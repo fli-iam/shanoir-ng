@@ -64,16 +64,16 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition implem
         this.dicomTag = dicomTag;
     }
     
-    public boolean fulfilled(ExaminationAttributes dicomAttributes) {
+    public boolean fulfilled(ExaminationAttributes<?> dicomAttributes) {
         return fulfilled(dicomAttributes, new StringBuffer());
     }
 
-    public boolean fulfilled(ExaminationAttributes examinationAttributes, StringBuffer errorMsg) {
+    public <T> boolean fulfilled(ExaminationAttributes<T> examinationAttributes, StringBuffer errorMsg) {
         if (examinationAttributes == null) throw new IllegalArgumentException("dicomAttributes can not be null");
         int nbOk = 0; int total = 0; int nbUnknown = 0;
-        for (Long acqId : examinationAttributes.getAcquisitionIds()) {
-            AcquisitionAttributes acqAttributes = examinationAttributes.getAcquisitionAttributes(acqId);
-            for (long datasetId : acqAttributes.getDatasetIds()) {
+        for (T acqId : examinationAttributes.getAcquisitionIds()) {
+            AcquisitionAttributes<T> acqAttributes = examinationAttributes.getAcquisitionAttributes(acqId);
+            for (T datasetId : acqAttributes.getDatasetIds()) {
                 total++;
                 boolean alreadyFulfilled = getCardinality() >= 1 && nbOk >= getCardinality();
                 if (!alreadyFulfilled) {
@@ -115,14 +115,14 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition implem
         return complies;
     }
 
-    public boolean fulfilled(AcquisitionAttributes acqAttributes) {
+    public boolean fulfilled(AcquisitionAttributes<?> acqAttributes) {
         return fulfilled(acqAttributes, new StringBuffer());
     }
 
-    public boolean fulfilled(AcquisitionAttributes acqAttributes, StringBuffer errorMsg) {
+    public <T> boolean fulfilled(AcquisitionAttributes<T> acqAttributes, StringBuffer errorMsg) {
         if (acqAttributes == null) throw new IllegalArgumentException("dicomAttributes can not be null");
         int nbOk = 0; int total = 0; int nbUnknown = 0;
-        for (long datasetId : acqAttributes.getDatasetIds()) {
+        for (T datasetId : acqAttributes.getDatasetIds()) {
             total++;
             boolean alreadyFulfilled = getCardinality() >= 1 && nbOk >= getCardinality();
             if (!alreadyFulfilled) {
@@ -140,11 +140,11 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition implem
         return complies;
     }
 
-    public Boolean fulfilled(Attributes dicomAttributes, long datasetId) {
+    public Boolean fulfilled(Attributes dicomAttributes, Object datasetId) {
         return fulfilled(dicomAttributes, new StringBuffer(), datasetId);
     }
         
-    private Boolean fulfilled(Attributes dicomAttributes, StringBuffer errorMsg, long datasetId) {
+    private Boolean fulfilled(Attributes dicomAttributes, StringBuffer errorMsg, Object datasetId) {
         LOG.debug("conditionFulfilled: " + this.getId() + " processing condition " + getId() +  " with all its values: ");
         this.getValues().stream().forEach(s -> LOG.debug(s));
         if (dicomAttributes == null) {

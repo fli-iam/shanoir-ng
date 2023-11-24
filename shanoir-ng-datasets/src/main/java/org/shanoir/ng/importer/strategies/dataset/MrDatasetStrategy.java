@@ -35,7 +35,6 @@ import org.shanoir.ng.importer.dto.DatasetsWrapper;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
-import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.importer.strategies.datasetexpression.DatasetExpressionContext;
 import org.shanoir.ng.shared.dicom.EchoTime;
 import org.shanoir.ng.shared.mapper.EchoTimeMapper;
@@ -71,7 +70,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 	private FlipAngleMapper flipAngleMapper;
 	
 	@Override
-	public DatasetsWrapper<MrDataset> generateDatasetsForSerie(AcquisitionAttributes serieAttributes, Serie serie,
+	public DatasetsWrapper<MrDataset> generateDatasetsForSerie(AcquisitionAttributes<String> serieAttributes, Serie serie,
 			ImportJob importJob) throws Exception {
 		
 		DatasetsWrapper<MrDataset> datasetWrapper = new DatasetsWrapper<>();
@@ -91,7 +90,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 			importJob.getProperties().put(ImportJob.INDEX_PROPERTY, String.valueOf(datasetIndex));
 
 			MrDataset mrDataset = new MrDataset();
-			mrDataset = generateSingleDataset(serieAttributes.getDatasetAttributes(dataset.hashCode()), serie, dataset, datasetIndex, importJob);
+			mrDataset = generateSingleDataset(serieAttributes.getDatasetAttributes(dataset.getFirstImageSOPInstanceUID()), serie, dataset, datasetIndex, importJob);
 			if (mrDataset.getFirstImageAcquisitionTime() != null) {
 				if (datasetWrapper.getFirstImageAcquisitionTime() == null) {
 					datasetWrapper.setFirstImageAcquisitionTime(mrDataset.getFirstImageAcquisitionTime());
@@ -125,6 +124,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 	public MrDataset generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset, int datasetIndex,
 			ImportJob importJob) throws Exception {
 		MrDataset mrDataset = new MrDataset();
+		mrDataset.setSOPInstanceUID(dataset.getFirstImageSOPInstanceUID());
 		mrDataset.setCreationDate(serie.getSeriesDate());
 		mrDataset.setDiffusionGradients(dataset.getDiffusionGradients());
 		final String serieDescription = serie.getSeriesDescription();

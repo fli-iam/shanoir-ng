@@ -80,7 +80,7 @@ public class CardsProcessingService {
         boolean changeInAtLeastOneAcquisition = false;
         for (DatasetAcquisition acquisition : acquisitions) {
             if (CollectionUtils.isNotEmpty(acquisition.getDatasets()) && CollectionUtils.isNotEmpty(studyCard.getRules())) {
-                AcquisitionAttributes dicomAttributes = downloader.getDicomAttributesForAcquisition(acquisition);
+                AcquisitionAttributes<Long> dicomAttributes = downloader.getDicomAttributesForAcquisition(acquisition);
                 changeInAtLeastOneAcquisition = studyCard.apply(acquisition, dicomAttributes);
             }
         }

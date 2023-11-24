@@ -38,13 +38,13 @@ import jakarta.persistence.Entity;
 @JsonTypeName("DatasetAcquisition")
 public class DatasetAcquisitionRule extends StudyCardRule<DatasetAcquisition> {
 
-    public void apply(DatasetAcquisition acquisition, AcquisitionAttributes dicomAttributes) {
+    public void apply(DatasetAcquisition acquisition, AcquisitionAttributes<?> dicomAttributes) {
         if (this.getConditions() == null || this.getConditions().isEmpty() || conditionsfulfilled(dicomAttributes, acquisition)) {
             if (this.getAssignments() != null) applyAssignments(acquisition);
         }
     }
    
-    private boolean conditionsfulfilled(AcquisitionAttributes dicomAttributes, DatasetAcquisition acquisition) {
+    private boolean conditionsfulfilled(AcquisitionAttributes<?> dicomAttributes, DatasetAcquisition acquisition) {
         boolean fulfilled = true;
         for (StudyCardCondition condition : getConditions()) {
             if (condition instanceof StudyCardDICOMConditionOnDatasets) {

@@ -262,7 +262,7 @@ public class ImporterService {
                 float progress = 0.5f;
                 for (Serie serie : study.getSelectedSeries() ) {
                     // get dicomAttributes
-                    AcquisitionAttributes dicomAttributes = null;
+                    AcquisitionAttributes<String> dicomAttributes = null;
                     try {
                         dicomAttributes = dicomProcessing.getDicomAcquisitionAttributes(serie, serie.getIsEnhanced());
                     } catch (PacsException e) {
@@ -294,7 +294,7 @@ public class ImporterService {
     }
 
     private QualityCardResult checkQuality(Examination examination, ImportJob importJob) throws ShanoirException {
-        ExaminationAttributes dicomAttributes = null;          
+        ExaminationAttributes<String> dicomAttributes = null;          
         Study firstStudy = importJob.getFirstStudy();
         if (firstStudy == null) {
             throw new ShanoirException("The given import job does not provide any serie. Examination : " + examination.getId());
@@ -355,7 +355,7 @@ public class ImporterService {
         }           
     }
 
-    public DatasetAcquisition createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob, AcquisitionAttributes dicomAttributes) throws Exception {
+    public DatasetAcquisition createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
         if (checkSerieForDicomImages(serie)) {
             DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob, dicomAttributes);			
             datasetAcquisition.setExamination(examination);

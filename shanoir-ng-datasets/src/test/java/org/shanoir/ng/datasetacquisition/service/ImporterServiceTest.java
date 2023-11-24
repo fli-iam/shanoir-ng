@@ -8,7 +8,6 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.dicom.DicomProcessing;
-import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;

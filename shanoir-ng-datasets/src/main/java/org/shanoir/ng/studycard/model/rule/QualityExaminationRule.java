@@ -87,7 +87,7 @@ public class QualityExaminationRule extends AbstractEntity {
         apply(examination, null, result);	        
     }
 	
-	public void apply(Examination examination, ExaminationAttributes examinationDicomAttributes, QualityCardResult result) {
+	public void apply(Examination examination, ExaminationAttributes<?> examinationDicomAttributes, QualityCardResult result) {
 	    ExaminationData examData = convert(examination);
 	    if (examData.getSubjectStudy() == null) {
 	        Logger log = LoggerFactory.getLogger(QualityExaminationRule.class);
@@ -97,7 +97,7 @@ public class QualityExaminationRule extends AbstractEntity {
 	    }
     }
 
-    public void apply(ExaminationData examination, ExaminationAttributes examinationDicomAttributes, QualityCardResult result) {
+    public void apply(ExaminationData examination, ExaminationAttributes<?> examinationDicomAttributes, QualityCardResult result) {
         if (this.getConditions() == null || this.getConditions().isEmpty()) {
             result.addUpdatedSubjectStudy( 
                     setTagToSubjectStudy(examination.getSubjectStudy()));
@@ -140,7 +140,7 @@ public class QualityExaminationRule extends AbstractEntity {
         return subjectStudyCopy;
     }
 
-    private ConditionResult conditionsfulfilled(ExaminationAttributes dicomAttributes, ExaminationData examination, QualityCardResult result) {
+    private ConditionResult conditionsfulfilled(ExaminationAttributes<?> dicomAttributes, ExaminationData examination, QualityCardResult result) {
         boolean allFulfilled = true;
         ConditionResult condResult = new ConditionResult();
         Collections.sort(conditions, new ConditionComparator()); // sort by level

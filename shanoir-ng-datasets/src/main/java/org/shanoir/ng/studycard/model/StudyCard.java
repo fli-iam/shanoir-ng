@@ -143,7 +143,7 @@ public class StudyCard extends HalEntity implements Card {
     * @param dicomAttributes
     * @return true if the application had any effect on acquisitions
     */
-    public boolean apply(DatasetAcquisition acquisition, AcquisitionAttributes dicomAttributes) {
+    public boolean apply(DatasetAcquisition acquisition, AcquisitionAttributes<?> dicomAttributes) {
         boolean changeInAtLeastOneAcquisition = false;
         if (this.getRules() != null) {
             for (StudyCardRule<?> rule : this.getRules()) {
@@ -153,7 +153,16 @@ public class StudyCard extends HalEntity implements Card {
                 } else if (rule instanceof DatasetRule && acquisition.getDatasets() != null) {
                     for (Dataset dataset : acquisition.getDatasets()) {
                         changeInAtLeastOneAcquisition = true;
-                        ((DatasetRule) rule).apply(dataset, dicomAttributes.getDatasetAttributes(dataset.getId()));                       
+                        Attributes attributes;
+                        if (String.class.equals(dicomAttributes.getParametrizedType())) {
+                            // @SuppressWarnings("unchecked") doesn't work ...
+                            attributes = ((AcquisitionAttributes<String>)dicomAttributes).getDatasetAttributes(dataset.getSOPInstanceUID());
+                        } else if (Long.class.equals(dicomAttributes.getParametrizedType())) {
+                            attributes = ((AcquisitionAttributes<Long>)dicomAttributes).getDatasetAttributes(dataset.getId());
+                        } else {
+                            throw new IllegalStateException("the parametrized type of AcquisitionAttributes is not implemented, use String or Long");
+                        }
+                        ((DatasetRule) rule).apply(dataset, attributes);                       
                     }
                 } else {
                     throw new IllegalStateException("unknown type of rule");

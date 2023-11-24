@@ -41,7 +41,7 @@ public class PetDatasetStragegy implements DatasetStrategy<PetDataset>{
 	DatasetExpressionContext datasetExpressionContext;
 
 	@Override
-	public DatasetsWrapper<PetDataset> generateDatasetsForSerie(AcquisitionAttributes dicomAttributes, Serie serie,
+	public DatasetsWrapper<PetDataset> generateDatasetsForSerie(AcquisitionAttributes<String> dicomAttributes, Serie serie,
 			ImportJob importJob) throws Exception {
 		
 		DatasetsWrapper<PetDataset> datasetWrapper = new DatasetsWrapper<>();
@@ -59,7 +59,7 @@ public class PetDatasetStragegy implements DatasetStrategy<PetDataset>{
 
 		for (Dataset dataset : serie.getDatasets()) {
 			importJob.getProperties().put(ImportJob.INDEX_PROPERTY, String.valueOf(datasetIndex));
-			PetDataset petDataset = generateSingleDataset(dicomAttributes.getDatasetAttributes(dataset.hashCode()), serie, dataset, datasetIndex, importJob);
+			PetDataset petDataset = generateSingleDataset(dicomAttributes.getDatasetAttributes(dataset.getFirstImageSOPInstanceUID()), serie, dataset, datasetIndex, importJob);
 			datasetWrapper.getDatasets().add(petDataset);
 			datasetIndex++;
 		}
@@ -71,6 +71,7 @@ public class PetDatasetStragegy implements DatasetStrategy<PetDataset>{
 	public PetDataset generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset, int datasetIndex,
 			ImportJob importJob) throws Exception {
 		PetDataset petDataset = new PetDataset();
+		petDataset.setSOPInstanceUID(dataset.getFirstImageSOPInstanceUID());
 		petDataset.setCreationDate(serie.getSeriesDate());
 		final String serieDescription = serie.getSeriesDescription();
 

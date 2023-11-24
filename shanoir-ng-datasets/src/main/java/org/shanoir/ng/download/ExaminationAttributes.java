@@ -28,17 +28,20 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.examination.model.Examination;
 
-public class ExaminationAttributes {
+/**
+ * The parametrized type is the type for the uid keys
+ */
+public class ExaminationAttributes<T> {
 
-	private ConcurrentMap<Long, AcquisitionAttributes> acquisitionMap = new ConcurrentHashMap<>();
+	private ConcurrentMap<T, AcquisitionAttributes<T>> acquisitionMap = new ConcurrentHashMap<>();
 
     public ExaminationAttributes() {}
 
-    public AcquisitionAttributes getAcquisitionAttributes(long id) {
+    public AcquisitionAttributes<T> getAcquisitionAttributes(T id) {
 		return acquisitionMap.get(id);
 	}
 
-    public Attributes getDatasetAttributes(long acquisitionId, long datasetId) {
+    public Attributes getDatasetAttributes(T acquisitionId, T datasetId) {
         if (acquisitionMap.containsKey(acquisitionId)) {
             return acquisitionMap.get(acquisitionId).getDatasetAttributes(datasetId);
         } else return null;
@@ -46,7 +49,7 @@ public class ExaminationAttributes {
 
     public List<Attributes> getAllDatasetAttributes() {
         List<Attributes> res = new ArrayList<>();
-        for (AcquisitionAttributes acqAttributes : acquisitionMap.values()) {
+        for (AcquisitionAttributes<T> acqAttributes : acquisitionMap.values()) {
             for (Attributes attr : acqAttributes.getAllDatasetAttributes()) {
                 res.add(attr);
             }
@@ -54,17 +57,17 @@ public class ExaminationAttributes {
         return res;
 	}
 
-	public void addDatasetAttributes(long acquisitionId, long datasetId, Attributes attributes) {
+	public void addDatasetAttributes(T acquisitionId, T datasetId, Attributes attributes) {
 		if (!acquisitionMap.containsKey(acquisitionId)) {
-            acquisitionMap.put(acquisitionId, new AcquisitionAttributes());
+            acquisitionMap.put(acquisitionId, new AcquisitionAttributes<T>());
         }
         acquisitionMap.get(acquisitionId).addDatasetAttributes(datasetId, attributes);
 	}
 
-    public void addDatasetAttributes(Examination examination, Attributes singleImageAttributes) {
+    public static void addDatasetAttributes(ExaminationAttributes<Long> examinationAttributes, Examination examination, Attributes singleImageAttributes) {
         //String serieUID = singleImageAttributes.getString(Tag.SeriesInstanceUID);
         String sopUID = singleImageAttributes.getString(Tag.SOPInstanceUID);
-        if (sopUID != null && examination != null && examination.getDatasetAcquisitions() != null) {
+        if (sopUID != null && examination != null && examination.getDatasetAcquisitions() != null && examinationAttributes != null) {
             for (DatasetAcquisition acquisition : examination.getDatasetAcquisitions()) {
                 if (acquisition.getDatasets() != null) {
                     for (Dataset dataset : acquisition.getDatasets()) {
@@ -75,7 +78,7 @@ public class ExaminationAttributes {
                                         if (file.getPath() != null) {
                                             String datasetSopUID =  WADODownloaderService.extractInstanceUID(file.getPath());
                                             if (sopUID.equals(datasetSopUID)) {
-                                                this.addDatasetAttributes(acquisition.getId(), dataset.getId(), singleImageAttributes);
+                                                examinationAttributes.addDatasetAttributes(acquisition.getId(), dataset.getId(), singleImageAttributes);
                                             }
                                         }
                                     }
@@ -91,7 +94,7 @@ public class ExaminationAttributes {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        for (Long acqId : acquisitionMap.keySet()) {
+        for (T acqId : acquisitionMap.keySet()) {
             sb.append("acquisition ").append(acqId).append("\n");
             for(String line : acquisitionMap.get(acqId).toString().split("\n")) {
                 sb.append("\t").append(line).append("\n");
@@ -100,11 +103,11 @@ public class ExaminationAttributes {
         return sb.toString();
     }
 
-    public Set<Long> getAcquisitionIds() {
+    public Set<T> getAcquisitionIds() {
         return acquisitionMap.keySet();
     }
 
-    public void addAcquisitionAttributes(long acquisitionId, AcquisitionAttributes dicomAcquisitionAttributes) {
+    public void addAcquisitionAttributes(T acquisitionId, AcquisitionAttributes<T> dicomAcquisitionAttributes) {
         if (acquisitionMap.containsKey(acquisitionId)) {
             acquisitionMap.get(acquisitionId).merge(dicomAcquisitionAttributes);
         } else {

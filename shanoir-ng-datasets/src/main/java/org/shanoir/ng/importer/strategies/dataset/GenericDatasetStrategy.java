@@ -29,7 +29,7 @@ public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
 	DatasetExpressionContext datasetExpressionContext;
 	
 	@Override
-	public DatasetsWrapper<GenericDataset> generateDatasetsForSerie(AcquisitionAttributes dicomAttributes, Serie serie,
+	public DatasetsWrapper<GenericDataset> generateDatasetsForSerie(AcquisitionAttributes<String> dicomAttributes, Serie serie,
 			ImportJob importJob) throws Exception {
 		DatasetsWrapper<GenericDataset> datasetWrapper = new DatasetsWrapper<>();
 		/**
@@ -46,7 +46,7 @@ public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
 
 		for (Dataset anyDataset : serie.getDatasets()) {
 			importJob.getProperties().put(ImportJob.INDEX_PROPERTY, String.valueOf(datasetIndex));
-			GenericDataset dataset = generateSingleDataset(dicomAttributes.getDatasetAttributes(anyDataset.hashCode()), serie, anyDataset, datasetIndex, importJob);
+			GenericDataset dataset = generateSingleDataset(dicomAttributes.getDatasetAttributes(anyDataset.getFirstImageSOPInstanceUID()), serie, anyDataset, datasetIndex, importJob);
 			datasetWrapper.getDatasets().add(dataset);
 			datasetIndex++;
 		}
@@ -59,6 +59,7 @@ public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
 	public GenericDataset generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset,
 			int datasetIndex, ImportJob importJob) throws Exception {
 		GenericDataset genericDataset = new GenericDataset();
+		genericDataset.setSOPInstanceUID(dataset.getFirstImageSOPInstanceUID());
 		genericDataset.setCreationDate(serie.getSeriesDate());
 		final String serieDescription = serie.getSeriesDescription();
 

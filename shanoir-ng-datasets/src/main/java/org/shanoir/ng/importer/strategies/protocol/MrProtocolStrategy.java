@@ -48,7 +48,7 @@ public class MrProtocolStrategy {
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(MrProtocolStrategy.class);
 
-	public MrProtocol generateProtocolForSerie(AcquisitionAttributes acquisitionAttributes, Serie serie) {
+	public MrProtocol generateProtocolForSerie(AcquisitionAttributes<String> acquisitionAttributes, Serie serie) {
 
 		Attributes attributes = acquisitionAttributes.getFirstDatasetAttributes();
 		// dcm4che3 does not support MultiframeExtraction for MRS

@@ -103,7 +103,7 @@ public class QualityCard extends HalEntity implements Card {
     * @param studyCard
     * @param dicomAttributes
     */
-    public QualityCardResult apply(Examination examination, ExaminationAttributes dicomAttributes) {
+    public QualityCardResult apply(Examination examination, ExaminationAttributes<?> dicomAttributes) {
         QualityCardResult result = new QualityCardResult();
         if (this.getRules() != null) {
             for (QualityExaminationRule rule : this.getRules()) {

@@ -51,6 +51,9 @@ public class Dataset {
 	
 	@JsonProperty("bVectors")
 	private List<Double> bVectors;
+
+	@JsonProperty("firstImageSOPInstanceUID")
+	private String firstImageSOPInstanceUID;
 	
 	public String getName() {
 		return name;
@@ -139,4 +142,11 @@ public class Dataset {
 		this.echoTimes = echoTimes;
 	}
 
+	public String getFirstImageSOPInstanceUID() {
+		return this.firstImageSOPInstanceUID;
+	}
+
+	public void setFirstImageSOPInstanceUID(String firstImageSOPInstanceUID) {
+		this.firstImageSOPInstanceUID = firstImageSOPInstanceUID;
+	}
 }

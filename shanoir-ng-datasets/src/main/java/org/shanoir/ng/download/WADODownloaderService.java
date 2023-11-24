@@ -386,7 +386,7 @@ public class WADODownloaderService {
 		}
 	}
 
-	public AcquisitionAttributes getDicomAttributesForAcquisition(DatasetAcquisition acquisition) throws PacsException {
+	public AcquisitionAttributes<Long> getDicomAttributesForAcquisition(DatasetAcquisition acquisition) throws PacsException {
 		long ts = new Date().getTime();
 		List<Dataset> datasets = new ArrayList<>();
 		if (acquisition.getDatasets() != null) {
@@ -394,7 +394,7 @@ public class WADODownloaderService {
 				datasets.add(dataset);
 			}
 		}
-		AcquisitionAttributes dAcquisitionAttributes = new AcquisitionAttributes();
+		AcquisitionAttributes<Long> dAcquisitionAttributes = new AcquisitionAttributes<>();
 		datasets.parallelStream().forEach(
 			dataset -> {
 				try {

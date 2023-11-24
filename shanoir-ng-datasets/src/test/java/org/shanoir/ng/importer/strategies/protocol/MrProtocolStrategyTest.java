@@ -45,8 +45,8 @@ public class MrProtocolStrategyTest {
 	public void testGenerateMrProtocolForSerieNotEnhancedMR() throws IOException {
 		Attributes attributes = getAttributesFromFile("/1.3.12.2.1107.5.2.43.166066.2018042412210060639615964");
 		Serie serie = generateSerie(attributes);
-		AcquisitionAttributes acqAttributes = new AcquisitionAttributes();
-		acqAttributes.addDatasetAttributes(1L, attributes);
+		AcquisitionAttributes<String> acqAttributes = new AcquisitionAttributes<>();
+		acqAttributes.addDatasetAttributes("UID12345", attributes);
 		MrProtocol mrProtocol = mrProtocolStrategy.generateProtocolForSerie(acqAttributes, serie);
 		Assertions.assertTrue(mrProtocol.getNumberOfAverages().equals(1));
 		Assertions.assertTrue(mrProtocol.getFilters().equals("77"));

@@ -28,6 +28,7 @@ import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.dto.mapper.ExaminationDatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
+import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.EegImportJob;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.service.EegImporterService;

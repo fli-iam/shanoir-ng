@@ -47,31 +47,31 @@ public class DicomProcessing {
 		}
 	}
 
-    public ExaminationAttributes getDicomExaminationAttributes(Study study, Boolean isEnhanced) throws ShanoirException {
-		ExaminationAttributes attributes = new ExaminationAttributes();
+    public ExaminationAttributes<String> getDicomExaminationAttributes(Study study, Boolean isEnhanced) throws ShanoirException {
+		ExaminationAttributes<String> attributes = new ExaminationAttributes<String>();
 		if (study != null) {
 			for (Serie serie : study.getSeries()) {
-				attributes.addAcquisitionAttributes(serie.hashCode(), getDicomAcquisitionAttributes(serie, isEnhanced));
+				attributes.addAcquisitionAttributes(serie.getSeriesInstanceUID(), getDicomAcquisitionAttributes(serie, isEnhanced));
 			}
 		}
 		return attributes;
     }
 
-	public ExaminationAttributes getDicomExaminationAttributes(Study study) throws ShanoirException {
-		ExaminationAttributes attributes = new ExaminationAttributes();
+	public ExaminationAttributes<String> getDicomExaminationAttributes(Study study) throws ShanoirException {
+		ExaminationAttributes<String> attributes = new ExaminationAttributes<String>();
 		if (study != null) {
 			for (Serie serie : study.getSeries()) {
-				attributes.addAcquisitionAttributes(serie.hashCode(), getDicomAcquisitionAttributes(serie));
+				attributes.addAcquisitionAttributes(serie.getSeriesInstanceUID(), getDicomAcquisitionAttributes(serie));
 			}
 		}
 		return attributes;
     }
 
-	public AcquisitionAttributes getDicomAcquisitionAttributes(Serie serie, Boolean isEnhanced) throws ShanoirException {
-		AcquisitionAttributes attributes = new AcquisitionAttributes();
+	public AcquisitionAttributes<String> getDicomAcquisitionAttributes(Serie serie, Boolean isEnhanced) throws ShanoirException {
+		AcquisitionAttributes<String> attributes = new AcquisitionAttributes<String>();
 		for (Dataset dataset : serie.getDatasets()) {
 			try {
-				attributes.addDatasetAttributes(dataset.hashCode(), getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), isEnhanced));
+				attributes.addDatasetAttributes(dataset.getFirstImageSOPInstanceUID(), getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), isEnhanced));
 			} catch (IOException e) {
 				throw new ShanoirException("Could not read dicom metadata from file for serie " + serie.getSopClassUID(), e);
 			}
@@ -79,7 +79,7 @@ public class DicomProcessing {
 		return attributes;
 	}
 
-	public AcquisitionAttributes getDicomAcquisitionAttributes(Serie serie) throws ShanoirException {
+	public AcquisitionAttributes<String> getDicomAcquisitionAttributes(Serie serie) throws ShanoirException {
 		return getDicomAcquisitionAttributes(serie, serie.getIsEnhanced());
 	}
 

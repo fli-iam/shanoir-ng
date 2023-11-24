@@ -80,7 +80,7 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
     }
 	
 	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes dicomAttributes) throws Exception {
+	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
 		MrDatasetAcquisition mrDatasetAcquisition = new MrDatasetAcquisition();
 		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}", serie.getSequenceName(), serie.getProtocolName(), rank);
 		mrDatasetAcquisition.setCreationDate(LocalDate.now());

@@ -29,7 +29,7 @@ public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStra
 	
 	
 	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes dicomAttributes) throws Exception {
+	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
 		GenericDatasetAcquisition datasetAcquisition = new GenericDatasetAcquisition();
 		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}",serie.getSequenceName(), serie.getProtocolName(), rank);
 		datasetAcquisition.setRank(rank);

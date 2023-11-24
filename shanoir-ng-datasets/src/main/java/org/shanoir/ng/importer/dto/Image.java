@@ -43,6 +43,8 @@ public class Image {
 	@JsonProperty("imageOrientationPatient")
 	public List<Double> imageOrientationPatient;
 
+	public String SOPInstanceUID;
+
 	public String getPath() {
 		return path;
 	}
@@ -98,7 +100,12 @@ public class Image {
 	public void setFlipAngle(String flipAngle) {
 		this.flipAngle = flipAngle;
 	}
-	
-	
 
+	public String getSOPInstanceUID() {
+		return SOPInstanceUID;
+	}
+
+	public void setSOPInstanceUID(String sOPInstanceUID) {
+		SOPInstanceUID = sOPInstanceUID;
+	}
 }
