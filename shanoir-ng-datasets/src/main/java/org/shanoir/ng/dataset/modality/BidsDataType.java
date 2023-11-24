@@ -36,7 +36,10 @@ public enum BidsDataType {
 	PET("pet"),
 	
 	/* Microscopy.*/
-	MICR("micr");	
+	MICR("micr"),
+
+	/* Near-Infrared Spectroscopy */
+	NIRS("nirs");
 
 	private String folderName;
 
