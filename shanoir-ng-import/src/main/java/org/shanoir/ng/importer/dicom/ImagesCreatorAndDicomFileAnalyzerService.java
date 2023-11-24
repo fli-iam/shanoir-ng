@@ -282,6 +282,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			MultiframeExtractor emf = new MultiframeExtractor();
 			attributes = emf.extract(attributes, 0);
 		}
+		image.setSOPInstanceUID(attributes.getString(Tag.SOPInstanceUID));
 		// acquisition number
 		image.setAcquisitionNumber(attributes.getInt(Tag.AcquisitionNumber, 0));
 		// image orientation patient

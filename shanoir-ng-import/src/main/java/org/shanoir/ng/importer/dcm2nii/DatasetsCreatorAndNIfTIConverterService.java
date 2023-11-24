@@ -708,9 +708,10 @@ public class DatasetsCreatorAndNIfTIConverterService {
 					datasetMap.get(seriesToDatasetsSeparator).getRepetitionTimes().add(image.getRepetitionTime());
 					datasetMap.get(seriesToDatasetsSeparator).getInversionTimes().add(image.getInversionTime());
 					datasetMap.get(seriesToDatasetsSeparator).setEchoTimes(image.getEchoTimes());
-					// new dataset has to be created, new expression format and add image/datasetfile
+				// new dataset has to be created, new expression format and add image/datasetfile
 				} else {
 					Dataset dataset = new Dataset();
+					dataset.setFirstImageSOPInstanceUID(image.getSOPInstanceUID());
 					ExpressionFormat expressionFormat = new ExpressionFormat();
 					expressionFormat.setType("dcm");
 					dataset.getExpressionFormats().add(expressionFormat);
