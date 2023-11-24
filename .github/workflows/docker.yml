@@ -8,10 +8,8 @@ env:
 on:
   workflow_dispatch:
   push:
-    branches:
-      - 'master'
     tags:
-      - 'v*'
+      - '*'
   
 jobs:
   push_to_registry:
