@@ -3,15 +3,15 @@ name: Publish Docker images
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ env.REGISTRY }}/${{ github.repository }}
+  IMAGE_NAME: ${{ REGISTRY }}/${{ github.repository }}
   TAG: ${{ github.ref }}
 on:
+  workflow_dispatch:
   push:
     branches:
       - 'master'
     tags:
       - 'v*'
-  workflow_dispatch:
   
 jobs:
   push_to_registry:
