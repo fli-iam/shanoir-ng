@@ -2,6 +2,7 @@ package org.shanoir.uploader.dicom.retrieve;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URL;
 
 import org.apache.log4j.Logger;
 import org.shanoir.uploader.dicom.query.ConfigBean;
@@ -21,6 +22,8 @@ public class DcmRcvManager {
 
 	private static Logger logger = Logger.getLogger(DcmRcvManager.class);
 	
+	private static final String SOP_CLASSES_PROPERTIES = "/sop-classes.properties";
+
 	/**
 	 * In the brackets '{ggggeeee}' the dicom attribute value is used to be replaced.
 	 * We store in a folder with the SeriesInstanceUID and the file name of the SOPInstanceUID.
@@ -50,7 +53,8 @@ public class DcmRcvManager {
         connectOptions.setMaxOpsInvoked(15);
         connectOptions.setMaxOpsPerformed(15);
 		params.setConnectOptions(connectOptions);
-		this.lParams = new ListenerParams(params, true, STORAGE_PATTERN + DICOM_FILE_SUFFIX, null, null);
+		URL sOPClassesPropertiesFileURL = this.getClass().getResource(SOP_CLASSES_PROPERTIES);
+		lParams = new ListenerParams(params, true, STORAGE_PATTERN + DICOM_FILE_SUFFIX, sOPClassesPropertiesFileURL, null);
 	}
 	
 	/**
