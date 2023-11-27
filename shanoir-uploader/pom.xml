@@ -18,6 +18,7 @@
 		<dcm4che.version>5.31.1</dcm4che.version>
 		<keycloak.version>20.0.0</keycloak.version>
 		<jackson.version>2.13.4</jackson.version>
+		<json.version>20231013</json.version>
 		<junit.jupiter.version>5.8.2</junit.jupiter.version>
 		<junit.platform.version>1.8.2</junit.platform.version>
 		<poi.version>4.1.2</poi.version>
@@ -205,7 +206,7 @@
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20230227</version>
+			<version>${json.version}</version>
 		</dependency>
 		<!-- dependency for Apache commons-lang library -->
 		<dependency>
