@@ -20,9 +20,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RoleResource;
 import org.keycloak.admin.client.resource.UserResource;
+import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.shanoir.ng.email.EmailService;
@@ -104,6 +106,12 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 
 	@Value("${kc.admin.client.realm.users}")
 	private String keycloakRealm;
+
+	@Value("${service-account.user.name}")
+	private String vipSrvUsername;
+
+	@Value("${service-account.user.email}")
+	private String vipSrvEmail;
 	
 	private Keycloak keycloak;
 	
@@ -146,6 +154,11 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 					throw new IllegalStateException("Could not export users to Keycloak.");
 				}
 			}
+		}
+
+		if(!StringUtils.isBlank(vipSrvEmail)
+				&& !StringUtils.isBlank(vipSrvUsername)){
+			this.setVIPServiceAccountEmail();
 		}
 	}
 
@@ -206,5 +219,31 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 		userRepresentation.setUsername(user.getUsername());
 		return userRepresentation;
 	}
+
+	/**
+	 * Set up the email ${service-account.user.email}
+	 * of the keycloak user ${service-account.user.name} ('service-account-service-account')
+	 * associated with the keycloak client 'service-account'
+	 *
+	 * See service-account.user.* application properties
+	 */
+	private void setVIPServiceAccountEmail(){
+
+		final List<UserRepresentation> userRepresentationList = keycloak.realm(keycloakRealm).users().searchByUsername(this.vipSrvUsername, true);
+		if (userRepresentationList == null || userRepresentationList.isEmpty()) {
+			LOG.debug("User [{]] does not exists in Keycloak. Do nothing.");
+			return;
+		}
+		if(userRepresentationList.size() > 1){
+			LOG.error("Multiple users [{]] found in Keycloak.");
+			return;
+		}
+		UserRepresentation user = userRepresentationList.get(0);
+		user.setEmail(this.vipSrvEmail);
+
+		UserResource userResource = keycloak.realm(keycloakRealm).users().get(user.getId());
+		userResource.update(user);
+	}
+
 
 }
