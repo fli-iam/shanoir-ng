@@ -156,8 +156,8 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 			}
 		}
 
-		if(!StringUtils.isBlank(vipSrvEmail)
-				&& !StringUtils.isBlank(vipSrvUsername)){
+		if(!StringUtils.isBlank(vipSrvEmail)){
+			initKeycloakAdminClient();
 			this.setVIPServiceAccountEmail();
 		}
 	}

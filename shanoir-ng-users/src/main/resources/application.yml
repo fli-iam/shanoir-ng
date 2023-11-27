@@ -101,6 +101,7 @@ logging:
 vip:
   enabled: false
   uri: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/vip/rest/register
+# Config of keycloak client 'service-account' used for communication with VIP
 service-account:
   user:
     name: service-account-service-account
