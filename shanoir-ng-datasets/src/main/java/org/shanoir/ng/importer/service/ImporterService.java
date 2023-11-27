@@ -52,6 +52,7 @@ import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.download.ExaminationAttributes;
+import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -133,6 +134,9 @@ public class ImporterService {
 
     @Autowired
     private DicomProcessing dicomProcessing;
+
+    @Autowired
+    private WADODownloaderService downloader;
 
     private static final String SUBJECT_PREFIX = "sub-";
     
@@ -304,7 +308,7 @@ public class ImporterService {
         QualityCardResult qualityResult = new QualityCardResult();
         for (QualityCard qualityCard : qualityCards) {
             if (qualityCard.isToCheckAtImport()) {
-                qualityResult.merge(qualityCard.apply(examination, dicomAttributes));                       
+                qualityResult.merge(qualityCard.apply(examination, dicomAttributes, downloader));                       
             }
         }
         return qualityResult;

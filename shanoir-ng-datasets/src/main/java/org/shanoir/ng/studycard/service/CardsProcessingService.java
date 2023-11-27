@@ -116,7 +116,7 @@ public class CardsProcessingService {
                 LOG.debug(qualityCard.getRules().size() + " rules found for study card with id: " + qualityCard.getId() + " and name: " + qualityCard.getName());
                 long rulesStartTs = new Date().getTime();
                 for (QualityExaminationRule rule : qualityCard.getRules()) {
-                    rule.apply(examination, result);
+                    rule.apply(examination, result, downloader);
                 }
                 LOG.debug("Quality check for examination " + examination.getId() + " : rules application took " + (new Date().getTime() - rulesStartTs) + "ms");
             }

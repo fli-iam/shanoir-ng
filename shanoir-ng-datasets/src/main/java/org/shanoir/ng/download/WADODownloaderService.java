@@ -339,7 +339,6 @@ public class WADODownloaderService {
 		try {
 			DatasetUtils.getDatasetFilePathURLs(dataset, urls, DatasetExpressionFormat.DICOM);
 			if (!urls.isEmpty()) {
-				System.out.println("##################################### download dataset " + dataset.getId());
 				String jsonMetadataStr = downloadDicomMetadataForURL(urls.get(0));
 				JsonParser parser = Json.createParser(new StringReader(jsonMetadataStr));
 				Attributes dicomAttributes = new JSONReader(parser).readDataset(null);

@@ -34,10 +34,8 @@ import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.studycard.model.DicomTagType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -45,16 +43,17 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 
 @Entity
-@Component
+@Configurable
 @DiscriminatorValue("StudyCardDICOMConditionOnDatasets")
 @JsonTypeName("StudyCardDICOMConditionOnDatasets")
-public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition implements ApplicationContextAware {
+public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
 	
     private static final Logger LOG = LoggerFactory.getLogger(StudyCardDICOMConditionOnDatasets.class);
     
 	private int dicomTag;
 
-    private static ApplicationContext context;
+    @Autowired
+    //WADODownloaderService downloader;
 	
 	public Integer getDicomTag() {
         return dicomTag;
@@ -106,7 +105,7 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition implem
      * @param errorMsg
      * @return
      */
-    public boolean fulfilled(List<DatasetAcquisition> acquisitions, ExaminationAttributes<Long> examinationAttributesCache, StringBuffer errorMsg) {
+    public boolean fulfilled(List<DatasetAcquisition> acquisitions, ExaminationAttributes<Long> examinationAttributesCache, WADODownloaderService downloader, StringBuffer errorMsg) {
         if (acquisitions == null) throw new IllegalArgumentException("acquisitions can not be null");
         int nbOk = 0; int total = 0; int nbUnknown = 0;
         for (DatasetAcquisition acquisition : acquisitions) {
@@ -119,7 +118,7 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition implem
                 boolean alreadyFulfilled = getCardinality() >= 1 && nbOk >= getCardinality();
                 if (!alreadyFulfilled) {
                     if (!acqAttributes.has(dataset.getId())) {
-                        acqAttributes.addDatasetAttributes(dataset.getId(), downloadAttributes(dataset, errorMsg));
+                        acqAttributes.addDatasetAttributes(dataset.getId(), downloadAttributes(dataset, downloader, errorMsg));
                     }
                     if (acqAttributes.getDatasetAttributes(dataset.getId()) == null) { // in case of pacs error
                         nbUnknown++;
@@ -261,9 +260,8 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition implem
         return false;
     }
 
-    private Attributes downloadAttributes(Dataset dataset, StringBuffer errorMsg) {
+    private Attributes downloadAttributes(Dataset dataset, WADODownloaderService downloader, StringBuffer errorMsg) {
         try {
-            WADODownloaderService downloader = (WADODownloaderService) context.getBean("WADODownloaderService");
             Attributes attributes = downloader.getDicomAttributesForDataset(dataset);
             return attributes;
         } catch (PacsException e) {
@@ -315,10 +313,5 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition implem
     
     private String getDicomTagCodeAndLabel(int tag) {
         return Keyword.valueOf(tag) + " (" + getDicomTagHexString(tag) + ")";
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        context = applicationContext;   
     }
 }
