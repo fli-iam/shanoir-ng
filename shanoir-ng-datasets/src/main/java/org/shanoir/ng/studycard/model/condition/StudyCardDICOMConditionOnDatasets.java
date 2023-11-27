@@ -68,6 +68,13 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition implem
         return fulfilled(dicomAttributes, new StringBuffer());
     }
 
+    /**
+     * Check the conditions on a complete set of already known dicom Attributes
+     * @param <T> the type of the used keys
+     * @param examinationAttributes complete set of already known dicom Attributes, not a cache
+     * @param errorMsg
+     * @return
+     */
     public <T> boolean fulfilled(ExaminationAttributes<T> examinationAttributes, StringBuffer errorMsg) {
         if (examinationAttributes == null) throw new IllegalArgumentException("dicomAttributes can not be null");
         int nbOk = 0; int total = 0; int nbUnknown = 0;
@@ -92,20 +99,38 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition implem
         return complies;
     }
     
-    public boolean fulfilled(List<DatasetAcquisition> acquisitions, StringBuffer errorMsg) {
+    /**
+     * Check condition on acquisitions
+     * @param acquisitions data checked
+     * @param examinationAttributesCache to be used as a cache
+     * @param errorMsg
+     * @return
+     */
+    public boolean fulfilled(List<DatasetAcquisition> acquisitions, ExaminationAttributes<Long> examinationAttributesCache, StringBuffer errorMsg) {
         if (acquisitions == null) throw new IllegalArgumentException("acquisitions can not be null");
         int nbOk = 0; int total = 0; int nbUnknown = 0;
         for (DatasetAcquisition acquisition : acquisitions) {
+            if (!examinationAttributesCache.has(acquisition.getId())) {
+                examinationAttributesCache.addAcquisitionAttributes(acquisition.getId(), new AcquisitionAttributes<Long>());
+            }
+            AcquisitionAttributes<Long> acqAttributes = examinationAttributesCache.getAcquisitionAttributes(acquisition.getId());
             for (Dataset dataset : acquisition.getDatasets()) {
                 total++;
                 boolean alreadyFulfilled = getCardinality() >= 1 && nbOk >= getCardinality();
                 if (!alreadyFulfilled) {
-                    Boolean fulfilled = fulfilled(dataset, errorMsg);
-                    if (fulfilled == null) {
-                        nbUnknown++;
+                    if (!acqAttributes.has(dataset.getId())) {
+                        acqAttributes.addDatasetAttributes(dataset.getId(), downloadAttributes(dataset, errorMsg));
                     }
-                    else if (fulfilled) {
-                        nbOk++;
+                    if (acqAttributes.getDatasetAttributes(dataset.getId()) == null) { // in case of pacs error
+                        nbUnknown++;
+                    } else {
+                        Boolean fulfilled = fulfilled(acqAttributes.getDatasetAttributes(dataset.getId()), errorMsg, dataset.getId() );
+                        if (fulfilled == null) {
+                            nbUnknown++;
+                        }
+                        else if (fulfilled) {
+                            nbOk++;
+                        }
                     }
                 }  
             }
@@ -236,12 +261,11 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition implem
         return false;
     }
 
-
-    private Boolean fulfilled(Dataset dataset, StringBuffer errorMsg) {
+    private Attributes downloadAttributes(Dataset dataset, StringBuffer errorMsg) {
         try {
             WADODownloaderService downloader = (WADODownloaderService) context.getBean("WADODownloaderService");
             Attributes attributes = downloader.getDicomAttributesForDataset(dataset);
-            return fulfilled(attributes, errorMsg, dataset.getId());
+            return attributes;
         } catch (PacsException e) {
             if (errorMsg != null) errorMsg.append("\ncondition [" + toString() 
                 + "] was ignored on dataset " + dataset.getId() + " because no dicom data could be found on pacs");

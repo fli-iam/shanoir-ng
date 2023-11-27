@@ -264,8 +264,9 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    private stringToDate(dateString: String): Date {
-        if (!dateString) return null;
+    private stringToDate(dateString: string): Date {
+        if (!dateString) return null; 
+        dateString += '';
         let split: string[] = dateString.split('-');
         if (split.length != 3) return null;
         let splitNum: number[] = split.map(elt => parseInt(elt));

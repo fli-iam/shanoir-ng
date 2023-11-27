@@ -80,7 +80,7 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
     }
 
     getPage(pageable: FilterablePageable): Promise<Page<any>> {
-        return Promise.resolve(this.report.getPage(pageable));
+        return Promise.resolve(this.report?.getPage(pageable));
     }
 
     downloadReport() {

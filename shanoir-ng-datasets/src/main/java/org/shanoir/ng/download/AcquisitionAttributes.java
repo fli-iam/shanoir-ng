@@ -16,6 +16,7 @@ package org.shanoir.ng.download;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -27,18 +28,24 @@ import org.dcm4che3.data.Attributes;
  */
 public class AcquisitionAttributes<T> {
 
-	private ConcurrentMap<T, Attributes> datasetMap = new ConcurrentHashMap<>();
+	private ConcurrentMap<T, Optional<Attributes>> datasetMap = new ConcurrentHashMap<>();
 
 	public Attributes getDatasetAttributes(T id) {
-		return datasetMap.get(id);
+		return datasetMap.get(id).orElse(null);
 	}
 
 	public List<Attributes> getAllDatasetAttributes() {
-		return new ArrayList<>(datasetMap.values());
+		List<Attributes> list = new ArrayList<>();
+		for (Optional<Attributes> attributes : datasetMap.values()) {
+			if (attributes.isPresent()) {
+				list.add(attributes.get());
+			}
+		}
+		return list;
 	}
 
 	public void addDatasetAttributes(T id, Attributes attributes) {
-		this.datasetMap.put(id, attributes);
+		this.datasetMap.put(id, Optional.ofNullable(attributes));
 	}
 
 	@Override
@@ -46,9 +53,13 @@ public class AcquisitionAttributes<T> {
         StringBuilder sb = new StringBuilder();
         for (T dsId : datasetMap.keySet()) {
             sb.append("dataset ").append(dsId).append("\n");
-            for(String line : datasetMap.get(dsId).toString(1000, 1000).split("\n")) {
-                sb.append("\t").append(line).append("\n");
-            }
+			if (datasetMap.get(dsId).isPresent()) {
+				for(String line : datasetMap.get(dsId).get().toString(1000, 1000).split("\n")) {
+					sb.append("\t").append(line).append("\n");
+				}
+			} else {
+				sb.append("\tnull\n");
+			}
         }
         return sb.toString();
     }
@@ -65,7 +76,7 @@ public class AcquisitionAttributes<T> {
 
     public Attributes getFirstDatasetAttributes() {
         if (datasetMap != null && datasetMap.size() > 0) {
-			return datasetMap.entrySet().iterator().next().getValue();
+			return datasetMap.entrySet().iterator().next().getValue().orElse(null);
 		} else {
 			return null;
 		}
@@ -80,7 +91,7 @@ public class AcquisitionAttributes<T> {
 			@SuppressWarnings("unchecked")
 			AcquisitionAttributes<T> other = (AcquisitionAttributes<T>) obj;
 			for(T id : datasetMap.keySet()) {
-				Attributes attributes = datasetMap.get(id);
+				Attributes attributes = datasetMap.get(id).orElse(null);
 				Attributes otherAttributes = other.getDatasetAttributes(id);
 				if (otherAttributes == null || !otherAttributes.equals(attributes)) {
 					return false;
@@ -93,11 +104,15 @@ public class AcquisitionAttributes<T> {
 
 	}
 
-	public Class getParametrizedType() {
+	public Class<?> getParametrizedType() {
 		if (this.datasetMap != null && !this.datasetMap.keySet().isEmpty()) {
 			return this.datasetMap.keySet().iterator().next().getClass();
 		} else {
 			return null;
 		}
 	}
+
+    public boolean has(T acqId) {
+        return datasetMap.containsKey(acqId);
+    }
 }

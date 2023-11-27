@@ -234,7 +234,7 @@ public class ImporterService {
             String msg = e.buildErrorMessage();
             event.setStatus(ShanoirEvent.ERROR);
             event.setMessage("Quality checks didn't pass at import, import aborted");
-            event.setReport(msg);
+            event.setReport(e.getQualityResult().toString());
             event.setProgress(-1f);
             eventService.publishEvent(event);
             LOG.warn(msg, e);	

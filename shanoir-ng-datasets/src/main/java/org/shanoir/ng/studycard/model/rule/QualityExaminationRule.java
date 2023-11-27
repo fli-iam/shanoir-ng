@@ -140,18 +140,34 @@ public class QualityExaminationRule extends AbstractEntity {
         return subjectStudyCopy;
     }
 
+    /**
+     * 
+     * @param dicomAttributes if null conditions will be checked on the examination data and dicom data will be fetched from pacs.
+     * Else conditions will be checked on the looping on the given dicom attributes 
+     * @param examination
+     * @param result
+     * @return
+     */
     private ConditionResult conditionsfulfilled(ExaminationAttributes<?> dicomAttributes, ExaminationData examination, QualityCardResult result) {
         boolean allFulfilled = true;
         ConditionResult condResult = new ConditionResult();
         Collections.sort(conditions, new ConditionComparator()); // sort by level
+        boolean pilotedByDicomAttributes;
+        ExaminationAttributes<Long> examinationAttributesCache = new ExaminationAttributes<Long>();
+        if (dicomAttributes != null) {
+            pilotedByDicomAttributes = true;
+        } else {
+            pilotedByDicomAttributes = false;
+            examinationAttributesCache = new ExaminationAttributes<Long>();
+        }
         for (StudyCardCondition condition : getConditions()) {
             StringBuffer msg = new StringBuffer();
             boolean fulfilled = true;
             if (condition instanceof StudyCardDICOMConditionOnDatasets) {
-                if (dicomAttributes != null) {
+                if (pilotedByDicomAttributes) {
                     fulfilled = ((StudyCardDICOMConditionOnDatasets) condition).fulfilled(dicomAttributes, msg);
                 } else {
-                    fulfilled = ((StudyCardDICOMConditionOnDatasets) condition).fulfilled(examination.getDatasetAcquisitions(), msg);
+                    fulfilled = ((StudyCardDICOMConditionOnDatasets) condition).fulfilled(examination.getDatasetAcquisitions(), examinationAttributesCache, msg);
                 }
             } else if (condition instanceof ExamMetadataCondOnAcq) {
                 fulfilled = ((ExamMetadataCondOnAcq) condition).fulfilled(examination.getDatasetAcquisitions(), msg);

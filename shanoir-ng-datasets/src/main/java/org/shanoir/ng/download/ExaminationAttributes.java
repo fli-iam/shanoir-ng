@@ -16,6 +16,7 @@ package org.shanoir.ng.download;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -33,25 +34,31 @@ import org.shanoir.ng.examination.model.Examination;
  */
 public class ExaminationAttributes<T> {
 
-	private ConcurrentMap<T, AcquisitionAttributes<T>> acquisitionMap = new ConcurrentHashMap<>();
+	private ConcurrentMap<T, Optional<AcquisitionAttributes<T>>> acquisitionMap = new ConcurrentHashMap<>();
 
     public ExaminationAttributes() {}
 
     public AcquisitionAttributes<T> getAcquisitionAttributes(T id) {
-		return acquisitionMap.get(id);
+		return acquisitionMap.get(id).orElse(null);
 	}
 
     public Attributes getDatasetAttributes(T acquisitionId, T datasetId) {
         if (acquisitionMap.containsKey(acquisitionId)) {
-            return acquisitionMap.get(acquisitionId).getDatasetAttributes(datasetId);
+            if (acquisitionMap.get(acquisitionId).isPresent()) {
+                return acquisitionMap.get(acquisitionId).get().getDatasetAttributes(datasetId);
+            } else {
+                return null;
+            }
         } else return null;
 	}
 
     public List<Attributes> getAllDatasetAttributes() {
         List<Attributes> res = new ArrayList<>();
-        for (AcquisitionAttributes<T> acqAttributes : acquisitionMap.values()) {
-            for (Attributes attr : acqAttributes.getAllDatasetAttributes()) {
-                res.add(attr);
+        for (Optional<AcquisitionAttributes<T>> acqAttributes : acquisitionMap.values()) {
+            if (acqAttributes.isPresent()) {
+                for (Attributes attr : acqAttributes.get().getAllDatasetAttributes()) {
+                    res.add(attr);
+                }
             }
         }
         return res;
@@ -59,9 +66,9 @@ public class ExaminationAttributes<T> {
 
 	public void addDatasetAttributes(T acquisitionId, T datasetId, Attributes attributes) {
 		if (!acquisitionMap.containsKey(acquisitionId)) {
-            acquisitionMap.put(acquisitionId, new AcquisitionAttributes<T>());
+            acquisitionMap.put(acquisitionId, Optional.of(new AcquisitionAttributes<T>()));
         }
-        acquisitionMap.get(acquisitionId).addDatasetAttributes(datasetId, attributes);
+        acquisitionMap.get(acquisitionId).get().addDatasetAttributes(datasetId, attributes);
 	}
 
     public static void addDatasetAttributes(ExaminationAttributes<Long> examinationAttributes, Examination examination, Attributes singleImageAttributes) {
@@ -108,11 +115,15 @@ public class ExaminationAttributes<T> {
     }
 
     public void addAcquisitionAttributes(T acquisitionId, AcquisitionAttributes<T> dicomAcquisitionAttributes) {
-        if (acquisitionMap.containsKey(acquisitionId)) {
-            acquisitionMap.get(acquisitionId).merge(dicomAcquisitionAttributes);
+        if (acquisitionMap.containsKey(acquisitionId) && acquisitionMap.get(acquisitionId).isPresent()) {
+            acquisitionMap.get(acquisitionId).get().merge(dicomAcquisitionAttributes);
         } else {
-            acquisitionMap.put(acquisitionId, dicomAcquisitionAttributes);
+            acquisitionMap.put(acquisitionId, Optional.ofNullable(dicomAcquisitionAttributes));
         }
+    }
+
+    public boolean has(T acqId) {
+        return acquisitionMap.containsKey(acqId);
     }
 
 }
