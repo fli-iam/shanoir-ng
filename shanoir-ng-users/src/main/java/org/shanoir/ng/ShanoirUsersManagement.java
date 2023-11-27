@@ -73,7 +73,6 @@ import jakarta.ws.rs.core.Response;
  *
  */
 @Component
-//@EnableRetry
 public class ShanoirUsersManagement implements ApplicationRunner {
 
 	private static final String SYNC_ALL_USERS_TO_KEYCLOAK = "syncAllUsersToKeycloak";
@@ -171,7 +170,6 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 				kcAdminClientClientId);
 	}
 
-	//@Retryable(value = { ProcessingException.class }, maxAttempts = 50, backoff = @Backoff(delay = 5000))
 	private void createUsersIfNotExisting() {
 		LOG.info(SYNC_ALL_USERS_TO_KEYCLOAK);
 		final Iterable<User> users = userRepository.findAll();
@@ -204,10 +202,10 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 
 	private UserRepresentation getUserRepresentation(final User user) {
 		final Map<String, List<String>> attributes = new HashMap<>();
-		attributes.put("userId", Arrays.asList(user.getId().toString()));
-		attributes.put("canImportFromPACS", Arrays.asList("" + user.isCanAccessToDicomAssociation()));
+		attributes.put("userId", List.of(user.getId().toString()));
+		attributes.put("canImportFromPACS", List.of("" + user.isCanAccessToDicomAssociation()));
 		if (user.getExpirationDate() != null) {
-			attributes.put("expirationDate", Arrays.asList("" + user.getExpirationDate()));
+			attributes.put("expirationDate", List.of("" + user.getExpirationDate()));
 		}
 		final UserRepresentation userRepresentation = new UserRepresentation();
 		userRepresentation.setAttributes(attributes);
@@ -231,11 +229,11 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 
 		final List<UserRepresentation> userRepresentationList = keycloak.realm(keycloakRealm).users().searchByUsername(this.vipSrvUsername, true);
 		if (userRepresentationList == null || userRepresentationList.isEmpty()) {
-			LOG.debug("User [{]] does not exists in Keycloak. Do nothing.");
+			LOG.debug("User [{}] does not exists in Keycloak. Do nothing.", this.vipSrvUsername);
 			return;
 		}
 		if(userRepresentationList.size() > 1){
-			LOG.error("Multiple users [{]] found in Keycloak.");
+			LOG.error("Multiple users [{}] found in Keycloak.", this.vipSrvUsername);
 			return;
 		}
 		UserRepresentation user = userRepresentationList.get(0);
