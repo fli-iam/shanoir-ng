@@ -97,7 +97,7 @@ export class Task extends Entity {
             } else if (this.message.indexOf('VIP Execution') != -1) {
                return '/dataset-processing/details/' + this.objectId
             }
-        } else if (this.eventType === 'copyDataset.event' && this.status != -1) {
+        } else if (this.eventType === 'copyDataset.event' && this.status != -1 && this.message.lastIndexOf('study [') != -1) {
             return '/study/details/' + this.message.slice(this.message.lastIndexOf("[") + 1, this.message.lastIndexOf("]"));
         }
         return null;
