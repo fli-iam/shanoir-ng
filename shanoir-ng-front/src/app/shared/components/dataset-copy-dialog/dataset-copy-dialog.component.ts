@@ -127,7 +127,7 @@ export class DatasetCopyDialogComponent {
         this.selectedStudy = study;
     }
 
-    cancel() {
+    close() {
         this.ownRef.destroy();
     }
 }

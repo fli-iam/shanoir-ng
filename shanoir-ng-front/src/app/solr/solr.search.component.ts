@@ -608,8 +608,6 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         modalRef.instance.canCopy = this.hasCopyRight;
         modalRef.instance.lines = this.selectedLines;
     }
-
-
 }
 
 export interface SelectionBlock {
