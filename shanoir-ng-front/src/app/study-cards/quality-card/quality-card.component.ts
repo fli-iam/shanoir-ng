@@ -75,7 +75,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     forceStudyId: number;
     nbExaminations: number;
     progress: number;
-    readonly NB_EXAM_THRESHOLD: number = 50;
+    readonly NB_EXAM_THRESHOLD: number = 1;
 
     constructor(
             private route: ActivatedRoute,

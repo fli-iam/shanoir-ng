@@ -47,7 +47,7 @@ export class TestQualityCardOptionsComponent implements OnInit {
         });
         formGroup.controls.from.setValidators([
             Validators.required, 
-            Validators.min(0), 
+            Validators.min(1), 
             (control: AbstractControl) => Validators.max(formGroup.get('to').value)(control)
         ]);
         formGroup.controls.to.setValidators([
@@ -78,5 +78,9 @@ export class TestQualityCardOptionsComponent implements OnInit {
             this.cancel();
         }
     }   
-   
+    
+    updateValidity() {
+        this.form.controls.from.updateValueAndValidity();
+        this.form.controls.to.updateValueAndValidity();
+    }
 }

@@ -24,13 +24,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <li>
                     <label>From</label>
                     <span class="right-col">
-                        <input formControlName="from" type="number">
+                        <input formControlName="from" type="number" (change)="updateValidity()" [min]="1">
                     </span>
                 </li>
 				<li>
                     <label>To</label>
                     <span class="right-col">
-                        <input formControlName="to" type="number">
+                        <input formControlName="to" type="number" (change)="updateValidity()" [min]="1" [max]="nbExaminations">
                     </span>
                 </li>
 				<li>
