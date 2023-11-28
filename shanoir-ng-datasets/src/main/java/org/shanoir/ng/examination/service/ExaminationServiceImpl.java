@@ -20,12 +20,15 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
@@ -39,6 +42,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -80,12 +84,14 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 	@Autowired
 	private DatasetService datasetService;
+	@Autowired
+	private DatasetAcquisitionService datasetAcquisitionService;
 	
 	@Value("${datasets-data}")
 	private String dataDir;
 	
 	@Override
-	public void deleteById(final Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException {
+	public void deleteById(final Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException {
 		Optional<Examination> examinationOpt = examinationRepository.findById(id);
 		if (!examinationOpt.isPresent()) {
 			throw new EntityNotFoundException(Examination.class, id);
@@ -94,19 +100,22 @@ public class ExaminationServiceImpl implements ExaminationService {
 		Examination examination = examinationOpt.get();
 		String studyIdAsString = examination.getStudyId().toString();
 
-		// Iterate over datasets acquisitions and datasets to send events and remove them from solr
-		for (DatasetAcquisition dsAcq : examination.getDatasetAcquisitions()) {
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, dsAcq.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
-			for (Dataset ds : dsAcq.getDatasets())  {
-				eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, ds.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS, ds.getStudyId()));
-				solrService.deleteFromIndex(ds.getId());
-				this.datasetService.deleteDatasetFromPacs(ds);
+		List<Examination> childExam = examinationRepository.findBySourceId(id);
+		if (childExam.isEmpty()) {
+			if (examination.getDatasetAcquisitions() != null) {
+				for (DatasetAcquisition dsAcq : examination.getDatasetAcquisitions()) {
+					this.datasetAcquisitionService.deleteById(dsAcq.getId());
+				}
 			}
+			examinationRepository.deleteById(id);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, id.toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS, examination.getStudyId()));
+		} else {
+			throw new RestServiceException(
+					new ErrorModel(
+							HttpStatus.UNPROCESSABLE_ENTITY.value(),
+							"This examination is linked to another examination that was copied."
+					));
 		}
-
-		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, id.toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS, examination.getStudyId()));
-		// Delete examination
-		examinationRepository.deleteById(id);
 	}
 
 	@Override

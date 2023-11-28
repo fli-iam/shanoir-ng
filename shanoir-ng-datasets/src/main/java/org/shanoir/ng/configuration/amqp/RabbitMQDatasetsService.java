@@ -117,7 +117,7 @@ public class RabbitMQDatasetsService {
 
 	@Autowired
 	private BIDSService bidsService;
-	
+
 	@Autowired
 	private ObjectMapper objectMapper;
 	@Autowired
@@ -457,8 +457,8 @@ public class RabbitMQDatasetsService {
 
 		try {
 			RelatedDatasetDTO dto = objectMapper.readValue(data, RelatedDatasetDTO.class);
-			Long userId = dto.getUserId();
 			SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+			Long userId = dto.getUserId();
 			Long studyId = dto.getStudyId();
 			datasetParentIds = dto.getDatasetIds();
 
@@ -478,10 +478,8 @@ public class RabbitMQDatasetsService {
 				eventService.publishEvent(event);
 
 				LOG.warn("[CopyDatasets] Start copy for dataset " + datasetParentId + " to study " + studyId);
-				LOG.warn("start requests");
 				List<Dataset> dsCopiedList = datasetRepository.findBySourceId(datasetParentId);
 				Dataset datasetParent = datasetService.findById(datasetParentId);
-				LOG.warn("end requests");
 
 				if (datasetParent.getSourceId() != null) {
 					copy = false;
@@ -511,6 +509,9 @@ public class RabbitMQDatasetsService {
 			event.setStatus(ShanoirEvent.SUCCESS);
 			event.setProgress(1.0f);
 			eventService.publishEvent(event);
+
+			solrService.indexAll();
+
 			return res;
 		} catch (Exception e) {
 			LOG.error("Something went wrong during the copy. {}", e.getMessage());

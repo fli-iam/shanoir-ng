@@ -25,6 +25,7 @@ import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.study.dto.RelatedDatasetDTO;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
@@ -50,10 +51,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -74,6 +72,8 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 	@Autowired
 	private SubjectRepository subjectRepository;
 	@Autowired
+	private SubjectStudyRepository subjectStudyRepository;
+	@Autowired
 	private RabbitTemplate rabbitTemplate;
 	@Autowired
 	private ObjectMapper objectMapper;
@@ -81,13 +81,19 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 
 	@Transactional
 	@Override
-	public void addSubjectStudyToNewStudy(List<Long> subjectIds, Long studyId) {
-		Study study = studyService.findById(Long.valueOf(studyId));
+	public void addSubjectStudyToNewStudy(List<String> subjectIdStudyId, Long studyId) {
+		List<Long> subjectIds = new ArrayList<>();
+		List<Long> studySourceId = new ArrayList<>();
+		for (String s : subjectIdStudyId) {
+			subjectIds.add(Long.valueOf(s.substring(0, s.indexOf("/"))));
+			studySourceId.add(Long.valueOf(s.substring(s.indexOf("/") + 1, s.length())));
+		}
+
+		Study studyTarget = studyService.findById(Long.valueOf(studyId));
 		Boolean toAdd = true;
 		Iterable<Subject> subjects = subjectRepository.findAllById(subjectIds);
 		for (Subject subject : subjects) {
-			List<SubjectStudy> subjectStudyList = study.getSubjectStudyList();
-
+			List<SubjectStudy> subjectStudyList = studyTarget.getSubjectStudyList();
 			for (SubjectStudy subjectStudy : subjectStudyList) {
 				if (subjectStudy.getSubject().equals(subject)) {
 					toAdd = false;
@@ -99,12 +105,18 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 
 			if (toAdd) {
 				SubjectStudy ssToAdd = new SubjectStudy();
-				ssToAdd.setStudy(study);
+				for (int i = 0; i < subjectIds.size(); i++) {
+					if (subjectIds.get(i).equals(subject.getId())) {
+						SubjectStudy type = subjectStudyRepository.findByStudyIdAndSubjectId(studySourceId.get(i), subjectIds.get(i));
+						ssToAdd.setSubjectType(type.getSubjectType());
+					}
+				}
+				ssToAdd.setStudy(studyTarget);
 				ssToAdd.setSubject(subject);
 
 				subjectStudyList.add(ssToAdd);
-				study.setSubjectStudyList(subjectStudyList);
-				studyRepository.save(study);
+				studyTarget.setSubjectStudyList(subjectStudyList);
+				studyRepository.save(studyTarget);
 			}
 		}
 	}
@@ -140,9 +152,16 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 	private void addCenterToStudy(Study study, List<Long> centerIds) {
 		Iterable<Center> centers = centerRepository.findAllById(centerIds);
 		for (Center center : centers) {
+			boolean add = true;
 			List<StudyCenter> studyCenterList = study.getStudyCenterList();
+			for (StudyCenter sc : studyCenterList) {
+				if (center != null && sc.getCenter().getId().equals(center.getId())) {
+					add = false;
+					break;
+				}
+			}
 
-			if (center != null && !studyCenterList.contains(center)) {
+			if (add) {
 				StudyCenter centerToAdd = new StudyCenter();
 				centerToAdd.setStudy(study);
 				centerToAdd.setCenter(center);
@@ -156,6 +175,9 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 	}
 
 	private String copyDatasetToStudy(List<Long> datasetIds, Long studyId, Long userId) throws MicroServiceCommunicationException {
+		// datasetIds order is : selected datasets in solr from top of the table to bottom
+		// reverse that order so that the first dataset to be treated is the last selected in solr
+		Collections.sort(datasetIds);
 		RelatedDatasetDTO dto = new RelatedDatasetDTO();
 		dto.setStudyId(studyId);
 		dto.setDatasetIds(datasetIds);

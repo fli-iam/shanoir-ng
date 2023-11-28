@@ -17,6 +17,7 @@ package org.shanoir.ng.examination.service;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -44,7 +45,7 @@ public interface ExaminationService {
 	 * @throws ShanoirException 
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnExamination(#id, 'CAN_ADMINISTRATE'))")
-	void deleteById(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException;
+	void deleteById(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
 
 	/**
 	 * Delete an examination from a rabbit MQ call, not identified

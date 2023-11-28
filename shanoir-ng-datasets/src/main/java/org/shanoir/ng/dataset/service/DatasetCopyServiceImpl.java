@@ -20,6 +20,7 @@ import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.model.*;
 import org.shanoir.ng.shared.service.StudyService;
+import org.shanoir.ng.solr.service.SolrService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +45,6 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
     private DatasetAcquisitionRepository datasetAcquisitionRepository;
     @Autowired
     private ExaminationRepository examinationRepository;
-
     @Autowired
     private DatasetRepository datasetRepository;
 

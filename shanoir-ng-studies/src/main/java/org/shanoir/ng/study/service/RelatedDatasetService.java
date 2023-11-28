@@ -31,6 +31,6 @@ public interface RelatedDatasetService {
 	String addCenterAndCopyDatasetToStudy(List<Long> datasetIds, Long studyId, List<Long> centerIds);
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	void addSubjectStudyToNewStudy(List<Long> subjectIds, Long studyId);
+	void addSubjectStudyToNewStudy(List<String> subjectIdStudyId, Long studyId);
 
 }

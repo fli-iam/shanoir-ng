@@ -17,6 +17,7 @@ package org.shanoir.ng.datasetacquisition.service;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -63,7 +64,7 @@ public interface DatasetAcquisitionService {
 	Iterable<DatasetAcquisition> update(List<DatasetAcquisition> entities);
 	
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnDatasetAcquisition(#id, 'CAN_ADMINISTRATE')")
-	void deleteById(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException;
+	void deleteById(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
 
     boolean existsByStudyCardId(Long studyCardId);
 

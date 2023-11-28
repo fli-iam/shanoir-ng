@@ -48,8 +48,7 @@ export class DatasetCopyDialogComponent {
     centerIds: string[]=[];
     subjectIds: string[]=[];
     lines: SolrDocument[];
-    datasetSubjectIds: string[]=[];
-    datasetExamIds: string[]=[];
+    subjectIdStudyId: string[]=[];
     protected consoleService = ServiceLocator.injector.get(ConsoleService);
     constructor(private http: HttpClient,
                 private studyRightsService: StudyRightsService,
@@ -68,8 +67,8 @@ export class DatasetCopyDialogComponent {
                 this.statusMessage = "Be careful, some of the selected datasets have a null subject.";
                 this.canCopy = false;
             }
-            if (!this.datasetSubjectIds.includes(line.datasetId + "/" + line.subjectId)) {
-                this.datasetSubjectIds.push(line.datasetId + "/" + line.subjectId);
+            if (!this.subjectIdStudyId.includes(line.subjectId + "/" + line.studyId)) {
+                this.subjectIdStudyId.push(line.subjectId + "/" + line.studyId);
             }
         }
     }
@@ -87,8 +86,7 @@ export class DatasetCopyDialogComponent {
                 formData.set('datasetIds', Array.from(this.datasetsIds).join(","));
                 formData.set('studyId', this.selectedStudy.id.toString());
                 formData.set('centerIds', Array.from(this.centerIds).join(","));
-                formData.set('datasetSubjectIds', Array.from(this.datasetSubjectIds).join(","));
-                formData.set('subjectIds', Array.from(this.subjectIds).join(","));
+                formData.set('subjectIdStudyId', Array.from(this.subjectIdStudyId).join(","));
                 console.log("formData : ", formData);
                 return this.http.post<string>(AppUtils.BACKEND_API_STUDY_URL + '/copyDatasets', formData, { responseType: 'text' as 'json'})
                     .toPromise()
