@@ -34,8 +34,6 @@ import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.studycard.model.DicomTagType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -43,7 +41,6 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 
 @Entity
-@Configurable
 @DiscriminatorValue("StudyCardDICOMConditionOnDatasets")
 @JsonTypeName("StudyCardDICOMConditionOnDatasets")
 public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
@@ -51,9 +48,6 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
     private static final Logger LOG = LoggerFactory.getLogger(StudyCardDICOMConditionOnDatasets.class);
     
 	private int dicomTag;
-
-    @Autowired
-    //WADODownloaderService downloader;
 	
 	public Integer getDicomTag() {
         return dicomTag;
