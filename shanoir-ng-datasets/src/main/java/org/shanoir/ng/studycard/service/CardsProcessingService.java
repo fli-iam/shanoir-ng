@@ -141,44 +141,50 @@ public class CardsProcessingService {
 	 * @throws MicroServiceCommunicationException 
 	 */
 	public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags, Integer start, Integer stop) throws MicroServiceCommunicationException {
-        long startTs = new Date().getTime();
-        if (qualityCard == null) throw new IllegalArgumentException("qualityCard can't be null");
-        ShanoirEvent event = new ShanoirEvent(ShanoirEventType.CHECK_QUALITY_EVENT, null, KeycloakUtil.getTokenUserId(), "Quality check started on study " + qualityCard.getStudyId() , 4);
-		eventService.publishEvent(event);
-        Study study = studyService.findById(qualityCard.getStudyId());
-		if (study == null ) throw new IllegalArgumentException("study can't be null");
-		if (qualityCard.getStudyId() != study.getId()) throw new IllegalStateException("study and studycard ids don't match");
-		if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {	    
-		    QualityCardResult result = new QualityCardResult();
-            Float i = 0f;
-            List<Examination> examinations;
-            if (start != null && stop != null) {
-                examinations = study.getExaminations().subList(start, stop < study.getExaminations().size() ? stop : study.getExaminations().size());
-            } else {
-                examinations = study.getExaminations();
-            }
-            for (Examination examination : examinations) {
-                event.setStatus(2);
-                event.setProgress(i / study.getExaminations().size());
-                event.setMessage("checking quality for examination " + examination.getComment());
+        try {
+
+            long startTs = new Date().getTime();
+            if (qualityCard == null) throw new IllegalArgumentException("qualityCard can't be null");
+            ShanoirEvent event = new ShanoirEvent(ShanoirEventType.CHECK_QUALITY_EVENT, null, KeycloakUtil.getTokenUserId(), "Quality check started on study " + qualityCard.getStudyId() , 4);
+            eventService.publishEvent(event);
+            Study study = studyService.findById(qualityCard.getStudyId());
+            if (study == null ) throw new IllegalArgumentException("study can't be null");
+            if (qualityCard.getStudyId() != study.getId()) throw new IllegalStateException("study and studycard ids don't match");
+            if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {	    
+                QualityCardResult result = new QualityCardResult();
+                Float i = 0f;
+                List<Examination> examinations;
+                if (start != null && stop != null) {
+                    examinations = study.getExaminations().subList(start, stop < study.getExaminations().size() ? stop : study.getExaminations().size());
+                } else {
+                    examinations = study.getExaminations();
+                }
+                for (Examination examination : examinations) {
+                    event.setStatus(2);
+                    event.setProgress(i / study.getExaminations().size());
+                    event.setMessage("checking quality for examination " + examination.getComment());
+                    event.setReport(result.toString());
+                    eventService.publishEvent(event);
+                    result.merge(applyQualityCardOnExamination(qualityCard, examination, updateTags));
+                    i++;
+                };
+                event.setProgress(1f);
+                event.setStatus(1);
+                event.setMessage("Quality card applied on study " + study.getName() + " in " + (new Date().getTime() - startTs) + " ms.");
                 event.setReport(result.toString());
                 eventService.publishEvent(event);
-                result.merge(applyQualityCardOnExamination(qualityCard, examination, updateTags));
-                i++;
-            };
-            event.setProgress(1f);
-            event.setStatus(1);
-            event.setMessage("Quality card applied on study " + study.getName() + " in " + (new Date().getTime() - startTs) + " ms.");
-            event.setReport(result.toString());
-            eventService.publishEvent(event);
-			return result;
-		} else {
-            event.setStatus(-1);
-            event.setMessage("Study card used with emtpy rules.");
-            event.setProgress(1f);
-            eventService.publishEvent(event);
-			throw new RestClientException("Study card used with emtpy rules.");
-		}
+                return result;
+            } else {
+                event.setStatus(-1);
+                event.setMessage("Study card used with emtpy rules.");
+                event.setProgress(1f);
+                eventService.publishEvent(event);
+                throw new RestClientException("Study card used with emtpy rules.");
+            }
+        } catch (Exception e) {
+            LOG.error("Test exception", e);
+            throw e;
+        }
 	}
 
     /**
