@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.processing.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import org.shanoir.ng.dataset.model.Dataset;
