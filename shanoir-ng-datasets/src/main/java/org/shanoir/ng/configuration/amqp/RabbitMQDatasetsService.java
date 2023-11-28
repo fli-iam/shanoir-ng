@@ -466,7 +466,7 @@ public class RabbitMQDatasetsService {
 					ShanoirEventType.COPY_DATASET_EVENT,
 					null,
 					userId,
-					"Copy of dataset " + count++ + "/" + datasetParentIds.size() + " to study " + studyId,
+					"Copy of dataset " + count++ + "/" + datasetParentIds.size() + " to study [" + studyId + "].",
 					ShanoirEvent.IN_PROGRESS,
 					Float.valueOf(count/datasetParentIds.size())
 			);
@@ -505,9 +505,10 @@ public class RabbitMQDatasetsService {
 				}
 			}
 
-			event.setMessage("Copy of datasets successful.");
+			event.setMessage("Copy of datasets successful in study [" + studyId + "].");
 			event.setStatus(ShanoirEvent.SUCCESS);
 			event.setProgress(1.0f);
+
 			eventService.publishEvent(event);
 
 			solrService.indexAll();
