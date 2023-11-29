@@ -152,7 +152,7 @@ public class CardsProcessingService {
             if (qualityCard.getStudyId() != study.getId()) throw new IllegalStateException("study and studycard ids don't match");
             if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {	    
                 QualityCardResult result = new QualityCardResult();
-                Float i = 0f;
+                int i = 0;
                 List<Examination> examinations;
                 if (start != null && stop != null) {
                     examinations = study.getExaminations().subList(start, stop < study.getExaminations().size() ? stop : study.getExaminations().size());
@@ -160,12 +160,14 @@ public class CardsProcessingService {
                     examinations = study.getExaminations();
                 }
                 for (Examination examination : examinations) {
+                    LOG.error("start exam " + i + " - " + examination.getComment());
                     event.setStatus(2);
-                    event.setProgress(i / study.getExaminations().size());
+                    event.setProgress((float)i / examinations.size());
                     event.setMessage("checking quality for examination " + examination.getComment());
                     event.setReport(result.toString());
                     eventService.publishEvent(event);
                     result.merge(applyQualityCardOnExamination(qualityCard, examination, updateTags));
+                    LOG.error("stop exam " + i + " - " + examination.getComment());
                     i++;
                 };
                 event.setProgress(1f);
