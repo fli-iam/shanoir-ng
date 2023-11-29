@@ -30,6 +30,7 @@ import java.util.List;
  * @author msimon
  */
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 public class DatasetProcessing extends AbstractEntity {
 
 	/**
@@ -63,6 +64,10 @@ public class DatasetProcessing extends AbstractEntity {
 	@NotNull
 	private Long studyId;
 
+	/** Parent dataset processing id (e.g. VIP execution) **/
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "parent_id")
+	private DatasetProcessing parent;
 
 	/**
 	 * @return the comment
@@ -162,4 +167,11 @@ public class DatasetProcessing extends AbstractEntity {
 		this.studyId = studyId;
 	}
 
+	public DatasetProcessing getParent() {
+		return parent;
+	}
+
+	public void setParent(DatasetProcessing parent) {
+		this.parent = parent;
+	}
 }
