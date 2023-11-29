@@ -170,10 +170,12 @@ public class CardsProcessingService {
                     LOG.error("stop exam " + i + " - " + examination.getComment());
                     i++;
                 };
+                LOG.error("finalize" + i);
                 event.setProgress(1f);
                 event.setStatus(1);
                 event.setMessage("Quality card applied on study " + study.getName() + " in " + (new Date().getTime() - startTs) + " ms.");
                 event.setReport(result.toString());
+                LOG.error("publish " + event.getProgress());
                 eventService.publishEvent(event);
                 return result;
             } else {
