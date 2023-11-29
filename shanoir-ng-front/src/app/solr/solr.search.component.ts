@@ -98,7 +98,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             private breadcrumbsService: BreadcrumbsService, private formBuilder: UntypedFormBuilder,
             private solrService: SolrService, private router: Router, private datasetService: DatasetService, private datasetAcquisitionService: DatasetAcquisitionService,
             private keycloakService: KeycloakService, private studyRightsService: StudyRightsService, private downloadService: MassDownloadService, private clipboard: Clipboard,
-            private confirmDialogService: ConfirmDialogService, private consoleService: ConsoleService, private processingService: ProcessingService, private studyService: StudyService) {
+            private confirmDialogService: ConfirmDialogService, private consoleService: ConsoleService, private processingService: ExecutionDataService, private studyService: StudyService) {
 
         this.getRole();
         if (this.role != 'admin') this.getRights();
