@@ -2,6 +2,7 @@ package org.shanoir.ng.vip.monitoring.schedule;
 
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.SecurityException;
+import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.vip.monitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.monitoring.service.ExecutionMonitoringService;
 import org.slf4j.Logger;
@@ -36,6 +37,8 @@ public class ExecutionStatusMonitorRunner implements ApplicationRunner {
      */
     @Override
     public void run(ApplicationArguments args) throws EntityNotFoundException, SecurityException {
+
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 
         List<ExecutionMonitoring> runningMonitorings = execMonitoringSrv.findAllRunning();
 
