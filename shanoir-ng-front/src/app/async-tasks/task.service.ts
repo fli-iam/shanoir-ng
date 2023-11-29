@@ -36,4 +36,15 @@ export class TaskService extends EntityService<Task> {
             .toPromise()
             .then(this.mapEntityList);
     }
+
+    protected toRealObject(entity: Task): Task {
+        let trueObject = Object.assign(new Task(), entity);
+        Object.keys(entity).forEach(key => {
+            let value = entity[key];
+            if (['creationDate', 'lastUpdate'].includes(key) && value) {
+                trueObject[key] = new Date(value);
+            }
+        });
+        return trueObject;
+    }
 }
