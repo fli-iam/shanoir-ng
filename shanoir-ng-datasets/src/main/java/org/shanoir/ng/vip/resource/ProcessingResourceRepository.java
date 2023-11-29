@@ -11,4 +11,6 @@ public interface ProcessingResourceRepository  extends CrudRepository<Processing
 
     @Query(value = "SELECT dataset.id FROM ProcessingResource WHERE resourceId = :resourceId")
     List<Long> findDatasetIdsByResourceId(String resourceId);
+
+    void deleteByProcessingId(Long processingId);
 }

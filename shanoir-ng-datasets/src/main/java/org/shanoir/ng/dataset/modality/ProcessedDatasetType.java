@@ -28,7 +28,9 @@ public enum ProcessedDatasetType {
 	// NonReconstructedDataset
 	NONRECONSTRUCTEDDATASET(2),
 
-	UNDEFINED(3);
+	UNDEFINED(3),
+
+	EXECUTION_RESULT(4);
 
 	private int id;
 

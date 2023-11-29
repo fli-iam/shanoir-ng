@@ -27,14 +27,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</span>
 
 		<fieldset>
-
 			<ol>
-				<legend>
-					Research study
-					<tool-tip>A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...</tool-tip>
-				</legend>
+                <li *ngIf="mode == 'view' && datasetProcessing?.parentId">
+                    <label>Parent processing</label>
+                    <span class="right-col">
+						  <a [routerLink]="['/dataset-processing/details/', datasetProcessing.parentId]">
+                                Dataset processing n°{{ datasetProcessing.parentId }}
+                            </a>
+					</span>
+                </li>
 				<li>
-					<label>Research study</label>
+					<label>Study</label>
 					<span class="right-col" [ngSwitch]="mode">
 						<ng-template [ngSwitchCase]="'view'">
                             <a [routerLink]="['/study/details/', study?.id]">
@@ -121,6 +124,27 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						{{executionMonitoring.status}}
 					</span>
 				</li>
+
+                <li *ngIf="executionMonitoring.startDate">
+                    <label class="right-col">Start date</label>
+                    <span class="right-col">
+						{{ formatDate(executionMonitoring.startDate) }}
+					</span>
+                </li>
+
+                <li *ngIf="executionMonitoring.endDate">
+                    <label class="right-col">End date</label>
+                    <span class="right-col">
+						{{ formatDate(executionMonitoring.endDate) }}
+					</span>
+                </li>
+
+                <li *ngIf="getDuration()">
+                    <label class="right-col">Duration</label>
+                    <span class="right-col">
+						{{ getDuration() }}
+					</span>
+                </li>
 
                 <button type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="downloadStdout()">Download stdout logs<i class="fas fa-download"></i></button>
                 <button type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="downloadStderr()">Download stderr logs<i class="fas fa-download"></i></button>

@@ -83,9 +83,8 @@ import { StudyCardForRulesListComponent } from './study-cards/study-card-list/st
 import { ProcessedDatasetClinicalContextComponent } from './import/processed-dataset-clinical-context/processed-dataset-clinical-context.component';
 import { DUAComponent } from './dua/dua.component';
 import { AccessRequestComponent } from './users/access-request/access-request.component';
-import { ProcessingComponent } from './processing/processing.component';
-import { PipelinesComponent } from './processing/pipelines/pipelines.component';
-import { ExecutionComponent } from './processing/execution/execution.component';
+import { PipelinesComponent } from './vip/pipelines/pipelines.component';
+import { ExecutionComponent } from './vip/execution/execution.component';
 import { ExecutionMonitoringsComponent } from './vip/execution-monitorings/execution-monitorings.component';
 import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
 import { ApplyStudyCardOnComponent } from './study-cards/apply-study-card-on/apply-study-card-on.component';
@@ -125,22 +124,15 @@ let routes: Routes = [
     }, {
         path: 'solr-search',
         component: SolrSearchComponent
-    },
-    {
+    }, {
         path: 'execution-monitoring',
         component: ExecutionMonitoringsComponent
     }, {
-        path: 'processing',
-        component: ProcessingComponent,
-        children:[
-            {
-                path: 'pipelines',
-                component: PipelinesComponent
-            }, {
-                path: 'execution',
-                component: ExecutionComponent
-            }
-        ]
+        path: 'pipelines',
+        component: PipelinesComponent
+    }, {
+        path: 'execution',
+        component: ExecutionComponent
     }, {
         path: 'imports',
         component: ImportComponent,
