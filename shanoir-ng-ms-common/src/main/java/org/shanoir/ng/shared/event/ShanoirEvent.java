@@ -1,5 +1,6 @@
 package org.shanoir.ng.shared.event;
 
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 public class ShanoirEvent {
@@ -125,7 +126,7 @@ public class ShanoirEvent {
 	 * @param message the message to set
 	 */
 	public void setMessage(String message) {
-		this.message = message;
+		this.message = StandardCharsets.UTF_8.encode(message).toString();
 	}
 
 	public String getReport() {
@@ -133,7 +134,7 @@ public class ShanoirEvent {
 	}
 
 	public void setReport(String report) {
-		this.report = report;
+		this.report = StandardCharsets.UTF_8.encode(report).toString();
 	}
 
 	/**
