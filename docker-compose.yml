@@ -102,6 +102,7 @@ services:
       - SHANOIR_CERTIFICATE_PEM_CRT
       - SHANOIR_CERTIFICATE_PEM_KEY
       - SHANOIR_MIGRATION
+      - VIP_SERVICE_EMAIL
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java
