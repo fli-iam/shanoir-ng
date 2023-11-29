@@ -167,7 +167,7 @@ public class CardsProcessingService {
                     event.setReport(result.toString());
                     eventService.publishEvent(event);
                     result.merge(applyQualityCardOnExamination(qualityCard, examination, updateTags));
-                    LOG.error("stop exam " + i + " - " + examination.getComment());
+                    LOG.error("stop exam " + i + " - " + examination.getComment() + " - " + (float)i / examinations.size());
                     i++;
                 };
                 LOG.error("finalize" + i);
