@@ -161,7 +161,7 @@ public class CardsProcessingService {
                 event.setStatus(2);
                 event.setProgress((float)i / examinations.size());
                 event.setMessage("checking quality for examination " + examination.getComment());
-                event.setReport(result.toString());
+                //event.setReport(result.toString()); // too heavy
                 eventService.publishEvent(event);
                 result.merge(applyQualityCardOnExamination(qualityCard, examination, updateTags));
                 i++;
