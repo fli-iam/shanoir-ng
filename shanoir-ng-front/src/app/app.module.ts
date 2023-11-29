@@ -267,6 +267,7 @@ import { TaskStatusComponent } from './async-tasks/status/task-status.component'
 import {DatasetCopyDialogComponent} from "./shared/components/dataset-copy-dialog/dataset-copy-dialog.component";
 import { DownloadSetupComponent } from './shared/mass-download/download-setup/download-setup.component';
 import { DownloadSetupAltComponent } from './shared/mass-download/download-setup-alt/download-setup-alt.component';
+import {ProcessingService} from "./processing/processing.service";
 
 @NgModule({
     imports: [
@@ -477,6 +478,7 @@ import { DownloadSetupAltComponent } from './shared/mass-download/download-setup
         ManufacturerService,
         RoleService,
         StudyService,
+        ProcessingService,
         CoilService,
         AccessRequestService,
         // ToolService,
