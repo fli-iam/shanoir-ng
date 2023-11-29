@@ -25,7 +25,7 @@ import { AfterViewChecked } from "@angular/core";
 import { environment } from "../../environments/environment";
 import { DatasetAcquisition } from '../dataset-acquisitions/shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../dataset-acquisitions/shared/dataset-acquisition.service';
-import { ProcessingService } from '../processing/processing.service';
+import { ExecutionDataService } from '../vip/execution.data-service';
 import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
 import { ColumnDefinition } from '../shared/components/table/column.definition.type';
 import { Page, Pageable } from "../shared/components/table/pageable.model";
@@ -525,7 +525,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
 
         let downloadable = true;
         selection.forEach((datasetid) => {
-            let selected: any = this.table.page.content.find((element: any) => element.id == datasetid);
+            let selected: any = this.table?.page?.content?.find((element: any) => element.id == datasetid);
             let studyId
             if (selected) {
                 studyId = selected.studyId;
@@ -593,7 +593,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                     + 'Remove datasets that belongs to the following study(ies) from your selection : ' + [...noAdminStudies].join(', '));
             }else{
                 this.processingService.setDatasets(this.selectedDatasetIds);
-                this.router.navigate(['/processing']);
+                this.router.navigate(['pipelines']);
             }
         });
     }

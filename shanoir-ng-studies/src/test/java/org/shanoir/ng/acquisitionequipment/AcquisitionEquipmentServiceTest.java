@@ -35,6 +35,7 @@ import org.mockito.quality.Strictness;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.acquisitionequipment.service.AcquisitionEquipmentServiceImpl;
+import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.manufacturermodel.model.Manufacturer;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -131,6 +132,10 @@ public class AcquisitionEquipmentServiceTest {
 		manu.setName(MANUFACTURER_NAME);
 		model.setManufacturer(manu);
 		equipment.setManufacturerModel(model);
+		Center center = new Center();
+		center.setName("name");
+		center.setId(1L);
+		equipment.setCenter(center);
 		return equipment;
 	}
 

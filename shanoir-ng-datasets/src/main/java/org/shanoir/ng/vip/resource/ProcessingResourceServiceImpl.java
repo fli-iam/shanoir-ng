@@ -39,4 +39,9 @@ public class ProcessingResourceServiceImpl implements ProcessingResourceService 
         repository.saveAll(processingResources);
         return resourceId;
     }
+
+    @Override
+    public void deleteByProcessingId(Long processingId) {
+        repository.deleteByProcessingId(processingId);
+    }
 }

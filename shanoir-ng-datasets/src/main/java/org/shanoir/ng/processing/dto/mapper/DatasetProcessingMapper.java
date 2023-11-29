@@ -16,12 +16,15 @@ package org.shanoir.ng.processing.dto.mapper;
 
 import java.util.List;
 
+import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
+import org.shanoir.ng.examination.dto.mapper.ExaminationDecorator;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 
 @Mapper(componentModel = "spring", uses = { DatasetMapper.class })
+@DecoratedWith(DatasetProcessingDecorator.class)
 public interface DatasetProcessingMapper {
 
 	/**

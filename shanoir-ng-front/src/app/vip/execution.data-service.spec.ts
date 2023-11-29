@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { ProcessingService } from './processing.service';
+import { ExecutionDataService } from './execution.data-service';
 
 describe('ProcessingService', () => {
-  let service: ProcessingService;
+  let service: ExecutionDataService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(ProcessingService);
+    service = TestBed.inject(ExecutionDataService);
   });
 
   it('should be created', () => {

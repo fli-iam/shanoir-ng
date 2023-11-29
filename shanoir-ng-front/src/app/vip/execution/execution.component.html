@@ -88,6 +88,6 @@
 </div>
 
 <div *ngIf="parametersApplied">
-    <button type="button" (click)="onSubmitExecutionForm()">Run all</button>
+    <button type="button" [disabled]="isSubmitted" (click)="onSubmitExecutionForm()">Run all</button>
 </div>
 
