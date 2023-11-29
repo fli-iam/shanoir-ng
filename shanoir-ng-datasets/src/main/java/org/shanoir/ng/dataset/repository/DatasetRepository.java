@@ -27,7 +27,9 @@ import java.util.List;
 
 public interface DatasetRepository extends PagingAndSortingRepository<Dataset, Long>, CrudRepository<Dataset, Long>, DatasetRepositoryCustom {
 
-	List<Dataset> findBySourceId(Long sourceId);
+	List<Dataset> findBySourceId(Long sourceDatasetId);
+
+	List<Dataset> findBySourceIdIn(List<Long> sourceDatasetId);
 
 	Page<Dataset> findByDatasetAcquisitionExaminationStudy_IdIn(Iterable<Long> studyIds, Pageable pageable);
 

@@ -45,6 +45,7 @@ import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -101,7 +102,13 @@ public class ExaminationServiceImpl implements ExaminationService {
 		String studyIdAsString = examination.getStudyId().toString();
 
 		List<Examination> childExam = examinationRepository.findBySourceId(id);
-		if (childExam.isEmpty()) {
+		if (!CollectionUtils.isEmpty(childExam)) {
+			throw new RestServiceException(
+					new ErrorModel(
+							HttpStatus.UNPROCESSABLE_ENTITY.value(),
+							"This examination is linked to another examination that was copied."
+					));
+		} else {
 			if (examination.getDatasetAcquisitions() != null) {
 				for (DatasetAcquisition dsAcq : examination.getDatasetAcquisitions()) {
 					this.datasetAcquisitionService.deleteById(dsAcq.getId());
@@ -109,12 +116,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 			}
 			examinationRepository.deleteById(id);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, id.toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS, examination.getStudyId()));
-		} else {
-			throw new RestServiceException(
-					new ErrorModel(
-							HttpStatus.UNPROCESSABLE_ENTITY.value(),
-							"This examination is linked to another examination that was copied."
-					));
+
 		}
 	}
 

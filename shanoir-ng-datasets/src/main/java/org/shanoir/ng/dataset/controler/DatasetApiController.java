@@ -145,7 +145,7 @@ public class DatasetApiController implements DatasetApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}  catch (RestServiceException e) {
+		} catch (RestServiceException e) {
 			return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
 		} catch (Exception e) {
 			LOG.error("Error while deleting dataset. Please check DICOM server configuration.", e);
@@ -163,6 +163,8 @@ public class DatasetApiController implements DatasetApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		} catch (RestServiceException e) {
+			return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
 		} catch (IOException | SolrServerException e) {
 			LOG.error("Error while deleting datasets: ", e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

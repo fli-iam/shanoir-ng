@@ -16,31 +16,21 @@ package org.shanoir.ng.study.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.EntityManager;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
-import org.shanoir.ng.manufacturermodel.service.ManufacturerModelServiceImpl;
-import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.dataset.RelatedDataset;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
-import org.shanoir.ng.shared.subjectstudy.SubjectType;
-import org.shanoir.ng.study.dto.RelatedDatasetDTO;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.repository.StudyUserRepository;
-import org.shanoir.ng.study.security.StudySecurityService;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
-import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
-import org.shanoir.ng.subjectstudy.model.SubjectStudyTag;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
-import org.shanoir.ng.subjectstudy.service.SubjectStudyService;
-import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,10 +39,8 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Implementation of RelatedDataset service.
@@ -178,7 +166,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 		// datasetIds order is : selected datasets in solr from top of the table to bottom
 		// reverse that order so that the first dataset to be treated is the last selected in solr
 		Collections.sort(datasetIds);
-		RelatedDatasetDTO dto = new RelatedDatasetDTO();
+		RelatedDataset dto = new RelatedDataset();
 		dto.setStudyId(studyId);
 		dto.setDatasetIds(datasetIds);
 		dto.setUserId(userId);

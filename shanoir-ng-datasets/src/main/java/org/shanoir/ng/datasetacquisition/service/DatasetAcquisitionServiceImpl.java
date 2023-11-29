@@ -37,6 +37,7 @@ import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.util.*;
@@ -184,7 +185,13 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         }
 
         List<DatasetAcquisition> childDSAcq = repository.findBySourceId(id);
-        if (childDSAcq.isEmpty()) {
+        if (!CollectionUtils.isEmpty(childDSAcq)) {
+            throw new RestServiceException(
+                    new ErrorModel(
+                            HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                            "This datasetAcquisition is linked to another datasetAcquisition that was copied."
+                    ));
+        } else {
             if (entity.getDatasets() != null) {
                 for (Dataset ds : entity.getDatasets()) {
                     datasetService.deleteById(ds.getId());
@@ -192,14 +199,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
             }
             repository.deleteById(id);
             shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-        } else {
-        throw new RestServiceException(
-                new ErrorModel(
-                        HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                        "This datasetAcquisition is linked to another datasetAcquisition that was copied."
-                ));
         }
-
     }
     
     @Override

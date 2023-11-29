@@ -19,7 +19,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.bids.service.BIDSService;
-import org.shanoir.ng.dataset.dto.RelatedDatasetDTO;
 import org.shanoir.ng.dataset.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
@@ -32,6 +31,7 @@ import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.dataset.RelatedDataset;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -44,9 +44,7 @@ import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
-import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
-import org.shanoir.ng.vip.monitoring.model.ExecutionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
@@ -439,7 +437,6 @@ public class RabbitMQDatasetsService {
 	/**
 	 * Iterate through a list of dataset to copy each into a new study
 	 * @param data The list of datasets id to copy and the studyId to copy in
-	 *             ex: 112,113,114,115;58 (datasetId,dsId,dsId,dsId;studyId)
 	 *
 	 * @return
 	 */
@@ -450,19 +447,20 @@ public class RabbitMQDatasetsService {
 		Map<Long, Examination> examMap = new HashMap<>();
 		Map<Long, DatasetAcquisition> acqMap = new HashMap<>();
 		List<Long> datasetParentIds;
+		List<Long> newDatasets = new ArrayList<>();
 		Boolean copy = false;
 		String res = "";
 		int count = 0;
 		float progress = 0f;
-
+		ShanoirEvent event = null;
 		try {
-			RelatedDatasetDTO dto = objectMapper.readValue(data, RelatedDatasetDTO.class);
+			RelatedDataset dto = objectMapper.readValue(data, RelatedDataset.class);
 			SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 			Long userId = dto.getUserId();
 			Long studyId = dto.getStudyId();
 			datasetParentIds = dto.getDatasetIds();
 
-			ShanoirEvent event = new ShanoirEvent(
+			event = new ShanoirEvent(
 					ShanoirEventType.COPY_DATASET_EVENT,
 					null,
 					userId,
@@ -500,7 +498,9 @@ public class RabbitMQDatasetsService {
 					}
 				}
 				if (copy) {
-					datasetCopyService.moveDataset(datasetParent, studyId, examMap, acqMap);
+					Long id = datasetCopyService.moveDataset(datasetParent, studyId, examMap, acqMap, event);
+					if (id != null)
+						newDatasets.add(id);
 					res = "Copy worked !";
 				}
 			}
@@ -510,8 +510,7 @@ public class RabbitMQDatasetsService {
 			event.setProgress(1.0f);
 
 			eventService.publishEvent(event);
-
-			solrService.indexAll();
+			solrService.indexDatasets(newDatasets);
 
 			return res;
 		} catch (Exception e) {

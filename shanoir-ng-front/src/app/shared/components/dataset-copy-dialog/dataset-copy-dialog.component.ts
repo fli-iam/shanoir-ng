@@ -73,6 +73,7 @@ export class DatasetCopyDialogComponent {
         }
     }
     public copy() {
+        this.canCopy = false;
         this.checkRightsOnSelectedStudies(this.selectedStudy.id).then( () => {
             this.isDatasetInStudy = this.checkDatasetBelongToStudy(this.lines, this.selectedStudy.id);
 
@@ -87,12 +88,13 @@ export class DatasetCopyDialogComponent {
                 formData.set('studyId', this.selectedStudy.id.toString());
                 formData.set('centerIds', Array.from(this.centerIds).join(","));
                 formData.set('subjectIdStudyId', Array.from(this.subjectIdStudyId).join(","));
-                console.log("formData : ", formData);
                 return this.http.post<string>(AppUtils.BACKEND_API_STUDY_URL + '/copyDatasets', formData, { responseType: 'text' as 'json'})
                     .toPromise()
                     .then(res => {
-                        this.statusMessage = res;
+                        this.canCopy = true;
+                        this.statusMessage = res ? res : "An error occured during copy of dataset to study " + this.selectedStudy.id;
                     }).catch(reason => {
+                        this.canCopy = true;
                         if (reason.status == 403) {
                             this.statusMessage = "You must be admin or expert.";
                         } else throw Error(reason);

@@ -366,7 +366,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                 'Are you sure you want to delete ' + this.selectedDatasetIds.size + ' dataset(s) ?'
             ).then(res => {
                 if (res) {
-                    this.datasetService.deleteAll([...this.selectedDatasetIds]).then(() => {
+                    this.datasetService.deleteAll([...this.selectedDatasetIds]).then((deleted) => {
                         this.selectedDatasetIds = new Set();
                         if (this.tab == 'selected') this.selectionTable.refresh();
                         this.table.refresh().then(() => {
@@ -379,6 +379,11 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                                 + 'You cannot delete those datasets. Please select only datasets that you can administrate (see the yellow shield icon) and try again. '
                                 +' If you really need to delete those datasets, contact an administrator for the corresponding study '
                                 + ' and ask him to grant you the administrator role in the study.');
+                        }
+                        if(reason?.status == 422) {
+                            let warn = 'At least on of the selected dataset is linked to other entities, it was not deleted.';
+                            this.consoleService.log('warn', warn);
+                            return false;
                         } else throw Error(reason);
                     });
                 }

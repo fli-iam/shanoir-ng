@@ -38,7 +38,6 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
     ) { }
 
     ngOnInit() {
-        console.log("task : ", this.task);
     }
 
     ngOnChanges(changes: SimpleChanges): void {

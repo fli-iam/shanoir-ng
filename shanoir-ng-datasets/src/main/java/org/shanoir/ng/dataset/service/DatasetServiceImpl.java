@@ -111,23 +111,20 @@ public class DatasetServiceImpl implements DatasetService {
 		}
 
 		List<Dataset> childDatasets = repository.findBySourceId(id);
-		Dataset parentDataset = null;
-		if (datasetDb.getSourceId() != null)
-			parentDataset = repository.findById(datasetDb.getSourceId()).orElse(null);
 
-		if (childDatasets.isEmpty()) {
-			solrService.deleteFromIndex(id);
-			if (childDatasets.isEmpty() && parentDataset == null) {
-				this.deleteDatasetFromPacs(datasetDb);
-			}
-			repository.deleteById(id);
-			shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, datasetDb.getStudyId()));
-		} else {
+		if (!CollectionUtils.isEmpty(childDatasets)) {
 			throw new RestServiceException(
 					new ErrorModel(
 							HttpStatus.UNPROCESSABLE_ENTITY.value(),
 							"This dataset is linked to another dataset that was copied."
 					));
+		} else {
+			solrService.deleteFromIndex(id);
+			if (datasetDb.getSourceId() == null) {
+				this.deleteDatasetFromPacs(datasetDb);
+			}
+			repository.deleteById(id);
+			shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, datasetDb.getStudyId()));
 		}
 	}
 
@@ -162,16 +159,27 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Override
 	@Transactional
-	public void deleteByIdIn(List<Long> ids) throws EntityNotFoundException, SolrServerException, IOException {
+	public void deleteByIdIn(List<Long> ids) throws EntityNotFoundException, SolrServerException, IOException, RestServiceException {
 		List<Dataset> dss = this.findByIdIn(ids);
 		Map<Long, Long> datasetStudyMap = new HashMap<>();
 		for (Dataset ds : dss) {
 			datasetStudyMap.put(ds.getId(), ds.getStudyId());
 		}
-		repository.deleteByIdIn(ids);
-		solrService.deleteFromIndex(ids);
-		for (Long id : ids) {
-			shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, datasetStudyMap.get(id)));
+
+		List<Dataset> childDatasets = repository.findBySourceIdIn(ids);
+		System.out.println("childDatasets size : " + childDatasets.size());
+		if (!CollectionUtils.isEmpty(childDatasets)) {
+			throw new RestServiceException(
+					new ErrorModel(
+							HttpStatus.UNPROCESSABLE_ENTITY.value(),
+							"This dataset is linked to another dataset that was copied."
+					));
+		} else {
+			repository.deleteByIdIn(ids);
+			solrService.deleteFromIndex(ids);
+			for (Long id : ids) {
+				shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, datasetStudyMap.get(id)));
+			}
 		}
 	}
 

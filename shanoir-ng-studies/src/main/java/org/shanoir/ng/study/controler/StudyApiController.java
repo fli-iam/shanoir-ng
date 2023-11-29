@@ -253,10 +253,15 @@ public class StudyApiController implements StudyApi {
 			@Parameter(name = "subject id of datasets", required = true)
 			@RequestParam(value = "subjectIdStudyId", required = true) List<String> subjectIdStudyId) {
 
-		Long studyId = Long.valueOf(studyIdAsStr);
-		String res = relatedDatasetService.addCenterAndCopyDatasetToStudy(datasetIds, studyId, centerIds);
-		relatedDatasetService.addSubjectStudyToNewStudy(subjectIdStudyId, studyId);
+		String res = null;
+		try {
+			Long studyId = Long.valueOf(studyIdAsStr);
+			res = relatedDatasetService.addCenterAndCopyDatasetToStudy(datasetIds, studyId, centerIds);
+			relatedDatasetService.addSubjectStudyToNewStudy(subjectIdStudyId, studyId);
 
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 		return new ResponseEntity<>(res, HttpStatus.OK);
 	}
 

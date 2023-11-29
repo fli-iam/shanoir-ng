@@ -1,8 +1,8 @@
-package org.shanoir.ng.study.dto;
+package org.shanoir.ng.shared.dataset;
 
 import java.util.List;
 
-public class RelatedDatasetDTO {
+public class RelatedDataset {
 
     private Long studyId;
 
@@ -10,7 +10,7 @@ public class RelatedDatasetDTO {
 
     private Long userId;
 
-    public RelatedDatasetDTO() {
+    public RelatedDataset() {
     }
 
     public Long getStudyId() {

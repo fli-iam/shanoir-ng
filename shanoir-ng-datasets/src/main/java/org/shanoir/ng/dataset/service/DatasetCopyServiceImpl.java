@@ -18,6 +18,8 @@ import org.shanoir.ng.eeg.model.Event;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.model.*;
 import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.solr.service.SolrService;
@@ -47,11 +49,13 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
     private ExaminationRepository examinationRepository;
     @Autowired
     private DatasetRepository datasetRepository;
+    @Autowired
+    ShanoirEventService eventService;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetCopyServiceImpl.class);
 
     @Override
-    public void moveDataset(Dataset ds, Long studyId, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap) {
+    public Long moveDataset(Dataset ds, Long studyId, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap, ShanoirEvent event) {
         try {
             Long oldDsId = ds.getId();
             DatasetAcquisition newAcq = null;
@@ -69,7 +73,6 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                     // ... creating the DatasetAcquisition in case it doesn't exist yet
                     newAcq = moveAcquisition(ds.getDatasetAcquisition(), studyId, examMap);
                 }
-
                 List<DatasetExpression> dsExList = ds.getDatasetExpressions();
                 datasetCleanup(ds);
 
@@ -85,15 +88,19 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                 newDs.setSourceId(oldDsId);
                 entityManager.flush();
                 acqMap.put(oldAcqId, newAcq);
-                LOG.warn("[CopyDatasets] New dataset created with id = " + newDs.getId());
 
+                LOG.warn("[CopyDatasets] New dataset created with id = " + newDs.getId());
+                return newDs.getId();
             } else if (ds.getDatasetProcessing() != null) {
                 LOG.error("[CopyDatasets] Dataset selected is a processed dataset, it can't be copied.");
+                return null;
             }
         } catch (Exception e) {
-            LOG.error("[CopyDatasets] Error in the Dataset service", e);
+            event.setMessage("[CopyDatasets] Error during the copy of dataset [" + ds.getId() + "] to study [" + studyId + "]. ");
+            eventService.publishEvent(event);
             throw e;
         }
+        return null;
     }
 
     public DatasetAcquisition moveAcquisition(DatasetAcquisition acq, Long studyId, Map<Long, Examination> examMap) {
