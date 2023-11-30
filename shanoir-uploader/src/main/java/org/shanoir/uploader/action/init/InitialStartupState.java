@@ -10,11 +10,13 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.Random;
 import java.util.ResourceBundle;
+import java.util.TimeZone;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
@@ -58,12 +60,13 @@ public class InitialStartupState implements State {
 		logger.info("Start running of ShanoirUploader...");
 		logger.info("Version: " + ShUpConfig.SHANOIR_UPLOADER_VERSION);
 		logger.info("Release Date: " + ShUpConfig.RELEASE_DATE);
-		logger.info(System.getProperty("java.vendor"));
-		logger.info(System.getProperty("java.vendor.url"));
-		logger.info(System.getProperty("java.version"));
+		logger.info("Java Vendor: " + System.getProperty("java.vendor"));
+		logger.info("Java Vendor URL: " + System.getProperty("java.vendor.url"));
+		logger.info("Java Version: " + System.getProperty("java.version"));
         InetAddress inetAddress = InetAddress.getLocalHost();
         logger.info("IP Address: " + inetAddress.getHostAddress());
         logger.info("Host Name: " + inetAddress.getHostName());
+		logger.info("TimeZone: " + System.getProperty("user.timezone") + ", " + TimeZone.getDefault() + ", " + ZoneId.systemDefault());
 		 // Disable http request to check for quartz upload
 		System.setProperty("org.quartz.scheduler.skipUpdateCheck", "true");
 		System.setProperty("jdk.http.auth.tunneling.disabledSchemes", "");
