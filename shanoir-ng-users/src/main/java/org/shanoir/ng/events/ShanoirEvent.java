@@ -5,8 +5,15 @@ import java.sql.Types;
 import org.hibernate.annotations.JdbcTypeCode;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
 
 @Entity
+@Table(name = "events",
+		indexes = {
+			@Index(name = "i_user_type", columnList = "userId, eventType"),
+		}
+	)
 public class ShanoirEvent extends ShanoirEventLight {
 
 	@JdbcTypeCode(Types.LONGVARCHAR)

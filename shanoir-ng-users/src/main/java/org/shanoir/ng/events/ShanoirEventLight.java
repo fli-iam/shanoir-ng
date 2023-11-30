@@ -8,10 +8,8 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.Index;
-import jakarta.persistence.Table;
+import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Transient;
 
 /**
@@ -19,17 +17,11 @@ import jakarta.persistence.Transient;
  * @author JComeD
  *
  */
-@Entity
-@Table(name = "events",
-		indexes = {
-			@Index(name = "i_user_type", columnList = "userId,eventType"),
-		}
-	)
+@MappedSuperclass
 public class ShanoirEventLight {
 
 	/** ID of the event, normally generated BEFORE arriving here **/
 	@Id
-	//@JsonSerialize(using=ToStringSerializer.class)
 	protected Long id;
 	
 	/** See EventType **/
