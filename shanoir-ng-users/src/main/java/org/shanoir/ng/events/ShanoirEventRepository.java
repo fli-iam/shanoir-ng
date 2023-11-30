@@ -23,4 +23,6 @@ public interface ShanoirEventRepository extends CrudRepository<ShanoirEvent, Lon
 	 * @param expiryDate the expiration date.
 	 */
     public void deleteByLastUpdateBefore(Date expiryDate);
+
+    ShanoirEvent findByIdAndUserId(Long taskId, long userId);
 }

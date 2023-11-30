@@ -73,15 +73,25 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
                headerName: 'Progress', field: 'progress', width: '110px', type: 'progress', 
                cellRenderer: params => { return {progress: params.data?.progress, status: params.data?.status}; }
             }, { 
-               headerName: "Creation", field: "creationDate", width: '130px', type: 'date'
+               headerName: "Creation", field: "creationDate", width: '130px', type: 'date', defaultSortCol: true, defaultAsc: false,
             }, {
-                headerName: "Last update", field: "lastUpdate", width: '130px', defaultSortCol: true, defaultAsc: false, type: 'date'
+                headerName: "Last update", field: "lastUpdate", width: '130px', type: 'date'
             }
         ];
     }
 
     getCustomActionsDefs(): any[] {
         return [];
+    }
+
+    select(lightTask: Task) {
+        this.selected = null;
+        if (!lightTask) return;
+        if (lightTask.report || !lightTask.hasReport) {
+            this.selected = lightTask;
+        } else {
+            this.taskService.get(lightTask.completeId).then(task => this.selected = task);
+        }
     }
 
 }

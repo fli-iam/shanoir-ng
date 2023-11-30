@@ -37,6 +37,7 @@ export class Task extends Entity {
 
     debugTs: number = Date.now();
     id: number;
+    completeId: BigInt;
     creationDate: Date;
     lastUpdate: Date;
     report: string;
@@ -47,6 +48,7 @@ export class Task extends Entity {
     eventLabel: string;
     objectId: number;
     route: string;
+    hasReport: boolean;
     private readonly FIELDS: string[] = ['id', 'creationDate', 'lastUpdate','_status','_message', '_progress', '_eventType', 'eventLabel', 'objectId', 'route', 'report'];
 
     set eventType(eventType: string) {
