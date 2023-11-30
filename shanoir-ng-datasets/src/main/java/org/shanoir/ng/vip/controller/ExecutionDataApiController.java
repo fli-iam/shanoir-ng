@@ -67,7 +67,8 @@ public class ExecutionDataApiController implements ExecutionDataApi {
             @NotNull @Parameter(name = "The \"content\" action downloads the raw file. If the path points to a directory, a tarball of this directory is returned. The \"exists\" action returns a BooleanResponse object (see definition) indicating if the path exists or not. The \"properties\" action returns a Path object (see definition) with the path properties. The \"list\" action returns a DirectoryList object (see definition) with the properties of all the files of the directory (if the path is not a directory an error must be returned). The \"md5\" action is optional and returns a PathMd5 object (see definition).",
                     required=true)
             @Valid @RequestParam(value = "action", required = true, defaultValue = "content") String action,
-            @Valid @RequestParam(value = "format", required = false, defaultValue = DCM) final String format,
+            @Valid @RequestParam(value = "format", required = false, defaultValue = DCM)  final String format,
+            @Valid @RequestParam(value  = "converter", required  = false) Long converter,
             HttpServletResponse response) throws IOException, RestServiceException, EntityNotFoundException {
         // TODO implement those actions
         switch (action){
@@ -85,7 +86,7 @@ public class ExecutionDataApiController implements ExecutionDataApi {
                     return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
                 }
 
-                datasetDownloaderService.massiveDownload(format, datasets, response, true, null);
+                datasetDownloaderService.massiveDownload(format, datasets, response, true, converter);
                 return new ResponseEntity<Void>(HttpStatus.OK);
         }
 

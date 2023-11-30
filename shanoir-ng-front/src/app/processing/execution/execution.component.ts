@@ -59,6 +59,17 @@ export class ExecutionComponent implements OnInit {
     groupBy = "dataset";
     isLoading = true;
     datasetsPromise: Promise<void>;
+    converter: number;
+
+    niftiConverters: Option<number>[] = [
+        new Option<number>(1, 'DCM2NII_2008_03_31', null, null, null, false),
+        new Option<number>(2, 'MCVERTER_2_0_7', null, null, null, false),
+        new Option<number>(4, 'DCM2NII_2014_08_04', null, null, null, false),
+        new Option<number>(5, 'MCVERTER_2_1_0', null, null, null, false),
+        new Option<number>(6, 'DCM2NIIX', null, null, null, false),
+        new Option<number>(7, 'DICOMIFIER', null, null, null, false),
+        new Option<number>(8, 'MRICONVERTER', null, null, null, false),
+    ];
 
     constructor(private breadcrumbsService: BreadcrumbsService, private processingService: ProcessingService, private vipClientService: VipClientService, private router: Router, private msgService: MsgBoxService, private keycloakService: KeycloakService, private datasetService: DatasetService, private executionMonitoringService: ExecutionMonitoringService) {
         this.breadcrumbsService.nameStep('2. Executions');
@@ -204,7 +215,7 @@ export class ExecutionComponent implements OnInit {
             (processing) => {
 
                 let execution = this.initExecution(processing);
-                this.setExecutionParameters(processing, execution);
+                this.setExecutionParameters(processing, execution, this.converter);
 
                 this.vipClientService.createExecution(execution).then(
                     (execution) => {
@@ -245,7 +256,7 @@ export class ExecutionComponent implements OnInit {
         return execution;
     }
 
-    private setExecutionParameters(processing: ExecutionMonitoring, execution: Execution) {
+    private setExecutionParameters(processing: ExecutionMonitoring, execution: Execution, converter: number) {
         processing.parametersResources.forEach(dto => {
             execution.inputValues[dto.parameter] = [];
             let extension = ".nii.gz"
@@ -256,7 +267,7 @@ export class ExecutionComponent implements OnInit {
             dto.resourceIds.forEach(id => {
                 let entity_name = `resource_id+${id}+${this.groupBy}${extension}`
                 // datasetId URI param = resourceId (to be changed once VIP has been updated)
-                let inputValue = `shanoir:/${entity_name}?format=${this.exportFormat}&datasetId=${id}&token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`;
+                let inputValue = `shanoir:/${entity_name}?format=${this.exportFormat}&datasetId=${id}&converter=${converter}&token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`;
                 execution.inputValues[dto.parameter].push(inputValue);
             })
         });
