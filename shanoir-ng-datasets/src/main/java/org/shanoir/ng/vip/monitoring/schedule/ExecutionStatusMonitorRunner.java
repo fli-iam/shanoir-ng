@@ -23,7 +23,7 @@ public class ExecutionStatusMonitorRunner implements ApplicationRunner {
     private ExecutionMonitoringService execMonitoringSrv;
 
     @Autowired
-    private ExecutionStatusMonitor execMonitor;
+    private ExecutionStatusMonitorService execMonitor;
 
 
     /**
