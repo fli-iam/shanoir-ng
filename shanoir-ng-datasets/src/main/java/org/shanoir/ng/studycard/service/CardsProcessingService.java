@@ -149,6 +149,14 @@ public class CardsProcessingService {
         if (study == null ) throw new IllegalArgumentException("study can't be null");
         if (qualityCard.getStudyId() != study.getId()) throw new IllegalStateException("study and studycard ids don't match");
         if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {	    
+            if (updateTags) { // first reset subject studies
+                event.setMessage("resetting quality subject tags");
+                eventService.publishEvent(event);
+                resetSubjectStudies(study.getSubjectStudyList());
+                try {
+                    subjectStudyService.update(study.getSubjectStudyList());
+                } catch (EntityNotFoundException e) {} // too bad
+            }
             QualityCardResult result = new QualityCardResult();
             int i = 0;
             List<Examination> examinations;
@@ -163,9 +171,18 @@ public class CardsProcessingService {
                 event.setMessage("checking quality for examination " + examination.getComment());
                 //event.setReport(result.toString()); // too heavy
                 eventService.publishEvent(event);
-                result.merge(applyQualityCardOnExamination(qualityCard, examination, updateTags));
+                result.merge(applyQualityCardOnExamination(qualityCard, examination, false));
                 i++;
             };
+            if (updateTags) { // update subject studies
+			    try {
+                    event.setMessage("setting quality subject tags");
+                    eventService.publishEvent(event);
+			        subjectStudyService.update(result.getUpdatedSubjectStudies());
+			    } catch (EntityNotFoundException e) {
+                    throw new IllegalStateException("Could not update subject-studies", e);
+			    }	    
+			}
             event.setProgress(1f);
             event.setStatus(1);
             event.setMessage("Quality card applied on study " + study.getName() + " in " + (new Date().getTime() - startTs) + " ms.");
