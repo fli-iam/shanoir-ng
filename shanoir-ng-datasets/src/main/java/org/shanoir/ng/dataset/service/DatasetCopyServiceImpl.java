@@ -168,6 +168,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                     element.setMrDataset(mrDs);
                 }
             }
+
             if (mrDs.getDatasetProcessing() != null) {
                 mrDs.getDatasetProcessing().setId(null);
             }

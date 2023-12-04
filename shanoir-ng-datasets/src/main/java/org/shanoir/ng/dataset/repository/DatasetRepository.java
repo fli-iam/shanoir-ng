@@ -27,6 +27,12 @@ import java.util.List;
 
 public interface DatasetRepository extends PagingAndSortingRepository<Dataset, Long>, CrudRepository<Dataset, Long>, DatasetRepositoryCustom {
 
+	@Query("SELECT COUNT(*) FROM Dataset ds " +
+			"INNER JOIN DatasetAcquisition acq ON ds.datasetAcquisition.id=acq.id " +
+			"INNER JOIN Examination ex ON acq.examination.id=ex.id " +
+			"WHERE ds.sourceId=:datasetParentId AND ex.study.id=:studyId")
+	Long countDatasetsBySourceIdAndStudyId(Long datasetParentId, Long studyId);
+
 	List<Dataset> findBySourceId(Long sourceDatasetId);
 
 	List<Dataset> findBySourceIdIn(List<Long> sourceDatasetId);

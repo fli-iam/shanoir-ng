@@ -12,22 +12,17 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { HttpClient, HttpParams } from '@angular/common/http';
-import {Component, ComponentRef, ElementRef, EventEmitter, HostListener, Input, Output, ViewChild} from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import {Component} from '@angular/core';
 import {Study} from "../../../studies/shared/study.model";
-import {UntypedFormBuilder, UntypedFormGroup} from "@angular/forms";
-import { GlobalService } from '../../services/global.service';
-import {StudyStorageVolumeDTO} from "../../../studies/shared/study.dto";
 import * as AppUtils from "../../../utils/app.utils";
 import {KeycloakService} from "../../keycloak/keycloak.service";
 import {StudyUserRight} from "../../../studies/shared/study-user-right.enum";
 import {StudyRightsService} from "../../../studies/shared/study-rights.service";
 import {ServiceLocator} from "../../../utils/locator.service";
 import {ConsoleService} from "../../console/console.service";
-import {DatasetService} from "../../../datasets/shared/dataset.service";
 import {StudyService} from "../../../studies/shared/study.service";
 import {SolrDocument} from "../../../solr/solr.document.model";
-import {ShanoirError} from "../../models/error.model";
 
 @Component({
     selector: 'user-action-dialog',
@@ -57,6 +52,8 @@ export class DatasetCopyDialogComponent {
     }
 
     ngOnInit() {
+        // sort studies by alphabetical order
+        this.studies.sort((a, b) => (a.name < b.name ? -1 : 1));
         for (let line of this.lines) {
             if (!this.centerIds.includes(line.centerId)) {
                 this.centerIds.push(line.centerId);

@@ -476,33 +476,50 @@ public class RabbitMQDatasetsService {
 				eventService.publishEvent(event);
 
 				LOG.warn("[CopyDatasets] Start copy for dataset " + datasetParentId + " to study " + studyId);
+				Long dsCount = datasetRepository.countDatasetsBySourceIdAndStudyId(datasetParentId, studyId);
+				System.out.println("count : " + dsCount);
 				List<Dataset> dsCopiedList = datasetRepository.findBySourceId(datasetParentId);
 				Dataset datasetParent = datasetService.findById(datasetParentId);
 
+
 				if (datasetParent.getSourceId() != null) {
-					copy = false;
 					res = "Selected dataset is a copy, please pick the original dataset.";
 					LOG.warn("[CopyDatasets] Selected dataset is a copy, please pick the original dataset.");
-				} else if (dsCopiedList.isEmpty()) {
-					copy = true;
+				} else if (dsCount != 0) {
+					res = "Dataset already exists in this study, copy aborted.";
+					LOG.warn("[CopyDatasets] Dataset already exists in this study, copy aborted.");
 				} else {
-					for (Dataset d : dsCopiedList) {
-						if (d != null && d.getSourceId().equals(datasetParentId) && d.getStudyId() != null && d.getStudyId().equals(studyId)) {
-							res = "Dataset already exists in this study, copy aborted.";
-							LOG.warn("[CopyDatasets] Dataset already exists in this study, copy aborted.");
-							copy = false;
-							break;
-						} else {
-							copy = true;
-						}
-					}
-				}
-				if (copy) {
 					Long id = datasetCopyService.moveDataset(datasetParent, studyId, examMap, acqMap, event);
 					if (id != null)
 						newDatasets.add(id);
 					res = "Copy worked !";
 				}
+
+
+//				if (datasetParent.getSourceId() != null) {
+//					copy = false;
+//					res = "Selected dataset is a copy, please pick the original dataset.";
+//					LOG.warn("[CopyDatasets] Selected dataset is a copy, please pick the original dataset.");
+//				} else if (dsCopiedList.isEmpty()) {
+//					copy = true;
+//				} else {
+//					for (Dataset d : dsCopiedList) {
+//						if (d != null && d.getSourceId().equals(datasetParentId) && d.getStudyId() != null && d.getStudyId().equals(studyId)) {
+//							res = "Dataset already exists in this study, copy aborted.";
+//							LOG.warn("[CopyDatasets] Dataset already exists in this study, copy aborted.");
+//							copy = false;
+//							break;
+//						} else {
+//							copy = true;
+//						}
+//					}
+//				}
+//				if (copy) {
+//					Long id = datasetCopyService.moveDataset(datasetParent, studyId, examMap, acqMap, event);
+//					if (id != null)
+//						newDatasets.add(id);
+//					res = "Copy worked !";
+//				}
 			}
 
 			event.setMessage("Copy of datasets successful in study [" + studyId + "].");
