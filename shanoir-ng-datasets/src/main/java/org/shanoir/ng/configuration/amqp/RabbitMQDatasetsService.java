@@ -477,8 +477,8 @@ public class RabbitMQDatasetsService {
 
 				LOG.warn("[CopyDatasets] Start copy for dataset " + datasetParentId + " to study " + studyId);
 				Long dsCount = datasetRepository.countDatasetsBySourceIdAndStudyId(datasetParentId, studyId);
-				System.out.println("count : " + dsCount);
-				List<Dataset> dsCopiedList = datasetRepository.findBySourceId(datasetParentId);
+				LOG.warn("[CopyDatasets] count " + dsCount);
+//				List<Dataset> dsCopiedList = datasetRepository.findBySourceId(datasetParentId);
 				Dataset datasetParent = datasetService.findById(datasetParentId);
 
 
