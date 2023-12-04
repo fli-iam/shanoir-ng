@@ -47,7 +47,7 @@ import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.download.DatasetDownloadResult;
+import org.shanoir.ng.download.DatasetDownloadError;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -333,7 +333,7 @@ public class DatasetApiController implements DatasetApi {
 	public ResponseEntity<String> getDicomMetadataByDatasetId(
 		@Parameter(name = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId) throws IOException, MessagingException {
 		final Dataset dataset = datasetService.findById(datasetId);
-		DatasetDownloadResult result = new DatasetDownloadResult();
+		DatasetDownloadError result = new DatasetDownloadError();
 		List<URL> pathURLs = new ArrayList<>();
 		DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, result);
 		if (pathURLs.isEmpty()) {

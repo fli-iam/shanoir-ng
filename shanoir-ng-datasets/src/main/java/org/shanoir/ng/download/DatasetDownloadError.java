@@ -17,9 +17,8 @@ package org.shanoir.ng.download;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DatasetDownloadResult {
+public class DatasetDownloadError {
 
-    public static final String SUCCESS = "SUCCESS";
     public static final String PARTIAL_FAILURE = "PARTIAL_FAILURE";
     public static final String ERROR = "ERROR";
 
@@ -27,10 +26,10 @@ public class DatasetDownloadResult {
 
     private String status;
 
-    public DatasetDownloadResult(){
+    public DatasetDownloadError(){
     }
 
-    public DatasetDownloadResult(String message, String status) {
+    public DatasetDownloadError(String message, String status) {
         this.status = status;
         this.messages.add(message);
     }

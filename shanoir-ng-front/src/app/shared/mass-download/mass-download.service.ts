@@ -357,21 +357,19 @@ export class MassDownloadService {
             // Check ERRORS file in zip
             var zip: any = new JSZip();
             const unzipPromise: Promise<any> = zip.loadAsync(httpResponse.body).then(dataFiles => {
-                if (dataFiles.files['RESULT.json']) {
-                    return dataFiles.files['RESULT.json'].async('string').then(content => {
+                if (dataFiles.files['ERRORS.json']) {
+                    return dataFiles.files['ERRORS.json'].async('string').then(content => {
                         const errorsJson: any = JSON.parse(content);
-                        if (errorsJson.status != 0) {
-                            report.list[id].status = 'ERROR';
-                            report.list[id].error = errorsJson.messages;
-                            report.list[id].errorTime = Date.now();
-                            task.lastUpdate = new Date();
-                            task.status = 5;
-                        } else {
-                            report.list[id].status = 'SUCCESS';
-                            delete report.list[id].error;
-                            delete report.list[id].errorTime;
-                        }
+                        report.list[id].status = 'ERROR';
+                        report.list[id].error = errorsJson;
+                        report.list[id].errorTime = Date.now();
+                        task.lastUpdate = new Date();
+                        task.status = 5;
                     });
+                } else {
+                    report.list[id].status = 'SUCCESS';
+                    delete report.list[id].error;
+                    delete report.list[id].errorTime;
                 }
                 return dataFiles;
             });

@@ -139,7 +139,7 @@ public class WADODownloaderService {
 	 * @throws RestServiceException
 	 *
 	 */
-	public List<String> downloadDicomFilesForURLsAsZip(final List<URL> urls, final ZipOutputStream zipOutputStream, String subjectName, Dataset dataset, String datasetFilePath, DatasetDownloadResult downloadResult) {
+	public List<String> downloadDicomFilesForURLsAsZip(final List<URL> urls, final ZipOutputStream zipOutputStream, String subjectName, Dataset dataset, String datasetFilePath, DatasetDownloadError downloadResult) {
 		int i = 0;
 		List<String> files = new ArrayList<>();
 		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext(); i++) {
@@ -154,7 +154,7 @@ public class WADODownloaderService {
 				if (indexInstanceUID <= 0) {
 					LOG.error("URL for download is neither in WADO-RS nor in WADO-URI format. URL : " + url + " - Dataset id : " + dataset.getId());
 					String errorDetails = "URL for download is neither in WADO-RS nor in WADO-URI format";
-					downloadResult.update(errorDetails, DatasetDownloadResult.PARTIAL_FAILURE);
+					downloadResult.update(errorDetails, DatasetDownloadError.PARTIAL_FAILURE);
 				// in case an old WADO-URI is found in the database: convert it to WADO-RS
 				} else {
 					url = wadoURItoWadoRS(url);
@@ -172,7 +172,7 @@ public class WADODownloaderService {
 				}
 			} catch (ZipPacsFileException e) {
 				LOG.error("Could not download dataset {} as dicom: ");
-				downloadResult.update("Could not download dataset as dicom: " + e.getMessage(), DatasetDownloadResult.PARTIAL_FAILURE);
+				downloadResult.update("Could not download dataset as dicom: " + e.getMessage(), DatasetDownloadError.PARTIAL_FAILURE);
 			}
 		}
 		return files;
@@ -229,7 +229,7 @@ public class WADODownloaderService {
 	 * @return
 	 *
 	 */
-	public List<File> downloadDicomFilesForURLs(final List<URL> urls, final File workFolder, String subjectName, Dataset dataset, DatasetDownloadResult downloadResult) {
+	public List<File> downloadDicomFilesForURLs(final List<URL> urls, final File workFolder, String subjectName, Dataset dataset, DatasetDownloadError downloadResult) {
 		List<File> files = new ArrayList<>();
 		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
 			try {
@@ -265,12 +265,12 @@ public class WADODownloaderService {
 							files.add(extractedDicomFile);
 						}
 					} else {
-						downloadResult.update("URL for download is neither in WADO-RS nor in WADO-URI format", DatasetDownloadResult.PARTIAL_FAILURE);
+						downloadResult.update("URL for download is neither in WADO-RS nor in WADO-URI format", DatasetDownloadError.PARTIAL_FAILURE);
 					}
 				}
 			} catch (Exception e) {
 				LOG.error("A dicom file could not be downloaded from the pacs:", e);
-				downloadResult.update("A dicom file could not be downloaded from the pacs:" + e.getMessage(), DatasetDownloadResult.PARTIAL_FAILURE);
+				downloadResult.update("A dicom file could not be downloaded from the pacs:" + e.getMessage(), DatasetDownloadError.PARTIAL_FAILURE);
 			}
 		}
 		return files;

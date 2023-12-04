@@ -19,7 +19,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.datasetfile.DatasetFile;
-import org.shanoir.ng.download.DatasetDownloadResult;
+import org.shanoir.ng.download.DatasetDownloadError;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.util.UriUtils;
@@ -52,7 +52,7 @@ public class DatasetFileUtils {
 	 * @param pathURLs
 	 * @throws MalformedURLException
 	 */
-	public static void getDatasetFilePathURLs(final Dataset dataset, final List<URL> pathURLs, final DatasetExpressionFormat format, DatasetDownloadResult downloadResult) {
+	public static void getDatasetFilePathURLs(final Dataset dataset, final List<URL> pathURLs, final DatasetExpressionFormat format, DatasetDownloadError downloadResult) {
 		List<DatasetExpression> datasetExpressions = dataset.getDatasetExpressions();
 		for (Iterator<DatasetExpression> itExpressions = datasetExpressions.iterator(); itExpressions.hasNext();) {
 			DatasetExpression datasetExpression = itExpressions.next();
@@ -66,7 +66,7 @@ public class DatasetFileUtils {
 						url = new URL(datasetFile.getPath().replaceAll("%20", " "));
 						pathURLs.add(url);
 					} catch (MalformedURLException e) {
-						downloadResult.update("Malformed URI: " + datasetFile.getPath().replaceAll("%20", " "), DatasetDownloadResult.PARTIAL_FAILURE);
+						downloadResult.update("Malformed URI: " + datasetFile.getPath().replaceAll("%20", " "), DatasetDownloadError.PARTIAL_FAILURE);
 					}
 				}
 			}
