@@ -173,13 +173,13 @@ public class CardsProcessingService {
                 examinations = study.getExaminations();
             }
             // Load lazy data before go parallel
-            loadExaminationsLazyCollections(study.getExaminations());
-            loadRulesLazyCollections(qualityCard.getRules());
+            loadExaminationsLazyCollections(study.getExaminations(), event);
+            loadRulesLazyCollections(qualityCard.getRules(), event);
             // main loop
             try {
                 examinations.parallelStream().forEach(examination -> {
                     event.setStatus(2);
-                    event.setProgress(i.floatValue() / examinations.size());
+                    event.setProgress(0.5f + (i.floatValue() * 0.5f / examinations.size()));
                     event.setMessage("checking quality for examination " + examination.getComment());
                     //event.setReport(result.toString()); // too heavy, too slow
                     eventService.publishEvent(event);
@@ -217,9 +217,13 @@ public class CardsProcessingService {
         }
 	}
 
-    private void loadExaminationsLazyCollections(List<Examination> examinations) {
+    private void loadExaminationsLazyCollections(List<Examination> examinations, ShanoirEvent event) {
         if (examinations != null) {
+            int i = 0;
             for (Examination examination : examinations) {
+                event.setMessage("Loading examination " + examination.getComment() + " data from Shanoir database");
+                event.setProgress(i * 0.4f / examinations.size());
+                eventService.publishEvent(event);
                 if (examination.getSubject() != null) {
                     Hibernate.initialize(examination.getSubject().getSubjectStudyList());
                 }
@@ -236,11 +240,15 @@ public class CardsProcessingService {
                         }
                     }
                 }
+                i++;
             }
         }
     }
 
-    private void loadRulesLazyCollections(List<QualityExaminationRule> rules) {
+    private void loadRulesLazyCollections(List<QualityExaminationRule> rules, ShanoirEvent event) {
+        event.setMessage("Loading rules");
+        event.setProgress(0.5f);
+        eventService.publishEvent(event);
         if (rules != null) {
             for (QualityExaminationRule rule : rules) {
                 if (rule.getConditions() != null) {
