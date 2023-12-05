@@ -126,7 +126,7 @@ public class DownloadOrCopyActionListener implements ActionListener {
 	 */
 	private DicomDataTransferObject completeDicomDataWithGUIValues(final DicomDataTransferObject dicomData) {
 		try {
-			dicomData.setBirthDate(LocalDate.parse(mainWindow.birthDateTF.getText()));
+			dicomData.setBirthDate(Util.convertStringToLocalDate(mainWindow.birthDateTF.getText()));
 			if (mainWindow.mSexR.isSelected())
 				dicomData.setSex("M");
 			if (mainWindow.fSexR.isSelected())
@@ -174,7 +174,7 @@ public class DownloadOrCopyActionListener implements ActionListener {
 			subjectIdentifier = identifierCalculator.calculateIdentifierWithHashs(dicomData.getFirstNameHash1(), dicomData.getBirthNameHash1(), dicomData.getBirthDateHash());
 		// Neurinfo mode
 		} else {
-			String birthDate = Util.convertDicomDateToString(dicomData.getBirthDate());
+			String birthDate = Util.convertLocalDateToString(dicomData.getBirthDate());
 			subjectIdentifier = identifierCalculator.calculateIdentifier(dicomData.getFirstName(), dicomData.getLastName(), birthDate);
 		}
 		dicomData.setSubjectIdentifier(subjectIdentifier);

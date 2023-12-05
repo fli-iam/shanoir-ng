@@ -128,7 +128,7 @@ public class Pseudonymizer {
 				pseudonymusExePath, 1);
 		String firstNameHash3 = pseudonymusExec(dicomData.getFirstName(),
 				pseudonymusExePath, 2);
-		final String birthDate = Util.convertDicomDateToString(dicomData.getBirthDate());
+		final String birthDate = Util.convertLocalDateToString(dicomData.getBirthDate());
 		final String birthDateHash = pseudonymusExec(birthDate, pseudonymusExePath, 0);
 		/**
 		 * Store all created hash values in DTO.

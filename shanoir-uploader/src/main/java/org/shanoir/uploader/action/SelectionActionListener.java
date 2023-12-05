@@ -171,7 +171,7 @@ public class SelectionActionListener implements TreeSelectionListener {
 				mainWindow.fSexR.setEnabled(true);
 				// add this exception here for damaged DICOMDIRs without birth date set
 				if (dicomData.getBirthDate() != null) {
-					String birthDateText = Util.convertDicomDateToString(dicomData.getBirthDate());
+					String birthDateText = Util.convertLocalDateToString(dicomData.getBirthDate());
 					mainWindow.birthDateTF.setText(birthDateText);
 				}
 				if (dicomData.getSex() != null && dicomData.getSex().equals("M")) {

@@ -591,16 +591,14 @@ public final class Util {
 		return strDate;
 	}
 
-	/**
-	 * Format dicom format.
-	 *
-	 * @param date the date
-	 *
-	 * @return the string
-	 */
-	public static String convertDicomDateToString(final LocalDate localDate) {
+	public static String convertLocalDateToString(final LocalDate localDate) {
 		DateTimeFormatter pattern = DateTimeFormatter.ofPattern(DATE_PATTERN);
 		return localDate.format(pattern);
 	}
+	
+	public static LocalDate convertStringToLocalDate(final String date) {
+		DateTimeFormatter pattern = DateTimeFormatter.ofPattern(DATE_PATTERN);
+		return LocalDate.parse(date, pattern);
+	}	
 
 }

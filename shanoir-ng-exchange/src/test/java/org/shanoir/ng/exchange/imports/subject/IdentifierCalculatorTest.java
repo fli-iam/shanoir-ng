@@ -2,9 +2,6 @@ package org.shanoir.ng.exchange.imports.subject;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -26,25 +23,10 @@ public class IdentifierCalculatorTest {
 	private static final String FIRST_NAME = "firstName";
 	
 	private static final String LAST_NAME = "lastName";
-	
-	private static final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-	
-	private Date birthDate;
 
-	@SuppressWarnings("deprecation")
 	@Before
 	public void setup() {
 		identifierCalculator = new IdentifierCalculator();
-		try {
-			birthDate = sdf.parse("01/01/2020");
-			/**
-			 * This behaviour is strange and is there to produce the same result
-			 * as when using the Web GUI of sh-old, where 01:00:00 is set programmatically
-			 * in the backend, even if not entered by the user, maybe because of time zone problems.
-			 */
-			birthDate.setHours(1);
-		} catch (ParseException e) {
-		}
 	}
 
 	@Test
@@ -57,7 +39,7 @@ public class IdentifierCalculatorTest {
 	
 	@Test
 	public void testCalculateIdentifier() throws UnsupportedEncodingException, NoSuchAlgorithmException {
-		String subjectIdentifier = identifierCalculator.calculateIdentifier(FIRST_NAME, LAST_NAME, birthDate.toString());
+		String subjectIdentifier = identifierCalculator.calculateIdentifier(FIRST_NAME, LAST_NAME, "01/01/2020");
 		// Values have been acquired during tests with master sh-old
 		Assert.assertEquals("AC-844A74B6-74", subjectIdentifier);
 	}
