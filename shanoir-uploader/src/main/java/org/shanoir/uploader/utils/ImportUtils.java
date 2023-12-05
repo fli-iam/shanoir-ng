@@ -3,7 +3,8 @@ package org.shanoir.uploader.utils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.time.LocalDate;
-import java.time.ZoneOffset;
+import java.time.temporal.TemporalAdjuster;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -124,11 +125,9 @@ public class ImportUtils {
 		}
 		LocalDate birthDate = dicomData.getBirthDate();
 		if (birthDate != null) {
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(Date.from(birthDate.atStartOfDay().toInstant(ZoneOffset.UTC)));
-			cal.set(Calendar.MONTH, Calendar.JANUARY);
-			cal.set(Calendar.DAY_OF_MONTH, 1);
-			uploadJob.setPatientBirthDate(LocalDate.from(cal.toInstant()).toString());
+			birthDate = birthDate.with(TemporalAdjusters.firstDayOfYear());
+			String birthDateStr = Util.convertLocalDateToString(birthDate); 
+			uploadJob.setPatientBirthDate(birthDateStr);
 		}
 		uploadJob.setPatientSex(dicomData.getSex());
 
@@ -136,7 +135,8 @@ public class ImportUtils {
 		 * Study level
 		 */
 		uploadJob.setStudyInstanceUID(dicomData.getStudyInstanceUID());
-		uploadJob.setStudyDate(ShUpConfig.formatter.format(dicomData.getStudyDate()));
+		String studyDateStr = Util.convertLocalDateToString(dicomData.getStudyDate());
+		uploadJob.setStudyDate(studyDateStr);
 		uploadJob.setStudyDescription(dicomData.getStudyDescription());
 
 		/**
@@ -161,33 +161,6 @@ public class ImportUtils {
 		}
 		uploadJob.setMriInformation(mriInformation);
 		logger.info(mriInformation.toString());
-	}
-
-	/**
-	 * For OFSEP, do not transfer the real birth date but the first day of the year
-	 *
-	 * @return the date of the first day of the year
-	 */
-	private static Date getFirstDayOfTheYear(Date pBirthDate) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("getFirstDayOfTheYear : Begin");
-			logger.debug("getFirstDayOfTheYear : current subject birth date=" + pBirthDate);
-		}
-		if (pBirthDate != null) {
-			final GregorianCalendar birthDate = new GregorianCalendar();
-			birthDate.setTime(pBirthDate);
-			// set day and month to 01/01
-			birthDate.set(Calendar.MONTH, Calendar.JANUARY);
-			birthDate.set(Calendar.DAY_OF_MONTH, 1);
-			birthDate.set(Calendar.HOUR, 1);
-			if (logger.isDebugEnabled()) {
-				logger.debug("getFirstDayOfTheYear : anonymity birth date=" + birthDate.getTime());
-				logger.debug("getFirstDayOfTheYear : End");
-			}
-			return birthDate.getTime();
-		}
-		logger.debug("getFirstDayOfTheYear : End - return null");
-		return null;
 	}
 
 	/**
@@ -266,7 +239,8 @@ public class ImportUtils {
 			final DicomDataTransferObject dicomData, NominativeDataUploadJob dataUploadJob) {
 		dataUploadJob.setPatientName(dicomData.getFirstName() + " " + dicomData.getLastName());
 		dataUploadJob.setPatientPseudonymusHash(dicomData.getSubjectIdentifier());
-		dataUploadJob.setStudyDate(ShUpConfig.formatter.format(dicomData.getStudyDate()));
+		String studyDateStr = Util.convertLocalDateToString(dicomData.getStudyDate()); 
+		dataUploadJob.setStudyDate(studyDateStr);
 		dataUploadJob.setIPP(dicomData.getIPP());
 		dataUploadJob.setMriSerialNumber(uploadJob.getMriInformation().getManufacturer()
 				+ "(" + uploadJob.getMriInformation().getDeviceSerialNumber() + ")");
