@@ -1,6 +1,7 @@
 package org.shanoir.ng.vip.monitoring.schedule;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -20,6 +21,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Component
@@ -68,8 +70,7 @@ public class ExecutionStatusMonitorRunner implements ApplicationRunner {
                 LOG.error("No [{}] type event found for object id [{}]", ShanoirEventType.EXECUTION_MONITORING_EVENT, monitoring.getId());
                 continue;
             }
-
-            events = objectMapper.readValue(eventsAsString, List.class);
+            events = objectMapper.readValue(eventsAsString, new TypeReference<List<ShanoirEvent>>() {});
 
             for(ShanoirEvent event : events){
                 execMonitor.startMonitoringJob(monitoring, event);
