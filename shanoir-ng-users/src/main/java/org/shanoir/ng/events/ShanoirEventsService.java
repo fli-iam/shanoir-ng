@@ -41,8 +41,12 @@ public class ShanoirEventsService {
 		}
 	}
 
-	public List<ShanoirEvent> getEventsByUserAndType(Long userId, String eventType) {
-		return Utils.toList(repository.findByUserIdAndEventType(userId, eventType));
+	public List<ShanoirEvent> getEventsByUserIdAndTypeIn(Long userId, List<String> eventType) {
+		return Utils.toList(repository.findByUserIdAndEventTypeIn(userId, eventType));
+	}
+
+	public List<ShanoirEvent> getEventsByObjectIdAndTypeIn(String objectId, String eventType) {
+		return Utils.toList(repository.findByObjectIdAndEventType(objectId, eventType));
 	}
 
 	/**

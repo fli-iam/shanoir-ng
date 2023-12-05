@@ -74,12 +74,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <i *ngIf="task.status == 2" class="fa-solid fa-play status-icon"></i>
                 <i *ngIf="task.status == 1" class="fa-solid fa-check status-icon"></i>
                 <i *ngIf="task.status == -1 || task.status == 5" class="fa-solid fa-triangle-exclamation status-icon"></i>
-                {{task.creationDate | date: 'HH:mm:ss'}} 
+                {{task.creationDate | date: 'HH:mm:ss'}}
                 <ng-template [ngSwitchCase]="'downloadDataset.event'">
                     <i class="fa-solid fa-download"></i>
                 </ng-template>
                 <ng-template [ngSwitchCase]="'importDataset.event'">
                     <i class="fa-solid fa-upload"></i>
+                </ng-template>
+                <ng-template [ngSwitchCase]="'executionMonitoring.event'">
+                    <i class="fa-solid fa-cog"></i>
                 </ng-template>
                 <ng-template ngSwitchDefault>
                     <i class="fa-regular fa-clock"></i>

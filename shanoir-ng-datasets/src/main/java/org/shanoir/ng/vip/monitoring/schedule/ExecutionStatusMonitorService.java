@@ -64,17 +64,40 @@ public class ExecutionStatusMonitorService {
 	private ResultHandlerService outputProcessingService;
 
 	/**
-	 * Async job that monitor the state of the VIP execution and process its outcome
 	 *
-	 * @param identifier unique id of the VIP execution
+	 * Start a monitoring job from a VIP execution identifier
+	 *
+	 * @param identifier
 	 * @throws EntityNotFoundException
 	 * @throws SecurityException
 	 */
+	public void startMonitoringJob(String identifier) throws EntityNotFoundException, SecurityException {
+
+		ExecutionMonitoring processing = this.executionMonitoringService
+				.findByIdentifier(identifier)
+				.orElseThrow(() -> new EntityNotFoundException(
+						"Processing [" + this.identifier + "] not found"));
+		processing.setProcessingDate(LocalDate.now());
+
+		this.startMonitoringJob(processing, null);
+
+	}
+
+	/**
+	 * Async job that monitor the state of the VIP execution and process its outcome
+	 *
+	 * @param processing
+	 * @param event
+	 *
+	 * @throws EntityNotFoundException
+	 * @throws SecurityException
+	 */
+
 	@Async
 	@Transactional
-	public void startMonitoringJob(String identifier) throws EntityNotFoundException, SecurityException {
+	public void startMonitoringJob(ExecutionMonitoring processing, ShanoirEvent event) throws EntityNotFoundException, SecurityException {
 		int attempts = 1;
-		this.identifier = identifier;
+		this.identifier = processing.getIdentifier();
 
 		stop.set(false);
 
@@ -84,23 +107,18 @@ public class ExecutionStatusMonitorService {
 		// refresh the token
 		String token = this.refreshServiceAccountAccessToken();
 
-		ExecutionMonitoring processing = this.executionMonitoringService
-				.findByIdentifier(this.identifier)
-				.orElseThrow(() -> new EntityNotFoundException(
-						"Processing [" + this.identifier + "] not found"));
-		processing.setProcessingDate(LocalDate.now());
-
 		String execLabel = this.getExecLabel(processing);
 
-		ShanoirEvent event = new ShanoirEvent(
-				ShanoirEventType.IMPORT_DATASET_EVENT,
-				processing.getId().toString(),
-				KeycloakUtil.getTokenUserId(),
-				execLabel + " : " + ExecutionStatus.RUNNING.getRestLabel(),
-				ShanoirEvent.IN_PROGRESS,
-				0.5f);
+		if(event == null){
+			event = new ShanoirEvent(
+					ShanoirEventType.EXECUTION_MONITORING_EVENT,
+					processing.getId().toString(),
+					KeycloakUtil.getTokenUserId(),
+					this.getExecLabel(processing) + " : " + ExecutionStatus.RUNNING.getRestLabel(),
+					ShanoirEvent.IN_PROGRESS,
+					0.5f);
+		}
 		eventService.publishEvent(event);
-
 
 		while (!stop.get()) {
 

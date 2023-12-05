@@ -77,6 +77,8 @@ public class RabbitMQConfiguration {
 
 	public static final String STUDY_DATASETS_TOTAL_STORAGE_VOLUME = "study-datasets-total-storage-volume";
 
+	public static final String EXECUTION_MONITORING_TASK = "execution-monitoring-task";
+
 	/** Get the type of dataset from a given study. */
 	public static final String STUDY_DATASET_TYPE = "study-dataset-type";
 	
@@ -255,6 +257,11 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue studyDatasetsTotalStorageVolumeQueue() {
 		return new Queue(STUDY_DATASETS_TOTAL_STORAGE_VOLUME, true);
+	}
+
+	@Bean
+	public static Queue sexecutionMonitoringEventQueue() {
+		return new Queue(EXECUTION_MONITORING_TASK, true);
 	}
 
 	@Bean
