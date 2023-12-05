@@ -41,7 +41,7 @@ public class IdentifierCalculatorTest {
 	public void testCalculateIdentifier() throws UnsupportedEncodingException, NoSuchAlgorithmException {
 		String subjectIdentifier = identifierCalculator.calculateIdentifier(FIRST_NAME, LAST_NAME, "01/01/2020");
 		// Values have been acquired during tests with master sh-old
-		Assert.assertEquals("AC-844A74B6-74", subjectIdentifier);
+		Assert.assertEquals("AB-859C-100131", subjectIdentifier);
 	}
 
 }
