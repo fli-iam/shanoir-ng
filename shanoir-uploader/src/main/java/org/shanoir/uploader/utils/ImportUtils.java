@@ -2,6 +2,8 @@ package org.shanoir.uploader.utils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -120,9 +122,14 @@ public class ImportUtils {
 			uploadJob.setFirstNameHash3(dicomData.getFirstNameHash3());
 			uploadJob.setBirthDateHash(dicomData.getBirthDateHash());
 		}
-		Date patientBirthDateFirstDayOfYear = getFirstDayOfTheYear(dicomData.getBirthDate());
-		uploadJob.setPatientBirthDate(ShUpConfig.formatter.format(patientBirthDateFirstDayOfYear));
-
+		LocalDate birthDate = dicomData.getBirthDate();
+		if (birthDate != null) {
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(Date.from(birthDate.atStartOfDay().toInstant(ZoneOffset.UTC)));
+			cal.set(Calendar.MONTH, Calendar.JANUARY);
+			cal.set(Calendar.DAY_OF_MONTH, 1);
+			uploadJob.setPatientBirthDate(LocalDate.from(cal.toInstant()).toString());
+		}
 		uploadJob.setPatientSex(dicomData.getSex());
 
 		/**

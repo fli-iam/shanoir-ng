@@ -324,9 +324,9 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 
 			// Calculate identifier
 
-			// #1609 we encounter problems when using same subject data accross multiple studies.
+			// #1609 we encounter problems when using same subject data across multiple studies.
 			// We add study id in front of identifier to correct this
-			subjectIdentifier = stNode.getId() +  this.identifierCalculator.calculateIdentifier(dicomData.getFirstName(), dicomData.getLastName(), dicomData.getBirthDate());
+			subjectIdentifier = stNode.getId() +  this.identifierCalculator.calculateIdentifier(dicomData.getFirstName(), dicomData.getLastName(), dicomData.getBirthDate().toString());
 
 			dicomData.setSubjectIdentifier(subjectIdentifier);
 
@@ -337,7 +337,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 				cal.setTime(Date.from(dicomBirthDate.atStartOfDay().toInstant(ZoneOffset.UTC)));
 				cal.set(Calendar.MONTH, Calendar.JANUARY);
 				cal.set(Calendar.DAY_OF_MONTH, 1);
-				dicomData.setBirthDate(cal.getTime());
+				dicomData.setBirthDate(LocalDate.from(cal.toInstant()));
 			}
 
 		} catch (Exception e) {
@@ -441,7 +441,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 	
 			subject.setImagedObjectCategory(ImagedObjectCategory.LIVING_HUMAN_BEING);
 	
-			subject.setBirthDate(dicomData.getBirthDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+			subject.setBirthDate(dicomData.getBirthDate());
 	
 			ImportUtils.addSubjectStudy(study2, subject, SubjectType.PATIENT, true, subjectStudyIdentifier);
 	

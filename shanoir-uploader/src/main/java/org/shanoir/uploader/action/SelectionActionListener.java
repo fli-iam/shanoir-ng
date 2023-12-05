@@ -22,6 +22,7 @@ import org.shanoir.uploader.dicom.query.PatientTreeNode;
 import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.dicom.query.StudyTreeNode;
 import org.shanoir.uploader.gui.MainWindow;
+import org.shanoir.uploader.utils.Util;
 
 /**
  * This class implements the logic when a node is selected in a DicomTree.
@@ -170,7 +171,8 @@ public class SelectionActionListener implements TreeSelectionListener {
 				mainWindow.fSexR.setEnabled(true);
 				// add this exception here for damaged DICOMDIRs without birth date set
 				if (dicomData.getBirthDate() != null) {
-					mainWindow.birthDateTF.setText(formatter.format(dicomData.getBirthDate()));
+					String birthDateText = Util.convertDicomDateToString(dicomData.getBirthDate());
+					mainWindow.birthDateTF.setText(birthDateText);
 				}
 				if (dicomData.getSex() != null && dicomData.getSex().equals("M")) {
 					mainWindow.mSexR.setSelected(true);

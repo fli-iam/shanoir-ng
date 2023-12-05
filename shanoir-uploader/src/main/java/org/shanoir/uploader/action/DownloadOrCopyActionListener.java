@@ -5,7 +5,7 @@ import java.awt.event.ActionListener;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.ResourceBundle;
 import java.util.Set;
 
@@ -20,6 +20,7 @@ import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.gui.MainWindow;
+import org.shanoir.uploader.utils.Util;
 
 /**
  * This class implements the logic when the download or copy button is clicked.
@@ -125,8 +126,7 @@ public class DownloadOrCopyActionListener implements ActionListener {
 	 */
 	private DicomDataTransferObject completeDicomDataWithGUIValues(final DicomDataTransferObject dicomData) {
 		try {
-			Date birthDate = ShUpConfig.formatter.parse(mainWindow.birthDateTF.getText());
-			dicomData.setBirthDate(birthDate);
+			dicomData.setBirthDate(LocalDate.parse(mainWindow.birthDateTF.getText()));
 			if (mainWindow.mSexR.isSelected())
 				dicomData.setSex("M");
 			if (mainWindow.fSexR.isSelected())
@@ -174,7 +174,8 @@ public class DownloadOrCopyActionListener implements ActionListener {
 			subjectIdentifier = identifierCalculator.calculateIdentifierWithHashs(dicomData.getFirstNameHash1(), dicomData.getBirthNameHash1(), dicomData.getBirthDateHash());
 		// Neurinfo mode
 		} else {
-			subjectIdentifier = identifierCalculator.calculateIdentifier(dicomData.getFirstName(), dicomData.getLastName(), dicomData.getBirthDate());
+			String birthDate = Util.convertDicomDateToString(dicomData.getBirthDate());
+			subjectIdentifier = identifierCalculator.calculateIdentifier(dicomData.getFirstName(), dicomData.getLastName(), birthDate);
 		}
 		dicomData.setSubjectIdentifier(subjectIdentifier);
 		return dicomData;

@@ -17,6 +17,7 @@ import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -62,6 +63,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
  *
  */
 public final class Util {
+
+	private static final String DATE_PATTERN = "dd/MM/yyyy";
 
 	private static Logger logger = Logger.getLogger(Util.class);
 
@@ -595,38 +598,9 @@ public final class Util {
 	 *
 	 * @return the string
 	 */
-	public static String convertDicomDateToString(final Date date) {
-		final SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-		return formatter.format(date);
-	}
-
-	/**
-	 * Convert a string dicom date into a real date object.
-	 *
-	 * @param sDate the s date
-	 *
-	 * @return the date
-	 */
-	public static Date convertStringDicomDateToDate(String sDate) {
-		if (sDate == null) {
-			return null;
-		} else {
-			Date d = null;
-			try {
-				final SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-				final ParsePosition pos = new ParsePosition(0);
-				d = formatter.parse(sDate, pos);
-			} catch (RuntimeException e) {
-				e.printStackTrace();
-				return null;
-			} catch (Exception e) {
-				logger.error("convert : " + d + " is not a date");
-				logger.debug("convert : End, return null");
-				e.printStackTrace();
-				return null;
-			}
-			return d;
-		}
+	public static String convertDicomDateToString(final LocalDate localDate) {
+		DateTimeFormatter pattern = DateTimeFormatter.ofPattern(DATE_PATTERN);
+		return localDate.format(pattern);
 	}
 
 }
