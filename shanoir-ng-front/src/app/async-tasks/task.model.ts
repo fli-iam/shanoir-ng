@@ -118,6 +118,15 @@ export class Task extends Entity {
         }
         return true;
     }
+
+    updateWith(task: Task) {
+        if (task.status != undefined) this.status = task.status;
+        if (task.progress != undefined) this.progress = task.progress;
+        if (task.lastUpdate) this.lastUpdate = task.lastUpdate;
+        if (!this.creationDate && task.creationDate) this.creationDate = task.creationDate;
+        if (task.report) this.report = task.report;
+        if (task.message) this.message = task.message;
+    }
 }
 
 
