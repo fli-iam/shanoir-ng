@@ -71,6 +71,8 @@ public class ExecutionStatusMonitorService {
 	 * @throws EntityNotFoundException
 	 * @throws SecurityException
 	 */
+	@Async
+	@Transactional
 	public void startMonitoringJob(String identifier) throws EntityNotFoundException, SecurityException {
 
 		ExecutionMonitoring processing = this.executionMonitoringService

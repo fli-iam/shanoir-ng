@@ -42,7 +42,6 @@ public class ProcessingResourceServiceImpl implements ProcessingResourceService 
     }
 
     @Override
-    @Transactional
     public void deleteByProcessingId(Long processingId) {
         repository.deleteByProcessingId(processingId);
     }
