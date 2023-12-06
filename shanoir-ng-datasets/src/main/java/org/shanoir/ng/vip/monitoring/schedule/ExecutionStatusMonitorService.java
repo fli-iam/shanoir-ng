@@ -64,28 +64,6 @@ public class ExecutionStatusMonitorService {
 	private ResultHandlerService outputProcessingService;
 
 	/**
-	 *
-	 * Start a monitoring job from a VIP execution identifier
-	 *
-	 * @param identifier
-	 * @throws EntityNotFoundException
-	 * @throws SecurityException
-	 */
-	@Async
-	@Transactional
-	public void startMonitoringJob(String identifier) throws EntityNotFoundException, SecurityException {
-
-		ExecutionMonitoring processing = this.executionMonitoringService
-				.findByIdentifier(identifier)
-				.orElseThrow(() -> new EntityNotFoundException(
-						"Processing [" + this.identifier + "] not found"));
-		processing.setProcessingDate(LocalDate.now());
-
-		this.startMonitoringJob(processing, null);
-
-	}
-
-	/**
 	 * Async job that monitor the state of the VIP execution and process its outcome
 	 *
 	 * @param processing

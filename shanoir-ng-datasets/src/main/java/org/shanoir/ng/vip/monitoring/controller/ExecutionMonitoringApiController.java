@@ -56,7 +56,7 @@ public class ExecutionMonitoringApiController implements ExecutionMonitoringApi 
                 throw new RestServiceException(
                         new ErrorModel(HttpStatus.BAD_REQUEST.value(), "Monitoring job has been set to start but processing identifier is null or empty.", null));
             }
-            executionStatusMonitorService.startMonitoringJob(createdMonitoring.getIdentifier());
+            executionStatusMonitorService.startMonitoringJob(createdMonitoring, null);
         }
 
         ExecutionMonitoringDTO createdDTO = mapper.executionMonitoringToExecutionMonitoringDTO(createdMonitoring);
@@ -81,7 +81,7 @@ public class ExecutionMonitoringApiController implements ExecutionMonitoringApi 
                     throw new RestServiceException(
                             new ErrorModel(HttpStatus.BAD_REQUEST.value(), "Monitoring job has been set to start but processing identifier is null or empty.", null));
                 }
-                executionStatusMonitorService.startMonitoringJob(updatedMonitoring.getIdentifier());
+                executionStatusMonitorService.startMonitoringJob(updatedMonitoring, null);
             }
 
             return new ResponseEntity<>(HttpStatus.OK);
