@@ -224,12 +224,14 @@ export class ExecutionComponent implements OnInit {
                     (error) => {
                         this.msgService.log('error', 'Sorry, an error occurred while creating the execution on VIP.');
                         console.error(error);
+                        this.isSubmitted = false;
                     }
                 )
             },
             (error) => {
                 this.msgService.log('error', 'Sorry, an error occurred while creating dataset processing.');
                 console.error(error);
+                this.isSubmitted = false;
             }
         )
     }
