@@ -36,6 +36,7 @@ import java.time.LocalDate;
 @Service
 public class ExecutionStatusMonitorService {
 
+	public static final float DEFAULT_PROGRESS = 0.5f;
 	@Value("${vip.uri}")
 	private String VIP_URI;
 
@@ -88,17 +89,7 @@ public class ExecutionStatusMonitorService {
 		String token = this.refreshServiceAccountAccessToken();
 
 		String execLabel = this.getExecLabel(processing);
-
-		if(event == null){
-			event = new ShanoirEvent(
-					ShanoirEventType.EXECUTION_MONITORING_EVENT,
-					processing.getId().toString(),
-					KeycloakUtil.getTokenUserId(),
-					this.getExecLabel(processing) + " : " + ExecutionStatus.RUNNING.getRestLabel(),
-					ShanoirEvent.IN_PROGRESS,
-					0.5f);
-		}
-		eventService.publishEvent(event);
+		event = this.initShanoirEvent(processing, event, execLabel);
 
 		while (!stop.get()) {
 
@@ -146,6 +137,26 @@ public class ExecutionStatusMonitorService {
 				stop.set(true);
 			}
 		}
+	}
+
+	private ShanoirEvent initShanoirEvent(ExecutionMonitoring processing, ShanoirEvent event, String execLabel) {
+		String startMsg = execLabel + " : " + ExecutionStatus.RUNNING.getRestLabel();
+
+		if(event == null){
+			event = new ShanoirEvent(
+					ShanoirEventType.EXECUTION_MONITORING_EVENT,
+					processing.getId().toString(),
+					KeycloakUtil.getTokenUserId(),
+					startMsg,
+					ShanoirEvent.IN_PROGRESS,
+					DEFAULT_PROGRESS);
+		}else{
+			event.setMessage(startMsg);
+			event.setStatus(ShanoirEvent.IN_PROGRESS);
+			event.setProgress(DEFAULT_PROGRESS);
+		}
+		eventService.publishEvent(event);
+		return event;
 	}
 
 	private String getExecLabel(ExecutionMonitoring processing) {
