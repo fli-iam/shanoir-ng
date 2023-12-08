@@ -713,7 +713,6 @@ public class DatasetsCreatorAndNIfTIConverterService {
 				} else {
 					Dataset dataset = new Dataset();
 					dataset.setFirstImageSOPInstanceUID(image.getSOPInstanceUID());
-					LOG.error("############################################" + dataset.getFirstImageSOPInstanceUID());
 					ExpressionFormat expressionFormat = new ExpressionFormat();
 					expressionFormat.setType("dcm");
 					dataset.getExpressionFormats().add(expressionFormat);

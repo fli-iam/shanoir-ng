@@ -27,7 +27,6 @@ import org.shanoir.ng.importer.dto.DatasetFile;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.dto.Study;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -72,7 +71,6 @@ public class DicomProcessing {
 		AcquisitionAttributes<String> attributes = new AcquisitionAttributes<String>();
 		for (Dataset dataset : serie.getDatasets()) {
 			try {
-				LoggerFactory.getLogger(this.getClass()).error("############################################# 1" + dataset.getFirstImageSOPInstanceUID());
 				attributes.addDatasetAttributes(dataset.getFirstImageSOPInstanceUID(), getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), isEnhanced));
 			} catch (IOException e) {
 				throw new ShanoirException("Could not read dicom metadata from file for serie " + serie.getSopClassUID(), e);
