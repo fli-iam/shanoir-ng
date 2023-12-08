@@ -122,7 +122,9 @@ public class ExecutionStatusMonitorService {
 						try{
 							Thread.sleep(sleepTime); // sleep/stop a thread for 20 seconds
 						} catch (InterruptedException e) {
-							throw new ResultHandlerException("Thread exception", e);
+							event.setMessage(execLabel + " : Monitoring interrupted, current state unknown...");
+							eventService.publishEvent(event);
+							LOG.warn("Execution monitoring thread interrupted", e);
 						}
 						break;
 					default:
