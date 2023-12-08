@@ -117,7 +117,8 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	@Transactional
 	@WithMockKeycloakUser(authorities = { "ROLE_ADMIN" })
 	public void createNewDatasetAcquisition(Message importJobStr) throws JsonParseException, JsonMappingException, IOException, AmqpRejectAndDontRequeueException {
-	    ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
+	    LoggerFactory.getLogger(this.getClass()).error("############################################# import job\n" + importJobStr);
+		ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
 		try {
 			createAllDatasetAcquisitions(importJob, importJob.getUserId());
 		} catch (Exception e) {
