@@ -158,6 +158,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 					progress = progress + (0.5f / series.size());
 					importJob.getShanoirEvent().setProgress(progress);
 					importJob.getShanoirEvent().setMessage("Converting to NIfTI for serie [" + (serie.getProtocolName() == null ? serie.getSeriesInstanceUID() : serie.getProtocolName()) + "] (" + cpt + "/" + nbSeries + ")...");
+					importJob.getShanoirEvent().setReport(null);
 					shanoirEventService.publishEvent(importJob.getShanoirEvent());
 					File serieIDFolderFile = createSerieIDFolderAndMoveFiles(workFolder, seriesFolderFile, serie);
 					boolean serieIdentifiedForNotSeparating;
