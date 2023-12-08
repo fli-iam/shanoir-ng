@@ -133,7 +133,7 @@ public class ShanoirEvent {
 	}
 
 	public void setReport(String report) {
-		this.report = report.replaceAll("\uFFFD", "?");
+		this.report = report == null ? null : report.replaceAll("\uFFFD", "?");
 	}
 
 	/**
