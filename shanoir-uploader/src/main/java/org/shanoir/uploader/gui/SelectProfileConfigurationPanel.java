@@ -7,7 +7,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 
-import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -41,13 +40,14 @@ public class SelectProfileConfigurationPanel extends JPanel {
 		selectProfileLabel.setHorizontalAlignment(SwingConstants.LEFT);
 		shanoirStartupGBC.weightx = 0.2;
 		shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
-		shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
+		shanoirStartupGBC.insets = new Insets(5,10, 5, 5);
 		shanoirStartupGBC.gridx = 1;
 		shanoirStartupGBC.gridy = 0;
 		container.add(selectProfileLabel, shanoirStartupGBC);
 
 		selectProfileCB = new JComboBoxMandatory();
 		selectProfileCB.setBackground(Color.WHITE);
+		selectProfileCB.setAlignmentX(SwingConstants.CENTER);
 		shanoirStartupGBC.weightx = 0.2;
 		shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
 		shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
@@ -65,7 +65,7 @@ public class SelectProfileConfigurationPanel extends JPanel {
 		rbRememberProfile.setHorizontalAlignment(SwingConstants.LEFT);
 		shanoirStartupGBC.weightx = 0.2;
 		shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
-		shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
+		shanoirStartupGBC.insets = new Insets(5, 0, 5, 5);
 		shanoirStartupGBC.gridx = 1;
 		shanoirStartupGBC.gridy = 2;
 		container.add(rbRememberProfile, shanoirStartupGBC);
@@ -75,7 +75,7 @@ public class SelectProfileConfigurationPanel extends JPanel {
 		select.setHorizontalAlignment(SwingConstants.CENTER);
 		shanoirStartupGBC.weightx = 0.7;
 		shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
-		shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
+		shanoirStartupGBC.insets = new Insets(10, 5, 5, 5);
 		shanoirStartupGBC.gridx = 1;
 		shanoirStartupGBC.gridy = 3;
 		container.add(select, shanoirStartupGBC);
