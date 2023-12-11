@@ -125,7 +125,7 @@ public class ShanoirEvent {
 	 * @param message the message to set
 	 */
 	public void setMessage(String message) {
-		this.message = message.replaceAll("\uFFFD", "?");
+		this.message = message == null ? null : message.replaceAll("\uFFFD", "?");
 	}
 
 	public String getReport() {
@@ -133,6 +133,7 @@ public class ShanoirEvent {
 	}
 
 	public void setReport(String report) {
+		//.replaceAll("[^a-zA-Z0-9]+", "");
 		this.report = report == null ? null : report.replaceAll("\uFFFD", "?");
 	}
 
