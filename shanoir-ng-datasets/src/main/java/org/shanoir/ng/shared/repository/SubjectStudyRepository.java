@@ -11,4 +11,6 @@ public interface SubjectStudyRepository extends CrudRepository<SubjectStudy, Lon
 
 	public List<SubjectStudy> findByStudy_Id(Long studyId);
 
+	public List<SubjectStudy> findByStudy_IdAndSubjectId(Long studyId, Long subjectId);
+
 }

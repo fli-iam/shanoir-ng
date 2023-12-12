@@ -59,8 +59,6 @@ public class QualityException extends Exception {
 
     public String buildErrorMessage() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Quality checks didn't pass at import.");
-        sb.append("\n");
         sb.append("Study : ")
             .append(this.getExamination().getStudy().getName())
             .append(" (").append(this.getExamination().getStudy().getId()).append(")");

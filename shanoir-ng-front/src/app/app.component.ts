@@ -12,21 +12,19 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, ViewContainerRef, HostBinding, HostListener, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostBinding, HostListener, ViewChild, ViewContainerRef } from '@angular/core';
 
+import { Router } from '@angular/router';
+import { parent, slideMarginLeft, slideRight } from './shared/animations/animations';
+import { ConfirmDialogService } from './shared/components/confirm-dialog/confirm-dialog.service';
+import { ConsoleComponent } from './shared/console/console.component';
 import { KeycloakService } from './shared/keycloak/keycloak.service';
 import { GlobalService } from './shared/services/global.service';
-import { ServiceLocator } from './utils/locator.service';
-import { slideRight, parent, slideMarginLeft } from './shared/animations/animations';
 import { WindowService } from './shared/services/window.service';
 import { KeycloakSessionService } from './shared/session/keycloak-session.service';
-import { ConfirmDialogService } from './shared/components/confirm-dialog/confirm-dialog.service';
-import { Router } from '@angular/router';
 import { StudyService } from './studies/shared/study.service';
-import { ConsoleComponent } from './shared/console/console.component';
 import { UserService } from './users/shared/user.service';
-import { UserComponent } from './users/user/user.component';
-import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
+import { ServiceLocator } from './utils/locator.service';
 
 
 @Component({
@@ -94,7 +92,7 @@ export class AppComponent {
         const text: string = 'You are a member of at least one study that needs you to accept its data user agreement. '
             + 'Until you have agreed those terms you cannot access to any data from these studies. '
             + 'Would you like to review those terms now?';
-        const buttons = {ok: 'Yes, proceed to the signing page', cancel: 'Later'};
+        const buttons = {yes: 'Yes, proceed to the signing page', cancel: 'Later'};
         this.confirmService.confirm(title, text, buttons).then(response => {
                 if (response == true) this.router.navigate(['/dua']);
             });

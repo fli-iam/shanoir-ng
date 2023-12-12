@@ -270,6 +270,5 @@ public class Serie {
 
 	public void setIsSpectroscopy(Boolean isSpectroscopy) {
 		this.isSpectroscopy = isSpectroscopy;
-	}
-	
+	}	
 }

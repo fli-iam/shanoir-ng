@@ -23,6 +23,7 @@ FROM quay.io/keycloak/keycloak:20.0.0 as base_image
 #
 # All other variables are set in the entrypoint.
 ENV KC_DB="mysql" \
+    KC_LOG="console,file" \
     KC_HTTP_RELATIVE_PATH="/auth"
 
 #
@@ -43,6 +44,7 @@ FROM base_image
 COPY --from=builder /opt/keycloak/ /opt/keycloak/
 COPY --chown=keycloak themes/. /opt/keycloak/themes
 COPY cfg/. /opt/keycloak/
+RUN  mkdir /opt/keycloak/data/log
 
 COPY entrypoint entrypoint_common oneshot /bin/
 
