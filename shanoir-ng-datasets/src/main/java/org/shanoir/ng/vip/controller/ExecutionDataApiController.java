@@ -20,7 +20,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
+import org.shanoir.ng.dataset.service.DatasetService;
+import org.shanoir.ng.processing.model.DatasetProcessingType;
+import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.vip.monitoring.model.Execution;
+import org.shanoir.ng.vip.monitoring.model.ExecutionDTO;
+import org.shanoir.ng.vip.monitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.resource.ProcessingResourceService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -34,7 +41,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
-import java.util.List;
+import java.time.LocalDate;
+import java.util.*;
 
 @Controller
 public class ExecutionDataApiController implements ExecutionDataApi {
@@ -48,6 +56,12 @@ public class ExecutionDataApiController implements ExecutionDataApi {
 
     @Autowired
     private ProcessingResourceService processingResourceService;
+
+    @Autowired
+    private DatasetService datasetService;
+
+    @Autowired
+    private DatasetSecurityService datasetSecurityService;
 
     @Override
     public ResponseEntity<?> getPath(
@@ -82,6 +96,38 @@ public class ExecutionDataApiController implements ExecutionDataApi {
 
         return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
 
+    }
+
+    @Override
+    public ResponseEntity<?> createExecution(ExecutionDTO execution) throws EntityNotFoundException {
+        // 1: Get dataset IDS and check rights
+        List<Long> inputDatasetIds = new ArrayList<>();
+        for (Map.Entry<String, Object> argument : execution.getInputValues().entrySet()) {
+            if (argument.getValue() instanceof Long) {
+                // We have a dataset id here
+                inputDatasetIds.add((Long) argument.getValue());
+            }
+        }
+        if (!this.datasetSecurityService.hasRightOnEveryDataset(inputDatasetIds, "CAN_IMPORT")) {
+            LOG.error("Admin right is mandatory for every study we are updating");
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        };
+
+        List<Dataset> inputDatasets = this.datasetService.findByIdIn(inputDatasetIds);
+
+        // 2: Create monitoring
+        ExecutionMonitoring executionMonitoring = new ExecutionMonitoring();
+        executionMonitoring.setName(execution.getName());
+        executionMonitoring.setPipelineIdentifier(execution.getPipelineIdentifier()); // TODO: get pipeline ?
+        executionMonitoring.setResultsLocation(KeycloakUtil.getTokenUserId() + "/" + LocalDate.now());
+        executionMonitoring.setTimeout(20);
+        executionMonitoring.setComment(execution.getName());
+        executionMonitoring.setDatasetProcessingType(DatasetProcessingType.valueOf(execution.getProcessingType()));
+        executionMonitoring.setOutputProcessing(execution.getOutputProcessing());
+        executionMonitoring.setInputDatasets(inputDatasets);
+
+        // 3: create Execution
+        return null;
     }
 
 }

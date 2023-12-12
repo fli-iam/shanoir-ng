@@ -25,6 +25,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.vip.monitoring.model.Execution;
+import org.shanoir.ng.vip.monitoring.model.ExecutionDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,11 +48,22 @@ public interface ExecutionDataApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "404", description = "No dataset found"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-
     @RequestMapping(value = "/path/{completePath}",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
     ResponseEntity<?> getPath(@Parameter(name = "the complete path on which to request information. It can contain non-encoded slashes. Except for the \"exists\" action, any request on a non-existing path should return an error", required=true) @PathVariable("completePath") String completePath, @NotNull @Parameter(name = "The \"content\" action downloads the raw file. If the path points to a directory, a tarball of this directory is returned. The \"exists\" action returns a BooleanResponse object (see definition) indicating if the path exists or not. The \"properties\" action returns a Path object (see definition) with the path properties. The \"list\" action returns a DirectoryList object (see definition) with the properties of all the files of the directory (if the path is not a directory an error must be returned). The \"md5\" action is optional and returns a PathMd5 object (see definition)." ,required=true
     ) @Valid @RequestParam(value = "action", required = true) String action, @Valid @RequestParam(value = "format", required = false, defaultValue = "dcm") final String format, HttpServletResponse response) throws IOException, RestServiceException, EntityNotFoundException;
 
+    @Operation(summary = "Creates an execution inside VIP", description = "Creates the ressources and path control in shanoir before creating an execution in VIP", tags={  })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Execution successfully created response."),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "No dataset found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @RequestMapping(value = "/createExecution",
+            produces = {"application/json"},
+            method = RequestMethod.POST)
+    ResponseEntity<?> createExecution(
+            ExecutionDTO execution
+    ) throws EntityNotFoundException;
 }
