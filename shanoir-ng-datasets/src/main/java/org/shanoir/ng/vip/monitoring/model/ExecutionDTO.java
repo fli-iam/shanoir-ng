@@ -27,7 +27,7 @@ public class ExecutionDTO {
     private String pipelineIdentifier;
     private int timeout;
     private ExecutionStatus status;
-    private Map<String, Object> inputValues;
+    private Map<String, PipelineParameter> inputValues;
     private Map<String, List<Object>> returnedFiles;
     private String studyIdentifier;
     private Integer errorCode;
@@ -36,6 +36,7 @@ public class ExecutionDTO {
     private String resultsLocation;
     private String outputProcessing;
     private String processingType;
+    private Pipeline pipeline;
 
     public String getIdentifier() {
         return identifier;
@@ -77,11 +78,11 @@ public class ExecutionDTO {
         this.status = status;
     }
 
-    public Map<String, Object> getInputValues() {
+    public Map<String, PipelineParameter> getInputValues() {
         return inputValues;
     }
 
-    public void setInputValues(Map<String, Object> inputValues) {
+    public void setInputValues(Map<String, PipelineParameter> inputValues) {
         this.inputValues = inputValues;
     }
 
@@ -148,4 +149,7 @@ public class ExecutionDTO {
     public void setProcessingType(String processingType) {
         this.processingType = processingType;
     }
+
+
+
 }

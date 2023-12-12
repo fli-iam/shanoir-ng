@@ -28,6 +28,7 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.vip.monitoring.model.Execution;
 import org.shanoir.ng.vip.monitoring.model.ExecutionDTO;
 import org.shanoir.ng.vip.monitoring.model.ExecutionMonitoring;
+import org.shanoir.ng.vip.monitoring.model.PipelineParameter;
 import org.shanoir.ng.vip.resource.ProcessingResourceService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -102,10 +103,10 @@ public class ExecutionDataApiController implements ExecutionDataApi {
     public ResponseEntity<?> createExecution(ExecutionDTO execution) throws EntityNotFoundException {
         // 1: Get dataset IDS and check rights
         List<Long> inputDatasetIds = new ArrayList<>();
-        for (Map.Entry<String, Object> argument : execution.getInputValues().entrySet()) {
-            if (argument.getValue() instanceof Long) {
+        for (Map.Entry<String, PipelineParameter> argument : execution.getInputValues().entrySet()) {
+            if ("File".equals(argument.getValue().getType())) {
                 // We have a dataset id here
-                inputDatasetIds.add((Long) argument.getValue());
+                inputDatasetIds.add(Long.valueOf(argument.getValue().getValue()));
             }
         }
         if (!this.datasetSecurityService.hasRightOnEveryDataset(inputDatasetIds, "CAN_IMPORT")) {
@@ -115,10 +116,10 @@ public class ExecutionDataApiController implements ExecutionDataApi {
 
         List<Dataset> inputDatasets = this.datasetService.findByIdIn(inputDatasetIds);
 
-        // 2: Create monitoring
+        // 2: Create monitoring on shanoir
         ExecutionMonitoring executionMonitoring = new ExecutionMonitoring();
         executionMonitoring.setName(execution.getName());
-        executionMonitoring.setPipelineIdentifier(execution.getPipelineIdentifier()); // TODO: get pipeline ?
+        executionMonitoring.setPipelineIdentifier(execution.getPipelineIdentifier());
         executionMonitoring.setResultsLocation(KeycloakUtil.getTokenUserId() + "/" + LocalDate.now());
         executionMonitoring.setTimeout(20);
         executionMonitoring.setComment(execution.getName());
@@ -126,7 +127,7 @@ public class ExecutionDataApiController implements ExecutionDataApi {
         executionMonitoring.setOutputProcessing(execution.getOutputProcessing());
         executionMonitoring.setInputDatasets(inputDatasets);
 
-        // 3: create Execution
+        // 3: create Execution on VIP
         return null;
     }
 
