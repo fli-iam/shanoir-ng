@@ -32,6 +32,7 @@ export class QualityCardRule {
 
     tag: QualityTag[];
     conditions: StudyCardCondition[];
+    orConditions: boolean = false;
 
     static copy(rule: QualityCardRule): QualityCardRule {
         let copy: QualityCardRule = new QualityCardRule();

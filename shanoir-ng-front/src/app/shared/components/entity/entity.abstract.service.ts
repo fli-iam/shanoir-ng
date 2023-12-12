@@ -107,7 +107,7 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
             })
     }
 
-    get(id: number, mode: 'eager' | 'lazy' = 'eager'): Promise<T> {
+    get(id: number | BigInt, mode: 'eager' | 'lazy' = 'eager'): Promise<T> {
         return this.http.get<any>(this.API_URL + '/' + id)
             .toPromise()
             .then(entity => this.mapEntity(entity, null, mode));
@@ -140,7 +140,7 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
         });
     }
 
-    protected toRealObject(entity: T): T {
+    protected toRealObject(entity: any): T {
         let trueObject = Object.assign(this.getEntityInstance(entity), entity);
         Object.keys(entity).forEach(key => {
             let value = entity[key];

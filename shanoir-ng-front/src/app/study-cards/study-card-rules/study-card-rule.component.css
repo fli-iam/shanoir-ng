@@ -5,7 +5,8 @@
 
 .conditions, .separator, .actions { vertical-align: middle; display: inline-block; position: relative; }
 
-.conditions::ng-deep .condition:not(:first-child) condition::before { display: inline; content: "and " }
+.conditions::ng-deep .condition:not(:first-child) condition::before { display: inline; vertical-align: middle; content: "and " }
+.conditions.or::ng-deep .condition:not(:first-child) condition::before { display: inline; vertical-align: middle; content: "or " }
 
 condition, action, .add, .always, .quality-tag {
     border: 1px solid var(--grey);
@@ -42,3 +43,6 @@ condition.edit:hover, action.edit:hover { border-color: var(--color-b); }
 
 .error { background-color: var(--color-error); color: white; }
 .error i { color: white; }
+
+.and-or { margin-right: 20px; color: var(--color-a); }
+toggle-switch { vertical-align: middle; margin: 0 2px; }
