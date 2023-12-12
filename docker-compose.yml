@@ -44,6 +44,8 @@ services:
       - SHANOIR_KEYCLOAK_PASSWORD
       - SHANOIR_ALLOWED_ADMIN_IPS
     build: ./docker-compose/keycloak
+    volumes:
+      - "keycloak-logs:/opt/keycloak/data/log"
     networks:
       - shanoir_ng_network
     ports:
@@ -353,6 +355,7 @@ volumes:
   certificate-share-data:
   tmp:
   logs:
+  keycloak-logs:
 
 networks:
   shanoir_ng_network:
