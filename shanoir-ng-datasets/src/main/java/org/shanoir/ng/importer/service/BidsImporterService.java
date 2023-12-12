@@ -132,6 +132,9 @@ public class BidsImporterService {
 			case "micr":
 				importDataset(importJob, BidsDataType.MICR, DatasetModalityType.MICR_DATASET, event);
 				break;
+			case "nirs":
+				importDataset(importJob, BidsDataType.NIRS, DatasetModalityType.NIRS_DATASET, event);
+				break;
 			default:
 				if (event != null) {
 					LOG.error("The data type folder is not recognized. Please update your BIDS archive following the rules.");
@@ -234,9 +237,15 @@ public class BidsImporterService {
 			final String subLabel = SUBJECT_PREFIX + importJob.getSubjectName();
 			final String sesLabel = SESSION_PREFIX + importJob.getExaminationId();
 
-			final File outDir = new File(niftiStorageDir + File.separator + File.separator + subLabel + File.separator + sesLabel + File.separator + bidsDataType.getFolderName());
+			final File outDir = new File(niftiStorageDir + File.separator + subLabel + File.separator + sesLabel + File.separator + bidsDataType.getFolderName());
 			outDir.mkdirs();
-			String outPath = outDir.getAbsolutePath() + File.separator + importedFile.getName();
+
+			// remove old subject and session names from files names
+			String filename = importedFile.getName()
+					.replaceFirst("sub-[^_]+_", "")
+					.replaceFirst("ses-[^_]+_", "");
+
+			String outPath = outDir.getAbsolutePath() + File.separator + filename;
 			Path importedFileFinalLocation = Files.copy(importedFile.toPath(), Paths.get(outPath), StandardCopyOption.REPLACE_EXISTING);
 
 			DatasetFile dsFile = new DatasetFile();
@@ -262,6 +271,7 @@ public class BidsImporterService {
 
 		datasetAcquisition.setDatasets(new ArrayList<>(datasets));
 		datasetAcquisition.setAcquisitionEquipmentId(equipmentId);
+		datasetAcquisition.setCreationDate(LocalDateTime.now().toLocalDate());
 		datasetAcquisitionRepository.save(datasetAcquisition);
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, datasetAcquisition.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, examination.getStudyId()));
 		

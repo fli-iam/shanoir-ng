@@ -186,7 +186,7 @@ public class DefaultHandler extends ResultHandler {
 			ProcessedDatasetImportJob processedDataset = new ProcessedDatasetImportJob();
 			processedDataset.setDatasetProcessing(processing);
 			processedDataset.setProcessedDatasetFilePath(file.getAbsolutePath());
-			processedDataset.setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
+			processedDataset.setProcessedDatasetType(ProcessedDatasetType.EXECUTION_RESULT);
 			processedDataset.setStudyId(execution.getStudyId());
 			processedDataset.setStudyName(study.getName());
 			processedDataset.setProcessedDatasetName(execution.getName());
@@ -224,6 +224,7 @@ public class DefaultHandler extends ResultHandler {
 
 	private DatasetProcessing createProcessing(ExecutionMonitoring execution, List<Dataset> inputDatasets) {
 		DatasetProcessing processing = new DatasetProcessing();
+		processing.setParent(execution);
 		processing.setComment(execution.getPipelineIdentifier());
 		processing.setInputDatasets(inputDatasets);
 		processing.setProcessingDate(execution.getProcessingDate());

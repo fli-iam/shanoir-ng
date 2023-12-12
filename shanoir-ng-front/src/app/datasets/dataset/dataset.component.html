@@ -17,10 +17,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<div class="layout">
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
-					<h2 class="header command-zone"i18n="View dataset|Title@@datasetDetailViewTitle">Details on dataset</h2>
+					<h2 class="header command-zone"i18n="View dataset|Title@@datasetDetailViewTitle">Details on {{dataset.datasetProcessing ? 'processed ' : '' }}dataset</h2>
 				</ng-template>
 				<ng-template [ngSwitchCase]="'edit'">
-					<h2 class="header command-zone"i18n="Edit dataset|Title@@datasetDetailEditTitle">Edit dataset</h2>
+					<h2 class="header command-zone"i18n="Edit dataset|Title@@datasetDetailEditTitle">Edit {{dataset.datasetProcessing ? 'processed ' : '' }}dataset</h2>
 				</ng-template>
 				<ng-template [ngSwitchCase]="'create'">
 					<h2 class="header command-zone"i18n="Create dataset|Title@@datasetDetailCreateTitle">Create dataset</h2>

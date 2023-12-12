@@ -12,8 +12,9 @@ import org.shanoir.ng.processing.model.DatasetProcessing;
  */
 
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED)
 public class ExecutionMonitoring extends DatasetProcessing {
+
+    private static final long serialVersionUID = -6123167560220373977L;
 
     private String identifier;
 

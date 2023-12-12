@@ -33,12 +33,12 @@ public interface EchoTimeMapper {
 
 	
 	List<EchoTime> EchoTimeDTOListToEchoTimeList(
-			List<org.shanoir.ng.importer.dto.EchoTime> echoTimeDTOList);
+			List<org.shanoir.ng.shared.dicom.EchoTime> echoTimeDTOList);
 
 
 	@Mapping(target = "echoTimeValue", source = "echoTime")
 	EchoTime EchoTimeDTOToEchoTime(
-			org.shanoir.ng.importer.dto.EchoTime echoTimes);
+			org.shanoir.ng.shared.dicom.EchoTime echoTimes);
 
 }
 

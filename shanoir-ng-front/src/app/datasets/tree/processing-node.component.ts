@@ -17,7 +17,7 @@ import { Router } from '@angular/router';
 import {DatasetNode, ProcessingNode, UNLOADED} from '../../tree/tree.model';
 import { DatasetProcessing } from '../shared/dataset-processing.model';
 import {DatasetService} from "../shared/dataset.service";
-import {ProcessingService} from "../../processing/processing.service";
+import {ExecutionDataService} from "../../vip/execution.data-service";
 import {DatasetProcessingService} from "../shared/dataset-processing.service";
 
 

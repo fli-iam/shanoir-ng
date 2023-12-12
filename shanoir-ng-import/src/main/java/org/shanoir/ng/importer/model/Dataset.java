@@ -19,6 +19,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.shanoir.ng.shared.dicom.EchoTime;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Dataset {
@@ -42,6 +44,9 @@ public class Dataset {
 	
 	@JsonProperty("flipAngles")
 	public Set<Double> flipAngles;
+
+	@JsonProperty("firstImageSOPInstanceUID")
+	private String firstImageSOPInstanceUID;
 	
 	public String getName() {
 		return name;
@@ -114,6 +119,11 @@ public class Dataset {
 		this.echoTimes = echoTimes;
 	}
 
+	public String getFirstImageSOPInstanceUID() {
+		return firstImageSOPInstanceUID;
+	}
 
-
+	public void setFirstImageSOPInstanceUID(String firstImageSOPInstanceUID) {
+		this.firstImageSOPInstanceUID = firstImageSOPInstanceUID;
+	}
 }
