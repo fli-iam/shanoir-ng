@@ -16,7 +16,10 @@ package org.shanoir.ng.dataset.modality;
 
 import jakarta.persistence.*;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
 import org.shanoir.ng.shared.model.*;
+import org.xmlunit.diff.Diff;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -76,7 +79,49 @@ public class MrDataset extends Dataset {
 	/** Store temporarily the last image acquisition time until all images are processed */
 	@Transient
 	private LocalDateTime lastImageAcquisitionTime;
-	
+
+	public MrDataset() {}
+
+	public MrDataset(Dataset d, MrProtocol mrpro) {
+		super(d);
+
+		MrProtocol mrp = new MrProtocol(mrpro, this);
+		this.diffusionGradients = new ArrayList<>(((MrDataset) d).getDiffusionGradients().size());
+		for (DiffusionGradient dg : ((MrDataset) d).getDiffusionGradients()) {
+			this.diffusionGradients.add(new DiffusionGradient(dg, this, mrp));
+		}
+
+		this.echoTime = new ArrayList<>(((MrDataset) d).getEchoTime().size());
+		for (EchoTime et : ((MrDataset) d).getEchoTime()) {
+			this.echoTime.add(new EchoTime(et, this));
+		}
+
+		this.flipAngle = new ArrayList<>(((MrDataset) d).getFlipAngle().size());
+		for (FlipAngle fa : ((MrDataset) d).getFlipAngle()) {
+			this.flipAngle.add(new FlipAngle(fa, this));
+		}
+
+		this.inversionTime = new ArrayList<>(((MrDataset) d).getInversionTime().size());
+		for (InversionTime it : ((MrDataset) d).getInversionTime()) {
+			this.inversionTime.add(new InversionTime(it, this));
+		}
+
+		if (((MrDataset) d).getMrQualityProcedureType() != null) {
+			this.mrQualityProcedureType = ((MrDataset) d).getMrQualityProcedureType().getId();
+		} else {
+			this.mrQualityProcedureType = null;
+		}
+		this.originMrMetadata = ((MrDataset) d).getOriginMrMetadata();
+
+		this.repetitionTime = new ArrayList<>(((MrDataset) d).getRepetitionTime().size());
+		for (RepetitionTime rt : ((MrDataset) d).getRepetitionTime()) {
+			this.repetitionTime.add(new RepetitionTime(rt, this));
+		}
+		this.updatedMrMetadata = new MrDatasetMetadata(((MrDataset) d).getUpdatedMrMetadata());
+		this.firstImageAcquisitionTime = ((MrDataset) d).getFirstImageAcquisitionTime();
+		this.lastImageAcquisitionTime = ((MrDataset) d).getLastImageAcquisitionTime();
+	}
+
 	/**
 	 * @return the diffusionGradients
 	 */

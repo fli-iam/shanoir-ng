@@ -70,13 +70,13 @@ public class DiffusionGradient extends AbstractEntity {
 	public DiffusionGradient() {
 	}
 
-	public DiffusionGradient(MrProtocol mrProtocol, MrDataset mrDataset, Double diffusionGradientBValue, Double diffusionGradientOrientationX, Double diffusionGradientOrientationY, Double diffusionGradientOrientationZ) {
-		this.mrProtocol = mrProtocol;
-		this.mrDataset = mrDataset;
-		this.diffusionGradientBValue = diffusionGradientBValue;
-		this.diffusionGradientOrientationX = diffusionGradientOrientationX;
-		this.diffusionGradientOrientationY = diffusionGradientOrientationY;
-		this.diffusionGradientOrientationZ = diffusionGradientOrientationZ;
+	public DiffusionGradient(DiffusionGradient dg, MrDataset mr, MrProtocol mrp) {
+		this.mrProtocol = mrp;
+		this.mrDataset = mr;
+		this.diffusionGradientBValue = dg.getDiffusionGradientBValue();
+		this.diffusionGradientOrientationX = dg.getDiffusionGradientOrientationX();
+		this.diffusionGradientOrientationY = dg.getDiffusionGradientOrientationY();
+		this.diffusionGradientOrientationZ = dg.getDiffusionGradientOrientationZ();
 	}
 
 	/**

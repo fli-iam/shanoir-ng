@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.bids.BidsDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
@@ -32,9 +33,11 @@ import org.shanoir.ng.datasetacquisition.validation.DatasetsModalityTypeCheck;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+import org.shanoir.ng.shared.model.InversionTime;
 import org.shanoir.ng.studycard.model.StudyCard;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -97,6 +100,22 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	private LocalDate creationDate;
 
 	private Long sourceId;
+
+	public DatasetAcquisition() {
+	}
+
+	public DatasetAcquisition(DatasetAcquisition other) {
+		this.acquisitionEquipmentId = other.acquisitionEquipmentId;
+
+		this.examination = other.examination;
+		this.studyCard = other.studyCard;
+		this.studyCardTimestamp = other.studyCardTimestamp;
+		this.rank = other.rank;
+		this.softwareRelease = other.softwareRelease;
+		this.sortingIndex = other.sortingIndex;
+		this.creationDate = other.creationDate;
+		this.sourceId = other.sourceId;
+	}
 
 	/**
 	 * @return the acquisitionEquipmentId

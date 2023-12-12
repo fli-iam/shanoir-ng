@@ -50,6 +50,19 @@ public class MrProtocolSCMetadata extends MrProtocolMetadata {
 	/** Bids dataset type folder. **/
 	private String bidsDataType;
 
+	public MrProtocolSCMetadata() {
+	}
+
+	public MrProtocolSCMetadata(MrProtocolSCMetadata other) {
+		super(other);
+		this.comment = other.comment;
+		this.axisOrientationAtAcquisition = other.axisOrientationAtAcquisition;
+		this.contrastAgentProduct = other.contrastAgentProduct;
+		this.mrSequenceApplication = other.mrSequenceApplication;
+		this.mrSequencePhysics = other.mrSequencePhysics;
+		this.bidsDataType = other.bidsDataType;
+	}
+
 	/**
 	 * @return the comment
 	 */
