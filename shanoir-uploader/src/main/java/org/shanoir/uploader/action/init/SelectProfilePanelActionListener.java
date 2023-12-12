@@ -47,6 +47,7 @@ public class SelectProfilePanelActionListener implements ActionListener {
 					// Store the new Profile configuration in the basic.properties file
 					OutputStream out = new FileOutputStream(propertiesFile);
 					props.store(out, "Profile Configuration");
+					out.close();
 				} catch (Exception exception) {
 					logger.error("Failed to save selected Profile : " + exception.getMessage());
 				}
