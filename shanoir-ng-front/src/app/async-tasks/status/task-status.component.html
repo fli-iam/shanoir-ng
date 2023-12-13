@@ -26,15 +26,19 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </li>
             <li>
                 <label>Status</label>
-                <span class="right-col"><progress-bar [progress]="task?.progress"></progress-bar></span>
+                <span class="right-col">
+                    <progress-bar [progress]="task?.progress" [warning]="task.status == 5 || task.status == 3"></progress-bar>
+                    <button [disabled]="loading" *ngIf="task.eventType == 'downloadDataset.event' && task?.progress == -1 && browserCompatible" class="alt left-icon normal" (click)="retry()">
+                        <i class="fas fa-download"></i>
+                        Retry
+                    </button>
+                </span>
             </li>
             <li class="message-li">
                 <label>Last message</label>
                 <span class="right-col">
                     <div class="message">
-                        <code *ngFor="let line of task?.message.split('\n')" [class.tab]="line.startsWith('- ')">
-                            {{line}}
-                        </code>
+                        <pre><code>{{task?.message}}</code></pre>
                     </div>
                 </span>
             </li>
@@ -54,6 +58,27 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <li>
                 <label>Last update</label>
                 <span class="right-col">{{task.lastUpdate | date: 'dd/MM/yyyy HH:mm:ss'}}</span>
+            </li>
+            <li class="message-li" *ngIf="task.report && task._eventType != 'checkQuality.event' && task._eventType != 'importDataset.event'">
+                <label>Report</label>
+                <span class="right-col">
+                    <div class="message">
+                        <pre><code>{{task?.report}}</code></pre>
+                    </div>
+                </span>
+            </li>
+        </ol>
+        <ol *ngIf="this.report && (task._eventType == 'checkQuality.event' || task._eventType == 'importDataset.event')">
+            <legend>Report</legend>
+            <li>
+                <shanoir-table #table class="report"
+                    [getPage]="getPage.bind(this)"
+                    [columnDefs]="reportColumns"
+                    [customActionDefs]="reportActions"
+                    [browserSearch]="false"
+                    [collapseControls]="true"
+                    (registerRefresh)="registerTableRefresh($event)"
+                ></shanoir-table>
             </li>
         </ol>
     </fieldset>

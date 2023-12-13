@@ -21,6 +21,10 @@ import { QualityCardDTOService } from './quality-card.dto';
 import { QualityCardDTO } from './quality-card.dto.model';
 import { QualityCard } from './quality-card.model';
 
+export class Interval {
+    constructor(public from: number, public to: number) {}
+};
+
 @Injectable()
 export class QualityCardService extends EntityService<QualityCard> {
 
@@ -62,8 +66,15 @@ export class QualityCardService extends EntityService<QualityCard> {
             .toPromise();
     }
 
-    testOnStudy(qualityCardId: number): Promise<any> {
-        return this.http.get<any[]>(this.API_URL + '/test/' + qualityCardId)
+    testOnStudy(qualityCardId: number, start?: number, stop?: number): Promise<any> {
+        return this.http.get<any[]>(this.API_URL + '/test/' + qualityCardId 
+            + (start != null && start != undefined && stop != null && stop != undefined
+                ? '/' + (start - 1) + '/' + stop : '')
+            ).toPromise();
+    }
+
+    testOnExamination(qualityCardId: number, examinationId: number): Promise<any> {
+        return this.http.get<any[]>(this.API_URL + '/test/' + qualityCardId + '/exam/' + examinationId)
             .toPromise();
     }
 

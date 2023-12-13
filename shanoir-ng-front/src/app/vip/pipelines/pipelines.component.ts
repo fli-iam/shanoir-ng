@@ -1,0 +1,68 @@
+import {Component, Input, OnInit} from '@angular/core';
+import { Router } from '@angular/router';
+import { BreadcrumbsService } from 'src/app/breadcrumbs/breadcrumbs.service';
+import { Pipeline } from 'src/app/vip/models/pipeline';
+import { VipClientService } from 'src/app/vip/shared/vip-client.service';
+import { ExecutionDataService } from '../execution.data-service';
+import {Mode} from "../../shared/components/entity/entity.component.abstract";
+
+@Component({
+  selector: 'app-pipelines',
+  templateUrl: './pipelines.component.html',
+  styleUrls: ['./pipelines.component.css']
+})
+export class PipelinesComponent implements OnInit {
+
+  pipelines:Pipeline[];
+  selectedPipeline:Pipeline;
+  descriptionLoading:boolean;
+
+  constructor(private breadcrumbsService: BreadcrumbsService, private vipClientService: VipClientService, private router: Router, private processingService:ExecutionDataService) {
+    this.pipelines = [];
+    this.descriptionLoading = false;
+
+    this.breadcrumbsService.currentStepAsMilestone();
+    this.breadcrumbsService.nameStep('1. Processing');
+  }
+
+  ngOnInit(): void {
+    this.vipClientService.listPipelines().subscribe(
+      (pipelines :Pipeline[])=>{
+        this.pipelines = pipelines;
+      }
+    )
+  }
+
+  selectPipeline(pipeline:Pipeline) {
+    this.descriptionLoading = true;
+    this.vipClientService.getPipeline(pipeline.identifier).subscribe(
+      (pipeline:Pipeline)=>{
+        this.descriptionLoading = false;
+        this.selectedPipeline = pipeline;
+      },
+      (error)=>{
+        console.error(error);
+      }
+    )
+  }
+
+  isSelectedDatasets(): boolean {
+      return this.processingService.selectedDatasets && this.processingService.selectedDatasets.size > 0;
+  }
+
+  choosePipeLine(){
+    this.processingService.setPipeline(this.selectedPipeline);
+    let filesParam = 0;
+    // Here we are going to calculate the number of possible executions in parallel
+    this.selectedPipeline.parameters?.forEach(parameter => {
+        if (parameter.type == 'File') {
+            filesParam += 1;
+        }
+    })
+    this.router.navigate(['execution']);
+  }
+
+  navigateToSolr(): void{
+        this.router.navigate(['/solr-search']);
+    }
+}

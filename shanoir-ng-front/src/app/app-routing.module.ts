@@ -83,10 +83,9 @@ import { StudyCardForRulesListComponent } from './study-cards/study-card-list/st
 import { ProcessedDatasetClinicalContextComponent } from './import/processed-dataset-clinical-context/processed-dataset-clinical-context.component';
 import { DUAComponent } from './dua/dua.component';
 import { AccessRequestComponent } from './users/access-request/access-request.component';
-import { ProcessingComponent } from './processing/processing.component';
-import { PipelinesComponent } from './processing/pipelines/pipelines.component';
-import { ExecutionComponent } from './processing/execution/execution.component';
-import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-processings/carmin-dataset-processings.component';
+import { PipelinesComponent } from './vip/pipelines/pipelines.component';
+import { ExecutionComponent } from './vip/execution/execution.component';
+import { ExecutionMonitoringsComponent } from './vip/execution-monitorings/execution-monitorings.component';
 import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
 import { ApplyStudyCardOnComponent } from './study-cards/apply-study-card-on/apply-study-card-on.component';
 import { PreClinicalContextComponent } from './import/pre-clinical-context/pre-clinical-context.component';
@@ -125,22 +124,15 @@ let routes: Routes = [
     }, {
         path: 'solr-search',
         component: SolrSearchComponent
-    },
-    {
-        path: 'carmin-dataset-processings',
-        component: CarminDatasetProcessingsComponent
     }, {
-        path: 'processing',
-        component: ProcessingComponent,
-        children:[
-            {
-                path: 'pipelines',
-                component: PipelinesComponent
-            }, {
-                path: 'execution',
-                component: ExecutionComponent
-            }
-        ]
+        path: 'execution-monitoring',
+        component: ExecutionMonitoringsComponent
+    }, {
+        path: 'pipelines',
+        component: PipelinesComponent
+    }, {
+        path: 'execution',
+        component: ExecutionComponent
     }, {
         path: 'imports',
         component: ImportComponent,
@@ -205,7 +197,7 @@ let routes: Routes = [
     }, {
         path: 'task/status/:ts',
         component: TaskStatusComponent
-    }, {    
+    }, {
         path: 'task',
         component: AsyncTasksComponent
     }, {
@@ -230,12 +222,7 @@ let routes: Routes = [
     },{
         path: 'download-statistics',
         component: DownloadStatisticsComponent
-    },
-
-    // Automatically generated routes from:
-    // https://www.typescriptlang.org/play/#code/LAKAZgrgdgxgLgSwPZQAQHMCmcBKSJyYDOAYkgE4AUmUicAngHICGAtpgFypFzkJToANKhp16AYSSsADilEdmUesIA2CHpJlzaCpcNCpDRw8wIALLgG9ymZgBMA-F0XLUMG80JPUL4RGl2npjeLgC+qACUzkqolqAGRjZwEORoANoJxoZxIFl5qNKeFiK0CAws7IKZ+YY2dgg28AAqSFyiZUxsmKgA1KgA5AD0ajz9Vbk1RoVwZgCynjDF-ZAqKmPVxqHCOZNTRW2l5V29A8PqcOsTuzBSslDyqCNwmnei47uGMIoAgvAIAG5BZzmAB0HjsqAcqDSphmYNsdgAuqguNA7JgwPxMHZ3vktrENvlpsV2kd2D0hui4MwECoiIMOAg7JcPm5bto4AcxC8ObjdoFqVZUKwkOiuP1-ghMAB3fqoLaEvJfKC-RCAwjAuHgyHQ2FmeH2ZGoqDozH3HGK+XbS3GYlcjoVTAUwbYsoMpksj43LT3HQlbns31wPmTAXMIUisUDV0XK02ozK1UAoE+UH+AXdKEwtMBIJG1BojFYi1XLL4nYfO3+h1dZ3uWyET3XQMPUkSFu0EM1MMR0WcAb1oJyhWlmqJv7q-t6kGDwg67Nw2eYfOFs3YrtGULVREAblAoT3IFAKmwqHI+EIRGi9DSyIAvNDd-EQOeCMRUA-X5eZygvnBKNUWC4BexBkFQ-Q8BAdj0GMAwAMrJNBPJBrB-QIVB9AADLnMhoiwZYS7it85jfHYrD8AA8uQACiAAe0iYOQcAAOIQMw5DMn4uYagMxEzKR5FQFRdEMUxrHscyoQRCGQF4G+pAUJQEEQAARgAVpg8CoXBqkafAuG0NpumaXA2EaB2FzbOmKb9HxZgCfw4kcf0UkydgcmXmBSmYLRbD8J4yBQKhdF+VAAUoAZlkDCFgnhVAZnPBZ+HWTxtkkWRjlsc5rmAe5IEKeBYZENgqEACKeMwxWJT6eHCP05XUlVCWRcl3H9ml-EZUJNH0YxLFZZJ0m5cB8lef0MCiIxqHiJN5AtXVM20IxzVJdshG8elgnCb1YkDbBKXtXZDndSJfVOYNbkjZ5in9MwMAAI4QOoZSBQAtJgj0INI7CGXVvyfUQL0oNRn3faI828Q9T2A4gwOgz9pk4atsTrR19lddton9RJ+1tURm2UT1WPnS5Q2lrJ+VjTctLTUgtIQ-0ki0itNW-SjHipUdGNE2de1cRm+OdVtPO7TjOXk3lo03RAxXkKhACqssM4ry1I6zUUERzh0E1AJP8zZXOCST4vGBTUvgawigQGAd3JDYct1fMUDW7bKSMQzAASUiYBDmsNtrQuE6dovOfrnM65jvNi2TpuS9dFtWzb8Bu+Qr2RpgayO4nrv27MfYqJ73u+6jhtBzt2OhwWeMbYHJ3l8bESgBEh6gDcUBEEgJ4gioSDoJQX7EI3R4gCecCoBe0gEB+AxpAAOkFh5gBQqCUKPZ4gePYDr-JEQEqWE9Tz0D79LPcCWPP-TVAfY9HwMp+n1Ws-9HKfQDyCxInCfYwX4exgIFv-cQLwnqI0OALRd4VjyNfXox9768FdKAloXAn4v23oQYBDQTItE-k-QQP9qhblLP-Feb9vSvFoBAy00Db4nzgKfMhHJxQnFIRZT+eCF4EOqMQwBb4QRhkoaOIw1DYF0LgD2WIwo+zIOfswoBYYQTpxwcOdh-Rf6bi4QA0hPwJxBAETUYRd9RHjjVCmNIqCtEqh0YQNIAAGZEfR+iIhUWowwhDjAGNoVsC++5W4oA7l3Hufdr4RCAA
-    // See code below
-    {
+    },{
         path: 'study',
         redirectTo: 'study/list',
     },

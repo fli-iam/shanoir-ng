@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
+import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Serie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,9 @@ public class MrProtocolStrategyTest {
 	public void testGenerateMrProtocolForSerieNotEnhancedMR() throws IOException {
 		Attributes attributes = getAttributesFromFile("/1.3.12.2.1107.5.2.43.166066.2018042412210060639615964");
 		Serie serie = generateSerie(attributes);
-		MrProtocol mrProtocol = mrProtocolStrategy.generateProtocolForSerie(attributes, serie);
+		AcquisitionAttributes<String> acqAttributes = new AcquisitionAttributes<>();
+		acqAttributes.addDatasetAttributes("UID12345", attributes);
+		MrProtocol mrProtocol = mrProtocolStrategy.generateProtocolForSerie(acqAttributes, serie);
 		Assertions.assertTrue(mrProtocol.getNumberOfAverages().equals(1));
 		Assertions.assertTrue(mrProtocol.getFilters().equals("77"));
 	}	

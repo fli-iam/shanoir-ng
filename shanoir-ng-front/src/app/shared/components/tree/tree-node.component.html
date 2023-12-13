@@ -13,18 +13,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <span class="arrow" (click)="toggle()">
-    <span *ngIf="dataLoading">
-        <div class="fa fa-cog fa-spin"></div>
-    </span>
     <span *ngIf="hasChildren==true && isOpen"><i class="fas fa-angle-down"></i></span>
     <span *ngIf="hasChildren==true && !isOpen"><i class="fas fa-angle-right"></i></span>
     <span *ngIf="hasChildren=='unknown' && !isOpen && !dataLoading"><i class="fas fa-angle-right"></i></span>
 </span>
 <div class="node" [class.clickable-node]="isClickable()" title="{{title}}">
-    <span *ngIf="pictoUrl" (click)="labelClick.emit()" class="picto" [class.clickable]="isClickable()">
+    <span *ngIf="dataLoading">
+        <div class="fa fa-cog fa-spin"></div>
+    </span>
+    <span *ngIf="!dataLoading && pictoUrl" (click)="labelClick.emit()" class="picto" [class.clickable]="isClickable()">
         <img class="picto" src="{{pictoUrl}}" />
     </span>
-    <span *ngIf="awesome" (click)="labelClick.emit()" class="picto" [class.clickable]="isClickable()">
+    <span *ngIf="!dataLoading && awesome" (click)="labelClick.emit()" class="picto" [class.clickable]="isClickable()">
         <i class="{{awesome}}"></i>
     </span>
     <input #box class="box" type="checkbox" *ngIf="hasBox" [(ngModel)]="value" (change)="chkbxChange.emit(value)" class="clickable" />
@@ -41,7 +41,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <span>
         <ng-content select="dropdown-menu"></ng-content>
     </span>
-   <span class="tag label" [class.dark]="getFontColor(tag.color)" [style.background]="tag.color" *ngFor="let tag of tags">
+    <span *ngIf="qualityTag" class="tag label dark" [style.background]="qualityTag == 'ERROR' ? 'red' : (qualityTag == 'WARNING' ? 'orange' : 'green')">
+        {{qualityTag}}
+    </span>
+    <span class="tag label" [class.dark]="getFontColor(tag.color)" [style.background]="tag.color" *ngFor="let tag of tags">
         {{tag.name}}
     </span>
     <tool-tip *ngIf="tooltip">{{tooltip}}</tool-tip>

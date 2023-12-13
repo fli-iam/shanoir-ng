@@ -13,21 +13,19 @@
  */
 import { Component, ViewChild } from '@angular/core';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { DatasetExpressionFormat } from "../../enum/dataset-expression-format.enum";
+import { ConfirmDialogService } from "../../shared/components/confirm-dialog/confirm-dialog.service";
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
-import { TableComponent } from '../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
+import { TableComponent } from '../../shared/components/table/table.component';
+import { AccessRequest } from "../../users/access-request/access-request.model";
+import { UserService } from '../../users/shared/user.service';
 import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
 import { StudyUserRight } from '../shared/study-user-right.enum';
+import { StudyUser } from "../shared/study-user.model";
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { UserService } from '../../users/shared/user.service';
-import {ConfirmDialogService} from "../../shared/components/confirm-dialog/confirm-dialog.service";
-import {DatasetExpressionFormat} from "../../enum/dataset-expression-format.enum";
-import {Page} from "../../shared/components/table/pageable.model";
-import {StudyUser} from "../shared/study-user.model";
-import {AccessRequest} from "../../users/access-request/access-request.model";
-import {EntityRoutes} from "../../shared/components/entity/entity.abstract";
 
 
 @Component({
@@ -261,7 +259,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                     const text: string = 'You are a member of at least one study that needs you to accept its data user agreement. '
                         + 'Until you have agreed those terms you cannot access to any data from these studies. '
                         + 'Would you like to review those terms now?';
-                    const buttons = {ok: 'Yes, proceed to the signing page', cancel: 'Later'};
+                    const buttons = {yes: 'Yes, proceed to the signing page', cancel: 'Later'};
                     this.confirmService.confirm(title, text, buttons).then(response => {
                         if (response == true) this.router.navigate(['/dua']);
                     });

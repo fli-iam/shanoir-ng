@@ -30,12 +30,13 @@ import { BrowserPaging } from '../../shared/components/table/browser-paging.mode
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
-import { CarminDatasetProcessingService } from 'src/app/carmin/shared/carmin-dataset-processing.service';
-import { CarminDatasetProcessing } from 'src/app/carmin/models/carmin-dataset-processing.model';
+import { ExecutionMonitoringService } from 'src/app/vip/shared/execution-monitoring.service';
+import { ExecutionMonitoring } from 'src/app/vip/models/execution-monitoring.model';
 import { SuperPromise } from '../../utils/super-promise';
-import {CarminClientService} from "../../carmin/shared/carmin-client.service";
+import {VipClientService} from "../../vip/shared/vip-client.service";
 import {HttpResponse} from "@angular/common/http";
 import * as AppUtils from "../../utils/app.utils";
+import {formatDate} from "@angular/common";
 
 @Component({
     selector: 'dataset-processing-detail',
@@ -57,8 +58,8 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     public outputDatasetOptions: Option<Dataset>[] = [];
     public inputDatasetsColumnDefs: ColumnDefinition[];
     public outputDatasetsColumnDefs: ColumnDefinition[];
-    public isCarminDatasetProcessingEntity: boolean = false;
-    public carminDatasetProcessing: CarminDatasetProcessing;
+    public isExecutionMonitoring: boolean = false;
+    public executionMonitoring: ExecutionMonitoring;
     prefilledStudy: Study;
     prefilledSubject: Subject;
 
@@ -67,8 +68,8 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             private studyService: StudyService,
             private datasetService: DatasetService,
             private datasetProcessingService: DatasetProcessingService,
-            private carminDatasetProcessingService: CarminDatasetProcessingService,
-            private carminClientService: CarminClientService
+            private executionMonitoringService: ExecutionMonitoringService,
+            private vipClientService: VipClientService
             ) {
 
         super(route, 'dataset-processing');
@@ -89,13 +90,13 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
 
     initView(): Promise<void> {
         return this.datasetProcessingService.get(this.id).then((entity)=> {
-            // checking if the datasetProcessing is carmin type.
-            this.carminDatasetProcessingService.getCarminDatasetProcessing(entity.id).subscribe(
-                (carminDatasetProcessing: CarminDatasetProcessing) => {
-                    this.setCarminDatasetProcessing(carminDatasetProcessing);
+            // checking if the datasetProcessing is not execution monitoring
+            this.executionMonitoringService.getExecutionMonitoring(entity.id).subscribe(
+                (executionMonitoring: ExecutionMonitoring) => {
+                    this.setExecutionMonitoring(executionMonitoring);
                 }, (error) => {
-                    // 404 : if it's not found then it's not carmin type !
-                    this.resetCarminDatasetProcessing();
+                    // 404 : if it's not found then it's not execution monitoring !
+                    this.resetExecutionMonitoring();
                 }
             )
 
@@ -169,13 +170,13 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         }
     }
 
-    setCarminDatasetProcessing(carminDatasetProcessing: CarminDatasetProcessing){
-        this.isCarminDatasetProcessingEntity = true;
-        this.carminDatasetProcessing = carminDatasetProcessing;
+    setExecutionMonitoring(executionMonitoring: ExecutionMonitoring){
+        this.isExecutionMonitoring = true;
+        this.executionMonitoring = executionMonitoring;
     }
 
-    resetCarminDatasetProcessing(){
-        this.isCarminDatasetProcessingEntity = false;
+    resetExecutionMonitoring(){
+        this.isExecutionMonitoring = false;
     }
 
     fetchStudies(): Promise<void> {
@@ -223,7 +224,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             'outputDatasetList': [{value: this.datasetProcessing.outputDatasets, disabled: !this.subject}],
             'comment': [this.datasetProcessing.comment]
         });
-        this.subscribtions.push(
+        this.subscriptions.push(
             formGroup.get('study').valueChanges.subscribe(studyVal => {
                 if (!!this.prefilledSubject || !studyVal) formGroup.get('subject').disable();
                 else formGroup.get('subject').enable();
@@ -260,26 +261,26 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
 
     public downloadStdout() {
 
-        if(!this.carminDatasetProcessing){
+        if(!this.executionMonitoring){
             return;
         }
 
-        let filename = this.carminDatasetProcessing.name + ".stdout.log";
+        let filename = this.executionMonitoring.name + ".stdout.log";
 
-        this.carminClientService.getStdout(this.carminDatasetProcessing.identifier).toPromise().then(response => {
+        this.vipClientService.getStdout(this.executionMonitoring.identifier).toPromise().then(response => {
             this.downloadLogIntoBrowser(response, filename );
         });
     }
 
     public downloadStderr() {
 
-        if(!this.carminDatasetProcessing){
+        if(!this.executionMonitoring){
             return;
         }
 
-        let filename = this.carminDatasetProcessing.name + ".stderr.log";
+        let filename = this.executionMonitoring.name + ".stderr.log";
 
-        this.carminClientService.getStderr(this.carminDatasetProcessing.identifier).toPromise().then(response => {
+        this.vipClientService.getStderr(this.executionMonitoring.identifier).toPromise().then(response => {
             this.downloadLogIntoBrowser(response, filename );
         });
     }
@@ -289,5 +290,35 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             type: 'text/plain'
         });
         AppUtils.browserDownloadFile(blob, filename);
+    }
+
+    public formatDate(millis: number) : string {
+        return millis ? formatDate(new Date(millis), 'dd/MM/YYYY HH:mm:ss', 'en-US') : "";
+    }
+
+    public getDuration(){
+
+        let start = this.executionMonitoring?.startDate;
+        let end = this.executionMonitoring?.endDate;
+
+        if(!start || !end){
+            return "";
+        }
+
+        let duration = end - start;
+
+        if(duration <= 0){
+            return "";
+        }
+
+        let milliseconds = Math.floor((duration % 1000));
+        let seconds = Math.floor((duration / 1000) % 60);
+        let minutes = Math.floor((duration / (1000 * 60)) % 60);
+        let hours = Math.floor((duration / (1000 * 60 * 60)));
+
+        return String(hours).padStart(2, "0") + ":" +
+            String(minutes).padStart(2, "0") + ":" +
+            String(seconds).padStart(2, "0") + "." +
+            String(milliseconds).padStart(3, "0")
     }
 }

@@ -13,20 +13,20 @@
  */
 
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
 
+import { HttpClient } from '@angular/common/http';
 import { EntityService } from '../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../utils/app.utils';
 import { Task } from './task.model';
-import { HttpClient } from '@angular/common/http';
 
 @Injectable()
 export class TaskService extends EntityService<Task> {
 
     API_URL = AppUtils.BACKEND_API_TASKS_URL;
+    
 
     constructor(protected http: HttpClient) {
-        super(http)
+        super(http);
     }
 
     getEntityInstance() { return new Task(); }
@@ -35,5 +35,19 @@ export class TaskService extends EntityService<Task> {
         return this.http.get<Task[]>(this.API_URL)
             .toPromise()
             .then(this.mapEntityList);
+    }
+
+    protected toRealObject(entity: any): Task {
+        let trueObject = Object.assign(new Task(), entity);
+        trueObject.completeId = entity.idAsString;
+        Object.keys(entity).forEach(key => {
+            if (key != 'idAsString') {
+                let value = entity[key];
+                if (['creationDate', 'lastUpdate'].includes(key) && value) {
+                    trueObject[key] = new Date(value);
+                }
+            }
+        });
+        return trueObject;
     }
 }

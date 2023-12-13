@@ -3,16 +3,17 @@ package org.shanoir.uploader.action.init;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.gui.SelectProfileConfigurationPanel;
+import org.shanoir.uploader.utils.PropertiesUtil;
 
 public class SelectProfilePanelActionListener implements ActionListener {
 	
@@ -30,14 +31,35 @@ public class SelectProfilePanelActionListener implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		String selectedProfile = (String) selectProfilePanel.selectProfileCB.getSelectedItem();
 		ShUpConfig.profileSelected = selectedProfile;
+		configureSelectedProfile(selectedProfile);
+		
+		// If the "Remember profile" box is ticked, we store the selected profile in basic.properties 
+		// to avoid displaying the Profile selection the next time the application starts
+		if (selectProfilePanel.rbRememberProfile.isSelected()) {
+			logger.info("Saving Profile selected in basic.properties file.");
+			String fileName = ShUpConfig.shanoirUploaderFolder + File.separator + ShUpConfig.BASIC_PROPERTIES;
+			final File propertiesFile = new File(fileName);
+			boolean propertiesExists = propertiesFile.exists();
+			if (propertiesExists) {
+				try (OutputStream out = new FileOutputStream(propertiesFile);){
+					Properties props = ShUpConfig.basicProperties;
+					props.setProperty(ShUpConfig.PROFILE, selectedProfile);
+					// Store the new Profile configuration in the basic.properties file
+					props.store(out, "Profile Configuration");
+				} catch (Exception exception) {
+					logger.error("Failed to save selected Profile : " + exception.getMessage());
+				}
+			}
+		}
+		sSC.nextState();
+	}
+
+	public void configureSelectedProfile(String selectedProfile) {
 		String filePath = File.separator + ShUpConfig.PROFILE_DIR + selectedProfile;
 		ShUpConfig.profileDirectory = new File(ShUpConfig.shanoirUploaderFolder, filePath);
 		logger.info("Profile directory set to: " + ShUpConfig.profileDirectory.getAbsolutePath());
 		File profilePropertiesFile = new File(ShUpConfig.profileDirectory, ShUpConfig.PROFILE_PROPERTIES);
-		loadPropertiesFromFile(profilePropertiesFile, ShUpConfig.profileProperties);
-		
-		ShUpConfig.encryption.decryptIfEncryptedString(profilePropertiesFile,
-				ShUpConfig.profileProperties, "shanoir.server.user.password");
+		PropertiesUtil.loadPropertiesFromFile(ShUpConfig.profileProperties, profilePropertiesFile);
 		logger.info("Profile " + selectedProfile + " successfully initialized.");
 		
 		File keycloakJson = new File(ShUpConfig.profileDirectory, ShUpConfig.KEYCLOAK_JSON);
@@ -47,7 +69,7 @@ public class SelectProfilePanelActionListener implements ActionListener {
 		} else {
 			logger.error("Error: missing keycloak.json! Connection with sh-ng will not work.");
 			return;
-	}
+		}
 
 		// check if pseudonymus has been copied in case of true
 		if (Boolean.parseBoolean(ShUpConfig.profileProperties.getProperty(ShUpConfig.MODE_PSEUDONYMUS))) {
@@ -56,7 +78,7 @@ public class SelectProfilePanelActionListener implements ActionListener {
 			if (!pseudonymusFolder.exists()) {
 				logger.error(pseudonymusFolder.getAbsolutePath() + " folder missing for mode pseudonymus! Please copy manually.");
 			}
-			// than check for the key in the .jar file
+			// then check for the key in the .jar file
 			Properties keyProperties = new Properties();
 			InputStream in = getClass().getResourceAsStream("/profile." + selectedProfile + "/" + ShUpConfig.MODE_PSEUDONYMUS_KEY_FILE);
 			if (in != null) {
@@ -72,19 +94,5 @@ public class SelectProfilePanelActionListener implements ActionListener {
 				return;
 			}
 		}
-		sSC.nextState();
 	}
-
-	private void loadPropertiesFromFile(final File propertiesFile, final Properties properties) {
-		try {
-			final FileInputStream fIS = new FileInputStream(propertiesFile);
-			properties.load(fIS);
-			fIS.close();
-		} catch (FileNotFoundException e) {
-			logger.error(e.getMessage(), e);
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-		}
-	}
-
 }

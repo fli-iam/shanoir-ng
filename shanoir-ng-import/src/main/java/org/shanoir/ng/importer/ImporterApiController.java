@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -75,8 +74,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -87,7 +84,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -144,9 +140,6 @@ public class ImporterApiController implements ImporterApi {
 
 	@Value("${shanoir.import.directory}")
 	private String importDir;
-
-	@Autowired
-	private RestTemplate restTemplate;
 
 	@Autowired
 	private DicomDirGeneratorService dicomDirGeneratorService;
@@ -268,7 +261,6 @@ public class ImporterApiController implements ImporterApi {
 		final File importJobDir = new File(userImportDir, tempDirId);
 		if (importJobDir.exists()) {
 			importJob.setWorkFolder(importJobDir.getAbsolutePath());
-			cleanSeries(importJob);
 			LOG.info("Starting import job for user {} (userId: {}) with import job folder: {}", KeycloakUtil.getTokenUserName(), userId, importJob.getWorkFolder());
 			importerManagerService.manageImportJob(importJob);
 			return new ResponseEntity<>(HttpStatus.OK);
@@ -276,24 +268,6 @@ public class ImporterApiController implements ImporterApi {
 			LOG.error("Missing importJobDir.");
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Missing importJobDir.", null));
-		}
-	}
-
-	private void cleanSeries(final ImportJob importJob) {
-		for (Iterator<Patient> patientIt = importJob.getPatients().iterator(); patientIt.hasNext();) {
-			Patient patient = patientIt.next();
-			List<Study> studies = patient.getStudies();
-			for (Iterator<Study> studyIt = studies.iterator(); studyIt.hasNext();) {
-				Study study = studyIt.next();
-				List<Serie> series = study.getSeries();
-				for (Iterator<Serie> serieIt = series.iterator(); serieIt.hasNext();) {
-					Serie serie = serieIt.next();
-					if (serie.isIgnored() || serie.isErroneous() || !serie.getSelected()) {
-						LOG.info("Serie {} cleaned from import (ignored, erroneous, not selected).", serie.getSeriesDescription());
-						serieIt.remove();
-					}
-				}
-			}
 		}
 	}
 
@@ -309,7 +283,6 @@ public class ImporterApiController implements ImporterApi {
 			importJob.setWorkFolder("");
 			importJob.setFromPacs(true);
 			importJob.setUserId(KeycloakUtil.getTokenUserId());
-
 		} catch (ShanoirException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage(), null));
@@ -332,12 +305,11 @@ public class ImporterApiController implements ImporterApi {
 		MockMultipartFile multiPartFile;
 		try {
 			multiPartFile = new MockMultipartFile(tempFile.getName(), tempFile.getName(), APPLICATION_ZIP, new FileInputStream(tempFile.getAbsolutePath()));
-
 			// Import dicomfile
 			return uploadDicomZipFile(multiPartFile);
 		} catch (IOException e) {
 			LOG.error("ERROR while loading zip fiole, please contact an administrator");
-			e.printStackTrace();
+			LOG.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 		} finally {
 			// Delete temp file which is useless now
@@ -374,12 +346,9 @@ public class ImporterApiController implements ImporterApi {
 			if (!userImportDir.exists()) {
 				userImportDir.mkdirs(); // create if not yet existing
 			}
-
 			// Unzip the file and get the elements
 			File tempFile = ImportUtils.saveTempFile(userImportDir, eegFile);
-
 			File importJobDir = ImportUtils.saveTempFileCreateFolderAndUnzip(tempFile, eegFile, false);
-
 			EegImportJob importJob = new EegImportJob();
 			importJob.setUserId(userId);
 			importJob.setArchive(eegFile.getOriginalFilename());

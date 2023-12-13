@@ -63,7 +63,6 @@ import { DatasetProcessingDTOService } from './datasets/shared/dataset-processin
 import { DatasetProcessingPipe } from './datasets/dataset-processing/dataset-processing.pipe';
 import { EegDatasetComponent } from './datasets/dataset/eeg/dataset.eeg.component';
 import { MrDatasetComponent } from './datasets/dataset/mr/dataset.mr.component';
-import { DatasetDownloadComponent } from './datasets/download/dataset-download.component';
 import { DownloadStatisticsComponent } from './datasets/download-statistics/download-statistics.component';
 import { DatasetDTOService } from './datasets/shared/dataset.dto';
 import { DatasetService } from './datasets/shared/dataset.service';
@@ -103,9 +102,6 @@ import { DropdownMenuComponent } from './shared/components/dropdown-menu/dropdow
 import { MenuItemComponent } from './shared/components/dropdown-menu/menu-item/menu-item.component';
 import { FormFooterComponent } from './shared/components/form-footer/form-footer.component';
 import { LoadingBarComponent } from './shared/components/loading-bar/loading-bar.component';
-import { ModalComponent } from './shared/components/modal/modal.component';
-import { ModalService } from './shared/components/modals/modal.service';
-import { ModalsComponent } from './shared/components/modals/modals.component';
 import { PapayaComponent } from './shared/components/papaya/papaya.component';
 import { SubjectStudyListComponent } from './shared/components/subject-study-list/subject-study-list.component';
 import { PagerComponent } from './shared/components/table/pager/pager.component';
@@ -180,10 +176,7 @@ import { CenterNodeComponent } from './centers/tree/center-node.component';
 import { EquipmentNodeComponent } from './acquisition-equipments/tree/equipment-node.component';
 import { MemberNodeComponent } from './users/tree/member-node.component';
 import { StudyCardNodeComponent } from './study-cards/tree/study-card-node.component';
-
 import { ReplaceSpacePipe } from './utils/pipes';
-
-//import { ModalService} from './shared/components/modal/modal.service';
 import { AnimalSubjectsListComponent }   from './preclinical/animalSubject/list/animalSubject-list.component';
 import { AnimalSubjectService }   from './preclinical/animalSubject/shared/animalSubject.service';
 import { AnimalSubjectFormComponent }   from './preclinical/animalSubject/edit/animalSubject-form.component';
@@ -251,13 +244,12 @@ import { VarDirective } from './utils/ng-var.directive';
 import { AccessRequestComponent } from './users/access-request/access-request.component';
 import { MultiSelectComponent } from './shared/multi-select/multi-select.component';
 import { MultiSelectTableComponent } from './shared/multi-select-table/multi-select-table.component';
-import { ProcessingComponent } from './processing/processing.component';
-import { PipelinesComponent } from './processing/pipelines/pipelines.component';
-import { CarminClientService } from './carmin/shared/carmin-client.service';
-import { PipelineComponent } from './processing/pipelines/pipeline/pipeline.component';
-import { ExecutionComponent } from './processing/execution/execution.component';
-import { CarminDatasetProcessingService } from './carmin/shared/carmin-dataset-processing.service';
-import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-processings/carmin-dataset-processings.component';
+import { PipelinesComponent } from './vip/pipelines/pipelines.component';
+import { VipClientService } from './vip/shared/vip-client.service';
+import { PipelineComponent } from './vip/pipelines/pipeline/pipeline.component';
+import { ExecutionComponent } from './vip/execution/execution.component';
+import { ExecutionMonitoringService } from './vip/shared/execution-monitoring.service';
+import { ExecutionMonitoringsComponent } from './vip/execution-monitorings/execution-monitorings.component';
 import { QualityControlComponent } from './quality-control/quality-control.component';
 import { QualityCardService } from './study-cards/shared/quality-card.service';
 import { QualityCardDTOService } from './study-cards/shared/quality-card.dto';
@@ -268,8 +260,12 @@ import { WelcomeComponent } from './welcome/welcome.component';
 import { LoginGuard } from "./shared/roles/login-guard";
 import { AccessRequestService } from './users/access-request/access-request.service';
 import { AccessRequestListComponent } from './users/access-request/access-request-list.component';
+import { MassDownloadService } from './shared/mass-download/mass-download.service';
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { TaskStatusComponent } from './async-tasks/status/task-status.component';
+import { DownloadSetupComponent } from './shared/mass-download/download-setup/download-setup.component';
+import { DownloadSetupAltComponent } from './shared/mass-download/download-setup-alt/download-setup-alt.component';
+import { TestQualityCardOptionsComponent } from './study-cards/test-quality-card-options/test-quality-card-options.component';
 
 @NgModule({
     imports: [
@@ -310,7 +306,6 @@ import { TaskStatusComponent } from './async-tasks/status/task-status.component'
         ManufacturerComponent,
         ManufacturerModelComponent,
         ManufacturerModelPipe,
-        ModalComponent,
         MenuItemComponent,
         StudyComponent,
         StudyListComponent,
@@ -334,7 +329,6 @@ import { TaskStatusComponent } from './async-tasks/status/task-status.component'
         DatasetProcessingComponent,
         DatasetProcessingListComponent,
         DatasetProcessingPipe,
-        DatasetDownloadComponent,
         DownloadStatisticsComponent,
         DatepickerComponent,
         MrDatasetComponent,
@@ -357,7 +351,6 @@ import { TaskStatusComponent } from './async-tasks/status/task-status.component'
         TableSearchComponent,
         TimesPipe,
         FormFooterComponent,
-        ModalsComponent,
         BreadcrumbsComponent,
         SelectBoxComponent,
         UploaderComponent,
@@ -446,30 +439,22 @@ import { TaskStatusComponent } from './async-tasks/status/task-status.component'
         AccessRequestComponent,
         MultiSelectComponent,
         MultiSelectTableComponent,
-        ProcessingComponent,
         PipelinesComponent,
         PipelineComponent,
         ExecutionComponent,
-        CarminDatasetProcessingsComponent,
+        ExecutionMonitoringsComponent,
         WelcomeComponent,
         AccessRequestListComponent,
         QualityControlComponent,
         QualityCardListComponent,
         QualityCardComponent,
         QualityCardRuleComponent,
-        TaskStatusComponent
+        TaskStatusComponent,
+        DownloadSetupComponent,
+        DownloadSetupAltComponent,
+        TestQualityCardOptionsComponent
     ],
-    // Not required anymore with Angular > 9.0
-    // entryComponents: [
-    //     ConfirmDialogComponent,
-    //     ModalsComponent
-    // ],
     providers: [
-        // {
-        //     provide: APP_BASE_HREF,
-        //     useValue: environment.production  ? '/shanoir-ng/' : '/dev/'
-        // },
-        // AccountEventsService,
         AcquisitionEquipmentService,
         AuthAdminGuard,
         AuthAdminOrExpertGuard,
@@ -478,8 +463,8 @@ import { TaskStatusComponent } from './async-tasks/status/task-status.component'
         CenterService,
         ConfirmDialogService,
         ExaminationService,
-        CarminClientService,
-        CarminDatasetProcessingService,
+        VipClientService,
+        ExecutionMonitoringService,
         {
             provide: ErrorHandler,
             useClass: HandleErrorService
@@ -488,7 +473,6 @@ import { TaskStatusComponent } from './async-tasks/status/task-status.component'
         KeycloakService,
         ManufacturerModelService,
         ManufacturerService,
-        ModalService,
         RoleService,
         StudyService,
         CoilService,
@@ -552,6 +536,7 @@ import { TaskStatusComponent } from './async-tasks/status/task-status.component'
         SubjectDTOService,
         QualityCardService,
         QualityCardDTOService,
+        MassDownloadService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],
     bootstrap: [AppComponent]
