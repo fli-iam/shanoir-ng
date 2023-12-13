@@ -18,6 +18,8 @@ public class ShanoirEvent {
 
 	protected String message;
 
+	protected String report;
+
 	protected int status;
 
 	protected Float progress;
@@ -123,7 +125,16 @@ public class ShanoirEvent {
 	 * @param message the message to set
 	 */
 	public void setMessage(String message) {
-		this.message = message;
+		this.message = message == null ? null : message.replaceAll("\uFFFD", "?");
+	}
+
+	public String getReport() {
+		return report;
+	}
+
+	public void setReport(String report) {
+		//.replaceAll("[^a-zA-Z0-9]+", "");
+		this.report = report == null ? null : report.replaceAll("\uFFFD", "?");
 	}
 
 	/**
@@ -175,5 +186,7 @@ public class ShanoirEvent {
     public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
     }
+
+	
 
 }

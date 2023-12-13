@@ -11,27 +11,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
-import {Router} from '@angular/router';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Router } from '@angular/router';
 
-import {DatasetAcquisition} from '../../dataset-acquisitions/shared/dataset-acquisition.model';
-import {DatasetProcessing} from '../../datasets/shared/dataset-processing.model';
-import {Dataset} from '../../datasets/shared/dataset.model';
-import {DatasetProcessingType} from '../../enum/dataset-processing-type.enum';
-import {ExaminationPipe} from '../../examinations/shared/examination.pipe';
-import {ExaminationService} from '../../examinations/shared/examination.service';
-import {SubjectExamination} from '../../examinations/shared/subject-examination.model';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { DatasetAcquisition } from '../../dataset-acquisitions/shared/dataset-acquisition.model';
+import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
+import { Dataset } from '../../datasets/shared/dataset.model';
+import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
+import { ExaminationPipe } from '../../examinations/shared/examination.pipe';
+import { ExaminationService } from '../../examinations/shared/examination.service';
+import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
 import {
+    ClinicalSubjectNode,
     DatasetAcquisitionNode,
     DatasetNode,
     ExaminationNode,
+    PreclinicalSubjectNode,
     ProcessingNode,
-    ClinicalSubjectNode,
-    UNLOADED, SubjectNode, PreclinicalSubjectNode,
+    SubjectNode,
+    UNLOADED,
 } from '../../tree/tree.model';
-import {Subject} from '../shared/subject.model';
-import {SubjectService} from "../shared/subject.service";
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { Subject } from '../shared/subject.model';
+import { SubjectService } from "../shared/subject.service";
 
 
 @Component({

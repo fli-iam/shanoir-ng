@@ -14,18 +14,29 @@
 
 package org.shanoir.ng.studycard.model.rule;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-import jakarta.persistence.*;
-import org.dcm4che3.data.Attributes;
+import java.util.List;
+
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.studycard.model.assignment.StudyCardAssignment;
 import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.DiscriminatorType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -47,6 +58,9 @@ public abstract class StudyCardRule<T> extends AbstractEntity {
 	@JoinTable(name="study_card_condition_join", joinColumns = {@JoinColumn(name = "study_card_rule_id")}, inverseJoinColumns = {@JoinColumn(name = "condition_id")})
 	private List<StudyCardCondition> conditions;
 	
+	@NotNull
+	private boolean orConditions;
+	
 	public List<StudyCardAssignment<?>> getAssignments() {
 		return assignments;
 	}
@@ -62,6 +76,13 @@ public abstract class StudyCardRule<T> extends AbstractEntity {
 	public void setConditions(List<StudyCardCondition> conditions) {
 		this.conditions = conditions;
 	}
-	
-	abstract void apply(T object, Attributes dicomAttributes);
+
+		
+	public boolean isOrConditions() {
+        return orConditions;
+    }
+
+    public void setOrConditions(boolean orConditions) {
+        this.orConditions = orConditions;
+    }
 }

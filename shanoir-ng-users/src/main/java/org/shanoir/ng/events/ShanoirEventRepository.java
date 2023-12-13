@@ -25,4 +25,6 @@ public interface ShanoirEventRepository extends CrudRepository<ShanoirEvent, Lon
     public void deleteByLastUpdateBefore(Date expiryDate);
 
 	List<ShanoirEvent> findByObjectIdAndEventType(String objectId, String eventType);
+
+    ShanoirEvent findByIdAndUserId(Long taskId, long userId);
 }
