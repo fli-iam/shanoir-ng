@@ -172,7 +172,7 @@ public class ImporterService {
                     .filter(ss -> ss.getStudy().getId().equals(examination.getStudy().getId()))
                     .findFirst().orElse(null);
                 QualityTag tagSave = subjectStudy != null ? subjectStudy.getQualityTag() : null;
-                ExaminationData examData = new ExaminationData();
+                ExaminationData examData = new ExaminationData(examination);
                 examData.setDatasetAcquisitions(Utils.toList(generatedAcquisitions));
                 QualityCardResult qualityResult = checkQuality(examData, importJob);                				
                 // Has quality check passed ?
