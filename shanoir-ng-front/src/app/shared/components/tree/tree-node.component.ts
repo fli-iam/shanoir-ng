@@ -27,6 +27,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { CheckboxComponent } from '../../checkbox/checkbox.component';
 import { Tag } from '../../../tags/tag.model';
 import { isDarkColor } from '../../../utils/app.utils';
+import { QualityTag } from 'src/app/study-cards/shared/quality-card.model';
 
 const noop = () => {
 };
@@ -59,6 +60,7 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
     @Input() dataLoading: boolean = false;
     @Input() title: string;
     @Input() tags: Tag[];
+    @Input() qualityTag: QualityTag;
     public isOpen: boolean = false;
     @Input() opened: boolean = false;
     @Output() openedChange: EventEmitter<boolean> = new EventEmitter();

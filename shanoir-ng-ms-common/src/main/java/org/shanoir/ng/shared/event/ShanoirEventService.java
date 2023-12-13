@@ -38,6 +38,7 @@ public class ShanoirEventService {
 			.append("event_type=").append(event.getEventType()).append(";")
 			.append("object_id=").append(event.getObjectId()).append(";")
 			.append("message=").append(event.getMessage()).append(";")
+			.append("report=").append(event.getReport()).append(";")
 			.append("status=").append(event.getStatus()).append(";")
 			.append("progress=").append(event.getProgress()).append("]");
 		LOG.info(builder.toString());

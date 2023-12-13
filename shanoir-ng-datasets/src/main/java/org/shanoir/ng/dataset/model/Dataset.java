@@ -130,6 +130,10 @@ public abstract class Dataset extends AbstractEntity {
 	@OneToOne(cascade = CascadeType.ALL)
 	private DatasetMetadata updatedMetadata;
 
+	@JsonIgnore
+	@Transient
+	public String SOPInstanceUID;
+
 	/**
 	 * @return the creationDate
 	 */
@@ -392,4 +396,11 @@ public abstract class Dataset extends AbstractEntity {
 		this.downloadable = downloadable;
 	}
 
+	public String getSOPInstanceUID() {
+		return SOPInstanceUID;
+	}
+
+	public void setSOPInstanceUID(String sOPInstanceUID) {
+		SOPInstanceUID = sOPInstanceUID;
+	}
 }

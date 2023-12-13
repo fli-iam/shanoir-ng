@@ -23,7 +23,7 @@ import org.shanoir.ng.studycard.model.assignment.DatasetAssignment;
 import org.shanoir.ng.studycard.model.assignment.StudyCardAssignment;
 import org.shanoir.ng.studycard.model.condition.DatasetMetadataCondOnDataset;
 import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
-import org.shanoir.ng.studycard.model.condition.StudyCardDICOMCondition;
+import org.shanoir.ng.studycard.model.condition.StudyCardDICOMConditionOnDatasets;
 
 /**
  * A rule that applies to a {@link Dataset}
@@ -33,7 +33,6 @@ import org.shanoir.ng.studycard.model.condition.StudyCardDICOMCondition;
 @JsonTypeName("Dataset")
 public class DatasetRule extends StudyCardRule<Dataset> {
 
-    @Override
     public void apply(Dataset dataset, Attributes dicomAttributes) {
         if (this.getConditions() == null || this.getConditions().isEmpty() || conditionsfulfilled(dicomAttributes, dataset)) {
             if (this.getAssignments() != null) applyAssignments(dataset);
@@ -43,8 +42,8 @@ public class DatasetRule extends StudyCardRule<Dataset> {
     private boolean conditionsfulfilled(Attributes dicomAttributes, Dataset dataset) {
         boolean fulfilled = true;
         for (StudyCardCondition condition : getConditions()) {
-            if (condition instanceof StudyCardDICOMCondition) {
-                fulfilled &= ((StudyCardDICOMCondition) condition).fulfilled(dicomAttributes);
+            if (condition instanceof StudyCardDICOMConditionOnDatasets) {
+                fulfilled &= ((StudyCardDICOMConditionOnDatasets) condition).fulfilled(dicomAttributes, dataset.getId());
             } else if (condition instanceof DatasetMetadataCondOnDataset) {
                 fulfilled &= ((DatasetMetadataCondOnDataset) condition).fulfilled(dataset);
             } else {

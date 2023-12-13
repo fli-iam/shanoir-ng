@@ -27,6 +27,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
+
 /**
  * CRON job to request VIP api and create processedDataset
  * 
@@ -119,7 +120,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 				switch (execution.getStatus()) {
 					case FINISHED:
 
-						this.processFinishedJob(processing, event);
+						this.processFinishedJob(processing, event, execution.getEndDate());
 						break;
 
 					case UNKOWN:
@@ -171,19 +172,20 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 				+ (execution.getErrorCode() != null ? " (Error code : " + execution.getErrorCode() + ")" : ""));
 	}
 
-	public void processFinishedJob(ExecutionMonitoring processing, ShanoirEvent event) throws EntityNotFoundException, ResultHandlerException {
+	public void processFinishedJob(ExecutionMonitoring execution, ShanoirEvent event, Long endDate) throws EntityNotFoundException, ResultHandlerException {
 
-		String execLabel = this.getExecLabel(processing);
-		processing.setStatus(ExecutionStatus.FINISHED);
-		processing.setProcessingDate(LocalDate.now());
+		String execLabel = this.getExecLabel(execution);
+		execution.setStatus(ExecutionStatus.FINISHED);
+		execution.setEndDate(endDate);
+		execution.setProcessingDate(LocalDate.now());
 
-		this.executionMonitoringService.update(processing);
+		this.executionMonitoringService.update(execution);
 
 		LOG.info("{} status is [{}]", execLabel, ExecutionStatus.FINISHED.getRestLabel());
 		event.setMessage(execLabel + " : Finished. Processing imported results...");
 		eventService.publishEvent(event);
 
-		this.outputProcessingService.process(processing);
+		this.outputProcessingService.process(execution);
 
 		LOG.info("Execution status updated, stopping job...");
 

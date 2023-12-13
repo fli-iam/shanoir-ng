@@ -44,6 +44,8 @@ services:
       - SHANOIR_KEYCLOAK_PASSWORD
       - SHANOIR_ALLOWED_ADMIN_IPS
     build: ./docker-compose/keycloak
+    volumes:
+      - "keycloak-logs:/opt/keycloak/data/log"
     networks:
       - shanoir_ng_network
     ports:
@@ -102,6 +104,7 @@ services:
       - SHANOIR_CERTIFICATE_PEM_CRT
       - SHANOIR_CERTIFICATE_PEM_KEY
       - SHANOIR_MIGRATION
+      - VIP_SERVICE_EMAIL
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java
@@ -353,6 +356,7 @@ volumes:
   certificate-share-data:
   tmp:
   logs:
+  keycloak-logs:
 
 networks:
   shanoir_ng_network:
