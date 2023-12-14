@@ -36,7 +36,7 @@ import java.util.List;
 @DiscriminatorColumn(name="scope", discriminatorType = DiscriminatorType.STRING)
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "scope")
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = StudyCardDICOMCondition.class, name = "StudyCardDICOMCondition"),
+    @JsonSubTypes.Type(value = StudyCardDICOMConditionOnDatasets.class, name = "StudyCardDICOMConditionOnDatasets"),
     @JsonSubTypes.Type(value = ExamMetadataCondOnDatasets.class, name = "ExamMetadataCondOnDatasets"),
     @JsonSubTypes.Type(value = ExamMetadataCondOnAcq.class, name = "ExamMetadataCondOnAcq"),
     @JsonSubTypes.Type(value = DatasetMetadataCondOnDataset.class, name = "DatasetMetadataCondOnDataset"),
@@ -52,6 +52,29 @@ public abstract class StudyCardCondition extends AbstractEntity {
 	
 	@NotNull
 	private int operation;
+
+    @NotNull
+    private int cardinality;
+    
+    public int getCardinality() {
+        return cardinality;
+    }
+
+    public void setCardinality(int cardinality) {
+        this.cardinality = cardinality;
+    }
+
+    protected boolean cardinalityComplies(int nbOk, int nbUnknown, int total) {
+        if (getCardinality() == -1) return total == nbOk || (nbOk > 0 && total == nbOk + nbUnknown); // all
+        if (getCardinality() == 0) return 0 == nbOk; // none
+        else return nbOk >= getCardinality(); // n
+    }
+
+    protected boolean cardinalityComplies(int nbOk, int total) {
+        if (getCardinality() == -1) return total == nbOk; // all
+        if (getCardinality() == 0) return 0 == nbOk; // none
+        else return nbOk >= getCardinality(); // n
+    }
 
 	public Operation getOperation() {
 		return Operation.getType(operation);
@@ -76,6 +99,8 @@ public abstract class StudyCardCondition extends AbstractEntity {
             return comparison == 0;
         } else if (Operation.SMALLER_THAN.equals(operation)) {
             return comparison < 0;
+        } else if (Operation.NOT_EQUALS.equals(operation)) {
+            return comparison != 0;
         }
         throw new IllegalArgumentException("Cannot use this method for non-numerical operations (" + operation + ")");
     }
@@ -84,7 +109,9 @@ public abstract class StudyCardCondition extends AbstractEntity {
         if (original != null) {
             if (Operation.EQUALS.equals(operation)) {
                 return original.equals(studycardStr);
-            } else if (Operation.CONTAINS.equals(operation)) {
+            } else if (Operation.NOT_EQUALS.equals(operation)) {
+                return !original.equals(studycardStr);
+             } else if (Operation.CONTAINS.equals(operation)) {
                 return original.contains(studycardStr);
             } else if (Operation.DOES_NOT_CONTAIN.equals(operation)) {
                 return !original.contains(studycardStr);
@@ -92,6 +119,10 @@ public abstract class StudyCardCondition extends AbstractEntity {
                 return original.startsWith(studycardStr);
             } else if (Operation.ENDS_WITH.equals(operation)) {
                 return original.endsWith(studycardStr);
+            } else if (Operation.DOES_NOT_START_WITH.equals(operation)) {
+                return !original.startsWith(studycardStr);
+            } else if (Operation.DOES_NOT_END_WITH.equals(operation)) {
+                return !original.endsWith(studycardStr);
             }
         } else {
             LOG.error("Error in studycard processing: tag (from pacs) or field (from database) null.");

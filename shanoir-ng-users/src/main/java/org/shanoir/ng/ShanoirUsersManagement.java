@@ -14,15 +14,14 @@
 
 package org.shanoir.ng;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RoleResource;
 import org.keycloak.admin.client.resource.UserResource;
+import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.shanoir.ng.email.EmailService;
@@ -71,7 +70,6 @@ import jakarta.ws.rs.core.Response;
  *
  */
 @Component
-//@EnableRetry
 public class ShanoirUsersManagement implements ApplicationRunner {
 
 	private static final String SYNC_ALL_USERS_TO_KEYCLOAK = "syncAllUsersToKeycloak";
@@ -104,8 +102,14 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 
 	@Value("${kc.admin.client.realm.users}")
 	private String keycloakRealm;
+
+	@Value("${service-account.user.name}")
+	private String vipSrvUsername;
+
+	@Value("${service-account.user.email}")
+	private String vipSrvEmail;
 	
-	private Keycloak keycloak;
+	private Keycloak keycloak = null;
 	
 	@Autowired
 	private UserRepository userRepository;
@@ -116,49 +120,56 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 	
 	@Override
 	public void run(final ApplicationArguments args) throws Exception {
+
+		if(!StringUtils.isBlank(vipSrvEmail)){
+			initKeycloakAdminClient();
+			this.setVIPServiceAccountEmail();
+		}
+
 		if (args.getOptionNames().isEmpty()) {
 			LOG.info("ShanoirUsersManagement called without option. Starting up MS Users without additional operation.");
-		} else {
+			return;
+		}
+
+		if (args.containsOption(SYNC_ALL_USERS_TO_KEYCLOAK)
+				&& "true".equals(args.getOptionValues(SYNC_ALL_USERS_TO_KEYCLOAK).get(0))) {
+
 			initKeycloakAdminClient();
-			if(args.containsOption("createInitialAdminShanoir")) {
-				/**
-				 * @ToDo: implement initial admin Shanoir creation here, in database users and in keycloak, check if dbs are really empty.
-				 */
-			} else if (args.containsOption(SYNC_ALL_USERS_TO_KEYCLOAK)
-					&& args.getOptionValues(SYNC_ALL_USERS_TO_KEYCLOAK).get(0) != null
-					&& args.getOptionValues(SYNC_ALL_USERS_TO_KEYCLOAK).get(0).equals("true")) {
-				
-				int tries = 0;
-				boolean success = false;
-				while (!success && tries < 50) {
-					try {
-						createUsersIfNotExisting();
-						success = true;
-					} catch (Exception e) {
-						tries++;
-						String msg = "Try " + tries + " failed for updating keycloak users on startup (" + e.getMessage() + ")";
-						LOG.error(msg); // users logs
-						System.out.println(msg); // docker compose console
-						TimeUnit.SECONDS.sleep(5);
-					}
+
+			int tries = 0;
+			boolean success = false;
+			while (!success && tries < 50) {
+				try {
+					createUsersIfNotExisting();
+					success = true;
+				} catch (Exception e) {
+					tries++;
+					String msg = "Try [" + tries + "] failed for updating keycloak users on startup (" + e.getMessage() + ")";
+					LOG.error(msg, e); // users logs
+					System.out.println(msg); // docker compose console
+					TimeUnit.SECONDS.sleep(5);
 				}
-				if (!success) {
-					throw new IllegalStateException("Could not export users to Keycloak.");
-				}
+			}
+			if (!success) {
+				throw new IllegalStateException("Could not export users to Keycloak.");
 			}
 		}
 	}
 
 	private void initKeycloakAdminClient() {
-			keycloak = Keycloak.getInstance(
-				kcAdminClientServerUrl,
-				kcAdminClientRealm,
-				kcAdminClientUsername,
-				kcAdminClientPassword,
-				kcAdminClientClientId);
+
+		if(this.keycloak != null){
+			return;
+		}
+
+		this.keycloak = Keycloak.getInstance(
+			kcAdminClientServerUrl,
+			kcAdminClientRealm,
+			kcAdminClientUsername,
+			kcAdminClientPassword,
+			kcAdminClientClientId);
 	}
 
-	//@Retryable(value = { ProcessingException.class }, maxAttempts = 50, backoff = @Backoff(delay = 5000))
 	private void createUsersIfNotExisting() {
 		LOG.info(SYNC_ALL_USERS_TO_KEYCLOAK);
 		final Iterable<User> users = userRepository.findAll();
@@ -191,10 +202,10 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 
 	private UserRepresentation getUserRepresentation(final User user) {
 		final Map<String, List<String>> attributes = new HashMap<>();
-		attributes.put("userId", Arrays.asList(user.getId().toString()));
-		attributes.put("canImportFromPACS", Arrays.asList("" + user.isCanAccessToDicomAssociation()));
+		attributes.put("userId", List.of(user.getId().toString()));
+		attributes.put("canImportFromPACS", List.of("" + user.isCanAccessToDicomAssociation()));
 		if (user.getExpirationDate() != null) {
-			attributes.put("expirationDate", Arrays.asList("" + user.getExpirationDate()));
+			attributes.put("expirationDate", List.of("" + user.getExpirationDate()));
 		}
 		final UserRepresentation userRepresentation = new UserRepresentation();
 		userRepresentation.setAttributes(attributes);
@@ -206,5 +217,31 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 		userRepresentation.setUsername(user.getUsername());
 		return userRepresentation;
 	}
+
+	/**
+	 * Set up the email ${service-account.user.email}
+	 * of the keycloak user ${service-account.user.name} ('service-account-service-account')
+	 * associated with the keycloak client 'service-account'
+	 *
+	 * See service-account.user.* application properties
+	 */
+	private void setVIPServiceAccountEmail(){
+
+		final List<UserRepresentation> userRepresentationList = keycloak.realm(keycloakRealm).users().searchByUsername(this.vipSrvUsername, true);
+		if (userRepresentationList == null || userRepresentationList.isEmpty()) {
+			LOG.debug("User [{}] does not exists in Keycloak. Do nothing.", this.vipSrvUsername);
+			return;
+		}
+		if(userRepresentationList.size() > 1){
+			LOG.error("Multiple users [{}] found in Keycloak.", this.vipSrvUsername);
+			return;
+		}
+		UserRepresentation user = userRepresentationList.get(0);
+		user.setEmail(this.vipSrvEmail);
+
+		UserResource userResource = keycloak.realm(keycloakRealm).users().get(user.getId());
+		userResource.update(user);
+	}
+
 
 }

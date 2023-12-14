@@ -29,7 +29,6 @@ import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.UID;
 import org.dcm4che3.emf.MultiframeExtractor;
 import org.dcm4che3.io.DicomInputStream;
-import org.shanoir.ng.importer.model.EchoTime;
 import org.shanoir.ng.importer.model.EquipmentDicom;
 import org.shanoir.ng.importer.model.Image;
 import org.shanoir.ng.importer.model.Instance;
@@ -38,6 +37,7 @@ import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
+import org.shanoir.ng.shared.dicom.EchoTime;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.slf4j.Logger;
@@ -282,6 +282,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			MultiframeExtractor emf = new MultiframeExtractor();
 			attributes = emf.extract(attributes, 0);
 		}
+		image.setSOPInstanceUID(attributes.getString(Tag.SOPInstanceUID));
 		// acquisition number
 		image.setAcquisitionNumber(attributes.getInt(Tag.AcquisitionNumber, 0));
 		// image orientation patient

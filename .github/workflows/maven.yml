@@ -50,5 +50,6 @@ jobs:
         VIP_URL_SCHEME: https
         VIP_URL_HOST: vip
         VIP_CLIENT_SECRET: SECRET
+        VIP_SERVICE_EMAIL: ''
         
         

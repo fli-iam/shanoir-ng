@@ -86,7 +86,7 @@ export class StudyCardRuleComponent implements OnChanges {
     }
 
     addNewCondition() {
-        let cond = new StudyCardCondition('StudyCardDICOMCondition');
+        let cond = new StudyCardCondition('StudyCardDICOMConditionOnDatasets');
         cond.values = [null];
         this.rule.conditions.push(cond);
         this.change.emit(this.rule);

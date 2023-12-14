@@ -12,12 +12,12 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.importer.dcm2nii;
+package org.shanoir.ng.shared.dicom;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
-import org.shanoir.ng.importer.model.EchoTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +58,11 @@ public class SerieToDatasetsSeparator {
 		this.acquisitionNumber = acquisitionNumber;
 		this.echoTime = echoTime;
 		this.imageOrientationPatient = imageOrientationPatient;
+	}
+
+	public SerieToDatasetsSeparator(String acquisitionNumber, List<EchoTime> echoTimes,
+			List<Double> imageOrientationPatient) {
+		
 	}
 
 	/*

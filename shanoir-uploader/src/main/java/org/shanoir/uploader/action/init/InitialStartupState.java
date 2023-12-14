@@ -1,7 +1,6 @@
 package org.shanoir.uploader.action.init;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -23,6 +22,7 @@ import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.gui.ShUpStartupDialog;
 import org.shanoir.uploader.utils.Encryption;
 import org.shanoir.uploader.utils.Util;
+import org.shanoir.uploader.utils.PropertiesUtil;
 
 /**
  * This concrete state class is the initial state (entry point) of the state machine.
@@ -277,19 +277,7 @@ public class InitialStartupState implements State {
 		} else {
 			Util.copyFileFromJar(fileName, propertiesFile);
 		}
-		loadPropertiesFromFile(properties, propertiesFile);
-	}
-
-	private void loadPropertiesFromFile(final Properties properties, final File propertiesFile) {
-		try {
-			final FileInputStream fIS = new FileInputStream(propertiesFile);
-			properties.load(fIS);
-			fIS.close();
-		} catch (FileNotFoundException e) {
-			logger.error(e.getMessage(), e);
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-		}
+		PropertiesUtil.loadPropertiesFromFile(properties, propertiesFile);
 	}
 	
 	private void initLanguage() {
@@ -302,6 +290,7 @@ public class InitialStartupState implements State {
 	}
 
 	private void initProfile() throws FileNotFoundException, IOException {
+		// If profile property is not null or empty it means that the "remember profile" box was ticked in a previous execution. 
 		String profile = ShUpConfig.basicProperties.getProperty(ShUpConfig.PROFILE);
 		if (profile != null && !profile.isEmpty()) {
 			ShUpConfig.profileSelected = profile;

@@ -53,6 +53,7 @@ public class DicomJsonUtils {
     public static final String STUDY_INSTANCE_UID = "0020000D";
     public static final String SERIE_INSTANCE_UID = "0020000E";
     public static final String OBJECT_INSTANCE_UID = "00080018";
+    
     public static final String VALUE = "Value";
     
     public static final String STUDIES = "studies";
