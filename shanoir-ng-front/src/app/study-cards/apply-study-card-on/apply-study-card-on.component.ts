@@ -57,6 +57,7 @@ export class ApplyStudyCardOnComponent implements OnInit {
     private _status: Status = 'default';
     showIncompatibles: boolean = true;
     studyRights: Map<number, StudyUserRight[]>;
+    errorMessage: string;
 
     constructor(
             private datasetAcquisitionService: DatasetAcquisitionService,
@@ -167,6 +168,9 @@ export class ApplyStudyCardOnComponent implements OnInit {
                     this.status = 'done';
                 }).catch(error => {
                     this.status = 'error';
+                    if (error?.error?.message?.includes('could not get dicom attributes from pacs')) {
+                        this.errorMessage = 'Could not get dicom attributes from pacs';
+                    }
                     throw error;
                 });
             }

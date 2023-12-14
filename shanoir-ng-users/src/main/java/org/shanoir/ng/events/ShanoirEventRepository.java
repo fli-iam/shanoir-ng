@@ -17,9 +17,12 @@ public interface ShanoirEventRepository extends CrudRepository<ShanoirEvent, Lon
 	 * @return a list of ShanoirEvents with given userID and event type
 	 */
 	List<ShanoirEvent> findByUserIdAndEventTypeIn(Long userId, List<String> eventType);
+
 	/**
 	 * Deletes all events older than a date.
 	 * @param expiryDate the expiration date.
 	 */
     public void deleteByLastUpdateBefore(Date expiryDate);
+
+    ShanoirEvent findByIdAndUserId(Long taskId, long userId);
 }

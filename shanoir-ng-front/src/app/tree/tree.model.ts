@@ -85,6 +85,7 @@ export abstract class SubjectNode implements ShanoirNode {
 export class ClinicalSubjectNode extends SubjectNode {
     public title = "subject";
     public awesome = "fas fa-user-injured";
+    qualityTag: QualityTag;
 }
 
 export class PreclinicalSubjectNode extends SubjectNode {

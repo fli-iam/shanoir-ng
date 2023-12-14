@@ -505,6 +505,8 @@ public class RabbitMQDatasetsService {
 			return res;
 		} catch (Exception e) {
 			event.setMessage("[CopyDatasets] Error during the copy of dataset.");
+			event.setStatus(ShanoirEvent.ERROR);
+			event.setProgress(-1f);
 			eventService.publishEvent(event);
 			LOG.error("Something went wrong during the copy. {}", e.getMessage());
 			throw new AmqpRejectAndDontRequeueException(e.getMessage(), e);

@@ -36,4 +36,15 @@ public interface SubjectStudyService {
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@datasetSecurityService.hasRightOnSubjectStudies(#subjectStudies, 'CAN_IMPORT') || @datasetSecurityService.hasRightOnSubjectStudies(#subjectStudies, 'CAN_ADMINISTRATE')))")
 	List<SubjectStudy> update(Iterable<SubjectStudy> subjectStudies) throws EntityNotFoundException, MicroServiceCommunicationException;
+
+	/**
+	 * get subject-studies.
+	 *
+	 * @param subjectId
+	 * @param studyId
+	 * @return subject studies
+	 * @throws EntityNotFoundException 
+	 */
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@datasetSecurityService.hasRightOnSubjectStudies(#subjectStudies, 'CAN_SEE_ALL') || @datasetSecurityService.hasRightOnSubjectStudies(#subjectStudies, 'CAN_ADMINISTRATE')))")
+	List<SubjectStudy> get(Long subjectId, Long studyId);
 }

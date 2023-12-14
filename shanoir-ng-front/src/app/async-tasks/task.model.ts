@@ -13,7 +13,6 @@
  */
 
 import { Entity } from '../shared/components/entity/entity.abstract';
-import { Report } from '../shared/mass-download/mass-download.service';
 import { camelToSpaces } from '../utils/app.utils';
 
 export enum TaskStatus {
@@ -38,8 +37,10 @@ export class Task extends Entity {
 
     debugTs: number = Date.now();
     id: number;
+    completeId: BigInt;
     creationDate: Date;
     lastUpdate: Date;
+    report: string;
     private _status: TaskStatus;
     private _message: string;
     private _progress: number;
@@ -47,7 +48,7 @@ export class Task extends Entity {
     eventLabel: string;
     objectId: number;
     route: string;
-    report: string;
+    hasReport: boolean;
     private readonly FIELDS: string[] = ['id', 'creationDate', 'lastUpdate','_status','_message', '_progress', '_eventType', 'eventLabel', 'objectId', 'route', 'report'];
 
     set eventType(eventType: string) {

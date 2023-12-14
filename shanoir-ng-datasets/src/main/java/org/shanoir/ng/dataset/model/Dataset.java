@@ -132,6 +132,10 @@ public abstract class Dataset extends AbstractEntity {
 
 	private Long sourceId;
 
+	@JsonIgnore
+	@Transient
+	public String SOPInstanceUID;
+
 	public Dataset() {
 	}
 
@@ -437,4 +441,11 @@ public abstract class Dataset extends AbstractEntity {
 		this.sourceId = sourceId;
 	}
 
+	public String getSOPInstanceUID() {
+		return SOPInstanceUID;
+	}
+
+	public void setSOPInstanceUID(String sOPInstanceUID) {
+		SOPInstanceUID = sOPInstanceUID;
+	}
 }

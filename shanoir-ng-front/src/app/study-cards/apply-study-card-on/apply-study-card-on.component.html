@@ -83,6 +83,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div *ngIf="status == 'error'" class="button-div error right-icon">
     Error<i class="fa-solid fa-exclamation-triangle"></i>
+    <div class="details">{{errorMessage}}</div>
 </div>
 
 <shanoir-table #table
