@@ -29,6 +29,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipOutputStream;
 
 import javax.json.Json;
@@ -147,7 +148,7 @@ public class WADODownloaderService {
 	 * @throws RestServiceException
 	 *
 	 */
-	public List<String> downloadDicomFilesForURLsAsZip(final List<URL> urls, final ZipOutputStream zipOutputStream, String subjectName, Dataset dataset, String datasetFilePath, List<SerieError> serieErrors) throws IOException, MessagingException, RestServiceException {
+	public List<String> downloadDicomFilesForURLsAsZip(final List<URL> urls, final SafeZipOutputStream zipOutputStream, String subjectName, Dataset dataset, String datasetFilePath, List<SerieError> serieErrors) throws IOException, MessagingException, RestServiceException {
 		int i = 0;
 		List<String> files = new ArrayList<>();
 		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext(); i++) {
@@ -221,7 +222,7 @@ public class WADODownloaderService {
 	 * @throws ZipPacsFileException
 	 * @throws IOException when couldn't write into the stream
 	 */
-	private String downloadAndWriteFileInZip(String url, ZipOutputStream zipOutputStream, String name) throws ZipPacsFileException {
+	private String downloadAndWriteFileInZip(String url, SafeZipOutputStream zipOutputStream, String name) throws ZipPacsFileException {
 		byte[] responseBody = null;
 		try {
 			responseBody = downloadFileFromPACS(url);
@@ -495,7 +496,7 @@ public class WADODownloaderService {
 	 * @throws IOException
 	 * @throws MessagingException
 	 */
-	private void extractDICOMZipFromMHTMLFile(final byte[] responseBody, final String instanceUID, String name, ZipOutputStream zipOutputStream)
+	private void extractDICOMZipFromMHTMLFile(final byte[] responseBody, final String instanceUID, String name, SafeZipOutputStream zipOutputStream)
 			throws IOException, MessagingException {
 		try(ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
 			ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, CONTENT_TYPE_MULTIPART);

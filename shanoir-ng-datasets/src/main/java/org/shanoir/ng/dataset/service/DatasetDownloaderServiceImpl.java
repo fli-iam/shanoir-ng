@@ -36,6 +36,7 @@ import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.download.DatasetError;
+import org.shanoir.ng.download.SafeZipOutputStream;
 import org.shanoir.ng.download.SerieError;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
@@ -143,7 +144,7 @@ public class DatasetDownloaderServiceImpl {
 
 		List<SerieError> serieErrors = new ArrayList<>();
 
-		try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
+		try (SafeZipOutputStream zipOutputStream = new SafeZipOutputStream(response.getOutputStream())) {
 			List<URL> pathURLs = new ArrayList<>();
 			switch (format) {
 				case DCM:
@@ -256,7 +257,7 @@ public class DatasetDownloaderServiceImpl {
 		response.setHeader("Content-Disposition",
 				"attachment;filename=" + "Datasets" + formatter.format(new DateTime().toDate()));
 
-		try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
+		try (SafeZipOutputStream zipOutputStream = new SafeZipOutputStream(response.getOutputStream())) {
 
 			for (Dataset dataset : datasets) {
 				if (!dataset.isDownloadable()) {
