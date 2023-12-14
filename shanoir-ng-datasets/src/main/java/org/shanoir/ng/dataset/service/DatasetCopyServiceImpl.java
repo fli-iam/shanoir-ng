@@ -88,43 +88,51 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
             Long oldDsId = ds.getId();
             LOG.warn("moveDataset : " + oldDsId + " to study : " + studyId);
 
-            // Creation of new dataset
-            MrDataset newMrDs = new MrDataset(ds, ((MrDatasetAcquisition) ds.getDatasetAcquisition()).getMrProtocol());
-            newMrDs.setSourceId(oldDsId);
-            newMrDs.setSubjectId(ds.getSubjectId());
+            // Creation of new dataset according to its type
+            String dsType = ds.getType();
+            Dataset newDs = null;
+            if ("Mr".equals(dsType)) {
+                newDs = new MrDataset(ds, ((MrDatasetAcquisition) ds.getDatasetAcquisition()).getMrProtocol());
+            } else {
+                newDs = DatasetUtils.copyDatasetFromDataset(ds);
+            }
+            newDs.setSourceId(oldDsId);
+            newDs.setSubjectId(ds.getSubjectId());
 
-            // Get existing acquisition or make a new one
-            MrDatasetAcquisition newDsAcq = null;
+            // Handling of DatasetAcquisition and Examination
+            DatasetAcquisition newDsAcq = null;
             Long oldAcqId = ds.getDatasetAcquisition().getId();
             if (acqMap.get(oldAcqId) != null) {
-                newDsAcq = (MrDatasetAcquisition) acqMap.get(oldAcqId);
+                newDsAcq = acqMap.get(oldAcqId);
             } else {
-                newDsAcq = (MrDatasetAcquisition) datasetAcquisitionRepository.findBySourceIdAndExaminationStudy_Id(oldAcqId, studyId);
+                newDsAcq = datasetAcquisitionRepository.findBySourceIdAndExaminationStudy_Id(oldAcqId, studyId);
             }
             if (newDsAcq == null) {
-                newDsAcq = (MrDatasetAcquisition) moveAcquisition(ds.getDatasetAcquisition(), newMrDs, studyId, examMap);
+                newDsAcq = moveAcquisition(ds.getDatasetAcquisition(), newDs, studyId, examMap);
             }
 
-            newMrDs.setDatasetAcquisition(newDsAcq);
-
-            List<DatasetExpression> dsExList = ds.getDatasetExpressions();
-            for (DatasetExpression dsEx : dsExList) {
-                this.moveDatasetExpression(dsEx, newMrDs);
+            // Create the DatasetExpression for the new Dataset
+            newDs.setDatasetAcquisition(newDsAcq);
+            List<DatasetExpression> dexpList = new ArrayList<>(ds.getDatasetExpressions().size());
+            for (DatasetExpression dexp : ds.getDatasetExpressions()) {
+                dexpList.add(new DatasetExpression(dexp, newDs));
             }
+            newDs.setDatasetExpressions(dexpList);
 
-            datasetRepository.save(newMrDs);
 
+            datasetRepository.save(newDs);
 
             acqMap.put(oldAcqId, newDsAcq);
 
-            LOG.warn("new dataset id : " + newMrDs.getId());
+            LOG.warn("new dataset id : " + newDs.getId());
+            LOG.warn("new dataset name : " + newDs.getName());
             LOG.warn("new acquisition id : " + newDsAcq.getId());
             LOG.warn("old dataset id : " + oldDsId);
             LOG.warn("old acquisition id : " + oldAcqId);
-            LOG.warn("new dataset sourceId : " + newMrDs.getSourceId());
+            LOG.warn("new dataset sourceId : " + newDs.getSourceId());
             LOG.warn("new acquisition sourceId : " + newDsAcq.getSourceId());
             LOG.warn("========== FIN ============");
-            return newMrDs.getId();
+            return newDs.getId();
 
         } catch (Exception e) {
             event.setMessage("[CopyDatasets] Error during the copy of dataset [" + ds.getId() + "] to study [" + studyId + "]. ");
@@ -133,10 +141,10 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
         }
     }
 
-    public DatasetAcquisition moveAcquisition(DatasetAcquisition acq, MrDataset newDs, Long studyId, Map<Long, Examination> examMap) {
+    public DatasetAcquisition moveAcquisition(DatasetAcquisition acq, Dataset newDs, Long studyId, Map<Long, Examination> examMap) {
         Long oldAcqId = acq.getId();
         Examination newExam = null;
-        // Get existing examination or make a new one
+        // Get existing examination...
         if (acq.getExamination() != null &&  acq.getExamination().getId() != null) {
             if (examMap.get(acq.getExamination().getId()) != null) {
                 newExam = examMap.get(acq.getExamination().getId());
@@ -147,7 +155,13 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                 newExam = moveExamination(acq, studyId);
             }
         }
-        MrDatasetAcquisition newDsAcq = new MrDatasetAcquisition(acq, newDs);
+        // Create new DatasetAcquisition according to its type
+        DatasetAcquisition newDsAcq = null;
+        if ("Mr".equals(acq.getType())) {
+            newDsAcq = new MrDatasetAcquisition(acq, (MrDataset) newDs);
+        } else {
+            newDsAcq = DatasetAcquisitionUtils.copyDatasetAcquisitionFromDatasetAcquisition(acq);
+        }
         newDsAcq.setExamination(newExam);
         newDsAcq.setSourceId(oldAcqId);
 
@@ -169,18 +183,5 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
         LOG.warn("new examination id : " + newExamination.getId());
         LOG.warn("[CopyDatasets] New examination created with id = " + newExamination.getId());
         return newExamination;
-    }
-
-    public void moveDatasetExpression(DatasetExpression expression, Dataset d) {
-        for (DatasetFile file : expression.getDatasetFiles()) {
-            this.moveFile(file, expression);
-        }
-        DatasetExpression dexp = new DatasetExpression(expression, d);
-        datasetExpressionRepository.save(dexp);
-    }
-
-    public void moveFile(DatasetFile file, DatasetExpression expression) {
-        DatasetFile dsFile = new DatasetFile(file, expression);
-        datasetFileRepository.save(dsFile);
     }
 }

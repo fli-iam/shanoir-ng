@@ -142,6 +142,37 @@ public class PetProtocol extends AbstractEntity {
 	@NotNull
 	private Double voxelSizeZ;
 
+	public PetProtocol() {}
+
+	public PetProtocol(PetProtocol other, PetDatasetAcquisition acq) {
+		this.attenuationCorrectionMethod = other.getAttenuationCorrectionMethod();
+		this.convolutionKernel = other.getConvolutionKernel();
+		this.decayCorrection = other.getDecayCorrection();
+		this.decayFactor = other.getDecayFactor();
+		this.dimensionX = other.getDimensionX();
+		this.dimensionY = other.getDimensionY();
+		this.doseCalibrationFactor = other.getDoseCalibrationFactor();
+		this.energyWindowLowerLimit = other.getEnergyWindowLowerLimit();
+		this.energyWindowUpperLimit = other.getEnergyWindowUpperLimit();
+		this.numberOfIterations = other.getNumberOfIterations();
+		this.numberOfSlices = other.getNumberOfSlices();
+		this.numberOfSubsets = other.getNumberOfSubsets();
+		this.petDatasetAcquisition = acq;
+		this.radionuclideHalfLife = other.getRadionuclideHalfLife();
+		this.radionuclideTotalDose = other.getRadionuclideTotalDose();
+		this.radiopharmaceuticalCode = other.getRadiopharmaceuticalCode();
+		this.randomsCorrectionMethod = other.getRandomsCorrectionMethod();
+		this.reconstructionMethod = other.getReconstructionMethod();
+		this.rescaleSlope = other.getRescaleSlope();
+		this.rescaleType = other.getRescaleType();
+		this.scatterCorrectionMethod = other.getScatterCorrectionMethod();
+		this.scatterFractionFactor = other.getScatterFractionFactor();
+		this.units = other.getUnits();
+		this.voxelSizeX = other.getVoxelSizeX();
+		this.voxelSizeY = other.getVoxelSizeY();
+		this.voxelSizeZ = other.getVoxelSizeZ();
+	}
+
 	/**
 	 * @return the attenuationCorrectionMethod
 	 */

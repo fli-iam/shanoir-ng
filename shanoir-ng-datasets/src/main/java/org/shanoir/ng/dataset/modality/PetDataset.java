@@ -33,6 +33,14 @@ public class PetDataset extends Dataset {
 	 */
 	private static final long serialVersionUID = -209384115208882224L;
 
+	public PetDataset() {
+
+	}
+
+	public PetDataset(Dataset other) {
+		super(other);
+	}
+
 	@Override
 	public String getType() {
 		return "Pet";

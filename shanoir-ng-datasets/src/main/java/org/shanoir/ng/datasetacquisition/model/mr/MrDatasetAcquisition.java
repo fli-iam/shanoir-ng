@@ -31,6 +31,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 @JsonTypeName("Mr")
 public class MrDatasetAcquisition extends DatasetAcquisition {
 
+	public static final String datasetAcquisitionType = "Mr";
 	/**
 	 * UID
 	 */

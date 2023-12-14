@@ -151,7 +151,7 @@ public abstract class Dataset extends AbstractEntity {
 			this.processings.add(new DatasetProcessing(dproc));
 		}
 
-		this.originMetadata = d.getOriginMetadata();
+		this.originMetadata = new DatasetMetadata(d.getOriginMetadata());
 		this.referencedDatasetForSuperimposition = d.getReferencedDatasetForSuperimposition();
 
 		this.referencedDatasetForSuperimpositionChildrenList = new ArrayList<>(d.getReferencedDatasetForSuperimpositionChildrenList().size());
@@ -163,7 +163,7 @@ public abstract class Dataset extends AbstractEntity {
 		this.studyId = d.getStudyId();
 		this.subjectId = d.getSubjectId();
 		this.downloadable = d.downloadable;
-		this.updatedMetadata = d.getUpdatedMetadata();
+		this.updatedMetadata = new DatasetMetadata(d.getUpdatedMetadata());
 		this.sourceId = d.getSourceId();
 	}
 
