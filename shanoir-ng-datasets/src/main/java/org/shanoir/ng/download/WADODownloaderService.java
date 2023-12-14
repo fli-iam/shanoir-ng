@@ -43,6 +43,7 @@ import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.service.DatasetUtils;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
+import org.shanoir.ng.download.SafeZipOutputStream.DuplicateEntryException;
 import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
@@ -506,9 +507,13 @@ public class WADODownloaderService {
 				BodyPart bodyPart = multipart.getBodyPart(0);
 				if (bodyPart.isMimeType(CONTENT_TYPE_DICOM) || bodyPart.isMimeType(CONTENT_TYPE_DICOM_XML)) {
 					ZipEntry entry = new ZipEntry(name + DCM);
-					zipOutputStream.putNextEntry(entry);
-					bodyPart.getInputStream().transferTo(zipOutputStream);
-					zipOutputStream.closeEntry();
+					try {
+						zipOutputStream.putNextEntry(entry);
+						bodyPart.getInputStream().transferTo(zipOutputStream);
+						zipOutputStream.closeEntry();
+					} catch (DuplicateEntryException e) {
+						LOG.warn(e.getMessage());
+					}
 				} else {
 					throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
 				}
@@ -517,9 +522,13 @@ public class WADODownloaderService {
 					BodyPart bodyPart = multipart.getBodyPart(i);
 					if (bodyPart.isMimeType(CONTENT_TYPE_DICOM) || bodyPart.isMimeType(CONTENT_TYPE_DICOM_XML)) {
 						ZipEntry entry = new ZipEntry(name + UNDER_SCORE + i + DCM);
-						zipOutputStream.putNextEntry(entry);
-						bodyPart.getInputStream().transferTo(zipOutputStream);
-						zipOutputStream.closeEntry();
+						try {
+							zipOutputStream.putNextEntry(entry);
+							bodyPart.getInputStream().transferTo(zipOutputStream);
+							zipOutputStream.closeEntry();
+						} catch (DuplicateEntryException e) {
+							LOG.warn(e.getMessage());
+						}
 					} else {
 						throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
 					}

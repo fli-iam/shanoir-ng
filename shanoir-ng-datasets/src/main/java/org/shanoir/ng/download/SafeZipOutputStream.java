@@ -20,6 +20,7 @@ import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipOutputStream;
 
 public class SafeZipOutputStream extends ZipOutputStream {
@@ -36,9 +37,21 @@ public class SafeZipOutputStream extends ZipOutputStream {
 
 	@Override
 	public void putNextEntry(ZipEntry e) throws IOException {
-		if (e != null && !entryNameSet.contains(e.getName())) {
-			super.putNextEntry(e);
-			entryNameSet.add(e.getName());
+		if (e == null) return;
+		else {
+			if (entryNameSet.contains(e.getName())) {
+				throw new DuplicateEntryException("zip output stream already contains entry withe name : " + e.getName());
+			} else {
+				super.putNextEntry(e);
+				entryNameSet.add(e.getName());
+			}
 		}
-	}	
+	}
+	
+	public class DuplicateEntryException extends ZipException {
+
+		public DuplicateEntryException(String message) {
+			super(message);
+		}
+	}
 }
