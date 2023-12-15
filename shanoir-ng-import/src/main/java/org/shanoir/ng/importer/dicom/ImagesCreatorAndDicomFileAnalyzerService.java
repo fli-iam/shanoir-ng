@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
@@ -281,6 +282,10 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			|| UID.EnhancedPETImageStorage.equals(sopClassUID)) {
 			MultiframeExtractor emf = new MultiframeExtractor();
 			attributes = emf.extract(attributes, 0);
+		}
+		String sopInstanceUID = attributes.getString(Tag.SOPInstanceUID);
+		if (sopInstanceUID == null || sopInstanceUID.isEmpty()) {
+			sopInstanceUID = "GeneratedSopInstanceUID." + RandomStringUtils.randomAlphabetic(26);
 		}
 		image.setSOPInstanceUID(attributes.getString(Tag.SOPInstanceUID));
 		// acquisition number
