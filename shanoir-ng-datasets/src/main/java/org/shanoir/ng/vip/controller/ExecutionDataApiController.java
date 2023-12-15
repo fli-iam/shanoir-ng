@@ -19,27 +19,33 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import org.keycloak.representations.AccessTokenResponse;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
+import org.shanoir.ng.processing.dto.ParameterResourcesDTO;
 import org.shanoir.ng.processing.model.DatasetProcessingType;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.SecurityException;
+import org.shanoir.ng.shared.security.KeycloakServiceAccountUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
-import org.shanoir.ng.vip.monitoring.model.Execution;
-import org.shanoir.ng.vip.monitoring.model.ExecutionDTO;
-import org.shanoir.ng.vip.monitoring.model.ExecutionMonitoring;
-import org.shanoir.ng.vip.monitoring.model.PipelineParameter;
+import org.shanoir.ng.vip.dto.ExecutionMonitoringDTO;
+import org.shanoir.ng.vip.monitoring.model.*;
+import org.shanoir.ng.vip.monitoring.schedule.ExecutionStatusMonitorService;
+import org.shanoir.ng.vip.monitoring.service.ExecutionMonitoringService;
 import org.shanoir.ng.vip.resource.ProcessingResourceService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -63,6 +69,21 @@ public class ExecutionDataApiController implements ExecutionDataApi {
 
     @Autowired
     private DatasetSecurityService datasetSecurityService;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Autowired
+    private KeycloakServiceAccountUtils keycloakServiceAccountUtils;
+
+    @Autowired
+    ExecutionMonitoringService executionMonitoringService;
+
+    @Autowired
+    ExecutionStatusMonitorService executionStatusMonitorService;
+
+    @Value(value = "")
+    private String vipExecutionRestApi;
 
     @Override
     public ResponseEntity<?> getPath(
@@ -100,10 +121,10 @@ public class ExecutionDataApiController implements ExecutionDataApi {
     }
 
     @Override
-    public ResponseEntity<?> createExecution(ExecutionDTO execution) throws EntityNotFoundException {
+    public ResponseEntity<?> createExecution(ExecutionDTO execution, List<Long> datasetIds) throws EntityNotFoundException, SecurityException {
         // 1: Get dataset IDS and check rights
         List<Long> inputDatasetIds = new ArrayList<>();
-        for (Map.Entry<String, PipelineParameter> argument : execution.getInputValues().entrySet()) {
+        for (Map.Entry<String, PipelineParameter> argument : execution.getPipelineIdentifier()) {
             if ("File".equals(argument.getValue().getType())) {
                 // We have a dataset id here
                 inputDatasetIds.add(Long.valueOf(argument.getValue().getValue()));
@@ -122,12 +143,32 @@ public class ExecutionDataApiController implements ExecutionDataApi {
         executionMonitoring.setPipelineIdentifier(execution.getPipelineIdentifier());
         executionMonitoring.setResultsLocation(KeycloakUtil.getTokenUserId() + "/" + LocalDate.now());
         executionMonitoring.setTimeout(20);
+        executionMonitoring.setStatus(ExecutionStatus.RUNNING);
         executionMonitoring.setComment(execution.getName());
         executionMonitoring.setDatasetProcessingType(DatasetProcessingType.valueOf(execution.getProcessingType()));
         executionMonitoring.setOutputProcessing(execution.getOutputProcessing());
         executionMonitoring.setInputDatasets(inputDatasets);
 
+        /* Save monitoring in db. */
+        final ExecutionMonitoring createdMonitoring = executionMonitoringService.create(executionMonitoring);
+
+        List<ParameterResourcesDTO> parametersDatasets = executionMonitoringService.createProcessingResources(createdMonitoring, executionMonitoring.getParametersResources());
+
+        executionStatusMonitorService.startMonitoringJob(createdMonitoring.getIdentifier());
+
         // 3: create Execution on VIP
+        // init headers with the active access token
+        AccessTokenResponse accessTokenResponse = keycloakServiceAccountUtils.getServiceAccountAccessToken();
+
+        execution.setInputValues();
+
+        execution.setResultsLocation("shanoir:/" + executionMonitoring.getResultsLocation() + "?token=" + accessTokenResponse.getToken() + "&refreshToken=" + accessTokenResponse.getRefreshToken() + "&md5=none&type=File");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + accessTokenResponse.getToken());
+        HttpEntity<ExecutionDTO> entity = new HttpEntity<>(execution, headers);
+        this.restTemplate.exchange(vipExecutionRestApi, HttpMethod.POST, entity, ExecutionDTO.class);
+
         return null;
     }
 

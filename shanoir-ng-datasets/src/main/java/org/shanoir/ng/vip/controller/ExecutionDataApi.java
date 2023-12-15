@@ -25,6 +25,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.vip.monitoring.model.Execution;
 import org.shanoir.ng.vip.monitoring.model.ExecutionDTO;
 import org.springframework.http.ResponseEntity;
@@ -65,5 +66,5 @@ public interface ExecutionDataApi {
             method = RequestMethod.POST)
     ResponseEntity<?> createExecution(
             ExecutionDTO execution
-    ) throws EntityNotFoundException;
+    ) throws EntityNotFoundException, SecurityException;
 }
