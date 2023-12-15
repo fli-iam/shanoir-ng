@@ -15,6 +15,8 @@
 
 package org.shanoir.ng.vip.monitoring.model;
 
+import org.shanoir.ng.processing.dto.ParameterResourcesDTO;
+
 import java.util.List;
 import java.util.Map;
 
@@ -27,8 +29,9 @@ public class ExecutionDTO {
     private String pipelineIdentifier;
     private int timeout;
     private ExecutionStatus status;
-    private Map<String, PipelineParameter> inputValues;
+    private Map<String, List<String>> inputValues;
     private Map<String, List<Object>> returnedFiles;
+    private List<ParameterResourcesDTO> parametersRessources;
     private String studyIdentifier;
     private Integer errorCode;
     private Long startDate;
@@ -78,11 +81,11 @@ public class ExecutionDTO {
         this.status = status;
     }
 
-    public Map<String, PipelineParameter> getInputValues() {
+    public Map<String, List<String>> getInputValues() {
         return inputValues;
     }
 
-    public void setInputValues(Map<String, PipelineParameter> inputValues) {
+    public void setInputValues(Map<String, List<String>> inputValues) {
         this.inputValues = inputValues;
     }
 
@@ -151,5 +154,20 @@ public class ExecutionDTO {
     }
 
 
+    public List<ParameterResourcesDTO> getParametersRessources() {
+        return parametersRessources;
+    }
+
+    public void setParametersRessources(List<ParameterResourcesDTO> parametersRessources) {
+        this.parametersRessources = parametersRessources;
+    }
+
+    public Pipeline getPipeline() {
+        return pipeline;
+    }
+
+    public void setPipeline(Pipeline pipeline) {
+        this.pipeline = pipeline;
+    }
 
 }

@@ -48,6 +48,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.sql.Array;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -123,19 +124,12 @@ public class ExecutionDataApiController implements ExecutionDataApi {
     @Override
     public ResponseEntity<?> createExecution(ExecutionDTO execution, List<Long> datasetIds) throws EntityNotFoundException, SecurityException {
         // 1: Get dataset IDS and check rights
-        List<Long> inputDatasetIds = new ArrayList<>();
-        for (Map.Entry<String, PipelineParameter> argument : execution.getPipelineIdentifier()) {
-            if ("File".equals(argument.getValue().getType())) {
-                // We have a dataset id here
-                inputDatasetIds.add(Long.valueOf(argument.getValue().getValue()));
-            }
-        }
-        if (!this.datasetSecurityService.hasRightOnEveryDataset(inputDatasetIds, "CAN_IMPORT")) {
+        if (!this.datasetSecurityService.hasRightOnEveryDataset(datasetIds, "CAN_IMPORT")) {
             LOG.error("Admin right is mandatory for every study we are updating");
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         };
 
-        List<Dataset> inputDatasets = this.datasetService.findByIdIn(inputDatasetIds);
+        List<Dataset> inputDatasets = this.datasetService.findByIdIn(datasetIds);
 
         // 2: Create monitoring on shanoir
         ExecutionMonitoring executionMonitoring = new ExecutionMonitoring();
@@ -152,7 +146,7 @@ public class ExecutionDataApiController implements ExecutionDataApi {
         /* Save monitoring in db. */
         final ExecutionMonitoring createdMonitoring = executionMonitoringService.create(executionMonitoring);
 
-        List<ParameterResourcesDTO> parametersDatasets = executionMonitoringService.createProcessingResources(createdMonitoring, executionMonitoring.getParametersResources());
+        List<ParameterResourcesDTO> parametersDatasets = executionMonitoringService.createProcessingResources(createdMonitoring, execution.getParametersRessources());
 
         executionStatusMonitorService.startMonitoringJob(createdMonitoring.getIdentifier());
 
@@ -160,9 +154,13 @@ public class ExecutionDataApiController implements ExecutionDataApi {
         // init headers with the active access token
         AccessTokenResponse accessTokenResponse = keycloakServiceAccountUtils.getServiceAccountAccessToken();
 
-        execution.setInputValues();
-
         execution.setResultsLocation("shanoir:/" + executionMonitoring.getResultsLocation() + "?token=" + accessTokenResponse.getToken() + "&refreshToken=" + accessTokenResponse.getRefreshToken() + "&md5=none&type=File");
+
+        Map<String, List<String>> parametersDatasetsInputValues = new HashMap<>();
+        for (ParameterResourcesDTO parameterResourcesDTO : parametersDatasets) {
+            parametersDatasetsInputValues.put(parameterResourcesDTO.getParameter(), parameterResourcesDTO.getResourceIds());
+        }
+        execution.setInputValues(parametersDatasetsInputValues);
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + accessTokenResponse.getToken());

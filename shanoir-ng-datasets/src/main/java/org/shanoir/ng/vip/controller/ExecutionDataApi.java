@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * @author Alae Es-saki
@@ -65,6 +66,7 @@ public interface ExecutionDataApi {
             produces = {"application/json"},
             method = RequestMethod.POST)
     ResponseEntity<?> createExecution(
-            ExecutionDTO execution
+            ExecutionDTO execution,
+            List<Long> datasetsIds
     ) throws EntityNotFoundException, SecurityException;
 }
