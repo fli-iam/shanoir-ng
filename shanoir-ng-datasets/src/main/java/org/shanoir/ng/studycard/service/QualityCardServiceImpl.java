@@ -17,6 +17,7 @@ package org.shanoir.ng.studycard.service;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.studycard.model.QualityCard;
+import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
 import org.shanoir.ng.studycard.model.rule.QualityExaminationRule;
 import org.shanoir.ng.studycard.repository.QualityCardRepository;
 import org.shanoir.ng.utils.Utils;
@@ -80,9 +81,9 @@ public class QualityCardServiceImpl implements QualityCardService {
     @Override
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasUpdateRightOnCard(#card, 'CAN_ADMINISTRATE'))")
     public QualityCard update(final QualityCard card) throws EntityNotFoundException, MicroServiceCommunicationException {
-        final QualityCard qualityCardDb = qualityCardRepository.findById(card.getId()).orElse(null);
+        QualityCard qualityCardDb = qualityCardRepository.findById(card.getId()).orElse(null);
         if (qualityCardDb == null) throw new EntityNotFoundException(QualityCard.class, card.getId());
-        updateQualityCardValues(qualityCardDb, card);
+        qualityCardDb = updateQualityCardValues(qualityCardDb, card);
         qualityCardRepository.save(qualityCardDb);
         return qualityCardDb;
     }

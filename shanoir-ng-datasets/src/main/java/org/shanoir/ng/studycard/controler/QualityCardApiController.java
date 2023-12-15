@@ -14,11 +14,17 @@
 
 package org.shanoir.ng.studycard.controler;
 
-import io.swagger.v3.oas.annotations.Parameter;
+import java.util.List;
+
 import org.shanoir.ng.shared.error.FieldErrorMap;
-import org.shanoir.ng.shared.exception.*;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ErrorDetails;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
+import org.shanoir.ng.studycard.model.rule.QualityExaminationRule;
 import org.shanoir.ng.studycard.service.CardsProcessingService;
 import org.shanoir.ng.studycard.service.QualityCardService;
 import org.shanoir.ng.studycard.service.QualityCardUniqueConstraintManager;
@@ -32,7 +38,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.List;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class QualityCardApiController implements QualityCardApi {
@@ -114,6 +120,7 @@ public class QualityCardApiController implements QualityCardApi {
 			@Parameter(name = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId,
 			@Parameter(name = "quality card to update", required = true) @RequestBody QualityCard qualityCard,
 			final BindingResult result) throws RestServiceException {
+
 		validate(qualityCard, result);
 		try {
 			qualityCardService.update(qualityCard);
@@ -169,4 +176,18 @@ public class QualityCardApiController implements QualityCardApi {
         return new ResponseEntity<>(results, HttpStatus.OK);
     }
 
+	@Override
+    public ResponseEntity<QualityCardResult> testQualityCardOnStudy(
+        @Parameter(name = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId,
+		@Parameter(name = "examination number start ", required = true) @PathVariable("start") int start,
+		@Parameter(name = "examination number stop", required = true) @PathVariable("stop") int stop) throws RestServiceException, MicroServiceCommunicationException {
+
+        final QualityCard qualityCard = qualityCardService.findById(qualityCardId);
+        if (qualityCard == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        LOG.info("test quality card: name:" + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
+        QualityCardResult results = cardProcessingService.applyQualityCardOnStudy(qualityCard, start, stop);
+        return new ResponseEntity<>(results, HttpStatus.OK);
+    }
 }

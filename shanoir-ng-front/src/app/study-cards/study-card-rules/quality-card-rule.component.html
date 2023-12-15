@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="conditions">
+<div class="conditions" [class.or]="rule.orConditions">
 	<div *ngFor="let condition of rule.conditions; let i = index" class="condition">	
 		<condition 
 				ruleScope="Examination"
@@ -29,8 +29,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<div *ngIf="rule.conditions?.length == 0">
 		<span class="always"><i class="fas fa-infinity"></i>Always</span>
 	</div>
-	<div>
-		<span *ngIf="mode != 'view'" class="add" (click)="addNewCondition()"><i class="fas fa-plus"></i>Add a condition</span>
+	<div *ngIf="mode != 'view'">
+		<span class="and-or">
+			And
+			<toggle-switch [(ngModel)]="rule.orConditions"></toggle-switch>
+			Or
+		</span>
+		<span class="add" (click)="addNewCondition()"><i class="fas fa-plus"></i>Add a condition</span>
 	</div>
 </div>
 

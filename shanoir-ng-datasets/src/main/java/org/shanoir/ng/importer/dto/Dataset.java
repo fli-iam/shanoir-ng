@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.shanoir.ng.shared.dicom.EchoTime;
 import org.shanoir.ng.shared.model.DiffusionGradient;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -50,6 +51,9 @@ public class Dataset {
 	
 	@JsonProperty("bVectors")
 	private List<Double> bVectors;
+
+	@JsonProperty("firstImageSOPInstanceUID")
+	private String firstImageSOPInstanceUID;
 	
 	public String getName() {
 		return name;
@@ -138,4 +142,11 @@ public class Dataset {
 		this.echoTimes = echoTimes;
 	}
 
+	public String getFirstImageSOPInstanceUID() {
+		return this.firstImageSOPInstanceUID;
+	}
+
+	public void setFirstImageSOPInstanceUID(String firstImageSOPInstanceUID) {
+		this.firstImageSOPInstanceUID = firstImageSOPInstanceUID;
+	}
 }

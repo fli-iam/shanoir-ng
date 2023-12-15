@@ -32,6 +32,7 @@ export class QualityCardDTO {
                 let ruleDTO: QualityCardRuleDTO = new QualityCardRuleDTO();
                 ruleDTO.conditions = rule.conditions.map(cond => new StudyCardConditionDTO(cond));
                 ruleDTO.qualityTag = rule.tag;
+                ruleDTO.orConditions = rule.orConditions;
                 return ruleDTO;
             });
             this.toCheckAtImport = qualityCard.toCheckAtImport;
@@ -42,4 +43,5 @@ export class QualityCardDTO {
 export class QualityCardRuleDTO {
     qualityTag: QualityTag[];
     conditions: StudyCardConditionDTO[];
+    orConditions: boolean;
 }

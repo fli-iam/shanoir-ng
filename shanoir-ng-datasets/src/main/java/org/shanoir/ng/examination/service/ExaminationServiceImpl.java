@@ -179,6 +179,11 @@ public class ExaminationServiceImpl implements ExaminationService {
 	}
 
 	@Override
+	public List<Long> findIdsByStudyId(Long studyId) {
+		return examinationRepository.findIdsByStudyId(studyId);
+	}
+
+	@Override
 	public List<Examination> findByStudyId(Long studyId) {
 		return examinationRepository.findByStudy_Id(studyId);
 	}

@@ -99,6 +99,7 @@ export class QualityCardDTOService {
             for (let ruleDTO of dto.rules) {
                 let rule: QualityCardRule = new QualityCardRule();
                 rule.tag = ruleDTO.qualityTag;
+                rule.orConditions = ruleDTO.orConditions;
                 if (ruleDTO.conditions) {
                     rule.conditions = [];
                     for (let conditionDTO of ruleDTO.conditions) {
