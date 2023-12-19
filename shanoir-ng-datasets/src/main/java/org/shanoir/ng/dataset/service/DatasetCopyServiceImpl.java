@@ -109,11 +109,10 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                 } else {
                     newDsAcq = datasetAcquisitionRepository.findBySourceIdAndExaminationStudy_Id(oldAcqId, studyId);
                 }
+                if (newDsAcq == null) {
+                    newDsAcq = moveAcquisition(ds.getDatasetAcquisition(), newDs, studyId, examMap);
+                }
             }
-            if (newDsAcq == null) {
-                newDsAcq = moveAcquisition(ds.getDatasetAcquisition(), newDs, studyId, examMap);
-            }
-
             // Create the DatasetExpression for the new Dataset
             newDs.setDatasetAcquisition(newDsAcq);
             List<DatasetExpression> dexpList = new ArrayList<>(ds.getDatasetExpressions().size());
