@@ -86,61 +86,58 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
     public Long moveDataset(Dataset ds, Long studyId, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap, ShanoirEvent event) throws JsonProcessingException {
         try {
             Long oldDsId = ds.getId();
-            LOG.warn("moveDataset : " + oldDsId + " to study : " + studyId);
+            LOG.warn("[CopyDatasets] moveDataset : " + oldDsId + " to study : " + studyId);
 
             // Creation of new dataset according to its type
             String dsType = ds.getType();
             Dataset newDs = null;
-            if ("Mr".equals(dsType) && ds.getDatasetAcquisition() != null) {
-                newDs = new MrDataset(ds, ((MrDatasetAcquisition) ds.getDatasetAcquisition()).getMrProtocol());
-            } else {
-                newDs = DatasetUtils.copyDatasetFromDataset(ds);
-            }
-            newDs.setSourceId(oldDsId);
-            newDs.setSubjectId(ds.getSubjectId());
-
-            // Handling of DatasetAcquisition and Examination
-            DatasetAcquisition newDsAcq = null;
-            Long oldAcqId = null;
-            if (ds.getDatasetAcquisition() != null) {
-                oldAcqId = ds.getDatasetAcquisition().getId();
-                if (acqMap.get(oldAcqId) != null) {
-                    newDsAcq = acqMap.get(oldAcqId);
+            if (ds.getDatasetAcquisition() != null &&  ds.getDatasetAcquisition().getId() != null) {
+                if ("Mr".equals(dsType)) {
+                    newDs = new MrDataset(ds, ((MrDatasetAcquisition) ds.getDatasetAcquisition()).getMrProtocol());
                 } else {
-                    newDsAcq = datasetAcquisitionRepository.findBySourceIdAndExaminationStudy_Id(oldAcqId, studyId);
+                    newDs = DatasetUtils.copyDatasetFromDataset(ds);
                 }
-                if (newDsAcq == null) {
-                    newDsAcq = moveAcquisition(ds.getDatasetAcquisition(), newDs, studyId, examMap);
+                newDs.setSourceId(oldDsId);
+                newDs.setSubjectId(ds.getSubjectId());
+
+                // Handling of DatasetAcquisition and Examination
+                DatasetAcquisition newDsAcq = null;
+                Long oldAcqId = null;
+                if (ds.getDatasetAcquisition() != null) {
+                    oldAcqId = ds.getDatasetAcquisition().getId();
+                    if (acqMap.get(oldAcqId) != null) {
+                        newDsAcq = acqMap.get(oldAcqId);
+                    } else {
+                        newDsAcq = datasetAcquisitionRepository.findBySourceIdAndExaminationStudy_Id(oldAcqId, studyId);
+                    }
+                    if (newDsAcq == null) {
+                        newDsAcq = moveAcquisition(ds.getDatasetAcquisition(), newDs, studyId, examMap);
+                    }
                 }
+                // Create the DatasetExpression for the new Dataset
+                newDs.setDatasetAcquisition(newDsAcq);
+                List<DatasetExpression> dexpList = new ArrayList<>(ds.getDatasetExpressions().size());
+                for (DatasetExpression dexp : ds.getDatasetExpressions()) {
+                    dexpList.add(new DatasetExpression(dexp, newDs));
+                }
+                newDs.setDatasetExpressions(dexpList);
+
+
+                datasetRepository.save(newDs);
+
+                acqMap.put(oldAcqId, newDsAcq);
+                return newDs.getId();
+            } else if (ds.getDatasetProcessing() != null) {
+                LOG.error("[CopyDatasets] Dataset selected is a processed dataset, it can't be copied.");
+                return null;
             }
-            // Create the DatasetExpression for the new Dataset
-            newDs.setDatasetAcquisition(newDsAcq);
-            List<DatasetExpression> dexpList = new ArrayList<>(ds.getDatasetExpressions().size());
-            for (DatasetExpression dexp : ds.getDatasetExpressions()) {
-                dexpList.add(new DatasetExpression(dexp, newDs));
-            }
-            newDs.setDatasetExpressions(dexpList);
-
-
-            datasetRepository.save(newDs);
-
-            acqMap.put(oldAcqId, newDsAcq);
-
-            LOG.warn("new dataset id : " + newDs.getId());
-            LOG.warn("new dataset name : " + newDs.getName());
-            LOG.warn("new acquisition id : " + newDsAcq.getId());
-            LOG.warn("old dataset id : " + oldDsId);
-            LOG.warn("old acquisition id : " + oldAcqId);
-            LOG.warn("new dataset sourceId : " + newDs.getSourceId());
-            LOG.warn("new acquisition sourceId : " + newDsAcq.getSourceId());
-            LOG.warn("========== FIN ============");
-            return newDs.getId();
 
         } catch (Exception e) {
             event.setMessage("[CopyDatasets] Error during the copy of dataset [" + ds.getId() + "] to study [" + studyId + "]. ");
             eventService.publishEvent(event);
             throw e;
         }
+        return null;
     }
 
     public DatasetAcquisition moveAcquisition(DatasetAcquisition acq, Dataset newDs, Long studyId, Map<Long, Examination> examMap) {
