@@ -138,13 +138,9 @@ public class Examination extends HalEntity {
     public Examination(Examination other, Study study, Subject subject) {
         this.centerId = other.centerId;
         this.comment = other.comment;
-//        this.datasetAcquisitions = other.datasetAcquisitions;
         this.examinationDate = other.examinationDate;
         this.experimentalGroupOfSubjectsId = other.experimentalGroupOfSubjectsId;
-        this.extraDataFilePathList = new ArrayList<>(other.getExtraDataFilePathList().size());
-        for (String edfp : other.getExtraDataFilePathList()) {
-            this.extraDataFilePathList.add(new String(edfp));
-        }
+        this.extraDataFilePathList = null;
 
         this.instrumentBasedAssessmentList = new ArrayList<>(other.getInstrumentBasedAssessmentList().size());
         for (InstrumentBasedAssessment instru : other.getInstrumentBasedAssessmentList()) {

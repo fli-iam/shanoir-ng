@@ -476,10 +476,7 @@ public class RabbitMQDatasetsService {
 
 				LOG.warn("[CopyDatasets] Start copy for dataset " + datasetParentId + " to study " + studyId);
 				Long dsCount = datasetRepository.countDatasetsBySourceIdAndStudyId(datasetParentId, studyId);
-				LOG.warn("[CopyDatasets] count " + dsCount);
-//				List<Dataset> dsCopiedList = datasetRepository.findBySourceId(datasetParentId);
 				Dataset datasetParent = datasetService.findById(datasetParentId);
-
 
 				if (datasetParent.getSourceId() != null) {
 					res = "Selected dataset is a copy, please pick the original dataset.";
@@ -488,7 +485,7 @@ public class RabbitMQDatasetsService {
 					res = "Dataset already exists in this study, copy aborted.";
 					LOG.warn("[CopyDatasets] Dataset already exists in this study, copy aborted.");
 				} else {
-					Long id = datasetCopyService.moveDataset(datasetParent, studyId, examMap, acqMap, event);
+					Long id = datasetCopyService.moveDataset(datasetParent, studyId, examMap, acqMap, event, userId);
 					if (id != null)
 						newDatasets.add(id);
 					res = "Copy worked !";

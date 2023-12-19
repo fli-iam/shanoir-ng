@@ -10,5 +10,5 @@ import java.util.Map;
 
 public interface DatasetCopyService {
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#dataset.getId(), 'CAN_ADMINISTRATE'))")
-    Long moveDataset(Dataset ds, Long studyId, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap, ShanoirEvent event) throws Exception;
+    Long moveDataset(Dataset ds, Long studyId, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap, ShanoirEvent event, Long userId) throws Exception;
 }
