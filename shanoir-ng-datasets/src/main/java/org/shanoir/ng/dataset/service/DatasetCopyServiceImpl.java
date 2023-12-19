@@ -101,11 +101,14 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
 
             // Handling of DatasetAcquisition and Examination
             DatasetAcquisition newDsAcq = null;
-            Long oldAcqId = ds.getDatasetAcquisition().getId();
-            if (acqMap.get(oldAcqId) != null) {
-                newDsAcq = acqMap.get(oldAcqId);
-            } else {
-                newDsAcq = datasetAcquisitionRepository.findBySourceIdAndExaminationStudy_Id(oldAcqId, studyId);
+            Long oldAcqId = null;
+            if (ds.getDatasetAcquisition() != null) {
+                oldAcqId = ds.getDatasetAcquisition().getId();
+                if (acqMap.get(oldAcqId) != null) {
+                    newDsAcq = acqMap.get(oldAcqId);
+                } else {
+                    newDsAcq = datasetAcquisitionRepository.findBySourceIdAndExaminationStudy_Id(oldAcqId, studyId);
+                }
             }
             if (newDsAcq == null) {
                 newDsAcq = moveAcquisition(ds.getDatasetAcquisition(), newDs, studyId, examMap);
