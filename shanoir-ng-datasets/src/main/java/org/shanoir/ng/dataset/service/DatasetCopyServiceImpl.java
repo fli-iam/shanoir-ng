@@ -136,6 +136,9 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
         Subject subject = subjectRepository.findById(oldExam.getSubject().getId()).orElse(null);
 
         Examination newExamination = new Examination(oldExam, newStudy, subject);
+        newExamination.setSourceId(oldExam.getId());
+
+        examinationRepository.save(newExamination);
         eventService.publishEvent(
                 new ShanoirEvent(
                         ShanoirEventType.CREATE_EXAMINATION_EVENT,
@@ -144,9 +147,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                         "centerId:" + newExamination.getCenterId() + ";subjectId:" + (newExamination.getSubject() != null ? newExamination.getSubject().getId() : null),
                         ShanoirEvent.SUCCESS,
                         newExamination.getStudyId()));
-        newExamination.setSourceId(oldExam.getId());
 
-        examinationRepository.save(newExamination);
         LOG.warn("[CopyDatasets] New examination created with id = " + newExamination.getId());
         return newExamination;
     }
