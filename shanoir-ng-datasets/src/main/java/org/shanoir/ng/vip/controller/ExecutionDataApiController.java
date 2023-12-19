@@ -83,7 +83,7 @@ public class ExecutionDataApiController implements ExecutionDataApi {
     @Autowired
     ExecutionStatusMonitorService executionStatusMonitorService;
 
-    @Value(value = "")
+    @Value(value = "vip.uri")
     private String vipExecutionRestApi;
 
     @Override
