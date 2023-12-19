@@ -91,7 +91,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
             // Creation of new dataset according to its type
             String dsType = ds.getType();
             Dataset newDs = null;
-            if ("Mr".equals(dsType)) {
+            if ("Mr".equals(dsType) && ds.getDatasetAcquisition() != null) {
                 newDs = new MrDataset(ds, ((MrDatasetAcquisition) ds.getDatasetAcquisition()).getMrProtocol());
             } else {
                 newDs = DatasetUtils.copyDatasetFromDataset(ds);

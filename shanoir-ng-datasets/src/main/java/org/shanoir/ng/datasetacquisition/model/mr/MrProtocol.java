@@ -226,7 +226,11 @@ public class MrProtocol extends AbstractEntity {
 		this.numberOfPhaseEncodingSteps = mrPro.getNumberOfPhaseEncodingSteps();
 		this.numberOfTemporalPositions = mrPro.getNumberOfTemporalPositions();
 		this.originMetadata = mrPro.getOriginMetadata();
-		this.patientPosition = mrPro.getPatientPosition().getId();
+		if (mrPro.getPatientPosition() != null) {
+			this.patientPosition = mrPro.getPatientPosition().getId();
+		} else {
+			this.patientPosition = null;
+		}
 		this.percentPhaseFov = mrPro.getPercentPhaseFov();
 		this.percentSampling = mrPro.getPercentSampling();
 		this.pixelBandwidth = mrPro.getPixelBandwidth();
