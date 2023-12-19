@@ -78,8 +78,6 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	@Autowired
 	private ShanoirEventService eventService;
 
-	UIDGeneration uidGenerator = new UIDGeneration();
-
 	public void createImagesAndAnalyzeDicomFiles(List<Patient> patients, String folderFileAbsolutePath, boolean isImportFromPACS, ShanoirEvent event)
 			throws FileNotFoundException {
 		// patient level
@@ -285,10 +283,6 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			|| UID.EnhancedPETImageStorage.equals(sopClassUID)) {
 			MultiframeExtractor emf = new MultiframeExtractor();
 			attributes = emf.extract(attributes, 0);
-		}
-		String sopInstanceUID = attributes.getString(Tag.SOPInstanceUID);
-		if (sopInstanceUID == null || sopInstanceUID.isEmpty()) {
-			sopInstanceUID = uidGenerator.getNewUID();
 		}
 		image.setSOPInstanceUID(attributes.getString(Tag.SOPInstanceUID));
 		// acquisition number
