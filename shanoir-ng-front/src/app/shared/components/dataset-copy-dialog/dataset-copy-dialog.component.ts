@@ -53,7 +53,7 @@ export class DatasetCopyDialogComponent {
 
     ngOnInit() {
         // sort studies by alphabetical order
-        this.studies.sort((a, b) => (a.name < b.name ? -1 : 1));
+        this.studies.sort((a: any, b: any) => { return a.name.localeCompare(b.name, undefined, {sensitivity: 'base'})});
         for (let line of this.lines) {
             if (!this.centerIds.includes(line.centerId)) {
                 this.centerIds.push(line.centerId);
