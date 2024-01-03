@@ -30,6 +30,7 @@ import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.UID;
 import org.dcm4che3.emf.MultiframeExtractor;
 import org.dcm4che3.io.DicomInputStream;
+import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
 import org.shanoir.ng.importer.model.EquipmentDicom;
 import org.shanoir.ng.importer.model.Image;
 import org.shanoir.ng.importer.model.Instance;
@@ -285,7 +286,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 		}
 		String sopInstanceUID = attributes.getString(Tag.SOPInstanceUID);
 		if (sopInstanceUID == null || sopInstanceUID.isEmpty()) {
-			sopInstanceUID = "GeneratedSopInstanceUID." + RandomStringUtils.randomAlphabetic(26);
+			UIDGeneration generator = new UIDGeneration();
+			sopInstanceUID = generator.getNewUID();
 		}
 		image.setSOPInstanceUID(attributes.getString(Tag.SOPInstanceUID));
 		// acquisition number
