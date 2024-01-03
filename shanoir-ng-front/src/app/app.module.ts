@@ -244,11 +244,10 @@ import { VarDirective } from './utils/ng-var.directive';
 import { AccessRequestComponent } from './users/access-request/access-request.component';
 import { MultiSelectComponent } from './shared/multi-select/multi-select.component';
 import { MultiSelectTableComponent } from './shared/multi-select-table/multi-select-table.component';
-import { ProcessingComponent } from './processing/processing.component';
-import { PipelinesComponent } from './processing/pipelines/pipelines.component';
+import { PipelinesComponent } from './vip/pipelines/pipelines.component';
 import { VipClientService } from './vip/shared/vip-client.service';
-import { PipelineComponent } from './processing/pipelines/pipeline/pipeline.component';
-import { ExecutionComponent } from './processing/execution/execution.component';
+import { PipelineComponent } from './vip/pipelines/pipeline/pipeline.component';
+import { ExecutionComponent } from './vip/execution/execution.component';
 import { ExecutionMonitoringService } from './vip/shared/execution-monitoring.service';
 import { ExecutionMonitoringsComponent } from './vip/execution-monitorings/execution-monitorings.component';
 import { QualityControlComponent } from './quality-control/quality-control.component';
@@ -440,7 +439,6 @@ import { TestQualityCardOptionsComponent } from './study-cards/test-quality-card
         AccessRequestComponent,
         MultiSelectComponent,
         MultiSelectTableComponent,
-        ProcessingComponent,
         PipelinesComponent,
         PipelineComponent,
         ExecutionComponent,

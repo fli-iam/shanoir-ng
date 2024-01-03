@@ -43,7 +43,7 @@ import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
 import { Profile } from "../../shared/models/profile.model";
 import { AccessRequest } from 'src/app/users/access-request/access-request.model';
-import { ProcessingService } from 'src/app/processing/processing.service';
+import { ExecutionDataService } from 'src/app/vip/execution.data-service';
 import { DatasetService } from "../../datasets/shared/dataset.service";
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { DatasetExpressionFormat } from "../../enum/dataset-expression-format.enum";
@@ -104,7 +104,7 @@ export class StudyComponent extends EntityComponent<Study> {
             private studyRightsService: StudyRightsService,
             private studyCardService: StudyCardService,
             private accessRequestService: AccessRequestService,
-            private processingService: ProcessingService,
+            private processingService: ExecutionDataService,
             private downloadService: MassDownloadService) {
 
         super(route, 'study');
@@ -640,7 +640,7 @@ export class StudyComponent extends EntityComponent<Study> {
 
     goToProcessing() {
         this.processingService.setDatasets(new Set(this.selectedDatasetIds));
-        this.router.navigate(['/processing']);
+        this.router.navigate(['pipelines']);
     }
 
     reloadSubjectStudies() {
