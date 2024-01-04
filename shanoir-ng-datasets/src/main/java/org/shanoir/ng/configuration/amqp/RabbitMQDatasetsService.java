@@ -53,6 +53,7 @@ import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -443,12 +444,13 @@ public class RabbitMQDatasetsService {
 	@RabbitListener(queues = RabbitMQConfiguration.COPY_DATASETS_TO_STUDY_QUEUE)
 	@RabbitHandler
 	@Transactional
-	public String copyDatasetsToStudy(final String data) {
+	@Async
+	public void copyDatasetsToStudy(final String data) {
 		Map<Long, Examination> examMap = new HashMap<>();
 		Map<Long, DatasetAcquisition> acqMap = new HashMap<>();
 		List<Long> datasetParentIds;
 		List<Long> newDatasets = new ArrayList<>();
-		String res = "";
+		//String res = "";
 		int count = 0;
 		float progress = 0f;
 		ShanoirEvent event = null;
@@ -479,16 +481,16 @@ public class RabbitMQDatasetsService {
 				Dataset datasetParent = datasetService.findById(datasetParentId);
 
 				if (datasetParent.getSourceId() != null) {
-					res = "Selected dataset is a copy, please pick the original dataset.";
+					//res = "Selected dataset is a copy, please pick the original dataset.";
 					LOG.warn("[CopyDatasets] Selected dataset is a copy, please pick the original dataset.");
 				} else if (dsCount != 0) {
-					res = "Dataset already exists in this study, copy aborted.";
+					//res = "Dataset already exists in this study, copy aborted.";
 					LOG.warn("[CopyDatasets] Dataset already exists in this study, copy aborted.");
 				} else {
 					Long id = datasetCopyService.moveDataset(datasetParent, studyId, examMap, acqMap, event, userId);
 					if (id != null)
 						newDatasets.add(id);
-					res = "Copy worked !";
+					//res = "Copy worked !";
 				}
 			}
 
@@ -499,7 +501,7 @@ public class RabbitMQDatasetsService {
 			eventService.publishEvent(event);
 			solrService.indexDatasets(newDatasets);
 
-			return res;
+			//return res;
 		} catch (Exception e) {
 			event.setMessage("[CopyDatasets] Error during the copy of dataset.");
 			event.setStatus(ShanoirEvent.ERROR);

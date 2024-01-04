@@ -35,7 +35,6 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
-import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -126,7 +125,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 				addCenterToStudy(study, centerIds);
 
 				try {
-					result = copyDatasetToStudy(datasetIds, studyId, userId);
+					copyDatasetToStudy(datasetIds, studyId, userId);
 				} catch (MicroServiceCommunicationException e) {
 					throw new RuntimeException(e);
 				}
@@ -163,7 +162,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 		}
 	}
 
-	private String copyDatasetToStudy(List<Long> datasetIds, Long studyId, Long userId) throws MicroServiceCommunicationException {
+	private void copyDatasetToStudy(List<Long> datasetIds, Long studyId, Long userId) throws MicroServiceCommunicationException {
 		// datasetIds order is : selected datasets in solr from top of the table to bottom
 		// reverse that order so that the first dataset to be treated is the last selected in solr
 		Collections.sort(datasetIds);
@@ -172,9 +171,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 		dto.setDatasetIds(datasetIds);
 		dto.setUserId(userId);
 		try {
-			MessageProperties messageProperties = new MessageProperties();
-			messageProperties.setExpiration("3600000"); // 1h
-			return (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.COPY_DATASETS_TO_STUDY_QUEUE, objectMapper.writeValueAsString(dto), messageProperties);
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.COPY_DATASETS_TO_STUDY_QUEUE, objectMapper.writeValueAsString(dto));
 		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException(
 					"Error while communicating with datasets MS to copy datasets to study.", e);
