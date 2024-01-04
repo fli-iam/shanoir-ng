@@ -28,12 +28,24 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</span>
 
 			<ul class="tabs">
-				<li [class.active]="activeTab == 'general'" [routerLink]="'.'" fragment="general" replaceUrl="true">General</li>
-				<li [class.active]="activeTab == 'files'" [routerLink]="'.'" [fragment]="'files'" replaceUrl="true">Files</li>
-				<li [class.active]="activeTab == 'subjects'" [routerLink]="'.'" [fragment]="'subjects'" replaceUrl="true">Subjects</li>
-				<li [class.active]="activeTab == 'centers'" [routerLink]="'.'" [fragment]="'centers'" replaceUrl="true">Centers</li>
-				<li [class.active]="activeTab == 'members'" [routerLink]="'.'" [fragment]="'members'" replaceUrl="true">Members</li>
-				<li [class.active]="activeTab == 'tags'" [routerLink]="'.'" [fragment]="'tags'" replaceUrl="true">Tags</li>
+				<li [class.active]="activeTab == 'general'" [routerLink]="'.'" [fragment]="'general'" replaceUrl="true">
+					<span class="general">General</span>
+				</li>
+				<li [class.active]="activeTab == 'files'" [routerLink]="'.'" [fragment]="'files'" replaceUrl="true">
+					<span class="files">Files</span>
+				</li>
+				<li [class.active]="activeTab == 'subjects'" [routerLink]="'.'" [fragment]="'subjects'" replaceUrl="true">
+					<span class="subjects">Subjects</span>
+				</li>
+				<li [class.active]="activeTab == 'centers'" [routerLink]="'.'" [fragment]="'centers'" replaceUrl="true">
+					<span class="centers">Centers</span>
+				</li>
+				<li [class.active]="activeTab == 'members'" [routerLink]="'.'" [fragment]="'members'" replaceUrl="true">
+					<span class="members">Members</span>
+				</li>
+				<li class="tags" [class.active]="activeTab == 'tags'" [routerLink]="'.'" [fragment]="'tags'" replaceUrl="true">
+					<span class="tags">Tags</span>
+				</li>
 				<ng-container *ngIf="mode == 'view'">
 					<li *ngIf="isStudyAdmin" [class.active]="activeTab == 'quality'" [routerLink]="'.'" [fragment]="'quality'" replaceUrl="true">Quality</li>
 					<li [class.active]="activeTab == 'tree'" [routerLink]="'.'" [fragment]="'tree'" replaceUrl="true">Tree</li>
@@ -45,7 +57,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ng-container>
 			</ul>
 
-			<fieldset *ngIf="activeTab == 'general'">
+			<fieldset [class.hidden-tab]="activeTab != 'general'" tab="general">
 				<legend i18n="Study detail|Name label@@studyDetailGeneral">General</legend>
 				<ol>
 					<li>
@@ -204,7 +216,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 				</ol>
 			</fieldset>
-			<fieldset [class.hidden-tab]="activeTab != 'files'">
+			<fieldset [class.hidden-tab]="activeTab != 'files'" tab="files">
 				<legend i18n="Study detail|Data User Agreement label@@studyDetailDataUserAgreement">
 					Data user agreement (DUA)
 					<tool-tip class="larger">
@@ -244,7 +256,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 				</ol>
 			</fieldset>
-			<fieldset [class.hidden-tab]="activeTab != 'general'">
+			<fieldset [class.hidden-tab]="activeTab != 'general'" tab="general">
 				<legend i18n="Study detail|Name label@@studyDetailDefaultAccessLevel">Access level</legend>
 				<ol>
 					<li>
@@ -273,12 +285,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 				</ol>
 			</fieldset>
-			<fieldset [class.hidden-tab]="activeTab != 'subjects'">
-        <legend>Subject tags</legend>
-        <tag-creator ngDefaultControl [mode]="mode" [study]="study" [(ngModel)]="study.tags" (onChange)="onTagListChange()" formControlName="tags"></tag-creator>
+			<fieldset [class.hidden-tab]="activeTab != 'subjects'" tab="subjects">
+				<legend>Subject tags</legend>
+				<tag-creator ngDefaultControl [mode]="mode" [study]="study" [(ngModel)]="study.tags" (onChange)="onTagListChange()" formControlName="tags"></tag-creator>
 				<subject-study-list [study]="study" [selectableList]="subjects" [(ngModel)]="study.subjectStudyList" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>
 			</fieldset>
-			<fieldset [class.hidden-tab]="activeTab != 'centers'">
+			<fieldset [class.hidden-tab]="activeTab != 'centers'" tab="centers">
 				<legend i18n="Study detail|Name label@@studyDetailCentersAndPITitle">List of centers</legend>
 				<ol>
 					<li>
@@ -342,7 +354,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 				</ol>
 			</fieldset>
-			<fieldset [class.hidden-tab]="activeTab != 'files'">
+			<fieldset [class.hidden-tab]="activeTab != 'files'" tab="files">
 				<legend i18n="Study detail|Protocol files label@@studyDetailProtocolFiles">Study files</legend>
 				<ol>
 					<li *ngIf="mode != 'view'">
@@ -371,7 +383,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </li>
 				</ol>
 			</fieldset>
-			<fieldset [class.hidden-tab]="activeTab != 'members'">
+			<fieldset [class.hidden-tab]="activeTab != 'members'" tab="members">
 				<legend i18n="Study detail|Study Members@@studyMembers">Study members</legend>
 				<studyuser-list
 				    formControlName="studyUserList"
@@ -393,12 +405,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 				</ul>
-      </fieldset>
-			<fieldset [class.hidden-tab]="activeTab != 'quality'" *ngIf="mode == 'view'">
+      		</fieldset>
+			<fieldset [class.hidden-tab]="activeTab != 'quality'" *ngIf="mode == 'view'" tab="quality">
 				<legend>Quality control</legend>
 				<quality-control [studyId]="study.id" (tagUpdate)="reloadSubjectStudies()"></quality-control>
 			</fieldset>
-			<fieldset [class.hidden-tab]="activeTab != 'tree'" *ngIf="mode != 'create'">
+			<fieldset [class.hidden-tab]="activeTab != 'tree'" *ngIf="mode != 'create'" tab="tree">
 				<legend>Tree</legend>
 				<study-node [input]="studyNode"
 						(selectedChange)="onTreeSelectedChange($event)"
@@ -406,11 +418,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						[hasBox]="true">
 				</study-node>
 			</fieldset>
-            <fieldset [class.hidden-tab]="activeTab != 'tags'" *ngIf="mode != 'view' || (study.studyTags && study.studyTags.length > 0)">
+            <fieldset [class.hidden-tab]="activeTab != 'tags'" *ngIf="mode != 'view' || (study.studyTags && study.studyTags.length > 0)" class="tags">
                 <legend>Public Study tags</legend>
                 <tag-creator ngDefaultControl [mode]="mode" [study]="study" [(ngModel)]="study.studyTags" (onChange)="onStudyTagListChange()" formControlName="studyTags"></tag-creator>
             </fieldset>
-            <fieldset *ngIf="mode == 'view'" [class.hidden-tab]="activeTab != 'bids'">
+            <fieldset *ngIf="mode == 'view'" [class.hidden-tab]="activeTab != 'bids'" tab="bids">
 				        <legend>BIDS tree</legend>
                 <bids-tree [studyId]="id" [studyName]="study.name"></bids-tree>
             </fieldset>

@@ -138,6 +138,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             this.activatedRoute.fragment.subscribe(fragment => {
                 if (fragment) {
                     this.activeTab = fragment;
+                    this.reloadRequiredStyles();
                 }
             })
         );
@@ -179,10 +180,18 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 if (this.hasRequiredField(control)) {
                     const input = this.formContainerElement.nativeElement.querySelector('li [formControlName="' + field + '"]');
                     if (input) {
+                        // adding * to input labels
                         const li = input.closest('li');
                         if (li) {
                             const label = li.querySelector(':scope > label');
                             if (label) label.classList.add('required-label');
+                        }
+                        // adding * to tab labels
+                        const tabName = input.closest('fieldset')?.getAttribute('tab');
+                        if (tabName) {
+                            const tabLabelElt = this.formContainerElement.nativeElement.querySelector('ul.tabs .' + tabName);
+                            console.log(tabLabelElt);
+                            tabLabelElt?.classList.add('required-label');
                         }
                     }
                 }
