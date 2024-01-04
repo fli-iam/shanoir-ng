@@ -59,12 +59,7 @@ spring:
     sql-dialect: Mysql
   rabbitmq:
     host: ${SHANOIR_PREFIX}rabbitmq
-    port:   
-    username: guest
-    password: guest
-    listener:
-      simple:
-        default-requeue-rejected: 'false'
+    port: 5672
   session:
     store-type: none
   servlet:
@@ -174,9 +169,6 @@ spring:
       matching-strategy: ANT_PATH_MATCHER
   rabbitmq:
     host: localhost
-    listener:
-      simple:
-        default-requeue-rejected: 'false'
   sql:
     init:
       mode: always

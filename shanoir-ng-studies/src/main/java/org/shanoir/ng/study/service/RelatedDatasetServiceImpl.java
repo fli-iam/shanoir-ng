@@ -35,6 +35,7 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -171,7 +172,9 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 		dto.setDatasetIds(datasetIds);
 		dto.setUserId(userId);
 		try {
-			return (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.COPY_DATASETS_TO_STUDY_QUEUE, objectMapper.writeValueAsString(dto));
+			MessageProperties messageProperties = new MessageProperties();
+			messageProperties.setExpiration("3600000"); // 1h
+			return (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.COPY_DATASETS_TO_STUDY_QUEUE, objectMapper.writeValueAsString(dto), messageProperties);
 		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException(
 					"Error while communicating with datasets MS to copy datasets to study.", e);
