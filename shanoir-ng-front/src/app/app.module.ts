@@ -266,6 +266,7 @@ import { TaskStatusComponent } from './async-tasks/status/task-status.component'
 import { DownloadSetupComponent } from './shared/mass-download/download-setup/download-setup.component';
 import { DownloadSetupAltComponent } from './shared/mass-download/download-setup-alt/download-setup-alt.component';
 import { TestQualityCardOptionsComponent } from './study-cards/test-quality-card-options/test-quality-card-options.component';
+import { SessionService } from './shared/services/session.service';
 
 @NgModule({
     imports: [
@@ -537,6 +538,7 @@ import { TestQualityCardOptionsComponent } from './study-cards/test-quality-card
         QualityCardService,
         QualityCardDTOService,
         MassDownloadService,
+        SessionService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],
     bootstrap: [AppComponent]
