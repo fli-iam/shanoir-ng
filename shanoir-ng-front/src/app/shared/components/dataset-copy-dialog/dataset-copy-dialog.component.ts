@@ -89,7 +89,7 @@ export class DatasetCopyDialogComponent {
                     .toPromise()
                     .then(res => {
                         this.canCopy = true;
-                        this.statusMessage = res ? res : "An error occured during copy of dataset to study " + this.selectedStudy.id;
+                        this.statusMessage = "Copy started, you can close this dialog.";
                     }).catch(reason => {
                         this.canCopy = true;
                         if (reason.status == 403) {

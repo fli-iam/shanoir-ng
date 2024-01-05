@@ -450,7 +450,6 @@ public class RabbitMQDatasetsService {
 		Map<Long, DatasetAcquisition> acqMap = new HashMap<>();
 		List<Long> datasetParentIds;
 		List<Long> newDatasets = new ArrayList<>();
-		//String res = "";
 		int count = 0;
 		float progress = 0f;
 		ShanoirEvent event = null;
@@ -472,7 +471,7 @@ public class RabbitMQDatasetsService {
 
 			for (Long datasetParentId : datasetParentIds) {
 				progress += 1f / datasetParentIds.size();
-				event.setMessage("Copy of dataset " + count++ + "/" + datasetParentIds.size());
+				event.setMessage("Copy of dataset [" + datasetParentId + "] to study [" + studyId + "]: " + count++ + "/" + datasetParentIds.size());
 				event.setProgress(progress);
 				eventService.publishEvent(event);
 
@@ -481,16 +480,13 @@ public class RabbitMQDatasetsService {
 				Dataset datasetParent = datasetService.findById(datasetParentId);
 
 				if (datasetParent.getSourceId() != null) {
-					//res = "Selected dataset is a copy, please pick the original dataset.";
 					LOG.warn("[CopyDatasets] Selected dataset is a copy, please pick the original dataset.");
 				} else if (dsCount != 0) {
-					//res = "Dataset already exists in this study, copy aborted.";
 					LOG.warn("[CopyDatasets] Dataset already exists in this study, copy aborted.");
 				} else {
 					Long id = datasetCopyService.moveDataset(datasetParent, studyId, examMap, acqMap, event, userId);
 					if (id != null)
 						newDatasets.add(id);
-					//res = "Copy worked !";
 				}
 			}
 
@@ -501,7 +497,6 @@ public class RabbitMQDatasetsService {
 			eventService.publishEvent(event);
 			solrService.indexDatasets(newDatasets);
 
-			//return res;
 		} catch (Exception e) {
 			event.setMessage("[CopyDatasets] Error during the copy of dataset.");
 			event.setStatus(ShanoirEvent.ERROR);
