@@ -66,7 +66,7 @@ td { padding: 0 5px; border: none; white-space: nowrap; text-overflow: ellipsis;
 	.cell-container.multiselect a, .cell-container.wrap a { white-space: initial; width: auto; height: 100%; }
 	/*.cell-container:empty:after { content: '.'; visibility: hidden; }*/
 	.cell-container:not(.wrap) .default-data-parent { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.cell-container.wrap .default-data-parent { white-space-collapse: break-spaces; }
+ .cell-container.wrap .default-data-parent { white-space: break-spaces; }
   	.cell-new-tab { line-height:21px; height: inherit; display: block; text-decoration: none; color: black; width: auto; }
 
 .loader { float: right; border-left: none !important; }
