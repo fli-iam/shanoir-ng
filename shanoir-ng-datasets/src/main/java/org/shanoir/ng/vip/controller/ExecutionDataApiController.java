@@ -122,14 +122,17 @@ public class ExecutionDataApiController implements ExecutionDataApi {
     }
 
     @Override
-    public ResponseEntity<?> createExecution(ExecutionDTO execution, List<Long> datasetIds) throws EntityNotFoundException, SecurityException {
+    public ResponseEntity<?> createExecution(
+            @Valid @RequestParam(value = "execution", required = false) final ExecutionDTO execution,
+            @Valid @RequestParam(value = "datasetsIds", required = false) final List<Long> datasetsIds
+            ) throws EntityNotFoundException, SecurityException {
         // 1: Get dataset IDS and check rights
-        if (!this.datasetSecurityService.hasRightOnEveryDataset(datasetIds, "CAN_IMPORT")) {
+        if (!this.datasetSecurityService.hasRightOnEveryDataset(datasetsIds, "CAN_IMPORT")) {
             LOG.error("Admin right is mandatory for every study we are updating");
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         };
 
-        List<Dataset> inputDatasets = this.datasetService.findByIdIn(datasetIds);
+        List<Dataset> inputDatasets = this.datasetService.findByIdIn(datasetsIds);
 
         // 2: Create monitoring on shanoir
         ExecutionMonitoring executionMonitoring = new ExecutionMonitoring();
