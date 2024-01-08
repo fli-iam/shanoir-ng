@@ -26,13 +26,9 @@ import jakarta.validation.constraints.NotNull;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.SecurityException;
-import org.shanoir.ng.vip.monitoring.model.Execution;
 import org.shanoir.ng.vip.monitoring.model.ExecutionDTO;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -66,7 +62,7 @@ public interface ExecutionDataApi {
             produces = {"application/json"},
             method = RequestMethod.POST)
     ResponseEntity<?> createExecution(
-            @Valid @RequestParam(value = "execution", required = false) final ExecutionDTO execution,
-            @Valid @RequestParam(value = "datasetsIds", required = false) final List<Long> datasetsIds
+            @Valid @RequestBody final ExecutionDTO execution,
+            @Valid @RequestBody final List<Long> datasetsIds
     ) throws EntityNotFoundException, SecurityException;
 }

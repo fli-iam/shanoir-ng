@@ -44,6 +44,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
 
@@ -123,8 +124,8 @@ public class ExecutionDataApiController implements ExecutionDataApi {
 
     @Override
     public ResponseEntity<?> createExecution(
-            @Valid @RequestParam(value = "execution", required = false) final ExecutionDTO execution,
-            @Valid @RequestParam(value = "datasetsIds", required = false) final List<Long> datasetsIds
+            @Valid @RequestBody final ExecutionDTO execution,
+            @Valid @RequestBody final List<Long> datasetsIds
             ) throws EntityNotFoundException, SecurityException {
         // 1: Get dataset IDS and check rights
         LOG.error("" + execution);
