@@ -29,6 +29,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipOutputStream;
 
 import javax.json.Json;
@@ -228,7 +229,7 @@ public class WADODownloaderService {
 			this.extractDICOMZipFromMHTMLFile(responseBody, extractInstanceUID(url),  name, zipOutputStream);
 			return name + DCM;
 		} catch (IOException | MessagingException e) {
-			LOG.error("A dicom file could not be downloaded from the pacs:", e);
+			LOG.error("Error in downloading/wring a file from pacs to zip : " + e.getMessage());
 			throw new ZipPacsFileException(e);
 		} catch (HttpClientErrorException e) {
 			//LOG.error("A dicom file could not be downloaded from the pacs:", e);
