@@ -127,6 +127,8 @@ public class ExecutionDataApiController implements ExecutionDataApi {
             @Valid @RequestParam(value = "datasetsIds", required = false) final List<Long> datasetsIds
             ) throws EntityNotFoundException, SecurityException {
         // 1: Get dataset IDS and check rights
+        LOG.error("" + execution);
+        LOG.error("" + datasetsIds);
         if (!this.datasetSecurityService.hasRightOnEveryDataset(datasetsIds, "CAN_IMPORT")) {
             LOG.error("Admin right is mandatory for every study we are updating");
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
