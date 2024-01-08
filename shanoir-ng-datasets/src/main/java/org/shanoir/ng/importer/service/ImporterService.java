@@ -298,14 +298,28 @@ public class ImporterService {
     }
 
     private QualityCardResult checkQuality(Examination examination, ImportJob importJob) throws ShanoirException {
+        QualityCardResult qualityResult = new QualityCardResult();
+        List<QualityCard> qualityCards = qualityCardService.findByStudy(examination.getStudyId());
+        if (qualityCards == null || qualityCards.isEmpty()) {
+            return qualityResult;
+        }
+        boolean qualityCheck = false;
+        for (QualityCard qualityCard : qualityCards) {
+            if (qualityCard.isToCheckAtImport()) {
+                qualityCheck = true;
+                break;
+            }
+        }
+        if (!qualityCheck) {
+            return  qualityResult;
+        }
         ExaminationAttributes<String> dicomAttributes = null;          
         Study firstStudy = importJob.getFirstStudy();
         if (firstStudy == null) {
             throw new ShanoirException("The given import job does not provide any serie. Examination : " + examination.getId());
         }
         dicomAttributes = dicomProcessing.getDicomExaminationAttributes(firstStudy);
-        List<QualityCard> qualityCards = qualityCardService.findByStudy(examination.getStudyId());
-        QualityCardResult qualityResult = new QualityCardResult();
+
         for (QualityCard qualityCard : qualityCards) {
             if (qualityCard.isToCheckAtImport()) {
                 qualityResult.merge(qualityCard.apply(examination, dicomAttributes, downloader));                       
