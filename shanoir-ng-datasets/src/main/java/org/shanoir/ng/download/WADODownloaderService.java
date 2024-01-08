@@ -26,8 +26,10 @@ import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipOutputStream;
@@ -151,37 +153,41 @@ public class WADODownloaderService {
 	public List<String> downloadDicomFilesForURLsAsZip(final List<URL> urls, final ZipOutputStream zipOutputStream, String subjectName, Dataset dataset, String datasetFilePath, List<SerieError> serieErrors) throws IOException, MessagingException, RestServiceException {
 		int i = 0;
 		List<String> files = new ArrayList<>();
+		Set<String> zippedUrls= new HashSet<>();
 		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext(); i++) {
 			String url = ((URL) iterator.next()).toString();
-			// handle and check at first for WADO-RS URLs by "/instances/"
-			int indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_RS);
-			// WADO-URI link found in database
-			if (indexInstanceUID <= 0) {
-				// handle and check secondly for WADO-URI URLs by "objectUID="
-				// instanceUID == objectUID
-				indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_URI);
+			if (!zippedUrls.contains(url)) {
+				zippedUrls.add(url);
+				// handle and check at first for WADO-RS URLs by "/instances/"
+				int indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_RS);
+				// WADO-URI link found in database
 				if (indexInstanceUID <= 0) {
-					LOG.error("URL for download is neither in WADO-RS nor in WADO-URI format. URL : " + url + " - Dataset id : " + dataset.getId());
-					String errorDetails = "URL for download is neither in WADO-RS nor in WADO-URI format";
-					writeErrorFileInZip(zipOutputStream, subjectName, indexInstanceUID, errorDetails);
-				// in case an old WADO-URI is found in the database: convert it to WADO-RS
-				} else {
-					url = wadoURItoWadoRS(url);
-					indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_RS); // calculate new index
+					// handle and check secondly for WADO-URI URLs by "objectUID="
+					// instanceUID == objectUID
+					indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_URI);
+					if (indexInstanceUID <= 0) {
+						LOG.error("URL for download is neither in WADO-RS nor in WADO-URI format. URL : " + url + " - Dataset id : " + dataset.getId());
+						String errorDetails = "URL for download is neither in WADO-RS nor in WADO-URI format";
+						writeErrorFileInZip(zipOutputStream, subjectName, indexInstanceUID, errorDetails);
+					// in case an old WADO-URI is found in the database: convert it to WADO-RS
+					} else {
+						url = wadoURItoWadoRS(url);
+						indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_RS); // calculate new index
+					}
 				}
-			}
-			String instanceUID = url.substring(indexInstanceUID + WADO_REQUEST_TYPE_WADO_RS.length());
-			// Build name
-			String name = buildFileName(subjectName, dataset, datasetFilePath, instanceUID);
-			// Download and zip
-			try {
-				String zipedFile = downloadAndWriteFileInZip(url, zipOutputStream, name);
-				if (zipedFile != null) {
-					files.add(zipedFile);
+				String instanceUID = url.substring(indexInstanceUID + WADO_REQUEST_TYPE_WADO_RS.length());
+				// Build name
+				String name = buildFileName(subjectName, dataset, datasetFilePath, instanceUID);
+				// Download and zip
+				try {
+					String zipedFile = downloadAndWriteFileInZip(url, zipOutputStream, name);
+					if (zipedFile != null) {
+						files.add(zipedFile);
+					}
+				} catch (ZipPacsFileException e) {
+					writeErrorFileInZip(zipOutputStream, name, i, e.getMessage());
+					if (serieErrors != null) serieErrors.add(new SerieError(i, url, e.getMessage()));
 				}
-			} catch (ZipPacsFileException e) {
-				writeErrorFileInZip(zipOutputStream, name, i, e.getMessage());
-				if (serieErrors != null) serieErrors.add(new SerieError(i, url, e.getMessage()));
 			}
 		}
 		return files;
@@ -229,7 +235,7 @@ public class WADODownloaderService {
 			this.extractDICOMZipFromMHTMLFile(responseBody, extractInstanceUID(url),  name, zipOutputStream);
 			return name + DCM;
 		} catch (IOException | MessagingException e) {
-			LOG.error("Error in downloading/wring a file from pacs to zip : " + e.getMessage());
+			LOG.error("Error in downloading/wring a file from pacs to zip", e);
 			throw new ZipPacsFileException(e);
 		} catch (HttpClientErrorException e) {
 			//LOG.error("A dicom file could not be downloaded from the pacs:", e);
