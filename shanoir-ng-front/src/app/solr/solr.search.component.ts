@@ -509,7 +509,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode() ,disabledIfNoResult: true },
             {title: "Download", awesome: "fa-solid fa-download", action: () => this.downloadSelected(), disabledIfNoSelected: true},
             {title: "Copy selected ids", awesome: "fa-solid fa-copy", action: () => this.copyIds(), disabledIfNoSelected: true },
-            {title: "Copy to study", awesome: "fa-solid fa-copy", action: () => this.copyToStudy(), disabledIfNoSelected: true }
+            {title: "Copy to study", awesome: "fa-solid fa-copy", action: () => this.copyToStudy(), disabledIfNoResult: true }
         );
         return customActionDefs;
     }
