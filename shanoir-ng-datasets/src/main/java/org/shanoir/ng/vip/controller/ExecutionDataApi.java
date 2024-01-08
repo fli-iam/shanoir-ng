@@ -60,9 +60,10 @@ public interface ExecutionDataApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @RequestMapping(value = "/createExecution",
             produces = {"application/json"},
+            consumes = {"application/json"},
             method = RequestMethod.POST)
     ResponseEntity<?> createExecution(
-            @Valid @RequestParam("execution") final ExecutionDTO execution,
-            @Valid @RequestParam("datasetsIds") final List<Long> datasetsIds
+            @Parameter(name = "executionDTO", required = true) @RequestBody final ExecutionDTO execution,
+            @Parameter(name = "datasetsIds", required = true) @RequestBody final List<Long> datasetsIds
     ) throws EntityNotFoundException, SecurityException;
 }

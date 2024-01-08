@@ -124,8 +124,8 @@ public class ExecutionDataApiController implements ExecutionDataApi {
 
     @Override
     public ResponseEntity<?> createExecution(
-            @Valid @RequestParam("execution") final ExecutionDTO execution,
-            @Valid @RequestParam("datasetsIds") final List<Long> datasetsIds
+            @Parameter(name = "executionDTO", required = true) @RequestBody final ExecutionDTO execution,
+            @Parameter(name = "datasetsIds", required = true) @RequestBody final List<Long> datasetsIds
             ) throws EntityNotFoundException, SecurityException {
         // 1: Get dataset IDS and check rights
         LOG.error("" + execution);
