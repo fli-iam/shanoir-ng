@@ -154,6 +154,7 @@ public class WADODownloaderService {
 		int i = 0;
 		List<String> files = new ArrayList<>();
 		Set<String> zippedUrls= new HashSet<>();
+		long duplicates = 0;
 		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext(); i++) {
 			String url = ((URL) iterator.next()).toString();
 			if (!zippedUrls.contains(url)) {
@@ -188,7 +189,12 @@ public class WADODownloaderService {
 					writeErrorFileInZip(zipOutputStream, name, i, e.getMessage());
 					if (serieErrors != null) serieErrors.add(new SerieError(i, url, e.getMessage()));
 				}
+			} else {
+				duplicates++;
 			}
+		}
+		if (duplicates > 0) {
+			LOG.error("There were " + duplicates + " duplicate dataset_files when zipping dataset n°" + dataset.getId() + ", they were ignored.");
 		}
 		return files;
 	}
