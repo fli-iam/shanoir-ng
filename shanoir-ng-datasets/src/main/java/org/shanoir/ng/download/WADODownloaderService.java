@@ -241,7 +241,7 @@ public class WADODownloaderService {
 			this.extractDICOMZipFromMHTMLFile(responseBody, extractInstanceUID(url),  name, zipOutputStream);
 			return name + DCM;
 		} catch (IOException | MessagingException e) {
-			LOG.error("Error in downloading/wring a file from pacs to zip", e);
+			LOG.error("Error in downloading/writing a file from pacs to zip", e);
 			throw new ZipPacsFileException(e);
 		} catch (HttpClientErrorException e) {
 			//LOG.error("A dicom file could not be downloaded from the pacs:", e);
