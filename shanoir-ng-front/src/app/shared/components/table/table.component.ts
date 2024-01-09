@@ -253,6 +253,8 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             let date: Date;
             if (result instanceof Date) {
                 date = result;
+            } else if (!Number.isNaN(Date.parse(result))) {
+                date = new Date(Date.parse(result));
             } else {
                 date = this.stringToDate(result);
             }
