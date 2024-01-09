@@ -159,6 +159,16 @@ public class ExaminationApiController implements ExaminationApi {
 		return new ResponseEntity<>(examinationMapper.examinationsToSubjectExaminationDTOs(examinations), HttpStatus.OK);
 	}
 
+	@Override
+	public ResponseEntity<List<Long>> findExaminationsByStudyId(
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+		final List<Long> examinations = examinationService.findIdsByStudyId(studyId);
+		if (examinations.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(examinations, HttpStatus.OK);
+	}
+
 	// Attention: this method is used by ShanoirUploader!!!
 	@Override
 	public ResponseEntity<ExaminationDTO> saveNewExamination(

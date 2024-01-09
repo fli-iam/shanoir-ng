@@ -22,7 +22,7 @@ export type ColumnDefinition = {
     defaultField?: string,
 
     /** default is string, progress should be included in [0, 1] */
-    type?: 'string' | 'number' | 'boolean' | 'button' | 'link' | 'date' | 'progress',
+    type?: 'string' | 'number' | 'boolean' | 'button' | 'link' | 'date' | 'dateTime' | 'progress',
 
     /** tells if the table is sorted by this column by default */
     defaultSortCol?: boolean,

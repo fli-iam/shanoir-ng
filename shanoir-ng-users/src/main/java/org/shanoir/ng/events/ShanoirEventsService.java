@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.commons.lang3.time.DateUtils;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.tasks.AsyncTaskApiController;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,13 +37,23 @@ public class ShanoirEventsService {
 		repository.save(event);
 
 		// Push notification to UI
-		if (ShanoirEventType.IMPORT_DATASET_EVENT.equals(event.getEventType())) {
+		if (ShanoirEventType.IMPORT_DATASET_EVENT.equals(event.getEventType())
+				|| ShanoirEventType.CHECK_QUALITY_EVENT.equals(event.getEventType())) { 
+
 			sendSseEventsToUI(event);
 		}
 	}
 
-	public List<ShanoirEvent> getEventsByUserAndType(Long userId, String eventType) {
-		return Utils.toList(repository.findByUserIdAndEventType(userId, eventType));
+	public List<ShanoirEventLight> getEventsByUserAndType(Long userId, String... eventType) {
+		List<String> list = new ArrayList<String>();
+		for (String type : eventType) {
+			list.add(type);
+		}
+		List<ShanoirEventLight> events = new ArrayList<>();
+		for (ShanoirEvent event : Utils.toList(repository.findByUserIdAndEventTypeIn(userId, list))) {
+			events.add(event.toLightEvent());
+		}
+		return events;
 	}
 
 	/**
@@ -91,5 +102,10 @@ public class ShanoirEventsService {
             }
         });
         AsyncTaskApiController.emitters.removeAll(sseEmitterListToRemove);
+	}
+
+	public ShanoirEvent findById(Long taskId) {
+		Long userId = KeycloakUtil.getTokenUserId();
+		return repository.findByIdAndUserId(taskId, userId);
 	}
 }

@@ -10,6 +10,7 @@ import java.awt.Insets;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
@@ -25,6 +26,7 @@ public class SelectProfileConfigurationPanel extends JPanel {
 	@SuppressWarnings("rawtypes")
 	public JComboBoxMandatory selectProfileCB;
 	public JButton select;
+	public JRadioButton rbRememberProfile;
 
 	public SelectProfileConfigurationPanel(StartupStateContext sSC) {
 		Container container = new Container();
@@ -38,13 +40,14 @@ public class SelectProfileConfigurationPanel extends JPanel {
 		selectProfileLabel.setHorizontalAlignment(SwingConstants.LEFT);
 		shanoirStartupGBC.weightx = 0.2;
 		shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
-		shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
+		shanoirStartupGBC.insets = new Insets(5,10, 5, 5);
 		shanoirStartupGBC.gridx = 1;
 		shanoirStartupGBC.gridy = 0;
 		container.add(selectProfileLabel, shanoirStartupGBC);
 
 		selectProfileCB = new JComboBoxMandatory();
 		selectProfileCB.setBackground(Color.WHITE);
+		selectProfileCB.setAlignmentX(SwingConstants.CENTER);
 		shanoirStartupGBC.weightx = 0.2;
 		shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
 		shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
@@ -58,17 +61,27 @@ public class SelectProfileConfigurationPanel extends JPanel {
 			selectProfileCB.addItem(profiles[i]);
 		}
 
+		rbRememberProfile = new JRadioButton(ShUpConfig.resourceBundle.getString("shanoir.uploader.profile.remember.label"));
+		rbRememberProfile.setHorizontalAlignment(SwingConstants.LEFT);
+		shanoirStartupGBC.weightx = 0.2;
+		shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
+		shanoirStartupGBC.insets = new Insets(5, 0, 5, 5);
+		shanoirStartupGBC.gridx = 1;
+		shanoirStartupGBC.gridy = 2;
+		container.add(rbRememberProfile, shanoirStartupGBC);
+
 		select = new JButton(ShUpConfig.resourceBundle.getString("shanoir.uploader.profile.select.button"));
 		select.setPreferredSize(new Dimension(150, 20));
 		select.setHorizontalAlignment(SwingConstants.CENTER);
 		shanoirStartupGBC.weightx = 0.7;
 		shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
-		shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
+		shanoirStartupGBC.insets = new Insets(10, 5, 5, 5);
 		shanoirStartupGBC.gridx = 1;
-		shanoirStartupGBC.gridy = 2;
+		shanoirStartupGBC.gridy = 3;
 		container.add(select, shanoirStartupGBC);
 		
 		SelectProfilePanelActionListener sPPAL = new SelectProfilePanelActionListener(this, sSC);
 		select.addActionListener(sPPAL);
+		
 	}
 }

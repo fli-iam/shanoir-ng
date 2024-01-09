@@ -25,7 +25,7 @@ import { AfterViewChecked } from "@angular/core";
 import { environment } from "../../environments/environment";
 import { DatasetAcquisition } from '../dataset-acquisitions/shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../dataset-acquisitions/shared/dataset-acquisition.service';
-import { ProcessingService } from '../processing/processing.service';
+import { ExecutionDataService } from '../vip/execution.data-service';
 import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
 import { ColumnDefinition } from '../shared/components/table/column.definition.type';
 import { Page, Pageable } from "../shared/components/table/pageable.model";
@@ -84,7 +84,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             private breadcrumbsService: BreadcrumbsService, private formBuilder: UntypedFormBuilder,
             private solrService: SolrService, private router: Router, private datasetService: DatasetService, private datasetAcquisitionService: DatasetAcquisitionService,
             private keycloakService: KeycloakService, private studyRightsService: StudyRightsService, private downloadService: MassDownloadService, private clipboard: Clipboard,
-            private confirmDialogService: ConfirmDialogService, private consoleService: ConsoleService, private processingService: ProcessingService) {
+            private confirmDialogService: ConfirmDialogService, private consoleService: ConsoleService, private processingService: ExecutionDataService) {
 
         this.getRole();
         if (this.role != 'admin') this.getRights();
@@ -544,7 +544,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                     + 'Remove datasets that belongs to the following study(ies) from your selection : ' + [...noAdminStudies].join(', '));
             }else{
                 this.processingService.setDatasets(this.selectedDatasetIds);
-                this.router.navigate(['/processing']);
+                this.router.navigate(['pipelines']);
             }
         });
     }

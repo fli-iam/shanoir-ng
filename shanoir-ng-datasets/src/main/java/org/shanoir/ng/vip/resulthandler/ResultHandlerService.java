@@ -9,6 +9,7 @@ import org.apache.commons.io.IOUtils;
 import org.shanoir.ng.vip.monitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.vip.resource.ProcessingResourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,8 @@ public class ResultHandlerService {
     private List<ResultHandler> resultHandlers;
     @Autowired
     private DatasetProcessingService datasetProcessingService;
+    @Autowired
+    private ProcessingResourceService processingResourceService;
 
 
     /**
@@ -73,6 +76,7 @@ public class ResultHandlerService {
         // Remove processed datasets from current execution monitoring
         monitoring.setInputDatasets(Collections.emptyList());
         datasetProcessingService.update(monitoring);
+        processingResourceService.deleteByProcessingId(monitoring.getId());
     }
 
     private List<File> getArchivesToProcess(File userImportDir) throws ResultHandlerException {

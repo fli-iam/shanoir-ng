@@ -17,6 +17,8 @@ package org.shanoir.ng.importer.model;
 import java.util.List;
 import java.util.Set;
 
+import org.shanoir.ng.shared.dicom.EchoTime;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Image {
@@ -41,6 +43,8 @@ public class Image {
 	
 	@JsonProperty("imageOrientationPatient")
 	public List<Double> imageOrientationPatient;
+
+	public String SOPInstanceUID;
 
 	public String getPath() {
 		return path;
@@ -98,4 +102,11 @@ public class Image {
 		this.flipAngle = flipAngle;
 	}
 
+	public String getSOPInstanceUID() {
+		return SOPInstanceUID;
+	}
+
+	public void setSOPInstanceUID(String sOPInstanceUID) {
+		SOPInstanceUID = sOPInstanceUID;
+	}
 }
