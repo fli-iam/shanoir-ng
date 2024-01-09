@@ -153,7 +153,7 @@ public class WADODownloaderService {
 	public List<String> downloadDicomFilesForURLsAsZip(final List<URL> urls, final ZipOutputStream zipOutputStream, String subjectName, Dataset dataset, String datasetFilePath, List<SerieError> serieErrors) throws IOException, MessagingException, RestServiceException {
 		int i = 0;
 		List<String> files = new ArrayList<>();
-		Set<String> zippedUrls= new HashSet<>();
+		Set<String> zippedUrls = new HashSet<>();
 		long duplicates = 0;
 		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext(); i++) {
 			String url = ((URL) iterator.next()).toString();
