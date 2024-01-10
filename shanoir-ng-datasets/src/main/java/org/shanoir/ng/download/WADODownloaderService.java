@@ -310,27 +310,26 @@ public class WADODownloaderService {
 		return null;
 	}
 
-	public Attributes getDicomAttributesForExamination(Examination examination) throws PacsException {
+	public AcquisitionAttributes<Long> getDicomAttributesForAcquisition(DatasetAcquisition acquisition) throws PacsException {
 		long ts = new Date().getTime();
-		DatasetAcquisition acquisition = getFirstIfExist(examination.getDatasetAcquisitions());
-		if (acquisition == null) return null;
-		Attributes result = getDicomAttributesForAcquisition(acquisition);
+		List<Dataset> datasets = new ArrayList<>();
+		if (acquisition.getDatasets() != null) {
+			for (Dataset dataset : acquisition.getDatasets()) {
+				datasets.add(dataset);
+			}
+		}
+		AcquisitionAttributes<Long> dAcquisitionAttributes = new AcquisitionAttributes<>();
+		datasets.parallelStream().forEach(
+			dataset -> {
+				try {
+					dAcquisitionAttributes.addDatasetAttributes(dataset.getId(), getDicomAttributesForDataset(dataset));
+				} catch (PacsException e) {
+					throw new RuntimeException("could not get dicom attributes from pacs", e);
+				}
+			}
+		);
 		LOG.debug("get DICOM attributes for acquisition " + acquisition.getId() + " : " + (new Date().getTime() - ts) + " ms");
-		return result;
-	}
-
-	public Attributes getDicomAttributesForAcquisition(DatasetAcquisition acquisition) throws PacsException {
-		long ts = new Date().getTime();
-		Dataset ds = getFirstIfExist(acquisition.getDatasets());
-		if (ds == null) return null;
-		Attributes result = getDicomAttributesForDataset(ds);
-		LOG.debug("get DICOM attributes for dataset " + ds.getId() + " : " + (new Date().getTime() - ts) + " ms");
-		return result;
-	}
-
-	private <T> T getFirstIfExist(List<T> list) {
-		if (list == null || list.size() == 0) return null;
-		else return list.get(0);
+		return dAcquisitionAttributes;
 	}
 
 	/**
@@ -340,7 +339,7 @@ public class WADODownloaderService {
 	 * @param url
 	 * @return
 	 */
-	private String extractInstanceUID(String url) {
+	public static String extractInstanceUID(String url) {
 		Pattern p = null;
 		if (url.indexOf(CONTENT_TYPE) != -1) {
 			p = Pattern.compile("objectUID=(\\S+)&contentType");
