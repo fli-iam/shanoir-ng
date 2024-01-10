@@ -63,6 +63,6 @@ public interface ExecutionDataApi {
             consumes = {"application/json"},
             method = RequestMethod.POST)
     ResponseEntity<?> createExecution(
-            @Parameter(name = "executionDTO", required = true) @RequestBody final ExecutionDTO execution
+            @Parameter(name = "execution", required = true) @RequestBody final String execution
     ) throws EntityNotFoundException, SecurityException;
 }

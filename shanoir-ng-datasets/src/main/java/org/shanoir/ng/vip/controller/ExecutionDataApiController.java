@@ -15,6 +15,8 @@
 
 package org.shanoir.ng.vip.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -125,10 +127,18 @@ public class ExecutionDataApiController implements ExecutionDataApi {
 
     @Override
     public ResponseEntity<?> createExecution(
-            @Parameter(name = "executionDTO", required = true) @RequestBody final ExecutionDTO execution) throws EntityNotFoundException, SecurityException {
+            @Parameter(name = "execution", required = true) @RequestBody final String executionAsString) throws EntityNotFoundException, SecurityException {
         // 1: Get dataset IDS and check rights
         List<Long> datasetsIds = new ArrayList<Long>();
-        for (ParameterResourcesDTO param :execution.getParametersRessources()) {
+        ObjectMapper mapper = new ObjectMapper();
+        ExecutionDTO execution = null;
+        try {
+            execution = mapper.readValue(executionAsString, ExecutionDTO.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        for (ParameterResourcesDTO param : execution.getParametersRessources()) {
             datasetsIds.addAll(param.getDatasetIds());
         }
         if (!this.datasetSecurityService.hasRightOnEveryDataset(datasetsIds, "CAN_IMPORT")) {
@@ -144,13 +154,14 @@ public class ExecutionDataApiController implements ExecutionDataApi {
         executionMonitoring.setPipelineIdentifier(execution.getPipelineIdentifier());
         executionMonitoring.setResultsLocation(KeycloakUtil.getTokenUserId() + "/" + LocalDate.now());
         executionMonitoring.setTimeout(20);
+        executionMonitoring.setStudyId(Long.valueOf(execution.getStudyIdentifier()));
         executionMonitoring.setStatus(ExecutionStatus.RUNNING);
         executionMonitoring.setComment(execution.getName());
         executionMonitoring.setDatasetProcessingType(DatasetProcessingType.valueOf(execution.getProcessingType()));
         executionMonitoring.setOutputProcessing(execution.getOutputProcessing());
         executionMonitoring.setInputDatasets(inputDatasets);
 
-        /* Save monitoring in db. */
+        // Save monitoring in db.
         final ExecutionMonitoring createdMonitoring = executionMonitoringService.create(executionMonitoring);
 
         List<ParameterResourcesDTO> parametersDatasets = executionMonitoringService.createProcessingResources(createdMonitoring, execution.getParametersRessources());
@@ -173,6 +184,7 @@ public class ExecutionDataApiController implements ExecutionDataApi {
         headers.set("Authorization", "Bearer " + accessTokenResponse.getToken());
         HttpEntity<ExecutionDTO> entity = new HttpEntity<>(execution, headers);
         this.restTemplate.exchange(vipExecutionRestApi, HttpMethod.POST, entity, ExecutionDTO.class);
+
 
         return null;
     }
