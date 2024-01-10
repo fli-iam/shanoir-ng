@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import org.apache.xmlbeans.impl.jam.JParameter;
 import org.keycloak.representations.AccessTokenResponse;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
@@ -126,13 +127,16 @@ public class ExecutionDataApiController implements ExecutionDataApi {
     public ResponseEntity<?> createExecution(
             @Parameter(name = "executionDTO", required = true) @RequestBody final ExecutionDTO execution) throws EntityNotFoundException, SecurityException {
         // 1: Get dataset IDS and check rights
-        LOG.error("" + execution);
-        if (!this.datasetSecurityService.hasRightOnEveryDataset(execution.getParametersRessources().get(0).getDatasetIds(), "CAN_IMPORT")) {
+        List<Long> datasetsIds = new ArrayList<Long>();
+        for (ParameterResourcesDTO param :execution.getParametersRessources()) {
+            datasetsIds.addAll(param.getDatasetIds());
+        }
+        if (!this.datasetSecurityService.hasRightOnEveryDataset(datasetsIds, "CAN_IMPORT")) {
             LOG.error("Admin right is mandatory for every study we are updating");
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         };
 
-        List<Dataset> inputDatasets = this.datasetService.findByIdIn(execution.getParametersRessources().get(0).getDatasetIds());
+        List<Dataset> inputDatasets = this.datasetService.findByIdIn(datasetsIds);
 
         // 2: Create monitoring on shanoir
         ExecutionMonitoring executionMonitoring = new ExecutionMonitoring();
