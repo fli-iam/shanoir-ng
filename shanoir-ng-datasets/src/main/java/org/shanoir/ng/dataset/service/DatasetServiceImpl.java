@@ -167,7 +167,6 @@ public class DatasetServiceImpl implements DatasetService {
 		}
 
 		List<Dataset> childDatasets = repository.findBySourceIdIn(ids);
-		System.out.println("childDatasets size : " + childDatasets.size());
 		if (!CollectionUtils.isEmpty(childDatasets)) {
 			throw new RestServiceException(
 					new ErrorModel(

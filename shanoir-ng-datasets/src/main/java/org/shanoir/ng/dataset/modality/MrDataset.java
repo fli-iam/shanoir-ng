@@ -84,42 +84,42 @@ public class MrDataset extends Dataset {
 
 	public MrDataset(Dataset d, MrProtocol mrpro) {
 		super(d);
-
+		MrDataset mrDataset = (MrDataset) d;
 		MrProtocol mrp = new MrProtocol(mrpro, this);
-		this.diffusionGradients = new ArrayList<>(((MrDataset) d).getDiffusionGradients().size());
-		for (DiffusionGradient dg : ((MrDataset) d).getDiffusionGradients()) {
+		this.diffusionGradients = new ArrayList<>(mrDataset.getDiffusionGradients().size());
+		for (DiffusionGradient dg : mrDataset.getDiffusionGradients()) {
 			this.diffusionGradients.add(new DiffusionGradient(dg, this, mrp));
 		}
 
-		this.echoTime = new ArrayList<>(((MrDataset) d).getEchoTime().size());
-		for (EchoTime et : ((MrDataset) d).getEchoTime()) {
+		this.echoTime = new ArrayList<>(mrDataset.getEchoTime().size());
+		for (EchoTime et : mrDataset.getEchoTime()) {
 			this.echoTime.add(new EchoTime(et, this));
 		}
 
-		this.flipAngle = new ArrayList<>(((MrDataset) d).getFlipAngle().size());
-		for (FlipAngle fa : ((MrDataset) d).getFlipAngle()) {
+		this.flipAngle = new ArrayList<>(mrDataset.getFlipAngle().size());
+		for (FlipAngle fa : mrDataset.getFlipAngle()) {
 			this.flipAngle.add(new FlipAngle(fa, this));
 		}
 
-		this.inversionTime = new ArrayList<>(((MrDataset) d).getInversionTime().size());
-		for (InversionTime it : ((MrDataset) d).getInversionTime()) {
+		this.inversionTime = new ArrayList<>(mrDataset.getInversionTime().size());
+		for (InversionTime it : mrDataset.getInversionTime()) {
 			this.inversionTime.add(new InversionTime(it, this));
 		}
 
-		if (((MrDataset) d).getMrQualityProcedureType() != null) {
-			this.mrQualityProcedureType = ((MrDataset) d).getMrQualityProcedureType().getId();
+		if (mrDataset.getMrQualityProcedureType() != null) {
+			this.mrQualityProcedureType = mrDataset.getMrQualityProcedureType().getId();
 		} else {
 			this.mrQualityProcedureType = null;
 		}
-		this.originMrMetadata = ((MrDataset) d).getOriginMrMetadata();
+		this.originMrMetadata = mrDataset.getOriginMrMetadata();
 
-		this.repetitionTime = new ArrayList<>(((MrDataset) d).getRepetitionTime().size());
-		for (RepetitionTime rt : ((MrDataset) d).getRepetitionTime()) {
+		this.repetitionTime = new ArrayList<>(mrDataset.getRepetitionTime().size());
+		for (RepetitionTime rt : mrDataset.getRepetitionTime()) {
 			this.repetitionTime.add(new RepetitionTime(rt, this));
 		}
-		this.updatedMrMetadata = new MrDatasetMetadata(((MrDataset) d).getUpdatedMrMetadata());
-		this.firstImageAcquisitionTime = ((MrDataset) d).getFirstImageAcquisitionTime();
-		this.lastImageAcquisitionTime = ((MrDataset) d).getLastImageAcquisitionTime();
+		this.updatedMrMetadata = new MrDatasetMetadata(mrDataset.getUpdatedMrMetadata());
+		this.firstImageAcquisitionTime = mrDataset.getFirstImageAcquisitionTime();
+		this.lastImageAcquisitionTime = mrDataset.getLastImageAcquisitionTime();
 	}
 
 	/**
@@ -148,7 +148,7 @@ public class MrDataset extends Dataset {
 	}
 
 	/**
-	 * @param echoTime
+	 * @param echoTimes
 	 *            the echoTime to set
 	 */
 	public void setEchoTime(List<EchoTime> echoTimes) {
@@ -166,7 +166,7 @@ public class MrDataset extends Dataset {
 	}
 
 	/**
-	 * @param flipAngle
+	 * @param flipAngles
 	 *            the flipAngle to set
 	 */
 	public void setFlipAngle(List<FlipAngle> flipAngles) {
@@ -184,7 +184,7 @@ public class MrDataset extends Dataset {
 	}
 
 	/**
-	 * @param inversionTime
+	 * @param inversionTimes
 	 *            the inversionTime to set
 	 */
 	public void setInversionTime(List<InversionTime> inversionTimes) {
@@ -236,7 +236,7 @@ public class MrDataset extends Dataset {
 	}
 
 	/**
-	 * @param repetitionTime
+	 * @param repetitionTimes
 	 *            the repetitionTime to set
 	 */
 	public void setRepetitionTime(List<RepetitionTime> repetitionTimes) {
