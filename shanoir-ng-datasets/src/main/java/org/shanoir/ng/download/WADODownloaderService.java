@@ -14,11 +14,20 @@
 
 package org.shanoir.ng.download;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.StringReader;
 import java.net.URL;
 import java.nio.file.Files;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -33,7 +42,6 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.service.DatasetUtils;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
@@ -142,38 +150,48 @@ public class WADODownloaderService {
 	public List<String> downloadDicomFilesForURLsAsZip(final List<URL> urls, final ZipOutputStream zipOutputStream, String subjectName, Dataset dataset, String datasetFilePath, DatasetDownloadError downloadResult) {
 		int i = 0;
 		List<String> files = new ArrayList<>();
+		Set<String> zippedUrls = new HashSet<>();
+		long duplicates = 0;
 		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext(); i++) {
 			String url = ((URL) iterator.next()).toString();
-			// handle and check at first for WADO-RS URLs by "/instances/"
-			int indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_RS);
-			// WADO-URI link found in database
-			if (indexInstanceUID <= 0) {
-				// handle and check secondly for WADO-URI URLs by "objectUID="
-				// instanceUID == objectUID
-				indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_URI);
+			if (!zippedUrls.contains(url)) {
+				zippedUrls.add(url);
+				// handle and check at first for WADO-RS URLs by "/instances/"
+				int indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_RS);
+				// WADO-URI link found in database
 				if (indexInstanceUID <= 0) {
-					LOG.error("URL for download is neither in WADO-RS nor in WADO-URI format. URL : " + url + " - Dataset id : " + dataset.getId());
-					String errorDetails = "URL for download is neither in WADO-RS nor in WADO-URI format";
-					downloadResult.update(errorDetails, DatasetDownloadError.PARTIAL_FAILURE);
-				// in case an old WADO-URI is found in the database: convert it to WADO-RS
-				} else {
-					url = wadoURItoWadoRS(url);
-					indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_RS); // calculate new index
+					// handle and check secondly for WADO-URI URLs by "objectUID="
+					// instanceUID == objectUID
+					indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_URI);
+					if (indexInstanceUID <= 0) {
+						LOG.error("URL for download is neither in WADO-RS nor in WADO-URI format. URL : " + url + " - Dataset id : " + dataset.getId());
+						String errorDetails = "URL for download is neither in WADO-RS nor in WADO-URI format";
+						downloadResult.update(errorDetails, DatasetDownloadError.PARTIAL_FAILURE);
+					// in case an old WADO-URI is found in the database: convert it to WADO-RS
+					} else {
+						url = wadoURItoWadoRS(url);
+						indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_RS); // calculate new index
+					}
 				}
-			}
-			String instanceUID = url.substring(indexInstanceUID + WADO_REQUEST_TYPE_WADO_RS.length());
-			// Build name
-			String name = buildFileName(subjectName, dataset, datasetFilePath, instanceUID);
-			// Download and zip
-			try {
-				String zipedFile = downloadAndWriteFileInZip(url, zipOutputStream, name);
-				if (zipedFile != null) {
-					files.add(zipedFile);
+				String instanceUID = url.substring(indexInstanceUID + WADO_REQUEST_TYPE_WADO_RS.length());
+				// Build name
+				String name = buildFileName(subjectName, dataset, datasetFilePath, instanceUID);
+				// Download and zip
+				try {
+					String zipedFile = downloadAndWriteFileInZip(url, zipOutputStream, name);
+					if (zipedFile != null) {
+						files.add(zipedFile);
+					}
+				} catch (ZipPacsFileException e) {
+					LOG.error("Could not download dataset as dicom", e);
+					downloadResult.update("Could not download dataset as dicom: " + e.getMessage(), DatasetDownloadError.PARTIAL_FAILURE);
 				}
-			} catch (ZipPacsFileException e) {
-				LOG.error("Could not download dataset {} as dicom: ");
-				downloadResult.update("Could not download dataset as dicom: " + e.getMessage(), DatasetDownloadError.PARTIAL_FAILURE);
+			} else {
+				duplicates++;
 			}
+		}
+		if (duplicates > 0) {
+			LOG.error("There were " + duplicates + " duplicate dataset_files when zipping dataset n°" + dataset.getId() + ", they were ignored.");
 		}
 		return files;
 	}
@@ -209,7 +227,8 @@ public class WADODownloaderService {
 			this.extractDICOMZipFromMHTMLFile(responseBody, extractInstanceUID(url),  name, zipOutputStream);
 			return name + DCM;
 		} catch (IOException | MessagingException e) {
-			throw new ZipPacsFileException("Unexpected exception during dicom extraction from PACS", e);
+			LOG.error("Error in downloading/writing a file from pacs to zip", e);
+			throw new ZipPacsFileException(e);
 		} catch (HttpClientErrorException e) {
 			throw new ZipPacsFileException("Received " + e.getStatusCode() + " from PACS", e);
 		}
