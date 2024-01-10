@@ -2,19 +2,19 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
 import { Component } from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
@@ -33,12 +33,15 @@ export class CenterComponent extends EntityComponent<Center> {
     isNameUniqueError: boolean = false;
     phoneNumberPatternError: boolean = false;
     openAcqEq: boolean = true;
+    fromImport: string;
 
     constructor(
             private route: ActivatedRoute,
+            protected router: Router,
             private centerService: CenterService) {
 
         super(route, 'center');
+        this.fromImport = this.router.getCurrentNavigation()?.extras?.state?.fromImport;
     }
 
     get center(): Center { return this.entity; }
@@ -66,6 +69,10 @@ export class CenterComponent extends EntityComponent<Center> {
     }
 
     buildForm(): UntypedFormGroup {
+        if (this.fromImport) {
+            this.center.name = this.fromImport.split(' - ')[0] != "null" ? this.fromImport.split(' - ')[0] : "";
+            this.center.street = this.fromImport.split(' - ')[1] != "null" ? this.fromImport.split(' - ')[1] : "";
+        }
         return this.formBuilder.group({
             'name': [this.center.name, [Validators.required, Validators.minLength(2), Validators.maxLength(200), this.registerOnSubmitValidator('unique', 'name')]],
             'street': [this.center.street],

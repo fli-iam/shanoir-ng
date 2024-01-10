@@ -14,7 +14,7 @@
 
 import { Component } from '@angular/core';
 import { AbstractControl, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
@@ -43,7 +43,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     public datasetModalityTypeStr: string;
     private nonEditableCenter: boolean = false;
     private lastSubmittedManufAndSerial: ManufacturerAndSerial;
-
+    fromImport: string;
 
     get acqEquip(): AcquisitionEquipment { return this.entity; }
     set acqEquip(acqEquip: AcquisitionEquipment) { this.entity = acqEquip; }
@@ -54,9 +54,12 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
             private manufModelService: ManufacturerModelService,
             private centerService: CenterService,
             private studyCardService: StudyCardService,
-            public manufacturerModelPipe: ManufacturerModelPipe) {
+            public manufacturerModelPipe: ManufacturerModelPipe,
+            protected router: Router) {
 
         super(route, 'acquisition-equipment');
+
+        this.fromImport = this.router.getCurrentNavigation()?.extras?.state?.fromImport;
     }
 
     getService(): EntityService<AcquisitionEquipment> {
@@ -112,6 +115,10 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     buildForm(): UntypedFormGroup {
+        if (this.fromImport) {
+            this.acqEquip.serialNumber = this.fromImport.split('-')[2] != "null" ? this.fromImport.split('-')[2] : "";
+        }
+
         let form: UntypedFormGroup = this.formBuilder.group({
             'serialNumber': [this.acqEquip.serialNumber, [this.manufAndSerialUnicityValidator, this.noSpacesStartAndEndValidator]],
             'manufacturerModel': [this.acqEquip.manufacturerModel, [Validators.required]],
