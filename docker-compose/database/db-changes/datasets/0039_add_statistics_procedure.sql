@@ -18,7 +18,7 @@ delimiter //
 
 create procedure getStatistics(IN studyNameInRegExp VARCHAR(255), IN studyNameOutRegExp VARCHAR(255), IN subjectNameInRegExp VARCHAR(255), IN subjectNameOutRegExp VARCHAR(255))
 begin
-    select 'patient_id', 'shanoir_name', 'double_hash', 'birthname1', 'birthname2', 'birthname3', 'lastname1', 'lastname2', 'lastname3', 'firstname1', 'firstname2', 'firstname3', 'birthdate1', 'sex', 'birth_year', 'study_id', 'study_name', 'sequence_id', 'norm_sequence_name', 'sequence_name', 'center_id', 'center', 'device_manufacturer', 'device_model', 'device_field_strength', 'device_serial_number', 'examination_id', 'examination_date', 'import_date', 'creation_date', 'series_number', 'protocol_type', 'dicom_size_mo'
+    select 'patient_id', 'shanoir_name', 'double_hash', 'birthname1', 'birthname2', 'birthname3', 'lastname1', 'lastname2', 'lastname3', 'firstname1', 'firstname2', 'firstname3', 'birthdate1', 'sex', 'birth_year', 'study_id', 'study_name', 'sequence_id', 'norm_sequence_name', 'sequence_name', 'center_id', 'center', 'device_manufacturer', 'device_model', 'device_field_strength', 'device_serial_number', 'examination_id', 'examination_date', 'import_date', 'creation_date', 'protocol_type', 'dicom_size_mo'
     union all
     select 
         subject.id as patient_id,
@@ -51,7 +51,6 @@ begin
         date(examination.examination_date) as examination_date,
         date(dataset_acquisition.creation_date) as import_date,
         date(dataset.creation_date) as creation_date,
-        dataset_acquisition.sorting_index as series_number,
         mr_protocol_metadata.name as protocol_type,
         (select sum(size)/1000000 from dataset_expression as de where de.dataset_id = dataset.id and de.dataset_expression_format = 6) as dicom_size_mo
 
