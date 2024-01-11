@@ -79,7 +79,6 @@ export class DatasetCopyDialogComponent {
             } else if (this.isDatasetInStudy) {
                 this.statusMessage = 'Selected dataset(s) already belong to selected study.';
             } else {
-                this.statusMessage = "Copy started...";
                 const formData: FormData = new FormData();
                 formData.set('datasetIds', Array.from(this.datasetsIds).join(","));
                 formData.set('studyId', this.selectedStudy.id.toString());
@@ -87,9 +86,9 @@ export class DatasetCopyDialogComponent {
                 formData.set('subjectIdStudyId', Array.from(this.subjectIdStudyId).join(","));
                 return this.http.post<string>(AppUtils.BACKEND_API_STUDY_URL + '/copyDatasets', formData, { responseType: 'text' as 'json'})
                     .toPromise()
-                    .then(res => {
-                        this.canCopy = true;
-                        this.statusMessage = "Copy started, you can close this dialog.";
+                    .then( () => {
+                        this.close();
+                        this.consoleService.log('info', 'The copy of ' + this.datasetsIds.length + ' datasets towards study ' + this.selectedStudy.name + ' has started.');
                     }).catch(reason => {
                         this.canCopy = true;
                         if (reason.status == 403) {

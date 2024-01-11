@@ -108,7 +108,7 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 		this.acquisitionEquipmentId = other.acquisitionEquipmentId;
 
 		this.examination = other.examination;
-		this.studyCard = other.studyCard;
+		this.studyCard = null;
 		this.studyCardTimestamp = other.studyCardTimestamp;
 		this.rank = other.rank;
 		this.softwareRelease = other.softwareRelease;
