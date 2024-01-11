@@ -133,7 +133,6 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
             this.allCoilsPromise.resolve(this.allCoils);
         } 
         if (changes.cardType && this.cardType && (!this.assignmentFields || !this.conditionFields)) {
-            console.log(this.cardType)
             this.initFields();
         }
     }

@@ -190,7 +190,6 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                         const tabName = input.closest('fieldset')?.getAttribute('tab');
                         if (tabName) {
                             const tabLabelElt = this.formContainerElement.nativeElement.querySelector('ul.tabs .' + tabName);
-                            console.log(tabLabelElt);
                             tabLabelElt?.classList.add('required-label');
                         }
                     }
