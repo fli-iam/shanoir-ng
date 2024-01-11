@@ -36,6 +36,7 @@ import java.util.zip.ZipOutputStream;
 import javax.json.Json;
 import javax.json.stream.JsonParser;
 
+import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.json.JSONReader;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -350,27 +351,17 @@ public class WADODownloaderService {
 		LOG.debug("get DICOM attributes for acquisition " + acquisition.getId() + " : " + (new Date().getTime() - ts) + " ms");
 		return dAcquisitionAttributes;
 	}
-
-	/**
-	 * The instanceUID (== objectUID) is inside the URL string
-	 * and has to be extracted to be used.
-	 * 
-	 * @param url
-	 * @return
-	 */
-	public static String extractInstanceUID(String url) {
-		Pattern p = null;
-		if (url.indexOf(CONTENT_TYPE) != -1) {
-			p = Pattern.compile("objectUID=(\\S+)&contentType");
-		} else {
-			p = Pattern.compile("objectUID=(\\S+)");
-		}
-		Matcher m = p.matcher(url);
-		if (m.find()) {
-			return m.group(1);
-		} else {
-			return null;
-		}
+	
+	static String extractInstanceUID(String url) {
+		boolean condition1 = url != null && url.contains("objectUID=");
+		boolean condition2 = url != null && url.contains("instances/");
+		if (condition1) {
+			String[] split = StringUtils.splitByWholeSeparator(url, "objectUID=", 2);
+			return StringUtils.split(split[1], "&", 1)[0];
+		} else if (condition2) {
+			String[] split = StringUtils.splitByWholeSeparator(url, "instances/", 2);
+			return StringUtils.split(split[1], "/", 1)[0];
+		} else return null;
 	}
 
 	/**
