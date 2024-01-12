@@ -163,7 +163,7 @@ public class DatasetDownloaderServiceTest {
 
 		// WHEN we export all the datasets
 		try {
-			this.datasetDownloaderService.massiveDownload("otherWRONG", Collections.singletonList(dataset), response, false);
+			this.datasetDownloaderService.massiveDownload("otherWRONG", Collections.singletonList(dataset), response, false, null);
 		} catch (RestServiceException e) {
 			assertEquals("Unexpected error while downloading dataset files",
 					e.getErrorModel().getMessage());
@@ -200,7 +200,7 @@ public class DatasetDownloaderServiceTest {
 		HttpServletResponse response =  new MockHttpServletResponse();
 
 		// WHEN we export all the datasets
-		this.datasetDownloaderService.massiveDownload("nii", Collections.singletonList(dataset), response, false);
+		this.datasetDownloaderService.massiveDownload("nii", Collections.singletonList(dataset), response, false, null);
 
 		assertEquals(response.getContentType(), "application/zip");
 		// THEN all datasets are exported
@@ -242,7 +242,7 @@ public class DatasetDownloaderServiceTest {
 		dataset.setDatasetExpressions(datasetExpressions);
 	
 		HttpServletResponse response =  new MockHttpServletResponse();
-		this.datasetDownloaderService.massiveDownload("nii", Collections.singletonList(dataset), response, false);
+		this.datasetDownloaderService.massiveDownload("nii", Collections.singletonList(dataset), response, false, null);
 
 		// THEN all datasets are exported
 		

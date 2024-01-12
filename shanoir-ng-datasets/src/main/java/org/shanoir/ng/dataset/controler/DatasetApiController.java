@@ -24,11 +24,7 @@ import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -51,6 +47,7 @@ import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.download.DatasetDownloadError;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -324,17 +321,22 @@ public class DatasetApiController implements DatasetApi {
 			@Parameter(name = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId,
 			@Parameter(name = "Dowloading nifti, decide the nifti converter id") final Long converterId,
 			@Parameter(name = "Decide if you want to download dicom (dcm) or nifti (nii) files.")
-			@Valid @RequestParam(value = "format", required = false, defaultValue = DCM) final String format, HttpServletResponse response)
-					throws RestServiceException, IOException {
-		this.datasetDownloaderService.downloadDatasetById(datasetId, converterId, format, response, false);
+			@Valid @RequestParam(value = "format", required = false, defaultValue = DCM) final String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException {
+		Dataset dataset = this.datasetService.findById(datasetId);
+		if (dataset == null) {
+			throw new EntityNotFoundException(Dataset.class, datasetId);
+		}
+
+		this.datasetDownloaderService.massiveDownload(format, Collections.singletonList(dataset), response, false, converterId);
 	}
 
 	@Override
 	public ResponseEntity<String> getDicomMetadataByDatasetId(
 		@Parameter(name = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId) throws IOException, MessagingException {
-		final Dataset dataset = datasetService.findById(datasetId);		
+		final Dataset dataset = datasetService.findById(datasetId);
+		DatasetDownloadError result = new DatasetDownloadError();
 		List<URL> pathURLs = new ArrayList<>();
-		DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
+		DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, result);
 		if (pathURLs.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} else {
@@ -370,7 +372,7 @@ public class DatasetApiController implements DatasetApi {
 		// STEP 1: Retrieve all datasets all in one with only the one we can see
 		List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
 
-		datasetDownloaderService.massiveDownload(format, datasets, response, false);
+		datasetDownloaderService.massiveDownload(format, datasets, response, false, null);
 	}	
 
 	@Override
@@ -393,7 +395,7 @@ public class DatasetApiController implements DatasetApi {
 					new ErrorModel(HttpStatus.FORBIDDEN.value(), "This study has " + size + " datasets. You can't download more than " + DATASET_LIMIT + " datasets." ));
 		}
 
-		datasetDownloaderService.massiveDownload(format, datasets, response, false);
+		datasetDownloaderService.massiveDownload(format, datasets, response, false, null);
 	}
 
 	@Override
@@ -417,7 +419,7 @@ public class DatasetApiController implements DatasetApi {
 					new ErrorModel(HttpStatus.FORBIDDEN.value(), "This examination has " + size + " datasets. You can't download more than " + DATASET_LIMIT + " datasets."));
 		}
 
-		datasetDownloaderService.massiveDownload(format, datasets, response, true);
+		datasetDownloaderService.massiveDownload(format, datasets, response, true, null);
 	}
 
     @Override
@@ -441,7 +443,7 @@ public class DatasetApiController implements DatasetApi {
 					new ErrorModel(HttpStatus.FORBIDDEN.value(), "This acquisition has " + size + " datasets. You can't download more than " + DATASET_LIMIT + " datasets."));
 		}
 
-		datasetDownloaderService.massiveDownload(format, datasets, response, true);
+		datasetDownloaderService.massiveDownload(format, datasets, response, true, null);
     }
 
     /**
