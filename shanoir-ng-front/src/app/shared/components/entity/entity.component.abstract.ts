@@ -174,7 +174,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     private styleRequiredLabels() {
-        if (this.formContainerElement) {
+        if (this.formContainerElement && this.form) {
             for (const field in this.form.controls) {
                 const control = this.form.get(field);
                 if (this.hasRequiredField(control)) {

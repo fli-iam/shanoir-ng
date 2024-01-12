@@ -72,11 +72,18 @@ export class MassDownloadService {
             } else return Promise.resolve();
         }).catch(error => {
             if (error == this.BROWSER_COMPAT_ERROR_MSG) {
-                return this.openAltModal(format).then(ret => {
-                    if (ret != 'cancel') {
-                        return this._downloadAlt('datasetIds', datasetIds, ret);
-                    } else return Promise.resolve();
-                });
+                if (datasetIds.length > this.datasetService.MAX_DATASETS_IN_ZIP_DL) {
+                    this.dialogService.error('Too many datasets', 'You are trying to download ' 
+                        + datasetIds.length + ' datasets while Shanoir sets a limit to ' + this.datasetService.MAX_DATASETS_IN_ZIP_DL 
+                        + ' in a single zip. Please confider using a browser compatible with the Shanoir unlimited download functionality. See link below.',
+                        "https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker#browser_compatibility" );
+                } else {
+                    return this.openAltModal(format).then(ret => {
+                        if (ret != 'cancel') {
+                            return this._downloadAlt('datasetIds', datasetIds, ret);
+                        } else return Promise.resolve();
+                    });
+                }
             } else throw error;
         });
     }
@@ -90,10 +97,19 @@ export class MassDownloadService {
             } else return Promise.resolve();
         }).catch(error => {
             if (error == this.BROWSER_COMPAT_ERROR_MSG) {
-                return this.openAltModal().then(ret => {
-                    if (ret != 'cancel') {
-                        return this._downloadAlt('studyId', studyId, ret);
-                    } else return Promise.resolve();
+                this.datasetService.countDatasetsByStudyId(studyId).then(nbDatasets => {
+                    if (nbDatasets > this.datasetService.MAX_DATASETS_IN_ZIP_DL) {
+                        this.dialogService.error('Too many datasets', 'This study contains ' 
+                            + nbDatasets + ' datasets while Shanoir sets a limit to ' + this.datasetService.MAX_DATASETS_IN_ZIP_DL 
+                            + ' in a single zip. Please confider using a browser compatible with the Shanoir unlimited download functionality. See link below.',
+                            "https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker#browser_compatibility" );
+                    } else {
+                        return this.openAltModal().then(ret => {
+                            if (ret != 'cancel') {
+                                return this._downloadAlt('studyId', studyId, ret);
+                            } else return Promise.resolve();
+                        });
+                    }
                 });
             } else throw error;
         });
