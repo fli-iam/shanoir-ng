@@ -167,10 +167,9 @@ public class ExecutionDataApiController implements ExecutionDataApi {
 
         List<ParameterResourcesDTO> parametersDatasets = executionMonitoringService.createProcessingResources(createdMonitoring, execution.getParametersRessources());
 
-        executionStatusMonitorService.startMonitoringJob(createdMonitoring.getIdentifier());
-
         // 3: create Execution on VIP
         // init headers with the active access token
+
         AccessTokenResponse accessTokenResponse = keycloakServiceAccountUtils.getServiceAccountAccessToken();
 
         execution.setResultsLocation("shanoir:/" + executionMonitoring.getResultsLocation() + "?token=" + accessTokenResponse.getToken() + "&refreshToken=" + accessTokenResponse.getRefreshToken() + "&md5=none&type=File");
@@ -184,8 +183,14 @@ public class ExecutionDataApiController implements ExecutionDataApi {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + accessTokenResponse.getToken());
         HttpEntity<ExecutionDTO> entity = new HttpEntity<>(execution, headers);
-
-        ResponseEntity<ExecutionDTO> execResult = this.restTemplate.exchange(VIP_URI, HttpMethod.POST, entity, ExecutionDTO.class);
+        LOG.error(VIP_URI);
+        String vip_uri = VIP_URI;
+        if (VIP_URI.endsWith("%22") || VIP_URI.endsWith("\"")) {
+            vip_uri = vip_uri.replace("\"", "");
+            vip_uri = vip_uri.replace("%22", "");
+            LOG.error("made the change");
+        }
+        ResponseEntity<ExecutionDTO> execResult = this.restTemplate.exchange(vip_uri, HttpMethod.POST, entity, ExecutionDTO.class);
 
         ExecutionDTO execCreated = execResult.getBody();
 
