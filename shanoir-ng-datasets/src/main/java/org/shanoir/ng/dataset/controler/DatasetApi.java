@@ -191,7 +191,7 @@ public interface DatasetApi {
     		@Parameter(name = "Dowloading nifti, decide the nifti converter id") Long converterId,
     		@Parameter(name = "Decide if you want to download dicom (dcm) or nifti (nii) files.")
     		@Valid @RequestParam(value = "format", required = false, defaultValue="dcm") String format, 
-				HttpServletResponse response) throws RestServiceException, MalformedURLException, IOException;
+				HttpServletResponse response) throws RestServiceException, MalformedURLException, IOException, EntityNotFoundException;
 
     @Operation(summary = "getDicomMetadataByDatasetId", description = "If exists, returns the dataset dicom metadata corresponding to the given id")
     @ApiResponses(value = {
