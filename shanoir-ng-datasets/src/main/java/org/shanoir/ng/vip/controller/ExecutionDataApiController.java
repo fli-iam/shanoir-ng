@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.core.Response;
 import org.apache.xmlbeans.impl.jam.JParameter;
 import org.keycloak.representations.AccessTokenResponse;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -126,7 +127,7 @@ public class ExecutionDataApiController implements ExecutionDataApi {
     }
 
     @Override
-    public ResponseEntity<?> createExecution(
+    public ResponseEntity<ExecutionMonitoring> createExecution(
             @Parameter(name = "execution", required = true) @RequestBody final String executionAsString) throws EntityNotFoundException, SecurityException {
         // 1: Get dataset IDS and check rights
         List<Long> datasetsIds = new ArrayList<Long>();
@@ -183,9 +184,19 @@ public class ExecutionDataApiController implements ExecutionDataApi {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + accessTokenResponse.getToken());
         HttpEntity<ExecutionDTO> entity = new HttpEntity<>(execution, headers);
-        this.restTemplate.exchange(VIP_URI, HttpMethod.POST, entity, ExecutionDTO.class);
 
-        return null;
+        ResponseEntity<ExecutionDTO> execResult = this.restTemplate.exchange(VIP_URI, HttpMethod.POST, entity, ExecutionDTO.class);
+
+        ExecutionDTO execCreated = execResult.getBody();
+
+        executionMonitoring.setIdentifier(execCreated.getIdentifier());
+        executionMonitoring.setStatus(execCreated.getStatus());
+        executionMonitoring.setStartDate(execCreated.getStartDate());
+
+        executionMonitoring = this.executionMonitoringService.update(executionMonitoring);
+        this.executionStatusMonitorService.startMonitoringJob(executionMonitoring.getIdentifier());
+
+        return new ResponseEntity<>(executionMonitoring, HttpStatus.OK);
     }
 
 }
