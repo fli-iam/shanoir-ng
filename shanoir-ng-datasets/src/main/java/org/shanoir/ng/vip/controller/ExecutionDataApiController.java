@@ -87,8 +87,8 @@ public class ExecutionDataApiController implements ExecutionDataApi {
     @Autowired
     ExecutionStatusMonitorService executionStatusMonitorService;
 
-    @Value(value = "vip.uri")
-    private String vipExecutionRestApi;
+    @Value("${vip.uri}")
+    private String VIP_URI;
 
     @Override
     public ResponseEntity<?> getPath(
@@ -183,8 +183,7 @@ public class ExecutionDataApiController implements ExecutionDataApi {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + accessTokenResponse.getToken());
         HttpEntity<ExecutionDTO> entity = new HttpEntity<>(execution, headers);
-        this.restTemplate.exchange(vipExecutionRestApi, HttpMethod.POST, entity, ExecutionDTO.class);
-
+        this.restTemplate.exchange(VIP_URI, HttpMethod.POST, entity, ExecutionDTO.class);
 
         return null;
     }
