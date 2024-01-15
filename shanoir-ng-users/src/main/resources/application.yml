@@ -75,11 +75,13 @@ spring:
 
 springdoc:
   api-docs:
-    path: /api-docs
+    path: '/api-docs'
+    enabled: true
   swagger-ui:
-    path: /swagger-ui.html
-    enabled: false
-
+    url: /shanoir-ng/users/api-docs
+    config-url: /shanoir-ng/users/api-docs/swagger-config
+    enabled: true
+    disable-swagger-default-url: true
 front:
   server:
     address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
