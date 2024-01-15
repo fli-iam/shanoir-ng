@@ -192,12 +192,28 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             return null;
         } else {
             let fieldValue = this.getFieldRawValue(item, col["field"]);
-            if (fieldValue) return fieldValue;
+            if (fieldValue) {
+                return fieldValue;
+            }
             else if (col.defaultField)
                 return this.getFieldRawValue(item, col["defaultField"]);
             else
                 return;
         }
+    }
+
+    public static harmonizeToDate(value: any): Date {
+        let date: Date;
+        if (value instanceof Date) {
+            date = value;
+        } else if (!Number.isNaN(Date.parse(value))) {
+            date = new Date(Date.parse(value));
+        } else if (Number.isInteger(value)) {
+            date = new Date(value);
+        } else {
+            date = this.stringToDate(value);
+        }
+        return date;
     }
 
     public static getFieldRawValue(obj: Object, path: string): any {
@@ -249,15 +265,8 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         let result: any = this.getCellValue(item, col);
         if (result == null || this.isValueBoolean(result)) {
             return "";
-        } else if (col.type == 'date' || col.type == 'dateTime') {
-            let date: Date;
-            if (result instanceof Date) {
-                date = result;
-            } else if (!Number.isNaN(Date.parse(result))) {
-                date = new Date(Date.parse(result));
-            } else {
-                date = this.stringToDate(result);
-            }
+        } else if ((col.type == 'date' || col.type == 'dateTime') && !col.cellRenderer) {
+            let date: Date = TableComponent.harmonizeToDate(result);
             let dateFormat;
             if (col.type == 'dateTime') dateFormat = {year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false };
             else dateFormat = {year: "numeric", month: "2-digit", day: "2-digit"};
@@ -269,7 +278,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    private stringToDate(dateString: string): Date {
+    private static stringToDate(dateString: string): Date {
         if (!dateString) return null; 
         dateString += '';
         let split: string[] = dateString.split('-');
