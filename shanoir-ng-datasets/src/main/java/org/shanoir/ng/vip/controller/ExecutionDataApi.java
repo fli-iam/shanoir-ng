@@ -27,6 +27,7 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.vip.monitoring.model.ExecutionDTO;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -63,7 +64,7 @@ public interface ExecutionDataApi {
             consumes = {"application/json"},
             method = RequestMethod.POST)
     ResponseEntity<?> createExecution(
-            @Parameter(name = "execution", required = true) @RequestBody final String execution
+            @Parameter(name = "execution", required = true) @RequestBody final String execution, @RequestHeader(HttpHeaders.AUTHORIZATION) String authenticationToken
     ) throws EntityNotFoundException, SecurityException;
 
     @Operation(summary = "Get status for the given execution identifier", description = "Returns the status of the VIP execution that has the given identifier in parameter.", tags={  })

@@ -23,6 +23,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.core.Response;
 import org.apache.xmlbeans.impl.jam.JParameter;
+import org.hibernate.jpa.internal.util.LockOptionsHelper;
 import org.keycloak.representations.AccessTokenResponse;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
@@ -50,6 +51,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
@@ -131,9 +133,11 @@ public class ExecutionDataApiController implements ExecutionDataApi {
 
     @Override
     public ResponseEntity<ExecutionMonitoring> createExecution(
-            @Parameter(name = "execution", required = true) @RequestBody final String executionAsString) throws EntityNotFoundException, SecurityException {
+            @Parameter(name = "execution", required = true) @RequestBody final String executionAsString, @RequestHeader(HttpHeaders.AUTHORIZATION) String authenticationToken) throws EntityNotFoundException, SecurityException {
+
+        authenticationToken = authenticationToken.replace("Bearer ", "").trim();
         // 1: Get dataset IDS and check rights
-        List<Long> datasetsIds = new ArrayList<Long>();
+        List<Long> datasetsIds = new ArrayList<>();
         ObjectMapper mapper = new ObjectMapper();
         ExecutionDTO execution = null;
         try {
@@ -145,8 +149,9 @@ public class ExecutionDataApiController implements ExecutionDataApi {
         for (ParameterResourcesDTO param : execution.getParametersRessources()) {
             datasetsIds.addAll(param.getDatasetIds());
         }
+
         if (!this.datasetSecurityService.hasRightOnEveryDataset(datasetsIds, "CAN_IMPORT")) {
-            LOG.error("Admin right is mandatory for every study we are updating");
+            LOG.error("Import right is mandatory for every study we are updating");
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         };
 
@@ -173,9 +178,7 @@ public class ExecutionDataApiController implements ExecutionDataApi {
         // 3: create Execution on VIP
         // init headers with the active access token
 
-        AccessTokenResponse accessTokenResponse = keycloakServiceAccountUtils.getServiceAccountAccessToken();
-
-        execution.setResultsLocation("shanoir:/" + executionMonitoring.getResultsLocation() + "?token=" + accessTokenResponse.getToken() + "&refreshToken=" + accessTokenResponse.getRefreshToken() + "&md5=none&type=File");
+        execution.setResultsLocation("shanoir:/" + executionMonitoring.getResultsLocation() + "?token=" + authenticationToken + "&refreshToken=" + execution.getRefreshToken() + "&md5=none&type=File");
 
         Map<String, List<String>> parametersDatasetsInputValues = new HashMap<>();
         for (ParameterResourcesDTO parameterResourcesDTO : parametersDatasets) {
@@ -184,7 +187,7 @@ public class ExecutionDataApiController implements ExecutionDataApi {
         execution.setInputValues(parametersDatasetsInputValues);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + accessTokenResponse.getToken());
+        headers.set("Authorization", "Bearer " + authenticationToken);
         HttpEntity<ExecutionDTO> entity = new HttpEntity<>(execution, headers);
 
         ResponseEntity<ExecutionDTO> execResult = this.restTemplate.exchange(VIP_URI, HttpMethod.POST, entity, ExecutionDTO.class);

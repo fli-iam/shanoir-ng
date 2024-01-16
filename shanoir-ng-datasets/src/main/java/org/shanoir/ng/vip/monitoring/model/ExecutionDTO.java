@@ -40,6 +40,7 @@ public class ExecutionDTO {
     private String outputProcessing;
     private String processingType;
     private Pipeline pipeline;
+    private String refreshToken;
 
     public String getIdentifier() {
         return identifier;
@@ -168,6 +169,14 @@ public class ExecutionDTO {
 
     public void setPipeline(Pipeline pipeline) {
         this.pipeline = pipeline;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 
 }
