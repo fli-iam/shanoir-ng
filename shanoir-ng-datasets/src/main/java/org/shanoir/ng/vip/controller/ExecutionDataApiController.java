@@ -191,7 +191,7 @@ public class ExecutionDataApiController implements ExecutionDataApi {
             parametersDatasetsInputValues.put(parameterResourcesDTO.getParameter(), new ArrayList<>());
 
             for (String ressourceId : parameterResourcesDTO.getResourceIds()) {
-                String entityName = "resource_id" + ressourceId + parameterResourcesDTO.getGroupBy() + extension;
+                String entityName = "resource_id+" + ressourceId + "+" + parameterResourcesDTO.getGroupBy() + extension;
                 String inputValue = "shanoir:/" + entityName + "?format=" + exportFormat + "&datasetId=" + ressourceId
                  + "&token=" + authenticationToken + "&refreshToken=" + execution.getRefreshToken() + "&md5=none&type=File";
                 parametersDatasetsInputValues.get(parameterResourcesDTO.getParameter()).add(inputValue);
