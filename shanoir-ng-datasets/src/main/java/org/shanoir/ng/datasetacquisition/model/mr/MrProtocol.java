@@ -62,6 +62,7 @@ public class MrProtocol extends AbstractEntity {
 	 * of arrival.
 	 */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "mrProtocol", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonIgnore
 	private List<DiffusionGradient> diffusionGradients;
 
 	/**

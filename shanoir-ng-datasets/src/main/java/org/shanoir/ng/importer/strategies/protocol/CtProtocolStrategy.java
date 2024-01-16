@@ -14,15 +14,15 @@
 
 package org.shanoir.ng.importer.strategies.protocol;
 
-import org.dcm4che3.data.Attributes;
 import org.shanoir.ng.datasetacquisition.model.ct.CtProtocol;
+import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Serie;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CtProtocolStrategy {
 
-	public CtProtocol generateProtocolForSerie(Attributes attributes, Serie serie) {		
+	public CtProtocol generateProtocolForSerie(AcquisitionAttributes<String> attributes, Serie serie) {		
 		CtProtocol protocol = new CtProtocol();        
 		return protocol;
 	}
