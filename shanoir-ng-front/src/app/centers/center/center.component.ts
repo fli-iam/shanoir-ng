@@ -35,17 +35,18 @@ export class CenterComponent extends EntityComponent<Center> {
     openAcqEq: boolean = true;
     fromImport: string;
 
+    get center(): Center { return this.entity; }
+    set center(center: Center) { this.entity = center; }
+
     constructor(
             private route: ActivatedRoute,
             protected router: Router,
             private centerService: CenterService) {
 
         super(route, 'center');
+
         this.fromImport = this.router.getCurrentNavigation()?.extras?.state?.fromImport;
     }
-
-    get center(): Center { return this.entity; }
-    set center(center: Center) { this.entity = center; }
 
     getService(): EntityService<Center> {
         return this.centerService;
@@ -69,10 +70,6 @@ export class CenterComponent extends EntityComponent<Center> {
     }
 
     buildForm(): UntypedFormGroup {
-        if (this.fromImport) {
-            this.center.name = this.fromImport.split(' - ')[0] != "null" ? this.fromImport.split(' - ')[0] : "";
-            this.center.street = this.fromImport.split(' - ')[1] != "null" ? this.fromImport.split(' - ')[1] : "";
-        }
         return this.formBuilder.group({
             'name': [this.center.name, [Validators.required, Validators.minLength(2), Validators.maxLength(200), this.registerOnSubmitValidator('unique', 'name')]],
             'street': [this.center.street],

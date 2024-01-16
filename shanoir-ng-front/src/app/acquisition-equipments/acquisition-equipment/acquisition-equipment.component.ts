@@ -53,7 +53,6 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
             private acqEquipService: AcquisitionEquipmentService,
             private manufModelService: ManufacturerModelService,
             private centerService: CenterService,
-            private studyCardService: StudyCardService,
             public manufacturerModelPipe: ManufacturerModelPipe,
             protected router: Router) {
 
@@ -107,6 +106,10 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
             centerSelected.name = this.acqEquip.center.name;
             this.acqEquip.center = centerSelected;
         }
+
+        if (this.fromImport) {
+            this.acqEquip.serialNumber = this.fromImport.split('-')[2] != "null" ? this.fromImport.split('-')[2] : "";
+        }
     }
 
     private updateAcquEq(): void {
@@ -115,10 +118,6 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     buildForm(): UntypedFormGroup {
-        if (this.fromImport) {
-            this.acqEquip.serialNumber = this.fromImport.split('-')[2] != "null" ? this.fromImport.split('-')[2] : "";
-        }
-
         let form: UntypedFormGroup = this.formBuilder.group({
             'serialNumber': [this.acqEquip.serialNumber, [this.manufAndSerialUnicityValidator, this.noSpacesStartAndEndValidator]],
             'manufacturerModel': [this.acqEquip.manufacturerModel, [Validators.required]],
