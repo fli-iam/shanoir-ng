@@ -18,19 +18,14 @@ public class CenterAndEquipmentTest extends AbstractTest {
 	private static Logger logger = Logger.getLogger(CenterAndEquipmentTest.class);
 	
 	@Test
-	public void createCenter() throws Exception {
-		Center center = new Center();
-		center.setName("Center-Name-" + UUID.randomUUID().toString());
-		Center createdCenter = shUpClient.createCenter(center);
+	public void createCenterTest() throws Exception {
+		Center createdCenter = createCenter();
 		Assertions.assertNotNull(createdCenter);
 	}
 	
 	@Test
 	public void createEquipmentAndFindBySerialNumber() throws Exception {
-		Center center = new Center();
-		center.setName("Center-Name-" + UUID.randomUUID().toString());
-		Center createdCenter = shUpClient.createCenter(center);
-		Assertions.assertNotNull(createdCenter);
+		Center createdCenter = createCenter();
 		Manufacturer manufacturer = new Manufacturer();
 		manufacturer.setName("Manufacturer-" + UUID.randomUUID().toString());
 		Manufacturer createdManufacturer = shUpClient.createManufacturer(manufacturer);

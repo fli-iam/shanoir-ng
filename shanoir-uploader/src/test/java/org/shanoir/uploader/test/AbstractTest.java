@@ -3,11 +3,13 @@ package org.shanoir.uploader.test;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
+import org.shanoir.uploader.model.rest.Center;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 import org.shanoir.uploader.utils.Util;
 
@@ -67,6 +69,20 @@ public abstract class AbstractTest {
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 		}
+	}
+	
+	public static Center createCenter() {
+		Center center = new Center();
+		String centerUUID = UUID.randomUUID().toString();
+		center.setName("Center-Name-" + centerUUID);
+		center.setCity("Rennes");
+		center.setStreet("Center-Street-" + centerUUID);
+		center.setCountry("Center-Country-" + centerUUID);
+		center.setPostalCode("35000");
+		center.setWebsite("Center-Website-" + centerUUID);
+		center.setPhoneNumber("+3335353535");
+		Center createdCenter = shUpClient.createCenter(center);
+		return createdCenter;
 	}
 
 }

@@ -8,13 +8,15 @@ public class Center implements Comparable<Center> {
 
 	private String street;
 	
-	private String postCode;
+	private String postalCode;
 	
-	private String town;
+	private String city;
 	
 	private String country;
 	
 	private String website;
+	
+	private String phoneNumber;
 
 	public Center() {
 	}
@@ -48,20 +50,20 @@ public class Center implements Comparable<Center> {
 		this.street = street;
 	}
 
-	public String getPostCode() {
-		return postCode;
+	public String getPostalCode() {
+		return postalCode;
 	}
 
-	public void setPostCode(String postCode) {
-		this.postCode = postCode;
+	public void setPostalCode(String postalCode) {
+		this.postalCode = postalCode;
 	}
 
-	public String getTown() {
-		return town;
+	public String getCity() {
+		return city;
 	}
 
-	public void setTown(String town) {
-		this.town = town;
+	public void setCity(String city) {
+		this.city = city;
 	}
 
 	public String getCountry() {
@@ -78,6 +80,14 @@ public class Center implements Comparable<Center> {
 
 	public void setWebsite(String website) {
 		this.website = website;
+	}
+
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
 	}
 
 	public String toString() {
