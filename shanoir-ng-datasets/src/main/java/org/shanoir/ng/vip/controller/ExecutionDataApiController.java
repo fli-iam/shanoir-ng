@@ -132,7 +132,7 @@ public class ExecutionDataApiController implements ExecutionDataApi {
     }
 
     @Override
-    public ResponseEntity<ExecutionMonitoring> createExecution(
+    public ResponseEntity<ExecutionDTO> createExecution(
             @Parameter(name = "execution", required = true) @RequestBody final String executionAsString, @RequestHeader(HttpHeaders.AUTHORIZATION) String authenticationToken) throws EntityNotFoundException, SecurityException {
 
         authenticationToken = authenticationToken.replace("Bearer ", "").trim();
@@ -191,7 +191,7 @@ public class ExecutionDataApiController implements ExecutionDataApi {
             parametersDatasetsInputValues.put(parameterResourcesDTO.getParameter(), new ArrayList<>());
 
             for (String ressourceId : parameterResourcesDTO.getResourceIds()) {
-                String entityName = "resource_id+" + ressourceId + "+" + parameterResourcesDTO.getGroupBy() + extension;
+                String entityName = "resource_id+" + ressourceId + "+" + parameterResourcesDTO.getGroupBy().name().toLowerCase() + extension;
                 String inputValue = "shanoir:/" + entityName + "?format=" + exportFormat + "&datasetId=" + ressourceId
                  + "&token=" + authenticationToken + "&refreshToken=" + execution.getRefreshToken() + "&md5=none&type=File";
                 parametersDatasetsInputValues.get(parameterResourcesDTO.getParameter()).add(inputValue);
@@ -220,7 +220,7 @@ public class ExecutionDataApiController implements ExecutionDataApi {
         executionMonitoring = this.executionMonitoringService.update(executionMonitoring);
         this.executionStatusMonitorService.startMonitoringJob(executionMonitoring.getIdentifier());
 
-        return new ResponseEntity<>(executionMonitoring, HttpStatus.OK);
+        return new ResponseEntity<>(execution, HttpStatus.OK);
     }
 
     @Override
