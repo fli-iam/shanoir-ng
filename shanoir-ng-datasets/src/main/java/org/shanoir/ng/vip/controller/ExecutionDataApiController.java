@@ -170,6 +170,8 @@ public class ExecutionDataApiController implements ExecutionDataApi {
         executionMonitoring.setOutputProcessing(execution.getOutputProcessing());
         executionMonitoring.setInputDatasets(inputDatasets);
 
+        // let inputValue = `shanoir:/${entity_name}?format=${this.exportFormat}&datasetId=${id}&token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`;
+
         // Save monitoring in db.
         final ExecutionMonitoring createdMonitoring = executionMonitoringService.create(executionMonitoring);
 
@@ -178,13 +180,28 @@ public class ExecutionDataApiController implements ExecutionDataApi {
         // 3: create Execution on VIP
         // init headers with the active access token
 
-        execution.setResultsLocation("shanoir:/" + executionMonitoring.getResultsLocation() + "?token=" + authenticationToken + "&refreshToken=" + execution.getRefreshToken() + "&md5=none&type=File");
+        execution.setResultsLocation("shanoir:/" + createdMonitoring.getResultsLocation() + "?token=" + authenticationToken + "&refreshToken=" + execution.getRefreshToken() + "&md5=none&type=File");
+
+        String exportFormat = "dcm";
 
         Map<String, List<String>> parametersDatasetsInputValues = new HashMap<>();
         for (ParameterResourcesDTO parameterResourcesDTO : parametersDatasets) {
-            parametersDatasetsInputValues.put(parameterResourcesDTO.getParameter(), parameterResourcesDTO.getResourceIds());
+            parametersDatasetsInputValues.put(parameterResourcesDTO.getParameter(), new ArrayList<>());
+
+            for (String ressourceId : parameterResourcesDTO.getResourceIds()) {
+                String entityName = "resource_id"+ressourceId+parameterResourcesDTO.getGroupBy() + ".zip";
+                String inputValue = "shanoir:/" + entityName + "?format=" + exportFormat + "&datasetId=" + ressourceId
+                 + "&token=" + authenticationToken + "&refreshToken=" + execution.getRefreshToken() + "&md5=none&type=File";
+                parametersDatasetsInputValues.get(parameterResourcesDTO.getParameter()).add(inputValue);
+            }
         }
         execution.setInputValues(parametersDatasetsInputValues);
+
+        try {
+            LOG.error(mapper.writeValueAsString(execution));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + authenticationToken);
