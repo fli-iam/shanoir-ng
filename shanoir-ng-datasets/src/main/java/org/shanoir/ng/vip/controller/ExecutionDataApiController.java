@@ -41,6 +41,7 @@ import org.shanoir.ng.vip.monitoring.service.ExecutionMonitoringService;
 import org.shanoir.ng.vip.resource.ProcessingResourceService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.vip.resulthandler.ResultHandlerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
@@ -183,14 +186,8 @@ public class ExecutionDataApiController implements ExecutionDataApi {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + accessTokenResponse.getToken());
         HttpEntity<ExecutionDTO> entity = new HttpEntity<>(execution, headers);
-        LOG.error(VIP_URI);
-        String vip_uri = VIP_URI;
-        if (VIP_URI.endsWith("%22") || VIP_URI.endsWith("\"")) {
-            vip_uri = vip_uri.replace("\"", "");
-            vip_uri = vip_uri.replace("%22", "");
-            LOG.error("made the change");
-        }
-        ResponseEntity<ExecutionDTO> execResult = this.restTemplate.exchange(vip_uri, HttpMethod.POST, entity, ExecutionDTO.class);
+
+        ResponseEntity<ExecutionDTO> execResult = this.restTemplate.exchange(VIP_URI, HttpMethod.POST, entity, ExecutionDTO.class);
 
         ExecutionDTO execCreated = execResult.getBody();
 
@@ -204,4 +201,23 @@ public class ExecutionDataApiController implements ExecutionDataApi {
         return new ResponseEntity<>(executionMonitoring, HttpStatus.OK);
     }
 
+    @Override
+    public ResponseEntity<String> getexecutionStatus(@Parameter(name = "The execution identifier", required=true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException {
+
+        AccessTokenResponse accessTokenResponse = keycloakServiceAccountUtils.getServiceAccountAccessToken();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + accessTokenResponse.getToken());
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        Execution execution;
+        try {
+            String uri = VIP_URI + identifier + "/summary";
+            ResponseEntity<Execution> execResult = this.restTemplate.exchange(uri, HttpMethod.GET, entity, Execution.class);
+            execution = execResult.getBody();
+        } catch (HttpStatusCodeException e) {
+            // in case of an error with response payload
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(execution.getStatus().getRestLabel(), HttpStatus.OK);
+    }
 }
