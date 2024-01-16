@@ -170,8 +170,6 @@ public class ExecutionDataApiController implements ExecutionDataApi {
         executionMonitoring.setOutputProcessing(execution.getOutputProcessing());
         executionMonitoring.setInputDatasets(inputDatasets);
 
-        // let inputValue = `shanoir:/${entity_name}?format=${this.exportFormat}&datasetId=${id}&token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`;
-
         // Save monitoring in db.
         final ExecutionMonitoring createdMonitoring = executionMonitoringService.create(executionMonitoring);
 
@@ -182,14 +180,18 @@ public class ExecutionDataApiController implements ExecutionDataApi {
 
         execution.setResultsLocation("shanoir:/" + createdMonitoring.getResultsLocation() + "?token=" + authenticationToken + "&refreshToken=" + execution.getRefreshToken() + "&md5=none&type=File");
 
-        String exportFormat = "dcm";
+        String exportFormat = execution.getExportFormat();
+        String extension = ".nii.gz";
+        if ("dcm".equals(execution.getExportFormat())) {
+            extension = ".zip";
+        }
 
         Map<String, List<String>> parametersDatasetsInputValues = new HashMap<>();
         for (ParameterResourcesDTO parameterResourcesDTO : parametersDatasets) {
             parametersDatasetsInputValues.put(parameterResourcesDTO.getParameter(), new ArrayList<>());
 
             for (String ressourceId : parameterResourcesDTO.getResourceIds()) {
-                String entityName = "resource_id"+ressourceId+parameterResourcesDTO.getGroupBy() + ".zip";
+                String entityName = "resource_id" + ressourceId + parameterResourcesDTO.getGroupBy() + extension;
                 String inputValue = "shanoir:/" + entityName + "?format=" + exportFormat + "&datasetId=" + ressourceId
                  + "&token=" + authenticationToken + "&refreshToken=" + execution.getRefreshToken() + "&md5=none&type=File";
                 parametersDatasetsInputValues.get(parameterResourcesDTO.getParameter()).add(inputValue);

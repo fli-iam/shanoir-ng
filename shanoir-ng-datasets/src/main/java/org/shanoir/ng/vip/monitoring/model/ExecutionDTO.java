@@ -41,6 +41,7 @@ public class ExecutionDTO {
     private String processingType;
     private Pipeline pipeline;
     private String refreshToken;
+    private String exportFormat = "dcm";
 
     public String getIdentifier() {
         return identifier;
@@ -179,4 +180,11 @@ public class ExecutionDTO {
         this.refreshToken = refreshToken;
     }
 
+    public String getExportFormat() {
+        return exportFormat;
+    }
+
+    public void setExportFormat(String exportFormat) {
+        this.exportFormat = exportFormat;
+    }
 }
