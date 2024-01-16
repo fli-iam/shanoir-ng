@@ -49,9 +49,8 @@ public class CenterAndEquipmentTest extends AbstractTest {
 		equipment.setManufacturerModel(createdManufacturerModel);
 		AcquisitionEquipment createdEquipment = shUpClient.createEquipment(equipment);
 		Assertions.assertNotNull(createdEquipment);
-		// to fix here:
-//		List<AcquisitionEquipment> equipments = shUpClient.findAcquisitionEquipmentsBySerialNumber(serialNumberRandom);
-//		Assertions.assertNotNull(equipments);
+		List<AcquisitionEquipment> equipments = shUpClient.findAcquisitionEquipmentsBySerialNumber(serialNumberRandom);
+		Assertions.assertNotNull(equipments);
 	}
 	
 }
