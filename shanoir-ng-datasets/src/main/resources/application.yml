@@ -60,8 +60,6 @@ spring:
   rabbitmq:
     host: ${SHANOIR_PREFIX}rabbitmq
     port: 5672
-    username: guest
-    password: guest
   session:
     store-type: none
   servlet:

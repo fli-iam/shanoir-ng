@@ -19,6 +19,7 @@ import jakarta.persistence.*;
 import org.shanoir.ng.score.Score;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -50,6 +51,20 @@ public class VariableAssessment extends AbstractEntity {
 	/** The score list. */
 	@OneToMany(mappedBy = "variableAssessment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<Score> scoreList;
+
+	public VariableAssessment() {
+
+	}
+
+	public VariableAssessment(VariableAssessment other) {
+		this.instrumentBasedAssessment = other.instrumentBasedAssessment;
+		this.instrumentVariable = other.instrumentVariable;
+
+		this.scoreList = new ArrayList<>(other.getScoreList().size());
+		for (Score score : other.getScoreList()) {
+			this.scoreList.add(new Score(this));
+		}
+	}
 
 	/**
 	 * @return the instrumentBasedAssessment

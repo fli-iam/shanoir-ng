@@ -33,6 +33,12 @@ public class StatisticalDataset extends Dataset {
 	 */
 	private static final long serialVersionUID = 7175768970653122456L;
 
+	public StatisticalDataset() {}
+
+	public StatisticalDataset(Dataset other) {
+		super(other);
+	}
+
 	@Override
 	public String getType() {
 		return "Statistical";

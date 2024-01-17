@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
+import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 
 /**
@@ -30,6 +31,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 @JsonTypeName("Mr")
 public class MrDatasetAcquisition extends DatasetAcquisition {
 
+	public static final String datasetAcquisitionType = "Mr";
 	/**
 	 * UID
 	 */
@@ -38,6 +40,14 @@ public class MrDatasetAcquisition extends DatasetAcquisition {
 	/** MR protocol. */
 	@OneToOne(cascade = CascadeType.ALL)
 	private MrProtocol mrProtocol;
+
+	public MrDatasetAcquisition() {
+	}
+
+	public MrDatasetAcquisition(DatasetAcquisition acq, MrDataset mrDs) {
+		super(acq);
+		this.mrProtocol = new MrProtocol(((MrDatasetAcquisition) acq).getMrProtocol(), mrDs);
+	}
 
 	/**
 	 * @return the mrProtocol
