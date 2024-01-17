@@ -144,7 +144,8 @@ public class ExecutionDataApiController implements ExecutionDataApi {
         try {
             execution = mapper.readValue(executionAsString, ExecutionDTO.class);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            LOG.error("Could not parse execution DTO from input, please respect the expected structure.", e);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         String clientId = execution.getClient();
 
@@ -160,17 +161,7 @@ public class ExecutionDataApiController implements ExecutionDataApi {
         List<Dataset> inputDatasets = this.datasetService.findByIdIn(datasetsIds);
 
         // 2: Create monitoring on shanoir
-        ExecutionMonitoring executionMonitoring = new ExecutionMonitoring();
-        executionMonitoring.setName(execution.getName());
-        executionMonitoring.setPipelineIdentifier(execution.getPipelineIdentifier());
-        executionMonitoring.setResultsLocation(KeycloakUtil.getTokenUserId() + "/" + LocalDate.now());
-        executionMonitoring.setTimeout(20);
-        executionMonitoring.setStudyId(Long.valueOf(execution.getStudyIdentifier()));
-        executionMonitoring.setStatus(ExecutionStatus.RUNNING);
-        executionMonitoring.setComment(execution.getName());
-        executionMonitoring.setDatasetProcessingType(DatasetProcessingType.valueOf(execution.getProcessingType()));
-        executionMonitoring.setOutputProcessing(execution.getOutputProcessing());
-        executionMonitoring.setInputDatasets(inputDatasets);
+        ExecutionMonitoring executionMonitoring = createExecutionMonitoring(execution, inputDatasets);
 
         // Save monitoring in db.
         final ExecutionMonitoring createdMonitoring = executionMonitoringService.create(executionMonitoring);
@@ -222,6 +213,21 @@ public class ExecutionDataApiController implements ExecutionDataApi {
         this.executionStatusMonitorService.startMonitoringJob(executionMonitoring.getIdentifier());
 
         return new ResponseEntity<>(execCreated, HttpStatus.OK);
+    }
+
+    private ExecutionMonitoring createExecutionMonitoring(ExecutionDTO execution, List<Dataset> inputDatasets) {
+        ExecutionMonitoring executionMonitoring = new ExecutionMonitoring();
+        executionMonitoring.setName(execution.getName());
+        executionMonitoring.setPipelineIdentifier(execution.getPipelineIdentifier());
+        executionMonitoring.setResultsLocation(KeycloakUtil.getTokenUserId() + "/" + LocalDate.now());
+        executionMonitoring.setTimeout(20);
+        executionMonitoring.setStudyId(Long.valueOf(execution.getStudyIdentifier()));
+        executionMonitoring.setStatus(ExecutionStatus.RUNNING);
+        executionMonitoring.setComment(execution.getName());
+        executionMonitoring.setDatasetProcessingType(DatasetProcessingType.valueOf(execution.getProcessingType()));
+        executionMonitoring.setOutputProcessing(execution.getOutputProcessing());
+        executionMonitoring.setInputDatasets(inputDatasets);
+        return executionMonitoring;
     }
 
     @Override
