@@ -31,6 +31,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 public class ZipFileImportTest extends AbstractTest {
 
+	private static final String PROFILE_NEURINFO = "Profile Neurinfo";
+
 	private static Logger logger = Logger.getLogger(ZipFileImportTest.class);
 	
 	private static final String IN_PROGRESS = "IN_PROGRESS";
@@ -87,7 +89,7 @@ public class ZipFileImportTest extends AbstractTest {
 		importJob.setSubjectName(subject.getName());
 		importJob.setExaminationId(examination.getId());
 		importJob.setConverterId(Long.valueOf(6));
-		importJob.setAnonymisationProfileToUse("Profile Neurinfo"); // yes we are in ShUp, but use the standard import API
+		importJob.setAnonymisationProfileToUse(PROFILE_NEURINFO); // yes we are in ShUp, but use the standard import API
 		String importJobJson = Util.objectWriter.writeValueAsString(importJob);
 		shUpClient.startImportJob(importJobJson);
 	}
