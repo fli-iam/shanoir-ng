@@ -57,7 +57,6 @@ public interface ExecutionDataApi {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Execution successfully created response."),
             @ApiResponse(responseCode = "403", description = "forbidden"),
-            @ApiResponse(responseCode = "404", description = "No dataset found"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @RequestMapping(value = "/createExecution",
             produces = {"application/json"},
