@@ -20,11 +20,67 @@ import java.util.Map;
 
 public class Pipeline {
 
-    String identifier;
-    String name;
-    String version;
-    String outputProcessing;
-    String description;
-    List<PipelineParameter> parameters;
-    Map<String, String> properties;
+    private String identifier;
+    private String name;
+    private String version;
+    private String outputProcessing;
+    private String description;
+    private List<PipelineParameter> parameters;
+    private Map<String, String> properties;
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getOutputProcessing() {
+        return outputProcessing;
+    }
+
+    public void setOutputProcessing(String outputProcessing) {
+        this.outputProcessing = outputProcessing;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public List<PipelineParameter> getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(List<PipelineParameter> parameters) {
+        this.parameters = parameters;
+    }
+
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
+    }
 }

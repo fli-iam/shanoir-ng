@@ -88,10 +88,10 @@ public class ExecutionDataApiController implements ExecutionDataApi {
     private KeycloakServiceAccountUtils keycloakServiceAccountUtils;
 
     @Autowired
-    ExecutionMonitoringService executionMonitoringService;
+    private ExecutionMonitoringService executionMonitoringService;
 
     @Autowired
-    ExecutionStatusMonitorService executionStatusMonitorService;
+    private ExecutionStatusMonitorService executionStatusMonitorService;
 
     @Value("${vip.uri}")
     private String VIP_URI;
@@ -133,9 +133,10 @@ public class ExecutionDataApiController implements ExecutionDataApi {
 
     @Override
     public ResponseEntity<ExecutionDTO> createExecution(
-            @Parameter(name = "execution", required = true) @RequestBody final String executionAsString, @RequestHeader(HttpHeaders.AUTHORIZATION) String authenticationToken) throws EntityNotFoundException, SecurityException {
+            @Parameter(name = "execution", required = true) @RequestBody final String executionAsString) throws EntityNotFoundException, SecurityException {
 
-        authenticationToken = authenticationToken.replace("Bearer ", "").trim();
+        String authenticationToken = KeycloakUtil.getToken();
+
         // 1: Get dataset IDS and check rights
         List<Long> datasetsIds = new ArrayList<>();
         ObjectMapper mapper = new ObjectMapper();
@@ -145,6 +146,7 @@ public class ExecutionDataApiController implements ExecutionDataApi {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+        String clientId = execution.getClient();
 
         for (ParameterResourcesDTO param : execution.getParametersRessources()) {
             datasetsIds.addAll(param.getDatasetIds());
@@ -178,7 +180,7 @@ public class ExecutionDataApiController implements ExecutionDataApi {
         // 3: create Execution on VIP
         // init headers with the active access token
 
-        execution.setResultsLocation("shanoir:/" + createdMonitoring.getResultsLocation() + "?token=" + authenticationToken + "&refreshToken=" + execution.getRefreshToken() + "&md5=none&type=File");
+        execution.setResultsLocation("shanoir:/" + createdMonitoring.getResultsLocation() + "?token=" + authenticationToken + "&refreshToken=" + execution.getRefreshToken() + "&clientId=" + clientId + "&md5=none&type=File");
 
         String exportFormat = execution.getExportFormat();
         String extension = ".nii.gz";
@@ -193,7 +195,7 @@ public class ExecutionDataApiController implements ExecutionDataApi {
             for (String ressourceId : parameterResourcesDTO.getResourceIds()) {
                 String entityName = "resource_id+" + ressourceId + "+" + parameterResourcesDTO.getGroupBy().name().toLowerCase() + extension;
                 String inputValue = "shanoir:/" + entityName + "?format=" + exportFormat + "&datasetId=" + ressourceId
-                 + "&token=" + authenticationToken + "&refreshToken=" + execution.getRefreshToken() + "&md5=none&type=File";
+                 + "&token=" + authenticationToken + "&refreshToken=" + execution.getRefreshToken() + "&clientId=" + clientId + "&md5=none&type=File";
                 parametersDatasetsInputValues.get(parameterResourcesDTO.getParameter()).add(inputValue);
             }
         }
@@ -205,8 +207,7 @@ public class ExecutionDataApiController implements ExecutionDataApi {
             throw new RuntimeException(e);
         }
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + authenticationToken);
+        HttpHeaders headers = KeycloakUtil.getKeycloakHeader();
         HttpEntity<ExecutionDTO> entity = new HttpEntity<>(execution, headers);
 
         ResponseEntity<ExecutionDTO> execResult = this.restTemplate.exchange(VIP_URI, HttpMethod.POST, entity, ExecutionDTO.class);

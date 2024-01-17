@@ -64,14 +64,12 @@ public interface ExecutionDataApi {
             consumes = {"application/json"},
             method = RequestMethod.POST)
     ResponseEntity<?> createExecution(
-            @Parameter(name = "execution", required = true) @RequestBody final String execution, @RequestHeader(HttpHeaders.AUTHORIZATION) String authenticationToken
-    ) throws EntityNotFoundException, SecurityException;
+            @Parameter(name = "execution", required = true) @RequestBody final String execution) throws EntityNotFoundException, SecurityException;
 
     @Operation(summary = "Get status for the given execution identifier", description = "Returns the status of the VIP execution that has the given identifier in parameter.", tags={  })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "successful response, returns the status"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
-            @ApiResponse(responseCode = "404", description = "No execution found"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @RequestMapping(value = "/execution/{identifier}",
             produces = { "application/json", "application/octet-stream" },

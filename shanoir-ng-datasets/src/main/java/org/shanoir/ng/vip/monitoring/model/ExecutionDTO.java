@@ -42,6 +42,7 @@ public class ExecutionDTO {
     private Pipeline pipeline;
     private String refreshToken;
     private String exportFormat = "dcm";
+    private String client = "shanoir-ng-front";
 
     public String getIdentifier() {
         return identifier;
@@ -187,4 +188,13 @@ public class ExecutionDTO {
     public void setExportFormat(String exportFormat) {
         this.exportFormat = exportFormat;
     }
+
+    public String getClient() {
+        return client;
+    }
+
+    public void setClient(String client) {
+        this.client = client;
+    }
+
 }

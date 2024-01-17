@@ -23,12 +23,12 @@ import java.util.Map;
  */
 public class PipelineParameter {
 
-    String name;
-    String type;
-    String value;
-    boolean isOptional;
-    boolean isReturnedValue;
-    String description;
+    private String name;
+    private String type;
+    private String value;
+    private boolean isOptional;
+    private boolean isReturnedValue;
+    private String description;
 
     public String getName() {
         return name;
