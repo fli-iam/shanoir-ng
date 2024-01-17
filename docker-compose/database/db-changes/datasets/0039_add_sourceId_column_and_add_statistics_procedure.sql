@@ -10,6 +10,12 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
+ALTER TABLE dataset ADD COLUMN source_id bigint(20) DEFAULT NULL;
+ALTER TABLE dataset_acquisition ADD COLUMN source_id bigint(20) DEFAULT NULL;
+ALTER TABLE examination ADD COLUMN source_id bigint(20) DEFAULT NULL;
+
+-- squashed 0039_add_statistics_procedure.sql
+
 use datasets;
 
 drop procedure if exists getStatistics;
