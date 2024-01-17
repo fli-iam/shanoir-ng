@@ -220,7 +220,7 @@ public class ExecutionDataApiController implements ExecutionDataApi {
         executionMonitoring = this.executionMonitoringService.update(executionMonitoring);
         this.executionStatusMonitorService.startMonitoringJob(executionMonitoring.getIdentifier());
 
-        return new ResponseEntity<>(execution, HttpStatus.OK);
+        return new ResponseEntity<>(execCreated, HttpStatus.OK);
     }
 
     @Override
