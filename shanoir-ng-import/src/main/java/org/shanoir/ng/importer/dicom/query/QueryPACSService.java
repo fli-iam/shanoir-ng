@@ -279,21 +279,22 @@ public class QueryPACSService {
 		DicomParam[] params = { studyDescription, studyDate, new DicomParam(Tag.PatientName),
 			new DicomParam(Tag.PatientID), new DicomParam(Tag.PatientBirthDate), new DicomParam(Tag.PatientBirthName),
 			new DicomParam(Tag.PatientSex), new DicomParam(Tag.StudyInstanceUID) };
-		List<Attributes> attributesStudies = queryCFind(params, QueryRetrieveLevel.STUDY);
-		if (attributesStudies != null) {
+		List<Attributes> studies = queryCFind(params, QueryRetrieveLevel.STUDY);
+		// list of all corresponding DICOM studies received
+		if (studies != null) {
 			List<Patient> patients = new ArrayList<>();
-			for (int i = 0; i < attributesStudies.size(); i++) {
-				// handle patients
-				Patient patient = new Patient(attributesStudies.get(i));
-				patient = addPatientIfNotExisting(patients, patient);
-				// handle studies
-				Study study = new Study(attributesStudies.get(i));
-				patient.getStudies().add(study);
-				querySeries(study);
-			}
-			// Limit the max number of patients returned
-			if (maxPatientsFromPACS < patients.size()) {
-				patients = patients.subList(0, maxPatientsFromPACS);
+			for (int i = 0; i < studies.size(); i++) {
+				Attributes studyAttr = studies.get(i);
+				// handle patients: create patient from attributes
+				Patient patient = new Patient(studyAttr);
+				// Limit the max number of patients processed
+				if (patients.size() < maxPatientsFromPACS) {
+					patient = addPatientIfNotExisting(patients, patient);
+					// handle studies
+					Study study = new Study(studyAttr);
+					patient.getStudies().add(study);
+					querySeries(study);
+				}
 			}
 			importJob.setPatients(patients);
 		}
