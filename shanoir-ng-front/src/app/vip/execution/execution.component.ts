@@ -47,11 +47,9 @@ export class ExecutionComponent implements OnInit {
     token: String;
     refreshToken: String;
     parametersApplied: boolean = false;
-    nbExecutions = 0;
     execution: Execution;
     columnDefs: { [key: string]: ColumnDefinition[] } = {};
     datasetsByParam: { [key: string]: Dataset[] } = {};
-    tables = [];
     fileInputs = [];
     inputDatasets: Set<Dataset>;
     execDefaultName= "";
