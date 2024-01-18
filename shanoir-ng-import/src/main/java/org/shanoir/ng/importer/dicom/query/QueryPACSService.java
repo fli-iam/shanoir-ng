@@ -285,36 +285,46 @@ public class QueryPACSService {
 			List<Patient> patients = new ArrayList<>();
 			for (int i = 0; i < studies.size(); i++) {
 				Attributes studyAttr = studies.get(i);
-				// handle patients: create patient from attributes
+				// handle patient: create patient from attributes
 				Patient patient = new Patient(studyAttr);
-				// Limit the max number of patients processed
-				if (patients.size() < maxPatientsFromPACS) {
-					patient = addPatientIfNotExisting(patients, patient);
-					// handle studies
+				patient.setStudies(new ArrayList<Study>());
+				boolean newPatient = true;
+				for (Iterator<Patient> iterator = patients.iterator(); iterator.hasNext();) {
+					Patient existingPatient = iterator.next();
+					if (existingPatient.getPatientID().equals(patient.getPatientID())) {
+						patient = existingPatient;
+						newPatient = false;
+					}
+				}
+				boolean maxPatientsFromPACSReached = false;
+				if (newPatient) {
+					// Limit the max number of patients processed
+					if (patients.size() < maxPatientsFromPACS) {
+						patients.add(patient);
+					} else {
+						maxPatientsFromPACSReached = true;
+						// we do not stop the method here in case other studies
+						// follow afterwards from patients, that exist already
+						// maybe no guarantee here, that the pacs returns studies
+						// grouped by patient
+					}
+				}
+				if (!maxPatientsFromPACSReached) {
+					// handle study
 					Study study = new Study(studyAttr);
 					patient.getStudies().add(study);
 					querySeries(study);
+				} else {
+					if (!newPatient) { // only process existing patients, in case
+						// handle study
+						Study study = new Study(studyAttr);
+						patient.getStudies().add(study);
+						querySeries(study);						
+					}
 				}
 			}
 			importJob.setPatients(patients);
 		}
-	}
-
-	/**
-	 * This method adds a new patient to the patients list, if not already existing.
-	 * @param patients
-	 * @param newPatient
-	 */
-	private Patient addPatientIfNotExisting(List<Patient> patients, Patient newPatient) {
-		for (Iterator<Patient> iterator = patients.iterator(); iterator.hasNext();) {
-			Patient patientInList = iterator.next();
-			if (patientInList.getPatientID().equals(newPatient.getPatientID())) {
-				return patientInList;
-			}
-		}
-		newPatient.setStudies(new ArrayList<Study>());
-		patients.add(newPatient);
-		return newPatient;
 	}
 	
 	/**

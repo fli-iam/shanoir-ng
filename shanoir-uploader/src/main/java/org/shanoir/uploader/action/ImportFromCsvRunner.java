@@ -2,7 +2,6 @@ package org.shanoir.uploader.action;
 
 import java.io.File;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Calendar;
