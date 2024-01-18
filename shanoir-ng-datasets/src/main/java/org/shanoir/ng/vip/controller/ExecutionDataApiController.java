@@ -122,7 +122,7 @@ public class ExecutionDataApiController implements ExecutionDataApi {
                     return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
                 }
 
-                datasetDownloaderService.massiveDownload(format, datasets, response, true);
+                datasetDownloaderService.massiveDownload(format, datasets, response, true, null);
 
                 return new ResponseEntity<Void>(HttpStatus.OK);
         }

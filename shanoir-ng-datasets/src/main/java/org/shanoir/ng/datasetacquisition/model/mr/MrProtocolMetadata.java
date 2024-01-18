@@ -15,7 +15,9 @@
 package org.shanoir.ng.datasetacquisition.model.mr;
 
 import jakarta.persistence.*;
+import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.shanoir.ng.shared.model.FlipAngle;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -120,6 +122,40 @@ public class MrProtocolMetadata extends AbstractEntity {
 
 	/** Transmitting coil. */
 	private Long transmittingCoilId;
+
+	public MrProtocolMetadata() {
+
+	}
+
+	public MrProtocolMetadata(MrProtocolMetadata mrProcMD) {
+		this.acquisitionContrast = mrProcMD.getAcquisitionContrast().getId();
+		this.contrastAgentConcentration = mrProcMD.getContrastAgentConcentration();
+		this.contrastAgentUsed = mrProcMD.getContrastAgentUsed().getId();
+		this.injectedVolume = mrProcMD.getInjectedVolume();
+		this.magnetizationTransfer = mrProcMD.getMagnetizationTransfer();
+		this.mrSequenceKSpaceFill = mrProcMD.getMrSequenceKSpaceFill().getId();
+		this.mrSequenceName = mrProcMD.getMrSequenceName();
+
+		this.mrScanningSequence = new ArrayList<>(mrProcMD.getMrScanningSequence().size());
+		for (MrScanningSequence mrss : mrProcMD.getMrScanningSequence()) {
+			this.mrScanningSequence.add(mrss.getId());
+		}
+
+		this.mrSequenceVariant =  new ArrayList<>(mrProcMD.getMrSequenceVariant().size());
+		for (MrSequenceVariant mrsv : mrProcMD.getMrSequenceVariant()) {
+			this.mrSequenceVariant.add(mrsv.getId());
+		}
+
+		this.name = mrProcMD.getName();
+		this.parallelAcquisition = mrProcMD.getParallelAcquisition();
+		this.parallelAcquisitionTechnique = mrProcMD.getParallelAcquisitionTechnique().getId();
+		this.receivingCoilId = mrProcMD.getReceivingCoilId();
+		this.sliceOrder = mrProcMD.getSliceOrder().getId();
+		this.sliceOrientationAtAcquisition = mrProcMD.getSliceOrientationAtAcquisition().getId();
+		this.timeReductionFactorForTheInPlaneDirection = mrProcMD.getTimeReductionFactorForTheInPlaneDirection();
+		this.timeReductionFactorForTheOutOfPlaneDirection = mrProcMD.getTimeReductionFactorForTheOutOfPlaneDirection();
+		this.transmittingCoilId = mrProcMD.getTransmittingCoilId();
+	}
 
 	/**
 	 * @return the acquisitionContrast

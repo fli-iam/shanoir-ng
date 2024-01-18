@@ -51,6 +51,8 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
         private downloadService: MassDownloadService
     ) { }
 
+    ngOnInit() {
+    }
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.task && this.task) {
@@ -70,7 +72,7 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
                     this.task = tasks.find(task => task.id == this.task.id);
                 })
             );
-        } 
+        }
     }
 
     ngOnDestroy() {
