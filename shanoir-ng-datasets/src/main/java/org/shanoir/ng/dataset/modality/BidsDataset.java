@@ -13,6 +13,15 @@ public class BidsDataset extends Dataset {
 	/** BIDS data type. */
 	private String bidsDataType;
 
+	public BidsDataset() {
+
+	}
+
+	public BidsDataset(Dataset other) {
+		super(other);
+		this.bidsDataType = ((BidsDataset) other).getBidsDataType();
+	}
+
 	@Override
 	public String getType() {
 		return datasetType;
