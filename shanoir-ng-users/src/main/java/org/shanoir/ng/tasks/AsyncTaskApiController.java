@@ -40,7 +40,7 @@ public class AsyncTaskApiController implements AsyncTaskApi {
 	@Override
 	public ResponseEntity<List<ShanoirEventLight>> findTasks() {
 		Long userId = KeycloakUtil.getTokenUserId();
-		List<ShanoirEventLight> taskList = taskService.getEventsByUserAndType(userId, ShanoirEventType.IMPORT_DATASET_EVENT, ShanoirEventType.CHECK_QUALITY_EVENT);
+		List<ShanoirEventLight> taskList = taskService.getEventsByUserAndType(userId, ShanoirEventType.IMPORT_DATASET_EVENT, ShanoirEventType.COPY_DATASET_EVENT, ShanoirEventType.CHECK_QUALITY_EVENT);
 
 		// Get only event with last updates < 7 days
 		Date now = new Date();

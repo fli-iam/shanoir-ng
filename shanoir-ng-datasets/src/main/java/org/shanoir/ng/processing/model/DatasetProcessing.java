@@ -69,6 +69,24 @@ public class DatasetProcessing extends AbstractEntity {
 	@JoinColumn(name = "parent_id")
 	private DatasetProcessing parent;
 
+	public DatasetProcessing() {
+
+	}
+
+	public DatasetProcessing(DatasetProcessing dproc) {
+		this.comment = dproc.getComment();
+		if (dproc.getDatasetProcessingType() != null) {
+			this.datasetProcessingType = dproc.getDatasetProcessingType().getId();
+		} else {
+			this.datasetProcessingType = null;
+		}
+		this.inputDatasets = dproc.getInputDatasets();
+		this.outputDatasets = dproc.getOutputDatasets();
+		this.processingDate = dproc.getProcessingDate();
+		this.studyId = dproc.getStudyId();
+		this.parent = dproc.getParent();
+	}
+
 	/**
 	 * @return the comment
 	 */
