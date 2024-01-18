@@ -14,7 +14,7 @@
 
 import { Component } from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
-import {ActivatedRoute, Router} from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
@@ -33,19 +33,15 @@ export class CenterComponent extends EntityComponent<Center> {
     isNameUniqueError: boolean = false;
     phoneNumberPatternError: boolean = false;
     openAcqEq: boolean = true;
-    fromImport: string;
 
     get center(): Center { return this.entity; }
     set center(center: Center) { this.entity = center; }
 
     constructor(
             private route: ActivatedRoute,
-            protected router: Router,
             private centerService: CenterService) {
 
         super(route, 'center');
-
-        this.fromImport = this.router.getCurrentNavigation()?.extras?.state?.fromImport;
     }
 
     getService(): EntityService<Center> {
