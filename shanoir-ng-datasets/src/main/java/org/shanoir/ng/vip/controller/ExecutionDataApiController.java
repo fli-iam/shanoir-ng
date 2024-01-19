@@ -192,13 +192,6 @@ public class ExecutionDataApiController implements ExecutionDataApi {
         }
         execution.setInputValues(parametersDatasetsInputValues);
 
-        try {
-            LOG.error(mapper.writeValueAsString(execution));
-        }  catch (JsonProcessingException e) {
-            LOG.error("Could not parse execution DTO from VIP response, please contact an administrator", e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
         HttpHeaders headers = KeycloakUtil.getKeycloakHeader();
         HttpEntity<ExecutionDTO> entity = new HttpEntity<>(execution, headers);
 
