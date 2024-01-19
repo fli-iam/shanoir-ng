@@ -368,7 +368,7 @@ export class MassDownloadService {
         const downloadPromise: Promise<HttpResponse<Blob>> = this.datasetService.downloadToBlob(id, format);
         return Promise.all([metadataPromise, downloadPromise]).then(([dataset, httpResponse]) => {
             const blob: Blob = httpResponse.body;
-            const filename: string = this.getFilename(httpResponse) || 'dataset_' + id;
+            const filename: string = 'dataset_' + id;
 
             // Check ERRORS file in zip
             var zip: any = new JSZip();
@@ -392,19 +392,25 @@ export class MassDownloadService {
 
             if (unzip) {
                 return unzipPromise.then(data => {
+                    console.log(1);
                     if (data) {
                         return Promise.all(
                             Object.entries(data.files)?.map(([name, file]) => {
+                                console.log(2);
                                 task.message = 'unzipping file ' + name + ' from dataset n°' + id;
                                 this.notificationService.pushLocalTask(task);
                                 const path: string = this.buildAcquisitionPath(dataset) + filename.replace('.zip', '') + '/' + name;
+                                console.log('path', path);
                                 let type: string;
                                 if (name.endsWith('.json') || name.endsWith('.txt')) type = 'string';
                                 else type = 'blob';
                                 return (file as {async: (string) => Promise<Blob>}).async(type).then(blob => {
                                     task.message = 'saving file ' + name + ' from dataset n°' + id;
                                     this.notificationService.pushLocalTask(task);
-                                    return this.writeMyFile(path, blob, userFolderHandle);
+                                    console.log('try to write');
+                                    let ret = this.writeMyFile(path, blob, userFolderHandle);
+                                    console.log('write succeed');
+                                    return ret;
                                 });
                             })
                         );
