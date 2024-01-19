@@ -372,7 +372,7 @@ export class MassDownloadService {
         return Promise.all([metadataPromise, downloadPromise]).then(([dataset, httpResponse]) => {
             const blob: Blob = httpResponse.body;
             const filename: string = this.getFilename(httpResponse) || 'dataset_' + id;
-
+            console.log('filename', filename)
             // Check ERRORS file in zip
             var zip: any = new JSZip();
             const unzipPromise: Promise<any> = zip.loadAsync(httpResponse.body).then(dataFiles => {
@@ -450,6 +450,7 @@ export class MassDownloadService {
     }
 
     private buildAcquisitionPath(dataset: Dataset): string {
+        console.log('subject')
         return dataset.datasetAcquisition?.examination?.subject?.name
                 + '_' + dataset.datasetAcquisition?.examination?.subject?.id
                 + '/'
@@ -459,6 +460,7 @@ export class MassDownloadService {
     }
 
     private writeMyFile(path: string, content: any, userFolderHandle: FileSystemDirectoryHandle): Promise<void> {
+        console.log('path', path?.length, path)
         path = path.trim();
         if (path.startsWith('/')) path = path.substring(1); // remove 1st '/'
         let splitted: string[];
@@ -471,17 +473,21 @@ export class MassDownloadService {
         // if (this.deviceInformationService.getDeviceInfo()?.os?.toLocaleLowerCase().includes('windows')) {
             // ???????????????????????????????,
         // }
-        if (splitted.length > 0) { // if dirs to create
-            return this.createDirectoriesIn(splitted, userFolderHandle).then(lastFolderHandle => { // create the sub directories
-                lastFolderHandle.getFileHandle(filename, { create: true } // create the file handle
-                ).then(fileHandler => {
-                    this.writeFile(fileHandler, content); // write the file
+        try {
+            if (splitted.length > 0) { // if dirs to create
+                return this.createDirectoriesIn(splitted, userFolderHandle).then(lastFolderHandle => { // create the sub directories
+                    lastFolderHandle.getFileHandle(filename, { create: true } // create the file handle
+                    ).then(fileHandler => {
+                        this.writeFile(fileHandler, content); // write the file
+                    });
                 });
-            });
-        } else { // if no dir to create
-            userFolderHandle.getFileHandle(filename, { create: true }).then(fileHandler => {
-                this.writeFile(fileHandler, content);
-            });
+            } else { // if no dir to create
+                userFolderHandle.getFileHandle(filename, { create: true }).then(fileHandler => {
+                    this.writeFile(fileHandler, content);
+                });
+            }
+        } catch (e) {
+            console.log('GOT THE ERROR', e)
         }
     }
 
