@@ -28,6 +28,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { DownloadSetupAltComponent } from './download-setup-alt/download-setup-alt.component';
 import { DownloadSetupComponent, DownloadSetupOptions } from './download-setup/download-setup.component';
 import { Queue } from './queue.model';
+import { AngularDeviceInformationService } from 'angular-device-information';
 
 declare var JSZip: any;
 
@@ -62,7 +63,8 @@ export class MassDownloadService {
         private datasetService: DatasetService,
         private notificationService: NotificationsService,
         private consoleService: ConsoleService,
-        private dialogService: ConfirmDialogService) {
+        private dialogService: ConfirmDialogService,
+        private deviceInformationService: AngularDeviceInformationService) {
     }
 
     downloadByIds(datasetIds: number[], format?: Format): Promise<void> {
@@ -364,11 +366,12 @@ export class MassDownloadService {
     }
 
     private saveDataset(id: number, format: Format, userFolderHandle: FileSystemDirectoryHandle, report: Report, task: Task, unzip: boolean = false, dataset?: Dataset): Promise<void> {
+        console.log('start save ', id);
         const metadataPromise: Promise<Dataset> = (dataset?.id == id && dataset.datasetAcquisition?.examination?.subject) ? Promise.resolve(dataset) : this.datasetService.get(id, 'lazy');
         const downloadPromise: Promise<HttpResponse<Blob>> = this.datasetService.downloadToBlob(id, format);
         return Promise.all([metadataPromise, downloadPromise]).then(([dataset, httpResponse]) => {
             const blob: Blob = httpResponse.body;
-            const filename: string = 'dataset_' + id;
+            const filename: string = this.getFilename(httpResponse) || 'dataset_' + id;
 
             // Check ERRORS file in zip
             var zip: any = new JSZip();
@@ -392,25 +395,23 @@ export class MassDownloadService {
 
             if (unzip) {
                 return unzipPromise.then(data => {
-                    console.log(1);
                     if (data) {
                         return Promise.all(
                             Object.entries(data.files)?.map(([name, file]) => {
-                                console.log(2);
                                 task.message = 'unzipping file ' + name + ' from dataset n°' + id;
                                 this.notificationService.pushLocalTask(task);
                                 const path: string = this.buildAcquisitionPath(dataset) + filename.replace('.zip', '') + '/' + name;
-                                console.log('path', path);
                                 let type: string;
                                 if (name.endsWith('.json') || name.endsWith('.txt')) type = 'string';
                                 else type = 'blob';
                                 return (file as {async: (string) => Promise<Blob>}).async(type).then(blob => {
                                     task.message = 'saving file ' + name + ' from dataset n°' + id;
                                     this.notificationService.pushLocalTask(task);
-                                    console.log('try to write');
+                                    console.log('try to write ', path);
                                     let ret = this.writeMyFile(path, blob, userFolderHandle);
                                     console.log('write succeed');
                                     return ret;
+
                                 });
                             })
                         );
@@ -430,6 +431,7 @@ export class MassDownloadService {
             task.message = 'saving dataset n°' + id + ' failed';
             task.status = 5;
         }).finally(() => {
+            console.log('finally 1', id);
             if (report.list[id].status == 'SUCCESS') {
                 task.lastUpdate = new Date();
                 task.message = '(' + report.nbSuccess + '/' + report.requestedDatasetIds.length + ') dataset n°' + id + ' successfully saved';
@@ -443,6 +445,7 @@ export class MassDownloadService {
             task.lastUpdate = new Date();
             task.progress = (report.nbSuccess + report.nbError) / report.requestedDatasetIds.length;
             this.notificationService.pushLocalTask(task);
+            console.log('finally 2', id);
         });
     }
 
@@ -465,6 +468,9 @@ export class MassDownloadService {
             splitted = [path];
         }
         const filename = splitted.pop(); // separate filename from dir path
+        // if (this.deviceInformationService.getDeviceInfo()?.os?.toLocaleLowerCase().includes('windows')) {
+            // ???????????????????????????????,
+        // }
         if (splitted.length > 0) { // if dirs to create
             return this.createDirectoriesIn(splitted, userFolderHandle).then(lastFolderHandle => { // create the sub directories
                 lastFolderHandle.getFileHandle(filename, { create: true } // create the file handle
