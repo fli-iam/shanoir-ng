@@ -170,17 +170,7 @@ public class QueryPACSService {
 		if (StringUtils.isNotBlank(dicomQuery.getPatientName())
 			|| StringUtils.isNotBlank(dicomQuery.getPatientID())
 			|| StringUtils.isNotBlank(dicomQuery.getPatientBirthDate())) {
-			// For Patient Name and Patient ID, wild card search is not allowed
-			if (!dicomQuery.getPatientName().contains("*") && !dicomQuery.getPatientID().contains("*")) {
-				queryPatientLevel(dicomQuery, importJob);
-			}
-			// @Todo: implement wild card search
-			// Do Fuzzy search on base of patient name here
-//			if (StringUtils.isNotEmpty(dicomQuery.getPatientName())
-//				&& (dicomQuery.getPatientName().contains("*") || !dicomQuery.getPatientName().contains("^"))) {
-			// Do precise search here, using name, id or date
-//			} else {
-//			}
+			queryPatientLevel(dicomQuery, importJob);
 		/**
 		 * In case of any study specific search field is filled, work on study level. Second priority.
 		 */
@@ -246,16 +236,16 @@ public class QueryPACSService {
 		DicomParam patientID = initDicomParam(Tag.PatientID, dicomQuery.getPatientID());
 		DicomParam patientBirthDate = initDicomParam(Tag.PatientBirthDate, dicomQuery.getPatientBirthDate());
 		DicomParam[] params = { patientName, patientID, patientBirthDate, new DicomParam(Tag.PatientBirthName), new DicomParam(Tag.PatientSex) };
-		List<Attributes> attributesPatients = queryCFind(params, QueryRetrieveLevel.PATIENT);
-		if (attributesPatients != null) {
+		List<Attributes> patientsAttr = queryCFind(params, QueryRetrieveLevel.PATIENT);
+		if (patientsAttr != null) {
 			// Limit the max number of patients returned
-			int patientsNbre = attributesPatients.size();
-			if (maxPatientsFromPACS < attributesPatients.size()) {
+			int patientsNbre = patientsAttr.size();
+			if (maxPatientsFromPACS < patientsAttr.size()) {
 				patientsNbre = maxPatientsFromPACS;
 			}
-			List<Patient> patients = new ArrayList<>();
+			List<Patient> patients = new ArrayList<Patient>();
 			for (int i = 0; i < patientsNbre; i++) {
-				Patient patient = new Patient(attributesPatients.get(i));
+				Patient patient = new Patient(patientsAttr.get(i));
 				boolean patientExists = patients.stream().anyMatch(p -> p.getPatientID().equals(patient.getPatientID()));
 				if (!patientExists) {
 					patients.add(patient);
@@ -351,18 +341,22 @@ public class QueryPACSService {
 	 * @param patient
 	 */
 	private void queryStudies(DicomQuery dicomQuery, Patient patient) {
+		DicomParam patientName = initDicomParam(Tag.PatientName, patient.getPatientName());
+		DicomParam patientID = initDicomParam(Tag.PatientID, patient.getPatientID());
+		DicomParam studyDescription = initDicomParam(Tag.StudyDescription, dicomQuery.getStudyDescription());
+		DicomParam studyDate = initDicomParam(Tag.StudyDate, dicomQuery.getStudyDate());
 		DicomParam[] params = {
-			new DicomParam(Tag.PatientID, patient.getPatientID()),
-			new DicomParam(Tag.PatientName, patient.getPatientName()),
+			patientName,
+			patientID,
 			new DicomParam(Tag.StudyInstanceUID),
-			new DicomParam(Tag.StudyDate, dicomQuery.getStudyDate()),
-			new DicomParam(Tag.StudyDescription, dicomQuery.getStudyDescription())
+			studyDescription,
+			studyDate
 		};
-		List<Attributes> attributesStudies = queryCFind(params, QueryRetrieveLevel.STUDY);
-		if (attributesStudies != null) {
-			List<Study> studies = new ArrayList<>();
-			for (int i = 0; i < attributesStudies.size(); i++) {
-				Study study = new Study(attributesStudies.get(i));
+		List<Attributes> studiesAttr = queryCFind(params, QueryRetrieveLevel.STUDY);
+		if (studiesAttr != null) {
+			List<Study> studies = new ArrayList<Study>();
+			for (int i = 0; i < studiesAttr.size(); i++) {
+				Study study = new Study(studiesAttr.get(i));
 				studies.add(study);
 				querySeries(study);
 			}
@@ -373,13 +367,15 @@ public class QueryPACSService {
 
 	/**
 	 * This method queries for series, creates them and adds them to studies.
+	 * 
 	 * @param calling
 	 * @param called
 	 * @param study
 	 */
 	private void querySeries(Study study) {
+		DicomParam studyInstanceUID = initDicomParam(Tag.StudyInstanceUID, study.getStudyInstanceUID());
 		DicomParam[] params = {
-			new DicomParam(Tag.StudyInstanceUID, study.getStudyInstanceUID()),
+			studyInstanceUID,
 			new DicomParam(Tag.SeriesInstanceUID),
 			new DicomParam(Tag.SOPClassUID),
 			new DicomParam(Tag.SeriesDescription),
@@ -391,16 +387,16 @@ public class QueryPACSService {
 			new DicomParam(Tag.ManufacturerModelName),
 			new DicomParam(Tag.DeviceSerialNumber)
 		};
-		List<Attributes> attributesList = queryCFind(params, QueryRetrieveLevel.SERIES);
-		if (attributesList != null) {
+		List<Attributes> seriesAttr = queryCFind(params, QueryRetrieveLevel.SERIES);
+		if (seriesAttr != null) {
 			List<Serie> series = new ArrayList<Serie>();
-			for (int i = 0; i < attributesList.size(); i++) {
-				Attributes attributes = attributesList.get(i);
-				Serie serie = new Serie(attributes);
-				if (!DicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(attributes)) {
+			for (int i = 0; i < seriesAttr.size(); i++) {
+				Attributes serieAttr = seriesAttr.get(i);
+				Serie serie = new Serie(serieAttr);
+				if (!DicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(serieAttr)) {
 					queryInstances(serie, study);
 					if (!serie.getInstances().isEmpty()) {
-						DicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, attributes);
+						DicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, serieAttr);
 						DicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);
 					} else {
 						LOG.warn("Serie found with empty instances and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
@@ -427,18 +423,20 @@ public class QueryPACSService {
 	 * @param serie
 	 */
 	private void queryInstances(Serie serie, Study study) {
+		DicomParam studyInstanceUID = initDicomParam(Tag.StudyInstanceUID, study.getStudyInstanceUID());
+		DicomParam seriesInstanceUID = initDicomParam(Tag.SeriesInstanceUID, serie.getSeriesInstanceUID());
 		DicomParam[] params = {
-			new DicomParam(Tag.StudyInstanceUID, study.getStudyInstanceUID()),
-			new DicomParam(Tag.SeriesInstanceUID, serie.getSeriesInstanceUID()),
+			studyInstanceUID,
+			seriesInstanceUID,
 			new DicomParam(Tag.SOPInstanceUID),
 			new DicomParam(Tag.InstanceNumber)
 		};
-		List<Attributes> attributes = queryCFind(params, QueryRetrieveLevel.IMAGE);
-		if (attributes != null) {
+		List<Attributes> instancesAttr = queryCFind(params, QueryRetrieveLevel.IMAGE);
+		if (instancesAttr != null) {
 			List<Instance> instances = new ArrayList<>();
-			for (int i = 0; i < attributes.size(); i++) {
-				Instance instance = new Instance(attributes.get(i));
-				if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes.get(i))) {
+			for (int i = 0; i < instancesAttr.size(); i++) {
+				Instance instance = new Instance(instancesAttr.get(i));
+				if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(instancesAttr.get(i))) {
 					instances.add(instance);
 				}
 			}

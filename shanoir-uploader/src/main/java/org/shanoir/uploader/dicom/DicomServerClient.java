@@ -84,8 +84,8 @@ public class DicomServerClient implements IDicomServerClient {
 			final String studyDate
 			) throws Exception {
 		DicomQuery query = new DicomQuery();
-		query.setPatientID(patientID);
 		query.setPatientName(patientName);
+		query.setPatientID(patientID);
 		query.setPatientBirthDate(patientBirthDate);
 		query.setStudyDescription(studyDescription);
 		query.setStudyDate(studyDate);
