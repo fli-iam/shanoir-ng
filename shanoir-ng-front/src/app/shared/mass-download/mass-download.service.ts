@@ -478,12 +478,12 @@ export class MassDownloadService {
                 return this.createDirectoriesIn(splitted, userFolderHandle).then(lastFolderHandle => { // create the sub directories
                     lastFolderHandle.getFileHandle(filename, { create: true } // create the file handle
                     ).then(fileHandler => {
-                        this.writeFile(fileHandler, content); // write the file
+                        return this.writeFile(fileHandler, content); // write the file
                     });
                 });
             } else { // if no dir to create
                 userFolderHandle.getFileHandle(filename, { create: true }).then(fileHandler => {
-                    this.writeFile(fileHandler, content);
+                    return this.writeFile(fileHandler, content);
                 });
             }
         } catch (e) {
