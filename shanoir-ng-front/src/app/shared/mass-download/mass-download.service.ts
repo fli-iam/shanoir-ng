@@ -486,6 +486,8 @@ export class MassDownloadService {
                     lastFolderHandle.getFileHandle(filename, { create: true } // create the file handle
                     ).then(fileHandler => {
                         return this.writeFile(fileHandler, content); // write the file
+                    }).catch(error => {
+                        console.log('catch create file 1', error);
                     });
                 }).catch(error => {
                     console.log('catch create directory', error);
@@ -494,7 +496,7 @@ export class MassDownloadService {
                 return userFolderHandle.getFileHandle(filename, { create: true }).then(fileHandler => {
                     return this.writeFile(fileHandler, content);
                 }).catch(error => {
-                    console.log('catch create file', error);
+                    console.log('catch create file 2', error);
                 });
             }
         } catch (e) {
