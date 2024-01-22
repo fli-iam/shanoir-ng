@@ -500,17 +500,12 @@ export class MassDownloadService {
         return handle;
     }
 
-    private async writeFile(fileHandle: FileSystemFileHandle, contents) {
-        // Create a FileSystemWritableFileStream to write to.
-        console.log('write 1')
-        const writable: FileSystemWritableFileStream = await fileHandle.createWritable();
-        console.log('write 2')
-        // Write the contents of the file to the stream.
-        await writable.write({type: 'write', data: contents});
-        console.log('write 3')
-        // Close the file and write the contents to disk.
-        await writable.close();
-        console.log('write 4')
+    private writeFile(fileHandle: FileSystemFileHandle, contents): Promise<void> {
+        return fileHandle.createWritable().then(writable => {
+            return writable.write({type: 'write', data: contents}).then(() => {
+                return writable.close();
+            });
+        });
     }
 
     private createDirectoriesIn(dirs: string[], parentFolderHandle: FileSystemDirectoryHandle): Promise<FileSystemDirectoryHandle> {
