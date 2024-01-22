@@ -49,10 +49,10 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Output() rowClick: EventEmitter<Object> = new EventEmitter<Object>();
     @Output() rowEdit: EventEmitter<Object> = new EventEmitter<Object>();
     @Output() pageLoaded: EventEmitter<Page<any>> = new EventEmitter();
+    @Output() registerRefresh: EventEmitter<(number?) => void> = new EventEmitter();
     @Input() disableCondition: (item: any) => boolean;
     @Input() maxResults: number = 20;
     @Input() subRowsKey: string;
-    @Output() registerRefresh: EventEmitter<(number?) => void> = new EventEmitter();
     page: Page<Object>;
     isLoading: boolean = false;
     maxResultsField: number;
@@ -253,6 +253,8 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             let date: Date;
             if (result instanceof Date) {
                 date = result;
+            } else if (!Number.isNaN(Date.parse(result))) {
+                date = new Date(Date.parse(result));
             } else {
                 date = this.stringToDate(result);
             }
@@ -268,7 +270,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     private stringToDate(dateString: string): Date {
-        if (!dateString) return null; 
+        if (!dateString) return null;
         dateString += '';
         let split: string[] = dateString.split('-');
         if (split.length != 3) return null;

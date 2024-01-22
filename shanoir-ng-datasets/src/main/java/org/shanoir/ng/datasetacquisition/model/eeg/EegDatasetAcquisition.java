@@ -13,6 +13,13 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 @JsonTypeName("Eeg")
 public class EegDatasetAcquisition extends DatasetAcquisition{
 
+	public static final String datasetAcquisitionType = "Eeg";
+	public EegDatasetAcquisition() {}
+
+	public EegDatasetAcquisition(DatasetAcquisition other) {
+		super(other);
+	}
+
 	@Override
 	public String getType() {
 		return "Eeg";

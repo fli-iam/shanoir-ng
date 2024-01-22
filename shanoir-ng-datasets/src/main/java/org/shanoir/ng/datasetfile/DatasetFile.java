@@ -42,6 +42,16 @@ public class DatasetFile extends AbstractEntity {
 	@Column(columnDefinition = "TEXT")
 	private String path;
 
+	public DatasetFile() {
+
+	}
+
+	public DatasetFile(DatasetFile df, DatasetExpression dexp) {
+		this.datasetExpression = dexp;
+		this.pacs = df.isPacs();
+		this.path = new String(df.getPath());
+	}
+
 	/**
 	 * @return the datasetExpression
 	 */
