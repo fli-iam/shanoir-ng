@@ -480,10 +480,14 @@ export class MassDownloadService {
                     ).then(fileHandler => {
                         return this.writeFile(fileHandler, content); // write the file
                     });
+                }).catch(error => {
+                    console.log('catch create directory', error);
                 });
             } else { // if no dir to create
                 userFolderHandle.getFileHandle(filename, { create: true }).then(fileHandler => {
                     return this.writeFile(fileHandler, content);
+                }).catch(error => {
+                    console.log('catch create file', error);
                 });
             }
         } catch (e) {
