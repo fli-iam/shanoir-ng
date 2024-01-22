@@ -21,9 +21,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.core.Response;
-import org.apache.xmlbeans.impl.jam.JParameter;
-import org.hibernate.jpa.internal.util.LockOptionsHelper;
 import org.keycloak.representations.AccessTokenResponse;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
@@ -31,18 +28,18 @@ import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.processing.dto.ParameterResourcesDTO;
 import org.shanoir.ng.processing.model.DatasetProcessingType;
-import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.security.KeycloakServiceAccountUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
-import org.shanoir.ng.vip.dto.ExecutionMonitoringDTO;
-import org.shanoir.ng.vip.monitoring.model.*;
+import org.shanoir.ng.vip.monitoring.model.Execution;
+import org.shanoir.ng.vip.monitoring.model.ExecutionDTO;
+import org.shanoir.ng.vip.monitoring.model.ExecutionMonitoring;
+import org.shanoir.ng.vip.monitoring.model.ExecutionStatus;
 import org.shanoir.ng.vip.monitoring.schedule.ExecutionStatusMonitorService;
 import org.shanoir.ng.vip.monitoring.service.ExecutionMonitoringService;
 import org.shanoir.ng.vip.resource.ProcessingResourceService;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.vip.resulthandler.ResultHandlerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,16 +48,16 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
-import java.sql.Array;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 public class ExecutionDataApiController implements ExecutionDataApi {
@@ -204,7 +201,7 @@ public class ExecutionDataApiController implements ExecutionDataApi {
         executionMonitoring.setStartDate(execCreated.getStartDate());
 
         executionMonitoring = this.executionMonitoringService.update(executionMonitoring);
-        this.executionStatusMonitorService.startMonitoringJob(executionMonitoring.getIdentifier());
+        this.executionStatusMonitorService.startMonitoringJob(executionMonitoring, null);
 
         return new ResponseEntity<>(execCreated, HttpStatus.OK);
     }
