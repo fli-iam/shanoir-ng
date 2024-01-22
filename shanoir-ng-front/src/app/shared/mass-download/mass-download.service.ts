@@ -374,7 +374,7 @@ export class MassDownloadService {
             const filename: string = this.getFilename(httpResponse) || 'dataset_' + id;
             console.log('filename', filename)
             // Check ERRORS file in zip
-            var zip: any = new JSZip();
+            let zip: any = new JSZip();
             const unzipPromise: Promise<any> = zip.loadAsync(httpResponse.body).then(dataFiles => {
                 if (dataFiles.files['ERRORS.json']) {
                     return dataFiles.files['ERRORS.json'].async('string').then(content => {
@@ -384,13 +384,17 @@ export class MassDownloadService {
                         report.list[id].errorTime = Date.now();
                         task.lastUpdate = new Date();
                         task.status = 5;
+                    }).catch(e => {
+                        console.log('maybe here 1 ???', e);
                     });
                 } else {
                     report.list[id].status = 'SUCCESS';
                     delete report.list[id].error;
                     delete report.list[id].errorTime;
+                    return dataFiles;
                 }
-                return dataFiles;
+            }).catch(e => {
+                console.log('maybe here 2 ???', e);
             });
 
             if (unzip) {
@@ -414,12 +418,17 @@ export class MassDownloadService {
                             })
                         );
                     }
+                }).catch(e => {
+                    console.log('maybe here 3 ???', e);
                 });
             } else {
                 const path: string = this.buildAcquisitionPath(dataset) + filename;
                 task.message = 'saving dataset n°' + id;
                 this.notificationService.pushLocalTask(task);
-                return Promise.all([unzipPromise, this.writeMyFile(path, blob, userFolderHandle)]).then(() => null);
+                return Promise.all([unzipPromise, this.writeMyFile(path, blob, userFolderHandle)]).then(() => null)
+                .catch(e => {
+                    console.log('maybe here 4 ???', e);
+                });
             }
         }).catch(reason => {
             report.list[id].status = 'ERROR';
@@ -505,7 +514,7 @@ export class MassDownloadService {
         return fileHandle.createWritable().then(writable => {
             console.log('writable created');
             return writable.write({type: 'write', data: contents}).then(() => {
-                console.log('wrote');
+                console.log('wrote', contents);
                 return writable.close().then(v => {
                     console.log('closed');
                 });
