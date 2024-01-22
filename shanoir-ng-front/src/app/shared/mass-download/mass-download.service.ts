@@ -407,11 +407,9 @@ export class MassDownloadService {
                                 return (file as {async: (string) => Promise<Blob>}).async(type).then(blob => {
                                     task.message = 'saving file ' + name + ' from dataset n°' + id;
                                     this.notificationService.pushLocalTask(task);
-                                    console.log('try to write ', path);
-                                    let ret = this.writeMyFile(path, blob, userFolderHandle);
-                                    console.log('write succeed');
-                                    return ret;
-
+                                    return this.writeMyFile(path, blob, userFolderHandle);
+                                }).catch(e => {
+                                    console.log('wtf ?', e)
                                 });
                             })
                         );
@@ -484,7 +482,7 @@ export class MassDownloadService {
                     console.log('catch create directory', error);
                 });
             } else { // if no dir to create
-                userFolderHandle.getFileHandle(filename, { create: true }).then(fileHandler => {
+                return userFolderHandle.getFileHandle(filename, { create: true }).then(fileHandler => {
                     return this.writeFile(fileHandler, content);
                 }).catch(error => {
                     console.log('catch create file', error);
@@ -495,20 +493,25 @@ export class MassDownloadService {
         }
     }
 
-    private async getFolderHandle(): Promise<FileSystemDirectoryHandle> {
+    private getFolderHandle(): Promise<FileSystemDirectoryHandle> {
         const options = {
             mode: 'readwrite'
         };
         // @ts-ignore
-        const handle: FileSystemDirectoryHandle = await window.showDirectoryPicker(options);
-        return handle;
+        return window.showDirectoryPicker(options);
     }
 
     private writeFile(fileHandle: FileSystemFileHandle, contents): Promise<void> {
         return fileHandle.createWritable().then(writable => {
+            console.log('writable created');
             return writable.write({type: 'write', data: contents}).then(() => {
-                return writable.close();
+                console.log('wrote');
+                return writable.close().then(v => {
+                    console.log('closed');
+                });
             });
+        }).finally(() => {
+            console.log('write finally !!!!');
         }).catch(error => {
             console.log('CATCH !!!!', error);
         });
