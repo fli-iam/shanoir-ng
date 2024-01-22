@@ -505,6 +505,8 @@ export class MassDownloadService {
             return writable.write({type: 'write', data: contents}).then(() => {
                 return writable.close();
             });
+        }).catch(error => {
+            console.log('CATCH !!!!', error);
         });
     }
 
