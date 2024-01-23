@@ -28,7 +28,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { DownloadSetupAltComponent } from './download-setup-alt/download-setup-alt.component';
 import { DownloadSetupComponent, DownloadSetupOptions } from './download-setup/download-setup.component';
 import { Queue } from './queue.model';
-import { AngularDeviceInformationService } from 'angular-device-information';
+import { ShanoirError } from '../models/error.model';
 
 declare var JSZip: any;
 
@@ -63,14 +63,13 @@ export class MassDownloadService {
         private datasetService: DatasetService,
         private notificationService: NotificationsService,
         private consoleService: ConsoleService,
-        private dialogService: ConfirmDialogService,
-        private deviceInformationService: AngularDeviceInformationService) {
+        private dialogService: ConfirmDialogService) {
     }
 
     downloadByIds(datasetIds: number[], format?: Format): Promise<void> {
         return this.openModal(format).then(ret => {
             if (ret != 'cancel') {
-                return this._downloadByIds(datasetIds, ret.format, ret.nbQueues, ret.unzip);
+                return this._downloadByIds(datasetIds, ret);
             } else return Promise.resolve();
         }).catch(error => {
             if (error == this.BROWSER_COMPAT_ERROR_MSG) {
@@ -94,7 +93,7 @@ export class MassDownloadService {
         return this.openModal().then(ret => {
             if (ret != 'cancel') {
                 return this.datasetService.getByStudyId(studyId).then(datasets => {
-                    this._downloadDatasets(datasets, ret.format, ret.nbQueues, ret.unzip);
+                    this._downloadDatasets(datasets, ret);
                 })
             } else return Promise.resolve();
         }).catch(error => {
@@ -122,7 +121,7 @@ export class MassDownloadService {
         return this.openModal(format, options).then(ret => {
             if (ret != 'cancel') {
                 return datasetsPromise.then(datasets => {
-                    this._downloadDatasets(datasets, ret.format, ret.nbQueues, ret.unzip, downloadState);
+                    this._downloadDatasets(datasets, ret, downloadState);
                 })
             } else return Promise.resolve();
         }).catch(error => {
@@ -160,7 +159,7 @@ export class MassDownloadService {
         return this.openModal().then(ret => {
             if (ret != 'cancel') {
                 return this.datasetService.getByStudyIdAndSubjectId(studyId, subjectId).then(datasets => {
-                    return this._downloadDatasets(datasets, ret.format, ret.nbQueues, ret.unzip).then(r => {
+                    return this._downloadDatasets(datasets, ret).then(r => {
                         return r;
                     });
                 })
@@ -168,7 +167,7 @@ export class MassDownloadService {
         });
     }
 
-    private _downloadByIds(datasetIds: number[], format: Format, nbQueues: number = 4, unzip: boolean= false, task?: Task, report?: Report, parentHandle?: FileSystemDirectoryHandle): Promise<void> {
+    private _downloadByIds(datasetIds: number[], options: DownloadOptions, task?: Task, report?: Report, parentHandle?: FileSystemDirectoryHandle): Promise<void> {
         if (datasetIds.length == 0) return;
         let directoryHandlePromise: Promise<FileSystemDirectoryHandle>;
         if (parentHandle) {
@@ -187,16 +186,16 @@ export class MassDownloadService {
                     this.notificationService.pushLocalTask(task);
                     const start: number = Date.now();
                     let ids = [...datasetIds]; // copy array
-                    if (!report) report = this.initReport(datasetIds, task.id, parentFolderHandle.name, format, nbQueues, unzip);
+                    if (!report) report = this.initReport(datasetIds, task.id, parentFolderHandle.name, options);
                     let promises: Promise<void>[] = [];
-                    for (let queueIndex = 0; queueIndex < nbQueues; queueIndex++) { // build the dl queues
+                    for (let queueIndex = 0; queueIndex < options.nbQueues; queueIndex++) { // build the dl queues
                         promises.push(
-                            this.recursiveSave(ids.shift(), format, parentFolderHandle, ids, report, task, unzip)
+                            this.recursiveSave(ids.shift(), options, parentFolderHandle, ids, report, task)
                         );
                     }
                     return Promise.all(promises).then(() => {
                         this.handleEnd(task, report, start);
-                        this.writeMyFile(this.REPORT_FILENAME, JSON.stringify(report), parentFolderHandle);
+                        return this.writeMyFile(this.REPORT_FILENAME, JSON.stringify(report), parentFolderHandle);
                     }).catch(reason => {
                         task.message = 'download error : ' + reason;
                         task.lastUpdate = new Date();
@@ -289,7 +288,7 @@ export class MassDownloadService {
         });
     }
 
-    private _downloadDatasets(datasets: Dataset[], format: Format, nbQueues: number = 4, unzip: boolean = false, downloadState?: TaskState): Promise<void> {
+    private _downloadDatasets(datasets: Dataset[], options, downloadState?: TaskState): Promise<void> {
         if (datasets.length == 0) return;
         return this.getFolderHandle()
         // add a subdirectory
@@ -304,12 +303,12 @@ export class MassDownloadService {
                     task.lastUpdate = new Date();
                     const start: number = Date.now();
                     let ids = [...datasets.map(ds => ds.id)];
-                    let report: Report = this.initReport(datasets.map(ds => ds.id), task.id, parentFolderHandle.name, format, nbQueues, unzip);
+                    let report: Report = this.initReport(datasets.map(ds => ds.id), task.id, parentFolderHandle.name, options);
                     let promises: Promise<void>[] = [];
                     let j = 0;
-                    for (let queueIndex = 0; queueIndex < nbQueues; queueIndex++) { // build the dl queues
+                    for (let queueIndex = 0; queueIndex < options.nbQueues; queueIndex++) { // build the dl queues
                         promises.push(
-                            this.recursiveSave(ids.shift(), format, parentFolderHandle, ids, report, task, unzip, datasets)
+                            this.recursiveSave(ids.shift(), options, parentFolderHandle, ids, report, task, datasets)
                         );
                     }
                     return Promise.all(promises).then(() => {
@@ -332,7 +331,7 @@ export class MassDownloadService {
     private _downloadFromReport(report: Report, task: Task, parentHandle: FileSystemDirectoryHandle) {
         if (!report) throw new Error('report can\'t be null !');
         const noSuccessIds: number[] = Object.keys(report.list).filter(key => report.list[key].status != 'SUCCESS').map(key => parseInt(key));
-        this._downloadByIds(noSuccessIds, report.format, report.nbQueues, report.unzip, task, report, parentHandle);
+        this._downloadByIds(noSuccessIds, report, task, report, parentHandle);
     }
 
     private handleEnd(task: Task, report: Report, start: number) {
@@ -354,25 +353,23 @@ export class MassDownloadService {
         this.notificationService.pushLocalTask(task);
     }
 
-    private recursiveSave(id: number, format: Format, userFolderHandle: FileSystemDirectoryHandle, remainingIds: number[], report: Report, task: Task, unzip: boolean = false, datasets?: Dataset[]): Promise<void> {
+    private recursiveSave(id: number, options: DownloadOptions, userFolderHandle: FileSystemDirectoryHandle, remainingIds: number[], report: Report, task: Task, datasets?: Dataset[]): Promise<void> {
         if (!id) return Promise.resolve();
-        return this.saveDataset(id, format, userFolderHandle, report, task, unzip, datasets?.find(ds => ds.id == id)).then(() => {
+        return this.saveDataset(id, options, userFolderHandle, report, task, datasets?.find(ds => ds.id == id)).then(() => {
             if (remainingIds.length > 0) {
-                return this.recursiveSave(remainingIds.shift(), format, userFolderHandle, remainingIds, report, task, unzip, datasets);
+                return this.recursiveSave(remainingIds.shift(), options, userFolderHandle, remainingIds, report, task, datasets);
             } else {
                 return Promise.resolve();
             }
         });
     }
 
-    private saveDataset(id: number, format: Format, userFolderHandle: FileSystemDirectoryHandle, report: Report, task: Task, unzip: boolean = false, dataset?: Dataset): Promise<void> {
-        console.log('start save ', id);
+    private saveDataset(id: number, options: DownloadOptions, userFolderHandle: FileSystemDirectoryHandle, report: Report, task: Task, dataset?: Dataset): Promise<void> {
         const metadataPromise: Promise<Dataset> = (dataset?.id == id && dataset.datasetAcquisition?.examination?.subject) ? Promise.resolve(dataset) : this.datasetService.get(id, 'lazy');
-        const downloadPromise: Promise<HttpResponse<Blob>> = this.datasetService.downloadToBlob(id, format);
+        const downloadPromise: Promise<HttpResponse<Blob>> = this.datasetService.downloadToBlob(id, options.format);
         return Promise.all([metadataPromise, downloadPromise]).then(([dataset, httpResponse]) => {
             const blob: Blob = httpResponse.body;
             const filename: string = this.getFilename(httpResponse) || 'dataset_' + id;
-            console.log('filename', filename)
             // Check ERRORS file in zip
             let zip: any = new JSZip();
             const unzipPromise: Promise<any> = zip.loadAsync(httpResponse.body).then(dataFiles => {
@@ -384,8 +381,6 @@ export class MassDownloadService {
                         report.list[id].errorTime = Date.now();
                         task.lastUpdate = new Date();
                         task.status = 5;
-                    }).catch(e => {
-                        console.log('maybe here 1 ???', e);
                     });
                 } else {
                     report.list[id].status = 'SUCCESS';
@@ -393,42 +388,40 @@ export class MassDownloadService {
                     delete report.list[id].errorTime;
                     return dataFiles;
                 }
-            }).catch(e => {
-                console.log('maybe here 2 ???', e);
             });
 
-            if (unzip) {
+            if (options.unzip) {
                 return unzipPromise.then(data => {
                     if (data) {
+                        let index: number = 1;
                         return Promise.all(
                             Object.entries(data.files)?.map(([name, file]) => {
                                 task.message = 'unzipping file ' + name + ' from dataset n°' + id;
                                 this.notificationService.pushLocalTask(task);
-                                const path: string = this.buildAcquisitionPath(dataset) + filename.replace('.zip', '') + '/' + name;
+                                index++;
                                 let type: string;
                                 if (name.endsWith('.json') || name.endsWith('.txt')) type = 'string';
                                 else type = 'blob';
                                 return (file as {async: (string) => Promise<Blob>}).async(type).then(blob => {
                                     task.message = 'saving file ' + name + ' from dataset n°' + id;
                                     this.notificationService.pushLocalTask(task);
+                                    let path: string;
+                                    if (options.shortPath) {
+                                        path = this.buildShortFilePath(dataset, index, name);
+                                    } else {
+                                        path = this.buildFilePath(dataset, filename, name);
+                                    }
                                     return this.writeMyFile(path, blob, userFolderHandle);
-                                }).catch(e => {
-                                    console.log('wtf ?', e)
                                 });
                             })
                         );
                     }
-                }).catch(e => {
-                    console.log('maybe here 3 ???', e);
                 });
             } else {
                 const path: string = this.buildAcquisitionPath(dataset) + filename;
                 task.message = 'saving dataset n°' + id;
                 this.notificationService.pushLocalTask(task);
-                return Promise.all([unzipPromise, this.writeMyFile(path, blob, userFolderHandle)]).then(() => null)
-                .catch(e => {
-                    console.log('maybe here 4 ???', e);
-                });
+                return Promise.all([unzipPromise, this.writeMyFile(path, blob, userFolderHandle)]).then(() => null);
             }
         }).catch(reason => {
             report.list[id].status = 'ERROR';
@@ -438,7 +431,6 @@ export class MassDownloadService {
             task.message = 'saving dataset n°' + id + ' failed';
             task.status = 5;
         }).finally(() => {
-            console.log('finally 1', id);
             if (report.list[id].status == 'SUCCESS') {
                 task.lastUpdate = new Date();
                 task.message = '(' + report.nbSuccess + '/' + report.requestedDatasetIds.length + ') dataset n°' + id + ' successfully saved';
@@ -452,12 +444,20 @@ export class MassDownloadService {
             task.lastUpdate = new Date();
             task.progress = (report.nbSuccess + report.nbError) / report.requestedDatasetIds.length;
             this.notificationService.pushLocalTask(task);
-            console.log('finally 2', id);
         });
+    }
+    
+    private buildFilePath(dataset: Dataset, zipName: string, fileName: string): string {
+        return this.buildAcquisitionPath(dataset) + zipName.replace('.zip', '') + '/' + fileName;
+    }
+
+    private buildShortFilePath(dataset: Dataset, fileIndex: number, fileName: string): string {
+            let fileNameSplit: string[] = fileName.split('.');
+            let extension: string =  fileNameSplit.pop();
+            return this.buildShortAcquisitionPath(dataset) + 'ds' + dataset.id + '/' + fileIndex + '.' + extension;
     }
 
     private buildAcquisitionPath(dataset: Dataset): string {
-        console.log('subject')
         return dataset.datasetAcquisition?.examination?.subject?.name
                 + '_' + dataset.datasetAcquisition?.examination?.subject?.id
                 + '/'
@@ -466,8 +466,14 @@ export class MassDownloadService {
                 + '/';
     }
 
+    private buildShortAcquisitionPath(dataset: Dataset): string {
+        return 'subj' + dataset.datasetAcquisition?.examination?.subject?.id
+            + '/'
+            + 'exam' + dataset.datasetAcquisition?.examination?.id
+            + '/';
+    }
+
     private writeMyFile(path: string, content: any, userFolderHandle: FileSystemDirectoryHandle): Promise<void> {
-        console.log('path', path?.length, path)
         path = path.trim();
         if (path.startsWith('/')) path = path.substring(1); // remove 1st '/'
         let splitted: string[];
@@ -477,30 +483,20 @@ export class MassDownloadService {
             splitted = [path];
         }
         const filename = splitted.pop(); // separate filename from dir path
-        // if (this.deviceInformationService.getDeviceInfo()?.os?.toLocaleLowerCase().includes('windows')) {
-            // ???????????????????????????????,
-        // }
-        try {
-            if (splitted.length > 0) { // if dirs to create
-                return this.createDirectoriesIn(splitted, userFolderHandle).then(lastFolderHandle => { // create the sub directories
-                    lastFolderHandle.getFileHandle(filename, { create: true } // create the file handle
-                    ).then(fileHandler => {
-                        return this.writeFile(fileHandler, content); // write the file
-                    }).catch(error => {
-                        console.log('catch create file 1', error);
-                    });
+        if (splitted.length > 0) { // if dirs to create
+            return this.createDirectoriesIn(splitted, userFolderHandle).then(lastFolderHandle => { // create the sub directories
+                return lastFolderHandle.getFileHandle(filename, { create: true }).then(fileHandler => {
+                    return this.writeFile(fileHandler, content); // write the file
                 }).catch(error => {
-                    console.log('catch create directory', error);
+                    throw new ShanoirError({error: {code: ShanoirError.FILE_PATH_TOO_LONG, message: 'Probable reason: file path too long for Windows, max 260 characters'}});
                 });
-            } else { // if no dir to create
-                return userFolderHandle.getFileHandle(filename, { create: true }).then(fileHandler => {
-                    return this.writeFile(fileHandler, content);
-                }).catch(error => {
-                    console.log('catch create file 2', error);
-                });
-            }
-        } catch (e) {
-            console.log('GOT THE ERROR', e)
+            });
+        } else { // if no dir to create
+            return userFolderHandle.getFileHandle(filename, { create: true }).then(fileHandler => {
+                return this.writeFile(fileHandler, content);
+            }).catch(error => {
+                throw new ShanoirError({error: {code: ShanoirError.FILE_PATH_TOO_LONG, message: 'Probable reason: file path too long for Windows, max 260 characters'}});
+            });
         }
     }
 
@@ -514,17 +510,9 @@ export class MassDownloadService {
 
     private writeFile(fileHandle: FileSystemFileHandle, contents): Promise<void> {
         return fileHandle.createWritable().then(writable => {
-            console.log('writable created');
             return writable.write({type: 'write', data: contents}).then(() => {
-                console.log('wrote', contents);
-                return writable.close().then(v => {
-                    console.log('closed');
-                });
+                return writable.close();
             });
-        }).finally(() => {
-            console.log('write finally !!!!');
-        }).catch(error => {
-            console.log('CATCH !!!!', error);
         });
     }
 
@@ -545,7 +533,7 @@ export class MassDownloadService {
         return contentDispHeader?.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length).replace('/', '_');
     }
 
-    private initReport(datasetIds: number[], taskId: number, folderName: string, format: Format, nbQueues: number, unzip: boolean): Report {
+    private initReport(datasetIds: number[], taskId: number, folderName: string, options: DownloadOptions): Report {
         let report: Report = {
             taskId: taskId,
             folderName: folderName,
@@ -554,9 +542,9 @@ export class MassDownloadService {
             list: {},
             nbError: 0,
             nbSuccess: 0,
-            format : format,
-            nbQueues: nbQueues,
-            unzip: unzip
+            format : options.format,
+            nbQueues: options.nbQueues,
+            unzip: options.unzip
         };
         datasetIds.forEach(id => report.list[id] = { status: 'QUEUED' });
         return report;
@@ -583,7 +571,7 @@ export class MassDownloadService {
         return task;
     }
 
-    private openModal(format?: Format, options?: DownloadSetupOptions): Promise<{format: Format, nbQueues: number, unzip: boolean} | 'cancel'> {
+    private openModal(format?: Format, options?: DownloadSetupOptions): Promise<DownloadOptions | 'cancel'> {
         // @ts-ignore
         if (window.showDirectoryPicker) { // test compatibility
             let modalRef: ComponentRef<DownloadSetupComponent> = ServiceLocator.rootViewContainerRef.createComponent(DownloadSetupComponent);
@@ -656,3 +644,11 @@ export class MassDownloadService {
     }
 }
 
+export class DownloadOptions {
+
+    constructor(public format: Format) {}
+
+    nbQueues: number = 4;
+    unzip?: boolean = false;
+    shortPath?: boolean = false;
+}

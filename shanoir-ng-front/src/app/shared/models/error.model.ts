@@ -18,6 +18,8 @@ export class ShanoirError {
     public details: any;
     public message: string;
 
+    static FILE_PATH_TOO_LONG: string = 'FILE_PATH_TOO_LONG';
+
     constructor(reason: {error: {code?: any, details?: any, message?: any}}) {
         this.code = reason.error.code;
         this.details = reason.error.details;

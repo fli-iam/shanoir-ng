@@ -13,10 +13,12 @@
  */
 
 import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { Format } from 'src/app/datasets/shared/dataset.service';
 import { GlobalService } from '../../services/global.service';
 import { Option } from '../../select/select.component';
+import { DownloadOptions } from '../mass-download.service';
+import { AngularDeviceInformationService } from 'angular-device-information';
 
 @Component({
     selector: 'download-setup',
@@ -26,7 +28,7 @@ import { Option } from '../../select/select.component';
 
 export class DownloadSetupComponent implements OnInit {
 
-    @Output() go: EventEmitter<{format: Format, nbQueues: number, unzip: boolean}> = new EventEmitter();
+    @Output() go: EventEmitter<DownloadOptions> = new EventEmitter();
     @Output() close: EventEmitter<void> = new EventEmitter();
     form: UntypedFormGroup;
     @Input() format: Format; 
@@ -38,11 +40,13 @@ export class DownloadSetupComponent implements OnInit {
         new Option<Format>('eeg', 'EEG', null, null, null, !this.options.hasEeg),
         new Option<Format>('BIDS', 'BIDS', null, null, null, !this.options.hasBids),
     ];
+    winOs: boolean;
         
-    constructor(private formBuilder: UntypedFormBuilder, globalService: GlobalService) {
+    constructor(private formBuilder: UntypedFormBuilder, globalService: GlobalService, deviceInformationService: AngularDeviceInformationService) {
         globalService.onNavigate.subscribe(() => {
             this.cancel();
         });
+        this.winOs = deviceInformationService.getDeviceInfo()?.os?.toLocaleLowerCase().includes('windows');
     }
 
     ngOnInit(): void {
@@ -55,15 +59,18 @@ export class DownloadSetupComponent implements OnInit {
             'nbQueues': [4, [Validators.required, Validators.min(1), Validators.max(1024)]],
             'unzip': [false, []],
         });
+        if (this.winOs) {
+            formGroup.addControl('shortPath', new UntypedFormControl([false, []]));
+        }
         return formGroup;
     }
 
     downloadNow() {
-        this.go.emit({
-            format: this.form.get('format').value, 
-            nbQueues: this.form.get('nbQueues').value,
-            unzip: this.form.get('unzip').value
-        });
+        let options: DownloadOptions = new DownloadOptions(this.form.get('format').value);
+        options.nbQueues = this.form.get('nbQueues').value;
+        options.unzip = this.form.get('unzip').value;
+        if (this.form.get('shortPath') && options.unzip) options.shortPath = this.form.get('shortPath').value;
+        this.go.emit(options);
     }
     
     cancel() {
