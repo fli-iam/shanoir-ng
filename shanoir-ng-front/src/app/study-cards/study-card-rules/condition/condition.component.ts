@@ -37,7 +37,18 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
     @Input() fields: ShanoirMetadataField[];
     tagOptions: Option<DicomTag>[];
     shanoirFieldOptions: Option<any>[];
-    operations: Operation[] = ['STARTS_WITH', 'EQUALS', 'ENDS_WITH', 'CONTAINS', "DOES_NOT_CONTAIN", 'SMALLER_THAN', 'BIGGER_THAN'];
+    operations: Option<Operation>[] = [
+        new Option('EQUALS', ' ', null, null, 'fa-solid fa-equals'),
+        new Option('NOT_EQUALS', ' ', null, null, 'fa-solid fa-not-equal'),
+        new Option('SMALLER_THAN', ' ', null, null, 'fa-solid fa-less-than'),
+        new Option('BIGGER_THAN', ' ', null, null, 'fa-solid fa-greater-than'),
+        new Option('CONTAINS', 'contains', null, null),
+        new Option('DOES_NOT_CONTAIN', '! contains', null, null),
+        new Option('STARTS_WITH', 'starts with', null, null),
+        new Option('DOES_NOT_START_WITH', '! starts with', null, null),
+        new Option('ENDS_WITH', 'ends with', null, null),
+        new Option('DOES_NOT_END_WITH', '! ends with'),
+    ];
     @Output() delete: EventEmitter<void> = new EventEmitter();
     init: boolean = false;
     conditionTypeOptions: Option<ConditionScope>[];
@@ -80,18 +91,18 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
         if (changes.ruleScope && this.ruleScope) {
             if (this.ruleScope == 'Dataset') {
                 this.conditionTypeOptions = [
-                    new Option('StudyCardDICOMCondition', 'the DICOM field'),
+                    new Option('StudyCardDICOMConditionOnDatasets', 'the DICOM field'),
                     new Option('DatasetMetadataCondOnDataset', 'the dataset field'),
                 ];
             } else if (this.ruleScope == 'DatasetAcquisition') {
                 this.conditionTypeOptions = [
-                    new Option('StudyCardDICOMCondition', 'the DICOM field'),
+                    new Option('StudyCardDICOMConditionOnDatasets', 'the DICOM field'),
                     new Option('AcqMetadataCondOnAcq', 'the acquisition field'),
                     new Option('AcqMetadataCondOnDatasets', 'the dataset field'),
                 ];
             } else if (this.ruleScope == 'Examination') {
                 this.conditionTypeOptions = [
-                    new Option('StudyCardDICOMCondition', 'the DICOM field'),
+                    new Option('StudyCardDICOMConditionOnDatasets', 'the DICOM field'),
                     new Option('ExamMetadataCondOnAcq', 'the acquisition field'),
                     new Option('ExamMetadataCondOnDatasets', 'the dataset field'),
                 ];
@@ -179,7 +190,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
     }
 
     onFieldChange(field: string) {
-        if (!(this.condition.scope == 'StudyCardDICOMCondition' && this.condition.dicomTag.code+"" == field)) {
+        if (!(this.condition.scope == 'StudyCardDICOMConditionOnDatasets' && this.condition.dicomTag.code+"" == field)) {
             this.computeConditionOptions();
             if (this.shanoirFieldOptions?.length > 0) this.condition.operation = 'EQUALS';
             else this.condition.operation = null;
@@ -211,7 +222,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
             this.computeConditionOptionsSubscription.unsubscribe();
             this.computeConditionOptionsSubscription = null;
         }
-        if (this.condition.scope != 'StudyCardDICOMCondition') {
+        if (this.condition.scope != 'StudyCardDICOMConditionOnDatasets') {
             let conditionField: ShanoirMetadataField = this.fields.find(metadataField => metadataField.field == this.condition.shanoirField);
             if (conditionField && conditionField.options) {
                 this.computeConditionOptionsSubscription = conditionField.options.subscribe(opts => {

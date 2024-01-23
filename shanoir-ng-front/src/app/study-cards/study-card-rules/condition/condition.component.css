@@ -1,15 +1,13 @@
 :host { white-space: nowrap; color: purple; }
 
 select-box, input { border: none !important; margin-right: 5px; }
-input { box-sizing: border-box; width: auto; padding: 0 1px; }
-auto-ajust-input { vertical-align: bottom; }
+input { box-sizing: border-box; width: auto; padding: 0 1px; vertical-align: middle; }
 
 input[type=number]::-webkit-inner-spin-button, 
 input[type=number]::-webkit-outer-spin-button { opacity: 1; }
 
 .cardinality-type { color: darkgreen; }
 .cardinality { color: chocolate; }
-.type { }
 .var { color: blue; }
 .method { color: darkgreen; }
 .value { color: chocolate; text-overflow: ellipsis; }
@@ -31,10 +29,14 @@ input[type=number]::-webkit-outer-spin-button { opacity: 1; }
 .error:not(:focus-within) { color: white !important; background-color: var(--color-error) !important; border-radius: 4px !important; }
 .error:not(:focus-within)::ng-deep ::placeholder { color: white !important; }
 
+.multi-value.edit { margin-top: 3px; }
 .multi-value { display: inline-block; vertical-align: top; position: relative; }
 .multi-value .one-value { display: flex; }
+auto-ajust-input { margin-top: -3px; }
 
 .add-cond-value  { text-align: left; color: var(--color-b); cursor: pointer; display: inline-block; padding: 1px 8px; border: 1px dashed var(--grey); border-radius: 10px; margin: 1px 0 4px -7px; padding: 0px 7px; }
 .add-cond-value  i { margin-right: 7px; color: purple; }
 
 .one-value + .one-value::before { content: "or "; margin-right: 5px; color: purple; }
+
+span { vertical-align: middle; }

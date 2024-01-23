@@ -21,16 +21,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 import org.shanoir.ng.dataset.DatasetDescription;
-import org.shanoir.ng.dataset.controler.DatasetApiController.CoordinatesSystem;
-import org.shanoir.ng.dataset.modality.BidsDataset;
-import org.shanoir.ng.dataset.modality.EegDataSetDescription;
-import org.shanoir.ng.dataset.modality.EegDataset;
-import org.shanoir.ng.dataset.modality.MrDataset;
-import org.shanoir.ng.dataset.modality.MrDatasetNature;
-import org.shanoir.ng.dataset.modality.PetDataset;
+import org.shanoir.ng.dataset.controler.DatasetApiController;
+import org.shanoir.ng.dataset.modality.*;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -49,7 +45,6 @@ import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Study;
@@ -68,7 +63,6 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriUtils;
 
@@ -222,7 +216,7 @@ public class BIDSServiceImpl implements BIDSService {
 				studyName = this.studyRepo.findById(studyId).get().getName();
 			}
 			// Try to delete the BIDS folder recursively if possible
-			File bidsDir = new File(bidsStorageDir + File.separator + STUDY_PREFIX + studyId + '_' + studyName);
+			File bidsDir = new File(bidsStorageDir + File.separator + STUDY_PREFIX + studyId + studyName);
 			if (bidsDir.exists()) {
 				FileUtils.deleteDirectory(bidsDir);
 			}
@@ -233,9 +227,9 @@ public class BIDSServiceImpl implements BIDSService {
 
 	@Override
 	public File getBidsFolderpath(final Long studyId, String studyName) {
-		studyName = studyName.replaceAll("[ _] ", "");
-		String filePath = bidsStorageDir + File.separator + STUDY_PREFIX + studyId + '_' + studyName;
-		return new File(filePath);
+		studyName = this.formatLabel(studyName);
+		String tmpFilePath = bidsStorageDir + File.separator + STUDY_PREFIX + studyId + studyName;
+		return new File(tmpFilePath);
 	}
 
 	/**
@@ -332,6 +326,7 @@ public class BIDSServiceImpl implements BIDSService {
 		boolean useSessionFolder = (examinationList != null && examinationList.size() > 1) ;
 		File sessionFile = null;
 		try {
+
 			sessionFile = new File(subjDir.getAbsolutePath() + "/" + subjDir.getName() + SESSIONS_TSV);
 			if (useSessionFolder) {
 				// Generate  sub-<label>_sessions.tsv file
@@ -343,11 +338,7 @@ public class BIDSServiceImpl implements BIDSService {
 				.append(NEW_LINE);
 				
 				for (Examination examination : examinationList) {
-					String sessionLabel = "" + examination.getId();
-					sessionLabel += (examination.getComment() != null ? "-" + examination.getComment() : "");
-			
-					sessionLabel = sessionLabel.replaceAll(" ", "");
-					sessionLabel = sessionLabel.replaceAll("_", "");
+					String sessionLabel = this.getSessionLabel(examination);
 			
 					buffer.append(sessionLabel).append(TABULATION)
 					.append(examination.getExaminationDate()).append(TABULATION)
@@ -360,7 +351,7 @@ public class BIDSServiceImpl implements BIDSService {
 			File examDir = subjDir;
 			for (Examination exam : examinationList) {
 				if (useSessionFolder) {
-					examDir = createExaminationFolder(exam, subjDir, sessionFile);
+					examDir = createExaminationFolder(exam, subjDir);
 				}
 				exportAsBids(exam, examDir, studyName, subject.getName());
 			}
@@ -379,10 +370,9 @@ public class BIDSServiceImpl implements BIDSService {
 	 */
 	private File createSubjectFolder(String subjectName, final int index, final File baseDir) throws IOException {
 		// Generate another ID here ?
-		subjectName = subjectName.replaceAll(" ", "");
-		subjectName = subjectName.replaceAll("_", "");
+		subjectName = this.formatLabel(subjectName);
 
-		File subjectFolder = new File(baseDir.getAbsolutePath() + File.separator + SUBJECT_PREFIX + index + "-" + subjectName);
+		File subjectFolder = new File(baseDir.getAbsolutePath() + File.separator + SUBJECT_PREFIX + index + subjectName);
 		if (!subjectFolder.exists()) {
 			subjectFolder.mkdirs();
 		}
@@ -428,16 +418,11 @@ public class BIDSServiceImpl implements BIDSService {
 	 * Create the session/examination BIDS folder
 	 * @param examination the examination for which we want to create the folder
 	 * @param subjectDir the parent folder
-	 * @param sessionFile the session file to complete
 	 * @return the newly created folder
 	 * @throws IOException 
 	 */
-	private File createExaminationFolder(final Examination examination, final File subjectDir, File sessionFile) throws IOException {
-		String sessionLabel = "" + examination.getId();
-		sessionLabel += (examination.getComment() != null ? "-" + examination.getComment() : "");
-
-		sessionLabel = sessionLabel.replaceAll(" ", "");
-		sessionLabel = sessionLabel.replaceAll("_", "");
+	private File createExaminationFolder(final Examination examination, final File subjectDir) throws IOException {
+		String sessionLabel = this.getSessionLabel(examination);
 
 		// Create exam/session folder
 		File examFolder = new File(subjectDir.getAbsolutePath() + File.separator + SESSION_PREFIX +  sessionLabel);
@@ -445,6 +430,15 @@ public class BIDSServiceImpl implements BIDSService {
 			examFolder.mkdirs();
 		}
 		return examFolder;
+	}
+
+	private String getSessionLabel(Examination examination) {
+		String label = "" + examination.getId();
+		if(!StringUtils.isBlank(examination.getComment())){
+			label += examination.getComment();
+		}
+
+		return formatLabel(label);
 	}
 
 	/**
@@ -462,12 +456,12 @@ public class BIDSServiceImpl implements BIDSService {
 		if (dataset.getDatasetAcquisition() == null && dataset.getDatasetProcessing() != null) {
 			return;
 		}
-
-		String subjectNameUpdated = subjectName.replaceAll("[ _] ", ""); 
+		String subjectNameUpdated = this.formatLabel(subjectName);
 		String datasetFilePrefix = workDir.getName().contains(SESSION_PREFIX) ? workDir.getParentFile().getName() + "_" + workDir.getName() : workDir.getName();
 		
 		dataFolder = createSpecificDataFolder(dataset, workDir, dataFolder, subjectNameUpdated, studyName);
 
+		// Copy dataset files in the directory AS hard link to avoid duplicating files
 		List<URL> pathURLs = new ArrayList<>();
 
 		if (!"Eeg".equals(dataset.getType()) && !"BIDS".equals(dataset.getType()) && onlyHasDicom(dataset)) {
@@ -647,8 +641,7 @@ public class BIDSServiceImpl implements BIDSService {
 
 	private File getScansFile(File parentFile, String subjectName) throws IOException {
 		String fileName = parentFile.getName() + SCANS_FILE_EXTENSION;
-		subjectName = subjectName.replaceAll(" ", "");
-		subjectName = subjectName.replaceAll("_", "");
+		subjectName = this.formatLabel(subjectName);
 		if (!parentFile.getName().contains(subjectName)) {
 			fileName = SUBJECT_PREFIX + subjectName + "_" + parentFile.getName() + SCANS_FILE_EXTENSION;
 		}
@@ -808,7 +801,7 @@ public class BIDSServiceImpl implements BIDSService {
 		buffer = new StringBuilder();
 		buffer.append("{\n")
 		.append("\"EEGCoordinateSystem\": ").append("\"" + dataset.getCoordinatesSystem()).append("\",\n")
-		.append("\"EEGCoordinateUnits\": ").append("\"" + CoordinatesSystem.valueOf(dataset.getCoordinatesSystem()).getUnit()).append("\"\n")
+		.append("\"EEGCoordinateUnits\": ").append("\"" + DatasetApiController.CoordinatesSystem.valueOf(dataset.getCoordinatesSystem()).getUnit()).append("\"\n")
 		.append("}");
 
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
@@ -849,8 +842,7 @@ public class BIDSServiceImpl implements BIDSService {
 
 		for (Subject subject : subjs) {
 			String subjectName = subject.getName();
-			subjectName = subjectName.replaceAll(" ", "");
-			subjectName = subjectName.replaceAll("_", "");
+			subjectName = this.formatLabel(subjectName);
 			// Write in the file the values
 			buffer.append(SUBJECT_PREFIX).append(index++).append("_").append(subjectName).append(CSV_SEPARATOR)
 			.append(subject.getId()).append(CSV_SEPARATOR)
@@ -862,6 +854,10 @@ public class BIDSServiceImpl implements BIDSService {
 		} catch (IOException e) {
 			LOG.error("Error while creating particpants.tsv file: {}", e);
 		}
+	}
+
+	private String formatLabel(String label){
+		return label.replaceAll("[^a-zA-Z0-9]+", "");
 	}
 
 }

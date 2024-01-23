@@ -30,6 +30,7 @@ import java.util.List;
  * @author msimon
  */
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 public class DatasetProcessing extends AbstractEntity {
 
 	/**
@@ -63,6 +64,28 @@ public class DatasetProcessing extends AbstractEntity {
 	@NotNull
 	private Long studyId;
 
+	/** Parent dataset processing id (e.g. VIP execution) **/
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "parent_id")
+	private DatasetProcessing parent;
+
+	public DatasetProcessing() {
+
+	}
+
+	public DatasetProcessing(DatasetProcessing dproc) {
+		this.comment = dproc.getComment();
+		if (dproc.getDatasetProcessingType() != null) {
+			this.datasetProcessingType = dproc.getDatasetProcessingType().getId();
+		} else {
+			this.datasetProcessingType = null;
+		}
+		this.inputDatasets = dproc.getInputDatasets();
+		this.outputDatasets = dproc.getOutputDatasets();
+		this.processingDate = dproc.getProcessingDate();
+		this.studyId = dproc.getStudyId();
+		this.parent = dproc.getParent();
+	}
 
 	/**
 	 * @return the comment
@@ -162,4 +185,11 @@ public class DatasetProcessing extends AbstractEntity {
 		this.studyId = studyId;
 	}
 
+	public DatasetProcessing getParent() {
+		return parent;
+	}
+
+	public void setParent(DatasetProcessing parent) {
+		this.parent = parent;
+	}
 }

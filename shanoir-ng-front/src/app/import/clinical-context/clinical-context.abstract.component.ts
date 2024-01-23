@@ -467,6 +467,10 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         studyCenter.study = this.study;
         let newCenter = new Center();
         newCenter.studyCenterList = [studyCenter];
+        if (this.importedCenterDataStr != null) {
+            newCenter.name = this.importedCenterDataStr.split(' - ')[0] != "null" ? this.importedCenterDataStr.split(' - ')[0] : "";
+            newCenter.street = this.importedCenterDataStr.split(' - ')[1] != "null" ? this.importedCenterDataStr.split(' - ')[1] : "";
+        }
         return newCenter;
     }
 
@@ -479,7 +483,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
 
     public openCreateAcqEqt() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/acquisition-equipment/create']).then(success => {
+        this.router.navigate(['/acquisition-equipment/create'], { state: { fromImport: this.importedEquipmentDataStr } }).then(success => {
 
             this.breadcrumbsService.currentStep.addPrefilled('center', this.center);
 

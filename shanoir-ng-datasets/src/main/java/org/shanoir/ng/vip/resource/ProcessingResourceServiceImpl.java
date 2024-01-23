@@ -5,6 +5,7 @@ import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.vip.monitoring.model.ExecutionMonitoring;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,5 +39,10 @@ public class ProcessingResourceServiceImpl implements ProcessingResourceService 
         }
         repository.saveAll(processingResources);
         return resourceId;
+    }
+
+    @Override
+    public void deleteByProcessingId(Long processingId) {
+        repository.deleteByProcessingId(processingId);
     }
 }

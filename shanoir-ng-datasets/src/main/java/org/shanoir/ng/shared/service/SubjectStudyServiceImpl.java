@@ -47,13 +47,13 @@ public class SubjectStudyServiceImpl implements SubjectStudyService {
 
 	@Autowired
     private RabbitTemplate rabbitTemplate;
-	
+
 	@Autowired
 	private ObjectMapper objectMapper;
 
 	@Override
 	public List<SubjectStudy> update(final Iterable<SubjectStudy> subjectStudies) throws EntityNotFoundException, MicroServiceCommunicationException {
-		if (subjectStudies == null) return null;
+        if (subjectStudies == null) return null;
 		Set<Long> ids = new HashSet<>();
 	    for (SubjectStudy subjectStudy : subjectStudies) {
 	        ids.add(subjectStudy.getId());
@@ -69,7 +69,7 @@ public class SubjectStudyServiceImpl implements SubjectStudyService {
         }
 		subjectStudyRepository.saveAll(subjectStudiesDb);
         List<SubjectStudyQualityTagDTO> subjectStudyTagDTOs = getSubjectStudyTagDTOs(Utils.toList(subjectStudiesDb));
-			    this.send(subjectStudyTagDTOs, RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG);		
+			    this.send(subjectStudyTagDTOs, RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG);
 		return Utils.toList(subjectStudiesDb);
 	}
 	
@@ -99,6 +99,11 @@ public class SubjectStudyServiceImpl implements SubjectStudyService {
             }            
         }
         return dtos;
+    }
+
+    @Override
+    public List<SubjectStudy> get(Long subjectId, Long studyId) {
+        return subjectStudyRepository.findByStudy_IdAndSubjectId(studyId, subjectId);
     }
 
 	private void send(Object obj, String queue) throws MicroServiceCommunicationException {

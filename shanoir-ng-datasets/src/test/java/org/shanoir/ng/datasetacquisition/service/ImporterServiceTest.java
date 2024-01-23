@@ -14,9 +14,11 @@ import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.importer.dto.*;
 import org.shanoir.ng.importer.service.DatasetAcquisitionContext;
 import org.shanoir.ng.importer.service.DicomPersisterService;
+import org.shanoir.ng.importer.service.ImporterMailService;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.service.SubjectStudyService;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.service.QualityCardService;
@@ -78,6 +80,12 @@ public class ImporterServiceTest {
 	@Mock
 	private DatasetAcquisitionRepository datasetAcquisitionRepository;
 
+	@Mock
+	private ImporterMailService importerServiceMail;
+
+	@Mock
+	private SubjectStudyService subjectStudyService;
+
 	private Examination exam;
 
 	@BeforeEach
@@ -128,14 +136,21 @@ public class ImporterServiceTest {
 		importJob.setStudyId(1L);
 		importJob.setStudyCardName("SCname");
 		importJob.setShanoirEvent(new ShanoirEvent());
-		
+
+		org.shanoir.ng.shared.model.Subject subject = new org.shanoir.ng.shared.model.Subject();
+		subject.setSubjectStudyList(Collections.emptyList());
+
 		Examination examination = new Examination();
 		examination.setId(2L);
 		examination.setExaminationDate(LocalDate.now());
 		examination.setDatasetAcquisitions(new ArrayList<>());
+		examination.setSubject(subject);
 		when(examinationRepository.findById(importJob.getExaminationId())).thenReturn(Optional.of(examination));
 		DatasetAcquisition datasetAcq = new MrDatasetAcquisition();
-		when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, 0, importJob, new Attributes())).thenReturn(datasetAcq);
+
+		//DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob, dicomAttributes);
+
+		when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(Mockito.eq(serie), Mockito.eq(0), Mockito.eq(importJob), Mockito.any())).thenReturn(datasetAcq);
 		when(studyUserRightRepo.findByStudyId(importJob.getStudyId())).thenReturn(Collections.emptyList());
 		when(dicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced())).thenReturn(new Attributes());
 		when(qualityCardService.findByStudy(examination.getStudyId())).thenReturn(Utils.toList(new QualityCard())); // TODO perform quality card tests

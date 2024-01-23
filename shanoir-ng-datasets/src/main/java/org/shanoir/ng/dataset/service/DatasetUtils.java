@@ -5,21 +5,7 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
 
-import org.shanoir.ng.dataset.modality.BidsDataset;
-import org.shanoir.ng.dataset.modality.CalibrationDataset;
-import org.shanoir.ng.dataset.modality.CtDataset;
-import org.shanoir.ng.dataset.modality.EegDataset;
-import org.shanoir.ng.dataset.modality.GenericDataset;
-import org.shanoir.ng.dataset.modality.MegDataset;
-import org.shanoir.ng.dataset.modality.MeshDataset;
-import org.shanoir.ng.dataset.modality.MrDataset;
-import org.shanoir.ng.dataset.modality.ParameterQuantificationDataset;
-import org.shanoir.ng.dataset.modality.PetDataset;
-import org.shanoir.ng.dataset.modality.RegistrationDataset;
-import org.shanoir.ng.dataset.modality.SegmentationDataset;
-import org.shanoir.ng.dataset.modality.SpectDataset;
-import org.shanoir.ng.dataset.modality.StatisticalDataset;
-import org.shanoir.ng.dataset.modality.TemplateDataset;
+import org.shanoir.ng.dataset.modality.*;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -119,6 +105,57 @@ public class DatasetUtils {
 				break;
 		}
 		dataset.setOriginMetadata(originMetadata);
+		return dataset;
+	}
+
+	public static Dataset copyDatasetFromDataset(Dataset d) {
+		String type = d.getType();
+		Dataset dataset = null;
+
+		switch(type) {
+			case CalibrationDataset.datasetType:
+				dataset = new CalibrationDataset(d);
+				break;
+			case CtDataset.datasetType:
+				dataset = new CtDataset(d);
+				break;
+			case EegDataset.datasetType:
+				dataset = new EegDataset(d);
+				break;
+			case MegDataset.datasetType:
+				dataset = new MegDataset(d);
+				break;
+			case MeshDataset.datasetType:
+				dataset = new MeshDataset(d);
+				break;
+			case ParameterQuantificationDataset.datasetType:
+				dataset = new ParameterQuantificationDataset(d);
+				break;
+			case PetDataset.datasetType:
+				dataset = new PetDataset(d);
+				break;
+			case RegistrationDataset.datasetType:
+				dataset = new RegistrationDataset(d);
+				break;
+			case SegmentationDataset.datasetType:
+				dataset = new SegmentationDataset(d);
+				break;
+			case SpectDataset.datasetType:
+				dataset = new SpectDataset(d);
+				break;
+			case StatisticalDataset.datasetType:
+				dataset = new StatisticalDataset(d);
+				break;
+			case TemplateDataset.datasetType:
+				dataset = new TemplateDataset(d);
+				break;
+			case BidsDataset.datasetType:
+				dataset = new BidsDataset(d);
+				break;
+			default:
+				dataset = new GenericDataset(d);
+				break;
+		}
 		return dataset;
 	}
 	

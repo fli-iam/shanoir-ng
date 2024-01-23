@@ -130,6 +130,47 @@ public abstract class Dataset extends AbstractEntity {
 	@OneToOne(cascade = CascadeType.ALL)
 	private DatasetMetadata updatedMetadata;
 
+	private Long sourceId;
+
+	@JsonIgnore
+	@Transient
+	public String SOPInstanceUID;
+
+	public Dataset() {
+	}
+
+	public Dataset(Dataset d) {
+		this.creationDate = d.getCreationDate();
+		this.datasetAcquisition = d.getDatasetAcquisition();
+		this.datasetExpressions = new ArrayList<>(d.getDatasetExpressions().size());
+		for (DatasetExpression ds : d.getDatasetExpressions()) {
+			this.datasetExpressions.add(new DatasetExpression(ds, d));
+		}
+
+		this.datasetProcessing = d.getDatasetProcessing();
+		this.groupOfSubjectsId = d.getGroupOfSubjectsId();
+
+		this.processings = new ArrayList<>(d.getProcessings().size());
+		for (DatasetProcessing dproc : d.getProcessings()) {
+			this.processings.add(new DatasetProcessing(dproc));
+		}
+
+		this.originMetadata = new DatasetMetadata(d.getOriginMetadata());
+		this.referencedDatasetForSuperimposition = d.getReferencedDatasetForSuperimposition();
+
+		this.referencedDatasetForSuperimpositionChildrenList = new ArrayList<>(d.getReferencedDatasetForSuperimpositionChildrenList().size());
+		for (Dataset ds : d.getReferencedDatasetForSuperimpositionChildrenList()) {
+			this.referencedDatasetForSuperimpositionChildrenList.add(ds);
+		}
+
+		this.importedStudyId = d.getImportedStudyId();
+		this.studyId = d.getStudyId();
+		this.subjectId = d.getSubjectId();
+		this.downloadable = d.downloadable;
+		this.updatedMetadata = new DatasetMetadata(d.getUpdatedMetadata());
+		this.sourceId = d.getSourceId();
+	}
+
 	/**
 	 * @return the creationDate
 	 */
@@ -392,4 +433,19 @@ public abstract class Dataset extends AbstractEntity {
 		this.downloadable = downloadable;
 	}
 
+	public Long getSourceId() {
+		return sourceId;
+	}
+
+	public void setSourceId(Long sourceId) {
+		this.sourceId = sourceId;
+	}
+
+	public String getSOPInstanceUID() {
+		return SOPInstanceUID;
+	}
+
+	public void setSOPInstanceUID(String sOPInstanceUID) {
+		SOPInstanceUID = sOPInstanceUID;
+	}
 }

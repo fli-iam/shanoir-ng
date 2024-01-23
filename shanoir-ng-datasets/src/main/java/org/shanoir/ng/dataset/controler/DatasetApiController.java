@@ -24,12 +24,7 @@ import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -52,6 +47,7 @@ import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.download.DatasetDownloadError;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -59,10 +55,7 @@ import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.ErrorDetails;
-import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -149,6 +142,8 @@ public class DatasetApiController implements DatasetApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		} catch (RestServiceException e) {
+			return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
 		} catch (Exception e) {
 			LOG.error("Error while deleting dataset. Please check DICOM server configuration.", e);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -165,6 +160,8 @@ public class DatasetApiController implements DatasetApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		} catch (RestServiceException e) {
+			return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
 		} catch (IOException | SolrServerException e) {
 			LOG.error("Error while deleting datasets: ", e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -320,11 +317,26 @@ public class DatasetApiController implements DatasetApi {
 	}
 	
 	@Override
+	public void downloadDatasetById(
+			@Parameter(name = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId,
+			@Parameter(name = "Dowloading nifti, decide the nifti converter id") final Long converterId,
+			@Parameter(name = "Decide if you want to download dicom (dcm) or nifti (nii) files.")
+			@Valid @RequestParam(value = "format", required = false, defaultValue = DCM) final String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException {
+		Dataset dataset = this.datasetService.findById(datasetId);
+		if (dataset == null) {
+			throw new EntityNotFoundException(Dataset.class, datasetId);
+		}
+
+		this.datasetDownloaderService.massiveDownload(format, Collections.singletonList(dataset), response, false, converterId);
+	}
+
+	@Override
 	public ResponseEntity<String> getDicomMetadataByDatasetId(
 		@Parameter(name = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId) throws IOException, MessagingException {
-		final Dataset dataset = datasetService.findById(datasetId);		
+		final Dataset dataset = datasetService.findById(datasetId);
+		DatasetDownloadError result = new DatasetDownloadError();
 		List<URL> pathURLs = new ArrayList<>();
-		DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
+		DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, result);
 		if (pathURLs.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} else {
@@ -337,17 +349,6 @@ public class DatasetApiController implements DatasetApi {
 		File originalNiftiName = new File(importJob.getProcessedDatasetFilePath());
 		importerService.cleanTempFiles(originalNiftiName.getParent());
 		return new ResponseEntity<Void>(HttpStatus.OK);
-	}
-
-	@Override
-	public void downloadDatasetById(
-			@Parameter(name = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId,
-			@Parameter(name = "Dowloading nifti, decide the nifti converter id") final Long converterId,
-			@Parameter(name = "Decide if you want to download dicom (dcm) or nifti (nii) files.")
-			@Valid @RequestParam(value = "format", required = false, defaultValue = DCM) final String format, HttpServletResponse response)
-					throws EntityNotFoundException, RestServiceException, IOException {
-		
-		this.datasetDownloaderService.massiveDownload(format, Collections.singletonList(this.datasetService.findById(datasetId)), response, false, converterId);
 	}
 
 	@Override

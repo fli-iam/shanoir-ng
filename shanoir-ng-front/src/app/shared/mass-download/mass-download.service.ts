@@ -12,23 +12,22 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import {formatDate} from '@angular/common';
-import {HttpResponse} from '@angular/common/http';
-import {ComponentRef, Injectable} from '@angular/core';
-import {Observable, Subscription} from 'rxjs-compat';
-import {take} from 'rxjs/operators';
-import {Task, TaskState} from 'src/app/async-tasks/task.model';
-import {Dataset} from 'src/app/datasets/shared/dataset.model';
-import {DatasetService, Format} from 'src/app/datasets/shared/dataset.service';
-import {ServiceLocator} from 'src/app/utils/locator.service';
-import {SuperPromise} from 'src/app/utils/super-promise';
-import {ConfirmDialogService} from '../components/confirm-dialog/confirm-dialog.service';
-import {ConsoleService} from '../console/console.service';
-import {NotificationsService} from '../notifications/notifications.service';
-import {DownloadSetupAltComponent} from './download-setup-alt/download-setup-alt.component';
-import {DownloadSetupComponent} from './download-setup/download-setup.component';
-import {Queue} from './queue.model';
-import {DatasetType} from "../../datasets/shared/dataset-type.model";
+import { formatDate } from '@angular/common';
+import { HttpResponse } from '@angular/common/http';
+import { ComponentRef, Injectable } from '@angular/core';
+import { Observable, Subscription } from 'rxjs-compat';
+import { take } from 'rxjs/operators';
+import { Task, TaskState } from 'src/app/async-tasks/task.model';
+import { Dataset } from 'src/app/datasets/shared/dataset.model';
+import { DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
+import { ServiceLocator } from 'src/app/utils/locator.service';
+import { SuperPromise } from 'src/app/utils/super-promise';
+import { ConfirmDialogService } from '../components/confirm-dialog/confirm-dialog.service';
+import { ConsoleService } from '../console/console.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { DownloadSetupAltComponent } from './download-setup-alt/download-setup-alt.component';
+import { DownloadSetupComponent } from './download-setup/download-setup.component';
+import { Queue } from './queue.model';
 
 declare var JSZip: any;
 

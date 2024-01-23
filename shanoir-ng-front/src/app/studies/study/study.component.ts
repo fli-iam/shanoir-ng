@@ -42,7 +42,7 @@ import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
 import { Profile } from "../../shared/models/profile.model";
 import { AccessRequest } from 'src/app/users/access-request/access-request.model';
-import { ProcessingService } from 'src/app/processing/processing.service';
+import { ExecutionDataService } from 'src/app/vip/execution.data-service';
 import { DatasetService } from "../../datasets/shared/dataset.service";
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { DatasetExpressionFormat } from "../../enum/dataset-expression-format.enum";
@@ -103,7 +103,7 @@ export class StudyComponent extends EntityComponent<Study> {
             private studyRightsService: StudyRightsService,
             private studyCardService: StudyCardService,
             private accessRequestService: AccessRequestService,
-            private processingService: ProcessingService,
+            private processingService: ExecutionDataService,
             private downloadService: MassDownloadService) {
 
         super(route, 'study');
@@ -241,6 +241,7 @@ export class StudyComponent extends EntityComponent<Study> {
             'visibleByDefault': [this.study.visibleByDefault],
             'downloadableByDefault': [this.study.downloadableByDefault],
             'monoCenter': [{value: this.study.monoCenter, disabled: this.study.studyCenterList && this.study.studyCenterList.length > 1}, [Validators.required]],
+            'selectedCenter': [this.selectedCenter, this.study.monoCenter ? [Validators.required] : []],
             'studyCenterList': [this.study.studyCenterList, [this.validateCenter]],
             'subjectStudyList': [this.study.subjectStudyList],
             'tags': [this.study.tags],
@@ -250,6 +251,11 @@ export class StudyComponent extends EntityComponent<Study> {
             'dataUserAgreement': [],
             'studyUserList': [this.study.studyUserList]
         });
+
+        this.subscriptions.push(formGroup.get('monoCenter').valueChanges.subscribe(val => {
+            formGroup.get('selectedCenter').setValidators(val ? [Validators.required] : []);
+            this.reloadRequiredStyles();
+        }));
         return formGroup;
     }
 
@@ -639,7 +645,7 @@ export class StudyComponent extends EntityComponent<Study> {
 
     goToProcessing() {
         this.processingService.setDatasets(new Set(this.selectedDatasetIds));
-        this.router.navigate(['/processing']);
+        this.router.navigate(['pipelines']);
     }
 
     reloadSubjectStudies() {

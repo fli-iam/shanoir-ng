@@ -13,7 +13,6 @@
  */
 
 import { Entity } from '../shared/components/entity/entity.abstract';
-import { Report } from '../shared/mass-download/mass-download.service';
 import { camelToSpaces } from '../utils/app.utils';
 
 export enum TaskStatus {
@@ -38,16 +37,18 @@ export class Task extends Entity {
 
     debugTs: number = Date.now();
     id: number;
+    completeId: BigInt;
     creationDate: Date;
     lastUpdate: Date;
+    report: string;
     private _status: TaskStatus;
     private _message: string;
     private _progress: number;
-    private _eventType: string;
+    _eventType: string;
     eventLabel: string;
     objectId: number;
     route: string;
-    report: string;
+    hasReport: boolean;
     private readonly FIELDS: string[] = ['id', 'creationDate', 'lastUpdate','_status','_message', '_progress', '_eventType', 'eventLabel', 'objectId', 'route', 'report'];
 
     set eventType(eventType: string) {
@@ -94,15 +95,17 @@ export class Task extends Entity {
             } else if (this.message.indexOf('dataset [') != -1) {
                 let substring = this.message.match(/dataset \[\d+\]/g)[0];
                 return '/dataset/details/' + substring.slice(substring.lastIndexOf("[") + 1, substring.lastIndexOf("]"));
-            } else if (this.message.indexOf('VIP Execution') != -1) {
-               return '/dataset-processing/details/' + this.objectId
             }
+        } else if (this.eventType === 'executionMonitoring.event' && this.status != -1) {
+            return '/dataset-processing/details/' + this.objectId
+        } else if (this.eventType === 'copyDataset.event' && this.status != -1 && this.message.lastIndexOf('study [') != -1) {
+            return '/study/details/' + this.message.slice(this.message.lastIndexOf("[") + 1, this.message.lastIndexOf("]"));
         }
         return null;
     }
 
     stringify(): string {
-        return JSON.stringify(this, this.FIELDS); 
+        return JSON.stringify(this, this.FIELDS);
     }
 
     clone(): Task {

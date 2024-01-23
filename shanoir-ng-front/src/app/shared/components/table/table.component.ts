@@ -49,6 +49,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Output() rowClick: EventEmitter<Object> = new EventEmitter<Object>();
     @Output() rowEdit: EventEmitter<Object> = new EventEmitter<Object>();
     @Output() pageLoaded: EventEmitter<Page<any>> = new EventEmitter();
+    @Output() registerRefresh: EventEmitter<(number?) => void> = new EventEmitter();
     @Input() disableCondition: (item: any) => boolean;
     @Input() maxResults: number = 20;
     @Input() subRowsKey: string;
@@ -111,6 +112,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             this.checkCompactMode();
         }));
         this.checkCompactMode();
+        this.registerRefresh.emit(this.refresh.bind(this));
     }
 
     private computeItemVars() {
@@ -247,14 +249,19 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         let result: any = this.getCellValue(item, col);
         if (result == null || this.isValueBoolean(result)) {
             return "";
-        } else if (col.type == 'date') {
+        } else if (col.type == 'date' || col.type == 'dateTime') {
             let date: Date;
             if (result instanceof Date) {
                 date = result;
+            } else if (!Number.isNaN(Date.parse(result))) {
+                date = new Date(Date.parse(result));
             } else {
                 date = this.stringToDate(result);
             }
-            return date?.toLocaleDateString(undefined, {year: "numeric", month: "2-digit", day: "2-digit"}) || result;
+            let dateFormat;
+            if (col.type == 'dateTime') dateFormat = {year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false };
+            else dateFormat = {year: "numeric", month: "2-digit", day: "2-digit"};
+            return date?.toLocaleDateString(undefined, dateFormat) || result;
         } else if (result.text) {
             return result;
         } else {
@@ -262,8 +269,9 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    private stringToDate(dateString: String): Date {
+    private stringToDate(dateString: string): Date {
         if (!dateString) return null;
+        dateString += '';
         let split: string[] = dateString.split('-');
         if (split.length != 3) return null;
         let splitNum: number[] = split.map(elt => parseInt(elt));

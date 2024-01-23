@@ -108,15 +108,16 @@ public class OFSEPSeqIdHandler extends ResultHandler {
     }
 
     @Override
-    public void manageTarGzResult(List<File> resultFiles, File parentFolder, ExecutionMonitoring processing) throws ResultHandlerException {
+    public void manageTarGzResult(List<File> resultFiles, File parentFolder, ExecutionMonitoring processing) {
 
-        for(File file : resultFiles){
+        for (File file : resultFiles) {
             if (!file.getName().equals(PIPELINE_OUTPUT)) {
                 continue;
             }
 
             if (file.length() == 0) {
-                throw new ResultHandlerException("Result file [" + file.getAbsolutePath() + "] is present but empty.", null);
+                LOG.error("File" + file.getName() + " is empty, this processing result won't be created.");
+                continue;
             }
 
             try (InputStream is = new FileInputStream(file)) {
@@ -130,13 +131,11 @@ public class OFSEPSeqIdHandler extends ResultHandler {
 
                 this.processSeries(series, processing);
 
-            }catch (Exception e) {
-                throw new ResultHandlerException("An error occured while extracting result from result archive.", e);
+            } catch (Exception e) {
+                LOG.error("An error occured while extracting result from result archive.", e);
             }
-
-            return;
         }
-        throw new ResultHandlerException("Expected result file [" + parentFolder.getAbsolutePath() + "/" + PIPELINE_OUTPUT + "] is not present.", null);
+        LOG.error("Expected result file [" + parentFolder.getAbsolutePath() + "/" + PIPELINE_OUTPUT + "] is not present.");
     }
 
     /**

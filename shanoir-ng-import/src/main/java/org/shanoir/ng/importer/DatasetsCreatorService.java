@@ -1,6 +1,8 @@
 package org.shanoir.ng.importer;
 
 import org.shanoir.ng.importer.model.*;
+import org.shanoir.ng.shared.dicom.EchoTime;
+import org.shanoir.ng.shared.dicom.SerieToDatasetsSeparator;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ImportUtils;
@@ -138,6 +140,7 @@ public class DatasetsCreatorService {
 					dataset.getExpressionFormats().add(expressionFormat);
 					DatasetFile datasetFile = createDatasetFile(image);
 					dataset.getFlipAngles().add(Double.valueOf(image.getFlipAngle()));
+					dataset.setFirstImageSOPInstanceUID(image.getSOPInstanceUID());
 					dataset.getRepetitionTimes().add(image.getRepetitionTime());
 					dataset.getInversionTimes().add(image.getInversionTime());
 					dataset.setEchoTimes(image.getEchoTimes());

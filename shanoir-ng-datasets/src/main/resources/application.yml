@@ -60,8 +60,6 @@ spring:
   rabbitmq:
     host: ${SHANOIR_PREFIX}rabbitmq
     port: 5672
-    username: guest
-    password: guest
   session:
     store-type: none
   servlet:
@@ -80,10 +78,13 @@ shanoir:
 
 springdoc:
   api-docs:
-    path: /api-docs
-  swagger-ui:
-    path: /swagger-ui.html
+    path: '/api-docs'
     enabled: true
+  swagger-ui:
+    url: /shanoir-ng/datasets/api-docs
+    config-url: /shanoir-ng/datasets/api-docs/swagger-config
+    enabled: true
+    disable-swagger-default-url: true
 
 front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/

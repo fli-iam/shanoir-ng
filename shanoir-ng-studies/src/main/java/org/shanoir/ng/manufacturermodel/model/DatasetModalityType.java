@@ -50,7 +50,9 @@ public enum DatasetModalityType {
 	/**
 	 * EEG Dataset
 	 */
-	EEG_DATASET(6);
+	EEG_DATASET(6),
+
+	NIRS_DATASET(7);
 
 	private int id;
 

@@ -22,6 +22,7 @@ import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.dicom.DicomProcessing;
+import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
@@ -41,7 +42,7 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
 	DatasetExpressionContext datasetExpressionContext;
 	
 	@Override
-	public DatasetsWrapper<CtDataset> generateDatasetsForSerie(Attributes dicomAttributes, Serie serie,
+	public DatasetsWrapper<CtDataset> generateDatasetsForSerie(AcquisitionAttributes<String> dicomAttributes, Serie serie,
 			ImportJob importJob) throws Exception {
 		
 		DatasetsWrapper<CtDataset> datasetWrapper = new DatasetsWrapper<>();
@@ -59,7 +60,7 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
 
 		for (Dataset anyDataset : serie.getDatasets()) {
 			importJob.getProperties().put(ImportJob.INDEX_PROPERTY, String.valueOf(datasetIndex));
-			CtDataset dataset = generateSingleDataset(dicomAttributes, serie, anyDataset, datasetIndex, importJob);
+			CtDataset dataset = generateSingleDataset(dicomAttributes.getDatasetAttributes(anyDataset.getFirstImageSOPInstanceUID()), serie, anyDataset, datasetIndex, importJob);
 			datasetWrapper.getDatasets().add(dataset);
 			datasetIndex++;
 		}
@@ -72,6 +73,7 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
 	public CtDataset generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset, int datasetIndex,
 			ImportJob importJob) throws Exception {
 		CtDataset ctDataset = new CtDataset();
+		ctDataset.setSOPInstanceUID(dataset.getFirstImageSOPInstanceUID());
 		ctDataset.setCreationDate(serie.getSeriesDate());
 		final String serieDescription = serie.getSeriesDescription();
 

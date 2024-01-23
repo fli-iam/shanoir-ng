@@ -164,4 +164,5 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     goToList(): void {
         this.router.navigate(['/solr-search']);
     }
+
 }
