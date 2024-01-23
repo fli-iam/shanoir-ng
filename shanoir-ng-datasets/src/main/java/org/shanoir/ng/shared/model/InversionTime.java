@@ -52,6 +52,15 @@ public class InversionTime extends AbstractEntity {
 	@NotNull
 	private Double inversionTimeValue;
 
+	public InversionTime() {
+
+	}
+
+	public InversionTime(InversionTime it, MrDataset mr) {
+		this.inversionTimeValue = it.getInversionTimeValue();
+		this.mrDataset = mr;
+	}
+
 	/**
 	 * @return the inversionTimeValue
 	 */

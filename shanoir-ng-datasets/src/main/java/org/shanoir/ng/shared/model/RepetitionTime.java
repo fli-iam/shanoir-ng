@@ -53,6 +53,15 @@ public class RepetitionTime extends AbstractEntity {
 	@NotNull
 	private Double repetitionTimeValue;
 
+	public RepetitionTime() {
+
+	}
+
+	public RepetitionTime(RepetitionTime rt, MrDataset mr) {
+		this.mrDataset = mr;
+		this.repetitionTimeValue = rt.getRepetitionTimeValue();
+	}
+
 	/**
 	 * @return the repetitionTimeValue
 	 */
@@ -65,6 +74,10 @@ public class RepetitionTime extends AbstractEntity {
 	 */
 	public void setRepetitionTimeValue(Double repetitionTimeValue) {
 		this.repetitionTimeValue = repetitionTimeValue;
+	}
+
+	public MrDataset getMrDataset() {
+		return mrDataset;
 	}
 
 	public void setMrDataset(MrDataset mrDataset) {

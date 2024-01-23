@@ -42,6 +42,14 @@ public class Score extends HalEntity {
 	@JsonIgnore
 	private VariableAssessment variableAssessment;
 
+	public Score() {
+
+	}
+
+	public Score(VariableAssessment va) {
+		this.variableAssessment = va;
+	}
+
 	/**
 	 * Init HATEOAS links
 	 */

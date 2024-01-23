@@ -7,6 +7,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import org.shanoir.ng.dataset.modality.EegDataset;
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 
 /**
@@ -96,6 +97,24 @@ public class Channel extends HalEntity {
     @JoinColumn(name = "dataset_id")
     @JsonIgnore
 	private EegDataset dataset;
+
+	public Channel() {
+
+	}
+
+	public Channel(Channel other, EegDataset d) {
+		this.name = other.getName();
+		this.resolution = other.getResolution();
+		this.referenceUnits = other.getReferenceUnits();
+		this.referenceType = other.getReferenceType();
+		this.lowCutoff = other.getLowCutoff();
+		this.highCutoff = other.getHighCutoff();
+		this.notch = other.getNotch();
+		this.x = other.getX();
+		this.y = other.getY();
+		this.z = other.getZ();
+		this.dataset = d;
+	}
 
 	/**
 	 * @return the lowCutOff
