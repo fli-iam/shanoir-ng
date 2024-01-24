@@ -29,6 +29,7 @@ spring:
     database-platform: org.hibernate.dialect.MySQL57Dialect
     defer-datasource-initialization: true
     generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
+    show-sql: true
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: validate
@@ -103,8 +104,11 @@ logging:
     org.springframework.web: ERROR
     org.hibernate: ERROR
     org.shanoir: INFO
-        
-  
+    com:
+      zaxxer:
+        hikari.HikariConfig: DEBUG
+        hikari: TRACE
+
 ### ============================================================= ###
 ###                  Dicom Server Configuration                   ###
 ### ============================================================= ###
@@ -197,7 +201,10 @@ logging:
   level:
     org.springframework.web: DEBUG
     org.hibernate: ERROR
-
+    com:
+      zaxxer:
+        hikari.HikariConfig: DEBUG
+        hikari: TRACE
 ---
 spring:
   config.activate.on-profile: test
