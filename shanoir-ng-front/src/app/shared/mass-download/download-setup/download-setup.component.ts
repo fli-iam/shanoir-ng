@@ -60,7 +60,7 @@ export class DownloadSetupComponent implements OnInit {
             'unzip': [false, []],
         });
         if (this.winOs) {
-            formGroup.addControl('shortPath', new UntypedFormControl([false, []]));
+            formGroup.addControl('shortPath', new UntypedFormControl(false));
         }
         return formGroup;
     }
@@ -70,6 +70,7 @@ export class DownloadSetupComponent implements OnInit {
         options.nbQueues = this.form.get('nbQueues').value;
         options.unzip = this.form.get('unzip').value;
         if (this.form.get('shortPath') && options.unzip) options.shortPath = this.form.get('shortPath').value;
+        console.log(options.shortPath)
         this.go.emit(options);
     }
     
