@@ -38,6 +38,14 @@ public class CtProtocol extends AbstractEntity {
 	@OneToOne(cascade = CascadeType.ALL, mappedBy = "ctProtocol")
 	private CtDatasetAcquisition ctDatasetAcquisition;
 
+	public CtProtocol() {
+
+	}
+
+	public CtProtocol(CtDatasetAcquisition acq) {
+		this.ctDatasetAcquisition = acq;
+	}
+
 	/**
 	 * @return the ctDatasetAcquisition
 	 */

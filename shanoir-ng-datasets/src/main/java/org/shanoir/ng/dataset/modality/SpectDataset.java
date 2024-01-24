@@ -36,6 +36,19 @@ public class SpectDataset extends Dataset {
 	/** Spect Dataset Nature. */
 	private Integer spectDatasetNature;
 
+	public SpectDataset() {
+
+	}
+
+	public SpectDataset(Dataset other) {
+		super(other);
+		if (((SpectDataset) other).getSpectDatasetNature() != null) {
+			this.spectDatasetNature = ((SpectDataset) other).getSpectDatasetNature().getId();
+		} else {
+			this.spectDatasetNature = null;
+		}
+	}
+
 	/**
 	 * @return the spectDatasetNature
 	 */

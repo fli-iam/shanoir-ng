@@ -16,6 +16,7 @@ package org.shanoir.ng.dataset.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.processing.model.DatasetProcessingType;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
@@ -103,6 +104,40 @@ public class DatasetExpression extends AbstractEntity {
 	 * conversion made during the import process
 	 */
 	private Boolean originalNiftiConversion;
+
+
+	public DatasetExpression() {
+	}
+
+	public DatasetExpression(DatasetExpression dexp, Dataset d) {
+		this.comingFromDatasetExpressions = new ArrayList<>(dexp.getComingFromDatasetExpressions().size());
+		for (DatasetExpression de : dexp.getComingFromDatasetExpressions()) {
+			this.comingFromDatasetExpressions.add(new DatasetExpression(de, d));
+		}
+		this.creationDate = dexp.getExpressionCreationDate();
+		this.dataset = d;
+		this.datasetExpressionFormat = dexp.getDatasetExpressionFormat().getId();
+		this.size = dexp.getSize();
+
+		this.datasetFiles = new ArrayList<>(dexp.getDatasetFiles().size());
+		for (DatasetFile df : dexp.getDatasetFiles()) {
+			this.datasetFiles.add(new DatasetFile(df, this));
+		}
+
+		if (dexp.getDatasetProcessingType() != null) {
+			this.datasetProcessingType = dexp.getDatasetProcessingType().getId();
+		} else {
+			this.datasetProcessingType = null;
+		}
+		this.frameCount = dexp.getFrameCount();
+		this.multiFrame = dexp.isMultiFrame();
+		this.originalDatasetExpression = dexp.getOriginalDatasetExpression();
+		this.niftiConverterId = dexp.getNiftiConverterId();
+		this.firstImageAcquisitionTime = dexp.getFirstImageAcquisitionTime();
+		this.lastImageAcquisitionTime = dexp.getLastImageAcquisitionTime();
+		this.niftiConverterVersion = dexp.getNiftiConverterVersion();
+		this.originalNiftiConversion = dexp.getOriginalNiftiConversion();
+	}
 
 	/**
 	 * @return the comingFromDatasetExpressions

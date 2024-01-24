@@ -25,6 +25,7 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationServiceImpl;
 import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
@@ -85,7 +86,7 @@ public class ExaminationServiceTest {
 
 	@Test
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void deleteByIdTest() throws ShanoirException, SolrServerException, IOException {
+	public void deleteByIdTest() throws ShanoirException, SolrServerException, IOException, RestServiceException {
 		examinationService.deleteById(EXAMINATION_ID);
 		Mockito.verify(examinationRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}

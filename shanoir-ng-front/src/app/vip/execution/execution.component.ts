@@ -47,11 +47,9 @@ export class ExecutionComponent implements OnInit {
     token: String;
     refreshToken: String;
     parametersApplied: boolean = false;
-    nbExecutions = 0;
     execution: Execution;
     columnDefs: { [key: string]: ColumnDefinition[] } = {};
     datasetsByParam: { [key: string]: Dataset[] } = {};
-    tables = [];
     fileInputs = [];
     inputDatasets: Set<Dataset>;
     execDefaultName= "";
@@ -224,12 +222,14 @@ export class ExecutionComponent implements OnInit {
                     (error) => {
                         this.msgService.log('error', 'Sorry, an error occurred while creating the execution on VIP.');
                         console.error(error);
+                        this.isSubmitted = false;
                     }
                 )
             },
             (error) => {
                 this.msgService.log('error', 'Sorry, an error occurred while creating dataset processing.');
                 console.error(error);
+                this.isSubmitted = false;
             }
         )
     }

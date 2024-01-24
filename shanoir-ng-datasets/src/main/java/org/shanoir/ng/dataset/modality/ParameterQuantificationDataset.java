@@ -32,7 +32,20 @@ public class ParameterQuantificationDataset extends Dataset {
 	 * UID
 	 */
 	private static final long serialVersionUID = 7649321017486497468L;
-	
+
+	public ParameterQuantificationDataset() {
+
+	}
+
+	public ParameterQuantificationDataset(Dataset other) {
+		super(other);
+		if (((ParameterQuantificationDataset) other).getParameterQuantificationDatasetNature() != null) {
+			this.parameterQuantificationDatasetNature = ((ParameterQuantificationDataset) other).getParameterQuantificationDatasetNature().getId();
+		} else {
+			this.parameterQuantificationDatasetNature = null;
+		}
+	}
+
 	/** Parameter Quantification Dataset Nature. */
 	private Integer parameterQuantificationDatasetNature;
 
