@@ -208,7 +208,7 @@ export class NotificationsService {
         tmpTasks = tmpTasks.concat(this.newLocalTasksQueue);
         let tmpTasksStr: string = this.serializeTasks(tmpTasks); // also checks the size limit
         localStorage.setItem(this.storageKey, tmpTasksStr);
-        this.newLocalTasksQueue = [];
+        this.newLocalTasksQueue = []8;
         this.localTasks = tmpTasks;
         this.updateStatusVars();
         this.emitTasks();
