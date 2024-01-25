@@ -27,8 +27,8 @@ spring:
     username: users
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
-    hikari.maximum-pool-size: 40
-    hikari.minimum-idle: 40
+    hikari.maximum-pool-size: 20
+    hikari.minimum-idle: 20
   jpa:
     database-platform: org.hibernate.dialect.MySQL57Dialect
     defer-datasource-initialization: true
