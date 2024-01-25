@@ -118,6 +118,14 @@ public final class KeycloakUtil {
 		return jwt.getToken().getClaim(PREFERRED_USERNAME);
 	}
 
+	public static String getToken() {
+		final JwtAuthenticationToken jwt = getJwtAuthenticationToken();
+		if (jwt == null) {
+			throw new TokenNotFoundException("JwtAuthenticationToken not found.");
+		}
+		return jwt.getToken().getTokenValue();
+	}
+
 	/**
 	 * Get current ID from keycloak with a default fallback value
 	 * @param defaultId the default value to set
@@ -141,7 +149,7 @@ public final class KeycloakUtil {
 		final JwtAuthenticationToken jwt = getJwtAuthenticationToken();
 		final HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.add("Authorization", "Bearer " + jwt.getToken());
+		headers.add("Authorization", "Bearer " + jwt.getToken().getTokenValue());
 		return headers;
 	}
 
