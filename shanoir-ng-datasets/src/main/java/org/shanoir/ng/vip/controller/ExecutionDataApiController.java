@@ -98,7 +98,7 @@ public class ExecutionDataApiController implements ExecutionDataApi {
     @Value("${vip.uri}")
     private String VIP_URI;
 
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSS");
 
 
     @Override
