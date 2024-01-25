@@ -25,6 +25,8 @@ spring:
     username: preclinical
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari.maximum-pool-size: 40
+    hikari.minimum-idle: 40
   jpa:
     database-platform: org.hibernate.dialect.MySQL57Dialect
     defer-datasource-initialization: true
@@ -114,6 +116,9 @@ server:
   port: 9915
 spring:
   config.activate.on-profile: dev
+  datasource:
+    hikari.maximum-pool-size: 15
+    hikari.minimum-idle: 15
   jpa:
     defer-datasource-initialization: true
     generate-ddl: true
