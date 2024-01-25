@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpStatus;
-import org.apache.hc.core5.http.ParseException;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.net.URIBuilder;
 import org.apache.log4j.Logger;
@@ -249,12 +248,10 @@ public class ShanoirUploaderServiceClient {
 						return responseEntityJson.getString("access_token");
 					}				
 				}
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);				
 			}
 		} catch (UnsupportedEncodingException e) {
-			logger.error(e.getMessage(), e);
-		} catch (ParseException e) {
-			logger.error(e.getMessage(), e);
-		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 		}
 		return null;
