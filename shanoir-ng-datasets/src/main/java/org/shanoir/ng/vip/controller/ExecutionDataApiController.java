@@ -60,6 +60,8 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.sql.Array;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Controller
@@ -95,6 +97,9 @@ public class ExecutionDataApiController implements ExecutionDataApi {
 
     @Value("${vip.uri}")
     private String VIP_URI;
+
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+
 
     @Override
     public ResponseEntity<?> getPath(
@@ -213,7 +218,7 @@ public class ExecutionDataApiController implements ExecutionDataApi {
         ExecutionMonitoring executionMonitoring = new ExecutionMonitoring();
         executionMonitoring.setName(execution.getName());
         executionMonitoring.setPipelineIdentifier(execution.getPipelineIdentifier());
-        executionMonitoring.setResultsLocation(KeycloakUtil.getTokenUserId() + "/" + LocalDate.now());
+        executionMonitoring.setResultsLocation(KeycloakUtil.getTokenUserId() + "/" + formatter.format(LocalDateTime.now()));
         executionMonitoring.setTimeout(20);
         executionMonitoring.setStudyId(Long.valueOf(execution.getStudyIdentifier()));
         executionMonitoring.setStatus(ExecutionStatus.RUNNING);
