@@ -101,11 +101,13 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 						} catch (Exception e) { // one serie/file could cause problems, log and mark as erroneous, but continue with next serie
 							handleError(event, nbSeries, cpt, serie, e);
 						}
-						// use a second try here, in case error is on serie, to get at least the serie name for error tracing
-						try {
-							getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, serie, patient, isImportFromPACS);
-						} catch (Exception e) {
-							handleError(event, nbSeries, cpt, serie, e);						
+						if (!serie.isIgnored()) {
+							// use a second try here, in case error is on serie, to get at least the serie name for error tracing
+							try {
+								getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, serie, patient, isImportFromPACS);
+							} catch (Exception e) {
+								handleError(event, nbSeries, cpt, serie, e);						
+							}
 						}
 					}
 					cpt++;
@@ -142,8 +144,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 
 	/**
 	 * This method iterates over all instances, filters only the images
-	 * and puts them into a new list: images. For the moment non-images are
-	 * not implemented.
+	 * and puts them into a new list: images.
 	 * 
 	 * @param folderFileAbsolutePath
 	 * @param serie
@@ -151,7 +152,6 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 */
 	private void filterAndCreateImages(String folderFileAbsolutePath, Serie serie, boolean isImportFromPACS) throws Exception {
 		List<Image> images = new ArrayList<Image>();
-		List<Object> nonImages = new ArrayList<Object>();
 		List<Instance> instances = serie.getInstances();
 		if (instances != null) {
 			for (Iterator<Instance> instancesIt = instances.iterator(); instancesIt.hasNext();) {
@@ -159,10 +159,18 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				File instanceFile = getFileFromInstance(instance, serie, folderFileAbsolutePath, isImportFromPACS);
 				processDicomFilePerInstanceAndCreateImage(instanceFile, images, folderFileAbsolutePath);
 			}
-			serie.setNonImages(nonImages);
-			serie.setNonImagesNumber(nonImages.size());
-			serie.setImages(images);
-			serie.setImagesNumber(images.size());
+			/**
+			 * Old versions of ShUp v7.0.1, still installed and running, send "ignored" series.
+			 * The method processDicomFilePerInstanceAndCreateImage will ignore those instances,
+			 * so the images remain empty, that is why we tag these series as ignored now. 
+			 */
+			if (!images.isEmpty()) {
+				serie.setImages(images);
+				serie.setImagesNumber(images.size());
+			} else {
+				serie.setIgnored(true);
+				serie.setSelected(false);
+			}
 		}
 	}
 
