@@ -286,7 +286,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                 // populate criteria
                 if (solrResultPage) {
                     this.pagingCriterion.forEach(criterionComponent => {
-                        if (this.solrRequest.facetPaging.has(criterionComponent.facetName)) {
+                        if (this.solrRequest?.facetPaging?.has(criterionComponent.facetName)) {
                             let facetPage: FacetResultPage = solrResultPage.facetResultPages.find(facetResPage => facetResPage.content[0]?.key?.name == criterionComponent.facetName)
                             if (!facetPage) facetPage = new FacetResultPage();
                             criterionComponent.refresh(facetPage);
