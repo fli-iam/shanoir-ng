@@ -32,6 +32,7 @@ import org.shanoir.ng.importer.service.DicomSRImporterService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.paging.PageImpl;
@@ -132,7 +133,7 @@ public class ExaminationApiControllerTest {
 	ObjectMapper objectMapper;
 
 	@BeforeEach
-	public void setup() throws ShanoirException, SolrServerException, IOException {
+	public void setup() throws ShanoirException, SolrServerException, IOException, RestServiceException {
 		doNothing().when(examinationServiceMock).deleteById(1L);
 		given(examinationServiceMock.findPage(Mockito.any(Pageable.class), Mockito.eq(false))).willReturn(new PageImpl<Examination>(Arrays.asList(new Examination())));
 		Examination exam = new Examination();

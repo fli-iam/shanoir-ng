@@ -30,6 +30,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 @JsonTypeName("Pet")
 public class PetDatasetAcquisition extends DatasetAcquisition {
 
+	public static final String datasetAcquisitionType = "Pet";
 	/**
 	 * UID
 	 */
@@ -38,6 +39,15 @@ public class PetDatasetAcquisition extends DatasetAcquisition {
 	/** PET protocol. */
 	@OneToOne(cascade = CascadeType.ALL)
 	private PetProtocol petProtocol;
+
+	public PetDatasetAcquisition() {
+
+	}
+
+	public PetDatasetAcquisition(DatasetAcquisition other) {
+		super(other);
+		this.petProtocol = new PetProtocol(((PetDatasetAcquisition) other).getPetProtocol(), this);
+	}
 
 	/**
 	 * @return the petProtocol

@@ -76,12 +76,6 @@ public class Serie {
 	@JsonProperty("isSpectroscopy")
 	private Boolean isSpectroscopy;
 
-	@JsonProperty("nonImages")
-	private List<Object> nonImages = null;
-
-	@JsonProperty("nonImagesNumber")
-	private Integer nonImagesNumber = null;
-
 	@JsonProperty("images")
 	private List<Image> images = null;
 
@@ -185,22 +179,6 @@ public class Serie {
 
 	public void setIsMultiFrame(Boolean isMultiFrame) {
 		this.isMultiFrame = isMultiFrame;
-	}
-
-	public List<Object> getNonImages() {
-		return nonImages;
-	}
-
-	public void setNonImages(List<Object> nonImages) {
-		this.nonImages = nonImages;
-	}
-
-	public Integer getNonImagesNumber() {
-		return nonImagesNumber;
-	}
-
-	public void setNonImagesNumber(Integer nonImagesNumber) {
-		this.nonImagesNumber = nonImagesNumber;
 	}
 
 	public List<Image> getImages() {

@@ -137,7 +137,7 @@ public class CardsProcessingService {
             LOG.info("Quality check for examination " + examination.getId() + " finished in " + (new Date().getTime() - startTs) + " ms");
             return result;
 		} else {
-			throw new RestClientException("Study card used with emtpy rules.");
+			throw new RestClientException("Quality card used with emtpy rules.");
 		}
 	}
 
@@ -210,10 +210,10 @@ public class CardsProcessingService {
             return result;
         } else {
             event.setStatus(-1);
-            event.setMessage("Study card used with emtpy rules.");
+            event.setMessage("Quality card used with emtpy rules.");
             event.setProgress(1f);
             eventService.publishEvent(event);
-            throw new RestClientException("Study card used with emtpy rules.");
+            throw new RestClientException("Quality card used with emtpy rules.");
         }
 	}
 

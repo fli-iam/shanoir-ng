@@ -63,6 +63,9 @@ export class HandleErrorService implements ErrorHandler {
     }
 
     private handleDefaultError(error: any) {
+        if (error?.message?.startsWith('No activity within')) {
+            return;
+        }
         try {
             let msg: string = 'Error' 
             if (error.name != 'Error') msg += ' : ' + error.name;

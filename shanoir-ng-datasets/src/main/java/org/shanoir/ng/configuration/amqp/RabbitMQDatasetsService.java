@@ -16,10 +16,13 @@ package org.shanoir.ng.configuration.amqp;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityManager;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.dataset.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.dataset.service.DatasetCopyService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
@@ -28,7 +31,9 @@ import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.dataset.RelatedDataset;
 import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.model.*;
 import org.shanoir.ng.shared.repository.AcquisitionEquipmentRepository;
@@ -48,6 +53,7 @@ import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -56,6 +62,8 @@ import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * RabbitMQ configuration.
@@ -67,6 +75,8 @@ public class RabbitMQDatasetsService {
 
 	@Autowired
 	private DatasetService datasetService;
+	@Autowired
+	private DatasetCopyService datasetCopyService;
 
 	@Autowired
 	private RabbitMqStudyUserService listener;
@@ -81,6 +91,9 @@ public class RabbitMQDatasetsService {
 	private CenterRepository centerRepository;
 
 	@Autowired
+	private DatasetRepository datasetRepository;
+
+	@Autowired
 	private AcquisitionEquipmentRepository acquisitionEquipmentRepository;
 
 	@Autowired
@@ -93,6 +106,9 @@ public class RabbitMQDatasetsService {
 	private ExaminationService examinationService;
 
 	@Autowired
+	ShanoirEventService eventService;
+
+	@Autowired
 	private ExaminationRepository examinationRepository;
 	
 	@Autowired
@@ -100,10 +116,12 @@ public class RabbitMQDatasetsService {
 
 	@Autowired
 	private BIDSService bidsService;
-	
+
 	@Autowired
 	private ObjectMapper objectMapper;
-	
+	@Autowired
+	EntityManager entityManager;
+
 	private static final Logger LOG = LoggerFactory.getLogger(RabbitMQDatasetsService.class);
 
 	@RabbitListener(bindings = @QueueBinding(
@@ -219,7 +237,7 @@ public class RabbitMQDatasetsService {
 
 	/**
 	 * Updates all the solr references for this subject.
-	 * @param subjectId the subject ID updated
+	 * @param subjectIds the subject ID updated
 	 */
 	private void updateSolr(final List<Long> subjectIds) throws SolrServerException, IOException {
 		Set<Long> datasetsToUpdate = new HashSet<>();
@@ -279,7 +297,7 @@ public class RabbitMQDatasetsService {
 
 	/**
 	 * Receives a shanoirEvent as a json object, concerning a dataset acquisition to create
-	 * @param commandArrStr the task as a json string.
+	 * @param studyStr the task as a json string.
 	 */
 	@RabbitListener(bindings = @QueueBinding(
 			key = ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT,
@@ -309,7 +327,7 @@ public class RabbitMQDatasetsService {
 
 	/**
          * Receives a shanoirEvent as a json object, concerning a subject deletion
-         * @param commandArrStr the task as a json string.
+         * @param eventAsString the task as a json string.
          */
 	@RabbitListener(bindings = @QueueBinding(
 			key = ShanoirEventType.DELETE_SUBJECT_EVENT,
@@ -347,7 +365,7 @@ public class RabbitMQDatasetsService {
 
 	/**
 	 * Receives a shanoirEvent as a json object, concerning a subject deletion
-	 * @param commandArrStr the task as a json string.
+	 * @param eventAsString the task as a json string.
 	 */
 	@RabbitListener(bindings = @QueueBinding(
 			key = ShanoirEventType.DELETE_STUDY_EVENT,
@@ -408,12 +426,84 @@ public class RabbitMQDatasetsService {
 		datasetService.getVolumeByFormatByStudyId(studyIds).forEach((id, volumeByFormat) -> {
 			studyStorageVolumes.put(id, new StudyStorageVolumeDTO(volumeByFormat, examinationService.getExtraDataSizeByStudyId(id)));
 		});
-		
+
 		try {
 			return objectMapper.writeValueAsString(studyStorageVolumes);
 		} catch (JsonProcessingException e) {
 			LOG.error("Error while serializing HashMap<Long, StudyVolumeStorageDTO>.", e);
 			throw new AmqpRejectAndDontRequeueException(e);
+		}
+	}
+
+	/**
+	 * Iterate through a list of dataset to copy each into a new study
+	 * @param data The list of datasets id to copy and the studyId to copy in
+	 *
+	 * @return
+	 */
+	@RabbitListener(queues = RabbitMQConfiguration.COPY_DATASETS_TO_STUDY_QUEUE)
+	@RabbitHandler
+	@Transactional
+	@Async
+	public void copyDatasetsToStudy(final String data) {
+		Map<Long, Examination> examMap = new HashMap<>();
+		Map<Long, DatasetAcquisition> acqMap = new HashMap<>();
+		List<Long> datasetParentIds;
+		List<Long> newDatasets = new ArrayList<>();
+		int count = 0;
+		float progress = 0f;
+		ShanoirEvent event = null;
+		try {
+			RelatedDataset dto = objectMapper.readValue(data, RelatedDataset.class);
+			SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+			Long userId = dto.getUserId();
+			Long studyId = dto.getStudyId();
+			datasetParentIds = dto.getDatasetIds();
+
+			event = new ShanoirEvent(
+					ShanoirEventType.COPY_DATASET_EVENT,
+					null,
+					userId,
+					"Copy of dataset " + count++ + "/" + datasetParentIds.size() + " to study [" + studyId + "].",
+					ShanoirEvent.IN_PROGRESS,
+					Float.valueOf(count/datasetParentIds.size())
+			);
+
+			for (Long datasetParentId : datasetParentIds) {
+				progress += 1f / datasetParentIds.size();
+				event.setMessage("Copy of dataset [" + datasetParentId + "] to study [" + studyId + "]: " + count++ + "/" + datasetParentIds.size());
+				event.setProgress(progress);
+				eventService.publishEvent(event);
+
+				LOG.warn("[CopyDatasets] Start copy for dataset " + datasetParentId + " to study " + studyId);
+				Long dsCount = datasetRepository.countDatasetsBySourceIdAndStudyId(datasetParentId, studyId);
+				Dataset datasetParent = datasetService.findById(datasetParentId);
+
+				if (datasetParent.getSourceId() != null) {
+					LOG.warn("[CopyDatasets] Selected dataset is a copy, please pick the original dataset.");
+				} else if (dsCount != 0) {
+					LOG.warn("[CopyDatasets] Dataset already exists in this study, copy aborted.");
+				} else {
+					Long id = datasetCopyService.moveDataset(datasetParent, studyId, examMap, acqMap, event, userId);
+					if (id != null)
+						newDatasets.add(id);
+				}
+			}
+
+			event.setMessage("Copy of datasets successful in study [" + studyId + "].");
+			event.setStatus(ShanoirEvent.SUCCESS);
+			event.setProgress(1.0f);
+
+			eventService.publishEvent(event);
+			solrService.indexDatasets(newDatasets);
+
+		} catch (Exception e) {
+			event.setMessage("[CopyDatasets] Error during the copy of dataset.");
+			event.setStatus(ShanoirEvent.ERROR);
+			event.setProgress(-1f);
+			eventService.publishEvent(event);
+			LOG.error("Something went wrong during the copy. {}", e.getMessage());
+			throw new AmqpRejectAndDontRequeueException(e.getMessage(), e);
 		}
 	}
 }

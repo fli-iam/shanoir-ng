@@ -73,9 +73,12 @@ public class RabbitMQConfiguration {
 	/** Get the list of subjects for a given study. */
 	public static final String DATASET_SUBJECT_QUEUE = "dataset-subjects-queue";
 
+	public static final String COPY_DATASETS_TO_STUDY_QUEUE = "copy-datasets-to-study-queue";
 	public static final String STUDY_DATASETS_DETAILED_STORAGE_VOLUME = "study-datasets-detailed-storage-volume";
 
 	public static final String STUDY_DATASETS_TOTAL_STORAGE_VOLUME = "study-datasets-total-storage-volume";
+
+	public static final String EXECUTION_MONITORING_TASK = "execution-monitoring-task";
 
 	/** Get the type of dataset from a given study. */
 	public static final String STUDY_DATASET_TYPE = "study-dataset-type";
@@ -246,6 +249,10 @@ public class RabbitMQConfiguration {
 	public static Queue datasetSubjectQueue() {
 		return new Queue(DATASET_SUBJECT_QUEUE, true);
 	}
+	@Bean
+	public static Queue copyDatasetToStudyQueue() {
+		return new Queue(COPY_DATASETS_TO_STUDY_QUEUE, true);
+	}
 
 	@Bean
 	public static Queue studyDatasetsDetailedStorageVolumeQueue() {
@@ -255,6 +262,11 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue studyDatasetsTotalStorageVolumeQueue() {
 		return new Queue(STUDY_DATASETS_TOTAL_STORAGE_VOLUME, true);
+	}
+
+	@Bean
+	public static Queue sexecutionMonitoringEventQueue() {
+		return new Queue(EXECUTION_MONITORING_TASK, true);
 	}
 
 	@Bean

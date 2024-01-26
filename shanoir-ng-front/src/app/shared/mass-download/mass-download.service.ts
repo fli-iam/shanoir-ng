@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -193,9 +193,9 @@ export class MassDownloadService {
             });
         }).catch(error => { /* the user clicked 'cancel' in the choose directory window */ });
     }
-    
+
     makeRootSubdirectory(handle: FileSystemDirectoryHandle, nbDatasets: number): Promise<FileSystemDirectoryHandle> {
-        const dirName: string = 'Shanoir-download_' + nbDatasets + 'ds_' + formatDate(new Date(), 'dd-MM-YYYY_HH\'h\'mm', 'en-US'); 
+        const dirName: string = 'Shanoir-download_' + nbDatasets + 'ds_' + formatDate(new Date(), 'dd-MM-YYYY_HH\'h\'mm', 'en-US');
         return handle.getDirectoryHandle(dirName, { create: true })
     }
 
@@ -279,7 +279,7 @@ export class MassDownloadService {
             .then(parentFolderHandle => { // ask the user's parent directory
 
             let task: Task = this.createTask(datasets.length);
-            if (downloadState) downloadState.status = task.status; 
+            if (downloadState) downloadState.status = task.status;
             return this.downloadQueue.waitForTurn().then(releaseQueue => {
                 try {
                     task.status = 2;
@@ -453,7 +453,7 @@ export class MassDownloadService {
         } else { // if no dir to create
             userFolderHandle.getFileHandle(filename, { create: true }).then(fileHandler => {
                 this.writeFile(fileHandler, content);
-            }); 
+            });
         }
     }
 
@@ -553,7 +553,7 @@ export class MassDownloadService {
     private waitForEnd(modalRef: ComponentRef<any>): Promise<any | 'cancel'> {
         let resPromise: SuperPromise<any | 'cancel'> = new SuperPromise();
         let result: Observable<any> = Observable.race([
-            modalRef.instance.go, 
+            modalRef.instance.go,
             modalRef.instance.close.map(() => 'cancel')
         ]);
         result.pipe(take(1)).subscribe(ret => {

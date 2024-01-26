@@ -15,6 +15,7 @@
 package org.shanoir.ng.dataset.modality;
 
 import jakarta.persistence.Entity;
+import org.hibernate.sql.Template;
 import org.shanoir.ng.dataset.model.Dataset;
 
 /**
@@ -32,6 +33,19 @@ public class TemplateDataset extends Dataset {
 	 * UID
 	 */
 	private static final long serialVersionUID = -3399415257911069266L;
+
+	public TemplateDataset() {
+
+	}
+
+	public TemplateDataset(Dataset other) {
+		super(other);
+		if (((TemplateDataset) other).getTemplateDatasetNature() != null) {
+			this.templateDatasetNature = ((TemplateDataset) other).getTemplateDatasetNature().getId();
+		} else {
+			this.templateDatasetNature = null;
+		}
+	}
 
 	/** Template Dataset Nature. */
 	private Integer templateDatasetNature;

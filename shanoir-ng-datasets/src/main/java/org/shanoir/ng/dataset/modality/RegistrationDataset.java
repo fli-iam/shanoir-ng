@@ -36,6 +36,19 @@ public class RegistrationDataset extends Dataset {
 	/** Registration Dataset Nature. */
 	private Integer registrationDatasetType;
 
+	public RegistrationDataset() {
+
+	}
+
+	public RegistrationDataset(Dataset other) {
+		super(other);
+		if (((RegistrationDataset) other).getRegistrationDatasetType() != null) {
+			this.registrationDatasetType = ((RegistrationDataset) other).getRegistrationDatasetType().getId();
+		} else {
+			this.registrationDatasetType = null;
+		}
+	}
+
 	/**
 	 * @return the registrationDatasetType
 	 */

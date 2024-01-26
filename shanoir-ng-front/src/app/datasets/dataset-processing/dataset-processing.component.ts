@@ -36,6 +36,7 @@ import { SuperPromise } from '../../utils/super-promise';
 import {VipClientService} from "../../vip/shared/vip-client.service";
 import {HttpResponse} from "@angular/common/http";
 import * as AppUtils from "../../utils/app.utils";
+import {formatDate} from "@angular/common";
 
 @Component({
     selector: 'dataset-processing-detail',
@@ -289,5 +290,35 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             type: 'text/plain'
         });
         AppUtils.browserDownloadFile(blob, filename);
+    }
+
+    public formatDate(millis: number) : string {
+        return millis ? formatDate(new Date(millis), 'dd/MM/YYYY HH:mm:ss', 'en-US') : "";
+    }
+
+    public getDuration(){
+
+        let start = this.executionMonitoring?.startDate;
+        let end = this.executionMonitoring?.endDate;
+
+        if(!start || !end){
+            return "";
+        }
+
+        let duration = end - start;
+
+        if(duration <= 0){
+            return "";
+        }
+
+        let milliseconds = Math.floor((duration % 1000));
+        let seconds = Math.floor((duration / 1000) % 60);
+        let minutes = Math.floor((duration / (1000 * 60)) % 60);
+        let hours = Math.floor((duration / (1000 * 60 * 60)));
+
+        return String(hours).padStart(2, "0") + ":" +
+            String(minutes).padStart(2, "0") + ":" +
+            String(seconds).padStart(2, "0") + "." +
+            String(milliseconds).padStart(3, "0")
     }
 }

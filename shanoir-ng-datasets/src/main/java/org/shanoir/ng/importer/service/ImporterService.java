@@ -171,7 +171,7 @@ public class ImporterService {
                     .filter(ss -> ss.getStudy().getId().equals(examination.getStudy().getId()))
                     .findFirst().orElse(null);
                 QualityTag tagSave = subjectStudy != null ? subjectStudy.getQualityTag() : null;
-                QualityCardResult qualityResult = checkQuality(examination, importJob);                				
+                QualityCardResult qualityResult = checkQuality(examination, generatedAcquisitions, importJob);                				
                 // Has quality check passed ?
                 if (qualityResult.hasError()) {
                     throw new QualityException(examination, qualityResult);
@@ -298,20 +298,49 @@ public class ImporterService {
     }
 
     private QualityCardResult checkQuality(Examination examination, ImportJob importJob) throws ShanoirException {
+        QualityCardResult qualityResult = new QualityCardResult();
+        List<QualityCard> qualityCards = qualityCardService.findByStudy(examination.getStudyId());
+        if (qualityCards == null || qualityCards.isEmpty()) {
+            return qualityResult;
+        }
+        boolean qualityCheck = false;
+        for (QualityCard qualityCard : qualityCards) {
+            if (qualityCard.isToCheckAtImport()) {
+                qualityCheck = true;
+                break;
+            }
+        }
+        if (!qualityCheck) {
+            return  qualityResult;
+        }
         ExaminationAttributes<String> dicomAttributes = null;          
         Study firstStudy = importJob.getFirstStudy();
         if (firstStudy == null) {
             throw new ShanoirException("The given import job does not provide any serie. Examination : " + examination.getId());
         }
         dicomAttributes = dicomProcessing.getDicomExaminationAttributes(firstStudy);
-        List<QualityCard> qualityCards = qualityCardService.findByStudy(examination.getStudyId());
-        QualityCardResult qualityResult = new QualityCardResult();
+
         for (QualityCard qualityCard : qualityCards) {
             if (qualityCard.isToCheckAtImport()) {
                 qualityResult.merge(qualityCard.apply(examination, dicomAttributes, downloader));                       
             }
         }
         return qualityResult;
+    }
+
+    private QualityCardResult checkQuality(Examination examination, Set<DatasetAcquisition> limitToTheseAcquisitions, ImportJob importJob) throws ShanoirException {
+        // save the exam acquisitions
+        List<DatasetAcquisition> saveList = new ArrayList<>();
+        for (DatasetAcquisition acquisition : examination.getDatasetAcquisitions()) {
+            saveList.add(acquisition);
+        }
+        // replace ths exam acquisitions by the reduced set
+        examination.setDatasetAcquisitions(Utils.toList(limitToTheseAcquisitions));
+        // check quality
+        QualityCardResult result = checkQuality(examination, importJob);
+        // set the data back
+        examination.setDatasetAcquisitions(saveList);
+        return result;
     }
 
     StudyCard getStudyCard(ImportJob importJob) {
