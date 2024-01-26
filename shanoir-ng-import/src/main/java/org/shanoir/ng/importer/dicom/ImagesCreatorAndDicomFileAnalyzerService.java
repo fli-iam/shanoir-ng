@@ -51,7 +51,7 @@ import org.springframework.stereotype.Service;
  * This class splits the instances array into two different array nodes: non-images and images,
  * on using the sop class uid. Before the instances are numbered with their instance number
  * and added like this by DicomDirToModelReader. DicomFileAnalyzer removes/deletes
- * the instances node and splits into two nodes: images and nonImages. As this class
+ * the instances node and creates an image. As this class
  * is reading the content of each dicom file already it adds as well the informations,
  * which are later necessary to separate datasets inside each serie:
  * acquisitionNumber, echoNumbers and imageOrientationsPatient.
