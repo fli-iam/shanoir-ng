@@ -40,7 +40,8 @@ export class ExecutionMonitoringService extends EntityService<ExecutionMonitorin
     }
 
     public updateAndStart(monitoring: ExecutionMonitoring){
-        return this.http.put<any>(this.API_URL + '/' + monitoring.id + '?start=true', this.stringify(monitoring))
+        return this.http.put<any>(this.API_URL + '/' + monitoring.id + '?start=true', this.stringify(monitoring), {reportProgress: true,
+            observe: 'events'})
             .toPromise();
     }
 
