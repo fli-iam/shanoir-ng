@@ -102,7 +102,7 @@ public class NIfTIConverterService {
 		// Here we should check logs to check which converter failed or not.
 		LOG.error(conversionLogs);
 
-		return conversionLogs.contains("an error has probably occured");
+		return !conversionLogs.contains("an error has probably occured");
 	}
 
 	/**

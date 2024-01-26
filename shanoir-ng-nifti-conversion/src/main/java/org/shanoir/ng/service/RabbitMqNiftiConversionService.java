@@ -79,6 +79,7 @@ public class RabbitMqNiftiConversionService {
 			String workFolder = messageSplit[1];
 			String workFolderResult = workFolder + File.separator + "result";
 
+			// If we're coming from BIDS, we need to convert directly in the given folder
 			if (messageSplit.length > 2) {
 				workFolderResult = messageSplit[2];
 			}

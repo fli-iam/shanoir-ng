@@ -163,7 +163,6 @@ public class DatasetDownloaderServiceImpl {
 						// Convert them, sending to import microservice
 						boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + workFolder.getAbsolutePath());
 						if (!result) {
-							response.setContentType(null);
 							throw new RestServiceException(
 									new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Nifti conversion failed", null));
 						}
@@ -214,7 +213,6 @@ public class DatasetDownloaderServiceImpl {
 			event.setStatus(ShanoirEvent.SUCCESS);
 			eventService.publishEvent(event);
 		} catch (Exception e) {
-			response.setContentType(null);
 			LOG.error("Unexpected error while downloading dataset files.", e);
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
