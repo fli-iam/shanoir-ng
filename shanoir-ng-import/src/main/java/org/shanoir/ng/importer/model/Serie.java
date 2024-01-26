@@ -94,12 +94,6 @@ public class Serie {
 	@JsonProperty("multiFrameCount")
 	private Integer multiFrameCount;
 
-	@JsonProperty("nonImages")
-	private List<Object> nonImages;
-
-	@JsonProperty("nonImagesNumber")
-	private Integer nonImagesNumber;
-
 	@JsonProperty("instances")
 	private List<Instance> instances;
 
@@ -263,22 +257,6 @@ public class Serie {
 
 	public void setIsMultiFrame(Boolean isMultiFrame) {
 		this.isMultiFrame = isMultiFrame;
-	}
-
-	public List<Object> getNonImages() {
-		return nonImages;
-	}
-
-	public void setNonImages(List<Object> nonImages) {
-		this.nonImages = nonImages;
-	}
-
-	public Integer getNonImagesNumber() {
-		return nonImagesNumber;
-	}
-
-	public void setNonImagesNumber(Integer nonImagesNumber) {
-		this.nonImagesNumber = nonImagesNumber;
 	}
 
 	public List<Image> getImages() {

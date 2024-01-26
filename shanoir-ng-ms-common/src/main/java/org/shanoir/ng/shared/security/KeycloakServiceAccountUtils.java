@@ -62,11 +62,11 @@ public class KeycloakServiceAccountUtils {
             return response.getBody();
         } catch (HttpStatusCodeException e){
             // in case of error with a response payload.
-            LOG.error("Unepected error while retrieving access token.",e);
-            throw new SecurityException("error response, message : "+ e.getMessage());
+            LOG.error("Unexpected error while retrieving access token.", e);
+            throw new SecurityException("Unexpected error while retrieving access token.", e);
         }catch (RestClientException e){
             // in case of an error but no response payload;
-            LOG.error("There is no response payload for service account token request", e);
+            LOG.error("No response payload for service account token request", e);
             throw new SecurityException("No response payload for service account token request", e);
         }
     }
