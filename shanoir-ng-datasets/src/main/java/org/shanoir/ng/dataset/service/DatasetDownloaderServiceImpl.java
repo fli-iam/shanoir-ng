@@ -133,7 +133,8 @@ public class DatasetDownloaderServiceImpl {
 					// DOWNLOAD BIDS
 					DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.BIDS, downloadResult);
 					DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath);
-				} else if (!CollectionUtils.isEmpty(dataset.getProcessings())) {
+					// Manage errors here
+				} else if (dataset.getDatasetProcessing() != null) {
 					// DOWNLOAD PROCESSED DATASET
 					DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE, downloadResult);
 					DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath);
