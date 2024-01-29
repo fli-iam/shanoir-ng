@@ -275,6 +275,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     }
 
     getStudiesStorageVolume(ids: number[]): Promise<Map<number, StudyStorageVolumeDTO>> {
+        // separate cached and uncached volumes
         let cachedVolumes: Map<number, StudyStorageVolumeDTO> = new Map();
         ids.forEach(id => {
             if (this.studyVolumesCache.has(id)) {
@@ -282,19 +283,33 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             }
         });
         ids = ids.filter(id => !cachedVolumes.has(id));
+        let rets: Promise<Map<number, StudyStorageVolumeDTO>>[] = [];
+        if (cachedVolumes.size > 0) rets.push(Promise.resolve(cachedVolumes));
 
-        const formData: FormData = new FormData();
-        formData.set('studyIds', ids.join(","));
-        return this.http.post<Map<number, StudyStorageVolumeDTO>>(AppUtils.BACKEND_API_STUDY_URL + '/detailedStorageVolume', formData)
-            .toPromise()
-            .then(volumes => {
-                return volumes ? Object.entries(volumes).reduce((map: Map<number, StudyStorageVolumeDTO>, entry) => map.set(parseInt(entry[0]), entry[1]), new Map()) : new Map();
-            }).then(volumes => {
-                volumes.forEach((value, key) => {
-                    this.studyVolumesCache.set(key, value);
-                });
-                return volumes;
+        if (ids.length > 0) { // fetch volumes from server
+            const formData: FormData = new FormData();
+            formData.set('studyIds', ids.join(","));
+            rets.push(this.http.post<Map<number, StudyStorageVolumeDTO>>(AppUtils.BACKEND_API_STUDY_URL + '/detailedStorageVolume', formData)
+                .toPromise()
+                .then(volumes => {
+                    return volumes ? Object.entries(volumes).reduce((map: Map<number, StudyStorageVolumeDTO>, entry) => map.set(parseInt(entry[0]), entry[1]), new Map()) : new Map();
+                }).then(volumes => {
+                    volumes.forEach((value, key) => {
+                        this.studyVolumesCache.set(key, value);
+                    });
+                    return volumes;
+                })
+            );
+        }
+        // aggregate results
+        return Promise.all(rets).then(results => {
+            let totalVolumes: Map<number, StudyStorageVolumeDTO> = new Map();
+            results?.forEach(result => {
+                result.forEach((val, key) => totalVolumes.set(key, val));
             });
+            return totalVolumes;
+        });
+
     }
 
     storageVolumePrettyPrint(size: number) {
