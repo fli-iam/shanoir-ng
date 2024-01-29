@@ -41,13 +41,10 @@ import { Study } from './study.model';
 export class StudyService extends EntityService<Study> implements OnDestroy {
 
     API_URL = AppUtils.BACKEND_API_STUDY_URL;
-
     private _duasToSign: number = 0;
-
     subscriptions: Subscription[] = [];
-
-    // currently uploads, number is the studyId and Subjet is a rxjs Subject
-    fileUploads: Map<number, Promise<void>> = new Map();
+    fileUploads: Map<number, Promise<void>> = new Map(); // current uploads
+    private studyVolumesCache: Map<number, StudyStorageVolumeDTO> = new Map();
 
     constructor(protected http: HttpClient, private keycloakService: KeycloakService, private studyDTOService: StudyDTOService) {
         super(http)
@@ -277,14 +274,26 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             .toPromise();
     }
 
-    getStudiesStorageVolume(ids: Set<number>): Promise<Map<number, StudyStorageVolumeDTO>> {
-        const formData: FormData = new FormData();
-        formData.set('studyIds', Array.from(ids).join(","));
+    getStudiesStorageVolume(ids: number[]): Promise<Map<number, StudyStorageVolumeDTO>> {
+        let cachedVolumes: Map<number, StudyStorageVolumeDTO> = new Map();
+        ids.forEach(id => {
+            if (this.studyVolumesCache.has(id)) {
+                cachedVolumes.set(id, this.studyVolumesCache.get(id));
+            }
+        });
+        ids = ids.filter(id => !cachedVolumes.has(id));
 
+        const formData: FormData = new FormData();
+        formData.set('studyIds', ids.join(","));
         return this.http.post<Map<number, StudyStorageVolumeDTO>>(AppUtils.BACKEND_API_STUDY_URL + '/detailedStorageVolume', formData)
             .toPromise()
             .then(volumes => {
                 return volumes ? Object.entries(volumes).reduce((map: Map<number, StudyStorageVolumeDTO>, entry) => map.set(parseInt(entry[0]), entry[1]), new Map()) : new Map();
+            }).then(volumes => {
+                volumes.forEach((value, key) => {
+                    this.studyVolumesCache.set(key, value);
+                });
+                return volumes;
             });
     }
 

@@ -36,14 +36,11 @@ import { StudyService } from '../shared/study.service';
 
 export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
 
-    private isStudyVolumesFetching = true;
-
     @ViewChild('table', { static: false }) table: TableComponent;
-
-
     accessRequestValidated = false;
     hasDUA: boolean;
     isSuConfirmed: boolean;
+    
     constructor(
         private studyService: StudyService,
         private confirmService: ConfirmDialogService,
@@ -56,11 +53,9 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
         return this.studyService;
     }
 
-
     getEntities(): Promise<Study[]> {
-        this.isStudyVolumesFetching = true;
         let earlyResult: Promise<Study[]> = Promise.all([
-            this.studyService.getAll(),
+            this.studyService.getAll().then(studies => this.fetchStorageVolumesByChunk(studies)),
             this.studyService.getPublicStudiesData()
         ]).then(([studies, publicStudies]) => {
             if (!studies) studies = [];
@@ -97,47 +92,51 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                     }
                 }
             }
-            this.fetchStorageVolumes(studies);
         });
         return earlyResult;
     }
 
-    private fetchStorageVolumes(studies: Study[] | AccessRequest[]) {
-        let pageSize = Number(this.table.maxResults);
-        let promises = [];
-        for (let i = 0; i < studies.length; i += pageSize) {
-            let ids = new Set<number>(studies.slice(i, i + pageSize).map(study => study.id));
-            promises.push(this.studyService.getStudiesStorageVolume(ids).then(volumes => {
-                studies.forEach(study => {
-                    let volume = volumes.get(study.id);
-                    if(volume) {
-                        (study as Study).totalSize = volume.total;
-                        let sizesByLabel = new Map<String, number>()
-                        if (volume.volumeByFormat) {
-                            for (let sizeByFormat of volume.volumeByFormat) {
-                                if (sizeByFormat.size > 0) {
-                                    sizesByLabel.set(DatasetExpressionFormat.getLabel(sizeByFormat.format), sizeByFormat.size);
-                                }
-                            }
-                        }
-
-                        if (volume.extraDataSize && volume.extraDataSize > 0) {
-                            sizesByLabel.set("Other files (DUA, protocol...)", volume.extraDataSize);
-                        }
-
-                        (study as Study).detailedSizes = sizesByLabel;
-                    }
-                });
-            }));
+    private fetchStorageVolumesByChunk(studies) {
+        const chunkSize = 10;
+        let chunks: Study[][] = [];
+        for (let i = 0; i < studies.length; i += chunkSize) {
+            const chunk = studies.slice(i, i + chunkSize);
+            chunks.push(chunk);
         }
-
-        Promise.all(promises).then(() => {
-            this.table.columnDefs.forEach(column => {
+        let queue: Promise<void> = Promise.resolve();               
+        chunks.forEach(chunk => {
+            queue = queue.then(() => this.fetchStorageVolumes(chunk));
+        });
+        queue.then(() => {
+            this.columnDefs.forEach(column => {
                 if(column.headerName === "Storage volume"){
                     column.disableSorting = false;
                 }
             })
-            return this.isStudyVolumesFetching = false;
+        });
+        return studies;
+    }
+
+    private fetchStorageVolumes(studies: Study[]): Promise<void> {
+        return this.studyService.getStudiesStorageVolume(studies?.map(s => s.id)).then(volumes => {
+            studies.forEach(study => {
+                let volume = volumes.get(study.id);
+                if(volume) {
+                    (study as Study).totalSize = volume.total;
+                    let sizesByLabel = new Map<String, number>()
+                    if (volume.volumeByFormat) {
+                        for (let sizeByFormat of volume.volumeByFormat) {
+                            if (sizeByFormat.size > 0) {
+                                sizesByLabel.set(DatasetExpressionFormat.getLabel(sizeByFormat.format), sizeByFormat.size);
+                            }
+                        }
+                    }
+                    if (volume.extraDataSize && volume.extraDataSize > 0) {
+                        sizesByLabel.set("Other files (DUA, protocol...)", volume.extraDataSize);
+                    }
+                    (study as Study).detailedSizes = sizesByLabel;
+                }
+            });
         });
     }
 
@@ -176,22 +175,23 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             {
                 headerName: "Storage volume", field: "totalSize", disableSearch: true, disableSorting: true, type: "number", orderBy: ["totalSize"],
                 cellRenderer: (params: any) => {
-                    if (this.isStudyVolumesFetching) {
+                    params.data.totalSize
+                    if (params.data?.totalSize) {
+                        return this.studyService.storageVolumePrettyPrint(params.data.totalSize);
+                    } else {
                         return "Fetching..."
                     }
-                    return this.studyService.storageVolumePrettyPrint(params.data.totalSize);
                 },
                 tip: (data: any) => {
                     let tip = ""
-                    if(this.isStudyVolumesFetching){
-                        return "Calculating the detailed study storage volume, this may take up to a minute"
-                    }
                     if(data.detailedSizes){
                         data.detailedSizes.forEach((size: number, label: string) => {
                             tip += label + " : " + this.studyService.storageVolumePrettyPrint(size) + "\n";
                         });
+                        return tip;
+                    } else {
+                        return "Calculating the detailed study storage volume, this may take up to a minute"
                     }
-                    return tip;
                 }
             }
         ];
