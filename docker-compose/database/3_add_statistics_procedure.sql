@@ -17,7 +17,7 @@ DROP PROCEDURE IF EXISTS getStatistics;
 delimiter //
 CREATE PROCEDURE getStatistics(IN studyNameInRegExp VARCHAR(255), IN studyNameOutRegExp VARCHAR(255), IN subjectNameInRegExp VARCHAR(255), IN subjectNameOutRegExp VARCHAR(255))
 BEGIN
-    SELECT 'patient_id', 'shanoir_name', 'double_hash', 'birthname1', 'birthname2', 'birthname3', 'lastname1', 'lastname2', 'lastname3', 'firstname1', 'firstname2', 'firstname3', 'birthdate1', 'sex', 'birth_year', 'study_id', 'study_name', 'sequence_id', 'norm_sequence_name', 'sequence_name', 'center_id', 'center', 'center_address', 'device_manufacturer', 'device_model', 'device_field_strength', 'device_serial_number', 'examination_id', 'examination_date', 'import_date', 'creation_date', 'protocol_type', 'dicom_size_mo', 'execution'
+    SELECT 'patient_id', 'shanoir_name', 'double_hash', 'birthname1', 'birthname2', 'birthname3', 'lastname1', 'lastname2', 'lastname3', 'firstname1', 'firstname2', 'firstname3', 'birthdate1', 'sex', 'birth_year', 'study_id', 'study_name', 'sequence_id', 'norm_sequence_name', 'sequence_name', 'center_id', 'center', 'device_manufacturer', 'device_model', 'device_field_strength', 'device_serial_number', 'examination_id', 'examination_date', 'import_date', 'creation_date', 'protocol_type', 'dicom_size_mo', 'execution'
     UNION ALL
     SELECT 
         subject.id AS patient_id,
@@ -42,7 +42,6 @@ BEGIN
         dataset_metadata.comment AS sequence_name,
         center.id AS center_id,
         center.name AS center,
-        CONCAT(center.street, ' ', center.postal_code, ' ', center.city, ' ', center.country) AS center_address,
         manufacturer.name AS device_manufacturer,
         manufacturer_model.name AS device_model,
         manufacturer_model.magnetic_field AS device_field_strength,
