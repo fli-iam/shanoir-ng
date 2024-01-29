@@ -176,8 +176,10 @@ public class DefaultHandler extends ResultHandler {
 		// Create dataset processing
 		DatasetProcessing processing = this.createProcessing(execution, inputDatasets);
 
-		Study study = studyRepository.findById(execution.getStudyId())
-				.orElseThrow(() -> new NotFoundException("Study [" + execution.getStudyId() + "] not found."));
+		Long studyId = inputDatasets.get(0).getStudyId();
+
+		Study study = studyRepository.findById(studyId)
+				.orElseThrow(() -> new NotFoundException("Study [" + studyId + "] not found."));
 
 		for (File file : processedFiles) {
 
@@ -187,11 +189,11 @@ public class DefaultHandler extends ResultHandler {
 			processedDataset.setDatasetProcessing(processing);
 			processedDataset.setProcessedDatasetFilePath(file.getAbsolutePath());
 			processedDataset.setProcessedDatasetType(ProcessedDatasetType.EXECUTION_RESULT);
-			processedDataset.setStudyId(execution.getStudyId());
+			processedDataset.setStudyId(studyId);
 			processedDataset.setStudyName(study.getName());
 			processedDataset.setProcessedDatasetName(execution.getName());
 
-			if(inputDatasets.size() != 0) {
+			if(!inputDatasets.isEmpty()) {
 
 				List<Long> subjectIds = inputDatasets.stream().map(Dataset::getSubjectId).collect(Collectors.toList());
 
