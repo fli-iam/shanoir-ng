@@ -9,6 +9,7 @@ import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.eeg.EegDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 
 import java.net.MalformedURLException;
@@ -37,6 +38,9 @@ public class DatasetAcquisitionUtils {
 				break;
 			case BidsDatasetAcquisition.datasetAcquisitionType:
 				acq = new BidsDatasetAcquisition(other);
+				break;
+			case XaDatasetAcquisition.datasetAcquisitionType:
+				acq = new XaDatasetAcquisition(other);
 				break;
 			default:
 				acq = new GenericDatasetAcquisition(other);
