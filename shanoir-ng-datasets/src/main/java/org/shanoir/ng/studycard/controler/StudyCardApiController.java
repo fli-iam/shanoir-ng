@@ -16,7 +16,9 @@ package org.shanoir.ng.studycard.controler;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.dcm4che3.data.StandardElementDictionary;
 import org.dcm4che3.data.Tag;
+import org.dcm4che3.data.VR;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
@@ -25,6 +27,7 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.studycard.dto.DicomTag;
+import org.shanoir.ng.studycard.model.DicomTagType;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.StudyCardApply;
 import org.shanoir.ng.studycard.service.CardsProcessingService;
@@ -177,16 +180,24 @@ public class StudyCardApiController implements StudyCardApi {
         try {
             for (Field field : declaredFields) {
                 if (java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
-                    if (field.getType().getName() == "int")
-                        dicomTags.add(new DicomTag(field.getInt(null), field.getName()));
+                    if (field.getType().getName() == "int") {
+                        int tagCode = field.getInt(null);
+                        VR tagVr = StandardElementDictionary.INSTANCE.vrOf(tagCode);
+                        DicomTagType tagType = DicomTagType.valueOf(tagVr);
+                        dicomTags.add(new DicomTag(tagCode, field.getName(), tagType));
+                    }
                     // longs actually code a date and a time, see Tag.class
-                    if (field.getType().getName() == "long") {
+                    else if (field.getType().getName() == "long") {
                         String name = field.getName().replace("DateAndTime", "");
                         String hexStr = String.format("%016X", field.getLong(null));
                         String dateStr = hexStr.substring(0, 8);
                         String timeStr = hexStr.substring(8);
-                        dicomTags.add(new DicomTag(Integer.parseInt(dateStr, 16), name + "Date"));
-                        dicomTags.add(new DicomTag(Integer.parseInt(timeStr, 16), name + "Time"));
+                        int dateTagCode = Integer.parseInt(dateStr, 16);
+                        int timeTagCode = Integer.parseInt(timeStr, 16);
+                        DicomTagType dateTagType = DicomTagType.valueOf(StandardElementDictionary.INSTANCE.vrOf(dateTagCode));
+                        DicomTagType timeTagType = DicomTagType.valueOf(StandardElementDictionary.INSTANCE.vrOf(timeTagCode));
+                        dicomTags.add(new DicomTag(dateTagCode, name + "Date", dateTagType));
+                        dicomTags.add(new DicomTag(timeTagCode, name + "Time", timeTagType));
                     }
                 }
             }

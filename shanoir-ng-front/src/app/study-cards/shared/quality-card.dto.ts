@@ -104,7 +104,7 @@ export class QualityCardDTOService {
                     rule.conditions = [];
                     for (let conditionDTO of ruleDTO.conditions) {
                         let condition: StudyCardCondition = new StudyCardCondition(conditionDTO.scope);
-                        condition.dicomTag = new DicomTag(+conditionDTO.dicomTag, null);
+                        condition.dicomTag = new DicomTag(+conditionDTO.dicomTag, null, null);
                         condition.shanoirField = conditionDTO.shanoirField;
                         condition.values = conditionDTO.values;
                         condition.operation = conditionDTO.operation as Operation;

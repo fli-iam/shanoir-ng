@@ -40,3 +40,11 @@ auto-ajust-input { margin-top: -3px; }
 .one-value + .one-value::before { content: "or "; margin-right: 5px; color: purple; }
 
 span { vertical-align: middle; }
+
+auto-ajust-input.ng-invalid.ng-touched { 
+    color: white !important;
+    background-color: var(--color-error) !important;
+    border-radius: 4px !important;
+}
+
+form { display: inline-block; }

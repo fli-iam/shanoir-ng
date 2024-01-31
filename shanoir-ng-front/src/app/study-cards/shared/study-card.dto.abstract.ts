@@ -66,7 +66,7 @@ export abstract class StudyCardDTOServiceAbstract {
                     rule.conditions = [];
                     for (let conditionDTO of ruleDTO.conditions) {
                         let condition: StudyCardCondition = new StudyCardCondition(conditionDTO.scope);
-                        if (conditionDTO.dicomTag) condition.dicomTag = new DicomTag(+conditionDTO.dicomTag, null);
+                        if (conditionDTO.dicomTag) condition.dicomTag = new DicomTag(+conditionDTO.dicomTag, null, null);
                         condition.shanoirField = conditionDTO.shanoirField;
                         condition.values = conditionDTO.values;
                         condition.operation = conditionDTO.operation as Operation;

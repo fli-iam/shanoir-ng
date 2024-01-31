@@ -14,16 +14,20 @@
 
 package org.shanoir.ng.studycard.dto;
 
+import org.shanoir.ng.studycard.model.DicomTagType;
+
 public class DicomTag {
 	
 	private int code;
 	
 	private String label;
 
-	public DicomTag(int code, String label) {
-		super();
+	private DicomTagType type;
+
+	public DicomTag(int code, String label, DicomTagType type) {
 		this.code = code;
 		this.label = label;
+		this.type = type;
 	}
 
 	public int getCode() {
@@ -41,5 +45,12 @@ public class DicomTag {
 	public void setLabel(String label) {
 		this.label = label;
 	}
-	
+
+	public DicomTagType getType() {
+		return type;
+	}
+
+	public void setType(DicomTagType type) {
+		this.type = type;
+	}
 }

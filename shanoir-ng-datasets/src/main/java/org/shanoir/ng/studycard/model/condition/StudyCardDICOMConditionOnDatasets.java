@@ -218,7 +218,7 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
                                 comparison = dateValue.compareTo(scDate);
                             } catch (ParseException e) {
                                 if (errorMsg != null) errorMsg.append("\ncondition [" + toString() 
-                                    + "] could not be checked on dataset " + datasetId + " because there was a date format problem");
+                                    + "] could not be checked on dataset " + datasetId + " because there was a date format problem (please use yyyyMMdd)");
                                 return null;
                             }
                         }

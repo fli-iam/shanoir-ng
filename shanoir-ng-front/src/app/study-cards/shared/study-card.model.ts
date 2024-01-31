@@ -91,11 +91,14 @@ export class StudyCardCondition {
     constructor(public scope: ConditionScope) {}
 }
 
+export type TagType = 'String' | 'Long' | 'Float' | 'Double' | 'Integer' | 'Binary' | 'Date';
+
 export class DicomTag {
 
     constructor(
         public code: number,
-        public label: string) {};
+        public label: string,
+        public type: TagType) {};
 
     equals(other: DicomTag): boolean {
         return this.code == other.code;
