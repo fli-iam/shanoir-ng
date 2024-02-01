@@ -4,7 +4,6 @@ import java.util.Comparator;
 import java.util.Map.Entry;
 
 import org.shanoir.uploader.dicom.DicomTreeNode;
-import org.shanoir.uploader.utils.Util;
 
 /**
  * Dicom Study comparator based on their study date.
@@ -23,7 +22,7 @@ public class StudyComparator implements Comparator<Entry<String, DicomTreeNode>>
 		final String date2 = ((StudyTreeNode) study2.getValue()).getStudyDate().toString();
 		if (date1 != null && !date1.equals("")) {
 			if (date2 != null && !date2.equals("")) {
-				return Util.convertStringDicomDateToDate(date1).compareTo(Util.convertStringDicomDateToDate(date2));
+				return date1.compareTo(date2);
 			} else {
 				return -1;
 			}
