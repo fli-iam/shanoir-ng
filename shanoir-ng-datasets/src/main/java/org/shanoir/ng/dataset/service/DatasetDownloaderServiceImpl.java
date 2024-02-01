@@ -121,7 +121,11 @@ public class DatasetDownloaderServiceImpl {
 					subjectName = subjectName.replaceAll(File.separator, "_");
 				}
 				String studyName = studyRepository.findById(dataset.getStudyId()).orElse(null).getName();
-				String datasetFilePath = getDatasetFilepath(dataset, studyName, subjectName);
+
+				String datasetFilePath = null;
+				if (datasets.size() != 1) {
+					datasetFilePath = getDatasetFilepath(dataset, studyName, subjectName);
+				}
 
 				List<URL> pathURLs = new ArrayList<>();
 

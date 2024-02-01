@@ -19,7 +19,7 @@ CREATE PROCEDURE getStatistics(IN studyNameInRegExp VARCHAR(255), IN studyNameOu
 BEGIN
     SELECT 'patient_id', 'shanoir_name', 'double_hash', 'birthname1', 'birthname2', 'birthname3', 'lastname1', 'lastname2', 'lastname3', 'firstname1', 'firstname2', 'firstname3', 'birthdate1', 'sex', 'birth_year', 'study_id', 'study_name', 'sequence_id', 'norm_sequence_name', 'sequence_name', 'center_id', 'center', 'device_manufacturer', 'device_model', 'device_field_strength', 'device_serial_number', 'examination_id', 'examination_date', 'import_date', 'creation_date', 'protocol_type', 'dicom_size_mo', 'execution'
     UNION ALL
-    SELECT 
+    SELECT
         subject.id AS patient_id,
         subject.name AS shanoir_name,
         subject.identifier AS double_hash,
@@ -53,39 +53,39 @@ BEGIN
         mr_protocol_metadata.name AS protocol_type,
         (SELECT sum(size)/1000000 FROM dataset_expression AS de WHERE de.dataset_id = dataset.id AND de.dataset_expression_format = 6) AS dicom_size_mo,
         (SELECT JSON_OBJECT('execution_name', exe.name, 'status', (CASE
-            WHEN exe.status = 0 THEN 'RUNNING'
-            WHEN exe.status = 1 THEN 'FINISHED'
-            WHEN exe.status = 2 THEN 'EXECUTION_FAILED'
-            WHEN exe.status = 4 THEN 'KILLED'
-            ELSE 'UNKNOWN'
-        END), 'processing_date', proc.processing_date, 'properties', JSON_ARRAYAGG(JSON_OBJECT(property.name, property.value)))
-        FROM datasets.dataset_property property
-        LEFT JOIN dataset_processing proc ON property.dataset_processing_id = proc.id
-        LEFT JOIN execution_monitoring exe ON proc.id = exe.id
-        WHERE property.dataset_id = dataset.id
-        GROUP BY property.dataset_processing_id
-        ORDER BY exe.start_date DESC
-        LIMIT 1) AS execution
+                                                                       WHEN exe.status = 0 THEN 'RUNNING'
+                                                                       WHEN exe.status = 1 THEN 'FINISHED'
+                                                                       WHEN exe.status = 2 THEN 'EXECUTION_FAILED'
+                                                                       WHEN exe.status = 4 THEN 'KILLED'
+                                                                       ELSE 'UNKNOWN'
+            END), 'processing_date', proc.processing_date, 'properties', JSON_ARRAYAGG(JSON_OBJECT(property.name, property.value)))
+         FROM datasets.dataset_property property
+                  LEFT JOIN dataset_processing proc ON property.dataset_processing_id = proc.id
+                  LEFT JOIN execution_monitoring exe ON proc.id = exe.id
+         WHERE property.dataset_id = dataset.id
+         GROUP BY property.dataset_processing_id
+         ORDER BY exe.start_date DESC
+         LIMIT 1) AS execution
 
-    FROM dataset 
-        LEFT JOIN dataset_acquisition ON (dataset_acquisition.id = dataset.dataset_acquisition_id)
-        LEFT JOIN dataset_metadata ON (dataset_metadata.id = dataset.updated_metadata_id)
-        LEFT JOIN mr_dataset_acquisition ON (mr_dataset_acquisition.id = dataset_acquisition.id)
-        LEFT JOIN mr_protocol ON (mr_protocol.id = mr_dataset_acquisition.mr_protocol_id)
-        LEFT JOIN mr_protocol_metadata ON (mr_protocol_metadata.id = mr_protocol.id)
-        LEFT JOIN studies.acquisition_equipment AS acquisition_equipment ON (acquisition_equipment.id = dataset_acquisition.acquisition_equipment_id)
-        LEFT JOIN studies.manufacturer_model AS manufacturer_model ON (manufacturer_model.id = acquisition_equipment.manufacturer_model_id)
-        LEFT JOIN studies.manufacturer AS manufacturer ON (manufacturer.id = manufacturer_model.manufacturer_id)
-        LEFT JOIN examination ON (examination.id = dataset_acquisition.examination_id)
-        LEFT JOIN studies.subject AS subject ON (subject.id = examination.subject_id)
-        LEFT JOIN studies.study AS study ON (study.id = examination.study_id)
-        LEFT JOIN studies.center AS center ON (center.id = examination.center_id)
-        LEFT JOIN studies.pseudonymus_hash_values AS pseudonymus_hash_values ON (pseudonymus_hash_values.id = subject.pseudonymus_hash_values_id)
+    FROM dataset
+             LEFT JOIN dataset_acquisition ON (dataset_acquisition.id = dataset.dataset_acquisition_id)
+             LEFT JOIN dataset_metadata ON (dataset_metadata.id = dataset.updated_metadata_id)
+             LEFT JOIN mr_dataset_acquisition ON (mr_dataset_acquisition.id = dataset_acquisition.id)
+             LEFT JOIN mr_protocol ON (mr_protocol.id = mr_dataset_acquisition.mr_protocol_id)
+             LEFT JOIN mr_protocol_metadata ON (mr_protocol_metadata.id = mr_protocol.id)
+             LEFT JOIN studies.acquisition_equipment AS acquisition_equipment ON (acquisition_equipment.id = dataset_acquisition.acquisition_equipment_id)
+             LEFT JOIN studies.manufacturer_model AS manufacturer_model ON (manufacturer_model.id = acquisition_equipment.manufacturer_model_id)
+             LEFT JOIN studies.manufacturer AS manufacturer ON (manufacturer.id = manufacturer_model.manufacturer_id)
+             LEFT JOIN examination ON (examination.id = dataset_acquisition.examination_id)
+             LEFT JOIN studies.subject AS subject ON (subject.id = examination.subject_id)
+             LEFT JOIN studies.study AS study ON (study.id = examination.study_id)
+             LEFT JOIN studies.center AS center ON (center.id = examination.center_id)
+             LEFT JOIN studies.pseudonymus_hash_values AS pseudonymus_hash_values ON (pseudonymus_hash_values.id = subject.pseudonymus_hash_values_id)
 
     WHERE subject.name rlike if(subjectNameInRegExp IS NULL  OR subjectNameInRegExp = '', '.*', subjectNameInRegExp)
-        AND subject.name NOT rlike if(subjectNameOutRegExp IS NULL  OR subjectNameOutRegExp = '', '^\b\B$', subjectNameOutRegExp)
-        AND study.name rlike if(studyNameInRegExp IS NULL  OR studyNameInRegExp = '', '.*', studyNameInRegExp)
-        AND study.name NOT rlike if(studyNameOutRegExp IS NULL  OR studyNameOutRegExp = '', '^\b\B$', studyNameOutRegExp);
+      AND subject.name NOT rlike if(subjectNameOutRegExp IS NULL  OR subjectNameOutRegExp = '', '^\b\B$', subjectNameOutRegExp)
+      AND study.name rlike if(studyNameInRegExp IS NULL  OR studyNameInRegExp = '', '.*', studyNameInRegExp)
+      AND study.name NOT rlike if(studyNameOutRegExp IS NULL  OR studyNameOutRegExp = '', '^\b\B$', studyNameOutRegExp);
 END //
 
 delimiter ;
