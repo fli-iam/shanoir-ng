@@ -161,6 +161,7 @@ services:
     ports:
      - "9903:9903"
      - "9913:9913"
+     - "44105:44105"
     depends_on:
       - "database"
       - "rabbitmq"
