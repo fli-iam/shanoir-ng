@@ -31,7 +31,6 @@ public class ShanoirEventsService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ShanoirEventsService.class);
 
-
 	public void addEvent(ShanoirEvent event) {
 		// Call repository
 		repository.save(event);
