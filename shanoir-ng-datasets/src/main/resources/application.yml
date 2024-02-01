@@ -25,6 +25,8 @@ spring:
     username: datasets
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari.maximum-pool-size: 60
+    hikari.minimum-idle:  60
   jpa:
     database-platform: org.hibernate.dialect.MySQL57Dialect
     defer-datasource-initialization: true
@@ -103,8 +105,8 @@ logging:
     org.springframework.web: ERROR
     org.hibernate: ERROR
     org.shanoir: INFO
-        
-  
+
+
 ### ============================================================= ###
 ###                  Dicom Server Configuration                   ###
 ### ============================================================= ###

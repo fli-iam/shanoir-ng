@@ -48,7 +48,11 @@ public class OFSEPSeqIdHandler extends ResultHandler {
             "type",
             "protocolValidityStatus",
             "name",
-            "numberOfDirections"
+            "numberOfDirections",
+            "deviceConstructor",
+            "deviceMagneticField",
+            "deviceModel",
+            "deviceSerialNumber"
     };
 
     private static final String[] VOLUME_PROPERTIES = {
