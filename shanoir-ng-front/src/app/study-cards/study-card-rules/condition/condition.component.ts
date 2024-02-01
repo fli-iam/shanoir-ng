@@ -56,21 +56,19 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
     conditionTypeOptions: Option<ConditionScope>[];
     fieldLabel: string;
     cardinalityType: 'NONE' | 'ALL' | 'AT_LEAST' = 'ALL';
-
     @Input() showErrors: boolean;
     tagTouched: boolean = false;
     operationTouched: boolean = false;
     valueTouched: boolean = false;
     shanoirFieldTouched: boolean = false;
-
     private computeConditionOptionsSubscription: Subscription;
     private conditionChangeSubscription: Subscription;
+    @Input() addSubForm: (FormGroup) => void;
 
     constructor(
             private dicomService: DicomService,
             private cdr: ChangeDetectorRef,
-            private formBuilder: UntypedFormBuilder) {
-    }
+            private formBuilder: UntypedFormBuilder) {}
 
     buildForm(): UntypedFormGroup {
         let form: UntypedFormGroup = this.formBuilder.group({
@@ -107,12 +105,16 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
                 }
             });
         }
+        this.addSubForm(this.form);
         setTimeout(() => this.init = true);
     }
             
     ngOnDestroy(): void {
         this.computeConditionOptionsSubscription?.unsubscribe();
         this.conditionChangeSubscription?.unsubscribe();
+        setTimeout(() => {
+            (this.form?.get('values') as FormArray)?.clear();
+        });
     }
 
     ngOnChanges(changes: SimpleChanges): void {

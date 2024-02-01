@@ -41,7 +41,7 @@ auto-ajust-input { margin-top: -3px; }
 
 span { vertical-align: middle; }
 
-auto-ajust-input.ng-invalid.ng-touched { 
+auto-ajust-input.ng-invalid.ng-dirty { 
     color: white !important;
     background-color: var(--color-error) !important;
     border-radius: 4px !important;

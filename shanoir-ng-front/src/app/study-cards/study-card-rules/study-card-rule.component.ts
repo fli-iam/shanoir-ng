@@ -51,9 +51,9 @@ export class StudyCardRuleComponent implements OnChanges {
     @Input() showErrors: boolean = false;
     @ViewChildren(StudyCardActionComponent) assignmentChildren: QueryList<StudyCardActionComponent>;
     touched: boolean = false;
-
     assignmentFieldOptions: Option<string>[];
     conditionFieldOptions: Option<string>[];
+    @Input() addSubForm: (FormGroup) => void;
 
     constructor(public elementRef: ElementRef) { }
 

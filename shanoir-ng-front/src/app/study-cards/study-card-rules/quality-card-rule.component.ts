@@ -42,8 +42,8 @@ export class QualityCardRuleComponent implements OnChanges {
     tagOptions = [new Option('VALID', 'Valid', undefined, 'green', 'fa-solid fa-circle-check'), 
             new Option('WARNING', 'Warning', undefined, 'chocolate', 'fa-solid fa-triangle-exclamation'), 
             new Option('ERROR', 'Error', undefined, 'red', 'fa-solid fa-times-circle')];
-
     conditionFieldOptions: Option<string>[];
+    @Input() addSubForm: (FormGroup) => void;
 
     constructor(public elementRef: ElementRef) { }
 

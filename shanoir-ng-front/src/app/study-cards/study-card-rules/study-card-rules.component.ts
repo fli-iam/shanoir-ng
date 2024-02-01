@@ -24,7 +24,7 @@ import {
     SimpleChanges,
     ViewChildren,
 } from '@angular/core';
-import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErrors } from '@angular/forms';
+import { AbstractControl, ControlValueAccessor, FormGroup, NG_VALUE_ACCESSOR, ValidationErrors } from '@angular/forms';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 
 import { Coil } from '../../coils/shared/coil.model';
@@ -79,6 +79,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     @Output() selectedRulesChange: EventEmitter<(StudyCardRule | QualityCardRule)[]> = new EventEmitter();
     selectedRules: Map<number, StudyCardRule | QualityCardRule> = new Map();
     rulesToAnimate: Set<number> = new Set();
+    @Input() addSubForm: (FormGroup) => void;
 
     
     constructor(
