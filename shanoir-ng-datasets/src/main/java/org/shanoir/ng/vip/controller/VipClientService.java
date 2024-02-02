@@ -23,11 +23,11 @@ public class VipClientService {
     private static final Logger LOG = LoggerFactory.getLogger(VipClientService.class);
 
     @Value("${vip.uri}")
-    private String VIP_URI;
+    private String vipBaseUrl;
 
-    private final String VIP_EXECUTION_URI = VIP_URI + "/executions/";
+    private String vipExecutionUrl = vipBaseUrl + "executions/";
 
-    private final String VIP_PIPELINE_URI = VIP_URI + "/pipelines/";
+    private String vipPipelineUrl = vipBaseUrl + "pipelines/";
 
     @Autowired
     private RestTemplate restTemplate;
@@ -43,7 +43,7 @@ public class VipClientService {
      * @return Execution
      */
     public Execution getExecution(String identifier) {
-        String uri = VIP_EXECUTION_URI + identifier;
+        String uri = vipExecutionUrl + identifier;
         ResponseEntity<Execution> execResult = this.restTemplate.exchange(uri, HttpMethod.GET, this.getUserHttpEntity(), Execution.class);
         return execResult.getBody();
     }
@@ -58,7 +58,7 @@ public class VipClientService {
      */
     public Execution getExecutionAsService(int attempts, String identifier) throws ResultHandlerException, SecurityException {
 
-        String uri = VIP_EXECUTION_URI + identifier;
+        String uri = vipExecutionUrl + identifier;
 
         HttpEntity<String> httpHeaders = this.getServiceHttpEntity();
 
@@ -91,7 +91,7 @@ public class VipClientService {
      */
     public ExecutionDTO createExecution(ExecutionDTO execution) {
         HttpEntity<ExecutionDTO> entity = new HttpEntity<>(execution, this.getUserHttpEntity().getHeaders());
-        ResponseEntity<ExecutionDTO> execResult = this.restTemplate.exchange(VIP_EXECUTION_URI, HttpMethod.POST, entity, ExecutionDTO.class);
+        ResponseEntity<ExecutionDTO> execResult = this.restTemplate.exchange(vipExecutionUrl, HttpMethod.POST, entity, ExecutionDTO.class);
         return execResult.getBody();
     }
 
@@ -103,7 +103,7 @@ public class VipClientService {
      * @return string
      */
     public String getExecutionStderr(String identifier) {
-        String uri = VIP_EXECUTION_URI + identifier + "/stderr";
+        String uri = vipExecutionUrl + identifier + "/stderr";
         ResponseEntity<String> execResult = this.restTemplate.exchange(uri, HttpMethod.GET, this.getUserHttpEntity(), String.class);
         return execResult.getBody();
     }
@@ -116,7 +116,7 @@ public class VipClientService {
      * @return string
      */
     public String getExecutionStdout(String identifier) {
-        String uri = VIP_EXECUTION_URI + identifier + "/stdout";
+        String uri = vipExecutionUrl + identifier + "/stdout";
         ResponseEntity<String> execResult = this.restTemplate.exchange(uri, HttpMethod.GET, this.getUserHttpEntity(), String.class);
         return execResult.getBody();
     }
@@ -127,7 +127,7 @@ public class VipClientService {
      * @return JSON as string
      */
     public String getPipelineAll() {
-        ResponseEntity<String> execResult = this.restTemplate.exchange(VIP_PIPELINE_URI, HttpMethod.GET, this.getUserHttpEntity(), String.class);
+        ResponseEntity<String> execResult = this.restTemplate.exchange(vipPipelineUrl, HttpMethod.GET, this.getUserHttpEntity(), String.class);
         return execResult.getBody();
     }
 
@@ -138,7 +138,7 @@ public class VipClientService {
      * @return JSON as string
      */
     public String getPipeline(String identifier) {
-        String uri = VIP_PIPELINE_URI + identifier;
+        String uri = vipPipelineUrl + identifier;
         ResponseEntity<String> execResult = this.restTemplate.exchange(uri, HttpMethod.GET, this.getUserHttpEntity(), String.class);
         return execResult.getBody();
     }

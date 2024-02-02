@@ -144,8 +144,8 @@ public class ExecutionApiController implements ExecutionApi {
 
             parametersDatasetsInputValues.put(parameterResourcesDTO.getParameter(), new ArrayList<>());
 
-            for (String ressourceId : parameterResourcesDTO.getResourceIds()) {
-                String inputValue = this.getInputValueUri(execution, groupBy, ressourceId, authenticationToken);
+            for (String resourceId : parameterResourcesDTO.getResourceIds()) {
+                String inputValue = this.getInputValueUri(execution, groupBy, resourceId, authenticationToken);
                 parametersDatasetsInputValues.get(parameterResourcesDTO.getParameter()).add(inputValue);
             }
         }
@@ -160,12 +160,12 @@ public class ExecutionApiController implements ExecutionApi {
                 + "&md5=none&type=File";
     }
 
-    private String getInputValueUri(ExecutionDTO execution, String groupBy, String ressourceId, String authenticationToken){
+    private String getInputValueUri(ExecutionDTO execution, String groupBy, String resourceId, String authenticationToken){
         String exportFormat = execution.getExportFormat();
-        String entityName = "resource_id+" + ressourceId + "+" + groupBy + ("dcm".equals(exportFormat) ? ".zip" : ".nii.gz");
+        String entityName = "resource_id+" + resourceId + "+" + groupBy + ("dcm".equals(exportFormat) ? ".zip" : ".nii.gz");
         return SHANOIR_URI_SCHEME + entityName
                 + "?format=" + exportFormat
-                + "&datasetId=" + ressourceId
+                + "&resourceId=" + resourceId
                 + "&token=" + authenticationToken
                 + "&refreshToken=" + execution.getRefreshToken()
                 + "&clientId=" + execution.getClient()
