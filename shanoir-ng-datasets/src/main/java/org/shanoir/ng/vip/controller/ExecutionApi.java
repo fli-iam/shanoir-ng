@@ -36,7 +36,7 @@ import java.io.IOException;
  * @author Alae Es-saki
  */
 @Tag(name = "execution")
-@RequestMapping("/execution")
+@RequestMapping("/vip/execution")
 public interface ExecutionApi {
 
     @Operation(summary = "Creates an execution inside VIP", description = "Creates the ressources and path control in shanoir before creating an execution in VIP", tags={  })
