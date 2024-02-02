@@ -14,8 +14,8 @@ import {ExecutionMonitoring} from 'src/app/vip/models/execution-monitoring.model
 import {Execution} from 'src/app/vip/models/execution';
 import {ParameterType} from 'src/app/vip/models/parameterType';
 import {Pipeline} from 'src/app/vip/models/pipeline';
-import {VipClientService} from 'src/app/vip/shared/vip-client.service';
-import {ExecutionMonitoringService} from 'src/app/vip/shared/execution-monitoring.service';
+import {ExecutionService} from 'src/app/vip/execution/execution.service';
+import {ExecutionMonitoringService} from 'src/app/vip/execution-monitorings/execution-monitoring.service';
 import {Dataset} from 'src/app/datasets/shared/dataset.model';
 import {DatasetService} from 'src/app/datasets/shared/dataset.service';
 import {DatasetProcessingType} from 'src/app/enum/dataset-processing-type.enum';
@@ -59,7 +59,7 @@ export class ExecutionComponent implements OnInit {
     isSubmitted = true;
     datasetsPromise: Promise<void>;
 
-    constructor(private breadcrumbsService: BreadcrumbsService, private processingService: ExecutionDataService, private vipClientService: VipClientService, private router: Router, private msgService: MsgBoxService, private keycloakService: KeycloakService, private datasetService: DatasetService, private executionMonitoringService: ExecutionMonitoringService) {
+    constructor(private breadcrumbsService: BreadcrumbsService, private processingService: ExecutionDataService, private executionService: ExecutionService, private router: Router, private msgService: MsgBoxService, private keycloakService: KeycloakService, private datasetService: DatasetService, private executionMonitoringService: ExecutionMonitoringService) {
         this.breadcrumbsService.nameStep('2. Executions');
         this.selectedDatasets = new Set<Dataset>();
         this.isSubmitted = false;
@@ -203,7 +203,7 @@ export class ExecutionComponent implements OnInit {
                 let execution = this.initExecution(processing);
                 this.setExecutionParameters(processing, execution);
 
-                this.vipClientService.createExecution(execution).then(
+                this.executionService.createExecution(execution).then(
                     (execution) => {
 
                         processing.identifier = execution.identifier;

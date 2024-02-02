@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-@Tag(name = "carmin-data")
-@RequestMapping("/carmin-data/pipeline")
+@Tag(name = "pipeline")
+@RequestMapping("/pipeline")
 public interface PipelineApi {
 
     @Operation(summary = "Get execution DTO for the given identifier", description = "Returns the VIP execution that has the given identifier in parameter.", tags={  })
