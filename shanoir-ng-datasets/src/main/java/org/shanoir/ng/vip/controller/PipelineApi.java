@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 @Tag(name = "pipeline")
-@RequestMapping("/pipeline")
+@RequestMapping("/vip/pipeline")
 public interface PipelineApi {
 
     @Operation(summary = "Get execution DTO for the given identifier", description = "Returns the VIP execution that has the given identifier in parameter.", tags={  })
