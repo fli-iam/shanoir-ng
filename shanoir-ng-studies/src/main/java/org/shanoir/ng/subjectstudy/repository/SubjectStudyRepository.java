@@ -16,11 +16,11 @@ package org.shanoir.ng.subjectstudy.repository;
 
 import java.util.List;
 
-import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 /**
  * Repository for Subject.
@@ -29,16 +29,12 @@ import org.springframework.data.repository.CrudRepository;
  */
 public interface SubjectStudyRepository extends CrudRepository<SubjectStudy, Long> {
 
-	/**
-	 * Find template by data.
-	 *
-	 * @param data
-	 *            data.
-	 * @return a template.
-	 */
 	List<SubjectStudy> findByStudy(Study study);
 
 	SubjectStudy findByStudyIdAndSubjectId(Long studyId, Long subjectId);
 
 	long countBySubject(Subject subject);
+	
+    int countByStudyId(@Param("studyId") Long studyId);
+
 }

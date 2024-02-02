@@ -16,15 +16,9 @@ package org.shanoir.ng.study.model;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import jakarta.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
-import org.hibernate.validator.constraints.NotBlank;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.shanoir.ng.groupofsubjects.ExperimentalGroupOfSubjects;
 import org.shanoir.ng.profile.model.Profile;
 import org.shanoir.ng.shared.core.model.IdName;
@@ -44,6 +38,21 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ColumnResult;
+import jakarta.persistence.ConstructorResult;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.SqlResultSetMapping;
 import jakarta.validation.constraints.NotNull;
 
 /**
@@ -87,16 +96,16 @@ public class Study extends HalEntity {
 	@NotNull
 	private boolean monoCenter;
 
-	@NotBlank
 	@Column(unique = true)
 	@Unique
 	@EditableOnlyBy(roles = { "ROLE_ADMIN", "ROLE_EXPERT" })
 	private String name;
 
 	/** List of protocol files directly attached to the study. */
-	@ElementCollection
+	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(name = "protocol_file_path")
 	@Column(name = "path")
+	@JoinColumn(name = "study_id") // use join, instead of second select
 	private List<String> protocolFilePaths;
 	
 	/** List of data user agreement form directly attached to the study. */
@@ -110,7 +119,6 @@ public class Study extends HalEntity {
 	private LocalDate startDate;
 
 	/** Relations between the investigators, the centers and the studies. */
-	@NotEmpty
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<StudyCenter> studyCenterList;
 
@@ -129,16 +137,14 @@ public class Study extends HalEntity {
 
 	/** List of the examinations related to this study. */
 	@OneToMany(mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
-	@LazyCollection(LazyCollectionOption.EXTRA)
 	private Set<StudyExamination> examinations;
 
 	/** Relations between the subjects and the studies. */
 	@OneToMany(mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
-	@LazyCollection(LazyCollectionOption.EXTRA)
 	private List<SubjectStudy> subjectStudyList;
 
 	/** List of Timepoints dividing the study **/
-	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "study", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	@OrderBy("rank asc")
 	private List<Timepoint> timepoints;
 
@@ -160,7 +166,7 @@ public class Study extends HalEntity {
 	@Column(name = "license", columnDefinition = "TEXT")
 	private String license;
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<StudyTag> studyTags;
 
 	/**

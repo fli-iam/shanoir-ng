@@ -505,12 +505,10 @@ public class StudyApiController implements StudyApi {
 	@Override
 	public ResponseEntity<List<PublicStudyDTO>> findPublicStudiesData() {
 		List<PublicStudyDTO> studiesDTO = new ArrayList<>();
-
 		List<Study> studies = studyService.findPublicStudies();
 		if (studies.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-
 		for (Study study : studies) {
 			studiesDTO.add(studyMapper.studyToPublicStudyDTO(study));
 		}
