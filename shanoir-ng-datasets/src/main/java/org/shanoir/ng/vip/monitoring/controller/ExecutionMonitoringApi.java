@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Tag(name = "executionMonitoring")
-@RequestMapping("/executionMonitoring")
+@Tag(name = "execution-monitoring")
+@RequestMapping("/execution-monitoring")
 public interface ExecutionMonitoringApi {
 
         @Operation(summary = "", description = "Saves a new execution monitoring")

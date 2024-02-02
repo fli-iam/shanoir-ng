@@ -35,8 +35,8 @@ import java.io.IOException;
 /**
  * @author Alae Es-saki
  */
-@Tag(name = "carmin-data")
-@RequestMapping("/carmin-data/execution")
+@Tag(name = "execution")
+@RequestMapping("/execution")
 public interface ExecutionApi {
 
     @Operation(summary = "Creates an execution inside VIP", description = "Creates the ressources and path control in shanoir before creating an execution in VIP", tags={  })
