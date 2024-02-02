@@ -82,7 +82,7 @@ public class ExecutionApiController implements ExecutionApi {
         // 1: Get dataset IDS and check rights
         List<Long> datasetsIds = new ArrayList<>();
         ObjectMapper mapper = new ObjectMapper();
-        ExecutionDTO execution = null;
+        ExecutionDTO execution;
         try {
             execution = mapper.readValue(executionAsString, ExecutionDTO.class);
         } catch (JsonProcessingException e) {
@@ -102,17 +102,15 @@ public class ExecutionApiController implements ExecutionApi {
 
         List<Dataset> inputDatasets = this.datasetService.findByIdIn(datasetsIds);
 
-        // 2: Create monitoring on shanoir
+        // 2: Create monitoring on shanoir & save it in db
         ExecutionMonitoring executionMonitoring = this.createExecutionMonitoring(execution, inputDatasets);
-
-        // Save monitoring in db.
         final ExecutionMonitoring createdMonitoring = executionMonitoringService.create(executionMonitoring);
+
         // 3: create Execution on VIP
         // init headers with the active access token
-
         execution.setResultsLocation(this.getResultsLocationUri(createdMonitoring.getResultsLocation(), authenticationToken, execution.getRefreshToken(), clientId));
 
-        Map<String, List<String>> parametersDatasetsInputValues = getParametersDatasetsInputValues(createdMonitoring, execution, authenticationToken);
+        Map<String, List<String>> parametersDatasetsInputValues = this.getParametersDatasetsInputValues(createdMonitoring, execution, authenticationToken);
         execution.setInputValues(parametersDatasetsInputValues);
 
         ExecutionDTO execCreated = vipClient.createExecution(execution);
@@ -120,7 +118,6 @@ public class ExecutionApiController implements ExecutionApi {
         executionMonitoring.setIdentifier(execCreated.getIdentifier());
         executionMonitoring.setStatus(execCreated.getStatus());
         executionMonitoring.setStartDate(execCreated.getStartDate());
-
         executionMonitoring = this.executionMonitoringService.update(executionMonitoring);
 
         this.executionStatusMonitorService.startMonitoringJob(executionMonitoring, null);
@@ -128,6 +125,14 @@ public class ExecutionApiController implements ExecutionApi {
         return new ResponseEntity<>(execCreated, HttpStatus.OK);
     }
 
+    /**
+     * Set processed datasets in parameters as URIs
+     *
+     * @param createdMonitoring
+     * @param execution
+     * @param authenticationToken
+     * @return
+     */
     private Map<String, List<String>> getParametersDatasetsInputValues(ExecutionMonitoring createdMonitoring, ExecutionDTO execution, String authenticationToken) {
         List<ParameterResourcesDTO> parametersDatasets = executionMonitoringService.createProcessingResources(createdMonitoring, execution.getParametersRessources());
 
@@ -156,11 +161,8 @@ public class ExecutionApiController implements ExecutionApi {
     }
 
     private String getInputValueUri(ExecutionDTO execution, String groupBy, String ressourceId, String authenticationToken){
-
         String exportFormat = execution.getExportFormat();
-
         String entityName = "resource_id+" + ressourceId + "+" + groupBy + ("dcm".equals(exportFormat) ? ".zip" : ".nii.gz");
-
         return SHANOIR_URI_SCHEME + entityName
                 + "?format=" + exportFormat
                 + "&datasetId=" + ressourceId

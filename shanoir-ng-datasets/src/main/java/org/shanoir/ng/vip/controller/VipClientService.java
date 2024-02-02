@@ -1,20 +1,26 @@
 package org.shanoir.ng.vip.controller;
 
+import org.keycloak.representations.AccessTokenResponse;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.security.KeycloakServiceAccountUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.vip.monitoring.model.Execution;
 import org.shanoir.ng.vip.monitoring.model.ExecutionDTO;
+import org.shanoir.ng.vip.resulthandler.ResultHandlerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 @Service
 public class VipClientService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(VipClientService.class);
 
     @Value("${vip.uri}")
     private String VIP_URI;
@@ -31,7 +37,7 @@ public class VipClientService {
 
     /**
      *
-     * Get execution from VIP API <a href="https://app.swaggerhub.com/apis/CARMIN/carmin-common_api_for_research_medical_imaging_network/0.3.1#/default/getExecution">VIP API</a>
+     * Get execution from <a href="https://app.swaggerhub.com/apis/CARMIN/carmin-common_api_for_research_medical_imaging_network/0.3.1#/default/getExecution">VIP API</a>
      *
      * @param identifier
      * @return Execution
@@ -43,8 +49,43 @@ public class VipClientService {
     }
 
     /**
+     * Try to get execution from <a href="https://app.swaggerhub.com/apis/CARMIN/carmin-common_api_for_research_medical_imaging_network/0.3.1#/default/getExecution">VIP API</a>
+     * Authenticate as service account
+     * @param attempts
+     * @param identifier
+     * @return
+     * @throws ResultHandlerException
+     */
+    public Execution getExecutionAsService(int attempts, String identifier) throws ResultHandlerException, SecurityException {
+
+        String uri = VIP_EXECUTION_URI + identifier;
+
+        HttpEntity<String> httpHeaders = this.getServiceHttpEntity();
+
+        // check how many times the loop tried to get the execution's info without success (only UNAUTHORIZED error)
+        if(attempts >= 3){
+            throw new ResultHandlerException("Failed to get execution details from VIP in [" + attempts + "] attempts", null);
+        }
+
+        try {
+            ResponseEntity<Execution> executionResponseEntity = this.restTemplate.exchange(uri, HttpMethod.GET, httpHeaders, Execution.class);
+            return executionResponseEntity.getBody();
+        } catch (HttpStatusCodeException e) {
+            // in case of an error with response payload
+            if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+                LOG.info("Unauthorized : refreshing token... ({} attempts)", attempts);
+                return null;
+            } else {
+                throw new ResultHandlerException("Failed to get execution details from VIP in " + attempts + " attempts", e);
+            }
+        } catch (RestClientException e) {
+            throw new ResultHandlerException("No response payload in execution infos from VIP", e);
+        }
+    }
+
+    /**
      *
-     * Get execution from VIP API <a href="https://app.swaggerhub.com/apis/CARMIN/carmin-common_api_for_research_medical_imaging_network/0.3.1#/default/getExecution">VIP API</a>
+     * Create execution on <a href="https://app.swaggerhub.com/apis/CARMIN/carmin-common_api_for_research_medical_imaging_network/0.3.1#/default/getExecution">VIP API</a>
      *
      * @return ExecutionDTO
      */
@@ -102,8 +143,25 @@ public class VipClientService {
         return execResult.getBody();
     }
 
+
     /**
-     * Prepare the HTTP headers for VIP API call
+     * Set up the HTTP headers for VIP API call
+     * Refresh & use service account token
+     *
+     * @return
+     * @throws SecurityException
+     */
+    private HttpEntity<String> getServiceHttpEntity() throws SecurityException {
+        AccessTokenResponse accessTokenResponse = keycloakServiceAccountUtils.getServiceAccountAccessToken();
+        String token = accessTokenResponse.getToken();
+        // init headers with the active access token
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        return new HttpEntity<>(headers);
+    }
+
+    /**
+     * Set up the HTTP headers for VIP API call
      * Reuse authenticated user token
      *
      * @return

@@ -1,6 +1,7 @@
 package org.shanoir.ng.vip.monitoring.schedule;
 
 import org.keycloak.representations.AccessTokenResponse;
+import org.shanoir.ng.vip.controller.VipClientService;
 import org.shanoir.ng.vip.monitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.monitoring.model.Execution;
 import org.shanoir.ng.vip.monitoring.model.ExecutionStatus;
@@ -37,11 +38,6 @@ import java.time.LocalDate;
 public class ExecutionStatusMonitorService {
 
 	public static final float DEFAULT_PROGRESS = 0.5f;
-	@Value("${vip.uri}")
-	private String VIP_URI;
-
-	@Value("${vip.upload-folder}")
-	private String importDir;
 
 	@Value("${vip.sleep-time}")
 	private long sleepTime;
@@ -64,6 +60,9 @@ public class ExecutionStatusMonitorService {
 	@Autowired
 	private ResultHandlerService outputProcessingService;
 
+	@Autowired
+	private VipClientService vipClient;
+
 	/**
 	 * Async job that monitor the state of the VIP execution and process its outcome
 	 *
@@ -82,12 +81,6 @@ public class ExecutionStatusMonitorService {
 
 		stop.set(false);
 
-		String uri = VIP_URI + identifier + "/summary";
-		RestTemplate restTemplate = new RestTemplate();
-
-		// refresh the token
-		String token = this.refreshServiceAccountAccessToken();
-
 		String execLabel = this.getExecLabel(processing);
 		event = this.initShanoirEvent(processing, event, execLabel);
 
@@ -95,10 +88,9 @@ public class ExecutionStatusMonitorService {
 
 			try{
 
-				Execution execution = this.getExecutionFromVIP(token, attempts, restTemplate, uri);
+				Execution execution = vipClient.getExecutionAsService(attempts, this.identifier);
 
 				if(execution == null){
-					token = this.refreshServiceAccountAccessToken();
 					attempts++;
 					continue;
 				}
@@ -205,43 +197,6 @@ public class ExecutionStatusMonitorService {
 		event.setStatus(ShanoirEvent.SUCCESS);
 		event.setProgress(1f);
 		eventService.publishEvent(event);
-	}
-
-	private Execution getExecutionFromVIP(String token, int attempts, RestTemplate restTemplate, String uri) throws ResultHandlerException {
-
-		// check how many times the loop tried to get the execution's info without success (only UNAUTHORIZED error)
-		if(attempts >= 3){
-			throw new ResultHandlerException("Failed to get execution details from VIP in [" + attempts + "] attempts", null);
-		}
-
-		// init headers with the active access token
-		HttpHeaders headers = new HttpHeaders();
-		headers.set("Authorization", "Bearer " + token);
-		HttpEntity entity = new HttpEntity(headers);
-
-		try {
-			ResponseEntity<Execution> executionResponseEntity = restTemplate.exchange(uri, HttpMethod.GET, entity, Execution.class);
-			return executionResponseEntity.getBody();
-		} catch (HttpStatusCodeException e) {
-			// in case of an error with response payload
-			if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
-				LOG.info("Unauthorized : refreshing token... ({} attempts)", attempts);
-				return null;
-			} else {
-				throw new ResultHandlerException("Failed to get execution details from VIP in " + attempts + " attempts", e);
-			}
-		} catch (RestClientException e) {
-			throw new ResultHandlerException("No response payload in execution infos from VIP", e);
-		}
-	}
-
-	/**
-	 * Get token from keycloak service account
-	 * @return
-	 */
-	private String refreshServiceAccountAccessToken() throws SecurityException {
-		AccessTokenResponse accessTokenResponse = keycloakServiceAccountUtils.getServiceAccountAccessToken();
-		return accessTokenResponse.getToken();
 	}
 
 	private void setJobInError(ShanoirEvent event, String msg){
