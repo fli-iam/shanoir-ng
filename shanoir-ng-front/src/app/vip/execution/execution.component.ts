@@ -117,7 +117,8 @@ export class ExecutionComponent implements OnInit {
         this.executionForm = new UntypedFormGroup({
             "execution_name": new UntypedFormControl('', Validators.required),
             "export_format": new UntypedFormControl('', Validators.required),
-            "group_by": new UntypedFormControl('', Validators.required)
+            "group_by": new UntypedFormControl('', Validators.required),
+            "converter": new UntypedFormControl('', this.exportFormat == 'nii' ? Validators.required : null)
         });
 
         this.pipeline.parameters.forEach(
