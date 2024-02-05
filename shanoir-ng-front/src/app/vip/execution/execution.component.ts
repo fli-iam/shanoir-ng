@@ -118,7 +118,7 @@ export class ExecutionComponent implements OnInit {
             "execution_name": new UntypedFormControl('', Validators.required),
             "export_format": new UntypedFormControl('', Validators.required),
             "group_by": new UntypedFormControl('', Validators.required),
-            "converter": new UntypedFormControl('', this.exportFormat == 'nii' ? Validators.required : null)
+            "converter": new UntypedFormControl('')
         });
 
         this.pipeline.parameters.forEach(
@@ -213,7 +213,7 @@ export class ExecutionComponent implements OnInit {
             (processing) => {
 
                 let execution = this.initExecution(processing);
-                this.setExecutionParameters(processing, execution, this.converter);
+                this.setExecutionParameters(processing, execution);
 
                 this.vipClientService.createExecution(execution).then(
                     (execution) => {
@@ -256,7 +256,7 @@ export class ExecutionComponent implements OnInit {
         return execution;
     }
 
-    private setExecutionParameters(processing: ExecutionMonitoring, execution: Execution, converter: number) {
+    private setExecutionParameters(processing: ExecutionMonitoring, execution: Execution) {
         processing.parametersResources.forEach(dto => {
             execution.inputValues[dto.parameter] = [];
             let extension = ".nii.gz"
@@ -267,7 +267,7 @@ export class ExecutionComponent implements OnInit {
             dto.resourceIds.forEach(id => {
                 let entity_name = `resource_id+${id}+${this.groupBy}${extension}`
                 // datasetId URI param = resourceId (to be changed once VIP has been updated)
-                let inputValue = `shanoir:/${entity_name}?format=${this.exportFormat}&datasetId=${id}&converter=${converter}&token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`;
+                let inputValue = `shanoir:/${entity_name}?format=${this.exportFormat}&datasetId=${id}&converter=${this.converter}&token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`;
                 execution.inputValues[dto.parameter].push(inputValue);
             })
         });
