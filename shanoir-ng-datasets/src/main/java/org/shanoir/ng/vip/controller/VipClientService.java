@@ -137,8 +137,8 @@ public class VipClientService {
      * @param identifier
      * @return JSON as string
      */
-    public String getPipeline(String identifier) {
-        String uri = vipPipelineUrl + identifier;
+    public String getPipeline(String name, String version) {
+        String uri = vipPipelineUrl + name + "/" + version;
         ResponseEntity<String> execResult = this.restTemplate.exchange(uri, HttpMethod.GET, this.getUserHttpEntity(), String.class);
         return execResult.getBody();
     }
