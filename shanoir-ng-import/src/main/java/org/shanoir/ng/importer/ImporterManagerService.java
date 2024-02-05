@@ -314,9 +314,10 @@ public class ImporterManagerService {
 					event.setMessage("Downloading DICOM files from PACS for serie [" + (serie.getProtocolName() == null ? serie.getSeriesInstanceUID() : serie.getProtocolName()) + "] (" + cpt + "/" + nbSeries + ")");
 					eventService.publishEvent(event);
 
-					queryPACSService.queryCMOVE(serie);
-					String serieID = serie.getSeriesInstanceUID();
-					File serieIDFolderDir = new File(importJobDir + File.separator + serieID);
+					String studyInstanceUID = study.getStudyInstanceUID();
+					String seriesInstanceUID = serie.getSeriesInstanceUID();
+					queryPACSService.queryCMOVE(studyInstanceUID, seriesInstanceUID);
+					File serieIDFolderDir = new File(importJobDir + File.separator + seriesInstanceUID);
 
 					if(!serieIDFolderDir.exists()) {
 						serieIDFolderDir.mkdirs();
@@ -326,9 +327,9 @@ public class ImporterManagerService {
 					for (Iterator<Instance> iterator = serie.getInstances().iterator(); iterator.hasNext();) {
 						Instance instance = iterator.next();
 						String sopInstanceUID = instance.getSopInstanceUID();
-						File oldFile = new File(dicomStoreSCPServer.getStorageDirPath() + File.separator + serieID + File.separator + sopInstanceUID + DicomStoreSCPServer.DICOM_FILE_SUFFIX);
+						File oldFile = new File(dicomStoreSCPServer.getStorageDirPath() + File.separator + seriesInstanceUID + File.separator + sopInstanceUID + DicomStoreSCPServer.DICOM_FILE_SUFFIX);
 						if (oldFile.exists()) {
-							File newFile = new File(importJobDir.getAbsolutePath() + File.separator + serieID + File.separator + oldFile.getName());
+							File newFile = new File(importJobDir.getAbsolutePath() + File.separator + seriesInstanceUID + File.separator + oldFile.getName());
 							oldFile.renameTo(newFile);
 							LOG.debug("Moving file: {} to ", oldFile.getAbsolutePath(), newFile.getAbsolutePath());
 						} else {

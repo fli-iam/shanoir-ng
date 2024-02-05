@@ -1,6 +1,8 @@
 package org.shanoir.uploader.dicom.retrieve;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import org.apache.log4j.Logger;
 import org.shanoir.uploader.dicom.query.ConfigBean;
@@ -20,6 +22,8 @@ public class DcmRcvManager {
 
 	private static Logger logger = Logger.getLogger(DcmRcvManager.class);
 	
+	private static final String SOP_CLASSES_PROPERTIES = "/sop-classes.properties";
+
 	/**
 	 * In the brackets '{ggggeeee}' the dicom attribute value is used to be replaced.
 	 * We store in a folder with the SeriesInstanceUID and the file name of the SOPInstanceUID.
@@ -34,21 +38,23 @@ public class DcmRcvManager {
 	
 	private DicomListener listener;
 
-	public void configure(final ConfigBean configBean) {
+	public void configure(final ConfigBean configBean) throws MalformedURLException {
 		logger.info("Configuring local DICOM server with params:"
 				+ " AET title: " + configBean.getLocalDicomServerAETCalling()
 				+ ", AET host: " + configBean.getLocalDicomServerHost()
 				+ ", AET port: " + configBean.getLocalDicomServerPort());
         scpNode = new DicomNode(configBean.getLocalDicomServerAETCalling(), configBean.getLocalDicomServerHost(), configBean.getLocalDicomServerPort());
 		AdvancedParams params = new AdvancedParams();
+		params.setTsuidOrder(AdvancedParams.IVR_LE_ONLY);
         ConnectOptions connectOptions = new ConnectOptions();
         connectOptions.setConnectTimeout(30000);
         connectOptions.setAcceptTimeout(50000);
         // Concurrent DICOM operations
         connectOptions.setMaxOpsInvoked(15);
         connectOptions.setMaxOpsPerformed(15);
-        params.setConnectOptions(connectOptions);
-		this.lParams = new ListenerParams(params, true, STORAGE_PATTERN + DICOM_FILE_SUFFIX, null, null);
+		params.setConnectOptions(connectOptions);
+		URL sOPClassesPropertiesFileURL = this.getClass().getResource(SOP_CLASSES_PROPERTIES);
+		lParams = new ListenerParams(params, true, STORAGE_PATTERN + DICOM_FILE_SUFFIX, sOPClassesPropertiesFileURL, null);
 	}
 	
 	/**

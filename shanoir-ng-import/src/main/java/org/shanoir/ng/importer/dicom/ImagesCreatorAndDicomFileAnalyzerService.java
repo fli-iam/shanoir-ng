@@ -29,7 +29,6 @@ import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.UID;
 import org.dcm4che3.emf.MultiframeExtractor;
 import org.dcm4che3.io.DicomInputStream;
-import org.shanoir.ng.importer.model.EquipmentDicom;
 import org.shanoir.ng.importer.model.Image;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.InstitutionDicom;
@@ -38,6 +37,7 @@ import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.dicom.EchoTime;
+import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.slf4j.Logger;
@@ -213,7 +213,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			return instanceFile;
 		} else {
 			throw new FileNotFoundException(
-					"instanceFilePath in DicomDir: missing file: " + instanceFilePath);
+					"instanceFilePath: missing file: " + instanceFilePath);
 		}
 	}
 	

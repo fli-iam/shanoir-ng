@@ -92,7 +92,7 @@ public class StudyTreeNode implements DicomTreeNode {
 	 * @see org.shanoir.dicom.model.DicomTreeNode#getDisplayString()
 	 */
 	public String getDisplayString() {
-		return study.getStudyDescription();
+		return  "[" + study.getStudyDate() + "] " + study.getStudyDescription();
 	}
 	
 	public LocalDate getStudyDate() {
@@ -195,6 +195,7 @@ public class StudyTreeNode implements DicomTreeNode {
 	 */
 	public SerieTreeNode initChildTreeNode(final Serie serie) {
 		final SerieTreeNode serieTreeNode = new SerieTreeNode(serie);
+		serieTreeNode.setParent(this);
 		return serieTreeNode;
 	}
 

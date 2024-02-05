@@ -1,14 +1,13 @@
 package org.shanoir.uploader.dicom.anonymize;
 
 import java.io.File;
-import java.util.GregorianCalendar;
 
 import org.apache.commons.lang.SystemUtils;
 import org.apache.log4j.Logger;
-import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.action.DicomDataTransferObject;
 import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.utils.StreamGobbler;
+import org.shanoir.uploader.utils.Util;
 
 /**
  * This class is used for pseudonymization. Pseudonymization is a data management and
@@ -129,9 +128,7 @@ public class Pseudonymizer {
 				pseudonymusExePath, 1);
 		String firstNameHash3 = pseudonymusExec(dicomData.getFirstName(),
 				pseudonymusExePath, 2);
-		final GregorianCalendar birthDateCal = new GregorianCalendar();
-		birthDateCal.setTime(dicomData.getBirthDate());
-		final String birthDate = ShUpConfig.formatter.format(birthDateCal.getTime());
+		final String birthDate = Util.convertLocalDateToString(dicomData.getBirthDate());
 		final String birthDateHash = pseudonymusExec(birthDate, pseudonymusExePath, 0);
 		/**
 		 * Store all created hash values in DTO.

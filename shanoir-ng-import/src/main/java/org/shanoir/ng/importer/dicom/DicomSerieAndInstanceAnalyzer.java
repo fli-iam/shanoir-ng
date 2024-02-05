@@ -8,8 +8,6 @@ import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.utils.ImportUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 /**
  * This class is a helper class, that will in the future be used to detect
