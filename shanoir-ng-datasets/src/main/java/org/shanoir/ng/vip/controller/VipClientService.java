@@ -1,5 +1,6 @@
 package org.shanoir.ng.vip.controller;
 
+import jakarta.annotation.PostConstruct;
 import org.keycloak.representations.AccessTokenResponse;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.security.KeycloakServiceAccountUtils;
@@ -22,12 +23,11 @@ public class VipClientService {
 
     private static final Logger LOG = LoggerFactory.getLogger(VipClientService.class);
 
-    @Value("${vip.uri}")
-    private String vipBaseUrl;
+    @Value("${vip.uri}/executions/")
+    private String vipExecutionUrl;
 
-    private String vipExecutionUrl = vipBaseUrl + "executions/";
-
-    private String vipPipelineUrl = vipBaseUrl + "pipelines/";
+    @Value("${vip.uri}/pipelines/")
+    private String vipPipelineUrl;
 
     @Autowired
     private RestTemplate restTemplate;
