@@ -20,10 +20,10 @@ public interface PipelineApi {
             @ApiResponse(responseCode = "200", description = "successful response, returns the status"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/{identifier}",
+    @RequestMapping(value = "/{name}/{version}",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
-    ResponseEntity<String> getPipeline(@Parameter(name = "The pipeline identifier", required=true) @PathVariable("identifier") String identifier) throws SecurityException;
+    ResponseEntity<String> getPipeline(@Parameter(name = "The pipeline name", required=true) @PathVariable("name") String name, @Parameter(name = "The pipeline version", required=true) @PathVariable("version") String version) throws SecurityException;
 
     @Operation(summary = "Get execution DTO for the given identifier", description = "Returns the VIP execution that has the given identifier in parameter.", tags={  })
     @ApiResponses(value = {

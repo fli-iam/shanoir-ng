@@ -18,10 +18,10 @@ public class PipelineApiController implements PipelineApi {
      * @return
      */
     @Override
-    public ResponseEntity<String> getPipeline(String identifier) {
+    public ResponseEntity<String> getPipeline(String name, String version) {
         String json;
         try {
-            json = vipClient.getPipeline(identifier);
+            json = vipClient.getPipeline(name, version);
         } catch (HttpStatusCodeException e) {
             // in case of an error with response payload
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
