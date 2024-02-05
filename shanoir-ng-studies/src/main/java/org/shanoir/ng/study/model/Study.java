@@ -53,6 +53,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.SqlResultSetMapping;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotNull;
 
 /**
@@ -138,10 +139,16 @@ public class Study extends HalEntity {
 	/** List of the examinations related to this study. */
 	@OneToMany(mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<StudyExamination> examinations;
+	
+	@Transient
+	private int numberOfExaminations;
 
 	/** Relations between the subjects and the studies. */
 	@OneToMany(mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<SubjectStudy> subjectStudyList;
+	
+	@Transient
+	private int numberOfSubjects;
 
 	/** List of Timepoints dividing the study **/
 	@OneToMany(mappedBy = "study", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -255,6 +262,22 @@ public class Study extends HalEntity {
 			this.examinations.retainAll(examinations);
 			this.examinations.addAll(examinations);
 		}
+	}
+
+	public int getNumberOfExaminations() {
+		return numberOfExaminations;
+	}
+
+	public void setNumberOfExaminations(int numberOfExaminations) {
+		this.numberOfExaminations = numberOfExaminations;
+	}
+
+	public int getNumberOfSubjects() {
+		return numberOfSubjects;
+	}
+
+	public void setNumberOfSubjects(int numberOfSubjects) {
+		this.numberOfSubjects = numberOfSubjects;
 	}
 
 	/**

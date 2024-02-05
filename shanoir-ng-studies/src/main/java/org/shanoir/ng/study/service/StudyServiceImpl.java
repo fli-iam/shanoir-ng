@@ -50,6 +50,7 @@ import org.shanoir.ng.study.rights.command.CommandType;
 import org.shanoir.ng.study.rights.command.StudyUserCommand;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.studyexamination.StudyExamination;
+import org.shanoir.ng.studyexamination.StudyExaminationRepository;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subject.service.SubjectService;
@@ -123,6 +124,9 @@ public class StudyServiceImpl implements StudyService {
 
 	@Autowired
 	private SubjectStudyRepository subjectStudyRepository;
+	
+	@Autowired
+	private StudyExaminationRepository studyExaminationRepository;
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
@@ -705,7 +709,16 @@ public class StudyServiceImpl implements StudyService {
 
 	@Override
 	public List<Study> findPublicStudies() {
-		return this.studyRepository.findByVisibleByDefaultTrue();
+		List<Study> studies = this.studyRepository.findByVisibleByDefaultTrue();
+		studies.stream().forEach(s -> setNumbersOfSubjectAndExaminations(s));
+		return studies;
+	}
+	
+	private void setNumbersOfSubjectAndExaminations(Study study) {
+		int numberOfSubjects = subjectStudyRepository.countByStudyId(study.getId());
+		study.setNumberOfSubjects(numberOfSubjects);
+		int numberOfExaminations = studyExaminationRepository.countByStudyId(study.getId());
+		study.setNumberOfExaminations(numberOfExaminations);
 	}
 
 	@Override

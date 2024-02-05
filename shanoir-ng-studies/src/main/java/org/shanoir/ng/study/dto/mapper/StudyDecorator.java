@@ -23,9 +23,7 @@ import org.shanoir.ng.study.dto.PublicStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.studycenter.StudyCenterMapper;
-import org.shanoir.ng.studyexamination.StudyExaminationRepository;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyMapper;
-import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.tag.model.StudyTagMapper;
 import org.shanoir.ng.tag.model.TagMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,12 +53,6 @@ public abstract class StudyDecorator implements StudyMapper {
 
 	@Autowired
 	private StudyTagMapper studyTagMapper;
-	
-	@Autowired
-	private SubjectStudyRepository subjectStudyRepository;
-	
-	@Autowired
-	private StudyExaminationRepository studyExaminationRepository;
 
 	@Override
 	public List<StudyDTO> studiesToStudyDTOs(final List<Study> studies) {
@@ -129,12 +121,11 @@ public abstract class StudyDecorator implements StudyMapper {
 	@Override
 	public PublicStudyDTO studyToPublicStudyDTO(final Study study) {
 		final PublicStudyDTO publicStudyDTO = delegate.studyToPublicStudyDTO(study);
-
 		if (study.getSubjectStudyList() != null) {
-			publicStudyDTO.setNbSubjects(subjectStudyRepository.countByStudyId(study.getId()));
+			publicStudyDTO.setNbSubjects(study.getNumberOfSubjects());
 		}
 		if (study.getExaminations() != null) {
-			publicStudyDTO.setNbExaminations(studyExaminationRepository.countByStudyId(study.getId()));
+			publicStudyDTO.setNbExaminations(study.getNumberOfExaminations());
 		}
 		if (study.getStudyTags() != null) {
 			publicStudyDTO.setStudyTags(studyTagMapper.studyTagListToStudyTagDTOList(study.getStudyTags()));
@@ -144,5 +135,6 @@ public abstract class StudyDecorator implements StudyMapper {
 		}
 		return publicStudyDTO;
 	}
+
 }
 
