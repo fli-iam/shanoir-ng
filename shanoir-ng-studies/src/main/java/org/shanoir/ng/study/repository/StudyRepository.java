@@ -17,6 +17,7 @@ package org.shanoir.ng.study.repository;
 import java.util.List;
 
 import org.shanoir.ng.study.model.Study;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -59,6 +60,7 @@ public interface StudyRepository extends CrudRepository<Study, Long> {
 	 * Lists all the publicly available studies.
 	 * @return all the publicly available studies.
 	 */
+	@EntityGraph(attributePaths = { "studyTags" })
 	List<Study> findByVisibleByDefaultTrue();
 
 }

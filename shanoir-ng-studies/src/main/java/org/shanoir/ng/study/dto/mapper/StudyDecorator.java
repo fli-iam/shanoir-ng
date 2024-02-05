@@ -127,7 +127,7 @@ public abstract class StudyDecorator implements StudyMapper {
 	}
 
 	@Override
-	public PublicStudyDTO studyToPublicStudyDTO (final Study study) {
+	public PublicStudyDTO studyToPublicStudyDTO(final Study study) {
 		final PublicStudyDTO publicStudyDTO = delegate.studyToPublicStudyDTO(study);
 
 		if (study.getSubjectStudyList() != null) {
