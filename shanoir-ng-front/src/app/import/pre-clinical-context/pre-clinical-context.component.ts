@@ -86,6 +86,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         importJob.acquisitionEquipmentId = context.acquisitionEquipment.id;
         importJob.archive = contextImportJob.archive;
         importJob.timestamp = timestamp;
+        importJob.anonymisationProfileToUse = context.study.profile?.profileName;
         return this.importService.startImportJob(importJob);
     }
 
@@ -96,6 +97,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
                     .getAnimalSubject(this.subject.id)
                     .then(animalSubject => this.animalSubject = animalSubject);
             }
+            this.onContextChange();
         });
     }
 
@@ -210,18 +212,6 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
             && !!context.acquisitionEquipment
             && !!context.subject
             && !!context.examination
-            && !!context.niftiConverter
         );
-    }
-
-    getImportedCenterDataStr(): string {
-        return this.patient?.studies[0]?.series[0]?.institution?.institutionName + " - "
-                + this.patient?.studies[0]?.series[0]?.institution?.institutionAddress;
-    }
-
-    getImportedEquipmentDataStr(): string {
-        return this.patient?.studies[0]?.series[0]?.equipment?.manufacturer
-                + '-' + this. patient?.studies[0]?.series[0]?.equipment?.manufacturerModelName
-                + '-' + this.patient?.studies[0]?.series[0]?.equipment?.deviceSerialNumber;
     }
 }
