@@ -203,7 +203,6 @@ public class StudyApiController implements StudyApi {
 			dto.setStorageVolume(studyService.getDetailedStorageVolume(dto.getId()));
 		}
 		return new ResponseEntity<>(dto, HttpStatus.OK);
-
 	}
 
 	@Override

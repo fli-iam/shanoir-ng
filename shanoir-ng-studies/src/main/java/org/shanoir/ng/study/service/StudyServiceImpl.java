@@ -738,14 +738,10 @@ public class StudyServiceImpl implements StudyService {
 			LOG.error("Error while fetching study [{}] datasets volume storage details.", studyId, e);
 			return null;
 		}
-
 		long filesSize = this.getStudyFilesSize(studyId);
-
 		dto.setExtraDataSize(filesSize + dto.getExtraDataSize());
 		dto.setTotal(filesSize + dto.getTotal());
-
 		return dto;
-
 	}
 
 	@Override
