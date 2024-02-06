@@ -22,6 +22,8 @@
 		<junit.jupiter.version>5.8.2</junit.jupiter.version>
 		<junit.platform.version>1.8.2</junit.platform.version>
 		<poi.version>4.1.2</poi.version>
+		<maven.build.timestamp.format>yyyy-MM-dd'T'HH-mm-ss'Z'</maven.build.timestamp.format>
+		<timestamp>${maven.build.timestamp}</timestamp>
 	</properties>
 
 	<dependencies>
@@ -344,7 +346,7 @@
 						</goals>
 						<configuration>
 							<appendAssemblyId>false</appendAssemblyId>
-							<finalName>${project.artifactId}-${project.version}-${maven.build.timestamp}</finalName>
+							<finalName>${project.artifactId}-${project.version}-${timestamp}</finalName>
 							<descriptors>
 								<descriptor>src/main/assembly/zip.xml</descriptor>
 							</descriptors>
