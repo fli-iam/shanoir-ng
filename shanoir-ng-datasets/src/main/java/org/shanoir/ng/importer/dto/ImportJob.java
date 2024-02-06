@@ -37,7 +37,9 @@ public class ImportJob implements Serializable {
 
     private boolean fromDicomZip;
 
-    private boolean fromShanoirUploader;
+	private Map<String, String> properties = new HashMap<>();
+
+	private boolean fromShanoirUploader;
 
     private boolean fromPacs;
 
@@ -212,6 +214,14 @@ public class ImportJob implements Serializable {
 
     public void setShanoirEvent(ShanoirEvent shanoirEvent) {
         this.shanoirEvent = shanoirEvent;
+    }
+
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
     }
 
     public Serie getFirstSerie() {
