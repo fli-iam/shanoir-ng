@@ -260,7 +260,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
                 if (rule.conditions?.find(cond => !cond.operation)) {
                     errors.missingField = 'condition operation';
                 }      
-                if (rule.conditions?.find(cond => cond.values?.length <= 0)) {
+                if (rule.conditions?.find(cond => cond.operation != 'PRESENT' && cond.operation != 'ABSENT' && cond.values?.length <= 0)) {
                     errors.missingField = 'condition values';
                 }                     
                 if (rule instanceof StudyCardRule) {

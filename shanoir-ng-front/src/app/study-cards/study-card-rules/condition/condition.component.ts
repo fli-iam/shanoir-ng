@@ -45,11 +45,13 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
         new Option('SMALLER_THAN', ' ', null, null, 'fa-solid fa-less-than'),
         new Option('BIGGER_THAN', ' ', null, null, 'fa-solid fa-greater-than'),
         new Option('CONTAINS', 'contains', null, null),
-        new Option('DOES_NOT_CONTAIN', '! contains', null, null),
-        new Option('STARTS_WITH', 'starts with', null, null),
-        new Option('DOES_NOT_START_WITH', '! starts with', null, null),
-        new Option('ENDS_WITH', 'ends with', null, null),
+        new Option('DOES_NOT_CONTAIN', '! contains'),
+        new Option('STARTS_WITH', 'starts with'),
+        new Option('DOES_NOT_START_WITH', '! starts with'),
+        new Option('ENDS_WITH', 'ends with'),
         new Option('DOES_NOT_END_WITH', '! ends with'),
+        new Option('PRESENT', 'present'),
+        new Option('ABSENT', 'absent'),
     ];
     @Output() delete: EventEmitter<void> = new EventEmitter();
     init: boolean = false;
@@ -83,13 +85,17 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
         let validators: ValidatorFn[] = [Validators.required]
         let type: TagType = this.condition?.dicomTag?.type;
         if (['Double', 'Float'].includes(type)) {
-            validators.push(Validators.pattern("[+-]?([0-9]*[.])?[0-9]+")); // only numbers, with dot as decimal separator
+            validators.push(Validators.pattern('[+-]?([0-9]*[.])?[0-9]+')); // reals : only numbers, with dot as decimal separator
         } else if (['Integer', 'Long'].includes(type)) {
-            validators.push(Validators.pattern("[+-]?[0-9]+")); // only numbers w/o decimals 
+            validators.push(Validators.pattern('[+-]?[0-9]+')); // only numbers w/o decimals 
         } else if (type == 'String') {
             validators.push(Validators.pattern('^[^\"]*$')); // exclude "
         } else if (type == 'Date') {
             validators.push(Validators.pattern((/^\d{4}(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])$/))); // yyyyMMdd
+        } else if (type == 'FloatArray') {
+            validators.push(Validators.pattern('([+-]?([0-9]*[.])?[0-9]+)(,[+-]?([0-9]*[.])?[0-9]+)*')); // comma separated reals
+        }else if ( type == 'IntArray') {
+            validators.push(Validators.pattern('([+-]?[0-9]+)(,[+-]?[0-9]+)*')); // comma separated integers
         }
         return new FormControl(value, validators);
     }
@@ -269,7 +275,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
         let type: TagType = this.condition?.dicomTag?.type;
         if (['Double', 'Float', 'Integer', 'Long', 'Date'].includes(type)) {
             this.operations.forEach(op => {
-                if (['EQUALS', 'SMALLER_THAN', 'BIGGER_THAN', 'NOT_EQUALS'].includes(op.value)) {
+                if (['EQUALS', 'SMALLER_THAN', 'BIGGER_THAN', 'NOT_EQUALS','PRESENT', 'ABSENT'].includes(op.value)) {
                     op.disabled = false;
                 } else {
                     op.disabled = true;
@@ -278,7 +284,16 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
             });
         } else if (type == 'String') {
             this.operations.forEach(op => {
-                if (['STARTS_WITH', 'EQUALS', 'ENDS_WITH', 'CONTAINS', 'DOES_NOT_CONTAIN', 'DOES_NOT_START_WITH', 'NOT_EQUALS', 'DOES_NOT_END_WITH'].includes(op.value)) {
+                if (['STARTS_WITH', 'EQUALS', 'ENDS_WITH', 'CONTAINS', 'DOES_NOT_CONTAIN', 'DOES_NOT_START_WITH', 'NOT_EQUALS', 'DOES_NOT_END_WITH', 'PRESENT', 'ABSENT'].includes(op.value)) {
+                    op.disabled = false;
+                } else {
+                    op.disabled = true;
+                }
+               ;
+            });
+        } else if (['FloatArray', 'IntArray'].includes(type)) {
+            this.operations.forEach(op => {
+                if (['EQUALS', 'NOT_EQUALS', 'PRESENT', 'ABSENT'].includes(op.value)) {
                     op.disabled = false;
                 } else {
                     op.disabled = true;
@@ -287,7 +302,11 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
             });
         } else {
             this.operations.forEach(op => {
-                op.disabled = false;
+                if (['PRESENT', 'ABSENT'].includes(op.value)) {
+                    op.disabled = false;
+                } else {
+                    op.disabled = true;
+                }
             });
         }
     }
@@ -309,6 +328,16 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
                 this.fieldOptions.forEach(opt => opt.disabled = false);
             }
         }
+    }
+
+    onOperationChange() {
+        if (this.condition.operation == 'PRESENT' || this.condition.operation == 'ABSENT') {
+            this.condition.values = [];
+            (this.form.get('values') as FormArray).clear();
+        } else if (this.condition.values.length == 0) {
+            this.resetValues();
+        }
+        this.onConditionChange(); 
     }
 
     private computeConditionOptions() {

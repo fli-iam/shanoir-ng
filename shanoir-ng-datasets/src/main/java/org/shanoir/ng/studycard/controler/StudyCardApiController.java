@@ -202,7 +202,7 @@ public class StudyCardApiController implements StudyCardApi {
                 }
             }
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new RestServiceException(new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Cannot parse the dcm4che lib Tag class static fields", e));
+            throw new RestServiceException(e, new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Cannot parse the dcm4che lib Tag class static fields", e));
         }
         return new ResponseEntity<>(dicomTags, HttpStatus.OK);
     }

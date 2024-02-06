@@ -91,7 +91,7 @@ export class StudyCardCondition {
     constructor(public scope: ConditionScope) {}
 }
 
-export type TagType = 'String' | 'Long' | 'Float' | 'Double' | 'Integer' | 'Binary' | 'Date';
+export type TagType = 'String' | 'Long' | 'Float' | 'Double' | 'Integer' | 'Binary' | 'Date' | 'FloatArray' | 'IntArray';
 
 export class DicomTag {
 
@@ -105,7 +105,7 @@ export class DicomTag {
     }
 }
 
-export type Operation = 'STARTS_WITH' | 'EQUALS' | 'ENDS_WITH' | 'CONTAINS' | 'DOES_NOT_CONTAIN' | 'SMALLER_THAN' | 'BIGGER_THAN' | 'DOES_NOT_START_WITH' | 'NOT_EQUALS' | 'DOES_NOT_END_WITH';
+export type Operation = 'STARTS_WITH' | 'EQUALS' | 'ENDS_WITH' | 'CONTAINS' | 'DOES_NOT_CONTAIN' | 'SMALLER_THAN' | 'BIGGER_THAN' | 'DOES_NOT_START_WITH' | 'NOT_EQUALS' | 'DOES_NOT_END_WITH' | 'PRESENT' | 'ABSENT';
 
 export type ConditionScope = 'StudyCardDICOMConditionOnDatasets' | 'AcqMetadataCondOnAcq' | 'AcqMetadataCondOnDatasets' | 
     'DatasetMetadataCondOnDataset' | 'ExamMetadataCondOnAcq' | 'ExamMetadataCondOnDatasets';

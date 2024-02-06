@@ -90,32 +90,34 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             class="method auto-width"
             [class.error]="operationError"
             [(ngModel)]="condition.operation" 
-            (userChange)="onConditionChange()" 
+            (userChange)="onOperationChange()" 
             [options]="operations" 
             placeholder="select operation" 
             (focusout)="operationTouched = true"
             [clear]="false">
     </select-box>
-    <form [formGroup]="form">
-        <span *ngIf="condition.scope == 'StudyCardDICOMConditionOnDatasets' || !(shanoirFieldOptions?.length > 0)" formArrayName="values" class="multi-value edit">
-            <span *ngFor="let value of condition.values; let i  = index; trackBy: trackByFn" class="one-value">
-                <auto-ajust-input 
-                        [formControlName]="i"
-                        class="value"
-                        [(ngModel)]="condition.values[i]"
-                        (change)="onConditionChange()"
-                        placeholder="enter value"
-                        (focusout)="valueTouched = true">
-                </auto-ajust-input>
-                <span *ngIf="condition.values.length > 1" class="delete-value" (click)="onTextValueRemove(i)"><i class="far fa-times-circle"></i></span>
-            </span>
-            <div *ngIf="condition.values[condition.values.length - 1]" class="add-cond-value-frame">
-                <span class="add-cond-value" (click)="onTextValueAdd()">
-                    <i class="fa-solid fa-circle-plus"></i>Add a possible value
+    <ng-container *ngIf="condition?.operation != 'PRESENT' && condition?.operation != 'ABSENT'"> 
+        <form [formGroup]="form">
+            <span *ngIf="condition.scope == 'StudyCardDICOMConditionOnDatasets' || !(shanoirFieldOptions?.length > 0)" formArrayName="values" class="multi-value edit">
+                <span *ngFor="let value of condition.values; let i  = index; trackBy: trackByFn" class="one-value">
+                    <auto-ajust-input 
+                            [formControlName]="i"
+                            class="value"
+                            [(ngModel)]="condition.values[i]"
+                            (change)="onConditionChange()"
+                            placeholder="enter value"
+                            (focusout)="valueTouched = true">
+                    </auto-ajust-input>
+                    <span *ngIf="condition.values.length > 1" class="delete-value" (click)="onTextValueRemove(i)"><i class="far fa-times-circle"></i></span>
                 </span>
-            </div>
-        </span>
-    </form>
+                <div *ngIf="!(condition.values[condition.values.length - 1]?.length == 0)" class="add-cond-value-frame">
+                    <span class="add-cond-value" (click)="onTextValueAdd()">
+                        <i class="fa-solid fa-circle-plus"></i>Add a possible value
+                    </span>
+                </div>
+            </span>
+        </form>
+    </ng-container>
     <span *ngIf="condition.scope != 'StudyCardDICOMConditionOnDatasets' && (shanoirFieldOptions?.length > 0)" class="multi-value edit">
         <select-box 
                 *ngFor="let value of condition.values; let i  = index"

@@ -14,9 +14,11 @@
 
 package org.shanoir.ng.studycard.model.condition;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -32,6 +34,7 @@ import org.shanoir.ng.download.ExaminationAttributes;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.studycard.model.DicomTagType;
+import org.shanoir.ng.studycard.model.Operation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -175,79 +178,111 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
         }
         VR tagVr = StandardElementDictionary.INSTANCE.vrOf(dicomTag);
         DicomTagType tagType = DicomTagType.valueOf(tagVr);
+        if (!this.getOperation().compatibleWith(tagType)) {
+            throw new IllegalArgumentException("Study card processing : operation " + this.getOperation() + " is not compatible with dicom tag " 
+                    + this.getDicomTag() + " of type " + tagType + "(condition id : " + this.getId() + ")");
+        }
+
+        if (Operation.PRESENT.equals(getOperation())) {
+            if (dicomAttributes.contains(getDicomTag())) {
+                return true;
+            } else {
+                if (errorMsg != null) errorMsg.append("\ncondition [" + toString() 
+                    + "] failed on dataset " + datasetId + " because the tag " + getDicomTagCodeAndLabel(this.getDicomTag()) + " was required but was absent");
+                return false;
+            }
+        } else if (Operation.ABSENT.equals(getOperation())) {
+            if (dicomAttributes.contains(getDicomTag())) {
+                if (errorMsg != null) errorMsg.append("\ncondition [" + toString() 
+                    + "] failed on dataset " + datasetId + " because the tag " + getDicomTagCodeAndLabel(this.getDicomTag()) + " was required absent but was present");
+                return false;
+            } else {
+                return true;
+            }
+        }
+
         // get all possible values, that can fulfill the condition
         for (String value : this.getValues()) {
-            if (tagType.isNumerical()) {
-                if (!this.getOperation().isNumerical()) {
-                    throw new IllegalArgumentException("Study card processing : operation " + this.getOperation() + " is not compatible with dicom tag " 
-                            + this.getDicomTag() + " of type " + tagType + "(condition id : " + this.getId() + ")");
+            if (DicomTagType.String.equals(tagType)) {
+                String stringValue = dicomAttributes.getString(this.getDicomTag());
+                if (stringValue == null) {
+                    LOG.warn("Could not find a value in the dicom for the tag " + getDicomTagCodeAndLabel(this.getDicomTag()));
+                    if (errorMsg != null) errorMsg.append("\ncondition [" + toString() 
+                        + "] failed because could not find/extract a value in the dicom for the tag " + getDicomTagCodeAndLabel(this.getDicomTag()));
+                    return false;
+                } else if (textualCompare(this.getOperation(), stringValue, value)) {
+                    if (errorMsg != null) errorMsg.append("\ncondition [" + toString() + "] succeed on acquisition ");
+                    return true; // as condition values are combined by OR: return if one is true
+                } // else continue to check other values
+
+            } else if (DicomTagType.FloatArray.equals(tagType)) {
+                float[] floatValues = dicomAttributes.getFloats(this.getDicomTag());
+                if (floatValues == null) {
+                    if (errorMsg != null) errorMsg.append("\ncondition [" + toString() 
+                        + "] failed on dataset " + datasetId + " because could not find/extract a value in the dicom for the tag " + getDicomTagCodeAndLabel(this.getDicomTag()));
+                    return false;
                 } else {
-                    BigDecimal scValue = new BigDecimal(value);
-                    Integer comparison = null;
-                    if (DicomTagType.Float.equals(tagType)) {
-                        Float floatValue = dicomAttributes.getFloat(this.getDicomTag(), Float.NaN);
-                        if (floatValue.equals(Float.NaN)) {
-                            if (errorMsg != null) errorMsg.append("\ncondition [" + toString() 
-                                + "] failed on dataset " + datasetId + " because could not find/extract a value in the dicom for the tag " + getDicomTagCodeAndLabel(this.getDicomTag()));
-                            return false;
-                        } else comparison = BigDecimal.valueOf(floatValue).compareTo(scValue);
-                    // There is no dicomAttributes.getLong() !
-                    } else if (DicomTagType.Double.equals(tagType) || DicomTagType.Long.equals(tagType)) {
-                        Double doubleValue = dicomAttributes.getDouble(this.getDicomTag(), Double.NaN);
-                        if (doubleValue.equals(Double.NaN)) {
-                            if (errorMsg != null) errorMsg.append("\ncondition [" + toString() 
-                                + "] failed on dataset " + datasetId + " because could not find/extract a value in the dicom for the tag " + getDicomTagCodeAndLabel(this.getDicomTag()));
-                            return false;
-                        } else comparison = BigDecimal.valueOf(doubleValue).compareTo(scValue);
-                    } else if (DicomTagType.Integer.equals(tagType)) {
-                        Integer integerValue = dicomAttributes.getInt(this.getDicomTag(), Integer.MIN_VALUE);
-                        if (integerValue.equals(Integer.MIN_VALUE)) {
-                            if (errorMsg != null) errorMsg.append("\ncondition [" + toString() 
-                                + "] failed on dataset " + datasetId + " because could not find/extract a value in the dicom for the tag " + getDicomTagCodeAndLabel(this.getDicomTag()));
-                            return false;
-                        } else comparison = BigDecimal.valueOf(integerValue).compareTo(scValue);
-                    } else if (DicomTagType.Date.equals(tagType)) {
-                        Date dateValue = dicomAttributes.getDate(this.getDicomTag());
-                        if (dateValue.equals(null)) {
-                            if (errorMsg != null) errorMsg.append("\ncondition [" + toString() 
-                                + "] failed on dataset " + datasetId + " because could not find/extract a value in the dicom for the date tag " + getDicomTagCodeAndLabel(this.getDicomTag()));
-                            return false;
-                        } else {
-                            try {
-                                Date scDate = new SimpleDateFormat("yyyyMMdd").parse(value);
-                                comparison = dateValue.compareTo(scDate);
-                            } catch (ParseException e) {
-                                if (errorMsg != null) errorMsg.append("\ncondition [" + toString() 
-                                    + "] could not be checked on dataset " + datasetId + " because there was a date format problem (please use yyyyMMdd)");
-                                return null;
-                            }
-                        }
-                    } else {
-                        throw new IllegalStateException("tagType for tag " + dicomTag + " is not implemented, tagType : " + tagType);
-                    }
-                    if (comparison != null && numericalCompare(this.getOperation(), comparison)) {
-                        if (errorMsg != null) errorMsg.append("\ncondition [" + toString() + "] succeed on dataset " + datasetId + ", value found : " + dicomAttributes.getString(this.getDicomTag()));
-                        return true; // as condition values are combined by OR: return if one is true
-                    } // else continue to check other values
+                    float[] valueArr = extractFloatArray(value);
+                    return arrayCompare(getOperation(), floatValues, valueArr);
                 }
-            } else if (tagType.isTextual()) {
-                if (!this.getOperation().isTextual()) {
-                    throw new IllegalArgumentException("Study card processing : operation " + this.getOperation() + " is not a textual operation and is not compatible with the textual dicom tag " 
-                            + getDicomTagCodeAndLabel(this.getDicomTag()) + " of type " + tagType + "(condition id : " + this.getId() + ")");
+            } else if (DicomTagType.FloatArray.equals(tagType)) {
+                float[] floatValues = dicomAttributes.getFloats(this.getDicomTag());
+                if (floatValues == null) {
+                    if (errorMsg != null) errorMsg.append("\ncondition [" + toString() 
+                        + "] failed on dataset " + datasetId + " because could not find/extract a value in the dicom for the tag " + getDicomTagCodeAndLabel(this.getDicomTag()));
+                    return false;
                 } else {
-                    String stringValue = dicomAttributes.getString(this.getDicomTag());
-                    if (stringValue == null) {
-                        LOG.warn("Could not find a value in the dicom for the tag " + getDicomTagCodeAndLabel(this.getDicomTag()));
+                    float[] valueArr = extractFloatArray(value);
+                    return arrayCompare(getOperation(), floatValues, valueArr);
+                }
+            } else { // numerical simple comparisons
+                BigDecimal scValue = new BigDecimal(value);
+                Integer comparison = null;
+                if (DicomTagType.Float.equals(tagType)) {
+                    Float floatValue = dicomAttributes.getFloat(this.getDicomTag(), Float.NaN);
+                    if (floatValue.equals(Float.NaN)) {
                         if (errorMsg != null) errorMsg.append("\ncondition [" + toString() 
-                            + "] failed because could not find/extract a value in the dicom for the tag " + getDicomTagCodeAndLabel(this.getDicomTag()));
+                            + "] failed on dataset " + datasetId + " because could not find/extract a value in the dicom for the tag " + getDicomTagCodeAndLabel(this.getDicomTag()));
                         return false;
-                    } else if (textualCompare(this.getOperation(), stringValue, value)) {
-                        if (errorMsg != null) errorMsg.append("\ncondition [" + toString() + "] succeed on acquisition ");
-                        return true; // as condition values are combined by OR: return if one is true
-                    } // else continue to check other values
+                    } else comparison = BigDecimal.valueOf(floatValue).compareTo(scValue);
+                // There is no dicomAttributes.getLong() !
+                } else if (DicomTagType.Double.equals(tagType) || DicomTagType.Long.equals(tagType)) {
+                    Double doubleValue = dicomAttributes.getDouble(this.getDicomTag(), Double.NaN);
+                    if (doubleValue.equals(Double.NaN)) {
+                        if (errorMsg != null) errorMsg.append("\ncondition [" + toString() 
+                            + "] failed on dataset " + datasetId + " because could not find/extract a value in the dicom for the tag " + getDicomTagCodeAndLabel(this.getDicomTag()));
+                        return false;
+                    } else comparison = BigDecimal.valueOf(doubleValue).compareTo(scValue);
+                } else if (DicomTagType.Integer.equals(tagType)) {
+                    Integer integerValue = dicomAttributes.getInt(this.getDicomTag(), Integer.MIN_VALUE);
+                    if (integerValue.equals(Integer.MIN_VALUE)) {
+                        if (errorMsg != null) errorMsg.append("\ncondition [" + toString() 
+                            + "] failed on dataset " + datasetId + " because could not find/extract a value in the dicom for the tag " + getDicomTagCodeAndLabel(this.getDicomTag()));
+                        return false;
+                    } else comparison = BigDecimal.valueOf(integerValue).compareTo(scValue);
+                } else if (DicomTagType.Date.equals(tagType)) {
+                    Date dateValue = dicomAttributes.getDate(this.getDicomTag());
+                    if (dateValue.equals(null)) {
+                        if (errorMsg != null) errorMsg.append("\ncondition [" + toString() 
+                            + "] failed on dataset " + datasetId + " because could not find/extract a value in the dicom for the date tag " + getDicomTagCodeAndLabel(this.getDicomTag()));
+                        return false;
+                    } else {
+                        try {
+                            Date scDate = new SimpleDateFormat("yyyyMMdd").parse(value);
+                            comparison = dateValue.compareTo(scDate);
+                        } catch (ParseException e) {
+                            if (errorMsg != null) errorMsg.append("\ncondition [" + toString() 
+                                + "] could not be checked on dataset " + datasetId + " because there was a date format problem (please use yyyyMMdd)");
+                            return null;
+                        }
+                    }
+                } else {
+                    throw new IllegalStateException("tagType for tag " + dicomTag + " is not implemented, tagType : " + tagType);
                 }
-            } else  {
-                throw new IllegalStateException("tagType for tag " + dicomTag + " is neither numerical or textual, tagType : " + tagType);
+                if (comparison != null && numericalCompare(this.getOperation(), comparison)) {
+                    if (errorMsg != null) errorMsg.append("\ncondition [" + toString() + "] succeed on dataset " + datasetId + ", value found : " + dicomAttributes.getString(this.getDicomTag()));
+                    return true; // as condition values are combined by OR: return if one is true
+                } // else continue to check other values
             }
         }
         if (errorMsg != null) errorMsg.append("\ncondition [" + toString() + "] failed on dataset " + datasetId + ", the found dicom value : " + dicomAttributes.getString(this.getDicomTag()) + " matches none of the given values : [" + String.join(", ", getValues()) + "] - operator : " + getOperation() + ")");
