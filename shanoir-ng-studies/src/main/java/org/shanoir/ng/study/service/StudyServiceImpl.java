@@ -449,14 +449,17 @@ public class StudyServiceImpl implements StudyService {
 
 	@Override
 	public List<Study> findAll() {
-		// Utils.copyList is used to prevent a bug with @PostFilter
+		List<Study> studies;
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			return Utils.copyList(studyRepository.findAll());
+			studies = studyRepository.findAll();
 		} else {
-			return Utils.copyList(studyRepository
-					.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(
-							KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId(), true));
+			studies = studyRepository
+				.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(
+					KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId(), true);
 		}
+		studies.stream().forEach(s -> setNumbersOfSubjectAndExaminations(s));
+		// Utils.copyList is used to prevent a bug with @PostFilter
+		return Utils.copyList(studies);
 	}
 
 	@Transactional
@@ -716,9 +719,9 @@ public class StudyServiceImpl implements StudyService {
 	
 	private void setNumbersOfSubjectAndExaminations(Study study) {
 		int numberOfSubjects = subjectStudyRepository.countByStudyId(study.getId());
-		study.setNumberOfSubjects(numberOfSubjects);
+		study.setNbSubjects(numberOfSubjects);
 		int numberOfExaminations = studyExaminationRepository.countByStudyId(study.getId());
-		study.setNumberOfExaminations(numberOfExaminations);
+		study.setNbExaminations(numberOfExaminations);
 	}
 
 	@Override

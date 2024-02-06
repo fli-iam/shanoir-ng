@@ -133,7 +133,7 @@ public class Study extends HalEntity {
 	private Integer studyType;
 
 	/** Users associated to the research study. */
-	@OneToMany(mappedBy = "study", targetEntity = StudyUser.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "study", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<StudyUser> studyUserList;
 
 	/** List of the examinations related to this study. */
@@ -141,14 +141,14 @@ public class Study extends HalEntity {
 	private Set<StudyExamination> examinations;
 	
 	@Transient
-	private int numberOfExaminations;
+	private int nbExaminations;
 
 	/** Relations between the subjects and the studies. */
 	@OneToMany(mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<SubjectStudy> subjectStudyList;
 	
 	@Transient
-	private int numberOfSubjects;
+	private int nbSubjects;
 
 	/** List of Timepoints dividing the study **/
 	@OneToMany(mappedBy = "study", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -264,20 +264,20 @@ public class Study extends HalEntity {
 		}
 	}
 
-	public int getNumberOfExaminations() {
-		return numberOfExaminations;
+	public int getNbExaminations() {
+		return nbExaminations;
 	}
 
-	public void setNumberOfExaminations(int numberOfExaminations) {
-		this.numberOfExaminations = numberOfExaminations;
+	public void setNbExaminations(int nbExaminations) {
+		this.nbExaminations = nbExaminations;
 	}
 
-	public int getNumberOfSubjects() {
-		return numberOfSubjects;
+	public int getNbSubjects() {
+		return nbSubjects;
 	}
 
-	public void setNumberOfSubjects(int numberOfSubjects) {
-		this.numberOfSubjects = numberOfSubjects;
+	public void setNbSubjects(int nbSubjects) {
+		this.nbSubjects = nbSubjects;
 	}
 
 	/**

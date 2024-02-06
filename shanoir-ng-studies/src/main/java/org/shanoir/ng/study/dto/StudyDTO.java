@@ -55,7 +55,7 @@ public class StudyDTO {
 
 	private int nbExaminations;
 
-	private int nbSujects;
+	private int nbSubjects;
 
 	private List<String> protocolFilePaths;
 	
@@ -239,16 +239,16 @@ public class StudyDTO {
 	/**
 	 * @return the nbSujects
 	 */
-	public int getNbSujects() {
-		return nbSujects;
+	public int getNbSubjects() {
+		return nbSubjects;
 	}
 
 	/**
 	 * @param nbSujects
 	 *            the nbSujects to set
 	 */
-	public void setNbSujects(int nbSujects) {
-		this.nbSujects = nbSujects;
+	public void setNbSubjects(int nbSubjects) {
+		this.nbSubjects = nbSubjects;
 	}
 
 	/**
@@ -474,7 +474,6 @@ public class StudyDTO {
 	public void setLicense(String license) {
 		this.license = license;
 	}
-
 
 	public StudyStorageVolumeDTO getStorageVolume() {
 		return storageVolume;

@@ -362,6 +362,7 @@ export class CenterStudyDTO {
 
 export class PublicStudyData {
   downloadableByDefault: boolean;
+  challenge: boolean;
   endDate: Date;
   id: number;
   name: string;

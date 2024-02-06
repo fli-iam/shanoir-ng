@@ -14,12 +14,17 @@
 
 package org.shanoir.ng.study.security;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.StudyDTO;
+import org.shanoir.ng.study.dto.StudyLightDTO;
 import org.shanoir.ng.study.dua.DataUserAgreement;
 import org.shanoir.ng.study.dua.DataUserAgreementRepository;
 import org.shanoir.ng.study.model.Study;
@@ -367,6 +372,33 @@ public class StudySecurityService {
 		List<StudyDTO> newList = new ArrayList<>();
 		Map<Long, StudyDTO> map = new HashMap<>();
 		for (StudyDTO dto : dtos) {
+			map.put(dto.getId(), dto);
+		}
+		for (Study study : studyRepository.findAllById(new ArrayList<>(map.keySet()))) {
+			if (hasPrivilege(study, right)) {
+				newList.add(map.get(study.getId()));
+			}
+		}
+		dtos = newList;
+		return true;
+	}
+	
+	/**
+	 * For every study of the list, check that the connected user has the given
+	 * right.
+	 *
+	 * @param dtos
+	 * @param rightStr
+	 * @return true or false
+	 */
+	public boolean filterStudyLightDTOsHasRight(List<StudyLightDTO> dtos, String rightStr) {
+		StudyUserRight right = StudyUserRight.valueOf(rightStr);
+		if (dtos == null) {
+			return true;
+		}
+		List<StudyLightDTO> newList = new ArrayList<>();
+		Map<Long, StudyLightDTO> map = new HashMap<>();
+		for (StudyLightDTO dto : dtos) {
 			map.put(dto.getId(), dto);
 		}
 		for (Study study : studyRepository.findAllById(new ArrayList<>(map.keySet()))) {

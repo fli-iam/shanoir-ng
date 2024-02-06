@@ -40,7 +40,7 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
-import org.shanoir.ng.study.dto.PublicStudyDTO;
+import org.shanoir.ng.study.dto.StudyLightDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
@@ -155,8 +155,15 @@ public class StudyApiController implements StudyApi {
 		if (studies.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-
 		return new ResponseEntity<>(studyMapper.studiesToStudyDTOs(studies), HttpStatus.OK);
+	}
+	
+	public ResponseEntity<List<StudyLightDTO>> findStudiesLight() {
+		List<Study> studies = studyService.findAll();
+		if (studies.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(studyMapper.studiesToStudyLightDTOs(studies), HttpStatus.OK);
 	}
 
 	@Override
@@ -503,23 +510,23 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<List<PublicStudyDTO>> findPublicStudiesData() {
-		List<PublicStudyDTO> studiesDTO = new ArrayList<>();
+	public ResponseEntity<List<StudyLightDTO>> findPublicStudiesData() {
+		List<StudyLightDTO> studiesDTO = new ArrayList<>();
 		List<Study> studies = studyService.findPublicStudies();
 		if (studies.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		for (Study study : studies) {
-			studiesDTO.add(studyMapper.studyToPublicStudyDTO(study));
+			studiesDTO.add(studyMapper.studyToStudyLightDTO(study));
 		}
 		return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
 	}
 
 	/**
-	 * This method allows to filter studies by ont the one the given user is not part in
+	 * This method allows to filter studies by on the one the given user is not part in
 	 * @param studies the list of studies to filter
 	 * @param tokenUserId the user to filter with
-	 * @return the list fo filtered studies
+	 * @return the list of filtered studies
 	 */
 	private List<Study> filterStudies(List<Study> studies, Long tokenUserId) {
 		List<Study> filteredStudies = new ArrayList<Study>();

@@ -22,7 +22,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
-import org.shanoir.ng.study.dto.PublicStudyDTO;
+import org.shanoir.ng.study.dto.StudyLightDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.timepoint.TimepointMapper;
@@ -43,7 +43,9 @@ public interface StudyMapper {
 	 * @param studies list of studies.
 	 * @return list of studies DTO.
 	 */
-	List<StudyDTO> studiesToStudyDTOs (List<Study> studies);
+	List<StudyDTO> studiesToStudyDTOs(List<Study> studies);
+
+	List<StudyLightDTO> studiesToStudyLightDTOs(List<Study> studies);
 
 	/**
 	 * Map a @Study to a @StudyDTO.
@@ -52,24 +54,19 @@ public interface StudyMapper {
 	 * @return study DTO.
 	 */
 	@Mappings({ @Mapping(target = "experimentalGroupsOfSubjects", ignore = true),
-			@Mapping(target = "nbExaminations", ignore = true),
-			@Mapping(target = "nbSujects", ignore = true),
-			@Mapping(target = "studyCards", ignore = true),
-			@Mapping(target = "studyCenterList", ignore = true),
-			@Mapping(target = "subjectStudyList", ignore = true),
-			@Mapping(target = "tags", ignore = true),
-			@Mapping(target = "storageVolume", ignore = true) }
-	)
-	StudyDTO studyToStudyDTO (Study study);
-	
+			@Mapping(target = "nbExaminations", ignore = true), @Mapping(target = "nbSubjects", ignore = true),
+			@Mapping(target = "studyCards", ignore = true), @Mapping(target = "studyCenterList", ignore = true),
+			@Mapping(target = "subjectStudyList", ignore = true), @Mapping(target = "tags", ignore = true),
+			@Mapping(target = "storageVolume", ignore = true) })
+	StudyDTO studyToStudyDTO(Study study);
+
 	@Mappings({ @Mapping(target = "studyCenterList", ignore = true) })
-	IdNameCenterStudyDTO studyToExtendedIdNameDTO (Study study);
-	
-	List<IdNameCenterStudyDTO> studiesToSimpleStudyDTOs (List<Study> studies);
-	
-	IdName studyToIdNameDTO (Study study);
+	IdNameCenterStudyDTO studyToExtendedIdNameDTO(Study study);
 
+	List<IdNameCenterStudyDTO> studiesToSimpleStudyDTOs(List<Study> studies);
 
-	PublicStudyDTO studyToPublicStudyDTO (Study study);
+	IdName studyToIdNameDTO(Study study);
+
+	StudyLightDTO studyToStudyLightDTO(Study study);
 
 }
