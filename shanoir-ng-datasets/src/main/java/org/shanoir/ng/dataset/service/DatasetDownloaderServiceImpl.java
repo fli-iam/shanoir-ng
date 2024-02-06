@@ -157,12 +157,12 @@ public class DatasetDownloaderServiceImpl {
 						String tmpFilePath = userDir + File.separator + dataset.getId() + "_" + format;
 						File workFolder = new File(tmpFilePath + "-" + formatter.format(new DateTime().toDate()));
 
-						DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, null);
+						DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, downloadResult);
 
 						// Create temporary workfolder with dicom files, to be able to convert them
 						workFolder.mkdirs();
 
-						downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset, null);
+						downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset, downloadResult);
 
 						// Convert them, sending to import microservice
 						boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + workFolder.getAbsolutePath());
