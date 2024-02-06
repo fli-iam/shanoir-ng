@@ -164,7 +164,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                 }
             },
             {
-                headerName: "Subjects", field: "nbSujects", type: "number", width: '30px'
+                headerName: "Subjects", field: "nbSubjects", type: "number", width: '30px'
             },
             {
                 headerName: "Examinations", field: "nbExaminations", type: "number", width: '30px'

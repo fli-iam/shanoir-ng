@@ -195,17 +195,13 @@ public class StudyApiController implements StudyApi {
 	@Override
 	public ResponseEntity<StudyDTO> findStudyById(@PathVariable("studyId") final Long studyId, boolean withStorageVolume) {
 		Study study = studyService.findById(studyId);
-
 		if (study == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-
 		StudyDTO dto = studyMapper.studyToStudyDTO(study);
-
 		if(withStorageVolume){
 			dto.setStorageVolume(studyService.getDetailedStorageVolume(dto.getId()));
 		}
-
 		return new ResponseEntity<>(dto, HttpStatus.OK);
 
 	}
