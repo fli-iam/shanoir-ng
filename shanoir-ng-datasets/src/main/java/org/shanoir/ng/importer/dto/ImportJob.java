@@ -33,13 +33,11 @@ public class ImportJob implements Serializable {
 	
 	private static final long serialVersionUID = 8804929608059674037L;
 
-	private boolean fromDicomZip;
-
-	private Map<String, String> properties = new HashMap<>();
-	
     private long timestamp;
 
-	private boolean fromShanoirUploader;
+    private boolean fromDicomZip;
+
+    private boolean fromShanoirUploader;
 
     private boolean fromPacs;
 
@@ -214,14 +212,6 @@ public class ImportJob implements Serializable {
 
     public void setShanoirEvent(ShanoirEvent shanoirEvent) {
         this.shanoirEvent = shanoirEvent;
-    }
-
-    public Map<String, String> getProperties() {
-        return properties;
-    }
-
-    public void setProperties(Map<String, String> properties) {
-        this.properties = properties;
     }
 
     public Serie getFirstSerie() {

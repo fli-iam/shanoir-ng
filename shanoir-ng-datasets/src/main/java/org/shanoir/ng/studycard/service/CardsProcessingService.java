@@ -66,13 +66,7 @@ public class CardsProcessingService {
     private DatasetAcquisitionService datasetAcquisitionService;
 
 	@Autowired
-    private RabbitTemplate rabbitTemplate;
-
-	@Autowired
     private WADODownloaderService downloader;
-
-	@Autowired
-	private ObjectMapper objectMapper;
 
 	@Autowired
 	private SubjectStudyService subjectStudyService;

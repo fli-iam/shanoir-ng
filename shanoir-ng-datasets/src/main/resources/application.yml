@@ -75,9 +75,6 @@ spring:
         jwt:
           issuer-uri: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth/realms/shanoir-ng
 
-shanoir:
-  database: other
-
 springdoc:
   api-docs:
     path: '/api-docs'
