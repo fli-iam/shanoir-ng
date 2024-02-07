@@ -20,9 +20,10 @@ import java.util.Optional;
 import org.shanoir.ng.coil.model.Coil;
 import org.shanoir.ng.coil.repository.CoilRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import jakarta.transaction.Transactional;
 
 /**
  * center service implementation.
@@ -54,8 +55,11 @@ public class CoilServiceImpl implements CoilService {
 		return repository.findById(id);
 	}
 	
+	@Transactional
 	public List<Coil> findAll() {
-		return Utils.toList(repository.findAll());
+		List<Coil> coils = repository.findAll();
+		coils.stream().forEach(s -> s.getCenter().getStudyCenterList().size());
+		return coils;
 	}
 	
 	public Coil create(final Coil entity) {
