@@ -15,6 +15,7 @@
 package org.shanoir.ng.study.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.shanoir.ng.study.model.Study;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -23,6 +24,9 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface StudyRepository extends CrudRepository<Study, Long> {
+	
+	@EntityGraph("Study.All")
+	Optional<Study> findById(Long id);
 	
 	/**
 	 * Get all studies

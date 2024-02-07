@@ -18,6 +18,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.groupofsubjects.ExperimentalGroupOfSubjects;
 import org.shanoir.ng.profile.model.Profile;
@@ -49,6 +51,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.PostLoad;
@@ -63,6 +67,11 @@ import jakarta.validation.constraints.NotNull;
  *
  */
 @Entity
+@NamedEntityGraph(name = "Study.All", attributeNodes = { @NamedAttributeNode("studyUserList"),
+		@NamedAttributeNode("studyCenterList"), @NamedAttributeNode("subjectStudyList"),
+		@NamedAttributeNode("experimentalGroupsOfSubjects"), @NamedAttributeNode("studyTags"),
+		@NamedAttributeNode("protocolFilePaths"), @NamedAttributeNode("dataUserAgreementPaths"),
+		@NamedAttributeNode("timepoints"), @NamedAttributeNode("tags"), @NamedAttributeNode("profile") })
 @JsonPropertyOrder({ "_links", "id", "name" })
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 @SqlResultSetMapping(name = "studyNameResult", classes = { @ConstructorResult(targetClass = IdName.class, columns = {
@@ -104,13 +113,14 @@ public class Study extends HalEntity {
 
 	/** List of protocol files directly attached to the study. */
 	@ElementCollection(fetch = FetchType.EAGER)
+	@Fetch(FetchMode.JOIN)
 	@CollectionTable(name = "protocol_file_path")
 	@Column(name = "path")
-	@JoinColumn(name = "study_id") // use join, instead of second select
 	private List<String> protocolFilePaths;
 	
 	/** List of data user agreement form directly attached to the study. */
-	@ElementCollection
+	@ElementCollection(fetch = FetchType.EAGER)
+	@Fetch(FetchMode.JOIN)
 	@CollectionTable(name = "data_user_agreement_file")
 	@Column(name = "path")
 	private List<String> dataUserAgreementPaths;
@@ -126,7 +136,8 @@ public class Study extends HalEntity {
 	@NotNull
 	private Integer studyStatus;
 
-	@ManyToOne()
+	@ManyToOne(fetch = FetchType.EAGER)
+	@Fetch(FetchMode.JOIN)
 	@JoinColumn(name = "profile_id")
 	private Profile profile;
 
