@@ -15,6 +15,7 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.shanoir.ng.dataset.dto.InputDTO;
 import org.shanoir.ng.dataset.modality.EegDataset;
