@@ -482,9 +482,19 @@ public class StudyServiceImpl implements StudyService {
             Long count = (Long) row[1];
             studyIdExaminationsCountMap.put(studyId, count);
         }
-        studies.stream().forEach(s -> { 
-			s.setNbSubjects(studyIdSubjectsCountMap.get(s.getId()).intValue());
-			s.setNbExaminations(studyIdExaminationsCountMap.get(s.getId()).intValue());
+        studies.stream().forEach(s -> {
+        	Long nbSubjects = studyIdSubjectsCountMap.get(s.getId());
+        	if (nbSubjects != null) {
+        		s.setNbSubjects(nbSubjects.intValue());
+        	} else {
+        		s.setNbSubjects(0);
+        	}
+        	Long nbExaminations = studyIdExaminationsCountMap.get(s.getId());
+        	if (nbExaminations != null) {
+        		s.setNbExaminations(nbExaminations.intValue());
+        	} else {
+        		s.setNbExaminations(0);
+        	}
 		});
 	}
 
