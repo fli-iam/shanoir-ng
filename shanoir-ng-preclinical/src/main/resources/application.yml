@@ -26,7 +26,6 @@ spring:
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
-    database-platform: org.hibernate.dialect.MySQL57Dialect
     defer-datasource-initialization: true
     generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
     hibernate:
@@ -49,6 +48,9 @@ spring:
     init:
       data-locations: classpath:/scripts/import.sql
       mode: never
+  threads:
+    virtual:
+      enabled: true
 ##### Others #####
   jackson:
     mapper:
@@ -131,6 +133,9 @@ spring:
   sql:
     init:
       mode: always
+  threads:
+    virtual:
+      enabled: true
 # logging configuration
 logging:
   file:
