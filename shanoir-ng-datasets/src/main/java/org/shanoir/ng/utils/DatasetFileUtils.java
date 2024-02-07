@@ -1,6 +1,8 @@
 package org.shanoir.ng.utils;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -9,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -90,6 +93,7 @@ public class DatasetFileUtils {
 		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
 			URL url =  iterator.next();
 			File srcFile = new File(UriUtils.decode(url.getPath(), StandardCharsets.UTF_8.name()));
+			String srcPath = srcFile.getAbsolutePath();
 
 			String fileName = getFileName(keepName, srcFile, subjectName, dataset, index);
 
@@ -100,16 +104,29 @@ public class DatasetFileUtils {
 			if (datasetFilePath != null) {
 				fileName = datasetFilePath + File.separator + fileName;
 			}
+			boolean compressed = srcPath.endsWith(".nii");
+
+			// Gzip file if necessary in order to always return a .nii.gz file
+			if (compressed) {
+				srcPath = srcPath + ".gz";
+				fileName = fileName + ".gz";
+				compressGzipFile(srcFile.getAbsolutePath(), srcPath);
+			}
 
 			files.add(fileName);
 
-			FileSystemResource fileSystemResource = new FileSystemResource(srcFile.getAbsolutePath());
+			FileSystemResource fileSystemResource = new FileSystemResource(srcPath);
 			ZipEntry zipEntry = new ZipEntry(fileName);
 			zipEntry.setSize(fileSystemResource.contentLength());
 			zipEntry.setTime(System.currentTimeMillis());
 			zipOutputStream.putNextEntry(zipEntry);
 			StreamUtils.copy(fileSystemResource.getInputStream(), zipOutputStream);
 			zipOutputStream.closeEntry();
+
+			if (compressed) {
+				// If we gzipped the file, delete the newly created file directly after
+				FileUtils.deleteQuietly(new File(srcPath));
+			}
 
 			index++;
 		}
@@ -166,5 +183,17 @@ public class DatasetFileUtils {
 			name.append(FilenameUtils.getExtension(srcFile.getName()));
 		}
 		return name.toString();
+	}
+
+	private static void compressGzipFile(String source, String gzipDestination) throws IOException {
+		try (FileInputStream fis = new FileInputStream(source);
+		FileOutputStream fos = new FileOutputStream(gzipDestination);
+		GZIPOutputStream gzipOS = new GZIPOutputStream(fos)) {
+			byte[] buffer = new byte[1024];
+			int len;
+			while ((len = fis.read(buffer)) > 0) {
+				gzipOS.write(buffer, 0, len);
+			}
+		}
 	}
 }
