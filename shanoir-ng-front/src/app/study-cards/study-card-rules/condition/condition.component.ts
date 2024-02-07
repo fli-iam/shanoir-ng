@@ -241,22 +241,25 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
     }
 
     private resetValues() {
+        this.clearValues()
+        if (this.condition.operation != 'PRESENT' && this.condition.operation != 'ABSENT') {
+            setTimeout(() => { // otherwise bugs
+                this.onTextValueAdd();
+            })
+        }
+    }
+
+    private clearValues() {
         this.condition.values = [];
         (this.form.get('values') as FormArray).clear();
-        setTimeout(() => { // otherwise bugs
-            this.onTextValueAdd();
-        })
     }
 
     onFieldChange(field: string) {
-        if (!(this.condition.scope == 'StudyCardDICOMConditionOnDatasets' && this.condition.dicomTag.code+"" == field)) {
-            this.computeConditionOptions();
-            if (this.shanoirFieldOptions?.length > 0) this.condition.operation = 'EQUALS';
-            else this.condition.operation = null;
-            this.resetValues();
-            this.valueTouched = false;
-            this.conditionChange.emit(this.condition);
-        }
+        this.computeConditionOptions();
+        this.filterOperations();
+        this.resetValues();
+        this.valueTouched = false;
+        this.conditionChange.emit(this.condition);
     }
 
     onDicomFieldChange(field: DicomTag) {
@@ -271,44 +274,81 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
         }
     }
 
+    /**
+     * Filter the available operations
+     */
     private filterOperations() {
-        let type: TagType = this.condition?.dicomTag?.type;
-        if (['Double', 'Float', 'Integer', 'Long', 'Date'].includes(type)) {
-            this.operations.forEach(op => {
-                if (['EQUALS', 'SMALLER_THAN', 'BIGGER_THAN', 'NOT_EQUALS','PRESENT', 'ABSENT'].includes(op.value)) {
-                    op.disabled = false;
+        if (this.condition.scope == 'StudyCardDICOMConditionOnDatasets') { // DICOM fields
+            if (this.condition?.dicomTag) {
+                let type: TagType = this.condition.dicomTag.type;
+                if (['Double', 'Float', 'Integer', 'Long', 'Date'].includes(type)) {
+                    this.operations.forEach(op => {
+                        if (['EQUALS', 'SMALLER_THAN', 'BIGGER_THAN', 'NOT_EQUALS','PRESENT', 'ABSENT'].includes(op.value)) {
+                            op.disabled = false;
+                        } else {
+                            op.disabled = true;
+                        }
+                       ;
+                    });
+                } else if (type == 'String') {
+                    this.operations.forEach(op => {
+                        if (['STARTS_WITH', 'EQUALS', 'ENDS_WITH', 'CONTAINS', 'DOES_NOT_CONTAIN', 'DOES_NOT_START_WITH', 'NOT_EQUALS', 'DOES_NOT_END_WITH', 'PRESENT', 'ABSENT'].includes(op.value)) {
+                            op.disabled = false;
+                        } else {
+                            op.disabled = true;
+                        }
+                       ;
+                    });
+                } else if (['FloatArray', 'IntArray'].includes(type)) {
+                    this.operations.forEach(op => {
+                        if (['EQUALS', 'NOT_EQUALS', 'PRESENT', 'ABSENT'].includes(op.value)) {
+                            op.disabled = false;
+                        } else {
+                            op.disabled = true;
+                        }
+                       ;
+                    });
                 } else {
-                    op.disabled = true;
+                    this.operations.forEach(op => {
+                        if (['PRESENT', 'ABSENT'].includes(op.value)) {
+                            op.disabled = false;
+                        } else {
+                            op.disabled = true;
+                        }
+                    });
                 }
-               ;
-            });
-        } else if (type == 'String') {
-            this.operations.forEach(op => {
-                if (['STARTS_WITH', 'EQUALS', 'ENDS_WITH', 'CONTAINS', 'DOES_NOT_CONTAIN', 'DOES_NOT_START_WITH', 'NOT_EQUALS', 'DOES_NOT_END_WITH', 'PRESENT', 'ABSENT'].includes(op.value)) {
-                    op.disabled = false;
-                } else {
-                    op.disabled = true;
-                }
-               ;
-            });
-        } else if (['FloatArray', 'IntArray'].includes(type)) {
-            this.operations.forEach(op => {
-                if (['EQUALS', 'NOT_EQUALS', 'PRESENT', 'ABSENT'].includes(op.value)) {
-                    op.disabled = false;
-                } else {
-                    op.disabled = true;
-                }
-               ;
-            });
-        } else {
-            this.operations.forEach(op => {
-                if (['PRESENT', 'ABSENT'].includes(op.value)) {
-                    op.disabled = false;
-                } else {
-                    op.disabled = true;
-                }
-            });
+            } else {
+                this.operations.forEach(op => op.disabled = false);
+            }
+        } else { // Shanoir fields
+            if (this.shanoirFieldOptions?.length > 0) { // with option list such as coils
+                this.operations.forEach(op => {
+                    if (['EQUALS', 'NOT_EQUALS'].includes(op.value)) {
+                        op.disabled = false;
+                    } else {
+                        op.disabled = true;
+                    }
+                   ;
+                });
+            } else { // string fields
+                this.operations.forEach(op => {
+                    if (['STARTS_WITH', 'EQUALS', 'ENDS_WITH', 'CONTAINS', 'DOES_NOT_CONTAIN', 'DOES_NOT_START_WITH', 'NOT_EQUALS', 'DOES_NOT_END_WITH'].includes(op.value)) {
+                        op.disabled = false;
+                    } else {
+                        op.disabled = true;
+                    }
+                   ;
+                });
+            }
         }
+        // unselect disabled option
+        if (this.condition.operation) {
+            let selectOperation: Option<Operation> = this.operations.find(op => op.value == this.condition.operation);
+            if (selectOperation?.disabled) {
+                this.condition.operation = null;
+            } 
+        }
+        if (this.shanoirFieldOptions?.length > 0) this.condition.operation = 'EQUALS';
     }
 
     private previousField: DicomTag;
@@ -318,7 +358,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
             this.condition.scope = value;
             this.condition.shanoirField = null;
             this.condition.dicomTag = null;
-            this.condition.operation = null;
+            this.filterOperations();
             this.resetValues();
             if (value.endsWith('OnDataset') || value.endsWith('OnDatasets')) {
                 this.fieldOptions.forEach(opt => opt.disabled = opt.section != 'Dataset');
@@ -332,8 +372,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
 
     onOperationChange() {
         if (this.condition.operation == 'PRESENT' || this.condition.operation == 'ABSENT') {
-            this.condition.values = [];
-            (this.form.get('values') as FormArray).clear();
+            this.clearValues();
         } else if (this.condition.values.length == 0) {
             this.resetValues();
         }
@@ -365,6 +404,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
         } else if (this.cardinalityType == 'AT_LEAST' && this.condition.cardinality <= 1) {
             this.condition.cardinality = 1;
         }
+        this.onConditionChange(); 
     }
 
     get tagError(): boolean {

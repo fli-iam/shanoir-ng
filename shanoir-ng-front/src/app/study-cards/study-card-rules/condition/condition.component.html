@@ -41,7 +41,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <select-box
         class="cardinality-type auto-width"
         [(ngModel)]="cardinalityType"
-        (ngModelChange)="onCardinalityTypeChange()"
+        (userChange)="onCardinalityTypeChange()"
         [clear]="false"
         placeholder="select cardinality"
         [search]="false"
@@ -58,7 +58,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <select-box 
         class="type auto-width"
         [ngModel]="condition.scope" 
-        (ngModelChange)="onConditionTypeChange($event)" 
+        (userChange)="onConditionTypeChange($event)" 
         [options]="conditionTypeOptions"
         placeholder="select conditition type" 
         [clear]="false">
@@ -123,7 +123,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 *ngFor="let value of condition.values; let i  = index"
                 class="value auto-width one-value" 
                 [(ngModel)]="condition.values[i]" 
-                (ngModelChange)="onConditionValueChange($event, i)" 
+                (userChange)="onConditionValueChange($event, i)" 
                 (selectOption)="onConditionOptionSelect($event)" 
                 (onUserClear)="onConditionOptionUnselect($event)" 
                 [options]="shanoirFieldOptions" 
