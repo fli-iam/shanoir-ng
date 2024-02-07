@@ -14,7 +14,10 @@
 
 package org.shanoir.ng.studyexamination;
 
+import java.util.List;
+
 import org.shanoir.ng.subject.model.Subject;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
@@ -30,5 +33,8 @@ public interface StudyExaminationRepository extends CrudRepository<StudyExaminat
 	public void deleteBySubject(Subject subject);
 	
     int countByStudyId(@Param("studyId") Long studyId);
+
+    @Query("SELECT s.examinationId, COUNT(s) FROM StudyExamination s GROUP BY s.examinationId")
+    List<Object[]> countByStudyIdGroupBy();
 
 }

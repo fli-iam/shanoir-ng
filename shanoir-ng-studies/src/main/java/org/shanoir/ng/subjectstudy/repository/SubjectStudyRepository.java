@@ -19,11 +19,12 @@ import java.util.List;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 /**
- * Repository for Subject.
+ * Repository for SubjectStudy.
  *
  * @author msimon
  */
@@ -36,5 +37,8 @@ public interface SubjectStudyRepository extends CrudRepository<SubjectStudy, Lon
 	long countBySubject(Subject subject);
 	
     int countByStudyId(@Param("studyId") Long studyId);
+    
+    @Query("SELECT s.study.id, COUNT(s) FROM SubjectStudy s GROUP BY s.study.id")
+    List<Object[]> countByStudyIdGroupBy();
 
 }

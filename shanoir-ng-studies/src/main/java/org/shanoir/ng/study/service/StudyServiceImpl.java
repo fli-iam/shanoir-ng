@@ -457,9 +457,35 @@ public class StudyServiceImpl implements StudyService {
 				.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(
 					KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId(), true);
 		}
-		studies.stream().forEach(s -> setNumbersOfSubjectAndExaminations(s));
+		setNumberOfSubjectsAndExaminations(studies);
 		// Utils.copyList is used to prevent a bug with @PostFilter
 		return Utils.copyList(studies);
+	}
+
+	/**
+	 * This method optimizes the queries to the database, only two selects to get all counts.
+	 * Instead of x00+ selects for all studies in Shanoir. Use HashMap to avoid N+N iteration.
+	 * @param studies
+	 */
+	private void setNumberOfSubjectsAndExaminations(List<Study> studies) {
+		List<Object[]> subjectsCount = subjectStudyRepository.countByStudyIdGroupBy();
+		HashMap<Long, Long> studyIdSubjectsCountMap = new HashMap<>();
+        for (Object[] row : subjectsCount) {
+            Long studyId = (Long) row[0];
+            Long count = (Long) row[1];
+            studyIdSubjectsCountMap.put(studyId, count);
+        }
+		List<Object[]> examinationsCount = studyExaminationRepository.countByStudyIdGroupBy();
+		HashMap<Long, Long> studyIdExaminationsCountMap = new HashMap<>();
+        for (Object[] row : examinationsCount) {
+            Long studyId = (Long) row[0];
+            Long count = (Long) row[1];
+            studyIdExaminationsCountMap.put(studyId, count);
+        }
+        studies.stream().forEach(s -> { 
+			s.setNbSubjects(studyIdSubjectsCountMap.get(s.getId()).intValue());
+			s.setNbExaminations(studyIdExaminationsCountMap.get(s.getId()).intValue());
+		});
 	}
 
 	@Transactional
@@ -713,15 +739,8 @@ public class StudyServiceImpl implements StudyService {
 	@Override
 	public List<Study> findPublicStudies() {
 		List<Study> studies = this.studyRepository.findByVisibleByDefaultTrue();
-		studies.stream().forEach(s -> setNumbersOfSubjectAndExaminations(s));
+		setNumberOfSubjectsAndExaminations(studies);
 		return studies;
-	}
-	
-	private void setNumbersOfSubjectAndExaminations(Study study) {
-		int numberOfSubjects = subjectStudyRepository.countByStudyId(study.getId());
-		study.setNbSubjects(numberOfSubjects);
-		int numberOfExaminations = studyExaminationRepository.countByStudyId(study.getId());
-		study.setNbExaminations(numberOfExaminations);
 	}
 
 	@Override
