@@ -360,7 +360,7 @@ export class CenterStudyDTO {
     tags: Tag[];
 }
 
-export class PublicStudyData {
+export class StudyLight {
   downloadableByDefault: boolean;
   challenge: boolean;
   endDate: Date;

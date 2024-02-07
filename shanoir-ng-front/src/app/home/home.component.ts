@@ -21,7 +21,7 @@ import { DataUserAgreement } from '../dua/shared/dua.model';
 import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
 import { KeycloakService } from '../shared/keycloak/keycloak.service';
 import { ImagesUrlUtil } from '../shared/utils/images-url.util';
-import { PublicStudyData } from '../studies/shared/study.dto';
+import { StudyLight } from '../studies/shared/study.dto';
 import { StudyService } from '../studies/shared/study.service';
 import { AccessRequest } from '../users/access-request/access-request.model';
 import { User } from '../users/shared/user.model';
@@ -38,9 +38,9 @@ export class HomeComponent {
     shanoirBigLogoUrl: string = ImagesUrlUtil.SHANOIR_BLACK_LOGO_PATH;
 
     challengeDua: DataUserAgreement;
-    challengeStudies: PublicStudyData[];
-    studies: PublicStudyData[];
-    allStudies: PublicStudyData[];
+    challengeStudies: StudyLight[];
+    studies: StudyLight[];
+    allStudies: StudyLight[];
     accountRequests: User[];
     jobs: Task[];
     solrInput: string;

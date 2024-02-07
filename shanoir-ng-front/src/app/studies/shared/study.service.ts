@@ -29,7 +29,7 @@ import { StudyUserRight } from './study-user-right.enum';
 import { StudyUser } from "./study-user.model";
 import {
     CenterStudyDTO,
-    PublicStudyData,
+    StudyLight,
     StudyDTO,
     StudyDTOService,
     StudyStorageVolumeDTO,
@@ -59,9 +59,9 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             .then(this.mapEntity);
     }
 
-    getStudiesLight(): Promise<PublicStudyData[]> {
-      return this.http.get<PublicStudyData[]>(AppUtils.BACKEND_API_STUDY_STUDIES_LIGHT_URL)
-        .toPromise().then((typeResult: PublicStudyData[]) => {
+    getStudiesLight(): Promise<StudyLight[]> {
+      return this.http.get<StudyLight[]>(AppUtils.BACKEND_API_STUDY_STUDIES_LIGHT_URL)
+        .toPromise().then((typeResult: StudyLight[]) => {
           return typeResult;
         });
     }
@@ -82,9 +82,9 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         .toPromise();
     }
 
-    getPublicStudiesData(): Promise<PublicStudyData[]> {
-      return this.http.get<PublicStudyData[]>(AppUtils.BACKEND_API_STUDY_PUBLIC_STUDIES_DATA_URL)
-        .toPromise().then((typeResult: PublicStudyData[]) => {
+    getPublicStudiesData(): Promise<StudyLight[]> {
+      return this.http.get<StudyLight[]>(AppUtils.BACKEND_API_STUDY_PUBLIC_STUDIES_DATA_URL)
+        .toPromise().then((typeResult: StudyLight[]) => {
           return typeResult;
         });
     }
