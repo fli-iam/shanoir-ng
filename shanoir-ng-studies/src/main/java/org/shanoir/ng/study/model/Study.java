@@ -64,6 +64,7 @@ import jakarta.validation.constraints.NotNull;
  * Study.
  * 
  * @author msimon
+ * @author mkain
  *
  */
 @Entity
