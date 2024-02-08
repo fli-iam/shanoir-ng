@@ -44,7 +44,15 @@ jobs:
 ##          SHANOIR_ADMIN_EMAIL: nobody@inria.fr
 ##          SHANOIR_KEYCLOAK_USER: admin
 ##          SHANOIR_KEYCLOAK_PASSWORD: '&a1A&a1A'
-        
+ 
+      # Install the cosign tool except on PR
+      # https://github.com/sigstore/cosign-installer
+      - name: Install cosign
+        #if: github.event_name != 'pull_request'
+        uses: sigstore/cosign-installer@6e04d228eb30da1757ee4e1dd75a0ec73a653e06 #v3.1.1
+        with:
+          cosign-release: 'v2.1.1'
+
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
@@ -71,7 +79,16 @@ jobs:
           done
 
       - name: Push docker images
+        if: ${{ github.event_name != 'pull_request' }}
         run: |
           for image in ${{ env.IMAGES }} ; do
             docker push --all-tags "${{ env.DOCKER_REPOSITORY }}/$image"
           done
+
+      - name: Sign docker images
+        if: ${{ github.event_name != 'pull_request' }}
+        run: |
+          set -x
+          for image in ${{ env.IMAGES }} ; do
+            digest="`docker image inspect "${{ env.DOCKER_REPOSITORY }}/$image:${{ env.TAG }}" -f "{{index .RepoDigests 0}}" | cut -d @ -f 2`"
+            cosign sign --tlog-upload=false "${{ env.DOCKER_REPOSITORY }}/$image:${{ env.TAG }}@$digest"
