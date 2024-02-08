@@ -2,9 +2,10 @@
 name: Publish Docker images
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ghcr.io/${{ github.repository }}
+  DOCKER_REPOSITORY: ghcr.io/${{ github.repository }}
   TAG: ${{ github.ref_name }}
+  IMAGES: datasets import nginx preclinical studies users
+  #IMAGES: database datasets import keycloak keycloak-database nginx nifti-conversion preclinical solr studies users
 on:
   workflow_dispatch:
 #  push:
@@ -44,57 +45,23 @@ jobs:
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ${{ env.DOCKER_REPOSITORY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-        
-      - name: USERS - Build & push Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: ./docker-compose/users
-          builder: ${{ steps.buildx.outputs.name }}
-          push: true
-          tags: ${{ env.IMAGE_NAME }}/users:latest, ${{ env.IMAGE_NAME }}/users:${{ env.TAG }}
-          
-      - name: STUDIES - Build & push Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: ./docker-compose/studies
-          builder: ${{ steps.buildx.outputs.name }}
-          push: true
-          tags: ${{ env.IMAGE_NAME }}/studies:latest, ${{ env.IMAGE_NAME }}/studies:${{ env.TAG }}
-          
-      - name: IMPORT - Build & push Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: ./docker-compose/import
-          builder: ${{ steps.buildx.outputs.name }}
-          push: true
-          tags: ${{ env.IMAGE_NAME }}/import:latest, ${{ env.IMAGE_NAME }}/import:${{ env.TAG }}
-          
-      - name: DATASETS  - Build & push Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: ./docker-compose/datasets
-          builder: ${{ steps.buildx.outputs.name }}
-          push: true
-          tags: ${{ env.IMAGE_NAME }}/datasets:latest, ${{ env.IMAGE_NAME }}/datasets:${{ env.TAG }}
 
-      - name: PRECLINICAL - Build & push Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: ./docker-compose/preclinical
-          builder: ${{ steps.buildx.outputs.name }}
-          push: true
-          tags: ${{ env.IMAGE_NAME }}/preclinical:latest, ${{ env.IMAGE_NAME }}/preclinical:${{ env.TAG }}
-          
-      - name:  NGINX - Build & push Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: ./docker-compose/nginx
-          builder: ${{ steps.buildx.outputs.name }}
-          push: true
-          tags: ${{ env.IMAGE_NAME }}/nginx:latest, ${{ env.IMAGE_NAME }}/nginx:${{ env.TAG }}
+      - name: Build docker images
+        run: |
+          for image in $IMAGES ; do
+            docker build  -t "{{ env.DOCKER_REPOSITORY }}/$image:{{ env.TAG }}" \
+                          -t "{{ env.DOCKER_REPOSITORY }}/$image:latest" \
+                          "docker-compose/$image"
+          done
+
+      - name: Push docker images
+        run: |
+          for image in $IMAGES ; do
+            docker push --all-tags "{{ env.DOCKER_REPOSITORY }}/$image:"
+          done
