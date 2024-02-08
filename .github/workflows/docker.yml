@@ -56,13 +56,13 @@ jobs:
       - name: Build docker images
         run: |
           for image in $IMAGES ; do
-            docker build  -t "{{ env.DOCKER_REPOSITORY }}/$image:{{ env.TAG }}" \
-                          -t "{{ env.DOCKER_REPOSITORY }}/$image:latest" \
+            docker build  -t "${{ env.DOCKER_REPOSITORY }}/$image:${{ env.TAG }}" \
+                          -t "${{ env.DOCKER_REPOSITORY }}/$image:latest" \
                           "docker-compose/$image"
           done
 
       - name: Push docker images
         run: |
           for image in $IMAGES ; do
-            docker push --all-tags "{{ env.DOCKER_REPOSITORY }}/$image:"
+            docker push --all-tags "${{ env.DOCKER_REPOSITORY }}/$image:"
           done
