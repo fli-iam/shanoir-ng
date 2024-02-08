@@ -16,7 +16,7 @@ on:
   
 jobs:
   push_to_registry:
-    name: Push Docker images to Container registry
+    name: Publish docker images
     runs-on: ubuntu-latest
     permissions:
       packages: write
