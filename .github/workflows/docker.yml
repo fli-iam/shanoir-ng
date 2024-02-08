@@ -28,18 +28,18 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
-      - name: Create directory /shanoir-ng-logs
-        run: sudo mkdir -m777 /var/log/shanoir-ng-logs
+##      - name: Create directory /shanoir-ng-logs
+##        run: sudo mkdir -m777 /var/log/shanoir-ng-logs
       
       - name: Maven build
         run: mvn -f ./shanoir-ng-parent/pom.xml install -DskipTests
-        env:
-          SHANOIR_URL_HOST: localhost
-          SHANOIR_URL_SCHEME: http
-          SHANOIR_PREFIX: github
-          SHANOIR_ADMIN_EMAIL: nobody@inria.fr
-          SHANOIR_KEYCLOAK_USER: admin
-          SHANOIR_KEYCLOAK_PASSWORD: '&a1A&a1A'
+##        env:
+##          SHANOIR_URL_HOST: localhost
+##          SHANOIR_URL_SCHEME: http
+##          SHANOIR_PREFIX: github
+##          SHANOIR_ADMIN_EMAIL: nobody@inria.fr
+##          SHANOIR_KEYCLOAK_USER: admin
+##          SHANOIR_KEYCLOAK_PASSWORD: '&a1A&a1A'
         
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
