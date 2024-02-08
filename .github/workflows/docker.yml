@@ -7,9 +7,9 @@ env:
   TAG: ${{ github.ref_name }}
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - '*'
+#  push:
+#    tags:
+#      - '*'
   
 jobs:
   push_to_registry:
