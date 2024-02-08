@@ -180,6 +180,5 @@ if [ ${#patterns[@]} -ne 0 ] ; then
 
 else
 	# 'normal' run
-	echo env "$@" "${extra[@]}"
 	exec env "$@" "${extra[@]}"
 fi
