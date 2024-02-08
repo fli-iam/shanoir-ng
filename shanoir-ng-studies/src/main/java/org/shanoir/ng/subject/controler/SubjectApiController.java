@@ -94,9 +94,7 @@ public class SubjectApiController implements SubjectApi {
 
 	@Override
 	public ResponseEntity<List<SubjectDTO>> findSubjects(boolean preclinical, boolean clinical) {
-
 		List<Subject> subjects = new ArrayList<>();
-
 		if(preclinical && clinical){
 			subjects = subjectService.findAll();
 		} else if (preclinical) {
@@ -104,11 +102,9 @@ public class SubjectApiController implements SubjectApi {
 		} else if (clinical) {
 			subjects = subjectService.findByPreclinical(false);
 		}
-
 		if (subjects.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-
 		return new ResponseEntity<>(subjectMapper.subjectsToSubjectDTOs(subjects), HttpStatus.OK);
 	}
 
@@ -158,7 +154,6 @@ public class SubjectApiController implements SubjectApi {
 		validate(subject, result);
 		try {
 			subjectService.update(subject);
-
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_SUBJECT_EVENT, subject.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
