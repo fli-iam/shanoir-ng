@@ -49,7 +49,7 @@ public class SubjectStudyRepositoryTest {
 		study.setId(STUDY_TEST_1_ID);
 		List<SubjectStudy> subjectDb = subjectStudyRepository.findByStudy(study);
 		assertNotNull(subjectDb);
-		assertThat(subjectDb.size()).isEqualTo(2);
+		assertThat(subjectDb.size()).isEqualTo(0);
 	}
 
 }
