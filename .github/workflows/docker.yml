@@ -77,7 +77,7 @@ jobs:
           tag = env['TAG']
           for image in IMAGES:
             repo = f"{env['DOCKER_REPOSITORY']}/{image}"
-            with tempfile.NamedTemporaryFile() as mdf:
+            with tempfile.TemporaryDirectory() as tmp:
               print(f"#\n#   Building {image}:{tag}\n#")
               subprocess.check_call(["docker", "buildx", "build",
                 "--cache-from=type=gha",
@@ -90,9 +90,9 @@ jobs:
                 "--label", "org.opencontainers.image.revision=${{ github.sha }}",
                 # FIXME: should not push the images immediately
                 "--push",
-                "--metadata-file", mdf.name,
+                "--metadata-file", f"{tmp}/mdf",
                 f"docker-compose/{image}"])
-              digest = json.load(mdf)["containerimage.digest"]
+              digest = json.load(open(f"{tmp}/mdf"))["containerimage.digest"]
 
               print(f"#\n#   Signing {image}:{tag}\n#")
               subprocess.check_call(["cosign", "sign", "--tlog-update=false", f"{repo}:{tag}@{digest}"])
