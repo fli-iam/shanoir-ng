@@ -8,6 +8,7 @@ env:
   #IMAGES: database datasets import keycloak keycloak-database nginx nifti-conversion preclinical solr studies users
 on:
   workflow_dispatch:
+  push:
 #  push:
 #    tags:
 #      - '*'
