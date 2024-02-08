@@ -34,7 +34,7 @@ public interface CenterRepository extends CrudRepository<Center, Long> {
 	@EntityGraph(attributePaths = "studyCenterList.study.name")
 	List<Center> findAll();
 	
-	@EntityGraph(attributePaths = "studyCenterList.study.name")
+	@EntityGraph(attributePaths = { "studyCenterList.study.name", "acquisitionEquipments" })
 	Optional<Center> findById(Long id);
 	
 	Center findByName(String name);

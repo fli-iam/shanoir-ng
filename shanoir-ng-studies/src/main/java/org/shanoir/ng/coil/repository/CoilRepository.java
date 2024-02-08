@@ -28,9 +28,12 @@ import org.springframework.data.repository.CrudRepository;
  */
 public interface CoilRepository extends CrudRepository<Coil, Long> {
 	
-	@EntityGraph(attributePaths = { "center.acquisitionEquipments" })
+	@EntityGraph(attributePaths = { "center.acquisitionEquipments", "manufacturerModel.manufacturer" })
 	List<Coil> findAll();
-
+	
+	@EntityGraph(attributePaths = { "center.studyCenterList", "center.acquisitionEquipments", "manufacturerModel.manufacturer" })
+	Optional<Coil> findById(Long id);
+	
 	/**
 	 * Find coil by name.
 	 *

@@ -56,7 +56,6 @@ public class CoilApiController implements CoilApi {
 	public ResponseEntity<Void> deleteCoil(
 			@Parameter(name = "id of the coil", required = true) @PathVariable("coilId") Long coilId)
 			throws RestServiceException {
-
 		try {
 			coilService.deleteById(coilId);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_COIL_EVENT, coilId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));

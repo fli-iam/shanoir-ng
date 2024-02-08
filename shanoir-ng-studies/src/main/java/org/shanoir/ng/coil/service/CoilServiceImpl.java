@@ -58,6 +58,7 @@ public class CoilServiceImpl implements CoilService {
 	@Transactional
 	public List<Coil> findAll() {
 		List<Coil> coils = repository.findAll();
+		// load study center list from database, as findAll does not allow multiple bags in entity graph
 		coils.stream().forEach(s -> s.getCenter().getStudyCenterList().size());
 		return coils;
 	}
