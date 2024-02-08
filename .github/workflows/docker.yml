@@ -3,6 +3,7 @@ name: Publish Docker images
 
 env:
   DOCKER_REPOSITORY: ghcr.io/${{ github.repository }}
+  GIT_REPO_URL: https://github.com/${{ github.repository }}
   TAG: ${{ github.ref_name }}
   IMAGES: database
   #IMAGES: datasets import nginx preclinical studies users
@@ -57,9 +58,16 @@ jobs:
       - name: Build docker images
         run: |
           for image in ${{ env.IMAGES }} ; do
-            docker build  -t "${{ env.DOCKER_REPOSITORY }}/$image:${{ env.TAG }}" \
-                          -t "${{ env.DOCKER_REPOSITORY }}/$image:latest" \
-                          "docker-compose/$image"
+            docker buildx build \
+                --cache-from=type=gha \
+                --cache-to=type=gha,mode=max \
+                --tag "${{ env.DOCKER_REPOSITORY }}/$image:${{ env.TAG }}" \
+                --tag "${{ env.DOCKER_REPOSITORY }}/$image:latest" \
+                --label "org.opencontainers.image.url=${{ env.GIT_REPO_URL }}" \
+                --label "org.opencontainers.image.source=${{ env.GIT_REPO_URL }}" \
+                --label "org.opencontainers.image.version=${{ env.TAG }}" \
+                --label "org.opencontainers.image.revision={{ github.sha }}" \
+                "docker-compose/$image"
           done
 
       - name: Push docker images
