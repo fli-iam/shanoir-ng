@@ -4,7 +4,8 @@ name: Publish Docker images
 env:
   DOCKER_REPOSITORY: ghcr.io/${{ github.repository }}
   TAG: ${{ github.ref_name }}
-  IMAGES: datasets import nginx preclinical studies users
+  IMAGES: database
+  #IMAGES: datasets import nginx preclinical studies users
   #IMAGES: database datasets import keycloak keycloak-database nginx nifti-conversion preclinical solr studies users
 on:
   workflow_dispatch:
