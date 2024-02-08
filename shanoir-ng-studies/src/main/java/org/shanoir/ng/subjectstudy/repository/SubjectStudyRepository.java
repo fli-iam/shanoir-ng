@@ -19,6 +19,7 @@ import java.util.List;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -30,6 +31,7 @@ import org.springframework.data.repository.query.Param;
  */
 public interface SubjectStudyRepository extends CrudRepository<SubjectStudy, Long> {
 
+	@EntityGraph(attributePaths = { "subjectStudyTags.tag.name", "subject" })
 	List<SubjectStudy> findByStudy(Study study);
 
 	SubjectStudy findByStudyIdAndSubjectId(Long studyId, Long subjectId);
