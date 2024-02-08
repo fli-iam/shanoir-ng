@@ -5,12 +5,10 @@ env:
   DOCKER_REPOSITORY: ghcr.io/${{ github.repository }}
   GIT_REPO_URL: https://github.com/${{ github.repository }}
   TAG: ${{ github.ref_name }}
-  IMAGES: database
-  #IMAGES: datasets import nginx preclinical studies users
-  #IMAGES: database datasets import keycloak keycloak-database nginx nifti-conversion preclinical solr studies users
 on:
   workflow_dispatch:
   push:
+#TODO: disable on pull-request
 #  push:
 #    tags:
 #      - '*'
@@ -63,32 +61,36 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
-      - name: Build docker images
+      - name: Build, push & sign docker images
+        shell: python
         run: |
-          for image in ${{ env.IMAGES }} ; do
-            docker buildx build \
-                --cache-from=type=gha \
-                --cache-to=type=gha,mode=max \
-                --tag "${{ env.DOCKER_REPOSITORY }}/$image:${{ env.TAG }}" \
-                --tag "${{ env.DOCKER_REPOSITORY }}/$image:latest" \
-                --label "org.opencontainers.image.url=${{ env.GIT_REPO_URL }}" \
-                --label "org.opencontainers.image.source=${{ env.GIT_REPO_URL }}" \
-                --label "org.opencontainers.image.version=${{ env.TAG }}" \
-                --label "org.opencontainers.image.revision={{ github.sha }}" \
-                "docker-compose/$image"
-          done
+          import os
+          import subprocess
+          import tempfile
 
-      - name: Push docker images
-        if: ${{ github.event_name != 'pull_request' }}
-        run: |
-          for image in ${{ env.IMAGES }} ; do
-            docker push --all-tags "${{ env.DOCKER_REPOSITORY }}/$image"
-          done
+          IMAGES = ["database"]
+          #IMAGES = "database datasets import keycloak keycloak-database nginx nifti-conversion preclinical solr studies users".split()
+          
+          env = os.environ
+          tag = env['TAG']
+          for image in IMAGES:
+            repo = f"{env['DOCKER_REPOSITORY']}/{image}"
+            with tempfile.NamedTemporaryFile() as mdf:
+              print(f"#\n#\n#   Building image {repo}:{tag}\n#\n#")
+              subprocess.check_call(["docker", "buildx", "build",
+                "--cache-from=type=gha",
+                "--cache-to=type=gha,mode=max",
+                "--tag", f"{ repo }:{ env['TAG'] }",
+                "--tag", f"{ repo }:latest",
+                "--label", f"org.opencontainers.image.url={ env['GIT_REPO_URL'] }",
+                "--label", f"org.opencontainers.image.source={ env['GIT_REPO_URL'] }",
+                "--label", f"org.opencontainers.image.version={ tag }",
+                "--label", "org.opencontainers.image.revision=${{ github.sha }}",
+                # FIXME: should not push the images immediately
+                "--push",
+                "--metadata-file", mdf.name,
+                f"docker-compose/{image}"])
+              digest = json.load(mdf)["containerimage.digest"]
 
-      - name: Sign docker images
-        if: ${{ github.event_name != 'pull_request' }}
-        run: |
-          set -x
-          for image in ${{ env.IMAGES }} ; do
-            digest="`docker image inspect "${{ env.DOCKER_REPOSITORY }}/$image:${{ env.TAG }}" -f "{{index .RepoDigests 0}}" | cut -d @ -f 2`"
-            cosign sign --tlog-upload=false "${{ env.DOCKER_REPOSITORY }}/$image:${{ env.TAG }}@$digest"
+              print(f"#\n#\n#   Signing image {repo}:{tag}\n#\n#")
+              subprocess.check_call(["cosign", "sign", "--tlog-update=false", f"{repo}:{tag}@{digest}"])
