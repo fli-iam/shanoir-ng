@@ -18,6 +18,7 @@ import java.util.List;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 import org.shanoir.ng.acquisitionequipment.dto.mapper.AcquisitionEquipmentMapper;
 import org.shanoir.ng.center.dto.CenterDTO;
 import org.shanoir.ng.center.model.Center;
@@ -49,7 +50,10 @@ public interface CenterMapper {
 	 *            center to map.
 	 * @return center DTO.
 	 */
-	@Mapping(target = "compatible", ignore = true) 
+	@Mappings({
+			@Mapping(target = "acquisitionEquipments", ignore = true),
+			@Mapping(target = "compatible", ignore = true)
+	})
 	CenterDTO centerToCenterDTO(Center center);
 
 	/**
