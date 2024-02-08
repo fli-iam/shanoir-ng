@@ -42,8 +42,9 @@ export KC_SPI_THEME_WELCOME_THEME="shanoir-theme"
 # - since the 'nginx' container does not expose the master realm to the
 #   outside, disabling strict checking allows us to reach the admin console
 #   at http://localhost:8080/auth/admin/
-export KC_HOSTNAME_STRICT="${KC_HOSTNAME_STRICT:false}"
-export KC_HOSTNAME_STRICT_HTTPS="${KC_HOSTNAME_STRICT_HTTPS:false}"
+export KC_HOSTNAME_STRICT=false
+export KC_HOSTNAME_STRICT_BACKCHANNEL=false
+
 
 export KC_DB_URL=jdbc:mysql://"${DB_ADDR:-${SHANOIR_PREFIX}keycloak-database}":"${DB_PORT:-3306}"/"${DB_DATABASE:-keycloak}"
 export KC_DB_USERNAME="${DB_USER:-keycloak}"
@@ -59,7 +60,7 @@ extra=("-Dms.users.url=http://${SHANOIR_PREFIX}users:9901"
 case "$SHANOIR_MIGRATION" in
 auto|dev)
 	# create the shanoir-ng realm if it does not exist yet
-	extra+=("-Dkeycloak.import=/tmp/import/shanoir-ng-realm.json"
+	extra+=("-Dkeycloak.import=/tmp/import/"
 		"-Dkeycloak.migration.strategy=IGNORE_EXISTING")
 	;;
 init)
@@ -179,5 +180,6 @@ if [ ${#patterns[@]} -ne 0 ] ; then
 
 else
 	# 'normal' run
+	echo env "$@" "${extra[@]}"
 	exec env "$@" "${extra[@]}"
 fi
