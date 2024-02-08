@@ -72,7 +72,8 @@ import jakarta.validation.constraints.NotNull;
 		@NamedAttributeNode("studyCenterList"), @NamedAttributeNode("subjectStudyList"),
 		@NamedAttributeNode("experimentalGroupsOfSubjects"), @NamedAttributeNode("studyTags"),
 		@NamedAttributeNode("protocolFilePaths"), @NamedAttributeNode("dataUserAgreementPaths"),
-		@NamedAttributeNode("timepoints"), @NamedAttributeNode("tags"), @NamedAttributeNode("profile") })
+		@NamedAttributeNode("timepoints"), @NamedAttributeNode("tags"), @NamedAttributeNode("profile"),
+		@NamedAttributeNode("examinations") })
 @JsonPropertyOrder({ "_links", "id", "name" })
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 @SqlResultSetMapping(name = "studyNameResult", classes = { @ConstructorResult(targetClass = IdName.class, columns = {
