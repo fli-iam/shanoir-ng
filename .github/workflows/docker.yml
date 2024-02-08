@@ -67,6 +67,7 @@ jobs:
         run: |
           import json
           import os
+          import sys
           import subprocess
           import tempfile
 
@@ -78,7 +79,7 @@ jobs:
           for image in IMAGES:
             repo = f"{env['DOCKER_REPOSITORY']}/{image}"
             with tempfile.TemporaryDirectory() as tmp:
-              print(f"#\n#   Building {image}:{tag}\n#")
+              sys.stderr.write(f"#\n#   Building {image}:{tag}\n#\n")
               subprocess.check_call(["docker", "buildx", "build",
                 "--cache-from=type=gha",
                 "--cache-to=type=gha,mode=max",
@@ -94,5 +95,5 @@ jobs:
                 f"docker-compose/{image}"])
               digest = json.load(open(f"{tmp}/mdf"))["containerimage.digest"]
 
-              print(f"#\n#   Signing {image}:{tag}\n#")
-              subprocess.check_call(["cosign", "sign", "--tlog-update=false", f"{repo}:{tag}@{digest}"])
+              sys.stderr.write(f"#\n#   Signing {image}:{tag}\n#\n")
+              subprocess.check_call(["cosign", "sign", "--tlog-upload=false", f"{repo}:{tag}@{digest}"])
