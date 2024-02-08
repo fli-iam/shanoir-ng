@@ -18,6 +18,8 @@ import java.util.List;
 
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
@@ -34,6 +36,7 @@ import org.springframework.data.domain.Page;
 @DecoratedWith(SubjectDecorator.class)
 public interface SubjectMapper {
 
+	@Mappings({ @Mapping(target = "subjectStudyList", ignore = true) })
 	SubjectDTO subjectToSubjectDTO(Subject subject);
 
 	List<SubjectDTO> subjectsToSubjectDTOs(List<Subject> subjects);

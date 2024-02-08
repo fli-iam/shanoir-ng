@@ -357,4 +357,5 @@ public class SubjectServiceImpl implements SubjectService {
     public boolean existsSubjectWithName(String name) {
         return this.subjectRepository.existsByName(name);
     }
+
 }
