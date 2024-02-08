@@ -214,8 +214,8 @@ spring:
   datasource:
     url: jdbc:h2:mem:SHANOIR_NG_DATASET;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;DATABASE_TO_UPPER=false;NON_KEYWORDS=VALUE
     username: sa
-    password: 
-    driver-class-name: org.h2.Driver
+    password:
+    driverClassName: org.h2.Driver
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     defer-datasource-initialization: true
@@ -223,6 +223,10 @@ spring:
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create-drop
+      properties:
+        hibernate:
+          format_sql=true:
+
   autoconfigure.exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
   mvc:
     pathmatch:
