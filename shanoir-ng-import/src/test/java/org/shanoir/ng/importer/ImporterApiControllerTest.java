@@ -29,6 +29,7 @@ import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
@@ -86,7 +87,7 @@ public class ImporterApiControllerTest {
 	@MockBean
 	private QueryPACSService queryPACSService;
 
-	@MockBean
+	@Mock
 	private RabbitTemplate rabbitTemplate;
 	
 	@MockBean
