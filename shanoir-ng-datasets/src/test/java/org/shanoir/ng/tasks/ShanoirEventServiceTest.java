@@ -31,7 +31,7 @@ public class ShanoirEventServiceTest {
 	@Autowired
 	private ShanoirEventService service;
 
-	@Mock
+	@Autowired
 	private RabbitTemplate rabbitTemplate;
 
 	@Test

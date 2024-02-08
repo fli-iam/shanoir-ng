@@ -127,7 +127,7 @@ public class DatasetApiControllerTest {
 	@MockBean
 	private StudyRepository studyRepo;
 
-	@Mock
+	@MockBean
 	private RabbitTemplate rabbitTemplate;
 	
 	@MockBean
