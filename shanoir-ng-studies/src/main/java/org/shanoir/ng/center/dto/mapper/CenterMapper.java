@@ -16,6 +16,7 @@ package org.shanoir.ng.center.dto.mapper;
 
 import java.util.List;
 
+import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -35,27 +36,26 @@ import org.shanoir.ng.studycenter.StudyCenterMapper;
 @Mapper(componentModel = "spring", uses = { AcquisitionEquipmentMapper.class, StudyCenterMapper.class })
 public interface CenterMapper {
 
-	/**
-	 * Map list of @Center to list of @CenterDTO.
-	 * 
-	 * @param centers
-	 *            list of centers.
-	 * @return list of centers DTO.
-	 */
+	@Named("centersWithoutAcquisitionEquipments")
+	@IterableMapping(qualifiedByName = "centerWithoutAcquisitionEquipments")
 	List<CenterDTO> centersToCenterDTOs(List<Center> centers);
-
-	@Named("centerWithoutAcquisitionEquipment")
+	
+	@Named("centerWithoutAcquisitionEquipments")
 	@Mappings({
-			@Mapping(target = "acquisitionEquipments", ignore = true),
-			@Mapping(target = "compatible", ignore = true)
+		@Mapping(target = "acquisitionEquipments", ignore = true),
+		@Mapping(target = "compatible", ignore = true)
 	})
 	CenterDTO centerToCenterDTO(Center center);
 
-	@Named("centerWithAcquisitionEquipment")
+	@Named("centersWithAcquisitionEquipments")
+	@IterableMapping(qualifiedByName = "centerWithAcquisitionEquipments")
+	List<CenterDTO> centersToCenterDTOsWithAcquisitionEquipments(List<Center> centers);
+
+	@Named("centerWithAcquisitionEquipments")
 	@Mappings({
 		@Mapping(target = "compatible", ignore = true)
 	})
-	CenterDTO centerToCenterDTOWithAcquisitionEquipment(Center center);
+	CenterDTO centerToCenterDTOWithAcquisitionEquipments(Center center);
 	
 	/**
 	 * Map list of @Center to list of @IdNameDTO.

@@ -30,7 +30,7 @@ import org.springframework.data.repository.query.Param;
  * @author msimon
  */
 public interface CenterRepository extends CrudRepository<Center, Long> {
-
+	
 	@EntityGraph(attributePaths = "studyCenterList.study.name")
 	List<Center> findAll();
 	
