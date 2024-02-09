@@ -111,7 +111,7 @@ public class ExecutionStatusMonitorService {
 						this.processFinishedJob(processing, event, execution.getEndDate());
 						break;
 
-					case UNKOWN:
+					case UNKNOWN:
 					case EXECUTION_FAILED:
 					case KILLED:
 
