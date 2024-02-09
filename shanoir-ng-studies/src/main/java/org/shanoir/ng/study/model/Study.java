@@ -114,15 +114,13 @@ public class Study extends HalEntity {
 	private String name;
 
 	/** List of protocol files directly attached to the study. */
-	@ElementCollection(fetch = FetchType.EAGER)
-	@Fetch(FetchMode.JOIN)
+	@ElementCollection
 	@CollectionTable(name = "protocol_file_path")
 	@Column(name = "path")
 	private List<String> protocolFilePaths;
 	
 	/** List of data user agreement form directly attached to the study. */
-	@ElementCollection(fetch = FetchType.EAGER)
-	@Fetch(FetchMode.JOIN)
+	@ElementCollection
 	@CollectionTable(name = "data_user_agreement_file")
 	@Column(name = "path")
 	private List<String> dataUserAgreementPaths;
@@ -146,25 +144,25 @@ public class Study extends HalEntity {
 	private Integer studyType;
 
 	/** Users associated to the research study. */
-	@OneToMany(mappedBy = "study", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<StudyUser> studyUserList;
 
 	/** List of the examinations related to this study. */
-	@OneToMany(mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<StudyExamination> examinations;
 	
 	@Transient
 	private int nbExaminations;
 
 	/** Relations between the subjects and the studies. */
-	@OneToMany(mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<SubjectStudy> subjectStudyList;
 	
 	@Transient
 	private int nbSubjects;
 
 	/** List of Timepoints dividing the study **/
-	@OneToMany(mappedBy = "study", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	@OrderBy("rank asc")
 	private List<Timepoint> timepoints;
 
@@ -186,7 +184,7 @@ public class Study extends HalEntity {
 	@Column(name = "license", columnDefinition = "TEXT")
 	private String license;
 
-	@OneToMany(fetch = FetchType.EAGER, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<StudyTag> studyTags;
 
 	/**

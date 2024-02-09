@@ -456,6 +456,9 @@ public class StudyServiceImpl implements StudyService {
 			studies = studyRepository
 				.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(
 					KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId(), true);
+			// the below is necessary for the StudySecurityService, it is not possible for the above method
+			// to have an EntityQuery with two bags contained, that is why I get back to the database:
+			studies.stream().forEach(s -> s.setStudyUserList(studyUserRepository.findByStudy_Id(s.getId())));
 		}
 		setNumberOfSubjectsAndExaminations(studies);
 		// Utils.copyList is used to prevent a bug with @PostFilter

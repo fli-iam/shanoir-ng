@@ -53,10 +53,11 @@ public interface StudyMapper {
 	 * @param study study to map.
 	 * @return study DTO.
 	 */
-	@Mappings({ @Mapping(target = "experimentalGroupsOfSubjects", ignore = true),
+	@Mappings({ @Mapping(target = "experimentalGroupsOfSubjects", ignore = true), @Mapping(target = "studyUserList", ignore = true),
 			@Mapping(target = "studyCards", ignore = true), @Mapping(target = "studyCenterList", ignore = true),
-			@Mapping(target = "subjectStudyList", ignore = true), @Mapping(target = "tags", ignore = true),
-			@Mapping(target = "storageVolume", ignore = true), @Mapping(target = "dataUserAgreementPaths", ignore = true) })
+			@Mapping(target = "subjectStudyList", ignore = true), @Mapping(target = "tags", ignore = true), @Mapping(target = "studyTags", ignore = true),
+			@Mapping(target = "storageVolume", ignore = true), @Mapping(target = "dataUserAgreementPaths", ignore = true),
+			@Mapping(target = "protocolFilePaths", ignore = true), @Mapping(target = "timepoints", ignore = true)})
 	StudyDTO studyToStudyDTO(Study study);
 
 	@Mappings({ @Mapping(target = "studyCenterList", ignore = true) })
@@ -66,6 +67,7 @@ public interface StudyMapper {
 
 	IdName studyToIdNameDTO(Study study);
 
+	@Mapping(target = "studyTags", ignore = true)
 	StudyLightDTO studyToStudyLightDTO(Study study);
 
 }

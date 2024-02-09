@@ -34,7 +34,7 @@ public interface StudyRepository extends CrudRepository<Study, Long> {
 	 * @return list of studies.
 	 */
 	List<Study> findAll();
-
+	
 	/**
 	 * Get all studies with isChallenge flag to true
 	 * @return the list of challenges
@@ -57,7 +57,8 @@ public interface StudyRepository extends CrudRepository<Study, Long> {
 	 *            user id.
 	 * @return list of studies.
 	 */
-	List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(Long userId, Integer studyUseRightId, boolean confirmed);
+	@EntityGraph(attributePaths = { "studyUserList" })
+	List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(Long userId, Integer studyUserRightId, boolean confirmed);
 
 	/**
 	 * Lists all the publicly available studies.

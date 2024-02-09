@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.shanoir.ng.study.model.StudyUser;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -35,6 +36,7 @@ public interface StudyUserRepository extends CrudRepository<StudyUser, Long> {
 	
 	StudyUser findByUserIdAndStudy_Id(Long userId, Long studyId);
 	
+	@EntityGraph(attributePaths = "studyUserRights")
 	List<StudyUser> findByStudy_Id(Long studyId);
 
 	@Transactional
