@@ -114,13 +114,15 @@ public class Study extends HalEntity {
 	private String name;
 
 	/** List of protocol files directly attached to the study. */
-	@ElementCollection
+	@ElementCollection(fetch = FetchType.EAGER)
+	@Fetch(FetchMode.JOIN)
 	@CollectionTable(name = "protocol_file_path")
 	@Column(name = "path")
 	private List<String> protocolFilePaths;
 	
 	/** List of data user agreement form directly attached to the study. */
-	@ElementCollection
+	@ElementCollection(fetch = FetchType.EAGER)
+	@Fetch(FetchMode.JOIN)
 	@CollectionTable(name = "data_user_agreement_file")
 	@Column(name = "path")
 	private List<String> dataUserAgreementPaths;
