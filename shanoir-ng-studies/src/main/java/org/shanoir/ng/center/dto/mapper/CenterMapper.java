@@ -19,6 +19,7 @@ import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
+import org.mapstruct.Named;
 import org.shanoir.ng.acquisitionequipment.dto.mapper.AcquisitionEquipmentMapper;
 import org.shanoir.ng.center.dto.CenterDTO;
 import org.shanoir.ng.center.model.Center;
@@ -43,19 +44,19 @@ public interface CenterMapper {
 	 */
 	List<CenterDTO> centersToCenterDTOs(List<Center> centers);
 
-	/**
-	 * Map a @Center to a @CenterDTO.
-	 * 
-	 * @param center
-	 *            center to map.
-	 * @return center DTO.
-	 */
+	@Named("centerWithoutAcquisitionEquipment")
 	@Mappings({
 			@Mapping(target = "acquisitionEquipments", ignore = true),
 			@Mapping(target = "compatible", ignore = true)
 	})
 	CenterDTO centerToCenterDTO(Center center);
 
+	@Named("centerWithAcquisitionEquipment")
+	@Mappings({
+		@Mapping(target = "compatible", ignore = true)
+	})
+	CenterDTO centerToCenterDTOWithAcquisitionEquipment(Center center);
+	
 	/**
 	 * Map list of @Center to list of @IdNameDTO.
 	 * 

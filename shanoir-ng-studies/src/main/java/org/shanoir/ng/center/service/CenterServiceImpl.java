@@ -132,11 +132,9 @@ public class CenterServiceImpl implements CenterService {
 	public List<Center> findByStudy(Long studyId) {
 		List<Center> centers = centerRepository.findByStudy(studyId);
 		StudyUser studyUser = studyUserRepo.findByUserIdAndStudy_Id(KeycloakUtil.getTokenUserId(), studyId);
-
 		if (studyUser != null && !CollectionUtils.isEmpty(studyUser.getCenterIds())) {
 			centers = centers.stream().filter(center -> studyUser.getCenterIds().contains(center.getId())).collect(Collectors.toList());
 		}
-
 		return centers;
 	}
 

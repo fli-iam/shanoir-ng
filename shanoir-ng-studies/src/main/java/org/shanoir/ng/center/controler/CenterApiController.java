@@ -91,7 +91,7 @@ public class CenterApiController implements CenterApi {
 		if (center.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<>(centerMapper.centerToCenterDTO(center.orElseThrow()), HttpStatus.OK);
+		return new ResponseEntity<>(centerMapper.centerToCenterDTOWithAcquisitionEquipment(center.orElseThrow()), HttpStatus.OK);
 	}
 
 	@Override
@@ -125,7 +125,6 @@ public class CenterApiController implements CenterApi {
 		}
 		return new ResponseEntity<>(centers, HttpStatus.OK);
 	}
-
 
 	@Override
 	public ResponseEntity<List<IdName>> findCentersNames(
@@ -191,4 +190,5 @@ public class CenterApiController implements CenterApi {
 			}
 		}
 	}
+
 }
