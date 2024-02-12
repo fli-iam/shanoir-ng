@@ -13,7 +13,7 @@
  */
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 
-import { FormArray, FormControl, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { FormArray, FormControl, FormGroup, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 import { Option } from '../../../shared/select/select.component';
@@ -65,7 +65,8 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
     shanoirFieldTouched: boolean = false;
     private computeConditionOptionsSubscription: Subscription;
     private conditionChangeSubscription: Subscription;
-    @Input() addSubForm: (FormGroup) => void;
+    @Input() addSubForm: (subForm: FormGroup) => FormGroup;
+    private parentForm: FormGroup;
 
     constructor(
             private dicomService: DicomService,
@@ -82,7 +83,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
     }
 
     private buildValueControl(value: string) {
-        let validators: ValidatorFn[] = [Validators.required]
+        let validators: ValidatorFn[] = [Validators.required, Validators.minLength(1)]
         let type: TagType = this.condition?.dicomTag?.type;
         if (['Double', 'Float'].includes(type)) {
             validators.push(Validators.pattern('[+-]?([0-9]*[.])?[0-9]+')); // reals : only numbers, with dot as decimal separator
@@ -94,7 +95,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
             validators.push(Validators.pattern((/^\d{4}(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])$/))); // yyyyMMdd
         } else if (type == 'FloatArray') {
             validators.push(Validators.pattern('([+-]?([0-9]*[.])?[0-9]+)(,[+-]?([0-9]*[.])?[0-9]+)*')); // comma separated reals
-        }else if ( type == 'IntArray') {
+        } else if ( type == 'IntArray') {
             validators.push(Validators.pattern('([+-]?[0-9]+)(,[+-]?[0-9]+)*')); // comma separated integers
         }
         return new FormControl(value, validators);
@@ -111,7 +112,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
                 }
             });
         }
-        this.addSubForm(this.form);
+        this.parentForm = this.addSubForm(this.form);
         setTimeout(() => this.init = true);
     }
             
@@ -360,6 +361,8 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
             this.condition.dicomTag = null;
             this.filterOperations();
             this.resetValues();
+            this.form = this.buildForm();
+            this.onConditionChange();
             if (value.endsWith('OnDataset') || value.endsWith('OnDatasets')) {
                 this.fieldOptions.forEach(opt => opt.disabled = opt.section != 'Dataset');
             } else if (value.endsWith('OnAcq') || value.endsWith('OnAcq')) {

@@ -19,6 +19,7 @@ import { SuperPromise } from '../../utils/super-promise';
 import { QualityCardRule } from '../shared/quality-card.model';
 import { StudyCardCondition } from '../shared/study-card.model';
 import { ShanoirMetadataField } from './action/action.component';
+import { FormGroup } from '@angular/forms';
 
 
 @Component({
@@ -43,7 +44,7 @@ export class QualityCardRuleComponent implements OnChanges {
             new Option('WARNING', 'Warning', undefined, 'chocolate', 'fa-solid fa-triangle-exclamation'), 
             new Option('ERROR', 'Error', undefined, 'red', 'fa-solid fa-times-circle')];
     conditionFieldOptions: Option<string>[];
-    @Input() addSubForm: (FormGroup) => void;
+    @Input() addSubForm: (subForm: FormGroup) => FormGroup;
 
     constructor(public elementRef: ElementRef) { }
 

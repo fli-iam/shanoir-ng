@@ -191,12 +191,13 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
         });
     }
 
-    addConditionForm(form: FormGroup) {
+    addConditionForm(form: FormGroup): FormGroup {
         if (this.mode != 'view') {
             setTimeout(() => { // prevent "changed after check" error
                 (this.form.get('conditions') as FormArray).push(form);
             });
         }
+        return this.form;
     }
 
     apply() {
