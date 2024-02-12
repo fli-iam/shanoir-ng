@@ -106,7 +106,6 @@ public interface StudyApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/names", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterStudyIdNameDTOsHasRight(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<IdName>> findStudiesNames() throws RestServiceException;
 
 	@Operation(summary = "", description = "Returns id, name and centers for all the studies")
@@ -118,7 +117,6 @@ public interface StudyApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/namesAndCenters", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterStudyIdNameDTOsHasRight(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<IdNameCenterStudyDTO>> findStudiesNamesAndCenters() throws RestServiceException;
 
 	@Operation(summary = "", description = "If exists, returns the study corresponding to the given id")
