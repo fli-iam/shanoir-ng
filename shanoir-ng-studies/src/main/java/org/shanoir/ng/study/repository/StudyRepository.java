@@ -29,12 +29,18 @@ public interface StudyRepository extends CrudRepository<Study, Long> {
 	Optional<Study> findById(Long id);
 	
 	/**
-	 * Get all studies
-	 * 
-	 * @return list of studies.
+	 * Lists all the publicly available studies.
+	 * @return all the publicly available studies.
 	 */
+	@EntityGraph(attributePaths = { "studyTags" })
+	List<Study> findByVisibleByDefaultTrue();
+
+	@EntityGraph(attributePaths = { "profile" })
 	List<Study> findAll();
 	
+	@EntityGraph(attributePaths = { "profile" })
+	List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(Long userId, Integer studyUserRightId, boolean confirmed);
+
 	/**
 	 * Get all studies with isChallenge flag to true
 	 * @return the list of challenges
@@ -48,23 +54,6 @@ public interface StudyRepository extends CrudRepository<Study, Long> {
 	 *            user id.
 	 * @return list of studies.
 	 */
-	List<Study> findByStudyUserList_UserIdOrderByNameAsc(Long userId);
-		
-	/**
-	 * Get studies linked to an user.
-	 * 
-	 * @param userId
-	 *            user id.
-	 * @return list of studies.
-	 */
-	@EntityGraph(attributePaths = { "studyUserList" })
-	List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(Long userId, Integer studyUserRightId, boolean confirmed);
-
-	/**
-	 * Lists all the publicly available studies.
-	 * @return all the publicly available studies.
-	 */
-	@EntityGraph(attributePaths = { "studyTags" })
-	List<Study> findByVisibleByDefaultTrue();
+	List<Study> findByStudyUserList_UserIdOrderByNameAsc(Long userId);	
 
 }

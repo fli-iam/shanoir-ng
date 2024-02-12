@@ -45,20 +45,17 @@ public interface StudyMapper {
 	 */
 	List<StudyDTO> studiesToStudyDTOs(List<Study> studies);
 
+	@Mappings({ @Mapping(target = "experimentalGroupsOfSubjects", ignore = true), @Mapping(target = "studyUserList", ignore = true),
+		@Mapping(target = "studyCards", ignore = true), @Mapping(target = "studyCenterList", ignore = true),
+		@Mapping(target = "subjectStudyList", ignore = true), @Mapping(target = "tags", ignore = true), @Mapping(target = "studyTags", ignore = true),
+		@Mapping(target = "storageVolume", ignore = true), @Mapping(target = "dataUserAgreementPaths", ignore = true),
+		@Mapping(target = "protocolFilePaths", ignore = true), @Mapping(target = "timepoints", ignore = true)})
+	StudyDTO studyToStudyDTO(Study study);
+
 	List<StudyLightDTO> studiesToStudyLightDTOs(List<Study> studies);
 
-	/**
-	 * Map a @Study to a @StudyDTO.
-	 * 
-	 * @param study study to map.
-	 * @return study DTO.
-	 */
-	@Mappings({ @Mapping(target = "experimentalGroupsOfSubjects", ignore = true), @Mapping(target = "studyUserList", ignore = true),
-			@Mapping(target = "studyCards", ignore = true), @Mapping(target = "studyCenterList", ignore = true),
-			@Mapping(target = "subjectStudyList", ignore = true), @Mapping(target = "tags", ignore = true), @Mapping(target = "studyTags", ignore = true),
-			@Mapping(target = "storageVolume", ignore = true), @Mapping(target = "dataUserAgreementPaths", ignore = true),
-			@Mapping(target = "protocolFilePaths", ignore = true), @Mapping(target = "timepoints", ignore = true)})
-	StudyDTO studyToStudyDTO(Study study);
+	@Mapping(target = "studyTags", ignore = true)
+	StudyLightDTO studyToStudyLightDTO(Study study);
 
 	@Mappings({ @Mapping(target = "studyCenterList", ignore = true) })
 	IdNameCenterStudyDTO studyToExtendedIdNameDTO(Study study);
@@ -66,8 +63,5 @@ public interface StudyMapper {
 	List<IdNameCenterStudyDTO> studiesToSimpleStudyDTOs(List<Study> studies);
 
 	IdName studyToIdNameDTO(Study study);
-
-	@Mapping(target = "studyTags", ignore = true)
-	StudyLightDTO studyToStudyLightDTO(Study study);
 
 }
