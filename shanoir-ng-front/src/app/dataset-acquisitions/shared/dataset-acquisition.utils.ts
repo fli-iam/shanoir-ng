@@ -29,7 +29,7 @@ export abstract class DatasetAcquisitionUtils {
             case 'Mr': return new MrDatasetAcquisition();
             case 'Pet': return new PetDatasetAcquisition();
             case 'Ct': return new CtDatasetAcquisition();
-            case 'Xa': return new CtDatasetAcquisition();
+            case 'Xa': return new XaDatasetAcquisition();
             case 'Generic': return new GenericDatasetAcquisition();
             case 'BIDS': return new BidsDatasetAcquisition();
             case 'Eeg': return new EegDatasetAcquisition();
