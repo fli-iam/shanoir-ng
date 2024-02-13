@@ -35,10 +35,10 @@ public interface StudyRepository extends CrudRepository<Study, Long> {
 	@EntityGraph(attributePaths = { "studyTags" })
 	List<Study> findByVisibleByDefaultTrue();
 
-	@EntityGraph(attributePaths = { "profile" })
+	@EntityGraph(attributePaths = { "profile", "tags" })
 	List<Study> findAll();
 	
-	@EntityGraph(attributePaths = { "profile" })
+	@EntityGraph(attributePaths = { "profile", "tags" })
 	List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(Long userId, Integer studyUserRightId, boolean confirmed);
 
 	/**

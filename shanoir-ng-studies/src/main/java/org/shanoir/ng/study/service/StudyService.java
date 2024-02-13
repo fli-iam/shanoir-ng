@@ -66,6 +66,10 @@ public interface StudyService {
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
 	@PostFilter("@studySecurityService.hasRightOnTrustedStudy(filterObject, 'CAN_SEE_ALL')")
 	List<Study> findAll();
+	
+	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
+	@PostFilter("@studySecurityService.hasRightOnTrustedStudy(filterObject, 'CAN_SEE_ALL')")
+	List<Study> findAllWithCenters();
 
 	/**
 	 * Get all the challenges
