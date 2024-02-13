@@ -69,6 +69,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     onChangeCallback = (_: any) => {};
     @Input() manufModelId: number;
     @Input() allCoils: Coil[];
+    @Input() studyId: number;
     assignmentFields: ShanoirMetadataField[];
     conditionFields: ShanoirMetadataField[];
     private coilOptionsSubject: Subject<Option<Coil>[]> = new BehaviorSubject<Option<Coil>[]>(null);
@@ -116,20 +117,25 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     }
     
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes.manufModelId) {
-            if (this.manufModelId) {
-                this.allCoilsPromise.then(allCoils => {
-                    let optionArr: Option<Coil>[] = [];
-                    allCoils
-                        .filter(coil => coil.manufacturerModel.id == this.manufModelId)
-                        .forEach(coil => optionArr.push(new Option<Coil>(coil, coil.name)));
-                    this.coilOptionsSubject.next(optionArr);
-                });
-            } else if (this.coilOptionsSubject) {
-                this.coilOptionsSubject.next([]);
-
-            }
+        if (changes.manufModelId && this.manufModelId) {
+            this.allCoilsPromise.then(allCoils => {
+                let optionArr: Option<Coil>[] = [];
+                allCoils
+                    .filter(coil => coil.manufacturerModel.id == this.manufModelId)
+                    .forEach(coil => optionArr.push(new Option<Coil>(coil, coil.name)));
+                this.coilOptionsSubject.next(optionArr);
+            });
         } 
+        if(changes.studyId && this.studyId) {
+            this.allCoilsPromise.then(allCoils => {
+                let optionArr: Option<Coil>[] = [];
+                allCoils
+                    .filter(coil => coil.center?.studyCenterList?.find(sc => sc.study.id == this.studyId))
+                    .forEach(coil => optionArr.push(new Option<Coil>(coil, coil.name)));
+                this.coilOptionsSubject.next(optionArr);
+            });
+
+        }
         if (changes.allCoils && this.allCoils) {
             this.allCoilsPromise.resolve(this.allCoils);
         } 

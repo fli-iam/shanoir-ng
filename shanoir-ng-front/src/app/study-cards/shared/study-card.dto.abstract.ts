@@ -23,7 +23,6 @@ import { DicomTag, Operation, StudyCard, StudyCardAssignment, StudyCardCondition
 export abstract class StudyCardDTOServiceAbstract {
 
     constructor() {}
-
     
     static isCoil(assigmentField: string): boolean {
         return assigmentField?.toLowerCase().includes('coil');
@@ -68,7 +67,16 @@ export abstract class StudyCardDTOServiceAbstract {
                         let condition: StudyCardCondition = new StudyCardCondition(conditionDTO.scope);
                         if (conditionDTO.dicomTag) condition.dicomTag = new DicomTag(+conditionDTO.dicomTag, null, null);
                         condition.shanoirField = conditionDTO.shanoirField;
-                        condition.values = conditionDTO.values;
+                        if (this.isCoil(condition.shanoirField) && !Number.isNaN(Number(conditionDTO.values?.[0]))) {
+                            condition.values = [];
+                            conditionDTO.values?.forEach(dtoVal => {
+                                let value = new Coil();
+                                value.id = +dtoVal;
+                                condition.values.push(value);
+                            });
+                        } else {
+                            condition.values = conditionDTO.values;
+                        }
                         condition.operation = conditionDTO.operation as Operation;
                         condition.cardinality = conditionDTO.cardinality;
                         rule.conditions.push(condition);

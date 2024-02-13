@@ -85,10 +85,18 @@ export class StudyCardCondition {
     shanoirField: string;
     dicomTag: DicomTag;
     operation: Operation;
-    values: string[] = [];
+    values: (string | Coil)[] = [];
     cardinality: number;
 
     constructor(public scope: ConditionScope) {}
+
+    get type(): 'string' | 'Coil' {
+        if (this.values?.[0] instanceof Coil) {
+            return 'Coil';
+        } else {
+            return 'string';
+        }
+    }
 }
 
 export type TagType = 'String' | 'Long' | 'Float' | 'Double' | 'Integer' | 'Binary' | 'Date' | 'FloatArray' | 'IntArray';

@@ -20,6 +20,7 @@ import { Option } from '../../../shared/select/select.component';
 import { DicomService } from '../../shared/dicom.service';
 import { ConditionScope, DicomTag, Operation, StudyCardCondition, TagType } from '../../shared/study-card.model';
 import { ShanoirMetadataField } from '../action/action.component';
+import { Coil } from 'src/app/coils/shared/coil.model';
 
 
 
@@ -82,7 +83,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
         return form;
     }
 
-    private buildValueControl(value: string) {
+    private buildValueControl(value: string | Coil) {
         let validators: ValidatorFn[] = [Validators.required, Validators.minLength(1)]
         let type: TagType = this.condition?.dicomTag?.type;
         if (['Double', 'Float'].includes(type)) {
@@ -206,12 +207,12 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
     }
 
     onConditionValueChange(value: any, index: number) {
+        this.onConditionChange();
         this.cdr.detectChanges();
     }
 
     onConditionOptionSelect(option: Option<any>) {
         if (option) option.disabled = true;
-        this.onConditionChange();
     }
 
     onConditionOptionUnselect(option: Option<any>) {

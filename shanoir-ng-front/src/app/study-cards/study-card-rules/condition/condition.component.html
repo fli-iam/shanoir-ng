@@ -30,10 +30,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             {{condition.operation}}
         </ng-container>
     </span>
-    <span class="multi-value">
+    <span class="multi-value" *ngIf="condition.type == 'string'">
         <div class="value" *ngFor="let value of condition.values; let i=index;">
             <span *ngIf="i > 0" class="or">or</span>
             "{{value}}"
+        </div>
+    </span>
+    <span class="multi-value" *ngIf="condition.type == 'Coil'">
+        <div class="value" *ngFor="let coil of condition.values; let i=index;">
+            <span *ngIf="i > 0" class="or">or</span>
+            {{coil.name || coil.id}}
         </div>
     </span>
 </span>
@@ -110,31 +116,32 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </auto-ajust-input>
                     <span *ngIf="condition.values.length > 1" class="delete-value" (click)="onTextValueRemove(i)"><i class="far fa-times-circle"></i></span>
                 </span>
-                <div *ngIf="!(condition.values[condition.values.length - 1]?.length == 0)" class="add-cond-value-frame">
+                <div *ngIf="!(condition.values[condition.values.length - 1]?.toString().length == 0)" class="add-cond-value-frame">
                     <span class="add-cond-value" (click)="onTextValueAdd()">
                         <i class="fa-solid fa-circle-plus"></i>Add a possible value
                     </span>
                 </div>
             </span>
+            <span *ngIf="condition.scope != 'StudyCardDICOMConditionOnDatasets' && (shanoirFieldOptions?.length > 0)" formArrayName="values" class="multi-value edit">
+                <select-box 
+                        *ngFor="let value of condition.values; let i  = index"
+                        [formControlName]="i"
+                        class="value auto-width one-value" 
+                        [(ngModel)]="condition.values[i]" 
+                        (userChange)="onConditionValueChange($event, i)" 
+                        (selectOption)="onConditionOptionSelect($event)" 
+                        (onUserClear)="onConditionOptionUnselect($event)" 
+                        [options]="shanoirFieldOptions" 
+                        placeholder="select value" 
+                        (focusout)="valueTouched = true">
+                </select-box>
+                <div *ngIf="condition.values[condition.values.length - 1] && condition.values.length < shanoirFieldOptions.length" class="add-cond-value-frame">
+                    <span class="add-cond-value" (click)="condition.values?.push(null)">
+                        <i class="fa-solid fa-plus"></i>Add a possible value
+                    </span>
+                </div>
+            </span>
         </form>
     </ng-container>
-    <span *ngIf="condition.scope != 'StudyCardDICOMConditionOnDatasets' && (shanoirFieldOptions?.length > 0)" class="multi-value edit">
-        <select-box 
-                *ngFor="let value of condition.values; let i  = index"
-                class="value auto-width one-value" 
-                [(ngModel)]="condition.values[i]" 
-                (userChange)="onConditionValueChange($event, i)" 
-                (selectOption)="onConditionOptionSelect($event)" 
-                (onUserClear)="onConditionOptionUnselect($event)" 
-                [options]="shanoirFieldOptions" 
-                placeholder="select value" 
-                (focusout)="valueTouched = true">
-        </select-box>
-        <div *ngIf="condition.values[condition.values.length - 1] && condition.values.length < shanoirFieldOptions.length" class="add-cond-value-frame">
-            <span class="add-cond-value" (click)="condition.values?.push(null)">
-                <i class="fa-solid fa-plus"></i>Add a possible value
-            </span>
-        </div>
-    </span>
 </ng-container>
 <span *ngIf="mode != 'view'" class="delete" (click)="delete.emit()"><i class="far fa-times-circle"></i></span>
