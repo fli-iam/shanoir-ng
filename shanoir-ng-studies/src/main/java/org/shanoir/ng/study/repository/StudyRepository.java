@@ -27,7 +27,7 @@ public interface StudyRepository extends CrudRepository<Study, Long> {
 	
 	@EntityGraph("Study.All")
 	Optional<Study> findById(Long id);
-	
+
 	/**
 	 * Lists all the publicly available studies.
 	 * @return all the publicly available studies.

@@ -426,6 +426,7 @@ public class StudySecurityService {
 		}
 		int nbStudies = 0;
 		for (Study study : studyRepository.findAllById(ids)) {
+			study.setStudyUserList(studyUserRepository.findByStudy_Id(study.getId()));
 			nbStudies++;
 			if (!hasPrivilege(study, right)) {
 				return false;

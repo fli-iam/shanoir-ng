@@ -253,7 +253,6 @@ public class SubjectServiceImpl implements SubjectService {
 	 */
 	private Subject updateSubjectValues(final Subject subjectDb, final Subject subject) throws MicroServiceCommunicationException {
 		subjectDb.setName(subject.getName());
-		//subjectDb.setBirthDate(subject.getBirthDate());
 		subjectDb.setIdentifier(subject.getIdentifier());
 		subjectDb.setPseudonymusHashValues(subject.getPseudonymusHashValues());
 		subjectDb.setSex(subject.getSex());
