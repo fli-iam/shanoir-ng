@@ -208,7 +208,7 @@ public class StudyServiceImpl implements StudyService {
 		study.setSubjectStudyList(null);
 		Study studyDb = studyRepository.save(study);
 
-		if (subjectStudyListSave != null) {
+		if (subjectStudyListSave != null && !subjectStudyListSave.isEmpty()) {
 			updateTags(subjectStudyListSave, studyDb.getTags());
 			studyDb.setSubjectStudyList(new ArrayList<>());
 			for (SubjectStudy subjectStudy : subjectStudyListSave) {
