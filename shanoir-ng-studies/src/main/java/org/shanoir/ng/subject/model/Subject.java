@@ -71,7 +71,7 @@ public class Subject extends HalEntity {
 	private Integer sex;
 
 	/** Relations beetween the subjects and the studies. */
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "subject", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OneToMany(mappedBy = "subject", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<SubjectStudy> subjectStudyList;
 
 	private String identifier;
