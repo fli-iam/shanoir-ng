@@ -146,7 +146,7 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
             total++;
             boolean alreadyFulfilled = getCardinality() >= 1 && nbOk >= getCardinality();
             if (!alreadyFulfilled) {
-                Boolean fulfilled = fulfilled(acqAttributes.getDatasetAttributes(datasetId), errorMsg,datasetId);
+                Boolean fulfilled = fulfilled(acqAttributes.getDatasetAttributes(datasetId), errorMsg, datasetId);
                 if (fulfilled == null) {
                     nbUnknown++;
                 }
@@ -173,8 +173,10 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
         VR tagVr = StandardElementDictionary.INSTANCE.vrOf(dicomTag);
         DicomTagType tagType = DicomTagType.valueOf(tagVr);
         if (!this.getOperation().compatibleWith(tagType)) {
-            throw new IllegalArgumentException("Study card processing : operation " + this.getOperation() + " is not compatible with dicom tag " 
+            if (errorMsg != null) errorMsg.append("\ncondition [" + toString() 
+                    + "] failed on dataset " + datasetId + " because the operation " + this.getOperation() + " is not compatible with dicom tag " 
                     + this.getDicomTag() + " of type " + tagType + "(condition id : " + this.getId() + ")");
+                return false;
         }
 
         if (Operation.PRESENT.equals(getOperation())) {
