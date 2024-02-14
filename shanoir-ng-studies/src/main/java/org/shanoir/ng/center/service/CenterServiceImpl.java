@@ -111,7 +111,9 @@ public class CenterServiceImpl implements CenterService {
 	}
 	
 	public List<Center> findAll() {
-		return Utils.toList(centerRepository.findAll());
+		List<Center> centers = centerRepository.findAll();
+		centers.stream().forEach(c -> c.setAcquisitionEquipments(centerRepository.findDistinctAcquisitionEquipmentsByCenterId(c.getId())));
+		return Utils.toList(centers);
 	}
 	
 	@Override

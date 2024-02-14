@@ -17,6 +17,7 @@ package org.shanoir.ng.center.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -33,6 +34,9 @@ public interface CenterRepository extends CrudRepository<Center, Long> {
 	
 	@EntityGraph(attributePaths = "studyCenterList.study.name")
 	List<Center> findAll();
+	
+	@Query("SELECT DISTINCT c.acquisitionEquipments FROM Center c WHERE c.id = :centerId")
+    List<AcquisitionEquipment> findDistinctAcquisitionEquipmentsByCenterId(@Param("centerId") Long centerId);
 	
 	@EntityGraph(attributePaths = { "studyCenterList.study.name", "acquisitionEquipments.manufacturerModel.manufacturer" })
 	Optional<Center> findById(Long id);
