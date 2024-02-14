@@ -21,12 +21,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.joda.time.DateTime;
 import org.shanoir.ng.dataset.modality.CalibrationDataset;
 import org.shanoir.ng.dataset.modality.CtDataset;
 import org.shanoir.ng.dataset.modality.EegDataset;
@@ -137,6 +140,8 @@ public class ImporterService {
 
     @Autowired
     private WADODownloaderService downloader;
+
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
 
     private static final String SUBJECT_PREFIX = "sub-";
     
@@ -544,7 +549,7 @@ public class ImporterService {
             String filePath = importJob.getProcessedDatasetFilePath();
             File srcFile = new File(filePath);
             String originalNiftiName = srcFile.getName();
-            File destFile = new File(outDir.getAbsolutePath() + File.separator + originalNiftiName);
+            File destFile = new File(outDir.getAbsolutePath() + File.separator + formatter.format(LocalDateTime.now()) + File.separator + originalNiftiName);
 
             // Save file
             Path location;

@@ -1,12 +1,24 @@
 package org.shanoir.uploader.model.rest;
 
 public class ManufacturerModel {
+	
+	private Long id;
+	
+	private String datasetModalityType;
 
 	private Double magneticField;
 
 	private Manufacturer manufacturer;
 
 	private String name;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
 
 	/**
 	 * @return the magneticField
@@ -56,6 +68,14 @@ public class ManufacturerModel {
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getDatasetModalityType() {
+		return datasetModalityType;
+	}
+
+	public void setDatasetModalityType(String datasetModalityType) {
+		this.datasetModalityType = datasetModalityType;
 	}
 
 }

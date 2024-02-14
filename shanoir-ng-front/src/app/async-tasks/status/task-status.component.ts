@@ -19,7 +19,8 @@ import { FilterablePageable, Page } from 'src/app/shared/components/table/pageab
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { QualityCardComponent } from 'src/app/study-cards/quality-card/quality-card.component';
 import { NotificationsService } from '../../shared/notifications/notifications.service';
-import { Task } from '../task.model';
+import {Task, TaskStatus} from '../task.model';
+import {TaskService} from "../task.service";
 
 
 @Component({
@@ -48,6 +49,7 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
 
     constructor(
         private notificationsService: NotificationsService,
+        private taskService: TaskService,
         private downloadService: MassDownloadService
     ) { }
 
@@ -67,6 +69,7 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
                     if (this.tableRefresh) this.tableRefresh();
                 }
             }
+
             this.subscriptions.push(
                 this.notificationsService.getNotifications().subscribe(tasks => {
                     this.task = tasks.find(task => task.id == this.task.id);
@@ -92,7 +95,7 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
     registerTableRefresh(refresh: () => void) {
         this.tableRefresh = refresh;
     }
-    
+
     retry() {
         this.loading = true;
         this.downloadService.retry(this.task).finally(() => this.loading = false);

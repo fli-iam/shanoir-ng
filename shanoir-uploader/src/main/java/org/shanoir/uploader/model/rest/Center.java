@@ -1,14 +1,22 @@
 package org.shanoir.uploader.model.rest;
 
-import java.util.List;
-
 public class Center implements Comparable<Center> {
 
 	private Long id;
 
 	private String name;
 
-	private List<Investigator> investigators;
+	private String street;
+	
+	private String postalCode;
+	
+	private String city;
+	
+	private String country;
+	
+	private String website;
+	
+	private String phoneNumber;
 
 	public Center() {
 	}
@@ -34,12 +42,52 @@ public class Center implements Comparable<Center> {
 		this.name = name;
 	}
 
-	public List<Investigator> getInvestigatorList() {
-		return investigators;
+	public String getStreet() {
+		return street;
 	}
 
-	public void setInvestigatorList(List<Investigator> investigatorList) {
-		this.investigators = investigatorList;
+	public void setStreet(String street) {
+		this.street = street;
+	}
+
+	public String getPostalCode() {
+		return postalCode;
+	}
+
+	public void setPostalCode(String postalCode) {
+		this.postalCode = postalCode;
+	}
+
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
+
+	public String getCountry() {
+		return country;
+	}
+
+	public void setCountry(String country) {
+		this.country = country;
+	}
+
+	public String getWebsite() {
+		return website;
+	}
+
+	public void setWebsite(String website) {
+		this.website = website;
+	}
+
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
 	}
 
 	public String toString() {

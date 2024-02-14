@@ -1,10 +1,12 @@
 package org.shanoir.ng.importer.vip.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Objects;
+
 import org.springframework.validation.annotation.Validated;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.validation.constraints.NotNull;
-import java.util.Objects;
 
 /**
  * Path

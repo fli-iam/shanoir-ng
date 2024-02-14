@@ -120,6 +120,8 @@ spring:
   config.activate.on-profile: dev
   datasource:
     url: jdbc:mysql://localhost:3307/users?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+    hikari.maximum-pool-size: 20
+    hikari.minimum-idle: 20
   jpa:
     generate-ddl: true
     hibernate:

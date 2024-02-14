@@ -107,10 +107,11 @@ public class RabbitMQConfiguration {
 	/** Queue to retrieve informations about studyc cards. */
 	public static final String FIND_STUDY_CARD_QUEUE = "find-study-card-queue";
 
-	/** Queue to retrieve the center ID from an acquisition equipement ID. */
-	public static final String ACQUISITION_EQUIPEMENT_CENTER_QUEUE = "acquisition-equipement-center-queue";
-	/** Queue to retrieve the center ID from an acquisition equipement ID. */
-	public static final String ACQUISITION_EQUIPEMENT_UPDATE_QUEUE = "acquisition-equipement-update-queue";
+	/** Queue to retrieve the center ID from an acquisition equipment ID. */
+	public static final String ACQUISITION_EQUIPMENT_CENTER_QUEUE = "acquisition-equipment-center-queue";
+	
+	/** Queue to retrieve the center ID from an acquisition equipment ID. */
+	public static final String ACQUISITION_EQUIPEMENT_UPDATE_QUEUE = "acquisition-equipment-update-queue";
 	
 	/** Queue to create exam for import bids. */
 	public static final String EXAMINATION_CREATION_QUEUE = "examination-creation-queue";
@@ -143,7 +144,7 @@ public class RabbitMQConfiguration {
 	public static final String IMPORTER_BIDS_DATASET_QUEUE = "importer-bids-dataset-queue";
 
 	/** Queue to create get equipment ID from code. */
-	public static final String ACQUISITION_EQUIPEMENT_CODE_QUEUE = "acquisition-equipment-code-queue";
+	public static final String ACQUISITION_EQUIPMENT_CODE_QUEUE = "acquisition-equipment-code-queue";
 
 	/** Queue to get the study card from a equipment code. */
 	public static final String IMPORT_STUDY_CARD_QUEUE="import-study-card-queue";
@@ -172,31 +173,6 @@ public class RabbitMQConfiguration {
 	/** Queue used to get anonymisation profile of a study. */
 	public static final String STUDY_ANONYMISATION_PROFILE_QUEUE = "study-anonymisation-profile-queue";
 
-	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
-	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
-	
-	private static final String CENTER_QUEUE_NAME_OUT = "center_queue_from_ng";
-
-	private static final String COIL_QUEUE_NAME_OUT = "coil_queue_from_ng";
-	
-	private static final String DELETE_ACQ_EQPT_QUEUE_NAME_OUT = "delete_acq_eqpt_queue_from_ng";
-
-	private static final String DELETE_CENTER_QUEUE_NAME_OUT = "delete_center_queue_from_ng";
-
-	private static final String DELETE_COIL_QUEUE_NAME_OUT = "delete_coil_queue_from_ng";
-
-	private static final String STUDY_QUEUE_NAME_IN = "study_queue_to_ng";
-
-	private static final String STUDY_DELETE_QUEUE_NAME_IN = "study_delete_queue_to_ng";
-
-	private static final String STUDY_QUEUE_NAME_OUT = "study_queue_from_ng";
-
-	private static final String SUBJECT_RPC_QUEUE_OUT = "subject_queue_with_RPC_from_ng";
-
-	private static final String SUBJECT_RPC_QUEUE_IN = "subject_queue_with_RPC_to_ng";
-
-	private static final String SUBJECT_QUEUE_OUT = "subject_queue_from_ng";
-	
 	////////////////// EXCHANGES //////////////////
 
 	/** Exchange used to publish / treat all sort of shanoir events. */
@@ -329,7 +305,7 @@ public class RabbitMQConfiguration {
 
 	@Bean
 	public static Queue acquisitionEquipementCenterQueue() {
-		return new Queue(ACQUISITION_EQUIPEMENT_CENTER_QUEUE, true);
+		return new Queue(ACQUISITION_EQUIPMENT_CENTER_QUEUE, true);
 	}
 	@Bean
 	public static Queue acquisitionEquipementUpdateQueue() {
@@ -388,7 +364,12 @@ public class RabbitMQConfiguration {
 
 	@Bean
 	public static Queue acquisitionEquipmentCodeQueue() {
-		return new Queue(ACQUISITION_EQUIPEMENT_CODE_QUEUE, true);
+		return new Queue(ACQUISITION_EQUIPMENT_CODE_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue equipmentFromCodeQueue() {
+		return new Queue(EQUIPMENT_FROM_CODE_QUEUE, true);
 	}
 
 	@Bean
@@ -414,10 +395,6 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue importStudyCardQueue() {
 		return new Queue(IMPORT_STUDY_CARD_QUEUE, true);
-	}
-	@Bean
-	public static Queue equipmentFromCodeQueue() {
-		return new Queue(EQUIPMENT_FROM_CODE_QUEUE, true);
 	}
 
 	@Bean

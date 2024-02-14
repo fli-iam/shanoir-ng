@@ -52,9 +52,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <appender-ref ref="DIMSE_FILE_LOG" />
     </logger>
     
-    
     <root level="INFO">
         <appender-ref ref="FILE" />
         <appender-ref ref="CONSOLE" />
     </root>
+
 </configuration>

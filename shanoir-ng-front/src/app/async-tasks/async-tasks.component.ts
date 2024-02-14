@@ -67,12 +67,12 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
 
     getColumnDefs(): ColumnDefinition[] {
         return [
-            { 
+            {
                headerName: 'Message', field: 'message', width: '100%', type:'link', route: (task: Task) => task.route
-            }, { 
-               headerName: 'Progress', field: 'progress', width: '110px', type: 'progress', 
+            }, {
+               headerName: 'Progress', field: 'progress', width: '110px', type: 'progress',
                cellRenderer: params => { return {progress: params.data?.progress, status: params.data?.status}; }
-            }, { 
+            }, {
                headerName: "Creation", field: "creationDate", width: '130px', type: 'dateTime', defaultSortCol: true, defaultAsc: false,
             }, {
                 headerName: "Last update", field: "lastUpdate", width: '130px', type: 'dateTime'
@@ -93,5 +93,4 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
             this.taskService.get(lightTask.completeId).then(task => this.selected = task);
         }
     }
-
 }

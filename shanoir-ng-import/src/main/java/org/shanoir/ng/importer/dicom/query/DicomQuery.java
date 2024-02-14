@@ -14,10 +14,10 @@
 
 package org.shanoir.ng.importer.dicom.query;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * ImportFromPACS: the user can query a PACS to chose
