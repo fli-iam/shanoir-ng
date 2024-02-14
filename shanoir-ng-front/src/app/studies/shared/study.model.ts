@@ -35,7 +35,6 @@ export class Study extends Entity {
     name: string;
     nbExaminations: number;
     nbSubjects: number;
-    nbSujects: number;
     nbMembers: number;
     protocolFilePaths: string[];
     dataUserAgreementPaths: string[];
@@ -71,6 +70,7 @@ export class Study extends Entity {
         }
     }
 }
+
 export class SimpleStudy {
     id: number;
     name: string;
