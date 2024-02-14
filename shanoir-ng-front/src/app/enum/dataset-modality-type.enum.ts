@@ -23,7 +23,8 @@ export enum DatasetModalityType {
     // MEG = 'MG',
     // SPECT = 'SPECT',
     EEG = 'EEG_DATASET',
-    NIRS = 'NIRS_DATASET'
+    NIRS = 'NIRS_DATASET',
+    XA = 'XA_DATASET'
 
 
 } export namespace DatasetModalityType {
