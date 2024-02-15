@@ -19,10 +19,12 @@ CMD ["mysqld"]
 ADD 1_create_databases.sh /docker-entrypoint-initdb.d/
 ADD 2_add_users.sql /docker-entrypoint-initdb.d/
 ADD 3_add_statistics_procedure.sql /docker-entrypoint-initdb.d/
+ADD 4_add_manageStudyStatistics_procedure.sql /docker-entrypoint-initdb.d/
  
 RUN chmod a+x /docker-entrypoint-initdb.d/1_create_databases.sh
 RUN chmod a+x /docker-entrypoint-initdb.d/2_add_users.sql
 RUN chmod a+x /docker-entrypoint-initdb.d/3_add_statistics_procedure.sql
+RUN chmod a+x /docker-entrypoint-initdb.d/4_add_manageStudyStatistics_procedure.sql
 RUN chmod a+x /shanoir-entrypoint.sh
 
 COPY db-changes /opt/db-changes

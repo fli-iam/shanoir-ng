@@ -149,4 +149,12 @@ public interface DatasetService {
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#dataset.getId(), 'CAN_ADMINISTRATE'))")
 	void deleteDatasetFromPacs(Dataset dataset) throws ShanoirException;
 
+	/**
+	 * Get statistics for data analysts and study promoters
+	 * 
+	 * @return imaging statistics
+	 */
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+	byte[] queryManageStudyStatistics(Long studyId) throws Exception;
+
 }

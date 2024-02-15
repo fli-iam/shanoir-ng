@@ -599,4 +599,25 @@ public class DatasetApiController implements DatasetApi {
 				.contentLength(data.length)
 				.body(resource);
 	}
+
+	@Override
+	public ResponseEntity<ByteArrayResource> getManageStudyStatistics(@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId)
+			throws RestServiceException, IOException {
+		try {
+			byte[] csvData = datasetService.queryManageStudyStatistics(studyId);
+
+			ByteArrayResource resource = new ByteArrayResource(csvData);
+
+			return ResponseEntity.ok()
+			.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=statistics.csv")
+			.contentLength(csvData.length)
+			.body(resource);
+
+		} catch (jakarta.persistence.NoResultException e) {
+			throw new RestServiceException(new ErrorModel(HttpStatus.NOT_FOUND.value(), "No result found.", e));
+		} catch (Exception e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while querying the database.", e));
+		}
+	}
 }

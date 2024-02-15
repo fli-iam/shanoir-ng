@@ -347,4 +347,9 @@ public class DatasetServiceImpl implements DatasetService {
 	public List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception {
 		return repository.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
 	}
+
+	@Override
+	public byte[] queryManageStudyStatistics(Long studyId) throws Exception {
+		return repository.queryManageStudyStatistics(studyId);
+	}
 }

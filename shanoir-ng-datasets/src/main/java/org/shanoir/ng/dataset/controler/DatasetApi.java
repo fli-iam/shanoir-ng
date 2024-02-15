@@ -279,7 +279,6 @@ public interface DatasetApi {
 			@Parameter(name = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
 			@RequestParam(value = "format", required = false, defaultValue="dcm") String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException;
 
-
 	@Operation(summary = "downloadStatistics", description = "Download statistics from the entire database")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "exported statistics"),
@@ -309,5 +308,17 @@ public interface DatasetApi {
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_SEE_ALL'))")
 	ResponseEntity<List<DatasetAndProcessingsDTOInterface>> findDatasetsByIds(
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds);
+
+			@Operation(summary = "getManageStudyStatistics", description = "Returns study imaging statistics corresponding to the given study id")
+			@ApiResponses(value = {
+				@ApiResponse(responseCode = "200", description = "exported statistics"),
+				@ApiResponse(responseCode = "401", description = "unauthorized"),
+				@ApiResponse(responseCode = "403", description = "forbidden"),
+				@ApiResponse(responseCode = "404", description = "no dataset found"),
+				@ApiResponse(responseCode = "500", description = "unexpected error") })
+			@GetMapping(value = "/manageStudyStatistics/{studyId}", produces = { "text/csv" })
+			@PreAuthorize("hasRole('ADMIN') or hasRole('EXPERT')")
+			ResponseEntity<ByteArrayResource> getManageStudyStatistics(
+				@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws RestServiceException, IOException;
 
 }
