@@ -46,7 +46,7 @@ COPY --chown=keycloak themes/. /opt/keycloak/themes
 COPY cfg/. /opt/keycloak/
 RUN  mkdir /opt/keycloak/data/log
 
-COPY entrypoint entrypoint_common oneshot /bin/
+COPY entrypoint entrypoint_common /bin/
 
 ENTRYPOINT ["/bin/entrypoint", "/opt/keycloak/bin/kc.sh"]
-CMD ["start"]
+CMD []
