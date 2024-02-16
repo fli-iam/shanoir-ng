@@ -490,6 +490,8 @@ export class MassDownloadService {
                 return lastFolderHandle.getFileHandle(filename, { create: true }).then(fileHandler => {
                     return this.writeFile(fileHandler, content); // write the file
                 }).catch(error => {
+                    console.log(1, error);
+                    console.trace();
                     throw new ShanoirError({error: {code: ShanoirError.FILE_PATH_TOO_LONG, message: 'Probable reason: file path too long for Windows, max 260 characters'}});
                 });
             });
@@ -497,6 +499,8 @@ export class MassDownloadService {
             return userFolderHandle.getFileHandle(filename, { create: true }).then(fileHandler => {
                 return this.writeFile(fileHandler, content);
             }).catch(error => {
+                console.log(2, error);
+                console.trace();
                 throw new ShanoirError({error: {code: ShanoirError.FILE_PATH_TOO_LONG, message: 'Probable reason: file path too long for Windows, max 260 characters'}});
             });
         }
