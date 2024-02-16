@@ -37,6 +37,7 @@ import jakarta.validation.Valid;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
+import org.shanoir.ng.dataset.dto.StudyStatisticsDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetMapper;
@@ -601,17 +602,14 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<ByteArrayResource> getManageStudyStatistics(@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId)
+	public ResponseEntity<List<StudyStatisticsDTO>> getManageStudyStatistics(@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId)
 			throws RestServiceException, IOException {
 		try {
-			byte[] csvData = datasetService.queryManageStudyStatistics(studyId);
-
-			ByteArrayResource resource = new ByteArrayResource(csvData);
+			List<StudyStatisticsDTO> statistics = datasetService.queryManageStudyStatistics(studyId);
 
 			return ResponseEntity.ok()
-			.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=statistics.csv")
-			.contentLength(csvData.length)
-			.body(resource);
+			.contentType(MediaType.APPLICATION_JSON)
+			.body(statistics);
 
 		} catch (jakarta.persistence.NoResultException e) {
 			throw new RestServiceException(new ErrorModel(HttpStatus.NOT_FOUND.value(), "No result found.", e));

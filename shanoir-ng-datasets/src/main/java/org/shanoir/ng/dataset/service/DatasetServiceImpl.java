@@ -14,32 +14,18 @@
 
 package org.shanoir.ng.dataset.service;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.assertj.core.util.Arrays;
-import org.shanoir.ng.configuration.amqp.RabbitMQDatasetsService;
 import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
-import org.shanoir.ng.dataset.modality.EegDataset;
+import org.shanoir.ng.dataset.dto.StudyStatisticsDTO;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
-import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.mr.MrScanningSequence;
-import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
-import org.shanoir.ng.eeg.model.Channel;
-import org.shanoir.ng.eeg.model.Event;
-import org.shanoir.ng.examination.model.Examination;
-import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -47,24 +33,18 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.model.*;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
-import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriUtils;
@@ -349,7 +329,7 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
-	public byte[] queryManageStudyStatistics(Long studyId) throws Exception {
+	public List<StudyStatisticsDTO> queryManageStudyStatistics(Long studyId) throws Exception {
 		return repository.queryManageStudyStatistics(studyId);
 	}
 }
