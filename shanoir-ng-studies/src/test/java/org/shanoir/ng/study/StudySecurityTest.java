@@ -27,7 +27,6 @@ import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.Study;
