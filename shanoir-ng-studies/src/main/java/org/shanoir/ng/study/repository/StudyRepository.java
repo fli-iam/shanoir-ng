@@ -18,8 +18,11 @@ import java.util.List;
 import java.util.Optional;
 
 import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.tag.model.Tag;
 import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -28,10 +31,6 @@ public interface StudyRepository extends CrudRepository<Study, Long> {
 	@EntityGraph("Study.All")
 	Optional<Study> findById(Long id);
 
-	/**
-	 * Lists all the publicly available studies.
-	 * @return all the publicly available studies.
-	 */
 	@EntityGraph(attributePaths = { "studyTags" })
 	List<Study> findByVisibleByDefaultTrue();
 
@@ -41,19 +40,11 @@ public interface StudyRepository extends CrudRepository<Study, Long> {
 	@EntityGraph(attributePaths = { "profile", "tags" })
 	List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(Long userId, Integer studyUserRightId, boolean confirmed);
 
-	/**
-	 * Get all studies with isChallenge flag to true
-	 * @return the list of challenges
-	 */
 	List<Study> findByChallengeTrue();
 
-	/**
-	 * Get studies linked to an user.
-	 * 
-	 * @param userId
-	 *            user id.
-	 * @return list of studies.
-	 */
 	List<Study> findByStudyUserList_UserIdOrderByNameAsc(Long userId);	
+
+	@Query("SELECT t FROM Study s LEFT JOIN s.tags t WHERE s.id = :studyId")
+    List<Tag> findTagsByStudyId(@Param("studyId") Long studyId);
 
 }

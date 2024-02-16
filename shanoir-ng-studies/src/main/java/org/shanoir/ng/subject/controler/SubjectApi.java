@@ -157,7 +157,6 @@ public interface SubjectApi {
 	@GetMapping(value = "/{studyId}/allSubjects", produces = {
 			"application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterSimpleSubjectDTOsHasRightInOneStudy(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<SimpleSubjectDTO>> findSubjectsByStudyId(
 			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@Parameter(name = "preclinical", required = false) @RequestParam(value="preclinical", required = false) String preclinical);
