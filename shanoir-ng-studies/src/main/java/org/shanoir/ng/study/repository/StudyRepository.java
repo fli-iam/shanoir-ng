@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.shanoir.ng.study.model.Study;
-import org.shanoir.ng.tag.model.Tag;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -44,7 +43,8 @@ public interface StudyRepository extends CrudRepository<Study, Long> {
 
 	List<Study> findByStudyUserList_UserIdOrderByNameAsc(Long userId);	
 
-	@Query("SELECT t FROM Study s LEFT JOIN s.tags t WHERE s.id = :studyId")
-    List<Tag> findTagsByStudyId(@Param("studyId") Long studyId);
+	@EntityGraph(attributePaths = "tags")
+    @Query("SELECT s FROM Study s WHERE s.id = :studyId")
+    Study findStudyWithTagsById(@Param("studyId") Long studyId);
 
 }

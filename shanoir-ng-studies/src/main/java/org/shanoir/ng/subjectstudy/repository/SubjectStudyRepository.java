@@ -31,7 +31,11 @@ import org.springframework.data.repository.query.Param;
 public interface SubjectStudyRepository extends CrudRepository<SubjectStudy, Long> {
 
 	@EntityGraph(attributePaths = { "subjectStudyTags.tag.name", "subject" })
-	List<SubjectStudy> findByStudyId(@Param("studyId") Long studyId);
+    @Query("SELECT ss FROM SubjectStudy ss " +
+           "LEFT JOIN FETCH ss.subjectStudyTags sst " +
+           "LEFT JOIN FETCH sst.tag t " +
+           "WHERE ss.study.id = :studyId")
+    List<SubjectStudy> findByStudyId(@Param("studyId") Long studyId);
 
 	SubjectStudy findByStudyIdAndSubjectId(Long studyId, Long subjectId);
 

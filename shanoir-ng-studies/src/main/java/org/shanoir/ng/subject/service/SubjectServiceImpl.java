@@ -42,7 +42,6 @@ import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyDecorator;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
-import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ListDependencyUpdate;
 import org.shanoir.ng.utils.Utils;
@@ -288,8 +287,8 @@ public class SubjectServiceImpl implements SubjectService {
 	public List<SimpleSubjectDTO> findAllSubjectsOfStudyId(final Long studyId) {
 		List<SimpleSubjectDTO> simpleSubjectDTOList = new ArrayList<>();
 		List<SubjectStudy> studySubjects = subjectStudyRepository.findByStudyId(studyId);
-		List<Tag> tags = studyRepository.findTagsByStudyId(studyId);
-		studySubjects.stream().forEach(ss -> ss.getStudy().setTags(tags));
+		Study studyWithTags = studyRepository.findStudyWithTagsById(studyId);
+		studySubjects.stream().forEach(ss -> ss.setStudy(studyWithTags));
 		if (studySubjects != null) {
 			for (SubjectStudy rel : studySubjects) {
 				SimpleSubjectDTO simpleSubjectDTO = new SimpleSubjectDTO();
@@ -310,8 +309,8 @@ public class SubjectServiceImpl implements SubjectService {
 	public List<SimpleSubjectDTO> findAllSubjectsOfStudyAndPreclinical(final Long studyId, boolean preclinical) {
 		List<SimpleSubjectDTO> simpleSubjectDTOList = new ArrayList<>();
 		List<SubjectStudy> studySubjects = subjectStudyRepository.findByStudyId(studyId);
-		List<Tag> tags = studyRepository.findTagsByStudyId(studyId);
-		studySubjects.stream().forEach(ss -> ss.getStudy().setTags(tags));
+		Study studyWithTags = studyRepository.findStudyWithTagsById(studyId);
+		studySubjects.stream().forEach(ss -> ss.setStudy(studyWithTags));
 		if (studySubjects != null) {
 			for (SubjectStudy rel : studySubjects) {
 				SimpleSubjectDTO simpleSubjectDTO = new SimpleSubjectDTO();
