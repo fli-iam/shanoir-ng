@@ -193,6 +193,7 @@ public class SubjectApiSecurityTest {
 		subjectStudyMock.setStudy(buildStudyMock(1L));
 		subjectStudyMock.setSubject(subjectMockNoRights);
 		given(subjectStudyRepository.findByStudyId(subjectStudyMock.getStudy().getId())).willReturn(Arrays.asList(subjectStudyMock));
+		given(studyRepository.findStudyWithTagsById(1L)).willReturn(buildStudyMock(1L));
 		assertAccessAuthorized(api::findSubjectsByStudyId, 1L, "null");
 		assertEquals(null, api.findSubjectsByStudyId(1L, "null").getBody());
 		
