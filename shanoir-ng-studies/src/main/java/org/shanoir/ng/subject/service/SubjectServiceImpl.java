@@ -287,11 +287,11 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	public List<SimpleSubjectDTO> findAllSubjectsOfStudyId(final Long studyId) {
 		List<SimpleSubjectDTO> simpleSubjectDTOList = new ArrayList<>();
-		List<SubjectStudy> subjectStudies = subjectStudyRepository.findByStudyId(studyId);
+		List<SubjectStudy> studySubjects = subjectStudyRepository.findByStudyId(studyId);
 		List<Tag> tags = studyRepository.findTagsByStudyId(studyId);
-		subjectStudies.stream().forEach(ss -> ss.getStudy().setTags(tags));
-		if (subjectStudies != null) {
-			for (SubjectStudy rel : subjectStudies) {
+		studySubjects.stream().forEach(ss -> ss.getStudy().setTags(tags));
+		if (studySubjects != null) {
+			for (SubjectStudy rel : studySubjects) {
 				SimpleSubjectDTO simpleSubjectDTO = new SimpleSubjectDTO();
 				if (studyId.equals(rel.getStudy().getId())) {
 					Subject sub = rel.getSubject();
@@ -309,11 +309,11 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	public List<SimpleSubjectDTO> findAllSubjectsOfStudyAndPreclinical(final Long studyId, boolean preclinical) {
 		List<SimpleSubjectDTO> simpleSubjectDTOList = new ArrayList<>();
-		List<SubjectStudy> subjectStudies = subjectStudyRepository.findByStudyId(studyId);
+		List<SubjectStudy> studySubjects = subjectStudyRepository.findByStudyId(studyId);
 		List<Tag> tags = studyRepository.findTagsByStudyId(studyId);
-		subjectStudies.stream().forEach(ss -> ss.getStudy().setTags(tags));
-		if (subjectStudies != null) {
-			for (SubjectStudy rel : subjectStudies) {
+		studySubjects.stream().forEach(ss -> ss.getStudy().setTags(tags));
+		if (studySubjects != null) {
+			for (SubjectStudy rel : studySubjects) {
 				SimpleSubjectDTO simpleSubjectDTO = new SimpleSubjectDTO();
 				if (studyId.equals(rel.getStudy().getId()) && preclinical == rel.getSubject().isPreclinical()) {
 					Subject sub = rel.getSubject();
