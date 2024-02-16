@@ -1,9 +1,8 @@
 package org.shanoir.ng.vip.monitoring.schedule;
 
-import org.keycloak.representations.AccessTokenResponse;
 import org.shanoir.ng.vip.controller.VipClientService;
 import org.shanoir.ng.vip.monitoring.model.ExecutionMonitoring;
-import org.shanoir.ng.vip.monitoring.model.Execution;
+import org.shanoir.ng.vip.dto.VipExecutionDTO;
 import org.shanoir.ng.vip.monitoring.model.ExecutionStatus;
 import org.shanoir.ng.vip.resulthandler.ResultHandlerException;
 import org.shanoir.ng.vip.resulthandler.ResultHandlerService;
@@ -19,13 +18,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 
@@ -88,26 +84,26 @@ public class ExecutionStatusMonitorService {
 
 			try{
 
-				Execution execution = vipClient.getExecutionAsService(attempts, this.identifier);
+				VipExecutionDTO dto = vipClient.getExecutionAsServiceAccount(attempts, this.identifier).block();
 
-				if(execution == null){
+				if(dto == null){
 					attempts++;
 					continue;
+				}else{
+					attempts = 1;
 				}
 
-				attempts = 1;
-
-				switch (execution.getStatus()) {
+				switch (dto.getStatus()) {
 					case FINISHED:
 
-						this.processFinishedJob(processing, event, execution.getEndDate());
+						this.processFinishedJob(processing, event, dto.getEndDate());
 						break;
 
 					case UNKNOWN:
 					case EXECUTION_FAILED:
 					case KILLED:
 
-						this.processKilledJob(processing, event, execution);
+						this.processKilledJob(processing, event, dto);
 						break;
 
 					case RUNNING:
@@ -123,7 +119,6 @@ public class ExecutionStatusMonitorService {
 						stop.set(true);
 						break;
 				}
-
 			}catch (ResultHandlerException e){
 				LOG.error(e.getMessage(), e.getCause());
 				this.setJobInError(event, execLabel + " : " + e.getMessage());
@@ -157,21 +152,21 @@ public class ExecutionStatusMonitorService {
 		return "VIP Execution [" + processing.getName() + "]";
 	}
 
-	public void processKilledJob(ExecutionMonitoring processing, ShanoirEvent event, Execution execution) throws EntityNotFoundException {
+	public void processKilledJob(ExecutionMonitoring processing, ShanoirEvent event, VipExecutionDTO vipExecutionDTO) throws EntityNotFoundException {
 
 		String execLabel = this.getExecLabel(processing);
 
-		LOG.warn("{} status is [{}]", execLabel, execution.getStatus().getRestLabel());
+		LOG.warn("{} status is [{}]", execLabel, vipExecutionDTO.getStatus().getRestLabel());
 
-		processing.setStatus(execution.getStatus());
+		processing.setStatus(vipExecutionDTO.getStatus());
 		this.executionMonitoringService.update(processing);
 
 		LOG.info("Execution status updated, stopping job...");
 
 		stop.set(true);
 
-		this.setJobInError(event, execLabel + " : "  + execution.getStatus().getRestLabel()
-				+ (execution.getErrorCode() != null ? " (Error code : " + execution.getErrorCode() + ")" : ""));
+		this.setJobInError(event, execLabel + " : "  + vipExecutionDTO.getStatus().getRestLabel()
+				+ (vipExecutionDTO.getErrorCode() != null ? " (Error code : " + vipExecutionDTO.getErrorCode() + ")" : ""));
 	}
 
 	public void processFinishedJob(ExecutionMonitoring execution, ShanoirEvent event, Long endDate) throws EntityNotFoundException, ResultHandlerException {
