@@ -143,17 +143,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								<instrument-assessment-detail [instrumentBasedAssesment]="instrumentBased">
                                 </instrument-assessment-detail>
                             </ng-template>
-                        <div *ngIf="mode == 'create' || mode=='edit'">
+                        </span>
+                    </li>
+                    <li *ngIf="mode == 'create' || mode=='edit'">
+                        <label i18n="Examination detail|Attached files label@@examinationDetailAttachedFiles">Attach new files</label>
                         <span class="right-col" [ngSwitch]="mode">
-                                <input #input hidden type="file" (change)="attachNewFile($event)"/>
-                                <button (click)="setFile()" class="left-icon"><i class="fas fa-upload"></i>Attach new files</button>
-                                <ul>
-                                    <li *ngFor="let file of examination.extraDataFilePathList"> {{getFileName(file)}} <button (click)="deleteFile(file)"><i class="fa-regular fa-trash-can"></i></button>
-                                    </li>
-                                </ul>
-                            </span>
-                        </div>
-                    </span>
+                            <input #input hidden type="file" (change)="attachNewFile($event)"/>
+                            <button (click)="setFile()" class="left-icon"><i class="fas fa-upload"></i>Choose file</button>
+                            <ul>
+                                <li *ngFor="let file of examination.extraDataFilePathList"> {{getFileName(file)}} <button (click)="deleteFile(file)"><i class="fa-regular fa-trash-can"></i></button>
+                                </li>
+                            </ul>
+						</span>
                     </li>
 				</ol>
 			</fieldset>
