@@ -48,7 +48,6 @@ public interface SubjectService {
 	@PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(filterObject, 'CAN_SEE_ALL')")
 	List<Subject> findAll();
 	
-	
 	/**
 	 * Get all the subjects.
 	 *
@@ -68,8 +67,7 @@ public interface SubjectService {
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnSubjectForOneStudy(filterObject.getId(), 'CAN_SEE_ALL')")
-	public List<SimpleSubjectDTO> findAllSubjectsOfStudy(final Long studyId);
-	
+	public List<SimpleSubjectDTO> findAllSubjectsOfStudyId(final Long studyId);
 	
 	/**
 	 * Get all the subjects of a study
@@ -171,21 +169,12 @@ public interface SubjectService {
 	@PreAuthorize("hasAnyRole('ADMIN') or hasAnyRole('EXPERT') and @studySecurityService.hasRightOnSubjectForEveryStudy(#id, 'CAN_ADMINISTRATE')")
 	void deleteById(Long id) throws EntityNotFoundException;
 
-
-	/**
-	 * This method should not be used directly. Same as findAllSubjectsOfStudy but with no roles
-	 * @param studyId
-	 * @return
-	 */
-	List<SimpleSubjectDTO> findAllSubjectsOfStudyId(Long studyId);
-
 	/**
 	 * Update subject name and values for other microservices.
 	 * @param subjectToSubjectDTO the subject DTO to update
 	 * @throws MicroServiceCommunicationException 
 	 */
 	boolean updateSubjectName(SubjectDTO subjectToSubjectDTO) throws MicroServiceCommunicationException;
-
 
 	/**
 	 * Returns a filtered page by clinical subject name.

@@ -34,6 +34,7 @@ import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
+import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.subject.controler.SubjectApi;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
@@ -73,6 +74,9 @@ public class SubjectApiSecurityTest {
 	
 	@MockBean
 	private SubjectRepository repository;
+
+	@MockBean
+	private StudyUserRepository studyUserRepository;
 	
 	@MockBean
 	private StudyRepository studyRepository;
@@ -188,7 +192,7 @@ public class SubjectApiSecurityTest {
 		SubjectStudy subjectStudyMock = new SubjectStudy();
 		subjectStudyMock.setStudy(buildStudyMock(1L));
 		subjectStudyMock.setSubject(subjectMockNoRights);
-		given(subjectStudyRepository.findByStudy(subjectStudyMock.getStudy())).willReturn(Arrays.asList(subjectStudyMock));
+		given(subjectStudyRepository.findByStudyId(subjectStudyMock.getStudy().getId())).willReturn(Arrays.asList(subjectStudyMock));
 		assertAccessAuthorized(api::findSubjectsByStudyId, 1L, "null");
 		assertEquals(null, api.findSubjectsByStudyId(1L, "null").getBody());
 		
@@ -214,7 +218,7 @@ public class SubjectApiSecurityTest {
 		subjectStudyMock = new SubjectStudy();
 		subjectStudyMock.setStudy(buildStudyMock(1L));
 		subjectStudyMock.setSubject(subjectMockWrongRights);
-		given(subjectStudyRepository.findByStudy(subjectStudyMock.getStudy())).willReturn(Arrays.asList(subjectStudyMock));
+		given(subjectStudyRepository.findByStudyId(subjectStudyMock.getStudy().getId())).willReturn(Arrays.asList(subjectStudyMock));
 		assertAccessAuthorized(api::findSubjectsByStudyId, 1L, null);
 		assertEquals(null, api.findSubjectsByStudyId(1L, null).getBody());
 
@@ -240,7 +244,7 @@ public class SubjectApiSecurityTest {
 		subjectStudyMock = new SubjectStudy();
 		subjectStudyMock.setStudy(buildStudyMock(1L));
 		subjectStudyMock.setSubject(subjectMockRightRights);
-		given(subjectStudyRepository.findByStudy(subjectStudyMock.getStudy())).willReturn(Arrays.asList(subjectStudyMock));
+		given(subjectStudyRepository.findByStudyId(subjectStudyMock.getStudy().getId())).willReturn(Arrays.asList(subjectStudyMock));
 		given(studyRepository.findById(1L)).willReturn(Optional.of(subjectStudyMock.getStudy()));
 		assertAccessAuthorized(api::findSubjectsByStudyId, 1L, null);
 		assertNotNull(api.findSubjectsByStudyId(1L,null).getBody());
@@ -290,6 +294,7 @@ public class SubjectApiSecurityTest {
 		studiesMock.add(buildStudyMock(13L, StudyUserRight.CAN_IMPORT));
 		given(studyRepository.findAllById(Arrays.asList(new Long[] { 13L }))).willReturn(studiesMock);
 		given(studyRepository.findById(13L)).willReturn(Optional.of(buildStudyMock(13L, StudyUserRight.CAN_IMPORT)));
+		given(studyUserRepository.findByStudy_Id(13L)).willReturn(buildStudyMock(13L, StudyUserRight.CAN_IMPORT).getStudyUserList());
 		newSubjectMock = buildSubjectMock(null);
 		addStudyToMock(newSubjectMock, 13L);
 		assertAccessAuthorized(api::saveNewSubject, newSubjectMock, null, mockBindingResult);

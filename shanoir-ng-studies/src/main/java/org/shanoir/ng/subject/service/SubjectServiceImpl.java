@@ -76,9 +76,6 @@ public class SubjectServiceImpl implements SubjectService {
 	private SubjectRepository subjectRepository;
 
 	@Autowired
-	private StudyRepository studyRepository;
-
-	@Autowired
 	private SubjectStudyRepository subjectStudyRepository;
 	
 	@Autowired
@@ -284,16 +281,11 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 
 	@Override
-	public List<SimpleSubjectDTO> findAllSubjectsOfStudy(final Long studyId) {
-		return this.findAllSubjectsOfStudyId(studyId);
-	}
-
-	@Override
 	public List<SimpleSubjectDTO> findAllSubjectsOfStudyId(final Long studyId) {
 		List<SimpleSubjectDTO> simpleSubjectDTOList = new ArrayList<>();
-		List<SubjectStudy> opt = subjectStudyRepository.findByStudy(studyRepository.findById(studyId).orElse(null));
-		if (opt != null) {
-			for (SubjectStudy rel : opt) {
+		List<SubjectStudy> subjectStudies = subjectStudyRepository.findByStudyId(studyId);
+		if (subjectStudies != null) {
+			for (SubjectStudy rel : subjectStudies) {
 				SimpleSubjectDTO simpleSubjectDTO = new SimpleSubjectDTO();
 				if (studyId.equals(rel.getStudy().getId())) {
 					Subject sub = rel.getSubject();
@@ -311,9 +303,9 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	public List<SimpleSubjectDTO> findAllSubjectsOfStudyAndPreclinical(final Long studyId, boolean preclinical) {
 		List<SimpleSubjectDTO> simpleSubjectDTOList = new ArrayList<>();
-		List<SubjectStudy> opt = subjectStudyRepository.findByStudy(studyRepository.findById(studyId).orElse(null));
-		if (opt != null) {
-			for (SubjectStudy rel : opt) {
+		List<SubjectStudy> subjectStudies = subjectStudyRepository.findByStudyId(studyId);
+		if (subjectStudies != null) {
+			for (SubjectStudy rel : subjectStudies) {
 				SimpleSubjectDTO simpleSubjectDTO = new SimpleSubjectDTO();
 				if (studyId.equals(rel.getStudy().getId()) && preclinical == rel.getSubject().isPreclinical()) {
 					Subject sub = rel.getSubject();

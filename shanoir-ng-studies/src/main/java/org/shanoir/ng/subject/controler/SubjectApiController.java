@@ -169,7 +169,7 @@ public class SubjectApiController implements SubjectApi {
 			@Parameter(name="preclinical", required = false) @RequestParam(value="preclinical", required = false) String preclinical) {
 		final List<SimpleSubjectDTO> simpleSubjectDTOList;
 		if ("null".equals(preclinical)) {
-			simpleSubjectDTOList = subjectService.findAllSubjectsOfStudy(studyId);
+			simpleSubjectDTOList = subjectService.findAllSubjectsOfStudyId(studyId);
 		} else {
 			simpleSubjectDTOList = subjectService.findAllSubjectsOfStudyAndPreclinical(studyId, Boolean.parseBoolean(preclinical));
 		}

@@ -147,4 +147,5 @@ public class SubjectStudyDTO {
     public void setQualityTag(QualityTag qualityTag) {
         this.qualityTag = qualityTag;
     }
+
 }
