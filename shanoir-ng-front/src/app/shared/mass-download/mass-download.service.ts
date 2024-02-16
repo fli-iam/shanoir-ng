@@ -438,6 +438,8 @@ export class MassDownloadService {
             } else if (report.list[id].status == 'ERROR') {
                 task.message = 'saving dataset n°' + id + ' failed';
                 report.nbError++;
+            } else {
+                console.log('THAT\'S IT', report.list[id], task);
             }
             task.report = JSON.stringify(report, null, 4);
             this.writeMyFile(this.REPORT_FILENAME, task.report, userFolderHandle);
