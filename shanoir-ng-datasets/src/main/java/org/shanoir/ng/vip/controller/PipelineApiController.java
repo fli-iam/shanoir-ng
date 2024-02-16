@@ -1,10 +1,8 @@
 package org.shanoir.ng.vip.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.client.HttpStatusCodeException;
+import reactor.core.publisher.Mono;
 
 @Controller
 public class PipelineApiController implements PipelineApi {
@@ -13,32 +11,17 @@ public class PipelineApiController implements PipelineApi {
     private VipClientService vipClient;
 
     /**
-     *
-     * @param identifier
+     * @param name
+     * @param version
      * @return
      */
     @Override
-    public ResponseEntity<String> getPipeline(String name, String version) {
-        String json;
-        try {
-            json = vipClient.getPipeline(name, version);
-        } catch (HttpStatusCodeException e) {
-            // in case of an error with response payload
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(json, HttpStatus.OK);
+    public Mono<String> getPipeline(String name, String version) {
+        return vipClient.getPipeline(name, version);
     }
 
     @Override
-    public ResponseEntity<String> getPipelineAll() {
-
-        String json;
-        try {
-            json = vipClient.getPipelineAll();
-        } catch (HttpStatusCodeException e) {
-            // in case of an error with response payload
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(json, HttpStatus.OK);
+    public Mono<String> getPipelineAll() {
+        return vipClient.getPipelineAll();
     }
 }
