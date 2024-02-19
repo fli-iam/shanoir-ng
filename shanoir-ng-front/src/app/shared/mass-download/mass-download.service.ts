@@ -492,7 +492,7 @@ export class MassDownloadService {
                     this.processFileError(error, path);
                 });
             }).catch(error => {
-                if (error instanceof ShanoirError) {
+                if (error instanceof ShanoirError) { 
                     throw error;
                 } else {
                     throw new ShanoirError({error: {code: ShanoirError.FILE_PATH_TOO_LONG, message: 'Probable reason: directory path too long for Windows, max 260 characters (<your chosen directory>/' + path + ')', details: error + ''}});
