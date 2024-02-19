@@ -20,7 +20,6 @@ BEGIN
 SELECT
     e.study_id AS study_id,
     c.name AS center_name,
-    SUBSTRING(s.name, 6, 2) AS center_number,
     s.id AS subject_id,
     s.name AS common_name,
     e.id AS examination_id,

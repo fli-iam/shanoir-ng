@@ -68,22 +68,20 @@ public class DatasetRepositoryImpl implements DatasetRepositoryCustom {
 
 			studyId = (Long) row[0];
 			String centerName = (String) row[1];
-			String centerNumber = (String) row[2];
-			Long subjectId = (Long) row[3];
-			String commonName = (String) row[4];
-			Long examinationId = (Long) row[5];
-			LocalDate examinationDate = (LocalDate) row[6];
-			Long datasetAcquisitionId = (Long) row[7];
-			LocalDate importDate = (LocalDate) row[8];
-			Long datasetId = (Long) row[9];
-			String modality = (String) row[10];
-			String quality = (String) row[11];
+			Long subjectId = (Long) row[2];
+			String commonName = (String) row[3];
+			Long examinationId = (Long) row[4];
+			LocalDate examinationDate = (LocalDate) row[5];
+			Long datasetAcquisitionId = (Long) row[6];
+			LocalDate importDate = (LocalDate) row[7];
+			Long datasetId = (Long) row[8];
+			String modality = (String) row[9];
+			String quality = (String) row[10];
 
-			StudyStatisticsDTO dto = new StudyStatisticsDTO(studyId, centerName, centerNumber, subjectId, commonName, examinationId, examinationDate, datasetAcquisitionId, importDate, datasetId, modality, quality);
+			StudyStatisticsDTO dto = new StudyStatisticsDTO(studyId, centerName, subjectId, commonName, examinationId, examinationDate, datasetAcquisitionId, importDate, datasetId, modality, quality);
 
 			dto.setStudyId(studyId);
 			dto.setCenterName(centerName);
-			dto.setCenterNumber(centerNumber);
 			dto.setSubjectId(subjectId);
 			dto.setCommonName(commonName);
 			dto.setExaminationId(examinationId);
