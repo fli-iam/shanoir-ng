@@ -31,8 +31,8 @@ public class StudyStatisticsDTO {
 
 	private String centerName;
 
-	// Different from centerId, it refers to the specific index determined by the study promoter
-	private Long centerNumber;
+	// Different from centerId, it refers to the specific index determined by the study promoter, type is String because it is a substring from the subject common name.
+	private String centerNumber;
 
 	private Long subjectId;
 
@@ -54,7 +54,7 @@ public class StudyStatisticsDTO {
 
 	private String quality;
 
-	public StudyStatisticsDTO(Long studyId, String centerName, Long centerNumber, Long subjectId, String commonName,
+	public StudyStatisticsDTO(Long studyId, String centerName, String centerNumber, Long subjectId, String commonName,
 			Long examinationId, LocalDate examinationDate, Long datasetAcquisitionId, LocalDate importDate,
 			Long datasetId, String modality, String quality) {
 		this.studyId = studyId;
@@ -87,11 +87,11 @@ public class StudyStatisticsDTO {
 		this.centerName = centerName;
 	}
 
-	public Long getCenterNumber() {
+	public String getCenterNumber() {
 		return centerNumber;
 	}
 
-	public void setCenterNumber(Long centerNumber) {
+	public void setCenterNumber(String centerNumber) {
 		this.centerNumber = centerNumber;
 	}
 

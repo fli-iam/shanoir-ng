@@ -68,7 +68,7 @@ public class DatasetRepositoryImpl implements DatasetRepositoryCustom {
 
 			studyId = (Long) row[0];
 			String centerName = (String) row[1];
-			Long centerNumber = (Long) row[2];
+			String centerNumber = (String) row[2];
 			Long subjectId = (Long) row[3];
 			String commonName = (String) row[4];
 			Long examinationId = (Long) row[5];
@@ -79,7 +79,7 @@ public class DatasetRepositoryImpl implements DatasetRepositoryCustom {
 			String modality = (String) row[10];
 			String quality = (String) row[11];
 
-			StudyStatisticsDTO dto = new StudyStatisticsDTO(datasetId, quality, datasetId, datasetId, quality, datasetId, importDate, datasetId, importDate, datasetId, quality, quality);
+			StudyStatisticsDTO dto = new StudyStatisticsDTO(studyId, centerName, centerNumber, subjectId, commonName, examinationId, examinationDate, datasetAcquisitionId, importDate, datasetId, modality, quality);
 
 			dto.setStudyId(studyId);
 			dto.setCenterName(centerName);
