@@ -489,20 +489,20 @@ export class MassDownloadService {
                 return lastFolderHandle.getFileHandle(filename, { create: true }).then(fileHandler => {
                     return this.writeFile(fileHandler, content); // write the file
                 }).catch(error => {
-                    throw new ShanoirError({error: {code: ShanoirError.FILE_PATH_TOO_LONG, message: 'Probable reason: file path too long for Windows, max 260 characters', details: error + ''}});
+                    throw new ShanoirError({error: {code: ShanoirError.FILE_PATH_TOO_LONG, message: 'Probable reason: file path too long for Windows, max 260 characters (<your chosen directory>/' + path + ')', details: error + ''}});
                 });
             }).catch(error => {
                 if (error instanceof ShanoirError) {
                     throw error;
                 } else {
-                    throw new ShanoirError({error: {code: ShanoirError.FILE_PATH_TOO_LONG, message: 'Probable reason: directory path too long for Windows, max 260 characters', details: error + ''}});
+                    throw new ShanoirError({error: {code: ShanoirError.FILE_PATH_TOO_LONG, message: 'Probable reason: directory path too long for Windows, max 260 characters (<your chosen directory>/' + path + ')', details: error + ''}});
                 }
             });
         } else { // if no dir to create
             return userFolderHandle.getFileHandle(filename, { create: true }).then(fileHandler => {
                 return this.writeFile(fileHandler, content);
             }).catch(error => {
-                throw new ShanoirError({error: {code: ShanoirError.FILE_PATH_TOO_LONG, message: 'Probable reason: file path too long for Windows, max 260 characters', details: error + ''}});
+                throw new ShanoirError({error: {code: ShanoirError.FILE_PATH_TOO_LONG, message: 'Probable reason: file path too long for Windows, max 260 characters (<your chosen directory>/' + path + ')', details: error + ''}});
             });
         }
     }
