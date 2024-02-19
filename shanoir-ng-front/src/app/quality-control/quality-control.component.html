@@ -12,13 +12,13 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<span class="subtitle">These are the compatible quality cards that you can apply all over your study.</span>
+<span class="subtitle">{{ message }}</span>
 
 <table>
     <ng-container *ngFor="let qualityCard of qualityCards">
         <tr>
-            <td class="sc-name left-icon" 
-                    [routerLink]="'/quality-card/details/' + qualityCard?.id" 
+            <td class="sc-name left-icon"
+                    [routerLink]="'/quality-card/details/' + qualityCard?.id"
                     routerLinkActive="active"
                     title="open details">
                 <i class="fa-solid fa-shuffle"></i>{{qualityCard.name}}
@@ -28,7 +28,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     {{qualityCard.rules?.length}} rule(s)
                     <study-card-rules class="rules" cardType="qualitycard"
                             *ngIf="selectedQualityCard?.id == qualityCard.id"
-                            [ngModel]="selectedQualityCard.rules" 
+                            [ngModel]="selectedQualityCard.rules"
                             mode="view"
                             [allCoils]="allCoils">
                     </study-card-rules>
@@ -37,14 +37,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <td>
                 <span>
                     Check at import
-                    <checkbox [(ngModel)]="qualityCard.toCheckAtImport" (onChange)="updateQualityCard(qualityCard)"></checkbox>
+                    <checkbox *ngIf="mode == 'edit'" [(ngModel)]="qualityCard.toCheckAtImport" (onChange)="updateQualityCard(qualityCard)"></checkbox>
+                    <i *ngIf="mode == 'view' && qualityCard.toCheckAtImport" class="fas fa-check"></i>
+                    <i *ngIf="mode == 'view' && !qualityCard.toCheckAtImport" class="fas fa-times"></i>
                 </span>
             </td>
             <td>
-                <button type="button" *ngIf="!pagings.get(qualityCard.id)" class="alt right-icon apply" (click)="apply(qualityCard)" [disabled]="loading.get(qualityCard.id)">
+                <button type="button" *ngIf="!pagings.get(qualityCard.id)" class="alt right-icon apply" (click)="apply(qualityCard)" [disabled]="loading.get(qualityCard.id) || mode=='edit'">
                     Apply now
                     <i *ngIf="!loading.get(qualityCard.id)" class="fa-solid fa-play"></i>
-                    <i *ngIf="loading.get(qualityCard.id)" class="fa fa-cog fa-spin"></i> 
+                    <i *ngIf="loading.get(qualityCard.id)" class="fa fa-cog fa-spin"></i>
                 </button>
                 <ng-container *ngIf="pagings.get(qualityCard.id) && pagings.get(qualityCard.id).items?.length > 0">
                     <button type="button" class="apply right-icon" (click)="downloadReport(qualityCard)">
@@ -60,6 +62,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <i class="fa-regular fa-circle-check"></i>
                     Quality check passed !
                 </span>
+            </td>
+            <td class="sc-name left-icon" *ngIf="mode=='edit'"
+                [routerLink]="'/quality-card/details/' + qualityCard?.id"
+                routerLinkActive="active"
+                title="Open details">
+                <i class="fa-solid fa-edit"></i>
             </td>
         </tr>
         <tr *ngIf="pagings.get(qualityCard.id)?.items?.length > 0">
@@ -78,6 +86,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div class="new">
     <button type="button" class="left-icon alt" [routerLink]="['/quality-card/create/for-study/' + studyId]">
         <i class="fa-solid fa-plus"></i>
-        Create a quality card 
+        Create a quality card
     </button>
 </div>
