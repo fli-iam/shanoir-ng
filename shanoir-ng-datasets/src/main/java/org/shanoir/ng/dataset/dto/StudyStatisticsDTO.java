@@ -16,7 +16,7 @@ package org.shanoir.ng.dataset.dto;
 
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 
-import java.time.LocalDate;
+import java.sql.Date;
 
 
 /**
@@ -38,12 +38,12 @@ public class StudyStatisticsDTO {
 	private Long examinationId;
 
 	@LocalDateAnnotations
-	private LocalDate examinationDate;
+	private Date examinationDate;
 
 	private Long datasetAcquisitionId;
 
 	@LocalDateAnnotations
-	private LocalDate importDate;
+	private Date importDate;
 
 	private Long datasetId;
 
@@ -52,7 +52,7 @@ public class StudyStatisticsDTO {
 	private String quality;
 
 	public StudyStatisticsDTO(Long studyId, String centerName, Long subjectId, String commonName,
-			Long examinationId, LocalDate examinationDate, Long datasetAcquisitionId, LocalDate importDate,
+			Long examinationId, Date examinationDate, Long datasetAcquisitionId, Date importDate,
 			Long datasetId, String modality, String quality) {
 		this.studyId = studyId;
 		this.centerName = centerName;
@@ -107,11 +107,11 @@ public class StudyStatisticsDTO {
 		this.examinationId = examinationId;
 	}
 
-	public LocalDate getExaminationDate() {
+	public Date getExaminationDate() {
 		return examinationDate;
 	}
 
-	public void setExaminationDate(LocalDate examinationDate) {
+	public void setExaminationDate(Date examinationDate) {
 		this.examinationDate = examinationDate;
 	}
 
@@ -123,11 +123,11 @@ public class StudyStatisticsDTO {
 		this.datasetAcquisitionId = datasetAcquisitionId;
 	}
 
-	public LocalDate getImportDate() {
+	public Date getImportDate() {
 		return importDate;
 	}
 
-	public void setImportDate(LocalDate importDate) {
+	public void setImportDate(Date importDate) {
 		this.importDate = importDate;
 	}
 
