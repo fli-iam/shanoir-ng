@@ -27,8 +27,19 @@ SELECT
     da.id AS dataset_acquisition_id,
     da.creation_date AS import_date,
     d.id AS dataset_id,
-    (case dm.dataset_modality_type when 1 then 'Mr' when 3 then 'Ct' when 12 then 'Xa' end) AS modality,
-    ss.quality_tag AS quality
+    (case dm.dataset_modality_type when 1 then 'Mr' 
+                                   when 2 then 'Meg' 
+                                   when 3 then 'Ct' 
+                                   when 4 then 'Spect' 
+                                   when 5 then 'Pet' 
+                                   when 6 then 'Egg' 
+                                   when 7 then 'Generic' 
+                                   when 8 then 'Ieeg' 
+                                   when 9 then 'Micr' 
+                                   when 10 then 'Beh'
+                                   when 11 then 'Nirs'
+                                   when 12 then 'Xa' end) AS modality,
+    (case ss.quality_tag when 1 then 'Valid' when 2 then 'Warning' when 3 then 'Error' end) AS quality
 FROM
     datasets.examination e
 INNER JOIN 

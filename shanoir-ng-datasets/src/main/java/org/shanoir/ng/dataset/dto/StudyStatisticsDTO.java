@@ -14,8 +14,6 @@
 
 package org.shanoir.ng.dataset.dto;
 
-import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
-
 import java.sql.Date;
 
 
