@@ -120,7 +120,6 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 					+ mainWindow.patientNameTF.getText() + " "
 					+ mainWindow.patientIDTF.getText() + " "
 					+ mainWindow.studyDescriptionTF.getText() + " "
-					+ mainWindow.seriesDescriptionTF.getText() + " "
 					+ mainWindow.studyDate.toString()) ;
 			this.mainWindow.isFromPACS = true;
 
@@ -196,10 +195,21 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 				// can not echo a GE PACS => control omitted
 				if (!exitFlag /* && dicomServerClient.echoDicomServer() */) {
 					// query Dicom Server
+					String modality = null;
+					if (!mainWindow.noRB.isSelected()) {
+						if (mainWindow.mrRB.isSelected()) {
+							modality = "MR";
+						} else if (mainWindow.ctRB.isSelected()) {
+							modality = "CT";
+						} else if (mainWindow.ptRB.isSelected()) {
+							modality = "PT";
+						} else if (mainWindow.nmRB.isSelected()) {
+							modality = "NM";
+						}
+					}
 					List<Patient> patients = dicomServerClient.queryDicomServer(
-							patientNameFinal, mainWindow.patientIDTF.getText(),
+							modality, patientNameFinal, mainWindow.patientIDTF.getText(),
 							mainWindow.studyDescriptionTF.getText(),
-							mainWindow.seriesDescriptionTF.getText(),
 							mainWindow.dateRS, mainWindow.studyDate);
 					fillMediaWithPatients(media, patients);
 				} else {

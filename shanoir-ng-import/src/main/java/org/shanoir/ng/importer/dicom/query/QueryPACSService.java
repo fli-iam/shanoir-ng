@@ -94,8 +94,6 @@ public class QueryPACSService {
 	
 	private DicomNode called;
 	
-	private Association association;
-	
 	@Value("${shanoir.import.pacs.store.aet.called.name}")
 	private String calledNameSCP;
 	
@@ -129,7 +127,7 @@ public class QueryPACSService {
 				calling.getAet(), calling.getHostname(), calling.getPort(), called.getAet(), called.getHostname(), called.getPort());
 	}
 	
-	private void connectAssociation(DicomNode calling, DicomNode called) throws Exception {
+	private Association connectAssociation(DicomNode calling, DicomNode called) throws Exception {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
         try {
@@ -153,8 +151,9 @@ public class QueryPACSService {
             		UID.PatientRootQueryRetrieveInformationModelFind, UID.ImplicitVRLittleEndian));
             aarq.addPresentationContext(new PresentationContext(3,
             		UID.StudyRootQueryRetrieveInformationModelFind, UID.ImplicitVRLittleEndian));
-            this.association = callingAE.connect(calledConn, aarq);
+            Association association = callingAE.connect(calledConn, aarq);
             LOG.info("connectAssociation finished between calling {} and called {}", calling.getAet(), called.getAet());
+            return association;
         } catch (IOException | InterruptedException | IncompatibleConnectionException | GeneralSecurityException e) {
 			LOG.error(e.getMessage(), e);
 			throw e;
@@ -162,7 +161,11 @@ public class QueryPACSService {
 	}
 	
 	public ImportJob queryCFIND(DicomQuery dicomQuery) throws Exception {
-		connectAssociation(calling, called);
+		LOG.info("--------------------");
+		LOG.info("--- START C-FIND ---");
+		LOG.info("--------------------");
+		long start = System.currentTimeMillis();
+		Association association = connectAssociation(calling, called);
 		ImportJob importJob = new ImportJob();
 		/**
 		 * In case of any patient specific search field is filled, work on patient level. Highest priority.
@@ -170,29 +173,35 @@ public class QueryPACSService {
 		if (StringUtils.isNotBlank(dicomQuery.getPatientName())
 			|| StringUtils.isNotBlank(dicomQuery.getPatientID())
 			|| StringUtils.isNotBlank(dicomQuery.getPatientBirthDate())) {
-			queryPatientLevel(dicomQuery, importJob);
+			queryPatientLevel(association, dicomQuery, importJob);
 		/**
 		 * In case of any study specific search field is filled, work on study level. Second priority.
 		 */
 		} else if (StringUtils.isNotBlank(dicomQuery.getStudyDescription())
 			|| StringUtils.isNotBlank(dicomQuery.getStudyDate())) {
-			queryStudyLevel(dicomQuery, importJob);
+			queryStudyLevel(association, dicomQuery, importJob);
 		} else {
 			throw new ShanoirImportException("DicomQuery: missing parameters.");
 		}
-		releaseAssociation();
+		releaseAssociation(association);
+		long finish = System.currentTimeMillis();
+		long timeElapsed = finish - start;
+		LOG.info("Duration of all calls of queryCFind " + timeElapsed + "ms.");
+		LOG.info("--------------------");
+		LOG.info("--- END C-FIND -----");
+		LOG.info("--------------------");
 		return importJob;
 	}
 
-	private void releaseAssociation() {
+	private void releaseAssociation(Association association) {
 		try {
-			this.association.release();
+			association.release();
 		} catch (IOException e) {
 			LOG.error(e.getMessage(), e);
 		}
-		ExecutorService executorService = (ExecutorService) this.association.getDevice().getExecutor();
+		ExecutorService executorService = (ExecutorService) association.getDevice().getExecutor();
 		executorService.shutdown();
-		this.association.getDevice().getScheduledExecutor().shutdown();
+		association.getDevice().getScheduledExecutor().shutdown();
 		LOG.info("releaseAssociation finished between calling {} and called {}", calling.getAet(), called.getAet());
 	}
 
@@ -217,9 +226,9 @@ public class QueryPACSService {
 	public boolean queryECHO(String calledAET, String hostName, int port, String callingAET) {
 		LOG.info("DICOM ECHO: Starting with configuration {}, {}, {} <- {}", calledAET, hostName, port, callingAET);
         try {
-    		connectAssociation(calling, called);
-        	this.association.cecho();
-            releaseAssociation();
+    		Association association = connectAssociation(calling, called);
+        	association.cecho();
+            releaseAssociation(association);
         } catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 			return false;
@@ -232,12 +241,13 @@ public class QueryPACSService {
 	 * @param dicomQuery
 	 * @param importJob
 	 */
-	private void queryPatientLevel(DicomQuery dicomQuery, ImportJob importJob) {
+	private void queryPatientLevel(Association association, DicomQuery dicomQuery, ImportJob importJob) {
+		DicomParam modality = initDicomParam(Tag.Modality, dicomQuery.getModality());
 		DicomParam patientName = initDicomParam(Tag.PatientName, dicomQuery.getPatientName());
 		DicomParam patientID = initDicomParam(Tag.PatientID, dicomQuery.getPatientID());
 		DicomParam patientBirthDate = initDicomParam(Tag.PatientBirthDate, dicomQuery.getPatientBirthDate());
-		DicomParam[] params = { patientName, patientID, patientBirthDate, new DicomParam(Tag.PatientBirthName), new DicomParam(Tag.PatientSex) };
-		List<Attributes> patientsAttr = queryCFind(params, QueryRetrieveLevel.PATIENT);
+		DicomParam[] params = {modality, patientName, patientID, patientBirthDate, new DicomParam(Tag.PatientBirthName), new DicomParam(Tag.PatientSex) };
+		List<Attributes> patientsAttr = queryCFind(association, params, QueryRetrieveLevel.PATIENT);
 		if (patientsAttr != null) {
 			// Limit the max number of patients returned
 			int patientsNbre = patientsAttr.size();
@@ -250,7 +260,7 @@ public class QueryPACSService {
 				boolean patientExists = patients.stream().anyMatch(p -> p.getPatientID().equals(patient.getPatientID()));
 				if (!patientExists) {
 					patients.add(patient);
-					queryStudies(dicomQuery, patient);
+					queryStudies(association, dicomQuery, patient);
 				}
 			}
 			importJob.setPatients(patients);
@@ -264,13 +274,14 @@ public class QueryPACSService {
 	 * @param called
 	 * @param importJob
 	 */
-	private void queryStudyLevel(DicomQuery dicomQuery, ImportJob importJob) {
+	private void queryStudyLevel(Association association, DicomQuery dicomQuery, ImportJob importJob) {
+		DicomParam modality = initDicomParam(Tag.Modality, dicomQuery.getModality());
 		DicomParam studyDescription = initDicomParam(Tag.StudyDescription, dicomQuery.getStudyDescription());
 		DicomParam studyDate = initDicomParam(Tag.StudyDate, dicomQuery.getStudyDate());
-		DicomParam[] params = { studyDescription, studyDate, new DicomParam(Tag.PatientName),
+		DicomParam[] params = { modality, studyDescription, studyDate, new DicomParam(Tag.PatientName),
 			new DicomParam(Tag.PatientID), new DicomParam(Tag.PatientBirthDate), new DicomParam(Tag.PatientBirthName),
 			new DicomParam(Tag.PatientSex), new DicomParam(Tag.StudyInstanceUID) };
-		List<Attributes> studies = queryCFind(params, QueryRetrieveLevel.STUDY);
+		List<Attributes> studies = queryCFind(association, params, QueryRetrieveLevel.STUDY);
 		// list of all corresponding DICOM studies received
 		if (studies != null) {
 			List<Patient> patients = new ArrayList<>();
@@ -304,13 +315,13 @@ public class QueryPACSService {
 					// handle study
 					Study study = new Study(studyAttr);
 					patient.getStudies().add(study);
-					querySeries(study);
+					querySeries(association, study, modality, studyDate);
 				} else {
 					if (!newPatient) { // only process existing patients, in case
 						// handle study
 						Study study = new Study(studyAttr);
 						patient.getStudies().add(study);
-						querySeries(study);						
+						querySeries(association, study, modality, studyDate);						
 					}
 				}
 			}
@@ -341,25 +352,27 @@ public class QueryPACSService {
 	 * @param dicomQuery 
 	 * @param patient
 	 */
-	private void queryStudies(DicomQuery dicomQuery, Patient patient) {
+	private void queryStudies(Association association, DicomQuery dicomQuery, Patient patient) {
+		DicomParam modality = initDicomParam(Tag.Modality, dicomQuery.getModality());
 		DicomParam patientName = initDicomParam(Tag.PatientName, patient.getPatientName());
 		DicomParam patientID = initDicomParam(Tag.PatientID, patient.getPatientID());
 		DicomParam studyDescription = initDicomParam(Tag.StudyDescription, dicomQuery.getStudyDescription());
 		DicomParam studyDate = initDicomParam(Tag.StudyDate, dicomQuery.getStudyDate());
 		DicomParam[] params = {
+			modality,
 			patientName,
 			patientID,
 			new DicomParam(Tag.StudyInstanceUID),
 			studyDescription,
 			studyDate
 		};
-		List<Attributes> studiesAttr = queryCFind(params, QueryRetrieveLevel.STUDY);
+		List<Attributes> studiesAttr = queryCFind(association, params, QueryRetrieveLevel.STUDY);
 		if (studiesAttr != null) {
 			List<Study> studies = new ArrayList<Study>();
 			for (int i = 0; i < studiesAttr.size(); i++) {
 				Study study = new Study(studiesAttr.get(i));
 				studies.add(study);
-				querySeries(study);
+				querySeries(association, study, modality, studyDate);
 			}
 			studies.sort((p1, p2) -> p1.getStudyDate().compareTo(p2.getStudyDate()));
 			patient.setStudies(studies);
@@ -373,29 +386,30 @@ public class QueryPACSService {
 	 * @param called
 	 * @param study
 	 */
-	private void querySeries(Study study) {
+	private void querySeries(Association association, Study study, DicomParam modality, DicomParam studyDate) {
 		DicomParam studyInstanceUID = initDicomParam(Tag.StudyInstanceUID, study.getStudyInstanceUID());
 		DicomParam[] params = {
+			modality,
 			studyInstanceUID,
+			studyDate,
 			new DicomParam(Tag.SeriesInstanceUID),
 			new DicomParam(Tag.SOPClassUID),
 			new DicomParam(Tag.SeriesDescription),
 			new DicomParam(Tag.SeriesDate),
 			new DicomParam(Tag.SeriesNumber),
-			new DicomParam(Tag.Modality),
 			new DicomParam(Tag.ProtocolName),
 			new DicomParam(Tag.Manufacturer),
 			new DicomParam(Tag.ManufacturerModelName),
 			new DicomParam(Tag.DeviceSerialNumber)
 		};
-		List<Attributes> seriesAttr = queryCFind(params, QueryRetrieveLevel.SERIES);
+		List<Attributes> seriesAttr = queryCFind(association, params, QueryRetrieveLevel.SERIES);
 		if (seriesAttr != null) {
 			List<Serie> series = new ArrayList<Serie>();
 			for (int i = 0; i < seriesAttr.size(); i++) {
 				Attributes serieAttr = seriesAttr.get(i);
 				Serie serie = new Serie(serieAttr);
 				if (!DicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(serieAttr)) {
-					queryInstances(serie, study);
+					queryInstances(association, serie, study, modality);
 					if (!serie.getInstances().isEmpty()) {
 						DicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, serieAttr);
 						DicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);
@@ -423,16 +437,17 @@ public class QueryPACSService {
 	 * @param called
 	 * @param serie
 	 */
-	private void queryInstances(Serie serie, Study study) {
+	private void queryInstances(Association association, Serie serie, Study study, DicomParam modality) {
 		DicomParam studyInstanceUID = initDicomParam(Tag.StudyInstanceUID, study.getStudyInstanceUID());
 		DicomParam seriesInstanceUID = initDicomParam(Tag.SeriesInstanceUID, serie.getSeriesInstanceUID());
 		DicomParam[] params = {
+			modality,
 			studyInstanceUID,
 			seriesInstanceUID,
 			new DicomParam(Tag.SOPInstanceUID),
 			new DicomParam(Tag.InstanceNumber)
 		};
-		List<Attributes> instancesAttr = queryCFind(params, QueryRetrieveLevel.IMAGE);
+		List<Attributes> instancesAttr = queryCFind(association, params, QueryRetrieveLevel.IMAGE);
 		if (instancesAttr != null) {
 			List<Instance> instances = new ArrayList<>();
 			for (int i = 0; i < instancesAttr.size(); i++) {
@@ -458,7 +473,8 @@ public class QueryPACSService {
 	 * @param level
 	 * @return
 	 */
-	private List<Attributes> queryCFind(DicomParam[] keys, QueryRetrieveLevel level) {
+	private List<Attributes> queryCFind(Association association, DicomParam[] keys, QueryRetrieveLevel level) {
+		long start = System.currentTimeMillis();
 		String cuid = null;
 		if (level.equals(QueryRetrieveLevel.PATIENT)) {
 			cuid = UID.PatientRootQueryRetrieveInformationModelFind;
@@ -470,7 +486,7 @@ public class QueryPACSService {
 			cuid = UID.StudyRootQueryRetrieveInformationModelFind;
 		}
 		DicomState state = new DicomState(new DicomProgress());
-		DimseRSPHandler rspHandler = new DimseRSPHandler(this.association.nextMessageID()) {
+		DimseRSPHandler rspHandler = new DimseRSPHandler(association.nextMessageID()) {
 			@Override
 			public void onDimseRSP(Association as, Attributes cmd, Attributes data) {
 				super.onDimseRSP(as, cmd, data);
@@ -499,7 +515,12 @@ public class QueryPACSService {
 		} catch (IOException | InterruptedException e) {
 			LOG.error("Error in c-find query: ", e);
 		}
-		return state.getDicomRSP();
+		List<Attributes> response = state.getDicomRSP();
+		LOG.info("C-FIND-RESPONSE:\n" + response);
+		long finish = System.currentTimeMillis();
+		long timeElapsed = finish - start;
+		LOG.info("Duration of C-FIND: " + timeElapsed + "ms.");
+		return response;
 	}
 	
     private void addAttributes(Attributes attrs, DicomParam param) {
