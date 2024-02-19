@@ -543,7 +543,7 @@ public class MainWindow extends JFrame {
 		mrRB.setSelected(true);
 		modalityRG.add(mrRB);
 		GridBagConstraints gBC_mrRB = new GridBagConstraints();
-		gBC_mrRB.insets = new Insets(10, 10, 10, 10);
+		gBC_mrRB.insets = new Insets(2, 2, 2, 2);
 		gBC_mrRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_mrRB.gridx = 1;
 		gBC_mrRB.gridy = 6;
@@ -552,7 +552,7 @@ public class MainWindow extends JFrame {
 		ctRB = new JRadioButton("CT");
 		modalityRG.add(ctRB);
 		GridBagConstraints gBC_ctRB = new GridBagConstraints();
-		gBC_ctRB.insets = new Insets(10, 10, 10, 10);
+		gBC_ctRB.insets = new Insets(2, 2, 2, 2);
 		gBC_ctRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_ctRB.gridx = 2;
 		gBC_ctRB.gridy = 6;
@@ -561,7 +561,7 @@ public class MainWindow extends JFrame {
 		ptRB = new JRadioButton("PT");
 		modalityRG.add(ptRB);
 		GridBagConstraints gBC_ptRB = new GridBagConstraints();
-		gBC_ptRB.insets = new Insets(10, 10, 10, 10);
+		gBC_ptRB.insets = new Insets(2, 2, 2, 2);
 		gBC_ptRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_ptRB.gridx = 3;
 		gBC_ptRB.gridy = 6;
@@ -570,7 +570,7 @@ public class MainWindow extends JFrame {
 		nmRB = new JRadioButton("NM");
 		modalityRG.add(nmRB);
 		GridBagConstraints gBC_nmRB = new GridBagConstraints();
-		gBC_nmRB.insets = new Insets(10, 10, 10, 10);
+		gBC_nmRB.insets = new Insets(2, 2, 2, 2);
 		gBC_nmRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_nmRB.gridx = 4;
 		gBC_nmRB.gridy = 6;
@@ -579,7 +579,7 @@ public class MainWindow extends JFrame {
 		noRB = new JRadioButton("None");
 		modalityRG.add(noRB);
 		GridBagConstraints gBC_noRB = new GridBagConstraints();
-		gBC_noRB.insets = new Insets(10, 10, 10, 10);
+		gBC_noRB.insets = new Insets(2, 2, 2, 2);
 		gBC_noRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_noRB.gridx = 5;
 		gBC_noRB.gridy = 6;
