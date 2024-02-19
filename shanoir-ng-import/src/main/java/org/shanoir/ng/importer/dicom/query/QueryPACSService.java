@@ -516,7 +516,8 @@ public class QueryPACSService {
 			LOG.error("Error in c-find query: ", e);
 		}
 		List<Attributes> response = state.getDicomRSP();
-		LOG.info("C-FIND-RESPONSE:\n" + response);
+		LOG.info("C-FIND-RESPONSE NB. ELEMENTS: " + response.size());
+		LOG.info("C-FIND-RESPONSE CONTENT:\n" + response);
 		long finish = System.currentTimeMillis();
 		long timeElapsed = finish - start;
 		LOG.info("Duration of C-FIND: " + timeElapsed + "ms.");
