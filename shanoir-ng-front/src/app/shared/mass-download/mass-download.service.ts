@@ -489,7 +489,7 @@ export class MassDownloadService {
                 return lastFolderHandle.getFileHandle(filename, { create: true }).then(fileHandler => {
                     return this.writeFile(fileHandler, content); // write the file
                 }).catch(error => {
-                    throw new ShanoirError({error: {code: ShanoirError.FILE_PATH_TOO_LONG, message: 'Probable reason: file path too long for Windows, max 260 characters (<your chosen directory>/' + path + ')', details: error + ''}});
+                    this.processFileError(error, path);
                 });
             }).catch(error => {
                 if (error instanceof ShanoirError) {
@@ -502,8 +502,18 @@ export class MassDownloadService {
             return userFolderHandle.getFileHandle(filename, { create: true }).then(fileHandler => {
                 return this.writeFile(fileHandler, content);
             }).catch(error => {
-                throw new ShanoirError({error: {code: ShanoirError.FILE_PATH_TOO_LONG, message: 'Probable reason: file path too long for Windows, max 260 characters (<your chosen directory>/' + path + ')', details: error + ''}});
+                this.processFileError(error, path);
             });
+        }
+    }
+
+    private processFileError(error: string, path: string) {
+        if (error?.includes('NotFoundError')) {
+            throw new ShanoirError({error: {code: ShanoirError.FILE_PATH_TOO_LONG, message: 'Probable reason: file path too long for Windows, max 260 characters (<your chosen directory>/' + path + ')', details: error + ''}});
+        } else if (error?.includes('Failed to create swap file')) {
+            throw new ShanoirError({error: {code: ShanoirError.FILE_TOO_BIG, message: 'Probable reason: file too big for Windows, max 260 characters (' + path + ')', details: error + ''}});
+        } else {
+            throw new ShanoirError({error: {code: ShanoirError.UNKNOWN_REASON, message: 'Writing the file failed with an unexpected error (' + path + ')', details: error + ''}});
         }
     }
 
