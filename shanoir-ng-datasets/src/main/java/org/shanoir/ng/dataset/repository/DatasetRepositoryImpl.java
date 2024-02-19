@@ -8,9 +8,9 @@ import org.springframework.stereotype.Component;
 
 import org.shanoir.ng.dataset.dto.StudyStatisticsDTO;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.sql.Date;
 
 @Component
 public class DatasetRepositoryImpl implements DatasetRepositoryCustom {
@@ -71,9 +71,9 @@ public class DatasetRepositoryImpl implements DatasetRepositoryCustom {
 			Long subjectId = (Long) row[2];
 			String commonName = (String) row[3];
 			Long examinationId = (Long) row[4];
-			LocalDate examinationDate = (LocalDate) row[5];
+			Date examinationDate = (Date) row[5];
 			Long datasetAcquisitionId = (Long) row[6];
-			LocalDate importDate = (LocalDate) row[7];
+			Date importDate = (Date) row[7];
 			Long datasetId = (Long) row[8];
 			String modality = (String) row[9];
 			String quality = (String) row[10];

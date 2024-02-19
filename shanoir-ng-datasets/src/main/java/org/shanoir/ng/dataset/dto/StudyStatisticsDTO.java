@@ -37,12 +37,10 @@ public class StudyStatisticsDTO {
 
 	private Long examinationId;
 
-	@LocalDateAnnotations
 	private Date examinationDate;
 
 	private Long datasetAcquisitionId;
 
-	@LocalDateAnnotations
 	private Date importDate;
 
 	private Long datasetId;
