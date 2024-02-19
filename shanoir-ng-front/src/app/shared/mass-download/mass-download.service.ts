@@ -209,6 +209,7 @@ export class MassDownloadService {
                 }
             });
         }).catch(error => { /* the user clicked 'cancel' in the choose directory window */ });
+
     }
 
     makeRootSubdirectory(handle: FileSystemDirectoryHandle, nbDatasets: number): Promise<FileSystemDirectoryHandle> {
@@ -421,7 +422,7 @@ export class MassDownloadService {
                 const path: string = this.buildAcquisitionPath(dataset) + filename;
                 task.message = 'saving dataset n°' + id;
                 this.notificationService.pushLocalTask(task);
-                return Promise.all([unzipPromise, this.writeMyFile(path, blob, userFolderHandle)]).then(() => null);
+                return unzipPromise.then(() => this.writeMyFile(path, blob, userFolderHandle)).then(() => null);
             }
         }).catch(reason => {
             report.list[id].status = 'ERROR';
@@ -438,8 +439,6 @@ export class MassDownloadService {
             } else if (report.list[id].status == 'ERROR') {
                 task.message = 'saving dataset n°' + id + ' failed';
                 report.nbError++;
-            } else {
-                console.log('THAT\'S IT', report.list[id], task);
             }
             task.report = JSON.stringify(report, null, 4);
             this.writeMyFile(this.REPORT_FILENAME, task.report, userFolderHandle);
@@ -490,18 +489,20 @@ export class MassDownloadService {
                 return lastFolderHandle.getFileHandle(filename, { create: true }).then(fileHandler => {
                     return this.writeFile(fileHandler, content); // write the file
                 }).catch(error => {
-                    console.log(1, error);
-                    console.trace();
-                    throw new ShanoirError({error: {code: ShanoirError.FILE_PATH_TOO_LONG, message: 'Probable reason: file path too long for Windows, max 260 characters'}});
+                    throw new ShanoirError({error: {code: ShanoirError.FILE_PATH_TOO_LONG, message: 'Probable reason: file path too long for Windows, max 260 characters', details: error + ''}});
                 });
+            }).catch(error => {
+                if (error instanceof ShanoirError) {
+                    throw error;
+                } else {
+                    throw new ShanoirError({error: {code: ShanoirError.FILE_PATH_TOO_LONG, message: 'Probable reason: directory path too long for Windows, max 260 characters', details: error + ''}});
+                }
             });
         } else { // if no dir to create
             return userFolderHandle.getFileHandle(filename, { create: true }).then(fileHandler => {
                 return this.writeFile(fileHandler, content);
             }).catch(error => {
-                console.log(2, error);
-                console.trace();
-                throw new ShanoirError({error: {code: ShanoirError.FILE_PATH_TOO_LONG, message: 'Probable reason: file path too long for Windows, max 260 characters'}});
+                throw new ShanoirError({error: {code: ShanoirError.FILE_PATH_TOO_LONG, message: 'Probable reason: file path too long for Windows, max 260 characters', details: error + ''}});
             });
         }
     }
