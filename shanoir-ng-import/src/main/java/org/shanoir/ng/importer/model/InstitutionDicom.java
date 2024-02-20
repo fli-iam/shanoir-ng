@@ -46,4 +46,5 @@ public class InstitutionDicom {
 	public void setInstitutionAddress(String institutionAddress) {
 		this.institutionAddress = institutionAddress;
 	}
+
 }

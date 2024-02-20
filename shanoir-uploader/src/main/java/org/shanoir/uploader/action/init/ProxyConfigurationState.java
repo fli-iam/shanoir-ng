@@ -1,8 +1,6 @@
 package org.shanoir.uploader.action.init;
 
 
-import java.io.IOException;
-
 import org.apache.log4j.Logger;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.service.rest.ServiceConfiguration;
@@ -30,7 +28,7 @@ public class ProxyConfigurationState implements State {
 		int httpResponseCode = 0;
 		try {
 			httpResponseCode = ShanoirUploaderServiceClient.testProxy(testURL);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			logger.error("Error during proxy test:", e);
 		}
 		logger.info("Proxy test returned following code: " + httpResponseCode);

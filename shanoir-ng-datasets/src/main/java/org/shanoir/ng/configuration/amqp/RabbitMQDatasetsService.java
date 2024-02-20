@@ -450,7 +450,12 @@ public class RabbitMQDatasetsService {
 		Map<Long, DatasetAcquisition> acqMap = new HashMap<>();
 		List<Long> datasetParentIds;
 		List<Long> newDatasets = new ArrayList<>();
-		int count = 0;
+		int countProgress = 0;
+		int countProcessed = 0;
+		int countAlreadyExist = 0;
+		int countCopy = 0;
+		int countSuccess = 0;
+		int countTotal = 0;
 		float progress = 0f;
 		ShanoirEvent event = null;
 		try {
@@ -459,19 +464,21 @@ public class RabbitMQDatasetsService {
 			Long userId = dto.getUserId();
 			Long studyId = dto.getStudyId();
 			datasetParentIds = dto.getDatasetIds();
+			countTotal = datasetParentIds.size();
 
 			event = new ShanoirEvent(
 					ShanoirEventType.COPY_DATASET_EVENT,
 					null,
 					userId,
-					"Copy of dataset " + count++ + "/" + datasetParentIds.size() + " to study [" + studyId + "].",
+					"Copy of dataset " + countProgress++ + "/" + countTotal + " to study [" + studyId + "].",
 					ShanoirEvent.IN_PROGRESS,
-					Float.valueOf(count/datasetParentIds.size())
+					Float.valueOf(countProgress/countTotal)
 			);
+			event.setReport("");
 
 			for (Long datasetParentId : datasetParentIds) {
-				progress += 1f / datasetParentIds.size();
-				event.setMessage("Copy of dataset [" + datasetParentId + "] to study [" + studyId + "]: " + count++ + "/" + datasetParentIds.size());
+				progress += 1f / countTotal;
+				event.setMessage("Copy of dataset [" + datasetParentId + "] to study [" + studyId + "]: " + countProgress++ + "/" + countTotal);
 				event.setProgress(progress);
 				eventService.publishEvent(event);
 
@@ -481,16 +488,26 @@ public class RabbitMQDatasetsService {
 
 				if (datasetParent.getSourceId() != null) {
 					LOG.warn("[CopyDatasets] Selected dataset is a copy, please pick the original dataset.");
+					countCopy++;
 				} else if (dsCount != 0) {
 					LOG.warn("[CopyDatasets] Dataset already exists in this study, copy aborted.");
+					countAlreadyExist++;
+
 				} else {
-					Long id = datasetCopyService.moveDataset(datasetParent, studyId, examMap, acqMap, event, userId);
-					if (id != null)
-						newDatasets.add(id);
+					Object[] result = datasetCopyService.moveDataset(datasetParent, studyId, examMap, acqMap, userId);
+					Long newDsId = (Long) result[0];
+					countProcessed += (int) result[1];
+					countSuccess += (int) result[2];
+					LOG.warn("countProcessed : " + countProcessed);
+					if (newDsId != null)
+						newDatasets.add(newDsId);
 				}
 			}
 
-			event.setMessage("Copy of datasets successful in study [" + studyId + "].");
+			event.setMessage("Copy successful for " + countSuccess + "/" + countTotal + " datasets to study [" + studyId + "].\n" +
+					countCopy + " were already copied datasets.\n" +
+					countAlreadyExist + " already existed in destination study.\n" +
+					countProcessed + " are processed datasets and cannot be copied.");
 			event.setStatus(ShanoirEvent.SUCCESS);
 			event.setProgress(1.0f);
 
