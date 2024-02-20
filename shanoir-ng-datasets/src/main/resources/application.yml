@@ -47,7 +47,6 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ANT_PATH_MATCHER
-    log-request-details: true
   sql:
     init:
       data-locations: classpath:/scripts/import.sql
@@ -106,8 +105,6 @@ logging:
     org.springframework.web: ERROR
     org.hibernate: ERROR
     org.shanoir: INFO
-    org.springframework.web.reactive.function.client.ExchangeFunction: TRACE
-    reactor.netty.channel.ChannelOperationsHandler: DEBUG
 
 
 ### ============================================================= ###

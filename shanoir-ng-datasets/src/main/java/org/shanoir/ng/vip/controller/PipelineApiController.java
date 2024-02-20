@@ -16,12 +16,12 @@ public class PipelineApiController implements PipelineApi {
     }
 
     /**
-     * @param name
+     * @param identifier
      * @param version
      * @return
      */
     @Override
-    public Mono<String> getPipeline(String name, String version) {
-        return vipClient.getPipeline(name, version);
+    public Mono<String> getPipeline(String identifier) {
+        return vipClient.getPipeline(identifier);
     }
 }

@@ -150,12 +150,11 @@ public class VipClientService {
     /**
      * Get the pipeline description from <a href="https://app.swaggerhub.com/apis/CARMIN/carmin-common_api_for_research_medical_imaging_network/0.3.1#/default/getPipeline">VIP API</a>
      *
-     * @param name
-     * @param version
+     * @param identifier
      * @return JSON as string
      */
-    public Mono<String> getPipeline(String name, String version) {
-        String url = vipPipelineUrl + name + "/" + version;
+    public Mono<String> getPipeline(String identifier) {
+        String url = vipPipelineUrl + identifier;
         return webClient.get()
                 .uri(url)
                 .headers(headers -> headers.addAll(this.getUserHttpHeaders()))
