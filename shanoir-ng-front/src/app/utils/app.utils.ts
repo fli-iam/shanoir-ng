@@ -398,3 +398,18 @@ export function isDarkColor(colorInp: string): boolean {
     var b = parseInt(colorInp.substring(4, 6), 16); // hexToB
     return (((r * 0.299) + (g * 0.587) + (b * 0.114)) < 145);
 }
+
+export function getSizeStr(size: number): string {
+    if (size == null || size == undefined){
+        return "";
+    }
+    const base: number = 1024;
+    const units: string[] = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    if (size == 0) {
+        return "0 " + units[0];
+    }
+    const exponent: number = Math.floor(Math.log(size) / Math.log(base));
+    let value: number = Math.round(parseFloat((size / Math.pow(base, exponent)).toFixed(2)));
+    let unit: string = units[exponent];
+    return value + " " + unit;
+}

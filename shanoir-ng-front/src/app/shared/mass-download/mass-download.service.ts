@@ -29,6 +29,7 @@ import { DownloadSetupAltComponent } from './download-setup-alt/download-setup-a
 import { DownloadSetupComponent, DownloadSetupOptions } from './download-setup/download-setup.component';
 import { Queue } from './queue.model';
 import { ShanoirError } from '../models/error.model';
+import { getSizeStr } from 'src/app/utils/app.utils';
 
 declare var JSZip: any;
 
@@ -42,6 +43,7 @@ export type Report = {
             status: 'QUEUED' | 'ERROR' | 'SUCCESS',
             error?: any,
             errorTime?: number
+            zipSize?: string,
         }
     }
     nbSuccess?: number;
@@ -370,10 +372,11 @@ export class MassDownloadService {
         const downloadPromise: Promise<HttpResponse<Blob>> = this.datasetService.downloadToBlob(id, options.format);
         return Promise.all([metadataPromise, downloadPromise]).then(([dataset, httpResponse]) => {
             const blob: Blob = httpResponse.body;
+            report.list[id].zipSize = getSizeStr(blob?.size);
             const filename: string = this.getFilename(httpResponse) || 'dataset_' + id;
             // Check ERRORS file in zip
             let zip: any = new JSZip();
-            const unzipPromise: Promise<any> = zip.loadAsync(httpResponse.body).then(dataFiles => {
+            const unzipPromise: Promise<any> = zip.loadAsync(blob).then(dataFiles => {
                 if (dataFiles.files['ERRORS.json']) {
                     return dataFiles.files['ERRORS.json'].async('string').then(content => {
                         const errorsJson: any = JSON.parse(content);
@@ -395,15 +398,16 @@ export class MassDownloadService {
                 return unzipPromise.then(data => {
                     if (data) {
                         let index: number = 1;
-                        return Promise.all(
-                            Object.entries(data.files)?.map(([name, file]) => {
-                                task.message = 'unzipping file ' + name + ' from dataset n°' + id;
-                                this.notificationService.pushLocalTask(task);
-                                index++;
-                                let type: string;
-                                if (name.endsWith('.json') || name.endsWith('.txt')) type = 'string';
-                                else type = 'blob';
-                                return (file as {async: (string) => Promise<Blob>}).async(type).then(blob => {
+                        let finalPromise: Promise<void> = Promise.resolve(); // write them sequentially, not in parallel like with promise.all
+                        Object.entries(data.files)?.map(([name, file]) => {
+                            task.message = 'unzipping file ' + name + ' from dataset n°' + id;
+                            this.notificationService.pushLocalTask(task);
+                            index++;
+                            let type: string;
+                            if (name.endsWith('.json') || name.endsWith('.txt')) type = 'string';
+                            else type = 'blob';
+                            return finalPromise.then(() => {
+                                (file as {async: (string) => Promise<Blob>}).async(type).then(blob => {
                                     task.message = 'saving file ' + name + ' from dataset n°' + id;
                                     this.notificationService.pushLocalTask(task);
                                     let path: string;
@@ -414,8 +418,9 @@ export class MassDownloadService {
                                     }
                                     return this.writeMyFile(path, blob, userFolderHandle);
                                 });
-                            })
-                        );
+                            });
+                        })
+                        return finalPromise;
                     }
                 });
             } else {
@@ -511,7 +516,7 @@ export class MassDownloadService {
         if (error?.includes('NotFoundError')) {
             throw new ShanoirError({error: {code: ShanoirError.FILE_PATH_TOO_LONG, message: 'Probable reason: file path too long for Windows, max 260 characters (<your chosen directory>/' + path + ')', details: error + ''}});
         } else if (error?.includes('Failed to create swap file')) {
-            throw new ShanoirError({error: {code: ShanoirError.FILE_TOO_BIG, message: 'Probable reason: file too big for Windows, max 260 characters (' + path + ')', details: error + ''}});
+            throw new ShanoirError({error: {code: ShanoirError.FILE_TOO_BIG, message: 'Probable reason: file too big', details: error + ''}});
         } else {
             throw new ShanoirError({error: {code: ShanoirError.UNKNOWN_REASON, message: 'Writing the file failed with an unexpected error (' + path + ')', details: error + ''}});
         }
