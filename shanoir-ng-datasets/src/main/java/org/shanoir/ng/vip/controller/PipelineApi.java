@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import reactor.core.publisher.Mono;
 
 @Tag(name = "pipeline")
-@RequestMapping("/vip/pipeline")
+@RequestMapping("/vip")
 public interface PipelineApi {
 
 
@@ -21,7 +21,7 @@ public interface PipelineApi {
             @ApiResponse(responseCode = "200", description = "successful response, returns the status"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "",
+    @RequestMapping(value = "/pipelines",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
     Mono<String> getPipelineAll() throws SecurityException;
@@ -31,7 +31,7 @@ public interface PipelineApi {
             @ApiResponse(responseCode = "200", description = "successful response, returns the status"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/{identifier}",
+    @RequestMapping(value = "/pipeline/{identifier}",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
     Mono<String> getPipeline(@Parameter(name = "The pipeline identifier", required=true) @PathVariable("identifier") String identifier) throws SecurityException;
