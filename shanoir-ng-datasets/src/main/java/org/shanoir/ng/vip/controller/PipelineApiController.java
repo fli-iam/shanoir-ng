@@ -17,7 +17,6 @@ public class PipelineApiController implements PipelineApi {
 
     /**
      * @param identifier
-     * @param version
      * @return
      */
     @Override
