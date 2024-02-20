@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.dataset.dto;
+package org.shanoir.ng.study.dto;
 
 import java.sql.Date;
 
@@ -46,22 +46,6 @@ public class StudyStatisticsDTO {
 	private String modality;
 
 	private String quality;
-
-	public StudyStatisticsDTO(Long studyId, String centerName, Long subjectId, String commonName,
-			Long examinationId, Date examinationDate, Long datasetAcquisitionId, Date importDate,
-			Long datasetId, String modality, String quality) {
-		this.studyId = studyId;
-		this.centerName = centerName;
-		this.subjectId = subjectId;
-		this.commonName = commonName;
-		this.examinationId = examinationId;
-		this.examinationDate = examinationDate;
-		this.datasetAcquisitionId = datasetAcquisitionId;
-		this.importDate = importDate;
-		this.datasetId = datasetId;
-		this.modality = modality;
-		this.quality = quality;
-	}
 
 	public Long getStudyId() {
 		return studyId;

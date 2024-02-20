@@ -25,7 +25,6 @@ import jakarta.validation.Valid;
 import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.dto.StudyStatisticsDTO;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -309,17 +308,5 @@ public interface DatasetApi {
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_SEE_ALL'))")
 	ResponseEntity<List<DatasetAndProcessingsDTOInterface>> findDatasetsByIds(
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds);
-
-			@Operation(summary = "getManageStudyStatistics", description = "Returns study imaging statistics corresponding to the given study id")
-			@ApiResponses(value = {
-				@ApiResponse(responseCode = "200", description = "exported statistics"),
-				@ApiResponse(responseCode = "401", description = "unauthorized"),
-				@ApiResponse(responseCode = "403", description = "forbidden"),
-				@ApiResponse(responseCode = "404", description = "no dataset found"),
-				@ApiResponse(responseCode = "500", description = "unexpected error") })
-			@GetMapping(value = "/manageStudyStatistics/{studyId}", produces = { "application/json" })
-			@PreAuthorize("hasRole('ADMIN') or hasRole('EXPERT')")
-			ResponseEntity<List<StudyStatisticsDTO>> getManageStudyStatistics(
-				@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws RestServiceException, IOException;
 
 }

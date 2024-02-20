@@ -18,7 +18,6 @@ import jakarta.transaction.Transactional;
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
-import org.shanoir.ng.dataset.dto.StudyStatisticsDTO;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
@@ -328,8 +327,4 @@ public class DatasetServiceImpl implements DatasetService {
 		return repository.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
 	}
 
-	@Override
-	public List<StudyStatisticsDTO> queryManageStudyStatistics(Long studyId) throws Exception {
-		return repository.queryManageStudyStatistics(studyId);
-	}
 }

@@ -37,7 +37,6 @@ import jakarta.validation.Valid;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
-import org.shanoir.ng.dataset.dto.StudyStatisticsDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetMapper;
@@ -601,21 +600,4 @@ public class DatasetApiController implements DatasetApi {
 				.body(resource);
 	}
 
-	@Override
-	public ResponseEntity<List<StudyStatisticsDTO>> getManageStudyStatistics(@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId)
-			throws RestServiceException, IOException {
-		try {
-			List<StudyStatisticsDTO> statistics = datasetService.queryManageStudyStatistics(studyId);
-
-			return ResponseEntity.ok()
-			.contentType(MediaType.APPLICATION_JSON)
-			.body(statistics);
-
-		} catch (jakarta.persistence.NoResultException e) {
-			throw new RestServiceException(new ErrorModel(HttpStatus.NOT_FOUND.value(), "No result found.", e));
-		} catch (Exception e) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while querying the database.", e));
-		}
-	}
 }

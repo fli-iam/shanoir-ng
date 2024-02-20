@@ -10,12 +10,13 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-use datasets;
 
-DROP PROCEDURE IF EXISTS getManageStudyStatistics;
+USE datasets;
+
+DROP PROCEDURE IF EXISTS getStudyStatistics;
 
 delimiter //
-CREATE PROCEDURE getManageStudyStatistics(IN studyId INT)
+CREATE PROCEDURE getStudyStatistics(IN studyId INT)
 BEGIN
 SELECT
     e.study_id AS study_id,
@@ -27,19 +28,19 @@ SELECT
     da.id AS dataset_acquisition_id,
     da.creation_date AS import_date,
     d.id AS dataset_id,
-    (case dm.dataset_modality_type when 1 then 'Mr' 
-                                   when 2 then 'Meg' 
-                                   when 3 then 'Ct' 
-                                   when 4 then 'Spect' 
-                                   when 5 then 'Pet' 
-                                   when 6 then 'Egg' 
-                                   when 7 then 'Generic' 
-                                   when 8 then 'Ieeg' 
-                                   when 9 then 'Micr' 
-                                   when 10 then 'Beh'
-                                   when 11 then 'Nirs'
-                                   when 12 then 'Xa' end) AS modality,
-    (case ss.quality_tag when 1 then 'Valid' when 2 then 'Warning' when 3 then 'Error' end) AS quality
+    (CASE dm.dataset_modality_type WHEN 1 THEN 'Mr' 
+                                   WHEN 2 THEN 'Meg' 
+                                   WHEN 3 THEN 'Ct' 
+                                   WHEN 4 THEN 'Spect' 
+                                   WHEN 5 THEN 'Pet' 
+                                   WHEN 6 THEN 'Egg' 
+                                   WHEN 7 THEN 'Generic' 
+                                   WHEN 8 THEN 'Ieeg' 
+                                   WHEN 9 THEN 'Micr' 
+                                   WHEN 10 THEN 'Beh'
+                                   WHEN 11 THEN 'Nirs'
+                                   WHEN 12 THEN 'Xa' END) AS modality,
+    (CASE ss.quality_tag WHEN 1 THEN 'Valid' WHEN 2 THEN 'Warning' WHEN 3 THEN 'Error' END) AS quality
 FROM
     datasets.examination e
 INNER JOIN 
