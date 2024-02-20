@@ -210,8 +210,8 @@ public class MainWindow extends JFrame {
 		mntmDicomServerConfiguration.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				DicomServerConfigurationWindow dscw = new DicomServerConfigurationWindow(
-						shanoirUploaderFolder, resourceBundle );
+				DicomServerConfigurationWindow dscw = new DicomServerConfigurationWindow(dicomServerClient,
+						shanoirUploaderFolder, resourceBundle);
 				dscw.hostNameTF.setText(ShUpConfig.dicomServerProperties.getProperty("dicom.server.host"));
 				dscw.portTF.setText(ShUpConfig.dicomServerProperties.getProperty("dicom.server.port"));
 				dscw.aetTF.setText(ShUpConfig.dicomServerProperties.getProperty("dicom.server.aet.called"));

@@ -71,6 +71,18 @@ public class DicomServerClient implements IDicomServerClient {
 		return true;
 	}
 	
+	@Override
+	public boolean echoDicomServer(String calledAET, String hostName, int port, String callingAET) {
+		boolean result = queryPACSService.queryECHO(calledAET, hostName, port, callingAET);
+		if (result) {
+			logger.info("Echoing of the DICOM server was successful? -> " + result);
+		} else {
+			logger.info("Echoing of the DICOM server was successful? -> " + result);
+			return false;
+		}
+		return true;
+	}
+
 	/* (non-Javadoc)
 	 * @see org.shanoir.uploader.dicom.IDicomServerClient#queryDicomServer(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 	 */

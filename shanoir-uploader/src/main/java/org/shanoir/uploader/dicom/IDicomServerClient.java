@@ -14,6 +14,8 @@ public interface IDicomServerClient {
 	 * @return 
 	 */
 	public boolean echoDicomServer();
+	
+	public boolean echoDicomServer(String calledAET, String hostName, int port, String callingAET);
 
 	/**
 	 * This method queries a DICOM server and returns a tree structured Media object.

@@ -122,7 +122,7 @@ public class QueryPACSService {
 		this.calling = calling;
 		this.called = called;
 		this.calledNameSCP = calledNameSCP;
-		this.maxPatientsFromPACS = 10;
+		this.maxPatientsFromPACS = 20;
 		LOG.info("Query: DicomNodes initialized via method call (ShUp): calling ({}, {}, {}) and called ({}, {}, {})",
 				calling.getAet(), calling.getHostname(), calling.getPort(), called.getAet(), called.getHostname(), called.getPort());
 	}
@@ -460,7 +460,7 @@ public class QueryPACSService {
 			serie.setInstances(instances);
 		}
 	}
-	
+
 	/**
 	 * This method does a C-FIND query and returns the results.
 	 * 

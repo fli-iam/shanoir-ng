@@ -17,6 +17,7 @@ import javax.swing.JOptionPane;
 import org.apache.log4j.Logger;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
 import org.shanoir.uploader.ShUpConfig;
+import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.gui.DicomServerConfigurationWindow;
 
 /**
@@ -33,10 +34,11 @@ public class DicomServerConfigurationListener implements ActionListener {
 
 	DicomServerConfigurationWindow dicomWindow;
 	
-	private QueryPACSService queryPACSService = new QueryPACSService();
-
-	public DicomServerConfigurationListener(DicomServerConfigurationWindow dicomWindow) {
+	private IDicomServerClient dicomServerClient;
+	
+	public DicomServerConfigurationListener(DicomServerConfigurationWindow dicomWindow, final IDicomServerClient dicomServerClient) {
 		this.dicomWindow = dicomWindow;
+		this.dicomServerClient = dicomServerClient;
 	}
 
 	public void actionPerformed(ActionEvent event) {
@@ -138,7 +140,7 @@ public class DicomServerConfigurationListener implements ActionListener {
 
 	// this method verifies the connection to the PACS
 	public boolean echo(String remoteHost, String remotePortString, String calledAET, String localAET) {
-		return queryPACSService.queryECHO(calledAET, remoteHost, Integer.valueOf(remotePortString), localAET);
+		return dicomServerClient.echoDicomServer(calledAET, remoteHost, Integer.valueOf(remotePortString), localAET);
 	}
 
 	// check only remoteHost, remotePortString and calledAET parameters (remote PACS
