@@ -15,7 +15,18 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/vip/pipeline")
 public interface PipelineApi {
 
-    @Operation(summary = "Get execution DTO for the given identifier", description = "Returns the VIP execution that has the given identifier in parameter.", tags={  })
+
+    @Operation(summary = "Get all available pipelines in VIP", description = "Returns all the pipelines available to the authenticated user in VIP", tags={  })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "successful response, returns the status"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @RequestMapping(value = "/all",
+            produces = { "application/json", "application/octet-stream" },
+            method = RequestMethod.GET)
+    Mono<String> getPipelineAll() throws SecurityException;
+
+    @Operation(summary = "Get the description of pipeline [name] in the version [version]", description = "Returns the VIp description of the pipeline [name] in the version [version].", tags={  })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "successful response, returns the status"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
@@ -24,16 +35,6 @@ public interface PipelineApi {
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
     Mono<String> getPipeline(@Parameter(name = "The pipeline name", required=true) @PathVariable("name") String name, @Parameter(name = "The pipeline version", required=true) @PathVariable("version") String version) throws SecurityException;
-
-    @Operation(summary = "Get execution DTO for the given identifier", description = "Returns the VIP execution that has the given identifier in parameter.", tags={  })
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "successful response, returns the status"),
-            @ApiResponse(responseCode = "403", description = "forbidden"),
-            @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/",
-            produces = { "application/json", "application/octet-stream" },
-            method = RequestMethod.GET)
-    Mono<String> getPipelineAll() throws SecurityException;
 
 
 }
