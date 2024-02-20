@@ -489,7 +489,7 @@ export class MassDownloadService {
                 return lastFolderHandle.getFileHandle(filename, { create: true }).then(fileHandler => {
                     return this.writeFile(fileHandler, content); // write the file
                 }).catch(error => {
-                    this.processFileError(error, path);
+                    this.processFileError(error + '', path);
                 });
             }).catch(error => {
                 if (error instanceof ShanoirError) { 
@@ -502,7 +502,7 @@ export class MassDownloadService {
             return userFolderHandle.getFileHandle(filename, { create: true }).then(fileHandler => {
                 return this.writeFile(fileHandler, content);
             }).catch(error => {
-                this.processFileError(error, path);
+                this.processFileError(error + '', path);
             });
         }
     }
