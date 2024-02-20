@@ -11,15 +11,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import reactor.util.retry.Retry;
-
-import java.time.Duration;
 
 @Service
 public class VipClientService {
@@ -53,7 +50,7 @@ public class VipClientService {
         String url = vipExecutionUrl + identifier;
         return webClient.get()
                 .uri(url)
-                .headers(httpHeaders -> this.getUserHttpHeaders())
+                .headers(headers -> headers.addAll(this.getUserHttpHeaders()))
                 .retrieve()
                 .bodyToMono(VipExecutionDTO.class);
     }
@@ -88,27 +85,6 @@ public class VipClientService {
                     return Mono.error(new ResultHandlerException("Failed to get execution details from VIP in " + attempts + " attempts", null));
                 })
                 .bodyToMono(VipExecutionDTO.class);
-
-
-//        // check how many times the loop tried to get the execution's info without success (only UNAUTHORIZED error)
-//        if(attempts >= 3){
-//            throw new ResultHandlerException("Failed to get execution details from VIP in [" + attempts + "] attempts", null);
-//        }
-//
-//        try {
-//            ResponseEntity<VipExecutionDTO> executionResponseEntity = this.restTemplate.exchange(url, HttpMethod.GET, headers, VipExecutionDTO.class);
-//            return executionResponseEntity.getBody();
-//        } catch (HttpStatusCodeException e) {
-//            // in case of an error with response payload
-//            if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
-//                LOG.info("Unauthorized : refreshing token... ({} attempts)", attempts);
-//                return null;
-//            } else {
-//                throw new ResultHandlerException("Failed to get execution details from VIP in " + attempts + " attempts", e);
-//            }
-//        } catch (RestClientException e) {
-//            throw new ResultHandlerException("No response payload in execution infos from VIP", e);
-//        }
     }
 
     /**
@@ -121,7 +97,7 @@ public class VipClientService {
         String url = vipExecutionUrl;
         return webClient.post()
                 .uri(url)
-                .headers(httpHeaders -> this.getUserHttpHeaders())
+                .headers(headers -> headers.addAll(this.getUserHttpHeaders()))
                 .bodyValue(execution)
                 .retrieve()
                 .bodyToMono(VipExecutionDTO.class);
@@ -138,7 +114,7 @@ public class VipClientService {
         String url = vipExecutionUrl + identifier + "/stderr";
         return webClient.get()
                 .uri(url)
-                .headers(httpHeaders -> this.getUserHttpHeaders())
+                .headers(headers -> headers.addAll(this.getUserHttpHeaders()))
                 .retrieve()
                 .bodyToMono(String.class);
     }
@@ -153,7 +129,7 @@ public class VipClientService {
         String url = vipExecutionUrl + identifier + "/stdout";
         return webClient.get()
                 .uri(url)
-                .headers(httpHeaders -> this.getUserHttpHeaders())
+                .headers(headers -> headers.addAll(this.getUserHttpHeaders()))
                 .retrieve()
                 .bodyToMono(String.class);
     }
@@ -166,7 +142,7 @@ public class VipClientService {
     public Mono<String> getPipelineAll() {
         return webClient.get()
                 .uri(vipPipelineUrl)
-                .headers(httpHeaders -> this.getUserHttpHeaders())
+                .headers(headers -> headers.addAll(this.getUserHttpHeaders()))
                 .retrieve()
                 .bodyToMono(String.class);
     }
@@ -182,7 +158,7 @@ public class VipClientService {
         String url = vipPipelineUrl + name + "/" + version;
         return webClient.get()
                 .uri(url)
-                .headers(httpHeaders -> this.getUserHttpHeaders())
+                .headers(headers -> headers.addAll(this.getUserHttpHeaders()))
                 .retrieve()
                 .bodyToMono(String.class);
     }
@@ -212,7 +188,6 @@ public class VipClientService {
      * @throws SecurityException
      */
     private HttpHeaders getUserHttpHeaders() {
-
         return KeycloakUtil.getKeycloakHeader();
     }
 }
