@@ -108,13 +108,8 @@ logging:
     org.springframework.web: ERROR
     org.hibernate: ERROR
     org.shanoir: INFO
-    org:
-      springframework:
-        web:
-          reactive:
-            function:
-              client:
-                ExchangeFunction: TRACE
+    org.springframework.web.reactive.function.client.ExchangeFunction: TRACE
+    reactor.netty.channel.ChannelOperationsHandler: DEBUG
 
 
 ### ============================================================= ###
