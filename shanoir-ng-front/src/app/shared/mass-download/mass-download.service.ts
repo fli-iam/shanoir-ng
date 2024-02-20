@@ -190,6 +190,7 @@ export class MassDownloadService {
                     let ids = [...datasetIds]; // copy array
                     if (!report) report = this.initReport(datasetIds, task.id, parentFolderHandle.name, options);
                     let promises: Promise<void>[] = [];
+                    if (options.unzip) options.nbQueues = 1;
                     for (let queueIndex = 0; queueIndex < options.nbQueues; queueIndex++) { // build the dl queues
                         promises.push(
                             this.recursiveSave(ids.shift(), options, parentFolderHandle, ids, report, task)
@@ -291,7 +292,7 @@ export class MassDownloadService {
         });
     }
 
-    private _downloadDatasets(datasets: Dataset[], options, downloadState?: TaskState): Promise<void> {
+    private _downloadDatasets(datasets: Dataset[], options: DownloadOptions, downloadState?: TaskState): Promise<void> {
         if (datasets.length == 0) return;
         return this.getFolderHandle()
         // add a subdirectory
@@ -308,7 +309,7 @@ export class MassDownloadService {
                     let ids = [...datasets.map(ds => ds.id)];
                     let report: Report = this.initReport(datasets.map(ds => ds.id), task.id, parentFolderHandle.name, options);
                     let promises: Promise<void>[] = [];
-                    let j = 0;
+                    if (options.unzip) options.nbQueues = 1;
                     for (let queueIndex = 0; queueIndex < options.nbQueues; queueIndex++) { // build the dl queues
                         promises.push(
                             this.recursiveSave(ids.shift(), options, parentFolderHandle, ids, report, task, datasets)
@@ -396,18 +397,18 @@ export class MassDownloadService {
 
             if (options.unzip) {
                 return unzipPromise.then(data => {
+                    let finalPromise: Promise<void> = Promise.resolve(); // write them sequentially, not in parallel like with promise.all
                     if (data) {
-                        let index: number = 1;
-                        let finalPromise: Promise<void> = Promise.resolve(); // write them sequentially, not in parallel like with promise.all
+                        let index: number = 0;
                         Object.entries(data.files)?.map(([name, file]) => {
-                            task.message = 'unzipping file ' + name + ' from dataset n°' + id;
-                            this.notificationService.pushLocalTask(task);
-                            index++;
-                            let type: string;
-                            if (name.endsWith('.json') || name.endsWith('.txt')) type = 'string';
-                            else type = 'blob';
-                            return finalPromise.then(() => {
-                                (file as {async: (string) => Promise<Blob>}).async(type).then(blob => {
+                            finalPromise = finalPromise.then(() => {
+                                index++;
+                                task.message = 'unzipping file ' + name + ' from dataset n°' + id;
+                                this.notificationService.pushLocalTask(task);
+                                let type: string;
+                                if (name.endsWith('.json') || name.endsWith('.txt')) type = 'string';
+                                else type = 'blob';
+                                return (file as {async: (string) => Promise<Blob>}).async(type).then(blob => {
                                     task.message = 'saving file ' + name + ' from dataset n°' + id;
                                     this.notificationService.pushLocalTask(task);
                                     let path: string;
@@ -420,8 +421,8 @@ export class MassDownloadService {
                                 });
                             });
                         })
-                        return finalPromise;
                     }
+                    return finalPromise;
                 });
             } else {
                 const path: string = this.buildAcquisitionPath(dataset) + filename;
@@ -532,7 +533,7 @@ export class MassDownloadService {
 
     private writeFile(fileHandle: FileSystemFileHandle, contents): Promise<void> {
         return fileHandle.createWritable().then(writable => {
-            return writable.write({type: 'write', data: contents}).then(() => {
+            return writable.write({type: 'write', data: contents}).finally(() => {
                 return writable.close();
             });
         });
