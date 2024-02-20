@@ -10,6 +10,11 @@ public class PipelineApiController implements PipelineApi {
     @Autowired
     private VipClientService vipClient;
 
+    @Override
+    public Mono<String> getPipelineAll() {
+        return vipClient.getPipelineAll();
+    }
+
     /**
      * @param name
      * @param version
@@ -18,10 +23,5 @@ public class PipelineApiController implements PipelineApi {
     @Override
     public Mono<String> getPipeline(String name, String version) {
         return vipClient.getPipeline(name, version);
-    }
-
-    @Override
-    public Mono<String> getPipelineAll() {
-        return vipClient.getPipelineAll();
     }
 }
