@@ -15,7 +15,6 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
-import org.shanoir.ng.importer.dicom.query.QueryPACSService;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.gui.DicomServerConfigurationWindow;
