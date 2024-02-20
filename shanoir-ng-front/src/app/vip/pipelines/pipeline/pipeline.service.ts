@@ -48,24 +48,8 @@ export class PipelineService {
    *
   */
 
-  public listPipelines(studyIdentifier?: string, property?: string, propertyValue?: string ): Observable<Array<Pipeline>> {
-
-    let queryParameters = new HttpParams();
-    if (studyIdentifier !== undefined && studyIdentifier !== null) {
-      queryParameters = queryParameters.set('studyIdentifier', <any>studyIdentifier);
-    }
-    if (property !== undefined && property !== null) {
-      queryParameters = queryParameters.set('property', <any>property);
-    }
-    if (propertyValue !== undefined && propertyValue !== null) {
-      queryParameters = queryParameters.set('propertyValue', <any>propertyValue);
-    }
-
-    return this.httpClient.get<Array<Pipeline>>(`${this.pipelineUrl}/all`,
-      {
-        params: queryParameters
-      }
-    );
+  public listPipelines(): Observable<Array<Pipeline>> {
+    return this.httpClient.get<Array<Pipeline>>(`${this.pipelineUrl}`);
   }
 
 }

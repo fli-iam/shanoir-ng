@@ -30,7 +30,7 @@ public interface PipelineApi {
             @ApiResponse(responseCode = "200", description = "successful response, returns the status"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/all",
+    @RequestMapping(value = "/",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
     Mono<String> getPipelineAll() throws SecurityException;
