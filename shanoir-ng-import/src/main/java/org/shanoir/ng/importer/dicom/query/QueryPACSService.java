@@ -226,6 +226,8 @@ public class QueryPACSService {
 	public boolean queryECHO(String calledAET, String hostName, int port, String callingAET) {
 		LOG.info("DICOM ECHO: Starting with configuration {}, {}, {} <- {}", calledAET, hostName, port, callingAET);
         try {
+    		DicomNode called = new DicomNode(calledAET, hostName, port);
+    		DicomNode calling = new DicomNode(callingAET);
     		Association association = connectAssociation(calling, called);
         	association.cecho();
             releaseAssociation(association);
