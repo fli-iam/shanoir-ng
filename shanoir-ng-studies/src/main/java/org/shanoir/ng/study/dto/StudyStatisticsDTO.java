@@ -27,6 +27,8 @@ public class StudyStatisticsDTO {
 
 	private Long studyId;
 
+	private Long centerId;
+
 	private String centerName;
 
 	private Long subjectId;
@@ -53,6 +55,14 @@ public class StudyStatisticsDTO {
 
 	public void setStudyId(Long studyId) {
 		this.studyId = studyId;
+	}
+
+	public Long getCenterId() {
+		return centerId;
+	}
+
+	public void setCenterId(Long centerId) {
+		this.centerId = centerId;
 	}
 
 	public String getCenterName() {

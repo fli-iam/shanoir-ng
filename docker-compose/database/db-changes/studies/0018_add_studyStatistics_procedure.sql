@@ -20,6 +20,7 @@ CREATE PROCEDURE getStudyStatistics(IN studyId INT)
 BEGIN
 SELECT
     e.study_id AS study_id,
+    c.id AS center_id,
     c.name AS center_name,
     s.id AS subject_id,
     s.name AS common_name,
