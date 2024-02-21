@@ -21,7 +21,7 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
 	@Override
 	public List<StudyStatisticsDTO> queryStudyStatistics(Long studyId) throws Exception {
 
-		//"getManageStudyStatistics" is the name of the MySQL procedure
+		//"getStudyStatistics" is the name of the MySQL procedure
 		StoredProcedureQuery query = entityManager.createStoredProcedureQuery("getStudyStatistics"); 
 
 		//Declare the parameters in the same order
