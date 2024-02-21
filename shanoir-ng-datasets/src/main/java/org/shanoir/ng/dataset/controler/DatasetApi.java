@@ -279,7 +279,6 @@ public interface DatasetApi {
 			@Parameter(name = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
 			@RequestParam(value = "format", required = false, defaultValue="dcm") String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException;
 
-
 	@Operation(summary = "downloadStatistics", description = "Download statistics from the entire database")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "exported statistics"),
