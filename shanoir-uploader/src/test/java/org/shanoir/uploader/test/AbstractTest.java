@@ -6,6 +6,7 @@ import java.util.Properties;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
@@ -53,9 +54,11 @@ public abstract class AbstractTest {
 				ShUpOnloadConfig.setTokenString(token);
 			} else {
 				logger.error("ERROR: login not successful.");
+	            Assumptions.assumeTrue(false, "Skipping test: probably no server available.");
 			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
+            Assumptions.assumeTrue(false, "Skipping test: probably no server available.");
 		}
 	}
 
