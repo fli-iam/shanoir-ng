@@ -81,6 +81,7 @@ public class OFSEPSeqIdHandler extends ResultHandler {
             "axis"
 
     };
+
     public static final String TYPE = "type";
     public static final String SERIES = "series";
     public static final String ID = "id";
