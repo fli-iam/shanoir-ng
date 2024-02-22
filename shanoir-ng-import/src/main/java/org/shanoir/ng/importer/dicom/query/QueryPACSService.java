@@ -404,7 +404,6 @@ public class QueryPACSService {
 			studyInstanceUID,
 			studyDate,
 			new DicomParam(Tag.SeriesInstanceUID),
-			new DicomParam(Tag.SOPClassUID),
 			new DicomParam(Tag.SeriesDescription),
 			new DicomParam(Tag.SeriesDate),
 			new DicomParam(Tag.SeriesNumber),
