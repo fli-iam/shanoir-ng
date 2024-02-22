@@ -30,7 +30,6 @@ import org.dcm4che3.data.UID;
 import org.dcm4che3.emf.MultiframeExtractor;
 import org.dcm4che3.io.DicomInputStream;
 import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
-import org.shanoir.ng.importer.model.EquipmentDicom;
 import org.shanoir.ng.importer.model.Image;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.InstitutionDicom;
