@@ -482,4 +482,19 @@ public class StudyDTO {
 	public void setStorageVolume(StudyStorageVolumeDTO storageVolume) {
 		this.storageVolume = storageVolume;
 	}
+
+	@Override
+	public String toString() {
+		return "StudyDTO [clinical=" + clinical + ", downloadableByDefault=" + downloadableByDefault + ", endDate="
+				+ endDate + ", experimentalGroupsOfSubjects=" + experimentalGroupsOfSubjects + ", id=" + id
+				+ ", monoCenter=" + monoCenter + ", name=" + name + ", profile=" + profile + ", nbExaminations="
+				+ nbExaminations + ", nbSubjects=" + nbSubjects + ", protocolFilePaths=" + protocolFilePaths
+				+ ", dataUserAgreementPaths=" + dataUserAgreementPaths + ", tags=" + tags + ", studyTags=" + studyTags
+				+ ", startDate=" + startDate + ", studyCards=" + studyCards + ", studyCenterList=" + studyCenterList
+				+ ", studyStatus=" + studyStatus + ", studyType=" + studyType + ", subjectStudyList=" + subjectStudyList
+				+ ", timepoints=" + timepoints + ", visibleByDefault=" + visibleByDefault + ", withExamination="
+				+ withExamination + ", studyUserList=" + studyUserList + ", challenge=" + challenge + ", description="
+				+ description + ", license=" + license + ", storageVolume=" + storageVolume + "]";
+	}
+
 }

@@ -232,7 +232,7 @@ public class StudyServiceImpl implements StudyService {
 			studyDb = studyRepository.save(studyDb);
 		}
 
-		updateStudyName(studyMapper.studyToStudyDTO(studyDb));
+		updateStudyName(studyMapper.studyToStudyDTODetailed(studyDb));
 
 		if (studyDb.getStudyUserList() != null) {
 			List<StudyUserCommand> commands = new ArrayList<>();
@@ -371,7 +371,7 @@ public class StudyServiceImpl implements StudyService {
 			studyDb = studyRepository.save(studyDb);
 		}
 
-		updateStudyName(studyMapper.studyToStudyDTO(studyDb));
+		updateStudyName(studyMapper.studyToStudyDTODetailed(studyDb));
 
 		return studyDb;
 	}
