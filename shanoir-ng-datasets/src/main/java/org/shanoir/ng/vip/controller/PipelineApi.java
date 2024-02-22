@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import reactor.core.publisher.Mono;
 
 @Tag(name = "pipeline")
-@RequestMapping("/vip")
+@RequestMapping("/vip-shanoir")
 public interface PipelineApi {
 
 
