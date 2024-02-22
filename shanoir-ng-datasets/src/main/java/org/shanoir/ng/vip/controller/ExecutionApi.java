@@ -46,7 +46,8 @@ public interface ExecutionApi {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Execution successfully created response."),
             @ApiResponse(responseCode = "403", description = "forbidden"),
-            @ApiResponse(responseCode = "500", description = "unexpected error") })
+            @ApiResponse(responseCode = "500", description = "unexpected error"),
+            @ApiResponse(responseCode = "503", description = "error from VIP API")})
     @RequestMapping(value = "/",
             produces = {"application/json"},
             consumes = {"application/json"},
@@ -58,7 +59,8 @@ public interface ExecutionApi {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "successful response, returns the status"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
-            @ApiResponse(responseCode = "500", description = "unexpected error") })
+            @ApiResponse(responseCode = "500", description = "unexpected error"),
+            @ApiResponse(responseCode = "503", description = "error from VIP API")})
     @RequestMapping(value = "/{identifier}",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
@@ -68,7 +70,8 @@ public interface ExecutionApi {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "successful response, returns the status"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
-            @ApiResponse(responseCode = "500", description = "unexpected error") })
+            @ApiResponse(responseCode = "500", description = "unexpected error"),
+            @ApiResponse(responseCode = "503", description = "error from VIP API")})
     @RequestMapping(value = "/{identifier}/stderr",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
@@ -78,7 +81,8 @@ public interface ExecutionApi {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "successful response, returns the status"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
-            @ApiResponse(responseCode = "500", description = "unexpected error") })
+            @ApiResponse(responseCode = "500", description = "unexpected error"),
+            @ApiResponse(responseCode = "503", description = "error from VIP API")})
     @RequestMapping(value = "/{identifier}/stdout",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
@@ -89,7 +93,8 @@ public interface ExecutionApi {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "successful response, returns the status"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
-            @ApiResponse(responseCode = "500", description = "unexpected error") })
+            @ApiResponse(responseCode = "500", description = "unexpected error"),
+            @ApiResponse(responseCode = "503", description = "error from VIP API")})
     @RequestMapping(value = "/{identifier}/status",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
