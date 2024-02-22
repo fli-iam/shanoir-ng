@@ -27,6 +27,7 @@ import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyLightDTO;
 import org.shanoir.ng.study.dto.StudyStorageVolumeDTO;
+import org.shanoir.ng.study.dto.StudyStatisticsDTO;
 import org.shanoir.ng.study.dua.DataUserAgreement;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
@@ -365,5 +366,17 @@ public interface StudyApi {
 	@GetMapping(value = "/studyUser/{studyId}", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER'))")
 	ResponseEntity<List<StudyUser>> getStudyUserByStudyId(@PathVariable("studyId") Long studyId);
+
+	@Operation(summary = "getStudyStatistics", description = "Returns study imaging statistics corresponding to the given study id")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "exported statistics"),
+		@ApiResponse(responseCode = "401", description = "unauthorized"),
+		@ApiResponse(responseCode = "403", description = "forbidden"),
+		@ApiResponse(responseCode = "404", description = "no study found"),
+		@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@GetMapping(value = "/statistics/{studyId}", produces = { "application/json" })
+	@PreAuthorize("hasRole('ADMIN') or hasRole('EXPERT')")
+	ResponseEntity<List<StudyStatisticsDTO>> getStudyStatistics(
+		@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws RestServiceException, IOException;
 
 }

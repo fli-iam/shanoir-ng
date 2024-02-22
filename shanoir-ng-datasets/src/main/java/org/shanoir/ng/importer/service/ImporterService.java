@@ -36,6 +36,7 @@ import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.MegDataset;
 import org.shanoir.ng.dataset.modality.MeshDataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.dataset.modality.XaDataset;
 import org.shanoir.ng.dataset.modality.ParameterQuantificationDataset;
 import org.shanoir.ng.dataset.modality.PetDataset;
 import org.shanoir.ng.dataset.modality.RegistrationDataset;
@@ -532,6 +533,10 @@ public class ImporterService {
                 case TemplateDataset.datasetType:
                     dataset = new TemplateDataset();
                     originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
+                    break;
+                case XaDataset.datasetType:
+                    dataset = new TemplateDataset();
+                    originMetadata.setDatasetModalityType(DatasetModalityType.XA_DATASET);
                     break;
                 default:
                 break;
