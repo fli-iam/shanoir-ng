@@ -30,6 +30,8 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 @JsonTypeName("Ct")
 public class CtDatasetAcquisition extends DatasetAcquisition {
 
+	public static final String datasetAcquisitionType = "Ct";
+
 	/**
 	 * UID
 	 */
@@ -37,6 +39,14 @@ public class CtDatasetAcquisition extends DatasetAcquisition {
 
 	@OneToOne(cascade = CascadeType.ALL)
 	private CtProtocol ctProtocol;
+
+	public CtDatasetAcquisition() {
+	}
+
+	public CtDatasetAcquisition(DatasetAcquisition other) {
+		super(other);
+		this.ctProtocol = new CtProtocol(this);
+	}
 
 	/**
 	 * @return the ctProtocol

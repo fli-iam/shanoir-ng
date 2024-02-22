@@ -99,12 +99,70 @@ public class DatasetUtils {
 				dataset = new BidsDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.MR_DATASET);
 				break;
+			case XaDataset.datasetType:
+				dataset = new XaDataset();
+				originMetadata.setDatasetModalityType(DatasetModalityType.XA_DATASET);
+				break;
 			default:
 				dataset = new GenericDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
 				break;
 		}
 		dataset.setOriginMetadata(originMetadata);
+		return dataset;
+	}
+
+	public static Dataset copyDatasetFromDataset(Dataset d) {
+		String type = d.getType();
+		Dataset dataset = null;
+
+		switch(type) {
+			case CalibrationDataset.datasetType:
+				dataset = new CalibrationDataset(d);
+				break;
+			case CtDataset.datasetType:
+				dataset = new CtDataset(d);
+				break;
+			case EegDataset.datasetType:
+				dataset = new EegDataset(d);
+				break;
+			case MegDataset.datasetType:
+				dataset = new MegDataset(d);
+				break;
+			case MeshDataset.datasetType:
+				dataset = new MeshDataset(d);
+				break;
+			case ParameterQuantificationDataset.datasetType:
+				dataset = new ParameterQuantificationDataset(d);
+				break;
+			case PetDataset.datasetType:
+				dataset = new PetDataset(d);
+				break;
+			case RegistrationDataset.datasetType:
+				dataset = new RegistrationDataset(d);
+				break;
+			case SegmentationDataset.datasetType:
+				dataset = new SegmentationDataset(d);
+				break;
+			case SpectDataset.datasetType:
+				dataset = new SpectDataset(d);
+				break;
+			case StatisticalDataset.datasetType:
+				dataset = new StatisticalDataset(d);
+				break;
+			case TemplateDataset.datasetType:
+				dataset = new TemplateDataset(d);
+				break;
+			case BidsDataset.datasetType:
+				dataset = new BidsDataset(d);
+				break;
+			case XaDataset.datasetType:
+				dataset = new XaDataset(d);
+				break;
+			default:
+				dataset = new GenericDataset(d);
+				break;
+		}
 		return dataset;
 	}
 	

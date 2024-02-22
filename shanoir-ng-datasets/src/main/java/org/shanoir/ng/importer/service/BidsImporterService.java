@@ -135,6 +135,9 @@ public class BidsImporterService {
 			case "nirs":
 				importDataset(importJob, BidsDataType.NIRS, DatasetModalityType.NIRS_DATASET, event);
 				break;
+			case "xa":
+				importDataset(importJob, BidsDataType.XA, DatasetModalityType.XA_DATASET, event);
+				break;
 			default:
 				if (event != null) {
 					LOG.error("The data type folder is not recognized. Please update your BIDS archive following the rules.");
@@ -183,7 +186,7 @@ public class BidsImporterService {
 		
 		Map<String, BidsDataset> datasetsByName = new HashMap<>();
 		
-		Map<String, Integer> equipments = objectMapper.readValue((String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_CODE_QUEUE, "all"), Map.class);
+		Map<String, Integer> equipments = objectMapper.readValue((String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.ACQUISITION_EQUIPMENT_CODE_QUEUE, "all"), Map.class);
 		Long equipmentId = 0L;
 
 		for (File importedFile : filesToImport) {

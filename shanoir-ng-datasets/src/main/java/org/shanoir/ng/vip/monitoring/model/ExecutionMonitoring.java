@@ -1,8 +1,6 @@
 package org.shanoir.ng.vip.monitoring.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
+import jakarta.persistence.*;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 
 /**
@@ -25,10 +23,7 @@ public class ExecutionMonitoring extends DatasetProcessing {
     private int timeout;
     
     private String outputProcessing;
-    
-    /**
-     * the status of the execution
-     */
+
     private ExecutionStatus status;
 
     private String resultsLocation;

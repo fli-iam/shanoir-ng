@@ -242,6 +242,7 @@ export class StudyComponent extends EntityComponent<Study> {
             'visibleByDefault': [this.study.visibleByDefault],
             'downloadableByDefault': [this.study.downloadableByDefault],
             'monoCenter': [{value: this.study.monoCenter, disabled: this.study.studyCenterList && this.study.studyCenterList.length > 1}, [Validators.required]],
+            'selectedCenter': [this.selectedCenter, this.study.monoCenter ? [Validators.required] : []],
             'studyCenterList': [this.study.studyCenterList, [this.validateCenter]],
             'subjectStudyList': [this.study.subjectStudyList],
             'tags': [this.study.tags],
@@ -251,6 +252,11 @@ export class StudyComponent extends EntityComponent<Study> {
             'dataUserAgreement': [],
             'studyUserList': [this.study.studyUserList]
         });
+
+        this.subscriptions.push(formGroup.get('monoCenter').valueChanges.subscribe(val => {
+            formGroup.get('selectedCenter').setValidators(val ? [Validators.required] : []);
+            this.reloadRequiredStyles();
+        }));
         return formGroup;
     }
 

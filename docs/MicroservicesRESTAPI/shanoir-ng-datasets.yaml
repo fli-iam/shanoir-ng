@@ -183,6 +183,7 @@ definitions:
           - SPECT Dataset
           - PET Dataset
           - EEG Dataset
+          - XA Dataset
       datasetProcessing:
         $ref: '#/definitions/DatasetProcessing'
       exploredEntity:
@@ -506,6 +507,7 @@ definitions:
           - SPECT Dataset
           - PET Dataset
           - EEG Dataset
+          - XA Dataset
       exploredEntity:
         type: string
         enum:

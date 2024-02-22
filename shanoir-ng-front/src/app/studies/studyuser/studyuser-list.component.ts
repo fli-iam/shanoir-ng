@@ -306,4 +306,8 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         this.onChangeCallback(this.studyUserList);
         this.onTouchedCallback();
     }
-}
+
+    protected getLoggedUserId(): number {
+        return this.keycloakService.getUserId();
+    }
+ }
