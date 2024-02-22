@@ -20,8 +20,9 @@ public interface PipelineApi {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "successful response, returns the status"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
-            @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/pipelines",
+            @ApiResponse(responseCode = "500", description = "unexpected error"),
+            @ApiResponse(responseCode = "503", description = "error from VIP API")})
+    @RequestMapping(value = "/pipeline",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
     Mono<String> getPipelineAll() throws SecurityException;
@@ -30,7 +31,8 @@ public interface PipelineApi {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "successful response, returns the status"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
-            @ApiResponse(responseCode = "500", description = "unexpected error") })
+            @ApiResponse(responseCode = "500", description = "unexpected error"),
+            @ApiResponse(responseCode = "503", description = "error from VIP API")})
     @RequestMapping(value = "/pipeline/{identifier}",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)

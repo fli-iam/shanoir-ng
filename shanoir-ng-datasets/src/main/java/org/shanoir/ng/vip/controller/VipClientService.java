@@ -2,6 +2,8 @@ package org.shanoir.ng.vip.controller;
 
 import jakarta.annotation.PostConstruct;
 import org.keycloak.representations.AccessTokenResponse;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.security.KeycloakServiceAccountUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -49,10 +51,14 @@ public class VipClientService {
     public Mono<VipExecutionDTO> getExecution(String identifier) {
         String url = vipExecutionUrl + identifier;
         return webClient.get()
-                .uri(url)
-                .headers(headers -> headers.addAll(this.getUserHttpHeaders()))
-                .retrieve()
-                .bodyToMono(VipExecutionDTO.class);
+            .uri(url)
+            .headers(headers -> headers.addAll(this.getUserHttpHeaders()))
+            .retrieve()
+            .bodyToMono(VipExecutionDTO.class)
+            .onErrorResume(e -> {
+                ErrorModel model = new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(), "Can't get execution [" + identifier + "] from VIP API", e.getMessage());
+                return Mono.error(new RestServiceException(e, model));
+            });
     }
 
     /**
@@ -74,17 +80,21 @@ public class VipClientService {
         HttpHeaders headers = this.getServiceAccountHttpHeaders();
 
         return webClient.get()
-                .uri(url)
-                .headers(httpHeaders -> httpHeaders.addAll(headers))
-                .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, response -> {
-                    if (response.statusCode().equals(HttpStatus.UNAUTHORIZED)) {
-                        LOG.info("Unauthorized : refreshing token... ({} attempts)", attempts);
-                        return Mono.empty();
-                    }
-                    return Mono.error(new ResultHandlerException("Failed to get execution details from VIP in " + attempts + " attempts", null));
-                })
-                .bodyToMono(VipExecutionDTO.class);
+            .uri(url)
+            .headers(httpHeaders -> httpHeaders.addAll(headers))
+            .retrieve()
+            .onStatus(HttpStatusCode::is4xxClientError, response -> {
+                if (response.statusCode().equals(HttpStatus.UNAUTHORIZED)) {
+                    LOG.info("Unauthorized : refreshing token... ({} attempts)", attempts);
+                    return Mono.empty();
+                }
+                return Mono.error(new ResultHandlerException("Failed to get execution details from VIP in " + attempts + " attempts", null));
+            })
+            .bodyToMono(VipExecutionDTO.class)
+            .onErrorResume(e -> {
+                ErrorModel model = new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(), "Can't get execution [" + identifier + "] from VIP API", e.getMessage());
+                return Mono.error(new RestServiceException(e, model));
+            });
     }
 
     /**
@@ -96,11 +106,14 @@ public class VipClientService {
 
         String url = vipExecutionUrl;
         return webClient.post()
-                .uri(url)
-                .headers(headers -> headers.addAll(this.getUserHttpHeaders()))
-                .bodyValue(execution)
-                .retrieve()
-                .bodyToMono(VipExecutionDTO.class);
+            .uri(url)
+            .headers(headers -> headers.addAll(this.getUserHttpHeaders()))
+            .bodyValue(execution)
+            .retrieve()
+            .bodyToMono(VipExecutionDTO.class).onErrorResume(e -> {
+                ErrorModel model = new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(), "Can't create execution [" + execution.getName() + "] through VIP API", e.getMessage());
+                return Mono.error(new RestServiceException(e, model));
+            });
     }
 
     /**
@@ -113,10 +126,14 @@ public class VipClientService {
 
         String url = vipExecutionUrl + identifier + "/stderr";
         return webClient.get()
-                .uri(url)
-                .headers(headers -> headers.addAll(this.getUserHttpHeaders()))
-                .retrieve()
-                .bodyToMono(String.class);
+            .uri(url)
+            .headers(headers -> headers.addAll(this.getUserHttpHeaders()))
+            .retrieve()
+            .bodyToMono(String.class)
+            .onErrorResume(e -> {
+                ErrorModel model = new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(), "Can't get execution [" + identifier + "] stderr logs from VIP API", e.getMessage());
+                return Mono.error(new RestServiceException(e, model));
+            });
     }
 
     /**
@@ -128,10 +145,14 @@ public class VipClientService {
     public Mono<String> getExecutionStdout(String identifier) {
         String url = vipExecutionUrl + identifier + "/stdout";
         return webClient.get()
-                .uri(url)
-                .headers(headers -> headers.addAll(this.getUserHttpHeaders()))
-                .retrieve()
-                .bodyToMono(String.class);
+            .uri(url)
+            .headers(headers -> headers.addAll(this.getUserHttpHeaders()))
+            .retrieve()
+            .bodyToMono(String.class)
+            .onErrorResume(e -> {
+                ErrorModel model = new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(), "Can't get execution [" + identifier + "] stdout logs from VIP API", e.getMessage());
+                return Mono.error(new RestServiceException(e, model));
+            });
     }
 
     /**
@@ -141,10 +162,14 @@ public class VipClientService {
      */
     public Mono<String> getPipelineAll() {
         return webClient.get()
-                .uri(vipPipelineUrl)
-                .headers(headers -> headers.addAll(this.getUserHttpHeaders()))
-                .retrieve()
-                .bodyToMono(String.class);
+            .uri(vipPipelineUrl)
+            .headers(headers -> headers.addAll(this.getUserHttpHeaders()))
+            .retrieve()
+            .bodyToMono(String.class)
+            .onErrorResume(e -> {
+                ErrorModel model = new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(), "Can't get pipelines descriptions from VIP API", e.getMessage());
+                return Mono.error(new RestServiceException(e, model));
+            });
     }
 
     /**
@@ -156,10 +181,14 @@ public class VipClientService {
     public Mono<String> getPipeline(String identifier) {
         String url = vipPipelineUrl + identifier;
         return webClient.get()
-                .uri(url)
-                .headers(headers -> headers.addAll(this.getUserHttpHeaders()))
-                .retrieve()
-                .bodyToMono(String.class);
+            .uri(url)
+            .headers(headers -> headers.addAll(this.getUserHttpHeaders()))
+            .retrieve()
+            .bodyToMono(String.class)
+            .onErrorResume(e -> {
+                ErrorModel model = new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(), "Can't get pipeline [" + identifier + "] description from VIP API", e.getMessage());
+                return Mono.error(new RestServiceException(e, model));
+            });
     }
 
 

@@ -49,7 +49,7 @@ export class PipelineService {
   */
 
   public listPipelines(): Observable<Array<Pipeline>> {
-    return this.httpClient.get<Array<Pipeline>>(`${this.pipelineUrl}s`);
+    return this.httpClient.get<Array<Pipeline>>(`${this.pipelineUrl}`);
   }
 
 }
