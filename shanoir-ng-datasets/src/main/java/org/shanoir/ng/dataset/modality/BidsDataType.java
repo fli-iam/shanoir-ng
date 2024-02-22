@@ -39,7 +39,10 @@ public enum BidsDataType {
 	MICR("micr"),
 
 	/* Near-Infrared Spectroscopy */
-	NIRS("nirs");
+	NIRS("nirs"),
+
+	/* X-Ray Angiography */
+	XA("xa");
 
 	private String folderName;
 

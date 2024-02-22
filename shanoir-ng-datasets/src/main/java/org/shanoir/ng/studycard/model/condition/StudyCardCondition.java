@@ -14,12 +14,8 @@
 
 package org.shanoir.ng.studycard.model.condition;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
+import java.util.List;
+
 import org.hibernate.annotations.Check;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
@@ -27,13 +23,25 @@ import org.shanoir.ng.studycard.model.Operation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.DiscriminatorType;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Check(constraints = "(dicomTag IS NOT NULL AND shanoirField IS NULL) OR (dicomTag IS NULL AND shanoirField IS NOT NULL)") 
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name="scope", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorColumn(name="scope", discriminatorType = DiscriminatorType.STRING, length = 47)
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "scope")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = StudyCardDICOMConditionOnDatasets.class, name = "StudyCardDICOMConditionOnDatasets"),

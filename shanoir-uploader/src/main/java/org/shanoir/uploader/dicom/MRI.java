@@ -74,4 +74,12 @@ public class MRI {
 		this.magneticFieldStrength = magneticFieldStrength;
 	}
 
+	@Override
+	public String toString() {
+		return "MRI [manufacturer=" + manufacturer + ", stationName=" + stationName + ", magneticFieldStrength="
+				+ magneticFieldStrength + ", deviceSerialNumber=" + deviceSerialNumber + ", manufacturersModelName="
+				+ manufacturersModelName + ", institutionName=" + institutionName + ", institutionAddress="
+				+ institutionAddress + "]";
+	}
+
 }

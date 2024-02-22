@@ -40,17 +40,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class RabbitMqCenterService {
 
 	@Autowired
-	private AcquisitionEquipmentRepository acquisitionEquipementService;
+	private AcquisitionEquipmentRepository acquisitionEquipmentService;
 
 	@Autowired
 	private ObjectMapper mapper;
 	
-	@RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_CENTER_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPMENT_CENTER_QUEUE)
 	@RabbitHandler
 	@Transactional
-	public String findCenterIdFromAcquisitionEquipement(String message) {
+	public String findCenterIdFromAcquisitionEquipment(String message) {
 		try {
-			AcquisitionEquipment ae = acquisitionEquipementService.findById(Long.valueOf(message)).orElse(null);
+			AcquisitionEquipment ae = acquisitionEquipmentService.findById(Long.valueOf(message)).orElse(null);
 			if (ae == null) {
 				return null;
 			} else {
@@ -61,12 +61,12 @@ public class RabbitMqCenterService {
 		}
 	}
 
-	@RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_CODE_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPMENT_CODE_QUEUE)
 	@RabbitHandler
 	@Transactional
-	public String findAcquisitionEquipements(String message) {
+	public String findAcquisitionEquipments(String message) {
 		try {
-			List<AcquisitionEquipment> aes = Utils.toList(acquisitionEquipementService.findAll());
+			List<AcquisitionEquipment> aes = Utils.toList(acquisitionEquipmentService.findAll());
 			Map<String, Long> easMap = new HashMap<>(); 
 			for (AcquisitionEquipment ae : aes) {
 				if (ae.getSerialNumber() != null) {
@@ -84,14 +84,14 @@ public class RabbitMqCenterService {
 	@Transactional
 	public Long getEquipmentFromCode(String message) {
 		try {
-			
-		AcquisitionEquipment equip = this.acquisitionEquipementService.findBySerialNumber(message);
-		if (equip == null) {
-			return null;
-		}
-		return equip.getId();
+			List<AcquisitionEquipment> equipList = acquisitionEquipmentService.findBySerialNumberContaining(message);
+			if (equipList == null || equipList.isEmpty()) {
+				return null;
+			}
+			return equipList.get(0).getId();
 		} catch (Exception e) {
 			return null;
 		}
 	}
+
 }

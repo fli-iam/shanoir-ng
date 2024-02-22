@@ -14,6 +14,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
@@ -206,7 +207,8 @@ public class DicomSRImporterService {
 		for (DatasetAcquisition acquisition : acquisitions) {
 			if (acquisition instanceof MrDatasetAcquisition
 				|| acquisition instanceof CtDatasetAcquisition
-				|| acquisition instanceof PetDatasetAcquisition) {
+				|| acquisition instanceof PetDatasetAcquisition
+				|| acquisition instanceof XaDatasetAcquisition) {
 				List<Dataset> datasets = acquisition.getDatasets();
 				for (Dataset dataset : datasets) {
 					List<DatasetExpression> expressions = dataset.getDatasetExpressions();

@@ -27,6 +27,7 @@ import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.PublicStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyStorageVolumeDTO;
+import org.shanoir.ng.study.dto.StudyStatisticsDTO;
 import org.shanoir.ng.study.dua.DataUserAgreement;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
@@ -133,7 +134,27 @@ public interface StudyApi {
 			@Parameter(name = "study to create", required = true) @RequestBody Study study, BindingResult result)
 			throws RestServiceException;
 
-  @Operation(summary = "", description = "If exists, returns the sizes of the study files detailed by format corresponding to the given id")
+	@Operation(summary = "", description = "Copy a list of dataset to a study")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "copy worked"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@RequestMapping(value = "/copyDatasets", produces = { "application/json" }, method = RequestMethod.POST)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+	ResponseEntity<String> copyDatasetsToStudy(
+			@Parameter(name = "Dataset ids to copy", required = true)
+			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
+			@Parameter(name = "Study id to copy in", required = true)
+			@RequestParam(value = "studyId", required = true) String studyId,
+			@Parameter(name = "center id of datasets", required = true)
+			@RequestParam(value = "centerIds", required = true) List<Long> centerIds,
+			@Parameter(name = "subject id of datasets", required = true)
+			@RequestParam(value = "subjectIds", required = true) List<String> subjectIdStudyId);
+
+
+	@Operation(summary = "", description = "If exists, returns the sizes of the study files detailed by format corresponding to the given id")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Sizes of the study files in bytes by format"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -331,5 +352,17 @@ public interface StudyApi {
 	@GetMapping(value = "/studyUser/{studyId}", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER'))")
 	ResponseEntity<List<StudyUser>> getStudyUserByStudyId(@PathVariable("studyId") Long studyId);
+
+	@Operation(summary = "getStudyStatistics", description = "Returns study imaging statistics corresponding to the given study id")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "exported statistics"),
+		@ApiResponse(responseCode = "401", description = "unauthorized"),
+		@ApiResponse(responseCode = "403", description = "forbidden"),
+		@ApiResponse(responseCode = "404", description = "no study found"),
+		@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@GetMapping(value = "/statistics/{studyId}", produces = { "application/json" })
+	@PreAuthorize("hasRole('ADMIN') or hasRole('EXPERT')")
+	ResponseEntity<List<StudyStatisticsDTO>> getStudyStatistics(
+		@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws RestServiceException, IOException;
 
 }

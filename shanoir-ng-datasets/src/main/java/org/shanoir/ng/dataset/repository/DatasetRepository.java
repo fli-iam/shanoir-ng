@@ -18,6 +18,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+//import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -25,6 +26,16 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import java.util.List;
 
 public interface DatasetRepository extends PagingAndSortingRepository<Dataset, Long>, CrudRepository<Dataset, Long>, DatasetRepositoryCustom {
+
+	@Query(value="SELECT COUNT(*) FROM dataset as ds " +
+			"INNER JOIN dataset_acquisition as acq ON ds.dataset_acquisition_id=acq.id " +
+			"INNER JOIN examination as ex ON acq.examination_id=ex.id " +
+			"WHERE ds.source_id=:datasetParentId AND ex.study_id=:studyId", nativeQuery = true)
+	Long countDatasetsBySourceIdAndStudyId(Long datasetParentId, Long studyId);
+
+	List<Dataset> findBySourceId(Long sourceDatasetId);
+
+	List<Dataset> findBySourceIdIn(List<Long> sourceDatasetId);
 
 	Page<Dataset> findByDatasetAcquisitionExaminationStudy_IdIn(Iterable<Long> studyIds, Pageable pageable);
 

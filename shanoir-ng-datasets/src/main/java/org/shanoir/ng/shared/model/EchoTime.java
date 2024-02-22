@@ -61,6 +61,15 @@ public class EchoTime extends AbstractEntity {
 	@NotNull
 	private Double echoTimeValue;
 
+	public EchoTime() {
+	}
+
+	public EchoTime(EchoTime et, MrDataset mr) {
+		this.mrDataset = mr;
+		this.echoNumber = et.getEchoNumber();
+		this.echoTimeValue = et.getEchoTimeValue();
+	}
+
 	/**
 	 * @return the echoNumber
 	 */
@@ -94,6 +103,10 @@ public class EchoTime extends AbstractEntity {
 	
 	public void setMrDataset(MrDataset mrDataset) {
 		this.mrDataset = mrDataset;
+	}
+
+	public MrDataset getMrDataset() {
+		return mrDataset;
 	}
 
 	@Override

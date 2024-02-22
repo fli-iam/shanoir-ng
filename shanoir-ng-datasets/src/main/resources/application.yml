@@ -25,6 +25,8 @@ spring:
     username: datasets
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari.maximum-pool-size: 60
+    hikari.minimum-idle:  60
   jpa:
     database-platform: org.hibernate.dialect.MySQL57Dialect
     defer-datasource-initialization: true
@@ -60,8 +62,6 @@ spring:
   rabbitmq:
     host: ${SHANOIR_PREFIX}rabbitmq
     port: 5672
-    username: guest
-    password: guest
   session:
     store-type: none
   servlet:
@@ -77,10 +77,13 @@ spring:
 
 springdoc:
   api-docs:
-    path: /api-docs
-  swagger-ui:
-    path: /swagger-ui.html
+    path: '/api-docs'
     enabled: true
+  swagger-ui:
+    url: /shanoir-ng/datasets/api-docs
+    config-url: /shanoir-ng/datasets/api-docs/swagger-config
+    enabled: true
+    disable-swagger-default-url: true
 
 front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
@@ -102,8 +105,8 @@ logging:
     org.springframework.web: ERROR
     org.hibernate: ERROR
     org.shanoir: INFO
-        
-  
+
+
 ### ============================================================= ###
 ###                  Dicom Server Configuration                   ###
 ### ============================================================= ###

@@ -9,7 +9,7 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface ExecutionMonitoringRepository extends CrudRepository<ExecutionMonitoring, Long> {
 
-    public Optional<ExecutionMonitoring> findByIdentifier(String identifier);
+    Optional<ExecutionMonitoring> findByIdentifier(String identifier);
 
     List<ExecutionMonitoring> findByStatus(ExecutionStatus status);
 }

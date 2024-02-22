@@ -7,6 +7,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import org.shanoir.ng.dataset.modality.EegDataset;
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 
 import java.util.Date;
@@ -46,8 +47,20 @@ public class Event extends HalEntity {
     @JsonIgnore
 	private EegDataset dataset;
 
-    
-    
+	public Event() {
+
+	}
+
+	public Event(Event other, Dataset d) {
+		this.type = other.getType();
+		this.description = other.getDescription();
+		this.position = other.getPosition();
+		this.points = other.getPoints();
+		this.channelNumber = other.getChannelNumber();
+		this.date = other.getDate();
+		this.dataset = (EegDataset) d;
+	}
+
 	public String getDescription() {
 		return description;
 	}

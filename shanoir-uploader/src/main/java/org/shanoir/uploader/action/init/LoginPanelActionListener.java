@@ -4,7 +4,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import org.apache.log4j.Logger;
-import org.json.JSONException;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.gui.LoginConfigurationPanel;
@@ -40,7 +39,7 @@ public class LoginPanelActionListener implements ActionListener {
 						"\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.fail"));
 				sSC.setState(new AuthenticationManualConfigurationState());
 			}
-		} catch (JSONException e1) {
+		} catch (Exception e1) {
 			logger.error(e1.getMessage(), e1);
 			sSC.getShUpStartupDialog().updateStartupText(
 					"\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.fail"));

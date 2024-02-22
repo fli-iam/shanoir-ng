@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -24,7 +24,7 @@ import { SessionService } from '../services/session.service';
 
 @Injectable()
 export class NotificationsService {
-  
+
     public nbNew: number = 0;
     public nbNewError: number = 0;
     private tasks: Task[] = [];
@@ -93,7 +93,7 @@ export class NotificationsService {
                 this.emitTasks();
             }
         });
-    }   
+    }
 
     updateStatusVars() {
         let tmpTasksInProgress = [];
@@ -163,7 +163,7 @@ export class NotificationsService {
                     this.refresh();
                 }
             });
-            this.refresh(); 
+            this.refresh();
         });
     }
 
@@ -174,7 +174,7 @@ export class NotificationsService {
     pushLocalTask(task: Task) {
         this.createOrUpdateTask(task.clone());
     }
-    
+
     private createOrUpdateTask(task: Task) {
         this.newLocalTasksQueue = this.newLocalTasksQueue.filter(t => t.id != task.id);
         this.newLocalTasksQueue.push(task);
@@ -213,7 +213,7 @@ export class NotificationsService {
         this.updateStatusVars();
         this.emitTasks();
     }
-    
+
     private serializeTasks(tasks: Task[]): string {
         let tasksToStore: Task[] = [].concat(tasks);
         let str: string = '[' + tasksToStore.map(t => t.stringify()).join(',') + ']';
