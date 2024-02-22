@@ -317,13 +317,16 @@ public class QueryPACSService {
 					// handle study
 					Study study = new Study(studyAttr);
 					patient.getStudies().add(study);
-					querySeries(association, study, modality, studyDate);
+					// use now study date returned from the DICOM server
+					String dicomResponseStudyDate = studyAttr.getString(Tag.StudyDate);
+					querySeries(association, study, modality, dicomResponseStudyDate);
 				} else {
 					if (!newPatient) { // only process existing patients, in case
 						// handle study
 						Study study = new Study(studyAttr);
 						patient.getStudies().add(study);
-						querySeries(association, study, modality, studyDate);						
+						String dicomResponseStudyDate = studyAttr.getString(Tag.StudyDate);
+						querySeries(association, study, modality, dicomResponseStudyDate);						
 					}
 				}
 			}
@@ -359,22 +362,27 @@ public class QueryPACSService {
 		DicomParam patientName = initDicomParam(Tag.PatientName, patient.getPatientName());
 		DicomParam patientID = initDicomParam(Tag.PatientID, patient.getPatientID());
 		DicomParam studyDescription = initDicomParam(Tag.StudyDescription, dicomQuery.getStudyDescription());
-		DicomParam studyDate = initDicomParam(Tag.StudyDate, dicomQuery.getStudyDate());
+		// query studies, at first using the potential study date entered by the user via the GUI
+		// most users will leave this empty, when the query patient root level queries
+		DicomParam dicomQueryStudyDate = initDicomParam(Tag.StudyDate, dicomQuery.getStudyDate());
 		DicomParam[] params = {
 			modality,
 			patientName,
 			patientID,
 			new DicomParam(Tag.StudyInstanceUID),
 			studyDescription,
-			studyDate
+			dicomQueryStudyDate
 		};
 		List<Attributes> studiesAttr = queryCFind(association, params, QueryRetrieveLevel.STUDY);
 		if (studiesAttr != null) {
 			List<Study> studies = new ArrayList<Study>();
 			for (int i = 0; i < studiesAttr.size(); i++) {
-				Study study = new Study(studiesAttr.get(i));
+				Attributes studyAttr = studiesAttr.get(i);
+				Study study = new Study(studyAttr);
 				studies.add(study);
-				querySeries(association, study, modality, studyDate);
+				// use now study date returned from the DICOM server
+				String dicomResponseStudyDate = studyAttr.getString(Tag.StudyDate);
+				querySeries(association, study, modality, dicomResponseStudyDate);
 			}
 			studies.sort((p1, p2) -> p1.getStudyDate().compareTo(p2.getStudyDate()));
 			patient.setStudies(studies);
@@ -388,8 +396,9 @@ public class QueryPACSService {
 	 * @param called
 	 * @param study
 	 */
-	private void querySeries(Association association, Study study, DicomParam modality, DicomParam studyDate) {
+	private void querySeries(Association association, Study study, DicomParam modality, String studyDateStr) {
 		DicomParam studyInstanceUID = initDicomParam(Tag.StudyInstanceUID, study.getStudyInstanceUID());
+		DicomParam studyDate = initDicomParam(Tag.StudyDate, studyDateStr);
 		DicomParam[] params = {
 			modality,
 			studyInstanceUID,
