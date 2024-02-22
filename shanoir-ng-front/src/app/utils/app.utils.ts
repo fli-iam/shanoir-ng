@@ -149,7 +149,7 @@ export const BACKEND_API_NIFTI_CONVERTER_URL: string = BACKEND_API_IMPORT_MS_URL
 export const BACKEND_API_PRECLINICAL_MS_URL: string = BACKEND_API_URL + '/preclinical';
 
 // vip
-export const BACKEND_API_VIP_URL: string = BACKEND_API_DATASET_MS_URL + '/vip-shanoir';
+export const BACKEND_API_VIP_URL: string = BACKEND_API_DATASET_MS_URL + '/shanoir-vip';
 export const BACKEND_API_VIP_EXEC_URL : string = BACKEND_API_VIP_URL + "/execution";
 export const BACKEND_API_VIP_PIPE_URL : string = BACKEND_API_VIP_URL + "/pipeline";
 
