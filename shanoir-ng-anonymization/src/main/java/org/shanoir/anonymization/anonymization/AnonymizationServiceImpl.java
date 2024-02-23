@@ -36,8 +36,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Anonymization serviceImpl. mkain: bug fixing done for multi-threading errors,
- * e.g. when used by server. bug fixed for identical media storage sop instance
- * uid and sop instance uid and bug fixed for invalid uid generation.
+ * e.g. when used by server; bug fixed for identical media storage sop instance
+ * uid and sop instance uid; bug fixed for invalid uid generation.
  * 
  * @author ifakhfakh
  * @author mkain
@@ -96,8 +96,8 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		Map<String, Profile> profiles = AnonymizationRulesSingleton.getInstance().getProfiles();
 		Map<String, String> anonymizationMap = profiles.get(profile).getAnonymizationMap();
 		tagsToDeleteForManufacturer = AnonymizationRulesSingleton.getInstance().getTagsToDeleteForManufacturer();
-		// init here for multi-threading reasons
 
+		// init here for multi-threading reasons
 		Map<String, String> seriesInstanceUIDs = new HashMap<>();
 		Map<String, String> studyInstanceUIDs = new HashMap<>();
 		Map<String, String> studyIds = new HashMap<>();
@@ -180,7 +180,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 			/**
 			 * DICOM "body": read tags
 			 */
-			Attributes datasetAttributes = din.readDataset(-1, -1);
+			Attributes datasetAttributes = din.readDatasetUntilPixelData();
 			
 			// temporarily keep the patient credentials in memory to search in private tags
 			String patientNameAttr = datasetAttributes.getString(Tag.PatientName);
@@ -371,6 +371,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		if (studyInstanceUIDs != null && studyInstanceUIDs.size() != 0
 				&& studyInstanceUIDs.get(attributes.getString(tagInt)) != null) {
 			value = studyInstanceUIDs.get(attributes.getString(tagInt));
+			LOG.debug("Existing StudyInstanceUID reused: {}", value);
 		} else {
 			UIDGeneration generator = new UIDGeneration();
 			String newUID = null;
@@ -380,6 +381,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 				LOG.error(e.getMessage());
 			}
 			value = newUID;
+			LOG.info("New StudyInstanceUID generated for DICOM study/exam: {}", newUID);
 			studyInstanceUIDs.put(attributes.getString(tagInt), value);
 		}
 		anonymizeTagAccordingToVR(attributes, tagInt, value);
@@ -398,6 +400,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 			}
 			String output = sb.toString();
 			value = output.toString();
+			LOG.info("New StudyID generated for DICOM study/exam: {}", value);
 			studyIds.put(attributes.getString(tagInt), value);
 		}
 		anonymizeTagAccordingToVR(attributes, tagInt, value);
