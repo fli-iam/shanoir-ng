@@ -37,6 +37,7 @@ import java.time.LocalDate;
 public class ExecutionStatusMonitorService {
 
 	public static final float DEFAULT_PROGRESS = 0.5f;
+
 	@Value("${vip.uri}")
 	private String VIP_URI;
 
