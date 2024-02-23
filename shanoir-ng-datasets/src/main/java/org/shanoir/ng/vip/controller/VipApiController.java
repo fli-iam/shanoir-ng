@@ -52,9 +52,9 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-public class ExecutionApiController implements ExecutionApi {
+public class VipApiController implements VipApi {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ExecutionApiController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(VipApiController.class);
     public static final String SHANOIR_URI_SCHEME = "shanoir:/";
 
     @Autowired
@@ -250,5 +250,19 @@ public class ExecutionApiController implements ExecutionApi {
     @Override
     public Mono<String> getExecutionStdout(String identifier) {
         return vipClient.getExecutionStdout(identifier);
+    }
+
+    @Override
+    public Mono<String> getPipelineAll() {
+        return vipClient.getPipelineAll();
+    }
+
+    /**
+     * @param identifier
+     * @return
+     */
+    @Override
+    public Mono<String> getPipeline(String identifier) {
+        return vipClient.getPipeline(identifier);
     }
 }
