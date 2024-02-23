@@ -254,6 +254,7 @@ public class VipApiController implements VipApi {
 
     @Override
     public Mono<String> getPipelineAll() {
+        LOG.error("[DEBUG] GET /toto/pipeline");
         return vipClient.getPipelineAll();
     }
 
@@ -263,6 +264,7 @@ public class VipApiController implements VipApi {
      */
     @Override
     public Mono<String> getPipeline(String identifier) {
+        LOG.error("[DEBUG] GET /toto/pipeline/" + identifier);
         return vipClient.getPipeline(identifier);
     }
 }

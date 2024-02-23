@@ -106,7 +106,7 @@ public interface VipApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "error from VIP API")})
-    @RequestMapping(value = "/pipeline",
+    @RequestMapping(value = "/pipelines",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
     Mono<String> getPipelineAll() throws SecurityException;
