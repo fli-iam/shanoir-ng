@@ -116,10 +116,10 @@ public interface VipApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "error from VIP API")})
-    @RequestMapping(value = "/pipeline/{identifier}",
+    @RequestMapping(value = "/pipeline/{identifier}/{version}",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
-    ResponseEntity<String> getPipeline(@Parameter(name = "The pipeline identifier", required=true) @PathVariable("identifier") String identifier) throws SecurityException;
+    ResponseEntity<String> getPipeline(@Parameter(name = "The pipeline identifier", required=true) @PathVariable("identifier") String identifier, @Parameter(name = "The pipeline version", required=true) @PathVariable("version") String version) throws SecurityException;
 
 
 }
