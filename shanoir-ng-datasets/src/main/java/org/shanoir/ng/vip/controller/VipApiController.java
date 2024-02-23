@@ -231,31 +231,30 @@ public class VipApiController implements VipApi {
     }
 
     @Override
-    public Mono<VipExecutionDTO> getExecution(@Parameter(name = "The execution identifier", required=true) @PathVariable("identifier") String identifier) {
-        return vipClient.getExecution(identifier);
+    public ResponseEntity<VipExecutionDTO> getExecution(@Parameter(name = "The execution identifier", required=true) @PathVariable("identifier") String identifier) {
+        return ResponseEntity.ok(vipClient.getExecution(identifier).block());
     }
 
 
     @Override
-    public Mono<ExecutionStatus> getExecutionStatus(@Parameter(name = "The execution identifier", required=true) @PathVariable("identifier") String identifier) {
-        return vipClient.getExecution(identifier).map(VipExecutionDTO::getStatus);
+    public ResponseEntity<ExecutionStatus> getExecutionStatus(@Parameter(name = "The execution identifier", required=true) @PathVariable("identifier") String identifier) {
+        return ResponseEntity.ok(vipClient.getExecution(identifier).map(VipExecutionDTO::getStatus).block());
     }
 
     @Override
-    public Mono<String> getExecutionStderr(String identifier) {
-        return vipClient.getExecutionStderr(identifier);
+    public ResponseEntity<String> getExecutionStderr(String identifier) {
+        return ResponseEntity.ok(vipClient.getExecutionStderr(identifier).block());
 
     }
 
     @Override
-    public Mono<String> getExecutionStdout(String identifier) {
-        return vipClient.getExecutionStdout(identifier);
+    public ResponseEntity<String> getExecutionStdout(String identifier) {
+        return ResponseEntity.ok(vipClient.getExecutionStdout(identifier).block());
     }
 
     @Override
-    public Mono<String> getPipelineAll() {
-        LOG.error("[DEBUG] GET /toto/pipeline");
-        return vipClient.getPipelineAll();
+    public ResponseEntity<String> getPipelineAll() {
+        return ResponseEntity.ok(vipClient.getPipelineAll().block());
     }
 
     /**
@@ -263,8 +262,7 @@ public class VipApiController implements VipApi {
      * @return
      */
     @Override
-    public Mono<String> getPipeline(String identifier) {
-        LOG.error("[DEBUG] GET /toto/pipeline/" + identifier);
-        return vipClient.getPipeline(identifier);
+    public ResponseEntity<String> getPipeline(String identifier) {
+        return ResponseEntity.ok(vipClient.getPipeline(identifier).block());
     }
 }

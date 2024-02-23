@@ -31,15 +31,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 
 /**
  * @author Alae Es-saki
  */
-@Tag(name = "toto")
-@RequestMapping("/toto")
+@Tag(name = "vip")
+@RequestMapping("/vip")
 public interface VipApi {
 
     @Operation(summary = "Creates an execution inside VIP and return the monitoring id and name", description = "Creates the ressources and path control in shanoir before creating an execution in VIP, then return the running execution monitoring", tags={  })
@@ -64,7 +63,7 @@ public interface VipApi {
     @RequestMapping(value = "/execution/{identifier}",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
-    Mono<VipExecutionDTO> getExecution(@Parameter(name = "The execution identifier", required=true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
+    ResponseEntity<VipExecutionDTO> getExecution(@Parameter(name = "The execution identifier", required=true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
 
     @Operation(summary = "Get stderr logs for the given VIP execution identifier", description = "Returns the stderr logs of the VIP execution that has the given identifier in parameter.", tags={  })
     @ApiResponses(value = {
@@ -75,7 +74,7 @@ public interface VipApi {
     @RequestMapping(value = "/execution/{identifier}/stderr",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
-    Mono<String> getExecutionStderr(@Parameter(name = "The execution identifier", required=true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
+    ResponseEntity<String> getExecutionStderr(@Parameter(name = "The execution identifier", required=true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
 
     @Operation(summary = "Get stdout logs for the given VIP execution identifier", description = "Returns the stdout logs of the VIP execution that has the given identifier in parameter.", tags={  })
     @ApiResponses(value = {
@@ -86,7 +85,7 @@ public interface VipApi {
     @RequestMapping(value = "/execution/{identifier}/stdout",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
-    Mono<String> getExecutionStdout(@Parameter(name = "The execution identifier", required=true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
+    ResponseEntity<String> getExecutionStdout(@Parameter(name = "The execution identifier", required=true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
 
 
     @Operation(summary = "Get status for the given VIP execution identifier", description = "Returns the status of the VIP execution that has the given identifier in parameter.", tags={  })
@@ -98,7 +97,7 @@ public interface VipApi {
     @RequestMapping(value = "/execution/{identifier}/status",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
-    Mono<ExecutionStatus> getExecutionStatus(@Parameter(name = "The execution identifier", required=true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
+    ResponseEntity<ExecutionStatus> getExecutionStatus(@Parameter(name = "The execution identifier", required=true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
 
     @Operation(summary = "Get all available pipelines in VIP", description = "Returns all the pipelines available to the authenticated user in VIP", tags={  })
     @ApiResponses(value = {
@@ -109,7 +108,7 @@ public interface VipApi {
     @RequestMapping(value = "/pipelines",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
-    Mono<String> getPipelineAll() throws SecurityException;
+    ResponseEntity<String> getPipelineAll() throws SecurityException;
 
     @Operation(summary = "Get the description of pipeline [name] in the version [version]", description = "Returns the VIp description of the pipeline [name] in the version [version].", tags={  })
     @ApiResponses(value = {
@@ -120,7 +119,7 @@ public interface VipApi {
     @RequestMapping(value = "/pipeline/{identifier}",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
-    Mono<String> getPipeline(@Parameter(name = "The pipeline identifier", required=true) @PathVariable("identifier") String identifier) throws SecurityException;
+    ResponseEntity<String> getPipeline(@Parameter(name = "The pipeline identifier", required=true) @PathVariable("identifier") String identifier) throws SecurityException;
 
 
 }
