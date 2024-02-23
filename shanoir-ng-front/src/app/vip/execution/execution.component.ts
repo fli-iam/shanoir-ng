@@ -30,7 +30,7 @@ import {GroupByEnum} from "../models/groupby.enum";
 import {PipelineParameter} from "../models/pipelineParameter";
 import {ServiceLocator} from "../../utils/locator.service";
 import {ConsoleService} from "../../shared/console/console.service";
-import {ExecutionCandidate} from "../models/execution-candidate";
+import {ExecutionCandidateDto} from "../models/execution-candidate.dto";
 
 @Component({
     selector: 'app-execution',
@@ -215,14 +215,14 @@ export class ExecutionComponent implements OnInit {
     }
 
     private initExecutionCandidate() {
-        let candidate = new ExecutionCandidate();
+        let candidate = new ExecutionCandidateDto();
         candidate.name = this.cleanProcessingName(this.executionForm.get("execution_name").value);
         candidate.pipelineIdentifier = this.pipeline.identifier
         candidate.studyIdentifier = [...this.selectedDatasets][0].study.id;  // TODO : this should be selected automatically if all datasets have the same study, if not show a select input to choose what context.
         candidate.processingType = DatasetProcessingType.SEGMENTATION; // TODO : this should be selected by the user.
         candidate.outputProcessing = this.pipeline.outputProcessing;
         candidate.client = KeycloakService.clientId;
-        candidate.parametersResources = [];
+        candidate.datasetParameters = [];
         candidate.inputParameters = {};
         this.pipeline.parameters.forEach(
             parameter => {
@@ -232,7 +232,7 @@ export class ExecutionComponent implements OnInit {
                     dto.parameter = parameter.name;
                     dto.groupBy = this.getGroupByEnumByLabel(this.groupBy);
                     dto.datasetIds = this.datasetsByParam[parameter.name].map(dataset => { return dataset.id});
-                    candidate.parametersResources.push(dto);
+                    candidate.datasetParameters.push(dto);
                 }else{
                     //Other type parameters (boolean, string...)
                     // TODO
