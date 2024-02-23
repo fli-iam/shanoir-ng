@@ -74,6 +74,8 @@ public class ShanoirUploaderServiceClient {
 	
 	private static final String SERVICE_SUBJECTS_FIND_BY_IDENTIFIER = "service.subjects.find.by.identifier";
 
+	private static final String SERVICE_SUBJECTS_FIND_BY_NAME_AND_STUDY = "service.subjects.find.by.identifier";
+
 	private static final String SERVICE_DATASETS = "service.datasets";
 	
 	private static final String SERVICE_DATASETS_DICOM_WEB_STUDIES = "service.datasets.dicom.web.studies";
@@ -119,7 +121,9 @@ public class ShanoirUploaderServiceClient {
 	private String serviceURLSubjectsCreate;
 
 	private String serviceURLSubjectsFindByIdentifier;
-	
+
+	private String serviceURLSubjectsFindBySubjectNameAndStudy;
+
 	private String serviceURLDatasets;
 	
 	private String serviceURLDatasetsDicomWebStudies;
@@ -175,6 +179,8 @@ public class ShanoirUploaderServiceClient {
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_MANUFACTURERS);
 		this.serviceURLSubjectsFindByIdentifier = this.serverURL
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_SUBJECTS_FIND_BY_IDENTIFIER);
+		this.serviceURLSubjectsFindBySubjectNameAndStudy = this.serverURL
+				+ ShUpConfig.endpointProperties.getProperty(SERVICE_SUBJECTS_FIND_BY_NAME_AND_STUDY);
 		this.serviceURLDatasets = this.serverURL + ShUpConfig.endpointProperties.getProperty(SERVICE_DATASETS);
 		this.serviceURLDatasetsDicomWebStudies = this.serverURL
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_DATASETS_DICOM_WEB_STUDIES);
