@@ -301,7 +301,7 @@ public class DICOMWebService {
 				LOG.error(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
 					+ " for rejectURL: " + rejectURL);
 				if (response.getCode() == 404 && response.getReasonPhrase().startsWith("Not Found")) {
-					LOG.error("Could not delete from pacs: " + response.getCode() + response.getReasonPhrase());
+					LOG.error("Could not delete from pacs: " + response.getCode() + " " + response.getReasonPhrase());
 					return;
 				} else {
 					throw new ShanoirException(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
