@@ -199,7 +199,7 @@ public class ImporterService {
                         // revert quality tag
                         subjectStudy.setQualityTag(tagSave);
                         subjectStudyService.update(qualityResult.getUpdatedSubjectStudies());
-                        throw new ShanoirException("Error while saving data in pacs, the import is canceled and acquisitions were not saved");
+                        throw new ShanoirException("Error while saving data in pacs, the import is canceled and acquisitions were not saved", e);
                     }
                 }
             } else {
