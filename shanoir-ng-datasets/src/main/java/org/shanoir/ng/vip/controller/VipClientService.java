@@ -180,15 +180,15 @@ public class VipClientService {
      * @param identifier
      * @return JSON as string
      */
-    public Mono<String> getPipeline(String identifier) {
-        String url = vipPipelineUrl + identifier;
+    public Mono<String> getPipeline(String identifier, String version) {
+        String url = vipPipelineUrl + identifier + "/" + version;
         return webClient.get()
             .uri(url)
             .headers(headers -> headers.addAll(this.getUserHttpHeaders()))
             .retrieve()
             .bodyToMono(String.class)
             .onErrorResume(e -> {
-                ErrorModel model = new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(), "Can't get pipeline [" + identifier + "] description from VIP API", e.getMessage());
+                ErrorModel model = new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(), "Can't get pipeline [" + identifier + "/" + version + "] description from VIP API", e.getMessage());
                 return Mono.error(new RestServiceException(e, model));
             });
     }

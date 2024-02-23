@@ -262,7 +262,7 @@ public class VipApiController implements VipApi {
      * @return
      */
     @Override
-    public ResponseEntity<String> getPipeline(String identifier) {
-        return ResponseEntity.ok(vipClient.getPipeline(identifier).block());
+    public ResponseEntity<String> getPipeline(String identifier, String version) {
+        return ResponseEntity.ok(vipClient.getPipeline(identifier, version).block());
     }
 }
