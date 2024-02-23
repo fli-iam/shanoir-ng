@@ -30,6 +30,7 @@ import { DownloadSetupComponent, DownloadSetupOptions } from './download-setup/d
 import { Queue } from './queue.model';
 import { ShanoirError } from '../models/error.model';
 import { getSizeStr } from 'src/app/utils/app.utils';
+import { AngularDeviceInformationService } from 'angular-device-information';
 
 declare var JSZip: any;
 
@@ -60,12 +61,16 @@ export class MassDownloadService {
     private downloadQueue: Queue = new Queue();
     readonly BROWSER_COMPAT_ERROR_MSG: string = 'browser not compatible';
     readonly REPORT_FILENAME: string = 'downloadReport.json';
+    winOs: boolean;
 
     constructor(
         private datasetService: DatasetService,
         private notificationService: NotificationsService,
         private consoleService: ConsoleService,
-        private dialogService: ConfirmDialogService) {
+        private dialogService: ConfirmDialogService,
+        deviceInformationService: AngularDeviceInformationService) {
+
+        this.winOs = deviceInformationService.getDeviceInfo()?.os?.toLocaleLowerCase().includes('windows');
     }
 
     downloadByIds(datasetIds: number[], format?: Format): Promise<void> {
@@ -190,7 +195,7 @@ export class MassDownloadService {
                     let ids = [...datasetIds]; // copy array
                     if (!report) report = this.initReport(datasetIds, task.id, parentFolderHandle.name, options);
                     let promises: Promise<void>[] = [];
-                    if (options.unzip) options.nbQueues = 1;
+                    if (options.unzip && this.winOs) options.nbQueues = 1;
                     for (let queueIndex = 0; queueIndex < options.nbQueues; queueIndex++) { // build the dl queues
                         promises.push(
                             this.recursiveSave(ids.shift(), options, parentFolderHandle, ids, report, task)
@@ -309,7 +314,7 @@ export class MassDownloadService {
                     let ids = [...datasets.map(ds => ds.id)];
                     let report: Report = this.initReport(datasets.map(ds => ds.id), task.id, parentFolderHandle.name, options);
                     let promises: Promise<void>[] = [];
-                    if (options.unzip) options.nbQueues = 1;
+                    if (options.unzip && this.winOs) options.nbQueues = 1;
                     for (let queueIndex = 0; queueIndex < options.nbQueues; queueIndex++) { // build the dl queues
                         promises.push(
                             this.recursiveSave(ids.shift(), options, parentFolderHandle, ids, report, task, datasets)
