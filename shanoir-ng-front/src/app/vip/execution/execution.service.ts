@@ -17,7 +17,7 @@ import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import * as AppUtils from "../../utils/app.utils";
 import {Execution} from "../models/execution";
-import {ExecutionCandidate} from "../models/execution-candidate";
+import {ExecutionCandidateDto} from "../models/execution-candidate.dto";
 import {IdName} from "../../shared/models/id-name.model";
 import {Id} from "../../shared/models/id.model";
 
@@ -34,7 +34,7 @@ export class ExecutionService {
    * The successful response must contain the execution identifier. If the status “Initializing” is returned, playExecution must be called to start the execution.
    * @param body Execution
    */
-  public createExecution(execution: ExecutionCandidate ): Promise<IdName> {
+  public createExecution(execution: ExecutionCandidateDto ): Promise<IdName> {
 
     if (execution === null || execution === undefined) {
       throw new Error('Required parameter execution was null or undefined when calling createExecution.');
