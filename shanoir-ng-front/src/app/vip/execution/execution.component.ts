@@ -229,8 +229,9 @@ export class ExecutionComponent implements OnInit {
                 if (this.isAFile(parameter)) {
                     // File type parameters (i.e. datasets)
                     let dto = new DatasetParameterDTO();
-                    dto.parameter = parameter.name;
+                    dto.name = parameter.name;
                     dto.groupBy = this.getGroupByEnumByLabel(this.groupBy);
+                    dto.exportFormat = this.exportFormat;
                     dto.datasetIds = this.datasetsByParam[parameter.name].map(dataset => { return dataset.id});
                     candidate.datasetParameters.push(dto);
                 }else{

@@ -2,7 +2,7 @@ import {GroupByEnum} from "./groupby.enum";
 
 export class DatasetParameterDTO {
 
-    parameter: string;
+    name: string;
     groupBy: GroupByEnum;
     exportFormat: string;
     datasetIds : number[];
