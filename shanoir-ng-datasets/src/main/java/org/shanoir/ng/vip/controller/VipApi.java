@@ -38,9 +38,9 @@ import java.io.IOException;
 /**
  * @author Alae Es-saki
  */
-@Tag(name = "execution")
-@RequestMapping("/carmin-data/execution")
-public interface ExecutionApi {
+@Tag(name = "toto")
+@RequestMapping("/toto")
+public interface VipApi {
 
     @Operation(summary = "Creates an execution inside VIP and return the monitoring id and name", description = "Creates the ressources and path control in shanoir before creating an execution in VIP, then return the running execution monitoring", tags={  })
     @ApiResponses(value = {
@@ -48,7 +48,7 @@ public interface ExecutionApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "error from VIP API")})
-    @RequestMapping(value = "/",
+    @RequestMapping(value = "/execution/",
             produces = {"application/json"},
             consumes = {"application/json"},
             method = RequestMethod.POST)
@@ -61,7 +61,7 @@ public interface ExecutionApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "error from VIP API")})
-    @RequestMapping(value = "/{identifier}",
+    @RequestMapping(value = "/execution/{identifier}",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
     Mono<VipExecutionDTO> getExecution(@Parameter(name = "The execution identifier", required=true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
@@ -72,7 +72,7 @@ public interface ExecutionApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "error from VIP API")})
-    @RequestMapping(value = "/{identifier}/stderr",
+    @RequestMapping(value = "/execution/{identifier}/stderr",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
     Mono<String> getExecutionStderr(@Parameter(name = "The execution identifier", required=true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
@@ -83,7 +83,7 @@ public interface ExecutionApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "error from VIP API")})
-    @RequestMapping(value = "/{identifier}/stdout",
+    @RequestMapping(value = "/execution/{identifier}/stdout",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
     Mono<String> getExecutionStdout(@Parameter(name = "The execution identifier", required=true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
@@ -95,9 +95,32 @@ public interface ExecutionApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "error from VIP API")})
-    @RequestMapping(value = "/{identifier}/status",
+    @RequestMapping(value = "/execution/{identifier}/status",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
     Mono<ExecutionStatus> getExecutionStatus(@Parameter(name = "The execution identifier", required=true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
+
+    @Operation(summary = "Get all available pipelines in VIP", description = "Returns all the pipelines available to the authenticated user in VIP", tags={  })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "successful response, returns the status"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "500", description = "unexpected error"),
+            @ApiResponse(responseCode = "503", description = "error from VIP API")})
+    @RequestMapping(value = "/pipeline",
+            produces = { "application/json", "application/octet-stream" },
+            method = RequestMethod.GET)
+    Mono<String> getPipelineAll() throws SecurityException;
+
+    @Operation(summary = "Get the description of pipeline [name] in the version [version]", description = "Returns the VIp description of the pipeline [name] in the version [version].", tags={  })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "successful response, returns the status"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "500", description = "unexpected error"),
+            @ApiResponse(responseCode = "503", description = "error from VIP API")})
+    @RequestMapping(value = "/pipeline/{identifier}",
+            produces = { "application/json", "application/octet-stream" },
+            method = RequestMethod.GET)
+    Mono<String> getPipeline(@Parameter(name = "The pipeline identifier", required=true) @PathVariable("identifier") String identifier) throws SecurityException;
+
 
 }
