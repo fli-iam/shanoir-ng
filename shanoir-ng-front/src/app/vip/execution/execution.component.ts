@@ -235,7 +235,7 @@ export class ExecutionComponent implements OnInit {
                     dto.datasetIds = this.datasetsByParam[parameter.name].map(dataset => { return dataset.id});
                     candidate.datasetParameters.push(dto);
                 }else if (this.executionForm.get(parameter.name).value?.toString()) {
-                    candidate.inputParameters[parameter.name] = this.executionForm.get(parameter.name).value.toString();
+                    candidate.inputParameters[parameter.name] = [ this.executionForm.get(parameter.name).value.toString() ];
                 }
             }
         )
