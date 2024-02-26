@@ -99,6 +99,10 @@ public class DatasetUtils {
 				dataset = new BidsDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.MR_DATASET);
 				break;
+			case XaDataset.datasetType:
+				dataset = new XaDataset();
+				originMetadata.setDatasetModalityType(DatasetModalityType.XA_DATASET);
+				break;
 			default:
 				dataset = new GenericDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
@@ -151,6 +155,9 @@ public class DatasetUtils {
 				break;
 			case BidsDataset.datasetType:
 				dataset = new BidsDataset(d);
+				break;
+			case XaDataset.datasetType:
+				dataset = new XaDataset(d);
 				break;
 			default:
 				dataset = new GenericDataset(d);
