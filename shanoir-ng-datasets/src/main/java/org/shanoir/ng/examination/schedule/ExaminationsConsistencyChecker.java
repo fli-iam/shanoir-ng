@@ -3,6 +3,11 @@ package org.shanoir.ng.examination.schedule;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetExpression;
+import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.slf4j.Logger;
@@ -61,7 +66,7 @@ public class ExaminationsConsistencyChecker {
 	
 			for (Examination examination : examinationsToCheck) {
 				LOG.info("Processing examination with ID: " + examination.getId());
-	
+				checkExamination(examination);
 				if (latestCheckedExamination == null) {
 					latestCheckedExamination = new LatestCheckedExamination();
 				}
@@ -69,8 +74,28 @@ public class ExaminationsConsistencyChecker {
 				latestCheckedExaminationRepository.save(latestCheckedExamination);
 			}
 			LOG.info("ExaminationsConsistencyChecker STOP...");
+		} catch(Exception e) {
+			LOG.info("ExaminationsConsistencyChecker STOPPED with exception...");
+			LOG.error(e.getMessage(), e);
 		} finally {
 			isTaskRunning.set(false);			
+		}
+	}
+	
+	private void checkExamination(Examination examination) {
+		for (DatasetAcquisition acquisition : examination.getDatasetAcquisitions()) {
+			for (Dataset dataset : acquisition.getDatasets()) {
+				for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+					if (DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat())) {
+						for (DatasetFile file : expression.getDatasetFiles()) {
+							if (file.isPacs()) {
+								String path = file.getPath();
+								LOG.info(path);
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 
