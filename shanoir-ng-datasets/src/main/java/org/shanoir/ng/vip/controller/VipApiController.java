@@ -108,7 +108,7 @@ public class VipApiController implements VipApi {
 
         List<Dataset> inputDatasets = datasetService.findByIdIn(datasetsIds);
 
-        ExecutionMonitoring executionMonitoring = this.initExecutionMonitoring(candidate, inputDatasets);
+        ExecutionMonitoring executionMonitoring = this.createExecutionMonitoring(candidate, inputDatasets);
 
         VipExecutionDTO execCreated = this.createVipExecution(candidate, executionMonitoring).block();
 
@@ -116,7 +116,7 @@ public class VipApiController implements VipApi {
             return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
-        return new ResponseEntity<>(this.createAndStartExecutionMonitoring(executionMonitoring, execCreated), HttpStatus.OK);
+        return new ResponseEntity<>(this.updateAndStartExecutionMonitoring(executionMonitoring, execCreated), HttpStatus.OK);
     }
 
     /**
@@ -127,11 +127,11 @@ public class VipApiController implements VipApi {
      * @return
      * @throws EntityNotFoundException
      */
-    private IdName createAndStartExecutionMonitoring(ExecutionMonitoring executionMonitoring, VipExecutionDTO execCreated) throws EntityNotFoundException, SecurityException {
+    private IdName updateAndStartExecutionMonitoring(ExecutionMonitoring executionMonitoring, VipExecutionDTO execCreated) throws EntityNotFoundException, SecurityException {
         executionMonitoring.setIdentifier(execCreated.getIdentifier());
         executionMonitoring.setStatus(execCreated.getStatus());
         executionMonitoring.setStartDate(execCreated.getStartDate());
-        ExecutionMonitoring createdMonitoring = this.executionMonitoringService.create(executionMonitoring);
+        ExecutionMonitoring createdMonitoring = this.executionMonitoringService.update(executionMonitoring);
         executionStatusMonitorService.startMonitoringJob(createdMonitoring, null);
         return new IdName(createdMonitoring.getId(), createdMonitoring.getName());
     }
@@ -215,7 +215,7 @@ public class VipApiController implements VipApi {
      * @param inputDatasets
      * @return
      */
-    private ExecutionMonitoring initExecutionMonitoring(ExecutionCandidateDTO execution, List<Dataset> inputDatasets) {
+    private ExecutionMonitoring createExecutionMonitoring(ExecutionCandidateDTO execution, List<Dataset> inputDatasets) {
         ExecutionMonitoring executionMonitoring = new ExecutionMonitoring();
         executionMonitoring.setName(execution.getName());
         executionMonitoring.setPipelineIdentifier(execution.getPipelineIdentifier());
@@ -227,7 +227,7 @@ public class VipApiController implements VipApi {
         executionMonitoring.setDatasetProcessingType(DatasetProcessingType.valueOf(execution.getProcessingType()));
         executionMonitoring.setOutputProcessing(execution.getOutputProcessing());
         executionMonitoring.setInputDatasets(inputDatasets);
-        return executionMonitoring;
+        return this.executionMonitoringService.create(executionMonitoring);
     }
 
     @Override
