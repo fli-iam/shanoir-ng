@@ -234,13 +234,11 @@ export class ExecutionComponent implements OnInit {
                     dto.exportFormat = this.exportFormat;
                     dto.datasetIds = this.datasetsByParam[parameter.name].map(dataset => { return dataset.id});
                     candidate.datasetParameters.push(dto);
-                }else{
-                    //Other type parameters (boolean, string...)
-                    // TODO
+                }else if (this.executionForm.get(parameter.name).value?.toString()) {
+                    candidate.inputParameters[parameter.name] = this.executionForm.get(parameter.name).value.toString();
                 }
             }
         )
-
         return candidate;
     }
 
