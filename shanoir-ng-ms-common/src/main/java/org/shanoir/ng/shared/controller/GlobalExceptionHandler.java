@@ -59,7 +59,11 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(value = Exception.class)
 	public ResponseEntity<ErrorModel> handleException(final Exception e) {
-		LOG.error("[DEBUG] Exception");
+
+		if(e.getCause() instanceof RestServiceException){
+			return this.handleRestServiceException((RestServiceException) e.getCause());
+		}
+
 		final ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
 		LOG.error("Unexpected error in the rest service. ", e);
 		return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
