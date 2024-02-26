@@ -124,7 +124,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
             'lastName': [this.lastName],
             'birthDate': [this.subject.birthDate],
             'sex': [this.subject.sex],
-            'subjectStudyList': [],
+            'subjectStudyList': [this.subject.subjectStudyList, [Validators.required]],
             'manualHemisphericDominance': [this.subject.manualHemisphericDominance],
             'languageHemisphericDominance': [this.subject.languageHemisphericDominance],
             'personalComments': []
