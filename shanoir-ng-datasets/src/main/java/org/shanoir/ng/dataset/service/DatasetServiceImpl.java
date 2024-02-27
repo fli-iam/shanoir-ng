@@ -25,6 +25,7 @@ import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
+import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.property.service.DatasetPropertyService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -85,6 +86,8 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Value("${dcm4chee-arc.dicom.web}")
 	private boolean dicomWeb;
+	@Autowired
+	private DatasetProcessingService processingService;
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirException, SolrServerException, IOException, RestServiceException {
@@ -102,6 +105,7 @@ public class DatasetServiceImpl implements DatasetService {
 							"This dataset is linked to another dataset that was copied."
 					));
 		} else {
+			processingService.removeDatasetFromAllInput(id);
 			propertyService.deleteByDatasetId(id);
 			repository.deleteById(id);
 			if (datasetDb.getSourceId() == null) {
