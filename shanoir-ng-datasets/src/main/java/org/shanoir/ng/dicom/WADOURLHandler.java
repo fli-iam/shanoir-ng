@@ -19,11 +19,7 @@ public class WADOURLHandler {
 	private static final String CONTENT_TYPE = "&contentType";
 
 	public boolean isWADO_URI(String url) {
-		if (url.contains(WADO_URI)) {
-			return true;
-		} else {
-			return false;
-		}
+		return url.contains(WADO_URI);
 	}
 	
 	public String convertWADO_URI_TO_WADO_RS(String url) {
