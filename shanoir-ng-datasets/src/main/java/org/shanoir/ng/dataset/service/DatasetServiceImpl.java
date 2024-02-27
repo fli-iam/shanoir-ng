@@ -25,6 +25,7 @@ import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
+import org.shanoir.ng.property.service.DatasetPropertyService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -79,6 +80,9 @@ public class DatasetServiceImpl implements DatasetService {
 	@Autowired
 	private DICOMWebService dicomWebService;
 
+	@Autowired
+	private DatasetPropertyService propertyService;
+
 	@Value("${dcm4chee-arc.dicom.web}")
 	private boolean dicomWeb;
 
@@ -98,11 +102,12 @@ public class DatasetServiceImpl implements DatasetService {
 							"This dataset is linked to another dataset that was copied."
 					));
 		} else {
-			solrService.deleteFromIndex(id);
+			propertyService.deleteByDatasetId(id);
+			repository.deleteById(id);
 			if (datasetDb.getSourceId() == null) {
 				this.deleteDatasetFromPacs(datasetDb);
 			}
-			repository.deleteById(id);
+			solrService.deleteFromIndex(id);
 			shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, datasetDb.getStudyId()));
 		}
 	}
