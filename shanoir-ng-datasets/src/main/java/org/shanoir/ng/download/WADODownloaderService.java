@@ -205,7 +205,7 @@ public class WADODownloaderService {
 		byte[] responseBody = null;
 		try {
 			responseBody = downloadFileFromPACS(url);
-			this.extractDICOMZipFromMHTMLFile(responseBody, wadoURLHandler.extractUIDs(url)[2],  name, zipOutputStream);
+			this.extractDICOMZipFromMHTMLFile(responseBody,  name, zipOutputStream);
 			return name + DCM;
 		} catch (IOException | MessagingException e) {
 			LOG.error("Error in downloading/writing a file from pacs to zip", e);
@@ -421,12 +421,11 @@ public class WADODownloaderService {
 	 * and audio files). The content of an MHTML file is encoded as if it were an HTML e-mail message, using the MIME type multipart/related.
 	 *
 	 * @param responseBody
-	 * @param instanceUID
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 * @throws MessagingException
 	 */
-	private void extractDICOMZipFromMHTMLFile(final byte[] responseBody, final String instanceUID, String name, ZipOutputStream zipOutputStream)
+	private void extractDICOMZipFromMHTMLFile(final byte[] responseBody, String name, ZipOutputStream zipOutputStream)
 			throws IOException, MessagingException {
 		try(ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
 			ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, CONTENT_TYPE_MULTIPART);

@@ -27,13 +27,20 @@ public class WADOURLHandler {
 	}
 	
 	public String convertWADO_URI_TO_WADO_RS(String url) {
-		return url
-				.replace("wado?requestType=WADO", "rs")
-				.replace("&studyUID=", "/studies/")
-				.replace("&seriesUID=", "/series/")
-				.replace("&objectUID=", "/instances/")
-				.replace("&contentType=application/dicom", "");
-	}
+        String[] patterns = {
+                "wado\\?requestType=WADO", "rs",
+                "&studyUID=", "/studies/",
+                "&seriesUID=", "/series/",
+                "&objectUID=", "/instances/",
+                "&contentType=application/dicom", ""
+        };
+        for (int i = 0; i < patterns.length; i += 2) {
+            Pattern pattern = Pattern.compile(patterns[i]);
+            Matcher matcher = pattern.matcher(url);
+            url = matcher.replaceAll(patterns[i + 1]);
+        }
+        return url;
+    }
 
 	/**
 	 * This method extracts all 3 UIDs from any WADO-RS or WADO-URI URL/link.
@@ -44,14 +51,14 @@ public class WADOURLHandler {
 	 */
 	public String[] extractUIDs(String url) {
 		String studyInstanceUID = null;
-        String seriesInstanceUID = null;
-        String sopInstanceUID = null;
+		String seriesInstanceUID = null;
+		String sopInstanceUID = null;
 		if (isWADO_URI(url)) {
-	        studyInstanceUID = extractUIDPattern(url, "studyUID", "&seriesUID");
-	        seriesInstanceUID = extractUIDPattern(url, "seriesUID", "&objectUID");
-	        sopInstanceUID = extractUIDPattern(url, "objectUID", url.contains(CONTENT_TYPE) ? CONTENT_TYPE : null);
+			studyInstanceUID = extractUIDPattern(url, "studyUID", "&seriesUID");
+			seriesInstanceUID = extractUIDPattern(url, "seriesUID", "&objectUID");
+			sopInstanceUID = extractUIDPattern(url, "objectUID", url.contains(CONTENT_TYPE) ? CONTENT_TYPE : null);
 		} else {
-			Pattern p = Pattern.compile(".*//studies//(.*)//series//(.*)//instances//(.*)");
+			Pattern p = Pattern.compile(".*/studies/(.*)/series/(.*)/instances/(.*)");
 			Matcher m = p.matcher(url);
 			if (m.find()) {
 				studyInstanceUID = m.group(1);
@@ -59,9 +66,12 @@ public class WADOURLHandler {
 				sopInstanceUID = m.group(3);
 			}
 		}
-		String[] uids = new String[]{studyInstanceUID, seriesInstanceUID, sopInstanceUID};
+		if (studyInstanceUID == null || seriesInstanceUID == null || sopInstanceUID == null)
+			throw new IllegalArgumentException(String.format("DICOM UIDs can not be null: %s, %s, %s", studyInstanceUID,
+					seriesInstanceUID, sopInstanceUID));
+		String[] uids = new String[] { studyInstanceUID, seriesInstanceUID, sopInstanceUID };
 		return uids;
-    }
+	}
 
 	private String extractUIDPattern(String url, String uidName, String endPattern) {
 	    Pattern p = Pattern.compile(".*" + uidName + "=(.*)" + (endPattern != null ? endPattern + ".*" : ""));
