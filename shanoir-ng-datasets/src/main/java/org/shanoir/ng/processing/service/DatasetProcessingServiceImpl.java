@@ -34,7 +34,7 @@ import java.util.Optional;
 public class DatasetProcessingServiceImpl implements DatasetProcessingService {
 
 	@Autowired
-	private DatasetProcessingRepository datasetProcessingRepository;
+	private DatasetProcessingRepository repository;
 
 	protected DatasetProcessing updateValues(final DatasetProcessing from, final DatasetProcessing to) {
 		to.setDatasetProcessingType(from.getDatasetProcessingType());
@@ -47,38 +47,55 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
 	}
 
 	public Optional<DatasetProcessing> findByComment(String comment) {
-		return datasetProcessingRepository.findByComment(comment);
+		return repository.findByComment(comment);
 	}
 	
     @Override
     public Optional<DatasetProcessing> findById(final Long id) {
-        return datasetProcessingRepository.findById(id);
+        return repository.findById(id);
     }
     
     @Override
     public List<DatasetProcessing> findAll() {
-        return Utils.toList(datasetProcessingRepository.findAll());
+        return Utils.toList(repository.findAll());
     }
     
     @Override
     public DatasetProcessing create(final DatasetProcessing entity) {
-        DatasetProcessing savedEntity = datasetProcessingRepository.save(entity);
+        DatasetProcessing savedEntity = repository.save(entity);
         return savedEntity;
     }
     
     @Override
     public DatasetProcessing update(final DatasetProcessing entity) throws EntityNotFoundException {
-        final Optional<DatasetProcessing> entityDbOpt = datasetProcessingRepository.findById(entity.getId());
+        final Optional<DatasetProcessing> entityDbOpt = repository.findById(entity.getId());
         final DatasetProcessing entityDb = entityDbOpt.orElseThrow(
                 () -> new EntityNotFoundException(entity.getClass(), entity.getId()));
         updateValues(entity, entityDb);
-        return datasetProcessingRepository.save(entityDb);
+        return repository.save(entityDb);
     }
 
     @Override
     public void deleteById(final Long id) throws EntityNotFoundException  {
-        final Optional<DatasetProcessing> entity = datasetProcessingRepository.findById(id);
+        final Optional<DatasetProcessing> entity = repository.findById(id);
         entity.orElseThrow(() -> new EntityNotFoundException("Cannot find entity with id = " + id));
-        datasetProcessingRepository.deleteById(id);
+        repository.deleteById(id);
+    }
+
+    /**
+     * Unlink given dataset to all dataset processing
+     *
+     * @param datasetId
+     */
+    @Override
+    public void removeDatasetFromAllInput(Long datasetId) {
+        List<DatasetProcessing> processings = repository.findAllByInputDatasets_Id(datasetId);
+
+        for(DatasetProcessing processing : processings){
+            processing.getInputDatasets().removeIf(ds -> ds.getId().equals(datasetId));
+        }
+
+        repository.saveAll(processings);
+
     }
 }

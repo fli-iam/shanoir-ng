@@ -85,5 +85,13 @@ public interface DatasetProcessingService {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     void deleteById(Long id) throws EntityNotFoundException;
 
+    /**
+     *
+     *
+     * @param datasetId
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+    void removeDatasetFromAllInput(Long datasetId);
+
 
 }
