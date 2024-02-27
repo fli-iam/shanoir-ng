@@ -76,10 +76,12 @@ jobs:
           
           env = os.environ
           tag = env['TAG']
-          for image in IMAGES:
+          try:
+           for image in IMAGES:
             repo = f"{env['DOCKER_REPOSITORY']}/{image}"
             with tempfile.TemporaryDirectory() as tmp:
               sys.stderr.write(f"#\n#   Building {image}:{tag}\n#\n")
+              subprocess.call(["date"])
               subprocess.check_call(["docker", "buildx", "build",
                 "--cache-from=type=gha",
                 "--cache-to=type=gha,mode=max",
@@ -96,4 +98,9 @@ jobs:
               digest = json.load(open(f"{tmp}/mdf"))["containerimage.digest"]
 
               sys.stderr.write(f"#\n#   Signing {image}:{tag}\n#\n")
+              subprocess.call(["date"])
               subprocess.check_call(["cosign", "sign", "--tlog-upload=false", f"{repo}:{tag}@{digest}"])
+          finally:
+              subprocess.call(["date"])
+            
+
