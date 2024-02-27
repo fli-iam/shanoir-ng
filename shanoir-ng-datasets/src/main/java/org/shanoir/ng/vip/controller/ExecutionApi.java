@@ -37,9 +37,9 @@ import java.io.IOException;
 /**
  * @author Alae Es-saki
  */
-@Tag(name = "vip")
-@RequestMapping("/vip")
-public interface VipApi {
+@Tag(name = "VIP execution", description="Proxy API for VIP /executions")
+@RequestMapping("/vip/execution")
+public interface ExecutionApi {
 
     @Operation(summary = "Creates an execution inside VIP and return the monitoring id and name", description = "Creates the ressources and path control in shanoir before creating an execution in VIP, then return the running execution monitoring", tags={  })
     @ApiResponses(value = {
@@ -47,7 +47,7 @@ public interface VipApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "error from VIP API")})
-    @RequestMapping(value = "/execution/",
+    @RequestMapping(value = "",
             produces = {"application/json"},
             consumes = {"application/json"},
             method = RequestMethod.POST)
@@ -60,7 +60,7 @@ public interface VipApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "error from VIP API")})
-    @RequestMapping(value = "/execution/{identifier}",
+    @RequestMapping(value = "/{identifier}",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
     ResponseEntity<VipExecutionDTO> getExecution(@Parameter(name = "The execution identifier", required=true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
@@ -71,7 +71,7 @@ public interface VipApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "error from VIP API")})
-    @RequestMapping(value = "/execution/{identifier}/stderr",
+    @RequestMapping(value = "/{identifier}/stderr",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
     ResponseEntity<String> getExecutionStderr(@Parameter(name = "The execution identifier", required=true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
@@ -82,7 +82,7 @@ public interface VipApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "error from VIP API")})
-    @RequestMapping(value = "/execution/{identifier}/stdout",
+    @RequestMapping(value = "/{identifier}/stdout",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
     ResponseEntity<String> getExecutionStdout(@Parameter(name = "The execution identifier", required=true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
@@ -94,32 +94,9 @@ public interface VipApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "error from VIP API")})
-    @RequestMapping(value = "/execution/{identifier}/status",
+    @RequestMapping(value = "/{identifier}/status",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
     ResponseEntity<ExecutionStatus> getExecutionStatus(@Parameter(name = "The execution identifier", required=true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
-
-    @Operation(summary = "Get all available pipelines in VIP", description = "Returns all the pipelines available to the authenticated user in VIP", tags={  })
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "successful response, returns the status"),
-            @ApiResponse(responseCode = "403", description = "forbidden"),
-            @ApiResponse(responseCode = "500", description = "unexpected error"),
-            @ApiResponse(responseCode = "503", description = "error from VIP API")})
-    @RequestMapping(value = "/pipelines",
-            produces = { "application/json", "application/octet-stream" },
-            method = RequestMethod.GET)
-    ResponseEntity<String> getPipelineAll() throws SecurityException;
-
-    @Operation(summary = "Get the description of pipeline [name] in the version [version]", description = "Returns the VIp description of the pipeline [name] in the version [version].", tags={  })
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "successful response, returns the status"),
-            @ApiResponse(responseCode = "403", description = "forbidden"),
-            @ApiResponse(responseCode = "500", description = "unexpected error"),
-            @ApiResponse(responseCode = "503", description = "error from VIP API")})
-    @RequestMapping(value = "/pipeline/{identifier}/{version}",
-            produces = { "application/json", "application/octet-stream" },
-            method = RequestMethod.GET)
-    ResponseEntity<String> getPipeline(@Parameter(name = "The pipeline identifier", required=true) @PathVariable("identifier") String identifier, @Parameter(name = "The pipeline version", required=true) @PathVariable("version") String version) throws SecurityException;
-
 
 }

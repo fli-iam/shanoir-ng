@@ -52,9 +52,9 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-public class VipApiController implements VipApi {
+public class ExecutionApiController implements ExecutionApi {
 
-    private static final Logger LOG = LoggerFactory.getLogger(VipApiController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ExecutionApiController.class);
     public static final String SHANOIR_URI_SCHEME = "shanoir:/";
 
     @Autowired
@@ -250,19 +250,5 @@ public class VipApiController implements VipApi {
     @Override
     public ResponseEntity<String> getExecutionStdout(String identifier) {
         return ResponseEntity.ok(vipClient.getExecutionStdout(identifier).block());
-    }
-
-    @Override
-    public ResponseEntity<String> getPipelineAll() {
-        return ResponseEntity.ok(vipClient.getPipelineAll().block());
-    }
-
-    /**
-     * @param identifier
-     * @return
-     */
-    @Override
-    public ResponseEntity<String> getPipeline(String identifier, String version) {
-        return ResponseEntity.ok(vipClient.getPipeline(identifier, version).block());
     }
 }
