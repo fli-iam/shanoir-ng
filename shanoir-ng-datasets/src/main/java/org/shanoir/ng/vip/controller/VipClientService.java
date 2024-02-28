@@ -77,7 +77,7 @@ public class VipClientService {
             throw new ResultHandlerException("Failed to get execution details from VIP in [" + attempts + "] attempts", null);
         }
 
-        String url = vipExecutionUrl + identifier;
+        String url = vipExecutionUrl + identifier + "/summary";
 
         HttpHeaders headers = this.getServiceAccountHttpHeaders();
 
