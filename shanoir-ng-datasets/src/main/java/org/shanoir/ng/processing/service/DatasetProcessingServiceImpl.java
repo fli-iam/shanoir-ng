@@ -14,24 +14,18 @@
 
 package org.shanoir.ng.processing.service;
 
-import org.apache.solr.client.solrj.SolrServerException;
-import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.dataset.service.ProcessedDatasetService;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * center service implementation.
@@ -46,7 +40,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
 	private DatasetProcessingRepository repository;
 
     @Autowired
-    private ProcessedDatasetService procDsService;
+    private ProcessedDatasetService processedDatasetService;
 
 	protected DatasetProcessing updateValues(final DatasetProcessing from, final DatasetProcessing to) {
 		to.setDatasetProcessingType(from.getDatasetProcessingType());
@@ -91,7 +85,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     public void deleteById(final Long id) throws EntityNotFoundException {
         final Optional<DatasetProcessing> entity = repository.findById(id);
         entity.orElseThrow(() -> new EntityNotFoundException("Cannot find dataset processing [" + id + "]"));
-        procDsService.deleteByProcessingId(id);
+        processedDatasetService.deleteByProcessingId(id);
         this.deleteByParentId(id);
         repository.deleteById(id);
     }
