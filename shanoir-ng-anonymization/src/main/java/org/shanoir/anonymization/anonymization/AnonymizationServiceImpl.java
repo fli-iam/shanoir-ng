@@ -180,7 +180,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 			/**
 			 * DICOM "body": read tags
 			 */
-			Attributes datasetAttributes = din.readDatasetUntilPixelData();
+			Attributes datasetAttributes = din.readDataset(-1, -1);
 			
 			// temporarily keep the patient credentials in memory to search in private tags
 			String patientNameAttr = datasetAttributes.getString(Tag.PatientName);
