@@ -42,4 +42,5 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
 	 */
 	List<DatasetProcessing> findAllByInputDatasets_Id(Long datasetId);
 
+    List<DatasetProcessing> findAllByParentId(Long id);
 }
