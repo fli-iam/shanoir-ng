@@ -40,7 +40,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
     accessRequestValidated = false;
     hasDUA: boolean;
     isSuConfirmed: boolean;
-    
+
     constructor(
         private studyService: StudyService,
         private confirmService: ConfirmDialogService,
@@ -97,24 +97,26 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
     }
 
     private fetchStorageVolumesByChunk(studies) {
-        const chunkSize = 10;
-        let chunks: Study[][] = [];
-        for (let i = 0; i < studies.length; i += chunkSize) {
-            const chunk = studies.slice(i, i + chunkSize);
-            chunks.push(chunk);
+        if (studies) {
+            const chunkSize = 10;
+            let chunks: Study[][] = [];
+            for (let i = 0; i < studies.length; i += chunkSize) {
+                const chunk = studies.slice(i, i + chunkSize);
+                chunks.push(chunk);
+            }
+            let queue: Promise<void> = Promise.resolve();
+            chunks.forEach(chunk => {
+                queue = queue.then(() => this.fetchStorageVolumes(chunk));
+            });
+            queue.then(() => {
+                this.columnDefs.forEach(column => {
+                    if (column.headerName === "Storage volume") {
+                        column.disableSorting = false;
+                    }
+                })
+            });
+            return studies;
         }
-        let queue: Promise<void> = Promise.resolve();               
-        chunks.forEach(chunk => {
-            queue = queue.then(() => this.fetchStorageVolumes(chunk));
-        });
-        queue.then(() => {
-            this.columnDefs.forEach(column => {
-                if(column.headerName === "Storage volume"){
-                    column.disableSorting = false;
-                }
-            })
-        });
-        return studies;
     }
 
     private fetchStorageVolumes(studies: Study[]): Promise<void> {
