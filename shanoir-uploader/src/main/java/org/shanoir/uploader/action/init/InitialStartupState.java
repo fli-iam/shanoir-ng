@@ -76,6 +76,7 @@ public class InitialStartupState implements State {
 		copyPseudonymus();
 		initProfiles();
 		initProfile();
+		initCredentials();
 		initStartupDialog(context);
 		context.setState(new ProxyConfigurationState());
 		context.nextState();
@@ -299,4 +300,15 @@ public class InitialStartupState implements State {
 			ShUpConfig.profileSelected = profile;
 		}
 	}
+	
+	private void initCredentials() throws FileNotFoundException, IOException {
+		String username = ShUpConfig.basicProperties.getProperty(ShUpConfig.USERNAME);
+		String password = ShUpConfig.basicProperties.getProperty(ShUpConfig.PASSWORD);
+		if (username != null && !username.isBlank() && password != null && !password.isBlank()) {
+			ShUpConfig.username = username;
+			ShUpConfig.password = password;
+			logger.info("Pre-configured credentials found.");
+		}
+	}
+
 }

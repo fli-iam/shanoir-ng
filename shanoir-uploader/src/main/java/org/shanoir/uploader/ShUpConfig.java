@@ -72,6 +72,10 @@ public class ShUpConfig {
 	
 	public static final String PROFILE = "profile";
 	
+	public static final String USERNAME = "username";
+
+	public static final String PASSWORD = "password";
+
 	/**
 	 * Static variables
 	 */
@@ -88,6 +92,10 @@ public class ShUpConfig {
 	public static String[] profiles;
 	
 	public static String profileSelected;
+	
+	public static String username;
+	
+	public static String password;
 	
 	public static File profileDirectory;
 	

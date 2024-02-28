@@ -25,6 +25,10 @@ public class LoginPanelActionListener implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		String username = this.loginPanel.loginText.getText();
 		String password = String.valueOf(this.loginPanel.passwordText.getPassword());
+		login(username, password);
+	}
+
+	public void login(String username, String password) {
 		ShanoirUploaderServiceClient shanoirUploaderServiceClient = ShUpOnloadConfig.getShanoirUploaderServiceClient();
 		String token;
 		try {
