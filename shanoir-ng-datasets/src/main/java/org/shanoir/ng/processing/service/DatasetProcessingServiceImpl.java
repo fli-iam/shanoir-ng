@@ -21,6 +21,7 @@ import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -90,12 +91,19 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     @Override
     public void removeDatasetFromAllInput(Long datasetId) {
         List<DatasetProcessing> processings = repository.findAllByInputDatasets_Id(datasetId);
+        List<DatasetProcessing> toUpdate = new ArrayList<>();
+        List<DatasetProcessing> toDelete = new ArrayList<>();
 
         for(DatasetProcessing processing : processings){
             processing.getInputDatasets().removeIf(ds -> ds.getId().equals(datasetId));
+            if(processing.getInputDatasets().isEmpty()){
+                // If processing is no more linked to a dataset, delete it
+                toDelete.add(processing);
+            }else{
+                toUpdate.add(processing);
+            }
         }
-
-        repository.saveAll(processings);
-
+        repository.deleteAll(toDelete);
+        repository.saveAll(toUpdate);
     }
 }
