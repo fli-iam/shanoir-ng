@@ -197,14 +197,14 @@ public class ExecutionApiController implements ExecutionApi {
                 + "&md5=none&type=File";
     }
 
-    private String getInputValueUri(ExecutionCandidateDTO execution, String groupBy, String exportFormat, String resourceId, String authenticationToken){
+    private String getInputValueUri(ExecutionCandidateDTO candidate, String groupBy, String exportFormat, String resourceId, String authenticationToken){
         String entityName = "resource_id+" + resourceId + "+" + groupBy + ("dcm".equals(exportFormat) ? ".zip" : ".nii.gz");
         return SHANOIR_URI_SCHEME + entityName
                 + "?format=" + exportFormat
                 + "&resourceId=" + resourceId
                 + "&token=" + authenticationToken
-                + "&refreshToken=" + execution.getRefreshToken()
-                + "&clientId=" + execution.getClient()
+                + "&refreshToken=" + candidate.getRefreshToken()
+                + "&clientId=" + candidate.getClient()
                 + "&md5=none&type=File";
     }
 

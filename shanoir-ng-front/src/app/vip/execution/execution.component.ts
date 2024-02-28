@@ -222,6 +222,7 @@ export class ExecutionComponent implements OnInit {
         candidate.processingType = DatasetProcessingType.SEGMENTATION; // TODO : this should be selected by the user.
         candidate.outputProcessing = this.pipeline.outputProcessing;
         candidate.client = KeycloakService.clientId;
+        candidate.refreshToken = this.refreshToken;
         candidate.datasetParameters = [];
         candidate.inputParameters = {};
         this.pipeline.parameters.forEach(
