@@ -177,9 +177,10 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             {
                 headerName: "Storage volume", field: "totalSize", disableSearch: true, disableSorting: true, type: "number", orderBy: ["totalSize"],
                 cellRenderer: (params: any) => {
-                    params.data.totalSize
                     if (params.data?.totalSize >= 0) {
                         return this.studyService.storageVolumePrettyPrint(params.data.totalSize);
+                    } else if (params.data.locked) {
+                        return "";
                     } else {
                         return "Fetching..."
                     }
