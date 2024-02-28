@@ -47,7 +47,7 @@ public interface ExecutionApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "error from VIP API")})
-    @RequestMapping(value = "",
+    @RequestMapping(value = "/",
             produces = {"application/json"},
             consumes = {"application/json"},
             method = RequestMethod.POST)
