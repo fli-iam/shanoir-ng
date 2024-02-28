@@ -60,7 +60,7 @@ public class ImportDialogOpener {
 			List<Examination> examinationDTOs = getExaminations(subject);
 			// init components of GUI and listeners
 			ImportStudyCardFilterDocumentListener importStudyCardFilterDocumentListener = new ImportStudyCardFilterDocumentListener(this.mainWindow);
-			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, subject, examinationDTOs, studyDate, importStudyCardFilterDocumentListener);
+			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, subject, examinationDTOs, studyDate, importStudyCardFilterDocumentListener, shanoirUploaderServiceClient);
 			ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, uploadJob, uploadFolder, subject, importStudyAndStudyCardCBIL);
 			importDialog = new ImportDialog(this.mainWindow,
 					ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
@@ -303,6 +303,14 @@ public class ImportDialogOpener {
 		}
 	}
 
+	private List<Subject> getSubjects(Study study) throws Exception {
+		if (study != null) {
+//			List<Subject> subjects = shanoirUploaderServiceClient.findSubjectsByStudy(study);
+//			return subjects;
+		}
+		return null;
+	}
+	
 	private List<Examination> getExaminations(Subject subjectDTO) throws Exception {
 		if (subjectDTO != null) {
 			List<Examination> examinationList = shanoirUploaderServiceClient

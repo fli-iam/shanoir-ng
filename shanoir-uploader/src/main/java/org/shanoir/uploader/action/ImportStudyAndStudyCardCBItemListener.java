@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.log4j.Logger;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.gui.customcomponent.JComboBoxMandatory;
@@ -20,8 +21,11 @@ import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
+import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 
 public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
+	
+	private static Logger logger = Logger.getLogger(ImportStudyAndStudyCardCBItemListener.class);
 
 	private MainWindow mainWindow;
 	
@@ -34,13 +38,16 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 	private Date studyDate;
 	
 	private ImportStudyCardFilterDocumentListener importStudyCardDocumentListener;
+	
+	private ShanoirUploaderServiceClient serviceClient;
 
-	public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, Subject subject, List<Examination> examinationDTOs, Date studyDate, ImportStudyCardFilterDocumentListener importStudyCardDocumentListener) {
+	public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, Subject subject, List<Examination> examinationDTOs, Date studyDate, ImportStudyCardFilterDocumentListener importStudyCardDocumentListener, ShanoirUploaderServiceClient serviceClient) {
 		this.mainWindow = mainWindow;
 		this.subject = subject;
 		this.examinationsOfSubject = examinationDTOs;
 		this.studyDate = studyDate;
 		this.importStudyCardDocumentListener = importStudyCardDocumentListener;
+		this.serviceClient = serviceClient;
 	}
 
 	public void itemStateChanged(ItemEvent e) {
@@ -49,6 +56,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 			if (e.getSource().equals(mainWindow.importDialog.studyCB)) {
 				Study study = (Study) e.getItem();
 				updateStudyCards(study);
+				updateSubjects(study);
 				updateSubjectStudy(study);
 				filterExistingExamsForSelectedStudy(study);
 			}
@@ -57,18 +65,27 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 			if (e.getSource().equals(mainWindow.importDialog.studyCardCB)) {
 				JComboBoxMandatory comboBox = (JComboBoxMandatory) e.getSource();
 				StudyCard studyCard = (StudyCard) comboBox.getSelectedItem();
-				// put center into exam using study card and acq equipment
+				// put center into exam using study card and acquisition equipment
 				mainWindow.importDialog.mrExaminationCenterCB.removeAllItems();
 				AcquisitionEquipment acqEquipment = studyCard.getAcquisitionEquipment();
 				if (acqEquipment != null) {
 					IdName center = acqEquipment.getCenter();
 					mainWindow.importDialog.mrExaminationCenterCB.addItem(center);
 				}
-				// add investigators
-				//mainWindow.importDialog.mrExaminationExamExecutiveCB.removeAllItems();
-				//mainWindow.importDialog.mrExaminationExamExecutiveCB.addItem(investigator);				
 			}			
 		} // ignore otherwise
+	}
+
+	private void updateSubjects(Study study) {
+		try {
+			List<Subject> subjects = serviceClient.findSubjectsByStudy(study.getId());
+			mainWindow.importDialog.existingSubjectsCB.removeAllItems();
+			for (Subject subject : subjects) {
+				mainWindow.importDialog.existingSubjectsCB.addItem(subject.getName());
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
 	}
 
 	/**
