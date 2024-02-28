@@ -45,8 +45,8 @@ export class ExecutionComponent implements OnInit {
     selectedDatasets: Set<Dataset>;
 
     datasetsOptions: Option<Dataset>[];
-    token: String;
-    refreshToken: String;
+    token: string;
+    refreshToken: string;
     parametersApplied: boolean = false;
     execution: Execution;
     columnDefs: { [key: string]: ColumnDefinition[] } = {};
@@ -88,12 +88,12 @@ export class ExecutionComponent implements OnInit {
             });
 
         this.keycloakService.getToken().then(
-            (token: String) => {
+            (token: string) => {
                 this.token = token;
             }
         )
         this.keycloakService.getRefreshToken().then(
-            (refreshToken: String) => {
+            (refreshToken: string) => {
                 this.refreshToken = refreshToken;
             }
         )
