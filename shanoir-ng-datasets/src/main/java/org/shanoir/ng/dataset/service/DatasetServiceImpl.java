@@ -100,19 +100,12 @@ public class DatasetServiceImpl implements DatasetService {
 							HttpStatus.UNPROCESSABLE_ENTITY.value(),
 							"This dataset is linked to another dataset that was copied."
 					));
-		} else {
-			this.deleteDatasetAndDependencies(id);
-		}
-	}
-
-	private void deleteDatasetAndDependencies(Long id) throws ShanoirException, SolrServerException, IOException {
-
-		final Dataset dataset = repository.findById(id).orElse(null);
-		if (dataset == null) {
-			throw new EntityNotFoundException(Dataset.class, id);
 		}
 
-		processingService.removeDatasetFromAllInput(id);
+		final Dataset dataset = repository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
+
+		processingService.removeDatasetFromAllProcessingInput(id);
 		propertyService.deleteByDatasetId(id);
 		repository.deleteById(id);
 
@@ -129,45 +122,32 @@ public class DatasetServiceImpl implements DatasetService {
             return;
         }
         for (DatasetExpression expression : dataset.getDatasetExpressions()) {
-            if (DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat())) {
-                for (DatasetFile file : expression.getDatasetFiles()) {
-                    if (file.isPacs()) {
-                        dicomWebService.deleteDicomFilesFromPacs(file.getPath());
-                    }
-                }
-            } else {
-                for (DatasetFile file : expression.getDatasetFiles()) {
-                    if (!file.isPacs()) {
-                        try {
-                            URL url = new URL(file.getPath().replaceAll("%20", " "));
-                            File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
-                            FileUtils.deleteQuietly(srcFile);
-                        } catch (MalformedURLException e) {
-                            throw new ShanoirException("Error while deleting dataset file", e);
-                        }
-                    }
-                }
-            }
+
+			boolean isDicom = DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat());
+
+			for (DatasetFile file : expression.getDatasetFiles()) {
+				if(isDicom && file.isPacs()){
+					dicomWebService.deleteDicomFilesFromPacs(file.getPath());
+				} else if (!file.isPacs()) {
+					try {
+						URL url = new URL(file.getPath().replaceAll("%20", " "));
+						File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
+						FileUtils.deleteQuietly(srcFile);
+					} catch (MalformedURLException e) {
+						throw new ShanoirException("Error while deleting dataset file", e);
+					}
+				}
+
+			}
         }
     }
 
 	@Override
 	@Transactional
 	public void deleteByIdIn(List<Long> ids) throws ShanoirException, SolrServerException, IOException, RestServiceException {
-		List<Dataset> dss = this.findByIdIn(ids);
-
-		List<Dataset> childDatasets = repository.findBySourceIdIn(ids);
-		if (!CollectionUtils.isEmpty(childDatasets)) {
-			throw new RestServiceException(
-					new ErrorModel(
-							HttpStatus.UNPROCESSABLE_ENTITY.value(),
-							"This dataset is linked to another dataset that was copied."
-					));
+		for(Long id : ids){
+			this.deleteById(id);
 		}
-
-		for (Long id : ids) {
-            this.deleteDatasetAndDependencies(id);
-        }
     }
 
 	@Override

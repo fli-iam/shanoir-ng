@@ -104,6 +104,7 @@ public interface DatasetService {
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetList(returnObject, 'CAN_SEE_ALL')")
 	List<Dataset> findAll();
 
+
 	/**
 	 * Fetch the asked page
 	 * 
