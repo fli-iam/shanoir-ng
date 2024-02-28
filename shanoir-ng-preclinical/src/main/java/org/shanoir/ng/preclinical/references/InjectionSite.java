@@ -44,8 +44,8 @@ public enum InjectionSite {
 	 *
 	 */
 	public static class Values {
-		public static final String CAUDAL_VEIN = "Caudal Vein";
-		public static final String INTRACEREBRAL = "Intracerebral";
+		public static final String CAUDAL_VEIN = "CAUDAL VEIN";
+		public static final String INTRACEREBRAL = "INTRACEREBRAL";
 	}
 
 }
