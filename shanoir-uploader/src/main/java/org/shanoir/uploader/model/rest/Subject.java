@@ -189,5 +189,10 @@ public class Subject {
 	public void setPseudonymusHashValues(PseudonymusHashValues pseudonymusHashValues) {
 		this.pseudonymusHashValues = pseudonymusHashValues;
 	}
+	
+	@Override
+	public String toString() {
+		return name;
+	}
 
 }
