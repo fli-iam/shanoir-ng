@@ -28,7 +28,6 @@ spring:
     hikari.maximum-pool-size: 40
     hikari.minimum-idle: 40
   jpa:
-    database-platform: org.hibernate.dialect.MySQL57Dialect
     defer-datasource-initialization: true
     generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
     hibernate:
@@ -51,6 +50,9 @@ spring:
     init:
       data-locations: classpath:/scripts/import.sql
       mode: never
+  threads:
+    virtual:
+      enabled: true
 ##### Others #####
   jackson:
     mapper:
@@ -162,6 +164,9 @@ spring:
   sql:
     init:
       mode: always
+  threads:
+    virtual:
+      enabled: true
 front.server:
   address: https://shanoir-ng-nginx/shanoir-ng/
   url: https://shanoir-ng-nginx
@@ -215,8 +220,8 @@ spring:
   datasource:
     url: jdbc:h2:mem:SHANOIR_NG_IMPORT;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;DATABASE_TO_UPPER=false
     username: sa
-    password: 
-    driver-class-name: org.h2.Driver
+    password:
+    driverClassName: org.h2.Driver
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     defer-datasource-initialization: true

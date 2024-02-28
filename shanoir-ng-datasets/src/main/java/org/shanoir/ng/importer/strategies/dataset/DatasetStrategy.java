@@ -28,8 +28,9 @@ import org.shanoir.ng.importer.dto.Serie;
  *  
  * <br/>Example of strategy :
  * <br/>- MrDatasetStrategy -> Modality MR - Magnetic Resonance
- * <br/>- CtDatasetStrategy -> Modality CT
+ * <br/>- CtDatasetStrategy -> Modality CT - Computed TDM
  * <br/>- MrsDatasetStrategy -> Modality MRS - Magnetic Resonance Spectroscopy
+ * <br/>- XaDatasetStrategy -> Modality XA - X-Ray Angiography
  * 
  * @author atouboul
  *

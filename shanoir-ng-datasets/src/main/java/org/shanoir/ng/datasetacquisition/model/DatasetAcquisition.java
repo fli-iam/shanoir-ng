@@ -29,6 +29,7 @@ import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.eeg.EegDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.validation.DatasetsModalityTypeCheck;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
@@ -56,7 +57,8 @@ import java.util.List;
 	@Type(value = PetDatasetAcquisition.class, name = "Pet"),
 	@Type(value = GenericDatasetAcquisition.class, name = "Generic"),
 	@Type(value = EegDatasetAcquisition.class, name = "Eeg"),
-	@Type(value = BidsDatasetAcquisition.class, name = "BIDS")})
+	@Type(value = BidsDatasetAcquisition.class, name = "BIDS"),
+	@Type(value = XaDatasetAcquisition.class, name = "Xa")})
 public abstract class DatasetAcquisition extends AbstractEntity {
 
 	/**
