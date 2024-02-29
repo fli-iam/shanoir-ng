@@ -43,21 +43,23 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
 			studyId = (Long) row[0];
 			Long centerId = (Long) row[1];
 			String centerName = (String) row[2];
-			Long subjectId = (Long) row[3];
-			String commonName = (String) row[4];
-			Long examinationId = (Long) row[5];
-			Date examinationDate = (Date) row[6];
-			Long datasetAcquisitionId = (Long) row[7];
-			Date importDate = (Date) row[8];
-			Long datasetId = (Long) row[9];
-			String modality = (String) row[10];
-			String quality = (String) row[11];
+			String centerPrefix = (String) row[3];
+			Long subjectId = (Long) row[4];
+			String commonName = (String) row[5];
+			Long examinationId = (Long) row[6];
+			Date examinationDate = (Date) row[7];
+			Long datasetAcquisitionId = (Long) row[8];
+			Date importDate = (Date) row[9];
+			Long datasetId = (Long) row[10];
+			String modality = (String) row[11];
+			String quality = (String) row[12];
 
 			StudyStatisticsDTO dto = new StudyStatisticsDTO();
 
 			dto.setStudyId(studyId);
 			dto.setCenterId(centerId);
 			dto.setCenterName(centerName);
+			dto.setCenterPrefix(centerPrefix);
 			dto.setSubjectId(subjectId);
 			dto.setCommonName(commonName);
 			dto.setExaminationId(examinationId);
