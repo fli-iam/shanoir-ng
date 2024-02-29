@@ -40,35 +40,21 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
 
 		for (Object[] row : results) {
 
-			studyId = (Long) row[0];
-			Long centerId = (Long) row[1];
-			String centerName = (String) row[2];
-			String centerPrefix = (String) row[3];
-			Long subjectId = (Long) row[4];
-			String commonName = (String) row[5];
-			Long examinationId = (Long) row[6];
-			Date examinationDate = (Date) row[7];
-			Long datasetAcquisitionId = (Long) row[8];
-			Date importDate = (Date) row[9];
-			Long datasetId = (Long) row[10];
-			String modality = (String) row[11];
-			String quality = (String) row[12];
-
 			StudyStatisticsDTO dto = new StudyStatisticsDTO();
 
-			dto.setStudyId(studyId);
-			dto.setCenterId(centerId);
-			dto.setCenterName(centerName);
-			dto.setCenterPrefix(centerPrefix);
-			dto.setSubjectId(subjectId);
-			dto.setCommonName(commonName);
-			dto.setExaminationId(examinationId);
-			dto.setExaminationDate(examinationDate);
-			dto.setDatasetAcquisitionId(datasetAcquisitionId);
-			dto.setImportDate(importDate);
-			dto.setDatasetId(datasetId);
-			dto.setModality(modality);
-			dto.setQuality(quality);
+			dto.setStudyId((Long) row[0]);
+			dto.setCenterId((Long) row[1]);
+			dto.setCenterName((String) row[2]);
+			dto.setCenterPrefix((String) row[3]);
+			dto.setSubjectId((Long) row[4]);
+			dto.setCommonName((String) row[5]);
+			dto.setExaminationId((Long) row[6]);
+			dto.setExaminationDate((Date) row[7]);
+			dto.setDatasetAcquisitionId((Long) row[8]);
+			dto.setImportDate((Date) row[9]);
+			dto.setDatasetId((Long) row[10]);
+			dto.setModality((String) row[11]);
+			dto.setQuality((String) row[12]);
 
 			studyStatisticsList.add(dto);
 
