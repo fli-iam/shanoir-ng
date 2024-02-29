@@ -6,7 +6,7 @@ name: Docker sigstore test
 # documentation.
 
 on:
-  push:
+  #push:
     #branches: [ $default-branch ]
     # Publish semver tags as releases.
     #tags: [ 'v*.*.*' ]
