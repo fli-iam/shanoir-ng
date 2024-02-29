@@ -22,6 +22,7 @@ SELECT
     e.study_id AS study_id,
     c.id AS center_id,
     c.name AS center_name,
+    sc.subject_name_prefix AS center_prefix,
     s.id AS subject_id,
     s.name AS common_name,
     e.id AS examination_id,
@@ -56,6 +57,8 @@ INNER JOIN
     datasets.subject_study ss ON d.subject_id = ss.subject_id
 INNER JOIN 
     studies.subject s ON ss.subject_id = s.id
+INNER JOIN
+    studies.study_center sc ON c.id = sc.center_id
 WHERE e.study_id = studyId;
 END //
 

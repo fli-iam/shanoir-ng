@@ -28,6 +28,7 @@ import org.shanoir.ng.importer.dto.DatasetFile;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.dto.Study;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -35,6 +36,9 @@ import org.springframework.util.CollectionUtils;
 public class DicomProcessing {
 
 	UIDGeneration uidGenerator = new UIDGeneration();
+	
+	@Autowired
+	private WADOURLHandler wadoURLHandler;
 
 	public Attributes getDicomObjectAttributes(DatasetFile image, Boolean isEnhancedMR) throws IOException {
 		File dicomFile = new File(image.getPath());
@@ -52,7 +56,7 @@ public class DicomProcessing {
 	}
 
     public ExaminationAttributes<String> getDicomExaminationAttributes(Study study, Boolean isEnhanced) throws ShanoirException {
-		ExaminationAttributes<String> attributes = new ExaminationAttributes<String>();
+		ExaminationAttributes<String> attributes = new ExaminationAttributes<String>(wadoURLHandler);
 		if (study != null) {
 			for (Serie serie : study.getSeries()) {
 				attributes.addAcquisitionAttributes(serie.getSeriesInstanceUID(), getDicomAcquisitionAttributes(serie, isEnhanced));
@@ -62,7 +66,7 @@ public class DicomProcessing {
     }
 
 	public ExaminationAttributes<String> getDicomExaminationAttributes(Study study) throws ShanoirException {
-		ExaminationAttributes<String> attributes = new ExaminationAttributes<String>();
+		ExaminationAttributes<String> attributes = new ExaminationAttributes<String>(wadoURLHandler);
 		if (study != null) {
 			for (Serie serie : study.getSeries()) {
 				attributes.addAcquisitionAttributes(serie.getSeriesInstanceUID(), getDicomAcquisitionAttributes(serie));

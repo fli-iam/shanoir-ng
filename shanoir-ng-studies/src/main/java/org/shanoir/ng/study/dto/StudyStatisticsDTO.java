@@ -31,6 +31,8 @@ public class StudyStatisticsDTO {
 
 	private String centerName;
 
+	private String centerPrefix;
+
 	private Long subjectId;
 
 	private String commonName;
@@ -71,6 +73,14 @@ public class StudyStatisticsDTO {
 
 	public void setCenterName(String centerName) {
 		this.centerName = centerName;
+	}
+
+	public String getCenterPrefix() {
+		return centerPrefix;
+	}
+
+	public void setCenterPrefix(String centerPrefix) {
+		this.centerPrefix = centerPrefix;
 	}
 
 	public Long getSubjectId() {
