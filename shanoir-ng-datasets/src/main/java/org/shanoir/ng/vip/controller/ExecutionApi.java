@@ -24,6 +24,7 @@ import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.SecurityException;
+import org.shanoir.ng.vip.dto.ExecutionCandidateDTO;
 import org.shanoir.ng.vip.dto.VipExecutionDTO;
 import org.shanoir.ng.vip.monitoring.model.ExecutionStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,7 +53,7 @@ public interface ExecutionApi {
             consumes = {"application/json"},
             method = RequestMethod.POST)
     ResponseEntity<IdName> createExecution(
-            @Parameter(name = "execution", required = true) @RequestBody final String execution) throws EntityNotFoundException, SecurityException;
+            @Parameter(name = "execution", required = true) @RequestBody final ExecutionCandidateDTO candidate) throws EntityNotFoundException, SecurityException;
 
     @Operation(summary = "Get VIP execution for the given identifier", description = "Returns the VIP execution that has the given identifier in parameter.", tags={  })
     @ApiResponses(value = {
