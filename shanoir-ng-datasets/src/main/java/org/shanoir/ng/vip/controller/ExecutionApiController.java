@@ -77,25 +77,17 @@ public class ExecutionApiController implements ExecutionApi {
     /**
      * Create execution on VIP and return Shanoir linked execution monitoring
      *
-     * @param executionAsString
+     * @param candidate
      * @return
      * @throws EntityNotFoundException
      * @throws SecurityException
      */
     @Override
     public ResponseEntity<IdName> createExecution(
-            @Parameter(name = "execution", required = true) @RequestBody final String executionAsString) throws EntityNotFoundException, SecurityException {
+            @Parameter(name = "execution", required = true) @RequestBody final ExecutionCandidateDTO candidate) throws EntityNotFoundException, SecurityException {
 
         // 1: Get dataset IDS and check rights
         List<Long> datasetsIds = new ArrayList<>();
-        ObjectMapper mapper = new ObjectMapper();
-        ExecutionCandidateDTO candidate;
-        try {
-            candidate = mapper.readValue(executionAsString, ExecutionCandidateDTO.class);
-        } catch (JsonProcessingException e) {
-            LOG.error("Could not parse execution DTO from input, please respect the expected structure.", e);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
 
         for (DatasetParameterDTO param : candidate.getDatasetParameters()) {
             datasetsIds.addAll(param.getDatasetIds());
@@ -104,7 +96,7 @@ public class ExecutionApiController implements ExecutionApi {
         if (!this.datasetSecurityService.hasRightOnEveryDataset(datasetsIds, "CAN_IMPORT")) {
             LOG.error("Import right is mandatory for every study we are updating");
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        };
+        }
 
         List<Dataset> inputDatasets = datasetService.findByIdIn(datasetsIds);
 
@@ -221,7 +213,7 @@ public class ExecutionApiController implements ExecutionApi {
         executionMonitoring.setPipelineIdentifier(execution.getPipelineIdentifier());
         executionMonitoring.setResultsLocation(KeycloakUtil.getTokenUserId() + "/" + formatter.format(LocalDateTime.now()));
         executionMonitoring.setTimeout(20);
-        executionMonitoring.setStudyId(Long.valueOf(execution.getStudyIdentifier()));
+        executionMonitoring.setStudyId(execution.getStudyIdentifier());
         executionMonitoring.setStatus(ExecutionStatus.RUNNING);
         executionMonitoring.setComment(execution.getName());
         executionMonitoring.setDatasetProcessingType(DatasetProcessingType.valueOf(execution.getProcessingType()));
