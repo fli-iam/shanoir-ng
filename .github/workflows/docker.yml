@@ -20,6 +20,7 @@ jobs:
     permissions:
       packages: write
       contents: read
+      id-token: write # needed by sigstore/fulcio
     steps:
 
 #      - name: Set up JDK 17
