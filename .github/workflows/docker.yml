@@ -99,7 +99,7 @@ jobs:
 
               sys.stderr.write(f"#\n#   Signing {image}:{tag}\n#\n")
               subprocess.call(["date"])
-              subprocess.check_call(["cosign", "sign", "--tlog-upload=false", f"{repo}:{tag}@{digest}"])
+              subprocess.check_call(["cosign", "sign", "--yes", "--tlog-upload=false", f"{repo}:{tag}@{digest}"])
           finally:
               subprocess.call(["date"])
             
