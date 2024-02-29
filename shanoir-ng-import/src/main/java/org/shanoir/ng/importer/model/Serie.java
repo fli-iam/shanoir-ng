@@ -111,18 +111,21 @@ public class Serie {
 	public Serie() {}
 
 	public Serie(Attributes attributes) {
-		this.seriesInstanceUID = attributes.getString(Tag.SeriesInstanceUID);
-		this.sopClassUID = attributes.getString(Tag.SOPClassUID);
-		this.seriesDescription = attributes.getString(Tag.SeriesDescription);
-		this.seriesDate = DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.SeriesDate));
-		this.seriesNumber = attributes.getString(Tag.SeriesNumber);
-		this.numberOfSeriesRelatedInstances = attributes.getInt(Tag.NumberOfSeriesRelatedInstances, 0);
-		this.modality = attributes.getString(Tag.Modality);
-		this.protocolName = attributes.getString(Tag.ProtocolName);
-		this.isEnhanced = Boolean.FALSE;
-		this.isMultiFrame = Boolean.FALSE;
-		this.isSpectroscopy = Boolean.FALSE;
-		this.isCompressed = Boolean.FALSE;
+		seriesInstanceUID = attributes.getString(Tag.SeriesInstanceUID);
+		// try to remove confusing spaces, in case DICOM server sends them wrongly
+		if (seriesInstanceUID != null)
+			seriesInstanceUID = seriesInstanceUID.trim();
+		sopClassUID = attributes.getString(Tag.SOPClassUID);
+		seriesDescription = attributes.getString(Tag.SeriesDescription);
+		seriesDate = DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.SeriesDate));
+		seriesNumber = attributes.getString(Tag.SeriesNumber);
+		numberOfSeriesRelatedInstances = attributes.getInt(Tag.NumberOfSeriesRelatedInstances, 0);
+		modality = attributes.getString(Tag.Modality);
+		protocolName = attributes.getString(Tag.ProtocolName);
+		isEnhanced = Boolean.FALSE;
+		isMultiFrame = Boolean.FALSE;
+		isSpectroscopy = Boolean.FALSE;
+		isCompressed = Boolean.FALSE;
 		final EquipmentDicom equipmentDicom = new EquipmentDicom(
 				attributes.getString(Tag.Manufacturer),
 				attributes.getString(Tag.ManufacturerModelName),

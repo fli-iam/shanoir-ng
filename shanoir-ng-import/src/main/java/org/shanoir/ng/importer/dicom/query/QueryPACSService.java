@@ -271,6 +271,7 @@ public class QueryPACSService {
 
 	/**
 	 * This method queries on study root level.
+	 * 
 	 * @param dicomQuery
 	 * @param calling
 	 * @param called
@@ -325,6 +326,7 @@ public class QueryPACSService {
 						// handle study
 						Study study = new Study(studyAttr);
 						patient.getStudies().add(study);
+						// use now study date returned from the DICOM server
 						String dicomResponseStudyDate = studyAttr.getString(Tag.StudyDate);
 						querySeries(association, study, modality, dicomResponseStudyDate);						
 					}
@@ -479,11 +481,11 @@ public class QueryPACSService {
 	 * each one has its own DimseRSPHandler and its own state, so this
 	 * might work, in case the association is not caching aspects.
 	 * 
-	 * @param keys
+	 * @param params
 	 * @param level
 	 * @return
 	 */
-	private List<Attributes> queryCFind(Association association, DicomParam[] keys, QueryRetrieveLevel level) {
+	private List<Attributes> queryCFind(Association association, DicomParam[] params, QueryRetrieveLevel level) {
 		long start = System.currentTimeMillis();
 		String cuid = null;
 		if (level.equals(QueryRetrieveLevel.PATIENT)) {
@@ -511,12 +513,12 @@ public class QueryPACSService {
 		try {
 			Attributes attributes = new Attributes();
 			attributes.setString(Tag.QueryRetrieveLevel, VR.CS, level.name());
-			for (DicomParam p : keys) {
+			for (DicomParam p : params) {
 				addAttributes(attributes, p);
 			}
 			LOG.info("Calling PACS, C-FIND with level: {}", level);
-			for (int i = 0; i < keys.length; i++) {
-				LOG.info("Tag: {}, Value: {}", keys[i].getTagName(), Arrays.toString(keys[i].getValues()));
+			for (int i = 0; i < params.length; i++) {
+				LOG.info("Tag: {}, Value: {}", params[i].getTagName(), Arrays.toString(params[i].getValues()));
 			}
 			association.cfind(cuid, Priority.NORMAL, attributes, null, rspHandler);
 	        if (association.isReadyForDataTransfer()) {

@@ -178,9 +178,12 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 					.getString(Tag.MediaStorageSOPInstanceUID);
 			
 			/**
-			 * DICOM "body": read tags
+			 * MK: Read entire dataset with PixelData. Attention: do NOT change here to only
+			 * readDatasetUntilPixelData(), as the modified DICOM image will MISS the PixelData!
+			 * It writes into the image, what has been read from the image, that is why we read
+			 * the entire dataset here (I made the mistake already twice...).
 			 */
-			Attributes datasetAttributes = din.readDataset(-1, -1);
+			Attributes datasetAttributes = din.readDataset();
 			
 			// temporarily keep the patient credentials in memory to search in private tags
 			String patientNameAttr = datasetAttributes.getString(Tag.PatientName);
