@@ -7,7 +7,7 @@ env:
   TAG: ${{ github.ref_name }}
 on:
   workflow_dispatch:
-  push:
+#  push:
 #TODO: disable on pull-request
 #  push:
 #    tags:
