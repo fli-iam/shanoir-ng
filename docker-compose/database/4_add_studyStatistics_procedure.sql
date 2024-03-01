@@ -53,11 +53,11 @@ INNER JOIN
 INNER JOIN
     datasets.dataset_metadata dm ON d.updated_metadata_id = dm.id
 INNER JOIN
-    datasets.subject_study ss ON d.subject_id = ss.subject_id
+    studies.subject_study ss ON d.subject_id = ss.subject_id AND d.study_id = ss.study_id
 INNER JOIN 
     studies.subject s ON ss.subject_id = s.id
 INNER JOIN
-    studies.study_center sc ON c.id = sc.center_id
+    studies.study_center sc ON c.id = sc.center_id AND e.study_id = sc.study_id
 WHERE e.study_id = studyId;
 END //
 
