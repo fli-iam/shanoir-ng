@@ -18,7 +18,7 @@ DROP PROCEDURE IF EXISTS getStudyStatistics;
 delimiter //
 CREATE PROCEDURE getStudyStatistics(IN studyId INT)
 BEGIN
-SELECT
+SELECT DISTINCT
     e.study_id AS study_id,
     c.id AS center_id,
     c.name AS center_name,
