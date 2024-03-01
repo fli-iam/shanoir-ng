@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
@@ -257,14 +258,16 @@ public class QueryPACSService {
 				patientsNbre = maxPatientsFromPACS;
 			}
 			List<Patient> patients = new ArrayList<Patient>();
-			for (int i = 0; i < patientsNbre; i++) {
-				Patient patient = new Patient(patientsAttr.get(i));
-				boolean patientExists = patients.stream().anyMatch(p -> p.getPatientID().equals(patient.getPatientID()));
-				if (!patientExists) {
-					patients.add(patient);
-					queryStudies(association, dicomQuery, patient);
-				}
-			}
+			IntStream.range(0, patientsNbre).parallel().forEach(i -> {
+			    Patient patient = new Patient(patientsAttr.get(i));
+			    boolean patientExists = patients.parallelStream().anyMatch(p -> p.getPatientID().equals(patient.getPatientID()));
+			    if (!patientExists) {
+			        synchronized (patients) {
+			            patients.add(patient);
+			        }
+			        queryStudies(association, dicomQuery, patient);
+			    }
+			});
 			importJob.setPatients(patients);
 		}
 	}
@@ -288,51 +291,55 @@ public class QueryPACSService {
 		// list of all corresponding DICOM studies received
 		if (studies != null) {
 			List<Patient> patients = new ArrayList<>();
-			for (int i = 0; i < studies.size(); i++) {
-				Attributes studyAttr = studies.get(i);
-				// handle patient: create patient from attributes
-				Patient patient = new Patient(studyAttr);
-				patient.setStudies(new ArrayList<Study>());
-				boolean newPatient = true;
-				for (Iterator<Patient> iterator = patients.iterator(); iterator.hasNext();) {
-					Patient existingPatient = iterator.next();
-					if (existingPatient.getPatientID().equals(patient.getPatientID())) {
-						patient = existingPatient;
-						newPatient = false;
-					}
-				}
-				boolean maxPatientsFromPACSReached = false;
-				if (newPatient) {
-					// Limit the max number of patients processed
-					if (patients.size() < maxPatientsFromPACS) {
-						patients.add(patient);
-					} else {
-						maxPatientsFromPACSReached = true;
-						// we do not stop the method here in case other studies
-						// follow afterwards from patients, that exist already
-						// maybe no guarantee here, that the pacs returns studies
-						// grouped by patient
-					}
-				}
-				if (!maxPatientsFromPACSReached) {
-					// handle study
-					Study study = new Study(studyAttr);
-					patient.getStudies().add(study);
-					// use now study date returned from the DICOM server
-					String dicomResponseStudyDate = studyAttr.getString(Tag.StudyDate);
-					querySeries(association, study, modality, dicomResponseStudyDate);
-				} else {
-					if (!newPatient) { // only process existing patients, in case
-						// handle study
-						Study study = new Study(studyAttr);
-						patient.getStudies().add(study);
-						// use now study date returned from the DICOM server
-						String dicomResponseStudyDate = studyAttr.getString(Tag.StudyDate);
-						querySeries(association, study, modality, dicomResponseStudyDate);						
-					}
-				}
-			}
+			studies.parallelStream().forEach(s -> processDICOMStudy(s, association, modality, patients));
 			importJob.setPatients(patients);
+		}
+	}
+
+	private void processDICOMStudy(Attributes studyAttr, Association association, DicomParam modality,
+			List<Patient> patients) {
+		// handle patient: create patient from attributes
+		Patient patient = new Patient(studyAttr);
+		patient.setStudies(new ArrayList<Study>());
+		boolean newPatient = true;
+		for (Iterator<Patient> iterator = patients.iterator(); iterator.hasNext();) {
+			Patient existingPatient = iterator.next();
+			if (existingPatient.getPatientID().equals(patient.getPatientID())) {
+				patient = existingPatient;
+				newPatient = false;
+			}
+		}
+		boolean maxPatientsFromPACSReached = false;
+		if (newPatient) {
+			// Limit the max number of patients processed
+			if (patients.size() < maxPatientsFromPACS) {
+				synchronized (patients) {
+		            patients.add(patient);
+		        }
+			} else {
+				maxPatientsFromPACSReached = true;
+				// we do not stop the method here in case other studies
+				// follow afterwards from patients, that exist already
+				// maybe no guarantee here, that the pacs returns studies
+				// grouped by patient
+			}
+		}
+		if (!maxPatientsFromPACSReached) {
+			// handle study
+			Study study = new Study(studyAttr);
+			patient.getStudies().add(study);
+			// use now study date returned from the DICOM server
+			String dicomResponseStudyDate = studyAttr.getString(Tag.StudyDate);
+			querySeries(association, study, modality, dicomResponseStudyDate);
+		} else {
+			if (!newPatient) { // only process existing patients, in case
+				// handle study
+				Study study = new Study(studyAttr);
+				patient.getStudies().add(study);
+				// use now study date returned from the DICOM server
+				String dicomResponseStudyDate = studyAttr.getString(Tag.StudyDate);
+				querySeries(association, study, modality, dicomResponseStudyDate);						
+			}
 		}
 	}
 	
@@ -378,14 +385,14 @@ public class QueryPACSService {
 		List<Attributes> studiesAttr = queryCFind(association, params, QueryRetrieveLevel.STUDY);
 		if (studiesAttr != null) {
 			List<Study> studies = new ArrayList<Study>();
-			for (int i = 0; i < studiesAttr.size(); i++) {
-				Attributes studyAttr = studiesAttr.get(i);
-				Study study = new Study(studyAttr);
-				studies.add(study);
-				// use now study date returned from the DICOM server
-				String dicomResponseStudyDate = studyAttr.getString(Tag.StudyDate);
-				querySeries(association, study, modality, dicomResponseStudyDate);
-			}
+			studiesAttr.parallelStream().forEach(studyAttr -> {
+			    Study study = new Study(studyAttr);
+			    synchronized (studies) {
+			        studies.add(study);
+			    }
+			    String dicomResponseStudyDate = studyAttr.getString(Tag.StudyDate);
+			    querySeries(association, study, modality, dicomResponseStudyDate);
+			});
 			studies.sort((p1, p2) -> p1.getStudyDate().compareTo(p2.getStudyDate()));
 			patient.setStudies(studies);
 		}
@@ -417,28 +424,31 @@ public class QueryPACSService {
 		List<Attributes> seriesAttr = queryCFind(association, params, QueryRetrieveLevel.SERIES);
 		if (seriesAttr != null) {
 			List<Serie> series = new ArrayList<Serie>();
-			for (int i = 0; i < seriesAttr.size(); i++) {
-				Attributes serieAttr = seriesAttr.get(i);
-				Serie serie = new Serie(serieAttr);
-				if (!DicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(serieAttr)) {
-					queryInstances(association, serie, study, modality);
-					if (!serie.getInstances().isEmpty()) {
-						DicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, serieAttr);
-						DicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);
-					} else {
-						LOG.warn("Serie found with empty instances and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
-						serie.setIgnored(true);
-						serie.setSelected(false);
-					}
-				} else {
-					LOG.warn("Serie found with no-imaging modality and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
-					serie.setIgnored(true);
-					serie.setSelected(false);
-				}
-				series.add(serie);
-			}
+			seriesAttr.parallelStream().forEach(s -> processDICOMSerie(s, association, study, modality, series));
 			series.sort(new SeriesNumberSorter());
 			study.setSeries(series);
+		}
+	}
+
+	private void processDICOMSerie(Attributes serieAttr, Association association, Study study, DicomParam modality, List<Serie> series) {
+		Serie serie = new Serie(serieAttr);
+		if (!DicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(serieAttr)) {
+			queryInstances(association, serie, study, modality);
+			if (!serie.getInstances().isEmpty()) {
+				DicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, serieAttr);
+				DicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);
+			} else {
+				LOG.warn("Serie found with empty instances and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
+				serie.setIgnored(true);
+				serie.setSelected(false);
+			}
+		} else {
+			LOG.warn("Serie found with no-imaging modality and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
+			serie.setIgnored(true);
+			serie.setSelected(false);
+		}
+		synchronized (series) {
+			series.add(serie);			
 		}
 	}
 	
@@ -462,12 +472,14 @@ public class QueryPACSService {
 		List<Attributes> instancesAttr = queryCFind(association, params, QueryRetrieveLevel.IMAGE);
 		if (instancesAttr != null) {
 			List<Instance> instances = new ArrayList<>();
-			for (int i = 0; i < instancesAttr.size(); i++) {
-				Instance instance = new Instance(instancesAttr.get(i));
-				if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(instancesAttr.get(i))) {
-					instances.add(instance);
+			instancesAttr.parallelStream().forEach(i -> {
+				Instance instance = new Instance(i);
+				if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(i)) {
+					synchronized (instances) {
+						instances.add(instance);						
+					}
 				}
-			}
+			});
 			instances.sort(new InstanceNumberSorter());
 			serie.setInstances(instances);
 		}
