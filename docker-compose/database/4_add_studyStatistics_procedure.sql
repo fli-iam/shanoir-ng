@@ -58,7 +58,7 @@ INNER JOIN
     studies.subject s ON ss.subject_id = s.id
 INNER JOIN
     studies.study_center sc ON c.id = sc.center_id AND e.study_id = sc.study_id
-WHERE e.study_id = studyId;
+WHERE e.study_id = studyId AND ss.study_id = studyId AND sc.study_id = studyId;
 END //
 
 delimiter ;
