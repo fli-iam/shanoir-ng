@@ -1,6 +1,7 @@
 package org.shanoir.uploader.action.init;
 
 import java.io.File;
+import java.net.MalformedURLException;
 
 import org.apache.log4j.Logger;
 import org.shanoir.uploader.ShUpConfig;
@@ -47,9 +48,14 @@ public class PacsConfigurationState implements State {
 		} else {
 			shUpOnloadConfig.getWorkFolder().mkdirs();
 		}
-		DicomServerClient dSC = new DicomServerClient(ShUpConfig.dicomServerProperties, shUpOnloadConfig.getWorkFolder());
-		shUpOnloadConfig.setDicomServerClient(dSC);
-		logger.info("DicomServerClient successfully initialized.");
+		DicomServerClient dSC;
+		try {
+			dSC = new DicomServerClient(ShUpConfig.dicomServerProperties, shUpOnloadConfig.getWorkFolder());
+			shUpOnloadConfig.setDicomServerClient(dSC);
+			logger.info("DicomServerClient successfully initialized.");
+		} catch (MalformedURLException e) {
+			logger.info("Error with init of DicomServerClient: " + e.getMessage(), e);
+		}
 	}
 
 }

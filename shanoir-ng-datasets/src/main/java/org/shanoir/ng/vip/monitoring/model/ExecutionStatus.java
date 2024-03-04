@@ -13,7 +13,7 @@ public enum ExecutionStatus {
     RUNNING("Running"),
     FINISHED("Finished"),
     EXECUTION_FAILED("ExecutionFailed"),
-    UNKOWN("Unknown"),
+    UNKNOWN("Unknown"),
     KILLED("Killed");
 
     private String restLabel;

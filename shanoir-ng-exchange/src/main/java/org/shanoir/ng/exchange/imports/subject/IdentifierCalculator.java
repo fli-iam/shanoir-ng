@@ -64,7 +64,7 @@ public class IdentifierCalculator {
 	 * @throws NoSuchAlgorithmException
 	 * @throws UnsupportedEncodingException
 	 */
-	public String calculateIdentifier(final String firstName, final String lastName, final Date birthDate) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+	public String calculateIdentifier(final String firstName, final String lastName, final String birthDate) throws NoSuchAlgorithmException, UnsupportedEncodingException {
 		final String subjectIdentifierSeed = firstName + lastName + birthDate;
 		String hex = calculateSHA(subjectIdentifierSeed);
 		return hex;

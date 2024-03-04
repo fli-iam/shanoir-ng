@@ -14,9 +14,6 @@
 
 package org.shanoir.ng.importer.dcm2nii;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
 import org.shanoir.ng.shared.hateoas.HalEntity;
@@ -24,6 +21,9 @@ import org.shanoir.ng.shared.security.EditableOnlyBy;
 import org.shanoir.ng.shared.validation.Unique;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 
 /**
  * The class NIfTIConverter.

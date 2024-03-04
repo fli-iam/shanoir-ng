@@ -563,7 +563,7 @@ public class DatasetApiController implements DatasetApi {
 			) throws RestServiceException, IOException {
 		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
 		File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
-		File statisticsFile = recreateFile(userDir + File.separator + "shanoirExportStatistics.txt");
+		File statisticsFile = recreateFile(userDir + File.separator + "shanoirExportStatistics.tsv");
 		File zipFile = recreateFile(userDir + File.separator + "shanoirExportStatistics" + ZIP);
 
 		// Get the data
@@ -599,4 +599,5 @@ public class DatasetApiController implements DatasetApi {
 				.contentLength(data.length)
 				.body(resource);
 	}
+
 }

@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
+import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -79,5 +80,9 @@ public interface AcquisitionEquipmentService {
 	List<AcquisitionEquipment> findAllByCenterId(Long centerId);
 	
 	List<AcquisitionEquipment> findAllByStudyId(Long studyId);
+	
+	List<AcquisitionEquipment> findAllBySerialNumber(String serialNumber);
+	
+	List<AcquisitionEquipment> findAcquisitionEquipmentsOrCreateOneByEquipmentDicom(EquipmentDicom equipmentDicom);
 	
 }
