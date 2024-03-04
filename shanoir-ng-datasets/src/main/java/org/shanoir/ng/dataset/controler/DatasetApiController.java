@@ -135,13 +135,15 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public ResponseEntity<Void> deleteDataset(
-			@Parameter(name = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId) {
+			@Parameter(name = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId) throws EntityNotFoundException, RestServiceException {
 		try {
 			datasetService.deleteById(datasetId);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} catch (EntityNotFoundException | RestServiceException e) {
+			throw e;
 		} catch (Exception e) {
-			LOG.error("Error while deleting dataset. Please check DICOM server configuration.", e);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while deleting dataset. Please check DICOM server configuration.", e.getMessage());
+			throw new RestServiceException(e, error);
 		}
 	}
 
@@ -149,13 +151,15 @@ public class DatasetApiController implements DatasetApi {
 	public ResponseEntity<Void> deleteDatasets(
 			@Parameter(name = "ids of the datasets", required=true) @Valid
 			@RequestBody List<Long> datasetIds)
-					throws RestServiceException {
+			throws RestServiceException {
 		try {
 			datasetService.deleteByIdIn(datasetIds);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} catch (IOException | SolrServerException | ShanoirException e) {
-			LOG.error("Error while deleting datasets: ", e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (RestServiceException e) {
+			throw e;
+		} catch (Exception e) {
+			ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while deleting dataset. Please check DICOM server configuration.", e.getMessage());
+			throw new RestServiceException(e, error);
 		}
 	}
 
