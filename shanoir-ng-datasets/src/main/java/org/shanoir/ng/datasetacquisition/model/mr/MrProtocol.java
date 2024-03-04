@@ -16,9 +16,12 @@ package org.shanoir.ng.datasetacquisition.model.mr;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.model.DiffusionGradient;
+import org.shanoir.ng.shared.model.InversionTime;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -62,6 +65,7 @@ public class MrProtocol extends AbstractEntity {
 	 * of arrival.
 	 */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "mrProtocol", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonIgnore
 	private List<DiffusionGradient> diffusionGradients;
 
 	/**
@@ -190,6 +194,55 @@ public class MrProtocol extends AbstractEntity {
 	/** Metadata updated by study card. */
 	@OneToOne(cascade = CascadeType.ALL)
 	private MrProtocolSCMetadata updatedMetadata;
+
+	public MrProtocol() {
+
+	}
+
+	public MrProtocol(MrProtocol mrPro, MrDataset mrDs) {
+		this.acquisitionDuration = mrPro.getAcquisitionDuration();
+		this.acquisitionResolutionX = mrPro.getAcquisitionResolutionX();
+		this.acquisitionResolutionY = mrPro.getAcquisitionResolutionY();
+
+		this.diffusionGradients = new ArrayList<>((mrPro.getDiffusionGradients().size()));
+		for (DiffusionGradient dg : mrPro.getDiffusionGradients()) {
+			this.diffusionGradients.add(new DiffusionGradient(dg, mrDs, this));
+		}
+
+		this.echoTrainLength = mrPro.getEchoTrainLength();
+		this.filters = mrPro.getFilters();
+		this.fovX = mrPro.getFovX();
+		this.fovY = mrPro.getFovY();
+		if (mrPro.getImagedNucleus() != null) {
+			this.imagedNucleus = mrPro.getImagedNucleus().getId();
+		} else {
+			this.imagedNucleus = null;
+		}
+
+		this.imagingFrequency = mrPro.getImagingFrequency();
+
+		// this.mrDatasetAcquisition = new MrDatasetAcquisition(mrDsAcq, mrDs);
+
+		this.numberOfAverages = mrPro.getNumberOfAverages();
+		this.numberOfPhaseEncodingSteps = mrPro.getNumberOfPhaseEncodingSteps();
+		this.numberOfTemporalPositions = mrPro.getNumberOfTemporalPositions();
+		this.originMetadata = mrPro.getOriginMetadata();
+		if (mrPro.getPatientPosition() != null) {
+			this.patientPosition = mrPro.getPatientPosition().getId();
+		} else {
+			this.patientPosition = null;
+		}
+		this.percentPhaseFov = mrPro.getPercentPhaseFov();
+		this.percentSampling = mrPro.getPercentSampling();
+		this.pixelBandwidth = mrPro.getPixelBandwidth();
+		this.pixelSpacingX = mrPro.getPixelSpacingX();
+		this.pixelSpacingY = mrPro.getPixelSpacingY();
+		this.sliceSpacing = mrPro.getSliceSpacing();
+		this.sliceThickness = mrPro.getSliceThickness();
+		this.temporalResolution = mrPro.getTemporalResolution();
+		this.magneticFieldStrength = mrPro.getMagneticFieldStrength();
+		this.updatedMetadata = mrPro.getUpdatedMetadata();
+	}
 
 	/**
 	 * @return the acquisitionDuration

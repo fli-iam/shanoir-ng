@@ -176,7 +176,6 @@ public class DatasetsCreatorAndNIfTIConverterService {
 					}
 					// as images/non-images are migrated to datasets, clear the list now
 					serie.getImages().clear();
-					serie.getNonImages().clear();
 				}
 				cpt++;
 			}

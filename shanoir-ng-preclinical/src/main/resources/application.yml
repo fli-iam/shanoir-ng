@@ -26,7 +26,6 @@ spring:
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
-    database-platform: org.hibernate.dialect.MySQL57Dialect
     defer-datasource-initialization: true
     generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
     hibernate:
@@ -49,6 +48,9 @@ spring:
     init:
       data-locations: classpath:/scripts/import.sql
       mode: never
+  threads:
+    virtual:
+      enabled: true
 ##### Others #####
   jackson:
     mapper:
@@ -73,10 +75,13 @@ spring:
 
 springdoc:
   api-docs:
-    path: /api-docs
-  swagger-ui:
-    path: /swagger-ui.html
+    path: '/api-docs'
     enabled: true
+  swagger-ui:
+    url: /shanoir-ng/preclinical/api-docs
+    config-url: /shanoir-ng/preclinical/api-docs/swagger-config
+    enabled: true
+    disable-swagger-default-url: true
 
 front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
@@ -128,6 +133,9 @@ spring:
   sql:
     init:
       mode: always
+  threads:
+    virtual:
+      enabled: true
 # logging configuration
 logging:
   file:
@@ -150,7 +158,7 @@ spring:
     url: jdbc:h2:mem:SHANOIR_NG_PRECLINICAL;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;DATABASE_TO_UPPER=false
     username: sa
     password:
-    driver-class-name: org.h2.Driver
+    driverClassName: org.h2.Driver
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     defer-datasource-initialization: true

@@ -1,6 +1,6 @@
 package org.shanoir.uploader.action;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import javax.swing.JOptionPane;
 
@@ -25,17 +25,7 @@ public class DicomDataTransferObject {
 
 	private static Logger logger = Logger.getLogger(DicomDataTransferObject.class);
 	
-	private static final String DATE = "date";
-
-	private static final String ID = "id";
-
-	private static final String SEX = "sex";
-
-	private static final String NAME = "name";
-
-	private static final String BIRTH_DATE = "birthDate";
-	
-	private Date birthDate;
+	private LocalDate birthDate;
 	
 	private String sex;
 	
@@ -57,7 +47,7 @@ public class DicomDataTransferObject {
 	
 	private String studyDescription;
 
-	private Date studyDate;
+	private LocalDate studyDate;
 	
 	private String birthNameHash1;
 
@@ -96,33 +86,30 @@ public class DicomDataTransferObject {
 		// extract birth date of the patient of the first selected series
 		// attention: the birth date is only taken from one patient, even
 		// when the tree could display and select multiple patients
-		final String dicomBirthDate = patient.getPatientBirthDate().toString();
-		if (dicomBirthDate != null && !"".equals(dicomBirthDate)) {
-			birthDate = Util.convertStringDicomDateToDate(dicomBirthDate);
-		}
 		final String name = patient.getPatientName();
 		firstName = Util.computeFirstName(name);
 		lastName = Util.computeLastName(name);
 		sex = patient.getPatientSex();
 		IPP = patient.getPatientID();
+		birthDate = patient.getPatientBirthDate();
 
 		/**
 		 * Extract from Study object.
 		 */
 		Study study = studyTreeNode.getStudy();
 		studyInstanceUID = study.getStudyInstanceUID();
-		String dicomStudyDate = study.getStudyDate().toString();
-		if (dicomStudyDate != null && !"".equals(dicomStudyDate)) {
-			studyDate = Util.convertStringDicomDateToDate(dicomStudyDate);
-		} else if (mainWindow != null) {
+		studyDescription = study.getStudyDescription();
+		studyDate = study.getStudyDate();
+		if (studyDate == null) {			
 			logger.error("Study date could not be used for import.");
-			JOptionPane.showMessageDialog(mainWindow.frame,
+			if(mainWindow != null) {
+				JOptionPane.showMessageDialog(mainWindow.frame,
 				    "Study date could not be used for import.",
 				    "Data error",
 				    JOptionPane.ERROR_MESSAGE);
+			}
 			throw new Exception();
 		}
-		studyDescription = study.getStudyDescription();
 	}
 
 	public String getIPP() {
@@ -133,7 +120,7 @@ public class DicomDataTransferObject {
 		IPP = iPP;
 	}
 
-	public Date getBirthDate() {
+	public LocalDate getBirthDate() {
 		return birthDate;
 	}
 
@@ -204,11 +191,11 @@ public class DicomDataTransferObject {
 		this.studyDescription = studyDescription;
 	}
 
-	public Date getStudyDate() {
+	public LocalDate getStudyDate() {
 		return studyDate;
 	}
 
-	public void setStudyDate(Date studyDate) {
+	public void setStudyDate(LocalDate studyDate) {
 		this.studyDate = studyDate;
 	}
 
@@ -300,7 +287,7 @@ public class DicomDataTransferObject {
 		this.birthDateHash = birthDateHash;
 	}
 
-	public void setBirthDate(Date birthDate) {
+	public void setBirthDate(LocalDate birthDate) {
 		this.birthDate = birthDate;
 	}	
 	

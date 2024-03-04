@@ -88,7 +88,7 @@ public class HttpService {
 		}
 	}
 
-	public CloseableHttpResponse get(String url) {
+	public CloseableHttpResponse get(String url) throws Exception {
 		try {
 			HttpGet httpGet = new HttpGet(url);
 			httpGet.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
@@ -96,11 +96,11 @@ public class HttpService {
 			return response;
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
+			throw e;
 		}
-		return null;
 	}
 
-	public CloseableHttpResponse post(String url, String json, boolean isLoginPost) {
+	public CloseableHttpResponse post(String url, String json, boolean isLoginPost) throws Exception {
 		try {
 			HttpPost httpPost = new HttpPost(url);
 			if (isLoginPost) {
@@ -114,11 +114,11 @@ public class HttpService {
 			return response;				
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
+			throw e;
 		}
-		return null;
 	}
 
-	public CloseableHttpResponse postFile(String url, String tempDirId, File file) {
+	public CloseableHttpResponse postFile(String url, String tempDirId, File file) throws Exception {
 		try {
 			HttpPost httpPost = new HttpPost(url + "/" + tempDirId);
 			httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
@@ -130,11 +130,11 @@ public class HttpService {
 			return response;
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
+			throw e;
 		}
-		return null;
 	}
 
-	public CloseableHttpResponse postFile(String url, File file) {
+	public CloseableHttpResponse postFile(String url, File file) throws Exception {
 		try {
 			HttpPost httpPost = new HttpPost(url);
 			httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
@@ -146,11 +146,11 @@ public class HttpService {
 			return response;
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
+			throw e;
 		}
-		return null;
 	}
 	
-	public CloseableHttpResponse postFileMultipartRelated(String url, File file) {
+	public CloseableHttpResponse postFileMultipartRelated(String url, File file) throws Exception {
 		try {
 			MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setBoundary(BOUNDARY);
 			multipartEntityBuilder.addBinaryBody("dcm_upload", file, ContentType.create(CONTENT_TYPE_DICOM), "filename");
@@ -163,11 +163,11 @@ public class HttpService {
 			return response;
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
+			throw e;
 		}
-		return null;
 	}
 
-	public CloseableHttpResponse put(String url, String json) {
+	public CloseableHttpResponse put(String url, String json) throws Exception {
 		try {
 			HttpPut httpPut = new HttpPut(url);
 			httpPut.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
@@ -177,8 +177,8 @@ public class HttpService {
 			return response;
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
+			throw e;
 		}
-		return null;
 	}
 
 	private CloseableHttpClient buildHttpClient(String url) throws Exception {

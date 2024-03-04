@@ -21,18 +21,22 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.joda.time.DateTime;
 import org.shanoir.ng.dataset.modality.CalibrationDataset;
 import org.shanoir.ng.dataset.modality.CtDataset;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.MegDataset;
 import org.shanoir.ng.dataset.modality.MeshDataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.dataset.modality.XaDataset;
 import org.shanoir.ng.dataset.modality.ParameterQuantificationDataset;
 import org.shanoir.ng.dataset.modality.PetDataset;
 import org.shanoir.ng.dataset.modality.RegistrationDataset;
@@ -139,6 +143,8 @@ public class ImporterService {
     @Autowired
     private WADODownloaderService downloader;
 
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+
     private static final String SUBJECT_PREFIX = "sub-";
     
     private static final String PROCESSED_DATASET_PREFIX = "processed-dataset";
@@ -196,7 +202,7 @@ public class ImporterService {
                         // revert quality tag
                         subjectStudy.setQualityTag(tagSave);
                         subjectStudyService.update(qualityResult.getUpdatedSubjectStudies());
-                        throw new ShanoirException("Error while saving data in pacs, the import is canceled and acquisitions were not saved");
+                        throw new ShanoirException("Error while saving data in pacs, the import is canceled and acquisitions were not saved", e);
                     }
                 }
             } else {
@@ -516,6 +522,10 @@ public class ImporterService {
                     dataset = new TemplateDataset();
                     originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
                     break;
+                case XaDataset.datasetType:
+                    dataset = new TemplateDataset();
+                    originMetadata.setDatasetModalityType(DatasetModalityType.XA_DATASET);
+                    break;
                 default:
                 break;
             }
@@ -532,7 +542,7 @@ public class ImporterService {
             String filePath = importJob.getProcessedDatasetFilePath();
             File srcFile = new File(filePath);
             String originalNiftiName = srcFile.getName();
-            File destFile = new File(outDir.getAbsolutePath() + File.separator + originalNiftiName);
+            File destFile = new File(outDir.getAbsolutePath() + File.separator + formatter.format(LocalDateTime.now()) + File.separator + originalNiftiName);
 
             // Save file
             Path location;

@@ -1,18 +1,15 @@
 package org.shanoir.uploader.dicom.query;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.tree.TreeNode;
 
-import org.shanoir.ng.importer.model.EquipmentDicom;
-import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.InstitutionDicom;
 import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.uploader.dicom.DicomTreeNode;
-import org.shanoir.uploader.dicom.MRI;
 
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
@@ -35,7 +32,7 @@ import jakarta.xml.bind.annotation.XmlType;
  * @author mkain
  * 
  */
-@XmlType(propOrder={"id", "modality", "protocol", "description", "seriesDate", "seriesNumber", "imagesCount", "selected", "fileNames", "mriInformation"})
+@XmlType(propOrder={"id", "modality", "protocol", "description", "seriesDate", "seriesNumber", "imagesCount", "selected", "fileNames"})
 public class SerieTreeNode implements DicomTreeNode {
 
 	private StudyTreeNode parent;
@@ -43,8 +40,6 @@ public class SerieTreeNode implements DicomTreeNode {
 	private Serie serie;
 	
 	private List<String> fileNames;
-	
-	private MRI mriInformation;
 	
 	// constructor for JAXB
 	public SerieTreeNode() {
@@ -272,31 +267,6 @@ public class SerieTreeNode implements DicomTreeNode {
 
 	public DicomTreeNode initChildTreeNode(Object arg0) {
 		return null;
-	}
-
-	@XmlElement
-	public MRI getMriInformation() {
-		if (this.mriInformation == null) {
-			this.mriInformation = new MRI();
-			InstitutionDicom institutionDicom = this.serie.getInstitution();
-			if(institutionDicom != null) {
-				this.mriInformation.setInstitutionName(institutionDicom.getInstitutionName());
-				this.mriInformation.setInstitutionAddress(institutionDicom.getInstitutionAddress());
-			}
-			EquipmentDicom equipmentDicom = this.serie.getEquipment();
-			if(equipmentDicom != null) {
-				this.mriInformation.setManufacturer(equipmentDicom.getManufacturer());
-				this.mriInformation.setManufacturersModelName(equipmentDicom.getManufacturerModelName());
-				this.mriInformation.setDeviceSerialNumber(equipmentDicom.getDeviceSerialNumber());
-				this.mriInformation.setStationName(equipmentDicom.getStationName());
-				this.mriInformation.setMagneticFieldStrength(equipmentDicom.getMagneticFieldStrength());
-			}
-		}
-		return this.mriInformation;
-	}
-	
-	public void setMriInformation(MRI mriInformation) {
-		this.mriInformation = mriInformation;
 	}
 
 	@Override

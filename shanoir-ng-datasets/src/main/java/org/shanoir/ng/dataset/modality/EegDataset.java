@@ -22,7 +22,9 @@ import org.hibernate.annotations.LazyCollectionOption;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.eeg.model.Channel;
 import org.shanoir.ng.eeg.model.Event;
+import org.shanoir.ng.shared.model.InversionTime;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -59,7 +61,25 @@ public class EegDataset extends Dataset {
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@OneToMany(mappedBy = "dataset", cascade = CascadeType.ALL)
 	private List<Event> events;
-	
+
+	public EegDataset() {}
+
+	public EegDataset(Dataset other) {
+		super(other);
+		this.samplingFrequency = ((EegDataset) other).getSamplingFrequency();
+		this.channelCount = ((EegDataset) other).getChannelCount();
+		this.coordinatesSystem = ((EegDataset) other).getCoordinatesSystem();
+		this.channels = new ArrayList<>(((EegDataset) other).getChannels().size());
+		for (Channel ch : ((EegDataset) other).getChannels()) {
+			this.channels.add(new Channel(ch, this));
+		}
+
+		this.events = new ArrayList<>(((EegDataset) other).getEvents().size());
+		for (Event ev : ((EegDataset) other).getEvents()) {
+			this.events.add(new Event(ev, this));
+		}
+	}
+
 	/**
 	 * @return the coordinatesSystem
 	 */

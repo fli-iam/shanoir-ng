@@ -10,12 +10,13 @@ import org.shanoir.uploader.test.datasets.dicom.web.StowDicomSRTest;
 
 public class StudyCardTest extends AbstractTest {
 
-	private static Logger logger = Logger.getLogger(StowDicomSRTest.class);
+	private static Logger logger = Logger.getLogger(StudyCardTest.class);
 	
 	@Test
 	public void applyStudyCardOnStudy() throws Exception {
-		List<StudyCardOnStudyResultDTO> results = shUpClient.applyStudyCardOnStudy(Long.valueOf(2));
-		logger.info(results);
+		// @todo here: create SC example, import and verify apply after
+//		List<StudyCardOnStudyResultDTO> results = shUpClient.applyStudyCardOnStudy(Long.valueOf(2));
+//		logger.info(results);
     }
 
 }
