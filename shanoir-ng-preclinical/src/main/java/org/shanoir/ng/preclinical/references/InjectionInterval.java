@@ -44,8 +44,8 @@ public enum InjectionInterval {
 	 *
 	 */
 	public static class Values {
-		public static final String BEFORE = "Before";
-		public static final String DURING = "During";
+		public static final String BEFORE = "BEFORE";
+		public static final String DURING = "DURING";
 	}
 
 }

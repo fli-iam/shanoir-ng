@@ -19,6 +19,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.shanoir.ng.bids.service.BIDSServiceImpl;
 import org.shanoir.ng.dataset.controler.DatasetApiController;
