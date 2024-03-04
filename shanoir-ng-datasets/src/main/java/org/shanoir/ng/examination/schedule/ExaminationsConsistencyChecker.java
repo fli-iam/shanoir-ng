@@ -28,6 +28,8 @@ import jakarta.transaction.Transactional;
  * applies multiple consistency checks on the data below in the tree. It
  * produces a .csv file with the result of his consistency check on the server.
  * It runs every two hours and stores the latest analyzed exam in its database.
+ * As ongoing imports can create temporarily empty examinations, we only check
+ * on examinations older than yesterday, not from today.
  * 
  * The following is checked:
  * 
