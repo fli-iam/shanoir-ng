@@ -1,6 +1,9 @@
 package org.shanoir.ng.examination.schedule;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.shanoir.ng.dataset.model.Dataset;
@@ -8,6 +11,7 @@ import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
+import org.shanoir.ng.dicom.WADOURLHandler;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.slf4j.Logger;
@@ -15,6 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
+import jakarta.transaction.Transactional;
 
 /**
  * This class iterates over all examinations in the database of Shanoir and
@@ -45,10 +51,14 @@ public class ExaminationsConsistencyChecker {
 	@Autowired
 	private LatestCheckedExaminationRepository latestCheckedExaminationRepository;
 	
+	@Autowired
+	private WADOURLHandler wadoURLHandler;
+	
 	private final AtomicBoolean isTaskRunning = new AtomicBoolean(false);
 
 //    @Scheduled(fixedRate = 2 * 60 * 60 * 1000) // Run every 2 hours (in milliseconds)
 	@Scheduled(fixedRate = 1000) // Run every 2 hours (in milliseconds)
+	@Transactional
 	public void check() {
 		if (!isTaskRunning.compareAndSet(false, true)) {
             return;
@@ -66,7 +76,17 @@ public class ExaminationsConsistencyChecker {
 	
 			for (Examination examination : examinationsToCheck) {
 				LOG.info("Processing examination with ID: " + examination.getId());
-				checkExamination(examination);
+				Set<String> studyInstanceUIDs = ConcurrentHashMap.newKeySet();
+				List<String> filesInPACS = new ArrayList<String>();
+				checkExamination(examination, filesInPACS);
+				LOG.info("Examination {} references {} files in PACS.", examination.getId(), filesInPACS.size());
+				filesInPACS.parallelStream().forEach(f -> {
+					String studyInstanceUID = wadoURLHandler.extractUIDs(f)[0];
+					studyInstanceUIDs.add(studyInstanceUID);
+				});
+				if (studyInstanceUIDs.size() > 1) {
+					LOG.error("Examination {} contains multiple StudyInstanceUIDs ({}).", examination.getId(), studyInstanceUIDs.size());
+				}
 				if (latestCheckedExamination == null) {
 					latestCheckedExamination = new LatestCheckedExamination();
 				}
@@ -82,21 +102,60 @@ public class ExaminationsConsistencyChecker {
 		}
 	}
 	
-	private void checkExamination(Examination examination) {
-		for (DatasetAcquisition acquisition : examination.getDatasetAcquisitions()) {
-			for (Dataset dataset : acquisition.getDatasets()) {
-				for (DatasetExpression expression : dataset.getDatasetExpressions()) {
-					if (DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat())) {
-						for (DatasetFile file : expression.getDatasetFiles()) {
-							if (file.isPacs()) {
-								String path = file.getPath();
-								LOG.info(path);
-							}
-						}
-					}
-				}
+	private void checkExamination(Examination examination, List<String> filesInPACS) {
+		List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
+		if (acquisitions != null && !acquisitions.isEmpty()) {
+			acquisitions.parallelStream().forEach(a -> {
+				checkAcquisition(a, filesInPACS);
+			});
+		} else {
+			LOG.info("Examination found without acquisitions: {}", examination.getId());
+			List<String> extraDataFilePaths = examination.getExtraDataFilePathList();
+			if (extraDataFilePaths != null && !extraDataFilePaths.isEmpty()) {
+				// keep examination for extra data
+			} else {
+				// potentially delete empty examination later
 			}
 		}
 	}
+	
+	private void checkAcquisition(DatasetAcquisition acquisition, List<String> filesInPACS) {
+		List<Dataset> datasets = acquisition.getDatasets();
+		if (datasets != null && !datasets.isEmpty()) {
+			datasets.parallelStream().forEach(d -> {
+				checkDataset(d, filesInPACS);
+			});
+		} else {
+			// potentially delete empty acquisition later
+		}
+	}
 
+	private void checkDataset(Dataset dataset, List<String> filesInPACS) {
+		List<DatasetExpression> expressions = dataset.getDatasetExpressions();
+		if (expressions != null && !expressions.isEmpty()) {
+			expressions.parallelStream().forEach(e -> {
+				if (DatasetExpressionFormat.DICOM.equals(e.getDatasetExpressionFormat())) {
+					checkExpression(e, filesInPACS);
+				}
+			});
+		} else {
+			// potentially delete empty dataset later
+		}
+	}
+	
+	private void checkExpression(DatasetExpression expression, List<String> filesInPACS) {
+		List<DatasetFile> files = expression.getDatasetFiles();
+		if (files != null && !files.isEmpty()) {
+			files.parallelStream().forEach(f -> {
+				if (f.isPacs()) {
+					synchronized (filesInPACS) {
+						filesInPACS.add(f.getPath());
+					}
+				}				
+			});
+		} else {
+			// potentially delete empty expression later
+		}
+	}
+	
 }
