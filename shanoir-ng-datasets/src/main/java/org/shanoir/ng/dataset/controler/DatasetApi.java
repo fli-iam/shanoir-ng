@@ -55,7 +55,7 @@ public interface DatasetApi {
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> deleteDataset(
 			@Parameter(name = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId)
-			throws RestServiceException;
+            throws RestServiceException, EntityNotFoundException;
 	
 	@Operation(summary = "", description = "Deletes several datasets")
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "datasets deleted"),
