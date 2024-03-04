@@ -57,7 +57,7 @@ public class ExaminationsConsistencyChecker {
 	private final AtomicBoolean isTaskRunning = new AtomicBoolean(false);
 
 //    @Scheduled(fixedRate = 2 * 60 * 60 * 1000) // Run every 2 hours (in milliseconds)
-	@Scheduled(fixedRate = 1000) // Run every 2 hours (in milliseconds)
+	@Scheduled(fixedRate = 10000) // Run every 2 hours (in milliseconds)
 	@Transactional
 	public void check() {
 		if (!isTaskRunning.compareAndSet(false, true)) {
@@ -105,7 +105,7 @@ public class ExaminationsConsistencyChecker {
 	private void checkExamination(Examination examination, List<String> filesInPACS) {
 		List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
 		if (acquisitions != null && !acquisitions.isEmpty()) {
-			acquisitions.parallelStream().forEach(a -> {
+			acquisitions.stream().forEach(a -> {
 				checkAcquisition(a, filesInPACS);
 			});
 		} else {
@@ -122,7 +122,7 @@ public class ExaminationsConsistencyChecker {
 	private void checkAcquisition(DatasetAcquisition acquisition, List<String> filesInPACS) {
 		List<Dataset> datasets = acquisition.getDatasets();
 		if (datasets != null && !datasets.isEmpty()) {
-			datasets.parallelStream().forEach(d -> {
+			datasets.stream().forEach(d -> {
 				checkDataset(d, filesInPACS);
 			});
 		} else {
@@ -133,7 +133,7 @@ public class ExaminationsConsistencyChecker {
 	private void checkDataset(Dataset dataset, List<String> filesInPACS) {
 		List<DatasetExpression> expressions = dataset.getDatasetExpressions();
 		if (expressions != null && !expressions.isEmpty()) {
-			expressions.parallelStream().forEach(e -> {
+			expressions.stream().forEach(e -> {
 				if (DatasetExpressionFormat.DICOM.equals(e.getDatasetExpressionFormat())) {
 					checkExpression(e, filesInPACS);
 				}
@@ -146,7 +146,7 @@ public class ExaminationsConsistencyChecker {
 	private void checkExpression(DatasetExpression expression, List<String> filesInPACS) {
 		List<DatasetFile> files = expression.getDatasetFiles();
 		if (files != null && !files.isEmpty()) {
-			files.parallelStream().forEach(f -> {
+			files.stream().forEach(f -> {
 				if (f.isPacs()) {
 					synchronized (filesInPACS) {
 						filesInPACS.add(f.getPath());
