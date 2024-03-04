@@ -1,5 +1,6 @@
 package org.shanoir.uploader.action;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.commons.lang.StringUtils;
@@ -82,6 +83,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
         }
 
         for (ExaminationImport importTodo : this.folderimport.getExaminationImports()) {
+            importFromFolderWindow.progressBar.setVisible(true);
             importFromFolderWindow.progressBar.setString("Preparing import " + i + "/" + this.folderimport.getExaminationImports().size());
             importFromFolderWindow.progressBar.setValue(100*i/this.folderimport.getExaminationImports().size() + 1);
 
@@ -133,20 +135,24 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
                 dicomDirFile.delete();
             }
         } catch (Exception e) {
-            logger.error("Something wrong happend while retrieving data: ", e);
-            // Set import in error
+            logger.error("Something wrong happened while retrieving data: ", e);
+            importTodo.setMessage("ERROR: Dicom is not readable by shanoir uploader, please check data consistency.");
+            return false;
         }
 
-        logger.error("Loading patients etc");
+        logger.error("Loading patients");
         // Create dicom data to be able to move things
         DicomDataTransferObject dicomData = null;
         Set<SerieTreeNode> selectedSeriesNodes = new HashSet<>();
 
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+
         PatientTreeNode patNode = new PatientTreeNode(patients.get(0));
         StudyTreeNode stNode = new StudyTreeNode(patients.get(0).getStudies().get(0));
-
         for (Serie serie: patients.get(0).getStudies().get(0).getSeries()) {
             SerieTreeNode serieNode = new SerieTreeNode(serie);
+            serieNode.setSelected(true);
             stNode.addTreeNode(serie.getSeriesInstanceUID(), serieNode);
             selectedSeriesNodes.add(serieNode);
         }
@@ -154,12 +160,13 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
         String subjectIdentifier = null;
         try {
             dicomData = new DicomDataTransferObject(null, patNode, stNode);
-
             // calculate identifier
             subjectIdentifier = stNode.getId() +  this.identifierCalculator.calculateIdentifier(dicomData.getFirstName(), dicomData.getLastName(), "" + (dicomData.getBirthDate() != null ? dicomData.getBirthDate() : LocalDate.of(1990, Month.JANUARY,1)));
             dicomData.setSubjectIdentifier(subjectIdentifier);
 
+
             // Change birth date to first day of year
+            logger.error("Study date could not be used for import9.");
             final LocalDate dicomBirthDate = patNode.getPatient().getPatientBirthDate();
             if (dicomBirthDate != null) {
                 Calendar cal = Calendar.getInstance();
@@ -169,9 +176,9 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
                 dicomData.setBirthDate(LocalDate.from(cal.toInstant()));
             }
         } catch (Exception e) {
-            logger.error("Something wrong happend while retrieving data: ", e);
-
-            // Set import in error here
+            logger.error("Something wrong happened while analyzing data from the dicom", e);
+            importTodo.setMessage("Something wrong happened while analyzing data from the dicom, please check data consistency.");
+            return false;
         }
 
         // Create upload folder
@@ -193,7 +200,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
             }
         } catch (Exception e) {
             logger.error("Could not infer data from local storage", e);
-            // Set in error here
+            importTodo.setMessage("Something wrong happened while analyzing data from the dicom, please check data consistency.");
             return false;
         }
 
@@ -205,7 +212,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
 
         if (allFileNames == null) {
             uploadJob.setUploadState(UploadState.ERROR);
-            // set in error here
+            importTodo.setMessage("Something wrong happened while analyzing data from the dicom, please check data consistency.");
             return false;
         }
         UploadJobManager uploadJobManager = new UploadJobManager(uploadFolder.getAbsolutePath());
@@ -236,7 +243,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
                 subjectStudyIdentifier = importTodo.getSubjectName();
             }
         } catch (Exception e) {
-            logger.error("Something wrong happend while retrieving data: ", e);
+            logger.error("Something wrong happened while trying to get the subject, we'll create a new one.");
             //Do nothing, if it fails, we'll just create a new subject
         }
 
@@ -273,7 +280,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
         }
         if (subject == null) {
             uploadJob.setUploadState(UploadState.ERROR);
-            // Set in error
+            importTodo.setMessage("Could not create new subject, maybe a subject with a similar name already exists, but does not match with the patient in the dicom.");
             return false;
         }
 
@@ -291,7 +298,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
 
         if (createdExam == null) {
             uploadJob.setUploadState(UploadState.ERROR);
-            // set in error here
+            importTodo.setMessage("Could not create new examination, please check your rights on the study or contact an administrator.");
             return false;
         }
 
@@ -301,7 +308,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
         logger.info("10 Import.json");
 
         ImportJob importJob = ImportUtils.prepareImportJob(uploadJob, subject.getName(), subject.getId(), createdExam.getId(), study, importTodo.getParent().getStudyCard());
-        importJob.setFromShanoirUploader(true); // @todo: set from csv here for upload
+        importJob.setFromShanoirUploader(true);
         Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, importJob, subject.getName());
         Thread thread = new Thread(runnable);
         thread.start();
