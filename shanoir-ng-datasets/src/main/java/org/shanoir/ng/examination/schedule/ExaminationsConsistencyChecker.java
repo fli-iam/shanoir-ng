@@ -1,5 +1,6 @@
 package org.shanoir.ng.examination.schedule;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -78,20 +79,22 @@ public class ExaminationsConsistencyChecker {
 				LOG.info("Processing examination with ID: " + examination.getId());
 				Set<String> studyInstanceUIDs = ConcurrentHashMap.newKeySet();
 				List<String> filesInPACS = new ArrayList<String>();
-				checkExamination(examination, filesInPACS);
-				LOG.info("Examination {} references {} files in PACS.", examination.getId(), filesInPACS.size());
-				filesInPACS.parallelStream().forEach(f -> {
-					String studyInstanceUID = wadoURLHandler.extractUIDs(f)[0];
-					studyInstanceUIDs.add(studyInstanceUID);
-				});
-				if (studyInstanceUIDs.size() > 1) {
-					LOG.error("Examination {} contains multiple StudyInstanceUIDs ({}).", examination.getId(), studyInstanceUIDs.size());
+				boolean checked = checkExamination(examination, filesInPACS);
+				if (checked) {
+					LOG.info("Examination {} references {} files in PACS.", examination.getId(), filesInPACS.size());
+					filesInPACS.parallelStream().forEach(f -> {
+						String studyInstanceUID = wadoURLHandler.extractUIDs(f)[0];
+						studyInstanceUIDs.add(studyInstanceUID);
+					});
+					if (studyInstanceUIDs.size() > 1) {
+						LOG.error("Examination {} contains multiple StudyInstanceUIDs ({}).", examination.getId(), studyInstanceUIDs.size());
+					}
+					if (latestCheckedExamination == null) {
+						latestCheckedExamination = new LatestCheckedExamination();
+					}
+					latestCheckedExamination.setExaminationId(examination.getId());
+					latestCheckedExaminationRepository.save(latestCheckedExamination);
 				}
-				if (latestCheckedExamination == null) {
-					latestCheckedExamination = new LatestCheckedExamination();
-				}
-				latestCheckedExamination.setExaminationId(examination.getId());
-				latestCheckedExaminationRepository.save(latestCheckedExamination);
 			}
 			LOG.info("ExaminationsConsistencyChecker STOP...");
 		} catch(Exception e) {
@@ -102,12 +105,21 @@ public class ExaminationsConsistencyChecker {
 		}
 	}
 	
-	private void checkExamination(Examination examination, List<String> filesInPACS) {
+	private boolean checkExamination(Examination examination, List<String> filesInPACS) {
 		List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
 		if (acquisitions != null && !acquisitions.isEmpty()) {
-			acquisitions.stream().forEach(a -> {
-				checkAcquisition(a, filesInPACS);
-			});
+			/**
+			 * Ongoing imports can create empty examinations and fill them up later.
+			 * To avoid confusion on this, we only check data from yesterday or older.
+			 */
+			DatasetAcquisition firstAcquisition = acquisitions.get(0);
+			if (!LocalDate.now().equals(firstAcquisition.getCreationDate())) {
+				acquisitions.stream().forEach(a -> {
+					checkAcquisition(a, filesInPACS);
+				});
+			} else {
+				return false;
+			}
 		} else {
 			LOG.info("Examination found without acquisitions: {}", examination.getId());
 			List<String> extraDataFilePaths = examination.getExtraDataFilePathList();
@@ -117,6 +129,7 @@ public class ExaminationsConsistencyChecker {
 				// potentially delete empty examination later
 			}
 		}
+		return true;
 	}
 	
 	private void checkAcquisition(DatasetAcquisition acquisition, List<String> filesInPACS) {
