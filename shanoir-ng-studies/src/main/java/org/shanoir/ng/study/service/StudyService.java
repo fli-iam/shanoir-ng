@@ -20,6 +20,7 @@ import java.util.Map;
 import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.study.dto.StudyStatisticsDTO;
 import org.shanoir.ng.study.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
@@ -148,4 +149,13 @@ public interface StudyService {
     StudyStorageVolumeDTO getDetailedStorageVolume(Long studyId);
 
 	Map<Long, StudyStorageVolumeDTO> getDetailedStorageVolumeByStudy(List<Long> studyId);
+
+		/**
+	 * Get statistics for data analysts and study promoters
+	 * 
+	 * @return imaging statistics
+	 */
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+	List<StudyStatisticsDTO> queryStudyStatistics(Long studyId) throws Exception;
+	
 }

@@ -12,40 +12,20 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.preclinical.anesthetics.anesthetic;
+package org.shanoir.ng.study.repository;
 
+import java.util.List;
 
-public enum AnestheticType {
+import org.shanoir.ng.study.dto.StudyStatisticsDTO;
+import org.springframework.stereotype.Repository;
 
-	GAS(Values.GAS),
-	INJECTION(Values.INJECTION);
-
-	private String value;
-
+@Repository
+public interface StudyRepositoryCustom {
+	
 	/**
-	 * Constructor.
-	 *
-	 * @param val
-	 *            value
+	 * Lists all datasets from a study with associated modality type and quality tags
+	 * 
 	 */
-	private AnestheticType(final String value) {
-		this.value = value;
-	}
-
-	/**
-	 * @return the value
-	 */
-	public String getValue() {
-		return value;
-	}
-
-	/**
-	 * List of enum values.
-	 *
-	 */
-	public static class Values {
-		public static final String GAS = "GAS";
-		public static final String INJECTION = "INJECTION";
-	}
+	List<StudyStatisticsDTO> queryStudyStatistics(Long studyId) throws Exception;
 
 }
