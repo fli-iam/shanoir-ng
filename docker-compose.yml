@@ -163,6 +163,7 @@ services:
      - "9913:9913"
      # uncomment below for local testing of import-from-pacs, enable:
      # pacs-to-ms-import: c-move from dcm4chee arc light to ms import
+     # do not add by default, as it blocks local ShUp from using 44105
      # - "44105:44105"
     depends_on:
       - "database"
