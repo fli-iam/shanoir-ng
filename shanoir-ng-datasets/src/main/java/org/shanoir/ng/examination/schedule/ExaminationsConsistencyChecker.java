@@ -35,6 +35,8 @@ import jakarta.transaction.Transactional;
  * 
  * 1) It checks, if an examination is empty and has no data below.
  * 
+ * 2) Add one StudyInstanceUID to the mysql database, per examination.
+ * 
  * 2) It checks the StudyInstanceUID per exam. Is it unique? Is there only one
  * StudyInstanceUID in all dataset files of the DICOM WADO path?
  * 
@@ -60,7 +62,7 @@ public class ExaminationsConsistencyChecker {
 	private final AtomicBoolean isTaskRunning = new AtomicBoolean(false);
 
 //    @Scheduled(fixedRate = 2 * 60 * 60 * 1000) // Run every 2 hours (in milliseconds)
-	@Scheduled(fixedRate = 10000) // Run every 2 hours (in milliseconds)
+	@Scheduled(fixedRate = 20000) // Run every 2 hours (in milliseconds)
 	@Transactional
 	public void check() {
 		if (!isTaskRunning.compareAndSet(false, true)) {
@@ -78,25 +80,7 @@ public class ExaminationsConsistencyChecker {
 			}
 	
 			for (Examination examination : examinationsToCheck) {
-				LOG.info("Processing examination with ID: " + examination.getId());
-				Set<String> studyInstanceUIDs = ConcurrentHashMap.newKeySet();
-				List<String> filesInPACS = new ArrayList<String>();
-				boolean checked = checkExamination(examination, filesInPACS);
-				if (checked) {
-					LOG.info("Examination {} references {} files in PACS.", examination.getId(), filesInPACS.size());
-					filesInPACS.parallelStream().forEach(f -> {
-						String studyInstanceUID = wadoURLHandler.extractUIDs(f)[0];
-						studyInstanceUIDs.add(studyInstanceUID);
-					});
-					if (studyInstanceUIDs.size() > 1) {
-						LOG.error("Examination {} contains multiple StudyInstanceUIDs ({}).", examination.getId(), studyInstanceUIDs.size());
-					}
-					if (latestCheckedExamination == null) {
-						latestCheckedExamination = new LatestCheckedExamination();
-					}
-					latestCheckedExamination.setExaminationId(examination.getId());
-					latestCheckedExaminationRepository.save(latestCheckedExamination);
-				}
+				processExamination(latestCheckedExamination, examination);
 			}
 			LOG.info("ExaminationsConsistencyChecker STOP...");
 		} catch(Exception e) {
@@ -104,6 +88,42 @@ public class ExaminationsConsistencyChecker {
 			LOG.error(e.getMessage(), e);
 		} finally {
 			isTaskRunning.set(false);			
+		}
+	}
+
+	private void processExamination(LatestCheckedExamination latestCheckedExamination,
+			Examination examination) {
+		LOG.info("Processing examination with ID: " + examination.getId());
+		List<String> filesInPACS = new ArrayList<String>();
+		boolean checked = checkExamination(examination, filesInPACS);
+		if (checked) {
+			LOG.info("Examination {} references {} files in PACS.", examination.getId(), filesInPACS.size());
+			if (!filesInPACS.isEmpty()) {
+				checkStudyInstanceUIDs(examination, filesInPACS);
+			}
+			if (latestCheckedExamination == null) {
+				latestCheckedExamination = new LatestCheckedExamination();
+			}
+			latestCheckedExamination.setExaminationId(examination.getId());
+			latestCheckedExaminationRepository.save(latestCheckedExamination);
+		}
+	}
+
+	private void checkStudyInstanceUIDs(Examination examination, List<String> filesInPACS) {
+		Set<String> studyInstanceUIDs = ConcurrentHashMap.newKeySet();
+		filesInPACS.parallelStream().forEach(f -> {
+			String studyInstanceUID = wadoURLHandler.extractUIDs(f)[0];
+			studyInstanceUIDs.add(studyInstanceUID);
+		});
+		if (studyInstanceUIDs.isEmpty()) {
+			LOG.error("Examination {} contains NULL StudyInstanceUIDs.");
+		} else if (studyInstanceUIDs.size() > 1) {
+			LOG.error("Examination {} contains multiple StudyInstanceUIDs ({}).", examination.getId(), studyInstanceUIDs.size());						
+		} else {
+			String studyInstanceUID = studyInstanceUIDs.iterator().next();
+			LOG.info("Examination {} StudyInstanceUID updated in database: {}", studyInstanceUID);
+			examination.setStudyInstanceUID(studyInstanceUID);
+			examinationRepository.save(examination);
 		}
 	}
 	
@@ -120,6 +140,7 @@ public class ExaminationsConsistencyChecker {
 					checkAcquisition(a, filesInPACS);
 				});
 			} else {
+				LOG.info("Examination {} check stopped, as creation date today (avoid ongoing imports).", examination.getId());
 				return false;
 			}
 		} else {
