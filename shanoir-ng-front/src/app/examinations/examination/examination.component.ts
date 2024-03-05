@@ -231,13 +231,14 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
 
     public save(): Promise<Examination> {
-        return super.save().then(result => {
+        return super.save( () => {
+            let uploads: Promise<void>[] = [];
             // Once the exam is saved, save associated files
             for (let file of this.files) {
-                this.examinationService.postFile(file, this.entity.id);
+                uploads.push(this.examinationService.postFile(file, this.entity.id));
             }
-            return result;
-        }).catch(reason => { if (reason.status == 403) {
+            return Promise.all(uploads).then(() => null);
+        }).then(() => null).catch(reason => { if (reason.status == 403) {
             this.consoleService.log('error', 'Examination ' + this.examination.id + ' Updating study / subject / center of an examination is forbiden.');
             return null;
         } else {
