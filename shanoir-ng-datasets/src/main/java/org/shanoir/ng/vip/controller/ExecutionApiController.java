@@ -23,8 +23,11 @@ import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.processing.dto.ParameterResourceDTO;
 import org.shanoir.ng.processing.model.DatasetProcessingType;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.vip.dto.DatasetParameterDTO;
@@ -84,31 +87,36 @@ public class ExecutionApiController implements ExecutionApi {
      */
     @Override
     public ResponseEntity<IdName> createExecution(
-            @Parameter(name = "execution", required = true) @RequestBody final ExecutionCandidateDTO candidate) throws EntityNotFoundException, SecurityException {
+            @Parameter(name = "execution", required = true) @RequestBody final ExecutionCandidateDTO candidate) throws EntityNotFoundException, SecurityException, RestServiceException {
 
-        // 1: Get dataset IDS and check rights
-        List<Long> datasetsIds = new ArrayList<>();
+        // 1: Get dataset and check rights
+        List<Dataset> inputDatasets = this.getDatasetsFromParams(candidate.getDatasetParameters());
 
-        for (DatasetParameterDTO param : candidate.getDatasetParameters()) {
-            datasetsIds.addAll(param.getDatasetIds());
-        }
-
-        if (!this.datasetSecurityService.hasRightOnEveryDataset(datasetsIds, "CAN_IMPORT")) {
-            LOG.error("Import right is mandatory for every study we are updating");
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-
-        List<Dataset> inputDatasets = datasetService.findByIdIn(datasetsIds);
+        this.checkRightsForExecution(inputDatasets);
 
         ExecutionMonitoring executionMonitoring = this.createExecutionMonitoring(candidate, inputDatasets);
 
-        VipExecutionDTO execCreated = this.createVipExecution(candidate, executionMonitoring).block();
+        VipExecutionDTO createdExecution = this.createVipExecution(candidate, executionMonitoring);
 
-        if(execCreated == null){
-            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+        IdName createdMonitoring = this.updateAndStartExecutionMonitoring(executionMonitoring, createdExecution);
+
+        return new ResponseEntity<>(createdMonitoring, HttpStatus.OK);
+    }
+
+    private List<Dataset> getDatasetsFromParams(List<DatasetParameterDTO> parameters){
+        List<Long> datasetsIds = new ArrayList<>();
+        for (DatasetParameterDTO param : parameters) {
+            datasetsIds.addAll(param.getDatasetIds());
         }
+        return datasetService.findByIdIn(datasetsIds);
+    }
 
-        return new ResponseEntity<>(this.updateAndStartExecutionMonitoring(executionMonitoring, execCreated), HttpStatus.OK);
+    private void checkRightsForExecution(List<Dataset> datasets) throws EntityNotFoundException, RestServiceException {
+        if (!this.datasetSecurityService.hasRightOnEveryDataset(datasets.stream().map(Dataset::getId).toList(), "CAN_ADMINISTRATE")) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.UNAUTHORIZED.value(),
+                            "You don't have the right to run pipelines on studies you don't administrate."));
+        }
     }
 
     /**
@@ -135,9 +143,8 @@ public class ExecutionApiController implements ExecutionApi {
      * @param executionMonitoring
      * @return
      */
-    private Mono<VipExecutionDTO> createVipExecution(ExecutionCandidateDTO candidate, ExecutionMonitoring executionMonitoring) {
+    private VipExecutionDTO createVipExecution(ExecutionCandidateDTO candidate, ExecutionMonitoring executionMonitoring) {
         VipExecutionDTO dto = new VipExecutionDTO();
-        dto.setIdentifier(candidate.getIdentifier());
         dto.setName(candidate.getName());
         dto.setPipelineIdentifier(candidate.getPipelineIdentifier());
         dto.setStudyIdentifier(candidate.getStudyIdentifier().toString());
@@ -146,7 +153,7 @@ public class ExecutionApiController implements ExecutionApi {
 
         dto.setInputValues(this.getInputValues(executionMonitoring, candidate));
 
-        return vipClient.createExecution(dto);
+        return vipClient.createExecution(dto).block();
     }
 
     /**

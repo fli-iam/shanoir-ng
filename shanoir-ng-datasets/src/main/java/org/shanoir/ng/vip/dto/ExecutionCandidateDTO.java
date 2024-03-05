@@ -15,6 +15,8 @@
 
 package org.shanoir.ng.vip.dto;
 
+import jakarta.validation.constraints.NotNull;
+
 import java.util.List;
 import java.util.Map;
 
@@ -22,24 +24,19 @@ import java.util.Map;
  * This class represents the DTO for {@link VipExecutionDTO} model class.
  */
 public class ExecutionCandidateDTO {
-    private String identifier;
+    @NotNull(message = "Execution name must be provided")
     private String name;
+    @NotNull(message = "Pipeline identifier must be provided")
     private String pipelineIdentifier;
     private Map<String, List<String>> inputParameters;
     private List<DatasetParameterDTO> datasetParameters;
     private Long studyIdentifier;
     private String outputProcessing;
     private String processingType;
+    @NotNull(message = "Refresh token must be provided")
     private String refreshToken;
-    private String client = "shanoir-ng-front";
-
-    public String getIdentifier() {
-        return identifier;
-    }
-
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
-    }
+    @NotNull(message = "Client must be provided")
+    private String client;
 
     public String getName() {
         return name;
