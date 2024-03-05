@@ -1,4 +1,4 @@
-/**
+/**rabbitMqCon
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
@@ -84,7 +84,6 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         importJob.examinationId = context.examination.id;
         importJob.studyId = context.study.id;
         importJob.acquisitionEquipmentId = context.acquisitionEquipment.id;
-        importJob.converterId = context.niftiConverter.id;
         importJob.archive = contextImportJob.archive;
         importJob.timestamp = timestamp;
         importJob.anonymisationProfileToUse = context.study.profile?.profileName;
