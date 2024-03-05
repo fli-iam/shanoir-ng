@@ -46,7 +46,7 @@ RUN apt-get update -qq \
     locales \
     locales-all \
     xvfb \
-    python3 \
+    python3.11 \
     python3-werkzeug \
     python3-yaml \
     software-properties-common
@@ -56,10 +56,10 @@ ARG PATH="/root/miniconda3/bin:${PATH}"
 
 #Install miniconda \
 RUN wget \
-    https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
+    https://repo.anaconda.com/miniconda/Miniconda3-py311_24.1.2-0-Linux-x86_64.sh \
     && mkdir /root/.conda \
-    && bash Miniconda3-latest-Linux-x86_64.sh -b \
-    && rm -f Miniconda3-latest-Linux-x86_64.sh
+    && bash Miniconda3-py311_24.1.2-0-Linux-x86_64.sh -b \
+    && rm -f Miniconda3-py311_24.1.2-0-Linux-x86_64.sh
 
 
 # Compile DCM2NIIX from source
