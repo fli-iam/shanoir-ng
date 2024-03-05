@@ -53,7 +53,7 @@ public interface ExecutionApi {
             consumes = {"application/json"},
             method = RequestMethod.POST)
     ResponseEntity<IdName> createExecution(
-            @Parameter(name = "execution", required = true) @RequestBody final ExecutionCandidateDTO candidate) throws EntityNotFoundException, SecurityException;
+            @Parameter(name = "execution", required = true) @RequestBody final ExecutionCandidateDTO candidate) throws EntityNotFoundException, SecurityException, RestServiceException;
 
     @Operation(summary = "Get VIP execution for the given identifier", description = "Returns the VIP execution that has the given identifier in parameter.", tags={  })
     @ApiResponses(value = {
