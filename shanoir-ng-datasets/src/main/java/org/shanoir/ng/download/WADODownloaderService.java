@@ -351,9 +351,11 @@ public class WADODownloaderService {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_MULTIPART + "; type=" + CONTENT_TYPE_DICOM + ";");
 		HttpEntity<String> entity = new HttpEntity<>(headers);
+		LOG.error("Calling following URL" + url);
 		ResponseEntity<byte[]> response = restTemplate.exchange(url,
 				HttpMethod.GET, entity, byte[].class, "1");
 		if (response.getStatusCode() == HttpStatus.OK) {
+			LOG.error("Headers:" + response.getHeaders());
 			return response.getBody();
 		} else {
 			throw new IOException("Download did not work: wrong status code received.");
@@ -393,6 +395,8 @@ public class WADODownloaderService {
 			throws IOException, MessagingException {
 		try(ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
 			ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, CONTENT_TYPE_MULTIPART);
+			System.setProperty("mail.mime.multipart.ignoreexistingboundaryparameter", "true");
+
 			MimeMultipart multipart = new MimeMultipart(datasource);
 			int count = multipart.getCount();
 			for (int i = 0; i < count; i++) {
