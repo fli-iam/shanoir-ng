@@ -69,7 +69,7 @@ export class DownloadSetupComponent implements OnInit {
         let options: DownloadOptions = new DownloadOptions(this.form.get('format').value);
         options.nbQueues = this.form.get('nbQueues').value;
         options.unzip = this.form.get('unzip').value;
-        if (this.form.get('shortPath') && options.unzip) options.shortPath = this.form.get('shortPath').value;
+        if (this.form.get('shortPath')) options.shortPath = this.form.get('shortPath').value;
         this.go.emit(options);
     }
     

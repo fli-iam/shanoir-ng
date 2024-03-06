@@ -430,7 +430,12 @@ export class MassDownloadService {
                     return finalPromise;
                 });
             } else {
-                const path: string = this.buildAcquisitionPath(dataset) + filename;
+                let path: string;
+                if (options.shortPath) {
+                    path = this.buildShortAcquisitionPath(dataset) + dataset.id + '.' + filename.split('.').pop();
+                } else {
+                    path = this.buildAcquisitionPath(dataset) + filename;
+                }
                 task.message = 'saving dataset n°' + id;
                 this.notificationService.pushLocalTask(task);
                 return unzipPromise.then(() => this.writeMyFile(path, blob, userFolderHandle)).then(() => null);
