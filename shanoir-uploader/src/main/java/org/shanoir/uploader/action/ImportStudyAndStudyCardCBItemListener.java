@@ -9,7 +9,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.gui.customcomponent.JComboBoxMandatory;
@@ -25,7 +26,7 @@ import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 
 public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 	
-	private static Logger logger = Logger.getLogger(ImportStudyAndStudyCardCBItemListener.class);
+	private static final Logger logger = LoggerFactory.getLogger(ImportStudyAndStudyCardCBItemListener.class);
 
 	private MainWindow mainWindow;
 	

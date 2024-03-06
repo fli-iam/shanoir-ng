@@ -5,7 +5,8 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.UUID;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
@@ -29,7 +30,7 @@ import org.shanoir.uploader.utils.Util;
  */
 public abstract class AbstractTest {
 
-	private static Logger logger = Logger.getLogger(AbstractTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(AbstractTest.class);
 
 	private static final String TEST_PROPERTIES = "test.properties";
 	

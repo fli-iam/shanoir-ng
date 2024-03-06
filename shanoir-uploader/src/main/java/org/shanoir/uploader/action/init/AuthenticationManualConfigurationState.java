@@ -1,12 +1,13 @@
 package org.shanoir.uploader.action.init;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.gui.ShUpStartupDialog;
 
 public class AuthenticationManualConfigurationState implements State {
 
-	private static Logger logger = Logger.getLogger(AuthenticationManualConfigurationState.class);
+	private static final Logger logger = LoggerFactory.getLogger(AuthenticationManualConfigurationState.class);
 
 	public void load(StartupStateContext context) {
 		if(ShUpConfig.username == null) {

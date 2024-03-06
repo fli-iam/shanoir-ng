@@ -11,7 +11,8 @@ import java.util.Set;
 
 import javax.swing.JOptionPane;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.uploader.ShUpConfig;
@@ -30,7 +31,7 @@ import org.shanoir.uploader.utils.Util;
  */
 public class DownloadOrCopyActionListener implements ActionListener {
 
-	private static Logger logger = Logger.getLogger(DownloadOrCopyActionListener.class);
+	private static final Logger logger = LoggerFactory.getLogger(DownloadOrCopyActionListener.class);
 
 	private MainWindow mainWindow;
 	private ResourceBundle resourceBundle;

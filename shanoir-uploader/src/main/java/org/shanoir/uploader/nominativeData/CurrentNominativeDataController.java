@@ -21,7 +21,8 @@ import javax.swing.UIManager;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.action.DeleteDirectory;
 import org.shanoir.uploader.gui.CurrentUploadsWindowTable;
 import org.shanoir.uploader.upload.UploadJob;
@@ -31,7 +32,7 @@ import org.shanoir.uploader.utils.Util;
 
 public class CurrentNominativeDataController {
 
-	private static Logger logger = Logger.getLogger(CurrentNominativeDataController.class);
+	private static final Logger logger = LoggerFactory.getLogger(CurrentNominativeDataController.class);
 
 	private CurrentNominativeDataModel currentNominativeDataModel = null;
 

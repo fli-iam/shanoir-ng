@@ -20,7 +20,8 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.action.DicomServerConfigurationListener;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 
@@ -47,7 +48,7 @@ public class DicomServerConfigurationWindow extends JFrame {
 	public JButton configureButton;
 	public boolean isDicomServerEnableTLS3DES = false;
 
-	private static Logger logger = Logger.getLogger(DicomServerConfigurationWindow.class);
+	private static final Logger logger = LoggerFactory.getLogger(DicomServerConfigurationWindow.class);
 
 	DicomServerConfigurationListener dSCL;
 

@@ -14,7 +14,8 @@ import java.util.ResourceBundle;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.gui.DicomServerConfigurationWindow;
@@ -29,7 +30,7 @@ import org.shanoir.uploader.gui.DicomServerConfigurationWindow;
 
 public class DicomServerConfigurationListener implements ActionListener {
 
-	private static Logger logger = Logger.getLogger(DicomServerConfigurationListener.class);
+	private static final Logger logger = LoggerFactory.getLogger(DicomServerConfigurationListener.class);
 
 	DicomServerConfigurationWindow dicomWindow;
 	

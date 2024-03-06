@@ -15,7 +15,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import org.apache.log4j.Logger;
 import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.model.Patient;
@@ -28,6 +27,8 @@ import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.dicom.query.StudyTreeNode;
 import org.shanoir.uploader.gui.DicomTree;
 import org.shanoir.uploader.gui.MainWindow;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class implements the logic when the open file from CD/DVD menu or the
@@ -39,10 +40,11 @@ import org.shanoir.uploader.gui.MainWindow;
  */
 public class FindDicomActionListener extends JPanel implements ActionListener {
 
-	private static final String DICOMDIR = "DICOMDIR";
+	private static final Logger logger = LoggerFactory.getLogger(FindDicomActionListener.class);
 
-	private static Logger logger = Logger
-			.getLogger(FindDicomActionListener.class);
+	private static final long serialVersionUID = 7126127792556196772L;
+
+	private static final String DICOMDIR = "DICOMDIR";
 
 	private MainWindow mainWindow;
 

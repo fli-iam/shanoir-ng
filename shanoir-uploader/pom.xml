@@ -13,7 +13,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>17</java.version>
-		<slf4j.version>2.0.7</slf4j.version>
+		<logback.version>1.5.3</logback.version>
 		<lombok.version>1.18.26</lombok.version>
 		<dcm4che.version>5.31.1</dcm4che.version>
 		<keycloak.version>20.0.0</keycloak.version>
@@ -71,14 +71,9 @@
 		</dependency>
 		
 		<dependency>
-		    <groupId>org.slf4j</groupId>
-		    <artifactId>slf4j-api</artifactId>
-		    <version>${slf4j.version}</version>
-		</dependency>
-		<dependency>
-		    <groupId>org.slf4j</groupId>
-		    <artifactId>slf4j-simple</artifactId>
-		    <version>${slf4j.version}</version>
+		    <groupId>ch.qos.logback</groupId>
+		    <artifactId>logback-classic</artifactId>
+		    <version>${logback.version}</version>
 		</dependency>
 
 		<!-- DCM4CHE dependencies -->
@@ -159,12 +154,6 @@
 		    <groupId>com.fasterxml.jackson.datatype</groupId>
 		    <artifactId>jackson-datatype-jdk8</artifactId>
 		    <version>${jackson.version}</version>
-		</dependency>
-		<!-- dependency log4j -->
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.13</version>
 		</dependency>
 		<dependency>
 		    <groupId>jakarta.xml.bind</groupId>

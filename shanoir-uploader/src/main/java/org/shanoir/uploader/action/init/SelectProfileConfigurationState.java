@@ -1,12 +1,13 @@
 package org.shanoir.uploader.action.init;
 
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.ShUpConfig;
 
 public class SelectProfileConfigurationState implements State {
 
-	private static Logger logger = Logger.getLogger(SelectProfileConfigurationState.class);
+	private static final Logger logger = LoggerFactory.getLogger(SelectProfileConfigurationState.class);
 	
 	public void load(StartupStateContext context) {
 		if(ShUpConfig.profileSelected == null) {

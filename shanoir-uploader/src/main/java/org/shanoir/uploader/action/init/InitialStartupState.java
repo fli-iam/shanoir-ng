@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.nio.file.Files;
@@ -17,14 +16,14 @@ import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.TimeZone;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.gui.ShUpStartupDialog;
 import org.shanoir.uploader.utils.Encryption;
-import org.shanoir.uploader.utils.Util;
 import org.shanoir.uploader.utils.PropertiesUtil;
+import org.shanoir.uploader.utils.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This concrete state class is the initial state (entry point) of the state machine.
@@ -44,10 +43,8 @@ import org.shanoir.uploader.utils.PropertiesUtil;
  */
 public class InitialStartupState implements State {
 
-	private static Logger logger = Logger.getLogger(InitialStartupState.class);
+	private static final Logger logger = LoggerFactory.getLogger(InitialStartupState.class);
 	
-	private static final String LOG4J_PROPERTIES = "/log4j.properties";
-
 	private static final String SU_V6_0_3 = ".su_v6.0.3";
 
 	private static final String SU_V6_0_4 = ".su_v6.0.4";
@@ -56,7 +53,6 @@ public class InitialStartupState implements State {
 
 	public void load(StartupStateContext context) throws Exception {
 		initShanoirUploaderFolder();
-		initLogging();
 		logger.info("Start running of ShanoirUploader...");
 		logger.info("Version: " + ShUpConfig.SHANOIR_UPLOADER_VERSION);
 		logger.info("Release Date: " + ShUpConfig.RELEASE_DATE);
@@ -188,24 +184,6 @@ public class InitialStartupState implements State {
 		ShUpStartupDialog shUpStartupDialog = new ShUpStartupDialog(context);
 		shUpStartupDialog.setVisible(true);
 		context.setShUpStartupDialog(shUpStartupDialog);
-	}
-	
-	/**
-	 * Initialize the logging.
-	 */
-	private void initLogging() {
-		try {
-			Properties log4jProperties = new Properties();
-			InputStream propsFile = InitialStartupState.class.getResourceAsStream(LOG4J_PROPERTIES);
-			log4jProperties.load(propsFile);
-			log4jProperties.put("log4j.appender.file.File",
-					ShUpConfig.shanoirUploaderFolder.getAbsolutePath() + File.separator + "su.log");
-			PropertyConfigurator.configure(log4jProperties);
-			logger.info("Logging successfully initialized.");
-		} catch (IOException e) {
-			// System.out here, as error in logging init, only exception
-			System.out.println("Init logging error: " + e.getMessage());
-		}
 	}
 	
 	private void initPropertiesFiles() throws FileNotFoundException, IOException {

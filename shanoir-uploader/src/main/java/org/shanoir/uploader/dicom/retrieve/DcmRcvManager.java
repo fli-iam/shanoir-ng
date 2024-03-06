@@ -4,7 +4,8 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.dicom.query.ConfigBean;
 import org.weasis.dicom.param.AdvancedParams;
 import org.weasis.dicom.param.ConnectOptions;
@@ -20,7 +21,7 @@ import org.weasis.dicom.tool.DicomListener;
  */
 public class DcmRcvManager {
 
-	private static Logger logger = Logger.getLogger(DcmRcvManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(DcmRcvManager.class);
 	
 	private static final String SOP_CLASSES_PROPERTIES = "/sop-classes.properties";
 

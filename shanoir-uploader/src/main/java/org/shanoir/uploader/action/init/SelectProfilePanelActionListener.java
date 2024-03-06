@@ -9,7 +9,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.gui.SelectProfileConfigurationPanel;
@@ -17,7 +18,7 @@ import org.shanoir.uploader.utils.PropertiesUtil;
 
 public class SelectProfilePanelActionListener implements ActionListener {
 	
-	private static Logger logger = Logger.getLogger(SelectProfilePanelActionListener.class);
+	private static final Logger logger = LoggerFactory.getLogger(SelectProfilePanelActionListener.class);
 
 	private SelectProfileConfigurationPanel selectProfilePanel;
 

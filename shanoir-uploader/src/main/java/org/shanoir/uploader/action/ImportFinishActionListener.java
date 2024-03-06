@@ -11,7 +11,8 @@ import java.util.Date;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
@@ -41,7 +42,7 @@ import org.shanoir.uploader.utils.Util;
  */
 public class ImportFinishActionListener implements ActionListener {
 
-	private static Logger logger = Logger.getLogger(ImportFinishActionListener.class);
+	private static final Logger logger = LoggerFactory.getLogger(ImportFinishActionListener.class);
 
 	private MainWindow mainWindow;
 	

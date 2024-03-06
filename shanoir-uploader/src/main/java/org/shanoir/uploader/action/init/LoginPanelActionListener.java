@@ -3,7 +3,8 @@ package org.shanoir.uploader.action.init;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.gui.LoginConfigurationPanel;
@@ -11,7 +12,7 @@ import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 
 public class LoginPanelActionListener implements ActionListener {
 	
-	private static Logger logger = Logger.getLogger(LoginPanelActionListener.class);
+	private static final Logger logger = LoggerFactory.getLogger(LoginPanelActionListener.class);
 
 	private LoginConfigurationPanel loginPanel;
 

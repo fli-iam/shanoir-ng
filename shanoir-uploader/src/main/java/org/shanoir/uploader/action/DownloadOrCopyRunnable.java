@@ -6,7 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
@@ -28,7 +29,7 @@ import org.shanoir.uploader.utils.ImportUtils;
  */
 public class DownloadOrCopyRunnable implements Runnable {
 
-	private static Logger logger = Logger.getLogger(DownloadOrCopyRunnable.class);
+	private static final Logger logger = LoggerFactory.getLogger(DownloadOrCopyRunnable.class);
 	
 	private boolean isFromPACS;
 	

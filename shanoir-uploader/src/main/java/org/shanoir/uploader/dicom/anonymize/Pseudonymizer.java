@@ -3,7 +3,8 @@ package org.shanoir.uploader.dicom.anonymize;
 import java.io.File;
 
 import org.apache.commons.lang.SystemUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.action.DicomDataTransferObject;
 import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.utils.StreamGobbler;
@@ -32,7 +33,7 @@ public class Pseudonymizer {
 	
 	private static final String DEBUG = "DEBUG";
 
-	private static Logger logger = Logger.getLogger(Pseudonymizer.class);
+	private static final Logger logger = LoggerFactory.getLogger(Pseudonymizer.class);
 
 	public static final String PSEUDONYMUS_FOLDER = "pseudonymus";
 	private static final String PSEUDONYMUS_SHANOIR = "PseudonymusShanoir";

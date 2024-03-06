@@ -11,7 +11,8 @@ import java.util.ResourceBundle;
 
 import javax.swing.JFileChooser;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.gui.ImportFromCSVWindow;
 import org.shanoir.uploader.model.CsvImport;
 
@@ -21,7 +22,7 @@ public class UploadFromCsvActionListener implements ActionListener {
 	ImportFromCSVWindow importFromCSVWindow;
 	private ResourceBundle resourceBundle;
 
-	private static Logger logger = Logger.getLogger(UploadFromCsvActionListener.class);
+	private static final Logger logger = LoggerFactory.getLogger(UploadFromCsvActionListener.class);
 
 	public UploadFromCsvActionListener(ImportFromCSVWindow importFromCSVWindow, ResourceBundle resourceBundle) {
 		this.importFromCSVWindow = importFromCSVWindow;

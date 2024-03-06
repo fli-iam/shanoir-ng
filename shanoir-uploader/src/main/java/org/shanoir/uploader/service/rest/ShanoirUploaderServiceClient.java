@@ -20,7 +20,8 @@ import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.net.URIBuilder;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.json.JSONObject;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.uploader.ShUpConfig;
@@ -48,7 +49,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
  */
 public class ShanoirUploaderServiceClient {
 
-	private static Logger logger = Logger.getLogger(ShanoirUploaderServiceClient.class);
+	private static final Logger logger = LoggerFactory.getLogger(ShanoirUploaderServiceClient.class);
 	
 	private static final String SHANOIR_SERVER_URL = "shanoir.server.url";
 	

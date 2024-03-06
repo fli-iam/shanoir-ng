@@ -41,7 +41,8 @@ import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.CaretListener;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
@@ -68,7 +69,7 @@ import org.shanoir.uploader.service.rest.UrlConfig;
 @SuppressWarnings("serial")
 public class MainWindow extends JFrame {
 
-	private static Logger logger = Logger.getLogger(MainWindow.class);
+	private static final Logger logger = LoggerFactory.getLogger(MainWindow.class);
 
 	public JFrame frame = this;
 

@@ -4,7 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class contains a hash key of nominative data extracted from the
@@ -16,7 +17,7 @@ import org.apache.log4j.Logger;
 
 public class CurrentNominativeDataModel extends Observable {
 
-	private static Logger logger = Logger.getLogger(CurrentNominativeDataModel.class);
+	private static final Logger logger = LoggerFactory.getLogger(CurrentNominativeDataModel.class);
 	// Hash key = folder name;
 	Map<String, NominativeDataUploadJob> currentUploads = null;
 

@@ -9,7 +9,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.MRI;
 import org.shanoir.uploader.gui.ImportDialog;
@@ -34,7 +35,7 @@ import org.shanoir.uploader.upload.UploadJob;
  */
 public class ImportDialogOpener {
 
-	private static Logger logger = Logger.getLogger(ImportDialogOpener.class);
+	private static final Logger logger = LoggerFactory.getLogger(ImportDialogOpener.class);
 
 	private MainWindow mainWindow;
 

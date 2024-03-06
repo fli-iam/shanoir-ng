@@ -21,7 +21,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.uploader.action.ImportFromCsvActionListener;
 import org.shanoir.uploader.action.UploadFromCsvActionListener;
@@ -35,7 +36,7 @@ public class ImportFromCSVWindow extends JFrame {
 	public JButton openButton;
 	public JProgressBar progressBar;
 
-	private static Logger logger = Logger.getLogger(ImportFromCSVWindow.class);
+	private static final Logger logger = LoggerFactory.getLogger(ImportFromCSVWindow.class);
 
 	public File shanoirUploaderFolder;
 	public ResourceBundle resourceBundle;

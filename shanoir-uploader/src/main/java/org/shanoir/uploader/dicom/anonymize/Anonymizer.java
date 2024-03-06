@@ -4,14 +4,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.anonymization.anonymization.AnonymizationService;
 import org.shanoir.anonymization.anonymization.AnonymizationServiceImpl;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
 
 public class Anonymizer {
 
-	private static Logger logger = Logger.getLogger(Anonymizer.class);
+	private static final Logger logger = LoggerFactory.getLogger(Anonymizer.class);
 
 	public boolean pseudonymize(final File uploadFolder,
 			final String profile, final String subjectName)

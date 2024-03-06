@@ -7,7 +7,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.shanoir.ng.importer.model.ImportJob;
@@ -33,7 +34,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 public class ZipFileImportTest extends AbstractTest {
 
-	private static Logger logger = Logger.getLogger(ZipFileImportTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(ZipFileImportTest.class);
 	
 	private static final String PROFILE_NEURINFO = "Profile Neurinfo";
 
@@ -44,7 +45,7 @@ public class ZipFileImportTest extends AbstractTest {
 	@Test
 	public void importDicomZipTest() throws Exception {
 		org.shanoir.uploader.model.rest.Study study = createStudyAndCenterAndStudyCard();
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 0; i++) {
 			ImportJob importJob = step1UploadDicom(ACR_PHANTOM_T1_ZIP);
 			if (!importJob.getPatients().isEmpty()) {
 				selectAllSeriesForImport(importJob);

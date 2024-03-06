@@ -4,7 +4,8 @@ import java.time.LocalDate;
 
 import javax.swing.JOptionPane;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.uploader.dicom.query.PatientTreeNode;
@@ -23,7 +24,7 @@ import org.shanoir.uploader.utils.Util;
  */
 public class DicomDataTransferObject {
 
-	private static Logger logger = Logger.getLogger(DicomDataTransferObject.class);
+	private static final Logger logger = LoggerFactory.getLogger(DicomDataTransferObject.class);
 	
 	private LocalDate birthDate;
 	

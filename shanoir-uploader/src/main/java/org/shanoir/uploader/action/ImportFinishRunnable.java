@@ -4,7 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
@@ -30,7 +31,7 @@ import org.shanoir.uploader.utils.Util;
  */
 public class ImportFinishRunnable implements Runnable {
 
-	private static Logger logger = Logger.getLogger(ImportFinishRunnable.class);
+	private static final Logger logger = LoggerFactory.getLogger(ImportFinishRunnable.class);
 	
 	public static final String IMPORT_JOB_JSON = "import-job.json";
 

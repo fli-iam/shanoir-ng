@@ -21,7 +21,8 @@ import javax.swing.SwingWorker;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
@@ -56,7 +57,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 	private static final String WILDCARD = "*";
 	private static final String WILDCARD_REPLACE = "\\*";
 
-	private static Logger logger = Logger.getLogger(ImportFromCsvRunner.class);
+	private static final Logger logger = LoggerFactory.getLogger(ImportFromCsvRunner.class);
 
 	private List<CsvImport> csvImports;
 	private ResourceBundle resourceBundle;
