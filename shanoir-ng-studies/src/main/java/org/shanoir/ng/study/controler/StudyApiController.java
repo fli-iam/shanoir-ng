@@ -47,6 +47,7 @@ import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.PublicStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyStorageVolumeDTO;
+import org.shanoir.ng.study.dto.StudyStatisticsDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.dua.DataUserAgreement;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
@@ -544,6 +545,24 @@ public class StudyApiController implements StudyApi {
 			}
 		}
 		return filteredStudies;
+	}
+
+	@Override
+	public ResponseEntity<List<StudyStatisticsDTO>> getStudyStatistics(@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId)
+			throws RestServiceException, IOException {
+		try {
+			List<StudyStatisticsDTO> statistics = studyService.queryStudyStatistics(studyId);
+
+			return ResponseEntity.ok()
+			.contentType(MediaType.APPLICATION_JSON)
+			.body(statistics);
+
+		} catch (jakarta.persistence.NoResultException e) {
+			throw new RestServiceException(new ErrorModel(HttpStatus.NOT_FOUND.value(), "No result found.", e));
+		} catch (Exception e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while querying the database.", e));
+		}
 	}
 
 }
