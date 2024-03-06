@@ -50,6 +50,9 @@ export KC_DB_URL=jdbc:mysql://"${DB_ADDR:-${SHANOIR_PREFIX}keycloak-database}":"
 export KC_DB_USERNAME="${DB_USER:-keycloak}"
 export KC_DB_PASSWORD="${DB_PASSWORD:-password}"
 
+# creation of the admin account
+export KEYCLOAK_ADMIN="$SHANOIR_KEYCLOAK_USER"
+export KEYCLOAK_ADMIN_PASSWORD="$SHANOIR_KEYCLOAK_PASSWORD"
 
 require  SHANOIR_MIGRATION
 STARTED_PATTERN=' \[io.quarkus\] \(main\) Keycloak .* started in [0-9.]+*s'
@@ -66,10 +69,6 @@ auto|dev)
 	extra+=(start --import-realm)
 	;;
 init)
-	# create the admin account
-	export KEYCLOAK_ADMIN="$SHANOIR_KEYCLOAK_USER"
-	export KEYCLOAK_ADMIN_PASSWORD="$SHANOIR_KEYCLOAK_PASSWORD"
-
 	# wipe out the shanoir-ng realm and recreate it
 	extra+=(import --file /tmp/import/shanoir-ng-realm.json --override true)
 	;;
