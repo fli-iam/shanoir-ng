@@ -14,13 +14,10 @@
 
 package org.shanoir.ng.download;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.StringReader;
+import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
@@ -159,7 +156,7 @@ public class WADODownloaderService {
 				String name = buildFileName(subjectName, dataset, datasetFilePath, sopInstanceUID);
 				// Download and zip
 				try {
-					String zipedFile = downloadAndWriteFileInZip(url, zipOutputStream, name);
+					String zipedFile = downloadAndWriteFileInZip(url, zipOutputStream, name, url.contains(WADO_REQUEST_TYPE_WADO_RS));
 					if (zipedFile != null) {
 						files.add(zipedFile);
 					}
@@ -201,11 +198,11 @@ public class WADODownloaderService {
 	 * @throws ZipPacsFileException
 	 * @throws IOException when couldn't write into the stream
 	 */
-	private String downloadAndWriteFileInZip(String url, ZipOutputStream zipOutputStream, String name) throws ZipPacsFileException {
+	private String downloadAndWriteFileInZip(String url, ZipOutputStream zipOutputStream, String name, boolean isMultipart) throws ZipPacsFileException {
 		byte[] responseBody = null;
 		try {
 			responseBody = downloadFileFromPACS(url);
-			this.extractDICOMZipFromMHTMLFile(responseBody,  name, zipOutputStream);
+			this.extractDICOMZipFromMHTMLFile(responseBody,  name, zipOutputStream, isMultipart);
 			return name + DCM;
 		} catch (IOException | MessagingException e) {
 			LOG.error("Error in downloading/writing a file from pacs to zip", e);
@@ -259,7 +256,6 @@ public class WADODownloaderService {
 						File extractedDicomFile = new File(workFolder.getPath() + File.separator + name + DCM);
 
 						byte[] responseBody = downloadFileFromPACS(url);
-						extractDICOMFilesFromMHTMLFile(responseBody, sopInstanceUID, workFolder);
 						try (ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
 							Files.copy(bIS, extractedDicomFile.toPath());
 							files.add(extractedDicomFile);
@@ -351,11 +347,13 @@ public class WADODownloaderService {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_MULTIPART + "; type=" + CONTENT_TYPE_DICOM + ";");
 		HttpEntity<String> entity = new HttpEntity<>(headers);
+
+		// TODO: remove
 		LOG.error("Calling following URL" + url);
+
 		ResponseEntity<byte[]> response = restTemplate.exchange(url,
 				HttpMethod.GET, entity, byte[].class, "1");
 		if (response.getStatusCode() == HttpStatus.OK) {
-			LOG.error("Headers:" + response.getHeaders());
 			return response.getBody();
 		} else {
 			throw new IOException("Download did not work: wrong status code received.");
@@ -395,8 +393,6 @@ public class WADODownloaderService {
 			throws IOException, MessagingException {
 		try(ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
 			ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, CONTENT_TYPE_MULTIPART);
-			System.setProperty("mail.mime.multipart.ignoreexistingboundaryparameter", "true");
-
 			MimeMultipart multipart = new MimeMultipart(datasource);
 			int count = multipart.getCount();
 			for (int i = 0; i < count; i++) {
@@ -429,9 +425,16 @@ public class WADODownloaderService {
 	 * @throws IOException
 	 * @throws MessagingException
 	 */
-	private void extractDICOMZipFromMHTMLFile(final byte[] responseBody, String name, ZipOutputStream zipOutputStream)
+	private void extractDICOMZipFromMHTMLFile(final byte[] responseBody, String name, ZipOutputStream zipOutputStream, boolean isMultipart)
 			throws IOException, MessagingException {
 		try(ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
+			if (!isMultipart) {
+				ZipEntry entry = new ZipEntry(name + DCM);
+				zipOutputStream.putNextEntry(entry);
+				bIS.transferTo(zipOutputStream);
+				zipOutputStream.closeEntry();
+				return;
+			}
 			ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, CONTENT_TYPE_MULTIPART);
 			MimeMultipart multipart = new MimeMultipart(datasource);
 			int count = multipart.getCount();
