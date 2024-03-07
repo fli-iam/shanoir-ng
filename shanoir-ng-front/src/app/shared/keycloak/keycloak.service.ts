@@ -47,7 +47,7 @@ export class KeycloakService {
             return Promise.resolve();
         }
 
-        const keycloakAuth: any = Keycloak({
+        const keycloakAuth: any = new Keycloak({
             url: AppUtils.KEYCLOAK_BASE_URL,
             realm: 'shanoir-ng',
             clientId: 'shanoir-ng-front',
