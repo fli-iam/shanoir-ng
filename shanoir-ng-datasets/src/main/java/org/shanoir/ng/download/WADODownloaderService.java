@@ -31,6 +31,7 @@ import java.util.zip.ZipOutputStream;
 import javax.json.Json;
 import javax.json.stream.JsonParser;
 
+import jakarta.mail.Multipart;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.json.JSONReader;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -156,7 +157,7 @@ public class WADODownloaderService {
 				String name = buildFileName(subjectName, dataset, datasetFilePath, sopInstanceUID);
 				// Download and zip
 				try {
-					String zipedFile = downloadAndWriteFileInZip(url, zipOutputStream, name, url.contains(WADO_REQUEST_TYPE_WADO_RS));
+					String zipedFile = downloadAndWriteFileInZip(url, zipOutputStream, name);
 					if (zipedFile != null) {
 						files.add(zipedFile);
 					}
@@ -198,11 +199,11 @@ public class WADODownloaderService {
 	 * @throws ZipPacsFileException
 	 * @throws IOException when couldn't write into the stream
 	 */
-	private String downloadAndWriteFileInZip(String url, ZipOutputStream zipOutputStream, String name, boolean isMultipart) throws ZipPacsFileException {
+	private String downloadAndWriteFileInZip(String url, ZipOutputStream zipOutputStream, String name) throws ZipPacsFileException {
 		byte[] responseBody = null;
 		try {
 			responseBody = downloadFileFromPACS(url);
-			this.extractDICOMZipFromMHTMLFile(responseBody,  name, zipOutputStream, isMultipart);
+			this.extractDICOMZipFromMHTMLFile(responseBody,  name, zipOutputStream, url.contains(WADO_REQUEST_TYPE_WADO_RS));
 			return name + DCM;
 		} catch (IOException | MessagingException e) {
 			LOG.error("Error in downloading/writing a file from pacs to zip", e);
@@ -425,6 +426,7 @@ public class WADODownloaderService {
 	private void extractDICOMZipFromMHTMLFile(final byte[] responseBody, String name, ZipOutputStream zipOutputStream, boolean isMultipart)
 			throws IOException, MessagingException {
 		try(ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
+			// Not multipart
 			if (!isMultipart) {
 				ZipEntry entry = new ZipEntry(name + DCM);
 				zipOutputStream.putNextEntry(entry);
@@ -435,6 +437,7 @@ public class WADODownloaderService {
 			ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, CONTENT_TYPE_MULTIPART);
 			MimeMultipart multipart = new MimeMultipart(datasource);
 			int count = multipart.getCount();
+			// Multipart but with a single body part
 			if (count == 1) {
 				BodyPart bodyPart = multipart.getBodyPart(0);
 				if (bodyPart.isMimeType(CONTENT_TYPE_DICOM) || bodyPart.isMimeType(CONTENT_TYPE_DICOM_XML)) {
@@ -445,17 +448,18 @@ public class WADODownloaderService {
 				} else {
 					throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
 				}
-			} else {
-				for (int i = 0; i < count; i++) {
-					BodyPart bodyPart = multipart.getBodyPart(i);
-					if (bodyPart.isMimeType(CONTENT_TYPE_DICOM) || bodyPart.isMimeType(CONTENT_TYPE_DICOM_XML)) {
-						ZipEntry entry = new ZipEntry(name + UNDER_SCORE + i + DCM);
-						zipOutputStream.putNextEntry(entry);
-						bodyPart.getInputStream().transferTo(zipOutputStream);
-						zipOutputStream.closeEntry();
-					} else {
-						throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
-					}
+				return;
+			}
+			// Multipart with multiple body parts.
+			for (int i = 0; i < count; i++) {
+				BodyPart bodyPart = multipart.getBodyPart(i);
+				if (bodyPart.isMimeType(CONTENT_TYPE_DICOM) || bodyPart.isMimeType(CONTENT_TYPE_DICOM_XML)) {
+					ZipEntry entry = new ZipEntry(name + UNDER_SCORE + i + DCM);
+					zipOutputStream.putNextEntry(entry);
+					bodyPart.getInputStream().transferTo(zipOutputStream);
+					zipOutputStream.closeEntry();
+				} else {
+					throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
 				}
 			}
 		}
