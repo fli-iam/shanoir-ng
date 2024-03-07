@@ -71,6 +71,11 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3.1.0
 
+      - name: Expose GitHub Runtime (needed for docker buildx cache)
+        uses: crazy-max/ghaction-github-runtime@v3.0.0
+        # enable the cache only for development builds
+        if: "${{ ! startsWith(github.ref, 'refs/tags/') }}"
+
       - name: printenv
         run: printenv
 
