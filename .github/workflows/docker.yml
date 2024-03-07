@@ -9,10 +9,8 @@ on:
   workflow_dispatch:
   push:
     tags:
+      - '*'
 #TODO: disable on pull-request
-#  push:
-#    tags:
-#      - '*'
   
 jobs:
   push_to_registry:
