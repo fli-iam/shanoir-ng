@@ -48,7 +48,7 @@ public interface AcquisitionEquipmentApi {
 			"application/json" }, method = RequestMethod.DELETE)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<Void> deleteAcquisitionEquipment(
-			@Parameter(name = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") Long acquisitionEquipmentId);
+			@Parameter(name = "acquisitionEquipmentId", description = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") Long acquisitionEquipmentId);
 
 	@Operation(summary = "", description = "If exists, returns the acquisition equipment corresponding to the given id")
 	@ApiResponses(value = {
@@ -60,7 +60,7 @@ public interface AcquisitionEquipmentApi {
 	@RequestMapping(value = "/{acquisitionEquipmentId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
 	ResponseEntity<AcquisitionEquipmentDTO> findAcquisitionEquipmentById(
-			@Parameter(name = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") Long acquisitionEquipmentId);
+			@Parameter(name = "acquisitionEquipmentId", description = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") Long acquisitionEquipmentId);
 
 	@Operation(summary = "", description = "If exists, returns the acquisition equipments corresponding to the given serial number")
 	@ApiResponses(value = {
@@ -96,7 +96,7 @@ public interface AcquisitionEquipmentApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/byCenter/{centerId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
-	ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByCenter(@Parameter(name = "id of the center", required = true) @PathVariable("centerId") Long centerId);
+	ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByCenter(@Parameter(name = "centerId", description = "id of the center", required = true) @PathVariable("centerId") Long centerId);
 	
 	@Operation(summary = "", description = "Returns all the acquisition equipments for a study")
 	@ApiResponses(value = {
@@ -107,7 +107,7 @@ public interface AcquisitionEquipmentApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/byStudy/{studyId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
-	ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByStudy(@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId);
+	ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByStudy(@Parameter(name = "studyId", description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 	
 	@Operation(summary = "", description = "Returns all the acquisition equipments")
 	@ApiResponses(value = {
@@ -145,7 +145,7 @@ public interface AcquisitionEquipmentApi {
 			"application/json" }, method = RequestMethod.PUT)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controlerSecurityService.idMatches(#acquisitionEquipmentId, #acquisitionEquipment)")
 	ResponseEntity<Void> updateAcquisitionEquipment(
-			@Parameter(name = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") Long acquisitionEquipmentId,
+			@Parameter(name = "acquisitionEquipmentId", description = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") Long acquisitionEquipmentId,
 			@Parameter(name = "acquisition equipment to update", required = true) @RequestBody AcquisitionEquipment acquisitionEquipment,
 			final BindingResult result) throws RestServiceException;
 

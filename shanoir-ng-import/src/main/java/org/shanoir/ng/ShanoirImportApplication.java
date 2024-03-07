@@ -16,6 +16,8 @@ package org.shanoir.ng;
 
 import java.util.concurrent.Executor;
 
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.servers.Server;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -29,8 +31,10 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
  * Shanoir-NG microservice import application.
  */
 @SpringBootApplication
-@OpenAPIDefinition
 @EnableAsync
+@OpenAPIDefinition(
+		info = @Info(title = "Shanoir import API"),
+		servers = @Server(url = "/shanoir-ng/import", description = "Import"))
 public class ShanoirImportApplication {
 
 	public static void main(String[] args) {

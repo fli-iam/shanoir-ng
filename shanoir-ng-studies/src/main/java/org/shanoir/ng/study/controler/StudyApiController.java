@@ -332,7 +332,7 @@ public class StudyApiController implements StudyApi {
 	
 	@Override
 	public void downloadProtocolFile(
-		@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+		@Parameter(name = "studyId", description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 		@Parameter(name = "file to download", required = true) @PathVariable("fileName") String fileName,
 		HttpServletResponse response) throws RestServiceException, IOException {
 		String filePath = studyService.getStudyFilePath(studyId, fileName);
@@ -353,7 +353,7 @@ public class StudyApiController implements StudyApi {
 
 	@Override
 	public ResponseEntity<Void> uploadProtocolFile(
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(name = "studyId", description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@Parameter(name = "file to upload", required = true) @Valid @RequestBody MultipartFile file)
 			throws RestServiceException {
 		try {
@@ -404,7 +404,7 @@ public class StudyApiController implements StudyApi {
 
 	@Override
 	public ResponseEntity<Boolean> hasDUAByStudyId(
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws ShanoirException {
+			@Parameter(name = "studyId", description = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws ShanoirException {
 
 		DataUserAgreement dua = this.dataUserAgreementService.findDUAByUserIdAndStudyId(KeycloakUtil.getTokenUserId(), studyId);
 
@@ -413,7 +413,7 @@ public class StudyApiController implements StudyApi {
 
 	@Override
 	public ResponseEntity<Void> acceptDataUserAgreement(
-		@Parameter(name = "id of the dua", required = true) @PathVariable("duaId") Long duaId)
+		@Parameter(name = "duaId", description = "id of the dua", required = true) @PathVariable("duaId") Long duaId)
 		throws RestServiceException, MicroServiceCommunicationException {
 		try {
 			this.dataUserAgreementService.acceptDataUserAgreement(duaId);
@@ -426,7 +426,7 @@ public class StudyApiController implements StudyApi {
 
 	@Override
 	public ResponseEntity<Void> uploadDataUserAgreement(
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(name = "studyId", description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@Parameter(name = "dua to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
 		try {
 			if (!file.getOriginalFilename().endsWith(PDF_EXTENSION)  || file.getSize() > 50000000) {
@@ -453,7 +453,7 @@ public class StudyApiController implements StudyApi {
 
 	@Override
 	public void downloadDataUserAgreement(
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(name = "studyId", description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@Parameter(name = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException {
 		String filePath = studyService.getStudyFilePath(studyId, fileName);
 		LOG.info("Retrieving file : {}", filePath);
@@ -472,7 +472,7 @@ public class StudyApiController implements StudyApi {
 
 	@Override
 	public ResponseEntity<Void> deleteStudyUser (
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(name = "studyId", description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@Parameter(name = "id of the userId", required = true) @PathVariable("userId") Long userId) throws IOException {
 		studyService.removeStudyUserFromStudy(studyId, userId);
 		List<StudyUserRight> surList = studyUserService.getRightsForStudy(studyId);
@@ -548,7 +548,7 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<List<StudyStatisticsDTO>> getStudyStatistics(@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId)
+	public ResponseEntity<List<StudyStatisticsDTO>> getStudyStatistics(@Parameter(name = "studyId", description = "id of the study", required = true) @PathVariable("studyId") Long studyId)
 			throws RestServiceException, IOException {
 		try {
 			List<StudyStatisticsDTO> statistics = studyService.queryStudyStatistics(studyId);

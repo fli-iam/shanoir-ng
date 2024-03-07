@@ -50,7 +50,7 @@ public interface CoilApi {
 	@DeleteMapping(value = "/{coilId}", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<Void> deleteCoil(
-			@Parameter(name = "id of the coil", required = true) @PathVariable("coilId") Long coilId)
+			@Parameter(name = "coilId", description = "id of the coil", required = true) @PathVariable("coilId") Long coilId)
 			throws RestServiceException;
 
 	@Operation(summary = "", description = "If exists, returns the coil corresponding to the given id")
@@ -62,7 +62,7 @@ public interface CoilApi {
 	@GetMapping(value = "/{coilId}", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<CoilDTO> findCoilById(
-			@Parameter(name = "id of the coil", required = true) @PathVariable("coilId") Long coilId);
+			@Parameter(name = "coilId", description = "id of the coil", required = true) @PathVariable("coilId") Long coilId);
 
 	@Operation(summary = "", description = "Returns all the coils")
 	@ApiResponses(value = {
@@ -97,7 +97,7 @@ public interface CoilApi {
 			"application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controlerSecurityService.idMatches(#coilId, #coil)")
 	ResponseEntity<Void> updateCoil(
-			@Parameter(name = "id of the coil", required = true) @PathVariable("coilId") Long coilId,
+			@Parameter(name = "coilId", description = "id of the coil", required = true) @PathVariable("coilId") Long coilId,
 			@Parameter(name = "coil to update", required = true) @Valid @RequestBody Coil coil, BindingResult result)
 			throws RestServiceException;
 

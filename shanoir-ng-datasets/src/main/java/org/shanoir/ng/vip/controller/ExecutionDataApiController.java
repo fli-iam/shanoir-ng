@@ -100,10 +100,10 @@ public class ExecutionDataApiController implements ExecutionDataApi {
 
     @Override
     public ResponseEntity<?> getPath(
-            @Parameter(name = "the complete path on which to request information. It can contain non-encoded slashes. Except for the \"exists\" action, any request on a non-existing path should return an error",
+            @Parameter(description = "the complete path on which to request information. It can contain non-encoded slashes. Except for the \"exists\" action, any request on a non-existing path should return an error",
                     required=true)
             @PathVariable("completePath") String completePath,
-            @NotNull @Parameter(name = "The \"content\" action downloads the raw file. If the path points to a directory, a tarball of this directory is returned. The \"exists\" action returns a BooleanResponse object (see definition) indicating if the path exists or not. The \"properties\" action returns a Path object (see definition) with the path properties. The \"list\" action returns a DirectoryList object (see definition) with the properties of all the files of the directory (if the path is not a directory an error must be returned). The \"md5\" action is optional and returns a PathMd5 object (see definition).",
+            @NotNull @Parameter(description = "The \"content\" action downloads the raw file. If the path points to a directory, a tarball of this directory is returned. The \"exists\" action returns a BooleanResponse object (see definition) indicating if the path exists or not. The \"properties\" action returns a Path object (see definition) with the path properties. The \"list\" action returns a DirectoryList object (see definition) with the properties of all the files of the directory (if the path is not a directory an error must be returned). The \"md5\" action is optional and returns a PathMd5 object (see definition).",
                     required=true)
             @Valid @RequestParam(value = "action", required = true, defaultValue = "content") String action,
             @Valid @RequestParam(value = "format", required = false, defaultValue = DCM) final String format,
@@ -135,7 +135,7 @@ public class ExecutionDataApiController implements ExecutionDataApi {
 
     @Override
     public ResponseEntity<ExecutionDTO> createExecution(
-            @Parameter(name = "execution", required = true) @RequestBody final String executionAsString) throws EntityNotFoundException, SecurityException {
+            @Parameter(description = "execution", required = true) @RequestBody final String executionAsString) throws EntityNotFoundException, SecurityException {
 
         String authenticationToken = KeycloakUtil.getToken();
 
@@ -227,7 +227,7 @@ public class ExecutionDataApiController implements ExecutionDataApi {
     }
 
     @Override
-    public ResponseEntity<String> getexecutionStatus(@Parameter(name = "The execution identifier", required=true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException {
+    public ResponseEntity<String> getexecutionStatus(@Parameter(description = "The execution identifier", required=true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException {
 
         AccessTokenResponse accessTokenResponse = keycloakServiceAccountUtils.getServiceAccountAccessToken();
         HttpHeaders headers = new HttpHeaders();

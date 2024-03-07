@@ -93,7 +93,7 @@ public interface AccessRequestApi {
 	@GetMapping(value = "byStudy/{studyId}", produces = { "application/json" }, consumes = {
 			"application/json" })
 	ResponseEntity<List<AccessRequest>> findAllByStudyId(
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId
+			@Parameter(name = "studyId", description = "id of the study", required = true) @PathVariable("studyId") Long studyId
 			) throws RestServiceException;
 
 	@Operation(summary = "get by id", description = "Find the access request for the given id")

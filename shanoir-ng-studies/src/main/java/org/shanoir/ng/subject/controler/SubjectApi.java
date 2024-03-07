@@ -57,7 +57,7 @@ public interface SubjectApi {
 	@DeleteMapping(value = "/{subjectId}", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @studySecurityService.hasRightOnSubjectForEveryStudy(#subjectId, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> deleteSubject(
-			@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
+			@Parameter(name = "subjectId", description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
 
 	@Operation(summary = "", description = "Returns all the subjects")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found subjects"),
@@ -116,7 +116,7 @@ public interface SubjectApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnSubjectForEveryStudies(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<SubjectDTO> findSubjectById(
-			@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
+			@Parameter(name = "subjectId", description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
 
 	// Attention: this method is used by ShanoirUploader!!!
 	@Operation(summary = "", description = "Saves a new subject")
@@ -144,7 +144,7 @@ public interface SubjectApi {
 			"application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
 	ResponseEntity<Void> updateSubject(
-			@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
+			@Parameter(name = "subjectId", description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@Parameter(name = "subject to update", required = true) @RequestBody Subject subject,
 			final BindingResult result) throws RestServiceException, MicroServiceCommunicationException;
 
@@ -159,7 +159,7 @@ public interface SubjectApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterSimpleSubjectDTOsHasRightInOneStudy(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<SimpleSubjectDTO>> findSubjectsByStudyId(
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(name = "studyId", description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@Parameter(name = "preclinical", required = false) @RequestParam(value="preclinical", required = false) String preclinical);
 
 	@Operation(summary = "", description = "If exists, returns the subject corresponding to the given identifier")

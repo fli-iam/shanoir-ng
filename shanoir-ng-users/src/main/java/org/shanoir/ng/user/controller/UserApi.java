@@ -50,7 +50,7 @@ public interface UserApi {
 			"application/json" }, method = RequestMethod.PUT)
 	@PreAuthorize("hasRole('ADMIN') and @controlerSecurityService.idMatches(#userId, #user)")
 	ResponseEntity<Void> confirmAccountRequest(
-			@Parameter(name = "id of the user", required = true) @PathVariable("userId") Long userId,
+			@Parameter(name = "userId", description = "id of the user", required = true) @PathVariable("userId") Long userId,
 			@Parameter(name = "user to update", required = true) @RequestBody User user, BindingResult result)
 			throws RestServiceException;
 
@@ -63,7 +63,7 @@ public interface UserApi {
 	@RequestMapping(value = "/{userId}", produces = { "application/json" }, method = RequestMethod.DELETE)
 	@PreAuthorize("hasRole('ADMIN') and !@isMeSecurityService.isMe(#userId)")
 	ResponseEntity<Void> deleteUser(
-			@Parameter(name = "id of the user", required = true) @PathVariable("userId") Long userId) throws ForbiddenException;
+			@Parameter(name = "userId", description = "id of the user", required = true) @PathVariable("userId") Long userId) throws ForbiddenException;
 
 	@Operation(summary = "", description = "Denies an account request")
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "user deleted"),
@@ -75,7 +75,7 @@ public interface UserApi {
 			"application/json" }, method = RequestMethod.DELETE)
 	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<Void> denyAccountRequest(
-			@Parameter(name = "id of the user", required = true) @PathVariable("userId") Long userId) throws RestServiceException;
+			@Parameter(name = "userId", description = "id of the user", required = true) @PathVariable("userId") Long userId) throws RestServiceException;
 
 	@Operation(summary = "", description = "If exists, returns the user corresponding to the given id")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found user"),
@@ -86,7 +86,7 @@ public interface UserApi {
 	@RequestMapping(value = "/{userId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT') and @isMeSecurityService.isMe(#userId))")
 	ResponseEntity<User> findUserById(
-			@Parameter(name = "id of the user", required = true) @PathVariable("userId") Long userId);
+			@Parameter(name = "userId", description = "id of the user", required = true) @PathVariable("userId") Long userId);
 
 	@Operation(summary = "", description = "Returns all the users")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found users"),
@@ -144,7 +144,7 @@ public interface UserApi {
 			"application/json" }, method = RequestMethod.PUT)
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT') and @isMeSecurityService.isMe(#userId)) and @controlerSecurityService.idMatches(#userId, #user)")
 	ResponseEntity<Void> updateUser(
-			@Parameter(name = "id of the user", required = true) @PathVariable("userId") Long userId,
+			@Parameter(name = "userId", description = "id of the user", required = true) @PathVariable("userId") Long userId,
 			@Parameter(name = "user to update", required = true) @RequestBody User user, BindingResult result)
 			throws RestServiceException;
 

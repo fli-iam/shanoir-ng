@@ -32,8 +32,8 @@ public interface ExecutionMonitoringApi {
                         "application/json" })
         @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
         ResponseEntity<ExecutionMonitoringDTO> saveNewExecutionMonitoring(
-                        @Parameter(name = "execution monitoring to create", required = true) @Valid @RequestBody ExecutionMonitoringDTO dto,
-                        @Parameter(name = "start monitoring job once created") @RequestParam(value = "start", required = false, defaultValue="false") boolean start,
+                        @Parameter(description = "execution monitoring to create", required = true) @Valid @RequestBody ExecutionMonitoringDTO dto,
+                        @Parameter(description = "start monitoring job once created") @RequestParam(value = "start", required = false, defaultValue="false") boolean start,
                         BindingResult result) throws RestServiceException, EntityNotFoundException, SecurityException;
 
         @Operation(summary = "", description = "Updates a execution monitoring")
@@ -46,8 +46,8 @@ public interface ExecutionMonitoringApi {
                 "application/json" })
         @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
         ResponseEntity<Void> updateExecutionMonitoring(
-                @Parameter(name = "execution monitoring to update", required = true) @Valid @RequestBody ExecutionMonitoringDTO dto,
-                @Parameter(name = "start monitoring job once updated") @RequestParam(value = "start", required = false, defaultValue="false") boolean start,
+                @Parameter(description = "execution monitoring to update", required = true) @Valid @RequestBody ExecutionMonitoringDTO dto,
+                @Parameter(description = "start monitoring job once updated") @RequestParam(value = "start", required = false, defaultValue="false") boolean start,
                 BindingResult result)
                 throws RestServiceException, SecurityException;
 
@@ -61,7 +61,7 @@ public interface ExecutionMonitoringApi {
         @GetMapping(value = "/{id}", produces = { "application/json" })
         @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
         ResponseEntity<ExecutionMonitoringDTO> findExecutionMonitoringById(
-                        @Parameter(name = "id of the execution monitoring", required = true) @PathVariable("id") Long id);
+                        @Parameter(description = "id of the execution monitoring", required = true) @PathVariable("id") Long id);
 
         @Operation(summary = "", description = "Return all execution monitorings")
         @ApiResponses(value = {

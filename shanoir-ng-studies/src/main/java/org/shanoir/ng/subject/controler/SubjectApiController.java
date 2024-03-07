@@ -71,7 +71,7 @@ public class SubjectApiController implements SubjectApi {
 
 	@Override
 	public ResponseEntity<Void> deleteSubject(
-			@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
+			@Parameter(name = "subjectId", description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
 		try {
 			// Delete all associated bids folders
 			subjectService.deleteById(subjectId);
@@ -84,7 +84,7 @@ public class SubjectApiController implements SubjectApi {
 
 	@Override
 	public ResponseEntity<SubjectDTO> findSubjectById(
-			@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
+			@Parameter(name = "subjectId", description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
 		final Subject subject = subjectService.findById(subjectId);
 		if (subject == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -152,7 +152,7 @@ public class SubjectApiController implements SubjectApi {
 	// Attention: this method is used by ShanoirUploader!!!
 	@Override
 	public ResponseEntity<Void> updateSubject(
-			@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
+			@Parameter(name = "subjectId", description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@Parameter(name = "subject to update", required = true) @RequestBody Subject subject,
 			final BindingResult result) throws RestServiceException, MicroServiceCommunicationException {
 		validate(subject, result);
@@ -170,7 +170,7 @@ public class SubjectApiController implements SubjectApi {
 
 	@Override
 	public ResponseEntity<List<SimpleSubjectDTO>> findSubjectsByStudyId(
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(name = "studyId", description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@Parameter(name="preclinical", required = false) @RequestParam(value="preclinical", required = false) String preclinical) {
 		final List<SimpleSubjectDTO> simpleSubjectDTOList;
 		if ("null".equals(preclinical)) {

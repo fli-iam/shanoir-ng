@@ -68,7 +68,7 @@ public class ExecutionMonitoringApiController implements ExecutionMonitoringApi 
 
     @Override
     public ResponseEntity<Void> updateExecutionMonitoring(
-            @Parameter(name = "execution monitoring to update", required = true) @Valid @RequestBody ExecutionMonitoringDTO dto,
+            @Parameter(description = "execution monitoring to update", required = true) @Valid @RequestBody ExecutionMonitoringDTO dto,
             boolean start,
             final BindingResult result) throws RestServiceException, SecurityException {
 
