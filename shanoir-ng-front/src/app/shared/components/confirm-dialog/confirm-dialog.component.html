@@ -17,10 +17,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <div class="header">
             <i *ngIf="mode == 'error'" class="fas fa-exclamation-circle"></i>
             <i *ngIf="mode == 'confirm'" class="fas fa-question-circle"></i>
-            {{ title }} - {{mode}}
+            {{ title }}
         </div>
         <div class="body">
             <p [innerHTML]="message"></p>
+            <a *ngIf="link" [href]="link">{{link}}</a>
         </div>
         <div class="footer">
             <button type="button" *ngIf="mode != 'choose'"
