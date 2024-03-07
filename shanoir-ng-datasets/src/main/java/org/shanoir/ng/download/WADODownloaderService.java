@@ -122,7 +122,7 @@ public class WADODownloaderService {
 
 	@Autowired
 	private WADOURLHandler wadoURLHandler;
-	
+
 	@PostConstruct
 	public void initRestTemplate() {
 		restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
@@ -395,19 +395,22 @@ public class WADODownloaderService {
 			int count = multipart.getCount();
 			for (int i = 0; i < count; i++) {
 				BodyPart bodyPart = multipart.getBodyPart(i);
-				if (bodyPart.isMimeType(CONTENT_TYPE_DICOM) || bodyPart.isMimeType(CONTENT_TYPE_DICOM_XML)) {
-					File extractedDicomFile = null;
-					if (count == 1) {
-						extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + DCM);
-					} else {
-						extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + UNDER_SCORE + i + DCM);
-					}
-					Files.copy(bodyPart.getInputStream(), extractedDicomFile.toPath());
-				} else {
+				if (isNotOnlyDicom(bodyPart)) {
 					throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
 				}
+				File extractedDicomFile = null;
+				if (count == 1) {
+					extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + DCM);
+				} else {
+					extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + UNDER_SCORE + i + DCM);
+				}
+				Files.copy(bodyPart.getInputStream(), extractedDicomFile.toPath());
 			}
 		}
+	}
+
+	private boolean isNotOnlyDicom(BodyPart bodyPart) throws MessagingException {
+		return !bodyPart.isMimeType(CONTENT_TYPE_DICOM) && !bodyPart.isMimeType(CONTENT_TYPE_DICOM_XML);
 	}
 
 	/**
@@ -440,27 +443,25 @@ public class WADODownloaderService {
 			// Multipart but with a single body part
 			if (count == 1) {
 				BodyPart bodyPart = multipart.getBodyPart(0);
-				if (bodyPart.isMimeType(CONTENT_TYPE_DICOM) || bodyPart.isMimeType(CONTENT_TYPE_DICOM_XML)) {
-					ZipEntry entry = new ZipEntry(name + DCM);
-					zipOutputStream.putNextEntry(entry);
-					bodyPart.getInputStream().transferTo(zipOutputStream);
-					zipOutputStream.closeEntry();
-				} else {
+				if (isNotOnlyDicom(bodyPart)) {
 					throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
 				}
+				ZipEntry entry = new ZipEntry(name + DCM);
+				zipOutputStream.putNextEntry(entry);
+				bodyPart.getInputStream().transferTo(zipOutputStream);
+				zipOutputStream.closeEntry();
 				return;
 			}
-			// Multipart with multiple body parts.
+			// Multipart with multiple parts
 			for (int i = 0; i < count; i++) {
 				BodyPart bodyPart = multipart.getBodyPart(i);
-				if (bodyPart.isMimeType(CONTENT_TYPE_DICOM) || bodyPart.isMimeType(CONTENT_TYPE_DICOM_XML)) {
-					ZipEntry entry = new ZipEntry(name + UNDER_SCORE + i + DCM);
-					zipOutputStream.putNextEntry(entry);
-					bodyPart.getInputStream().transferTo(zipOutputStream);
-					zipOutputStream.closeEntry();
-				} else {
+				if (isNotOnlyDicom(bodyPart)) {
 					throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
 				}
+				ZipEntry entry = new ZipEntry(name + UNDER_SCORE + i + DCM);
+				zipOutputStream.putNextEntry(entry);
+				bodyPart.getInputStream().transferTo(zipOutputStream);
+				zipOutputStream.closeEntry();
 			}
 		}
 	}
