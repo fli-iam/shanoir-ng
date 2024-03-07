@@ -15,12 +15,10 @@
 package org.shanoir.ng.study.controler;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
 
 import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -29,6 +27,7 @@ import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.PublicStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyStorageVolumeDTO;
+import org.shanoir.ng.study.dto.StudyStatisticsDTO;
 import org.shanoir.ng.study.dua.DataUserAgreement;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
@@ -353,5 +352,17 @@ public interface StudyApi {
 	@GetMapping(value = "/studyUser/{studyId}", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER'))")
 	ResponseEntity<List<StudyUser>> getStudyUserByStudyId(@PathVariable("studyId") Long studyId);
+
+	@Operation(summary = "getStudyStatistics", description = "Returns study imaging statistics corresponding to the given study id")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "exported statistics"),
+		@ApiResponse(responseCode = "401", description = "unauthorized"),
+		@ApiResponse(responseCode = "403", description = "forbidden"),
+		@ApiResponse(responseCode = "404", description = "no study found"),
+		@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@GetMapping(value = "/statistics/{studyId}", produces = { "application/json" })
+	@PreAuthorize("hasRole('ADMIN') or hasRole('EXPERT')")
+	ResponseEntity<List<StudyStatisticsDTO>> getStudyStatistics(
+		@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws RestServiceException, IOException;
 
 }

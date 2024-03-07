@@ -27,16 +27,21 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
+import org.shanoir.ng.dicom.WADOURLHandler;
 import org.shanoir.ng.examination.model.Examination;
 
 /**
- * The parametrized type is the type for the uid keys
+ * The parameterized type is the type for the uid keys
  */
 public class ExaminationAttributes<T> {
 
 	private ConcurrentMap<T, Optional<AcquisitionAttributes<T>>> acquisitionMap = new ConcurrentHashMap<>();
 
-    public ExaminationAttributes() {}
+	private WADOURLHandler wadoURLHandler;
+	
+    public ExaminationAttributes(WADOURLHandler wadoURLHandler) {
+    	this.wadoURLHandler = wadoURLHandler;
+    }
 
     public AcquisitionAttributes<T> getAcquisitionAttributes(T id) {
 		return acquisitionMap.get(id).orElse(null);
@@ -71,8 +76,7 @@ public class ExaminationAttributes<T> {
         acquisitionMap.get(acquisitionId).get().addDatasetAttributes(datasetId, attributes);
 	}
 
-    public static void addDatasetAttributes(ExaminationAttributes<Long> examinationAttributes, Examination examination, Attributes singleImageAttributes) {
-        //String serieUID = singleImageAttributes.getString(Tag.SeriesInstanceUID);
+    public void addDatasetAttributes(ExaminationAttributes<Long> examinationAttributes, Examination examination, Attributes singleImageAttributes) {
         String sopUID = singleImageAttributes.getString(Tag.SOPInstanceUID);
         if (sopUID != null && examination != null && examination.getDatasetAcquisitions() != null && examinationAttributes != null) {
             for (DatasetAcquisition acquisition : examination.getDatasetAcquisitions()) {
@@ -83,7 +87,7 @@ public class ExaminationAttributes<T> {
                                 if (expression.getDatasetFiles() != null) {
                                     for (DatasetFile file : expression.getDatasetFiles()) {
                                         if (file.getPath() != null) {
-                                            String datasetSopUID =  WADODownloaderService.extractInstanceUID(file.getPath());
+                                            String datasetSopUID =  wadoURLHandler.extractUIDs(file.getPath())[2];
                                             if (sopUID.equals(datasetSopUID)) {
                                                 examinationAttributes.addDatasetAttributes(acquisition.getId(), dataset.getId(), singleImageAttributes);
                                             }

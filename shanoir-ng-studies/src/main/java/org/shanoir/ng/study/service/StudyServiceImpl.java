@@ -31,6 +31,7 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.StudyDTO;
+import org.shanoir.ng.study.dto.StudyStatisticsDTO;
 import org.shanoir.ng.study.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.dua.DataUserAgreement;
@@ -779,5 +780,10 @@ public class StudyServiceImpl implements StudyService {
 		}
 
 		return size;
+	}
+
+	@Override
+	public List<StudyStatisticsDTO> queryStudyStatistics(Long studyId) throws Exception {
+		return studyRepository.queryStudyStatistics(studyId);
 	}
 }

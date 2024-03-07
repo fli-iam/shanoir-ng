@@ -25,6 +25,7 @@ export class ConfirmDialogComponent {
     title: string;
     mode: 'confirm' | 'choose' | 'info' | 'error';
     private _message: string;
+    link: string;
     buttons: {yes: string, no?: string, cancel: string};
     private closePromise: SuperPromise<any> = new SuperPromise();
 
@@ -59,9 +60,10 @@ export class ConfirmDialogComponent {
         return this.closePromise;
     }
 
-    public openError(title: string, message: string): Promise<boolean> {
+    public openError(title: string, message: string, link?: string): Promise<boolean> {
         this.title = title;
         this.message = message;
+        this.link = link;
         this.mode = 'error';
         return this.closePromise;
     }
