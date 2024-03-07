@@ -47,8 +47,8 @@ jobs:
 ##      - name: Create directory /shanoir-ng-logs
 ##        run: sudo mkdir -m777 /var/log/shanoir-ng-logs
       
-#      - name: Maven build
-#        run: mvn -f ./shanoir-ng-parent/pom.xml install -DskipTests
+      - name: Maven build
+        run: mvn -f ./shanoir-ng-parent/pom.xml install -DskipTests
 ##        env:
 ##          SHANOIR_URL_HOST: localhost
 ##          SHANOIR_URL_SCHEME: http
