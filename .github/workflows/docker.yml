@@ -75,8 +75,6 @@ jobs:
 
       - name: Expose GitHub Runtime (needed for docker buildx cache)
         uses: crazy-max/ghaction-github-runtime@v3.0.0
-        # enable the cache only for development builds
-        if: "${{ ! startsWith(github.ref, 'refs/tags/') }}"
 
       - name: printenv
         run: printenv 
@@ -100,6 +98,8 @@ jobs:
           
           env = os.environ
           tag = env['TAG']
+          # enable the cache only for development builds
+          cache_from = ["--cache-from=type=gha"] if not env['GITHUB_REF'].startswith("refs/tags/") else []
           try:
            for image in IMAGES:
             repo = f"{env['DOCKER_REPOSITORY']}/{image}"
@@ -107,7 +107,7 @@ jobs:
               sys.stderr.write(f"#\n#   Building {image}:{tag}\n#\n")
               subprocess.call(["date"])
               subprocess.check_call(["docker", "buildx", "build",
-                "--cache-from=type=gha",
+                *cache_from,
                 "--cache-to=type=gha,mode=max",
                 "--tag", f"{ repo }:{ env['TAG'] }",
                 "--tag", f"{ repo }:latest",
