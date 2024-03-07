@@ -8,6 +8,8 @@ env:
 on:
   workflow_dispatch:
   push:
+    branches: # TODO: remove
+      - docker-workflows
     tags:
       - '*'
 #TODO: disable on pull-request
