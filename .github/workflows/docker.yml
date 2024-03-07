@@ -77,7 +77,10 @@ jobs:
         if: "${{ ! startsWith(github.ref, 'refs/tags/') }}"
 
       - name: printenv
-        run: printenv
+        run: printenv 
+
+      - name: sorted printenv
+        run: printenv | sort
 
         # note: we should rather use buildx bake when it is no longer experimental
       - name: Build, push & sign docker images
