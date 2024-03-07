@@ -68,7 +68,6 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
 
     @Override
     protected Void doInBackground() throws Exception {
-        logger.error("coucouc");
         boolean success = true;
         int i = 1;
 
@@ -80,6 +79,11 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
                 folderimport.getStudyCard().setCenterId(acquisitionEquipment.getCenter().getId());
                 break;
             }
+        }
+
+        // Load all subjects if necessary
+        if (folderimport.getListOfSubjectsForStudy() == null) {
+            folderimport.setListOfSubjectsForStudy(this.shanoirUploaderServiceClientNG.findSubjectsByStudy(folderimport.getStudy().getId()));
         }
 
         for (ExaminationImport importTodo : this.folderimport.getExaminationImports()) {
@@ -109,7 +113,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
     }
 
     private boolean importData(ExaminationImport importTodo) {
-        // 1. Reead dicom to retrieve informations
+        // 1. Read dicom to retrieve information
         logger.info("1 - Get data from folder's path and copy it to destination folder");
         File selectedRootDir = new File(importTodo.getPath());
         List<Patient> patients = new ArrayList<>();
@@ -235,16 +239,12 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
 
         // 8.  Create subject if necessary
         Subject subjectFound = null;
-        String subjectStudyIdentifier = null;
-        try {
-            subjectFound = shanoirUploaderServiceClientNG.findSubjectBySubjectIdentifier(subjectIdentifier);
-            if (!subjectFound.getName().equals(importTodo.getSubjectName())) {
-                // If the name does not match, change the subjectStudyIdentifier for this study
-                subjectStudyIdentifier = importTodo.getSubjectName();
+
+        String subjectName = importTodo.getParent().getStudy().getName() + "_" + importTodo.getSubjectName();
+        for (Subject potentialSubject : importTodo.getParent().getListOfSubjectsForStudy()) {
+            if (potentialSubject.getName().equals(subjectName)) {
+                subjectFound = potentialSubject;
             }
-        } catch (Exception e) {
-            logger.error("Something wrong happened while trying to get the subject, we'll create a new one.");
-            //Do nothing, if it fails, we'll just create a new subject
         }
 
         Study study = new Study();
@@ -254,13 +254,10 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
         if (subjectFound != null) {
             logger.info("8 Subject exists, just use it");
             subject = subjectFound;
-            ImportUtils.addSubjectStudy(study, subject, SubjectType.PATIENT, true, subjectStudyIdentifier);
-            subject = shanoirUploaderServiceClientNG.createSubjectStudy(subject);
         } else {
             logger.info("8 Creating a new subject");
-
             subject = new org.shanoir.uploader.model.rest.Subject();
-            subject.setName(study.getName() + "_" + importTodo.getSubjectName());
+            subject.setName(subjectName);
             if (!StringUtils.isEmpty(patients.get(0).getPatientSex())) {
                 subject.setSex(Sex.valueOf(patients.get(0).getPatientSex()));
             } else {
@@ -273,10 +270,11 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
 
             subject.setBirthDate(dicomData.getBirthDate());
 
-            ImportUtils.addSubjectStudy(study, subject, SubjectType.PATIENT, true, subjectStudyIdentifier);
+            ImportUtils.addSubjectStudy(study, subject, SubjectType.PATIENT, true, null);
 
             // Get center ID from study card
             subject = shanoirUploaderServiceClientNG.createSubject(subject, true, this.folderimport.getStudyCard().getCenterId());
+            this.folderimport.getListOfSubjectsForStudy().add(subject);
         }
         if (subject == null) {
             uploadJob.setUploadState(UploadState.ERROR);

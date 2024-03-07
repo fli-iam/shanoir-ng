@@ -6,10 +6,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -382,6 +379,21 @@ public class ShanoirUploaderServiceClient {
 			}
 		}
 		return null;
+	}
+
+	public List<Subject> findSubjectsByStudy(final Long studyId) throws Exception {
+		URIBuilder b = new URIBuilder(this.serviceURLSubjectsByStudyId + studyId + "/allSubjects");
+		b.addParameter("preclinical",  "null");
+		URL url = b.build().toURL();
+		try (CloseableHttpResponse response = httpService.get(url.toString())) {
+			int code = response.getCode();
+			if (code == HttpStatus.SC_OK) {
+				return Util.getMappedList(response, Subject.class);
+			} else {
+				logger.error("Could not get subjects ids from study id " + studyId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+			}
+		}
+		return Collections.emptyList();
 	}
 
 	public List<Long> findDatasetIdsByStudyId(Long studyId) throws Exception {

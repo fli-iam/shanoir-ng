@@ -1,5 +1,7 @@
 package org.shanoir.uploader.model;
 
+import org.shanoir.uploader.model.rest.Subject;
+
 import java.util.List;
 
 public class FolderImport {
@@ -8,6 +10,8 @@ public class FolderImport {
 
     private org.shanoir.uploader.model.rest.Study study;
     private org.shanoir.uploader.model.rest.StudyCard studyCard;
+
+    private List<Subject> listOfSubjectsForStudy;
 
     public org.shanoir.uploader.model.rest.Study getStudy() {
         return study;
@@ -33,4 +37,11 @@ public class FolderImport {
         this.examinationImports = examinationImports;
     }
 
+    public List<Subject> getListOfSubjectsForStudy() {
+        return listOfSubjectsForStudy;
+    }
+
+    public void setListOfSubjectsForStudy(List<Subject> listOfSubjectsForStudy) {
+        this.listOfSubjectsForStudy = listOfSubjectsForStudy;
+    }
 }
