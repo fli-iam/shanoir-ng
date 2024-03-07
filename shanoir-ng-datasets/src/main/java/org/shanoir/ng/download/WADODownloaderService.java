@@ -348,9 +348,6 @@ public class WADODownloaderService {
 		headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_MULTIPART + "; type=" + CONTENT_TYPE_DICOM + ";");
 		HttpEntity<String> entity = new HttpEntity<>(headers);
 
-		// TODO: remove
-		LOG.error("Calling following URL" + url);
-
 		ResponseEntity<byte[]> response = restTemplate.exchange(url,
 				HttpMethod.GET, entity, byte[].class, "1");
 		if (response.getStatusCode() == HttpStatus.OK) {
