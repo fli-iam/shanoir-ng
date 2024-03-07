@@ -25,7 +25,9 @@ jobs:
     steps:
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4.1.0
+        #TODO: upgrade to v4 (https://github.com/actions/setup-java/issues/596)
+        #uses: actions/setup-java@v4.1.0
+        uses: actions/setup-java@v3
         with:
           distribution: oracle
           java-version: 17
