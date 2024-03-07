@@ -36,8 +36,10 @@ declare var JSZip: any;
 
 export type Report = {
     taskId: number,
-    folderName: string,
-    requestedDatasetIds: number[],
+    folderName?: string,
+    requestedDatasetIds?: number[],
+    studyId?: number,
+    status?: 'QUEUED' | 'ERROR' | 'SUCCESS',
     startTime: number,
     list?: {
         [key: number]: {
@@ -51,8 +53,8 @@ export type Report = {
     nbError?: number;
     duration?: number;
     format: Format;
-    nbQueues: number;
-    unzip: boolean;
+    nbQueues?: number;
+    unzip?: boolean;
 };
 
 @Injectable()
@@ -228,14 +230,18 @@ export class MassDownloadService {
     private _downloadAlt(inputDef: 'studyId' | 'datasetIds', input: number | number[], format: Format, downloadState?: TaskState): any {
         if (!inputDef || !input || (inputDef == 'datasetIds' && !(input as [])?.length)) throw new Error('bad arguments : ' + inputDef + ', ' + input);
         let task: Task;
+        let report: Report;
         if (inputDef == 'studyId') {
             task = this.createStudyTask(input as number);
+            report = this.initAltStudyReport(input as number, task.id, format);
         } else if (inputDef == 'datasetIds') {
             task = this.createTask((input as number[]).length);
+            report = this.initAltDatasetsReport(input as number[], task.id, format);
         }
         downloadState = new TaskState();
         downloadState.status = task.status;
         downloadState.progress = 0;
+
 
         return this.downloadQueue.waitForTurn().then(releaseQueue => {
             try {
@@ -278,8 +284,9 @@ export class MassDownloadService {
                         task.message = 'download completed in ' + duration + 'ms for ' + (input as number[]).length + ' datasets';
                     }
                     task.lastUpdate = new Date();
-                    task.status = 1;
+                    task.status = state.status;
                     task.progress = 1;
+                    task.report = state.errors;
                     downloadState.progress = task.progress;
                     this.notificationService.pushLocalTask(task);
                     endPromise.resolve();
@@ -340,7 +347,7 @@ export class MassDownloadService {
     private _downloadFromReport(report: Report, task: Task, parentHandle: FileSystemDirectoryHandle) {
         if (!report) throw new Error('report can\'t be null !');
         const noSuccessIds: number[] = Object.keys(report.list).filter(key => report.list[key].status != 'SUCCESS').map(key => parseInt(key));
-        this._downloadByIds(noSuccessIds, report, task, report, parentHandle);
+        this._downloadByIds(noSuccessIds, report as DownloadOptions, task, report, parentHandle);
     }
 
     private handleEnd(task: Task, report: Report, start: number) {
@@ -581,6 +588,26 @@ export class MassDownloadService {
         };
         datasetIds.forEach(id => report.list[id] = { status: 'QUEUED' });
         return report;
+    }
+
+    private initAltStudyReport(studyId: number, taskId: number, format: Format): Report {
+        return {
+            taskId: taskId,
+            studyId: studyId,
+            status: 'QUEUED',
+            startTime: Date.now(),
+            format : format
+        };
+    }
+
+    private initAltDatasetsReport(datasetIds: number[], taskId: number, format: Format): Report {
+        return {
+            taskId: taskId,
+            requestedDatasetIds: datasetIds,
+            status: 'QUEUED',
+            startTime: Date.now(),
+            format : format
+        };
     }
 
     private createTask(nbDatasets: number): Task {
