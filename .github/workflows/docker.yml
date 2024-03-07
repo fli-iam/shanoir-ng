@@ -23,10 +23,19 @@ jobs:
       id-token: write # needed by sigstore/fulcio
     steps:
 
-#      - name: Set up JDK 17
-#        uses: actions/setup-java@v1
-#        with:
-#          java-version: 17
+      - name: Set up JDK 17
+        uses: actions/setup-java@v1
+        with:
+          java-version: 17
+
+      - name: Set up Maven cache
+        uses: actions/cache@v3
+        # enable the cache only for development builds
+        if: "${{ not startsWith(github.ref, 'refs/tags/') }}"
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
 
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -62,6 +71,10 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
+      - name: printenv
+        run: printenv
+
+        # note: we should rather use buildx bake when it is no longer experimental
       - name: Build, push & sign docker images
         if: github.event_name != 'pull_request'
         shell: python
