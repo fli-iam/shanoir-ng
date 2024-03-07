@@ -287,9 +287,9 @@ public class SubjectServiceImpl implements SubjectService {
 	public List<SimpleSubjectDTO> findAllSubjectsOfStudyId(final Long studyId) {
 		List<SimpleSubjectDTO> simpleSubjectDTOList = new ArrayList<>();
 		List<SubjectStudy> studySubjects = subjectStudyRepository.findByStudyId(studyId);
-		Study studyWithTags = studyRepository.findStudyWithTagsById(studyId);
-		studySubjects.stream().forEach(ss -> ss.setStudy(studyWithTags));
 		if (studySubjects != null) {
+			Study studyWithTags = studyRepository.findStudyWithTagsById(studyId);
+			studySubjects.stream().forEach(ss -> ss.setStudy(studyWithTags));
 			for (SubjectStudy rel : studySubjects) {
 				SimpleSubjectDTO simpleSubjectDTO = new SimpleSubjectDTO();
 				if (studyId.equals(rel.getStudy().getId())) {

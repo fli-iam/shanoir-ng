@@ -205,7 +205,7 @@ public class EmailServiceImpl implements EmailService {
 			final String content = build("notifyCreateAccountRequest", variables);
 			messageHelper.setText(content, true);
 		};
-		LOG.info("User asked for an account: " + user.getUsername());
+		LOG.info("User asked for an account: {}", user.getUsername());
 		mailSender.send(messagePreparator);
 	}
 

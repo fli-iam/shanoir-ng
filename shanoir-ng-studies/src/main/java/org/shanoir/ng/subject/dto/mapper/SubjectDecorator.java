@@ -26,18 +26,17 @@ public class SubjectDecorator implements SubjectMapper {
 
 	@Override
 	public SubjectDTO subjectToSubjectDTONoStudies(Subject subject) {
-		final SubjectDTO subjectDTO = delegate.subjectToSubjectDTONoStudies(subject);
-		return subjectDTO;
+		return delegate.subjectToSubjectDTONoStudies(subject);
 	}
 	
 	@Override
 	public SubjectDTO subjectToSubjectDTO(Subject subject) {
-		final SubjectDTO subjectDTO = delegate.subjectToSubjectDTO(subject);
-		return subjectDTO;
+		return delegate.subjectToSubjectDTO(subject);
 	}
 
 	@Override
 	public List<SubjectDTO> subjectsToSubjectDTOs(List<Subject> subjects) {
 		return delegate.subjectsToSubjectDTOs(subjects);
 	}
+
 }
