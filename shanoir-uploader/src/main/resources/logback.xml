@@ -36,13 +36,13 @@
     </logger>
 
     <!-- Logger for org.dcm4che3.net.Dimse -->
-    <logger name="org.dcm4che3.net.Dimse" level="INFO" additivity="false">
+    <logger name="org.dcm4che3.net.Dimse" level="ERROR" additivity="false">
         <appender-ref ref="stdout" />
         <appender-ref ref="file" />
     </logger>
 
     <!-- Logger for org.dcm4che3.tool.storescp.StoreSCP -->
-    <logger name="org.dcm4che3.tool.storescp.StoreSCP" level="DEBUG" additivity="false">
+    <logger name="org.dcm4che3.tool.storescp.StoreSCP" level="ERROR" additivity="false">
         <appender-ref ref="stdout" />
         <appender-ref ref="file" />
     </logger>

@@ -207,6 +207,9 @@ public class QueryPACSService {
 	}
 
 	public DicomState queryCMOVE(String studyInstanceUID, String seriesInstanceUID) {
+		LOG.info("--------------------");
+		LOG.info("--- START C-MOVE ---");
+		LOG.info("--------------------");
 		DicomProgress progress = new DicomProgress();
 		progress.addProgressListener(new ProgressListener() {
 			@Override
@@ -221,7 +224,15 @@ public class QueryPACSService {
 		LOG.info("Calling PACS, C-MOVE for serie: {} of study: {}", seriesInstanceUID, studyInstanceUID);
 		AdvancedParams options = new AdvancedParams();
 		options.setTsuidOrder(AdvancedParams.IVR_LE_ONLY);
-		return CMove.process(options, calling, called, calledNameSCP, progress, params);
+		DicomState state = CMove.process(options, calling, called, calledNameSCP, progress, params);
+		while(Status.isPending(state.getStatus())) {
+			// wait here to finish one c-move after the other, avoid exception:
+			// Cannot close AutoCloseable org.dcm4che3.net.AssociationStateException: Sta1 - Idle
+		}
+		LOG.info("--------------------");
+		LOG.info("--- END C-MOVE -----");
+		LOG.info("--------------------");
+		return state;
 	}
 	
 	public boolean queryECHO(String calledAET, String hostName, int port, String callingAET) {
@@ -541,7 +552,7 @@ public class QueryPACSService {
 		}
 		List<Attributes> response = state.getDicomRSP();
 		LOG.info("C-FIND-RESPONSE NB. ELEMENTS: " + response.size());
-		LOG.info("C-FIND-RESPONSE CONTENT:\n" + response);
+		LOG.debug("C-FIND-RESPONSE CONTENT:\n" + response);
 		long finish = System.currentTimeMillis();
 		long timeElapsed = finish - start;
 		LOG.info("Duration of C-FIND: " + timeElapsed + "ms.");
