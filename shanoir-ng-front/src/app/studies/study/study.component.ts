@@ -538,20 +538,21 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     save(): Promise<Study> {
-        return super.save().then(result => {
+        return super.save(() => {
+            let uploads: Promise<void>[] = [];
             // Once the study is saved, save associated file if changed
             if (this.protocolFiles.length > 0) {
                 for (let file of this.protocolFiles) {
-                    this.studyService.uploadFile(file, this.entity.id, 'protocol-file');
+                    uploads.push(this.studyService.uploadFile(file, this.entity.id, 'protocol-file'));
                 }
             }
             if (this.dataUserAgreement) {
-                this.studyService.uploadFile(this.dataUserAgreement, this.entity.id, 'dua')
+                uploads.push(this.studyService.uploadFile(this.dataUserAgreement, this.entity.id, 'dua')
                     .catch(error => {
                         this.dataUserAgreement = null;
-                    });
+                    }));
             }
-            return result;
+            return Promise.all(uploads).then(() => null);
         }).then(study => {
             this.studyCardService.getAllForStudy(study.id).then(studyCards => {
                 if (!studyCards || studyCards.length == 0) {
