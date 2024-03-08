@@ -1,5 +1,8 @@
 package org.shanoir.ng.examination.schedule;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +21,11 @@ import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
+import com.opencsv.CSVWriter;
 
 import jakarta.transaction.Transactional;
 
@@ -49,6 +55,11 @@ import jakarta.transaction.Transactional;
 public class ExaminationsConsistencyChecker {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ExaminationsConsistencyChecker.class);
+	
+	private static final String ECC_CSV = "ecc.csv";
+
+	@Value("${logging.file.name}")
+    private String loggingFileName;
 
 	@Autowired
 	private ExaminationRepository examinationRepository;
@@ -82,6 +93,26 @@ public class ExaminationsConsistencyChecker {
 			for (Examination examination : examinationsToCheck) {
 				processExamination(latestCheckedExamination, examination);
 			}
+			
+			File datasetsLogFile = new File(loggingFileName);
+			if (datasetsLogFile.exists()) {
+				File parent = datasetsLogFile.getParentFile();
+				File csvFile = new File(parent.getAbsolutePath() + File.pathSeparator + ECC_CSV);
+				
+			}
+			
+	        
+//			try (CSVWriter writer = new CSVWriter(new FileWriter(filePath))) {
+//	            // Writing multi-column header to the CSV file
+//	            String[] header = data.get(0);
+//	            writer.writeNext(header);
+//
+//	            // Writing data (excluding the header) to the CSV file
+//	            data.subList(1, data.size()).forEach(writer::writeNext);
+//	        } catch (IOException e) {
+//	        	LOG.error(e.getMessage(), e);
+//	        }
+			
 			LOG.info("ExaminationsConsistencyChecker STOP...");
 		} catch(Exception e) {
 			LOG.info("ExaminationsConsistencyChecker STOPPED with exception...");
