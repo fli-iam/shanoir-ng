@@ -14,13 +14,10 @@
 
 package org.shanoir.ng.download;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.StringReader;
+import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
@@ -34,6 +31,7 @@ import java.util.zip.ZipOutputStream;
 import javax.json.Json;
 import javax.json.stream.JsonParser;
 
+import jakarta.mail.Multipart;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.json.JSONReader;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -124,7 +122,7 @@ public class WADODownloaderService {
 
 	@Autowired
 	private WADOURLHandler wadoURLHandler;
-	
+
 	@PostConstruct
 	public void initRestTemplate() {
 		restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
@@ -205,7 +203,7 @@ public class WADODownloaderService {
 		byte[] responseBody = null;
 		try {
 			responseBody = downloadFileFromPACS(url);
-			this.extractDICOMZipFromMHTMLFile(responseBody,  name, zipOutputStream);
+			this.extractDICOMZipFromMHTMLFile(responseBody,  name, zipOutputStream, url.contains(WADO_REQUEST_TYPE_WADO_RS));
 			return name + DCM;
 		} catch (IOException | MessagingException e) {
 			LOG.error("Error in downloading/writing file [{}] from pacs to zip", name, e);
@@ -259,7 +257,6 @@ public class WADODownloaderService {
 						File extractedDicomFile = new File(workFolder.getPath() + File.separator + name + DCM);
 
 						byte[] responseBody = downloadFileFromPACS(url);
-						extractDICOMFilesFromMHTMLFile(responseBody, sopInstanceUID, workFolder);
 						try (ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
 							Files.copy(bIS, extractedDicomFile.toPath());
 							files.add(extractedDicomFile);
@@ -350,6 +347,7 @@ public class WADODownloaderService {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_MULTIPART + "; type=" + CONTENT_TYPE_DICOM + ";");
 		HttpEntity<String> entity = new HttpEntity<>(headers);
+
 		ResponseEntity<byte[]> response = restTemplate.exchange(url,
 				HttpMethod.GET, entity, byte[].class, "1");
 		if (response.getStatusCode() == HttpStatus.OK) {
@@ -396,19 +394,22 @@ public class WADODownloaderService {
 			int count = multipart.getCount();
 			for (int i = 0; i < count; i++) {
 				BodyPart bodyPart = multipart.getBodyPart(i);
-				if (bodyPart.isMimeType(CONTENT_TYPE_DICOM) || bodyPart.isMimeType(CONTENT_TYPE_DICOM_XML)) {
-					File extractedDicomFile = null;
-					if (count == 1) {
-						extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + DCM);
-					} else {
-						extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + UNDER_SCORE + i + DCM);
-					}
-					Files.copy(bodyPart.getInputStream(), extractedDicomFile.toPath());
-				} else {
+				if (isNotOnlyDicom(bodyPart)) {
 					throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
 				}
+				File extractedDicomFile = null;
+				if (count == 1) {
+					extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + DCM);
+				} else {
+					extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + UNDER_SCORE + i + DCM);
+				}
+				Files.copy(bodyPart.getInputStream(), extractedDicomFile.toPath());
 			}
 		}
+	}
+
+	private boolean isNotOnlyDicom(BodyPart bodyPart) throws MessagingException {
+		return !bodyPart.isMimeType(CONTENT_TYPE_DICOM) && !bodyPart.isMimeType(CONTENT_TYPE_DICOM_XML);
 	}
 
 	/**
@@ -424,34 +425,42 @@ public class WADODownloaderService {
 	 * @throws IOException
 	 * @throws MessagingException
 	 */
-	private void extractDICOMZipFromMHTMLFile(final byte[] responseBody, String name, ZipOutputStream zipOutputStream)
+	private void extractDICOMZipFromMHTMLFile(final byte[] responseBody, String name, ZipOutputStream zipOutputStream, boolean isMultipart)
 			throws IOException, MessagingException {
 		try(ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
+			// Not multipart
+			if (!isMultipart) {
+				ZipEntry entry = new ZipEntry(name + DCM);
+				zipOutputStream.putNextEntry(entry);
+				bIS.transferTo(zipOutputStream);
+				zipOutputStream.closeEntry();
+				return;
+			}
 			ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, CONTENT_TYPE_MULTIPART);
 			MimeMultipart multipart = new MimeMultipart(datasource);
 			int count = multipart.getCount();
+			// Multipart but with a single body part
 			if (count == 1) {
 				BodyPart bodyPart = multipart.getBodyPart(0);
-				if (bodyPart.isMimeType(CONTENT_TYPE_DICOM) || bodyPart.isMimeType(CONTENT_TYPE_DICOM_XML)) {
-					ZipEntry entry = new ZipEntry(name + DCM);
-					zipOutputStream.putNextEntry(entry);
-					bodyPart.getInputStream().transferTo(zipOutputStream);
-					zipOutputStream.closeEntry();
-				} else {
+				if (isNotOnlyDicom(bodyPart)) {
 					throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
 				}
-			} else {
-				for (int i = 0; i < count; i++) {
-					BodyPart bodyPart = multipart.getBodyPart(i);
-					if (bodyPart.isMimeType(CONTENT_TYPE_DICOM) || bodyPart.isMimeType(CONTENT_TYPE_DICOM_XML)) {
-						ZipEntry entry = new ZipEntry(name + UNDER_SCORE + i + DCM);
-						zipOutputStream.putNextEntry(entry);
-						bodyPart.getInputStream().transferTo(zipOutputStream);
-						zipOutputStream.closeEntry();
-					} else {
-						throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
-					}
+				ZipEntry entry = new ZipEntry(name + DCM);
+				zipOutputStream.putNextEntry(entry);
+				bodyPart.getInputStream().transferTo(zipOutputStream);
+				zipOutputStream.closeEntry();
+				return;
+			}
+			// Multipart with multiple parts
+			for (int i = 0; i < count; i++) {
+				BodyPart bodyPart = multipart.getBodyPart(i);
+				if (isNotOnlyDicom(bodyPart)) {
+					throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
 				}
+				ZipEntry entry = new ZipEntry(name + UNDER_SCORE + i + DCM);
+				zipOutputStream.putNextEntry(entry);
+				bodyPart.getInputStream().transferTo(zipOutputStream);
+				zipOutputStream.closeEntry();
 			}
 		}
 	}
