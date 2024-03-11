@@ -9,17 +9,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.dcm4che3.net.Status;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.uploader.dicom.query.ConfigBean;
 import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.weasis.dicom.param.DicomNode;
-import org.weasis.dicom.param.DicomState;
 
 /**
  * This class is the communication interface to the DICOM server.
@@ -177,21 +175,14 @@ public class DicomServerClient implements IDicomServerClient {
 	}
 
 	private boolean getFilesFromServer(final String studyInstanceUID, final String seriesInstanceUID, final String seriesDescription) throws Exception {
-		final DicomState state;
 		try {
 			logger.info("\n C_MOVE, serie (" + seriesDescription + ") command: launching c-move with args: " + seriesDescription + ", " + seriesInstanceUID + "\n");
-			state = queryPACSService.queryCMOVE(studyInstanceUID, seriesInstanceUID);
-			logger.debug("\n Dicom Query list:\n " + state.toString() + "\n");
+			queryPACSService.queryCMOVE(studyInstanceUID, seriesInstanceUID);
 		} catch (final Exception e) {
 			logger.error(e.getMessage(), e);
 			return false;
 		}
-		if (state != null && state.getStatus() == Status.Success) {
-			return true;
-		} else {
-			logger.error("C_MOVE error: status: " + state.getStatus() + ", message: " + state.getMessage() + ", error comment: " + state.getProgress().getErrorComment());
-			return false;
-		}
+		return true;
 	}
 
 	/* (non-Javadoc)

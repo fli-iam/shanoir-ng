@@ -55,13 +55,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.weasis.dicom.op.CMove;
-import org.weasis.dicom.param.AdvancedParams;
 import org.weasis.dicom.param.DicomNode;
 import org.weasis.dicom.param.DicomParam;
 import org.weasis.dicom.param.DicomProgress;
 import org.weasis.dicom.param.DicomState;
-import org.weasis.dicom.param.ProgressListener;
 
 import jakarta.annotation.PostConstruct;
 
@@ -128,7 +125,7 @@ public class QueryPACSService {
 				calling.getAet(), calling.getHostname(), calling.getPort(), called.getAet(), called.getHostname(), called.getPort());
 	}
 	
-	private Association connectAssociation(DicomNode calling, DicomNode called) throws Exception {
+	private Association connectAssociation(DicomNode calling, DicomNode called, boolean cfind) throws Exception {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
         try {
@@ -146,12 +143,17 @@ public class QueryPACSService {
             AAssociateRQ aarq = new AAssociateRQ();
             aarq.setCallingAET(calling.getAet());
             aarq.setCalledAET(called.getAet());
-            aarq.addPresentationContext(new PresentationContext(1,
-                    UID.Verification, UID.ImplicitVRLittleEndian));
-            aarq.addPresentationContext(new PresentationContext(2,
-            		UID.PatientRootQueryRetrieveInformationModelFind, UID.ImplicitVRLittleEndian));
-            aarq.addPresentationContext(new PresentationContext(3,
-            		UID.StudyRootQueryRetrieveInformationModelFind, UID.ImplicitVRLittleEndian));
+            if (cfind) {
+	            aarq.addPresentationContext(new PresentationContext(1,
+	                    UID.Verification, UID.ImplicitVRLittleEndian));
+	            aarq.addPresentationContext(new PresentationContext(2,
+	            		UID.PatientRootQueryRetrieveInformationModelFind, UID.ImplicitVRLittleEndian));
+	            aarq.addPresentationContext(new PresentationContext(3,
+	            		UID.StudyRootQueryRetrieveInformationModelFind, UID.ImplicitVRLittleEndian));
+            } else {
+                aarq.addPresentationContext(new PresentationContext(1,
+                		UID.StudyRootQueryRetrieveInformationModelMove, UID.ImplicitVRLittleEndian));
+            }
             Association association = callingAE.connect(calledConn, aarq);
             LOG.info("connectAssociation finished between calling {} and called {}", calling.getAet(), called.getAet());
             return association;
@@ -166,7 +168,7 @@ public class QueryPACSService {
 		LOG.info("--- START C-FIND ---");
 		LOG.info("--------------------");
 		long start = System.currentTimeMillis();
-		Association association = connectAssociation(calling, called);
+		Association association = connectAssociation(calling, called, true);
 		ImportJob importJob = new ImportJob();
 		/**
 		 * In case of any patient specific search field is filled, work on patient level. Highest priority.
@@ -187,7 +189,7 @@ public class QueryPACSService {
 		releaseAssociation(association);
 		long finish = System.currentTimeMillis();
 		long timeElapsed = finish - start;
-		LOG.info("Duration of all calls of queryCFind " + timeElapsed + "ms.");
+		LOG.info("Duration of all calls of queryCFIND " + timeElapsed + "ms.");
 		LOG.info("--------------------");
 		LOG.info("--- END C-FIND -----");
 		LOG.info("--------------------");
@@ -206,33 +208,25 @@ public class QueryPACSService {
 		LOG.info("releaseAssociation finished between calling {} and called {}", calling.getAet(), called.getAet());
 	}
 
-	public DicomState queryCMOVE(String studyInstanceUID, String seriesInstanceUID) {
+	public void queryCMOVE(String studyInstanceUID, String seriesInstanceUID) throws Exception {
 		LOG.info("--------------------");
 		LOG.info("--- START C-MOVE ---");
 		LOG.info("--------------------");
-		DicomProgress progress = new DicomProgress();
-		progress.addProgressListener(new ProgressListener() {
-			@Override
-			public void handleProgression(DicomProgress progress) {
-				LOG.debug("Remaining operations:{}", progress.getNumberOfRemainingSuboperations());
-			}
-		});
+		long start = System.currentTimeMillis();
+		Association association = connectAssociation(calling, called, false);
 		DicomParam[] params = {
 			new DicomParam(Tag.QueryRetrieveLevel, "SERIES"),
 			new DicomParam(Tag.StudyInstanceUID, studyInstanceUID),
 			new DicomParam(Tag.SeriesInstanceUID, seriesInstanceUID) };
 		LOG.info("Calling PACS, C-MOVE for serie: {} of study: {}", seriesInstanceUID, studyInstanceUID);
-		AdvancedParams options = new AdvancedParams();
-		options.setTsuidOrder(AdvancedParams.IVR_LE_ONLY);
-		DicomState state = CMove.process(options, calling, called, calledNameSCP, progress, params);
-		while(Status.isPending(state.getStatus())) {
-			// wait here to finish one c-move after the other, avoid exception:
-			// Cannot close AutoCloseable org.dcm4che3.net.AssociationStateException: Sta1 - Idle
-		}
+		queryCMove(association, params);		
+		releaseAssociation(association);
+		long finish = System.currentTimeMillis();
+		long timeElapsed = finish - start;
+		LOG.info("Duration of all calls of queryCMOVE " + timeElapsed + "ms.");
 		LOG.info("--------------------");
 		LOG.info("--- END C-MOVE -----");
 		LOG.info("--------------------");
-		return state;
 	}
 	
 	public boolean queryECHO(String calledAET, String hostName, int port, String callingAET) {
@@ -240,7 +234,7 @@ public class QueryPACSService {
         try {
     		DicomNode called = new DicomNode(calledAET, hostName, port);
     		DicomNode calling = new DicomNode(callingAET);
-    		Association association = connectAssociation(calling, called);
+    		Association association = connectAssociation(calling, called, true);
         	association.cecho();
             releaseAssociation(association);
         } catch (Exception e) {
@@ -510,29 +504,9 @@ public class QueryPACSService {
 	 */
 	private List<Attributes> queryCFind(Association association, DicomParam[] params, QueryRetrieveLevel level) {
 		long start = System.currentTimeMillis();
-		String cuid = null;
-		if (level.equals(QueryRetrieveLevel.PATIENT)) {
-			cuid = UID.PatientRootQueryRetrieveInformationModelFind;
-		} else if (level.equals(QueryRetrieveLevel.STUDY)) {
-			cuid = UID.StudyRootQueryRetrieveInformationModelFind;
-		} else if (level.equals(QueryRetrieveLevel.SERIES)) {
-			cuid = UID.StudyRootQueryRetrieveInformationModelFind;
-		} else if (level.equals(QueryRetrieveLevel.IMAGE)) {
-			cuid = UID.StudyRootQueryRetrieveInformationModelFind;
-		}
+		String cuid = getCUID(level);
 		DicomState state = new DicomState(new DicomProgress());
-		DimseRSPHandler rspHandler = new DimseRSPHandler(association.nextMessageID()) {
-			@Override
-			public void onDimseRSP(Association as, Attributes cmd, Attributes data) {
-				super.onDimseRSP(as, cmd, data);
-				int status = cmd.getInt(Tag.Status, -1);
-				if (Status.isPending(status)) {
-			        state.addDicomRSP(data);
-				} else {
-					state.setStatus(status);
-				}
-			}
-		};
+		DimseRSPHandler rspHandler = createCFindRSPHandler(association, state);
 		try {
 			Attributes attributes = new Attributes();
 			attributes.setString(Tag.QueryRetrieveLevel, VR.CS, level.name());
@@ -558,7 +532,82 @@ public class QueryPACSService {
 		LOG.info("Duration of C-FIND: " + timeElapsed + "ms.");
 		return response;
 	}
-	
+
+	private String getCUID(QueryRetrieveLevel level) {
+		if (level.equals(QueryRetrieveLevel.PATIENT)) {
+			return UID.PatientRootQueryRetrieveInformationModelFind;
+		} else if (level.equals(QueryRetrieveLevel.STUDY)) {
+			return UID.StudyRootQueryRetrieveInformationModelFind;
+		} else if (level.equals(QueryRetrieveLevel.SERIES)) {
+			return UID.StudyRootQueryRetrieveInformationModelFind;
+		} else if (level.equals(QueryRetrieveLevel.IMAGE)) {
+			return UID.StudyRootQueryRetrieveInformationModelFind;
+		}
+		return null;
+	}
+
+	private DimseRSPHandler createCFindRSPHandler(Association association, DicomState state) {
+		DimseRSPHandler rspHandler = new DimseRSPHandler(association.nextMessageID()) {
+			@Override
+			public void onDimseRSP(Association as, Attributes cmd, Attributes data) {
+				super.onDimseRSP(as, cmd, data);
+				int status = cmd.getInt(Tag.Status, -1);
+				if (Status.isPending(status)) {
+			        state.addDicomRSP(data);
+				} else {
+					state.setStatus(status);
+				}
+			}
+		};
+		return rspHandler;
+	}
+
+	private List<Attributes> queryCMove(Association association, DicomParam[] params) {
+		long start = System.currentTimeMillis();
+		DicomState state = new DicomState(new DicomProgress());
+        DimseRSPHandler rspHandler = createCMoveRSPHandler(association, state);
+		Attributes attributes = new Attributes();
+		for (DicomParam p : params) {
+			addAttributes(attributes, p);
+		}
+		try {
+			association.cmove(UID.StudyRootQueryRetrieveInformationModelMove, Priority.NORMAL, attributes, null, calledNameSCP, rspHandler);
+	        if (association.isReadyForDataTransfer()) {
+	            association.waitForOutstandingRSP();
+	        }
+		} catch (IOException | InterruptedException e) {
+			LOG.error("Error in c-move query: ", e);
+		}
+		List<Attributes> response = state.getDicomRSP();
+		LOG.info("C-MOVE-RESPONSE NB. ELEMENTS: " + response.size());
+		LOG.debug("C-MOVE-RESPONSE CONTENT:\n" + response);
+		long finish = System.currentTimeMillis();
+		long timeElapsed = finish - start;
+		LOG.info("Duration of C-MOVE: " + timeElapsed + "ms.");
+		return response;
+	}
+
+	private DimseRSPHandler createCMoveRSPHandler(Association association, DicomState state) {
+		DimseRSPHandler rspHandler = new DimseRSPHandler(association.nextMessageID()) {
+            @Override
+            public void onDimseRSP(Association as, Attributes cmd, Attributes data) {
+                super.onDimseRSP(as, cmd, data);
+                DicomProgress p = state.getProgress();
+                if (p != null) {
+                    p.setAttributes(cmd);
+                    if (p.isCancel()) {
+                        try {
+                            this.cancel(as);
+                        } catch (IOException e) {
+                            LOG.error("Cancel C-MOVE", e);
+                        }
+                    }
+                }
+            }
+        };
+		return rspHandler;
+	}
+
     private void addAttributes(Attributes attrs, DicomParam param) {
         int tag = param.getTag();
         String[] ss = param.getValues();
