@@ -151,7 +151,7 @@ public class WADODownloaderService {
 		Set<String> zippedUrls = new HashSet<>();
 		long duplicates = 0;
 		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext(); i++) {
-			String url = ((URL) iterator.next()).toString();
+			String url = iterator.next().toString();
 			if (!zippedUrls.contains(url)) {
 				zippedUrls.add(url);
 				String sopInstanceUID = wadoURLHandler.extractUIDs(url)[2];
@@ -164,15 +164,15 @@ public class WADODownloaderService {
 						files.add(zipedFile);
 					}
 				} catch (ZipPacsFileException e) {
-					LOG.error("Could not download dataset as dicom", e);
-					downloadResult.update("Could not download dataset as dicom: " + e.getMessage(), DatasetDownloadError.PARTIAL_FAILURE);
+					LOG.error("Could not download dataset [{}] as dicom", dataset.getId(), e);
+					downloadResult.update("Could not download dataset [" + dataset.getId() + "] as dicom : " + e.getMessage(), DatasetDownloadError.PARTIAL_FAILURE);
 				}
 			} else {
 				duplicates++;
 			}
 		}
 		if (duplicates > 0) {
-			LOG.error("There were " + duplicates + " duplicate dataset_files when zipping dataset n°" + dataset.getId() + ", they were ignored.");
+			LOG.error("There were [" + duplicates + "] duplicate dataset_files when zipping dataset [" + dataset.getId() + "], they were ignored.");
 		}
 		return files;
 	}
@@ -208,7 +208,7 @@ public class WADODownloaderService {
 			this.extractDICOMZipFromMHTMLFile(responseBody,  name, zipOutputStream);
 			return name + DCM;
 		} catch (IOException | MessagingException e) {
-			LOG.error("Error in downloading/writing a file from pacs to zip", e);
+			LOG.error("Error in downloading/writing file [{}] from pacs to zip", name, e);
 			throw new ZipPacsFileException(e);
 		} catch (HttpClientErrorException e) {
 			throw new ZipPacsFileException("Received " + e.getStatusCode() + " from PACS", e);
@@ -265,12 +265,12 @@ public class WADODownloaderService {
 							files.add(extractedDicomFile);
 						}
 					} else {
-						downloadResult.update("URL for download is neither in WADO-RS nor in WADO-URI format", DatasetDownloadError.PARTIAL_FAILURE);
+						downloadResult.update("URL for download of dataset [" + dataset.getId() + "] is neither in WADO-RS nor in WADO-URI format", DatasetDownloadError.PARTIAL_FAILURE);
 					}
 				}
 			} catch (Exception e) {
-				LOG.error("A dicom file could not be downloaded from the pacs:", e);
-				downloadResult.update("A dicom file could not be downloaded from the pacs:" + e.getMessage(), DatasetDownloadError.PARTIAL_FAILURE);
+				LOG.error("A dicom file of dataset [{}] could not be downloaded from the pacs", dataset.getId(), e);
+				downloadResult.update("A dicom file of [" + dataset.getId() + "] could not be downloaded from the pacs :" + e.getMessage(), DatasetDownloadError.PARTIAL_FAILURE);
 			}
 		}
 		return files;
@@ -298,14 +298,13 @@ public class WADODownloaderService {
 				if (dicomAttributes != null) {
 					return dicomAttributes;
 				} else {
-					LOG.error("Could not find dicom attributes for dataset with id: " + dataset.getId());
+					LOG.error("Could not find dicom attributes for dataset [{}]", dataset.getId());
 				}
 			} else {
-				LOG.error("Could not find dicom attributes for dataset with id: " + dataset.getId()
-						+ " : no pacs url for this dataset");
+				LOG.error("Could not find dicom attributes for dataset [{}] : no pacs url for this dataset", dataset.getId());
 			}
 		} catch (IOException | MessagingException | RestClientException e) {
-			throw new PacsException("Can not get dicom attributes for dataset " + dataset.getId(), e);
+			throw new PacsException("Can not get dicom attributes for dataset [" + dataset.getId() + "]", e);
 		}
 		return null;
 	}
@@ -324,11 +323,11 @@ public class WADODownloaderService {
 				try {
 					dAcquisitionAttributes.addDatasetAttributes(dataset.getId(), getDicomAttributesForDataset(dataset));
 				} catch (PacsException e) {
-					throw new RuntimeException("could not get dicom attributes from pacs", e);
+					throw new RuntimeException("Could not get dataset [" + dataset.getId() + "] dicom attributes from pacs", e);
 				}
 			}
 		);
-		LOG.debug("get DICOM attributes for acquisition " + acquisition.getId() + " : " + (new Date().getTime() - ts) + " ms");
+		LOG.debug("get DICOM attributes for acquisition [" + acquisition.getId() + "] : " + (new Date().getTime() - ts) + " ms");
 		return dAcquisitionAttributes;
 	}
 
