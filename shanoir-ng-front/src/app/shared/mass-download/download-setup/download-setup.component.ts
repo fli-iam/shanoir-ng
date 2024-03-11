@@ -12,13 +12,15 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import {DatasetService, Format} from 'src/app/datasets/shared/dataset.service';
-import { GlobalService } from '../../services/global.service';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { AngularDeviceInformationService } from 'angular-device-information';
+import { DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
+import { DatasetType } from "../../../datasets/shared/dataset-type.model";
+import { Dataset } from "../../../datasets/shared/dataset.model";
 import { Option } from '../../select/select.component';
-import {Dataset} from "../../../datasets/shared/dataset.model";
-import {DatasetType} from "../../../datasets/shared/dataset-type.model";
+import { GlobalService } from '../../services/global.service';
+import { DownloadInputIds, DownloadSetup } from '../mass-download.service';
 
 @Component({
     selector: 'download-setup',
@@ -26,29 +28,21 @@ import {DatasetType} from "../../../datasets/shared/dataset-type.model";
     styleUrls: ['download-setup.component.css']
 })
 
-export class DownloadSetupComponent implements OnInit {
+export class DownloadSetupComponent implements OnChanges {
 
-    @Output() go: EventEmitter<{format: Format, converter: number, nbQueues: number, unzip: boolean, datasets: Dataset[]}> = new EventEmitter();
+    @Output() go: EventEmitter<DownloadSetup> = new EventEmitter();
     @Output() close: EventEmitter<void> = new EventEmitter();
-    @Input() studyId: number;
-    @Input() examinationId: number;
-    @Input() acquisitionId: number;
-    @Input() subjectId: number;
-    @Input() datasetIds: number[];
+    @Input() inputIds: DownloadInputIds;
     form: UntypedFormGroup;
     loading: boolean;
     format: Format;
     converter: number;
     datasets: Dataset[];
     hasDicom: boolean = false;
-
-    @ViewChild('window') window: ElementRef;
-
     formatOptions: Option<Format>[] = [
         new Option<Format>('dcm', 'Dicom', null, null, null, false),
         new Option<Format>('nii', 'Nifti', null, null, null, false),
     ];
-
     niftiConverters: Option<number>[] = [
         new Option<number>(1, 'DCM2NII_2008_03_31', null, null, null, false),
         new Option<number>(2, 'MCVERTER_2_0_7', null, null, null, false),
@@ -58,29 +52,41 @@ export class DownloadSetupComponent implements OnInit {
         new Option<number>(7, 'DICOMIFIER', null, null, null, false),
         new Option<number>(8, 'MRICONVERTER', null, null, null, false),
     ];
+    winOs: boolean;
+    @ViewChild('window') window: ElementRef;
 
-    constructor(private formBuilder: UntypedFormBuilder,
-                globalService: GlobalService,
-                private datasetService: DatasetService) {
+    constructor(
+            private formBuilder: UntypedFormBuilder, 
+            globalService: GlobalService, 
+            deviceInformationService: AngularDeviceInformationService,
+            private datasetService: DatasetService) {
+
         globalService.onNavigate.subscribe(() => {
             this.cancel();
         });
+        this.winOs = deviceInformationService.getDeviceInfo()?.os?.toLocaleLowerCase().includes('windows');
+        this.form = this.buildForm();
     }
 
-    ngOnInit(): void {
-        this.form = this.buildForm();
-        this.loading = true;
-        if (this.studyId) {
-            if (this.subjectId) {
-                this.datasetService.getByStudyIdAndSubjectId(this.studyId, this.subjectId).then(
-                    datasetsResult => {
-                        this.datasets = datasetsResult;
-                        this.hasDicom = this.hasDicomInDatasets(this.datasets);
-                        this.loading = false;
-                    }
-                );
-            } else {
-                this.datasetService.getByStudyId(this.studyId).then(
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes.inputIds?.currentValue) {
+            this.loading = true;
+            let fetchDatasets: Promise<Dataset[]>;
+            if (this.inputIds.studyId) {
+                if (this.inputIds.subjectId) {
+                    fetchDatasets = this.datasetService.getByStudyIdAndSubjectId(this.inputIds.studyId, this.inputIds.subjectId);
+                } else {
+                    fetchDatasets = this.datasetService.getByStudyId(this.inputIds.studyId);
+                }
+            } else if (this.inputIds.examinationId) {
+                fetchDatasets = this.datasetService.getByExaminationId(this.inputIds.examinationId);
+            } else if (this.inputIds.acquisitionId) {
+                fetchDatasets =this.datasetService.getByAcquisitionId(this.inputIds.acquisitionId);
+            } else if (this.inputIds.datasetIds) {
+                fetchDatasets =this.datasetService.getByIds(new Set(this.inputIds.datasetIds));
+            }
+            if (fetchDatasets) {
+                fetchDatasets.then(
                     datasetsResult => {
                         this.datasets = datasetsResult;
                         this.hasDicom = this.hasDicomInDatasets(this.datasets);
@@ -88,30 +94,6 @@ export class DownloadSetupComponent implements OnInit {
                     }
                 );
             }
-        } else if (this.examinationId) {
-            this.datasetService.getByExaminationId(this.examinationId).then(
-                datasetsResult => {
-                    this.datasets = datasetsResult;
-                    this.hasDicom = this.hasDicomInDatasets(this.datasets);
-                    this.loading = false;
-                }
-            );
-        } else if (this.acquisitionId) {
-            this.datasetService.getByAcquisitionId(this.acquisitionId).then(
-                datasetsResult => {
-                    this.datasets = datasetsResult;
-                    this.hasDicom = this.hasDicomInDatasets(this.datasets);
-                    this.loading = false;
-                }
-            );
-        } else if (this.datasetIds) {
-            this.datasetService.getByIds(new Set(this.datasetIds)).then(
-                datasetsResult => {
-                    this.datasets = datasetsResult;
-                    this.hasDicom = this.hasDicomInDatasets(this.datasets);
-                    this.loading = false;
-                }
-            );
         }
     }
 
@@ -122,17 +104,20 @@ export class DownloadSetupComponent implements OnInit {
             'nbQueues': [4, [Validators.required, Validators.min(1), Validators.max(1024)]],
             'unzip': [false, []],
         });
+        if (this.winOs) {
+            formGroup.addControl('shortPath', new UntypedFormControl(false));
+        }
         return formGroup;
     }
 
     downloadNow() {
-        this.go.emit({
-            format: this.form.get('format').value,
-            converter: (this.form.get('format').value == 'nii') ? this.form.get('converter').value : null,
-            nbQueues: this.form.get('nbQueues').value,
-            unzip: this.form.get('unzip').value,
-            datasets: this.datasets
-        });
+        let setup: DownloadSetup = new DownloadSetup(this.form.get('format').value);
+        setup.nbQueues = this.form.get('nbQueues').value;
+        setup.unzip = this.form.get('unzip').value;
+        setup.converter = (this.form.get('format').value == 'nii') ? this.form.get('converter').value : null;
+        if (this.form.get('shortPath')) setup.shortPath = this.form.get('shortPath').value;
+        setup.datasets = this.datasets;
+        this.go.emit(setup);
     }
 
     cancel() {

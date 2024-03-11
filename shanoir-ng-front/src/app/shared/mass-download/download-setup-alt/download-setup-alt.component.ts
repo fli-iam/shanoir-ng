@@ -12,13 +12,14 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import {DatasetService, Format} from 'src/app/datasets/shared/dataset.service';
-import { GlobalService } from '../../services/global.service';
+import { DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
+import { DatasetType } from "../../../datasets/shared/dataset-type.model";
+import { Dataset } from "../../../datasets/shared/dataset.model";
 import { Option } from '../../select/select.component';
-import {Dataset} from "../../../datasets/shared/dataset.model";
-import {DatasetType} from "../../../datasets/shared/dataset-type.model";
+import { GlobalService } from '../../services/global.service';
+import { DownloadInputIds } from '../mass-download.service';
 
 @Component({
     selector: 'download-setup-alt',
@@ -26,15 +27,11 @@ import {DatasetType} from "../../../datasets/shared/dataset-type.model";
     styleUrls: ['download-setup-alt.component.css']
 })
 
-export class DownloadSetupAltComponent implements OnInit {
+export class DownloadSetupAltComponent implements OnChanges {
 
     @Output() go: EventEmitter<{format: Format, converter: number, datasets: Dataset[]}> = new EventEmitter();
     @Output() close: EventEmitter<void> = new EventEmitter();
-    @Input() studyId: number;
-    @Input() examinationId: number;
-    @Input() acquisitionId: number;
-    @Input() subjectId: number;
-    @Input() datasetIds: number[];
+    @Input() inputIds: DownloadInputIds;
     form: UntypedFormGroup;
     @ViewChild('window') window: ElementRef;
     loading: boolean;
@@ -66,20 +63,25 @@ export class DownloadSetupAltComponent implements OnInit {
         });
     }
 
-    ngOnInit(): void {
-        this.form = this.buildForm();
-        this.loading = true;
-        if (this.studyId) {
-            if (this.subjectId) {
-                this.datasetService.getByStudyIdAndSubjectId(this.studyId, this.subjectId).then(
-                    datasetsResult => {
-                        this.datasets = datasetsResult;
-                        this.hasDicom = this.hasDicomInDatasets(this.datasets);
-                        this.loading = false;
-                    }
-                );
-            } else {
-                this.datasetService.getByStudyId(this.studyId).then(
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes.inputIds?.currentValue) {
+            this.loading = true;
+            let fetchDatasets: Promise<Dataset[]>;
+            if (this.inputIds.studyId) {
+                if (this.inputIds.subjectId) {
+                    fetchDatasets = this.datasetService.getByStudyIdAndSubjectId(this.inputIds.studyId, this.inputIds.subjectId);
+                } else {
+                    fetchDatasets = this.datasetService.getByStudyId(this.inputIds.studyId);
+                }
+            } else if (this.inputIds.examinationId) {
+                fetchDatasets = this.datasetService.getByExaminationId(this.inputIds.examinationId);
+            } else if (this.inputIds.acquisitionId) {
+                fetchDatasets =this.datasetService.getByAcquisitionId(this.inputIds.acquisitionId);
+            } else if (this.inputIds.datasetIds) {
+                fetchDatasets =this.datasetService.getByIds(new Set(this.inputIds.datasetIds));
+            }
+            if (fetchDatasets) {
+                fetchDatasets.then(
                     datasetsResult => {
                         this.datasets = datasetsResult;
                         this.hasDicom = this.hasDicomInDatasets(this.datasets);
@@ -87,30 +89,6 @@ export class DownloadSetupAltComponent implements OnInit {
                     }
                 );
             }
-        } else if (this.examinationId) {
-            this.datasetService.getByExaminationId(this.examinationId).then(
-                datasetsResult => {
-                    this.datasets = datasetsResult;
-                    this.hasDicom = this.hasDicomInDatasets(this.datasets);
-                    this.loading = false;
-                }
-            );
-        } else if (this.acquisitionId) {
-            this.datasetService.getByAcquisitionId(this.acquisitionId).then(
-                datasetsResult => {
-                    this.datasets = datasetsResult;
-                    this.hasDicom = this.hasDicomInDatasets(this.datasets);
-                    this.loading = false;
-                }
-            );
-        } else if (this.datasetIds) {
-            this.datasetService.getByIds(new Set(this.datasetIds)).then(
-                datasetsResult => {
-                    this.datasets = datasetsResult;
-                    this.hasDicom = this.hasDicomInDatasets(this.datasets);
-                    this.loading = false;
-                }
-            );
         }
     }
 

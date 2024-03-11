@@ -28,6 +28,15 @@
                         </span>
                     </span>
                 </li>
+                <li *ngIf="winOs">
+                    <label>
+                        Short paths
+                        <tool-tip>Windows cannot unzip files to a path longer than 260 characters. If you encounter this problem while trying to download and/or unzip files, you may try this option (and / or choose a target directory with a shorter path).</tool-tip>
+                    </label>
+                    <span class="right-col">
+                        <checkbox formControlName="shortPath"></checkbox>
+                    </span>
+                </li>
             </ol>
         </fieldset>
         <div class="footer">

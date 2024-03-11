@@ -30,8 +30,9 @@ export type Format = 'nii' | 'dcm';
 
 @Injectable()
 export class DatasetService extends EntityService<Dataset> {
-
-    API_URL = AppUtils.BACKEND_API_DATASET_URL;
+    
+    readonly API_URL = AppUtils.BACKEND_API_DATASET_URL;
+    readonly MAX_DATASETS_IN_ZIP_DL: number = 500;
 
     httpOptions = {
         headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -112,6 +113,11 @@ export class DatasetService extends EntityService<Dataset> {
             .then(dtos => this.datasetDTOService.toEntityList(Array.from(dtos)));
     }
 
+    countDatasetsByStudyId(studyId: number): Promise<number> {
+        return this.http.get<number>(AppUtils.BACKEND_API_DATASET_URL + '/study/nb-datasets/' + studyId)
+        .toPromise();
+    }
+    
     public downloadDatasets(ids: number[], format: string, converter ? : number, state?: TaskState): Observable<TaskState> {
         const formData: FormData = new FormData();
         formData.set('datasetIds', ids.join(","));

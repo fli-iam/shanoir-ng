@@ -301,23 +301,6 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     }
 
     storageVolumePrettyPrint(size: number) {
-
-        const base: number = 1024;
-        const units: string[] = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-
-        if(size == null){
-            return "";
-        }
-
-        if(size == 0){
-            return "0 " + units[0];
-        }
-
-        const exponent: number = Math.floor(Math.log(size) / Math.log(base));
-        let value: number = parseFloat((size / Math.pow(base, exponent)).toFixed(2));
-        let unit: string = units[exponent];
-
-        return value + " " + unit;
-
+        return AppUtils.getSizeStr(size);
     }
 }
