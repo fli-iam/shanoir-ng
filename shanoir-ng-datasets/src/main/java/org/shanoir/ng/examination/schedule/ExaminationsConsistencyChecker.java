@@ -82,7 +82,7 @@ public class ExaminationsConsistencyChecker {
             return;
         }
 		try {
-			LOG.info("ExaminationsConsistencyChecker START...");
+			LOG.info("START...");
 			List<Examination> examinationsToCheck;
 			LatestCheckedExamination latestCheckedExamination =
 					latestCheckedExaminationRepository.findTopByOrderByIdDesc().orElse(null);
@@ -92,9 +92,9 @@ public class ExaminationsConsistencyChecker {
 				examinationsToCheck = examinationRepository.findAll();
 			}
 			checkExaminations(examinationsToCheck, latestCheckedExamination);
-			LOG.info("ExaminationsConsistencyChecker STOP...");
+			LOG.info("STOP...");
 		} catch(Exception e) {
-			LOG.info("ExaminationsConsistencyChecker STOPPED with exception...");
+			LOG.info("STOPPED with exception...");
 			LOG.error(e.getMessage(), e);
 		} finally {
 			isTaskRunning.set(false);			
@@ -107,7 +107,7 @@ public class ExaminationsConsistencyChecker {
 			File datasetsLogFile = new File(loggingFileName);
 			if (datasetsLogFile.exists()) {
 				File parent = datasetsLogFile.getParentFile();
-				File csvFile = new File(parent.getAbsolutePath() + File.pathSeparator + ECC + examinationsToCheck.get(0).getId() + CSV);
+				File csvFile = new File(parent.getAbsolutePath() + File.separator + ECC + examinationsToCheck.get(0).getId() + CSV);
 				if (csvFile.createNewFile()) {
 					try (CSVWriter writer = new CSVWriter(new FileWriter(csvFile))) {
 						for (Examination examination : examinationsToCheck) {
@@ -119,7 +119,7 @@ public class ExaminationsConsistencyChecker {
 				}
 			}				
 		} else {
-			LOG.info("ExaminationsConsistencyChecker : no new examinations found.");
+			LOG.info("No new examinations found.");
 		}
 	}
 
