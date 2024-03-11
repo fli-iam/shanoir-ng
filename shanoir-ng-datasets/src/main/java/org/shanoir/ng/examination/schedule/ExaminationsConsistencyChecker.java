@@ -56,7 +56,9 @@ public class ExaminationsConsistencyChecker {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ExaminationsConsistencyChecker.class);
 	
-	private static final String ECC_CSV = "ecc.csv";
+	private static final String ECC = "ecc_";
+	
+	private static final String CSV = ".csv";
 
 	@Value("${logging.file.name}")
     private String loggingFileName;
@@ -81,38 +83,15 @@ public class ExaminationsConsistencyChecker {
         }
 		try {
 			LOG.info("ExaminationsConsistencyChecker START...");
+			List<Examination> examinationsToCheck;
 			LatestCheckedExamination latestCheckedExamination =
 					latestCheckedExaminationRepository.findTopByOrderByIdDesc().orElse(null);
-			List<Examination> examinationsToCheck;
 			if (latestCheckedExamination != null) {
 				examinationsToCheck = examinationRepository.findByIdGreaterThan(latestCheckedExamination.getExaminationId());
 			} else {
 				examinationsToCheck = examinationRepository.findAll();
 			}
-	
-			for (Examination examination : examinationsToCheck) {
-				processExamination(latestCheckedExamination, examination);
-			}
-			
-			File datasetsLogFile = new File(loggingFileName);
-			if (datasetsLogFile.exists()) {
-				File parent = datasetsLogFile.getParentFile();
-				File csvFile = new File(parent.getAbsolutePath() + File.pathSeparator + ECC_CSV);
-				
-			}
-			
-	        
-//			try (CSVWriter writer = new CSVWriter(new FileWriter(filePath))) {
-//	            // Writing multi-column header to the CSV file
-//	            String[] header = data.get(0);
-//	            writer.writeNext(header);
-//
-//	            // Writing data (excluding the header) to the CSV file
-//	            data.subList(1, data.size()).forEach(writer::writeNext);
-//	        } catch (IOException e) {
-//	        	LOG.error(e.getMessage(), e);
-//	        }
-			
+			checkExaminations(examinationsToCheck, latestCheckedExamination);
 			LOG.info("ExaminationsConsistencyChecker STOP...");
 		} catch(Exception e) {
 			LOG.info("ExaminationsConsistencyChecker STOPPED with exception...");
@@ -122,15 +101,39 @@ public class ExaminationsConsistencyChecker {
 		}
 	}
 
-	private void processExamination(LatestCheckedExamination latestCheckedExamination,
-			Examination examination) {
+	private void checkExaminations(List<Examination> examinationsToCheck,
+			LatestCheckedExamination latestCheckedExamination) throws IOException {
+		if (!examinationsToCheck.isEmpty()) {
+			File datasetsLogFile = new File(loggingFileName);
+			if (datasetsLogFile.exists()) {
+				File parent = datasetsLogFile.getParentFile();
+				File csvFile = new File(parent.getAbsolutePath() + File.pathSeparator + ECC + examinationsToCheck.get(0).getId() + CSV);
+				if (csvFile.createNewFile()) {
+					try (CSVWriter writer = new CSVWriter(new FileWriter(csvFile))) {
+						for (Examination examination : examinationsToCheck) {
+							checkExamination(latestCheckedExamination, examination, writer);
+						}
+			        } catch (IOException e) {
+			        	LOG.error(e.getMessage(), e);
+			        }
+				}
+			}				
+		} else {
+			LOG.info("ExaminationsConsistencyChecker : no new examinations found.");
+		}
+	}
+
+	private void checkExamination(LatestCheckedExamination latestCheckedExamination,
+			Examination examination, CSVWriter writer) {
 		LOG.info("Processing examination with ID: " + examination.getId());
 		List<String> filesInPACS = new ArrayList<String>();
 		boolean checked = checkExamination(examination, filesInPACS);
 		if (checked) {
 			LOG.info("Examination {} references {} files in PACS.", examination.getId(), filesInPACS.size());
 			if (!filesInPACS.isEmpty()) {
-				checkStudyInstanceUIDs(examination, filesInPACS);
+				boolean uidsOK = checkStudyInstanceUIDs(examination, filesInPACS);
+				String[] lineInCSV = { examination.getId().toString(), ""+filesInPACS.size(), ""+uidsOK};
+	            writer.writeNext(lineInCSV);
 			}
 			if (latestCheckedExamination == null) {
 				latestCheckedExamination = new LatestCheckedExamination();
@@ -140,7 +143,7 @@ public class ExaminationsConsistencyChecker {
 		}
 	}
 
-	private void checkStudyInstanceUIDs(Examination examination, List<String> filesInPACS) {
+	private boolean checkStudyInstanceUIDs(Examination examination, List<String> filesInPACS) {
 		Set<String> studyInstanceUIDs = ConcurrentHashMap.newKeySet();
 		filesInPACS.parallelStream().forEach(f -> {
 			String studyInstanceUID = wadoURLHandler.extractUIDs(f)[0];
@@ -148,13 +151,16 @@ public class ExaminationsConsistencyChecker {
 		});
 		if (studyInstanceUIDs.isEmpty()) {
 			LOG.error("Examination {} contains NULL StudyInstanceUIDs.");
+			return false;
 		} else if (studyInstanceUIDs.size() > 1) {
-			LOG.error("Examination {} contains multiple StudyInstanceUIDs ({}).", examination.getId(), studyInstanceUIDs.size());						
+			LOG.error("Examination {} contains multiple StudyInstanceUIDs ({}).", examination.getId(), studyInstanceUIDs.size());
+			return false;
 		} else {
 			String studyInstanceUID = studyInstanceUIDs.iterator().next();
 			LOG.info("Examination {} StudyInstanceUID updated in database: {}", studyInstanceUID);
 			examination.setStudyInstanceUID(studyInstanceUID);
 			examinationRepository.save(examination);
+			return true;
 		}
 	}
 	
