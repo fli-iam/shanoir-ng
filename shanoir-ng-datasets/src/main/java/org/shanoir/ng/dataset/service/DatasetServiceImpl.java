@@ -156,6 +156,11 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
+	public int countByStudyId(Long studyId) {
+		return repository.countByDatasetAcquisition_Examination_Study_Id(studyId);
+	}
+
+	@Override
 	public List<Dataset> findByIdIn(List<Long> ids) {
 		return Utils.toList(repository.findAllById(ids));
 	}

@@ -282,6 +282,14 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
+	public ResponseEntity<Integer> findNbDatasetByStudyId(
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+		
+		final int nbDatasets = datasetService.countByStudyId(studyId);
+		return new ResponseEntity<Integer>(nbDatasets, HttpStatus.OK);
+	}
+
+	@Override
 	public ResponseEntity<List<Long>> findDatasetIdsBySubjectIdStudyId(
 			@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
