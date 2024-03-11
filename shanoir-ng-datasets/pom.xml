@@ -28,7 +28,9 @@
 
 	<properties>
 		<solrj.version>9.2.1</solrj.version>
-		<spring.data.solr.version>4.3.15</spring.data.solr.version>		
+		<spring.data.solr.version>4.3.15</spring.data.solr.version>
+		<orika.version>1.5.4</orika.version>
+		<opencsv.version>5.7.1</opencsv.version>
 	</properties>
 
 	<dependencies>
@@ -127,7 +129,13 @@
 		<dependency>
 			<groupId>ma.glasnost.orika</groupId>
 			<artifactId>orika-core</artifactId>
-			<version>1.5.4</version>
+			<version>${orika.version}</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>com.opencsv</groupId>
+		    <artifactId>opencsv</artifactId>
+		    <version>${opencsv.version}</version>
 		</dependency>
 	</dependencies>
 
@@ -179,4 +187,5 @@
 			</plugin>
 		</plugins>
 	</build>
+
 </project>
