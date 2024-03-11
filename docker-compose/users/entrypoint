@@ -27,6 +27,8 @@ dev|init)
 	;;
 esac
 
+# Rabbit MQ default environnement variable to set
+export SPRING_AMQP_DESERIALIZATION_TRUST_ALL=true
 
 # TLS server certificate management
 # ---------------------------------

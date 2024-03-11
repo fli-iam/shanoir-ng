@@ -1,10 +1,10 @@
 import {GroupByEnum} from "./groupby.enum";
 
-export class ParameterResourcesDto {
+export class DatasetParameterDTO {
 
-    parameter: string;
-    resourceIds : string[];
+    name: string;
     groupBy: GroupByEnum;
+    exportFormat: string;
     datasetIds : number[];
 
 }

@@ -1,6 +1,6 @@
 /**
  * Shanoir NG - Import, manage and share neuroimaging data
- * Copyright (C) 2009-2022 Inria - https://www.inria.fr/
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -11,13 +11,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { DescriptorAssertions } from './descriptorAssertions';
 
-export interface DescriptorTests { 
-    /**
-     * Name of the test-case
-     */
-    name: string;
-    invocation: any;
-    assertions: DescriptorAssertions;
+package org.shanoir.ng.study.repository;
+
+import java.util.List;
+
+import org.shanoir.ng.study.dto.StudyStatisticsDTO;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface StudyRepositoryCustom {
+	
+	/**
+	 * Lists all datasets from a study with associated modality type and quality tags
+	 * 
+	 */
+	List<StudyStatisticsDTO> queryStudyStatistics(Long studyId) throws Exception;
+
 }

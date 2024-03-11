@@ -26,6 +26,8 @@ export enum TaskStatus {
 
 export class TaskState {
 
+    errors: any;
+
     constructor(public status?: TaskStatus, public progress?: number) {}
 
     isActive(): boolean {
