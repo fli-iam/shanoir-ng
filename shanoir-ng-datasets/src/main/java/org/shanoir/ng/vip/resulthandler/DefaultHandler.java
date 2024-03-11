@@ -5,6 +5,7 @@ import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.shanoir.ng.dataset.modality.GenericDataset;
 import org.shanoir.ng.dataset.modality.MeshDataset;
 import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -191,7 +192,7 @@ public class DefaultHandler extends ResultHandler {
 			processedDataset.setProcessedDatasetType(ProcessedDatasetType.EXECUTION_RESULT);
 			processedDataset.setStudyId(studyId);
 			processedDataset.setStudyName(study.getName());
-			processedDataset.setProcessedDatasetName(execution.getName());
+			processedDataset.setProcessedDatasetName(file.getName());
 
 			if(!inputDatasets.isEmpty()) {
 
@@ -207,11 +208,11 @@ public class DefaultHandler extends ResultHandler {
 					processedDataset.setSubjectName(subject.getName());
 					processedDataset.setDatasetType(inputDatasets.get(0).getType());
 				} else {
-					processedDataset.setDatasetType(MeshDataset.datasetType);
+					processedDataset.setDatasetType(GenericDataset.datasetType);
 				}
 			} else {
 				// default ?
-				processedDataset.setDatasetType(MeshDataset.datasetType);
+				processedDataset.setDatasetType(GenericDataset.datasetType);
 			}
 
 			importerService.createProcessedDataset(processedDataset);
