@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { AngularDeviceInformationService } from 'angular-device-information';
 import { DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
@@ -28,7 +28,7 @@ import { DownloadInputIds, DownloadSetup } from '../mass-download.service';
     styleUrls: ['download-setup.component.css']
 })
 
-export class DownloadSetupComponent implements OnChanges {
+export class DownloadSetupComponent implements OnInit {
 
     @Output() go: EventEmitter<DownloadSetup> = new EventEmitter();
     @Output() close: EventEmitter<void> = new EventEmitter();
@@ -68,8 +68,8 @@ export class DownloadSetupComponent implements OnChanges {
         this.form = this.buildForm();
     }
 
-    ngOnChanges(changes: SimpleChanges): void {
-        if (changes.inputIds?.currentValue) {
+    ngOnInit(): void {
+        if (this.inputIds) {
             this.loading = true;
             let fetchDatasets: Promise<Dataset[]>;
             if (this.inputIds.studyId) {

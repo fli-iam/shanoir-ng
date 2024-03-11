@@ -200,6 +200,7 @@ export class MassDownloadService {
      * This method is the main entrypoint to download initially datasets
      */
     private _downloadDatasets(setup: DownloadSetup, downloadState?: TaskState, task?: Task, report?: Report, parentHandle?: FileSystemDirectoryHandle): Promise<void> {
+        if (!setup?.datasets) throw new Error('datasets can\'t be null here');
         if (setup.datasets.length == 0) return;
         let datasetIds = setup.datasets.map(ds => ds.id); // copy array
         let directoryHandlePromise: Promise<FileSystemDirectoryHandle>;
