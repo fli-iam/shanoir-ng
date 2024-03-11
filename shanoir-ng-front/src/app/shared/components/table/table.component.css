@@ -128,3 +128,11 @@ tr.opened { border-left: 1px solid var(--grey); border-top: 1px solid var(--grey
 .block i, .block .label { white-space: nowrap; }
 .dark { color:white; }
 .table-edit { height: auto !important; }
+
+ input[type="number"] {
+     -moz-appearance: textfield;
+ }
+ input[type="number"]:hover,
+ input[type="number"]:focus {
+     -moz-appearance: number-input;
+ }
