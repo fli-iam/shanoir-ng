@@ -70,7 +70,6 @@ export class DownloadSetupComponent implements OnInit {
 
     ngOnInit(): void {
         if (this.inputIds) {
-            this.loading = true;
             let fetchDatasets: Promise<Dataset[]>;
             if (this.inputIds.studyId) {
                 if (this.inputIds.subjectId) {
@@ -86,13 +85,15 @@ export class DownloadSetupComponent implements OnInit {
                 fetchDatasets =this.datasetService.getByIds(new Set(this.inputIds.datasetIds));
             }
             if (fetchDatasets) {
+                this.loading = true;
                 fetchDatasets.then(
                     datasetsResult => {
                         this.datasets = datasetsResult;
                         this.hasDicom = this.hasDicomInDatasets(this.datasets);
-                        this.loading = false;
                     }
-                );
+                ).finally(() => {
+                    this.loading = false;
+                });
             }
         }
     }

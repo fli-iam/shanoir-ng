@@ -61,11 +61,11 @@ export class DownloadSetupAltComponent implements OnInit {
         globalService.onNavigate.subscribe(() => {
             this.cancel();
         });
+        this.form = this.buildForm();
     }
 
     ngOnInit(): void {
         if (this.inputIds) {
-            this.loading = true;
             let fetchDatasets: Promise<Dataset[]>;
             if (this.inputIds.studyId) {
                 if (this.inputIds.subjectId) {
@@ -81,13 +81,15 @@ export class DownloadSetupAltComponent implements OnInit {
                 fetchDatasets =this.datasetService.getByIds(new Set(this.inputIds.datasetIds));
             }
             if (fetchDatasets) {
+                this.loading = true;
                 fetchDatasets.then(
                     datasetsResult => {
                         this.datasets = datasetsResult;
                         this.hasDicom = this.hasDicomInDatasets(this.datasets);
-                        this.loading = false;
                     }
-                );
+                ).finally(() => {
+                    this.loading = false;
+                });
             }
         }
     }
