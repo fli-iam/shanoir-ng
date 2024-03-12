@@ -90,6 +90,7 @@ public class DatasetServiceImpl implements DatasetService {
 	private DatasetProcessingService processingService;
 
 	@Override
+	@Transactional
 	public void deleteById(final Long id) throws ShanoirException, SolrServerException, IOException, RestServiceException {
 
 		List<Dataset> childDatasets = repository.findBySourceId(id);
