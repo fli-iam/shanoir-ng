@@ -44,17 +44,17 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
 
 			dto.setStudyId((Long) row[0]);
 			dto.setCenterId((Long) row[1]);
-			dto.setCenterName((String) row[2]);
+			dto.setCenterName(String.valueOf(row[2]));
 			dto.setCenterPrefix(String.valueOf(row[3]));
 			dto.setSubjectId((Long) row[4]);
-			dto.setCommonName((String) row[5]);
+			dto.setCommonName(String.valueOf(row[5]));
 			dto.setExaminationId((Long) row[6]);
 			dto.setExaminationDate((Date) row[7]);
 			dto.setDatasetAcquisitionId((Long) row[8]);
 			dto.setImportDate((Date) row[9]);
 			dto.setDatasetId((Long) row[10]);
-			dto.setModality((String) row[11]);
-			dto.setQuality((String) row[12]);
+			dto.setModality(String.valueOf(row[11]));
+			dto.setQuality(String.valueOf(row[12]));
 
 			studyStatisticsList.add(dto);
 
