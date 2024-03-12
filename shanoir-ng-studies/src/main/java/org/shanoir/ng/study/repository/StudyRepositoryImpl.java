@@ -5,8 +5,9 @@ import jakarta.persistence.ParameterMode;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.StoredProcedureQuery;
 import org.springframework.stereotype.Component;
-
 import org.shanoir.ng.study.dto.StudyStatisticsDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,8 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
 
     @PersistenceContext
     private EntityManager entityManager;
+
+	private static final Logger LOG = LoggerFactory.getLogger(StudyRepositoryImpl.class);
 
 	@Override
 	public List<StudyStatisticsDTO> queryStudyStatistics(Long studyId) throws Exception {
@@ -39,6 +42,20 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
 		List<StudyStatisticsDTO> studyStatisticsList = new ArrayList<>();
 
 		for (Object[] row : results) {
+
+			LOG.error("Index : 0 - value {}", row[0]);
+			LOG.error("Index : 1 - value {}", row[1]);
+			LOG.error("Index : 2 - value {}", row[2]);
+			LOG.error("Index : 3 - value {}", row[3]);
+			LOG.error("Index : 4 - value {}", row[4]);
+			LOG.error("Index : 5 - value {}", row[5]);
+			LOG.error("Index : 6 - value {}", row[6]);
+			LOG.error("Index : 7 - value {}", row[7]);
+			LOG.error("Index : 8 - value {}", row[8]);
+			LOG.error("Index : 9 - value {}", row[9]);
+			LOG.error("Index : 10 - value {}", row[10]);
+			LOG.error("Index : 11 - value {}", row[11]);
+			LOG.error("Index : 12 - value {}", row[12]);
 
 			StudyStatisticsDTO dto = new StudyStatisticsDTO();
 
