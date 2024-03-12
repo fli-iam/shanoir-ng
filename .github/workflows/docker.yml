@@ -50,10 +50,10 @@ jobs:
       - name: Maven build
         run: mvn -f ./shanoir-ng-parent/pom.xml install -DskipTests
  
-      # Install the cosign tool except on PR
+      # Install the cosign tool (except on PR)
       # https://github.com/sigstore/cosign-installer
       - name: Install cosign
-        #if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request'
         uses: sigstore/cosign-installer@6e04d228eb30da1757ee4e1dd75a0ec73a653e06 #v3.1.1
         with:
           cosign-release: 'v2.1.1'
@@ -73,7 +73,6 @@ jobs:
 
         # note: we should rather use buildx bake when it is no longer experimental
       - name: Build, push & sign docker images
-        if: github.event_name != 'pull_request'
         shell: python
         run: |
           import json
@@ -108,8 +107,8 @@ jobs:
                 f"docker-compose/{image}"])
               digest = json.load(open(f"{tmp}/mdf"))["containerimage.digest"]
 
-              sys.stderr.write(f"#\n#   Signing {image}:{tag}\n#\n")
-              subprocess.call(["date"])
-              subprocess.check_call(["cosign", "sign", "--yes", "--tlog-upload=false", f"{repo}:{tag}@{digest}"])
+              if env['GITHUB_EVENT_NAME'] != "pull_request":
+                sys.stderr.write(f"#\n#   Signing {image}:{tag}\n#\n")
+                subprocess.check_call(["cosign", "sign", "--yes", "--tlog-upload=false", f"{repo}:{tag}@{digest}"])
             
 
