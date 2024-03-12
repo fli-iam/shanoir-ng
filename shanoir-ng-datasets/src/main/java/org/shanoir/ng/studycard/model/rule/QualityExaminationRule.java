@@ -154,12 +154,12 @@ public class QualityExaminationRule extends AbstractEntity {
         ConditionResult condResult = new ConditionResult();
         Collections.sort(conditions, new ConditionComparator()); // sort by level
         boolean pilotedByDicomAttributes;
-        ExaminationAttributes<Long> examinationAttributesCache = new ExaminationAttributes<Long>();
+        ExaminationAttributes<Long> examinationAttributesCache = new ExaminationAttributes<Long>(downloader.getWadoURLHandler());
         if (dicomAttributes != null) {
             pilotedByDicomAttributes = true;
         } else {
             pilotedByDicomAttributes = false;
-            examinationAttributesCache = new ExaminationAttributes<Long>();
+            examinationAttributesCache = new ExaminationAttributes<Long>(downloader.getWadoURLHandler());
         }
         for (StudyCardCondition condition : getConditions()) {
             StringBuffer msg = new StringBuffer();

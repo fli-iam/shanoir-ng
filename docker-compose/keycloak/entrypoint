@@ -42,16 +42,19 @@ export KC_SPI_THEME_WELCOME_THEME="shanoir-theme"
 # - since the 'nginx' container does not expose the master realm to the
 #   outside, disabling strict checking allows us to reach the admin console
 #   at http://localhost:8080/auth/admin/
-export KC_HOSTNAME_STRICT="${KC_HOSTNAME_STRICT:false}"
-export KC_HOSTNAME_STRICT_HTTPS="${KC_HOSTNAME_STRICT_HTTPS:false}"
+export KC_HOSTNAME_STRICT=false
+export KC_HOSTNAME_STRICT_BACKCHANNEL=false
+
 
 export KC_DB_URL=jdbc:mysql://"${DB_ADDR:-${SHANOIR_PREFIX}keycloak-database}":"${DB_PORT:-3306}"/"${DB_DATABASE:-keycloak}"
 export KC_DB_USERNAME="${DB_USER:-keycloak}"
 export KC_DB_PASSWORD="${DB_PASSWORD:-password}"
 
+# creation of the admin account
+export KEYCLOAK_ADMIN="$SHANOIR_KEYCLOAK_USER"
+export KEYCLOAK_ADMIN_PASSWORD="$SHANOIR_KEYCLOAK_PASSWORD"
 
 require  SHANOIR_MIGRATION
-patterns=()
 STARTED_PATTERN=' \[io.quarkus\] \(main\) Keycloak .* started in [0-9.]+*s'
 extra=("-Dms.users.url=http://${SHANOIR_PREFIX}users:9901"
        "-Dallowed.admin.ips=${SHANOIR_ALLOWED_ADMIN_IPS}")
@@ -59,37 +62,21 @@ extra=("-Dms.users.url=http://${SHANOIR_PREFIX}users:9901"
 case "$SHANOIR_MIGRATION" in
 auto|dev)
 	# create the shanoir-ng realm if it does not exist yet
-	extra+=("-Dkeycloak.import=/tmp/import/shanoir-ng-realm.json"
-		"-Dkeycloak.migration.strategy=IGNORE_EXISTING")
+	# NOTE: this will never reimport the realm when its config is changed
+	#       (the realm has to be reimported manually)
+	mkdir -p /opt/keycloak/data/import
+	cp /tmp/import/shanoir-ng-realm.json /opt/keycloak/data/import/
+	extra+=(start --import-realm)
 	;;
 init)
-	# create the admin account
-	export KEYCLOAK_ADMIN="$SHANOIR_KEYCLOAK_USER"
-	export KEYCLOAK_ADMIN_PASSWORD="$SHANOIR_KEYCLOAK_PASSWORD"
-
 	# wipe out the shanoir-ng realm and recreate it
-	extra+=("-Dkeycloak.migration.action=import"
-		"-Dkeycloak.migration.provider=singleFile"
-		"-Dkeycloak.migration.file=/tmp/import/shanoir-ng-realm.json"
-		"-Dkeycloak.migration.strategy=OVERWRITE_EXISTING")
-
-	patterns+=(
-		"KC-SERVICES0030: Full model import requested. Strategy: OVERWRITE_EXISTING"
-		"Full importing from file /tmp/import/shanoir-ng-realm.json"
-		"Realm 'shanoir-ng' imported"
-		"KC-SERVICES0032: Import finished successfully"
-		"$STARTED_PATTERN"
-		# The admin account is created after server is started, thus to avoid a
-		# race condition we need to match a KC-SERVICES0009 (user added to
-		# realm) or a KC-SERVICES0010 (user already exists) before stopping the
-		# server
-		"KC-SERVICES0009|KC-SERVICES0010"
-	)
+	extra+=(import --file /tmp/import/shanoir-ng-realm.json --override true)
 	;;
 never)
 	# FIXME: should we provide a facade for these too
 	# TODO: ensure that the realm config is up-to-date
 	#-> add an optional data volume to store the config of the imported realm
+	extra+=(start)
 	;;
 
 import)
@@ -109,18 +96,7 @@ import)
 	then
 		error "import dir '$IMPORT_DIR' does not contain any users file"
 	else
-		extra+=("-Dkeycloak.migration.action=import"
-			"-Dkeycloak.migration.provider=dir"
-			"-Dkeycloak.migration.dir='/tmp/import'"
-			"-Dkeycloak.migration.strategy=OVERWRITE_EXISTING"
-		)
-		patterns=(
-			"Importing from directory /tmp/import"
-			"KC-SERVICES0030: Full model import requested. Strategy: OVERWRITE_EXISTING"
-			"Realm 'shanoir-ng' imported"
-			"KC-SERVICES0032: Import finished successfully"
-			"$STARTED_PATTERN"
-		)
+		extra+=(import --dir /tmp/import --override true)
 	fi
 	;;
 
@@ -139,18 +115,7 @@ export)
 	elif [ -n "`ls -A "$EXPORT_DIR"`" ] ; then
 		error "export dir '$EXPORT_DIR' is not empty"
 	else
-		extra+=("-Dkeycloak.migration.action=export"
-			"-Dkeycloak.migration.realmName=shanoir-ng"
-			"-Dkeycloak.migration.provider=dir"
-			"-Dkeycloak.migration.usersExportStrategy=SAME_FILE"
-			"-Dkeycloak.migration.dir='$EXPORT_DIR'"
-		)
-		patterns=(
-			"Exporting into directory /export"
-			"KC-SERVICES0034: Export of realm 'shanoir-ng' requested"
-			"KC-SERVICES0035: Export finished successfully"
-			"$STARTED_PATTERN"
-		)
+		extra+=(export --realm shanoir-ng --dir "$EXPORT_DIR" --users same_file)
 	fi
 	;;
 esac
@@ -161,23 +126,4 @@ abort_if_error
 
 
 # run keycloak
-if [ ${#patterns[@]} -ne 0 ] ; then
-	# oneshot run (launch the server and kill it after startup)
-
-	fifo="`tmp_fifo`"
-	trap 'rm "$fifo"' EXIT
-	# filter the output to keep only the interesting messages
-	# (i.e: startup, import/export, warning, errors, ...)
-	sed '	/[0-9] INFO /{
-			/\[org\.keycloak\./p
-			/\[io\.quarkus\]/p
-			d
-		}' <"$fifo" &
-
-	# run until the server is fully started
-	exec oneshot "${patterns[@]}" -- env "$@" "${extra[@]}" > "$fifo"
-
-else
-	# 'normal' run
-	exec env "$@" "${extra[@]}"
-fi
+exec env "$@" "${extra[@]}"

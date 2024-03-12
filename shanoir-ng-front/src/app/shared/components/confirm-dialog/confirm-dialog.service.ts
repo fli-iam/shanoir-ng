@@ -52,11 +52,11 @@ export class ConfirmDialogService {
         });
     }
 
-    public error(title: string, message: string): Promise<boolean> {
+    public error(title: string, message: string, link?: string): Promise<boolean> {
         const componentFactory = this.componentFactoryResolver.resolveComponentFactory(ConfirmDialogComponent);
         const ref: ComponentRef<ConfirmDialogComponent> = ServiceLocator.rootViewContainerRef.createComponent(componentFactory);
         let dialog: ConfirmDialogComponent = ref.instance;
-        return dialog.openError(title, message).then(answer => {
+        return dialog.openError(title, message, link).then(answer => {
             ref.destroy();
             return answer;
         });

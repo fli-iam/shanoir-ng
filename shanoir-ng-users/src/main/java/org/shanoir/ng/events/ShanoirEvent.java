@@ -1,9 +1,6 @@
 package org.shanoir.ng.events;
 
-import java.sql.Types;
-
-import org.hibernate.annotations.JdbcTypeCode;
-
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
@@ -16,9 +13,8 @@ import jakarta.persistence.Table;
 	)
 public class ShanoirEvent extends ShanoirEventLight {
 
-	@JdbcTypeCode(Types.LONGVARCHAR)
+	@Column(columnDefinition = "LONGTEXT")
 	protected String report;
-
 
 	public ShanoirEvent() {
 		// Default empty constructor for json deserializer.
@@ -45,4 +41,5 @@ public class ShanoirEvent extends ShanoirEventLight {
 		setReport(null);
 		return light;
 	}
+
 }
