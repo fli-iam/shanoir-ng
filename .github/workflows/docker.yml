@@ -71,32 +71,32 @@ jobs:
       - name: Expose GitHub Runtime (needed for docker buildx cache)
         uses: crazy-max/ghaction-github-runtime@v3.0.0
 
-        # note: we should rather use buildx bake when it is no longer experimental
+      # note: ultimately we shoud build the images with the docker/bake-action
+      # (but buildx bake is still experimental)
       - name: Build, push & sign docker images
         shell: python
         run: |
           import json
           import os
-          import sys
           import subprocess
+          import sys
           import tempfile
 
           IMAGES = ["database"]
           #IMAGES = "database datasets import keycloak keycloak-database nginx nifti-conversion preclinical solr studies users".split()
           
           env = os.environ
-          tag = env['TAG']
           # enable the cache only for development builds
           cache_from = ["--cache-from=type=gha"] if not env['GITHUB_REF'].startswith("refs/tags/") else []
           for image in IMAGES:
             repo = f"{env['DOCKER_REPOSITORY']}/{image}"
+            tag  = env['TAG']
             with tempfile.TemporaryDirectory() as tmp:
               sys.stderr.write(f"#\n#   Building {image}:{tag}\n#\n")
               subprocess.check_call(["docker", "buildx", "build",
                 *cache_from,
                 "--cache-to=type=gha,mode=max",
-                "--tag", f"{ repo }:{ env['TAG'] }",
-                "--tag", f"{ repo }:latest",
+                "--tag", f"{ repo }:{ tag }",
                 "--label", f"org.opencontainers.image.url={ env['GIT_REPO_URL'] }",
                 "--label", f"org.opencontainers.image.source={ env['GIT_REPO_URL'] }",
                 "--label", f"org.opencontainers.image.version={ tag }",
