@@ -49,13 +49,6 @@ jobs:
       
       - name: Maven build
         run: mvn -f ./shanoir-ng-parent/pom.xml install -DskipTests
-##        env:
-##          SHANOIR_URL_HOST: localhost
-##          SHANOIR_URL_SCHEME: http
-##          SHANOIR_PREFIX: github
-##          SHANOIR_ADMIN_EMAIL: nobody@inria.fr
-##          SHANOIR_KEYCLOAK_USER: admin
-##          SHANOIR_KEYCLOAK_PASSWORD: '&a1A&a1A'
  
       # Install the cosign tool except on PR
       # https://github.com/sigstore/cosign-installer
