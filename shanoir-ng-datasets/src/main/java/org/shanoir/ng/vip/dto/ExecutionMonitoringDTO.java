@@ -1,7 +1,7 @@
 package org.shanoir.ng.vip.dto;
 
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
-import org.shanoir.ng.processing.dto.ParameterResourcesDTO;
+import org.shanoir.ng.processing.dto.ParameterResourceDTO;
 import org.shanoir.ng.vip.monitoring.model.ExecutionStatus;
 
 import java.util.List;
@@ -29,7 +29,7 @@ public class ExecutionMonitoringDTO extends DatasetProcessingDTO {
 
     private Long endDate;
 
-    private List<ParameterResourcesDTO> parametersResources;
+    private List<ParameterResourceDTO> parametersResources;
 
 
     public String getIdentifier() {
@@ -88,11 +88,11 @@ public class ExecutionMonitoringDTO extends DatasetProcessingDTO {
         this.outputProcessing = outputProcessing;
     }
 
-    public List<ParameterResourcesDTO> getParametersResources() {
+    public List<ParameterResourceDTO> getParametersResources() {
         return parametersResources;
     }
 
-    public void setParametersResources(List<ParameterResourcesDTO> parametersResources) {
+    public void setParametersResources(List<ParameterResourceDTO> parametersResources) {
         this.parametersResources = parametersResources;
     }
 }

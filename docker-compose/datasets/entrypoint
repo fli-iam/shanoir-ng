@@ -12,6 +12,9 @@ require  VIP_URL_HOST
 require  VIP_URL_SCHEME
 require  VIP_CLIENT_SECRET
 
+# Rabbit MQ default environnement variable to set
+export SPRING_AMQP_DESERIALIZATION_TRUST_ALL=true
+
 handle_microservice_migration
 
 abort_if_error

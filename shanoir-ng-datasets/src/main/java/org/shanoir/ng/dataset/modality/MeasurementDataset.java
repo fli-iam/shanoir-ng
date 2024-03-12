@@ -9,7 +9,13 @@ public class MeasurementDataset extends Dataset {
 	private static final long serialVersionUID = 7476089535424634218L;
 
 	public static final String datasetType = "Measurement";
-	
+
+	public MeasurementDataset() {}
+
+	public MeasurementDataset(Dataset other) {
+		super(other);
+	}
+
 	@Override
 	public String getType() {
 		return datasetType;

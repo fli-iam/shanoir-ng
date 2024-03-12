@@ -3,6 +3,7 @@ package org.shanoir.uploader.upload;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.shanoir.uploader.dicom.MRI;
 import org.shanoir.uploader.dicom.query.SerieTreeNode;
 
 import jakarta.xml.bind.annotation.XmlElement;
@@ -39,6 +40,8 @@ public class UploadJob {
 	private UploadState uploadState;
 	
 	private Collection<SerieTreeNode> series;
+	
+	private MRI mriInformation;
 	
 	private String birthNameHash1;
 
@@ -150,6 +153,15 @@ public class UploadJob {
 
 	public void setStudyDate(String studyDate) {
 		this.studyDate = studyDate;
+	}
+	
+	@XmlElement
+	public MRI getMriInformation() {
+		return this.mriInformation;
+	}
+	
+	public void setMriInformation(MRI mriInformation) {
+		this.mriInformation = mriInformation;
 	}
 
 	public String getBirthNameHash1() {

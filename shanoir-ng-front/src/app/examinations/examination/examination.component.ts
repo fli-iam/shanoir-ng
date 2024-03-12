@@ -168,11 +168,11 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         options.hasBids = this.hasBids;
         options.hasDicom = this.hasDicom;
         options.hasNii = this.hasDicom;
-        options.hasEeg = this.hasEEG; 
+        options.hasEeg = this.hasEEG;
         this.downloadService.downloadAllByExaminationId(this.examination?.id, null, options, this.downloadState);
     }
 
-    openViewer() {  
+    openViewer() {
 	    window.open(environment.viewerUrl + '/viewer/1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
     }
 
@@ -243,13 +243,14 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
 
     public save(): Promise<Examination> {
-        return super.save().then(result => {
+        return super.save( () => {
+            let uploads: Promise<void>[] = [];
             // Once the exam is saved, save associated files
             for (let file of this.files) {
-                this.examinationService.postFile(file, this.entity.id);
+                uploads.push(this.examinationService.postFile(file, this.entity.id));
             }
-            return result;
-        }).catch(reason => { if (reason.status == 403) {
+            return Promise.all(uploads).then(() => null);
+        }).then(() => null).catch(reason => { if (reason.status == 403) {
             this.consoleService.log('error', 'Examination ' + this.examination.id + ' Updating study / subject / center of an examination is forbiden.');
             return null;
         } else {

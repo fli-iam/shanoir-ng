@@ -57,7 +57,6 @@ public interface ManufacturerModelApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<List<IdName>> findManufacturerModelsNames();
 	
-	
 	@Operation(summary = "", description = "Returns id and name of all the manufacturer models")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found manufacturer models"),

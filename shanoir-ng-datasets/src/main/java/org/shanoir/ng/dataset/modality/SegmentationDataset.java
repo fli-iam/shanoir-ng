@@ -33,6 +33,12 @@ public class SegmentationDataset extends Dataset {
 	 */
 	private static final long serialVersionUID = -2192498115566764115L;
 
+	public SegmentationDataset() {}
+
+	public SegmentationDataset(Dataset other) {
+		super(other);
+	}
+
 	@Override
 	public String getType() {
 		return "Segmentation";

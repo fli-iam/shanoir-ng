@@ -31,7 +31,8 @@ export enum DatasetType {
   Statistical = 'Statistical',
   Template = 'Template',
   BIDS = 'BIDS',
-  Measurement = 'Measurement'
+  Measurement = 'Measurement',
+  Xa = 'Xa'
 } export namespace DatasetType {
 
   export function all(): Array<DatasetType> {

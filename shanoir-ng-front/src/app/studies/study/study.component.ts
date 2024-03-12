@@ -242,6 +242,7 @@ export class StudyComponent extends EntityComponent<Study> {
             'visibleByDefault': [this.study.visibleByDefault],
             'downloadableByDefault': [this.study.downloadableByDefault],
             'monoCenter': [{value: this.study.monoCenter, disabled: this.study.studyCenterList && this.study.studyCenterList.length > 1}, [Validators.required]],
+            'selectedCenter': [this.selectedCenter, this.study.monoCenter ? [Validators.required] : []],
             'studyCenterList': [this.study.studyCenterList, [this.validateCenter]],
             'subjectStudyList': [this.study.subjectStudyList],
             'tags': [this.study.tags],
@@ -251,6 +252,11 @@ export class StudyComponent extends EntityComponent<Study> {
             'dataUserAgreement': [],
             'studyUserList': [this.study.studyUserList]
         });
+
+        this.subscriptions.push(formGroup.get('monoCenter').valueChanges.subscribe(val => {
+            formGroup.get('selectedCenter').setValidators(val ? [Validators.required] : []);
+            this.reloadRequiredStyles();
+        }));
         return formGroup;
     }
 
@@ -532,20 +538,21 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     save(): Promise<Study> {
-        return super.save().then(result => {
+        return super.save(() => {
+            let uploads: Promise<void>[] = [];
             // Once the study is saved, save associated file if changed
             if (this.protocolFiles.length > 0) {
                 for (let file of this.protocolFiles) {
-                    this.studyService.uploadFile(file, this.entity.id, 'protocol-file');
+                    uploads.push(this.studyService.uploadFile(file, this.entity.id, 'protocol-file'));
                 }
             }
             if (this.dataUserAgreement) {
-                this.studyService.uploadFile(this.dataUserAgreement, this.entity.id, 'dua')
+                uploads.push(this.studyService.uploadFile(this.dataUserAgreement, this.entity.id, 'dua')
                     .catch(error => {
                         this.dataUserAgreement = null;
-                    });
+                    }));
             }
-            return result;
+            return Promise.all(uploads).then(() => null);
         }).then(study => {
             this.studyCardService.getAllForStudy(study.id).then(studyCards => {
                 if (!studyCards || studyCards.length == 0) {

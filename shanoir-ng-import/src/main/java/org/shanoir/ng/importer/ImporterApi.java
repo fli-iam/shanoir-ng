@@ -14,10 +14,8 @@
 
 package org.shanoir.ng.importer;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import org.shanoir.ng.exchange.model.Exchange;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.model.EegImportJob;
 import org.shanoir.ng.importer.model.ImportJob;
