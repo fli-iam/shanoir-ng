@@ -23,6 +23,7 @@ import org.shanoir.ng.acquisitionequipment.dto.AcquisitionEquipmentDTO;
 import org.shanoir.ng.acquisitionequipment.dto.mapper.AcquisitionEquipmentMapper;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.service.AcquisitionEquipmentService;
+import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -54,7 +55,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 	private AcquisitionEquipmentService acquisitionEquipmentService;
 
 	@Autowired
-	ShanoirEventService eventService;
+	private ShanoirEventService eventService;
 
 	@Override
 	public ResponseEntity<Void> deleteAcquisitionEquipment(
@@ -179,4 +180,32 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 			}
 		}
 	}
+
+	@Override
+	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsBySerialNumber(
+			@Parameter(name = "serial number of the acquisition equipment", required = true) @PathVariable("serialNumber") final String serialNumber) {
+		List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAllBySerialNumber(serialNumber);
+		// Remove "unknown" equipment
+		equipments = equipments.stream().filter(equipment -> equipment.getId() != 0).collect(Collectors.toList());
+		if (equipments.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<>(
+				acquisitionEquipmentMapper.acquisitionEquipmentsToAcquisitionEquipmentDTOs(equipments), HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsOrCreateOneByEquipmentDicom(
+			@Parameter(name = "equipment dicom to find or create an equipment", required = true) @RequestBody final EquipmentDicom equipmentDicom,
+			final BindingResult result) {
+		List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAcquisitionEquipmentsOrCreateOneByEquipmentDicom(equipmentDicom);
+		// Remove "unknown" equipment
+		equipments = equipments.stream().filter(equipment -> equipment.getId() != 0).collect(Collectors.toList());
+		if (equipments.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<>(
+				acquisitionEquipmentMapper.acquisitionEquipmentsToAcquisitionEquipmentDTOs(equipments), HttpStatus.OK);
+	}
+
 }

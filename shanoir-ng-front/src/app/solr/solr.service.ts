@@ -49,7 +49,15 @@ export class SolrService {
         return this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, this.stringifySolrRequest(mainRequest), { 'params': fakePageable.toParams() })
             .toPromise().then(solrResPage => {
                 solrResPage.content?.forEach(doc => doc.id = parseInt(doc.id as unknown as string));
-                return solrResPage && solrResPage.facetResultPages ? solrResPage.facetResultPages[0] : null;
+                if (solrResPage.facetResultPages?.[0]) {
+                    return solrResPage.facetResultPages[0];
+                } else {
+                    let reconstructed: FacetResultPage = new FacetResultPage();
+                    reconstructed.number = pageable.pageNumber;
+                    reconstructed.size = 0;
+                    reconstructed.numberOfElements = 0;
+                    return reconstructed;
+                }
             });
     }
 

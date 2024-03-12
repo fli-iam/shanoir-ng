@@ -49,13 +49,14 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Output() rowClick: EventEmitter<Object> = new EventEmitter<Object>();
     @Output() rowEdit: EventEmitter<Object> = new EventEmitter<Object>();
     @Output() pageLoaded: EventEmitter<Page<any>> = new EventEmitter();
-    @Output() registerRefresh: EventEmitter<(number?) => void> = new EventEmitter();
     @Input() disableCondition: (item: any) => boolean;
     @Input() maxResults: number = 20;
     @Input() subRowsKey: string;
+    @Output() registerRefresh: EventEmitter<(number?) => void> = new EventEmitter();
     page: Page<Object>;
     isLoading: boolean = false;
     maxResultsField: number;
+    pageNumber: number;
     lastSortedCol: Object = null;
     lastSortedAsc: boolean = true;
     currentPage: number = 1;
@@ -192,12 +193,28 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             return null;
         } else {
             let fieldValue = this.getFieldRawValue(item, col["field"]);
-            if (fieldValue) return fieldValue;
+            if (fieldValue) {
+                return fieldValue;
+            }
             else if (col.defaultField)
                 return this.getFieldRawValue(item, col["defaultField"]);
             else
                 return;
         }
+    }
+
+    public static harmonizeToDate(value: any): Date {
+        let date: Date;
+        if (value instanceof Date) {
+            date = value;
+        } else if (!Number.isNaN(Date.parse(value))) {
+            date = new Date(Date.parse(value));
+        } else if (Number.isInteger(value)) {
+            date = new Date(value);
+        } else {
+            date = this.stringToDate(value);
+        }
+        return date;
     }
 
     public static getFieldRawValue(obj: Object, path: string): any {
@@ -249,15 +266,8 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         let result: any = this.getCellValue(item, col);
         if (result == null || this.isValueBoolean(result)) {
             return "";
-        } else if (col.type == 'date' || col.type == 'dateTime') {
-            let date: Date;
-            if (result instanceof Date) {
-                date = result;
-            } else if (!Number.isNaN(Date.parse(result))) {
-                date = new Date(Date.parse(result));
-            } else {
-                date = this.stringToDate(result);
-            }
+        } else if ((col.type == 'date' || col.type == 'dateTime') && !col.cellRenderer) {
+            let date: Date = TableComponent.harmonizeToDate(result);
             let dateFormat;
             if (col.type == 'dateTime') dateFormat = {year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false };
             else dateFormat = {year: "numeric", month: "2-digit", day: "2-digit"};
@@ -269,7 +279,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    private stringToDate(dateString: string): Date {
+    private static stringToDate(dateString: string): Date {
         if (!dateString) return null;
         dateString += '';
         let split: string[] = dateString.split('-');
@@ -342,13 +352,23 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         return type != null ? "cell-" + type : "";
     }
 
+    jumpToPage(p: number) {
+        if (p <= this.page.totalPages) {
+            this.goToPage(p);
+        } else if (p < 0) {
+            this.goToPage(1);
+        } else {
+            this.goToPage(this.page.totalPages);
+        }
+    }
+
     goToPage(p: number, forceRefresh: boolean = false): Promise<Page<any>> {
         this.currentPage = p;
         this.isLoading = true;
-        let getPage: Page<any> | Promise<Page<any>> =  this.getPage(this.getPageable(), forceRefresh)
+        let getPage: Page<any> | Promise<Page<any>> = this.getPage(this.getPageable(), forceRefresh)
         if (getPage instanceof Promise) {
             return getPage.then(page => {
-                    this.pageLoaded.emit(page);
+                this.pageLoaded.emit(page);
                 return this.computePage(page);
             }).catch(reason => {
                 setTimeout(() => {
@@ -363,6 +383,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                 return page;
             });
         }
+
     }
 
     private computePage(page: Page<any>): Page<any> {

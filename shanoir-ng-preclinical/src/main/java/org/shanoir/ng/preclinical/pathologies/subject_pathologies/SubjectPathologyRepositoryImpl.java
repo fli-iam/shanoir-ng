@@ -35,8 +35,8 @@ public class SubjectPathologyRepositoryImpl implements SubjectPathologyRepositor
 	@Override
 	public List<SubjectPathology> findAllByPathology(Pathology pathology) {
 		return em.createQuery(
-				"SELECT p FROM SubjectPathology p WHERE p.pathology LIKE :pathology")
-				.setParameter("pathology", pathology)
+				"SELECT p FROM SubjectPathology p WHERE p.pathology.name LIKE :pathology")
+				.setParameter("pathology", pathology.getName())
 				.getResultList();
 	}
 	
@@ -44,8 +44,8 @@ public class SubjectPathologyRepositoryImpl implements SubjectPathologyRepositor
 	@Override
 	public List<SubjectPathology> findAllByPathologyModel(PathologyModel model) {
 		return em.createQuery(
-				"SELECT p FROM SubjectPathology p WHERE p.pathologyModel LIKE :model")
-				.setParameter("model", model)
+				"SELECT p FROM SubjectPathology p WHERE p.pathologyModel.name LIKE :model")
+				.setParameter("model", model.getName())
 				.getResultList();
 	}
 	
@@ -53,8 +53,8 @@ public class SubjectPathologyRepositoryImpl implements SubjectPathologyRepositor
 	@Override
 	public List<SubjectPathology> findAllByLocation(Reference location) {
 		return em.createQuery(
-				"SELECT p FROM SubjectPathology p WHERE p.location LIKE :location")
-				.setParameter("location", location)
+				"SELECT p FROM SubjectPathology p WHERE p.location.value LIKE :location")
+				.setParameter("location", location.getValue())
 				.getResultList();
 	}
 }

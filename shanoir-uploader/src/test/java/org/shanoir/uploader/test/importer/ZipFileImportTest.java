@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
@@ -30,13 +31,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 public class ZipFileImportTest extends AbstractTest {
 
+	private static final String PROFILE_NEURINFO = "Profile Neurinfo";
+
 	private static Logger logger = Logger.getLogger(ZipFileImportTest.class);
 	
+	private static final String IN_PROGRESS = "IN_PROGRESS";
+
 	private static final String ACR_PHANTOM_T1_ZIP = "acr_phantom_t1.zip";
 
 	@Test
 	public void importDicomZipTest() throws Exception {
-		org.shanoir.uploader.model.rest.Study study = createStudyAndStudyCard();
+		org.shanoir.uploader.model.rest.Study study = createStudyAndCenterAndStudyCard();
 		for (int i = 0; i < 1; i++) {
 			ImportJob importJob = step1UploadDicom(ACR_PHANTOM_T1_ZIP);
 			if (!importJob.getPatients().isEmpty()) {
@@ -48,20 +53,19 @@ public class ZipFileImportTest extends AbstractTest {
 		}
 	}
 	
-	private org.shanoir.uploader.model.rest.Study createStudyAndStudyCard() {
+	private org.shanoir.uploader.model.rest.Study createStudyAndCenterAndStudyCard() {
 		org.shanoir.uploader.model.rest.Study study = new org.shanoir.uploader.model.rest.Study();
 		final String randomStudyName = "Study-Name-" + UUID.randomUUID().toString();
 		study.setName(randomStudyName);
-		study.setStudyStatus("IN_PROGRESS");
+		study.setStudyStatus(IN_PROGRESS);
 		List<StudyCenter> studyCenterList = new ArrayList<StudyCenter>();
 		final StudyCenter studyCenter = new StudyCenter();
-		final Center center = new Center();
-		center.setId(Long.valueOf(1));
-		studyCenter.setCenter(center);
+		Center createdCenter = createCenter();
+		Assertions.assertNotNull(createdCenter);
+		studyCenter.setCenter(createdCenter);
 		studyCenterList.add(studyCenter);
 		study.setStudyCenterList(studyCenterList);
-		shUpClient.createStudy(study);
-		return study;
+		return shUpClient.createStudy(study);
 	}
 
 	private void createSubjectStudy(org.shanoir.uploader.model.rest.Study study, Subject subject) {
@@ -85,7 +89,7 @@ public class ZipFileImportTest extends AbstractTest {
 		importJob.setSubjectName(subject.getName());
 		importJob.setExaminationId(examination.getId());
 		importJob.setConverterId(Long.valueOf(6));
-		importJob.setAnonymisationProfileToUse("Profile Neurinfo"); // yes we are in ShUp, but use the standard import API
+		importJob.setAnonymisationProfileToUse(PROFILE_NEURINFO); // yes we are in ShUp, but use the standard import API
 		String importJobJson = Util.objectWriter.writeValueAsString(importJob);
 		shUpClient.startImportJob(importJobJson);
 	}

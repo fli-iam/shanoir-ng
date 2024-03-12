@@ -1,0 +1,26 @@
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.2.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.2.0 http://maven.apache.org/xsd/assembly-2.2.0.xsd">
+	<id>distribution</id>
+	<formats>
+		<format>zip</format>
+	</formats>
+	<includeBaseDirectory>true</includeBaseDirectory>
+	<baseDirectory>/</baseDirectory>
+	<files>
+		<file>
+			<source>target/${project.artifactId}-${project.version}-jar-with-dependencies.jar</source>
+			<outputDirectory>/</outputDirectory>
+		</file>
+		<file>
+			<source>target/start-shup-windows-java.bat</source>
+			<outputDirectory>/</outputDirectory>
+			<fileMode>0755</fileMode>
+		</file>
+		<file>
+			<source>target/start-shup-linux-mac-java.sh</source>
+			<outputDirectory>/</outputDirectory>
+			<fileMode>0755</fileMode>
+		</file>
+	</files>
+</assembly>

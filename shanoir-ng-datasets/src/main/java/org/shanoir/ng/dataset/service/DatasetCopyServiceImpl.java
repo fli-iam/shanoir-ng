@@ -44,8 +44,10 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
     private static final Logger LOG = LoggerFactory.getLogger(DatasetCopyServiceImpl.class);
 
     @Override
-    public Long moveDataset(Dataset ds, Long studyId, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap, ShanoirEvent event, Long userId) throws JsonProcessingException {
+    public Object[] moveDataset(Dataset ds, Long studyId, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap, Long userId) throws JsonProcessingException {
         try {
+            int countProcessed = 0;
+            int countSuccess = 0;
             Long oldDsId = ds.getId();
             LOG.warn("[CopyDatasets] moveDataset : " + oldDsId + " to study : " + studyId);
 
@@ -83,21 +85,21 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                 }
                 newDs.setDatasetExpressions(dexpList);
 
+
                 datasetRepository.save(newDs);
                 acqMap.put(oldAcqId, newDsAcq);
+                countSuccess++;
 
-                return newDs.getId();
             } else if (ds.getDatasetProcessing() != null) {
                 LOG.error("[CopyDatasets] Dataset selected is a processed dataset, it can't be copied.");
-                return null;
+                countProcessed++;
             }
 
+            return new Object[]{newDs != null ? newDs.getId() : null, countProcessed, countSuccess};
         } catch (Exception e) {
-            event.setMessage("[CopyDatasets] Error during the copy of dataset [" + ds.getId() + "] to study [" + studyId + "]. ");
-            eventService.publishEvent(event);
+            LOG.error("[CopyDatasets] Error during the copy of dataset [" + ds.getId() + "] to study [" + studyId + "].");
             throw e;
         }
-        return null;
     }
 
     public DatasetAcquisition moveAcquisition(DatasetAcquisition acq, Dataset newDs, Long studyId, Map<Long, Examination> examMap, Long userId) {
