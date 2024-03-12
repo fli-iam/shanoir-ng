@@ -7,7 +7,7 @@ import { Page, Pageable } from 'src/app/shared/components/table/pageable.model';
 import { TableComponent } from 'src/app/shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { ExecutionMonitoring } from '../models/execution-monitoring.model';
-import { ExecutionMonitoringService } from '../shared/execution-monitoring.service';
+import { ExecutionMonitoringService } from './execution-monitoring.service';
 
 @Component({
   selector: 'app-execution-monitorings',

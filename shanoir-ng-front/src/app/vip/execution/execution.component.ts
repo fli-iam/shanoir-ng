@@ -14,8 +14,8 @@ import {ExecutionMonitoring} from 'src/app/vip/models/execution-monitoring.model
 import {Execution} from 'src/app/vip/models/execution';
 import {ParameterType} from 'src/app/vip/models/parameterType';
 import {Pipeline} from 'src/app/vip/models/pipeline';
-import {VipClientService} from 'src/app/vip/shared/vip-client.service';
-import {ExecutionMonitoringService} from 'src/app/vip/shared/execution-monitoring.service';
+import {ExecutionService} from 'src/app/vip/execution/execution.service';
+import {ExecutionMonitoringService} from 'src/app/vip/execution-monitorings/execution-monitoring.service';
 import {Dataset} from 'src/app/datasets/shared/dataset.model';
 import {DatasetService} from 'src/app/datasets/shared/dataset.service';
 import {DatasetProcessingType} from 'src/app/enum/dataset-processing-type.enum';
@@ -25,11 +25,12 @@ import {MsgBoxService} from 'src/app/shared/msg-box/msg-box.service';
 import {ExecutionDataService} from '../execution.data-service';
 import {Option} from '../../shared/select/select.component';
 import { formatDate } from '@angular/common';
-import {ParameterResourcesDto} from "../models/parameter-resources.dto";
+import {DatasetParameterDTO} from "../models/dataset-parameter.dto";
 import {GroupByEnum} from "../models/groupby.enum";
 import {PipelineParameter} from "../models/pipelineParameter";
 import {ServiceLocator} from "../../utils/locator.service";
 import {ConsoleService} from "../../shared/console/console.service";
+import {ExecutionCandidateDto} from "../models/execution-candidate.dto";
 
 @Component({
     selector: 'app-execution',
@@ -44,16 +45,15 @@ export class ExecutionComponent implements OnInit {
     selectedDatasets: Set<Dataset>;
 
     datasetsOptions: Option<Dataset>[];
-    token: String;
-    refreshToken: String;
+    token: string;
+    refreshToken: string;
     parametersApplied: boolean = false;
     execution: Execution;
     columnDefs: { [key: string]: ColumnDefinition[] } = {};
     datasetsByParam: { [key: string]: Dataset[] } = {};
     fileInputs = [];
-    inputDatasets: Set<Dataset>;
     execDefaultName= "";
-    exportFormat="nii";
+    exportFormat= "nii";
     groupBy = "dataset";
     isLoading = true;
     isSubmitted = true;
@@ -70,10 +70,17 @@ export class ExecutionComponent implements OnInit {
         new Option<number>(8, 'MRICONVERTER', null, null, null, false),
     ];
 
-    constructor(private breadcrumbsService: BreadcrumbsService, private processingService: ExecutionDataService, private vipClientService: VipClientService, private router: Router, private msgService: MsgBoxService, private keycloakService: KeycloakService, private datasetService: DatasetService, private executionMonitoringService: ExecutionMonitoringService) {
-        this.breadcrumbsService.nameStep('2. Executions');
-        this.selectedDatasets = new Set<Dataset>();
-        this.isSubmitted = false;
+    constructor(
+        private breadcrumbsService: BreadcrumbsService,
+        private processingService: ExecutionDataService,
+        private executionService: ExecutionService,
+        private router: Router,
+        private msgService: MsgBoxService,
+        private keycloakService: KeycloakService,
+        private datasetService: DatasetService) {
+            this.breadcrumbsService.nameStep('2. Executions');
+            this.selectedDatasets = new Set<Dataset>();
+            this.isSubmitted = false;
     }
 
     ngOnInit(): void {
@@ -92,12 +99,12 @@ export class ExecutionComponent implements OnInit {
             });
 
         this.keycloakService.getToken().then(
-            (token: String) => {
+            (token: string) => {
                 this.token = token;
             }
         )
         this.keycloakService.getRefreshToken().then(
-            (refreshToken: String) => {
+            (refreshToken: string) => {
                 this.refreshToken = refreshToken;
             }
         )
@@ -207,121 +214,45 @@ export class ExecutionComponent implements OnInit {
 
         this.isSubmitted = true;
 
-        let processingInit = this.initProcessing();
-
-        this.executionMonitoringService.create(processingInit).then(
-            (processing) => {
-
-                let execution = this.initExecution(processing);
-                this.setExecutionParameters(processing, execution);
-
-                this.vipClientService.createExecution(execution).then(
-                    (execution) => {
-
-                        processing.identifier = execution.identifier;
-                        processing.status = execution.status;
-                        processing.startDate = execution.startDate;
-                        processing.endDate = execution.endDate;
-
-                        this.executionMonitoringService.updateAndStart(processing).then(() => {
-                                this.router.navigate([`/dataset-processing/details/${processing.id}`]);
-                            },
-                            (error) => {
-                                this.msgService.log('error', 'Sorry, an error occurred while updating dataset processing.');
-                                console.error(error);
-                            });
-                    },
-                    (error) => {
-                        this.msgService.log('error', 'Sorry, an error occurred while creating the execution on VIP.');
-                        console.error(error);
-                        this.isSubmitted = false;
-                    }
-                )
+        let exec = this.initExecutionCandidate();
+        this.executionService.createExecution(exec).then(
+            monitoring => {
+                this.router.navigate([`/dataset-processing/details/${monitoring.id}`]);
             },
             (error) => {
-                this.msgService.log('error', 'Sorry, an error occurred while creating dataset processing.');
+                this.msgService.log('error', 'Sorry, an error occurred while submitting execution.');
                 console.error(error);
-                this.isSubmitted = false;
-            }
-        )
-    }
-
-    private initExecution(processing: ExecutionMonitoring) {
-        let execution = new Execution();
-        execution.name = processing.name;
-        execution.pipelineIdentifier = processing.pipelineIdentifier;
-        execution.timeout = processing.timeout;
-        execution.inputValues = {};
-        execution.resultsLocation = this.getResultUri(processing.resultsLocation);
-        return execution;
-    }
-
-    private setExecutionParameters(processing: ExecutionMonitoring, execution: Execution) {
-        processing.parametersResources.forEach(dto => {
-            execution.inputValues[dto.parameter] = [];
-            let extension = ".nii.gz"
-            if (this.exportFormat == "dcm") {
-                extension = ".zip"
-            }
-
-            dto.resourceIds.forEach(id => {
-                let entity_name = `resource_id+${id}+${this.groupBy}${extension}`
-                // datasetId URI param = resourceId (to be changed once VIP has been updated)
-                let inputValue = `shanoir:/${entity_name}?format=${this.exportFormat}&datasetId=${id}&converter=${this.converter}&token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`;
-                execution.inputValues[dto.parameter].push(inputValue);
-            })
-        });
-
-        this.pipeline.parameters.forEach(
-            parameter => {
-                if (!this.isAFile(parameter)) {
-                    execution.inputValues[parameter.name] = this.executionForm.get(parameter.name).value;
-                }
-            }
-        )
-    }
-
-    private initProcessing() {
-        let processingInit = new ExecutionMonitoring();
-        processingInit.name = this.cleanProcessingName(this.executionForm.get("execution_name").value);
-        processingInit.pipelineIdentifier = this.pipeline.identifier
-        processingInit.resultsLocation = this.getResultPath();
-        processingInit.timeout = 20;
-        processingInit.comment = processingInit.name;
-        processingInit.studyId = [...this.selectedDatasets][0].study.id;  // TODO : this should be selected automatically if all datasets have the same study, if not show a select input to choose what context.
-        processingInit.datasetProcessingType = DatasetProcessingType.SEGMENTATION; // TODO : this should be selected by the user.
-        processingInit.outputProcessing = this.pipeline.outputProcessing;
-        this.inputDatasets = new Set();
-        this.pipeline.parameters.forEach(
-            parameter => {
-                if (this.isAFile(parameter)) {
-                    this.datasetsByParam[parameter.name].forEach(ds => {
-                        this.inputDatasets.add(ds);
-                    })
-                }
-            }
-        )
-        this.inputDatasets.forEach(dataset => {
-            dataset.study.subjectStudyList = [];
-            dataset.study.studyCenterList = [];
-            dataset.subject.subjectStudyList = [];
-        })
-        processingInit.inputDatasets = Array.from(this.inputDatasets);
-        processingInit.parametersResources = [];
-
-        this.pipeline.parameters.forEach(
-            parameter => {
-                if (this.isAFile(parameter)) {
-                    let dto = new ParameterResourcesDto();
-                    dto.parameter = parameter.name;
-                    dto.groupBy = this.getGroupByEnumByLabel(this.groupBy);
-                    dto.datasetIds = this.datasetsByParam[parameter.name].map(dataset => { return dataset.id});
-                    processingInit.parametersResources.push(dto);
-                }
             }
         );
+    }
 
-        return processingInit;
+    private initExecutionCandidate() {
+        let candidate = new ExecutionCandidateDto();
+        candidate.name = this.cleanProcessingName(this.executionForm.get("execution_name").value);
+        candidate.pipelineIdentifier = this.pipeline.identifier
+        candidate.studyIdentifier = [...this.selectedDatasets][0].study.id;  // TODO : this should be selected automatically if all datasets have the same study, if not show a select input to choose what context.
+        candidate.processingType = DatasetProcessingType.SEGMENTATION; // TODO : this should be selected by the user.
+        candidate.outputProcessing = this.pipeline.outputProcessing;
+        candidate.client = KeycloakService.clientId;
+        candidate.refreshToken = this.refreshToken;
+        candidate.datasetParameters = [];
+        candidate.inputParameters = {};
+        this.pipeline.parameters.forEach(
+            parameter => {
+                if (this.isAFile(parameter)) {
+                    // File type parameters (i.e. datasets)
+                    let dto = new DatasetParameterDTO();
+                    dto.name = parameter.name;
+                    dto.groupBy = this.getGroupByEnumByLabel(this.groupBy);
+                    dto.exportFormat = this.exportFormat;
+                    dto.datasetIds = this.datasetsByParam[parameter.name].map(dataset => { return dataset.id});
+                    candidate.datasetParameters.push(dto);
+                }else if (this.executionForm.get(parameter.name).value?.toString()) {
+                    candidate.inputParameters[parameter.name] = [ this.executionForm.get(parameter.name).value.toString() ];
+                }
+            }
+        )
+        return candidate;
     }
 
     getGroupByEnumByLabel(label: string){
@@ -342,14 +273,6 @@ export class ExecutionComponent implements OnInit {
     isAFile(parameter: PipelineParameter): boolean {
         return parameter.type == ParameterType.File;
 
-    }
-
-    private getResultPath(){
-        return `${this.keycloakService.getUserId()}/${Date.now()}`;
-    }
-
-    private getResultUri(resultPath: string) {
-        return `shanoir:/${resultPath}?token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`;
     }
 
     getDefaultExecutionName(): string {
