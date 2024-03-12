@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -69,7 +69,7 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
                     this.assignmentChangeSubscription = assignmentField.options.subscribe(opts => {
                         if (opts && opts.length > 0) {
                             let valueOption: Option<any> = opts.find(opt => {
-                                return opt.value == this.assignment.value 
+                                return opt.value == this.assignment.value
                                     || (opt.value.id && this.assignment.value['id'] && opt.value.id == this.assignment.value['id'])
                             });
                             if (valueOption) {
@@ -83,14 +83,14 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
                     });
                 } else {
                     this.valueIsString = true;
-                } 
+                }
             } else {
                 if (assignmentField && assignmentField.options) {
                     this.assignmentChangeSubscription = assignmentField.options.subscribe(opts => {
                         this.assigmentOptions = opts;
                         if (opts && opts.length > 0) {
                             let valueOption: Option<any> = opts.find(opt => {
-                                return opt.value == this.assignment.value 
+                                return opt.value == this.assignment.value
                                     || (opt.value.id && this.assignment.value['id'] && opt.value.id == this.assignment.value['id'])
                             });
                             if (valueOption) {
@@ -101,10 +101,10 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
                             }
                         }
                     });
-                    
+
                 } else {
                     this.assigmentOptions = null;
-                } 
+                }
             }
         }
     }
@@ -121,10 +121,11 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
             });
         } else {
             this.assigmentOptions = null;
-        }    
+        }
     }
 
     onSelectFieldOption(option: Option<any>) {
+        console.log("onSelectFieldOption");
         if (option) {
             option.disabled = true;
             if (option.section == 'Dataset') {
@@ -163,9 +164,9 @@ export class ShanoirMetadataField {
     public options?: Observable<Option<any>[]>;
 
     constructor(
-            public label: string, 
+            public label: string,
             public field: string,
-            public scope: MetadataFieldScope, 
+            public scope: MetadataFieldScope,
             options?: Observable<Option<any>[]> | Option<any>[]) {
 
         if (options instanceof Observable) {
