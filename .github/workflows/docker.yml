@@ -71,12 +71,6 @@ jobs:
       - name: Expose GitHub Runtime (needed for docker buildx cache)
         uses: crazy-max/ghaction-github-runtime@v3.0.0
 
-      - name: printenv
-        run: printenv 
-
-      - name: sorted printenv
-        run: printenv | sort
-
         # note: we should rather use buildx bake when it is no longer experimental
       - name: Build, push & sign docker images
         if: github.event_name != 'pull_request'
@@ -95,12 +89,10 @@ jobs:
           tag = env['TAG']
           # enable the cache only for development builds
           cache_from = ["--cache-from=type=gha"] if not env['GITHUB_REF'].startswith("refs/tags/") else []
-          try:
-           for image in IMAGES:
+          for image in IMAGES:
             repo = f"{env['DOCKER_REPOSITORY']}/{image}"
             with tempfile.TemporaryDirectory() as tmp:
               sys.stderr.write(f"#\n#   Building {image}:{tag}\n#\n")
-              subprocess.call(["date"])
               subprocess.check_call(["docker", "buildx", "build",
                 *cache_from,
                 "--cache-to=type=gha,mode=max",
@@ -119,7 +111,5 @@ jobs:
               sys.stderr.write(f"#\n#   Signing {image}:{tag}\n#\n")
               subprocess.call(["date"])
               subprocess.check_call(["cosign", "sign", "--yes", "--tlog-upload=false", f"{repo}:{tag}@{digest}"])
-          finally:
-              subprocess.call(["date"])
             
 
