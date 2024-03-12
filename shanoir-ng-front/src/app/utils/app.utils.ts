@@ -14,7 +14,7 @@
 
 import { Pipe, PipeTransform } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { HttpClient, HttpEvent, HttpEventType, HttpParams, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpEventType, HttpParams, HttpProgressEvent, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { TaskState, TaskStatus } from '../async-tasks/task.model';
 import { ServiceLocator } from './locator.service';
@@ -149,9 +149,13 @@ export const BACKEND_API_NIFTI_CONVERTER_URL: string = BACKEND_API_IMPORT_MS_URL
 export const BACKEND_API_PRECLINICAL_MS_URL: string = BACKEND_API_URL + '/preclinical';
 
 // vip
-export const VIP_BASE_URL : string = environment.vipUrl + "/rest";
+export const BACKEND_API_VIP_URL: string = BACKEND_API_DATASET_MS_URL + '/vip';
+export const BACKEND_API_VIP_EXEC_URL : string = BACKEND_API_VIP_URL + "/execution";
+export const BACKEND_API_VIP_PIPE_URL : string = BACKEND_API_VIP_URL + "/pipeline";
 
-export const BACKEND_API_VIP_EXEC_MONITORING_URL: string = BACKEND_API_DATASET_MS_URL + '/executionMonitoring';
+export const BACKEND_API_VIP_EXEC_MONITORING_URL: string = BACKEND_API_DATASET_MS_URL + '/execution-monitoring';
+
+declare var JSZip: any;
 
 export function hasUniqueError(error: any, fieldName: string): boolean {
     let hasUniqueError = false;
@@ -219,9 +223,11 @@ export function downloadWithStatusGET(url: string, params?: HttpParams, state ?:
         }
     );
     obs.toPromise().then(response => browserDownloadFileFromResponse(response as HttpResponse<Blob>));
-    return obs.map(event => {
-        state = extractProgression(event);
-        return state;
+    return obs.mergeMap(event => {
+        return extractState(event).then(s => {
+            state = s
+            return s;
+        });
     });
 }
 
@@ -237,21 +243,47 @@ export function downloadWithStatusPOST(url: string, formData: FormData, state ?:
         }
     );
     obs.toPromise().then(response => browserDownloadFileFromResponse(response as HttpResponse<Blob>));
-    return obs.map(event => {
-        state = extractProgression(event);
-        return state;
+    return obs.mergeMap(event => {
+        return extractState(event).then(s => {
+            state = s
+            return s;
+        });
     });
 }
 
-export function extractProgression(event: HttpEvent<any>): TaskState {
+export function extractState(event: HttpEvent<any>): Promise<TaskState> {
+    let task: TaskState;
     switch (event.type) {
         case HttpEventType.Sent:
-        case HttpEventType.ResponseHeader:
-            return new TaskState(TaskStatus.QUEUED, 0);
-        case HttpEventType.DownloadProgress:
-            return new TaskState(TaskStatus.IN_PROGRESS, event.loaded);
-        case HttpEventType.Response:
-            return new TaskState(TaskStatus.DONE);
+        case HttpEventType.ResponseHeader: {
+            task = new TaskState(TaskStatus.QUEUED, 0);
+            return Promise.resolve(task);
+        }
+        case HttpEventType.DownloadProgress: {
+            task = new TaskState(TaskStatus.IN_PROGRESS, (event as HttpProgressEvent).loaded);
+            return Promise.resolve(task);
+        }
+        case HttpEventType.Response: {
+            task = new TaskState(TaskStatus.DONE);
+            const blob: Blob = (event as HttpResponse<Blob>).body;
+            if (blob) {
+                //report.list[id].zipSize = getSizeStr(blob?.size);
+                // Check ERRORS file in zip
+                let zip: any = new JSZip();
+                return zip.loadAsync(blob).then(dataFiles => {
+                    if (dataFiles.files['ERRORS.json']) {
+                        return dataFiles.files['ERRORS.json'].async('string').then(content => {
+                            const errorsJson: any = JSON.parse(content);
+                            task.errors = JSON.stringify(errorsJson, null, 4);
+                            task.status = TaskStatus.DONE_BUT_WARNING;
+                            return task;
+                        });
+                    }
+                    return task;
+                });
+            }
+        }
+        default: return Promise.resolve(task);
     }
 }
 
@@ -397,4 +429,19 @@ export function isDarkColor(colorInp: string): boolean {
     var g = parseInt(colorInp.substring(2, 4), 16); // hexToG
     var b = parseInt(colorInp.substring(4, 6), 16); // hexToB
     return (((r * 0.299) + (g * 0.587) + (b * 0.114)) < 145);
+}
+
+export function getSizeStr(size: number): string {
+    if (size == null || size == undefined){
+        return "";
+    }
+    const base: number = 1024;
+    const units: string[] = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    if (size == 0) {
+        return "0 " + units[0];
+    }
+    const exponent: number = Math.floor(Math.log(size) / Math.log(base));
+    let value: number = Math.round(parseFloat((size / Math.pow(base, exponent)).toFixed(2)));
+    let unit: string = units[exponent];
+    return value + " " + unit;
 }

@@ -44,8 +44,8 @@ public enum InjectionType {
 	 *
 	 */
 	public static class Values {
-		public static final String BOLUS = "Bolus";
-		public static final String INFUSION = "Infusion";
+		public static final String BOLUS = "BOLUS";
+		public static final String INFUSION = "INFUSION";
 	}
 
 }
