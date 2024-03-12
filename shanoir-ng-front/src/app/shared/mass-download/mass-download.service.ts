@@ -135,20 +135,19 @@ export class MassDownloadService {
     }
 
     // This method is used to download in
-    private _downloadAlt(input: number | number[], format: Format, converter? : number, downloadState?: TaskState): any {
-        let task: Task = this.createTask((input as number[]).length);
+    private _downloadAlt(datasetIds: number[], format: Format, converter? : number, downloadState?: TaskState): any {
+        let task: Task = this.createTask(datasetIds.length);
 
         downloadState = new TaskState();
         downloadState.status = task.status;
         downloadState.progress = 0;
-
 
         return this.downloadQueue.waitForTurn().then(releaseQueue => {
             try {
                 task.status = 2;
                 task.lastUpdate = new Date();
                 const start: number = Date.now();
-                let downloadObs: Observable<TaskState> = this.datasetService.downloadDatasets(input as number[], format, converter);
+                let downloadObs: Observable<TaskState> = this.datasetService.downloadDatasets(datasetIds, format, converter);
 
                 let endPromise: SuperPromise<void> = new SuperPromise();
 
@@ -174,7 +173,7 @@ export class MassDownloadService {
                 const endSubscription: Subscription = downloadObs.last().subscribe(state => {
                     flowSubscription.unsubscribe();
                     let duration: number = Date.now() - start;
-                    task.message = 'download completed in ' + duration + 'ms for ' + (input as number[]).length + ' datasets';
+                    task.message = 'download completed in ' + duration + 'ms for ' + datasetIds.length + ' datasets';
                     task.lastUpdate = new Date();
                     task.status = state.status;
                     task.progress = 1;
@@ -484,26 +483,6 @@ export class MassDownloadService {
         };
         datasetIds.forEach(id => report.list[id] = { status: 'QUEUED' });
         return report;
-    }
-
-    private initAltStudyReport(studyId: number, taskId: number, format: Format): Report {
-        return {
-            taskId: taskId,
-            studyId: studyId,
-            status: 'QUEUED',
-            startTime: Date.now(),
-            format : format
-        };
-    }
-
-    private initAltDatasetsReport(datasetIds: number[], taskId: number, format: Format): Report {
-        return {
-            taskId: taskId,
-            requestedDatasetIds: datasetIds,
-            status: 'QUEUED',
-            startTime: Date.now(),
-            format : format
-        };
     }
 
     private createTask(nbDatasets: number): Task {
