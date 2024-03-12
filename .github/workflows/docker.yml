@@ -24,9 +24,6 @@ jobs:
       id-token: write # needed by sigstore/fulcio
     steps:
 
-      - name: Check out the repo
-        uses: actions/checkout@v4
-
       - name: Set up JDK 17
         #TODO: upgrade to v4 (https://github.com/actions/setup-java/issues/596)
         #uses: actions/setup-java@v4.1.0
@@ -34,18 +31,18 @@ jobs:
         with:
           java-version: 17
           distribution: oracle
-          cache: maven
-          cache-dependency-path: "**/pom.xml"
 
+      - name: Set up Maven cache
+        uses: actions/cache@v4
+        # enable the cache only for development builds
+        if: "${{ ! startsWith(github.ref, 'refs/tags/') }}"
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
 
-#      - name: Set up Maven cache
-#        uses: actions/cache@v4
-#        # enable the cache only for development builds
-#        if: "${{ ! startsWith(github.ref, 'refs/tags/') }}"
-#        with:
-#          path: ~/.m2/repository
-#          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-#          restore-keys: ${{ runner.os }}-maven-
+      - name: Check out the repo
+        uses: actions/checkout@v4
 
 ##      - name: Create directory /shanoir-ng-logs
 ##        run: sudo mkdir -m777 /var/log/shanoir-ng-logs
