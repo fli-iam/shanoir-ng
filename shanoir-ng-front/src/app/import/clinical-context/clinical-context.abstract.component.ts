@@ -36,8 +36,6 @@ import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
-import { StudyCard } from '../../study-cards/shared/study-card.model';
-import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
@@ -49,7 +47,6 @@ import {PreclinicalSubject} from "../../preclinical/animalSubject/shared/preclin
 export abstract class AbstractClinicalContextComponent implements OnDestroy, OnInit {
 
     public studyOptions: Option<Study>[] = [];
-    public studycardOptions: Option<StudyCard>[] = [];
     public centerOptions: Option<Center>[] = [];
     private allCenters: Center[];
     public acquisitionEquipmentOptions: Option<AcquisitionEquipment>[] = [];
@@ -57,7 +54,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     public examinations: SubjectExamination[] = [];
     public niftiConverters: NiftiConverter[] = [];
     public study: Study;
-    public studycard: StudyCard;
     public center: Center;
     public acquisitionEquipment: AcquisitionEquipment;
     public subject: SubjectWithSubjectStudy;
@@ -70,11 +66,8 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         new Option<string>('PATIENT', 'Patient'),
         new Option<string>('PHANTOM', 'Phantom')
     ];
-    public useStudyCard: boolean = true;
 
-    public scHasCoilToUpdate: boolean;
     public isAdminOfStudy: boolean[] = [];
-    public scHasDifferentModality: string;
     public modality: string;
     openSubjectStudy: boolean = false;
     loading: number = 0;
@@ -93,7 +86,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             protected importDataService: ImportDataService,
             public subjectExaminationLabelPipe: SubjectExaminationPipe,
             public acqEqPipe: AcquisitionEquipmentPipe,
-            public studycardService: StudyCardService,
             public studyRightsService: StudyRightsService,
             private keycloakService: KeycloakService,
             protected consoleService: ConsoleService,
@@ -296,7 +288,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     public onSelectStudy(): Promise<void> {
         this.loading++;
         this.computeIsAdminOfStudy(this.study?.id);
-        this.studycard = this.center = this.acquisitionEquipment = this.subject = this.examination = null;
+        this.center = this.acquisitionEquipment = this.subject = this.examination = null;
 
         let centersPromise: Promise<void>;
         centersPromise = this.getCenterOptions(this.study).then(options => {
@@ -507,7 +499,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         let context = this.getContext();
         return (
             !!context.study
-            && (!context.useStudyCard || context.studyCard)
             && !!context.center
             && !!context.acquisitionEquipment
             && !!context.subject?.subjectStudy?.subjectType
@@ -545,32 +536,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
 
     abstract importData(timestamp: number): Promise<any>;
 
-    private hasCoilToUpdate(studycard: StudyCard): boolean {
-        if (!studycard) return false;
-        for (let rule of studycard.rules) {
-            for (let ass of rule.assignments) {
-                if (ass.field?.endsWith('_COIL') && !(ass.value instanceof Coil)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private hasDifferentModality(studycard: StudyCard): any {
-        if (!studycard) return false;
-        for (let rule of studycard.rules) {
-            for (let ass of rule.assignments) {
-                if (ass.field == 'MODALITY_TYPE'
-                        && this.modality && typeof ass.value == 'string' && ass.value
-                        && (ass.value as string).split('_')[0] != this.modality.toUpperCase()) {
-                    return (ass.value as string).split('_')[0];
-                }
-            }
-        }
-        return false;
-    }
-
     protected hasAdminRightOn(study: Study): Promise<boolean> {
         if (!study) return Promise.resolve(false);
         else if (this.keycloakService.isUserAdmin()) return Promise.resolve(true);
@@ -579,29 +544,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             return rights && rights.includes(StudyUserRight.CAN_ADMINISTRATE);
         });
     }
-
-    public editStudyCard(studycard: StudyCard) {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/study-card/edit/' + studycard.id]).then(success => {
-            this.subscribtions.push(
-                currentStep.waitFor(this.breadcrumbsService.currentStep, true).subscribe(entity => {
-                    this.importDataService.contextBackup(this.stepTs).studyCard = entity as StudyCard;
-                })
-            );
-        });
-    }
-
-    public createStudyCard() {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/study-card/create', {studyId: this.study.id}]).then(success => {
-            this.subscribtions.push(
-                currentStep.waitFor(this.breadcrumbsService.currentStep, true).subscribe(entity => {
-                    this.importDataService.contextBackup(this.stepTs).studyCard = entity as StudyCard;
-                })
-            );
-        });
-    }
-
 
     ngOnDestroy() {
         for(let subscribtion of this.subscribtions) {

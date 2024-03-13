@@ -40,7 +40,6 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
     postConstructor() {
         this.patient = this.getFirstSelectedPatient();
         this.modality = this.getFirstSelectedSerie().modality.toString();
-        this.useStudyCard = this.modality.toUpperCase() == "MR";
     }
 
     protected exitCondition(): boolean {
