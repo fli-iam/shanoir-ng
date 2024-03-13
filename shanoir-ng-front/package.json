@@ -4,8 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build --configuration production",
-    "build:source-map": "ng build --configuration production --source-map",
+    "build": "ng build --configuration production --source-map",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
@@ -27,6 +26,7 @@
     "@stomp/ng2-stompjs": "^7.2.0",
     "@types/node": "^12.11.1",
     "@types/wicg-file-system-access": "^2020.9.6",
+    "angular-device-information": "^4.0.0",
     "file-saver-es": "^2.0.5",
     "git-describe": "4.0.4",
     "http-status-codes": "^2.1.4",

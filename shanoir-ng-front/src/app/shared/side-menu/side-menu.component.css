@@ -5,8 +5,8 @@
 .logo { margin-bottom: 20px; display: flex; justify-content: center; min-width: 300px; position: relative; }
 
 .logo img { height: 78px; opacity: 0.2; margin-top: 4px;
-    -webkit-filter: drop-shadow(0px -3px 0px rgba(0,0,0,.9)); 
-    filter: drop-shadow(0px -3px 0px rgba(0,0,0,.9)); 
+    -webkit-filter: drop-shadow(0px -3px 0px rgba(0,0,0,.9));
+    filter: drop-shadow(0px -3px 0px rgba(0,0,0,.9));
 }
 
 .user { text-align: center; min-width: 300px; }
@@ -61,9 +61,9 @@ a:hover, a:active { color: inherit; }
 .admin-tag-sep { color: var(--color-b-light2); }
 .instance { height: 0px; overflow: visible; text-align: center; min-width: 300px; font-size: 14px; font-weight: bold; }
     .instance-frame { padding: 4px 10px 0; position: relative; z-index: 1; }
-    .instance-frame::after { content: ""; position: absolute; left: -15px; right: 15px; top: 0; bottom: 0; 
+    .instance-frame::after { content: ""; position: absolute; left: -15px; right: 15px; top: 0; bottom: 0;
         display: inline-block; transform: skewX(45deg); z-index: -1; }
-    .instance-frame::before { content: ""; position: absolute; left: 15px; right: -15px; top: 0; bottom: 0; 
+    .instance-frame::before { content: ""; position: absolute; left: 15px; right: -15px; top: 0; bottom: 0;
         display: inline-block; transform: skewX(-45deg); z-index: -1; }
     .instance-frame, .instance-frame::after, .instance-frame::before { background-color: var(--instance-color); border-radius: 2px; }
     .instance-name::after { content: var(--instance-name); }

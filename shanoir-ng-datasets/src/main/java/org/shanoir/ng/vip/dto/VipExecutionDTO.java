@@ -1,10 +1,12 @@
-package org.shanoir.ng.vip.monitoring.model;
+package org.shanoir.ng.vip.dto;
+
+import org.shanoir.ng.vip.monitoring.model.ExecutionStatus;
 
 import java.util.List;
 import java.util.Map;
 
 
-public class Execution {
+public class VipExecutionDTO {
 
     private String identifier;
     private String name;
@@ -19,9 +21,9 @@ public class Execution {
     private Long endDate;
     private String resultsLocation;
 
-    public Execution() {}
+    public VipExecutionDTO() {}
 
-    public Execution(String identifier, ExecutionStatus status) {
+    public VipExecutionDTO(String identifier, ExecutionStatus status) {
         this.identifier = identifier;
         this.status = status;
     }

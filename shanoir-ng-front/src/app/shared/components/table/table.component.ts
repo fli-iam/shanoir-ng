@@ -56,6 +56,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     page: Page<Object>;
     isLoading: boolean = false;
     maxResultsField: number;
+    pageNumber: number;
     lastSortedCol: Object = null;
     lastSortedAsc: boolean = true;
     currentPage: number = 1;
@@ -351,13 +352,23 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         return type != null ? "cell-" + type : "";
     }
 
+    jumpToPage(p: number) {
+        if (p <= this.page.totalPages) {
+            this.goToPage(p);
+        } else if (p < 0) {
+            this.goToPage(1);
+        } else {
+            this.goToPage(this.page.totalPages);
+        }
+    }
+
     goToPage(p: number, forceRefresh: boolean = false): Promise<Page<any>> {
         this.currentPage = p;
         this.isLoading = true;
-        let getPage: Page<any> | Promise<Page<any>> =  this.getPage(this.getPageable(), forceRefresh)
+        let getPage: Page<any> | Promise<Page<any>> = this.getPage(this.getPageable(), forceRefresh)
         if (getPage instanceof Promise) {
             return getPage.then(page => {
-                    this.pageLoaded.emit(page);
+                this.pageLoaded.emit(page);
                 return this.computePage(page);
             }).catch(reason => {
                 setTimeout(() => {
@@ -372,6 +383,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                 return page;
             });
         }
+
     }
 
     private computePage(page: Page<any>): Page<any> {
