@@ -510,7 +510,6 @@ public class RabbitMQDatasetsService {
 					countProcessed + " are processed datasets and cannot be copied.");
 			event.setStatus(ShanoirEvent.SUCCESS);
 			event.setProgress(1.0f);
-
 			eventService.publishEvent(event);
 			solrService.indexDatasets(newDatasets);
 
