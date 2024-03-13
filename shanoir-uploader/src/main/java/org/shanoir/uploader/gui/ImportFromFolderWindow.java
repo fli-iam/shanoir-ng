@@ -22,7 +22,6 @@ public class ImportFromFolderWindow extends JFrame {
 
     public JButton uploadButton;
     public JButton openButton;
-    public JProgressBar progressBar;
 
     private static Logger logger = Logger.getLogger(ImportFromFolderWindow.class);
 
@@ -202,14 +201,6 @@ public class ImportFromFolderWindow extends JFrame {
         importListener = new ImportFromFolderActionListener(this, resourceBundle, dicomServerClient, dicomFileAnalyzer, shanoirUploaderFolder, shanoirUploaderServiceClientNG);
 
         uploadButton.addActionListener(importListener);
-
-        progressBar = new JProgressBar(0);
-        GridBagConstraints gBCProgressBar = new GridBagConstraints();
-        gBCProgressBar.anchor = GridBagConstraints.NORTHWEST;
-        gBCProgressBar.gridx = 0;
-        gBCProgressBar.gridy = 9;
-        progressBar.setVisible(false);
-        masterPanel.add(progressBar, gBCProgressBar);
 
         // center the frame
         // frame.setLocationRelativeTo( null );

@@ -87,18 +87,11 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
         }
 
         for (ExaminationImport importTodo : this.folderimport.getExaminationImports()) {
-            importFromFolderWindow.progressBar.setVisible(true);
-            importFromFolderWindow.progressBar.setString("Preparing import " + i + "/" + this.folderimport.getExaminationImports().size());
-            importFromFolderWindow.progressBar.setValue(100*i/this.folderimport.getExaminationImports().size() + 1);
-
             success = importData(importTodo) && success;
             i++;
         }
 
         if (success) {
-            importFromFolderWindow.progressBar.setString("Success !");
-            importFromFolderWindow.progressBar.setValue(100);
-
             // Open current import tab and close csv import panel
             ((JTabbedPane) this.importFromFolderWindow.scrollPaneUpload.getParent().getParent()).setSelectedComponent(this.importFromFolderWindow.scrollPaneUpload.getParent());
 
