@@ -300,7 +300,6 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     public onUserSelectedOption(option: Option<any>, event) {
-        console.log("OnUserSelectedOption");
         event.stopPropagation();
         if (option.disabled) return;
         let index: number = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, option.value));
@@ -308,7 +307,6 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     public onUserSelectedOptionIndex(index: number) {
-        console.log("OnUserSelectedOptionIndex : ", index);
         this.searchText = null;
         this.element.nativeElement.focus();
         this.selectedOptionIndex = index;

@@ -244,48 +244,12 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         }
     }
 
-    private getStudyCardOptions(study: Study): Promise<Option<StudyCard>[]> {
-        let studyEquipments: AcquisitionEquipment[] = [];
-        if (!study) return Promise.resolve([]);
-        /* find equipments for this study - needed for checking studycards compatibilities */
-        study.studyCenterList.forEach(sc => {
-            sc.center.acquisitionEquipments.forEach(eq => {
-                if (studyEquipments.findIndex(se => se.id == eq.id) == -1) studyEquipments.push(eq);
-            });
-        });
-        /* build the studycards options and set their compatibilies */
-        return this.studycardService.getAllForStudy(study.id).then(studycards => {
-            if (!studycards) studycards = [];
-            return studycards.map(sc => {
-                let opt = new Option(sc, sc.name);
-                let scEq = sc.acquisitionEquipment ? studyEquipments.find(se => se.id == sc.acquisitionEquipment.id) : null;
-                opt.compatible = this.acqEqCompatible(scEq);
-                return opt;
-            });
-        });
-    }
-
-    // private selectDefaultStudyCard(options: Option<StudyCard>[]): Promise<void> {
-    //     let founded = options?.find(option => option.compatible)?.value;
-    //     if (founded) {
-    //         this.studycard = founded;
-    //         return this.onSelectStudyCard();
-    //     } else if (options?.length > 0) {
-    //         this.studycard = options[0].value;
-    //         return this.onSelectStudyCard();
-    //     }
-    // }
-
     private getCenterOptions(study: Study): Promise<Option<Center>[]> {
-        console.log("getCenterOptions");
         if (study && study.id && study.studyCenterList) {
             return this.centerService.getCentersByStudyId(study.id).then(centers => {
                 return centers.map(center => {
                     let centerOption = new Option<Center>(center, center.name);
-                    // if (!this.useStudyCard) {
-                        centerOption.compatible = center && this.centerCompatible(center);
-                    // }
-                    console.log("centerOptions : ", centerOption);
+                    centerOption.compatible = center && this.centerCompatible(center);
                     return centerOption;
                 });
             });
@@ -314,37 +278,15 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         }
     }
 
-    // /**
-    //  * auto-select center, equipment, nifti converter from studycard
-    //  */
-    // private selectDataFromStudyCard(studyCard: StudyCard, studyCenterList: StudyCenter[]) {
-    //     if (studyCard && studyCenterList) {
-    //         this.acquisitionEquipment = null;
-    //         let eqFound: AcquisitionEquipment;
-    //         let scFound: StudyCenter = studyCenterList?.find(sc => {
-    //             eqFound = sc.center.acquisitionEquipments.find(eq => eq.id == this.studycard.acquisitionEquipment.id);
-    //             return (!!eqFound);
-    //         })
-    //         this.center = scFound ? scFound.center : this.studycard?.acquisitionEquipment?.center;
-    //         this.niftiConverter = this.studycard.niftiConverter;
-    //         return this.onSelectCenter().then(() => {
-    //             this.acquisitionEquipment = eqFound;
-    //         });
-    //     }
-    // }
-
     private getEquipmentOptions(center: Center): Option<AcquisitionEquipment>[] {
-        console.log("getEquipmentOptions");
         return center?.acquisitionEquipments?.map(acqEq => {
             let option = new Option<AcquisitionEquipment>(acqEq, this.acqEqPipe.transform(acqEq));
             option.compatible = this.acqEqCompatible(acqEq);
-            console.log("option : ", option);
             return option;
         });
     }
 
     private selectDefaultEquipment(options: Option<AcquisitionEquipment>[]) {
-        console.log("selectDefaultEquipemnt");
         let founded = options?.find(option => option.compatible)?.value;
         if (founded) {
             this.acquisitionEquipment = founded;
@@ -352,7 +294,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     public onSelectStudy(): Promise<void> {
-        console.log("onStudySelect");
         this.loading++;
         this.computeIsAdminOfStudy(this.study?.id);
         this.studycard = this.center = this.acquisitionEquipment = this.subject = this.examination = null;
@@ -362,17 +303,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             this.centerOptions = options;
             return this.selectDefaultCenter(options);
         });
-        // if (this.useStudyCard) {
-        //     studycardsOrCentersPromise = this.getStudyCardOptions(this.study).then(options => {
-        //         this.studycardOptions = options;
-        //         return this.selectDefaultStudyCard(options);
-        //     });
-        // } else {
-        //     studycardsOrCentersPromise = this.getCenterOptions(this.study).then(options => {
-        //         this.centerOptions = options;
-        //         return this.selectDefaultCenter(options);
-        //     });
-        // }
 
         let subjectsPromise: Promise<void> = this.getSubjectList(this.study?.id).then(subjects => {
             this.subjects = subjects ? subjects : [];
@@ -381,48 +311,19 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             .then(() => this.onContextChange());
     }
 
-    // public onSelectStudyCard(): Promise<any> {
-    //     if (this.studycard) {
-    //         this.loading++;
-    //         this.center = this.acquisitionEquipment = null;
-    //         this.scHasCoilToUpdate = this.hasCoilToUpdate(this.studycard);
-    //         this.scHasDifferentModality = this.hasDifferentModality(this.studycard);
-    //         return this.selectDataFromStudyCard(this.studycard, this.study?.studyCenterList)
-    //           .finally(() => this.loading--)
-    //           .then(() => this.onContextChange());
-    //     }
-    // }
-
-    // onClearStudyCard() {
-    //     this.studycard = null;
-    //     // this.useStudyCard = true;
-    // }
-
-    // onToggleUseStudyCard() {
-    //     if (!this.useStudyCard) this.studycard = null;
-    //     else {
-    //         let studycardOpt = this.studycardOptions.find(sco => sco.compatible == true);
-    //         if (studycardOpt) {
-    //             this.studycard = studycardOpt.value;
-    //             this.onSelectStudyCard();
-    //         }
-    //     }
-    //     this.importDataService.contextBackup(this.stepTs).useStudyCard = this.useStudyCard;
-    // }
-
     public onSelectCenter(): Promise<any> {
-        console.log("onSelectCenter");
         this.loading++;
         this.acquisitionEquipment = null;
         if (this.center) {
-            this.subjectNamePrefix = this.study.studyCenterList.find(studyCenter => studyCenter.center.id === this.center.id)?.subjectNamePrefix;;
+            this.subjectNamePrefix = this.study.studyCenterList.find(studyCenter => studyCenter.center.id === this.center.id)?.subjectNamePrefix;
         }
         this.openSubjectStudy = false;
-
-        this.acquisitionEquipmentOptions = this.getEquipmentOptions(this.center);
-        this.selectDefaultEquipment(this.acquisitionEquipmentOptions);
-        this.loading--;
-        this.onContextChange();
+        setTimeout(() => {
+            this.acquisitionEquipmentOptions = this.getEquipmentOptions(this.center);
+            this.selectDefaultEquipment(this.acquisitionEquipmentOptions);
+            this.loading--;
+            this.onContextChange();
+        });
         return Promise.resolve();
     }
 
@@ -456,11 +357,9 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     public onContextChange() {
-        console.log("onContextChange");
         this.importDataService.setContextBackup(this.stepTs, this.getContext());
         if (this.valid) {
             this.importDataService.contextData = this.getContext();
-            console.log("onContextChange valid : ", this.importDataService.contextData);
         }
     }
 
