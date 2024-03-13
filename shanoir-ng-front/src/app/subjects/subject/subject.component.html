@@ -167,6 +167,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</fieldset>
 			<fieldset *ngIf="mode !== 'view' && !forceStudy">
 				<subject-study-list [subject]="subject" [selectableList]="studies" [(ngModel)]="subject.subjectStudyList" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>
+                <label *ngIf="hasError('subjectStudyList', ['required'])" class="form-validation-alert" i18n="Subject detail|Subject StudyList required error@@subjectDetailSubjectStudyListRequiredError">Study is required!</label>
 			</fieldset>
 			<fieldset *ngIf="mode !== 'view' && forceStudy">
 				<ol>

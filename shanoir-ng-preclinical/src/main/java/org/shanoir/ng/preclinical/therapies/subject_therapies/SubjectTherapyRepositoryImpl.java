@@ -31,8 +31,8 @@ public class SubjectTherapyRepositoryImpl implements SubjectTherapyRepositoryCus
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<SubjectTherapy> findByAnimalSubject(AnimalSubject animalSubject) {
-		return em.createQuery("SELECT t FROM SubjectTherapy t WHERE t.animalSubject LIKE :animalSubject")
-				.setParameter("animalSubject", animalSubject).getResultList();
+		return em.createQuery("SELECT t FROM SubjectTherapy t WHERE t.animalSubject.id = :animalSubject")
+				.setParameter("animalSubject", animalSubject.getId()).getResultList();
 	}
 
 }
