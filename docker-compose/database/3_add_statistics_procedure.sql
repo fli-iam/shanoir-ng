@@ -17,7 +17,7 @@ DROP PROCEDURE IF EXISTS getStatistics;
 delimiter //
 CREATE PROCEDURE getStatistics(IN studyNameInRegExp VARCHAR(255), IN studyNameOutRegExp VARCHAR(255), IN subjectNameInRegExp VARCHAR(255), IN subjectNameOutRegExp VARCHAR(255))
 BEGIN
-SELECT 'patient_id', 'shanoir_name', 'double_hash', 'birthname1', 'birthname2', 'birthname3', 'lastname1', 'lastname2', 'lastname3', 'firstname1', 'firstname2', 'firstname3', 'birthdate1', 'sex', 'birth_year', 'study_id', 'study_name', 'sequence_id', 'norm_sequence_name', 'sequence_name', 'center_id', 'center', 'device_manufacturer', 'device_model', 'device_field_strength', 'device_serial_number', 'examination_id', 'examination_date', 'import_date', 'creation_date', 'series_number', 'protocol_type', 'dicom_size_mo', 'execution'
+SELECT 'patient_id', 'shanoir_name', 'double_hash', 'birthname1', 'birthname2', 'birthname3', 'lastname1', 'lastname2', 'lastname3', 'firstname1', 'firstname2', 'firstname3', 'birthdate1', 'sex', 'birth_year', 'study_id', 'study_name', 'sequence_id', 'norm_sequence_name', 'sequence_name', 'center_id', 'center', 'center_postcode', 'center_city', 'device_manufacturer', 'device_model', 'device_field_strength', 'device_serial_number', 'examination_id', 'examination_date', 'import_date', 'creation_date', 'series_number', 'protocol_type', 'dicom_size_mo', 'execution'
 UNION ALL
 SELECT
     subject.id AS patient_id,
@@ -42,6 +42,8 @@ SELECT
     dataset_metadata.comment AS sequence_name,
     center.id AS center_id,
     center.name AS center,
+    center.postal_code AS center_postcode,
+    center.city AS center_city,
     manufacturer.name AS device_manufacturer,
     manufacturer_model.name AS device_model,
     manufacturer_model.magnetic_field AS device_field_strength,
@@ -61,8 +63,8 @@ SELECT
     ELSE 'UNKNOWN'
     END), 'processing_date', proc.processing_date, 'properties', JSON_ARRAYAGG(JSON_OBJECT(property.name, property.value)))
     FROM datasets.dataset_property property
-    LEFT JOIN dataset_processing proc ON property.dataset_processing_id = proc.id
-    LEFT JOIN execution_monitoring exe ON proc.id = exe.id
+    LEFT JOIN datasets.dataset_processing proc ON property.dataset_processing_id = proc.id
+    LEFT JOIN datasets.execution_monitoring exe ON proc.id = exe.id
     WHERE property.dataset_id = dataset.id
     GROUP BY property.dataset_processing_id
     ORDER BY exe.start_date DESC
