@@ -323,6 +323,10 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 		}
 
 		List<ShanoirMetadata> result = this.findSolr(clause);
+
+		if(result.isEmpty()){
+			return null;
+		}
 		
 		if (result.size() > 1) {
 			LOG.error("Solr query returned multiple result for dataset [{}]. Please check database consistency.", datasetId);
