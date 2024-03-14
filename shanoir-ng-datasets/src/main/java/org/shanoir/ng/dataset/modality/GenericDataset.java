@@ -7,6 +7,9 @@ import org.shanoir.ng.dataset.model.Dataset;
 @Entity
 public class GenericDataset extends Dataset {
 
+	public static final String datasetType = "Generic";
+
+
 	/**
 	 * Serial version UUID
 	 */
@@ -22,7 +25,7 @@ public class GenericDataset extends Dataset {
 
 	@Override
 	public String getType() {
-		return "Generic";
+		return datasetType;
 	}
 
 }
