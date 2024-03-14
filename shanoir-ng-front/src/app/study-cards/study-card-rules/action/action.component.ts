@@ -125,7 +125,6 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
     }
 
     onSelectFieldOption(option: Option<any>) {
-        console.log("onSelectFieldOption");
         if (option) {
             option.disabled = true;
             if (option.section == 'Dataset') {
