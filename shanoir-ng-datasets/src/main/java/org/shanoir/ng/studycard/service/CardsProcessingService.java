@@ -166,6 +166,11 @@ public class CardsProcessingService {
                 examinations = study.getExaminations();
             }
             for (Examination examination : examinations) {
+                System.out.println("############################################# ... exam " + examination.getId() + " - " + examination.getComment());
+                for (SubjectStudy ss : examination.getSubject().getSubjectStudyList()) {
+                    System.out.println("############################################# ... study " + ss.getStudy().getId() + " - " + ss.getStudy().getName());
+                    System.out.println("############################################# ... subject " + ss.getSubject().getId() + " - " + ss.getSubject().getName());
+                }
                 event.setStatus(2);
                 event.setProgress((float)i / examinations.size());
                 event.setMessage("checking quality for examination " + examination.getComment());
