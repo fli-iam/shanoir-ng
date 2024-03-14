@@ -165,6 +165,7 @@ public class CardsProcessingService {
             } else {
                 examinations = study.getExaminations();
             }
+            System.out.println("############################################# ... current study " + study.getId() + " - " + study.getName());
             for (Examination examination : examinations) {
                 System.out.println("############################################# ... exam " + examination.getId() + " - " + examination.getComment());
                 for (SubjectStudy ss : examination.getSubject().getSubjectStudyList()) {
