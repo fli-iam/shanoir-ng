@@ -53,6 +53,7 @@ import {DatasetCopyDialogComponent} from "../shared/components/dataset-copy-dial
 
 const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags'];
 const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength'];
+const BooleanFacetNames: string[] = ['processed'];
 export type TextualFacet = typeof TextualFacetNames[number];
 @Component({
     selector: 'solr-search',
@@ -224,6 +225,19 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                 (this.solrRequest[facetName] as []).forEach(facetVal => {
                     this.selections = this.selections.concat(
                         new SimpleValueSelectionBlock(facetVal, () => {
+                            this.solrRequest[facetName] = this.solrRequest[facetName].filter(val => val != facetVal);
+                        })
+                    );
+
+                })
+            }
+        })
+
+        BooleanFacetNames.forEach(facetName => {
+            if (this.solrRequest[facetName] && Array.isArray(this.solrRequest[facetName])) {
+                (this.solrRequest[facetName] as []).forEach(facetVal => {
+                    this.selections = this.selections.concat(
+                        new BooleanSelectionBlock(facetVal, () => {
                             this.solrRequest[facetName] = this.solrRequest[facetName].filter(val => val != facetVal);
                         })
                     );
@@ -639,6 +653,15 @@ export class FacetSelectionBlock implements SelectionBlock {
 
     remove(): void {
         this.facetField.checked = false;
+    }
+}
+
+export class BooleanSelectionBlock implements SelectionBlock {
+
+    constructor(private value: boolean, public remove: () => void) {}
+
+    get label(): string {
+        return String(this.value);
     }
 }
 
