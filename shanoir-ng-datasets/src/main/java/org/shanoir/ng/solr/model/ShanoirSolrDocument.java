@@ -100,7 +100,7 @@ public class ShanoirSolrDocument {
 	private List<String> tags;
 
 	@Field
-	private boolean isProcessed;
+	private boolean processed;
 
 	public ShanoirSolrDocument () {		
 	}
@@ -108,7 +108,7 @@ public class ShanoirSolrDocument {
 	public ShanoirSolrDocument (String id, Long datasetId, String datasetName, String datasetType, String datasetNature,
 			Date datasetCreationDate, Long examinationId, String examinationComment, Date examinationDate, String acquisitionEquipmentName,
 			String subjectName, String subjectType, Long subjectId, String studyName, Long studyId, String centerName, Long centerId, Double sliceThickness,
-			Double pixelBandwidth, Double magneticFieldStrength, boolean isProcessed) {
+			Double pixelBandwidth, Double magneticFieldStrength, boolean processed) {
 		this.id = id;
 		this.datasetId = datasetId;
 		this.datasetName = datasetName;
@@ -129,7 +129,7 @@ public class ShanoirSolrDocument {
 		this.sliceThickness = sliceThickness;
 		this.pixelBandwidth = pixelBandwidth;
 		this.magneticFieldStrength = magneticFieldStrength;
-		this.isProcessed = isProcessed;
+		this.processed = processed;
 	}
 
 	public String getId() {
@@ -361,10 +361,10 @@ public class ShanoirSolrDocument {
 	}
 
 	public boolean isProcessed() {
-		return isProcessed;
+		return processed;
 	}
 
 	public void setProcessed(boolean processed) {
-		isProcessed = processed;
+		this.processed = processed;
 	}
 }

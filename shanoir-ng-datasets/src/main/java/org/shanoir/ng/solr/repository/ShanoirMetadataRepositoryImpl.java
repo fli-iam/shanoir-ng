@@ -60,7 +60,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"c.id as centerId, mrp.slice_thickness as sliceThickness, " +
 			"mrp.pixel_bandwidth as pixelBandwidth, " +
 			"mrp.magnetic_field_strength as magneticFieldStrength, " +
-			"0 as isProcessed"
+			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN mr_dataset_acquisition mda on mda.id = d.dataset_acquisition_id"
@@ -89,7 +89,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"c.id as centerId, null as sliceThickness, " +
 			"null as pixelBandwidth, " +
 			"null as magneticFieldStrength, " +
-			"0 as isProcessed"
+			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
@@ -116,7 +116,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as sliceThickness, " +
 			"null as pixelBandwidth, " +
 			"null as magneticFieldStrength, " +
-			"0 as isProcessed"
+			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
@@ -145,7 +145,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as sliceThickness, " +
 			"null as pixelBandwidth, " +
 			"null as magneticFieldStrength, " +
-			"0 as isProcessed"
+			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
@@ -172,7 +172,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as sliceThickness, " +
 			"null as pixelBandwidth, " +
 			"null as magneticFieldStrength, " +
-			"0 as isProcessed"
+			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
@@ -201,7 +201,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as sliceThickness, " +
 			"null as pixelBandwidth, " +
 			"null as magneticFieldStrength, " +
-			"0 as isProcessed"
+			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
@@ -230,7 +230,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			+ ", null as sliceThickness"
 			+ ", null as pixelBandwidth"
 			+ ", null as magneticFieldStrength"
-			+ ", 1 as isProcessed"
+			+ ", 1 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset dp ON dp.id ="
 			+ " (SELECT dataset_id from input_of_dataset_processing WHERE processing_id = d.dataset_processing_id LIMIT 1)"
@@ -262,7 +262,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			+ "null as sliceThickness, " +
 			"null as pixelBandwidth, " +
 			"null as magneticFieldStrength, " +
-			"0 as isProcessed"
+			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset refd ON refd.id = d.referenced_dataset_for_superimposition_id"
 			+ " LEFT JOIN dataset_acquisition da on da.id = refd.dataset_acquisition_id"
@@ -292,7 +292,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as sliceThickness, " +
 			"null as pixelBandwidth, " +
 			"null as magneticFieldStrength, " +
-			"0 as isProcessed"
+			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"

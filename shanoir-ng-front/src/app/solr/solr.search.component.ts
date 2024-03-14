@@ -51,9 +51,8 @@ import {Format} from "@angular-devkit/build-angular/src/builders/extract-i18n/sc
 import { TaskState } from '../async-tasks/task.model';
 import {DatasetCopyDialogComponent} from "../shared/components/dataset-copy-dialog/dataset-copy-dialog.component";
 
-const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags'];
+const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags', 'processed'];
 const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength'];
-const BooleanFacetNames: string[] = ['processed'];
 export type TextualFacet = typeof TextualFacetNames[number];
 @Component({
     selector: 'solr-search',
@@ -225,19 +224,6 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                 (this.solrRequest[facetName] as []).forEach(facetVal => {
                     this.selections = this.selections.concat(
                         new SimpleValueSelectionBlock(facetVal, () => {
-                            this.solrRequest[facetName] = this.solrRequest[facetName].filter(val => val != facetVal);
-                        })
-                    );
-
-                })
-            }
-        })
-
-        BooleanFacetNames.forEach(facetName => {
-            if (this.solrRequest[facetName] && Array.isArray(this.solrRequest[facetName])) {
-                (this.solrRequest[facetName] as []).forEach(facetVal => {
-                    this.selections = this.selections.concat(
-                        new BooleanSelectionBlock(facetVal, () => {
                             this.solrRequest[facetName] = this.solrRequest[facetName].filter(val => val != facetVal);
                         })
                     );
