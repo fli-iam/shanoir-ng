@@ -33,12 +33,6 @@ public class ExecutionStatusMonitorService {
 
 	public static final float DEFAULT_PROGRESS = 0.5f;
 
-	@Value("${vip.uri}")
-	private String VIP_URI;
-
-	@Value("${vip.upload-folder}")
-	private String importDir;
-
 	@Value("${vip.sleep-time}")
 	private long sleepTime;
 
