@@ -97,7 +97,7 @@ public class ShanoirEvent {
 	 * @param objectId the objectId to set
 	 */
 	public void setObjectId(String objectId) {
-		if (objectId.length() > 255) {
+		if (objectId != null && objectId.length() > 255) {
 			this.objectId = objectId.substring(0, 250) + "...";
 		} else {
 			this.objectId = objectId;
