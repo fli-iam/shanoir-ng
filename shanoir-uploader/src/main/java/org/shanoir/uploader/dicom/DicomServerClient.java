@@ -109,80 +109,90 @@ public class DicomServerClient implements IDicomServerClient {
 	 */
 	@Override
 	public synchronized List<String> retrieveDicomFiles(final Collection<SerieTreeNode> selectedSeries, final File uploadFolder) {
-		// for each exam/patient download: create a new mini-pacs that uses the specific download folder within the workFolder
-		dcmRcvManager.startSCPServer(uploadFolder.getAbsolutePath());
 		final List<String> retrievedDicomFiles = new ArrayList<String>();
-		final List<String> oldFileNames = new ArrayList<String>();
-		// Iterate over all series and send command for sending DICOM files.
-		for (SerieTreeNode serieTreeNode : selectedSeries) {
-			List<String> fileNamesForSerie = new ArrayList<String>();
-			final String seriesInstanceUID = serieTreeNode.getId();
-			final String studyInstanceUID = serieTreeNode.getParent().getId();
-			try {
-				// move files from server directly into uploadFolder
-				boolean noError = getFilesFromServer(studyInstanceUID, seriesInstanceUID, serieTreeNode.getDescription());
-				if(noError) {
-					// create file name filter for old files and only use .dcm files (ignore /tmp folder)
-					final FilenameFilter oldFileNamesAndDICOMFilter = new FilenameFilter() {
-						@Override
-						public boolean accept(File dir, String name) {
-							// ignore files from other series before
-							for (Iterator iterator = oldFileNames.iterator(); iterator.hasNext();) {
-								String oldFileName = (String) iterator.next();
-								if (name.equals(oldFileName)) {
-									return false;
-								}
-							}
-							// only take .dcm files into consideration, ignore others
-							if (name.endsWith(DcmRcvManager.DICOM_FILE_SUFFIX)) {
-								return true;
-							} else {
-								return false;
-							}
-						}
-					};
-					File serieFolder = new File (uploadFolder.getAbsolutePath() + File.separator + seriesInstanceUID);
-					if (serieFolder.exists()) {
-						File[] newFileNames = serieFolder.listFiles(oldFileNamesAndDICOMFilter);
-						logger.debug("newFileNames: " + newFileNames.length);
-						for (int i = 0; i < newFileNames.length; i++) {
-							fileNamesForSerie.add(newFileNames[i].getName());
-						}
-						serieTreeNode.setFileNames(fileNamesForSerie);
-						retrievedDicomFiles.addAll(fileNamesForSerie);
-						oldFileNames.addAll(fileNamesForSerie);
-						logger.info(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
-								+ " DICOM files for serie " + seriesInstanceUID + ": " + serieTreeNode.getDisplayString()
-								+ " was successful.\n\n");
-					} else {
-						logger.error(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
-						+ " DICOM files for serie " + seriesInstanceUID + ": " + serieTreeNode.getDisplayString()
-						+ " has failed.\n\n");
-						return null;
-					}
-				} else {
-					logger.error(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
-							+ " DICOM files for serie " + seriesInstanceUID + ": " + serieTreeNode.getDisplayString()
-							+ " has failed.\n\n");
-					return null;
-				}
-			} catch (final Exception e) {
-				logger.error(e.getMessage(), e);
-				return null;
-			}
-		}
+		if (!selectedSeries.isEmpty()) {
+			downloadFromDicomServer(selectedSeries, uploadFolder);
+			readDicomFilesFromDisk(selectedSeries, uploadFolder, retrievedDicomFiles);
+		}		
 		return retrievedDicomFiles;
 	}
 
-	private boolean getFilesFromServer(final String studyInstanceUID, final String seriesInstanceUID, final String seriesDescription) throws Exception {
-		try {
-			logger.info("\n C_MOVE, serie (" + seriesDescription + ") command: launching c-move with args: " + seriesDescription + ", " + seriesInstanceUID + "\n");
-			queryPACSService.queryCMOVE(studyInstanceUID, seriesInstanceUID);
-		} catch (final Exception e) {
-			logger.error(e.getMessage(), e);
-			return false;
+	private void readDicomFilesFromDisk(final Collection<SerieTreeNode> selectedSeries, final File uploadFolder,
+			final List<String> retrievedDicomFiles) {
+		final List<String> oldFileNames = new ArrayList<String>();
+		// Iterate over all series and align the downloaded files
+		for (SerieTreeNode serieTreeNode : selectedSeries) {
+			List<String> fileNamesForSerie = new ArrayList<String>();
+			final String seriesInstanceUID = serieTreeNode.getId();
+			try {
+				final FilenameFilter oldFileNamesAndDICOMFilter = createFileNameFilter(oldFileNames);
+				File serieFolder = new File (uploadFolder.getAbsolutePath() + File.separator + seriesInstanceUID);
+				if (serieFolder.exists()) {
+					File[] newFileNames = serieFolder.listFiles(oldFileNamesAndDICOMFilter);
+					logger.debug("newFileNames: " + newFileNames.length);
+					for (int i = 0; i < newFileNames.length; i++) {
+						fileNamesForSerie.add(newFileNames[i].getName());
+					}
+					serieTreeNode.setFileNames(fileNamesForSerie);
+					serieTreeNode.getSerie().setImagesNumber(fileNamesForSerie.size());
+					retrievedDicomFiles.addAll(fileNamesForSerie);
+					oldFileNames.addAll(fileNamesForSerie);
+					logger.info(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
+							+ " DICOM files for serie " + seriesInstanceUID + ": " + serieTreeNode.getDisplayString()
+							+ " was successful.\n\n");
+				} else {
+					logger.error(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
+					+ " DICOM files for serie " + seriesInstanceUID + ": " + serieTreeNode.getDisplayString()
+					+ " has failed.\n\n");
+				}
+			} catch (final Exception e) {
+				logger.error(e.getMessage(), e);
+			}
 		}
-		return true;
+	}
+
+	/**
+	 * Create file name filter for old files and only use .dcm files (ignore /tmp folder).
+	 * 
+	 * @param oldFileNames
+	 * @return
+	 */
+	private FilenameFilter createFileNameFilter(final List<String> oldFileNames) {
+		final FilenameFilter oldFileNamesAndDICOMFilter = new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String name) {
+				// ignore files from other series before
+				for (Iterator<String> iterator = oldFileNames.iterator(); iterator.hasNext();) {
+					String oldFileName = (String) iterator.next();
+					if (name.equals(oldFileName)) {
+						return false;
+					}
+				}
+				// only take .dcm files into consideration, ignore others
+				if (name.endsWith(DcmRcvManager.DICOM_FILE_SUFFIX)) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+		};
+		return oldFileNamesAndDICOMFilter;
+	}
+
+	private void downloadFromDicomServer(final Collection<SerieTreeNode> selectedSeries, final File uploadFolder) {
+		// for each exam/patient download: create a new local mini-pacs,
+		// that uses the specific download folder within the workFolder
+		dcmRcvManager.startSCPServer(uploadFolder.getAbsolutePath());
+		final String studyInstanceUID = selectedSeries.iterator().next().getParent().getId();
+		final List<String> seriesInstanceUIDs = new ArrayList<String>();
+		selectedSeries.stream().forEach(s -> seriesInstanceUIDs.add(s.getId()));
+		try {
+			queryPACSService.queryCMOVEs(studyInstanceUID, seriesInstanceUIDs);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			logger.error(uploadFolder.getName() + ":\n\n Download of "
+			+ " DICOM files for DICOM study/exam " + studyInstanceUID + ": " + " has failed.\n\n");
+		}
 	}
 
 	/* (non-Javadoc)

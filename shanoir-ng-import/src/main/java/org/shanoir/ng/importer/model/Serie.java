@@ -329,6 +329,7 @@ public class Serie {
 	
 	public String toString() {
 		StringBuffer sB = new StringBuffer();
+		sB.append("[ ");
 		sB.append(this.seriesDescription);
 		sB.append(", ");
 		sB.append(this.sequenceName);
@@ -338,6 +339,7 @@ public class Serie {
 		sB.append(this.seriesNumber);
 		sB.append(", ");
 		sB.append(this.seriesInstanceUID);
+		sB.append(" ]");
 		return sB.toString();
 	}
 

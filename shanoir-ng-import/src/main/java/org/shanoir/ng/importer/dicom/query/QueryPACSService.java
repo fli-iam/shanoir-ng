@@ -162,6 +162,18 @@ public class QueryPACSService {
 			throw e;
         }
 	}
+
+	private void releaseAssociation(Association association) {
+		try {
+			association.release();
+		} catch (IOException e) {
+			LOG.error(e.getMessage(), e);
+		}
+		ExecutorService executorService = (ExecutorService) association.getDevice().getExecutor();
+		executorService.shutdown();
+		association.getDevice().getScheduledExecutor().shutdown();
+		LOG.info("releaseAssociation finished between calling {} and called {}", calling.getAet(), called.getAet());
+	}
 	
 	public ImportJob queryCFIND(DicomQuery dicomQuery) throws Exception {
 		LOG.info("--------------------");
@@ -196,37 +208,45 @@ public class QueryPACSService {
 		return importJob;
 	}
 
-	private void releaseAssociation(Association association) {
-		try {
-			association.release();
-		} catch (IOException e) {
-			LOG.error(e.getMessage(), e);
-		}
-		ExecutorService executorService = (ExecutorService) association.getDevice().getExecutor();
-		executorService.shutdown();
-		association.getDevice().getScheduledExecutor().shutdown();
-		LOG.info("releaseAssociation finished between calling {} and called {}", calling.getAet(), called.getAet());
+	public void queryCMOVEs(String studyInstanceUID, List<String> seriesInstanceUIDs) throws Exception {
+		LOG.info("--------------------");
+		LOG.info("--- START C-MOVES --");
+		LOG.info("--------------------");
+		long start = System.currentTimeMillis();
+		Association association = connectAssociation(calling, called, false);
+		seriesInstanceUIDs.stream().forEach(s -> queryCMOVEPerSerie(studyInstanceUID, s, association));
+		releaseAssociation(association);
+		long finish = System.currentTimeMillis();
+		long timeElapsed = finish - start;
+		LOG.info("Duration of all series " + timeElapsed + "ms.");
+		LOG.info("--------------------");
+		LOG.info("--- END C-MOVES ----");
+		LOG.info("--------------------");
 	}
-
+	
 	public void queryCMOVE(String studyInstanceUID, String seriesInstanceUID) throws Exception {
 		LOG.info("--------------------");
 		LOG.info("--- START C-MOVE ---");
 		LOG.info("--------------------");
 		long start = System.currentTimeMillis();
 		Association association = connectAssociation(calling, called, false);
+		queryCMOVEPerSerie(studyInstanceUID, seriesInstanceUID, association);
+		releaseAssociation(association);
+		long finish = System.currentTimeMillis();
+		long timeElapsed = finish - start;
+		LOG.info("Duration of one serie " + timeElapsed + "ms.");
+		LOG.info("--------------------");
+		LOG.info("--- END C-MOVE -----");
+		LOG.info("--------------------");
+	}
+
+	private void queryCMOVEPerSerie(String studyInstanceUID, String seriesInstanceUID, Association association) {
 		DicomParam[] params = {
 			new DicomParam(Tag.QueryRetrieveLevel, "SERIES"),
 			new DicomParam(Tag.StudyInstanceUID, studyInstanceUID),
 			new DicomParam(Tag.SeriesInstanceUID, seriesInstanceUID) };
 		LOG.info("Calling PACS, C-MOVE for serie: {} of study: {}", seriesInstanceUID, studyInstanceUID);
-		queryCMove(association, params);		
-		releaseAssociation(association);
-		long finish = System.currentTimeMillis();
-		long timeElapsed = finish - start;
-		LOG.info("Duration of all calls of queryCMOVE " + timeElapsed + "ms.");
-		LOG.info("--------------------");
-		LOG.info("--- END C-MOVE -----");
-		LOG.info("--------------------");
+		queryCMove(association, params);
 	}
 	
 	public boolean queryECHO(String calledAET, String hostName, int port, String callingAET) {
@@ -563,7 +583,6 @@ public class QueryPACSService {
 	}
 
 	private List<Attributes> queryCMove(Association association, DicomParam[] params) {
-		long start = System.currentTimeMillis();
 		DicomState state = new DicomState(new DicomProgress());
         DimseRSPHandler rspHandler = createCMoveRSPHandler(association, state);
 		Attributes attributes = new Attributes();
@@ -581,9 +600,6 @@ public class QueryPACSService {
 		List<Attributes> response = state.getDicomRSP();
 		LOG.info("C-MOVE-RESPONSE NB. ELEMENTS: " + response.size());
 		LOG.debug("C-MOVE-RESPONSE CONTENT:\n" + response);
-		long finish = System.currentTimeMillis();
-		long timeElapsed = finish - start;
-		LOG.info("Duration of C-MOVE: " + timeElapsed + "ms.");
 		return response;
 	}
 
