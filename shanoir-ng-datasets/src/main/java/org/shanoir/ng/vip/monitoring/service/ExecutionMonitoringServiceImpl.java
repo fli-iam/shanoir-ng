@@ -2,11 +2,12 @@ package org.shanoir.ng.vip.monitoring.service;
 
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
+import org.shanoir.ng.vip.dto.DatasetParameterDTO;
 import org.shanoir.ng.vip.monitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.monitoring.model.ExecutionStatus;
 import org.shanoir.ng.vip.monitoring.repository.ExecutionMonitoringRepository;
 import org.shanoir.ng.vip.monitoring.security.ExecutionMonitoringSecurityService;
-import org.shanoir.ng.processing.dto.ParameterResourcesDTO;
+import org.shanoir.ng.processing.dto.ParameterResourceDTO;
 import org.shanoir.ng.vip.resource.ProcessingResourceService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.Utils;
@@ -106,15 +107,22 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
     }
 
     @Override
-    public List<ParameterResourcesDTO> createProcessingResources(ExecutionMonitoring processing, List<ParameterResourcesDTO> parameterDatasets) {
+    public List<ParameterResourceDTO> createProcessingResources(ExecutionMonitoring processing, List<DatasetParameterDTO> datasetParameters) {
 
-        if(parameterDatasets ==  null || parameterDatasets.isEmpty()){
+        if(datasetParameters ==  null || datasetParameters.isEmpty()){
             return new ArrayList<>();
         }
 
-        for (ParameterResourcesDTO dto : parameterDatasets) {
+        List<ParameterResourceDTO> resources = new ArrayList<>();
 
-            dto.setResourceIds(new ArrayList<>());
+        for (DatasetParameterDTO dto : datasetParameters) {
+
+            ParameterResourceDTO resourceDTO = new ParameterResourceDTO();
+            resourceDTO.setParameter(dto.getName());
+            resourceDTO.setExportFormat(dto.getExportFormat());
+            resourceDTO.setGroupBy(dto.getGroupBy());
+
+            resourceDTO.setResourceIds(new ArrayList<>());
 
             HashMap<Long, List<Dataset>> datasetsByEntityId = new HashMap<>();
             for (Long id : dto.getDatasetIds()) {
@@ -159,12 +167,12 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
 
             for(Map.Entry<Long, List<Dataset>> entry : datasetsByEntityId.entrySet()) {
                 String resourceId = processingResourceService.create(processing, entry.getValue());
-                dto.getResourceIds().add(resourceId);
+                resourceDTO.getResourceIds().add(resourceId);
             }
-
+            resources.add(resourceDTO);
         }
 
-        return parameterDatasets;
+        return resources;
 
 
     }

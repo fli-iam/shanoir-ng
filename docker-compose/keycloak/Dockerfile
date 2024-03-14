@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-FROM quay.io/keycloak/keycloak:20.0.0 as base_image
+FROM quay.io/keycloak/keycloak:23.0.5 as base_image
 
 # keycloak options (https://www.keycloak.org/server/all-config)
 #
@@ -46,7 +46,7 @@ COPY --chown=keycloak themes/. /opt/keycloak/themes
 COPY cfg/. /opt/keycloak/
 RUN  mkdir /opt/keycloak/data/log
 
-COPY entrypoint entrypoint_common oneshot /bin/
+COPY entrypoint entrypoint_common /bin/
 
 ENTRYPOINT ["/bin/entrypoint", "/opt/keycloak/bin/kc.sh"]
-CMD ["start"]
+CMD []

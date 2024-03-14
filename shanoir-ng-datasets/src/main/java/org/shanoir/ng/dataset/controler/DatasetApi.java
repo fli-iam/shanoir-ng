@@ -55,7 +55,7 @@ public interface DatasetApi {
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> deleteDataset(
 			@Parameter(name = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId)
-			throws RestServiceException;
+            throws RestServiceException, EntityNotFoundException;
 	
 	@Operation(summary = "", description = "Deletes several datasets")
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "datasets deleted"),
@@ -148,6 +148,18 @@ public interface DatasetApi {
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<DatasetDTO>> findDatasetByStudyId(
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId);
+
+	@Operation(summary = "", description = "Returns the number of datasets by study id")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "found datasets"),
+			@ApiResponse(responseCode = "204", description = "no dataset found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@RequestMapping(value = "/study/nb-datasets/{studyId}", produces = { "application/json" }, method = RequestMethod.GET)
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
+	ResponseEntity<Integer> findNbDatasetByStudyId(
 			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
 	@Operation(summary = "", description = "Returns the list of dataset id by subject id and study id")

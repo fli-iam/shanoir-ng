@@ -2,11 +2,13 @@ package org.shanoir.ng.processing.dto;
 
 import java.util.List;
 
-public class ParameterResourcesDTO {
+public class ParameterResourceDTO {
 
     private String parameter;
     private List<String> resourceIds;
     private GroupByEnum groupBy;
+
+    private String exportFormat;
     List<Long> datasetIds;
 
     public String getParameter() {
@@ -39,5 +41,13 @@ public class ParameterResourcesDTO {
 
     public void setResourceIds(List<String> resourceIds) {
         this.resourceIds = resourceIds;
+    }
+
+    public String getExportFormat() {
+        return exportFormat;
+    }
+
+    public void setExportFormat(String exportFormat) {
+        this.exportFormat = exportFormat;
     }
 }
