@@ -231,7 +231,9 @@ public class SolrServiceImpl implements SolrService {
 			if (order.getProperty().equals("studyName") || order.getProperty().equals("subjectName")
 					|| order.getProperty().equals("datasetName") || order.getProperty().equals("datasetNature")
 					|| order.getProperty().equals("datasetType") || order.getProperty().equals("examinationComment")
-					|| order.getProperty().equals("tags") || order.getProperty().equals("subjectType") || order.getProperty().equals("acquisitionEquipmentName")) {
+					|| order.getProperty().equals("tags") || order.getProperty().equals("subjectType") || order.getProperty().equals("acquisitionEquipmentName")
+					|| order.getProperty().equals("processed")
+			) {
 				pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
 						order.getDirection(), order.getProperty());
 			} else if (order.getProperty().equals("id")) {

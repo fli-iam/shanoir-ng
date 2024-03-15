@@ -54,6 +54,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </solr-paging-criterion>
 
         <solr-paging-criterion
+            label="Processed Dataset"
+            awesome="fa-solid fa-cog"
+            facetName="processed"
+            [getPage]="getFacetFieldPage.bind(this)"
+            [(ngModel)]="solrRequest.processed"
+            [ngModelOptions]="{standalone: true}"
+            (onChange)="updateSelections(); refreshTable('processed')">
+        </solr-paging-criterion>
+
+        <solr-paging-criterion
                 label="Tags"
                 awesome="fa-solid fa-tags"
                 facetName="tags"
@@ -113,16 +123,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [(ngModel)]="solrRequest.datasetType"
                 [ngModelOptions]="{standalone: true}"
                 (onChange)="updateSelections(); refreshTable('datasetType')">
-        </solr-paging-criterion>
-
-        <solr-paging-criterion
-            label="Dataset type"
-            awesome="fa-solid fa-brain"
-            facetName="processed"
-            [getPage]="getFacetFieldPage.bind(this)"
-            [(ngModel)]="solrRequest.processed"
-            [ngModelOptions]="{standalone: true}"
-            (onChange)="updateSelections(); refreshTable('processed')">
         </solr-paging-criterion>
 
         <solr-paging-criterion

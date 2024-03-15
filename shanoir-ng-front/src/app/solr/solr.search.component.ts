@@ -162,7 +162,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     buildForm(): UntypedFormGroup {
-        const searchBarRegex = '^((studyName|subjectName|datasetName|examinationComment|datasetTypes|datasetNatures|acquisitionEquipmentName)[:][*]?[a-zA-Z0-9\\s_\W\.\!\@\#\$\%\^\&\*\(\)\_\+\-\=]+[*]?[;])+$';
+        const searchBarRegex = '^((studyName|subjectName|datasetName|examinationComment|datasetTypes|processed|datasetNatures|acquisitionEquipmentName)[:][*]?[a-zA-Z0-9\\s_\W\.\!\@\#\$\%\^\&\*\(\)\_\+\-\=]+[*]?[;])+$';
         let formGroup = this.formBuilder.group({
             'startDate': [this.solrRequest.datasetStartDate, [DatepickerComponent.validator]],
             'endDate': [this.solrRequest.datasetEndDate, [DatepickerComponent.validator, this.dateOrderValidator]],
@@ -428,6 +428,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {headerName: "Admin", type: "boolean", cellRenderer: row => this.hasAdminRight(row.data.studyId), awesome: "fa-solid fa-shield", color: "goldenrod", disableSorting: true},
             {headerName: "Name", field: "datasetName"},
+            {field: "processed", type: "boolean", cellRenderer: row => this.isProcessed(row.data), awesome: "fa-solid fa-cog", disableSorting: true, tip: item => { return item.processed ? "is a processed dataset" : "" }},
             {headerName: "Tags", field: "tags"},
             {headerName: "Type", field: "datasetType"},
             {headerName: "Nature", field: "datasetNature"},
@@ -613,6 +614,10 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         modalRef.instance.canCopy = this.hasCopyRight;
         modalRef.instance.lines = this.selectedLines;
     }
+
+    private isProcessed(doc: SolrDocument) {
+        return doc.processed;
+    }
 }
 
 export interface SelectionBlock {
@@ -631,7 +636,8 @@ export class SimpleValueSelectionBlock implements SelectionBlock {
 
 export class FacetSelectionBlock implements SelectionBlock {
 
-    constructor(private facetField: FacetField) {}
+    constructor(private facetField: FacetField) {
+    }
 
     get label(): string {
         return this.facetField.value;
@@ -639,15 +645,6 @@ export class FacetSelectionBlock implements SelectionBlock {
 
     remove(): void {
         this.facetField.checked = false;
-    }
-}
-
-export class BooleanSelectionBlock implements SelectionBlock {
-
-    constructor(private value: boolean, public remove: () => void) {}
-
-    get label(): string {
-        return String(this.value);
     }
 }
 
