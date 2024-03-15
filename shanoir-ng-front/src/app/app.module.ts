@@ -245,10 +245,10 @@ import { AccessRequestComponent } from './users/access-request/access-request.co
 import { MultiSelectComponent } from './shared/multi-select/multi-select.component';
 import { MultiSelectTableComponent } from './shared/multi-select-table/multi-select-table.component';
 import { PipelinesComponent } from './vip/pipelines/pipelines.component';
-import { VipClientService } from './vip/shared/vip-client.service';
+import { ExecutionService } from './vip/execution/execution.service';
 import { PipelineComponent } from './vip/pipelines/pipeline/pipeline.component';
 import { ExecutionComponent } from './vip/execution/execution.component';
-import { ExecutionMonitoringService } from './vip/shared/execution-monitoring.service';
+import { ExecutionMonitoringService } from './vip/execution-monitorings/execution-monitoring.service';
 import { ExecutionMonitoringsComponent } from './vip/execution-monitorings/execution-monitorings.component';
 import { QualityControlComponent } from './quality-control/quality-control.component';
 import { QualityCardService } from './study-cards/shared/quality-card.service';
@@ -267,6 +267,7 @@ import {DatasetCopyDialogComponent} from "./shared/components/dataset-copy-dialo
 import { DownloadSetupComponent } from './shared/mass-download/download-setup/download-setup.component';
 import { DownloadSetupAltComponent } from './shared/mass-download/download-setup-alt/download-setup-alt.component';
 import { TestQualityCardOptionsComponent } from './study-cards/test-quality-card-options/test-quality-card-options.component';
+import {PipelineService} from "./vip/pipelines/pipeline/pipeline.service";
 
 @NgModule({
     imports: [
@@ -465,7 +466,8 @@ import { TestQualityCardOptionsComponent } from './study-cards/test-quality-card
         CenterService,
         ConfirmDialogService,
         ExaminationService,
-        VipClientService,
+        ExecutionService,
+        PipelineService,
         ExecutionMonitoringService,
         {
             provide: ErrorHandler,

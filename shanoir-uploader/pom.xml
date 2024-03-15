@@ -16,7 +16,7 @@
 		<slf4j.version>2.0.7</slf4j.version>
 		<lombok.version>1.18.26</lombok.version>
 		<dcm4che.version>5.31.1</dcm4che.version>
-		<keycloak.version>20.0.0</keycloak.version>
+		<keycloak.version>23.0.5</keycloak.version>
 		<jackson.version>2.13.4</jackson.version>
 		<json.version>20231013</json.version>
 		<junit.jupiter.version>5.8.2</junit.jupiter.version>
@@ -28,7 +28,7 @@
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-ms-common</artifactId>
-			<version>3.1.2</version>
+			<version>3.2.2</version>
 			<exclusions>
 			    <exclusion>
 			        <groupId>*</groupId>
@@ -39,7 +39,7 @@
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-import</artifactId>
-			<version>3.1.2</version>
+			<version>3.2.2</version>
 			<exclusions>
 			    <exclusion>
 			        <groupId>*</groupId>
@@ -50,7 +50,7 @@
 		<dependency>
 			<groupId>org.shanoir.anonymization</groupId>
 			<artifactId>anonymization</artifactId>
-			<version>3.1.2</version>
+			<version>3.2.2</version>
 			<exclusions>
 			    <exclusion>
 			        <groupId>*</groupId>
@@ -61,7 +61,7 @@
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-exchange</artifactId>
-			<version>3.1.2</version>
+			<version>3.2.2</version>
 			<exclusions>
 			    <exclusion>
 			        <groupId>*</groupId>

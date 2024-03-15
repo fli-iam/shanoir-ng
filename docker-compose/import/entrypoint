@@ -9,6 +9,9 @@ require  SHANOIR_MIGRATION
 require  SHANOIR_URL_HOST
 require  SHANOIR_URL_SCHEME
 
+# Rabbit MQ default environnement variable to set
+export SPRING_AMQP_DESERIALIZATION_TRUST_ALL=true
+
 handle_microservice_migration
 
 abort_if_error

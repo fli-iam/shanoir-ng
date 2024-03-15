@@ -1,6 +1,6 @@
 /**
  * Shanoir NG - Import, manage and share neuroimaging data
- * Copyright (C) 2009-2022 Inria - https://www.inria.fr/
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -9,16 +9,14 @@
  * (at your option) any later version.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ * anumber with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-export interface DescriptorErrorcodes { 
-    /**
-     * Value of the exit code
-     */
-    code: number;
-    /**
-     * Description of the error code.
-     */
-    description: string;
+import { DatasetAcquisition } from '../../shared/dataset-acquisition.model';
+import { XaProtocol } from './xa-protocol.model';
+
+
+export class XaDatasetAcquisition extends DatasetAcquisition {
+
+    protocol: XaProtocol;
 }

@@ -86,6 +86,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         importJob.examinationId = context.examination.id;
         importJob.studyId = context.study.id;
         importJob.acquisitionEquipmentId = context.acquisitionEquipment.id;
+        importJob.anonymisationProfileToUse = context.study.profile?.profileName;
         importJob.converterId = context.niftiConverter.id;
         importJob.archive = contextImportJob.archive;
         importJob.timestamp = timestamp;

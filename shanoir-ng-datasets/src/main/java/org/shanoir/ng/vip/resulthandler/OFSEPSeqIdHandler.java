@@ -81,6 +81,7 @@ public class OFSEPSeqIdHandler extends ResultHandler {
             "axis"
 
     };
+
     public static final String TYPE = "type";
     public static final String SERIES = "series";
     public static final String ID = "id";
@@ -171,7 +172,9 @@ public class OFSEPSeqIdHandler extends ResultHandler {
 
             for(Dataset ds : datasets){
 
-                JSONObject vol = this.getMatchingVolume(ds, serie);
+                Attributes attributes = this.getDicomAttributes(ds);
+
+                JSONObject vol = this.getMatchingVolume(ds, serie, attributes);
 
                 if(vol == null){
                     LOG.error("No volume from serie [{}] could be match with dataset [{}].", serieId, ds.getId());
@@ -186,6 +189,8 @@ public class OFSEPSeqIdHandler extends ResultHandler {
                 }
 
                 List<DatasetProperty> properties = this.getDatasetPropertiesFromVolume(ds, vol, execution);
+                properties.addAll(this.getDatasetPropertiesFromDicom(attributes, ds, execution));
+
                 datasetPropertyService.createAll(properties);
 
             }
@@ -270,7 +275,7 @@ public class OFSEPSeqIdHandler extends ResultHandler {
      * @return JSONObject
      * @throws JSONException
      */
-    public JSONObject getMatchingVolume(Dataset dataset, JSONObject serie) throws JSONException, PacsException {
+    public JSONObject getMatchingVolume(Dataset dataset, JSONObject serie, Attributes attributes) throws JSONException {
 
         if(serie.isNull(VOLUMES)){
             LOG.error("Volumes set is null in result file for serie [{}]", serie.getLong(ID));
@@ -278,8 +283,6 @@ public class OFSEPSeqIdHandler extends ResultHandler {
         }
 
         JSONArray volumes = serie.getJSONArray(VOLUMES);
-
-        Attributes attributes = wadoDownloaderService.getDicomAttributesForDataset(dataset);
 
         double[] dsOrientation = attributes.getDoubles(Tag.ImageOrientationPatient);
 
@@ -340,6 +343,31 @@ public class OFSEPSeqIdHandler extends ResultHandler {
 
         return true;
 
+    }
+
+    private List<DatasetProperty> getDatasetPropertiesFromDicom(Attributes attributes, Dataset ds, ExecutionMonitoring monitoring){
+
+        List<DatasetProperty> properties = new ArrayList<>();
+
+        DatasetProperty institutionName = new DatasetProperty();
+        institutionName.setDataset(ds);
+        institutionName.setName("dicom.InstitutionName");
+        institutionName.setValue(attributes.getString(Tag.InstitutionName));
+        institutionName.setProcessing(monitoring);
+        properties.add(institutionName);
+
+        DatasetProperty institutionAddress = new DatasetProperty();
+        institutionAddress.setDataset(ds);
+        institutionAddress.setName("dicom.InstitutionAddress");
+        institutionAddress.setValue(attributes.getString(Tag.InstitutionAddress));
+        institutionAddress.setProcessing(monitoring);
+        properties.add(institutionAddress);
+
+        return properties;
+    }
+
+    private Attributes getDicomAttributes(Dataset ds) throws PacsException {
+        return wadoDownloaderService.getDicomAttributesForDataset(ds);
     }
 
 }
