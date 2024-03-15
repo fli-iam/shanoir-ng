@@ -233,7 +233,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
         // 8.  Create subject if necessary
         Subject subjectFound = null;
 
-        String subjectName = importTodo.getSubjectName();
+        String subjectName = importTodo.getParent().getStudy().getName() + "_" + importTodo.getSubjectName();
         for (Subject potentialSubject : importTodo.getParent().getListOfSubjectsForStudy()) {
             if (potentialSubject.getName().equals(subjectName)) {
                 subjectFound = potentialSubject;
