@@ -136,9 +136,6 @@ public class ImportFromFolderWindow extends JFrame {
         studyCardCB.addItemListener(updateFolderImportStudyListener);
         masterPanel.add(studyCardCB, studyCardGBC);
 
-        // initialize others
-        this.updateFolderImportStudyListener.updateImportDialogForStudyAndStudyCard();
-
         // OPEN FILE button here
         openButton = new JButton(resourceBundle.getString("shanoir.uploader.import.folder.button.open"));
         GridBagConstraints gBCOpenButton = new GridBagConstraints();
@@ -150,6 +147,9 @@ public class ImportFromFolderWindow extends JFrame {
 
         uploadListener = new UploadFromFolderActionListener(this, resourceBundle);
         openButton.addActionListener(uploadListener);
+
+        // initialize others
+        this.updateFolderImportStudyListener.updateImportDialogForStudyAndStudyCard();
 
         // list of import display here
         //headers for the table

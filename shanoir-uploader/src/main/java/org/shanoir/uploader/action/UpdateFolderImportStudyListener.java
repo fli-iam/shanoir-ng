@@ -67,6 +67,10 @@ public class UpdateFolderImportStudyListener implements ItemListener {
                     }
                 }
             }
+
+            window.studyCB.setSelectedItem(studies.get(0));
+            this.updateStudyCards(studies.get(0));
+
         } catch (Exception e) {
             logger.error("Could not correctly retrieve study and study cards: ", e);
             // Set as error here
