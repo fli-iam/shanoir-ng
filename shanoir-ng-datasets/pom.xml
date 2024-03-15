@@ -27,7 +27,7 @@
 	<description>Dataset microservice for Shanoir NG</description>
 
 	<properties>
-		<solrj.version>9.2.1</solrj.version>
+		<solrj.version>9.4.1</solrj.version>
 		<spring.data.solr.version>4.3.15</spring.data.solr.version>		
 	</properties>
 
