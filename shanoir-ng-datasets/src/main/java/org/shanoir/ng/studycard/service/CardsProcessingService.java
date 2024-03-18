@@ -18,6 +18,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.dcm4che3.data.Attributes;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.AcquisitionAttributes;
@@ -41,9 +42,14 @@ import org.shanoir.ng.studycard.model.rule.QualityExaminationRule;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class CardsProcessingService {
@@ -55,20 +61,20 @@ public class CardsProcessingService {
 
     @Autowired
     private ExaminationService examinationService;
-	
+
 	@Autowired
     private DatasetAcquisitionService datasetAcquisitionService;
-	
+
 	@Autowired
     private WADODownloaderService downloader;
-	
+
 	@Autowired
 	private SubjectStudyService subjectStudyService;
 
     @Autowired
     private ShanoirEventService eventService;
 
-	
+
 	/**
 	 * Apply study card on given acquisitions
 	 * 
@@ -91,9 +97,9 @@ public class CardsProcessingService {
 
     /**
 	 * Study cards for quality control: apply on entire exam.
-	 * 
+	 *
 	 * @param studyCard
-	 * @throws MicroServiceCommunicationException 
+	 * @throws MicroServiceCommunicationException
 	 */
 	public QualityCardResult applyQualityCardOnExamination(QualityCard qualityCard, Examination examination, boolean updateTags) throws MicroServiceCommunicationException {
         long startTs = new Date().getTime();
@@ -101,7 +107,7 @@ public class CardsProcessingService {
 		if (examination == null ) throw new IllegalArgumentException("examination can't be null");
         LOG.debug("Quality check for examination " + examination.getId() + " started");
 		if (qualityCard.getStudyId() != examination.getStudy().getId()) throw new IllegalStateException("study and studycard ids don't match");
-		if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {	    
+		if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {
 		    QualityCardResult result = new QualityCardResult();
             if (updateTags) {
                 List<SubjectStudy> subjectsStudies = subjectStudyService.get(examination.getSubject().getId(), examination.getStudy().getId());
@@ -125,7 +131,7 @@ public class CardsProcessingService {
 			        subjectStudyService.update(result.getUpdatedSubjectStudies());
 			    } catch (EntityNotFoundException e) {
                     throw new IllegalStateException("Could not update subject-studies", e);
-			    }	    
+			    }
 			}
             LOG.info("Quality check for examination " + examination.getId() + " finished in " + (new Date().getTime() - startTs) + " ms");
             return result;
@@ -148,7 +154,7 @@ public class CardsProcessingService {
         Study study = studyService.findById(qualityCard.getStudyId());
         if (study == null ) throw new IllegalArgumentException("study can't be null");
         if (qualityCard.getStudyId() != study.getId()) throw new IllegalStateException("study and studycard ids don't match");
-        if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {	    
+        if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {
             if (updateTags) { // first reset subject studies
                 event.setMessage("resetting quality subject tags");
                 eventService.publishEvent(event);
@@ -200,9 +206,9 @@ public class CardsProcessingService {
 
     /**
 	 * Study cards for quality control: apply on entire study.
-	 * 
+	 *
 	 * @param studyCard
-	 * @throws MicroServiceCommunicationException 
+	 * @throws MicroServiceCommunicationException
 	 */
 	public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags) throws MicroServiceCommunicationException {
         return applyQualityCardOnStudy(qualityCard, updateTags, null, null);
@@ -210,9 +216,9 @@ public class CardsProcessingService {
 
         /**
 	 * Study cards for quality control: apply on entire study.
-	 * 
+	 *
 	 * @param studyCard
-	 * @throws MicroServiceCommunicationException 
+	 * @throws MicroServiceCommunicationException
 	 */
 	public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, Integer start, Integer stop) throws MicroServiceCommunicationException {
         return applyQualityCardOnStudy(qualityCard, false, start, stop);

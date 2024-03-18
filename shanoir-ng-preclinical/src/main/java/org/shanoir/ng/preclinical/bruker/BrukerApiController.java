@@ -28,10 +28,13 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -64,14 +67,11 @@ public class BrukerApiController implements BrukerApi {
 	public static final int KB = 1024;
 	public static final int BUFFER_SIZE = 2 * KB;
 
-	@Value("${ms.url.bruker2dicom}")
-	private String bruker2DicomMsUrl;
-
 	@Value("${preclinical.uploadBrukerFolder}")
 	private String brukerFolder;
 
 	@Autowired
-	private RestTemplate restTemplate;
+	RabbitTemplate rabbitTemplate;
 
 	@Override
 	public ResponseEntity<String> uploadBrukerFile(@RequestParam("files") MultipartFile[] uploadfiles)
@@ -114,6 +114,10 @@ public class BrukerApiController implements BrukerApi {
 			} else {
 				return new ResponseEntity<>(destinationFilePath, HttpStatus.NOT_ACCEPTABLE);
 			}
+		} catch (ShanoirException e) {
+			LOG.error("Error while converting bruker files to dicom files: {}", e.getMessage(), e);
+			throw new RestServiceException(e,
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while converting bruker files to dicom files: {}", e));
 		} catch (IOException e) {
 			LOG.error("Error while uploadBrukerFile: issue with file {}", e.getMessage(), e);
 			throw new RestServiceException(e,
@@ -126,40 +130,21 @@ public class BrukerApiController implements BrukerApi {
 	}
 
 	/**
-	 * This method does a REST http post call to the docker container bruker2dicom
+	 * This method does a call to the docker container nifti-conversion
 	 * to start the conversion of bruker2dicom.
 	 * 
 	 * @param brukerDirFile
 	 * @throws RestServiceException
 	 */
-	private void startBruker2Dicom(Path brukerDirFile) throws RestServiceException {
+	private void startBruker2Dicom(Path brukerDirFile) throws ShanoirException {
 		String sourceFilePath = brukerDirFile.toAbsolutePath().toString();
 		String destinationFilePath = brukerDirFile.toAbsolutePath().toString() + File.separator + RESULT_FOLDER;
-		String requestJson = "{\"source\":\"" + sourceFilePath
-				+ "\", \"destination\":\"" + destinationFilePath
-				+ "\", \"dicomdir\": true }";
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
 
-		// HttpEntity represents the request
-		HttpEntity<String> entity = new HttpEntity<>(requestJson, headers);
+		String request = sourceFilePath + ";" + destinationFilePath;
 
-		// Post to Bruker2Dicom to start conversion
-		ResponseEntity<String> response = null;
-		try {
-			response = restTemplate.exchange(bruker2DicomMsUrl, HttpMethod.POST, entity, String.class);
-		} catch (RestClientException e) {
-			LOG.error(ERROR_BRUKER2DICOM_REQUEST, e);
-			throw new RestServiceException(e, new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-					"Error while converting bruker2dicom.", null));
-		} catch (Exception e2) {
-			LOG.error(ERROR_BRUKER2DICOM_REQUEST, e2);
-			throw new RestServiceException(e2, new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-					"Error while converting bruker2dicom.", null));
-		}
-
-		if (!HttpStatus.OK.equals(response.getStatusCode()) && !HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
-			LOG.error(ERROR_BRUKER2DICOM_REQUEST);
+		boolean result = (boolean) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.BRUKER_CONVERSION_QUEUE, request);
+		if (!result) {
+			throw new ShanoirException("Conversion from bruker to dicom failed.");
 		}
 	}
 

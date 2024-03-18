@@ -13,7 +13,6 @@
  */
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { Coil } from '../../coils/shared/coil.model';
-import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { Study } from '../../studies/shared/study.model';
 
@@ -24,7 +23,6 @@ export class StudyCard extends Entity {
     name: string;
     study: Study;
     acquisitionEquipment: AcquisitionEquipment;
-    niftiConverter: NiftiConverter;
     rules: StudyCardRule[] = [];
 }
 

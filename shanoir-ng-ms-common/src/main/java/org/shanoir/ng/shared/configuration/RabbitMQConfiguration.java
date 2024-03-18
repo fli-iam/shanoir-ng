@@ -109,7 +109,7 @@ public class RabbitMQConfiguration {
 
 	/** Queue to retrieve the center ID from an acquisition equipment ID. */
 	public static final String ACQUISITION_EQUIPMENT_CENTER_QUEUE = "acquisition-equipment-center-queue";
-	
+
 	/** Queue to retrieve the center ID from an acquisition equipment ID. */
 	public static final String ACQUISITION_EQUIPEMENT_UPDATE_QUEUE = "acquisition-equipment-update-queue";
 	
@@ -172,6 +172,12 @@ public class RabbitMQConfiguration {
 
 	/** Queue used to get anonymisation profile of a study. */
 	public static final String STUDY_ANONYMISATION_PROFILE_QUEUE = "study-anonymisation-profile-queue";
+
+    /** Queue used to make bruker to dicom conversion. */
+    public static final String BRUKER_CONVERSION_QUEUE = "bruker-conversion-queue";
+
+    /** Queue used to make anima to nifti conversion. */
+    public static final String ANIMA_CONVERSION_QUEUE = "anima-conversion-queue";
 
 	////////////////// EXCHANGES //////////////////
 
@@ -416,5 +422,16 @@ public class RabbitMQConfiguration {
 	public static Queue studyAnonymisationProfileQueue() {
 		return new Queue(STUDY_ANONYMISATION_PROFILE_QUEUE, true);
 	}
+
+	@Bean
+	public static Queue brukerConversionQueue() {
+		return new Queue(BRUKER_CONVERSION_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue animaConversionQueue() {
+		return new Queue(ANIMA_CONVERSION_QUEUE, true);
+	}
+
 
 }
