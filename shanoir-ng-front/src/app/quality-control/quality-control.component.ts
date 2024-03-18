@@ -34,7 +34,6 @@ import * as AppUtils from '../utils/app.utils';
 export class QualityControlComponent implements OnChanges {
 
     @Input() studyId: number;
-    @Input() mode: string;
     @Output() tagUpdate: EventEmitter<void> = new EventEmitter();
     qualityCards: QualityCard[] = [];
     allCoils: Coil[];

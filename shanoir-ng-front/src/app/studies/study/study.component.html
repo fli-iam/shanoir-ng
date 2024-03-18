@@ -409,7 +409,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
       		</fieldset>
 			<fieldset [class.hidden-tab]="activeTab != 'quality'" tab="quality">
 				<legend>Quality control</legend>
-				<quality-control [studyId]="study.id" [mode]="mode" (tagUpdate)="reloadSubjectStudies()"></quality-control>
+				<quality-control [studyId]="study.id" (tagUpdate)="reloadSubjectStudies()"></quality-control>
 			</fieldset>
 			<fieldset [class.hidden-tab]="activeTab != 'tree'" *ngIf="mode != 'create'" tab="tree">
 				<legend>Tree</legend>
