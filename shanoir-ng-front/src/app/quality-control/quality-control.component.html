@@ -37,9 +37,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <td>
                 <span>
                     Check at import
-                    <checkbox *ngIf="mode == 'edit'" [(ngModel)]="qualityCard.toCheckAtImport" (onChange)="updateQualityCard(qualityCard)"></checkbox>
-                    <i *ngIf="mode == 'view' && qualityCard.toCheckAtImport" class="fas fa-check"></i>
-                    <i *ngIf="mode == 'view' && !qualityCard.toCheckAtImport" class="fas fa-times"></i>
+                    <checkbox [(ngModel)]="qualityCard.toCheckAtImport" (onChange)="updateQualityCard(qualityCard)"></checkbox>
                 </span>
             </td>
             <td>

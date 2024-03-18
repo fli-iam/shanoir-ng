@@ -46,15 +46,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <li class="tags" [class.active]="activeTab == 'tags'" [routerLink]="'.'" [fragment]="'tags'" replaceUrl="true">
                     <span class="tags">Tags</span>
                 </li>
-                <li class="tags" [class.active]="activeTab == 'quality'" [routerLink]="'.'" [fragment]="'quality'" replaceUrl="true">
-                    <span class="tags">Quality</span>
-                </li>
 				<ng-container *ngIf="mode == 'view'">
+                    <li [class.active]="activeTab == 'quality'" [routerLink]="'.'" [fragment]="'quality'" replaceUrl="true">Quality</li>
 					<li [class.active]="activeTab == 'tree'" [routerLink]="'.'" [fragment]="'tree'" replaceUrl="true">Tree</li>
 					<li [class.active]="activeTab == 'bids'" [routerLink]="'.'" [fragment]="'bids'" replaceUrl="true">BIDS</li>
 				</ng-container>
 				<ng-container *ngIf="mode != 'view'">
-					<li [class.active]="activeTab == 'tree'" class="disabled" replaceUrl="true">Tree</li>
+                    <li [class.active]="activeTab == 'quality'" class="disabled" replaceUrl="true">Quality</li>
+                    <li [class.active]="activeTab == 'tree'" class="disabled" replaceUrl="true">Tree</li>
 					<li [class.active]="activeTab == 'bids'" class="disabled" replaceUrl="true">BIDS</li>
 				</ng-container>
 			</ul>
