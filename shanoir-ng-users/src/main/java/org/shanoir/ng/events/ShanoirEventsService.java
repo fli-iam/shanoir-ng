@@ -35,12 +35,14 @@ public class ShanoirEventsService {
 	public void addEvent(ShanoirEvent event) {
 		// Call repository
 		repository.save(event);
+		// This is sad but with the @CreationTimestamp the date is not returned by the save method 
+		ShanoirEvent saved = repository.findById(event.getId()).orElse(null);
 		// Push notification to UI
 		if (ShanoirEventType.IMPORT_DATASET_EVENT.equals(event.getEventType())
 			  || ShanoirEventType.EXECUTION_MONITORING_EVENT.equals(event.getEventType())
 				|| ShanoirEventType.COPY_DATASET_EVENT.equals(event.getEventType())
 				|| ShanoirEventType.CHECK_QUALITY_EVENT.equals(event.getEventType())) { 
-			sendSseEventsToUI(event);
+			sendSseEventsToUI(saved);
 		}
 	}
 
@@ -81,6 +83,9 @@ public class ShanoirEventsService {
 	public void sendSseEventsToUI(ShanoirEvent notification) {
         List<SseEmitter> sseEmitterListToRemove = new ArrayList<>();
         AsyncTaskApiController.emitters.forEach((SseEmitter emitter) -> {
+			if (notification.getLastUpdate() == null) {
+				notification.setLastUpdate(new Date());
+			}
             try {
                 emitter.send(notification, MediaType.APPLICATION_JSON);
             } catch (IOException e2) {
