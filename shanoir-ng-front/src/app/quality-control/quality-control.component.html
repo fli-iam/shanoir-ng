@@ -61,12 +61,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     Quality check passed !
                 </span>
             </td>
-            <td class="sc-name left-icon" *ngIf="mode=='edit'"
-                [routerLink]="'/quality-card/details/' + qualityCard?.id"
-                routerLinkActive="active"
-                title="Open details">
-                <i class="fa-solid fa-edit"></i>
-            </td>
         </tr>
         <tr *ngIf="pagings.get(qualityCard.id)?.items?.length > 0">
             <td colspan="4" class="report-cell">
