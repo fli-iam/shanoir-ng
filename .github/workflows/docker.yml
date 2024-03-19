@@ -4,12 +4,27 @@ name: Publish Docker images
 env:
   DOCKER_REPOSITORY: ghcr.io/${{ github.repository }}
   GIT_REPO_URL: https://github.com/${{ github.repository }}
-  TAG: ${{ github.ref_name }}
+
+  # production builds
+  # - triggered by pushing a tag
+  # - builds the current commit
+  # - cache is disabled
+  # development builds
+  # - triggerd by workflow_dispatch events
+  # - builds the commit provided in the 'commit' input variable
+  # - cache is enabled
+  PRODUCTION: ${{ startsWith(github.ref, 'refs/tags/') && '1' || ''}
+  # tag of the resulting docker image
+  # - name of the git tag (production builds)
+  # - commit id (develpment builds)
+  IMAGE_TAG: ${{  startsWith(github.ref, 'refs/tags/') && github.ref_name || inputs.commit }}
 on:
   workflow_dispatch:
+    inputs:
+      commit:
+        description: 'commit id to be built'
+        required: true
   push:
-    branches: # TODO: remove
-      - docker-workflows
     tags:
       - '*'
 #TODO: disable on pull-request
@@ -23,6 +38,12 @@ jobs:
       contents: read
       id-token: write # needed by sigstore/fulcio
     steps:
+      # TODO: validate the commit id?
+
+      - name: Check out the repo
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.IMAGE_TAG }}
 
       - name: Set up JDK 17
         #TODO: upgrade to v4 (https://github.com/actions/setup-java/issues/596)
@@ -34,29 +55,17 @@ jobs:
 
       - name: Set up Maven cache
         uses: actions/cache@v4
-        # enable the cache only for development builds
-        if: "${{ ! startsWith(github.ref, 'refs/tags/') }}"
+        if: "${{ ! env.production }}"
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven-
 
-      - name: Check out the repo
-        uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3.1.0
 
-##      - name: Create directory /shanoir-ng-logs
-##        run: sudo mkdir -m777 /var/log/shanoir-ng-logs
-      
-      - name: Maven build
-        run: mvn -f ./shanoir-ng-parent/pom.xml install -DskipTests
- 
-      # Install the cosign tool (except on PR)
-      # https://github.com/sigstore/cosign-installer
-      - name: Install cosign
-        if: github.event_name != 'pull_request'
-        uses: sigstore/cosign-installer@6e04d228eb30da1757ee4e1dd75a0ec73a653e06 #v3.1.1
-        with:
-          cosign-release: 'v2.1.1'
+      - name: Expose GitHub Runtime (needed for docker buildx cache)
+        uses: crazy-max/ghaction-github-runtime@v3.0.0
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3.0.0
@@ -65,11 +74,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3.1.0
+      # Install the cosign tool (except on PR)
+      # https://github.com/sigstore/cosign-installer
+      - name: Install cosign
+        if: github.event_name != 'pull_request'
+        uses: sigstore/cosign-installer@6e04d228eb30da1757ee4e1dd75a0ec73a653e06 #v3.1.1
+        with:
+          cosign-release: 'v2.1.1'
 
-      - name: Expose GitHub Runtime (needed for docker buildx cache)
-        uses: crazy-max/ghaction-github-runtime@v3.0.0
+##      - name: Create directory /shanoir-ng-logs
+##        run: sudo mkdir -m777 /var/log/shanoir-ng-logs
+      
+      - name: Maven build
+        run: mvn -f ./shanoir-ng-parent/pom.xml install -DskipTests
 
       # note: ultimately we shoud build the images with the docker/bake-action
       # (but buildx bake is still experimental)
@@ -86,15 +103,13 @@ jobs:
           #IMAGES = "database datasets import keycloak keycloak-database nginx nifti-conversion preclinical solr studies users".split()
           
           env = os.environ
-          # enable the cache only for development builds
-          cache_from = ["--cache-from=type=gha"] if not env['GITHUB_REF'].startswith("refs/tags/") else []
           for image in IMAGES:
             repo = f"{env['DOCKER_REPOSITORY']}/{image}"
-            tag  = env['TAG']
+            tag  = env['IMAGE_TAG']
             with tempfile.TemporaryDirectory() as tmp:
               sys.stderr.write(f"#\n#   Building {image}:{tag}\n#\n")
               subprocess.check_call(["docker", "buildx", "build",
-                *cache_from,
+                *[["--cache-from=type=gha"] if not env['PRODUCTION'] else []],
                 "--cache-to=type=gha,mode=max",
                 "--tag", f"{ repo }:{ tag }",
                 "--label", f"org.opencontainers.image.url={ env['GIT_REPO_URL'] }",
