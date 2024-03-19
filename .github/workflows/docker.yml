@@ -83,9 +83,6 @@ jobs:
         uses: sigstore/cosign-installer@6e04d228eb30da1757ee4e1dd75a0ec73a653e06 #v3.1.1
         with:
           cosign-release: 'v2.1.1'
-
-##      - name: Create directory /shanoir-ng-logs
-##        run: sudo mkdir -m777 /var/log/shanoir-ng-logs
       
       - name: Maven build
         run: mvn -f ./shanoir-ng-parent/pom.xml install -DskipTests
@@ -101,8 +98,8 @@ jobs:
           import sys
           import tempfile
 
-          IMAGES = ["database"]
-          #IMAGES = "database datasets import keycloak keycloak-database nginx nifti-conversion preclinical solr studies users".split()
+          #IMAGES = ["database"]
+          IMAGES = "database datasets import keycloak keycloak-database nginx nifti-conversion preclinical solr studies users".split()
           
           env = os.environ
           for image in IMAGES:
