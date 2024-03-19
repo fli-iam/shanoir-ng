@@ -13,20 +13,20 @@ env:
   # - triggerd by workflow_dispatch events
   # - builds the commit provided in the 'commit' input variable
   # - cache is enabled
-  PRODUCTION: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) && '1' || '' }}
+  PRODUCTION: ${{ github.event_name == 'push' && '1' || '' }}
   # tag of the resulting docker image
   # - name of the git tag (production builds)
   # - commit id (develpment builds)
-  IMAGE_TAG: ${{ env.PRODUCTION && github.ref_name || inputs.commit }}
+  IMAGE_TAG: ${{  github.event_name == 'push' && github.ref_name || inputs.commit }}
 on:
+  push:
+    tags:
+      - '*'
   workflow_dispatch:
     inputs:
       commit:
         description: 'commit id to be built'
         required: true
-  push:
-    tags:
-      - '*'
 #TODO: disable on pull-request
   
 jobs:
