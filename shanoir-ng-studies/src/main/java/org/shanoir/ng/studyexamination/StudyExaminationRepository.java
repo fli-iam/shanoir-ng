@@ -34,7 +34,7 @@ public interface StudyExaminationRepository extends CrudRepository<StudyExaminat
 	
     int countByStudyId(@Param("studyId") Long studyId);
 
-    @Query("SELECT s.examinationId, COUNT(s) FROM StudyExamination s GROUP BY s.examinationId")
+    @Query("SELECT s.study.id, COUNT(s) FROM StudyExamination s GROUP BY s.study")
     List<Object[]> countByStudyIdGroupBy();
 
 }
