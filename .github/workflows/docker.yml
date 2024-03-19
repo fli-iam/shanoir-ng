@@ -111,7 +111,7 @@ jobs:
             with tempfile.TemporaryDirectory() as tmp:
               sys.stderr.write(f"#\n#   Building {image}:{tag}\n#\n")
               subprocess.check_call(["docker", "buildx", "build",
-                *[["--cache-from=type=gha"] if not env['PRODUCTION'] else []],
+                *(["--cache-from=type=gha"] if not env['PRODUCTION'] else []),
                 "--cache-to=type=gha,mode=max",
                 "--tag", f"{ repo }:{ tag }",
                 "--label", f"org.opencontainers.image.url={ env['GIT_REPO_URL'] }",
