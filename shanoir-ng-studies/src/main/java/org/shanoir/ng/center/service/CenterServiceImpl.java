@@ -137,6 +137,8 @@ public class CenterServiceImpl implements CenterService {
 		if (studyUser != null && !CollectionUtils.isEmpty(studyUser.getCenterIds())) {
 			centers = centers.stream().filter(center -> studyUser.getCenterIds().contains(center.getId())).collect(Collectors.toList());
 		}
+		// do this here: because of two bags exception, when annotating this additionally to the query in the repository
+		centers.stream().forEach(c -> c.setAcquisitionEquipments(centerRepository.findDistinctAcquisitionEquipmentsByCenterId(c.getId())));
 		return centers;
 	}
 
