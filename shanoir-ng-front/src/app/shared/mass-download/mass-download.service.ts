@@ -28,6 +28,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { DownloadSetupAltComponent } from './download-setup-alt/download-setup-alt.component';
 import { DownloadSetupComponent, DownloadSetupOptions } from './download-setup/download-setup.component';
 import { Queue } from './queue.model';
+import { SessionService } from '../services/session.service';
 import { ShanoirError } from '../models/error.model';
 import { getSizeStr } from 'src/app/utils/app.utils';
 import { AngularDeviceInformationService } from 'angular-device-information';
@@ -70,6 +71,7 @@ export class MassDownloadService {
         private notificationService: NotificationsService,
         private consoleService: ConsoleService,
         private dialogService: ConfirmDialogService,
+        private sessionService: SessionService,
         deviceInformationService: AngularDeviceInformationService) {
 
         this.winOs = deviceInformationService.getDeviceInfo()?.os?.toLocaleLowerCase().includes('windows');
@@ -457,7 +459,7 @@ export class MassDownloadService {
         }).finally(() => {
             if (report.list[id].status == 'SUCCESS') {
                 task.lastUpdate = new Date();
-                task.message = '(' + report.nbSuccess + '/' + report.requestedDatasetIds.length + ') dataset n°' + id + ' successfully saved';
+                task.message = '(' + report.nbSuccess + '/' + Object.keys(report.list).length + ') dataset n°' + id + ' successfully saved';
                 report.nbSuccess++;
             } else if (report.list[id].status == 'ERROR') {
                 task.message = 'saving dataset n°' + id + ' failed';
@@ -466,7 +468,7 @@ export class MassDownloadService {
             task.report = JSON.stringify(report, null, 4);
             this.writeMyFile(this.REPORT_FILENAME, task.report, userFolderHandle);
             task.lastUpdate = new Date();
-            task.progress = (report.nbSuccess + report.nbError) / report.requestedDatasetIds.length;
+            task.progress = (report.nbSuccess + report.nbError) / Object.keys(report.list).length;
             this.notificationService.pushLocalTask(task);
         });
     }
@@ -577,7 +579,6 @@ export class MassDownloadService {
         let report: Report = {
             taskId: taskId,
             folderName: folderName,
-            requestedDatasetIds: datasetIds,
             startTime: Date.now(),
             list: {},
             nbError: 0,
@@ -627,6 +628,7 @@ export class MassDownloadService {
         task.progress = 0;
         task.status = 2;
         task.eventType = 'downloadDataset.event';
+        task.sessionId = this.sessionService.sessionId;
         this.notificationService.pushLocalTask(task);
         return task;
     }
@@ -685,6 +687,9 @@ export class MassDownloadService {
                                 return file.text().then(text => {
                                     let reportFromFile: Report = JSON.parse(text);
                                     reportFromFile.nbError = 0;
+                                    task.status = 2;
+                                    task.sessionId = this.sessionService.sessionId;
+                                    this.notificationService.pushLocalTask(task);
                                     return this._downloadFromReport(reportFromFile, task, parentFolderHandle);
                                 });
                             });
