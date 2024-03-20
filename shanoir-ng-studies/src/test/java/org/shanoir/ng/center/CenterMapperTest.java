@@ -52,7 +52,7 @@ public class CenterMapperTest {
 
 	@Test
 	public void centersToCenterDTOsTest() {
-		final List<CenterDTO> centerDTOs = centerMapper.centersToCenterDTOs(Arrays.asList(createCenter()));
+		final List<CenterDTO> centerDTOs = centerMapper.centersToCenterDTOsFlat(Arrays.asList(createCenter()));
 		Assertions.assertNotNull(centerDTOs);
 		Assertions.assertTrue(centerDTOs.size() == 1);
 		Assertions.assertTrue(centerDTOs.get(0).getId().equals(CENTER_ID));
@@ -68,7 +68,7 @@ public class CenterMapperTest {
 
 	@Test
 	public void centerToCenterDTOTest() {
-		final CenterDTO centerDTO = centerMapper.centerToCenterDTO(createCenter());
+		final CenterDTO centerDTO = centerMapper.centerToCenterDTOFlat(createCenter());
 		Assertions.assertNotNull(centerDTO);
 		Assertions.assertTrue(centerDTO.getId().equals(CENTER_ID));
 	}

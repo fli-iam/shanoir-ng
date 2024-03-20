@@ -36,26 +36,49 @@ import org.shanoir.ng.studycenter.StudyCenterMapper;
 @Mapper(componentModel = "spring", uses = { AcquisitionEquipmentMapper.class, StudyCenterMapper.class })
 public interface CenterMapper {
 
-	@Named("centersWithoutAcquisitionEquipments")
-	@IterableMapping(qualifiedByName = "centerWithoutAcquisitionEquipments")
-	List<CenterDTO> centersToCenterDTOs(List<Center> centers);
+	@Named("centersToCenterDTOsFlat")
+	@IterableMapping(qualifiedByName = "centerToCenterDTOFlat")
+	List<CenterDTO> centersToCenterDTOsFlat(List<Center> centers);
 	
-	@Named("centerWithoutAcquisitionEquipments")
+	@Named("centerToCenterDTOFlat")
+	@Mappings({
+		@Mapping(target = "acquisitionEquipments", ignore = true),
+		@Mapping(target = "studyCenterList", ignore = true),
+		@Mapping(target = "compatible", ignore = true)
+	})
+	CenterDTO centerToCenterDTOFlat(Center center);
+
+	@Named("centersToCenterDTOsEquipments")
+	@IterableMapping(qualifiedByName = "centerToCenterDTOEquipments")
+	List<CenterDTO> centersToCenterDTOsEquipments(List<Center> centers);
+
+	@Named("centerToCenterDTOEquipments")
+	@Mappings({
+		@Mapping(target = "studyCenterList", ignore = true),
+		@Mapping(target = "compatible", ignore = true)
+	})
+	CenterDTO centerToCenterDTOEquipments(Center center);
+	
+	@Named("centersToCenterDTOsStudyCenters")
+	@IterableMapping(qualifiedByName = "centerToCenterDTOStudyCenters")
+	List<CenterDTO> centersToCenterDTOsStudyCenters(List<Center> centers);
+
+	@Named("centerToCenterDTOStudyCenters")
 	@Mappings({
 		@Mapping(target = "acquisitionEquipments", ignore = true),
 		@Mapping(target = "compatible", ignore = true)
 	})
-	CenterDTO centerToCenterDTO(Center center);
-
-	@Named("centersWithAcquisitionEquipments")
-	@IterableMapping(qualifiedByName = "centerWithAcquisitionEquipments")
-	List<CenterDTO> centersToCenterDTOsWithAcquisitionEquipments(List<Center> centers);
-
-	@Named("centerWithAcquisitionEquipments")
+	CenterDTO centerToCenterDTOStudyCenters(Center center);
+	
+	@Named("centersToCenterDTOsFull")
+	@IterableMapping(qualifiedByName = "centerToCenterDTOFull")
+	List<CenterDTO> centersToCenterDTOsFull(List<Center> centers);
+	
+	@Named("centerToCenterDTOFull")
 	@Mappings({
 		@Mapping(target = "compatible", ignore = true)
 	})
-	CenterDTO centerToCenterDTOWithAcquisitionEquipments(Center center);
+	CenterDTO centerToCenterDTOFull(Center center);	
 	
 	/**
 	 * Map list of @Center to list of @IdNameDTO.
