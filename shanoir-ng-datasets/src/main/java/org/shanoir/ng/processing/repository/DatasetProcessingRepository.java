@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.processing.repository;
 
+import java.util.List;
 import java.util.Optional;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.springframework.data.repository.CrudRepository;
@@ -33,4 +34,13 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
 	 */
 	Optional<DatasetProcessing> findByComment(String comment);
 
+	/**
+	 * Find all processings that are linked to given dataset through INPUT_OF_DATASET_PROCESSING table
+	 *
+	 * @param datasetId
+	 * @return
+	 */
+	List<DatasetProcessing> findAllByInputDatasets_Id(Long datasetId);
+
+    List<DatasetProcessing> findAllByParentId(Long id);
 }
