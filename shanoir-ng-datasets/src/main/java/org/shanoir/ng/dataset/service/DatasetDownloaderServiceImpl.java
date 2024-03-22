@@ -295,8 +295,6 @@ public class DatasetDownloaderServiceImpl {
 
 		downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset, downloadResult);
 
-		this.rabbitTemplate.setReplyTimeout(600000);
-
 		// Convert them, sending to import microservice
 		boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(
 				RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE,
