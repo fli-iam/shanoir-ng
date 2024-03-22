@@ -368,6 +368,9 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     goToEdit(id?: number): void {
+        if (this.activeTab == "quality" || this.activeTab == "tree" || this.activeTab == "bids") {
+            this.activeTab = "general";
+        }
         if (!id) {
             if (this.mode == 'edit') return;
             else if (this.mode == 'view') id = this.entity.id;
