@@ -43,7 +43,7 @@ public class XaProtocol extends AbstractEntity {
 	}
 
 	public XaProtocol(XaDatasetAcquisition acq) {
-		this.xaDatasetAcquisition = new XaDatasetAcquisition(acq);
+		this.xaDatasetAcquisition = acq;
 	}
 
 	/**
