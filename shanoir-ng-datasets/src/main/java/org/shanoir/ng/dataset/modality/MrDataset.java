@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -27,7 +27,7 @@ import java.util.List;
 
 /**
  * MR dataset.
- * 
+ *
  * @author msimon
  *
  */
@@ -71,7 +71,7 @@ public class MrDataset extends Dataset {
 	/** Metadata updated by study card. */
 	@OneToOne(cascade = CascadeType.ALL)
 	private MrDatasetMetadata updatedMrMetadata;
-	
+
 	/** Store temporarily the first image acquisition time until all images are processed*/
 	@Transient
 	private LocalDateTime  firstImageAcquisitionTime;
@@ -111,7 +111,7 @@ public class MrDataset extends Dataset {
 		} else {
 			this.mrQualityProcedureType = null;
 		}
-		this.originMrMetadata = mrDataset.getOriginMrMetadata();
+		this.originMrMetadata = new MrDatasetMetadata(mrDataset.getOriginMrMetadata());
 
 		this.repetitionTime = new ArrayList<>(mrDataset.getRepetitionTime().size());
 		for (RepetitionTime rt : mrDataset.getRepetitionTime()) {
