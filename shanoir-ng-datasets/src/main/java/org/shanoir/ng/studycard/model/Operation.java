@@ -16,21 +16,75 @@ package org.shanoir.ng.studycard.model;
 
 public enum Operation {
 
-	STARTS_WITH(1),
-	EQUALS(2),
-	ENDS_WITH(3),
-	CONTAINS(4),
-	SMALLER_THAN(5),
-	BIGGER_THAN(6),
-	DOES_NOT_CONTAIN(7),
-	DOES_NOT_START_WITH(8),
-	NOT_EQUALS(9),
-	DOES_NOT_END_WITH(10);
+	STARTS_WITH(1, new DicomTagType[] {
+		DicomTagType.String}),
+	EQUALS(2, new DicomTagType[] {
+		DicomTagType.String, 
+		DicomTagType.Date, 
+		DicomTagType.Double,
+		DicomTagType.Float,
+		DicomTagType.FloatArray,
+		DicomTagType.IntArray,
+		DicomTagType.Integer,
+		DicomTagType.Long}),
+	ENDS_WITH(3, new DicomTagType[] {
+		DicomTagType.String}),
+	CONTAINS(4, new DicomTagType[] {
+		DicomTagType.String}),
+	SMALLER_THAN(5, new DicomTagType[] {
+		DicomTagType.Date, 
+		DicomTagType.Double,
+		DicomTagType.Float,
+		DicomTagType.Integer,
+		DicomTagType.Long}),
+	BIGGER_THAN(6, new DicomTagType[] {
+		DicomTagType.Date, 
+		DicomTagType.Double,
+		DicomTagType.Float,
+		DicomTagType.Integer,
+		DicomTagType.Long}),
+	DOES_NOT_CONTAIN(7, new DicomTagType[] {
+		DicomTagType.String}),
+	DOES_NOT_START_WITH(8, new DicomTagType[] {
+		DicomTagType.String}),
+	NOT_EQUALS(9, new DicomTagType[] {
+		DicomTagType.String, 
+		DicomTagType.Date, 
+		DicomTagType.Double,
+		DicomTagType.Float,
+		DicomTagType.FloatArray,
+		DicomTagType.IntArray,
+		DicomTagType.Integer,
+		DicomTagType.Long}),
+	DOES_NOT_END_WITH(10, new DicomTagType[] {
+		DicomTagType.String}),
+	PRESENT(11, new DicomTagType[] {		
+		DicomTagType.String, 
+		DicomTagType.Date, 
+		DicomTagType.Double,
+		DicomTagType.Float,
+		DicomTagType.FloatArray,
+		DicomTagType.IntArray,
+		DicomTagType.Integer,
+		DicomTagType.Long,
+		DicomTagType.Binary}),
+	ABSENT(12, new DicomTagType[] {
+		DicomTagType.String, 
+		DicomTagType.Date, 
+		DicomTagType.Double,
+		DicomTagType.Float,
+		DicomTagType.FloatArray,
+		DicomTagType.IntArray,
+		DicomTagType.Integer,
+		DicomTagType.Long,
+		DicomTagType.Binary});
 	
 	private int id;
+	private DicomTagType[] dicomTypeCompatibilities;
 	
-	private Operation(final int id) {
+	private Operation(final int id, DicomTagType[] dicomTypeCompatibilities) {
 		this.id = id;
+		this.dicomTypeCompatibilities = dicomTypeCompatibilities;
 	}
 
 	/**
@@ -54,13 +108,17 @@ public enum Operation {
 	public int getId() {
 		return id;
 	}
-	
-	public boolean isNumerical() {
-		return this.equals(BIGGER_THAN) || this.equals(EQUALS) || this.equals(SMALLER_THAN) || this.equals(NOT_EQUALS);
-	}
-	
-	public boolean isTextual() {
-		return this.equals(CONTAINS) || this.equals(DOES_NOT_CONTAIN) || this.equals(ENDS_WITH) || this.equals(DOES_NOT_END_WITH) || this.equals(EQUALS) || this.equals(NOT_EQUALS) || this.equals(STARTS_WITH) || this.equals(DOES_NOT_START_WITH);
+
+	public DicomTagType[] getDicomTypeCompatibilities() {
+		return dicomTypeCompatibilities;
 	}
 
+	public boolean compatibleWith(DicomTagType type) {
+		for (DicomTagType myType : dicomTypeCompatibilities) {
+			if (myType.equals(type)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

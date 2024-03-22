@@ -29,7 +29,6 @@ input[type=number]::-webkit-outer-spin-button { opacity: 1; }
 .error:not(:focus-within) { color: white !important; background-color: var(--color-error) !important; border-radius: 4px !important; }
 .error:not(:focus-within)::ng-deep ::placeholder { color: white !important; }
 
-.multi-value.edit { margin-top: 3px; }
 .multi-value { display: inline-block; vertical-align: top; position: relative; }
 .multi-value .one-value { display: flex; }
 auto-ajust-input { margin-top: -3px; }
@@ -40,3 +39,11 @@ auto-ajust-input { margin-top: -3px; }
 .one-value + .one-value::before { content: "or "; margin-right: 5px; color: purple; }
 
 span { vertical-align: middle; }
+
+auto-ajust-input.ng-invalid.ng-dirty { 
+    color: white !important;
+    background-color: var(--color-error) !important;
+    border-radius: 4px !important;
+}
+
+form { display: inline-block; }

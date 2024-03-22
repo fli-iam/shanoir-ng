@@ -82,8 +82,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					[(ngModel)]="qualityCard.rules" 
 					[mode]="selectMode ? 'select' : mode" 
 					[allCoils]="allCoils"
+					[studyId]="qualityCard.study?.id"
 					[showErrors]="showRulesErrors"
-					(selectedRulesChange)="selectedRules = $event"> <!-- (importRules)="importRules()" -->
+					(selectedRulesChange)="selectedRules = $event"
+					[addSubForm]="addConditionForm.bind(this)">
 				</study-card-rules>
 			</fieldset>
 			<fieldset *ngIf="progress > 0 && progress < 1" class="progress">

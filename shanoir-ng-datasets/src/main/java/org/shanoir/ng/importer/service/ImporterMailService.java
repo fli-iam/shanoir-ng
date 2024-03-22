@@ -74,6 +74,7 @@ public class ImporterMailService {
         EmailDatasetImportFailed generatedMail = new EmailDatasetImportFailed();
         generatedMail.setExaminationId(importJob.getExaminationId().toString());
         generatedMail.setStudyId(importJob.getStudyId().toString());
+        generatedMail.setStudyCardId(importJob.getStudyCardId().toString());
         generatedMail.setSubjectName(importJob.getSubjectName());
         generatedMail.setStudyName(importJob.getStudyName());
         generatedMail.setUserId(userId);

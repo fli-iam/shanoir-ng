@@ -80,6 +80,13 @@ export class StudyCardDTOService extends StudyCardDTOServiceAbstract {
                         }
                     }
                 }
+                rule.conditions?.forEach(cond => {
+                    cond.values?.forEach((val, index) => {
+                        if (StudyCardDTOService.isCoil(cond.shanoirField)) {
+                            if (val instanceof Coil) cond.values[index] = coils.find(coil => coil.id == (val as Coil).id);
+                        }
+                    });
+                });
             }
         }
     }

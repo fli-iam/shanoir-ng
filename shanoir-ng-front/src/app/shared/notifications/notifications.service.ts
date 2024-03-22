@@ -201,7 +201,12 @@ export class NotificationsService {
         this.lastLocalStorageRead = Date.now();
         let storageTasks: Task[] = [];
         if (storageTasksStr) {
-            storageTasks = JSON.parse(storageTasksStr).map(task => Object.assign(new Task(), task));
+            storageTasks = JSON.parse(storageTasksStr).map(task => {
+                let newTask: Task = Object.assign(new Task(), task);
+                newTask.creationDate = new Date(task.creationDate as string);
+                newTask.lastUpdate = new Date(task.lastUpdate as string);
+                return newTask;
+            });
         }
         this.localTasks = storageTasks;
     }
@@ -210,7 +215,13 @@ export class NotificationsService {
         this.readLocalTasks();
         let tmpTasks: Task[] = this.localTasks.filter(lt => !this.newLocalTasksQueue.find(nlt => lt.id == nlt.id));
         tmpTasks = tmpTasks.concat(this.newLocalTasksQueue);
-        let tmpTasksStr: string = this.serializeTasks(tmpTasks); // also checks the size limit
+        tmpTasks.sort((a, b) => (a.lastUpdate?.getTime() || a.creationDate?.getDate()) - (b.lastUpdate?.getTime() || b.creationDate?.getDate()));
+        let tmpTasksStr: string = this.serializeTasks(tmpTasks); 
+        // check the size limit
+        while (tmpTasksStr.length > 4000000) {
+            tmpTasks.pop();
+            tmpTasksStr = this.serializeTasks(tmpTasks);
+        } 
         localStorage.setItem(this.storageKey, tmpTasksStr);
         this.newLocalTasksQueue = [];
         this.localTasks = tmpTasks;
@@ -221,10 +232,6 @@ export class NotificationsService {
     private serializeTasks(tasks: Task[]): string {
         let tasksToStore: Task[] = [].concat(tasks);
         let str: string = '[' + tasksToStore.map(t => t.stringify()).join(',') + ']';
-        while (str.length > 5200000) {
-            tasksToStore.shift();
-            str = '[' + tasksToStore.map(t => t.stringify()).join(',') + ']';
-        }
         return str;
     }
 
