@@ -17,6 +17,7 @@ package org.shanoir.ng.datasetacquisition.model.mr;
 import jakarta.persistence.*;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.shanoir.ng.shared.model.EchoTime;
 import org.shanoir.ng.shared.model.FlipAngle;
 
 import java.util.ArrayList;
@@ -156,14 +157,22 @@ public class MrProtocolMetadata extends AbstractEntity {
 			}
 			this.mrSequenceName = mrProcMD.getMrSequenceName();
 
-			this.mrScanningSequence = new ArrayList<>(mrProcMD.getMrScanningSequence().size());
-			for (MrScanningSequence mrss : mrProcMD.getMrScanningSequence()) {
-				this.mrScanningSequence.add(mrss.getId());
+			if (mrProcMD.getMrScanningSequence() != null) {
+				this.mrScanningSequence = new ArrayList<>(mrProcMD.getMrScanningSequence().size());
+				for (MrScanningSequence mrss : mrProcMD.getMrScanningSequence()) {
+					this.mrScanningSequence.add(MrScanningSequence.getScanningSequence(mrss.getId()).getId());
+				}
+			} else {
+				this.mrScanningSequence = null;
 			}
 
-			this.mrSequenceVariant = new ArrayList<>(mrProcMD.getMrSequenceVariant().size());
-			for (MrSequenceVariant mrsv : mrProcMD.getMrSequenceVariant()) {
-				this.mrSequenceVariant.add(mrsv.getId());
+			if (mrProcMD.getMrSequenceVariant() != null) {
+				this.mrSequenceVariant = new ArrayList<>(mrProcMD.getMrSequenceVariant().size());
+				for (MrSequenceVariant mrsv : mrProcMD.getMrSequenceVariant()) {
+					this.mrSequenceVariant.add(mrsv.getId());
+				}
+			} else {
+				this.mrSequenceVariant = null;
 			}
 
 			this.name = mrProcMD.getName();

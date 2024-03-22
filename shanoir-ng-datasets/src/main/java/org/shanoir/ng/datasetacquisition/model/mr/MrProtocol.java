@@ -241,7 +241,11 @@ public class MrProtocol extends AbstractEntity {
 		this.sliceThickness = mrPro.getSliceThickness();
 		this.temporalResolution = mrPro.getTemporalResolution();
 		this.magneticFieldStrength = mrPro.getMagneticFieldStrength();
-		this.updatedMetadata = new MrProtocolSCMetadata(mrPro.getUpdatedMetadata());
+		if (mrPro.getUpdatedMetadata() != null) {
+			this.updatedMetadata = new MrProtocolSCMetadata(mrPro.getUpdatedMetadata());
+		} else {
+			this.updatedMetadata = null;
+		}
 	}
 
 	/**
