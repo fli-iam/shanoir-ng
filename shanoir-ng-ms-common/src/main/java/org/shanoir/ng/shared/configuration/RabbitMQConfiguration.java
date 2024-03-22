@@ -258,6 +258,11 @@ public class RabbitMQConfiguration {
 	public static Queue datasetSubjectStudyQueue() {
 		return new Queue(DATASET_SUBJECT_STUDY_QUEUE, true);
 	}
+
+	@Bean
+	public static Queue subjectStudyQueue() {
+		return new Queue(SUBJECT_STUDY_QUEUE, true);
+	}
 	
 	@Bean
 	public static Queue studiesSubjectStudyStudyCardTagQueue() {

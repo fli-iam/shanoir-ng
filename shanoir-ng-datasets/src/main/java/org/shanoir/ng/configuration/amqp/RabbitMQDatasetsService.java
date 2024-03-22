@@ -152,13 +152,10 @@ public class RabbitMQDatasetsService {
 		listener.receiveStudyUsers(commandArrStr);
 	}
 
-	@RabbitListener(bindings = @QueueBinding(
-			value = @Queue(value = RabbitMQConfiguration.SUBJECT_STUDY_QUEUE, durable = "true"),
-			exchange = @Exchange(value = RabbitMQConfiguration.SUBJECT_STUDY_EXCHANGE, ignoreDeclarationExceptions = "true",
-			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
-	)
+	@Transactional
+	@RabbitListener(queues = RabbitMQConfiguration.SUBJECT_STUDY_QUEUE)
+	@RabbitHandler
 	public void receiveSubjectStudies(String commandArrStr) {
-		System.out.println("#################################### receive " + commandArrStr);
 		try {
 			SubjectStudyDTO[] dtos = objectMapper.readValue(commandArrStr, SubjectStudyDTO[].class);
 			List<SubjectStudy> subjectStudies = new ArrayList<>();

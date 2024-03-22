@@ -216,10 +216,7 @@ public class QualityExaminationRule extends AbstractEntity {
         examData.setSubjectName(examination.getSubject().getName());
         examData.setSubjectStudy(
                 examination.getSubject().getSubjectStudyList().stream()
-                    .filter(ss -> {
-                        System.out.println("#################################### --- " + ss.getStudy().getId() + " - " + examination.getStudy().getId());
-                        return ss.getStudy().getId().equals(examination.getStudy().getId());
-                    })
+                    .filter(ss -> ss.getStudy().getId().equals(examination.getStudy().getId()))
                     .findFirst().orElse(null));
         return examData;
     }

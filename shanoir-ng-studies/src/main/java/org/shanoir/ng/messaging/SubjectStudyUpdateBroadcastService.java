@@ -43,11 +43,10 @@ public class SubjectStudyUpdateBroadcastService {
 	private ObjectMapper objectMapper;
 	
 	public void send(List<SubjectStudy> subjectStudies) throws MicroServiceCommunicationException {
-		System.out.println("##################################### send ");
 		try {
 			String str = objectMapper.writeValueAsString(toDTO(subjectStudies));
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.SUBJECT_STUDY_EXCHANGE, RabbitMQConfiguration.SUBJECT_STUDY_QUEUE, str);
-			LOG.debug("Brodcasted subject-study creations : {}", str);
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.SUBJECT_STUDY_QUEUE, str);
+			LOG.debug("sent subject-study creations : {}", str);
 		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException("Could not send data to subject-study-exchange");
 		}
