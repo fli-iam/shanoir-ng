@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class RabbitMqNiftiConversionService {
-	
+
 	@Autowired
 	NIfTIConverterService converterService;
 
@@ -32,7 +32,7 @@ public class RabbitMqNiftiConversionService {
 	 * @param message the string containing the workfolder where the dicom
 	 * @return true if the conversion is a success, false otherwise
 	 */
-	@RabbitListener(queues = RabbitMQConfiguration.BRUKER_CONVERSION_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.BRUKER_CONVERSION_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	public boolean convertBrukerToDicom(String message) {
 		try {
@@ -52,7 +52,7 @@ public class RabbitMqNiftiConversionService {
 	 * @param message the string containing the image path of anima file
 	 * @return true if the conversion is a success, false otherwise
 	 */
-	@RabbitListener(queues = RabbitMQConfiguration.ANIMA_CONVERSION_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.ANIMA_CONVERSION_QUEUE, containerFactory = "singleConsumerFactory")
 	@RabbitHandler
 	public boolean convertAnimaToNifti(String message) {
 		try {
@@ -68,9 +68,13 @@ public class RabbitMqNiftiConversionService {
 	 * @param message the string containing the converter ID + the workfolder where the dicom are
 	 * @return true if the conversion is a success, false otherwise
 	 */
-	@RabbitListener(queues = RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
-	public boolean convertData(String message) {
+	public boolean convertData(String message) throws InterruptedException {
+		// Sleep for 15 seconds to check rabbitMQ logic
+		LOG.error("We sleepin'");
+		Thread.sleep(15000);
+		LOG.error("We not sleepin' animow");
 		try {
 			String[] messageSplit = message.split(";");
 			int converterId = Integer.parseInt(messageSplit[0]);

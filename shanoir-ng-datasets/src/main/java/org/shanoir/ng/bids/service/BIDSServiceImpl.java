@@ -192,7 +192,7 @@ public class BIDSServiceImpl implements BIDSService {
 					value = @Queue(value = RabbitMQConfiguration.BIDS_EVENT_QUEUE, durable = "true"),
 					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
 					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
-	}
+	}, containerFactory = "multipleConsumersFactory"
 			)
 	public void deleteBids(String eventAsString) {
 		ShanoirEvent event;
@@ -203,6 +203,9 @@ public class BIDSServiceImpl implements BIDSService {
 				return;
 			}
 			Study studyDeleted = studyRepo.findById(event.getStudyId()).orElse(null);
+			if (studyDeleted == null) {
+				return;
+			}
 			this.deleteBidsFolder(studyDeleted.getId(), studyDeleted.getName());
 		} catch (Exception e) {
 			LOG.error("ERROR when deleting BIDS folder: please delete it manually: {}", eventAsString, e);
@@ -482,6 +485,7 @@ public class BIDSServiceImpl implements BIDSService {
 				downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset, null);
 
 				// Convert them, sending to import microservice
+				LOG.error("sending shit to convert");
 				boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + workFolder.getAbsolutePath() + ";" + dataFolder.getAbsolutePath());
 
 				if (!result) {

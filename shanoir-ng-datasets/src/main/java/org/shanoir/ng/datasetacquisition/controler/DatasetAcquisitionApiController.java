@@ -47,6 +47,7 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -104,7 +105,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
 
-	@RabbitListener(queues = RabbitMQConfiguration.IMPORT_EEG_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.IMPORT_EEG_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	@Transactional
 	public int createNewEegDatasetAcquisition(Message importJobAsString) throws IOException {
@@ -117,11 +118,18 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 		return HttpStatus.OK.value();
 	}
 
-	@RabbitListener(queues = RabbitMQConfiguration.IMPORTER_QUEUE_DATASET)
+	@RabbitListener(queues = RabbitMQConfiguration.IMPORTER_QUEUE_DATASET, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	@Transactional
 	@WithMockKeycloakUser(authorities = { "ROLE_ADMIN" })
-	public void createNewDatasetAcquisition(Message importJobStr) throws JsonParseException, JsonMappingException, IOException, AmqpRejectAndDontRequeueException {
+	public void createNewDatasetAcquisition(Message importJobStr) throws JsonParseException, JsonMappingException, IOException, AmqpRejectAndDontRequeueException, InterruptedException {
+
+		SimpleMessageListenerContainer container;
+
+		LOG.error("We sleepin'");
+		Thread.sleep(120000);
+		LOG.error("We not sleepin' animow");
+
 		ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
 		try {
 			createAllDatasetAcquisitions(importJob, importJob.getUserId());

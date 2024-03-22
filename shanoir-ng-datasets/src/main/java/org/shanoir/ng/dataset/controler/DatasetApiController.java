@@ -30,7 +30,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.annotation.PostConstruct;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -59,7 +58,6 @@ import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
@@ -119,19 +117,10 @@ public class DatasetApiController implements DatasetApi {
 	ShanoirEventService eventService;
 
 	@Autowired
-	private RabbitTemplate rabbitTemplate;
-	
-	@Autowired
 	DatasetDownloaderServiceImpl datasetDownloaderService;
 
 	/** Number of downloadable datasets. */
 	private static final int DATASET_LIMIT = 500;
-
-	@PostConstruct
-	private void initialize() {
-		// Set timeout to 1mn (consider nifti reconversion can take some time)
-		this.rabbitTemplate.setReplyTimeout(60000);
-	}
 
 	@Override
 	public ResponseEntity<Void> deleteDataset(

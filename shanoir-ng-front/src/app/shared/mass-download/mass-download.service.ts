@@ -111,8 +111,8 @@ export class MassDownloadService {
             if (ret != 'cancel') {
                 return this._downloadDatasets(ret, downloadState).catch(error => {
                     if (ret.datasets.length > this.datasetService.MAX_DATASETS_IN_ZIP_DL) {
-                        this.dialogService.error('Too many datasets', 'You are trying to download ' 
-                            + ret.datasets.length + ' datasets while Shanoir sets a limit to ' + this.datasetService.MAX_DATASETS_IN_ZIP_DL 
+                        this.dialogService.error('Too many datasets', 'You are trying to download '
+                            + ret.datasets.length + ' datasets while Shanoir sets a limit to ' + this.datasetService.MAX_DATASETS_IN_ZIP_DL
                             + ' in a single zip. Please confider using a browser compatible with the Shanoir unlimited download functionality. See link below.',
                             "https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker#browser_compatibility" );
                     }
@@ -130,7 +130,7 @@ export class MassDownloadService {
     }
 
     makeRootSubdirectory(handle: FileSystemDirectoryHandle, nbDatasets: number): Promise<FileSystemDirectoryHandle> {
-        const dirName: string = 'Shanoir-download_' + nbDatasets + 'ds_' + formatDate(new Date(), 'dd-MM-YYYY_HH\'h\'mm', 'en-US');
+        const dirName: string = 'Shanoir-download_' + nbDatasets + 'ds_' + formatDate(new Date(), 'dd-MM-YYYY_HH\'h\'mm\'ss', 'en-US');
         return handle.getDirectoryHandle(dirName, { create: true })
     }
 
@@ -364,7 +364,7 @@ export class MassDownloadService {
             this.notificationService.pushLocalTask(task);
         });
     }
-    
+
     private buildFilePath(dataset: Dataset, zipName: string, fileName: string): string {
         return this.buildAcquisitionPath(dataset) + zipName.replace('.zip', '') + '/' + fileName;
     }
@@ -409,7 +409,7 @@ export class MassDownloadService {
                     this.processFileError(error + '', path);
                 });
             }).catch(error => {
-                if (error instanceof ShanoirError) { 
+                if (error instanceof ShanoirError) {
                     throw error;
                 } else {
                     throw new ShanoirError({error: {code: ShanoirError.FILE_PATH_TOO_LONG, message: 'Probable reason: directory path too long for Windows, max 260 characters (<your chosen directory>/' + path + ')', details: error + ''}});
