@@ -61,7 +61,7 @@ public class RabbitMQUserService {
 			key = "*.event",
 			value = @Queue( value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
 	        exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-	        	autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
+	        	autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)), containerFactory = "multipleConsumersFactory"
 	)
 	public void receiveEvent(String eventAsString) throws AmqpRejectAndDontRequeueException {
 		LOG.info("Receiving event: " + eventAsString);
@@ -78,7 +78,7 @@ public class RabbitMQUserService {
 	 * Receives an import end event as a json object, thus send a mail to study manager to notice him
 	 * @param commandArrStr the task as a json string.
 	 */
-	@RabbitListener(queues = RabbitMQConfiguration.IMPORT_DATASET_MAIL_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.IMPORT_DATASET_MAIL_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	public void receiveImportEvent(String generatedMailAsString) throws AmqpRejectAndDontRequeueException {
 		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
@@ -96,7 +96,7 @@ public class RabbitMQUserService {
 	 * that the import failed
 	 * @param commandArrStr the task as a json string.
 	 */
-	@RabbitListener(queues = RabbitMQConfiguration.IMPORT_DATASET_FAILED_MAIL_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.IMPORT_DATASET_FAILED_MAIL_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	public void receiveImportFailedEvent(String generatedMailAsString) throws AmqpRejectAndDontRequeueException {
 		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
@@ -114,7 +114,7 @@ public class RabbitMQUserService {
 	 * Receives an study user report as a json object, thus send a mail to study manager to notice him
 	 * @param commandArrStr the task as a json string.
 	 */
-	@RabbitListener(queues = RabbitMQConfiguration.STUDY_USER_MAIL_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_USER_MAIL_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	public void receiveStudyUserReport(String generatedMailAsString) throws AmqpRejectAndDontRequeueException {
 		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");

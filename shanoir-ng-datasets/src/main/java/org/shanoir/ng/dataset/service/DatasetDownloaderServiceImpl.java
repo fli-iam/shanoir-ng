@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.collections4.CollectionUtils;
 import org.joda.time.DateTime;
@@ -96,6 +97,12 @@ public class DatasetDownloaderServiceImpl {
 
 	@Autowired
 	private ObjectMapper objectMapper;
+
+	@PostConstruct
+	private void initialize() {
+		// Set timeout to 5mn (consider nifti reconversion can take some time)
+		this.rabbitTemplate.setReplyTimeout(300000);
+	}
 
 	public void massiveDownload(String format, List<Dataset> datasets, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
 		Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();

@@ -16,6 +16,13 @@ package org.shanoir.ng.shared.configuration;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.listener.MessageListenerContainer;
+import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.listener.RabbitListenerEndpoint;
+import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -31,6 +38,30 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 @Profile("!test")
 public class RabbitMQConfiguration {
+
+	@Autowired
+	private ConnectionFactory connectionFactory;
+
+	@Bean(name = "multipleConsumersFactory")
+	public SimpleRabbitListenerContainerFactory multipleConsumersFactory() {
+		SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+		factory.setConnectionFactory(connectionFactory);
+		factory.setMaxConcurrentConsumers(100);
+		factory.setConcurrentConsumers(10);
+		factory.setStartConsumerMinInterval(100L);
+		factory.setConsecutiveActiveTrigger(1);
+		factory.setAutoStartup(true);
+		factory.setPrefetchCount(1);
+		return factory;
+	}
+
+	@Bean(name = "singleConsumerFactory")
+	public SimpleRabbitListenerContainerFactory singleConsumerFactory() {
+		SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+		factory.setConnectionFactory(connectionFactory);
+		factory.setConcurrentConsumers(1);
+		return factory;
+	}
 
 	////////////////// QUEUES //////////////////
 
