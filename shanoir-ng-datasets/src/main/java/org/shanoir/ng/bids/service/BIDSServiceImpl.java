@@ -485,7 +485,6 @@ public class BIDSServiceImpl implements BIDSService {
 				downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset, null);
 
 				// Convert them, sending to import microservice
-				LOG.error("sending shit to convert");
 				boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + workFolder.getAbsolutePath() + ";" + dataFolder.getAbsolutePath());
 
 				if (!result) {
