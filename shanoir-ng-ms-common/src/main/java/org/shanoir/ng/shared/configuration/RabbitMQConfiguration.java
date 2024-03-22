@@ -59,12 +59,7 @@ public class RabbitMQConfiguration {
 	public SimpleRabbitListenerContainerFactory singleConsumerFactory() {
 		SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
 		factory.setConnectionFactory(connectionFactory);
-		factory.setMaxConcurrentConsumers(100);
-		factory.setConcurrentConsumers(10);
-		factory.setStartConsumerMinInterval(100L);
-		factory.setConsecutiveActiveTrigger(1);
-		factory.setAutoStartup(true);
-		factory.setPrefetchCount(1);
+		factory.setConcurrentConsumers(1);
 		return factory;
 	}
 
