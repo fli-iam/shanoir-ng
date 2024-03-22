@@ -157,7 +157,7 @@ public class PetProtocol extends AbstractEntity {
 		this.numberOfIterations = other.getNumberOfIterations();
 		this.numberOfSlices = other.getNumberOfSlices();
 		this.numberOfSubsets = other.getNumberOfSubsets();
-		this.petDatasetAcquisition = new PetDatasetAcquisition(acq);
+		this.petDatasetAcquisition = acq;
 		this.radionuclideHalfLife = other.getRadionuclideHalfLife();
 		this.radionuclideTotalDose = other.getRadionuclideTotalDose();
 		this.radiopharmaceuticalCode = other.getRadiopharmaceuticalCode();

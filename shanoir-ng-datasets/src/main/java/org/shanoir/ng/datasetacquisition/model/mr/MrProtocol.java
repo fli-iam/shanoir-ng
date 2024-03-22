@@ -226,7 +226,7 @@ public class MrProtocol extends AbstractEntity {
 		this.numberOfAverages = mrPro.getNumberOfAverages();
 		this.numberOfPhaseEncodingSteps = mrPro.getNumberOfPhaseEncodingSteps();
 		this.numberOfTemporalPositions = mrPro.getNumberOfTemporalPositions();
-		this.originMetadata = new MrProtocolMetadata(mrPro.getOriginMetadata());
+		this.originMetadata = mrPro.getOriginMetadata();
 		if (mrPro.getPatientPosition() != null) {
 			this.patientPosition = mrPro.getPatientPosition().getId();
 		} else {
@@ -241,7 +241,7 @@ public class MrProtocol extends AbstractEntity {
 		this.sliceThickness = mrPro.getSliceThickness();
 		this.temporalResolution = mrPro.getTemporalResolution();
 		this.magneticFieldStrength = mrPro.getMagneticFieldStrength();
-		this.updatedMetadata = new MrProtocolSCMetadata(mrPro.getUpdatedMetadata());
+		this.updatedMetadata = mrPro.getUpdatedMetadata();
 	}
 
 	/**
