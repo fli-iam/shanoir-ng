@@ -70,11 +70,7 @@ public class RabbitMqNiftiConversionService {
 	 */
 	@RabbitListener(queues = RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
-	public boolean convertData(String message) throws InterruptedException {
-		// Sleep for 15 seconds to check rabbitMQ logic
-		LOG.error("We sleepin'");
-		Thread.sleep(15000);
-		LOG.error("We not sleepin' animow");
+	public boolean convertData(String message) {
 		try {
 			String[] messageSplit = message.split(";");
 			int converterId = Integer.parseInt(messageSplit[0]);
