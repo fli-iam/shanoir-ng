@@ -39,7 +39,7 @@ public class RabbitMQImportService {
 	        	autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT))
 	)
 	public void receiveMessage(String commandArrStr) {
-		listener.receiveMessageImport(commandArrStr);
+		listener.receiveStudyUsers(commandArrStr);
 	}
 
 }
