@@ -84,14 +84,15 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
 
     async initCreate(): Promise<void> {
         this.entity = new AcquisitionEquipment();
-        this.prefill();
+        this.getManufModels().then( () => {
+            this.prefill();
+        });
         if (this.centersFromStudyCard == null) {
             this.centerService.getCentersNames().then(centers => this.centers = centers);
         }
         else {
             this.centers = this.centersFromStudyCard;
         }
-        this.getManufModels();
     }
 
     private prefill() {
@@ -109,6 +110,13 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
 
         if (this.fromImport) {
             this.acqEquip.serialNumber = this.fromImport.split('-')[2] != "null" ? this.fromImport.split('-')[2] : "";
+            let manuf = this.fromImport.split('-')[0] != "null" ? this.fromImport.split('-')[0] : "";
+            let model = this.fromImport.split('-')[1] != "null" ? this.fromImport.split('-')[1] : "";
+            this.manufModels.forEach(manufModels => {
+                if (manuf && model && manufModels.manufacturer.name.includes(manuf) && manufModels.name.includes(model)) {
+                    this.acqEquip.manufacturerModel = manufModels;
+                }
+            });
         }
     }
 
@@ -127,9 +135,11 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         return form;
     }
 
-    private getManufModels(manufModelId?: number): void {
-        this.manufModelService.getAll()
-            .then(manufModels => this.manufModels = manufModels);
+    private getManufModels(manufModelId?: number): Promise<void> {
+        return this.manufModelService.getAll()
+            .then(manufModels => {
+                this.manufModels = manufModels
+            });
     }
 
     public async hasEditRight(): Promise<boolean> {
