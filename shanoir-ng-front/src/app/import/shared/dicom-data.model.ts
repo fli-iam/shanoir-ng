@@ -106,4 +106,5 @@ export class DicomQuery {
     patientBirthDate: string = "";
     studyDescription: string = "";
     studyDate: string = "";
+    modality:  'MR' | 'CT' | 'PT' | 'NM' | 'XA' | 'None' = 'MR';
 }
