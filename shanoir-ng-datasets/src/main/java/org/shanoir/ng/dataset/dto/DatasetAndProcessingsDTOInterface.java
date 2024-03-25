@@ -25,11 +25,7 @@ public interface DatasetAndProcessingsDTOInterface {
 	public List<DatasetProcessingDTO> getProcessings();
 
 	public void setProcessings(List<DatasetProcessingDTO> datasetProcessings);
-    
-	public DatasetProcessingDTO getDatasetProcessing();
 
-	public void setDatasetProcessing(DatasetProcessingDTO datasetProcessing);
-	
 	public DatasetAcquisitionDTO getDatasetAcquisition();
 
 	public void setDatasetAcquisition(DatasetAcquisitionDTO datasetAcquisition);

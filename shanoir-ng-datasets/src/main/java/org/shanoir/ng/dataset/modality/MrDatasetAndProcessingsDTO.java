@@ -25,8 +25,6 @@ public class MrDatasetAndProcessingsDTO extends MrDatasetDTO implements DatasetA
 
 	private List<DatasetProcessingDTO> processings;
 	
-	private DatasetProcessingDTO datasetProcessing;
-
 	private DatasetAcquisitionDTO datasetAcquisition;
 
 	@Override
@@ -49,14 +47,4 @@ public class MrDatasetAndProcessingsDTO extends MrDatasetDTO implements DatasetA
 		this.processings = datasetProcessings;
 	}
 
-	@Override
-	public DatasetProcessingDTO getDatasetProcessing() {
-		return datasetProcessing;
-	}
-
-	@Override
-	public void setDatasetProcessing(DatasetProcessingDTO datasetProcessing) {
-		this.datasetProcessing = datasetProcessing;
-	}
-    
 }

@@ -34,8 +34,6 @@ public class DatasetProcessingDTO {
 	private String comment;
 
 	private DatasetProcessingType datasetProcessingType;
-	
-	private List<DatasetDTO> inputDatasets;
 
 	private List<DatasetDTO> outputDatasets;
 	
@@ -68,15 +66,6 @@ public class DatasetProcessingDTO {
 	public void setDatasetProcessingType(DatasetProcessingType datasetProcessingType) {
 		this.datasetProcessingType = datasetProcessingType;
 	}
-
-	public List<DatasetDTO> getInputDatasets() {
-		return inputDatasets;
-	}
-
-	public void setInputDatasets(List<DatasetDTO> inputDatasets) {
-		this.inputDatasets = inputDatasets;
-	}
-
 
 	public List<DatasetDTO> getOutputDatasets() {
 		return outputDatasets;
