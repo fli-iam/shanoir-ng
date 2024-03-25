@@ -17,13 +17,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<table class="layout">
 			<tr><td colspan="2">
 				<span class="right-col" [ngSwitch]="mode">
-					<ng-template [ngSwitchCase]="'view'"> 
+					<ng-template [ngSwitchCase]="'view'">
 						<div class="header command-zone" i18n="View therapy|Title">View therapy</div>
 					</ng-template>
-					<ng-template [ngSwitchCase]="'edit'"> 
+					<ng-template [ngSwitchCase]="'edit'">
 						<div class="header command-zone" i18n="Edit therapy|Title">Edit therapy</div>
 					</ng-template>
-					<ng-template [ngSwitchCase]="'create'"> 
+					<ng-template [ngSwitchCase]="'create'">
 						<div class="header command-zone" i18n="Create therapy|Title">Add therapy</div>
 					</ng-template>
 				</span>
@@ -36,12 +36,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<li class="required">
 							<label i18n="Edit therapy|Name label">Name</label>
 							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'"> 
+								<ng-template [ngSwitchCase]="'view'">
 										{{therapy?.name}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
 									<input type="text" id="name" formControlName="name" [(ngModel)]="therapy.name"/>
 									<label *ngIf="hasError('name', ['required'])" [@slideDown]="hasError('name', ['required'])" class="form-validation-alert" i18n="Edit therapy|Name required error@@therapyDetailNameRequiredError">Name is required!</label>
+        							<label *ngIf="hasError('name', ['unique'])" [@slideDown]="hasError('name', ['unique'])" class="form-validation-alert" i18n="Edit therapy|Name unique error@@therapyDetailNameUniqueError">Name should be unique!</label>
 								</ng-template>
 							</span>
 						</li>
@@ -61,18 +62,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<li class="required">
 							<label i18n="Edit therapy|Comment label">Comment</label>
 							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'"> 
+								<ng-template [ngSwitchCase]="'view'">
 										{{therapy?.comment}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
 									<textarea rows="4" id="comment" formControlName="comment" [(ngModel)]="therapy.comment"></textarea>
 								</ng-template>
 							</span>
-							
+
 						</li>
 					</ol>
 					</fieldset>
-				</td>				
+				</td>
 			</tr>
 		</table>
 		<form-footer

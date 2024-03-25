@@ -482,15 +482,15 @@ public class RabbitMQDatasetsService {
 				event.setProgress(progress);
 				eventService.publishEvent(event);
 
-				LOG.warn("[CopyDatasets] Start copy for dataset " + datasetParentId + " to study " + studyId);
+				LOG.info("[CopyDatasets] Start copy for dataset " + datasetParentId + " to study " + studyId);
 				Long dsCount = datasetRepository.countDatasetsBySourceIdAndStudyId(datasetParentId, studyId);
 				Dataset datasetParent = datasetService.findById(datasetParentId);
 
 				if (datasetParent.getSourceId() != null) {
-					LOG.warn("[CopyDatasets] Selected dataset is a copy, please pick the original dataset.");
+					LOG.info("[CopyDatasets] Selected dataset is a copy, please pick the original dataset.");
 					countCopy++;
 				} else if (dsCount != 0) {
-					LOG.warn("[CopyDatasets] Dataset already exists in this study, copy aborted.");
+					LOG.info("[CopyDatasets] Dataset already exists in this study, copy aborted.");
 					countAlreadyExist++;
 
 				} else {
@@ -498,7 +498,7 @@ public class RabbitMQDatasetsService {
 					Long newDsId = (Long) result[0];
 					countProcessed += (int) result[1];
 					countSuccess += (int) result[2];
-					LOG.warn("countProcessed : " + countProcessed);
+					LOG.info("countProcessed : " + countProcessed);
 					if (newDsId != null)
 						newDatasets.add(newDsId);
 				}
@@ -510,15 +510,16 @@ public class RabbitMQDatasetsService {
 					countProcessed + " are processed datasets and cannot be copied.");
 			event.setStatus(ShanoirEvent.SUCCESS);
 			event.setProgress(1.0f);
-
 			eventService.publishEvent(event);
 			solrService.indexDatasets(newDatasets);
 
 		} catch (Exception e) {
-			event.setMessage("[CopyDatasets] Error during the copy of dataset.");
-			event.setStatus(ShanoirEvent.ERROR);
-			event.setProgress(-1f);
-			eventService.publishEvent(event);
+			if (event != null) {
+				event.setMessage("[CopyDatasets] Error during the copy of dataset.");
+				event.setStatus(ShanoirEvent.ERROR);
+				event.setProgress(-1f);
+				eventService.publishEvent(event);
+			}
 			LOG.error("Something went wrong during the copy. {}", e.getMessage());
 			throw new AmqpRejectAndDontRequeueException(e.getMessage(), e);
 		}

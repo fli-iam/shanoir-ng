@@ -135,6 +135,9 @@ public class BidsImporterService {
 			case "nirs":
 				importDataset(importJob, BidsDataType.NIRS, DatasetModalityType.NIRS_DATASET, event);
 				break;
+			case "xa":
+				importDataset(importJob, BidsDataType.XA, DatasetModalityType.XA_DATASET, event);
+				break;
 			default:
 				if (event != null) {
 					LOG.error("The data type folder is not recognized. Please update your BIDS archive following the rules.");

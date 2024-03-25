@@ -14,7 +14,8 @@ public class DatasetRepositoryImpl implements DatasetRepositoryCustom {
     @PersistenceContext
     private EntityManager entityManager;
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp,
             String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception {
         

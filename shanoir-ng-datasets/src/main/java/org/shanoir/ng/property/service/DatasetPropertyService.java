@@ -8,4 +8,6 @@ import java.util.List;
 public interface DatasetPropertyService {
 
     List<DatasetProperty> createAll(List<DatasetProperty> properties);
+
+    void deleteByDatasetId(Long id);
 }

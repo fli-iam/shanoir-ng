@@ -53,7 +53,10 @@ public enum DatasetModalityType {
 	BEH_DATASET(10),
 
 	// Near-Infrared Spectroscopy dataset
-	NIRS_DATASET(11);
+	NIRS_DATASET(11),
+
+	// X-RAY ANGIOGRAPHY dataset
+	XA_DATASET(12);
 
 	private int id;
 

@@ -26,6 +26,8 @@ export enum TaskStatus {
 
 export class TaskState {
 
+    errors: any;
+
     constructor(public status?: TaskStatus, public progress?: number) {}
 
     isActive(): boolean {
@@ -49,7 +51,8 @@ export class Task extends Entity {
     objectId: number;
     route: string;
     hasReport: boolean;
-    private readonly FIELDS: string[] = ['id', 'creationDate', 'lastUpdate','_status','_message', '_progress', '_eventType', 'eventLabel', 'objectId', 'route', 'report'];
+    sessionId: string;
+    private readonly FIELDS: string[] = ['id', 'creationDate', 'lastUpdate','_status','_message', '_progress', '_eventType', 'eventLabel', 'objectId', 'route', 'report', 'sessionId'];
 
     set eventType(eventType: string) {
         this._eventType = eventType;

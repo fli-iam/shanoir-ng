@@ -37,6 +37,7 @@ declare var Keycloak: any;
 @Injectable()
 export class KeycloakService {
     static auth: any = {};
+    static clientId = 'shanoir-ng-front';
     // static auth: any = { loggedIn: true };
     private gettingToken: boolean = false;
     private tokenPromise: Promise<string>;
@@ -47,10 +48,10 @@ export class KeycloakService {
             return Promise.resolve();
         }
 
-        const keycloakAuth: any = Keycloak({
+        const keycloakAuth: any = new Keycloak({
             url: AppUtils.KEYCLOAK_BASE_URL,
             realm: 'shanoir-ng',
-            clientId: 'shanoir-ng-front',
+            clientId: this.clientId,
         });
         KeycloakService.auth.loggedIn = true; // false;
         function maybe_redirect_to_login_page()

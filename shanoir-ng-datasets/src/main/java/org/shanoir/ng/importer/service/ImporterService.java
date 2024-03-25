@@ -36,6 +36,7 @@ import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.MegDataset;
 import org.shanoir.ng.dataset.modality.MeshDataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.dataset.modality.XaDataset;
 import org.shanoir.ng.dataset.modality.ParameterQuantificationDataset;
 import org.shanoir.ng.dataset.modality.PetDataset;
 import org.shanoir.ng.dataset.modality.RegistrationDataset;
@@ -198,7 +199,7 @@ public class ImporterService {
                         // revert quality tag
                         subjectStudy.setQualityTag(tagSave);
                         subjectStudyService.update(qualityResult.getUpdatedSubjectStudies());
-                        throw new ShanoirException("Error while saving data in pacs, the import is canceled and acquisitions were not saved");
+                        throw new ShanoirException("Error while saving data in pacs, the import is canceled and acquisitions were not saved", e);
                     }
                 }
             } else {
@@ -532,6 +533,10 @@ public class ImporterService {
                 case TemplateDataset.datasetType:
                     dataset = new TemplateDataset();
                     originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
+                    break;
+                case XaDataset.datasetType:
+                    dataset = new TemplateDataset();
+                    originMetadata.setDatasetModalityType(DatasetModalityType.XA_DATASET);
                     break;
                 default:
                 break;
