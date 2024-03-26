@@ -19,7 +19,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.shanoir.ng.configuration.amqp.RabbitMQSendService;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
@@ -29,6 +30,8 @@ import org.shanoir.ng.shared.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.amqp.AmqpException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
  * SubjectStudy service implementation.
@@ -42,8 +45,11 @@ public class SubjectStudyServiceImpl implements SubjectStudyService {
 	@Autowired
 	private SubjectStudyRepository subjectStudyRepository;
 
-    @Autowired
-    private RabbitMQSendService rabbitSender;
+	@Autowired
+    private RabbitTemplate rabbitTemplate;
+
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	@Override
 	public List<SubjectStudy> update(final Iterable<SubjectStudy> subjectStudies) throws EntityNotFoundException, MicroServiceCommunicationException {
@@ -63,7 +69,7 @@ public class SubjectStudyServiceImpl implements SubjectStudyService {
         }
 		subjectStudyRepository.saveAll(subjectStudiesDb);
         List<SubjectStudyQualityTagDTO> subjectStudyTagDTOs = getSubjectStudyTagDTOs(Utils.toList(subjectStudiesDb));
-			    rabbitSender.send(subjectStudyTagDTOs, RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG);		
+			    this.send(subjectStudyTagDTOs, RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG);
 		return Utils.toList(subjectStudiesDb);
 	}
 	
@@ -99,4 +105,12 @@ public class SubjectStudyServiceImpl implements SubjectStudyService {
     public List<SubjectStudy> get(Long subjectId, Long studyId) {
         return subjectStudyRepository.findByStudy_IdAndSubjectId(studyId, subjectId);
     }
+
+	private void send(Object obj, String queue) throws MicroServiceCommunicationException {
+	    try {
+	        rabbitTemplate.convertAndSend(queue, objectMapper.writeValueAsString(obj));
+	    } catch (AmqpException | JsonProcessingException e) {
+	        throw new MicroServiceCommunicationException("Error while communicating with MS studies to send study card tags.", e);
+	    }
+	}
 }

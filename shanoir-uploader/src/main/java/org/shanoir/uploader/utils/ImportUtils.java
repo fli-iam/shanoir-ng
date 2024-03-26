@@ -185,7 +185,6 @@ public class ImportUtils {
 		importJob.setStudyCardName(studyCard.getName());
 		importJob.setStudyCardId(studyCard.getId());
 		importJob.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
-		importJob.setConverterId(studyCard.getNiftiConverterId());
 		importJob.setExaminationId(examinationId);
 
 		List<Patient> patients = new ArrayList<>();

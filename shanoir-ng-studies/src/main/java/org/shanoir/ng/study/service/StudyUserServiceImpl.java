@@ -98,7 +98,7 @@ public class StudyUserServiceImpl implements StudyUserService {
 		return studyUserRepository.findByStudy_Id(studyId);
 	}
 
-	@RabbitListener(queues = RabbitMQConfiguration.DELETE_USER_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.DELETE_USER_QUEUE, containerFactory = "singleConsumerFactory")
 	@RabbitHandler
 	@Transactional
 	@Override

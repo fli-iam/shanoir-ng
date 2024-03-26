@@ -14,6 +14,8 @@ import java.io.IOException;
  */
 public interface BIDSService {
 
+	File getBidsFolderpath(Long studyId, String studyName);
+
 	/**
 	 * Creates a full BIDS folder with all the data
 	 * @param studyId the study ID for which we create the BIDS folder

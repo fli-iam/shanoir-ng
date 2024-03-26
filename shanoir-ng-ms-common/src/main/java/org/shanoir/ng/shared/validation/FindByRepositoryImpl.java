@@ -19,8 +19,12 @@ import java.util.List;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
+import org.aspectj.lang.annotation.Before;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * Custom repository for entities.
@@ -29,12 +33,12 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
+@ConditionalOnProperty(prefix = "shanoir", name = "database", havingValue = "other", matchIfMissing = true)
 public class FindByRepositoryImpl<T extends AbstractEntity> implements FindByRepository<T> {
-
+	
 	@PersistenceContext
 	private EntityManager em;
-
-
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<T> findBy(String fieldName, Object value, @SuppressWarnings("rawtypes") Class clazz) {

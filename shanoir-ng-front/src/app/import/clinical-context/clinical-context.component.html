@@ -216,43 +216,5 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </span>
         </li>
     </ol>
-
-    <ol>
-        <legend>Nifti Converter</legend>
-        <li>
-            <label label [class.required-label]="!useStudyCard">Select a Nifti converter</label>
-            <span class="right-col">
-                <select-box *ngIf="!useStudyCard || niftiConverter"
-                        [(ngModel)]="niftiConverter"
-                        (userChange)="onSelectNifti()"
-                        [optionArr]="niftiConverters"
-                        [readOnly]="useStudyCard">
-                </select-box>
-            </span>
-            <div *ngIf="modality == 'CT'" class="ct-warn left-icon">
-                <i class="fas fa-exclamation-triangle"></i>
-                You are importing CT data. Please be aware that some nifti converters are not adapted for CT (dicomifier for example)
-            </div>
-        </li>
-    </ol>
-
-    <!-- <ol *ngIf="hasPosition">
-        <legend>
-            Coordinates system
-            <tool-tip> The coordinates sytem where the electrodes are set</tool-tip>
-        </legend>
-        <li class="required">
-            <label class="required-label">Select a coordinate system</label>
-            <span class="right-col">
-                <select-box
-                    [(ngModel)]="coordsystem"
-                    (userChange)="onSelectCoord(); onContextChange();"
-                    [ngModelOptions]="{standalone: true}"
-                    [options]="coordSystemOptions">
-                </select-box>
-            </span>
-        </li>
-    </ol> -->
-
 </fieldset>
 <button *ngIf="!reloading" class="next alt right-icon" [disabled]="!valid" (click)="next()">Import now<i class="fa-solid fa-flag-checkered"></i></button>

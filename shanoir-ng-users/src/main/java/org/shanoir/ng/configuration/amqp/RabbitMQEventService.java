@@ -30,7 +30,7 @@ public class RabbitMQEventService {
     @Autowired
     public ShanoirEventsService service;
 
-    @RabbitListener(queues = RabbitMQConfiguration.EXECUTION_MONITORING_TASK)
+    @RabbitListener(queues = RabbitMQConfiguration.EXECUTION_MONITORING_TASK, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
     @Transactional
     public String getExecutionMonitoringEventByObjectId(Long objectId) {

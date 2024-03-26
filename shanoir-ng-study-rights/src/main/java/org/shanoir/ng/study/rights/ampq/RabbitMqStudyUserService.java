@@ -68,7 +68,7 @@ public class RabbitMqStudyUserService {
 		}
     }
 
-	@RabbitListener(queues = RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	@Transactional    
 	public List<Long> getStudiesICanAdmin(Long userId) {
@@ -81,7 +81,7 @@ public class RabbitMqStudyUserService {
     	).collect(Collectors.toList());
     }
 
-	@RabbitListener(queues = RabbitMQConfiguration.STUDY_ADMINS_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_ADMINS_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	@Transactional
 	public List<Long> getStudyAdmins(Long studyId) {

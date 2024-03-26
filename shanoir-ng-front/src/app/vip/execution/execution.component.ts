@@ -58,6 +58,17 @@ export class ExecutionComponent implements OnInit {
     isLoading = true;
     isSubmitted = true;
     datasetsPromise: Promise<void>;
+    converter: number;
+
+    niftiConverters: Option<number>[] = [
+        new Option<number>(1, 'DCM2NII_2008_03_31', null, null, null, false),
+        new Option<number>(2, 'MCVERTER_2_0_7', null, null, null, false),
+        new Option<number>(4, 'DCM2NII_2014_08_04', null, null, null, false),
+        new Option<number>(5, 'MCVERTER_2_1_0', null, null, null, false),
+        new Option<number>(6, 'DCM2NIIX', null, null, null, false),
+        new Option<number>(7, 'DICOMIFIER', null, null, null, false),
+        new Option<number>(8, 'MRICONVERTER', null, null, null, false),
+    ];
 
     constructor(
         private breadcrumbsService: BreadcrumbsService,
@@ -113,7 +124,8 @@ export class ExecutionComponent implements OnInit {
         this.executionForm = new UntypedFormGroup({
             "execution_name": new UntypedFormControl('', Validators.required),
             "export_format": new UntypedFormControl('', Validators.required),
-            "group_by": new UntypedFormControl('', Validators.required)
+            "group_by": new UntypedFormControl('', Validators.required),
+            "converter": new UntypedFormControl('')
         });
 
         this.pipeline.parameters.forEach(
