@@ -57,7 +57,7 @@ public class RabbitMQPreclinicalService {
             key = ShanoirEventType.DELETE_SUBJECT_EVENT,
             value = @Queue(value = RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, durable = "true"),
             exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-                    autoDelete = "false", durable = "true", type= ExchangeTypes.TOPIC)), containerFactory = "singleConsumerFactory"
+                    autoDelete = "false", durable = "true", type= ExchangeTypes.TOPIC))
     )
     @Transactional
     public void deleteAnimalSubject(String eventAsString) throws AmqpRejectAndDontRequeueException {
