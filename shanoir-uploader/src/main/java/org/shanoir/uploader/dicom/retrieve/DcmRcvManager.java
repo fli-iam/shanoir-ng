@@ -48,11 +48,9 @@ public class DcmRcvManager {
 		AdvancedParams params = new AdvancedParams();
 		params.setTsuidOrder(AdvancedParams.IVR_LE_ONLY);
         ConnectOptions connectOptions = new ConnectOptions();
-        connectOptions.setConnectTimeout(30000);
-        connectOptions.setAcceptTimeout(50000);
-        // Concurrent DICOM operations
-        connectOptions.setMaxOpsInvoked(15);
-        connectOptions.setMaxOpsPerformed(15);
+		// 0 is unlimited below
+        connectOptions.setMaxOpsInvoked(0);
+        connectOptions.setMaxOpsPerformed(0);
 		params.setConnectOptions(connectOptions);
 		URL sOPClassesPropertiesFileURL = this.getClass().getResource(SOP_CLASSES_PROPERTIES);
 		lParams = new ListenerParams(params, true, STORAGE_PATTERN + DICOM_FILE_SUFFIX, sOPClassesPropertiesFileURL, null);
@@ -75,7 +73,8 @@ public class DcmRcvManager {
 		    this.listener.start(scpNode, lParams);
 	        logger.info("DICOM SCP server successfully initialized: " + this.scpNode.toString() + ", " + folderPath);
 		} catch (Exception e) {
-			logger.error("Error during startup of DICOM server: " + e.getMessage() + "\n DICOM server is not started.");
+			logger.error(e.getMessage(), e);
+			logger.error("Error during startup of DICOM server (not started): " + e.getMessage());
 		}		
 	}
 	
