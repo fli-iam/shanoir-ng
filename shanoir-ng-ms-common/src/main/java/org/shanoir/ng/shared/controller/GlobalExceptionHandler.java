@@ -40,28 +40,33 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(value = RestServiceException.class)
 	public ResponseEntity<ErrorModel> handleRestServiceException(final RestServiceException e) {
 		LOG.warn("Error in the rest service. ", e);
-		return new ResponseEntity<ErrorModel>(e.getErrorModel(), HttpStatus.valueOf(e.getErrorModel().getCode()));
+		return new ResponseEntity<>(e.getErrorModel(), HttpStatus.valueOf(e.getErrorModel().getCode()));
 	}
 
 	@ExceptionHandler(value = AccessDeniedException.class)
 	public ResponseEntity<ErrorModel> handleAccessDeniedException(final AccessDeniedException e) {
 		final ErrorModel error = new ErrorModel(HttpStatus.FORBIDDEN.value(), e.getMessage());
 		LOG.warn("Acces denied in the rest service. ", e);
-		return new ResponseEntity<ErrorModel>(error, HttpStatus.FORBIDDEN);
+		return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
 	}
 	
 	@ExceptionHandler(value = EntityNotFoundException.class)
 	public ResponseEntity<ErrorModel> handleEntityNotFoundException(final EntityNotFoundException e) {
 		final ErrorModel error = new ErrorModel(HttpStatus.NOT_FOUND.value(), e.getMessage());
 		LOG.warn("Entity not found in the rest service. ", e);
-		return new ResponseEntity<ErrorModel>(error, HttpStatus.NOT_FOUND);
+		return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
 	}
 
 	@ExceptionHandler(value = Exception.class)
 	public ResponseEntity<ErrorModel> handleException(final Exception e) {
+
+		if(e.getCause() instanceof RestServiceException){
+			return this.handleRestServiceException((RestServiceException) e.getCause());
+		}
+
 		final ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
 		LOG.error("Unexpected error in the rest service. ", e);
-		return new ResponseEntity<ErrorModel>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+		return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 }
