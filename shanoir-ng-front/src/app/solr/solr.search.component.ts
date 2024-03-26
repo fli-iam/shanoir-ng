@@ -277,11 +277,12 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         if (this.form.valid) {
             this.saveState();
             this.solrRequest.facetPaging = this.facetPageable ? this.facetPageable : this.buildFacetPageable();
-            return this.solrService.search(this.solrRequest, pageable).then(solrResultPage => {
+            let facetPagingTmp: Map<String, FacetPageable> = new Map(this.solrRequest.facetPaging); // shallow copy
+            let search = this.solrService.search(this.solrRequest, pageable).then(solrResultPage => {
                 // populate criteria
                 if (solrResultPage) {
                     this.pagingCriterion.forEach(criterionComponent => {
-                        if (this.solrRequest.facetPaging.has(criterionComponent.facetName)) {
+                        if (facetPagingTmp?.has(criterionComponent.facetName)) {
                             let facetPage: FacetResultPage = solrResultPage.facetResultPages.find(facetResPage => facetResPage.content[0]?.key?.name == criterionComponent.facetName)
                             if (!facetPage) facetPage = new FacetResultPage();
                             criterionComponent.refresh(facetPage);
@@ -297,10 +298,10 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                     this.syntaxError = true;
                     return new SolrResultPage();
                 } else throw reason;
-            }).finally(() => {
-                this.solrRequest.facetPaging = null;
-                this.facetPageable = null;
             });
+            this.solrRequest.facetPaging = null;
+            this.facetPageable = null;
+            return search;
         } else {
             return Promise.resolve(new SolrResultPage());
         }

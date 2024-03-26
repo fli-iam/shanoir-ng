@@ -30,7 +30,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <progress-bar [progress]="task?.progress" [warning]="task.status == 5 || task.status == 3"></progress-bar>
                     <button [disabled]="loading" *ngIf="task.eventType == 'downloadDataset.event' && (task?.status == -1 || task.status == 3) && browserCompatible" class="alt left-icon normal" (click)="retry()">
                         <i class="fas fa-download"></i>
-                        Retry
+                        Retry / Resume
                     </button>
                 </span>
             </li>

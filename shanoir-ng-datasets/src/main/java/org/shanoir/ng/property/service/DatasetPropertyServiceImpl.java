@@ -17,4 +17,9 @@ public class DatasetPropertyServiceImpl implements DatasetPropertyService {
         repository.saveAll(properties);
         return properties;
     }
+
+    @Override
+    public void deleteByDatasetId(Long id) {
+        repository.deleteByDatasetId(id);
+    }
 }

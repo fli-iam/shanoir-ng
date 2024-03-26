@@ -37,7 +37,7 @@ export class TaskService extends EntityService<Task> {
             .then(this.mapEntityList);
     }
 
-    protected toRealObject(entity: any): Task {
+    public toRealObject(entity: any): Task {
         let trueObject = Object.assign(new Task(), entity);
         trueObject.completeId = entity.idAsString;
         Object.keys(entity).forEach(key => {
