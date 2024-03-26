@@ -107,6 +107,7 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	}
 
 	public DatasetAcquisition(DatasetAcquisition other) {
+		System.out.println("DatasetAcquisition constructor");
 		this.acquisitionEquipmentId = other.acquisitionEquipmentId;
 
 		this.examination = other.examination;

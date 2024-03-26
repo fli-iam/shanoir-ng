@@ -46,6 +46,7 @@ public class MrDatasetAcquisition extends DatasetAcquisition {
 
 	public MrDatasetAcquisition(DatasetAcquisition acq, MrDataset mrDs) {
 		super(acq);
+		System.out.println("MrDatasetAcquisition constructor");
 		this.mrProtocol = new MrProtocol(((MrDatasetAcquisition) acq).getMrProtocol(), mrDs);
 	}
 

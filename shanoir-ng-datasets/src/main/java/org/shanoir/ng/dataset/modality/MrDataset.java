@@ -82,14 +82,15 @@ public class MrDataset extends Dataset {
 
 	public MrDataset() {}
 
-	public MrDataset(Dataset d, MrProtocol mrpro) {
+	public MrDataset(Dataset d) {
 		super(d);
+		System.out.println("MrDataset constructor");
 		MrDataset mrDataset = (MrDataset) d;
-		MrProtocol mrp = new MrProtocol(mrpro, this);
-		this.diffusionGradients = new ArrayList<>(mrDataset.getDiffusionGradients().size());
-		for (DiffusionGradient dg : mrDataset.getDiffusionGradients()) {
-			this.diffusionGradients.add(new DiffusionGradient(dg, this, mrp));
-		}
+//		MrProtocol mrp = new MrProtocol(mrpro, this);
+//		this.diffusionGradients = new ArrayList<>(mrDataset.getDiffusionGradients().size());
+//		for (DiffusionGradient dg : mrDataset.getDiffusionGradients()) {
+//			this.diffusionGradients.add(new DiffusionGradient(dg, this, mrp));
+//		}
 
 		this.echoTime = new ArrayList<>(mrDataset.getEchoTime().size());
 		for (EchoTime et : mrDataset.getEchoTime()) {
