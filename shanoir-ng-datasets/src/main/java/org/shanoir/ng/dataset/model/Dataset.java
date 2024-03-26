@@ -141,7 +141,6 @@ public abstract class Dataset extends AbstractEntity {
 	}
 
 	public Dataset(Dataset d) {
-		System.out.println("Dataset constructor");
 		this.creationDate = d.getCreationDate();
 		this.datasetAcquisition = d.getDatasetAcquisition();
 		this.datasetExpressions = new ArrayList<>(d.getDatasetExpressions().size());

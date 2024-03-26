@@ -71,7 +71,6 @@ public class DiffusionGradient extends AbstractEntity {
 	}
 
 	public DiffusionGradient(DiffusionGradient dg, MrDataset mr, MrProtocol mrp) {
-		System.out.println("DiffusionGradient constructor");
 		this.mrProtocol = mrp;
 		this.mrDataset = mr;
 		this.diffusionGradientBValue = dg.getDiffusionGradientBValue();

@@ -200,8 +200,6 @@ public class MrProtocol extends AbstractEntity {
 	}
 
 	public MrProtocol(MrProtocol mrPro, MrDataset mrDs) {
-		System.out.println("MrProtocol constructor");
-		System.out.println("MrProtocol mrPro.getDiffusionGradients().size() : " + mrPro.getDiffusionGradients().size());
 		this.acquisitionDuration = mrPro.getAcquisitionDuration();
 		this.acquisitionResolutionX = mrPro.getAcquisitionResolutionX();
 		this.acquisitionResolutionY = mrPro.getAcquisitionResolutionY();
