@@ -18,7 +18,7 @@ DROP PROCEDURE IF EXISTS getStudyStatistics;
 delimiter //
 CREATE PROCEDURE getStudyStatistics(IN studyId INT)
 BEGIN
-SELECT
+SELECT DISTINCT
     e.study_id AS study_id,
     c.id AS center_id,
     c.name AS center_name,
@@ -54,12 +54,14 @@ INNER JOIN
 INNER JOIN
     datasets.dataset_metadata dm ON d.updated_metadata_id = dm.id
 INNER JOIN
-    datasets.subject_study ss ON d.subject_id = ss.subject_id
+    studies.subject_study ss ON d.subject_id = ss.subject_id
 INNER JOIN 
     studies.subject s ON ss.subject_id = s.id
 INNER JOIN
     studies.study_center sc ON c.id = sc.center_id
-WHERE e.study_id = studyId;
+WHERE e.study_id = studyId 
+AND ss.study_id = studyId 
+AND sc.study_id = studyId;
 END //
 
 delimiter ;

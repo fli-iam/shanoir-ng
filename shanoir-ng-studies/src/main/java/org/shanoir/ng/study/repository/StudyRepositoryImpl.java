@@ -5,8 +5,9 @@ import jakarta.persistence.ParameterMode;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.StoredProcedureQuery;
 import org.springframework.stereotype.Component;
-
 import org.shanoir.ng.study.dto.StudyStatisticsDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,8 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
 
     @PersistenceContext
     private EntityManager entityManager;
+
+	private static final Logger LOG = LoggerFactory.getLogger(StudyRepositoryImpl.class);
 
 	@Override
 	public List<StudyStatisticsDTO> queryStudyStatistics(Long studyId) throws Exception {
@@ -49,12 +52,14 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
 			dto.setSubjectId((Long) row[4]);
 			dto.setCommonName((String) row[5]);
 			dto.setExaminationId((Long) row[6]);
-			dto.setExaminationDate((Date) row[7]);
-			dto.setDatasetAcquisitionId((Long) row[8]);
-			dto.setImportDate((Date) row[9]);
-			dto.setDatasetId((Long) row[10]);
-			dto.setModality((String) row[11]);
-			dto.setQuality((String) row[12]);
+			dto.setExaminationComment((String) row[7]);
+			dto.setExaminationDate((Date) row[8]);
+			dto.setDatasetAcquisitionId((Long) row[9]);
+			dto.setImportDate((Date) row[10]);
+			dto.setDatasetId((Long) row[11]);
+			dto.setDatasetName((String) row[12]);
+			dto.setModality((String) row[13]);
+			dto.setQuality((String) row[14]);
 
 			studyStatisticsList.add(dto);
 

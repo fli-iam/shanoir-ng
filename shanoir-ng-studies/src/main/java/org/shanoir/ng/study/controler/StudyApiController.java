@@ -560,6 +560,7 @@ public class StudyApiController implements StudyApi {
 		} catch (jakarta.persistence.NoResultException e) {
 			throw new RestServiceException(new ErrorModel(HttpStatus.NOT_FOUND.value(), "No result found.", e));
 		} catch (Exception e) {
+			LOG.error("Error while executing study statistics stored procedure.", e);
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while querying the database.", e));
 		}
