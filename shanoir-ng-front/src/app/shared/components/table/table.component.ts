@@ -573,7 +573,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
-        if (event.key == 'œ') {
+        if (event.key == '²') {
             console.log('table items', this.items);
         }
     }
