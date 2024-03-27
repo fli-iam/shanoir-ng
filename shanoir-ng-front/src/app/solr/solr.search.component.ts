@@ -429,7 +429,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {headerName: "Admin", type: "boolean", cellRenderer: row => this.hasAdminRight(row.data.studyId), awesome: "fa-solid fa-shield", color: "goldenrod", disableSorting: true},
             {headerName: "Name", field: "datasetName"},
-            {field: "processed", type: "boolean", cellRenderer: row => this.isProcessed(row.data), awesome: "fa-solid fa-cog", disableSorting: true, tip: item => { return item.processed ? "is a processed dataset" : "" }},
+            {headerName: "", type: "boolean", cellRenderer: row => row.data.processed, awesome: "fa-solid fa-cog", color: "dimgrey", disableSorting: true, tip: item => { return item.processed ? "is a processed dataset" : "" }},
             {headerName: "Tags", field: "tags"},
             {headerName: "Type", field: "datasetType"},
             {headerName: "Nature", field: "datasetNature"},
@@ -617,7 +617,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     private isProcessed(doc: SolrDocument) {
-        return doc.processed;
+        return doc.processed == true;
     }
 }
 

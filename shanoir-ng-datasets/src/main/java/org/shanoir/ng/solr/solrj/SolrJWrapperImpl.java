@@ -408,6 +408,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 			solrDoc.setSliceThickness((Double) document.getFirstValue("sliceThickness")); 
 			solrDoc.setPixelBandwidth((Double) document.getFirstValue("pixelBandwidth"));
 			solrDoc.setMagneticFieldStrength((Double) document.getFirstValue("magneticFieldStrength"));
+			solrDoc.setProcessed((Boolean) document.getFirstValue("processed"));
 			solrDocuments.add(solrDoc);
 		}
 		SolrResultPage<ShanoirSolrDocument> page = new SolrResultPage<>(solrDocuments, pageable, documents.getNumFound(), null);
