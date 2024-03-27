@@ -12,7 +12,8 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.quartz.JobBuilder;
 import org.quartz.JobExecutionContext;
 import org.quartz.SchedulerException;
@@ -33,7 +34,7 @@ import org.shanoir.uploader.utils.Util;
 
 public class ReadyState implements State {
 
-	private static Logger logger = Logger.getLogger(ReadyState.class);
+	private static final Logger logger = LoggerFactory.getLogger(ReadyState.class);
 	
 	public void load(StartupStateContext context) {
 		ShUpStartupDialog shUpStartupDialog = context.getShUpStartupDialog();

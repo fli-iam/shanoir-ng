@@ -1,6 +1,7 @@
 package org.shanoir.uploader.action.init;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.gui.ShUpStartupDialog;
 
 
@@ -18,7 +19,7 @@ import org.shanoir.uploader.gui.ShUpStartupDialog;
  */
 public class StartupStateContext {
 	
-	private static Logger logger = Logger.getLogger(StartupStateContext.class);
+	private static final Logger logger = LoggerFactory.getLogger(StartupStateContext.class);
 
 	private State state;
 	

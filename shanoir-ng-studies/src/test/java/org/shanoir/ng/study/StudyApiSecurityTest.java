@@ -34,6 +34,7 @@ import org.shanoir.ng.study.controler.StudyApi;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
+import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
@@ -74,6 +75,9 @@ public class StudyApiSecurityTest {
 	
 	@MockBean
 	private StudyRepository repository;
+
+	@MockBean
+	private StudyUserRepository studyUserRepository;
 	
 	@MockBean
 	private SubjectStudyRepository subjectStudyRepository;
@@ -151,6 +155,7 @@ public class StudyApiSecurityTest {
 		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, null, true)).willReturn(Arrays.asList(studyMockNoRights));
 		given(repository.findAll()).willReturn(Arrays.asList(studyMockNoRights));
 		given(repository.findById(1L)).willReturn(Optional.of(studyMockNoRights));
+		given(studyUserRepository.findByStudy_Id(1L)).willReturn(studyMockNoRights.getStudyUserList());
 		assertAccessAuthorized(api::findStudies);
 		assertEquals(null, api.findStudies().getBody());
 		assertAccessAuthorized(api::findStudiesNames);
@@ -162,6 +167,7 @@ public class StudyApiSecurityTest {
 		given(repository.findAll()).willReturn(Arrays.asList(studyMockWrongRights));
 		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(studyMockWrongRights));
 		given(repository.findById(2L)).willReturn(Optional.of(studyMockNoRights));
+		given(studyUserRepository.findByStudy_Id(2L)).willReturn(studyMockWrongRights.getStudyUserList());
 		assertAccessAuthorized(api::findStudies);
 		assertEquals(null, api.findStudies().getBody());
 		assertAccessAuthorized(api::findStudiesNames);
@@ -174,6 +180,7 @@ public class StudyApiSecurityTest {
 		given(repository.findAllById(Arrays.asList(3L))).willReturn(Arrays.asList(studyMockRightRights));
 		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(studyMockRightRights, studyMockWrongRights, studyMockNoRights));
 		given(repository.findById(3L)).willReturn(Optional.of(studyMockRightRights));
+		given(studyUserRepository.findByStudy_Id(3L)).willReturn(studyMockRightRights.getStudyUserList());
 		assertAccessAuthorized(api::findStudies);
 		assertNotNull(api.findStudies().getBody());
 		assertEquals(1, api.findStudies().getBody().size());

@@ -16,7 +16,8 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.dicom.DicomTreeNode;
 import org.shanoir.uploader.dicom.query.PatientTreeNode;
 import org.shanoir.uploader.dicom.query.SerieTreeNode;
@@ -32,7 +33,7 @@ import org.shanoir.uploader.utils.Util;
  */
 public class SelectionActionListener implements TreeSelectionListener {
 
-	private static Logger logger = Logger.getLogger(SelectionActionListener.class);
+	private static final Logger logger = LoggerFactory.getLogger(SelectionActionListener.class);
 
 	private static final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 

@@ -18,7 +18,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,10 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
-import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -44,7 +40,7 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
-import org.shanoir.ng.study.dto.PublicStudyDTO;
+import org.shanoir.ng.study.dto.StudyLightDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.study.dto.StudyStatisticsDTO;
@@ -61,8 +57,6 @@ import org.shanoir.ng.study.service.StudyUserService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.AmqpException;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -113,7 +107,6 @@ public class StudyApiController implements StudyApi {
 	@Autowired
 	private RelatedDatasetService relatedDatasetService;
 
-
 	private static final Logger LOG = LoggerFactory.getLogger(StudyApiController.class);
 
 	private final HttpServletRequest request;
@@ -163,8 +156,15 @@ public class StudyApiController implements StudyApi {
 		if (studies.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-
 		return new ResponseEntity<>(studyMapper.studiesToStudyDTOs(studies), HttpStatus.OK);
+	}
+	
+	public ResponseEntity<List<StudyLightDTO>> findStudiesLight() {
+		List<Study> studies = studyService.findAll();
+		if (studies.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(studyMapper.studiesToStudyLightDTOs(studies), HttpStatus.OK);
 	}
 
 	@Override
@@ -183,7 +183,7 @@ public class StudyApiController implements StudyApi {
 	@Override
 	public ResponseEntity<List<IdNameCenterStudyDTO>> findStudiesNamesAndCenters() throws RestServiceException {
 		List<IdNameCenterStudyDTO> studiesDTO = new ArrayList<>();
-		final List<Study> studies = studyService.findAll();
+		final List<Study> studies = studyService.findAllWithCenters();
 		if (studies.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
@@ -196,19 +196,14 @@ public class StudyApiController implements StudyApi {
 	@Override
 	public ResponseEntity<StudyDTO> findStudyById(@PathVariable("studyId") final Long studyId, boolean withStorageVolume) {
 		Study study = studyService.findById(studyId);
-
 		if (study == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-
-		StudyDTO dto = studyMapper.studyToStudyDTO(study);
-
+		StudyDTO dto = studyMapper.studyToStudyDTODetailed(study);
 		if(withStorageVolume){
 			dto.setStorageVolume(studyService.getDetailedStorageVolume(dto.getId()));
 		}
-
 		return new ResponseEntity<>(dto, HttpStatus.OK);
-
 	}
 
 	@Override
@@ -511,25 +506,23 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<List<PublicStudyDTO>> findPublicStudiesData() {
-		List<PublicStudyDTO> studiesDTO = new ArrayList<>();
-
+	public ResponseEntity<List<StudyLightDTO>> findPublicStudiesData() {
+		List<StudyLightDTO> studiesDTO = new ArrayList<>();
 		List<Study> studies = studyService.findPublicStudies();
 		if (studies.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-
 		for (Study study : studies) {
-			studiesDTO.add(studyMapper.studyToPublicStudyDTO(study));
+			studiesDTO.add(studyMapper.studyToStudyLightDTO(study));
 		}
 		return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
 	}
 
 	/**
-	 * This method allows to filter studies by ont the one the given user is not part in
+	 * This method allows to filter studies by on the one the given user is not part in
 	 * @param studies the list of studies to filter
 	 * @param tokenUserId the user to filter with
-	 * @return the list fo filtered studies
+	 * @return the list of filtered studies
 	 */
 	private List<Study> filterStudies(List<Study> studies, Long tokenUserId) {
 		List<Study> filteredStudies = new ArrayList<Study>();

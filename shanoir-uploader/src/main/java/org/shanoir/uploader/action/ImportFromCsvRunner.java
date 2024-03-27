@@ -21,7 +21,8 @@ import javax.swing.SwingWorker;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
@@ -56,7 +57,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 	private static final String WILDCARD = "*";
 	private static final String WILDCARD_REPLACE = "\\*";
 
-	private static Logger logger = Logger.getLogger(ImportFromCsvRunner.class);
+	private static final Logger logger = LoggerFactory.getLogger(ImportFromCsvRunner.class);
 
 	private List<CsvImport> csvImports;
 	private ResourceBundle resourceBundle;
@@ -172,7 +173,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		
 		try {
 			if (!StringUtils.isEmpty(csvImport.getIpp())) {
-				patients = dicomServerClient.queryDicomServer("", csvImport.getIpp(), "", "", null, null);
+				patients = dicomServerClient.queryDicomServer("MR", "", csvImport.getIpp(), "", null, null);
 			}
 			if (patients == null) {
 				String name = csvImport.getName().toUpperCase();
@@ -180,7 +181,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 					name+="^";
 					name+=csvImport.getSurname().toUpperCase();
 				}
-				patients = dicomServerClient.queryDicomServer(name, "", "", "", null, null);
+				patients = dicomServerClient.queryDicomServer("MR", name, "", "", null, null);
 			}
 		} catch (Exception e) {
 			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));

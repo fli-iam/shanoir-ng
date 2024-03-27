@@ -20,7 +20,7 @@ public class ShUpConfig {
 	 */
 	public static final String SHANOIR_UPLOADER_VERSION = "v8.0.0";
 	
-	public static final String RELEASE_DATE = "2024-01-19 16:23";
+	public static final String RELEASE_DATE = "2024-03-26 11:12";
 	
 	public static final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 	
@@ -72,6 +72,10 @@ public class ShUpConfig {
 	
 	public static final String PROFILE = "profile";
 	
+	public static final String USERNAME = "username";
+
+	public static final String PASSWORD = "password";
+
 	/**
 	 * Static variables
 	 */
@@ -88,6 +92,10 @@ public class ShUpConfig {
 	public static String[] profiles;
 	
 	public static String profileSelected;
+	
+	public static String username;
+	
+	public static String password;
 	
 	public static File profileDirectory;
 	

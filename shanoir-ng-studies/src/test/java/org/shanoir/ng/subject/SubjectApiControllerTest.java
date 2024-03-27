@@ -153,7 +153,7 @@ public class SubjectApiControllerTest {
 		list.add(subject2);
 		list.add(subject);
 		
-		given(subjectServiceMock.findAllSubjectsOfStudy(1L)).willReturn(list);
+		given(subjectServiceMock.findAllSubjectsOfStudyId(1L)).willReturn(list);
 
 		
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/1/allSubjects").param("preclinical", "null").accept(MediaType.APPLICATION_JSON)
@@ -180,7 +180,7 @@ public class SubjectApiControllerTest {
 		list.add(subject2);
 		list.add(subject);
 		
-		given(subjectServiceMock.findAllSubjectsOfStudy(1L)).willReturn(list);
+		given(subjectServiceMock.findAllSubjectsOfStudyId(1L)).willReturn(list);
 
 		
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/1/allSubjects").param("preclinical", "null").accept(MediaType.APPLICATION_JSON)

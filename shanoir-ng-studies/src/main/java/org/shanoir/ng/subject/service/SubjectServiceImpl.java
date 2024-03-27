@@ -76,10 +76,10 @@ public class SubjectServiceImpl implements SubjectService {
 	private SubjectRepository subjectRepository;
 
 	@Autowired
-	private StudyRepository studyRepository;
-
-	@Autowired
 	private SubjectStudyRepository subjectStudyRepository;
+	
+	@Autowired
+	private StudyRepository studyRepository;
 	
 	@Autowired
 	private SubjectStudyDecorator subjectStudyMapper;
@@ -253,7 +253,6 @@ public class SubjectServiceImpl implements SubjectService {
 	 */
 	private Subject updateSubjectValues(final Subject subjectDb, final Subject subject) throws MicroServiceCommunicationException {
 		subjectDb.setName(subject.getName());
-		//subjectDb.setBirthDate(subject.getBirthDate());
 		subjectDb.setIdentifier(subject.getIdentifier());
 		subjectDb.setPseudonymusHashValues(subject.getPseudonymusHashValues());
 		subjectDb.setSex(subject.getSex());
@@ -285,16 +284,13 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 
 	@Override
-	public List<SimpleSubjectDTO> findAllSubjectsOfStudy(final Long studyId) {
-		return this.findAllSubjectsOfStudyId(studyId);
-	}
-
-	@Override
 	public List<SimpleSubjectDTO> findAllSubjectsOfStudyId(final Long studyId) {
 		List<SimpleSubjectDTO> simpleSubjectDTOList = new ArrayList<>();
-		List<SubjectStudy> opt = subjectStudyRepository.findByStudy(studyRepository.findById(studyId).orElse(null));
-		if (opt != null) {
-			for (SubjectStudy rel : opt) {
+		List<SubjectStudy> studySubjects = subjectStudyRepository.findByStudyId(studyId);
+		if (studySubjects != null) {
+			Study studyWithTags = studyRepository.findStudyWithTagsById(studyId);
+			studySubjects.stream().forEach(ss -> ss.setStudy(studyWithTags));
+			for (SubjectStudy rel : studySubjects) {
 				SimpleSubjectDTO simpleSubjectDTO = new SimpleSubjectDTO();
 				if (studyId.equals(rel.getStudy().getId())) {
 					Subject sub = rel.getSubject();
@@ -312,9 +308,11 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	public List<SimpleSubjectDTO> findAllSubjectsOfStudyAndPreclinical(final Long studyId, boolean preclinical) {
 		List<SimpleSubjectDTO> simpleSubjectDTOList = new ArrayList<>();
-		List<SubjectStudy> opt = subjectStudyRepository.findByStudy(studyRepository.findById(studyId).orElse(null));
-		if (opt != null) {
-			for (SubjectStudy rel : opt) {
+		List<SubjectStudy> studySubjects = subjectStudyRepository.findByStudyId(studyId);
+		Study studyWithTags = studyRepository.findStudyWithTagsById(studyId);
+		studySubjects.stream().forEach(ss -> ss.setStudy(studyWithTags));
+		if (studySubjects != null) {
+			for (SubjectStudy rel : studySubjects) {
 				SimpleSubjectDTO simpleSubjectDTO = new SimpleSubjectDTO();
 				if (studyId.equals(rel.getStudy().getId()) && preclinical == rel.getSubject().isPreclinical()) {
 					Subject sub = rel.getSubject();
@@ -357,4 +355,5 @@ public class SubjectServiceImpl implements SubjectService {
     public boolean existsSubjectWithName(String name) {
         return this.subjectRepository.existsByName(name);
     }
+
 }

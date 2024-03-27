@@ -55,7 +55,7 @@ public class StudyDTO {
 
 	private int nbExaminations;
 
-	private int nbSujects;
+	private int nbSubjects;
 
 	private List<String> protocolFilePaths;
 	
@@ -239,16 +239,16 @@ public class StudyDTO {
 	/**
 	 * @return the nbSujects
 	 */
-	public int getNbSujects() {
-		return nbSujects;
+	public int getNbSubjects() {
+		return nbSubjects;
 	}
 
 	/**
 	 * @param nbSujects
 	 *            the nbSujects to set
 	 */
-	public void setNbSujects(int nbSujects) {
-		this.nbSujects = nbSujects;
+	public void setNbSubjects(int nbSubjects) {
+		this.nbSubjects = nbSubjects;
 	}
 
 	/**
@@ -475,7 +475,6 @@ public class StudyDTO {
 		this.license = license;
 	}
 
-
 	public StudyStorageVolumeDTO getStorageVolume() {
 		return storageVolume;
 	}
@@ -483,4 +482,19 @@ public class StudyDTO {
 	public void setStorageVolume(StudyStorageVolumeDTO storageVolume) {
 		this.storageVolume = storageVolume;
 	}
+
+	@Override
+	public String toString() {
+		return "StudyDTO [clinical=" + clinical + ", downloadableByDefault=" + downloadableByDefault + ", endDate="
+				+ endDate + ", experimentalGroupsOfSubjects=" + experimentalGroupsOfSubjects + ", id=" + id
+				+ ", monoCenter=" + monoCenter + ", name=" + name + ", profile=" + profile + ", nbExaminations="
+				+ nbExaminations + ", nbSubjects=" + nbSubjects + ", protocolFilePaths=" + protocolFilePaths
+				+ ", dataUserAgreementPaths=" + dataUserAgreementPaths + ", tags=" + tags + ", studyTags=" + studyTags
+				+ ", startDate=" + startDate + ", studyCards=" + studyCards + ", studyCenterList=" + studyCenterList
+				+ ", studyStatus=" + studyStatus + ", studyType=" + studyType + ", subjectStudyList=" + subjectStudyList
+				+ ", timepoints=" + timepoints + ", visibleByDefault=" + visibleByDefault + ", withExamination="
+				+ withExamination + ", studyUserList=" + studyUserList + ", challenge=" + challenge + ", description="
+				+ description + ", license=" + license + ", storageVolume=" + storageVolume + "]";
+	}
+
 }

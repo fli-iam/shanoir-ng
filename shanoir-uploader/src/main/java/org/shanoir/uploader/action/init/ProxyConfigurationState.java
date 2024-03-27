@@ -1,7 +1,8 @@
 package org.shanoir.uploader.action.init;
 
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.service.rest.ServiceConfiguration;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
@@ -21,7 +22,7 @@ import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
  */
 public class ProxyConfigurationState implements State {
 
-	private static Logger logger = Logger.getLogger(ProxyConfigurationState.class);
+	private static final Logger logger = LoggerFactory.getLogger(ProxyConfigurationState.class);
 		
 	public void load(StartupStateContext context) {
 		String testURL = ServiceConfiguration.getInstance().getTestURL();

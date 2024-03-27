@@ -11,7 +11,8 @@ import java.util.Date;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
@@ -41,7 +42,7 @@ import org.shanoir.uploader.utils.Util;
  */
 public class ImportFinishActionListener implements ActionListener {
 
-	private static Logger logger = Logger.getLogger(ImportFinishActionListener.class);
+	private static final Logger logger = LoggerFactory.getLogger(ImportFinishActionListener.class);
 
 	private MainWindow mainWindow;
 	
@@ -79,15 +80,23 @@ public class ImportFinishActionListener implements ActionListener {
 					"Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
+		boolean existingSubjectInStudy = false;
 		if (ShUpConfig.isModeSubjectCommonNameManual()) {
 			// minimal length for subject common name is 2, same for subject study identifier
+			// if nothing is entered, use existing subject selected
 			if (mainWindow.importDialog.subjectTextField.getText().length() < 2
 				|| !mainWindow.importDialog.subjectStudyIdentifierTF.getText().isEmpty()
 						&& mainWindow.importDialog.subjectStudyIdentifierTF.getText().length() < 2) {
-				JOptionPane.showMessageDialog(mainWindow.frame,
-						mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.subject.creation"),
-						"Error", JOptionPane.ERROR_MESSAGE);
-				return;
+				subject = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
+				if (subject == null) {
+					JOptionPane.showMessageDialog(mainWindow.frame,
+							mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.subject.creation"),
+							"Error", JOptionPane.ERROR_MESSAGE);
+					return;
+				} else {
+					logger.info("Auto-Import: existing subject used from server with ID: " + subject.getId() + ", name: " + subject.getName());
+					existingSubjectInStudy = true;
+				}
 			}
 		}
 		
@@ -129,7 +138,7 @@ public class ImportFinishActionListener implements ActionListener {
 			}
 		} else {
 			// if rel-subject-study does not exist for existing subject, create one
-			if (importStudyAndStudyCardCBILNG.getSubjectStudy() == null) {
+			if (importStudyAndStudyCardCBILNG.getSubjectStudy() == null && !existingSubjectInStudy) {
 				ImportUtils.addSubjectStudy(study, subject,
 						(SubjectType) mainWindow.importDialog.subjectTypeCB.getSelectedItem(),
 						mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.isSelected(),

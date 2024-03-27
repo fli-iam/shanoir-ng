@@ -8,7 +8,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -38,7 +39,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @DisallowConcurrentExecution
 public class UploadServiceJob implements Job {
 
-	private static Logger logger = Logger.getLogger(UploadServiceJob.class);
+	private static final Logger logger = LoggerFactory.getLogger(UploadServiceJob.class);
 
 	private ShanoirUploaderServiceClient uploadServiceClient;
 

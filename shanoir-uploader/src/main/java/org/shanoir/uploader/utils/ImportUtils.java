@@ -3,19 +3,15 @@ package org.shanoir.uploader.utils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.time.LocalDate;
-import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
-import org.apache.log4j.Logger;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
@@ -38,6 +34,8 @@ import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
 import org.shanoir.uploader.upload.UploadJob;
 import org.shanoir.uploader.upload.UploadState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class contains useful methods for data upload that are used multiple times in the application.
@@ -46,7 +44,7 @@ import org.shanoir.uploader.upload.UploadState;
  */
 public class ImportUtils {
 	
-	private static Logger logger = Logger.getLogger(ImportUtils.class);
+	private static final Logger logger = LoggerFactory.getLogger(ImportUtils.class);
 	
 	/**
 	 * Adds a subjectStudy to a given subject with the given study

@@ -41,10 +41,13 @@ public class Instance {
     public Instance() {}
     
     public Instance(Attributes attributes) {
-    		this.sopInstanceUID = attributes.getString(Tag.SOPInstanceUID);
-    		this.instanceNumber = attributes.getString(Tag.InstanceNumber);
-    		this.referencedSOPClassUIDInFile = attributes.getString(Tag.ReferencedSOPClassUIDInFile);
-    		this.referencedFileID = attributes.getStrings(Tag.ReferencedFileID);
+    		sopInstanceUID = attributes.getString(Tag.SOPInstanceUID);
+    		// try to remove confusing spaces, in case DICOM server sends them wrongly
+    		if (sopInstanceUID != null)
+    			sopInstanceUID = sopInstanceUID.trim();
+    		instanceNumber = attributes.getString(Tag.InstanceNumber);
+    		referencedSOPClassUIDInFile = attributes.getString(Tag.ReferencedSOPClassUIDInFile);
+    		referencedFileID = attributes.getStrings(Tag.ReferencedFileID);
     }
 
 	public String getInstanceNumber() {

@@ -53,6 +53,9 @@ public class DicomQuery {
 	@Size(max=8)
     @JsonProperty("studyDate")
     private String studyDate;
+	
+    @JsonProperty("modality")
+    private String modality;
 
 	public String getPatientName() {
 		return patientName;
@@ -92,6 +95,14 @@ public class DicomQuery {
 
 	public void setStudyDate(String studyDate) {
 		this.studyDate = studyDate;
+	}
+
+	public String getModality() {
+		return modality;
+	}
+
+	public void setModality(String modality) {
+		this.modality = modality;
 	}
     
 }

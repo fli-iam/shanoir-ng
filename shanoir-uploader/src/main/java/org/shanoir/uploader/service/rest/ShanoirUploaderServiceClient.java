@@ -20,7 +20,8 @@ import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.net.URIBuilder;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.json.JSONObject;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.uploader.ShUpConfig;
@@ -48,7 +49,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
  */
 public class ShanoirUploaderServiceClient {
 
-	private static Logger logger = Logger.getLogger(ShanoirUploaderServiceClient.class);
+	private static final Logger logger = LoggerFactory.getLogger(ShanoirUploaderServiceClient.class);
 	
 	private static final String SHANOIR_SERVER_URL = "shanoir.server.url";
 	
@@ -337,10 +338,26 @@ public class ShanoirUploaderServiceClient {
 		try (CloseableHttpResponse response = httpService.get(this.serviceURLSubjectsFindByIdentifier + URLEncoder.encode(subjectIdentifier, "UTF-8"))) {
 			int code = response.getCode();
 			if (code == HttpStatus.SC_OK) {
-				Subject subjectDTO = Util.getMappedObject(response, Subject.class);
-				return subjectDTO;
+				Subject subject = Util.getMappedObject(response, Subject.class);
+				return subject;
 			} else {
 				logger.warn("Could not find subject with identifier (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				return null;
+			}
+		}
+	}
+
+	public List<Subject> findSubjectsByStudy(Long studyId) throws Exception {
+		URIBuilder b = new URIBuilder(this.serviceURLSubjectsByStudyId + studyId + "/allSubjects");
+		b.addParameter("preclinical",  "null");
+		URL url = b.build().toURL();
+		try (CloseableHttpResponse response = httpService.get(url.toString())) {
+			int code = response.getCode();
+			if (code == HttpStatus.SC_OK) {
+				List<Subject> subjects = Util.getMappedList(response, Subject.class);
+				return subjects;
+			} else {
+				logger.error("Could not get subjects from study id " + studyId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 				return null;
 			}
 		}

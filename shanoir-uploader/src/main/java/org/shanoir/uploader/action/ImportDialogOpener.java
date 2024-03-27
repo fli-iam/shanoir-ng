@@ -9,7 +9,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.MRI;
 import org.shanoir.uploader.gui.ImportDialog;
@@ -34,7 +35,7 @@ import org.shanoir.uploader.upload.UploadJob;
  */
 public class ImportDialogOpener {
 
-	private static Logger logger = Logger.getLogger(ImportDialogOpener.class);
+	private static final Logger logger = LoggerFactory.getLogger(ImportDialogOpener.class);
 
 	private MainWindow mainWindow;
 
@@ -60,7 +61,7 @@ public class ImportDialogOpener {
 			List<Examination> examinationDTOs = getExaminations(subject);
 			// init components of GUI and listeners
 			ImportStudyCardFilterDocumentListener importStudyCardFilterDocumentListener = new ImportStudyCardFilterDocumentListener(this.mainWindow);
-			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, subject, examinationDTOs, studyDate, importStudyCardFilterDocumentListener);
+			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, subject, examinationDTOs, studyDate, importStudyCardFilterDocumentListener, shanoirUploaderServiceClient);
 			ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, uploadJob, uploadFolder, subject, importStudyAndStudyCardCBIL);
 			importDialog = new ImportDialog(this.mainWindow,
 					ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
@@ -303,6 +304,14 @@ public class ImportDialogOpener {
 		}
 	}
 
+	private List<Subject> getSubjects(Study study) throws Exception {
+		if (study != null) {
+//			List<Subject> subjects = shanoirUploaderServiceClient.findSubjectsByStudy(study);
+//			return subjects;
+		}
+		return null;
+	}
+	
 	private List<Examination> getExaminations(Subject subjectDTO) throws Exception {
 		if (subjectDTO != null) {
 			List<Examination> examinationList = shanoirUploaderServiceClient

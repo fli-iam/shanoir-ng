@@ -91,7 +91,7 @@ public class CenterApiController implements CenterApi {
 		if (center.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<>(centerMapper.centerToCenterDTO(center.orElseThrow()), HttpStatus.OK);
+		return new ResponseEntity<>(centerMapper.centerToCenterDTOStudyCenters(center.orElseThrow()), HttpStatus.OK);
 	}
 
 	@Override
@@ -102,7 +102,7 @@ public class CenterApiController implements CenterApi {
 		if (centers.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<>(centerMapper.centersToCenterDTOs(centers), HttpStatus.OK);
+		return new ResponseEntity<>(centerMapper.centersToCenterDTOsFull(centers), HttpStatus.OK);
 	}
 
 	@Override
@@ -112,7 +112,7 @@ public class CenterApiController implements CenterApi {
 		if (centers.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<>(centerMapper.centersToCenterDTOs(centers), HttpStatus.OK);
+		return new ResponseEntity<>(centerMapper.centersToCenterDTOsEquipments(centers), HttpStatus.OK);
 	}
 
 	@Override
@@ -125,7 +125,6 @@ public class CenterApiController implements CenterApi {
 		}
 		return new ResponseEntity<>(centers, HttpStatus.OK);
 	}
-
 
 	@Override
 	public ResponseEntity<List<IdName>> findCentersNames(
@@ -148,7 +147,7 @@ public class CenterApiController implements CenterApi {
 		/* Save center in db. */
 		final Center createdCenter = centerService.create(center);
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_CENTER_EVENT, createdCenter.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-		return new ResponseEntity<>(centerMapper.centerToCenterDTO(createdCenter), HttpStatus.OK);
+		return new ResponseEntity<>(centerMapper.centerToCenterDTOFlat(createdCenter), HttpStatus.OK);
 	}
 
 	@Override
@@ -191,4 +190,5 @@ public class CenterApiController implements CenterApi {
 			}
 		}
 	}
+
 }

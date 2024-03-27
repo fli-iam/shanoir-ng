@@ -16,13 +16,19 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.dataset.DatasetDescription;
 import org.shanoir.ng.dataset.controler.DatasetApiController.CoordinatesSystem;
-import org.shanoir.ng.dataset.modality.*;
+import org.shanoir.ng.dataset.modality.BidsDataset;
+import org.shanoir.ng.dataset.modality.EegDataSetDescription;
+import org.shanoir.ng.dataset.modality.EegDataset;
+import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.dataset.modality.MrDatasetNature;
+import org.shanoir.ng.dataset.modality.PetDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -196,7 +202,9 @@ public class BIDSServiceImpl implements BIDSService {
 	public void deleteBidsFolder(Long studyId, String studyName) {
 		try {
 			if (studyName == null) {
-				studyName = this.studyRepo.findById(studyId).get().getName();
+				Optional<Study> study = studyRepo.findById(studyId);
+				if (!study.isEmpty())
+					studyName = study.get().getName();
 			}
 			// Try to delete the BIDS folder recursively if possible
 			File bidsDir = new File(bidsStorageDir + File.separator + STUDY_PREFIX + studyId + studyName);

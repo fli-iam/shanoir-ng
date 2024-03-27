@@ -19,6 +19,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
@@ -32,6 +34,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
@@ -74,7 +77,8 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 	private Long userId;
 
 	/** Type of the relationship. */
-	@ElementCollection
+	@ElementCollection(fetch = FetchType.EAGER)
+	@Fetch(FetchMode.JOIN)
 	@CollectionTable(name="study_user_study_user_rights", joinColumns=@JoinColumn(name="study_user_id"))
 	private List<Integer> studyUserRights;
 	
@@ -82,7 +86,8 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 	@NotBlank
 	private String userName;
 
-	@ManyToMany
+	@ManyToMany(fetch = FetchType.EAGER)
+	@Fetch(FetchMode.JOIN)
 	@JoinTable(name = "study_user_center", joinColumns = @JoinColumn(name = "study_user_id"), inverseJoinColumns = @JoinColumn(name = "center_id"))
 	private List<Center> centers;
 

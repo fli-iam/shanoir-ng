@@ -16,7 +16,6 @@ package org.shanoir.ng.dicom;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;

@@ -61,9 +61,11 @@ public class ImportDialog extends JDialog {
 	public JLabel studyCardFilterLabel;
 	public JTextField studyCardFilterTextField;
 	
-	// Subject
+	// Subject(s)
 	public JLabel subjectLabel;
 	public JTextFieldMandatory subjectTextField;
+	public JLabel existingSubjectsLabel;
+	public JComboBox existingSubjectsCB;
 	public JLabel subjectImageObjectCategoryLabel;
 	public JComboBoxMandatory subjectImageObjectCategoryCB;
 	public JLabel subjectStudyIdentifierLabel;
@@ -449,6 +451,28 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridwidth = 1;
 		container.add(subjectTextField, importDialogGBC);
 
+		existingSubjectsLabel = new JLabel(resourceBundle.getString("shanoir.uploader.existingSubjectsLabel") + " *");
+
+		existingSubjectsLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		importDialogGBC.weightx = 0.2;
+		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
+		importDialogGBC.insets = new Insets(5, 5, 5, 5);
+		importDialogGBC.gridx = 0;
+		importDialogGBC.gridy = 13;
+		importDialogGBC.gridwidth = 2;
+		importDialogGBC.gridheight = 1;
+		container.add(existingSubjectsLabel, importDialogGBC);
+
+		existingSubjectsCB = new JComboBox();
+		existingSubjectsCB.setBackground(Color.LIGHT_GRAY);
+		importDialogGBC.weightx = 0.7;
+		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
+		importDialogGBC.insets = new Insets(5, 5, 5, 5);
+		importDialogGBC.gridx = 2;
+		importDialogGBC.gridy = 13;
+		importDialogGBC.gridwidth = 1;
+		container.add(existingSubjectsCB, importDialogGBC);
+		
 		subjectImageObjectCategoryLabel = new JLabel(
 				resourceBundle.getString("shanoir.uploader.subjectImageObjectCategoryLabel") + " *");
 		subjectImageObjectCategoryLabel.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -456,7 +480,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 13;
+		importDialogGBC.gridy = 14;
 		importDialogGBC.gridwidth = 2;
 		container.add(subjectImageObjectCategoryLabel, importDialogGBC);
 
@@ -466,7 +490,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 13;
+		importDialogGBC.gridy = 14;
 		importDialogGBC.gridwidth = 1;
 		container.add(subjectImageObjectCategoryCB, importDialogGBC);
 
@@ -477,7 +501,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 14;
+		importDialogGBC.gridy = 15;
 		importDialogGBC.gridwidth = 2;
 		container.add(subjectLanguageHemisphericDominanceLabel, importDialogGBC);
 
@@ -487,7 +511,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 14;
+		importDialogGBC.gridy = 15;
 		importDialogGBC.gridwidth = 1;
 		container.add(subjectLanguageHemisphericDominanceCB, importDialogGBC);
 
@@ -498,7 +522,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 15;
+		importDialogGBC.gridy = 16;
 		importDialogGBC.gridwidth = 2;
 		container.add(subjectManualHemisphericDominanceLabel, importDialogGBC);
 
@@ -508,7 +532,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 15;
+		importDialogGBC.gridy = 16;
 		importDialogGBC.gridwidth = 1;
 		container.add(subjectManualHemisphericDominanceCB, importDialogGBC);
 
@@ -519,7 +543,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 16;
+		importDialogGBC.gridy = 17;
 		importDialogGBC.gridwidth = 2;
 		container.add(subjectPersonalCommentLabel, importDialogGBC);
 
@@ -529,7 +553,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.weightx = 0.5;
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 16;
+		importDialogGBC.gridy = 17;
 		importDialogGBC.gridwidth = 2;
 		container.add(subjectPersonalCommentTextArea, importDialogGBC);
 
@@ -544,14 +568,14 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 1;
-		importDialogGBC.gridy = 17;
+		importDialogGBC.gridy = 18;
 		importDialogGBC.gridwidth = 1;
 		container.add(separatorSubjectStudyRelLabel, importDialogGBC);
 
 		separatorSubjectStudyRel = new JSeparator();
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 17;
+		importDialogGBC.gridy = 18;
 		importDialogGBC.weightx = 1;
 		importDialogGBC.gridwidth = 3;
 		container.add(separatorSubjectStudyRel, importDialogGBC);
@@ -563,7 +587,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 18;
+		importDialogGBC.gridy = 19;
 		importDialogGBC.gridwidth = 2;
 		container.add(subjectStudyIdentifierLabel, importDialogGBC);
 
@@ -575,7 +599,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 18;
+		importDialogGBC.gridy = 19;
 		importDialogGBC.gridwidth = 1;
 		container.add(subjectStudyIdentifierTF, importDialogGBC);
 
@@ -586,7 +610,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 19;
+		importDialogGBC.gridy = 20;
 		importDialogGBC.gridwidth = 2;
 		container.add(subjectIsPhysicallyInvolvedLabel, importDialogGBC);
 
@@ -595,7 +619,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 19;
+		importDialogGBC.gridy = 20;
 		importDialogGBC.gridwidth = 1;
 		container.add(subjectIsPhysicallyInvolvedCB, importDialogGBC);
 
@@ -605,7 +629,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 20;
+		importDialogGBC.gridy = 21;
 		importDialogGBC.gridwidth = 2;
 		container.add(subjectTypeLabel, importDialogGBC);
 
@@ -616,7 +640,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 20;
+		importDialogGBC.gridy = 21;
 		importDialogGBC.gridwidth = 1;
 		container.add(subjectTypeCB, importDialogGBC);
 
@@ -632,14 +656,14 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 1;
-		importDialogGBC.gridy = 21;
+		importDialogGBC.gridy = 22;
 		importDialogGBC.gridwidth = 1;
 		container.add(separatorMrExaminationLabel, importDialogGBC);
 
 		separatorMrExamination = new JSeparator();
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 21;
+		importDialogGBC.gridy = 22;
 		importDialogGBC.weightx = 1;
 		importDialogGBC.gridwidth = 3;
 		container.add(separatorMrExamination, importDialogGBC);
@@ -651,7 +675,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 22;
+		importDialogGBC.gridy = 23;
 		importDialogGBC.gridwidth = 2;
 		container.add(mrExaminationExistingExamLabel, importDialogGBC);
 
@@ -661,7 +685,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 22;
+		importDialogGBC.gridy = 23;
 		importDialogGBC.gridwidth = 1;
 		container.add(mrExaminationExistingExamCB, importDialogGBC);
 
@@ -671,7 +695,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 23;
+		importDialogGBC.gridy = 24;
 		importDialogGBC.gridwidth = 2;
 		container.add(mrExaminationNewExamLabel, importDialogGBC);
 
@@ -680,7 +704,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 23;
+		importDialogGBC.gridy = 24;
 		importDialogGBC.gridwidth = 1;
 		container.add(mrExaminationNewExamCB, importDialogGBC);
 
@@ -694,7 +718,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 24;
+		importDialogGBC.gridy = 25;
 		importDialogGBC.gridwidth = 2;
 		container.add(mrExaminationCenterLabel, importDialogGBC);
 
@@ -704,7 +728,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 24;
+		importDialogGBC.gridy = 25;
 		importDialogGBC.gridwidth = 1;
 		container.add(mrExaminationCenterCB, importDialogGBC);
 
@@ -715,7 +739,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 25;
+		importDialogGBC.gridy = 26;
 		importDialogGBC.gridwidth = 2;
 		container.add(mrExaminationExamExecutiveLabel, importDialogGBC);
 
@@ -725,7 +749,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 25;
+		importDialogGBC.gridy = 26;
 		importDialogGBC.gridwidth = 1;
 		container.add(mrExaminationExamExecutiveCB, importDialogGBC);
 
@@ -735,7 +759,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 26;
+		importDialogGBC.gridy = 27;
 		importDialogGBC.gridwidth = 2;
 		container.add(mrExaminationDateLabel, importDialogGBC);
 
@@ -754,7 +778,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 26;
+		importDialogGBC.gridy = 27;
 		importDialogGBC.gridwidth = 1;
 		container.add((Component) mrExaminationDateDP, importDialogGBC);
 
@@ -765,7 +789,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 27;
+		importDialogGBC.gridy = 28;
 		importDialogGBC.gridwidth = 2;
 		importDialogGBC.gridheight = 1;
 		container.add(mrExaminationCommentLabel, importDialogGBC);
@@ -775,7 +799,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 27;
+		importDialogGBC.gridy = 28;
 		importDialogGBC.gridwidth = 1;
 		container.add(mrExaminationCommentTF, importDialogGBC);
 
@@ -783,7 +807,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.weightx = 0;
 		importDialogGBC.gridx = 1;
-		importDialogGBC.gridy = 28;
+		importDialogGBC.gridy = 29;
 		importDialogGBC.gridwidth = 1;
 		container.add(cancelButton, importDialogGBC);
 
@@ -794,7 +818,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.weightx = 0;
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 28;
+		importDialogGBC.gridy = 29;
 		importDialogGBC.gridwidth = 2;
 		container.add(exportButton, importDialogGBC);
 		exportButton.addActionListener(importFinishAL);
