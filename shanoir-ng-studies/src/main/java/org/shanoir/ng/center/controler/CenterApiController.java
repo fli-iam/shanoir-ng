@@ -102,7 +102,7 @@ public class CenterApiController implements CenterApi {
 		if (centers.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<>(centerMapper.centersToCenterDTOsStudyCenters(centers), HttpStatus.OK);
+		return new ResponseEntity<>(centerMapper.centersToCenterDTOsFull(centers), HttpStatus.OK);
 	}
 
 	@Override
