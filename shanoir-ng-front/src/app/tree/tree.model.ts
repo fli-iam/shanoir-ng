@@ -133,11 +133,16 @@ export class DatasetNode implements ShanoirNode {
         public processings: ProcessingNode[] | UNLOADED,
         public processed: boolean,
         public canDelete: boolean
-    ) {}
+    ) {
+        if(processed){
+            this.title = "processed-dataset";
+            this.awesome = "fas fa-camera-rotate";
+        }
+    }
 
     public open: boolean = false;
     public selected: boolean = false;
-
+    public awesome: string = "fas fa-camera"
     public title: string = "dataset";
 
 }

@@ -82,7 +82,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <i class="fa-solid fa-upload"></i>
                 </ng-template>
                 <ng-template [ngSwitchCase]="'executionMonitoring.event'">
-                    <i class="fa-solid fa-cog"></i>
+                    <i class="fa-solid fa-gears"></i>
                 </ng-template>
                 <ng-template [ngSwitchCase]="'copyDataset.event'">
                     <i class="fa-solid fa-copy"></i>
@@ -129,14 +129,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <div *ngIf="state.uploadOpened" class="sub-menu" [@slideDown]="state.uploadOpened">
         <li routerLink="/imports/upload" routerLinkActive="active"><i class="fas fa-compact-disc"></i>DICOM</li>
         <li routerLink="/imports/pacs" routerLinkActive="active" *ngIf="canUserImportFromPACS()"><i class="fas fa-server"></i>PACS</li>
-        <li routerLink="/imports/bids" routerLinkActive="active"><i class="fas fa-brain"></i>BIDS</li>
+        <li routerLink="/imports/bids" routerLinkActive="active"><i class="fas fa-folder-tree"></i>BIDS</li>
         <li routerLink="/imports/bruker" routerLinkActive="active"><i class="fas fa-atom"></i>Bruker</li>
         <li routerLink="/imports/eeg" routerLinkActive="active"><i class="fas fa-bolt"></i>EEG</li>
-        <li routerLink="/imports/processed-dataset" routerLinkActive="active"><i class="fas fa-brain"></i>Processed datasets</li>
+        <li routerLink="/imports/processed-dataset" routerLinkActive="active"><i class="fas fa-gears"></i>Processed datasets</li>
         <!-- <li routerLink="" routerLinkActive="active"><i class="fas fa-cat"></i>From ShanoirUploader</li>
         <li routerLink="" routerLinkActive="active"><i class="fas fa-file-archive"></i>From files ...</li> -->
     </div>
-    <li (click)="state.adminOpened = !state.adminOpened; saveState();" *ngIf="isUserAdmin()"><i class="fas fa-cogs"></i>Administration<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
+    <li (click)="state.adminOpened = !state.adminOpened; saveState();" *ngIf="isUserAdmin()"><i class="fas fa-user-gear"></i>Administration<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
     <div *ngIf="isUserAdmin() && state.adminOpened" class="sub-menu" [@slideDown]="state.adminOpened">
         <li routerLink="/user" routerLinkActive="active"><i class="fas fa-users"></i>Manage users</li>
         <li (click)="indexToSolr()"><i class="fas fa-list-ol"></i>Index to Solr</li>
