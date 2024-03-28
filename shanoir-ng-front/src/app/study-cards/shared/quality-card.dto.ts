@@ -124,7 +124,7 @@ export class QualityCardDTOService {
                     rule.conditions = [];
                     for (let conditionDTO of ruleDTO.conditions) {
                         let condition: StudyCardCondition = new StudyCardCondition(conditionDTO.scope);
-                        condition.dicomTag = new DicomTag(+conditionDTO.dicomTag, null, null);
+                        condition.dicomTag = new DicomTag(+conditionDTO.dicomTag, null, null, null);
                         condition.shanoirField = conditionDTO.shanoirField;
                         if (StudyCardDTOServiceAbstract.isCoil(condition.shanoirField) && !Number.isNaN(Number(conditionDTO.values?.[0]))) {
                             condition.values = [];

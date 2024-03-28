@@ -65,7 +65,7 @@ export abstract class StudyCardDTOServiceAbstract {
                     rule.conditions = [];
                     for (let conditionDTO of ruleDTO.conditions) {
                         let condition: StudyCardCondition = new StudyCardCondition(conditionDTO.scope);
-                        if (conditionDTO.dicomTag) condition.dicomTag = new DicomTag(+conditionDTO.dicomTag, null, null);
+                        if (conditionDTO.dicomTag) condition.dicomTag = new DicomTag(+conditionDTO.dicomTag, null, null, null);
                         condition.shanoirField = conditionDTO.shanoirField;
                         if (this.isCoil(condition.shanoirField) && !Number.isNaN(Number(conditionDTO.values?.[0]))) {
                             condition.values = [];

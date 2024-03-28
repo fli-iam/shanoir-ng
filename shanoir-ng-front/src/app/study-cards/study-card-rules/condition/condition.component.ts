@@ -18,7 +18,7 @@ import { Subscription } from 'rxjs';
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 import { Option } from '../../../shared/select/select.component';
 import { DicomService } from '../../shared/dicom.service';
-import { ConditionScope, DicomTag, Operation, StudyCardCondition, TagType } from '../../shared/study-card.model';
+import { ConditionScope, DicomTag, Operation, StudyCardCondition, TagType, VM } from '../../shared/study-card.model';
 import { ShanoirMetadataField } from '../action/action.component';
 import { Coil } from 'src/app/coils/shared/coil.model';
 
@@ -86,6 +86,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
     private buildValueControl(value: string | Coil) {
         let validators: ValidatorFn[] = [Validators.required, Validators.minLength(1)]
         let type: TagType = this.condition?.dicomTag?.type;
+        let vm: VM = this.condition?.dicomTag?.vm;
         if (['Double', 'Float'].includes(type)) {
             validators.push(Validators.pattern('[+-]?([0-9]*[.])?[0-9]+')); // reals : only numbers, with dot as decimal separator
         } else if (['Integer', 'Long'].includes(type)) {
@@ -95,11 +96,35 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
         } else if (type == 'Date') {
             validators.push(Validators.pattern((/^\d{4}(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])$/))); // yyyyMMdd
         } else if (type == 'FloatArray') {
-            validators.push(Validators.pattern('([+-]?([0-9]*[.])?[0-9]+)(,[+-]?([0-9]*[.])?[0-9]+)*')); // comma separated reals
+            validators.push(Validators.pattern(this.buildArrayPattern(vm, 'float')));
         } else if ( type == 'IntArray') {
-            validators.push(Validators.pattern('([+-]?[0-9]+)(,[+-]?[0-9]+)*')); // comma separated integers
+            validators.push(Validators.pattern(this.buildArrayPattern(vm, 'int'))); // comma separated integers
         }
         return new FormControl(value, validators);
+    }
+
+    private buildArrayPattern(vm: VM, type: 'float' | 'int') {
+        let regexp: string;
+        let charBlock: string;
+        if (type == 'float') {
+            charBlock = '[+-]?([0-9]*[.])?[0-9]+';
+        } else if (type == 'int') {
+            charBlock = '[+-]?[0-9]+';
+        } else throw new Error('bad type');
+
+        if (vm.max.multiplier) {
+            if (vm.max.number > 1) {
+                regexp = '((' + charBlock + ')(,' + charBlock + '){' 
+                        + (vm.max.number - 1) + ',' + (vm.max.number - 1)
+                        + '})(,(' + charBlock + ')(,' + charBlock + '){' 
+                        + (vm.max.number - 1) + ',' + (vm.max.number - 1) + '})*';
+            } else {
+                regexp = '(' + charBlock + ')(,' + charBlock + '){' + (vm.min - 1) + ',}';
+            }
+        } else {
+            regexp = '(' + charBlock + ')(,' + charBlock + '){' + (vm.min - 1) + ',' + (vm.max.number - 1) + '}';
+        }
+        return regexp;
     }
             
     ngOnInit(): void {
@@ -108,13 +133,30 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
                 this.tagOptions = [];
                 for (let tag of tags) {
                     let hexStr: string = tag.code.toString(16).padStart(8, '0').toUpperCase();
-                    let label: string = hexStr.substr(0, 4) + ',' + hexStr.substr(4, 4) + ' - ' + tag.label + ' <' + tag.type + '>';
+                    let cardinality: string = this.buildCadinalityLabel(tag.vm);
+                    let label: string = hexStr.substr(0, 4) + ',' + hexStr.substr(4, 4) + ' - ' + tag.label + ' <' + tag.type + cardinality +'>';
                     this.tagOptions.push(new Option<DicomTag>(tag, label));
                 }
             });
         }
         this.parentForm = this.addSubForm(this.form);
         setTimeout(() => this.init = true);
+    }
+
+    private buildCadinalityLabel(vm: VM): string {
+        if (vm.max.multiplier) {
+            if (vm.min == vm.max.number) {
+                if (vm.min == 1) return '[n]' ;
+                else return '[' + vm.min + ',' + vm.max.number + 'n]';
+            }
+            else return '[' + vm.min + ',' + vm.max.number + 'n]';
+        } else {
+            if (vm.min == vm.max.number) {
+                if (vm.min == 1) return '' ;
+                else return '[' + vm.min + ']';
+            }
+            else return '[' + vm.min + ',' + vm.max.number + ']';
+        }
     }
             
     ngOnDestroy(): void {
@@ -267,10 +309,10 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
     onDicomFieldChange(field: DicomTag) {
         if (field?.code != this.previousField?.code) {
             this.filterOperations();
-            if (field?.type != this.previousField?.type) {
+            //if (field?.type != this.previousField?.type && field?.vm != this.previousField?.vm) {
                 this.resetValues();
                 this.valueTouched = false;
-            }
+            //}
             this.onConditionChange();
             this.previousField = field;
         }

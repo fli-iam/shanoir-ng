@@ -101,12 +101,15 @@ export class StudyCardCondition {
 
 export type TagType = 'String' | 'Long' | 'Float' | 'Double' | 'Integer' | 'Binary' | 'Date' | 'FloatArray' | 'IntArray';
 
+export type VM = {min: number, max: {number: number, multiplier: boolean}};
+
 export class DicomTag {
 
     constructor(
         public code: number,
         public label: string,
-        public type: TagType) {};
+        public type: TagType,
+        public vm: VM) {};
 
     equals(other: DicomTag): boolean {
         return this.code == other.code;

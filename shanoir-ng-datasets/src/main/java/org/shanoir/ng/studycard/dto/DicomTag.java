@@ -15,6 +15,7 @@
 package org.shanoir.ng.studycard.dto;
 
 import org.shanoir.ng.studycard.model.DicomTagType;
+import org.shanoir.ng.studycard.model.VM;
 
 public class DicomTag {
 	
@@ -24,10 +25,13 @@ public class DicomTag {
 
 	private DicomTagType type;
 
-	public DicomTag(int code, String label, DicomTagType type) {
+	private VM vm;
+
+	public DicomTag(int code, String label, DicomTagType type, VM vm) {
 		this.code = code;
 		this.label = label;
 		this.type = type;
+		this.vm = vm;
 	}
 
 	public int getCode() {
@@ -52,5 +56,13 @@ public class DicomTag {
 
 	public void setType(DicomTagType type) {
 		this.type = type;
+	}
+
+	public VM getVm() {
+		return vm;
+	}
+
+	public void setVm(VM vm) {
+		this.vm = vm;
 	}
 }

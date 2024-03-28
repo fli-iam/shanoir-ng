@@ -30,6 +30,7 @@ import org.shanoir.ng.studycard.dto.DicomTag;
 import org.shanoir.ng.studycard.model.DicomTagType;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.StudyCardApply;
+import org.shanoir.ng.studycard.model.VM;
 import org.shanoir.ng.studycard.service.CardsProcessingService;
 import org.shanoir.ng.studycard.service.StudyCardService;
 import org.shanoir.ng.studycard.service.StudyCardUniqueConstraintManager;
@@ -184,7 +185,8 @@ public class StudyCardApiController implements StudyCardApi {
                         int tagCode = field.getInt(null);
                         VR tagVr = StandardElementDictionary.INSTANCE.vrOf(tagCode);
                         DicomTagType tagType = DicomTagType.valueOf(tagVr);
-                        dicomTags.add(new DicomTag(tagCode, field.getName(), tagType));
+                        VM tagVm = VM.of(tagCode);
+                        dicomTags.add(new DicomTag(tagCode, field.getName(), tagType, tagVm));
                     }
                     // longs actually code a date and a time, see Tag.class
                     else if (field.getType().getName() == "long") {
@@ -196,8 +198,8 @@ public class StudyCardApiController implements StudyCardApi {
                         int timeTagCode = Integer.parseInt(timeStr, 16);
                         DicomTagType dateTagType = DicomTagType.valueOf(StandardElementDictionary.INSTANCE.vrOf(dateTagCode));
                         DicomTagType timeTagType = DicomTagType.valueOf(StandardElementDictionary.INSTANCE.vrOf(timeTagCode));
-                        dicomTags.add(new DicomTag(dateTagCode, name + "Date", dateTagType));
-                        dicomTags.add(new DicomTag(timeTagCode, name + "Time", timeTagType));
+                        dicomTags.add(new DicomTag(dateTagCode, name + "Date", dateTagType, VM.of(dateTagCode)));
+                        dicomTags.add(new DicomTag(timeTagCode, name + "Time", timeTagType, VM.of(timeTagCode)));
                     }
                 }
             }
