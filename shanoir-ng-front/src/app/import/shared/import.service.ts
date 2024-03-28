@@ -35,7 +35,7 @@ export class ImportService {
            return  this.http.post<ImportJob>(AppUtils.BACKEND_API_UPLOAD_MUTIPLE_DICOM_URL + "study/" + job.studyId
                                                                                            + "/studyName/" + job.studyName
                                                                                            + "/studyCard/" + job.studyCardId
-                                                                                           + "/centerId/" + job.centerId
+                                                                                           + "/center/" + job.centerId
                                                                                            + "/equipment/" + job.acquisitionEquipmentId + "/", formData,
                 {reportProgress: true,
                 observe: 'events'});
