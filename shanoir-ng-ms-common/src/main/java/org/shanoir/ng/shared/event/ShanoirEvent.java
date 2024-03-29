@@ -34,7 +34,7 @@ public class ShanoirEvent {
 
 	public ShanoirEvent(String eventType, String objectId, Long userId, String message,	int status) {
 		this.eventType = eventType;
-		this.objectId = objectId;
+		setObjectId(objectId);
 		this.userId = userId;
 		this.message = message;
 		this.status = status;
@@ -44,7 +44,7 @@ public class ShanoirEvent {
 
 	public ShanoirEvent(String eventType, String objectId, Long userId, String message,	int status, Long studyId) {
 		this.eventType = eventType;
-		this.objectId = objectId;
+		setObjectId(objectId);
 		this.userId = userId;
 		this.message = message;
 		this.status = status;
@@ -97,7 +97,11 @@ public class ShanoirEvent {
 	 * @param objectId the objectId to set
 	 */
 	public void setObjectId(String objectId) {
-		this.objectId = objectId;
+		if (objectId != null && objectId.length() > 255) {
+			this.objectId = objectId.substring(0, 250) + "...";
+		} else {
+			this.objectId = objectId;
+		}
 	}
 
 	/**

@@ -49,7 +49,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
             int countProcessed = 0;
             int countSuccess = 0;
             Long oldDsId = ds.getId();
-            LOG.warn("[CopyDatasets] moveDataset : " + oldDsId + " to study : " + studyId);
+            LOG.info("[CopyDatasets] moveDataset : " + oldDsId + " to study : " + studyId);
 
             // Creation of new dataset according to its type
             String dsType = ds.getType();
@@ -128,7 +128,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
 
         datasetAcquisitionRepository.save(newDsAcq);
         examMap.put(acq.getExamination().getId(), newExam);
-        LOG.warn("[CopyDatasets] New dataset acquisition created with id = " + newDsAcq.getId());
+        LOG.info("[CopyDatasets] New dataset acquisition created with id = " + newDsAcq.getId());
         return newDsAcq;
     }
 
@@ -150,7 +150,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                         ShanoirEvent.SUCCESS,
                         newExamination.getStudyId()));
 
-        LOG.warn("[CopyDatasets] New examination created with id = " + newExamination.getId());
+        LOG.info("[CopyDatasets] New examination created with id = " + newExamination.getId());
         return newExamination;
     }
 }
