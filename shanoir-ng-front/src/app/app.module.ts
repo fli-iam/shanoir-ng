@@ -22,7 +22,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Autosize } from 'ng-autosize';
-import { NgxJsonViewerModule } from 'ngx-json-viewer';
+//import { NgxJsonViewerModule } from 'ngx-json-viewer';
 import { AcquisitionEquipmentListComponent } from './acquisition-equipments/acquisition-equipment-list/acquisition-equipment-list.component';
 import { AcquisitionEquipmentComponent } from './acquisition-equipments/acquisition-equipment/acquisition-equipment.component';
 import { ManufacturerModelComponent } from './acquisition-equipments/manufacturer-model/manufacturer-model.component';
@@ -278,7 +278,7 @@ import { PipelineService } from "./vip/pipelines/pipeline/pipeline.service";
         FormsModule,
         HttpClientModule,
         ReactiveFormsModule,
-        NgxJsonViewerModule,
+        //NgxJsonViewerModule,
         AppRoutingModule,
         PreclinicalRoutingModule,
         RouterModule,
