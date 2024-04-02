@@ -277,7 +277,7 @@ public class DICOMWebService {
 		}
 	}
 
-	public void deleteDicomFilesFromPacs(String url) throws ShanoirException {
+	public void rejectDicomFilesFromPacs(String url) throws ShanoirException {
 		String rejectURL;
 		if (wadoURLHandler.isWADO_URI(url)) {
 			rejectURL = wadoURLHandler.convertWADO_URI_TO_WADO_RS(url) + REJECT_SUFFIX;
@@ -292,7 +292,7 @@ public class DICOMWebService {
 				LOG.info("Rejected from PACS: " + url);
 			} else {
 				LOG.error(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
-					+ " for rejectURL: " + rejectURL);
+						+ " for rejectURL: " + rejectURL);
 				if (response.getCode() == 404 && response.getReasonPhrase().startsWith("Not Found")) {
 					LOG.error("Could not delete from pacs: " + response.getCode() + " " + response.getReasonPhrase());
 					return;
@@ -305,6 +305,9 @@ public class DICOMWebService {
 			LOG.error("Could not reject instance from PACS: for rejectURL: " + rejectURL, e);
 			throw new ShanoirException("Could not reject instance from PACS: for rejectURL: " + url, e);
 		}
+	}
+
+	public void deleteDicomFilesFromPacs(String url) throws ShanoirException {
 		// STEP 2: Delete from the PACS
 		String deleteUrl = url.substring(0, url.indexOf("/aets/")) + REJECT_SUFFIX;
 		HttpDelete delete = new HttpDelete(deleteUrl);

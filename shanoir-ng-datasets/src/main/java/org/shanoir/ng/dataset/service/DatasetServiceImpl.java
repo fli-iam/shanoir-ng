@@ -128,7 +128,7 @@ public class DatasetServiceImpl implements DatasetService {
 
 			for (DatasetFile file : expression.getDatasetFiles()) {
 				if(isDicom && file.isPacs()){
-					dicomWebService.deleteDicomFilesFromPacs(file.getPath());
+					dicomWebService.rejectDicomFilesFromPacs(file.getPath());
 				} else if (!file.isPacs()) {
 					try {
 						URL url = new URL(file.getPath().replaceAll("%20", " "));

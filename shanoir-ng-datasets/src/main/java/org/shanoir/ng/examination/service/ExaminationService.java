@@ -53,7 +53,7 @@ public interface ExaminationService {
 	 * @param exam the examination to delete
 	 * @throws EntityNotFoundException
 	 */
-	void deleteFromRabbit(Examination exam) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
+//	void deleteFromRabbit(Examination exam) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
 
 	/**
 	 * Get all examinations for a specific user to support DICOMweb.
