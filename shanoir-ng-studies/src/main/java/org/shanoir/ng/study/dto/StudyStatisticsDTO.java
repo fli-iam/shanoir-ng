@@ -39,6 +39,8 @@ public class StudyStatisticsDTO {
 
 	private Long examinationId;
 
+	private String examinationComment;
+
 	private Date examinationDate;
 
 	private Long datasetAcquisitionId;
@@ -46,6 +48,8 @@ public class StudyStatisticsDTO {
 	private Date importDate;
 
 	private Long datasetId;
+
+	private String datasetName;
 
 	private String modality;
 
@@ -107,6 +111,14 @@ public class StudyStatisticsDTO {
 		this.examinationId = examinationId;
 	}
 
+	public String getExaminationComment() {
+		return examinationComment;
+	}
+
+	public void setExaminationComment(String examinationComment) {
+		this.examinationComment = examinationComment;
+	}
+
 	public Date getExaminationDate() {
 		return examinationDate;
 	}
@@ -137,6 +149,14 @@ public class StudyStatisticsDTO {
 
 	public void setDatasetId(Long datasetId) {
 		this.datasetId = datasetId;
+	}
+
+	public String getDatasetName() {
+		return datasetName;
+	}
+
+	public void setDatasetName(String datasetName) {
+		this.datasetName = datasetName;
 	}
 
 	public String getModality() {
