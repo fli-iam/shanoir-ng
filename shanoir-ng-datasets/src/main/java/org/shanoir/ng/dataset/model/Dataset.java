@@ -165,7 +165,6 @@ public abstract class Dataset extends AbstractEntity {
 		}
 
 		this.importedStudyId = d.getImportedStudyId();
-		this.studyId = d.getStudyId();
 		this.subjectId = d.getSubjectId();
 		this.downloadable = d.downloadable;
 		this.updatedMetadata = new DatasetMetadata(d.getUpdatedMetadata());
