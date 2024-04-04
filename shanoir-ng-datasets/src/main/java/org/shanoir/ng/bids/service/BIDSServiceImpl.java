@@ -178,6 +178,7 @@ public class BIDSServiceImpl implements BIDSService {
 	}
 			)
 	public void deleteBids(String eventAsString) {
+		LOG.error("DELETE BIDS");
 		ShanoirEvent event;
 		try {
 			event = objectMapper.readValue(eventAsString, ShanoirEvent.class);

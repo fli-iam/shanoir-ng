@@ -278,13 +278,29 @@ public class DICOMWebService {
 		}
 	}
 
-	public void rejectDicomFilesFromPacs(String url) throws ShanoirException {
+	public void rejectDatasetFromPacs(String url) throws ShanoirException {
+		LOG.error("rejectDatasetFromPacs url debut : " + url);
+		// http://dcm4chee-arc:8081/dcm4chee-arc/aets/AS_RECEIVED/rs
+		// /studies/1.4.9.12.34.1.8527.6019504007172390071883784149063171912817
+		// /series/1.4.9.12.34.1.8527.3337394718853472909476984780147187282204
+		// /instances/1.4.9.12.34.1.8527.3289336080900685321404420314758089471066
+
+
 		String rejectURL;
 		if (wadoURLHandler.isWADO_URI(url)) {
 			rejectURL = wadoURLHandler.convertWADO_URI_TO_WADO_RS(url) + REJECT_SUFFIX;
 		} else {
+			url = url.substring(0, url.indexOf("/instances"));
 			rejectURL = url + REJECT_SUFFIX;
 		}
+		LOG.error("rejectDatasetFromPacs url : " + rejectURL);
+		// http://dcm4chee-arc:8081/dcm4chee-arc/aets/AS_RECEIVED/rs
+		// /studies/1.4.9.12.34.1.8527.1290677356714181150232487040395959917596
+		// /series/1.4.9.12.34.1.8527.8126374164288968966891150436738179423797
+		// /instances/1.4.9.12.34.1.8527.3151950335480572806516184263194523472435
+		// /reject/113001%5EDCM
+
+
 		// STEP 1: Reject from the PACS
 		HttpPost post = new HttpPost(rejectURL);
 		post.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_JSON);

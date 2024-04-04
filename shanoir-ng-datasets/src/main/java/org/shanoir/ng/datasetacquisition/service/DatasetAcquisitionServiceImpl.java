@@ -19,6 +19,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.examination.service.ExaminationServiceImpl;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -30,6 +31,8 @@ import org.shanoir.ng.shared.service.SecurityService;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -63,6 +66,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     @Autowired
     private DatasetService datasetService;
 
+    private static final Logger LOG = LoggerFactory.getLogger(DatasetAcquisitionServiceImpl.class);
     @Override
     public List<DatasetAcquisition> findByStudyCard(Long studyCardId) {
         if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
@@ -179,6 +183,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     @Override
     @Transactional
     public void deleteById(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException {
+        LOG.error("DELETE DatasetAcquisition");
         final DatasetAcquisition entity = repository.findById(id).orElse(null);
         if (entity == null) {
             throw new EntityNotFoundException("Cannot find entity with id = " + id);
@@ -193,9 +198,13 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
                     ));
         } else {
             if (entity.getDatasets() != null) {
+                List<Long> datasetIds = new ArrayList<>();
                 for (Dataset ds : entity.getDatasets()) {
                     datasetService.deleteById(ds.getId());
+                    datasetIds.add(ds.getId());
                 }
+                LOG.error("call solr deleteFromIndex with size : " + datasetIds.size());
+                solrService.deleteFromIndex(datasetIds);
             }
             repository.deleteById(id);
             shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));

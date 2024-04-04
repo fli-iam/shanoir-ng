@@ -93,6 +93,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 	
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException {
+		LOG.error("DELETE Examination");
 		Optional<Examination> examinationOpt = examinationRepository.findById(id);
 		if (!examinationOpt.isPresent()) {
 			throw new EntityNotFoundException(Examination.class, id);
@@ -119,21 +120,6 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 		}
 	}
-
-//	@Override
-//	public void deleteFromRabbit(Examination exam) throws ShanoirException, SolrServerException, IOException, RestServiceException {
-//		Long tokenUserId = KeycloakUtil.getTokenUserId();
-//		String studyIdAsString = exam.getStudyId().toString();
-//		// Iterate over datasets acquisitions and datasets to send events and remove them from solr
-//		for (DatasetAcquisition dsAcq : exam.getDatasetAcquisitions()) {
-//			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, dsAcq.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
-//			for (Dataset ds : dsAcq.getDatasets())  {
-//				datasetService.deleteById(ds.getId());
-//			}
-//		}
-//		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, exam.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS, exam.getStudyId()));
-//		examinationRepository.deleteById(exam.getId());
-//	}
 
 	@Override
 	public List<Examination> findAll() {

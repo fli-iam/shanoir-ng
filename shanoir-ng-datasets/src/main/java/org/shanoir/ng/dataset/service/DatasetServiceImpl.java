@@ -23,6 +23,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionServiceImpl;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
@@ -41,6 +42,8 @@ import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -89,10 +92,12 @@ public class DatasetServiceImpl implements DatasetService {
 	@Autowired
 	private DatasetProcessingService processingService;
 
+	private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
+
 	@Override
 	@Transactional
 	public void deleteById(final Long id) throws ShanoirException, SolrServerException, IOException, RestServiceException {
-
+		LOG.error("DELETE Dataset");
 		List<Dataset> childDatasets = repository.findBySourceId(id);
 
 		if (!CollectionUtils.isEmpty(childDatasets)) {
@@ -113,23 +118,29 @@ public class DatasetServiceImpl implements DatasetService {
 		if (dataset.getSourceId() == null) {
 			this.deleteDatasetFromPacs(dataset);
 		}
-		solrService.deleteFromIndex(id);
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, dataset.getStudyId()));
 	}
 
 	@Override
 	public void deleteDatasetFromPacs(Dataset dataset) throws ShanoirException {
+		LOG.error("DELETE deleteDatasetFromPacs début");
         if (!dicomWeb) {
             return;
         }
+
         for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+			LOG.error("DELETE deleteDatasetFromPacs boucle expression");
 
 			boolean isDicom = DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat());
 
 			for (DatasetFile file : expression.getDatasetFiles()) {
-				if(isDicom && file.isPacs()){
-					dicomWebService.rejectDicomFilesFromPacs(file.getPath());
+				LOG.error("DELETE deleteDatasetFromPacs boucle file");
+				if (isDicom && file.isPacs()) {
+					LOG.error("if");
+					dicomWebService.rejectDatasetFromPacs(file.getPath());
+					break;
 				} else if (!file.isPacs()) {
+					LOG.error("else");
 					try {
 						URL url = new URL(file.getPath().replaceAll("%20", " "));
 						File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
@@ -138,9 +149,10 @@ public class DatasetServiceImpl implements DatasetService {
 						throw new ShanoirException("Error while deleting dataset file", e);
 					}
 				}
-
 			}
+			break;
         }
+		LOG.error("DELETE deleteDatasetFromPacs fin");
     }
 
 	@Override
