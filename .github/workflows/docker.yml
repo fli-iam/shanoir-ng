@@ -5,6 +5,10 @@ env:
   DOCKER_REPOSITORY: ghcr.io/${{ github.repository }}
   GIT_REPO_URL: https://github.com/${{ github.repository }}
 
+  IMAGES: >-
+    database datasets import keycloak keycloak-database nginx nifti-conversion
+    preclinical solr studies users
+
   # production builds
   # - triggered by pushing a tag
   # - builds the current commit
@@ -36,8 +40,38 @@ on:
 #TODO: disable on pull-request
   
 jobs:
+  #TODO: skip in production
+  check_registry:
+    name: Check the registry
+    runs-on: ubuntu-latest
+    outputs:
+      status: ${{ steps.step1.outputs.status }}
+    permissions:
+      packages: read
+    steps:
+      - name: check if the images are already built
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: python
+        run: |
+          import json, os, subprocess, sys
+          for image in os.environ["IMAGES"].split():
+            js = json.loads(subprocess.check_output(["gh", "api",
+              f"/users/a-ba/packages/container/shanoir-ng%2F{image}/versions"])
+            for version in js:
+              if os.environ["IMAGE_TAG"] in version["metadata"]["tags"]:
+                break
+            else:
+              print(f"image shanoir-ng/{image}:{os.environ["IMAGE_TAG"]} not found in the package repository")
+          else:
+            print(f"all images shanoir-ng/*:{os.environ["IMAGE_TAG"]} are already built")
+            with open(os.environ["GITHUB_OUTPUT"], "a") as fp:
+              fp.write("status=ok")
+
   push_to_registry:
     name: Publish docker images
+    needs: check_registry
+    if: needs.check_registry.outupts.status != "ok"
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -48,10 +82,7 @@ jobs:
       - name: printenv
         run: printenv | sort
 
-      - name: check if the images are already built
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh api /users/a-ba/packages/container/shanoir-ng%2Fdatabase/versions
+
 
       # TODO: remove
       - name: stop
@@ -114,7 +145,8 @@ jobs:
           import tempfile
 
           #IMAGES = ["database"]
-          IMAGES = "database datasets import keycloak keycloak-database nginx nifti-conversion preclinical solr studies users".split()
+          #IMAGES = "database datasets import keycloak keycloak-database nginx nifti-conversion preclinical solr studies users".split()
+          IMAGES = os.environ["IMAGES"].split()
           
           env = os.environ
           for image in IMAGES:
