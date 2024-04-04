@@ -7,8 +7,8 @@ env:
 
   IMAGES: >-
     database 
-    #datasets import keycloak keycloak-database nginx nifti-conversion
-    #preclinical solr studies users
+   #datasets import keycloak keycloak-database nginx nifti-conversion
+   #preclinical solr studies users
 
   # production builds
   # - triggered by pushing a tag
