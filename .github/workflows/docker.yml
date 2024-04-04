@@ -72,12 +72,12 @@ jobs:
           else:
             print(f"all images shanoir-ng/*:{os.environ['IMAGE_TAG']} are already built")
             with open(os.environ["GITHUB_OUTPUT"], "a") as fp:
-              fp.write("status=ok")
+              fp.write("status=ok\n")
 
   push_to_registry:
     name: Publish docker images
     needs: check_registry
-    if: needs.check_registry.outupts.status != 'ok'
+    if: needs.check_registry.outputs.status != 'ok'
     runs-on: ubuntu-latest
     permissions:
       packages: write
