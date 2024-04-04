@@ -55,14 +55,17 @@ jobs:
         shell: python
         run: |
           import json, os, subprocess, sys
+          from pprint import pprint
           for image in os.environ["IMAGES"].split():
             js = json.loads(subprocess.check_output(["gh", "api",
               f"/users/a-ba/packages/container/shanoir-ng%2F{image}/versions"]))
             for version in js:
+              pprint(version)
               if os.environ["IMAGE_TAG"] in version["metadata"]["container"]["tags"]:
                 break
             else:
               print(f"image shanoir-ng/{image}:{os.environ['IMAGE_TAG']} not found in the package repository")
+              sys.exit(0)
           else:
             print(f"all images shanoir-ng/*:{os.environ['IMAGE_TAG']} are already built")
             with open(os.environ["GITHUB_OUTPUT"], "a") as fp:
