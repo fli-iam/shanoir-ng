@@ -59,7 +59,7 @@ jobs:
             js = json.loads(subprocess.check_output(["gh", "api",
               f"/users/a-ba/packages/container/shanoir-ng%2F{image}/versions"]))
             for version in js:
-              if os.environ["IMAGE_TAG"] in version["metadata"]["tags"]:
+              if os.environ["IMAGE_TAG"] in version["metadata"]["container"]["tags"]:
                 break
             else:
               print(f"image shanoir-ng/{image}:{os.environ['IMAGE_TAG']} not found in the package repository")
