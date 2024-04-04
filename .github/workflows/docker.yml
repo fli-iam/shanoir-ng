@@ -10,7 +10,7 @@ env:
   # - builds the current commit
   # - cache is disabled
   # development builds
-  # - triggerd by workflow_dispatch events
+  # - triggerd by workflow_call events (used by the deploy-qualif.yml workflow)
   # - builds the commit provided in the 'commit' input variable
   # - cache is enabled
   PRODUCTION: ${{ github.event_name == 'push' && '1' || '' }}
@@ -22,7 +22,12 @@ on:
   push:
     tags:
       - '*'
-  workflow_dispatch:
+  workflow_dispatch: # TODO: remove
+    inputs:
+      commit:
+        description: 'commit id to be built'
+        required: true
+  workflow_call:
     inputs:
       commit:
         description: 'commit id to be built'
@@ -41,6 +46,13 @@ jobs:
       # TODO: validate the commit id?
       - name: printenv
         run: printenv | sort
+
+      - name: check if the images are already built
+        run: gh api /users/a-ba/packages/container/shanoir-ng%2Fdatabase/versions
+
+      # TODO: remove
+      - name: stop
+        run: false
 
       - name: Check out the repo
         uses: actions/checkout@v4
