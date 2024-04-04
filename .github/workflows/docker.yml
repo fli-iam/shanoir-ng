@@ -57,7 +57,7 @@ jobs:
           import json, os, subprocess, sys
           for image in os.environ["IMAGES"].split():
             js = json.loads(subprocess.check_output(["gh", "api",
-              f"/users/a-ba/packages/container/shanoir-ng%2F{image}/versions"])
+              f"/users/a-ba/packages/container/shanoir-ng%2F{image}/versions"]))
             for version in js:
               if os.environ["IMAGE_TAG"] in version["metadata"]["tags"]:
                 break
