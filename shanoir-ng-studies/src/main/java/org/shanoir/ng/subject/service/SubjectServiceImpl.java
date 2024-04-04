@@ -41,6 +41,7 @@ import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyDecorator;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
+import org.shanoir.ng.subjectstudy.model.SubjectStudyTag;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ListDependencyUpdate;
@@ -286,11 +287,13 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	public List<SimpleSubjectDTO> findAllSubjectsOfStudyId(final Long studyId) {
 		List<SimpleSubjectDTO> simpleSubjectDTOList = new ArrayList<>();
-		List<SubjectStudy> studySubjects = subjectStudyRepository.findByStudyId(studyId);
-		if (studySubjects != null) {
-			Study studyWithTags = studyRepository.findStudyWithTagsById(studyId);
-			studySubjects.stream().forEach(ss -> ss.setStudy(studyWithTags));
-			for (SubjectStudy rel : studySubjects) {
+		List<SubjectStudy> subjectStudyList = subjectStudyRepository.findByStudyId(studyId);
+		if (subjectStudyList != null) {
+			subjectStudyList.stream().forEach(ss -> {
+				ss.setSubjectStudyTags(subjectStudyRepository.findSubjectStudyTagsByStudyIdAndSubjectId(studyId, ss.getSubject().getId()));
+				ss.getStudy().setTags(studyRepository.findStudyWithTagsById(studyId).getTags());
+			});
+			for (SubjectStudy rel : subjectStudyList) {
 				SimpleSubjectDTO simpleSubjectDTO = new SimpleSubjectDTO();
 				if (studyId.equals(rel.getStudy().getId())) {
 					Subject sub = rel.getSubject();
@@ -308,11 +311,13 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	public List<SimpleSubjectDTO> findAllSubjectsOfStudyAndPreclinical(final Long studyId, boolean preclinical) {
 		List<SimpleSubjectDTO> simpleSubjectDTOList = new ArrayList<>();
-		List<SubjectStudy> studySubjects = subjectStudyRepository.findByStudyId(studyId);
-		Study studyWithTags = studyRepository.findStudyWithTagsById(studyId);
-		studySubjects.stream().forEach(ss -> ss.setStudy(studyWithTags));
-		if (studySubjects != null) {
-			for (SubjectStudy rel : studySubjects) {
+		List<SubjectStudy> subjectStudyList = subjectStudyRepository.findByStudyId(studyId);
+		if (subjectStudyList != null) {
+			subjectStudyList.stream().forEach(ss -> {
+				ss.setSubjectStudyTags(subjectStudyRepository.findSubjectStudyTagsByStudyIdAndSubjectId(studyId, ss.getSubject().getId()));
+				ss.getStudy().setTags(studyRepository.findStudyWithTagsById(studyId).getTags());
+			});
+			for (SubjectStudy rel : subjectStudyList) {
 				SimpleSubjectDTO simpleSubjectDTO = new SimpleSubjectDTO();
 				if (studyId.equals(rel.getStudy().getId()) && preclinical == rel.getSubject().isPreclinical()) {
 					Subject sub = rel.getSubject();
@@ -348,7 +353,16 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Override
 	public List<Subject> findByPreclinical(boolean preclinical) {
-		return subjectRepository.findByPreclinical(preclinical);
+		List<Subject> subjects = subjectRepository.findByPreclinical(preclinical);
+		subjects.stream().forEach(s -> {
+			List<SubjectStudy> subjectStudyList = s.getSubjectStudyList();
+			// do this here to avoid two bags violation exception and load subjectStudyTags
+			subjectStudyList.stream().forEach(ss -> {
+				ss.setSubjectStudyTags(subjectStudyRepository.findSubjectStudyTagsByStudyIdAndSubjectId(ss.getStudy().getId(), ss.getSubject().getId()));
+				ss.getStudy().setTags(studyRepository.findStudyWithTagsById(ss.getStudy().getId()).getTags());
+			});
+		});
+		return subjects;
 	}
 
     @Override
