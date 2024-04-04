@@ -8,6 +8,7 @@ env:
   IMAGES: >-
     database datasets import keycloak keycloak-database nginx nifti-conversion
     preclinical solr studies users
+  IMAGES: database
 
   # production builds
   # - triggered by pushing a tag
@@ -56,6 +57,7 @@ jobs:
         run: |
           import json, os, subprocess, sys
           from pprint import pprint
+          # FIXME: nifti-conversion will not be found
           for image in os.environ["IMAGES"].split():
             js = json.loads(subprocess.check_output(["gh", "api",
               f"/users/a-ba/packages/container/shanoir-ng%2F{image}/versions"]))
