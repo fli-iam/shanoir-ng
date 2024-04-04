@@ -46,11 +46,12 @@ jobs:
     name: Check the registry
     runs-on: ubuntu-latest
     outputs:
-      status: ${{ steps.step1.outputs.status }}
+      status: ${{ steps.check.outputs.status }}
     permissions:
       packages: read
     steps:
       - name: check if the images are already built
+        id: check
         env:
           GH_TOKEN: ${{ github.token }}
         shell: python
