@@ -64,7 +64,7 @@ jobs:
             else:
               print(f"image shanoir-ng/{image}:{os.environ["IMAGE_TAG"]} not found in the package repository")
           else:
-            print(f"all images shanoir-ng/*:{os.environ["IMAGE_TAG"]} are already built")
+            print(f"all images shanoir-ng/*:{os.environ['IMAGE_TAG']} are already built")
             with open(os.environ["GITHUB_OUTPUT"], "a") as fp:
               fp.write("status=ok")
 
