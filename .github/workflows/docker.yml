@@ -6,9 +6,9 @@ env:
   GIT_REPO_URL: https://github.com/${{ github.repository }}
 
   IMAGES: >-
-    database datasets import keycloak keycloak-database nginx nifti-conversion
-    preclinical solr studies users
-  IMAGES: database
+    database 
+    #datasets import keycloak keycloak-database nginx nifti-conversion
+    #preclinical solr studies users
 
   # production builds
   # - triggered by pushing a tag
