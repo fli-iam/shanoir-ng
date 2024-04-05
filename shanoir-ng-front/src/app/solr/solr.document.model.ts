@@ -19,6 +19,7 @@ export class SolrDocument {
     datasetId: string;
     datasetName: string;
     datasetType: string;
+    processed: boolean;
     datasetNature: string;
     datasetCreationDate: Date;
     examinationId: string;
@@ -51,6 +52,7 @@ export class SolrRequest {
     datasetStartDate: Date | 'invalid';
     datasetEndDate: Date | 'invalid';
     datasetType: string[];
+    processed: boolean[];
     datasetNature: string[];
     tags: string[];
     searchText: string;
