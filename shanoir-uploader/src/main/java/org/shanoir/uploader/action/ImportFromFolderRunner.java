@@ -133,7 +133,8 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
             }
         } catch (Exception e) {
             logger.error("Something wrong happened while retrieving data: ", e);
-            importTodo.setMessage("ERROR: Dicom is not readable by shanoir uploader, please check data consistency.");
+            importTodo.setMessage(resourceBundle.getString("shanoir.uploader.import.folder.error.dicom"));
+            importFromFolderWindow.displayImports(folderimport);
             return false;
         }
 
@@ -163,7 +164,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
 
 
             // Change birth date to first day of year
-            logger.error("Study date could not be used for import9.");
+            logger.error("Study date could not be used for import.");
             final LocalDate dicomBirthDate = patNode.getPatient().getPatientBirthDate();
             if (dicomBirthDate != null) {
                 Calendar cal = Calendar.getInstance();
@@ -174,7 +175,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
             }
         } catch (Exception e) {
             logger.error("Something wrong happened while analyzing data from the dicom", e);
-            importTodo.setMessage("Something wrong happened while analyzing data from the dicom, please check data consistency.");
+            importTodo.setMessage(resourceBundle.getString("shanoir.uploader.import.folder.error.dicom"));
             return false;
         }
 
@@ -197,7 +198,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
             }
         } catch (Exception e) {
             logger.error("Could not infer data from local storage", e);
-            importTodo.setMessage("Something wrong happened while analyzing data from the dicom, please check data consistency.");
+            importTodo.setMessage(resourceBundle.getString("shanoir.uploader.import.folder.error.copy"));
             return false;
         }
 
@@ -209,7 +210,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
 
         if (allFileNames == null) {
             uploadJob.setUploadState(UploadState.ERROR);
-            importTodo.setMessage("Something wrong happened while analyzing data from the dicom, please check data consistency.");
+            importTodo.setMessage(resourceBundle.getString("shanoir.uploader.import.folder.error.copy"));
             return false;
         }
         UploadJobManager uploadJobManager = new UploadJobManager(uploadFolder.getAbsolutePath());
@@ -271,7 +272,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
         }
         if (subject == null) {
             uploadJob.setUploadState(UploadState.ERROR);
-            importTodo.setMessage("Could not create new subject, maybe a subject with a similar name already exists, but does not match with the patient in the dicom.");
+            importTodo.setMessage(resourceBundle.getString("shanoir.uploader.import.folder.error.subject"));
             return false;
         }
 
@@ -289,7 +290,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
 
         if (createdExam == null) {
             uploadJob.setUploadState(UploadState.ERROR);
-            importTodo.setMessage("Could not create new examination, please check your rights on the study or contact an administrator.");
+            importTodo.setMessage(resourceBundle.getString("shanoir.uploader.import.folder.error.examination"));
             return false;
         }
 
