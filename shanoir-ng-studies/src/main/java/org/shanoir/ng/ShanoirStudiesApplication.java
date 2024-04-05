@@ -14,6 +14,8 @@
 
 package org.shanoir.ng;
 
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.servers.Server;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -23,7 +25,9 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
  * Shanoir-NG microservice studies application.
  */
 @SpringBootApplication
-@OpenAPIDefinition
+@OpenAPIDefinition(
+		info = @Info(title = "Shanoir studies API"),
+		servers = @Server(url = "/shanoir-ng/studies", description = "Studies"))
 public class ShanoirStudiesApplication {
 
 	public static void main(String[] args) {
