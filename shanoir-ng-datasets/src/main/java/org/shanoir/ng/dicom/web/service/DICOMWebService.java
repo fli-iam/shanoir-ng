@@ -1,10 +1,19 @@
 package org.shanoir.ng.dicom.web.service;
 
-import jakarta.annotation.PostConstruct;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.apache.hc.client5.http.classic.methods.HttpDelete;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.entity.mime.*;
+import org.apache.hc.client5.http.entity.mime.ContentBody;
+import org.apache.hc.client5.http.entity.mime.InputStreamBody;
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
+import org.apache.hc.client5.http.entity.mime.MultipartPart;
+import org.apache.hc.client5.http.entity.mime.MultipartPartBuilder;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -12,9 +21,11 @@ import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.shanoir.ng.dicom.WADOURLHandler;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
@@ -23,9 +34,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import jakarta.annotation.PostConstruct;
 
 /**
  * This class handles all calls to the shanoir backup pacs using DICOMWeb.
@@ -80,6 +89,9 @@ public class DICOMWebService {
 
 	@Value("${dcm4chee-arc.dicom.web.http.client.max.per.route}")
 	private int dicomWebHttpClientMaxPerRoute;
+	
+	@Autowired
+	private WADOURLHandler wadoURLHandler;
 
 	@PostConstruct
 	public void init() {
@@ -266,48 +278,35 @@ public class DICOMWebService {
 	}
 
 	public void deleteDicomFilesFromPacs(String url) throws ShanoirException {
-		String instanceId;
-		String studyId;
-		String serieId;
 		String rejectURL;
-		String deleteUrl;
-		if (url.contains("requestType=WADO")) {
-			instanceId = this.extractInstanceUID(url, null);
-			studyId = this.extractStudyUID(url, null);
-			serieId = this.extractSeriesUIDUID(url, null);
-			// http://localhost:8081/dcm4chee-arc/aets/AS_RECEIVED/rs/studies//series//instances//reject/113001%5EDCM
-			rejectURL = url.substring(0, url.indexOf("wado?")) + "rs/studies/" + studyId + "/series/" + serieId
-					+ "/instances/" + instanceId + REJECT_SUFFIX;
-			deleteUrl = url.substring(0, url.indexOf("/aets/")) + REJECT_SUFFIX;
+		if (wadoURLHandler.isWADO_URI(url)) {
+			rejectURL = wadoURLHandler.convertWADO_URI_TO_WADO_RS(url) + REJECT_SUFFIX;
 		} else {
-			// /studies/{study}/series/{series}/instances/{instance}/rendered
-			Pattern p = Pattern.compile(".*//studies//(.*)//series//(.*)//instances//(.*)");
-			Matcher m = p.matcher(url);
-			if (m.find()) {
-				studyId = m.group(1);
-				serieId = m.group(2);
-				instanceId = m.group(3);
-			}
 			rejectURL = url + REJECT_SUFFIX;
-			deleteUrl = url.substring(0, url.indexOf("/aets/")) + REJECT_SUFFIX;
 		}
 		// STEP 1: Reject from the PACS
 		HttpPost post = new HttpPost(rejectURL);
 		post.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_JSON);
 		try (CloseableHttpResponse response = httpClient.execute(post)) {
-			if (response.getCode() == HttpStatus.NO_CONTENT.value()) {
+			if (HttpStatus.OK.value() == response.getCode()) {
 				LOG.info("Rejected from PACS: " + url);
 			} else {
 				LOG.error(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
-					+ "for rejectURL: " + rejectURL);
-				throw new ShanoirException(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
-				+ "for rejectURL: " + rejectURL);
+					+ " for rejectURL: " + rejectURL);
+				if (response.getCode() == 404 && response.getReasonPhrase().startsWith("Not Found")) {
+					LOG.error("Could not delete from pacs: " + response.getCode() + " " + response.getReasonPhrase());
+					return;
+				} else {
+					throw new ShanoirException(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
+							+ " for rejectURL: " + rejectURL);
+				}
 			}
 		} catch (IOException e) {
-			LOG.error(e.getMessage(), e);
-			throw new ShanoirException(e.getMessage());
+			LOG.error("Could not reject instance from PACS: for rejectURL: " + rejectURL, e);
+			throw new ShanoirException("Could not reject instance from PACS: for rejectURL: " + url, e);
 		}
 		// STEP 2: Delete from the PACS
+		String deleteUrl = url.substring(0, url.indexOf("/aets/")) + REJECT_SUFFIX;
 		HttpDelete delete = new HttpDelete(deleteUrl);
 		delete.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_JSON);
 		try (CloseableHttpResponse response = httpClient.execute(delete)) {
@@ -323,51 +322,6 @@ public class DICOMWebService {
 			LOG.error(e.getMessage(), e);
 			throw new ShanoirException(e.getMessage());
 		}
-	}
-
-	/**
-	 * The instanceUID (== objectUID) is inside the URL string
-	 * and has to be extracted to be used.
-	 * 
-	 * @param url
-	 * @param instanceUID
-	 * @return
-	 */
-	private String extractInstanceUID(String url, String instanceUID) {
-		return extractUidPattern(url, "objectUID", url.indexOf(CONTENT_TYPE) != -1 ? CONTENT_TYPE : null, instanceUID);
-	}
-
-	/**
-	 * The studyID is inside the URL string
-	 * and has to be extracted to be used.
-	 * 
-	 * @param url
-	 * @param defaultUID
-	 * @return the studyUID
-	 */
-	private String extractStudyUID(String url, String studyUID) {
-		return extractUidPattern(url, "studyUID", "&seriesUID", studyUID);
-	}
-
-	/**
-	 * The series UID is inside the URL string
-	 * and has to be extracted to be used.
-	 * 
-	 * @param url
-	 * @param defaultUID
-	 * @return the seriesUID
-	 */
-	private String extractSeriesUIDUID(String url, String seriesUID) {
-		return extractUidPattern(url, "seriesUID", "&objectUID", seriesUID);
-	}
-
-	private String extractUidPattern(String url, String uidName, String endPattern, String defaultValue) {
-		Pattern p  = Pattern.compile(".*" + uidName + "=(.*)" + (endPattern != null ? endPattern + ".*" : ""));
-		Matcher m = p.matcher(url);
-		if (m.find()) {
-			defaultValue = m.group(1);
-		}
-		return defaultValue;
 	}
 	
 }

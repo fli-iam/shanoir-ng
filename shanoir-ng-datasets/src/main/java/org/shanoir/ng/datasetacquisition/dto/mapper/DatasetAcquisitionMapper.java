@@ -23,9 +23,13 @@ import org.mapstruct.MappingInheritanceStrategy;
 import org.mapstruct.ObjectFactory;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.bids.BidsDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.eeg.EegDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.data.domain.Page;
@@ -49,9 +53,13 @@ public interface DatasetAcquisitionMapper {
 	
 	@ObjectFactory
 	default DatasetAcquisition createDatasetAcquisition(DatasetAcquisitionDTO dto) {
-        if (dto.getType().equals("Mr")) return new MrDatasetAcquisition(); 
-        else if (dto.getType().equals("Pet")) return new PetDatasetAcquisition(); 
-        else if (dto.getType().equals("Ct")) return new CtDatasetAcquisition(); 
+		if (dto.getType().equals("Mr")) return new MrDatasetAcquisition();
+		else if (dto.getType().equals("Pet")) return new PetDatasetAcquisition();
+		else if (dto.getType().equals("Ct")) return new CtDatasetAcquisition();
+		else if (dto.getType().equals("BIDS")) return new BidsDatasetAcquisition();
+		else if (dto.getType().equals("Eeg")) return new EegDatasetAcquisition();
+		else if (dto.getType().equals("Xa")) return new XaDatasetAcquisition();
+		else if (dto.getType().equals("Generic")) return new GenericDatasetAcquisition();
         else throw new IllegalStateException("Cannot map from a dataset acquisition dto that don't provide a valid type. Given type = " + dto.getType());
     }
 

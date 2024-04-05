@@ -59,6 +59,37 @@ public class DatasetMetadata extends AbstractEntity {
 	/** Processed dataset type. */
 	private Integer processedDatasetType;
 
+	public DatasetMetadata() {
+
+	}
+
+	public DatasetMetadata(DatasetMetadata other) {
+		if (other.getCardinalityOfRelatedSubjects() != null) {
+			this.cardinalityOfRelatedSubjects = other.getCardinalityOfRelatedSubjects().getId();
+		} else {
+			this.cardinalityOfRelatedSubjects = null;
+		}
+
+		this.comment = other.getComment();
+		if (other.getDatasetModalityType() != null) {
+			this.datasetModalityType = other.getDatasetModalityType().getId();
+		} else {
+			this.datasetModalityType = null;
+		}
+		if (other.getExploredEntity() != null) {
+			this.exploredEntity = other.getExploredEntity().getId();
+		} else {
+			this.exploredEntity = null;
+		}
+
+		this.name = other.getName();
+		if (other.getProcessedDatasetType() != null) {
+			this.processedDatasetType = other.getProcessedDatasetType().getId();
+		} else {
+			this.processedDatasetType = null;
+		}
+	}
+
 	/**
 	 * @return the cardinalityOfRelatedSubjects
 	 */

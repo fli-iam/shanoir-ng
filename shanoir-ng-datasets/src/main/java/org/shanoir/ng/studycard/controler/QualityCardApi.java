@@ -136,5 +136,20 @@ public interface QualityCardApi {
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnQualityCard(#qualityCardId, 'CAN_ADMINISTRATE'))")
     ResponseEntity<QualityCardResult> testQualityCardOnStudy(
         @Parameter(name = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException;
-	
+
+	@Operation(summary = "", description = "Test a quality card on a study for quality control")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "applied a quality card on its study for quality control"),
+        @ApiResponse(responseCode = "401", description = "unauthorized"),
+        @ApiResponse(responseCode = "403", description = "forbidden"),
+        @ApiResponse(responseCode = "422", description = "bad parameters"),
+        @ApiResponse(responseCode = "500", description = "unexpected error")
+    })
+
+    @RequestMapping(value = "/test/{qualityCardId}/{start}/{stop}", method = RequestMethod.GET)
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnQualityCard(#qualityCardId, 'CAN_ADMINISTRATE'))")
+    ResponseEntity<QualityCardResult> testQualityCardOnStudy(
+        @Parameter(name = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId,
+		@Parameter(name = "examination number start ", required = true) @PathVariable("start") int start,
+		@Parameter(name = "examination number stop", required = true) @PathVariable("stop") int stop) throws RestServiceException, MicroServiceCommunicationException;
 }

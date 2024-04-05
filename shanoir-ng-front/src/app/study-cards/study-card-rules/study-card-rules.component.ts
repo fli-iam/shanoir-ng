@@ -85,7 +85,14 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
             private element: ElementRef,
             private confirmDialogService: ConfirmDialogService,
             private breadcrumbService: BreadcrumbsService) {
-     
+
+        if (this.breadcrumbService.currentStep.data.rulesToAnimate) 
+            this.rulesToAnimate = this.breadcrumbService.currentStep.data.rulesToAnimate;
+        else
+            this.breadcrumbService.currentStep.data.rulesToAnimate = this.rulesToAnimate;
+    }
+
+    initFields() {
         this.assignmentFields = [
             new ShanoirMetadataField('Dataset modality type', 'MODALITY_TYPE', 'Dataset', DatasetModalityType.options),
             new ShanoirMetadataField('Protocol name', 'PROTOCOL_NAME', 'DatasetAcquisition'),
@@ -96,21 +103,15 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
             new ShanoirMetadataField('Acquisition contrast', 'ACQUISITION_CONTRAST', 'DatasetAcquisition', AcquisitionContrast.options),
             new ShanoirMetadataField('MR sequence application', 'MR_SEQUENCE_APPLICATION', 'DatasetAcquisition', MrSequenceApplication.options),
             new ShanoirMetadataField('MR sequence physics', 'MR_SEQUENCE_PHYSICS', 'DatasetAcquisition', MrSequencePhysics.options),
-            new ShanoirMetadataField('New name for the dataset', 'NAME', 'Dataset'),
+            new ShanoirMetadataField(this.cardType == 'studycard' ? 'New name for the dataset' : 'Dataset name' , 'NAME', 'Dataset'),
             new ShanoirMetadataField('Dataset comment', 'COMMENT', 'Dataset'),
             new ShanoirMetadataField('MR sequence name', 'MR_SEQUENCE_NAME', 'DatasetAcquisition'),
             new ShanoirMetadataField('Contrast agent used', 'CONTRAST_AGENT_USED', 'DatasetAcquisition', ContrastAgent.options),
             new ShanoirMetadataField('Mr Dataset Nature', 'MR_DATASET_NATURE', 'Dataset', MrDatasetNature.options),
 			new ShanoirMetadataField('BIDS data type', 'BIDS_DATA_TYPE', 'DatasetAcquisition', BidsDataType.options)
         ];
-
         // here we reference assignment fields but conditions could be different
         this.conditionFields = this.assignmentFields;
-
-        if (this.breadcrumbService.currentStep.data.rulesToAnimate) 
-            this.rulesToAnimate = this.breadcrumbService.currentStep.data.rulesToAnimate;
-        else
-            this.breadcrumbService.currentStep.data.rulesToAnimate = this.rulesToAnimate;
     }
     
     ngOnChanges(changes: SimpleChanges): void {
@@ -127,8 +128,12 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
                 this.coilOptionsSubject.next([]);
 
             }
-        } else if (changes.allCoils && this.allCoils) {
+        } 
+        if (changes.allCoils && this.allCoils) {
             this.allCoilsPromise.resolve(this.allCoils);
+        } 
+        if (changes.cardType && this.cardType && (!this.assignmentFields || !this.conditionFields)) {
+            this.initFields();
         }
     }
 
@@ -245,10 +250,10 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
                 if (rule.conditions?.find(cond => cond.scope == null)) {
                     errors.noType = true; 
                 }
-                if (rule.conditions?.find(cond => cond.scope == 'StudyCardDICOMCondition' && !cond.dicomTag)) {
+                if (rule.conditions?.find(cond => cond.scope == 'StudyCardDICOMConditionOnDatasets' && !cond.dicomTag)) {
                     errors.missingField = 'condition dicomTag';
                 }
-                if (rule.conditions?.find(cond => cond.scope != 'StudyCardDICOMCondition' && !cond.shanoirField)) {
+                if (rule.conditions?.find(cond => cond.scope != 'StudyCardDICOMConditionOnDatasets' && !cond.shanoirField)) {
                     errors.missingField = 'condition shanoirField';
                 }
                 if (rule.conditions?.find(cond => !cond.operation)) {

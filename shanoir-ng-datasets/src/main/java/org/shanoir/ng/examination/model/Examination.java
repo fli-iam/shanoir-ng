@@ -20,10 +20,12 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
+import org.shanoir.ng.shared.model.EchoTime;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 
@@ -126,7 +128,39 @@ public class Examination extends HalEntity {
     @Column(nullable=false)
     @ColumnDefault("false")
     private boolean preclinical;
-        
+
+    private Long sourceId;
+
+    public Examination() {
+
+    }
+
+    public Examination(Examination other, Study study, Subject subject) {
+        this.centerId = other.centerId;
+        this.comment = other.comment;
+        this.examinationDate = other.examinationDate;
+        this.experimentalGroupOfSubjectsId = other.experimentalGroupOfSubjectsId;
+        this.extraDataFilePathList = null;
+
+        this.instrumentBasedAssessmentList = new ArrayList<>(other.getInstrumentBasedAssessmentList().size());
+        for (InstrumentBasedAssessment instru : other.getInstrumentBasedAssessmentList()) {
+            this.instrumentBasedAssessmentList.add(new InstrumentBasedAssessment(instru));
+        }
+        this.investigatorCenterId = other.investigatorCenterId;
+        this.investigatorExternal = other.investigatorExternal;
+        this.investigatorId = other.investigatorId;
+        this.note = other.note;
+
+        this.study = study;
+        this.subject = subject;
+
+        this.subjectWeight = other.subjectWeight;
+        this.timepointId = other.timepointId;
+        this.weightUnitOfMeasure = other.weightUnitOfMeasure;
+        this.preclinical = other.preclinical;
+        this.sourceId = other.sourceId;
+    }
+
     /**
      * Init HATEOAS links
      */
@@ -385,4 +419,11 @@ public class Examination extends HalEntity {
         this.preclinical = preclinical;
     }
 
+    public Long getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(Long sourceId) {
+        this.sourceId = sourceId;
+    }
 }

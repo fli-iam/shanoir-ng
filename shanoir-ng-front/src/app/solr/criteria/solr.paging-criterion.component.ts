@@ -86,9 +86,11 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
 
     loadPage(page: FacetResultPage) {
         if (!page || !page.content || page.content.length == 0) {
+            if (this.currentPage?.number != page?.number - 1) {
+                this.displayedFacets = [];
+                this.currentPage = page ? page : new Page();
+            }
             this.maxPage = this.currentPage ? this.currentPage.number : 1;
-            this.displayedFacets = [];
-            this.currentPage = page ? page : new Page();
         } else {
             if (page.content.length < SolrPagingCriterionComponent.PAGE_SIZE) {
                 this.maxPage = page.number;
@@ -193,8 +195,7 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
     writeValue(selectedFacetValues: string[]): void {
         this.loadedPromise.then(() => {
             this.selectedFacets = [];
-            if (!selectedFacetValues) selectedFacetValues = [];
-            selectedFacetValues.forEach(val => {
+            selectedFacetValues?.forEach(val => {
                 let displayed: FacetField = this.displayedFacets.find(fac => fac.value == val);
                 if (displayed) {
                     this.selectedFacets.push(displayed);

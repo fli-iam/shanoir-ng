@@ -13,12 +13,11 @@
  */
 
 import { Pipe, PipeTransform } from '@angular/core';
-
-import { MrDataset } from '../datasets/dataset/mr/dataset.mr.model';
-import { EegDataset } from '../datasets/dataset/eeg/dataset.eeg.model';
-import { Dataset } from '../datasets/shared/dataset.model';
-import { process } from '../process';
 import { environment } from '../../environments/environment';
+import { HttpClient, HttpEvent, HttpEventType, HttpParams, HttpProgressEvent, HttpResponse } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { TaskState, TaskStatus } from '../async-tasks/task.model';
+import { ServiceLocator } from './locator.service';
 
 
 // Base urls
@@ -64,6 +63,7 @@ export const BACKEND_API_STUDY_HAS_ONE_STUDY_TO_IMPORT: string = BACKEND_API_STU
 export const BACKEND_API_STUDY_PUBLIC_STUDIES_URL: string = BACKEND_API_STUDY_URL + '/public';
 export const BACKEND_API_STUDY_PUBLIC_STUDIES_DATA_URL: string = BACKEND_API_STUDY_URL + '/public/data';
 export const BACKEND_API_STUDY_PUBLIC_STUDIES_CONNECTED_URL: string = BACKEND_API_STUDY_URL + '/public/connected';
+export const BACKEND_API_STUDY_COPY_DATASETS: string = BACKEND_API_STUDY_URL + '/copyDatasets';
 
 
 // Profile API
@@ -78,7 +78,7 @@ export const BACKEND_API_STUDY_CHALLENGES_URL: string = BACKEND_API_STUDIES_MS_U
 export const BACKEND_API_SUBJECT_URL: string = BACKEND_API_STUDIES_MS_URL + '/subjects';
 export const BACKEND_API_SUBJECT_NAMES_URL: string = BACKEND_API_SUBJECT_URL + '/names';
 export const BACKEND_API_SUBJECT_FILTER_URL: string = BACKEND_API_SUBJECT_URL + '/filter';
-export const BACKEND_API_SUBJECT_FIND_BY_IDENTIFIER : string = BACKEND_API_SUBJECT_URL + '/findByIdentifier';
+export const BACKEND_API_SUBJECT_FIND_BY_IDENTIFIER: string = BACKEND_API_SUBJECT_URL + '/findByIdentifier';
 
 // Subject Study http api
 export const BACKEND_API_SUBJECT_STUDY_URL: string = BACKEND_API_STUDIES_MS_URL + '/subjectStudy';
@@ -148,10 +148,14 @@ export const BACKEND_API_NIFTI_CONVERTER_URL: string = BACKEND_API_IMPORT_MS_URL
 // Preclinical http api
 export const BACKEND_API_PRECLINICAL_MS_URL: string = BACKEND_API_URL + '/preclinical';
 
-// carmin
-export const CARMIN_BASE_URL : string = environment.vipUrl + "/rest";
+// vip
+export const BACKEND_API_VIP_URL: string = BACKEND_API_DATASET_MS_URL + '/vip';
+export const BACKEND_API_VIP_EXEC_URL : string = BACKEND_API_VIP_URL + "/execution";
+export const BACKEND_API_VIP_PIPE_URL : string = BACKEND_API_VIP_URL + "/pipeline";
 
-export const BACKEND_API_CARMIN_DATASET_PROCESSING_URL: string = BACKEND_API_DATASET_MS_URL + '/carminDatasetProcessing';
+export const BACKEND_API_VIP_EXEC_MONITORING_URL: string = BACKEND_API_DATASET_MS_URL + '/execution-monitoring';
+
+declare var JSZip: any;
 
 export function hasUniqueError(error: any, fieldName: string): boolean {
     let hasUniqueError = false;
@@ -168,15 +172,14 @@ export function hasUniqueError(error: any, fieldName: string): boolean {
     return hasUniqueError;
 }
 
-export function browserDownloadFile(blob: Blob, filename: string){
+export function browserDownloadFile(blob: Blob, filename: string) {
     if (window.navigator.msSaveBlob) {
         // IE 10+
         window.navigator.msSaveBlob(blob, filename);
     } else {
         var link = document.createElement('a');
         // Browsers that support HTML5 download attribute
-        if (link.download !== undefined)
-        {
+        if (link.download !== undefined) {
             var url = URL.createObjectURL(blob);
             link.setAttribute('href', url);
             link.setAttribute('download', filename);
@@ -186,6 +189,108 @@ export function browserDownloadFile(blob: Blob, filename: string){
             document.body.removeChild(link);
         }
     }
+}
+
+export function browserDownloadFileFromResponse(response: HttpResponse<any>) {
+    browserDownloadFile(response.body, getFilename(response));
+}
+
+export function downloadBlob(url: string, params?: HttpParams): Promise<Blob> {
+    const http: HttpClient = ServiceLocator.injector.get(HttpClient);
+    return http.get(
+        url,
+        {
+            reportProgress: true,
+            responseType: 'blob',
+            params: params
+        }
+    )
+    .map(response => {
+        return response;
+    })
+    .toPromise();
+}
+
+export function downloadWithStatusGET(url: string, params?: HttpParams, state ?: TaskState): Observable<TaskState> {
+    const http: HttpClient = ServiceLocator.injector.get(HttpClient);
+    let obs: Observable<HttpEvent<Blob>> = http.get(
+        url,
+        {
+            reportProgress: true,
+            observe: 'events',
+            responseType: 'blob',
+            params: params
+        }
+    );
+    obs.toPromise().then(response => browserDownloadFileFromResponse(response as HttpResponse<Blob>));
+    return obs.mergeMap(event => {
+        return extractState(event).then(s => {
+            state = s
+            return s;
+        });
+    });
+}
+
+export function downloadWithStatusPOST(url: string, formData: FormData, state ?: TaskState): Observable<TaskState> {
+    const http: HttpClient = ServiceLocator.injector.get(HttpClient);
+    let obs: Observable<HttpEvent<Blob>> = http.post(
+        url,
+        formData,
+        {
+            reportProgress: true,
+            observe: 'events',
+            responseType: 'blob'
+        }
+    );
+    obs.toPromise().then(response => browserDownloadFileFromResponse(response as HttpResponse<Blob>));
+    return obs.mergeMap(event => {
+        return extractState(event).then(s => {
+            state = s
+            return s;
+        });
+    });
+}
+
+export function extractState(event: HttpEvent<any>): Promise<TaskState> {
+    let task: TaskState;
+    switch (event.type) {
+        case HttpEventType.Sent:
+        case HttpEventType.ResponseHeader: {
+            task = new TaskState(TaskStatus.QUEUED, 0);
+            return Promise.resolve(task);
+        }
+        case HttpEventType.DownloadProgress: {
+            task = new TaskState(TaskStatus.IN_PROGRESS, (event as HttpProgressEvent).loaded);
+            return Promise.resolve(task);
+        }
+        case HttpEventType.Response: {
+            task = new TaskState(TaskStatus.DONE);
+            const blob: Blob = (event as HttpResponse<Blob>).body;
+            if (blob) {
+                //report.list[id].zipSize = getSizeStr(blob?.size);
+                // Check ERRORS file in zip
+                let zip: any = new JSZip();
+                return zip.loadAsync(blob).then(dataFiles => {
+                    if (dataFiles.files['ERRORS.json']) {
+                        return dataFiles.files['ERRORS.json'].async('string').then(content => {
+                            const errorsJson: any = JSON.parse(content);
+                            task.errors = JSON.stringify(errorsJson, null, 4);
+                            task.status = TaskStatus.DONE_BUT_WARNING;
+                            return task;
+                        });
+                    }
+                    return task;
+                });
+            }
+        }
+        default: return Promise.resolve(task);
+    }
+}
+
+export function getFilename(response: HttpResponse<any>): string {
+    const prefix = 'attachment;filename=';
+    let contentDispHeader: string = response.headers.get('Content-Disposition');
+    return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
 }
 
 export function pad(n, width, z?): string {
@@ -213,21 +318,21 @@ export function findLastIndex<T>(array: Array<T>, predicate: (value: T, index: n
 }
 
 
-@Pipe({name: 'times'})
+@Pipe({ name: 'times' })
 export class TimesPipe implements PipeTransform {
-  transform(value: number): any {
-    const iterable = {};
-    iterable[Symbol.iterator] = function* () {
-      let n = 0;
-      while (n < value) {
-        yield ++n;
-      }
-    };
-    return iterable;
-  }
+    transform(value: number): any {
+        const iterable = {};
+        iterable[Symbol.iterator] = function* () {
+            let n = 0;
+            while (n < value) {
+                yield ++n;
+            }
+        };
+        return iterable;
+    }
 }
 
-@Pipe({name: 'getValues'})
+@Pipe({ name: 'getValues' })
 export class GetValuesPipe implements PipeTransform {
     transform(map: Map<any, any>): any[] {
         let ret = [];
@@ -264,7 +369,7 @@ export function camelToSpaces(str: string): string {
         // insert a space before all caps
         .replace(/([A-Z])/g, ' $1')
         // uppercase the first character
-        .replace(/^./, function(str){ return str.toUpperCase(); });
+        .replace(/^./, function (str) { return str.toUpperCase(); });
 }
 
 export function isFunction(obj) {
@@ -273,46 +378,46 @@ export function isFunction(obj) {
 
 function deepEquals(x, y) {
     if (x === y) {
-      return true; // if both x and y are null or undefined and exactly the same
+        return true; // if both x and y are null or undefined and exactly the same
     } else if (!(x instanceof Object) || !(y instanceof Object)) {
-      return false; // if they are not strictly equal, they both need to be Objects
+        return false; // if they are not strictly equal, they both need to be Objects
     } else if (x.constructor !== y.constructor) {
-      // they must have the exact same prototype chain, the closest we can do is
-      // test their constructor.
-      return false;
+        // they must have the exact same prototype chain, the closest we can do is
+        // test their constructor.
+        return false;
     } else {
-      for (const p in x) {
-        if (!x.hasOwnProperty(p)) {
-          continue; // other properties were tested using x.constructor === y.constructor
+        for (const p in x) {
+            if (!x.hasOwnProperty(p)) {
+                continue; // other properties were tested using x.constructor === y.constructor
+            }
+            if (!y.hasOwnProperty(p)) {
+                return false; // allows to compare x[ p ] and y[ p ] when set to undefined
+            }
+            if (x[p] === y[p]) {
+                continue; // if they have the same strict value or identity then they are equal
+            }
+            if (typeof (x[p]) !== 'object') {
+                return false; // Numbers, Strings, Functions, Booleans must be strictly equal
+            }
+            if (!deepEquals(x[p], y[p])) {
+                return false;
+            }
         }
-        if (!y.hasOwnProperty(p)) {
-          return false; // allows to compare x[ p ] and y[ p ] when set to undefined
+        for (const p in y) {
+            if (y.hasOwnProperty(p) && !x.hasOwnProperty(p)) {
+                return false;
+            }
         }
-        if (x[p] === y[p]) {
-          continue; // if they have the same strict value or identity then they are equal
-        }
-        if (typeof (x[p]) !== 'object') {
-          return false; // Numbers, Strings, Functions, Booleans must be strictly equal
-        }
-        if (!deepEquals(x[p], y[p])) {
-          return false;
-        }
-      }
-      for (const p in y) {
-        if (y.hasOwnProperty(p) && !x.hasOwnProperty(p)) {
-          return false;
-        }
-      }
-      return true;
+        return true;
     }
 };
 
 export function objectsEqual(value1, value2) {
-        if (value1 == value2) return true;
-        else if (value1 && value2 && value1.id && value2.id) return value1.id == value2.id;
-        else if (value1 && value2 && value1.equals && value2.equals && typeof value1.equals == 'function' && typeof value2.equals == 'function') return value1.equals(value2);
-        else return deepEquals(value1, value2);
-    }
+    if (value1 == value2) return true;
+    else if (value1 && value2 && value1.id && value2.id) return value1.id == value2.id;
+    else if (value1 && value2 && value1.equals && value2.equals && typeof value1.equals == 'function' && typeof value2.equals == 'function') return value1.equals(value2);
+    else return deepEquals(value1, value2);
+}
 
 export function arraysEqual(array1: any[], array2: any[]) {
     return array1?.length === array2?.length && array1?.every((value, index) => array2 && objectsEqual(value, array2[index]));
@@ -324,4 +429,19 @@ export function isDarkColor(colorInp: string): boolean {
     var g = parseInt(colorInp.substring(2, 4), 16); // hexToG
     var b = parseInt(colorInp.substring(4, 6), 16); // hexToB
     return (((r * 0.299) + (g * 0.587) + (b * 0.114)) < 145);
+}
+
+export function getSizeStr(size: number): string {
+    if (size == null || size == undefined){
+        return "";
+    }
+    const base: number = 1024;
+    const units: string[] = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    if (size == 0) {
+        return "0 " + units[0];
+    }
+    const exponent: number = Math.floor(Math.log(size) / Math.log(base));
+    let value: number = Math.round(parseFloat((size / Math.pow(base, exponent)).toFixed(2)));
+    let unit: string = units[exponent];
+    return value + " " + unit;
 }

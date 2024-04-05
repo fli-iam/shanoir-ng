@@ -50,7 +50,13 @@ public enum DatasetModalityType {
 	MICR_DATASET(9),
 	
 	// Behavioural Dataset
-	BEH_DATASET(10);
+	BEH_DATASET(10),
+
+	// Near-Infrared Spectroscopy dataset
+	NIRS_DATASET(11),
+
+	// X-RAY ANGIOGRAPHY dataset
+	XA_DATASET(12);
 
 	private int id;
 

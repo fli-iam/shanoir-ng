@@ -15,6 +15,20 @@
 
 package org.shanoir.ng.dataset.controler;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.annotation.PostConstruct;
 import jakarta.mail.MessagingException;
@@ -33,6 +47,7 @@ import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.download.DatasetDownloadError;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -40,10 +55,7 @@ import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.ErrorDetails;
-import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,14 +75,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 @Controller
 public class DatasetApiController implements DatasetApi {
@@ -131,32 +135,31 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public ResponseEntity<Void> deleteDataset(
-			@Parameter(name = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId)
-					throws RestServiceException {
+			@Parameter(name = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId) throws EntityNotFoundException, RestServiceException {
 		try {
 			datasetService.deleteById(datasetId);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		} catch (EntityNotFoundException | RestServiceException e) {
+			throw e;
 		} catch (Exception e) {
-			LOG.error("Error while deleting dataset. Please check DICOM server configuration.", e);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while deleting dataset. Please check DICOM server configuration.", e.getMessage());
+			throw new RestServiceException(e, error);
 		}
 	}
 
 	@Override
 	public ResponseEntity<Void> deleteDatasets(
 			@Parameter(name = "ids of the datasets", required=true) @Valid
-			@RequestBody(required = true) List<Long> datasetIds)
-					throws RestServiceException {
+			@RequestBody List<Long> datasetIds)
+			throws RestServiceException {
 		try {
 			datasetService.deleteByIdIn(datasetIds);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		} catch (IOException | SolrServerException e) {
-			LOG.error("Error while deleting datasets: ", e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (RestServiceException e) {
+			throw e;
+		} catch (Exception e) {
+			ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while deleting dataset. Please check DICOM server configuration.", e.getMessage());
+			throw new RestServiceException(e, error);
 		}
 	}
 
@@ -229,8 +232,8 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<List<DatasetDTO>> findDatasetsByAcquisitionId(@Parameter(name = "id of the subject", required = true) @PathVariable("acquisitionId") Long acquisitionId) {
-		List<Dataset> datasets = datasetService.findByAcquisition(acquisitionId);
+	public ResponseEntity<List<DatasetDTO>> findDatasetsByExaminationId(@Parameter(name = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId) {
+		List<Dataset> datasets = datasetService.findByExaminationId(examinationId);
 		if (datasets.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} else {
@@ -239,8 +242,8 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<List<DatasetDTO>> findDatasetsByExaminationId(Long examinationId) {
-		List<Dataset> datasets = datasetService.findByExaminationId(examinationId);
+	public ResponseEntity<List<DatasetDTO>> findDatasetsByAcquisitionId(@Parameter(name = "id of the acquisition", required = true) @PathVariable("acquisitionId") Long acquisitionId) {
+		List<Dataset> datasets = datasetService.findByAcquisition(acquisitionId);
 		if (datasets.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} else {
@@ -279,6 +282,14 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
+	public ResponseEntity<Integer> findNbDatasetByStudyId(
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+		
+		final int nbDatasets = datasetService.countByStudyId(studyId);
+		return new ResponseEntity<Integer>(nbDatasets, HttpStatus.OK);
+	}
+
+	@Override
 	public ResponseEntity<List<Long>> findDatasetIdsBySubjectIdStudyId(
 			@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
@@ -313,17 +324,22 @@ public class DatasetApiController implements DatasetApi {
 			@Parameter(name = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId,
 			@Parameter(name = "Dowloading nifti, decide the nifti converter id") final Long converterId,
 			@Parameter(name = "Decide if you want to download dicom (dcm) or nifti (nii) files.")
-			@Valid @RequestParam(value = "format", required = false, defaultValue = DCM) final String format, HttpServletResponse response)
-					throws RestServiceException, IOException {
-		this.datasetDownloaderService.downloadDatasetById(datasetId, converterId, format, response, false);
+			@Valid @RequestParam(value = "format", required = false, defaultValue = DCM) final String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException {
+		Dataset dataset = this.datasetService.findById(datasetId);
+		if (dataset == null) {
+			throw new EntityNotFoundException(Dataset.class, datasetId);
+		}
+
+		this.datasetDownloaderService.massiveDownload(format, Collections.singletonList(dataset), response, false, converterId);
 	}
 
 	@Override
 	public ResponseEntity<String> getDicomMetadataByDatasetId(
 		@Parameter(name = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId) throws IOException, MessagingException {
-		final Dataset dataset = datasetService.findById(datasetId);		
+		final Dataset dataset = datasetService.findById(datasetId);
+		DatasetDownloadError result = new DatasetDownloadError();
 		List<URL> pathURLs = new ArrayList<>();
-		DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
+		DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, result);
 		if (pathURLs.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} else {
@@ -359,7 +375,7 @@ public class DatasetApiController implements DatasetApi {
 		// STEP 1: Retrieve all datasets all in one with only the one we can see
 		List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
 
-		datasetDownloaderService.massiveDownload(format, datasets, response, false);
+		datasetDownloaderService.massiveDownload(format, datasets, response, false, null);
 	}	
 
 	@Override
@@ -382,7 +398,7 @@ public class DatasetApiController implements DatasetApi {
 					new ErrorModel(HttpStatus.FORBIDDEN.value(), "This study has " + size + " datasets. You can't download more than " + DATASET_LIMIT + " datasets." ));
 		}
 
-		datasetDownloaderService.massiveDownload(format, datasets, response, false);
+		datasetDownloaderService.massiveDownload(format, datasets, response, false, null);
 	}
 
 	@Override
@@ -406,11 +422,16 @@ public class DatasetApiController implements DatasetApi {
 					new ErrorModel(HttpStatus.FORBIDDEN.value(), "This examination has " + size + " datasets. You can't download more than " + DATASET_LIMIT + " datasets."));
 		}
 
-		datasetDownloaderService.massiveDownload(format, datasets, response, true);
+		datasetDownloaderService.massiveDownload(format, datasets, response, true, null);
 	}
 
     @Override
-    public void massiveDownloadByAcquisitionId(Long acquisitionId, String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException {
+	public void massiveDownloadByAcquisitionId(
+			@Parameter(name = "id of the acquisition", required=true) @Valid
+			@RequestParam(value = "acquisitionId", required = true) Long acquisitionId,
+			@Parameter(name = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
+			@RequestParam(value = "format", required = false, defaultValue="dcm") String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException {
+		
 		// STEP 0: Check data integrity
 		if (acquisitionId == null) {
 			throw new RestServiceException(
@@ -425,7 +446,7 @@ public class DatasetApiController implements DatasetApi {
 					new ErrorModel(HttpStatus.FORBIDDEN.value(), "This acquisition has " + size + " datasets. You can't download more than " + DATASET_LIMIT + " datasets."));
 		}
 
-		datasetDownloaderService.massiveDownload(format, datasets, response, true);
+		datasetDownloaderService.massiveDownload(format, datasets, response, true, null);
     }
 
     /**
@@ -545,7 +566,7 @@ public class DatasetApiController implements DatasetApi {
 			) throws RestServiceException, IOException {
 		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
 		File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
-		File statisticsFile = recreateFile(userDir + File.separator + "shanoirExportStatistics.txt");
+		File statisticsFile = recreateFile(userDir + File.separator + "shanoirExportStatistics.tsv");
 		File zipFile = recreateFile(userDir + File.separator + "shanoirExportStatistics" + ZIP);
 
 		// Get the data
@@ -581,4 +602,5 @@ public class DatasetApiController implements DatasetApi {
 				.contentLength(data.length)
 				.body(resource);
 	}
+
 }

@@ -13,21 +13,19 @@
  */
 import { Component, ViewChild } from '@angular/core';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { DatasetExpressionFormat } from "../../enum/dataset-expression-format.enum";
+import { ConfirmDialogService } from "../../shared/components/confirm-dialog/confirm-dialog.service";
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
-import { TableComponent } from '../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
+import { TableComponent } from '../../shared/components/table/table.component';
+import { AccessRequest } from "../../users/access-request/access-request.model";
+import { UserService } from '../../users/shared/user.service';
 import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
 import { StudyUserRight } from '../shared/study-user-right.enum';
+import { StudyUser } from "../shared/study-user.model";
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { UserService } from '../../users/shared/user.service';
-import {ConfirmDialogService} from "../../shared/components/confirm-dialog/confirm-dialog.service";
-import {DatasetExpressionFormat} from "../../enum/dataset-expression-format.enum";
-import {Page} from "../../shared/components/table/pageable.model";
-import {StudyUser} from "../shared/study-user.model";
-import {AccessRequest} from "../../users/access-request/access-request.model";
-import {EntityRoutes} from "../../shared/components/entity/entity.abstract";
 
 
 @Component({
@@ -38,14 +36,11 @@ import {EntityRoutes} from "../../shared/components/entity/entity.abstract";
 
 export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
 
-    private isStudyVolumesFetching = true;
-
     @ViewChild('table', { static: false }) table: TableComponent;
-
-
     accessRequestValidated = false;
     hasDUA: boolean;
     isSuConfirmed: boolean;
+
     constructor(
         private studyService: StudyService,
         private confirmService: ConfirmDialogService,
@@ -58,11 +53,9 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
         return this.studyService;
     }
 
-
     getEntities(): Promise<Study[]> {
-        this.isStudyVolumesFetching = true;
         let earlyResult: Promise<Study[]> = Promise.all([
-            this.studyService.getAll(),
+            this.studyService.getAll().then(studies => this.fetchStorageVolumesByChunk(studies)),
             this.studyService.getPublicStudiesData()
         ]).then(([studies, publicStudies]) => {
             if (!studies) studies = [];
@@ -99,47 +92,53 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                     }
                 }
             }
-            this.fetchStorageVolumes(studies);
         });
         return earlyResult;
     }
 
-    private fetchStorageVolumes(studies: Study[] | AccessRequest[]) {
-        let pageSize = Number(this.table.maxResults);
-        let promises = [];
-        for (let i = 0; i < studies.length; i += pageSize) {
-            let ids = new Set<number>(studies.slice(i, i + pageSize).map(study => study.id));
-            promises.push(this.studyService.getStudiesStorageVolume(ids).then(volumes => {
-                studies.forEach(study => {
-                    let volume = volumes.get(study.id);
-                    if(volume) {
-                        (study as Study).totalSize = volume.total;
-                        let sizesByLabel = new Map<String, number>()
-                        if (volume.volumeByFormat) {
-                            for (let sizeByFormat of volume.volumeByFormat) {
-                                if (sizeByFormat.size > 0) {
-                                    sizesByLabel.set(DatasetExpressionFormat.getLabel(sizeByFormat.format), sizeByFormat.size);
-                                }
+    private fetchStorageVolumesByChunk(studies) {
+        if (studies) {
+            const chunkSize = 10;
+            let chunks: Study[][] = [];
+            for (let i = 0; i < studies.length; i += chunkSize) {
+                const chunk = studies.slice(i, i + chunkSize);
+                chunks.push(chunk);
+            }
+            let queue: Promise<void> = Promise.resolve();
+            chunks.forEach(chunk => {
+                queue = queue.then(() => this.fetchStorageVolumes(chunk));
+            });
+            queue.then(() => {
+                this.columnDefs.forEach(column => {
+                    if (column.headerName === "Storage volume") {
+                        column.disableSorting = false;
+                    }
+                })
+            });
+            return studies;
+        }
+    }
+
+    private fetchStorageVolumes(studies: Study[]): Promise<void> {
+        return this.studyService.getStudiesStorageVolume(studies?.map(s => s.id)).then(volumes => {
+            studies.forEach(study => {
+                let volume = volumes.get(study.id);
+                if(volume) {
+                    (study as Study).totalSize = volume.total;
+                    let sizesByLabel = new Map<String, number>()
+                    if (volume.volumeByFormat) {
+                        for (let sizeByFormat of volume.volumeByFormat) {
+                            if (sizeByFormat.size > 0) {
+                                sizesByLabel.set(DatasetExpressionFormat.getLabel(sizeByFormat.format), sizeByFormat.size);
                             }
                         }
-
-                        if (volume.extraDataSize && volume.extraDataSize > 0) {
-                            sizesByLabel.set("Other files (DUA, protocol...)", volume.extraDataSize);
-                        }
-
-                        (study as Study).detailedSizes = sizesByLabel;
                     }
-                });
-            }));
-        }
-
-        Promise.all(promises).then(() => {
-            this.table.columnDefs.forEach(column => {
-                if(column.headerName === "Storage volume"){
-                    column.disableSorting = false;
+                    if (volume.extraDataSize && volume.extraDataSize > 0) {
+                        sizesByLabel.set("Other files (DUA, protocol...)", volume.extraDataSize);
+                    }
+                    (study as Study).detailedSizes = sizesByLabel;
                 }
-            })
-            return this.isStudyVolumesFetching = false;
+            });
         });
     }
 
@@ -178,22 +177,24 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             {
                 headerName: "Storage volume", field: "totalSize", disableSearch: true, disableSorting: true, type: "number", orderBy: ["totalSize"],
                 cellRenderer: (params: any) => {
-                    if (this.isStudyVolumesFetching) {
+                    if (params.data?.totalSize >= 0) {
+                        return this.studyService.storageVolumePrettyPrint(params.data.totalSize);
+                    } else if (params.data.locked) {
+                        return "";
+                    } else {
                         return "Fetching..."
                     }
-                    return this.studyService.storageVolumePrettyPrint(params.data.totalSize);
                 },
                 tip: (data: any) => {
                     let tip = ""
-                    if(this.isStudyVolumesFetching){
-                        return "Calculating the detailed study storage volume, this may take up to a minute"
-                    }
                     if(data.detailedSizes){
                         data.detailedSizes.forEach((size: number, label: string) => {
                             tip += label + " : " + this.studyService.storageVolumePrettyPrint(size) + "\n";
                         });
+                        return tip;
+                    } else {
+                        return "Calculating the detailed study storage volume, this may take up to a minute"
                     }
-                    return tip;
                 }
             }
         ];
@@ -261,7 +262,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                     const text: string = 'You are a member of at least one study that needs you to accept its data user agreement. '
                         + 'Until you have agreed those terms you cannot access to any data from these studies. '
                         + 'Would you like to review those terms now?';
-                    const buttons = {ok: 'Yes, proceed to the signing page', cancel: 'Later'};
+                    const buttons = {yes: 'Yes, proceed to the signing page', cancel: 'Later'};
                     this.confirmService.confirm(title, text, buttons).then(response => {
                         if (response == true) this.router.navigate(['/dua']);
                     });

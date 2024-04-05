@@ -14,26 +14,31 @@
 
 package org.shanoir.ng.acquisitionequipment.service;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.center.model.Center;
-import org.shanoir.ng.center.service.CenterServiceImpl;
+import org.shanoir.ng.manufacturermodel.model.Manufacturer;
+import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.utils.Utils;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Acquisition equipment service implementation.
@@ -44,6 +49,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentService {
 
+	private static final Logger LOG = LoggerFactory.getLogger(AcquisitionEquipmentServiceImpl.class);
+	
 	@Autowired
 	private AcquisitionEquipmentRepository repository;
 
@@ -53,7 +60,6 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 	@Autowired
 	private ObjectMapper objectMapper;
 
-	private static final Logger LOG = LoggerFactory.getLogger(AcquisitionEquipmentServiceImpl.class);
 	@Override
 	public Optional<AcquisitionEquipment> findById(final Long id) {
 		return repository.findById(id);
@@ -78,21 +84,30 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 		return this.repository.findByCenterStudyCenterListStudyId(studyId);
 	}
 
+	public List<AcquisitionEquipment> findAllBySerialNumber(String serialNumber) {
+		return this.repository.findBySerialNumberContaining(serialNumber);
+	}
+	
 	public AcquisitionEquipment create(AcquisitionEquipment entity) {
 		AcquisitionEquipment newDbAcEq = repository.save(entity);
-		String datasetAcEqName = newDbAcEq.getManufacturerModel().getManufacturer().getName().trim() + " " + newDbAcEq.getManufacturerModel().getName().trim();
 		try {
-			updateName(new IdName(newDbAcEq.getId(), datasetAcEqName));
+			updateName(newDbAcEq);
 		} catch (MicroServiceCommunicationException e) {
 			LOG.error("Could not send the center name creation to the other microservices !", e);
 		}
 		return newDbAcEq;
 	}
 
-	private boolean updateName(IdName idName) throws MicroServiceCommunicationException{
+	private boolean updateName(AcquisitionEquipment equipment) throws MicroServiceCommunicationException{
 		try {
+			String datasetAcEqName =
+					equipment.getManufacturerModel().getManufacturer().getName() + " - "
+							+ equipment.getManufacturerModel().getName() + " "
+							+ (equipment.getManufacturerModel().getMagneticField() != null ? (equipment.getManufacturerModel().getMagneticField() + "T ") : "")
+							+ equipment.getSerialNumber() + " - " + equipment.getCenter().getName();
+
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_UPDATE_QUEUE,
-					objectMapper.writeValueAsString(idName));
+					objectMapper.writeValueAsString(new IdName(equipment.getId(), datasetAcEqName)));
 			return true;
 		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update acquisition equipment name.");
@@ -103,14 +118,91 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 		final Optional<AcquisitionEquipment> entityDbOpt = repository.findById(entity.getId());
 		final AcquisitionEquipment entityDb = entityDbOpt.orElseThrow(
 				() -> new EntityNotFoundException(entity.getClass(), entity.getId()));
-		updateValues(entity, entityDb);
-		return repository.save(entityDb);
+		AcquisitionEquipment updated = updateValues(entity, entityDb);
+		try {
+			updateName(updated);
+		} catch (MicroServiceCommunicationException e) {
+			LOG.error("Could not send the center name creation to the other microservices !", e);
+		}		return repository.save(entityDb);
 	}
 
 	public void deleteById(final Long id) throws EntityNotFoundException  {
 		final Optional<AcquisitionEquipment> entity = repository.findById(id);
 		entity.orElseThrow(() -> new EntityNotFoundException("Cannot find entity with id = " + id));
 		repository.deleteById(id);
+	}
+
+	@Override
+	public List<AcquisitionEquipment> findAcquisitionEquipmentsOrCreateOneByEquipmentDicom(
+			EquipmentDicom equipmentDicom) {
+		// trace all info from DICOM to get an overview of the possibilities in the hospitals and learn from it
+		LOG.info("findAcquisitionEquipmentsOrCreateOneByEquipmentDicom called with: " + equipmentDicom.toString());
+		if (equipmentDicom.isComplete()) { // we consider finding/creating the correct equipment is impossible without all 3 values
+			String dicomSerialNumber = equipmentDicom.getDeviceSerialNumber();
+			List<AcquisitionEquipment> equipments = findAllBySerialNumber(dicomSerialNumber);
+			if (equipments == null || equipments.isEmpty()) {
+				// second try: remove spaces and leading zeros
+				dicomSerialNumber = Utils.removeLeadingZeroes(dicomSerialNumber.trim());
+				equipments = findAllBySerialNumber(dicomSerialNumber);
+				// nothing found with device serial number from DICOM
+				if (equipments == null || equipments.isEmpty()) {
+					equipments = new ArrayList<AcquisitionEquipment>();
+					autoCreateNewAcquisitionEquipment(equipmentDicom, equipments);
+				} else {
+					matchOrRemoveEquipments(equipmentDicom, equipments);
+					if (equipments.isEmpty()) {
+						autoCreateNewAcquisitionEquipment(equipmentDicom, equipments);
+					}
+				}
+			} else {
+				matchOrRemoveEquipments(equipmentDicom, equipments);
+				if (equipments.isEmpty()) {
+					autoCreateNewAcquisitionEquipment(equipmentDicom, equipments);
+				}
+			}
+			return equipments;
+		}
+		return null;
+	}
+
+	private void autoCreateNewAcquisitionEquipment(EquipmentDicom equipmentDicom, List<AcquisitionEquipment> equipments) {
+		AcquisitionEquipment equipment = new AcquisitionEquipment();
+		Manufacturer manufacturer = new Manufacturer();
+		manufacturer.setName(equipmentDicom.getManufacturer());
+		ManufacturerModel manufacturerModel = new ManufacturerModel();
+		manufacturerModel.setName(equipmentDicom.getManufacturerModelName());
+		manufacturerModel.setManufacturer(manufacturer);
+		equipment.setManufacturerModel(manufacturerModel);
+		Center center = new Center();
+		center.setId(1L); // change later to correct center
+		equipment.setCenter(center);
+		AcquisitionEquipment newDbAcEq = repository.save(equipment);
+		equipments.add(newDbAcEq);
+	}
+
+	private void matchOrRemoveEquipments(EquipmentDicom equipmentDicom, List<AcquisitionEquipment> equipments) {
+		for (Iterator<AcquisitionEquipment> iterator = equipments.iterator(); iterator.hasNext();) {
+			AcquisitionEquipment acquisitionEquipment = (AcquisitionEquipment) iterator.next();
+			ManufacturerModel manufacturerModel = acquisitionEquipment.getManufacturerModel();
+			if (manufacturerModel != null) {
+				if (equipmentDicom.getManufacturerModelName().contains(manufacturerModel.getName())) {
+					Manufacturer manufacturer = manufacturerModel.getManufacturer();
+					if (manufacturer != null) {
+						if (equipmentDicom.getManufacturer().contains(manufacturer.getName())) {
+							// keep in list, as matching equipment found with high probability
+						} else {
+							iterator.remove();
+						}
+					} else {
+						iterator.remove();
+					}
+				} else {
+					iterator.remove();
+				}
+			} else {
+				iterator.remove();
+			}
+		}
 	}
 
 }

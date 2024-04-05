@@ -30,7 +30,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li>
 						<label>Name</label>
 						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">	
+							<ng-template [ngSwitchCase]="'view'">
 								{{qualityCard.name}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
@@ -73,6 +73,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<legend>
 					Rules
 				</legend>
+				<div class="info left-icon">
+					This rule set will be applied to each given examination
+				</div>
 				<study-card-rules class="rules" [formGroup]="form"
 					cardType="qualitycard"
 					formControlName="rules"
@@ -83,12 +86,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					(selectedRulesChange)="selectedRules = $event"> <!-- (importRules)="importRules()" -->
 				</study-card-rules>
 			</fieldset>
+			<fieldset *ngIf="progress > 0 && progress < 1" class="progress">
+				<progress-bar [progress]="progress"></progress-bar>
+				Computing quality checks...
+			</fieldset>
 			<fieldset class="report" *ngIf="report">
 				<legend>
 					Application Report 
 					<span *ngIf="reportIsTest">(test)</span>
 				</legend>
-				<shanoir-table class="report"
+				<shanoir-table #table class="report"
                     [getPage]="getPage.bind(this)"
                     [columnDefs]="reportColumns"
                     [browserSearch]="false"

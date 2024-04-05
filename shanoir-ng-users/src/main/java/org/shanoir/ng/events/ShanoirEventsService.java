@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.commons.lang3.time.DateUtils;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.tasks.AsyncTaskApiController;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,15 +35,35 @@ public class ShanoirEventsService {
 	public void addEvent(ShanoirEvent event) {
 		// Call repository
 		repository.save(event);
-
+		// This is sad but with the @CreationTimestamp the date is not returned by the save method 
+		ShanoirEvent saved = repository.findById(event.getId()).orElse(null);
 		// Push notification to UI
-		if (ShanoirEventType.IMPORT_DATASET_EVENT.equals(event.getEventType())) {
-			sendSseEventsToUI(event);
+		if (ShanoirEventType.IMPORT_DATASET_EVENT.equals(event.getEventType())
+			  || ShanoirEventType.EXECUTION_MONITORING_EVENT.equals(event.getEventType())
+				|| ShanoirEventType.COPY_DATASET_EVENT.equals(event.getEventType())
+				|| ShanoirEventType.CHECK_QUALITY_EVENT.equals(event.getEventType())) { 
+			sendSseEventsToUI(saved);
 		}
 	}
 
-	public List<ShanoirEvent> getEventsByUserAndType(Long userId, String eventType) {
-		return Utils.toList(repository.findByUserIdAndEventType(userId, eventType));
+	public List<ShanoirEvent> getEventsByUserIdAndTypeIn(Long userId, List<String> eventType) {
+		return Utils.toList(repository.findByUserIdAndEventTypeIn(userId, eventType));
+	}
+
+	public List<ShanoirEvent> getEventsByObjectIdAndTypeIn(String objectId, String eventType) {
+		return Utils.toList(repository.findByObjectIdAndEventType(objectId, eventType));
+  }
+    
+	public List<ShanoirEventLight> getEventsByUserAndType(Long userId, String... eventType) {
+		List<String> list = new ArrayList<String>();
+		for (String type : eventType) {
+			list.add(type);
+		}
+		List<ShanoirEventLight> events = new ArrayList<>();
+		for (ShanoirEvent event : Utils.toList(repository.findByUserIdAndEventTypeIn(userId, list))) {
+			events.add(event.toLightEvent());
+		}
+		return events;
 	}
 
 	/**
@@ -62,6 +83,9 @@ public class ShanoirEventsService {
 	public void sendSseEventsToUI(ShanoirEvent notification) {
         List<SseEmitter> sseEmitterListToRemove = new ArrayList<>();
         AsyncTaskApiController.emitters.forEach((SseEmitter emitter) -> {
+			if (notification.getLastUpdate() == null) {
+				notification.setLastUpdate(new Date());
+			}
             try {
                 emitter.send(notification, MediaType.APPLICATION_JSON);
             } catch (IOException e2) {
@@ -91,5 +115,10 @@ public class ShanoirEventsService {
             }
         });
         AsyncTaskApiController.emitters.removeAll(sseEmitterListToRemove);
+	}
+
+	public ShanoirEvent findById(Long taskId) {
+		Long userId = KeycloakUtil.getTokenUserId();
+		return repository.findByIdAndUserId(taskId, userId);
 	}
 }

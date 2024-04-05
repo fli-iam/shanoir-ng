@@ -14,10 +14,15 @@
 
 package org.shanoir.ng.studycard.model.rule;
 
-import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
-import org.dcm4che3.data.Attributes;
 import org.hibernate.annotations.GenericGenerator;
+import org.shanoir.ng.download.ExaminationAttributes;
+import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.model.SubjectStudy;
@@ -28,22 +33,28 @@ import org.shanoir.ng.studycard.model.ExaminationData;
 import org.shanoir.ng.studycard.model.condition.ExamMetadataCondOnAcq;
 import org.shanoir.ng.studycard.model.condition.ExamMetadataCondOnDatasets;
 import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
-import org.shanoir.ng.studycard.model.condition.StudyCardDICOMCondition;
+import org.shanoir.ng.studycard.model.condition.StudyCardDICOMConditionOnDatasets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
 public class QualityExaminationRule extends AbstractEntity {
 
 	private Integer tag;
-	
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+
+    @NotNull
+	private boolean orConditions;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	// there is a join table because a rule_id fk would lead to an ambiguity and bugs 
 	// because it could refer to a study card or quality card rule
 	@JoinTable(name="quality_card_condition_join", joinColumns = {@JoinColumn(name = "quality_card_rule_id")}, inverseJoinColumns = {@JoinColumn(name = "condition_id")})
@@ -64,23 +75,35 @@ public class QualityExaminationRule extends AbstractEntity {
 	public void setConditions(List<StudyCardCondition> conditions) {
 		this.conditions = conditions;
 	}
+    	
+	public boolean isOrConditions() {
+        return orConditions;
+    }
+
+    public void setOrConditions(boolean orConditions) {
+        this.orConditions = orConditions;
+    }
+
+    public void apply(Examination examination, QualityCardResult result, WADODownloaderService downloader) {
+        apply(examination, null, result, downloader);	        
+    }
 	
-	public void apply(Examination examination, Attributes examinationDicomAttributes, QualityCardResult result) {
+	public void apply(Examination examination, ExaminationAttributes<?> examinationDicomAttributes, QualityCardResult result, WADODownloaderService downloader) {
 	    ExaminationData examData = convert(examination);
 	    if (examData.getSubjectStudy() == null) {
 	        Logger log = LoggerFactory.getLogger(QualityExaminationRule.class);
 	        log.warn("No subject study in exam " + examination.getId());
 	    } else {
-	        apply(examData, examinationDicomAttributes, result);	        
+	        apply(examData, examinationDicomAttributes, result, downloader);	        
 	    }
     }
 
-    public void apply(ExaminationData examination, Attributes examinationDicomAttributes, QualityCardResult result) {
+    public void apply(ExaminationData examination, ExaminationAttributes<?> examinationDicomAttributes, QualityCardResult result, WADODownloaderService downloader) {
         if (this.getConditions() == null || this.getConditions().isEmpty()) {
             result.addUpdatedSubjectStudy( 
                     setTagToSubjectStudy(examination.getSubjectStudy()));
         } else {
-            ConditionResult conditionResult = conditionsfulfilled(examinationDicomAttributes, examination, result);
+            ConditionResult conditionResult = conditionsfulfilled(examinationDicomAttributes, examination, result, downloader);
             if (conditionResult.isFulfilled()) {
                 result.addUpdatedSubjectStudy( 
                         setTagToSubjectStudy(examination.getSubjectStudy()));
@@ -91,6 +114,7 @@ public class QualityExaminationRule extends AbstractEntity {
             if ((conditionResult.isFulfilled() && !getQualityTag().equals(QualityTag.VALID))
                     || (!conditionResult.isFulfilled() && getQualityTag().equals(QualityTag.VALID))) {
                 QualityCardResultEntry resultEntry = initResult(examination);
+                resultEntry.setFailedValid(QualityTag.VALID.equals(getQualityTag()) && !conditionResult.isFulfilled());       
                 resultEntry.setTagSet(getQualityTag());
                 if (conditionResult.isFulfilled()) {
                     resultEntry.setMessage("Tag " + getQualityTag().name() + " was set because those conditions were fulfilled : " + StringUtils.join(conditionResult.getFulfilledConditionsMsgList(), ", "));                   
@@ -117,15 +141,35 @@ public class QualityExaminationRule extends AbstractEntity {
         return subjectStudyCopy;
     }
 
-    private ConditionResult conditionsfulfilled(Attributes dicomAttributes, ExaminationData examination, QualityCardResult result) {
+    /**
+     * 
+     * @param dicomAttributes if null conditions will be checked on the examination data and dicom data will be fetched from pacs.
+     * Else conditions will be checked on the looping on the given dicom attributes 
+     * @param examination
+     * @param result
+     * @return
+     */
+    private ConditionResult conditionsfulfilled(ExaminationAttributes<?> dicomAttributes, ExaminationData examination, QualityCardResult result, WADODownloaderService downloader) {
         boolean allFulfilled = true;
         ConditionResult condResult = new ConditionResult();
         Collections.sort(conditions, new ConditionComparator()); // sort by level
+        boolean pilotedByDicomAttributes;
+        ExaminationAttributes<Long> examinationAttributesCache = new ExaminationAttributes<Long>(downloader.getWadoURLHandler());
+        if (dicomAttributes != null) {
+            pilotedByDicomAttributes = true;
+        } else {
+            pilotedByDicomAttributes = false;
+            examinationAttributesCache = new ExaminationAttributes<Long>(downloader.getWadoURLHandler());
+        }
         for (StudyCardCondition condition : getConditions()) {
             StringBuffer msg = new StringBuffer();
             boolean fulfilled = true;
-            if (condition instanceof StudyCardDICOMCondition) {
-                fulfilled = ((StudyCardDICOMCondition) condition).fulfilled(dicomAttributes, msg);
+            if (condition instanceof StudyCardDICOMConditionOnDatasets) {
+                if (pilotedByDicomAttributes) {
+                    fulfilled = ((StudyCardDICOMConditionOnDatasets) condition).fulfilled(dicomAttributes, msg);
+                } else {
+                    fulfilled = ((StudyCardDICOMConditionOnDatasets) condition).fulfilled(examination.getDatasetAcquisitions(), examinationAttributesCache, downloader, msg);
+                }
             } else if (condition instanceof ExamMetadataCondOnAcq) {
                 fulfilled = ((ExamMetadataCondOnAcq) condition).fulfilled(examination.getDatasetAcquisitions(), msg);
             } else if (condition instanceof ExamMetadataCondOnDatasets) {
@@ -138,7 +182,13 @@ public class QualityExaminationRule extends AbstractEntity {
             } else {
                 condResult.addUnfulfilledConditionsMsg(msg.toString());
             }
-            allFulfilled &= fulfilled;
+            if (isOrConditions() && fulfilled) {
+                allFulfilled = true;
+                break;
+            }
+            else {
+                allFulfilled &= fulfilled;
+            }
         }
         condResult.setFulfilled(allFulfilled);
         return condResult;
@@ -180,7 +230,7 @@ public class QualityExaminationRule extends AbstractEntity {
          * the higher the priority, the higher is the returned number.
          */
         private int priority(StudyCardCondition condition) {
-            if (condition instanceof StudyCardDICOMCondition) {
+            if (condition instanceof StudyCardDICOMConditionOnDatasets) {
                 return 1;
             } else if (condition instanceof ExamMetadataCondOnAcq) {
                 return 3;
@@ -221,5 +271,16 @@ public class QualityExaminationRule extends AbstractEntity {
         public void addUnfulfilledConditionsMsg(String msg) {
             this.unfulfilledConditionsMsgList.add(msg);
         }
+    }
+
+    public boolean hasDicomConditions() {
+        if (getConditions() != null) {
+            for (StudyCardCondition condition: getConditions()) {
+                if (condition instanceof StudyCardDICOMConditionOnDatasets) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

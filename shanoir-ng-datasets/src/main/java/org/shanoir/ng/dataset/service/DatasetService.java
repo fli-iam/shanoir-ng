@@ -18,6 +18,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -44,7 +45,7 @@ public interface DatasetService {
 	 * @throws ShanoirException 
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#id, 'CAN_ADMINISTRATE'))")
-	void deleteById(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException;
+	void deleteById(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
 	
 	/**
 	 * Delete several datasets.
@@ -53,7 +54,7 @@ public interface DatasetService {
 	 * @throws EntityNotFoundException
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnEveryDataset(#ids, 'CAN_ADMINISTRATE'))")
-	void deleteByIdIn(List<Long> ids) throws EntityNotFoundException, SolrServerException, IOException;
+	void deleteByIdIn(List<Long> ids) throws ShanoirException, SolrServerException, IOException, RestServiceException;
 
 	/**
 	 * Find dataset by its id.
@@ -103,6 +104,7 @@ public interface DatasetService {
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetList(returnObject, 'CAN_SEE_ALL')")
 	List<Dataset> findAll();
 
+
 	/**
 	 * Fetch the asked page
 	 * 
@@ -116,6 +118,9 @@ public interface DatasetService {
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetList(returnObject, 'CAN_SEE_ALL')")
 	List<Dataset> findByStudyId(Long studyId);
+
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
+	int countByStudyId(Long studyId);
 
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
 	List<VolumeByFormatDTO> getVolumeByFormat(Long studyId);
@@ -145,5 +150,4 @@ public interface DatasetService {
 	
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#dataset.getId(), 'CAN_ADMINISTRATE'))")
 	void deleteDatasetFromPacs(Dataset dataset) throws ShanoirException;
-
 }

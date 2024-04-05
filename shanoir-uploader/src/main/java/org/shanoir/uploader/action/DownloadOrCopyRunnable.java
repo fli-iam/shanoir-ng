@@ -65,14 +65,11 @@ public class DownloadOrCopyRunnable implements Runnable {
 			allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(this.isFromPACS, selectedSeries, uploadFolder, dicomFileAnalyzer, dicomServerClient, filePathDicomDir);
 		
 			/**
-			 * 2. Fill MRI information into serie from first DICOM file of each serie
-			 * This has already been done for CD/DVD import, but not yet here for PACS.
+			 * 2. Fill MRI information into all series from first DICOM file of each serie
 			 */
-			if (this.isFromPACS) {
-				for (Iterator iterator = selectedSeries.iterator(); iterator.hasNext();) {
-					SerieTreeNode serieTreeNode = (SerieTreeNode) iterator.next();
-					dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(uploadFolder.getAbsolutePath(), serieTreeNode.getSerie(), null, isFromPACS);
-				}
+			for (Iterator<SerieTreeNode> iterator = selectedSeries.iterator(); iterator.hasNext();) {
+				SerieTreeNode serieTreeNode = (SerieTreeNode) iterator.next();
+				dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(uploadFolder.getAbsolutePath(), serieTreeNode.getSerie(), null, isFromPACS);
 			}
 		} catch (FileNotFoundException e) {
 			logger.error(e.getMessage(), e);
@@ -93,7 +90,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 		 * 4. Write the NominativeDataUploadJobManager for displaying the download state
 		 */
 		NominativeDataUploadJob dataJob = new NominativeDataUploadJob();
-		ImportUtils.initDataUploadJob(selectedSeries, dicomData, dataJob);
+		ImportUtils.initDataUploadJob(uploadJob, dicomData, dataJob);
 		if (allFileNames == null) {
 			dataJob.setUploadState(UploadState.ERROR);
 		}

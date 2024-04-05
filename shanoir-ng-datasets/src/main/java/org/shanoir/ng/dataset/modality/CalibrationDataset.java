@@ -36,6 +36,17 @@ public class CalibrationDataset extends Dataset {
 	/** Calibration Dataset Nature. */
 	private Integer calibrationDatasetType;
 
+	public CalibrationDataset() { }
+
+	public CalibrationDataset(Dataset other) {
+		super(other);
+		if (((CalibrationDataset) other).getCalibrationDatasetType() != null) {
+			this.calibrationDatasetType = ((CalibrationDataset) other).getCalibrationDatasetType().getId();
+		} else {
+			this.calibrationDatasetType = null;
+		}
+	}
+
 	/**
 	 * @return the calibrationDatasetType
 	 */

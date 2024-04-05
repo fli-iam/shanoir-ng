@@ -2,7 +2,6 @@ package org.shanoir.uploader.action;
 
 import java.awt.Color;
 import java.io.File;
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -12,7 +11,7 @@ import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
 import org.shanoir.uploader.ShUpConfig;
-import org.shanoir.uploader.dicom.query.SerieTreeNode;
+import org.shanoir.uploader.dicom.MRI;
 import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
@@ -67,7 +66,7 @@ public class ImportDialogOpener {
 					ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
 					importStudyAndStudyCardCBIL, importFinishAL, importStudyCardFilterDocumentListener);
 			// update import dialog with items from server
-			updateImportDialogForSubject(subject); // this has to be done after init of dialog
+			updateImportDialogForSubject(subject); // this has to be done after init of the dialog
 			updateImportDialogForNewExamFields(studyDate, uploadJob.getStudyDescription());
 			updateImportDialogForStudyAndStudyCard(studiesWithStudyCards);
 			updateImportDialogForMRICenter(uploadJob);
@@ -84,14 +83,14 @@ public class ImportDialogOpener {
 	 * @param uploadJob
 	 */
 	private void updateImportDialogForMRICenter(final UploadJob uploadJob) {
-		SerieTreeNode firstSerie = uploadJob.getSeries().iterator().next();
- 		String institutionName = firstSerie.getMriInformation().getInstitutionName();
-		String institutionAddress = firstSerie.getMriInformation().getInstitutionAddress();
-		String stationName = firstSerie.getMriInformation().getStationName();
-		String manufacturer = firstSerie.getMriInformation().getManufacturer();
-		String manufacturersModelName = firstSerie.getMriInformation().getManufacturersModelName();
-		String magneticFieldStrength = firstSerie.getMriInformation().getMagneticFieldStrength();
-		String deviceSerialNumber = firstSerie.getMriInformation().getDeviceSerialNumber();
+		MRI mriInformation = uploadJob.getMriInformation();
+ 		String institutionName = mriInformation.getInstitutionName();
+		String institutionAddress = mriInformation.getInstitutionAddress();
+		String stationName = mriInformation.getStationName();
+		String manufacturer = mriInformation.getManufacturer();
+		String manufacturersModelName = mriInformation.getManufacturersModelName();
+		String magneticFieldStrength = mriInformation.getMagneticFieldStrength();
+		String deviceSerialNumber = mriInformation.getDeviceSerialNumber();
 		importDialog.mriCenterText.setText(institutionName);
 		importDialog.mriCenterAddressText.setText(institutionAddress);
 		importDialog.mriStationNameText.setText(stationName);
@@ -109,20 +108,18 @@ public class ImportDialogOpener {
 	 * @throws Exception 
 	 */
 	private List<Study> getStudiesWithStudyCards(final UploadJob uploadJob) throws Exception {
-		SerieTreeNode firstSerie = uploadJob.getSeries().iterator().next();
-		String deviceSerialNumber = firstSerie.getMriInformation().getDeviceSerialNumber();
 		List<Study> studies = shanoirUploaderServiceClient.findStudiesNamesAndCenters();
 		if (studies != null) {
 			logger.info("getStudiesWithStudyCards: " + studies.size() + " studies found.");
 			List<AcquisitionEquipment> acquisitionEquipments = shanoirUploaderServiceClient.findAcquisitionEquipments();
 			logger.info("findAcquisitionEquipments: " + acquisitionEquipments.size() + " equipments found.");
 			List<StudyCard> studyCards = getAllStudyCards(studies);
+			logger.info("getAllStudyCards for studies: " + studyCards.size() + " studycards found.");
 			for (Iterator<Study> iterator = studies.iterator(); iterator.hasNext();) {
 				Study study = (Study) iterator.next();
 				study.setCompatible(new Boolean(false));
 				Boolean compatibleStudyCard = false;
 				if (studyCards != null) {
-					logger.info("getAllStudyCards: " + studyCards.size() + " studycards found.");
 					List<StudyCard> studyCardsStudy = new ArrayList<StudyCard>();
 					for (Iterator<StudyCard> itStudyCards = studyCards.iterator(); itStudyCards.hasNext();) {
 						StudyCard studyCard = (StudyCard) itStudyCards.next();
@@ -141,6 +138,7 @@ public class ImportDialogOpener {
 										&& acquisitionEquipment.getManufacturerModel().getManufacturer() != null
 										&& acquisitionEquipment.getSerialNumber() != null) {
 										// check if values are present in DICOM
+										String deviceSerialNumber = uploadJob.getMriInformation().getDeviceSerialNumber();
 										if (deviceSerialNumber != null && !"".equals(deviceSerialNumber)) {
 											if (acquisitionEquipment.getSerialNumber().compareToIgnoreCase(deviceSerialNumber) == 0
 												|| deviceSerialNumber.contains(acquisitionEquipment.getSerialNumber())) {
@@ -176,7 +174,7 @@ public class ImportDialogOpener {
 		}
 	}
 
-	private List<StudyCard> getAllStudyCards(List<Study> studies) throws IOException {
+	private List<StudyCard> getAllStudyCards(List<Study> studies) throws Exception {
 		IdList idList = new IdList();
 		for (Iterator<Study> iterator = studies.iterator(); iterator.hasNext();) {
 			Study study = (Study) iterator.next();

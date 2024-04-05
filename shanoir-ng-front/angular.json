@@ -26,7 +26,7 @@
               "src/styles.css"
             ],
             "scripts": [],
-            "allowedCommonJsDependencies": [ 
+            "allowedCommonJsDependencies": [
               "sha.js"
            ],
             "vendorChunk": true,
@@ -59,7 +59,7 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "6kb",
+                  "maximumWarning": "10kb",
                   "maximumError": "10kb"
                 }
               ]
@@ -70,18 +70,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "shanoir-ng-front:build"
+            "buildTarget": "shanoir-ng-front:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "shanoir-ng-front:build:production"
+              "buildTarget": "shanoir-ng-front:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "shanoir-ng-front:build"
+            "buildTarget": "shanoir-ng-front:build"
           }
         },
         "test": {

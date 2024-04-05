@@ -17,6 +17,7 @@ package org.shanoir.ng.datasetacquisition.service;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -56,14 +57,14 @@ public interface DatasetAcquisitionService {
 	@PreAuthorize("#entity.getId() == null and (hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#entity.getExamination().getId(), 'CAN_IMPORT')))")
 	DatasetAcquisition create(DatasetAcquisition entity);
 
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasUpdateRightOnDatasetAcquisition(#entity, 'CAN_ADMINISTRATE')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnExamination(#entity.examination.id, 'CAN_ADMINISTRATE')")
 	DatasetAcquisition update(DatasetAcquisition entity) throws EntityNotFoundException;
 	
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnEveryTrustedDatasetAcquisition(#entities, 'CAN_ADMINISTRATE')")
 	Iterable<DatasetAcquisition> update(List<DatasetAcquisition> entities);
 	
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnDatasetAcquisition(#id, 'CAN_ADMINISTRATE')")
-	void deleteById(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException;
+	void deleteById(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
 
     boolean existsByStudyCardId(Long studyCardId);
 

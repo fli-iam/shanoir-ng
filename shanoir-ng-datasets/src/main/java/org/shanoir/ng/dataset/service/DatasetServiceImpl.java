@@ -14,8 +14,6 @@
 
 package org.shanoir.ng.dataset.service;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -27,10 +25,14 @@ import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
+import org.shanoir.ng.processing.service.DatasetProcessingService;
+import org.shanoir.ng.property.service.DatasetPropertyService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
@@ -43,6 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriUtils;
@@ -51,10 +54,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -65,9 +65,6 @@ import java.util.stream.Collectors;
  */
 @Service
 public class DatasetServiceImpl implements DatasetService {
-
-	@PersistenceContext
-	private EntityManager entityManager;
 
 	@Autowired
 	private DatasetRepository repository;
@@ -84,68 +81,84 @@ public class DatasetServiceImpl implements DatasetService {
 	@Autowired
 	private DICOMWebService dicomWebService;
 
+	@Autowired
+	private DatasetPropertyService propertyService;
+
 	@Value("${dcm4chee-arc.dicom.web}")
 	private boolean dicomWeb;
+	@Autowired
+	private DatasetProcessingService processingService;
 
 	@Override
-	public void deleteById(final Long id) throws ShanoirException, SolrServerException, IOException {
-		final Dataset datasetDb = repository.findById(id).orElse(null);
-		if (datasetDb == null) {
-			throw new EntityNotFoundException(Dataset.class, id);
+	@Transactional
+	public void deleteById(final Long id) throws ShanoirException, SolrServerException, IOException, RestServiceException {
+
+		List<Dataset> childDatasets = repository.findBySourceId(id);
+
+		if (!CollectionUtils.isEmpty(childDatasets)) {
+			throw new RestServiceException(
+					new ErrorModel(
+							HttpStatus.UNPROCESSABLE_ENTITY.value(),
+							"This dataset is linked to another dataset that was copied."
+					));
 		}
+
+		final Dataset dataset = repository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
+
+		processingService.removeDatasetFromAllProcessingInput(id);
+		propertyService.deleteByDatasetId(id);
 		repository.deleteById(id);
+
+		if (dataset.getSourceId() == null) {
+			this.deleteDatasetFromPacs(dataset);
+		}
 		solrService.deleteFromIndex(id);
-		this.deleteDatasetFromPacs(datasetDb);
-		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, datasetDb.getStudyId()));
+		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, dataset.getStudyId()));
 	}
 
 	@Override
 	public void deleteDatasetFromPacs(Dataset dataset) throws ShanoirException {
-		if (dicomWeb) {
-			for (DatasetExpression expression : dataset.getDatasetExpressions()) {
-				if (DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat())) {
-					for (DatasetFile file : expression.getDatasetFiles()) {
-						if (file.isPacs()) {
-							dicomWebService.deleteDicomFilesFromPacs(file.getPath());
-						}
-					}
-				} else {
-					for (DatasetFile file : expression.getDatasetFiles()) {
-						if (!file.isPacs()) {
-							try {
-								URL url = new URL(file.getPath().replaceAll("%20", " "));
-								File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
-								FileUtils.deleteQuietly(srcFile);
-							} catch (MalformedURLException e) {
-								throw new ShanoirException("Error while deleting dataset file", e);
-							}
-						}
+        if (!dicomWeb) {
+            return;
+        }
+        for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+
+			boolean isDicom = DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat());
+
+			for (DatasetFile file : expression.getDatasetFiles()) {
+				if(isDicom && file.isPacs()){
+					dicomWebService.deleteDicomFilesFromPacs(file.getPath());
+				} else if (!file.isPacs()) {
+					try {
+						URL url = new URL(file.getPath().replaceAll("%20", " "));
+						File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
+						FileUtils.deleteQuietly(srcFile);
+					} catch (MalformedURLException e) {
+						throw new ShanoirException("Error while deleting dataset file", e);
 					}
 				}
+
 			}
-		} else {
-			// Do not delete here -> REST API does not exist.
-		}
-	}
+        }
+    }
 
 	@Override
 	@Transactional
-	public void deleteByIdIn(List<Long> ids) throws EntityNotFoundException, SolrServerException, IOException {
-		List<Dataset> dss = this.findByIdIn(ids);
-		Map<Long, Long> datasetStudyMap = new HashMap<>();
-		for (Dataset ds : dss) {
-			datasetStudyMap.put(ds.getId(), ds.getStudyId());
+	public void deleteByIdIn(List<Long> ids) throws ShanoirException, SolrServerException, IOException, RestServiceException {
+		for(Long id : ids){
+			this.deleteById(id);
 		}
-		repository.deleteByIdIn(ids);
-		solrService.deleteFromIndex(ids);
-		for (Long id : ids) {
-			shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, datasetStudyMap.get(id)));
-		}
-	}
+    }
 
 	@Override
 	public Dataset findById(final Long id) {
 		return repository.findById(id).orElse(null);
+	}
+
+	@Override
+	public int countByStudyId(Long studyId) {
+		return repository.countByDatasetAcquisition_Examination_Study_Id(studyId);
 	}
 
 	@Override
@@ -185,7 +198,7 @@ public class DatasetServiceImpl implements DatasetService {
 		datasetDb.setId(dataset.getId());
 		datasetDb.setProcessings(dataset.getProcessings());
 		datasetDb.setSubjectId(dataset.getSubjectId());
-		if (dataset.getOriginMetadata().getId().equals(dataset.getUpdatedMetadata().getId())) {
+		if (dataset.getUpdatedMetadata().getId().equals(dataset.getOriginMetadata().getId())) {
 			// Force creation of a new dataset metadata
 			dataset.getUpdatedMetadata().setId(null);
 		}

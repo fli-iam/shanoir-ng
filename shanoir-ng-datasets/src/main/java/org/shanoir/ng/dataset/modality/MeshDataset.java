@@ -33,6 +33,12 @@ public class MeshDataset extends Dataset {
 	 */
 	private static final long serialVersionUID = 5177847059488327065L;
 
+	public MeshDataset() {}
+
+	public MeshDataset(Dataset other) {
+		super(other);
+	}
+
 	@Override
 	public String getType() {
 		return "Mesh";

@@ -18,6 +18,8 @@ public class ShanoirEvent {
 
 	protected String message;
 
+	protected String report;
+
 	protected int status;
 
 	protected Float progress;
@@ -32,7 +34,7 @@ public class ShanoirEvent {
 
 	public ShanoirEvent(String eventType, String objectId, Long userId, String message,	int status) {
 		this.eventType = eventType;
-		this.objectId = objectId;
+		setObjectId(objectId);
 		this.userId = userId;
 		this.message = message;
 		this.status = status;
@@ -42,7 +44,7 @@ public class ShanoirEvent {
 
 	public ShanoirEvent(String eventType, String objectId, Long userId, String message,	int status, Long studyId) {
 		this.eventType = eventType;
-		this.objectId = objectId;
+		setObjectId(objectId);
 		this.userId = userId;
 		this.message = message;
 		this.status = status;
@@ -95,7 +97,11 @@ public class ShanoirEvent {
 	 * @param objectId the objectId to set
 	 */
 	public void setObjectId(String objectId) {
-		this.objectId = objectId;
+		if (objectId != null && objectId.length() > 255) {
+			this.objectId = objectId.substring(0, 250) + "...";
+		} else {
+			this.objectId = objectId;
+		}
 	}
 
 	/**
@@ -123,7 +129,16 @@ public class ShanoirEvent {
 	 * @param message the message to set
 	 */
 	public void setMessage(String message) {
-		this.message = message;
+		this.message = message == null ? null : message.replaceAll("\uFFFD", "?");
+	}
+
+	public String getReport() {
+		return report;
+	}
+
+	public void setReport(String report) {
+		//.replaceAll("[^a-zA-Z0-9]+", "");
+		this.report = report == null ? null : report.replaceAll("\uFFFD", "?");
 	}
 
 	/**
@@ -175,5 +190,7 @@ public class ShanoirEvent {
     public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
     }
+
+	
 
 }

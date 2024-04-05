@@ -14,8 +14,8 @@
 
 package org.shanoir.ng.importer.service;
 
-import org.dcm4che3.data.Attributes;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.datasetacquisition.CtDatasetAcquisitionStrategy;
@@ -23,6 +23,7 @@ import org.shanoir.ng.importer.strategies.datasetacquisition.DatasetAcquisitionS
 import org.shanoir.ng.importer.strategies.datasetacquisition.GenericDatasetAcquisitionStrategy;
 import org.shanoir.ng.importer.strategies.datasetacquisition.MrDatasetAcquisitionStrategy;
 import org.shanoir.ng.importer.strategies.datasetacquisition.PetDatasetAcquisitionStrategy;
+import org.shanoir.ng.importer.strategies.datasetacquisition.XaDatasetAcquisitionStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -45,6 +46,9 @@ public class DatasetAcquisitionContext implements DatasetAcquisitionStrategy {
 	
 	@Autowired
 	private PetDatasetAcquisitionStrategy petDatasetAcquisitionStrategy;
+
+	@Autowired
+	private XaDatasetAcquisitionStrategy xaDatasetAcquisitionStrategy;
 	
 	@Autowired
 	private GenericDatasetAcquisitionStrategy genericDatasetAcquisitionStrategy;
@@ -52,7 +56,7 @@ public class DatasetAcquisitionContext implements DatasetAcquisitionStrategy {
 	// add other strategies for other modalities here
 
 	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, Attributes dicomAttributes) throws Exception {
+	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
 		DatasetAcquisitionStrategy datasetAcquisitionStrategy;
 		String modality = serie.getModality();
 		if ("MR".equals(modality)) {
@@ -61,7 +65,9 @@ public class DatasetAcquisitionContext implements DatasetAcquisitionStrategy {
 			datasetAcquisitionStrategy = ctDatasetAcquisitionStrategy;
 		} else if ("PT".equals(modality)) {
 			datasetAcquisitionStrategy = petDatasetAcquisitionStrategy;
-		} else {
+		} else if ("XA".equals(modality)) {
+			datasetAcquisitionStrategy = xaDatasetAcquisitionStrategy;
+		}else {
 			// By default we just create a generic dataset acquisition
 			datasetAcquisitionStrategy = genericDatasetAcquisitionStrategy;
 		}		

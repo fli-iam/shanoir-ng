@@ -192,8 +192,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </span>
         </div>
 
-        <div [hidden]="progressBar.progress == 0">
-            <progress-bar #progressBar [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
+        <div [hidden]="!progressState?.progress">
+            <progress-bar [progress]="progressState.progress"  [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
         </div>
 
         <div class="tabs">

@@ -14,7 +14,7 @@
 
 import { Component } from '@angular/core';
 import { AbstractControl, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
@@ -43,7 +43,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     public datasetModalityTypeStr: string;
     private nonEditableCenter: boolean = false;
     private lastSubmittedManufAndSerial: ManufacturerAndSerial;
-
+    fromImport: string;
 
     get acqEquip(): AcquisitionEquipment { return this.entity; }
     set acqEquip(acqEquip: AcquisitionEquipment) { this.entity = acqEquip; }
@@ -53,10 +53,12 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
             private acqEquipService: AcquisitionEquipmentService,
             private manufModelService: ManufacturerModelService,
             private centerService: CenterService,
-            private studyCardService: StudyCardService,
-            public manufacturerModelPipe: ManufacturerModelPipe) {
+            public manufacturerModelPipe: ManufacturerModelPipe,
+            protected router: Router) {
 
         super(route, 'acquisition-equipment');
+
+        this.fromImport = this.router.getCurrentNavigation()?.extras?.state?.fromImport;
     }
 
     getService(): EntityService<AcquisitionEquipment> {
@@ -104,6 +106,10 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
             centerSelected.name = this.acqEquip.center.name;
             this.acqEquip.center = centerSelected;
         }
+
+        if (this.fromImport) {
+            this.acqEquip.serialNumber = this.fromImport.split('-')[2] != "null" ? this.fromImport.split('-')[2] : "";
+        }
     }
 
     private updateAcquEq(): void {
@@ -133,7 +139,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     openNewManufModel() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/manufacturer-model/create']).then(success => {
-            this.subscribtions.push(
+            this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
                     (currentStep.entity as AcquisitionEquipment).manufacturerModel = entity as ManufacturerModel;
                 })
@@ -143,7 +149,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
 
     private registerManufAndSerialUnicityValidator(form: UntypedFormGroup) {
         this.onSubmitValidatedFields.push('serialNumber');
-        this.subscribtions.push(
+        this.subscriptions.push(
             form.get('manufacturerModel').valueChanges.subscribe(value => {
                 form.get('serialNumber').updateValueAndValidity();
             })

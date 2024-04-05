@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,7 +27,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -43,18 +47,22 @@ import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.PublicStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyStorageVolumeDTO;
+import org.shanoir.ng.study.dto.StudyStatisticsDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.dua.DataUserAgreement;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.security.StudyFieldEditionSecurityManager;
+import org.shanoir.ng.study.service.RelatedDatasetService;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.study.service.StudyUniqueConstraintManager;
 import org.shanoir.ng.study.service.StudyUserService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -65,6 +73,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import io.swagger.v3.oas.annotations.Parameter;
@@ -100,6 +109,10 @@ public class StudyApiController implements StudyApi {
 
 	@Autowired
 	private ShanoirEventService eventService;
+
+	@Autowired
+	private RelatedDatasetService relatedDatasetService;
+
 
 	private static final Logger LOG = LoggerFactory.getLogger(StudyApiController.class);
 
@@ -228,6 +241,29 @@ public class StudyApiController implements StudyApi {
 			studyUserList.add(studyUser);
 			study.setStudyUserList(studyUserList);
 		}
+	}
+
+	@Override
+	public ResponseEntity<String> copyDatasetsToStudy(
+			@Parameter(name = "Dataset ids to copy", required = true)
+			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
+			@Parameter(name = "Study id to copy in", required = true)
+			@RequestParam(value = "studyId", required = true) String studyIdAsStr,
+			@Parameter(name = "center id of datasets", required = true)
+			@RequestParam(value = "centerIds", required = true) List<Long> centerIds,
+			@Parameter(name = "subject id of datasets", required = true)
+			@RequestParam(value = "subjectIdStudyId", required = true) List<String> subjectIdStudyId) {
+
+		String res = null;
+		try {
+			Long studyId = Long.valueOf(studyIdAsStr);
+			res = relatedDatasetService.addCenterAndCopyDatasetToStudy(datasetIds, studyId, centerIds);
+			relatedDatasetService.addSubjectStudyToNewStudy(subjectIdStudyId, studyId);
+
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return new ResponseEntity<>(res, HttpStatus.OK);
 	}
 
 	@Override
@@ -509,6 +545,25 @@ public class StudyApiController implements StudyApi {
 			}
 		}
 		return filteredStudies;
+	}
+
+	@Override
+	public ResponseEntity<List<StudyStatisticsDTO>> getStudyStatistics(@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId)
+			throws RestServiceException, IOException {
+		try {
+			List<StudyStatisticsDTO> statistics = studyService.queryStudyStatistics(studyId);
+
+			return ResponseEntity.ok()
+			.contentType(MediaType.APPLICATION_JSON)
+			.body(statistics);
+
+		} catch (jakarta.persistence.NoResultException e) {
+			throw new RestServiceException(new ErrorModel(HttpStatus.NOT_FOUND.value(), "No result found.", e));
+		} catch (Exception e) {
+			LOG.error("Error while executing study statistics stored procedure.", e);
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while querying the database.", e));
+		}
 	}
 
 }

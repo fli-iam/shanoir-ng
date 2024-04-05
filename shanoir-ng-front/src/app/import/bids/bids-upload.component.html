@@ -20,7 +20,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <p>import.zip <br/>
      - sub-[SubjectName] <br/>
      - - ses-[examination-comment] <br/>
-     - - - [anat/func/dwi/eeg/ieeg/pet/..] <br/>
+     - - - [anat/func/dwi/eeg/ieeg/pet/nirs..] <br/>
      - - - - [list of data files] <br/>
      </p>
         <u>1) Subject: </u><br/>
@@ -58,7 +58,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </span>
         </li>
         <li>
-            <label>Select an associated center</label>
+            <label class="required-label">Select an associated center</label>
             <span class="right-col">
                 <select-box
                         [disabled]="(!study || !centerOptions || study.monoCenter || this.study.studyCenterList.length == 1)"
@@ -71,7 +71,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </ol>
 </fieldset>
 
-<upload-file (fileChange)="uploadArchive($event)" [loading]="archiveStatus == 'uploading'" [error]="archiveStatus == 'error'"></upload-file>
+<upload-file [disabled]="!center" (fileChange)="uploadArchive($event)" [loading]="archiveStatus == 'uploading'" [error]="archiveStatus == 'error'"></upload-file>
+
 <label *ngIf="archiveStatus == 'uploaded'" > Data successfully imported.</label>
 <label *ngIf="errorMessage" class="form-validation-alert" i18n="Import|ExtensionError label">
 {{errorMessage}}

@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ViewChild } from '@angular/core';
+import { Component, ComponentRef, ViewChild } from '@angular/core';
 import { FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -32,10 +32,16 @@ import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { QualityCard } from '../shared/quality-card.model';
-import { QualityCardService } from '../shared/quality-card.service';
+import { Interval, QualityCardService } from '../shared/quality-card.service';
 import { StudyCardRule } from '../shared/study-card.model';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
 import * as AppUtils from '../../utils/app.utils';
+import { ExaminationService } from 'src/app/examinations/shared/examination.service';
+import { ServiceLocator } from 'src/app/utils/locator.service';
+import { TestQualityCardOptionsComponent } from '../test-quality-card-options/test-quality-card-options.component';
+import { SuperPromise } from 'src/app/utils/super-promise';
+import { Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
 
 @Component({
     selector: 'quality-card',
@@ -67,11 +73,15 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
         {headerName: 'Details', field: 'message', wrap: true}
     ];
     forceStudyId: number;
+    nbExaminations: number;
+    progress: number;
+    readonly NB_EXAM_THRESHOLD: number = 50;
 
     constructor(
             private route: ActivatedRoute,
             private qualityCardService: QualityCardService, 
             private studyService: StudyService,
+            private examinationService: ExaminationService,
             private studyRightsService: StudyRightsService,
             keycloakService: KeycloakService,
             coilService: CoilService,
@@ -83,7 +93,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
         this.isAdminOrExpert = keycloakService.isUserAdminOrExpert();
         coilService.getAll().then(coils => this.allCoils = coils);
 
-        this.subscribtions.push(this.activatedRoute.params.subscribe(
+        this.subscriptions.push(this.activatedRoute.params.subscribe(
             params => {
                 this.forceStudyId = +params['studyId'];
             }
@@ -188,31 +198,74 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     test() {
         this.testing = true;
         this.report = null;
-        this.qualityCardService.testOnStudy(this.qualityCard.id).then(result => {
+
+        this.examinationService.findExaminationIdsByStudy(this.qualityCard.study.id).then(examIds => {
+            this.nbExaminations = examIds.length;
+            if (examIds?.length > 0) {
+                if (examIds.length > this.NB_EXAM_THRESHOLD) {
+                    this.openSetTestInterval(this.nbExaminations).then(response => {
+                        if (!response) {
+                            this.performTest();
+                        } else if (response instanceof Interval) {
+                            this.performTest((response as Interval).from, (response as Interval).to);
+                        }
+                    }).finally(() => {
+                        this.testing = false;
+                    });
+                } else {
+                    this.performTest();
+                }
+            }
+        });    
+    }
+
+    openSetTestInterval(nbExaminations: number): Promise<Interval | 'cancel'> {
+        let modalRef: ComponentRef<TestQualityCardOptionsComponent> = ServiceLocator.rootViewContainerRef.createComponent(TestQualityCardOptionsComponent);
+        modalRef.instance.nbExaminations = nbExaminations;
+        return this.waitForEnd(modalRef);
+    }
+
+    private waitForEnd(modalRef: ComponentRef<any>): Promise<Interval | 'cancel'> {
+        let resPromise: SuperPromise<any | 'cancel'> = new SuperPromise();
+        let result: Observable<any> = Observable.race([
+            modalRef.instance.test, 
+            modalRef.instance.close.map(() => 'cancel')
+        ]);
+        result.pipe(take(1)).subscribe(ret => {
+            modalRef.destroy();
+            resPromise.resolve(ret);
+        }, error => {
+            modalRef.destroy();
+            resPromise.reject(error);
+        });
+        return resPromise;
+    }
+
+    performTest(start?: number, stop?: number) {
+        this.qualityCardService.testOnStudy(this.qualityCard.id, start, stop).then(result => {
             this.report = new BrowserPaging(result, this.reportColumns);
             this.reportIsTest = true;
         }).finally(() => this.testing = false);
     }
 
-
     getPage(pageable: FilterablePageable): Promise<Page<any>> {
         return Promise.resolve(this.report.getPage(pageable));
     }
 
-    downloadReport() {
-        if (!this.report) return;
+    static downloadReport(report: any, name?: string) {
+        if (!report) return;
         let csvStr: string = '';
-        csvStr += this.report.columnDefs.map(col => col.headerName).join(',');
-        for (let entry of this.report.items) {
-            csvStr += '\n' + this.report.columnDefs.map(col => '"' + TableComponent.getCellValue(entry, col) + '"').join(',');
+        csvStr += report.columnDefs.map(col => col.headerName).join(',');
+        for (let entry of report.items) {
+            csvStr += '\n' + report.columnDefs.map(col => '"' + TableComponent.getCellValue(entry, col) + '"').join(',');
         }
         const csvBlob = new Blob([csvStr], {
             type: 'text/csv'
         });
-        AppUtils.browserDownloadFile(csvBlob, this.getReportFileName());
+        AppUtils.browserDownloadFile(csvBlob, 'qcReport_' + (name ? name + '_' : '') + Date.now().toLocaleString('fr-FR'));
     }
 
-    private getReportFileName(): string {
-        return 'qcReport_' + this.qualityCard.name + '_' + Date.now().toLocaleString('fr-FR');
+    protected downloadReport() {
+        QualityCardComponent.downloadReport(this.report, this.qualityCard?.name);
     }
 }

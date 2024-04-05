@@ -1,7 +1,6 @@
 package org.shanoir.uploader.action.init;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -10,11 +9,13 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.Random;
 import java.util.ResourceBundle;
+import java.util.TimeZone;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
@@ -23,6 +24,7 @@ import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.gui.ShUpStartupDialog;
 import org.shanoir.uploader.utils.Encryption;
 import org.shanoir.uploader.utils.Util;
+import org.shanoir.uploader.utils.PropertiesUtil;
 
 /**
  * This concrete state class is the initial state (entry point) of the state machine.
@@ -58,12 +60,13 @@ public class InitialStartupState implements State {
 		logger.info("Start running of ShanoirUploader...");
 		logger.info("Version: " + ShUpConfig.SHANOIR_UPLOADER_VERSION);
 		logger.info("Release Date: " + ShUpConfig.RELEASE_DATE);
-		logger.info(System.getProperty("java.vendor"));
-		logger.info(System.getProperty("java.vendor.url"));
-		logger.info(System.getProperty("java.version"));
+		logger.info("Java Vendor: " + System.getProperty("java.vendor"));
+		logger.info("Java Vendor URL: " + System.getProperty("java.vendor.url"));
+		logger.info("Java Version: " + System.getProperty("java.version"));
         InetAddress inetAddress = InetAddress.getLocalHost();
         logger.info("IP Address: " + inetAddress.getHostAddress());
         logger.info("Host Name: " + inetAddress.getHostName());
+		logger.info("TimeZone: " + System.getProperty("user.timezone") + ", " + TimeZone.getDefault() + ", " + ZoneId.systemDefault());
 		 // Disable http request to check for quartz upload
 		System.setProperty("org.quartz.scheduler.skipUpdateCheck", "true");
 		System.setProperty("jdk.http.auth.tunneling.disabledSchemes", "");
@@ -277,19 +280,7 @@ public class InitialStartupState implements State {
 		} else {
 			Util.copyFileFromJar(fileName, propertiesFile);
 		}
-		loadPropertiesFromFile(properties, propertiesFile);
-	}
-
-	private void loadPropertiesFromFile(final Properties properties, final File propertiesFile) {
-		try {
-			final FileInputStream fIS = new FileInputStream(propertiesFile);
-			properties.load(fIS);
-			fIS.close();
-		} catch (FileNotFoundException e) {
-			logger.error(e.getMessage(), e);
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-		}
+		PropertiesUtil.loadPropertiesFromFile(properties, propertiesFile);
 	}
 	
 	private void initLanguage() {
@@ -302,6 +293,7 @@ public class InitialStartupState implements State {
 	}
 
 	private void initProfile() throws FileNotFoundException, IOException {
+		// If profile property is not null or empty it means that the "remember profile" box was ticked in a previous execution. 
 		String profile = ShUpConfig.basicProperties.getProperty(ShUpConfig.PROFILE);
 		if (profile != null && !profile.isEmpty()) {
 			ShUpConfig.profileSelected = profile;

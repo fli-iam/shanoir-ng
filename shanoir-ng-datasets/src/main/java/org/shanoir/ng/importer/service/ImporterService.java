@@ -14,24 +14,66 @@
 
 package org.shanoir.ng.importer.service;
 
-import org.dcm4che3.data.Attributes;
-import org.shanoir.ng.dataset.modality.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.joda.time.DateTime;
+import org.shanoir.ng.dataset.modality.CalibrationDataset;
+import org.shanoir.ng.dataset.modality.CtDataset;
+import org.shanoir.ng.dataset.modality.EegDataset;
+import org.shanoir.ng.dataset.modality.MegDataset;
+import org.shanoir.ng.dataset.modality.MeshDataset;
+import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.dataset.modality.XaDataset;
+import org.shanoir.ng.dataset.modality.ParameterQuantificationDataset;
+import org.shanoir.ng.dataset.modality.PetDataset;
+import org.shanoir.ng.dataset.modality.RegistrationDataset;
+import org.shanoir.ng.dataset.modality.SegmentationDataset;
+import org.shanoir.ng.dataset.modality.SpectDataset;
+import org.shanoir.ng.dataset.modality.StatisticalDataset;
+import org.shanoir.ng.dataset.modality.TemplateDataset;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.*;
+import org.shanoir.ng.dataset.model.DatasetExpression;
+import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.model.DatasetMetadata;
+import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.DicomProcessing;
+import org.shanoir.ng.download.AcquisitionAttributes;
+import org.shanoir.ng.download.ExaminationAttributes;
+import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.importer.dto.*;
+import org.shanoir.ng.importer.dto.ImportJob;
+import org.shanoir.ng.importer.dto.Patient;
+import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
+import org.shanoir.ng.importer.dto.Serie;
+import org.shanoir.ng.importer.dto.Study;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.model.SubjectStudy;
+import org.shanoir.ng.shared.quality.QualityTag;
+import org.shanoir.ng.shared.service.SubjectStudyService;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.QualityException;
@@ -49,15 +91,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.time.LocalDate;
-import java.util.*;
 
 @Service
 @Scope("prototype")
@@ -101,7 +134,15 @@ public class ImporterService {
     private DatasetAcquisitionService datasetAcquisitionService;
 
     @Autowired
+	private SubjectStudyService subjectStudyService;
+
+    @Autowired
     private DicomProcessing dicomProcessing;
+
+    @Autowired
+    private WADODownloaderService downloader;
+
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
 
     private static final String SUBJECT_PREFIX = "sub-";
     
@@ -132,11 +173,21 @@ public class ImporterService {
                 generatedAcquisitions = generateAcquisitions(examination, importJob, event);
                 examination.getDatasetAcquisitions().addAll(generatedAcquisitions); // change to set() ?
                 // Quality check
-                QualityCardResult qualityResult = checkQuality(examination, importJob);                				
+                SubjectStudy subjectStudy = examination.getSubject().getSubjectStudyList().stream()
+                    .filter(ss -> ss.getStudy().getId().equals(examination.getStudy().getId()))
+                    .findFirst().orElse(null);
+                QualityTag tagSave = subjectStudy != null ? subjectStudy.getQualityTag() : null;
+                QualityCardResult qualityResult = checkQuality(examination, generatedAcquisitions, importJob);                				
                 // Has quality check passed ?
                 if (qualityResult.hasError()) {
                     throw new QualityException(examination, qualityResult);
                 } else { // Then do the import
+                    if (qualityResult.hasWarning() || qualityResult.hasFailedValid()) {
+                        event.setReport(qualityResult.toString());
+                    }
+                    // add tag to subject-study
+                    subjectStudyService.update(qualityResult.getUpdatedSubjectStudies());
+
                 	generatedAcquisitions = new HashSet<DatasetAcquisition>(datasetAcquisitionService.createAll(generatedAcquisitions));
                     try {
                         persistPatientInPacs(importJob.getPatients(), event);
@@ -145,7 +196,10 @@ public class ImporterService {
                         for (DatasetAcquisition acquisition : generatedAcquisitions) {
                             datasetAcquisitionService.deleteById(acquisition.getId());
                         }
-                        throw new ShanoirException("Error while saving data in pacs, the import is canceled and acquisitions were not saved");
+                        // revert quality tag
+                        subjectStudy.setQualityTag(tagSave);
+                        subjectStudyService.update(qualityResult.getUpdatedSubjectStudies());
+                        throw new ShanoirException("Error while saving data in pacs, the import is canceled and acquisitions were not saved", e);
                     }
                 }
             } else {
@@ -189,7 +243,8 @@ public class ImporterService {
         } catch (QualityException e) {
             String msg = e.buildErrorMessage();
             event.setStatus(ShanoirEvent.ERROR);
-            event.setMessage(msg);
+            event.setMessage("Quality checks didn't pass at import, import aborted");
+            event.setReport(e.getQualityResult().toString());
             event.setProgress(-1f);
             eventService.publishEvent(event);
             LOG.warn(msg, e);	
@@ -217,11 +272,11 @@ public class ImporterService {
                 float progress = 0.5f;
                 for (Serie serie : study.getSelectedSeries() ) {
                     // get dicomAttributes
-                    Attributes dicomAttributes = null;
+                    AcquisitionAttributes<String> dicomAttributes = null;
                     try {
-                        dicomAttributes = dicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced());
-                    } catch (IOException e) {
-                        throw new ShanoirException("Unable to retrieve dicom attributes in serie: " + serie.getSeriesDescription(), e);
+                        dicomAttributes = dicomProcessing.getDicomAcquisitionAttributes(serie, serie.getIsEnhanced());
+                    } catch (PacsException e) {
+                        throw new ShanoirException("Unable to retrieve dicom attributes in file " + serie.getFirstDatasetFileForCurrentSerie().getPath(), e);
                     }
                     
                     // Generate acquisition object with all sub objects : datasets, protocols, expressions, ...
@@ -249,24 +304,49 @@ public class ImporterService {
     }
 
     private QualityCardResult checkQuality(Examination examination, ImportJob importJob) throws ShanoirException {
-        Attributes dicomAttributes = null;
-        try {
-            Serie firstSerie = importJob.getFirstSerie();
-            if (firstSerie == null) {
-                throw new ShanoirException("The given import job does not provide any serie. Examination : " + examination.getId());
-            }
-            dicomAttributes = dicomProcessing.getDicomObjectAttributes(firstSerie.getFirstDatasetFileForCurrentSerie(), firstSerie.getIsEnhanced());
-        } catch (IOException e) {
-            throw new ShanoirException("Unable to retrieve dicom attributes for examination " + examination.getId(), e);
-        }
-        List<QualityCard> qualityCards = qualityCardService.findByStudy(examination.getStudyId());
         QualityCardResult qualityResult = new QualityCardResult();
+        List<QualityCard> qualityCards = qualityCardService.findByStudy(examination.getStudyId());
+        if (qualityCards == null || qualityCards.isEmpty()) {
+            return qualityResult;
+        }
+        boolean qualityCheck = false;
         for (QualityCard qualityCard : qualityCards) {
             if (qualityCard.isToCheckAtImport()) {
-                qualityResult.merge(qualityCard.apply(examination, dicomAttributes));                       
+                qualityCheck = true;
+                break;
+            }
+        }
+        if (!qualityCheck) {
+            return  qualityResult;
+        }
+        ExaminationAttributes<String> dicomAttributes = null;          
+        Study firstStudy = importJob.getFirstStudy();
+        if (firstStudy == null) {
+            throw new ShanoirException("The given import job does not provide any serie. Examination : " + examination.getId());
+        }
+        dicomAttributes = dicomProcessing.getDicomExaminationAttributes(firstStudy);
+
+        for (QualityCard qualityCard : qualityCards) {
+            if (qualityCard.isToCheckAtImport()) {
+                qualityResult.merge(qualityCard.apply(examination, dicomAttributes, downloader));                       
             }
         }
         return qualityResult;
+    }
+
+    private QualityCardResult checkQuality(Examination examination, Set<DatasetAcquisition> limitToTheseAcquisitions, ImportJob importJob) throws ShanoirException {
+        // save the exam acquisitions
+        List<DatasetAcquisition> saveList = new ArrayList<>();
+        for (DatasetAcquisition acquisition : examination.getDatasetAcquisitions()) {
+            saveList.add(acquisition);
+        }
+        // replace ths exam acquisitions by the reduced set
+        examination.setDatasetAcquisitions(Utils.toList(limitToTheseAcquisitions));
+        // check quality
+        QualityCardResult result = checkQuality(examination, importJob);
+        // set the data back
+        examination.setDatasetAcquisitions(saveList);
+        return result;
     }
 
     StudyCard getStudyCard(ImportJob importJob) {
@@ -314,7 +394,7 @@ public class ImporterService {
         }           
     }
 
-    public DatasetAcquisition createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob, Attributes dicomAttributes) throws Exception {
+    public DatasetAcquisition createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
         if (checkSerieForDicomImages(serie)) {
             DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob, dicomAttributes);			
             datasetAcquisition.setExamination(examination);
@@ -454,6 +534,10 @@ public class ImporterService {
                     dataset = new TemplateDataset();
                     originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
                     break;
+                case XaDataset.datasetType:
+                    dataset = new TemplateDataset();
+                    originMetadata.setDatasetModalityType(DatasetModalityType.XA_DATASET);
+                    break;
                 default:
                 break;
             }
@@ -470,7 +554,7 @@ public class ImporterService {
             String filePath = importJob.getProcessedDatasetFilePath();
             File srcFile = new File(filePath);
             String originalNiftiName = srcFile.getName();
-            File destFile = new File(outDir.getAbsolutePath() + File.separator + originalNiftiName);
+            File destFile = new File(outDir.getAbsolutePath() + File.separator + formatter.format(LocalDateTime.now()) + File.separator + originalNiftiName);
 
             // Save file
             Path location;

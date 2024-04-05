@@ -106,7 +106,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
                 <!-- display a progress bar -->
                 <ng-container *ngIf="col.type == 'progress'">
-                    <progress-bar [progress]="vars.render" width="100"></progress-bar>
+                    <progress-bar [progress]="vars.render?.progress != undefined ? vars.render?.progress : vars.render" width="100" [warning]="vars.render?.status == 5 || vars.render?.status == 3"></progress-bar>
                 </ng-container>
                 <div *ngIf="colIndex < columnDefs.length - 1" class="resizer" (mousedown)="startDrag(colIndex, refTd, $event, columnDefs)" (mouseup)="stopDrag()"></div>
             </td>
@@ -156,6 +156,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span>{{command.title}}</span>
             </button>
             <button type="button" *ngIf="command.action != undefined" (click)="command.action()" [disabled]="(command.disabledIfNoSelected && selection.size == 0) || (command.disabledIfNoResult && items?.length == 0)">
+                {{ command.hasCopyRight }}
                 <img *ngIf="command.img" src="{{command.img}}" />
                 <span *ngIf="command.awesome" class="awesome"><i class="fas {{command.awesome}}"></i></span>
                 <span>{{command.title}}</span>
@@ -237,7 +238,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span *ngIf="page && browserSearch">Found : {{page?.numberOfElements}}</span>
                 <span *ngIf="page">Total : {{page?.totalElements}}</span>
                 <span>Page size : <input class="max-results" [(ngModel)]="maxResultsField" (change)="updateMaxResults()" type="text"/></span>
-                <span (click)="settingsDialog.show()" class="clickable" [class.left-icon]="!compactMode" title="Columns settings">
+                <span>Go to page : <input class="max-results" [(ngModel)]="pageNumber" (keyup.enter)="jumpToPage(pageNumber)" type="number" [min]="0" [max]="page?.totalPages"/></span>
+                <span (click)="settingsOpened = true" class="clickable" [class.left-icon]="!compactMode" title="Columns settings">
                     <i class="fas fa-cog"></i>
                     <span *ngIf="!compactMode">Columns settings</span>
                 </span>
@@ -274,21 +276,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </tr>
 </tbody>
 
-<app-modal #settingsDialog>
-    <div class="main">
-        <div class="header">Table settings</div>
-        <div class="body">
-            <table>
-                <tr *ngFor="let col of subRowsDefs ? columnDefs.concat(subRowsDefs) : columnDefs">
-                    <td>{{col.headerName}}</td>
-                    <td><checkbox [(ngModel)]="col.hidden" [inverse]=true (ngModelChange)="saveSettings()"></checkbox></td>
-                    <td><input type="text" [(ngModel)]="col.width" (change)="saveSettings()"></td>
-                </tr>
-            </table>
-        </div>
-        <div class="footer">
-            <button type="button" (click)="resetColumns()">Reset</button>
-            <button type="button" (click)="settingsDialog.hide()">Close</button>
+<div class="modal-host" *ngIf="settingsOpened">
+    <div class="modal-cell">
+        <div class="modal-window">
+            <div class="header">Table settings</div>
+            <div class="body">
+                <table>
+                    <tr *ngFor="let col of subRowsDefs ? columnDefs.concat(subRowsDefs) : columnDefs">
+                        <td>{{col.headerName}}</td>
+                        <td><checkbox [(ngModel)]="col.hidden" [inverse]=true (ngModelChange)="saveSettings()"></checkbox></td>
+                        <td><input type="text" [(ngModel)]="col.width" (change)="saveSettings()"></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="footer">
+                <button type="button" (click)="resetColumns()">Reset</button>
+                <button type="button" (click)="settingsOpened = false">Close</button>
+            </div>
         </div>
     </div>
-</app-modal>
+</div>

@@ -43,7 +43,6 @@ import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.shanoir.ng.importer.model.Dataset;
 import org.shanoir.ng.importer.model.DatasetFile;
 import org.shanoir.ng.importer.model.DiffusionGradient;
-import org.shanoir.ng.importer.model.EchoTime;
 import org.shanoir.ng.importer.model.ExpressionFormat;
 import org.shanoir.ng.importer.model.Image;
 import org.shanoir.ng.importer.model.ImportJob;
@@ -51,6 +50,8 @@ import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.dicom.EchoTime;
+import org.shanoir.ng.shared.dicom.SerieToDatasetsSeparator;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -175,7 +176,6 @@ public class DatasetsCreatorAndNIfTIConverterService {
 					}
 					// as images/non-images are migrated to datasets, clear the list now
 					serie.getImages().clear();
-					serie.getNonImages().clear();
 				}
 				cpt++;
 			}
@@ -707,9 +707,10 @@ public class DatasetsCreatorAndNIfTIConverterService {
 					datasetMap.get(seriesToDatasetsSeparator).getRepetitionTimes().add(image.getRepetitionTime());
 					datasetMap.get(seriesToDatasetsSeparator).getInversionTimes().add(image.getInversionTime());
 					datasetMap.get(seriesToDatasetsSeparator).setEchoTimes(image.getEchoTimes());
-					// new dataset has to be created, new expression format and add image/datasetfile
+				// new dataset has to be created, new expression format and add image/datasetfile
 				} else {
 					Dataset dataset = new Dataset();
+					dataset.setFirstImageSOPInstanceUID(image.getSOPInstanceUID());
 					ExpressionFormat expressionFormat = new ExpressionFormat();
 					expressionFormat.setType("dcm");
 					dataset.getExpressionFormats().add(expressionFormat);

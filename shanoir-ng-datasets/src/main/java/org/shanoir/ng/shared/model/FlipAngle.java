@@ -52,6 +52,15 @@ public class FlipAngle extends AbstractEntity {
 	@NotNull
 	private String flipAngleValue;
 
+	public FlipAngle() {
+
+	}
+
+	public FlipAngle(FlipAngle other, MrDataset mr) {
+		this.mrDataset = mr;
+		this.flipAngleValue = other.flipAngleValue;
+	}
+
 	/**
 	 * @return the flipAngleValue
 	 */

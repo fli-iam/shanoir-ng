@@ -10,6 +10,17 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
+-- Manually create this table
+CREATE TABLE `study_card_condition` (
+                                        `id` bigint(20) NOT NULL AUTO_INCREMENT,
+                                        `dicom_tag` int(11) DEFAULT NULL,
+                                        `operation` int(11) NOT NULL,
+                                        `shanoir_field` int(11) DEFAULT NULL,
+                                        `scope` varchar(47) DEFAULT NULL,
+                                        `cardinality` int(11) DEFAULT NULL,
+                                        PRIMARY KEY (`id`)
+);
+
 -- Populates database for test
 
 INSERT INTO study
@@ -29,8 +40,8 @@ VALUES
 	(5,null,false,0,'QualityCard1',null,1);
 	
 INSERT INTO study_card_rule
-	(id, scope, study_card_id)
-VALUES (3,'DatasetAcquisition',1),(4,'DatasetAcquisition',1),(5,'DatasetAcquisition',1),(6,'DatasetAcquisition',1),(7,'Dataset',5),(8,'Dataset',5);
+	(id, scope, study_card_id, or_conditions)
+VALUES (3,'DatasetAcquisition',1,false),(4,'DatasetAcquisition',1,false),(5,'DatasetAcquisition',1,false),(6,'DatasetAcquisition',1,false),(7,'Dataset',5,false),(8,'Dataset',5,false);
 
 INSERT INTO study_card_assignment 
     (id, field, value, scope)
@@ -43,13 +54,13 @@ VALUES
 	(8,4,'4','Dataset');
 
 INSERT INTO study_card_condition
-	(id, shanoir_field, operation, scope, dicom_tag)
+	(id, shanoir_field, operation, scope, dicom_tag, cardinality)
 VALUES 
-	(1,2,4,'AcqMetadataCondOnAcq', null),
-	(2,2,4,'AcqMetadataCondOnAcq', null),
-	(3,1573009,5,'AcqMetadataCondOnAcq', null),
-	(4,1573009,6,'AcqMetadataCondOnAcq', null),
-	(5,1573013,6,'AcqMetadataCondOnAcq', null);
+	(1,2,4,'AcqMetadataCondOnAcq', null, 1),
+	(2,2,4,'AcqMetadataCondOnAcq', null, 1),
+	(3,1573009,5,'AcqMetadataCondOnAcq', null, 1),
+	(4,1573009,6,'AcqMetadataCondOnAcq', null, 1),
+	(5,1573013,6,'AcqMetadataCondOnAcq', null, 1);
 
 INSERT INTO study_card_condition_values
 	(value, study_card_condition_id)

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -44,8 +44,8 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
 
     constructor(
         private route: ActivatedRoute,
-        private modelService: PathologyModelService, 
-        private pathologyService: PathologyService) 
+        private modelService: PathologyModelService,
+        private pathologyService: PathologyService)
         {
 
             super(route, 'preclinical-pathology-model');
@@ -71,7 +71,7 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
             this.model = model;
             if(this.pathologies){
                 for(let patho of this.pathologies){
-                    if(patho.id == model.pathology.id) 
+                    if(patho.id == model.pathology.id)
                         this.model.pathology = patho;
                 }
             }
@@ -88,7 +88,7 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
 
     buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
-            'name': [this.model.name, Validators.required],
+            'name': [this.model.name, [Validators.required, this.registerOnSubmitValidator('unique', 'name')]],
             'pathology': [this.model.pathology, Validators.required],
             'comment': [this.model.comment],
             'specifications': [this.model.filename]
@@ -96,7 +96,7 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
     }
 
     manageSaveEntity(): void {
-        this.subscribtions.push(
+        this.subscriptions.push(
             this.onSave.subscribe(response => {
                 if (this.fileToUpload){
                     //Then upload specifications file
@@ -104,7 +104,7 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
                 }
             })
         );
-       
+
     }
 
     goToAddPathology(){
@@ -122,15 +122,15 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
             this.pathologies = pathologies;
         });
     }
-    
+
     fileChangeEvent(files: FileList){
     	this.fileToUpload = files.item(0);
     	this.model.filename = this.fileToUpload.name;
     }
-    
-    
-    
-    
+
+
+
+
 
 
 }

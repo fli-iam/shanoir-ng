@@ -153,7 +153,7 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
         const endpoint = this.API_URL + "/exportBIDS/studyId/" + this.studyId;
         let params = new HttpParams().set("filePath", item.path);
         
-        this.http.get(endpoint, { observe: 'response', responseType: 'blob', params: params }).subscribe(response => {
+        this.http.get(endpoint, { observe: 'response', responseType: 'blob', params: params }).toPromise().then(response => {
             if (response.status == 200) {
                 this.downloadIntoBrowser(response);
             }

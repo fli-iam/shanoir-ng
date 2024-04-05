@@ -17,6 +17,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [class.selected]="this.menuOpened"
         [label]="node.label"
         [tags]="node.tags"
+        [qualityTag]="node.qualityTag"
         [awesome]="node.awesome"
         (firstOpen)="loadExaminations()"
         [(opened)]="node.open"
@@ -26,10 +27,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [title]="node.title + ' n°' + node.id">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
-      <a [routerLink]="this.detailsPath" class="open-new-tab">
-        <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
-      </a>
-        <!-- <menu-item label="Collapse all" awesome="far fa-minus-square" (click)="collapseAll()"></menu-item> -->
+        <a [routerLink]="this.detailsPath" class="open-new-tab">
+            <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
+        </a>
+      <menu-item [disabled]="loading" label="Download" awesome="fas fa-download" (click)="loading ? null : download()"></menu-item>
+      <!-- <menu-item label="Collapse all" awesome="far fa-minus-square" (click)="collapseAll()"></menu-item> -->
     </dropdown-menu>
 
     <ng-container *ngIf="node.open && node.examinations && node.examinations != $any('UNLOADED')">

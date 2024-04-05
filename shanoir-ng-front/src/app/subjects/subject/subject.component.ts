@@ -124,19 +124,19 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
             'lastName': [this.lastName],
             'birthDate': [this.subject.birthDate],
             'sex': [this.subject.sex],
-            'subjectStudyList': [],
+            'subjectStudyList': [this.subject.subjectStudyList, [Validators.required]],
             'manualHemisphericDominance': [this.subject.manualHemisphericDominance],
             'languageHemisphericDominance': [this.subject.languageHemisphericDominance],
             'personalComments': []
         });
         this.updateFormControl(subjectForm);
-        this.subscribtions.push(
+        this.subscriptions.push(
             subjectForm.get('imagedObjectCategory').valueChanges.subscribe(val => {
                 this.isAlreadyAnonymized = false;
                 this.updateFormControl(subjectForm);
             })
         );
-        this.subscribtions.push(
+        this.subscriptions.push(
             subjectForm.get('isAlreadyAnonymized').valueChanges.subscribe(val => {
                 this.updateFormControl(subjectForm);
             })

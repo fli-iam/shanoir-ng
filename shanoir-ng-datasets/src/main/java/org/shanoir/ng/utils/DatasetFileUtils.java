@@ -1,21 +1,8 @@
 package org.shanoir.ng.utils;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.mail.MessagingException;
-import org.apache.commons.io.FilenameUtils;
-import org.shanoir.ng.dataset.dto.InputDTO;
-import org.shanoir.ng.dataset.modality.EegDataset;
-import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetExpression;
-import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.datasetfile.DatasetFile;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.util.StreamUtils;
-import org.springframework.web.util.UriUtils;
-
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -24,8 +11,28 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.shanoir.ng.dataset.dto.InputDTO;
+import org.shanoir.ng.dataset.modality.EegDataset;
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetExpression;
+import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.datasetfile.DatasetFile;
+import org.shanoir.ng.download.DatasetDownloadError;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.util.StreamUtils;
+import org.springframework.web.util.UriUtils;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.mail.MessagingException;
 
 public class DatasetFileUtils {
 
@@ -49,16 +56,22 @@ public class DatasetFileUtils {
 	 * @param pathURLs
 	 * @throws MalformedURLException
 	 */
-	public static void getDatasetFilePathURLs(final Dataset dataset, final List<URL> pathURLs, final DatasetExpressionFormat format) throws MalformedURLException {
+	public static void getDatasetFilePathURLs(final Dataset dataset, final List<URL> pathURLs, final DatasetExpressionFormat format, DatasetDownloadError downloadResult) {
 		List<DatasetExpression> datasetExpressions = dataset.getDatasetExpressions();
 		for (Iterator<DatasetExpression> itExpressions = datasetExpressions.iterator(); itExpressions.hasNext();) {
 			DatasetExpression datasetExpression = itExpressions.next();
 			if (datasetExpression.getDatasetExpressionFormat().equals(format)) {
 				List<DatasetFile> datasetFiles = datasetExpression.getDatasetFiles();
-				for (Iterator<DatasetFile> itFiles = datasetFiles.iterator(); itFiles.hasNext();) {
+				int i = 0;
+				for (Iterator<DatasetFile> itFiles = datasetFiles.iterator(); itFiles.hasNext(); i++) {
 					DatasetFile datasetFile = itFiles.next();
-					URL url = new URL(datasetFile.getPath().replaceAll("%20", " "));
-					pathURLs.add(url);
+					URL url;
+					try {
+						url = new URL(datasetFile.getPath().replaceAll("%20", " "));
+						pathURLs.add(url);
+					} catch (MalformedURLException e) {
+						downloadResult.update("Malformed URI: " + datasetFile.getPath().replaceAll("%20", " "), DatasetDownloadError.PARTIAL_FAILURE);
+					}
 				}
 			}
 		}
@@ -69,7 +82,6 @@ public class DatasetFileUtils {
 	 * Return the list of copied files
 	 *
 	 * @param urls
-	 * @param workFolder
 	 * @param subjectName the subjectName
 	 * @param datasetFilePath 
 	 * @throws IOException
@@ -82,6 +94,7 @@ public class DatasetFileUtils {
 		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
 			URL url =  iterator.next();
 			File srcFile = new File(UriUtils.decode(url.getPath(), StandardCharsets.UTF_8.name()));
+			String srcPath = srcFile.getAbsolutePath();
 
 			String fileName = getFileName(keepName, srcFile, subjectName, dataset, index);
 
@@ -92,16 +105,29 @@ public class DatasetFileUtils {
 			if (datasetFilePath != null) {
 				fileName = datasetFilePath + File.separator + fileName;
 			}
+			boolean compressed = srcPath.endsWith(".nii");
+
+			// Gzip file if necessary in order to always return a .nii.gz file
+			if (compressed) {
+				srcPath = srcPath + ".gz";
+				fileName = fileName + ".gz";
+				compressGzipFile(srcFile.getAbsolutePath(), srcPath);
+			}
 
 			files.add(fileName);
 
-			FileSystemResource fileSystemResource = new FileSystemResource(srcFile.getAbsolutePath());
+			FileSystemResource fileSystemResource = new FileSystemResource(srcPath);
 			ZipEntry zipEntry = new ZipEntry(fileName);
 			zipEntry.setSize(fileSystemResource.contentLength());
 			zipEntry.setTime(System.currentTimeMillis());
 			zipOutputStream.putNextEntry(zipEntry);
 			StreamUtils.copy(fileSystemResource.getInputStream(), zipOutputStream);
 			zipOutputStream.closeEntry();
+
+			if (compressed) {
+				// If we gzipped the file, delete the newly created file directly after
+				FileUtils.deleteQuietly(new File(srcPath));
+			}
 
 			index++;
 		}
@@ -130,7 +156,7 @@ public class DatasetFileUtils {
 	}
 
 	public static String getFileName(boolean keepName, File srcFile, String subjectName, Dataset dataset, int index) {
-		if (dataset.getDatasetProcessing() != null || dataset.getDatasetAcquisition() == null) {
+		if (keepName || dataset.getDatasetProcessing() != null || dataset.getDatasetAcquisition() == null) {
 			return srcFile.getName();
 		}
 
@@ -158,5 +184,17 @@ public class DatasetFileUtils {
 			name.append(FilenameUtils.getExtension(srcFile.getName()));
 		}
 		return name.toString();
+	}
+
+	private static void compressGzipFile(String source, String gzipDestination) throws IOException {
+		try (FileInputStream fis = new FileInputStream(source);
+		FileOutputStream fos = new FileOutputStream(gzipDestination);
+		GZIPOutputStream gzipOS = new GZIPOutputStream(fos)) {
+			byte[] buffer = new byte[1024];
+			int len;
+			while ((len = fis.read(buffer)) > 0) {
+				gzipOS.write(buffer, 0, len);
+			}
+		}
 	}
 }
