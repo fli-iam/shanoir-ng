@@ -111,9 +111,11 @@ public class DatasetServiceImpl implements DatasetService {
 		final Dataset dataset = repository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
 
+		LOG.error("DELETE Dataset 1");
 		processingService.removeDatasetFromAllProcessingInput(id);
 		propertyService.deleteByDatasetId(id);
 		repository.deleteById(id);
+		LOG.error("DELETE Dataset 2");
 
 		if (dataset.getSourceId() == null) {
 			this.deleteDatasetFromPacs(dataset);
@@ -181,7 +183,7 @@ public class DatasetServiceImpl implements DatasetService {
 	@Override
 	public Dataset create(final Dataset dataset) throws SolrServerException, IOException {
 		Dataset ds = repository.save(dataset);
-		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, ds.getStudyId()));
+		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.RELOAD_BIDS, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, ds.getStudyId()));
 		return ds;
 	}
 
@@ -193,7 +195,7 @@ public class DatasetServiceImpl implements DatasetService {
 		}
 		this.updateDatasetValues(datasetDb, dataset);
 		Dataset ds = repository.save(datasetDb);
-		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, datasetDb.getStudyId()));
+		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.RELOAD_BIDS, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, datasetDb.getStudyId()));
 		return ds;
 	}
 

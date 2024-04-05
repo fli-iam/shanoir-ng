@@ -33,6 +33,9 @@ import org.shanoir.ng.importer.service.EegImporterService;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -90,7 +93,10 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	
 	@Autowired
 	private ExaminationDatasetAcquisitionMapper examDsAcqMapper;
-	
+
+	@Autowired
+	private ShanoirEventService eventService;
+
 	@Override
 	public ResponseEntity<Void> createNewDatasetAcquisition(
 			@Parameter(name = "DatasetAcquisition to create", required = true) @Valid @RequestBody ImportJob importJob) throws RestServiceException {
@@ -202,7 +208,10 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 			@Parameter(name = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId)
 			throws RestServiceException {
 		try {
+			Long studyId = datasetAcquisitionService.findById(datasetAcquisitionId).getExamination().getStudyId();
 			datasetAcquisitionService.deleteById(datasetAcquisitionId);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.RELOAD_BIDS, datasetAcquisitionId.toString(), KeycloakUtil.getTokenUserId(), "" + studyId, ShanoirEvent.SUCCESS, studyId));
+
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);

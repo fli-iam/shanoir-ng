@@ -54,9 +54,12 @@ import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.utils.DatasetFileUtils;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -138,6 +141,10 @@ public class DatasetApiController implements DatasetApi {
 			@Parameter(name = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId) throws EntityNotFoundException, RestServiceException {
 		try {
 			datasetService.deleteById(datasetId);
+			Long studyId = datasetService.findById(datasetId).getDatasetAcquisition().getExamination().getStudyId();
+
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.RELOAD_BIDS, datasetId.toString(), KeycloakUtil.getTokenUserId(), "" + studyId, ShanoirEvent.SUCCESS, studyId));
+
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException | RestServiceException e) {
 			throw e;

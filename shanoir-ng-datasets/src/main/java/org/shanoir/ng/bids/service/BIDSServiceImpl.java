@@ -146,42 +146,23 @@ public class BIDSServiceImpl implements BIDSService {
 	 */
 	@RabbitListener(bindings = {
 			@QueueBinding(
-					key = ShanoirEventType.DELETE_EXAMINATION_EVENT,
+					key = ShanoirEventType.RELOAD_BIDS,
 					value = @Queue(value = RabbitMQConfiguration.BIDS_EVENT_QUEUE, durable = "true"),
 					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
-			@QueueBinding(
-					key = ShanoirEventType.DELETE_DATASET_EVENT,
-					value = @Queue(value = RabbitMQConfiguration.BIDS_EVENT_QUEUE, durable = "true"),
-					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
-			@QueueBinding(
-					key = ShanoirEventType.UPDATE_DATASET_EVENT,
-					value = @Queue(value = RabbitMQConfiguration.BIDS_EVENT_QUEUE, durable = "true"),
-					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
-			@QueueBinding(
-					key = ShanoirEventType.UPDATE_EXAMINATION_EVENT,
-					value = @Queue(value = RabbitMQConfiguration.BIDS_EVENT_QUEUE, durable = "true"),
-					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
+							autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
 			@QueueBinding(
 					key = ShanoirEventType.CREATE_EXAMINATION_EVENT,
 					value = @Queue(value = RabbitMQConfiguration.BIDS_EVENT_QUEUE, durable = "true"),
 					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
 					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
-			@QueueBinding(
-					key = ShanoirEventType.CREATE_DATASET_EVENT,
-					value = @Queue(value = RabbitMQConfiguration.BIDS_EVENT_QUEUE, durable = "true"),
-					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
 	}
 			)
 	public void deleteBids(String eventAsString) {
-		LOG.error("DELETE BIDS");
+		LOG.error("DELETE BIDS 1 " + eventAsString);
 		ShanoirEvent event;
 		try {
 			event = objectMapper.readValue(eventAsString, ShanoirEvent.class);
+			LOG.error("DELETE BIDS 2 " + event.getEventType());
 			if (event.getStudyId() == null) {
 				LOG.error("This event did not triggered a BIDs folder deletion {}", eventAsString);
 				return;

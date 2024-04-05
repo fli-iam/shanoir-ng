@@ -92,15 +92,13 @@ public class ExaminationServiceImpl implements ExaminationService {
 	private String dataDir;
 	
 	@Override
-	public void deleteById(final Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException {
+	public void deleteById(final Long id) throws ShanoirException, SolrServerException, IOException, RestServiceException {
 		LOG.error("DELETE Examination");
 		Optional<Examination> examinationOpt = examinationRepository.findById(id);
 		if (!examinationOpt.isPresent()) {
 			throw new EntityNotFoundException(Examination.class, id);
 		}
-		Long tokenUserId = KeycloakUtil.getTokenUserId();
 		Examination examination = examinationOpt.get();
-		String studyIdAsString = examination.getStudyId().toString();
 
 		List<Examination> childExam = examinationRepository.findBySourceId(id);
 		if (!CollectionUtils.isEmpty(childExam)) {
@@ -116,8 +114,6 @@ public class ExaminationServiceImpl implements ExaminationService {
 				}
 			}
 			examinationRepository.deleteById(id);
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, id.toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS, examination.getStudyId()));
-
 		}
 	}
 
