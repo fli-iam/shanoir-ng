@@ -43,6 +43,7 @@ public class LoginPanelActionListener implements ActionListener {
 				sSC.getShUpStartupDialog().updateStartupText(
 						"\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.fail"));
 				sSC.setState(new AuthenticationManualConfigurationState());
+				ShUpConfig.username = null;
 			}
 		} catch (Exception e1) {
 			logger.error(e1.getMessage(), e1);

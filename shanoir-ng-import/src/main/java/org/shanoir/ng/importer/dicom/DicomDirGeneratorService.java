@@ -104,6 +104,7 @@ public class DicomDirGeneratorService {
 		String pid = dataset.getString(Tag.PatientID, null);
 		String styuid = dataset.getString(Tag.StudyInstanceUID, null);
 		String seruid = dataset.getString(Tag.SeriesInstanceUID, null);
+		String seriesDescription = dataset.getString(Tag.SeriesDescription, null);
 
 		if (styuid != null) {
 			if (pid == null) {
@@ -127,6 +128,7 @@ public class DicomDirGeneratorService {
 				Attributes seriesRec = in.findSeriesRecord(studyRec, seruid);
 				if (seriesRec == null) {
 					seriesRec = recFact.createRecord(RecordType.SERIES, null, dataset, null, null);
+					seriesRec.setString(Tag.SeriesDescription, VR.LO, seriesDescription);
 					out.addLowerDirectoryRecord(studyRec, seriesRec);
 					num++;
 				}
