@@ -47,6 +47,10 @@ export class SubjectNodeComponent implements OnChanges {
     @Input() studyId: number;
     @Output() nodeInit: EventEmitter<SubjectNode> = new EventEmitter();
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
+    @Output() onNodeSelect: EventEmitter<number> = new EventEmitter();
+    @Output() onExaminationNodeSelect: EventEmitter<number> = new EventEmitter();
+    @Output() onAcquisitionNodeSelect: EventEmitter<number> = new EventEmitter();
+    @Output() onDatasetNodeSelect: EventEmitter<number> = new EventEmitter();
     node: SubjectNode;
     loading: boolean = false;
     menuOpened: boolean = false;

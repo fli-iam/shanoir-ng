@@ -22,7 +22,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [clickable] = "this.node.id != null"
         awesome="fas fa-procedures"
         [(opened)]="node.open"
-        (labelClick)="menuOpened = !menuOpened"
+        (labelClick)="menuOpened = !menuOpened; onNodeSelect.emit(node.id)"
         [hasChildren]="hasChildren()"
         (firstOpen)="loadDatasets()"
         [title]="node.title + ' n°' + node.id">
@@ -47,6 +47,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             (selectedChange)="selectedChange.emit()"
             [hasBox]="hasBox"
             (onDatasetDelete)="onDatasetDelete(i)"
+            (onNodeSelect)="onDatasetNodeSelect.emit($event)"
         >
         </dataset-node>
 

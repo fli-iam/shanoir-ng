@@ -18,7 +18,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [label]="node.label"
         awesome="fas fa-microscope"
         [(opened)]="node.open"
-        (labelClick)="menuOpened = !menuOpened"
+        (labelClick)="menuOpened = contextMenu && !menuOpened; onNodeSelect.emit(input.id);"
         [hasChildren]="false"
         [title]="node.title + ' n°' + node.id">
 

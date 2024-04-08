@@ -21,7 +21,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [label]="node.label"
         awesome="fas fa-stethoscope"
         [(opened)]="node.open"
-        (labelClick)="menuOpened = !menuOpened"
+        (labelClick)="menuOpened = !menuOpened; onNodeSelect.emit(node.id);"
         (firstOpen)="firstOpen()"
         [hasChildren]="hasChildren()"
         [title]="node.title + ' n°' + node.id">
@@ -46,6 +46,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 (selectedChange)="selectedChange.emit()"
                 [hasBox]="hasBox"
                 (onAcquisitionDelete)="onAcquisitionDelete(i)"
+                (onNodeSelect)="onAcquisitionNodeSelect.emit($event)"
+                (onDatasetNodeSelect)="onDatasetNodeSelect.emit($event)"
         >
         </dataset-acquisition-node>
     </ng-container>

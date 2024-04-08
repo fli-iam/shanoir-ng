@@ -19,7 +19,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         awesome="fa-regular fa-hospital"
         (firstOpen)="loadEquipments()"
         [(opened)]="node.open"
-        (labelClick)="menuOpened = !menuOpened"
+        (labelClick)="menuOpened = !menuOpened; onNodeSelect.emit(input.id)"
         [hasChildren]="hasChildren()"
         [title]="node.title + ' n°' + node.id">
 
@@ -34,7 +34,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     node
                     *ngFor="let acquisitionEquipment of node.acquisitionEquipments; let i = index"
                     [input]="acquisitionEquipment"
-                    (onEquipmentDelete)="onEquipmentDelete(i)">
+                    (onEquipmentDelete)="onEquipmentDelete(i)"
+                    (onNodeSelect)="onEquipementNodeSelect.emit($event)">
             </equipment-node>
     </ng-container>
 </node>

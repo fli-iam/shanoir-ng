@@ -28,8 +28,10 @@ import {KeycloakService} from "../../shared/keycloak/keycloak.service";
 export class EquipmentNodeComponent implements OnChanges {
 
     @Input() input: AcquisitionEquipmentNode | AcquisitionEquipment;
+    @Input() contextMenu: boolean = true;
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
     @Output() onEquipmentDelete: EventEmitter<void> = new EventEmitter();
+    @Output() onNodeSelect: EventEmitter<number> = new EventEmitter();
 
     node: AcquisitionEquipmentNode;
     loading: boolean = false;

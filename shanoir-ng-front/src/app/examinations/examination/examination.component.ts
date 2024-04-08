@@ -37,7 +37,7 @@ import { Format } from 'src/app/datasets/shared/dataset.service';
 import { DownloadSetupOptions } from 'src/app/shared/mass-download/download-setup/download-setup.component';
 
 @Component({
-    selector: 'examination',
+    selector: 'examination-detail',
     templateUrl: 'examination.component.html'
 })
 

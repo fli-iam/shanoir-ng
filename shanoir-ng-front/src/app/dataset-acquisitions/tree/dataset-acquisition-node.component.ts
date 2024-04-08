@@ -44,6 +44,8 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
     @Input() hasBox: boolean = false;
     detailsPath: string = '/dataset-acquisition/details/';
     @Output() onAcquisitionDelete: EventEmitter<void> = new EventEmitter();
+    @Output() onNodeSelect: EventEmitter<number> = new EventEmitter();
+    @Output() onDatasetNodeSelect: EventEmitter<number> = new EventEmitter();
     datasetIds: number[] = [];
     hasEEG: boolean = false;
     hasDicom: boolean = false;

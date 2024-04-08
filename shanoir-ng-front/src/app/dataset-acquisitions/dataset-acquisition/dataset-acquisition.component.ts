@@ -36,7 +36,7 @@ import { DownloadSetupOptions } from 'src/app/shared/mass-download/download-setu
 
 
 @Component({
-    selector: 'dataset-acquisition',
+    selector: 'dataset-acquisition-detail',
     templateUrl: 'dataset-acquisition.component.html',
     styleUrls: ['dataset-acquisition.component.css']
 })

@@ -20,7 +20,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [(opened)]="node.open"
         (labelClick)="menuOpened = !menuOpened"
         [hasChildren]="true"
-        [clickable]="showDetails">
+        [clickable]="showDetails"
+        (labelClick)="onStudyNodeSelect.emit($event)">
 
         <dropdown-menu [(openInput)]="menuOpened" *ngIf="showDetails && menuOpened">
           <a [routerLink]="this.detailsPath + this.node.id" class="open-new-tab">
@@ -42,6 +43,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [input]="subject"
                     [studyId]="node.id"
                     (selectedChange)="selectedChange.emit(node)"
+                    (onNodeSelect)="onSubjectNodeSelect.emit($event)"
+                    (onExaminationNodeSelect)="onExaminationNodeSelect.emit($event)"
+                    (onAcquisitionNodeSelect)="onAcquisitionNodeSelect.emit($event)"
+                    (onDatasetNodeSelect)="onDatasetNodeSelect.emit($event)"
                     [hasBox]="hasBox"
             >
             </subject-node>
@@ -60,7 +65,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <ng-container *ngIf="node.centersOpen && node.centers && node.centers != $any('UNLOADED')">
             <center-node
                     *ngFor="let center of node.centers"
-                    [input]="center">
+                    [input]="center"
+                    (onNodeSelect)="onCenterNodeSelect.emit($event)"
+                    (onEquipementNodeSelect)="onEquipementNodeSelect.emit($event)">
             </center-node>
         </ng-container>
 

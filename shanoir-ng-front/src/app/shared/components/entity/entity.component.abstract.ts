@@ -40,6 +40,7 @@ import {ConsoleService} from '../../console/console.service';
 import {FooterState} from '../form-footer/footer-state.model';
 import {Entity, EntityRoutes} from './entity.abstract';
 import {EntityService} from './entity.abstract.service';
+import { SuperPromise } from 'src/app/utils/super-promise';
 
 
 export type Mode = "view" | "edit" | "create";
@@ -59,6 +60,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     protected onSubmitValidatedFields: string[] = [];
     @ViewChild('formContainer', {static: false}) formContainerElement: ElementRef;
     activeTab: string;
+    protected isMainComponent: boolean;
 
     /* services */
     protected confirmDialogService: ConfirmDialogService;
@@ -104,35 +106,46 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     ngOnInit(): void {
-        //if (!this.id) this.id = +this.activatedRoute.snapshot.params['id'];
-        this.subscriptions.push(this.activatedRoute.params.subscribe(
-            params => {
-                const id = +params['id'];
-                this.id = id;
-                const choose = (): Promise<void> => {
-                    switch (this.mode) {
-                        case 'create' :
-                            return this.initCreate();
-                        case 'edit' :
-                            return this.initEdit();
-                        case 'view' :
-                            return this.initView();
-                        default:
-                            throw Error('mode has to be set!');
-                    }
+        let idPromise: SuperPromise<number> = new SuperPromise();
+        if (this.id) {
+            this.isMainComponent = false;
+            idPromise.resolve(this.id);
+        } else {
+            this.isMainComponent = true;
+            this.subscriptions.push(this.activatedRoute.params.subscribe(
+                params => {
+                    const id = +params['id'];
+                    idPromise.resolve(id);
+                })
+            );
+        }
+        idPromise.then(id => {
+            this.id = id;
+            const choose = (): Promise<void> => {
+                switch (this.mode) {
+                    case 'create' :
+                        return this.initCreate();
+                    case 'edit' :
+                        return this.initEdit();
+                    case 'view' :
+                        return this.initView();
+                    default:
+                        throw Error('mode has to be set!');
                 }
-                choose().then(() => {
-                    this.footerState = new FooterState(this.mode);
-                    this.hasEditRight().then(right => this.footerState.canEdit = right);
-                    this.hasDeleteRight().then(right => this.footerState.canDelete = right);
-                    if ((this.mode == 'create' || this.mode == 'edit') && this.breadcrumbsService.currentStep.entity) {
-                        this.entity = this.breadcrumbsService.currentStep.entity as T;
-                    }
-                    this.breadcrumbsService.currentStep.entity = this.entity;
-                    this.manageFormSubscriptions();
-                });
             }
-        ));
+            choose().then(() => {
+                this.footerState = new FooterState(this.mode);
+                this.footerState.backButton = this.isMainComponent;
+                this.hasEditRight().then(right => this.footerState.canEdit = right);
+                this.hasDeleteRight().then(right => this.footerState.canDelete = right);
+                if ((this.mode == 'create' || this.mode == 'edit') && this.breadcrumbsService.currentStep.entity) {
+                    this.entity = this.breadcrumbsService.currentStep.entity as T;
+                }
+                this.breadcrumbsService.currentStep.entity = this.entity;
+                this.manageFormSubscriptions();
+            });
+        });
+
         // load called tab
         this.subscriptions.push(
             this.activatedRoute.fragment.subscribe(fragment => {

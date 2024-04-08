@@ -1,0 +1,8 @@
+study-node {
+    display: inline-block;
+    height: calc(100vh - 80px);
+    vertical-align: top;
+    border-right: 1px solid var(--grey);
+}
+
+.details { padding-left: 20px; }

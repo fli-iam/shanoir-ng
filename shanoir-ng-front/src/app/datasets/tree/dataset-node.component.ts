@@ -35,6 +35,7 @@ export class DatasetNodeComponent implements OnChanges {
     @Input() related: boolean = false;
     detailsPath: string = '/dataset/details/';
     @Output() onDatasetDelete: EventEmitter<void> = new EventEmitter();
+    @Output() onNodeSelect: EventEmitter<number> = new EventEmitter();
 
     constructor(
         private router: Router,

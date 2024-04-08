@@ -40,6 +40,9 @@ export class ExaminationNodeComponent implements OnChanges {
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
     @Output() nodeInit: EventEmitter<ExaminationNode> = new EventEmitter();
     @Output() onExaminationDelete: EventEmitter<void> = new EventEmitter();
+    @Output() onNodeSelect: EventEmitter<number> = new EventEmitter();
+    @Output() onAcquisitionNodeSelect: EventEmitter<number> = new EventEmitter();
+    @Output() onDatasetNodeSelect: EventEmitter<number> = new EventEmitter();
 
     protected downloadState: TaskState = new TaskState();
     node: ExaminationNode;

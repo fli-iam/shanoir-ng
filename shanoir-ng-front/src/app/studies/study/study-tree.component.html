@@ -1,0 +1,38 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+<study-node *ngIf="studyNode"
+		[input]="studyNode"
+		[hasBox]="true"
+		(onStudyNodeSelect)="onStudyNodeSelect()"
+		(onSubjectNodeSelect)="onSubjectNodeSelect($event)"
+		(onExaminationNodeSelect)="onExaminationNodeSelect($event)"
+		(onAcquisitionNodeSelect)="onAcquisitionNodeSelect($event)"
+		(onDatasetNodeSelect)="onDatasetNodeSelect($event)"
+		(onProcessingNodeSelect)="onProcessingNodeSelect($event)"
+		(onCenterNodeSelect)="onCenterNodeSelect($event)"
+		(onEquipementNodeSelect)="onEquipementNodeSelect($event)"
+		(onStudyCardNodeSelect)="onStudyCardNodeSelect($event)"
+		(onQualityCardNodeSelect)="onQualityCardNodeSelect($event)"
+		(onMemberNodeSelect)="onMemberNodeSelect($event)">
+</study-node>
+
+<study-detail *ngIf="selection.studyId" [id]="selection.studyId" mode="view" class="details"></study-detail>
+<subject-detail *ngIf="selection.subjectId" [id]="selection.subjectId" mode="view" class="details"></subject-detail>
+<examination-detail *ngIf="selection.examinationId" [id]="selection.examinationId" mode="view" class="details"></examination-detail>
+<dataset-acquisition-detail *ngIf="selection.acquisitionId" [id]="selection.acquisitionId" mode="view" class="details"></dataset-acquisition-detail>
+<dataset-detail *ngIf="selection.datasetId" [id]="selection.datasetId" mode="view" class="details"></dataset-detail>
+<center-detail *ngIf="selection.centerId" [id]="selection.centerId" mode="view" class="details"></center-detail>
+<acquisition-equipment-detail *ngIf="selection.equipmentId" [id]="selection.equipmentId" mode="view" class="details">
+
+</acquisition-equipment-detail>

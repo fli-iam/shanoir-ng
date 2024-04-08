@@ -269,6 +269,7 @@ import { DownloadSetupAltComponent } from './shared/mass-download/download-setup
 import { TestQualityCardOptionsComponent } from './study-cards/test-quality-card-options/test-quality-card-options.component';
 import { SessionService } from './shared/services/session.service';
 import { PipelineService } from "./vip/pipelines/pipeline/pipeline.service";
+import { StudyTreeComponent } from './studies/study/study-tree.component';
 
 @NgModule({
     imports: [
@@ -456,7 +457,8 @@ import { PipelineService } from "./vip/pipelines/pipeline/pipeline.service";
         TaskStatusComponent,
         DownloadSetupComponent,
         DownloadSetupAltComponent,
-        TestQualityCardOptionsComponent
+        TestQualityCardOptionsComponent,
+        StudyTreeComponent
     ],
     providers: [
         AcquisitionEquipmentService,

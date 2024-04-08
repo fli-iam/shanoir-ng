@@ -30,6 +30,8 @@ export class CenterNodeComponent implements OnChanges {
 
     @Input() input: CenterNode | Center;
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
+    @Output() onEquipementNodeSelect: EventEmitter<number> = new EventEmitter();
+    @Output() onNodeSelect: EventEmitter<number> = new EventEmitter();
     node: CenterNode;
     loading: boolean = false;
     menuOpened: boolean = false;

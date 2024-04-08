@@ -50,6 +50,17 @@ export class StudyNodeComponent implements OnChanges {
     canAdmin: boolean = false;
     @Input() hasBox: boolean = false;
     detailsPath: string = '/study/details/';
+    @Output() onStudyNodeSelect: EventEmitter<number> = new EventEmitter();
+    @Output() onSubjectNodeSelect: EventEmitter<number> = new EventEmitter();
+    @Output() onExaminationNodeSelect: EventEmitter<number> = new EventEmitter();
+    @Output() onAcquisitionNodeSelect: EventEmitter<number> = new EventEmitter();
+    @Output() onDatasetNodeSelect: EventEmitter<number> = new EventEmitter();
+    @Output() onProcessingNodeSelect: EventEmitter<number> = new EventEmitter();
+    @Output() onCenterNodeSelect: EventEmitter<number> = new EventEmitter();
+    @Output() onEquipementNodeSelect: EventEmitter<number> = new EventEmitter();
+    @Output() onStudyCardNodeSelect: EventEmitter<number> = new EventEmitter();
+    @Output() onQualityCardNodeSelect: EventEmitter<number> = new EventEmitter();
+    @Output() onMemberNodeSelect: EventEmitter<number> = new EventEmitter();
 
     constructor(
             private router: Router,

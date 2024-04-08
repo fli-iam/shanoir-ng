@@ -41,6 +41,7 @@ import { CanImportFromPACSGuard } from './shared/roles/auth-can-import-from-PACS
 import { AuthAdminOrExpertGuard } from './shared/roles/auth-admin-or-expert-guard';
 import { StudyListComponent } from './studies/study-list/study-list.component';
 import { StudyComponent } from './studies/study/study.component';
+import { StudyTreeComponent } from './studies/study/study-tree.component';
 import { SubjectListComponent } from './subjects/subject-list/subject-list.component';
 import { SubjectComponent } from './subjects/subject/subject.component';
 import { AccountRequestComponent } from './users/account-request/account-request.component';
@@ -234,6 +235,10 @@ let routes: Routes = [
         path: 'study/details/:id',
         component: StudyComponent,
         data: { mode: 'view' },
+    },
+    {
+        path: 'study/tree/:id',
+        component: StudyTreeComponent
     },
     {
         path: 'study/edit/:id',
