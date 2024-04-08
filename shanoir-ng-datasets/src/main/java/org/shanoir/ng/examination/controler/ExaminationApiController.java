@@ -101,7 +101,6 @@ public class ExaminationApiController implements ExaminationApi {
 			examinationService.deleteById(examinationId);
 
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, examinationId.toString(), KeycloakUtil.getTokenUserId(), "" + studyId, ShanoirEvent.SUCCESS, studyId));
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.RELOAD_BIDS, examinationId.toString(), KeycloakUtil.getTokenUserId(), "" + studyId, ShanoirEvent.SUCCESS, studyId));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);

@@ -99,7 +99,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 			throw new EntityNotFoundException(Examination.class, id);
 		}
 		Examination examination = examinationOpt.get();
-
+		
 		List<Examination> childExam = examinationRepository.findBySourceId(id);
 		if (!CollectionUtils.isEmpty(childExam)) {
 			throw new RestServiceException(
@@ -115,6 +115,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 			}
 			examinationRepository.deleteById(id);
 		}
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.RELOAD_BIDS, id.toString(), KeycloakUtil.getTokenUserId(), "" + examination.getStudyId(), ShanoirEvent.SUCCESS, examination.getStudyId()));
 	}
 
 	@Override

@@ -208,9 +208,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 			@Parameter(name = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId)
 			throws RestServiceException {
 		try {
-			Long studyId = datasetAcquisitionService.findById(datasetAcquisitionId).getExamination().getStudyId();
 			datasetAcquisitionService.deleteById(datasetAcquisitionId);
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.RELOAD_BIDS, datasetAcquisitionId.toString(), KeycloakUtil.getTokenUserId(), "" + studyId, ShanoirEvent.SUCCESS, studyId));
 
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
