@@ -15,7 +15,9 @@ import org.shanoir.ng.importer.dto.EegImportJob;
 import org.shanoir.ng.importer.service.DicomSRImporterService;
 import org.shanoir.ng.importer.service.EegImporterService;
 import org.shanoir.ng.importer.service.ImporterService;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -52,7 +54,12 @@ public class DatasetAcquisitionApiControllerTest {
 	
 	@MockBean
 	private DatasetAcquisitionDatasetsMapper dsAcqDsMapper;
-	
+
+	@MockBean
+	private SolrService solrService;
+
+	@MockBean
+	private ShanoirEventService eventService;
 	@Autowired
 	private MockMvc mvc;
 

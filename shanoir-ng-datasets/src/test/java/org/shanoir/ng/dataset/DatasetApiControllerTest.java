@@ -47,6 +47,7 @@ import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.security.ControlerSecurityService;
+import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -138,7 +139,10 @@ public class DatasetApiControllerTest {
 	
 	@MockBean
 	private DatasetDownloaderServiceImpl datasetDownloaderService;
-	
+
+	@MockBean
+	private SolrService solrService;
+
 	@Autowired
 	private ObjectMapper mapper;
 

@@ -58,6 +58,7 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.*;
+import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
@@ -123,7 +124,10 @@ public class DatasetApiController implements DatasetApi {
 
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
-	
+
+	@Autowired
+	private SolrService solrService;
+
 	@Autowired
 	DatasetDownloaderServiceImpl datasetDownloaderService;
 
@@ -143,6 +147,7 @@ public class DatasetApiController implements DatasetApi {
 			datasetService.deleteById(datasetId);
 			Long studyId = datasetService.findById(datasetId).getDatasetAcquisition().getExamination().getStudyId();
 
+			solrService.deleteFromIndex(datasetId);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.RELOAD_BIDS, datasetId.toString(), KeycloakUtil.getTokenUserId(), "" + studyId, ShanoirEvent.SUCCESS, studyId));
 
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
