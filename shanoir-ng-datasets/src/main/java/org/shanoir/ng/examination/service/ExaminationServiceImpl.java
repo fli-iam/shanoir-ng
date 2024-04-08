@@ -108,8 +108,9 @@ public class ExaminationServiceImpl implements ExaminationService {
 							"This examination is linked to another examination that was copied."
 					));
 		} else {
-			if (examination.getDatasetAcquisitions() != null) {
-				for (DatasetAcquisition dsAcq : examination.getDatasetAcquisitions()) {
+			List<DatasetAcquisition> dsAcqs = examination.getDatasetAcquisitions();
+			if (dsAcqs != null) {
+				for (DatasetAcquisition dsAcq : dsAcqs) {
 					this.datasetAcquisitionService.deleteById(dsAcq.getId());
 				}
 			}
