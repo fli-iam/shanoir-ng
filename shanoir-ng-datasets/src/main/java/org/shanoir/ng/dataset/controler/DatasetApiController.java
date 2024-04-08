@@ -145,10 +145,10 @@ public class DatasetApiController implements DatasetApi {
 			@Parameter(name = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId) throws EntityNotFoundException, RestServiceException {
 		try {
 			datasetService.deleteById(datasetId);
-			Long studyId = datasetService.findById(datasetId).getDatasetAcquisition().getExamination().getStudyId();
+			//Long studyId = datasetService.findById(datasetId).getDatasetAcquisition().getExamination().getStudyId();
 
 			solrService.deleteFromIndex(datasetId);
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.RELOAD_BIDS, datasetId.toString(), KeycloakUtil.getTokenUserId(), "" + studyId, ShanoirEvent.SUCCESS, studyId));
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.RELOAD_BIDS, datasetId.toString(), KeycloakUtil.getTokenUserId(), "" + datasetId, ShanoirEvent.SUCCESS, datasetId));
 
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException | RestServiceException e) {
