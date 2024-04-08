@@ -98,18 +98,17 @@ public class DatasetServiceImpl implements DatasetService {
 	@Transactional
 	public void deleteById(final Long id) throws ShanoirException, SolrServerException, IOException, RestServiceException {
 		LOG.error("DELETE Dataset");
-		List<Dataset> childDatasets = repository.findBySourceId(id);
+		final Dataset dataset = repository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
 
-		if (!CollectionUtils.isEmpty(childDatasets)) {
+		if (dataset != null && dataset.getSourceId() != null) {
 			throw new RestServiceException(
 					new ErrorModel(
 							HttpStatus.UNPROCESSABLE_ENTITY.value(),
 							"This dataset is linked to another dataset that was copied."
 					));
-		}
 
-		final Dataset dataset = repository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
+		}
 
 		LOG.error("DELETE Dataset 1");
 		processingService.removeDatasetFromAllProcessingInput(id);

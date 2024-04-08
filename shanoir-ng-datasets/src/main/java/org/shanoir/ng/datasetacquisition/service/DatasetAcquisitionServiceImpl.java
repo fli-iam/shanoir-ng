@@ -189,8 +189,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
             throw new EntityNotFoundException("Cannot find entity with id = " + id);
         }
 
-        List<DatasetAcquisition> childDSAcq = repository.findBySourceId(id);
-        if (!CollectionUtils.isEmpty(childDSAcq)) {
+        if (entity != null && entity.getSourceId() != null) {
             throw new RestServiceException(
                     new ErrorModel(
                             HttpStatus.UNPROCESSABLE_ENTITY.value(),
