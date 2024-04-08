@@ -48,15 +48,5 @@ public class EegDatasetAndProcessingsDTO extends EegDatasetDTO implements Datase
 	public void setProcessings(List<DatasetProcessingDTO> datasetProcessings) {
 		this.processings = datasetProcessings;
 	}
-    
 
-	@Override
-	public DatasetProcessingDTO getDatasetProcessing() {
-		return datasetProcessing;
-	}
-
-	@Override
-	public void setDatasetProcessing(DatasetProcessingDTO datasetProcessing) {
-		this.datasetProcessing = datasetProcessing;
-	}
 }
