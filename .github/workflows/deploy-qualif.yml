@@ -32,8 +32,8 @@ jobs:
         instance: [neurinfo-qualif, ofsep-qualif]
     environment: deploy-qualif
     env:
-      url:        ${{ SHANOIR_DEPLOY_URL }}
-      token:      ${{ SHANOIR_DEPLOY_TOKEN }}
+      url:        ${{ secrets.SHANOIR_DEPLOY_URL }}
+      token:      ${{ secrets.SHANOIR_DEPLOY_TOKEN }}
       deploy_id:  ${{ inputs.deploy_id }}
       owner:      ${{ inputs.owner }}
       instance:   ${{ matrix.instance }}
