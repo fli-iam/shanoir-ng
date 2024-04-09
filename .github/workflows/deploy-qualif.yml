@@ -1,5 +1,8 @@
 name: Deploy to qualif
-run-name: Deploy ${{ inputs.commit }}
+run-name: >
+  Deploy ${{ inputs.commit }} (${{ inputs.ref }}) to
+  ${{ inputs.neurinfo && "neurinfo" || '' }}
+  ${{ inputs.ofsep    && "ofsep"    || '' }}
 
 on:
   workflow_dispatch:
@@ -7,6 +10,8 @@ on:
       commit:
         description: "commit id to be deployed"
         required: true
+      ref:
+        description: "git reference (only display)"
       owner:
         description: "person who triggered this deployment"
         required: true
