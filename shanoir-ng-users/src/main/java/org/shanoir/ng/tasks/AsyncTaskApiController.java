@@ -69,7 +69,7 @@ public class AsyncTaskApiController implements AsyncTaskApi {
 
 	@Override
     public ResponseEntity<SseEmitter> updateTasks() throws IOException {
-		long userId = KeycloakUtil.getTokenUserId();
+	long userId = KeycloakUtil.getTokenUserId();
         UserSseEmitter emitter = new UserSseEmitter(userId);
         emitters.add(emitter);
         emitter.onCompletion(() -> emitters.remove(emitter));
