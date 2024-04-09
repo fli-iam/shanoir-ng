@@ -17,17 +17,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </div>
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened"
+        [class.selected]="this.menuOpened || selection?.acquisitionId == node.id"
         [label]="node.label"
         [clickable] = "this.node.id != null"
         awesome="fas fa-procedures"
         [(opened)]="node.open"
-        (labelClick)="menuOpened = !menuOpened; onNodeSelect.emit(node.id)"
+        (labelClick)="menuOpened = withMenu && !menuOpened; selection.acquisitionId = node.id"
         [hasChildren]="hasChildren()"
         (firstOpen)="loadDatasets()"
         [title]="node.title + ' n°' + node.id">
 
-    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && this.node.id != null">
+    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu && withMenu && this.node.id != null">
         <a [routerLink]="this.detailsPath + this.node.id" class="open-new-tab">
             <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
         </a>
@@ -47,7 +47,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             (selectedChange)="selectedChange.emit()"
             [hasBox]="hasBox"
             (onDatasetDelete)="onDatasetDelete(i)"
-            (onNodeSelect)="onDatasetNodeSelect.emit($event)"
+            [selection]="selection"
+            [withMenu]="withMenu"
         >
         </dataset-node>
 

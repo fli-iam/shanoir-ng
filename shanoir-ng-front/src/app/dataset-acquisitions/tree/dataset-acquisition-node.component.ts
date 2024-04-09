@@ -12,7 +12,6 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
-import { Router } from '@angular/router';
 import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
 import { Dataset } from '../../datasets/shared/dataset.model';
 import { DatasetService } from '../../datasets/shared/dataset.service';
@@ -20,6 +19,7 @@ import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
 
 import { Subscription } from 'rxjs';
 import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
+import { Selection } from 'src/app/studies/study/study-tree.component';
 import { ConsoleService } from "../../shared/console/console.service";
 import { DatasetAcquisitionNode, DatasetNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
@@ -44,17 +44,16 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
     @Input() hasBox: boolean = false;
     detailsPath: string = '/dataset-acquisition/details/';
     @Output() onAcquisitionDelete: EventEmitter<void> = new EventEmitter();
-    @Output() onNodeSelect: EventEmitter<number> = new EventEmitter();
-    @Output() onDatasetNodeSelect: EventEmitter<number> = new EventEmitter();
     datasetIds: number[] = [];
     hasEEG: boolean = false;
     hasDicom: boolean = false;
     downloading = false;
     hasBids: boolean = false;
     protected subscriptions: Subscription[] = [];
+    @Input() selection: Selection = new Selection();
+    @Input() withMenu: boolean = true;
 
     constructor(
-        private router: Router,
         private datasetService: DatasetService,
         private datasetAcquisitionService: DatasetAcquisitionService,
         private consoleService: ConsoleService) {

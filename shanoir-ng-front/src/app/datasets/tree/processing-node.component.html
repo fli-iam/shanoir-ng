@@ -15,13 +15,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <node
         *ngIf="node"
         [label]="node.label"
+        [class.selected]="selection.processingId == node.id"
         awesome="fas fa-cog"
         [(opened)]="node.open"
-        (labelClick)="toggleMenu(); onNodeSelect.emit(node.id)"
+        (labelClick)="toggleMenu(); selection.processingId = node.id"
         [hasChildren]="hasChildren()"
         [title]="node.title + ' n°' + node.id">
 
-    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
+    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu">
         <menu-item label="Details..." awesome="fa-regular fa-eye" (click)="showProcessingDetails()"></menu-item>
         <menu-item *ngIf="node.canDelete"  label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteProcessing()"></menu-item>
     </dropdown-menu>

@@ -33,7 +33,7 @@ import {
     UNLOADED,
 } from '../../tree/tree.model';
 import { Subject } from '../shared/subject.model';
-import { SubjectService } from "../shared/subject.service";
+import { Selection } from 'src/app/studies/study/study-tree.component';
 
 
 @Component({
@@ -48,19 +48,17 @@ export class SubjectNodeComponent implements OnChanges {
     @Output() nodeInit: EventEmitter<SubjectNode> = new EventEmitter();
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
     @Output() onNodeSelect: EventEmitter<number> = new EventEmitter();
-    @Output() onExaminationNodeSelect: EventEmitter<number> = new EventEmitter();
-    @Output() onAcquisitionNodeSelect: EventEmitter<number> = new EventEmitter();
-    @Output() onDatasetNodeSelect: EventEmitter<number> = new EventEmitter();
     node: SubjectNode;
     loading: boolean = false;
     menuOpened: boolean = false;
     showDetails: boolean;
     @Input() hasBox: boolean = false;
     detailsPath: string = "";
+    @Input() selection: Selection = new Selection();
+    @Input() withMenu: boolean = true;
 
     constructor(
         private examinationService: ExaminationService,
-        private subjectService: SubjectService,
         private router: Router,
         private examPipe: ExaminationPipe,
         private downloadService: MassDownloadService) {

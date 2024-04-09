@@ -15,22 +15,23 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from
 import { Router } from '@angular/router';
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
 
+import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import { SubjectStudyPipe } from '../../subjects/shared/subject-study.pipe';
 import {
-    CenterNode, ExaminationNode,
+    CenterNode,
+    ClinicalSubjectNode,
     MemberNode,
-    ProcessingNode,
+    PreclinicalSubjectNode,
     RightNode,
     StudyCardNode,
     StudyNode,
-    ClinicalSubjectNode,
-    UNLOADED, SubjectNode, PreclinicalSubjectNode
+    SubjectNode,
+    UNLOADED
 } from '../../tree/tree.model';
+import { StudyRightsService } from "../shared/study-rights.service";
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
-import { StudyRightsService } from "../shared/study-rights.service";
-import { KeycloakService } from "../../shared/keycloak/keycloak.service";
-import { Tag } from '../../tags/tag.model';
+import { Selection } from '../study/study-tree.component';
 
 @Component({
     selector: 'study-node',
@@ -50,17 +51,8 @@ export class StudyNodeComponent implements OnChanges {
     canAdmin: boolean = false;
     @Input() hasBox: boolean = false;
     detailsPath: string = '/study/details/';
-    @Output() onStudyNodeSelect: EventEmitter<number> = new EventEmitter();
-    @Output() onSubjectNodeSelect: EventEmitter<number> = new EventEmitter();
-    @Output() onExaminationNodeSelect: EventEmitter<number> = new EventEmitter();
-    @Output() onAcquisitionNodeSelect: EventEmitter<number> = new EventEmitter();
-    @Output() onDatasetNodeSelect: EventEmitter<number> = new EventEmitter();
-    @Output() onProcessingNodeSelect: EventEmitter<number> = new EventEmitter();
-    @Output() onCenterNodeSelect: EventEmitter<number> = new EventEmitter();
-    @Output() onEquipementNodeSelect: EventEmitter<number> = new EventEmitter();
-    @Output() onStudyCardNodeSelect: EventEmitter<number> = new EventEmitter();
-    @Output() onQualityCardNodeSelect: EventEmitter<number> = new EventEmitter();
-    @Output() onMemberNodeSelect: EventEmitter<number> = new EventEmitter();
+    @Input() selection: Selection = new Selection();
+    @Input() withMenu: boolean = true;
 
     constructor(
             private router: Router,

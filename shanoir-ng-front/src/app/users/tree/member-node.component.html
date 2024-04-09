@@ -18,7 +18,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [label]="node.label"
         awesome="far fa-user"
         [(opened)]="node.open"
-        (labelClick)="menuOpened = isAdmin && !menuOpened"
+        (labelClick)="menuOpened = isAdmin && !menuOpened; selection.memberId = node.id"
         [hasChildren]="hasChildren()">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="isAdmin">

@@ -17,6 +17,7 @@ import { Router } from '@angular/router';
 import {DatasetNode, ProcessingNode, UNLOADED} from '../../tree/tree.model';
 import { Dataset } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
+import { Selection } from 'src/app/studies/study/study-tree.component';
 
 
 @Component({
@@ -35,7 +36,8 @@ export class DatasetNodeComponent implements OnChanges {
     @Input() related: boolean = false;
     detailsPath: string = '/dataset/details/';
     @Output() onDatasetDelete: EventEmitter<void> = new EventEmitter();
-    @Output() onNodeSelect: EventEmitter<number> = new EventEmitter();
+    @Input() selection: Selection = new Selection();
+    @Input() withMenu: boolean = true;
 
     constructor(
         private router: Router,

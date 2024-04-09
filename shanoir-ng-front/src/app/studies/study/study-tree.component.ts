@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { Subscription } from 'rxjs';
@@ -153,6 +153,12 @@ export class StudyTreeComponent {
         this.selection.qualitycardId = null;
         this.selection.memberId = null;
     }
+
+    @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
+        if (event.key == '²') {
+            console.log('selection', this.selection);
+        }
+    }
 }
 
 export class Selection {
@@ -179,7 +185,7 @@ export class Selection {
     }
 
     set examinationId(id: number) {
-        this.selectedEntity = 'study';
+        this.selectedEntity = 'examination';
         this.id = id;
     }
 
@@ -192,7 +198,7 @@ export class Selection {
         this.id = id;
     }
 
-    get acquisitiond(): number {
+    get acquisitionId(): number {
         return this.selectedEntity == 'acquisition' ? this.id : null;
     }
 

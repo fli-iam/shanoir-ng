@@ -12,11 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import { Router } from '@angular/router';
 
+import { Selection } from 'src/app/studies/study/study-tree.component';
 import { StudyCardNode } from '../../tree/tree.model';
 import { StudyCard } from '../shared/study-card.model';
-import {StudyCardService} from "../shared/study-card.service";
+import { StudyCardService } from "../shared/study-card.service";
 
 
 @Component({
@@ -33,9 +33,10 @@ export class StudyCardNodeComponent implements OnChanges {
     loading: boolean = false;
     menuOpened: boolean = false;
     detailsPath: string = '/study-card/details/';
+    @Input() selection: Selection = new Selection();
+    @Input() withMenu: boolean = true;
 
     constructor(
-        private router: Router,
         private cardService: StudyCardService) {
     }
 

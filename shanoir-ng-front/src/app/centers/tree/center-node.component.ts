@@ -12,13 +12,13 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import { Router } from '@angular/router';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 
-import {AcquisitionEquipmentNode, CenterNode, DatasetNode, UNLOADED} from '../../tree/tree.model';
+import { Selection } from 'src/app/studies/study/study-tree.component';
+import { KeycloakService } from "../../shared/keycloak/keycloak.service";
+import { AcquisitionEquipmentNode, CenterNode } from '../../tree/tree.model';
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
-import {KeycloakService} from "../../shared/keycloak/keycloak.service";
 
 
 @Component({
@@ -36,9 +36,10 @@ export class CenterNodeComponent implements OnChanges {
     loading: boolean = false;
     menuOpened: boolean = false;
     detailsPath: string = '/center/details/';
+    @Input() selection: Selection = new Selection();
+    @Input() withMenu: boolean = true;
 
     constructor(
-        private router: Router,
         private centerService: CenterService,
         private acquisitionEquipmentPipe: AcquisitionEquipmentPipe,
         private keycloakService: KeycloakService) {

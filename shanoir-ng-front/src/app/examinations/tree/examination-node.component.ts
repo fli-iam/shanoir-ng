@@ -11,23 +11,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {Component, EventEmitter, ViewChild, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
-import {Router} from '@angular/router';
-import {DatasetAcquisitionService} from '../../dataset-acquisitions/shared/dataset-acquisition.service';
-import {DatasetProcessing} from '../../datasets/shared/dataset-processing.model';
-import {Dataset} from '../../datasets/shared/dataset.model';
-import {DatasetService, Format} from '../../datasets/shared/dataset.service';
-import {DatasetProcessingType} from '../../enum/dataset-processing-type.enum';
-import {ConsoleService} from '../../shared/console/console.service';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { DatasetAcquisitionService } from '../../dataset-acquisitions/shared/dataset-acquisition.service';
+import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
+import { Dataset } from '../../datasets/shared/dataset.model';
+import { Format } from '../../datasets/shared/dataset.service';
+import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
+import { ConsoleService } from '../../shared/console/console.service';
 
-import {DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode} from '../../tree/tree.model';
-import {Examination} from '../shared/examination.model';
-import {ExaminationPipe} from '../shared/examination.pipe';
-import {ExaminationService} from '../shared/examination.service';
-import {LoadingBarComponent} from '../../shared/components/loading-bar/loading-bar.component';
-import {environment} from '../../../environments/environment';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { TaskState } from 'src/app/async-tasks/task.model';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { Selection } from 'src/app/studies/study/study-tree.component';
+import { environment } from '../../../environments/environment';
+import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode } from '../../tree/tree.model';
+import { Examination } from '../shared/examination.model';
+import { ExaminationPipe } from '../shared/examination.pipe';
+import { ExaminationService } from '../shared/examination.service';
 
 @Component({
     selector: 'examination-node',
@@ -40,9 +39,6 @@ export class ExaminationNodeComponent implements OnChanges {
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
     @Output() nodeInit: EventEmitter<ExaminationNode> = new EventEmitter();
     @Output() onExaminationDelete: EventEmitter<void> = new EventEmitter();
-    @Output() onNodeSelect: EventEmitter<number> = new EventEmitter();
-    @Output() onAcquisitionNodeSelect: EventEmitter<number> = new EventEmitter();
-    @Output() onDatasetNodeSelect: EventEmitter<number> = new EventEmitter();
 
     protected downloadState: TaskState = new TaskState();
     node: ExaminationNode;
@@ -55,13 +51,13 @@ export class ExaminationNodeComponent implements OnChanges {
     downloading = false;
     hasBids: boolean = false;
     detailsPath: string = '/examination/details/';
+    @Input() selection: Selection = new Selection();
+    @Input() withMenu: boolean = true;
 
     constructor(
-        private router: Router,
         private examinationService: ExaminationService,
         private datasetAcquisitionService: DatasetAcquisitionService,
         private examPipe: ExaminationPipe,
-        private datasetService: DatasetService,
         private downloadService: MassDownloadService,
         private consoleService: ConsoleService) {
     }

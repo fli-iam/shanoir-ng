@@ -17,6 +17,7 @@ import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 
 import { MemberNode } from '../../tree/tree.model';
 import { User } from '../shared/user.model';
+import { Selection } from 'src/app/studies/study/study-tree.component';
 
 
 @Component({
@@ -33,6 +34,8 @@ export class MemberNodeComponent implements OnChanges {
     menuOpened: boolean = false;
     isAdmin: boolean;
     detailsPath: string = '/user/details/';
+    @Input() selection: Selection = new Selection();
+    @Input() withMenu: boolean = true;
 
     constructor(
             private router: Router,

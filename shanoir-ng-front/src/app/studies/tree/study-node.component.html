@@ -14,14 +14,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <node
         *ngIf="node"
-        [class.selected]="showDetails && this.menuOpened"
+        [class.selected]="(showDetails && this.menuOpened) || selection?.studyId"
         [label]="node.label"
         awesome="fa-regular fa-folder-open"
         [(opened)]="node.open"
         (labelClick)="menuOpened = !menuOpened"
         [hasChildren]="true"
         [clickable]="showDetails"
-        (labelClick)="onStudyNodeSelect.emit($event)">
+        (labelClick)="selection.studyId = $event">
 
         <dropdown-menu [(openInput)]="menuOpened" *ngIf="showDetails && menuOpened">
           <a [routerLink]="this.detailsPath + this.node.id" class="open-new-tab">
@@ -43,11 +43,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [input]="subject"
                     [studyId]="node.id"
                     (selectedChange)="selectedChange.emit(node)"
-                    (onNodeSelect)="onSubjectNodeSelect.emit($event)"
-                    (onExaminationNodeSelect)="onExaminationNodeSelect.emit($event)"
-                    (onAcquisitionNodeSelect)="onAcquisitionNodeSelect.emit($event)"
-                    (onDatasetNodeSelect)="onDatasetNodeSelect.emit($event)"
                     [hasBox]="hasBox"
+                    [selection]="selection"
+                    [withMenu]="withMenu"
             >
             </subject-node>
         </ng-container>
@@ -66,8 +64,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <center-node
                     *ngFor="let center of node.centers"
                     [input]="center"
-                    (onNodeSelect)="onCenterNodeSelect.emit($event)"
-                    (onEquipementNodeSelect)="onEquipementNodeSelect.emit($event)">
+                    [selection]="selection"
+                    [withMenu]="withMenu">
             </center-node>
         </ng-container>
 
@@ -88,6 +86,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     *ngFor="let studycard of node.studyCards;let i = index"
                     [input]="studycard"
                     (onCardDelete)="onCardDelete(i)"
+                    [selection]="selection"
+                    [withMenu]="withMenu"
             >
             </studycard-node>
         </ng-container>
@@ -105,7 +105,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <ng-container *ngIf="node.membersOpen && node.members && node.members != $any('UNLOADED')">
             <member-node
                     *ngFor="let member of node.members"
-                    [input]="member">
+                    [input]="member"
+                    [selection]="selection"
+                    [withMenu]="withMenu">
             </member-node>
         </ng-container>
 

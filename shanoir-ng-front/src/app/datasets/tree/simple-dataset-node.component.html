@@ -26,7 +26,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [hasChildren]="hasChildren()"
         [title]="node.title + ' n°' + node.id">
 
-    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
+    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu">
         <a [routerLink]="this.detailsPath + this.node.id">
           <menu-item *ngIf="!related" label="Details..." awesome="fa-regular fa-eye" (click)="showDatasetDetails()"></menu-item>
         </a>

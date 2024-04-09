@@ -14,7 +14,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened"
+        [class.selected]="this.menuOpened || selection?.subjectId == node.id"
         [label]="node.label"
         [tags]="node.tags"
         [qualityTag]="node.qualityTag"
@@ -22,11 +22,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         (firstOpen)="loadExaminations()"
         [(opened)]="node.open"
         [hasChildren]="hasChildren()"
-        (labelClick)="menuOpened = !menuOpened; onNodeSelect.emit(node.id)"
+        (labelClick)="menuOpened = withMenu && !menuOpened; selection.subjectId = node.id"
         [dataLoading]="loading"
         [title]="node.title + ' n°' + node.id">
 
-    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
+    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu">
         <a [routerLink]="this.detailsPath" class="open-new-tab">
             <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
         </a>
@@ -42,9 +42,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 (selectedChange)="selectedChange.emit()"
                 [hasBox]="hasBox"
                 (onExaminationDelete)="onExaminationDelete(i)"
-                (onNodeSelect)="onExaminationNodeSelect.emit($event)"
-                (onAcquisitionNodeSelect)="onAcquisitionNodeSelect.emit($event)"
-                (onDatasetNodeSelect)="onDatasetNodeSelect.emit($event)"
+                [selection]="selection"
+                [withMenu]="withMenu"
         >
         </examination-node>
     </ng-container>

@@ -14,15 +14,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened"
+        [class.selected]="this.menuOpened || selection?.equipmentId"
         [label]="node.label"
         awesome="fas fa-microscope"
         [(opened)]="node.open"
-        (labelClick)="menuOpened = contextMenu && !menuOpened; onNodeSelect.emit(input.id);"
+        (labelClick)="menuOpened = contextMenu && !menuOpened; selection.equipmentId = node.id;"
         [hasChildren]="false"
         [title]="node.title + ' n°' + node.id">
 
-    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
+    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu && withMenu">
         <a [routerLink]="this.detailsPath + this.node.id" class="open-new-tab">
             <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
         </a>
