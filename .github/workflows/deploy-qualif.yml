@@ -38,6 +38,7 @@ jobs:
           instance: neurinfo-qualif
         name: "deploy to ${{ env.instance }}"
         run: >
+          set -x
           curl --fail -H "Authorization: Token $token" -d "owner=$owner"
               -d "deploy_id=$deploy_id" -d "instance=$instance" -- "$url"
       - env:
