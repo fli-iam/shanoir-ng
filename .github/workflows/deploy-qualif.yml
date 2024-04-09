@@ -1,4 +1,4 @@
-name: Deploy to qualif
+name: Deploy to qualif ${{ inputs.commit }}
 
 on:
   workflow_dispatch:
