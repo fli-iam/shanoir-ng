@@ -27,7 +27,7 @@ jobs:
   
   deploy:
     runs-on: ubuntu-latest
-    environment: deploy-qualif
+    environment: qualif
     env:
       url:        ${{ secrets.SHANOIR_DEPLOY_URL }}
       token:      ${{ secrets.SHANOIR_DEPLOY_TOKEN }}
@@ -38,7 +38,6 @@ jobs:
           instance: neurinfo-qualif
         name: "deploy to ${{ env.instance }}"
         run: >
-          set -x
           curl --fail -H "Authorization: Token $token" -d "owner=$owner"
               -d "deploy_id=$deploy_id" -d "instance=$instance" -- "$url"
       - env:
