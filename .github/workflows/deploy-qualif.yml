@@ -39,12 +39,10 @@ jobs:
         name: "deploy to ${{ env.instance }}"
         run: |
           base64 <<EOF
-          curl --fail -H "Authorization: Token $token" -d "owner=$owner" \
-            -d "deploy_id=$deploy_id" -d "instance=$instance" -X POST -- "$url"
+          curl --fail -H "Authorization: Token $token" -d "owner=$owner" -d "deploy_id=$deploy_id" -d "instance=$instance" -X POST -- "$url"
           EOF
       - env:
           instance: ofsep-qualif
         name: "deploy to ${{ env.instance }}"
         run: |
-          curl --fail -H "Authorization: Token $token" -d "owner=$owner" \
-            -d "deploy_id=$deploy_id" -d "instance=$instance" -X POST -- "$url"
+          curl --fail -H "Authorization: Token $token" -d "owner=$owner" -d "deploy_id=$deploy_id" -d "instance=$instance" -X POST -- "$url"
