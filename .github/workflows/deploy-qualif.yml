@@ -1,5 +1,5 @@
 name: Deploy to qualif
-run-name: Deploy ${{ inputs.commit }} (${{ inputs.ref }}) to  ${{ inputs.neurinfo && 'neurinfo' || '-' }}/${{ inputs.ofsep && 'ofsep' || '-' }} by ${{ inputs.owner }}
+run-name: Deploy ${{ inputs.commit[0:8] }} (${{ inputs.ref }}) to  ${{ inputs.neurinfo && 'neurinfo' || '-' }}/${{ inputs.ofsep && 'ofsep' || '-' }} by ${{ inputs.owner }}
 
 on:
   workflow_dispatch:
