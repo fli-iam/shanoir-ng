@@ -20,6 +20,7 @@ import { TaskService } from '../../async-tasks/task.service';
 import * as AppUtils from '../../utils/app.utils';
 import { KeycloakService } from '../keycloak/keycloak.service';
 import { SuperTimeout } from 'src/app/utils/super-timeout';
+import { SessionService } from '../services/session.service';
 
 @Injectable()
 export class NotificationsService {
@@ -42,10 +43,9 @@ export class NotificationsService {
     readonly readInterval: number = 1000;
     readonly persistenceTime: number = 1800000;
     private freshTimeouts: SuperTimeout[] = [];
-    private readonly TIMEOUT: number = 300000;
+    
 
-
-    constructor(private taskService: TaskService, private keycloakService: KeycloakService) {
+    constructor(private taskService: TaskService, private keycloakService: KeycloakService, private sessionService: SessionService) {
         this.connectToServer();
         this.connectReadSessionToLocalStorage();
     }
@@ -99,10 +99,10 @@ export class NotificationsService {
         let tmpTasksInProgress = [];
         let tmpTasksInWait = [];
         for (let task of this.allTasks) {
-            if (task.eventType.startsWith("downloadDataset") && (task.status == 2 || task.status == 4 || task.status == 5) && task.lastUpdate) {
-                if (Date.now() - new Date(task.lastUpdate).getTime() > this.TIMEOUT) {
+            if (task.eventType.startsWith("downloadDataset") && (task.status == 2 || task.status == 4 || task.status == 5)) {
+                if (!this.sessionService.isActive(task.sessionId)) {
                     task.status = -1;
-                    task.message = 'timeout';
+                    task.message = 'interrupted';
                 }
             }
             if (task.status == -1 && task.lastUpdate) {
@@ -160,7 +160,11 @@ export class NotificationsService {
                 });
             this.source.addEventListener('message', message => {
                 if (message.data !== "{}") {
-                    this.refresh();
+                    let task: Task = this.taskService.toRealObject(JSON.parse(message.data));
+                    this.tasks = this.tasks.filter(t => t.completeId != task.completeId);
+                    this.tasks.push(task);
+                    this.updateStatusVars();
+                    this.emitTasks();
                 }
             });
             this.refresh();

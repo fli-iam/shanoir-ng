@@ -103,8 +103,8 @@ export class BrowserPaging<T> {
                 cell1 = TableComponent.getFieldRawValue(n1, col.field)
                 cell2 = TableComponent.getFieldRawValue(n2, col.field)
             } else if ((col.type == "date" || col.type == "dateTime") && !col.cellRenderer) {
-                cell1 = TableComponent.harmonizeToDate(cell1).getTime();
-                cell2 = TableComponent.harmonizeToDate(cell2).getTime();
+                cell1 = TableComponent.harmonizeToDate(cell1)?.getTime();
+                cell2 = TableComponent.harmonizeToDate(cell2)?.getTime();
             }
             // If equality, test the id so the order is always the same
             if (cell1 == cell2) {
