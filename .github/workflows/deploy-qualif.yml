@@ -30,6 +30,7 @@ jobs:
     strategy:
       matrix:
         instance: [neurinfo-qualif, ofsep-qualif]
+    environment: deploy-qualif
     env:
       url:        ${{ SHANOIR_DEPLOY_URL }}
       token:      ${{ SHANOIR_DEPLOY_TOKEN }}
