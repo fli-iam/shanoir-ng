@@ -1,5 +1,5 @@
 name: Deploy to qualif
-run-name: Deploy ${{ inputs.commit }} (${{ inputs.ref }}) to  ${{ inputs.neurinfo && 'neurinfo' || '-' }}/${{ inputs.ofsep && 'ofsep' || '-' }} by ${{ inputs.owner }}
+run-name: ${{ inputs.description }}
 
 on:
   workflow_dispatch:
@@ -7,11 +7,7 @@ on:
       commit:
         description: "commit id to be deployed"
         required: true
-      ref:
-        description: "git reference (only display)"
-        default: "-"
-      owner:
-        description: "person who triggered this deployment"
+      description: "description of this workflow run"
         required: true
       deploy_id:
         description: "unique id for this deployment"
@@ -36,17 +32,16 @@ jobs:
       url:        ${{ secrets.SHANOIR_DEPLOY_URL }}
       token:      ${{ secrets.SHANOIR_DEPLOY_TOKEN }}
       deploy_id:  ${{ inputs.deploy_id }}
-      owner:      ${{ inputs.owner }}
     steps:
       - env:
           instance: neurinfo-qualif
         name: "deploy to ${{ env.instance }}"
         run: |
           base64 <<EOF
-          curl --fail --no-progress-meter -H "Authorization: Token $token" -d "owner=$owner" -d "deploy_id=$deploy_id" -d "instance=$instance" -X POST -- "$url"
+          curl --fail --no-progress-meter -H "Authorization: Token $token" -d "deploy_id=$deploy_id" -d "instance=$instance" -X POST -- "$url"
           EOF
       - env:
           instance: ofsep-qualif
         name: "deploy to ${{ env.instance }}"
         run: |
-          curl --fail --no-progress-meter -H "Authorization: Token $token" -d "owner=$owner" -d "deploy_id=$deploy_id" -d "instance=$instance" -X POST -- "$url"
+          curl --fail --no-progress-meter -H "Authorization: Token $token" -d "deploy_id=$deploy_id" -d "instance=$instance" -X POST -- "$url"
