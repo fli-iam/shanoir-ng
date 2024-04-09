@@ -1,0 +1,51 @@
+name: Deploy to qualif
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: "commit id to be deployed"
+        required: true
+      owner:
+        description: "person who triggered this deployment"
+        required: true
+      deploy_id:
+        description: "unique id for this deployment"
+        required: true
+      neurinfo:
+        type: boolean
+        required: true
+      ofsep:
+        type: boolean
+        required: true
+
+x-deploy-cmd: &deploy-cmd >
+
+x-deploy-env: &deploy-env
+
+jobs:
+  build_docker_images:
+    uses: ./.github/workflows/docker.yml
+    with:
+      commit: "${{ inputs.commit }}"
+  
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        instance: [neurinfo-qualif, ofsep-qualif]
+    env:
+      url:        ${{ SHANOIR_DEPLOY_URL }}
+      token:      ${{ SHANOIR_DEPLOY_TOKEN }}
+      deploy_id:  ${{ inputs.deploy_id }}
+      owner:      ${{ inputs.owner }}
+      instance:   ${{ matrix.instance }}
+    steps:
+      - name: "deploy ${{ matrix.instance }}"
+        run: |
+          curl --fail
+            -H "Authorization: Token $token"
+            -d "deploy_id=$deploy_id"
+            -d "owner=$owner"
+            -d "instance=$instance"
+            -- "$url"

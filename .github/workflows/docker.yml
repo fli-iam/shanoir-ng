@@ -27,11 +27,11 @@ on:
   push:
     tags:
       - '*'
-  workflow_dispatch: # TODO: remove
-    inputs:
-      commit:
-        description: 'commit id to be built'
-        required: true
+#  workflow_dispatch: # TODO: remove
+#    inputs:
+#      commit:
+#        description: 'commit id to be built'
+#        required: true
   workflow_call:
     inputs:
       commit:
