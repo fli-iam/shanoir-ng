@@ -27,22 +27,24 @@ jobs:
   
   deploy:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        instance: [neurinfo-qualif, ofsep-qualif]
     environment: deploy-qualif
     env:
       url:        ${{ secrets.SHANOIR_DEPLOY_URL }}
       token:      ${{ secrets.SHANOIR_DEPLOY_TOKEN }}
       deploy_id:  ${{ inputs.deploy_id }}
       owner:      ${{ inputs.owner }}
-      instance:   ${{ matrix.instance }}
     steps:
-      - name: "deploy ${{ matrix.instance }}"
-        run: |
+      - env:
+          instance: ofsep-qualif
+        name: &run-name "deploy to ${{ env.instance }}"
+        run:  &run-cmd >
           curl --fail
             -H "Authorization: Token $token"
             -d "deploy_id=$deploy_id"
             -d "owner=$owner"
             -d "instance=$instance"
             -- "$url"
+      - env:
+          instance: neurinfo-qualif
+        name: *run-name
+        run:  *run-cmd
