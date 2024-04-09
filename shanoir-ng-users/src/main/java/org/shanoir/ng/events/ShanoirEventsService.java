@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.commons.lang3.time.DateUtils;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.tasks.AsyncTaskApiController;
+import org.shanoir.ng.tasks.UserSseEmitter;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -81,23 +82,26 @@ public class ShanoirEventsService {
 	 * @param notification the event to send
 	 */
 	public void sendSseEventsToUI(ShanoirEvent notification) {
-        List<SseEmitter> sseEmitterListToRemove = new ArrayList<>();
-        AsyncTaskApiController.emitters.forEach((SseEmitter emitter) -> {
-			if (notification.getLastUpdate() == null) {
-				notification.setLastUpdate(new Date());
+        List<UserSseEmitter> sseEmitterListToRemove = new ArrayList<>();
+        AsyncTaskApiController.emitters.forEach((UserSseEmitter emitter) -> {
+			// ! IMPORTANT filter on user id
+			if (KeycloakUtil.getTokenUserId().equals(emitter.getUserId())) {
+				if (notification.getLastUpdate() == null) {
+					notification.setLastUpdate(new Date());
+				}
+				try {
+					emitter.send(notification, MediaType.APPLICATION_JSON);
+				} catch (IOException e2) {
+					emitter.complete();
+					sseEmitterListToRemove.add(emitter);
+					LOG.error("Error while send task to UI ", e2);
+				} catch (Exception e) {
+					emitter.complete();
+					sseEmitterListToRemove.add(emitter);
+					LOG.error("Error while send task to UI ", e);
+					throw e;
+				}
 			}
-            try {
-                emitter.send(notification, MediaType.APPLICATION_JSON);
-            } catch (IOException e2) {
-            	emitter.complete();
-                sseEmitterListToRemove.add(emitter);
-                LOG.error("Error while send task to UI ", e2);
-            } catch (Exception e) {
-            	emitter.complete();
-                sseEmitterListToRemove.add(emitter);
-                LOG.error("Error while send task to UI ", e);
-                throw e;
-            }
         });
         AsyncTaskApiController.emitters.removeAll(sseEmitterListToRemove);
     }
