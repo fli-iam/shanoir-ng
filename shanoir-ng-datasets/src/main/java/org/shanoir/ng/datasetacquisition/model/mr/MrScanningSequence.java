@@ -34,8 +34,11 @@ public enum MrScanningSequence {
 	// Echo Planar
 	EP(4),
 	
-	//Research Mode
-	RM(5);
+	// Research Mode
+	RM(5),
+
+	// Unknown, for the moment it is a test
+	S(6);
 	
 	private int id;
 
