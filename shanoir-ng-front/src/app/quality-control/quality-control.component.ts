@@ -63,8 +63,6 @@ export class QualityControlComponent implements OnChanges {
         if (changes.studyId && this.studyId) {
             this.qualityCardService.getAllForStudy(this.studyId).then(qualityCards => {
                 this.qualityCards = qualityCards;
-                if (this.qualityCards?.length > 0) this.message = "These are the compatible quality cards that you can apply all over your study.";
-                else if (this.qualityCards?.length == 0 || !this.qualityCards) this.message = "There are no existing quality card for this study.";
             });
         }
     }

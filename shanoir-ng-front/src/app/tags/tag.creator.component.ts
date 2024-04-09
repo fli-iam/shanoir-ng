@@ -53,8 +53,6 @@ export class TagCreatorComponent extends AbstractInput<Tag[]> {
     }
 
     ngOnChanges() {
-        if (this.study.studyTags?.length > 0) this.message = "";
-        if (this.study.studyTags?.length == 0 || !this.study.studyTags) this.message = "There are no public tags for this study.";
     }
 
     public addTag() {
