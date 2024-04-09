@@ -19,10 +19,6 @@ on:
         type: boolean
         required: true
 
-x-deploy-cmd: &deploy-cmd >
-
-x-deploy-env: &deploy-env
-
 jobs:
   build_docker_images:
     uses: ./.github/workflows/docker.yml
