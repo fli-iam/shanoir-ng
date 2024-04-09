@@ -7,7 +7,8 @@ on:
       commit:
         description: "commit id to be deployed"
         required: true
-      description: "description of this workflow run"
+      description:
+        description: "description of this workflow run"
         required: true
       deploy_id:
         description: "unique id for this deployment"
