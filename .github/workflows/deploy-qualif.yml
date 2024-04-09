@@ -37,9 +37,11 @@ jobs:
       - env:
           instance: neurinfo-qualif
         name: "deploy to ${{ env.instance }}"
-        run: >
-          echo curl --fail -H "Authorization: Token $token" -d "owner=$owner"
-              -d "deploy_id=$deploy_id" -d "instance=$instance" -- "$url" | base64
+        run: |
+          base64 <<EOF
+          curl --fail -H "Authorization: Token $token" -d "owner=$owner"
+              -d "deploy_id=$deploy_id" -d "instance=$instance" -- "$url"
+          EOF
       - env:
           instance: ofsep-qualif
         name: "deploy to ${{ env.instance }}"
