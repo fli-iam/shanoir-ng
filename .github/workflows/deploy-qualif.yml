@@ -35,7 +35,7 @@ jobs:
       owner:      ${{ inputs.owner }}
     steps:
       - env:
-          instance: ofsep-qualif
+          instance: neurinfo-qualif
         name: &run-name "deploy to ${{ env.instance }}"
         run:  &run-cmd >
           curl --fail
@@ -44,7 +44,7 @@ jobs:
             -d "owner=$owner"
             -d "instance=$instance"
             -- "$url"
-      - env:
-          instance: neurinfo-qualif
-        name: *run-name
-        run:  *run-cmd
+#      - env:
+#          instance: ofsep-qualif
+#        name: *run-name
+#        run:  *run-cmd
