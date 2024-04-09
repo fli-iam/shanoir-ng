@@ -19,6 +19,7 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -60,6 +61,8 @@ public class DatasetAcquisitionApiControllerTest {
 
 	@MockBean
 	private ShanoirEventService eventService;
+	@MockBean
+	private RabbitTemplate rabbitTemplate;
 	@Autowired
 	private MockMvc mvc;
 

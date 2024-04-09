@@ -97,7 +97,6 @@ public class DatasetServiceImpl implements DatasetService {
 	@Override
 	@Transactional
 	public void deleteById(final Long id) throws ShanoirException, SolrServerException, IOException, RestServiceException {
-		LOG.error("DELETE Dataset");
 		final Dataset dataset = repository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
 
@@ -110,11 +109,9 @@ public class DatasetServiceImpl implements DatasetService {
 
 		}
 
-		LOG.error("DELETE Dataset 1");
 		processingService.removeDatasetFromAllProcessingInput(id);
 		propertyService.deleteByDatasetId(id);
 		repository.deleteById(id);
-		LOG.error("DELETE Dataset 2");
 
 		if (dataset.getSourceId() == null) {
 			this.deleteDatasetFromPacs(dataset);
@@ -124,24 +121,18 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Override
 	public void deleteDatasetFromPacs(Dataset dataset) throws ShanoirException {
-		LOG.error("DELETE deleteDatasetFromPacs début");
         if (!dicomWeb) {
             return;
         }
 
         for (DatasetExpression expression : dataset.getDatasetExpressions()) {
-			LOG.error("DELETE deleteDatasetFromPacs boucle expression");
-
 			boolean isDicom = DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat());
 
 			for (DatasetFile file : expression.getDatasetFiles()) {
-				LOG.error("DELETE deleteDatasetFromPacs boucle file");
 				if (isDicom && file.isPacs()) {
-					LOG.error("if");
 					dicomWebService.rejectDatasetFromPacs(file.getPath());
 					break;
 				} else if (!file.isPacs()) {
-					LOG.error("else");
 					try {
 						URL url = new URL(file.getPath().replaceAll("%20", " "));
 						File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
@@ -153,7 +144,6 @@ public class DatasetServiceImpl implements DatasetService {
 			}
 			break;
         }
-		LOG.error("DELETE deleteDatasetFromPacs fin");
     }
 
 	@Override
@@ -182,6 +172,7 @@ public class DatasetServiceImpl implements DatasetService {
 	@Override
 	public Dataset create(final Dataset dataset) throws SolrServerException, IOException {
 		Dataset ds = repository.save(dataset);
+		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, ds.getStudyId()));
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.RELOAD_BIDS, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, ds.getStudyId()));
 		return ds;
 	}
@@ -194,6 +185,7 @@ public class DatasetServiceImpl implements DatasetService {
 		}
 		this.updateDatasetValues(datasetDb, dataset);
 		Dataset ds = repository.save(datasetDb);
+		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, ds.getStudyId()));
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.RELOAD_BIDS, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, datasetDb.getStudyId()));
 		return ds;
 	}

@@ -183,16 +183,12 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     @Override
     @Transactional
     public void deleteById(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException {
-        LOG.error("DELETE DatasetAcquisition 1");
         final DatasetAcquisition entity = repository.findById(id).orElse(null);
-        LOG.error("DELETE DatasetAcquisition 2");
         if (entity == null) {
-            LOG.error("entity == null");
             throw new EntityNotFoundException("Cannot find entity with id = " + id);
         }
 
         if (entity != null && entity.getSourceId() != null) {
-            LOG.error("entity != null && source != null");
             throw new RestServiceException(
                     new ErrorModel(
                             HttpStatus.UNPROCESSABLE_ENTITY.value(),
@@ -206,7 +202,6 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
                     datasetService.deleteById(ds.getId());
                     datasetIds.add(ds.getId());
                 }
-                LOG.error("call solr deleteFromIndex with size : " + datasetIds.size());
                 solrService.deleteFromIndex(datasetIds);
             }
             repository.deleteById(id);

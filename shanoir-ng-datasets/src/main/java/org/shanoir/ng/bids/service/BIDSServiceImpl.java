@@ -146,11 +146,6 @@ public class BIDSServiceImpl implements BIDSService {
 	 */
 	@RabbitListener(bindings = {
 			@QueueBinding(
-					key = ShanoirEventType.RELOAD_BIDS,
-					value = @Queue(value = RabbitMQConfiguration.BIDS_EVENT_QUEUE, durable = "true"),
-					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-							autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
-			@QueueBinding(
 					key = ShanoirEventType.CREATE_EXAMINATION_EVENT,
 					value = @Queue(value = RabbitMQConfiguration.BIDS_EVENT_QUEUE, durable = "true"),
 					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
@@ -158,11 +153,9 @@ public class BIDSServiceImpl implements BIDSService {
 	}
 			)
 	public void deleteBids(String eventAsString) {
-		LOG.error("DELETE BIDS 1 " + eventAsString);
 		ShanoirEvent event;
 		try {
 			event = objectMapper.readValue(eventAsString, ShanoirEvent.class);
-			LOG.error("DELETE BIDS 2 " + event.getEventType());
 			if (event.getStudyId() == null) {
 				LOG.error("This event did not triggered a BIDs folder deletion {}", eventAsString);
 				return;
@@ -172,6 +165,11 @@ public class BIDSServiceImpl implements BIDSService {
 		} catch (Exception e) {
 			LOG.error("ERROR when deleting BIDS folder: please delete it manually: {}", eventAsString, e);
 		}
+	}
+	@RabbitListener(queues = RabbitMQConfiguration.RELOAD_BIDS)
+	public void deleteBidsForStudy(Long studyId) {
+		Study studyDeleted = studyRepo.findById(studyId).orElse(null);
+		this.deleteBidsFolder(studyDeleted.getId(), studyDeleted.getName());
 	}
 
 	@Override

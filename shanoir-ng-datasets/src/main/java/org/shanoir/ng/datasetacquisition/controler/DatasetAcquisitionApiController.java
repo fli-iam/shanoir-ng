@@ -50,6 +50,7 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -96,6 +97,9 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
 	@Autowired
 	private ShanoirEventService eventService;
+
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
 
 	@Override
 	public ResponseEntity<Void> createNewDatasetAcquisition(
@@ -209,6 +213,9 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 			throws RestServiceException {
 		try {
 			datasetAcquisitionService.deleteById(datasetAcquisitionId);
+
+			Long studyId = 1L; //datasetAcquisitionService.findById(datasetAcquisitionId).getExamination().getStudyId();
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
 
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {

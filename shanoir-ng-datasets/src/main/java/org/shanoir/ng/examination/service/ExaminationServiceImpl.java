@@ -93,7 +93,6 @@ public class ExaminationServiceImpl implements ExaminationService {
 	
 	@Override
 	public void deleteById(final Long id) throws ShanoirException, SolrServerException, IOException, RestServiceException {
-		LOG.error("DELETE Examination");
 		Optional<Examination> examinationOpt = examinationRepository.findById(id);
 		if (!examinationOpt.isPresent()) {
 			throw new EntityNotFoundException(Examination.class, id);
