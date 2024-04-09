@@ -3,6 +3,7 @@ run-name: >
   Deploy ${{ inputs.commit }} (${{ inputs.ref }}) to
   ${{ inputs.neurinfo && "neurinfo" || '' }}
   ${{ inputs.ofsep    && "ofsep"    || '' }}
+  by ${{ inputs.owner }}
 
 on:
   workflow_dispatch:
@@ -12,6 +13,7 @@ on:
         required: true
       ref:
         description: "git reference (only display)"
+        default: "-"
       owner:
         description: "person who triggered this deployment"
         required: true
