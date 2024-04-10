@@ -1,5 +1,5 @@
 name: Deploy to qualif
-run-name: ${{ inputs.description }}
+run-name: deploy ${{ inputs.commit }} to ${{ inputs.neurinfo && 'neurinfo' || '-' }}/${{ inputs.ofsep && 'ofsep' || '-'}} by ${{ owner }}
 
 on:
   workflow_dispatch:
@@ -7,8 +7,8 @@ on:
       commit:
         description: "commit id to be deployed"
         required: true
-      description:
-        description: "description of this workflow run"
+      owner:
+        description: "person who triggered this workflow"
         required: true
       deploy_id:
         description: "unique id for this deployment"
