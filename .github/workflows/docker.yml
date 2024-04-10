@@ -42,7 +42,7 @@ on:
   
 jobs:
   #TODO: skip in production
-  check:
+  check_commit:
     name: Resolve git commit and check the container registry
     runs-on: ubuntu-latest
     outputs:
@@ -51,7 +51,7 @@ jobs:
     permissions:
       packages: read
     steps:
-      - name: resolve git commit ${{ inputs.commit }}
+      - name: resolve git commit ${{ inputs.commit }} and query the container registry
         id: resolve
         env:
           COMMIT: ${{ inputs.commit }}
@@ -98,11 +98,12 @@ jobs:
               if rep.ok:
                 for version in rep.json():
                   if sha in version["metadata"]["container"]["tags"]:
-                    break
+                    continue
               elif rep.status_code != 404:
                   rep.raise_for_status
               print(f"image shanoir-ng/{image}:{sha} not yet built and pushed to the registry")
               return ""
+            return "ok"
 
           sha = resolve_commit(os.environ["COMMIT"])
           print(f"resolved git commit: {sha}")
@@ -113,8 +114,8 @@ jobs:
 
   build_images:
     name: Build docker images
-    needs: check
-    if: needs.check.outputs.status != 'ok'
+    needs: check_commit
+    if: needs.check_commit.outputs.status != 'ok'
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -124,7 +125,7 @@ jobs:
       # tag of the resulting docker image
       # - name of the git tag (production builds)
       # - commit id (develpment builds)
-      IMAGE_TAG: ${{ github.event_name == 'push' && github.ref_name || needs.check.outputs.sha }}
+      IMAGE_TAG: ${{ github.event_name == 'push' && github.ref_name || needs.check_commit.outputs.sha }}
     steps:
       # TODO: validate the commit id?
       - name: printenv

@@ -1,5 +1,5 @@
 name: Deploy to qualif
-run-name: deploy ${{ inputs.commit }} to ${{ inputs.neurinfo && 'neurinfo' || '-' }}/${{ inputs.ofsep && 'ofsep' || '-'}} by ${{ inputs.owner }}
+run-name: deploy ${{ inputs.commit }} to ${{ inputs.neurinfo && 'neurinfo' || '-' }},${{ inputs.ofsep && 'ofsep' || '-'}} by ${{ inputs.owner }}
 
 on:
   workflow_dispatch:
@@ -37,7 +37,7 @@ jobs:
     steps:
       - env:
           instance: neurinfo-qualif
-        name: "deploy to ${{ env.instance }}"
+        name: "deploy to ${{ env.instance }} commit ${{ needs.build.outputs.sha }}"
         run: |
           base64 <<EOF
           curl --fail --no-progress-meter -H "Authorization: Token $token" -d "deploy_id=$deploy_id" -d "instance=$instance" -X POST -- "$url"
