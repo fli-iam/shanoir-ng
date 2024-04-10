@@ -79,7 +79,7 @@ public interface DatasetApi {
 	@GetMapping(value = "/{datasetId}", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_SEE_ALL'))")
 	ResponseEntity<DatasetAndProcessingsDTOInterface> findDatasetById(
-			@Parameter(name = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId);
+			@Parameter(name = "datasetId", description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId);
 
 	@Operation(summary = "", description = "Updates a dataset")
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "dataset updated"),

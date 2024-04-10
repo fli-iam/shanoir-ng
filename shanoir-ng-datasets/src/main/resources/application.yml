@@ -87,6 +87,7 @@ springdoc:
     enabled: true
     disable-swagger-default-url: true
 
+
 front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
   url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}

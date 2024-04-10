@@ -164,8 +164,7 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<DatasetAndProcessingsDTOInterface> findDatasetById(
-			@Parameter(name = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId) {
+	public ResponseEntity<DatasetAndProcessingsDTOInterface> findDatasetById(final Long datasetId) {
 
 		final Dataset dataset = datasetService.findById(datasetId);
 
