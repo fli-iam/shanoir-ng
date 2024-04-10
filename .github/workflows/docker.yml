@@ -43,7 +43,6 @@ on:
 jobs:
   #TODO: skip in production
   check_commit:
-    name: Resolve git commit and check the container registry
     runs-on: ubuntu-latest
     outputs:
       sha:    ${{ steps.resolve.outputs.sha }}
