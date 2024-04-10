@@ -57,7 +57,7 @@ jobs:
           COMMIT: ${{ inputs.commit }}
         shell: python
         run: |
-          import os, pathlib, requests
+          import os, pathlib, re, requests
           from urllib.parse import quote_plus
 
           def get(endpoint: str) -> requests.Response:
