@@ -313,27 +313,35 @@ public class ImporterManagerService {
 				for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
 					Serie serie = seriesIt.next();
 					event.setMessage("Downloading DICOM files from PACS for serie [" + (serie.getProtocolName() == null ? serie.getSeriesInstanceUID() : serie.getProtocolName()) + "] (" + cpt + "/" + nbSeries + ")");
+					LOG.error("#################################### " + event.getMessage());
 					eventService.publishEvent(event);
 
 					String studyInstanceUID = study.getStudyInstanceUID();
 					String seriesInstanceUID = serie.getSeriesInstanceUID();
+					LOG.error("#################################### start CMOVE");
 					queryPACSService.queryCMOVE(studyInstanceUID, seriesInstanceUID);
+					LOG.error("#################################### stop CMOVE");
 					File serieIDFolderDir = new File(importJobDir + File.separator + seriesInstanceUID);
 
 					if(!serieIDFolderDir.exists()) {
+						LOG.error("#################################### mkdir");
 						serieIDFolderDir.mkdirs();
 					} else {
+						LOG.error("#################################### error creating folder");
 						throw new ShanoirException("Error while creating serie id folder: folder already exists.");
 					}
 					for (Iterator<Instance> iterator = serie.getInstances().iterator(); iterator.hasNext();) {
 						Instance instance = iterator.next();
 						String sopInstanceUID = instance.getSopInstanceUID();
+						LOG.error("#################################### moving instance " + instance.getInstanceNumber());
 						File oldFile = new File(dicomStoreSCPServer.getStorageDirPath() + File.separator + seriesInstanceUID + File.separator + sopInstanceUID + DicomStoreSCPServer.DICOM_FILE_SUFFIX);
 						if (oldFile.exists()) {
 							File newFile = new File(importJobDir.getAbsolutePath() + File.separator + seriesInstanceUID + File.separator + oldFile.getName());
+							LOG.error("#################################### " + "Moving file: " + oldFile.getAbsolutePath() + " to : " + newFile.getAbsolutePath());
 							oldFile.renameTo(newFile);
 							LOG.debug("Moving file: {} to ", oldFile.getAbsolutePath(), newFile.getAbsolutePath());
 						} else {
+							LOG.error("#################################### error rename");
 							throw new ShanoirException("Error while creating serie id folder: file to copy does not exist.");
 						}
 					}
