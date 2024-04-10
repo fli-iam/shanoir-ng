@@ -58,6 +58,7 @@ jobs:
         shell: python
         run: |
           import os, pathlib, requests
+          from urllib.parse import quote_plus
 
           def get(endpoint: str) -> requests.Response:
             return requests.get(f"${{ github.api_url }}{endpoint}", headers={
