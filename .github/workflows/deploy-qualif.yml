@@ -21,12 +21,13 @@ on:
         required: true
 
 jobs:
-  build_docker_images:
+  build:
     uses: ./.github/workflows/docker.yml
     with:
       commit: "${{ inputs.commit }}"
   
   deploy:
+    needs: build
     runs-on: ubuntu-latest
     environment: qualif
     env:
