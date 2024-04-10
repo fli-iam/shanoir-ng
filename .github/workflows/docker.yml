@@ -121,7 +121,7 @@ jobs:
       # tag of the resulting docker image
       # - name of the git tag (production builds)
       # - commit id (develpment builds)
-      IMAGE_TAG: ${{ env.PRODUCTION && github.ref_name || needs.check.outputs.sha }}
+      IMAGE_TAG: ${{ github.event_name == 'push' && github.ref_name || needs.check.outputs.sha }}
     steps:
       # TODO: validate the commit id?
       - name: printenv
