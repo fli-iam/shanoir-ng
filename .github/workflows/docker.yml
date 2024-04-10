@@ -34,6 +34,7 @@ on:
         description: 'git commit to be built (eg: heads/develop, pull/4456/head, fb45b0a9)'
         type: string
         required: true
+    outputs:
       sha:
         description: 'effective git commit id built'
         value: ${{ jobs.check.outputs.sha }}
