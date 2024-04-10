@@ -37,7 +37,7 @@ on:
     outputs:
       sha:
         description: 'effective git commit id built'
-        value: ${{ jobs.check.outputs.sha }}
+        value: ${{ jobs.check_commit.outputs.sha }}
 #TODO: disable on pull-request
   
 jobs:
@@ -96,9 +96,8 @@ jobs:
               import pprint
               pprint.pprint(rep.json())
               if rep.ok:
-                for version in rep.json():
-                  if sha in version["metadata"]["container"]["tags"]:
-                    continue
+                if any(sha in version["metadata"]["container"]["tags"] for version in rep.json()):
+                  continue
               elif rep.status_code != 404:
                   rep.raise_for_status
               print(f"image shanoir-ng/{image}:{sha} not yet built and pushed to the registry")
