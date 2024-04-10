@@ -93,8 +93,6 @@ jobs:
             #  -> should run push_to_registry even if this job fails (is that possible?)
             for image in os.environ["IMAGES"].split():
               rep = get(f"/users/a-ba/packages/container/shanoir-ng%2F{image}/versions")
-              import pprint
-              pprint.pprint(rep.json())
               if rep.ok:
                 if any(sha in version["metadata"]["container"]["tags"] for version in rep.json()):
                   continue
