@@ -109,7 +109,6 @@ jobs:
           pathlib.Path(os.environ["GITHUB_OUTPUT"]).write_text(f"sha={sha}\nstatus={status}\n")
 
   build_images:
-    name: Build docker images
     needs: check_commit
     if: needs.check_commit.outputs.status != 'ok'
     runs-on: ubuntu-latest
