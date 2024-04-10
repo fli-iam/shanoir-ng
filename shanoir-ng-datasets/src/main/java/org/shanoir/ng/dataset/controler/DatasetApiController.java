@@ -149,11 +149,10 @@ public class DatasetApiController implements DatasetApi {
 	public ResponseEntity<Void> deleteDataset(
 			@Parameter(name = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId) throws EntityNotFoundException, RestServiceException {
 		try {
-			datasetService.deleteById(datasetId);
-
-			solrService.deleteFromIndex(datasetId);
-
 			Long studyId = datasetService.findById(datasetId).getDatasetAcquisition().getExamination().getStudyId();
+
+			datasetService.deleteById(datasetId);
+			solrService.deleteFromIndex(datasetId);
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
 
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);

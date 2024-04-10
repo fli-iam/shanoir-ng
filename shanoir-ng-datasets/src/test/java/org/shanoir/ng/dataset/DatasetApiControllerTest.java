@@ -155,8 +155,13 @@ public class DatasetApiControllerTest {
 
 	@BeforeEach
 	public void setup() throws ShanoirException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException, SolrServerException, RestServiceException {
+		MrDataset datasetToReturn = new MrDataset();
+		datasetToReturn.setDatasetAcquisition(dsAcq);
+		datasetToReturn.getDatasetAcquisition().setExamination(exam);
+		datasetToReturn.getDatasetAcquisition().getExamination().setStudy(study);
+
+		given(datasetServiceMock.findById(1L)).willReturn(datasetToReturn);
 		doNothing().when(datasetServiceMock).deleteById(1L);
-		given(datasetServiceMock.findById(1L)).willReturn(new MrDataset());
 		given(datasetServiceMock.create(Mockito.mock(MrDataset.class))).willReturn(new MrDataset());
 		given(studyRepo.findById(Mockito.anyLong())).willReturn(Optional.of(study));
 		given(controlerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(Dataset.class))).willReturn(true);
