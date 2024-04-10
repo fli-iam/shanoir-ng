@@ -85,7 +85,7 @@ public class ShanoirEventsService {
         List<UserSseEmitter> sseEmitterListToRemove = new ArrayList<>();
         AsyncTaskApiController.emitters.forEach((UserSseEmitter emitter) -> {
 			// ! IMPORTANT filter on user id
-			if (KeycloakUtil.getTokenUserId().equals(emitter.getUserId())) {
+			if (notification.getUserId() != null && notification.getUserId().equals(emitter.getUserId())) {
 				if (notification.getLastUpdate() == null) {
 					notification.setLastUpdate(new Date());
 				}
