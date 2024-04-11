@@ -58,7 +58,7 @@ public class SolrApiController implements SolrApi {
 	public ResponseEntity<SolrResultPage<ShanoirSolrDocument>> facetSearch(
 			@Parameter(name = "facets", required = true) @Valid @RequestBody ShanoirSolrQuery facet, Pageable pageable) throws RestServiceException {
 		SolrResultPage<ShanoirSolrDocument> documents = solrService.facetSearch(facet, pageable);
-		return new ResponseEntity<SolrResultPage<ShanoirSolrDocument>>(documents, HttpStatus.OK);
+		return new ResponseEntity<>(documents, HttpStatus.OK);
 	}
 	
 	@Override
