@@ -25,7 +25,7 @@ jobs:
     uses: ./.github/workflows/docker.yml
     with:
       commit: "${{ inputs.commit }}"
-  
+
   deploy:
     needs: build
     runs-on: shanoir-deploy
@@ -34,16 +34,26 @@ jobs:
       url:        ${{ secrets.SHANOIR_DEPLOY_URL }}
       token:      ${{ secrets.SHANOIR_DEPLOY_TOKEN }}
       deploy_id:  ${{ inputs.deploy_id }}
+    strategy:
+      matrix:
+        instance:
+          - { name: neurinfo, enabled: ${{ inputs.neurinfo }} }
+          - { name: ofsep,    enabled: ${{ inputs.ofsep }} }
+    if: ${{ matrix.instance.enabled }}
     steps:
-      - env:
-          instance: neurinfo-qualif
-        name: "deploy to ${{ env.instance }} commit ${{ needs.build.outputs.sha }}"
-        run: |
-          base64 <<EOF
-          echo curl --fail --no-progress-meter -H "Authorization: Token $token" -d "deploy_id=$deploy_id" -d "instance=$instance" -X POST -- "$url"
-          EOF
-      - env:
-          instance: ofsep-qualif
-        name: "deploy to ${{ env.instance }}"
-        run: |
-          echo curl --fail --no-progress-meter -H "Authorization: Token $token" -d "deploy_id=$deploy_id" -d "instance=$instance" -X POST -- "$url"
+      - name: "deploy commit ${{ needs.build.outputs.sha }}"
+        run: 'echo deploy to ${{ matrix.instance.name }}'
+
+#    steps:
+#      - env:
+#          instance: neurinfo-qualif
+#        name: "deploy to ${{ env.instance }} commit ${{ needs.build.outputs.sha }}"
+#        run: |
+#          base64 <<EOF
+#          echo curl --fail --no-progress-meter -H "Authorization: Token $token" -d "deploy_id=$deploy_id" -d "instance=$instance" -X POST -- "$url"
+#          EOF
+#      - env:
+#          instance: ofsep-qualif
+#        name: "deploy to ${{ env.instance }}"
+#        run: |
+#          echo curl --fail --no-progress-meter -H "Authorization: Token $token" -d "deploy_id=$deploy_id" -d "instance=$instance" -X POST -- "$url"
