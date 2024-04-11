@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DatasetPropertyRepository extends CrudRepository<DatasetProperty, Long> {
 
+    void deleteByDatasetId(Long id);
 }

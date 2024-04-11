@@ -51,7 +51,7 @@ import {Format} from "@angular-devkit/build-angular/src/builders/extract-i18n/sc
 import { TaskState } from '../async-tasks/task.model';
 import {DatasetCopyDialogComponent} from "../shared/components/dataset-copy-dialog/dataset-copy-dialog.component";
 
-const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags'];
+const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags', 'processed'];
 const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength'];
 export type TextualFacet = typeof TextualFacetNames[number];
 @Component({
@@ -162,7 +162,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     buildForm(): UntypedFormGroup {
-        const searchBarRegex = '^((studyName|subjectName|datasetName|examinationComment|datasetTypes|datasetNatures|acquisitionEquipmentName)[:][*]?[a-zA-Z0-9\\s_\W\.\!\@\#\$\%\^\&\*\(\)\_\+\-\=]+[*]?[;])+$';
+        const searchBarRegex = '^((studyName|subjectName|datasetName|examinationComment|datasetTypes|processed|datasetNatures|acquisitionEquipmentName)[:][*]?[a-zA-Z0-9\\s_\W\.\!\@\#\$\%\^\&\*\(\)\_\+\-\=]+[*]?[;])+$';
         let formGroup = this.formBuilder.group({
             'startDate': [this.solrRequest.datasetStartDate, [DatepickerComponent.validator]],
             'endDate': [this.solrRequest.datasetEndDate, [DatepickerComponent.validator, this.dateOrderValidator]],
@@ -282,11 +282,12 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         if (this.form.valid) {
             this.saveState();
             this.solrRequest.facetPaging = this.facetPageable ? this.facetPageable : this.buildFacetPageable();
-            return this.solrService.search(this.solrRequest, pageable).then(solrResultPage => {
+            let facetPagingTmp: Map<String, FacetPageable> = new Map(this.solrRequest.facetPaging); // shallow copy
+            let search = this.solrService.search(this.solrRequest, pageable).then(solrResultPage => {
                 // populate criteria
                 if (solrResultPage) {
                     this.pagingCriterion.forEach(criterionComponent => {
-                        if (this.solrRequest.facetPaging.has(criterionComponent.facetName)) {
+                        if (facetPagingTmp?.has(criterionComponent.facetName)) {
                             let facetPage: FacetResultPage = solrResultPage.facetResultPages.find(facetResPage => facetResPage.content[0]?.key?.name == criterionComponent.facetName)
                             if (!facetPage) facetPage = new FacetResultPage();
                             criterionComponent.refresh(facetPage);
@@ -302,10 +303,10 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                     this.syntaxError = true;
                     return new SolrResultPage();
                 } else throw reason;
-            }).finally(() => {
-                this.solrRequest.facetPaging = null;
-                this.facetPageable = null;
             });
+            this.solrRequest.facetPaging = null;
+            this.facetPageable = null;
+            return search;
         } else {
             return Promise.resolve(new SolrResultPage());
         }
@@ -427,6 +428,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         let columnDefs: ColumnDefinition[] = [
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {headerName: "Admin", type: "boolean", cellRenderer: row => this.hasAdminRight(row.data.studyId), awesome: "fa-solid fa-shield", color: "goldenrod", disableSorting: true},
+            {headerName: "", type: "boolean", cellRenderer: row => row.data.processed, awesome: "fa-solid fa-gears", color: "dimgrey", disableSorting: true, tip: item => { return item.processed ? "processed dataset" : "" }},
             {headerName: "Name", field: "datasetName"},
             {headerName: "Tags", field: "tags"},
             {headerName: "Type", field: "datasetType"},
@@ -613,6 +615,10 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         modalRef.instance.canCopy = this.hasCopyRight;
         modalRef.instance.lines = this.selectedLines;
     }
+
+    private isProcessed(doc: SolrDocument) {
+        return doc.processed == true;
+    }
 }
 
 export interface SelectionBlock {
@@ -631,7 +637,8 @@ export class SimpleValueSelectionBlock implements SelectionBlock {
 
 export class FacetSelectionBlock implements SelectionBlock {
 
-    constructor(private facetField: FacetField) {}
+    constructor(private facetField: FacetField) {
+    }
 
     get label(): string {
         return this.facetField.value;

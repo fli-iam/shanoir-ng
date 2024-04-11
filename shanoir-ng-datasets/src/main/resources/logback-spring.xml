@@ -44,6 +44,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </encoder>
     </appender>
 
+    <appender name="RESULTHANDLER_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>/var/log/shanoir-ng-logs/shanoir-vip-handler.log</file>
+        <encoder>
+            <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="org.shanoir.ng.vip.resulthandler" level="INFO" additivity="false">
+        <appender-ref ref="RESULTHANDLER_FILE"/>
+    </logger>
+
     <logger name="org.shanoir.ng.shared.event" level="INFO" additivity="false">
         <appender-ref ref="EVENT_FILE_LOG" />
     </logger>
