@@ -31,7 +31,7 @@ jobs:
     needs: build
     runs-on: shanoir-deploy
     env:
-      DEPLOY_ID: ${{ input.DEPLOY_ID }}
+      DEPLOY_ID: ${{ inputs.DEPLOY_ID }}
     steps:
       - name: "deploy commit ${{ needs.build.outputs.sha }}"
         run: /run/github-runner/deploy-shanoir "$DEPLOY_ID" neurinfo
@@ -41,7 +41,7 @@ jobs:
     needs: build
     runs-on: shanoir-deploy
     env:
-      DEPLOY_ID: ${{ input.DEPLOY_ID }}
+      DEPLOY_ID: ${{ inputs.DEPLOY_ID }}
     steps:
       - name: "deploy commit ${{ needs.build.outputs.sha }}"
         run: /run/github-runner/deploy-shanoir "$DEPLOY_ID" ofsep
