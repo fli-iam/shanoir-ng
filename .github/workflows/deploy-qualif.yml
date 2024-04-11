@@ -37,8 +37,8 @@ jobs:
     strategy:
       matrix:
         instance:
-          - { name: neurinfo, enabled: ${{ inputs.neurinfo }} }
-          - { name: ofsep,    enabled: ${{ inputs.ofsep }} }
+          - { name: neurinfo, enabled: "${{ inputs.neurinfo }}" }
+          - { name: ofsep,    enabled: "${{ inputs.ofsep }}" }
     if: ${{ matrix.instance.enabled }}
     steps:
       - name: "deploy commit ${{ needs.build.outputs.sha }}"
