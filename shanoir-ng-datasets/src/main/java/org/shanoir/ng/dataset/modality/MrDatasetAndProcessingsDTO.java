@@ -58,5 +58,5 @@ public class MrDatasetAndProcessingsDTO extends MrDatasetDTO implements DatasetA
 	public void setDatasetProcessing(DatasetProcessingDTO datasetProcessing) {
 		this.datasetProcessing = datasetProcessing;
 	}
-    
+
 }
