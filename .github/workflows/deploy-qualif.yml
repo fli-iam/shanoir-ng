@@ -28,7 +28,7 @@ jobs:
   
   deploy:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: shanoir-deploy
     environment: qualif
     env:
       url:        ${{ secrets.SHANOIR_DEPLOY_URL }}
@@ -40,10 +40,10 @@ jobs:
         name: "deploy to ${{ env.instance }} commit ${{ needs.build.outputs.sha }}"
         run: |
           base64 <<EOF
-          curl --fail --no-progress-meter -H "Authorization: Token $token" -d "deploy_id=$deploy_id" -d "instance=$instance" -X POST -- "$url"
+          echo curl --fail --no-progress-meter -H "Authorization: Token $token" -d "deploy_id=$deploy_id" -d "instance=$instance" -X POST -- "$url"
           EOF
       - env:
           instance: ofsep-qualif
         name: "deploy to ${{ env.instance }}"
         run: |
-          curl --fail --no-progress-meter -H "Authorization: Token $token" -d "deploy_id=$deploy_id" -d "instance=$instance" -X POST -- "$url"
+          echo curl --fail --no-progress-meter -H "Authorization: Token $token" -d "deploy_id=$deploy_id" -d "instance=$instance" -X POST -- "$url"
