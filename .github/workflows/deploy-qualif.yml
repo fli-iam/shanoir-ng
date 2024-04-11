@@ -34,7 +34,7 @@ jobs:
       DEPLOY_ID: ${{ input.DEPLOY_ID }}
     steps:
       - name: "deploy commit ${{ needs.build.outputs.sha }}"
-        run: /run/github-runner/deploy "$DEPLOY_ID" neurinfo
+        run: /run/github-runner/deploy-shanoir "$DEPLOY_ID" neurinfo
 
   deploy-ofsep:
     if: ${{ inputs.ofsep }}
@@ -44,5 +44,5 @@ jobs:
       DEPLOY_ID: ${{ input.DEPLOY_ID }}
     steps:
       - name: "deploy commit ${{ needs.build.outputs.sha }}"
-        run: /run/github-runner/deploy "$DEPLOY_ID" ofsep
+        run: /run/github-runner/deploy-shanoir "$DEPLOY_ID" ofsep
 
