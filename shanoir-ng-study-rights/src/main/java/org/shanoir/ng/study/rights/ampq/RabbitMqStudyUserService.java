@@ -52,7 +52,7 @@ public class RabbitMqStudyUserService {
 	@Autowired
 	private ObjectMapper mapper;
 	
-    public void receiveMessageImport(String commandArrStr) throws AmqpRejectAndDontRequeueException {
+    public void receiveStudyUsers(String commandArrStr) throws AmqpRejectAndDontRequeueException {
     	StudyUserCommand[] commands;
     	try {
     		LOG.debug("Received study-user commands : {}", commandArrStr);
