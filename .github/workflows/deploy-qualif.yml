@@ -39,10 +39,10 @@ jobs:
         instance:
           - { name: neurinfo, enabled: "${{ inputs.neurinfo }}" }
           - { name: ofsep,    enabled: "${{ inputs.ofsep }}" }
-    if: ${{ matrix.instance.enabled }}
     steps:
       - name: "deploy commit ${{ needs.build.outputs.sha }}"
         run: 'echo deploy to ${{ matrix.instance.name }}'
+        if: ${{ matrix.instance.enabled }}
 
 #    steps:
 #      - env:
