@@ -89,7 +89,7 @@ public class DicomProcessing {
 				dataset.setFirstImageSOPInstanceUID(sopUID);
 				attributes.addDatasetAttributes(dataset.getFirstImageSOPInstanceUID(), getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), isEnhanced));
 			} catch (IOException e) {
-				throw new ShanoirException("Could not read dicom metadata from file for serie : sequence name = " + serie.getSequenceName() + "; soap class UID = " + serie.getSopClassUID() + "; file path = " + serie.getFirstDatasetFileForCurrentSerie().getPath(), e);
+				throw new ShanoirException("Could not read dicom metadata from file for serie : description = " + serie.getSeriesDescription() + "; serie instance UID = " + serie.getSeriesInstanceUID() + "; file path = " + serie.getFirstDatasetFileForCurrentSerie().getPath(), e);
 			}
 		}
 		return attributes;
