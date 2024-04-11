@@ -18,7 +18,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +29,6 @@ import java.util.zip.ZipOutputStream;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.commons.collections4.CollectionUtils;
 import org.joda.time.DateTime;
 import org.shanoir.ng.dataset.modality.BidsDataset;
 import org.shanoir.ng.dataset.modality.EegDataset;
@@ -74,6 +72,8 @@ public class DatasetDownloaderServiceImpl {
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetDownloaderServiceImpl.class);
 
 	private static final String JSON_RESULT_FILENAME = "ERRORS.json";
+
+	private static final Long DEFAULT_NIFTI_CONVERTER_ID = 6L;
 
 	@Autowired
 	DatasetService datasetService;
@@ -158,45 +158,18 @@ public class DatasetDownloaderServiceImpl {
 						filesByAcquisitionId.get(dataset.getDatasetAcquisition().getId()).addAll(files);
 					}
 				} else if (NII.equals(format)) {
-					// Check if we want a specific converter -> nifti reconversion
+					// Check if we have a specific converter -> nifti reconversion
 					if (converterId != null) {
-						File userDir = DatasetFileUtils.getUserImportDir("/tmp");
-						String tmpFilePath = userDir + File.separator + dataset.getId() + "_" + format;
-						File workFolder = new File(tmpFilePath + "-" + formatter.format(new DateTime().toDate()));
-
-						DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, downloadResult);
-
-						// Create temporary workfolder with dicom files, to be able to convert them
-						workFolder.mkdirs();
-
-						downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset, downloadResult);
-
-						// Convert them, sending to import microservice
-						boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + workFolder.getAbsolutePath());
-						if (!result) {
-							response.setContentType(null);
-							throw new RestServiceException(
-									new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Nifti conversion failed", null));
-						}
-						workFolder = new File(workFolder.getAbsolutePath() + File.separator + "result");
-						List<String> files = new ArrayList<>();
-						for (File res : workFolder.listFiles()) {
-
-							if (!res.isDirectory()) {
-								// Then send workFolder to zipOutputFile
-								FileSystemResource fileSystemResource = new FileSystemResource(res.getAbsolutePath());
-								ZipEntry zipEntry = new ZipEntry(res.getName());
-								zipEntry.setSize(fileSystemResource.contentLength());
-								zipEntry.setTime(System.currentTimeMillis());
-								zipOutputStream.putNextEntry(zipEntry);
-								StreamUtils.copy(fileSystemResource.getInputStream(), zipOutputStream);
-								zipOutputStream.closeEntry();
-								files.add(res.getName());
-							}
-						}
+						reconvertToNifti(format, response, converterId, dataset, formatter, pathURLs, downloadResult, subjectName, zipOutputStream);
 					} else {
+						// Check that we have existing nifti, otherwise reconvert using dcm2niix by default.
 						DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE, downloadResult);
-						List<String> files = DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, false, datasetFilePath);
+						if (!pathURLs.isEmpty()) {
+							List<String> files = DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, false, datasetFilePath);
+						} else {
+							// Reconvert using dcm2niix by default.
+							reconvertToNifti(format, response, DEFAULT_NIFTI_CONVERTER_ID, dataset, formatter, pathURLs, downloadResult, subjectName, zipOutputStream);
+						}
 					}
 				} else {
 					downloadResult.update("Dataset format was not adapted to dataset download choosen", DatasetDownloadError.ERROR);
@@ -230,6 +203,43 @@ public class DatasetDownloaderServiceImpl {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 							"Unexpected error while downloading dataset files"));
+		}
+	}
+
+	private void reconvertToNifti(String format, HttpServletResponse response, Long converterId, Dataset dataset, SimpleDateFormat formatter, List<URL> pathURLs, DatasetDownloadError downloadResult, String subjectName, ZipOutputStream zipOutputStream) throws RestServiceException, IOException {
+		File userDir = DatasetFileUtils.getUserImportDir("/tmp");
+		String tmpFilePath = userDir + File.separator + dataset.getId() + "_" + format;
+		File workFolder = new File(tmpFilePath + "-" + formatter.format(new DateTime().toDate()));
+
+		DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, downloadResult);
+
+		// Create temporary workfolder with dicom files, to be able to convert them
+		workFolder.mkdirs();
+
+		downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset, downloadResult);
+
+		// Convert them, sending to import microservice
+		boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + workFolder.getAbsolutePath());
+		if (!result) {
+			response.setContentType(null);
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Nifti conversion failed", null));
+		}
+		workFolder = new File(workFolder.getAbsolutePath() + File.separator + "result");
+		List<String> files = new ArrayList<>();
+		for (File res : workFolder.listFiles()) {
+
+			if (!res.isDirectory()) {
+				// Then send workFolder to zipOutputFile
+				FileSystemResource fileSystemResource = new FileSystemResource(res.getAbsolutePath());
+				ZipEntry zipEntry = new ZipEntry(res.getName());
+				zipEntry.setSize(fileSystemResource.contentLength());
+				zipEntry.setTime(System.currentTimeMillis());
+				zipOutputStream.putNextEntry(zipEntry);
+				StreamUtils.copy(fileSystemResource.getInputStream(), zipOutputStream);
+				zipOutputStream.closeEntry();
+				files.add(res.getName());
+			}
 		}
 	}
 

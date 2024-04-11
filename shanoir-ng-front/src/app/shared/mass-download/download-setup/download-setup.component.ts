@@ -44,20 +44,21 @@ export class DownloadSetupComponent implements OnInit {
         new Option<Format>('nii', 'Nifti', null, null, null, false),
     ];
     niftiConverters: Option<number>[] = [
-        new Option<number>(1, 'DCM2NII_2008_03_31', null, null, null, false),
-        new Option<number>(2, 'MCVERTER_2_0_7', null, null, null, false),
-        new Option<number>(4, 'DCM2NII_2014_08_04', null, null, null, false),
-        new Option<number>(5, 'MCVERTER_2_1_0', null, null, null, false),
-        new Option<number>(6, 'DCM2NIIX', null, null, null, false),
-        new Option<number>(7, 'DICOMIFIER', null, null, null, false),
-        new Option<number>(8, 'MRICONVERTER', null, null, null, false),
+        new Option<number>(null, 'Existing nifti (if available)', null, null, null, false),
+        new Option<number>(1, 'Dcm2nii_2008_03_31', null, null, null, false),
+        new Option<number>(2, 'McVerter_2_0_7', null, null, null, false),
+        new Option<number>(4, 'Dcm2nii_2014_08_04', null, null, null, false),
+        new Option<number>(5, 'McVerter_2_1_0', null, null, null, false),
+        new Option<number>(6, 'Dcm2niix', null, null, null, false),
+        new Option<number>(7, 'Dicomifier', null, null, null, false),
+        new Option<number>(8, 'MriConverter', null, null, null, false),
     ];
     winOs: boolean;
     @ViewChild('window') window: ElementRef;
 
     constructor(
-            private formBuilder: UntypedFormBuilder, 
-            globalService: GlobalService, 
+            private formBuilder: UntypedFormBuilder,
+            globalService: GlobalService,
             deviceInformationService: AngularDeviceInformationService,
             private datasetService: DatasetService) {
 
@@ -96,6 +97,8 @@ export class DownloadSetupComponent implements OnInit {
                 });
             }
         }
+        // Empty converter by default
+        this.converter = 6;
     }
 
     private buildForm(): UntypedFormGroup {
@@ -115,7 +118,7 @@ export class DownloadSetupComponent implements OnInit {
         let setup: DownloadSetup = new DownloadSetup(this.form.get('format').value);
         setup.nbQueues = this.form.get('nbQueues').value;
         setup.unzip = this.form.get('unzip').value;
-        setup.converter = (this.form.get('format').value == 'nii') ? this.form.get('converter').value : null;
+        setup.converter = (this.form.get('format').value == 'nii') ? this.form.get('converter')?.value : null;
         if (this.form.get('shortPath')) setup.shortPath = this.form.get('shortPath').value;
         setup.datasets = this.datasets;
         this.go.emit(setup);

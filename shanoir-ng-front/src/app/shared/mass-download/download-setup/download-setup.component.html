@@ -15,7 +15,7 @@
                 <li *ngIf="hasDicom && form.get('format').value == 'nii'">
                 <label>Nifti converter</label>
                 <span class="right-col">
-                    <select-box formControlName="converter" [options]="niftiConverters"></select-box>
+                    <select-box formControlName="converter" [options]="niftiConverters" [(ngModel)]="converter"></select-box>
                 </span>
                 </li>
                 <li>
