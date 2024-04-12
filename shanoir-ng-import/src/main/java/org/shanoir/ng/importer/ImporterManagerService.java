@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -116,7 +117,7 @@ public class ImporterManagerService {
 		try {
 			// Always create a userId specific folder in the import work folder (the root of everything):
 			// split imports to clearly separate them into separate folders for each user
-			final String userImportDirFilePath = importDir + File.separator + Long.toString(importJob.getUserId());
+			final String userImportDirFilePath = importDir + File.separator + Long.toString(importJob.getUserId()) + File.separator + Long.toString(new Date().getTime());
 			final File userImportDir = new File(userImportDirFilePath);
 			if (!userImportDir.exists()) {
 				userImportDir.mkdirs(); // create if not yet existing, e.g. in case of PACS import
@@ -301,49 +302,38 @@ public class ImporterManagerService {
 	 * @throws ShanoirException
 	 */
 	private void downloadAndMoveDicomFilesToImportJobDir(final File importJobDir, List<Patient> patients, ShanoirEvent event) throws ShanoirException {
-		LOG.error("#################################### downloadAndMoveDicomFilesToImportJobDir ");
 		for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
 			Patient patient = patientsIt.next();
 			List<Study> studies = patient.getStudies();
-			LOG.error("#################################### patient " + patient.getPatientName());
 			for (Iterator<Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
 				Study study = studiesIt.next();
 				List<Serie> series = study.getSelectedSeries();
 				int nbSeries = series.size();
 				int cpt = 1;
-				LOG.error("#################################### study " + study.getStudyDescription());
 				for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
 					Serie serie = seriesIt.next();
 					event.setMessage("Downloading DICOM files from PACS for serie [" + (serie.getProtocolName() == null ? serie.getSeriesInstanceUID() : serie.getProtocolName()) + "] (" + cpt + "/" + nbSeries + ")");
-					LOG.error("#################################### " + event.getMessage());
 					eventService.publishEvent(event);
 
 					String studyInstanceUID = study.getStudyInstanceUID();
 					String seriesInstanceUID = serie.getSeriesInstanceUID();
-					LOG.error("#################################### start CMOVE");
 					queryPACSService.queryCMOVE(studyInstanceUID, seriesInstanceUID);
-					LOG.error("#################################### stop CMOVE");
 					File serieIDFolderDir = new File(importJobDir + File.separator + seriesInstanceUID);
 
 					if(!serieIDFolderDir.exists()) {
-						LOG.error("#################################### mkdir");
 						serieIDFolderDir.mkdirs();
 					} else {
-						LOG.error("#################################### error creating folder");
 						throw new ShanoirException("Error while creating serie id folder: folder already exists.");
 					}
 					for (Iterator<Instance> iterator = serie.getInstances().iterator(); iterator.hasNext();) {
 						Instance instance = iterator.next();
 						String sopInstanceUID = instance.getSopInstanceUID();
-						LOG.error("#################################### moving instance " + instance.getInstanceNumber());
 						File oldFile = new File(dicomStoreSCPServer.getStorageDirPath() + File.separator + seriesInstanceUID + File.separator + sopInstanceUID + DicomStoreSCPServer.DICOM_FILE_SUFFIX);
 						if (oldFile.exists()) {
 							File newFile = new File(importJobDir.getAbsolutePath() + File.separator + seriesInstanceUID + File.separator + oldFile.getName());
-							LOG.error("#################################### " + "Moving file: " + oldFile.getAbsolutePath() + " to : " + newFile.getAbsolutePath());
 							oldFile.renameTo(newFile);
 							LOG.debug("Moving file: {} to ", oldFile.getAbsolutePath(), newFile.getAbsolutePath());
 						} else {
-							LOG.error("#################################### error rename");
 							throw new ShanoirException("Error while creating serie id folder: file to copy does not exist.");
 						}
 					}
