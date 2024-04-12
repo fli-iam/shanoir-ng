@@ -369,8 +369,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         </span>
 					</li>
                     <li *ngIf="mode == 'view'">
-                        <div [hidden]="!pfDownloadState?.progress">
-                            <progress-bar [progress]="pfDownloadState?.progress" [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
+                        <div [hidden]="!pdfDownloadState?.progress">
+                            <progress-bar [progress]="pdfDownloadState?.progress" [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
                         </div>
                         <span class="right-col">
                             <span *ngIf="study.protocolFilePaths && study.protocolFilePaths[0]">

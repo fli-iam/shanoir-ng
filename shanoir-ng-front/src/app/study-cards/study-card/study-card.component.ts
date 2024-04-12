@@ -23,8 +23,6 @@ import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
 import { Coil } from '../../coils/shared/coil.model';
 import { CoilService } from '../../coils/shared/coil.service';
-import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
-import { NiftiConverterService } from '../../niftiConverters/nifti.converter.service';
 import { slideDown } from '../../shared/animations/animations';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
@@ -65,7 +63,6 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             private studyCardService: StudyCardService,
             private studyService: StudyService,
             private acqEqService: AcquisitionEquipmentService,
-            private niftiConverterService: NiftiConverterService,
             private studyRightsService: StudyRightsService,
             private acqEqptLabelPipe: AcquisitionEquipmentPipe,
             keycloakService: KeycloakService,
@@ -96,7 +93,6 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     initEdit(): Promise<void> {
         this.hasAdministrateRightPromise = Promise.resolve(false);
         this.fetchStudies();
-        this.fetchNiftiConverters();
         return this.studyCardService.get(this.id).then(sc => {
             this.studyCard = sc;
         });
@@ -112,10 +108,6 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             }
         });
         this.studyCard = new StudyCard();
-        this.fetchNiftiConverters().then(result => {
-            // pre-select dcm2niix
-            this.studyCard.niftiConverter = result.filter(element => element.name === 'dcm2niix')[0];
-        });
         return Promise.resolve();
     }
 
@@ -165,14 +157,6 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
                     let option: Option<AcquisitionEquipment> = new Option(acqEq, this.acqEqptLabelPipe.transform(acqEq));
                     this.acquisitionEquipments.push(option);
                 }
-            });
-    }
-
-    private fetchNiftiConverters(): Promise<NiftiConverter[]> {
-        return this.niftiConverterService.getAll()
-            .then(converters => {
-                this.niftiConverters = converters.map(converter => new IdName(converter.id, converter.name));
-                return converters;
             });
     }
 
