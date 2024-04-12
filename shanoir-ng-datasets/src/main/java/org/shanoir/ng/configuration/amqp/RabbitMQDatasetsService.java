@@ -146,7 +146,7 @@ public class RabbitMQDatasetsService {
 	@RabbitListener(bindings = @QueueBinding(
 			value = @Queue(value = RabbitMQConfiguration.STUDY_USER_QUEUE_DATASET, durable = "true"),
 			exchange = @Exchange(value = RabbitMQConfiguration.STUDY_USER_EXCHANGE, ignoreDeclarationExceptions = "true",
-			autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT))
+			autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT)), containerFactory = "multipleConsumersFactory"
 	)
 	public void receiveMessage(String commandArrStr) {
 		listener.receiveStudyUsers(commandArrStr);
@@ -180,7 +180,7 @@ public class RabbitMQDatasetsService {
 	}
 
 	@Transactional
-	@RabbitListener(queues = RabbitMQConfiguration.STUDY_NAME_UPDATE_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_NAME_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
 	@RabbitHandler
 	public void receiveStudyNameUpdate(final String studyStr) {
 		try {
@@ -238,7 +238,7 @@ public class RabbitMQDatasetsService {
 	}
 
 	@Transactional
-	@RabbitListener(queues = RabbitMQConfiguration.SUBJECT_NAME_UPDATE_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.SUBJECT_NAME_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
 	@RabbitHandler
 	public boolean receiveSubjectNameUpdate(final String subjectStr) {		
 		Subject su = receiveAndUpdateIdNameEntity(subjectStr, Subject.class, subjectRepository);
@@ -300,14 +300,14 @@ public class RabbitMQDatasetsService {
 	}
 
 	@Transactional
-	@RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_UPDATE_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
 	@RabbitHandler
 	public void receiveAcEqUpdate(final String acEqStr) {
 		receiveAndUpdateIdNameEntity(acEqStr, AcquisitionEquipment.class, acquisitionEquipmentRepository);
 	}
 
 	@Transactional
-	@RabbitListener(queues = RabbitMQConfiguration.CENTER_NAME_UPDATE_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.CENTER_NAME_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
 	@RabbitHandler
 	public void receiveCenterNameUpdate(final String centerStr) {
 		receiveAndUpdateIdNameEntity(centerStr, Center.class, centerRepository);
@@ -349,7 +349,7 @@ public class RabbitMQDatasetsService {
 			key = ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT,
 			value = @Queue(value = RabbitMQConfiguration.CREATE_DATASET_ACQUISITION_QUEUE, durable = "true"),
 			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
+			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)), containerFactory = "multipleConsumersFactory"
 			)
 	@Transactional(isolation = Isolation.READ_UNCOMMITTED,  propagation = Propagation.REQUIRES_NEW)
 	public void createDatasetAcquisition(final String studyStr) {
@@ -379,7 +379,7 @@ public class RabbitMQDatasetsService {
 			key = ShanoirEventType.DELETE_SUBJECT_EVENT,
 			value = @Queue(value = RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, durable = "true"),
 			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
+			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)), containerFactory = "singleConsumerFactory"
 			)
 	@Transactional
 	public void deleteSubject(String eventAsString) throws AmqpRejectAndDontRequeueException {
@@ -417,7 +417,7 @@ public class RabbitMQDatasetsService {
 			key = ShanoirEventType.DELETE_STUDY_EVENT,
 			value = @Queue(value = RabbitMQConfiguration.DELETE_STUDY_QUEUE, durable = "true"),
 			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
+			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)), containerFactory = "singleConsumerFactory"
 			)
 	@Transactional
 	public void deleteStudy(String eventAsString) throws AmqpRejectAndDontRequeueException {
@@ -443,7 +443,7 @@ public class RabbitMQDatasetsService {
 		}
 	}
 
-	@RabbitListener(queues = RabbitMQConfiguration.STUDY_DATASETS_DETAILED_STORAGE_VOLUME)
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_DATASETS_DETAILED_STORAGE_VOLUME, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	@Transactional
 	public String getDetailedStudyStorageVolume(Long studyId) {
@@ -461,7 +461,7 @@ public class RabbitMQDatasetsService {
 		}
 	}
 
-	@RabbitListener(queues = RabbitMQConfiguration.STUDY_DATASETS_TOTAL_STORAGE_VOLUME)
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_DATASETS_TOTAL_STORAGE_VOLUME, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	@Transactional
 	public String getDetailedStorageVolumeByStudy(List<Long> studyIds) {
@@ -487,7 +487,7 @@ public class RabbitMQDatasetsService {
 	 *
 	 * @return
 	 */
-	@RabbitListener(queues = RabbitMQConfiguration.COPY_DATASETS_TO_STUDY_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.COPY_DATASETS_TO_STUDY_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	@Transactional
 	@Async

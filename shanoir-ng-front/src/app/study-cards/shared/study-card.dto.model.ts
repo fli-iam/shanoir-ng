@@ -21,7 +21,6 @@ export class StudyCardDTO {
     name: string;
     studyId: number;
     acquisitionEquipmentId: number;
-    niftiConverterId: number;
     rules: StudyCardRuleDTO[];
 
     constructor(studyCard?: StudyCard) {
@@ -30,7 +29,6 @@ export class StudyCardDTO {
             this.name = studyCard.name;
             this.studyId = studyCard.study ? studyCard.study.id : null;
             this.acquisitionEquipmentId = studyCard.acquisitionEquipment?.id;
-            this.niftiConverterId = studyCard.niftiConverter.id;
             this.rules = studyCard.rules.map(rule => new StudyCardRuleDTO(rule));
         }
     }

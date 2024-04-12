@@ -67,7 +67,7 @@ public class RabbitMQStudiesService {
 			key = ShanoirEventType.CREATE_EXAMINATION_EVENT,
 			value = @Queue(value = RabbitMQConfiguration.EXAMINATION_STUDY_QUEUE, durable = "true"),
 			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
+			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)), containerFactory = "multipleConsumersFactory"
 			)
 	@RabbitHandler
 	@Transactional
@@ -107,7 +107,7 @@ public class RabbitMQStudiesService {
 			key = ShanoirEventType.DELETE_EXAMINATION_EVENT,
 			value = @Queue(value = RabbitMQConfiguration.EXAMINATION_STUDY_DELETE_QUEUE, durable = "true"),
 			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
+			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)), containerFactory = "singleConsumerFactory"
 			)
 	@RabbitHandler
 	@Transactional
@@ -125,7 +125,7 @@ public class RabbitMQStudiesService {
 		}
 	}
 
-	@RabbitListener(queues = RabbitMQConfiguration.STUDY_NAME_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_NAME_QUEUE, containerFactory = "singleConsumerFactory")
 	@Transactional
 	public String getStudyName(final long studyId) {
 		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
@@ -136,7 +136,7 @@ public class RabbitMQStudiesService {
 		return null;
 	}
 
-	@RabbitListener(queues = RabbitMQConfiguration.STUDY_ANONYMISATION_PROFILE_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_ANONYMISATION_PROFILE_QUEUE, containerFactory = "singleConsumerFactory")
 	@Transactional
 	public String getStudyAnonymisationProfile(final long studyId) {
 		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
@@ -151,7 +151,7 @@ public class RabbitMQStudiesService {
 	 * Receives a json object, concerning a study subscription
 	 * @param commandArrStr the studyUser as a json string.
 	 */
-	@RabbitListener(queues = RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE, containerFactory = "singleConsumerFactory")
 	@Transactional
 	public boolean studySubscription(final String studyStr) {
 		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
@@ -192,7 +192,7 @@ public class RabbitMQStudiesService {
 	}
 	
 	@Transactional
-	@RabbitListener(queues = RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG)
+	@RabbitListener(queues = RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG, containerFactory = "singleConsumerFactory")
 	@RabbitHandler
 	public void receiveSubjectStudyStudyCardTagUpdate(final String messageStr) {
 		try {
