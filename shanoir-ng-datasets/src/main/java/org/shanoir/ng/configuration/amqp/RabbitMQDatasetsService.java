@@ -195,44 +195,45 @@ public class RabbitMQDatasetsService {
 	@RabbitListener(queues = RabbitMQConfiguration.SUBJECT_NAME_UPDATE_QUEUE)
 	@RabbitHandler
 	public boolean receiveSubjectNameUpdate(final String subjectStr) {		
-		Subject su = receiveAndUpdateIdNameEntity(subjectStr, Subject.class, subjectRepository);
-		try {
-			if (su != null && su.getId() == null) throw new IllegalStateException("The subject should must have an id !");
-			Subject received = objectMapper.readValue(subjectStr, Subject.class);
+		// Subject su = receiveAndUpdateIdNameEntity(subjectStr, Subject.class, subjectRepository);
+		// try {
+		// 	if (su != null && su.getId() == null) throw new IllegalStateException("The subject should must have an id !");
+		// 	Subject received = objectMapper.readValue(subjectStr, Subject.class);
 	
-			// SUBJECT_STUDY
-			if (su.getSubjectStudyList() != null) {
-				su.getSubjectStudyList().clear();
-			} else {
-				su.setSubjectStudyList(new ArrayList<>());
-			}
-			if (received.getSubjectStudyList() != null) {
-				su.getSubjectStudyList().addAll(received.getSubjectStudyList());
-			}
-			for (SubjectStudy sustu : su.getSubjectStudyList()) {
-				sustu.setSubject(su);
-			}
-			if (su.getId() == null) throw new IllegalStateException("The entity should must have an id ! Received string : \"" + subjectStr + "\"");
-			subjectRepository.save(su);
+		// 	// SUBJECT_STUDY
+		// 	if (su.getSubjectStudyList() != null) {
+		// 		su.getSubjectStudyList().clear();
+		// 	} else {
+		// 		su.setSubjectStudyList(new ArrayList<>());
+		// 	}
+		// 	if (received.getSubjectStudyList() != null) {
+		// 		su.getSubjectStudyList().addAll(received.getSubjectStudyList());
+		// 	}
+		// 	for (SubjectStudy sustu : su.getSubjectStudyList()) {
+		// 		sustu.setSubject(su);
+		// 	}
+		// 	if (su.getId() == null) throw new IllegalStateException("The entity should must have an id ! Received string : \"" + subjectStr + "\"");
+		// 	subjectRepository.save(su);
 			
-			// Update solr references
-			List<Long> subjectIdList = new ArrayList<Long>();
-			subjectIdList.add(su.getId());
-			updateSolr(subjectIdList);
+		// 	// Update solr references
+		// 	List<Long> subjectIdList = new ArrayList<Long>();
+		// 	subjectIdList.add(su.getId());
+		// 	updateSolr(subjectIdList);
 			
-			// Update BIDS
-			Set<Long> studyIds = new HashSet<>();
+		// 	// Update BIDS
+		// 	Set<Long> studyIds = new HashSet<>();
 
-			for (Examination exam : examinationRepository.findBySubjectId(received.getId())) {
-				studyIds.add(exam.getStudyId());
-			}
-			for (Study stud : studyRepository.findAllById(studyIds)) {
-				bidsService.deleteBidsFolder(stud.getId(), stud.getName());
-			}
-			return true;
-		} catch (Exception e) {
-			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
-		}
+		// 	for (Examination exam : examinationRepository.findBySubjectId(received.getId())) {
+		// 		studyIds.add(exam.getStudyId());
+		// 	}
+		// 	for (Study stud : studyRepository.findAllById(studyIds)) {
+		// 		bidsService.deleteBidsFolder(stud.getId(), stud.getName());
+		// 	}
+		// 	return true;
+		// } catch (Exception e) {
+		// 	throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
+		// }
+		return true;
 	}
 
 	/**

@@ -126,8 +126,8 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 	}
 
 	public void addAllToIndex (final List<ShanoirSolrDocument> documents) throws SolrServerException, IOException {
-		solrClient.addBeans(documents);
-		solrClient.commit();
+		// solrClient.addBeans(documents);
+		// solrClient.commit();
 	}
 
 	public void deleteFromIndex(Long datasetId) throws SolrServerException, IOException {
