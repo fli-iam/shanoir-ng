@@ -205,14 +205,9 @@ public class DefaultHandler extends ResultHandler {
 
 					processedDataset.setSubjectId(subject.getId());
 					processedDataset.setSubjectName(subject.getName());
-					processedDataset.setDatasetType(inputDatasets.get(0).getType());
-				} else {
-					processedDataset.setDatasetType(GenericDataset.datasetType);
 				}
-			} else {
-				// default ?
-				processedDataset.setDatasetType(GenericDataset.datasetType);
 			}
+			processedDataset.setDatasetType(GenericDataset.datasetType);
 
 			importerService.createProcessedDataset(processedDataset);
 
