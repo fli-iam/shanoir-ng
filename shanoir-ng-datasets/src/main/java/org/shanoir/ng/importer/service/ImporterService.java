@@ -441,6 +441,7 @@ public class ImporterService {
     }
 
     public void cleanTempFiles(String workFolder) {
+        LOG.error("############################################ clean temp files" + workFolder);
         if (workFolder != null) {
             // delete workFolder.upload file
             File uploadZipFile = new File(workFolder.concat(UPLOAD_EXTENSION));
