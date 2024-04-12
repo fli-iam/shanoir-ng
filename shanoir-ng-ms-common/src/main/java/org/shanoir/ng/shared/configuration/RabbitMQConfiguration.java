@@ -83,8 +83,11 @@ public class RabbitMQConfiguration {
 	/** Update / create a study user to import MS. */
 	public static final String STUDY_USER_QUEUE_IMPORT = "study-user-queue-import";
 
-	/** Queue to notify when a user / study is update / deleted. */
+	/** Queue to notify when a user / study is updated / deleted. */
 	public static final String STUDY_USER_QUEUE = "study-user";
+
+	/** Queue to notify when a subject / study is updated / deleted. */
+	public static final String SUBJECT_STUDY_QUEUE = "subject-study";
 
 	/** BIDS purpose => Get a list of subjects to create bids participants file. */
 	public static final String SUBJECTS_QUEUE = "subjects-queue";
@@ -215,8 +218,11 @@ public class RabbitMQConfiguration {
 	/** Exchange used to publish / treat all sort of shanoir events. */
 	public static final String EVENTS_EXCHANGE = "events-exchange";
 
-	/** Exchange to notify when a user / study is update / deleted. */
+	/** Exchange to notify when a user / study is updated / deleted. */
 	public static final String STUDY_USER_EXCHANGE = "study-user-exchange";
+
+	/** Exchange to notify when a subject / study is updated / deleted. */
+	public static final String SUBJECT_STUDY_EXCHANGE = "subject-study-exchange";
 
     @Bean
     public static Queue getMSUsersToMSStudiesUserDelete() {
@@ -288,6 +294,11 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue datasetSubjectStudyQueue() {
 		return new Queue(DATASET_SUBJECT_STUDY_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue subjectStudyQueue() {
+		return new Queue(SUBJECT_STUDY_QUEUE, true);
 	}
 	
 	@Bean

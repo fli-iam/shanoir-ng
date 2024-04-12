@@ -14,9 +14,14 @@
 
 package org.shanoir.ng.configuration.amqp;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.EntityManager;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.dataset.dto.StudyStorageVolumeDTO;
@@ -35,11 +40,19 @@ import org.shanoir.ng.shared.dataset.RelatedDataset;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.shared.model.*;
+import org.shanoir.ng.shared.model.AcquisitionEquipment;
+import org.shanoir.ng.shared.model.Center;
+import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.model.SubjectStudy;
+import org.shanoir.ng.shared.model.Tag;
 import org.shanoir.ng.shared.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.shared.repository.SubjectStudyRepository;
+import org.shanoir.ng.shared.subjectstudy.SubjectStudyDTO;
+import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.studycard.model.StudyCard;
@@ -49,8 +62,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.ExchangeTypes;
+import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.Queue;
-import org.springframework.amqp.rabbit.annotation.*;
+import org.springframework.amqp.rabbit.annotation.QueueBinding;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.scheduling.annotation.Async;
@@ -60,10 +76,10 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.persistence.EntityManager;
 
 /**
  * RabbitMQ configuration.
@@ -115,6 +131,9 @@ public class RabbitMQDatasetsService {
 	private StudyCardRepository studyCardRepository;
 
 	@Autowired
+	private SubjectStudyRepository subjectStudyRepository;
+
+	@Autowired
 	private BIDSService bidsService;
 
 	@Autowired
@@ -130,7 +149,34 @@ public class RabbitMQDatasetsService {
 			autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT)), containerFactory = "multipleConsumersFactory"
 	)
 	public void receiveMessage(String commandArrStr) {
-		listener.receiveMessageImport(commandArrStr);
+		listener.receiveStudyUsers(commandArrStr);
+	}
+
+	@Transactional
+	@RabbitListener(queues = RabbitMQConfiguration.SUBJECT_STUDY_QUEUE)
+	@RabbitHandler
+	public void receiveSubjectStudies(String commandArrStr) {
+		try {
+			SubjectStudyDTO[] dtos = objectMapper.readValue(commandArrStr, SubjectStudyDTO[].class);
+			List<SubjectStudy> subjectStudies = new ArrayList<>();
+			for (int i = 0; i < dtos.length ; i++) {
+				subjectStudies.add(dtoToSubjectStudy(dtos[i]));
+			}			
+			subjectStudyRepository.saveAll(subjectStudies);
+		} catch (Exception e) {
+			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
+		}
+	}
+
+	private SubjectStudy dtoToSubjectStudy(SubjectStudyDTO dto) {
+		SubjectStudy subjectStudy = new SubjectStudy();
+		subjectStudy.setId(dto.getId());
+		subjectStudy.setStudy(new Study());
+		subjectStudy.getStudy().setId(dto.getStudyId());
+		subjectStudy.setSubject(new Subject());
+		subjectStudy.getSubject().setId(dto.getSubjectId());
+		subjectStudy.setSubjectType(SubjectType.getType(dto.getSubjectType()));
+		return subjectStudy;
 	}
 
 	@Transactional

@@ -43,16 +43,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<li [class.active]="activeTab == 'members'" [routerLink]="'.'" [fragment]="'members'" replaceUrl="true">
 					<span class="members">Members</span>
 				</li>
-				<li class="tags" [class.active]="activeTab == 'tags'" [routerLink]="'.'" [fragment]="'tags'" replaceUrl="true">
-					<span class="tags">Tags</span>
-				</li>
+                <li class="tags" [class.active]="activeTab == 'tags'" [routerLink]="'.'" [fragment]="'tags'" replaceUrl="true">
+                    <span class="tags">Tags</span>
+                </li>
 				<ng-container *ngIf="mode == 'view'">
-					<li *ngIf="isStudyAdmin" [class.active]="activeTab == 'quality'" [routerLink]="'.'" [fragment]="'quality'" replaceUrl="true">Quality</li>
+                    <li *ngIf="isStudyAdmin" [class.active]="activeTab == 'quality'" [routerLink]="'.'" [fragment]="'quality'" replaceUrl="true">Quality</li>
 					<li [class.active]="activeTab == 'tree'" [routerLink]="'.'" [fragment]="'tree'" replaceUrl="true">Tree</li>
 					<li [class.active]="activeTab == 'bids'" [routerLink]="'.'" [fragment]="'bids'" replaceUrl="true">BIDS</li>
 				</ng-container>
 				<ng-container *ngIf="mode != 'view'">
-					<li [class.active]="activeTab == 'tree'" class="disabled" replaceUrl="true">Tree</li>
+                    <li [class.active]="activeTab == 'quality'" class="disabled" replaceUrl="true">Quality</li>
+                    <li [class.active]="activeTab == 'tree'" class="disabled" replaceUrl="true">Tree</li>
 					<li [class.active]="activeTab == 'bids'" class="disabled" replaceUrl="true">BIDS</li>
 				</ng-container>
 			</ul>
@@ -406,7 +407,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 				</ul>
       		</fieldset>
-			<fieldset [class.hidden-tab]="activeTab != 'quality'" *ngIf="mode == 'view'" tab="quality">
+			<fieldset [class.hidden-tab]="activeTab != 'quality'" tab="quality">
 				<legend>Quality control</legend>
 				<quality-control [studyId]="study.id" (tagUpdate)="reloadSubjectStudies()"></quality-control>
 			</fieldset>
@@ -418,7 +419,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						[hasBox]="true">
 				</study-node>
 			</fieldset>
-            <fieldset [class.hidden-tab]="activeTab != 'tags'" *ngIf="mode != 'view' || (study.studyTags && study.studyTags.length > 0)" class="tags">
+            <fieldset [class.hidden-tab]="activeTab != 'tags'" class="tags">
                 <legend>Public Study tags</legend>
                 <tag-creator ngDefaultControl [mode]="mode" [study]="study" [(ngModel)]="study.studyTags" (onChange)="onStudyTagListChange()" formControlName="studyTags"></tag-creator>
             </fieldset>

@@ -115,13 +115,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					[allCoils]="allCoils"
 					[showErrors]="showRulesErrors"
 					(selectedRulesChange)="selectedRules = $event"
-					(importRules)="importRules()">
+					(importRules)="importRules()"
+					[addSubForm]="addConditionForm.bind(this)">
 				</study-card-rules>
 			</fieldset>
 			<form-footer
 				[state]="footerState"
 				(save)="save()"
-                (delete) = "delete()"
+                (delete)="delete()"
 				(edit)="goToEdit()"
 				(cancel)="goToView()"
 				(back)="goBack()">

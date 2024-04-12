@@ -53,6 +53,8 @@ import jakarta.validation.constraints.NotNull;
 public abstract class StudyCardCondition extends AbstractEntity {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(StudyCardCondition.class);
+
+    public static String LIST_SEPERATOR = ",";
 	
 	@ElementCollection 
 	@Column(name = "value")
@@ -109,8 +111,9 @@ public abstract class StudyCardCondition extends AbstractEntity {
             return comparison < 0;
         } else if (Operation.NOT_EQUALS.equals(operation)) {
             return comparison != 0;
+        } else {
+            throw new IllegalArgumentException("Cannot use this method for non-numerical operations (" + operation + ")");
         }
-        throw new IllegalArgumentException("Cannot use this method for non-numerical operations (" + operation + ")");
     }
     
     protected boolean textualCompare(Operation operation, String original, String studycardStr) {
@@ -131,12 +134,70 @@ public abstract class StudyCardCondition extends AbstractEntity {
                 return !original.startsWith(studycardStr);
             } else if (Operation.DOES_NOT_END_WITH.equals(operation)) {
                 return !original.endsWith(studycardStr);
+            } else {
+                throw new IllegalArgumentException("Cannot use this method for non-textual operations (" + operation + ")");
             }
         } else {
             LOG.error("Error in studycard processing: tag (from pacs) or field (from database) null.");
             return false;
         }
-        throw new IllegalArgumentException("Cannot use this method for non-textual operations (" + operation + ")");
+    }
+
+    protected boolean arrayCompare(Operation operation, float[] fromDicom, float[] fromStudycard) {
+        if (fromDicom != null) {
+            if (Operation.EQUALS.equals(operation)) {
+                if (fromStudycard == null) return false;
+                else if (fromDicom.length != fromDicom.length) return false;
+                else {
+                    for (int i = 0; i < fromDicom.length; i++) {
+                        if (fromDicom[i] != fromStudycard[i]) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+            } else if (Operation.NOT_EQUALS.equals(operation)) {
+                if (fromStudycard == null) return false;
+                else if (fromDicom.length != fromDicom.length) return false;
+                else {
+                    for (int i = 0; i < fromDicom.length; i++) {
+                        if (fromDicom[i] != fromStudycard[i]) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+            } else {
+                throw new IllegalArgumentException("Cannot use this method for operation " + operation);
+            }
+        } else {
+            LOG.error("Error in studycard processing: tag (from pacs) or field (from database) null.");
+            return false;
+        }
+    }
+
+    protected float[] extractFloatArray(String str) {
+        if (str == null) return new float[0];
+        else {
+            String[] split = str.split(LIST_SEPERATOR);
+            float[] floatArr = new float[split.length];
+            for (int i = 0; i < split.length; i++) {
+                floatArr[i] = Float.parseFloat(split[i]);
+            }
+            return floatArr;
+        }
+    }
+
+    protected int[] extractIntArray(String str) {
+        if (str == null) return new int[0];
+        else {
+            String[] split = str.split(LIST_SEPERATOR);
+            int[] intArr = new int[split.length];
+            for (int i = 0; i < split.length; i++) {
+                intArr[i] = Integer.parseInt(split[i]);
+            }
+            return intArr;
+        }
     }
 
 }

@@ -58,7 +58,11 @@ export class StudyCardConditionDTO {
         this.shanoirField = condition.shanoirField;
         this.dicomTag = condition.dicomTag?.code;
         this.operation = condition.operation;
-        this.values = condition.values;
+        if (condition.values?.[0] instanceof Coil) {
+            this.values = (condition.values as Coil[]).map(coil => coil.id.toString());
+        } else {
+            this.values = (condition.values as string[]);
+        }
         this.cardinality = condition.cardinality;
     }
 }
