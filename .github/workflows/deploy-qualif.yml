@@ -15,10 +15,13 @@ on:
         required: true
       neurinfo:
         type: boolean
-        required: true
+        default: false
       ofsep:
         type: boolean
-        required: true
+        default: false
+      poc-neurinfo:
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -26,21 +29,38 @@ jobs:
     with:
       commit: "${{ inputs.commit }}"
 
+  post_build:
+    runs-on: shanoir-deploy
+    needs: build
+    if: ${{ always() }}
+    env:
+      DEPLOY_ID: ${{ inputs.DEPLOY_ID }}
+    steps:
+      - run: sh /run/github-runner/deploy-shanoir post_build ${{ needs.build.result }}
+
   deploy-neurinfo:
     if: ${{ inputs.neurinfo }}
-    needs: build
+    needs: [ build, post_build ]
     runs-on: shanoir-deploy
     env:
       DEPLOY_ID: ${{ inputs.DEPLOY_ID }}
     steps:
-      - run: /run/github-runner/deploy-shanoir "$DEPLOY_ID" neurinfo
+      - run: sh /run/github-runner/deploy-shanoir neurinfo
 
   deploy-ofsep:
     if: ${{ inputs.ofsep }}
-    needs: build
+    needs: [ build, post_build ]
     runs-on: shanoir-deploy
     env:
       DEPLOY_ID: ${{ inputs.DEPLOY_ID }}
     steps:
-      - run: /run/github-runner/deploy-shanoir "$DEPLOY_ID" ofsep
+      - run: sh /run/github-runner/deploy-shanoir ofsep
 
+  deploy-poc-neurinfo:
+    if: ${{ inputs.poc-neurinfo }}
+    needs: [ build, post_build ]
+    runs-on: shanoir-deploy
+    env:
+      DEPLOY_ID: ${{ inputs.DEPLOY_ID }}
+    steps:
+      - run: sh /run/github-runner/deploy-shanoir poc-neurinfo
