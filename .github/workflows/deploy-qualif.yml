@@ -74,7 +74,7 @@ jobs:
             # match by commit
             if re.fullmatch(f"[0-9a-f]+", commit):
               # match by commit
-              if rep := get(f"{repo}/commits/{quote_plus(commit)}")
+              if rep := get(f"{repo}/commits/{quote_plus(commit)}"):
                 return rep["sha"]
 
             raise ValueError(f"unknown git commit: {commit}")
