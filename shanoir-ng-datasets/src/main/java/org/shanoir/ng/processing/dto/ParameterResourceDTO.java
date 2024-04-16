@@ -9,6 +9,7 @@ public class ParameterResourceDTO {
     private GroupByEnum groupBy;
 
     private String exportFormat;
+    private long converterId;
     List<Long> datasetIds;
 
     public String getParameter() {
@@ -49,5 +50,13 @@ public class ParameterResourceDTO {
 
     public void setExportFormat(String exportFormat) {
         this.exportFormat = exportFormat;
+    }
+
+    public long getConverterId() {
+        return converterId;
+    }
+
+    public void setConverterId(long converterId) {
+        this.converterId = converterId;
     }
 }
