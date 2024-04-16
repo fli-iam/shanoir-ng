@@ -117,10 +117,9 @@ jobs:
       DEPLOY_ID: ${{ inputs.DEPLOY_ID }}
     steps:
       - run: sh /run/github-runner/deploy-shanoir post_build ${{ needs.build.result }}
-      - run: echo '${{ needs.prepare.outputs.targets }}'
 
   deploy:
-    needs: [ build, post_build ]
+    needs: [ prepare, post_build ]
     runs-on: ${{ inputs.runner }}
     env:
       DEPLOY_ID: ${{ inputs.DEPLOY_ID }}
