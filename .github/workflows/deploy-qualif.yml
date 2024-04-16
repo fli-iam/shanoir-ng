@@ -98,6 +98,7 @@ jobs:
           if status:
             print("docker images already built")
           targets = [t for t in ("neurinfo", "ofsep", "poc-neurinfo") if inputs[t]]
+          print(f"sha={sha}\nstatus={status}\ntargets={json.dumps(targets)}\n")
           pathlib.Path(os.environ["GITHUB_OUTPUT"]).write_text(
             f"sha={sha}\nstatus={status}\ntargets={json.dumps(targets)}\n")
 
