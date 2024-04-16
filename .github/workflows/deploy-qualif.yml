@@ -126,9 +126,9 @@ jobs:
     runs-on: ${{ inputs.runner }}
     env:
       DEPLOY_ID: ${{ inputs.DEPLOY_ID }}
-      TARGETS: ${{ needs.prepare.outputs.targets }}
     strategy:
-      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+      matrix:
+        target: ${{ fromJSON(needs.prepare.outputs.targets) }}
     steps:
       - run: sh /run/github-runner/deploy-shanoir ${{ matrix.target }}
 
