@@ -124,7 +124,8 @@ jobs:
     strategy:
       matrix:
         targets: ${{ needs.prepare.outputs.targets }}
-      run: sh /run/github-runner/deploy-shanoir ${{ matrix.target }}
+    steps:
+      - run: sh /run/github-runner/deploy-shanoir ${{ matrix.target }}
 
 #  deploy-neurinfo:
 #    if: ${{ inputs.neurinfo }}
