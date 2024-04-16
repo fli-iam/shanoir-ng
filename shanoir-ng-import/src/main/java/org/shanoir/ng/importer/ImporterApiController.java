@@ -406,19 +406,18 @@ public class ImporterApiController implements ImporterApi {
 		}
 	}
 
-	private File convertAnalyzeToNifti(File imageFile, File headerFile) throws IOException, InterruptedException {
+	private File convertAnalyzeToNifti(File imageFile, File headerFile) throws ShanoirException {
 		String imageName = imageFile.getAbsolutePath();
 		String newImageName = imageName.replace(".img", ".nii.gz");
 		File parentFolder = imageFile.getParentFile().getAbsoluteFile();
-		String[] command = { "/bin/bash", "-c", "animaConvertImage -i " + imageName + " -o " + newImageName};
-		ProcessBuilder processBuilder = new ProcessBuilder(command);
-		processBuilder.directory(parentFolder);
-		Process process = processBuilder.start();
 
-		int exitCode = process.waitFor();
-		if(exitCode != 0) {
-			throw new IOException("Impossible to convert Analyze image to nifti.");
+		// Send to nifti conversion micro service
+		boolean result = (boolean) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.ANIMA_CONVERSION_QUEUE, imageName);
+
+		if (!result) {
+			throw new ShanoirException("Could not convert from anima to nifti, please contact an administrator.");
 		}
+
 		return new File(parentFolder, newImageName);
 	}
 
@@ -467,7 +466,7 @@ public class ImporterApiController implements ImporterApi {
 			}
 
 			return new ResponseEntity<String>(destinationImageFile.getAbsolutePath(), HttpStatus.OK);
-		} catch (IOException | InterruptedException e) {
+		} catch (IOException | ShanoirException e) {
 			LOG.error(e.getMessage(), e);
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), ERROR_WHILE_SAVING_UPLOADED_FILE, null));
@@ -713,7 +712,6 @@ public class ImporterApiController implements ImporterApi {
 			@Parameter(name = "studyName", required = true) @PathVariable("studyName") String studyName,
 			@Parameter(name = "studyCardId", required = true) @PathVariable("studyCardId") Long studyCardId,
 			@Parameter(name = "centerId", required = true) @PathVariable("centerId") Long centerId,
-			@Parameter(name = "converterId", required = true) @PathVariable("converterId") Long converterId, 
 			@Parameter(name = "equipmentId", required = true) @PathVariable("equipmentId") Long equipmentId) throws RestServiceException {
 		// STEP 1: Unzip file
 		if (dicomZipFile == null || !ImportUtils.isZipFile(dicomZipFile)) {
@@ -832,7 +830,6 @@ public class ImporterApiController implements ImporterApi {
 				for (Patient pat : job.getPatients()) {
 					pat.setSubject(subject);
 				}
-				job.setConverterId(converterId);
 
 				// STEP 4.4 Select all series
 				for(Study study : job.getPatients().get(0).getStudies()) {

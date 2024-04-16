@@ -12,14 +12,14 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Injectable } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
+import { Router } from '@angular/router';
 
 import { KeycloakService } from '../keycloak/keycloak.service';
 import { ConsoleService } from '../console/console.service';
 
 
 @Injectable()
-export class AuthAdminOrExpertGuard implements CanActivate {
+export class AuthAdminOrExpertGuard  {
 
     constructor(
             private keycloakService: KeycloakService, 

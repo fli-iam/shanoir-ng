@@ -13,7 +13,6 @@
  */
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { Coil } from '../../coils/shared/coil.model';
-import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { Study } from '../../studies/shared/study.model';
 
@@ -24,7 +23,6 @@ export class StudyCard extends Entity {
     name: string;
     study: Study;
     acquisitionEquipment: AcquisitionEquipment;
-    niftiConverter: NiftiConverter;
     rules: StudyCardRule[] = [];
 }
 
@@ -85,24 +83,38 @@ export class StudyCardCondition {
     shanoirField: string;
     dicomTag: DicomTag;
     operation: Operation;
-    values: string[] = [];
+    values: (string | Coil)[] = [];
     cardinality: number;
 
     constructor(public scope: ConditionScope) {}
+
+    get type(): 'string' | 'Coil' {
+        if (this.values?.[0] instanceof Coil) {
+            return 'Coil';
+        } else {
+            return 'string';
+        }
+    }
 }
+
+export type TagType = 'String' | 'Long' | 'Float' | 'Double' | 'Integer' | 'Binary' | 'Date' | 'FloatArray' | 'IntArray';
+
+export type VM = {min: number, max: {number: number, multiplier: boolean}};
 
 export class DicomTag {
 
     constructor(
         public code: number,
-        public label: string) {};
+        public label: string,
+        public type: TagType,
+        public vm: VM) {};
 
     equals(other: DicomTag): boolean {
         return this.code == other.code;
     }
 }
 
-export type Operation = 'STARTS_WITH' | 'EQUALS' | 'ENDS_WITH' | 'CONTAINS' | 'DOES_NOT_CONTAIN' | 'SMALLER_THAN' | 'BIGGER_THAN' | 'DOES_NOT_START_WITH' | 'NOT_EQUALS' | 'DOES_NOT_END_WITH';
+export type Operation = 'STARTS_WITH' | 'EQUALS' | 'ENDS_WITH' | 'CONTAINS' | 'DOES_NOT_CONTAIN' | 'SMALLER_THAN' | 'BIGGER_THAN' | 'DOES_NOT_START_WITH' | 'NOT_EQUALS' | 'DOES_NOT_END_WITH' | 'PRESENT' | 'ABSENT';
 
 export type ConditionScope = 'StudyCardDICOMConditionOnDatasets' | 'AcqMetadataCondOnAcq' | 'AcqMetadataCondOnDatasets' | 
     'DatasetMetadataCondOnDataset' | 'ExamMetadataCondOnAcq' | 'ExamMetadataCondOnDatasets';

@@ -30,7 +30,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.annotation.PostConstruct;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -59,7 +58,6 @@ import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
@@ -119,52 +117,38 @@ public class DatasetApiController implements DatasetApi {
 	ShanoirEventService eventService;
 
 	@Autowired
-	private RabbitTemplate rabbitTemplate;
-	
-	@Autowired
 	DatasetDownloaderServiceImpl datasetDownloaderService;
 
 	/** Number of downloadable datasets. */
 	private static final int DATASET_LIMIT = 500;
 
-	@PostConstruct
-	private void initialize() {
-		// Set timeout to 1mn (consider nifti reconversion can take some time)
-		this.rabbitTemplate.setReplyTimeout(60000);
-	}
-
 	@Override
 	public ResponseEntity<Void> deleteDataset(
-			@Parameter(name = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId)
-					throws RestServiceException {
+			@Parameter(name = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId) throws EntityNotFoundException, RestServiceException {
 		try {
 			datasetService.deleteById(datasetId);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		} catch (RestServiceException e) {
-			return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+		} catch (EntityNotFoundException | RestServiceException e) {
+			throw e;
 		} catch (Exception e) {
-			LOG.error("Error while deleting dataset. Please check DICOM server configuration.", e);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while deleting dataset. Please check DICOM server configuration.", e.getMessage());
+			throw new RestServiceException(e, error);
 		}
 	}
 
 	@Override
 	public ResponseEntity<Void> deleteDatasets(
 			@Parameter(name = "ids of the datasets", required=true) @Valid
-			@RequestBody(required = true) List<Long> datasetIds)
-					throws RestServiceException {
+			@RequestBody List<Long> datasetIds)
+			throws RestServiceException {
 		try {
 			datasetService.deleteByIdIn(datasetIds);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		} catch (RestServiceException e) {
-			return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
-		} catch (IOException | SolrServerException e) {
-			LOG.error("Error while deleting datasets: ", e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			throw e;
+		} catch (Exception e) {
+			ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while deleting dataset. Please check DICOM server configuration.", e.getMessage());
+			throw new RestServiceException(e, error);
 		}
 	}
 
@@ -364,7 +348,10 @@ public class DatasetApiController implements DatasetApi {
 			@Parameter(name = "ids of the datasets", required=true) @Valid
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
 			@Parameter(name = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
-			@RequestParam(value = "format", required = false, defaultValue=DCM) String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, MalformedURLException, IOException {
+			@RequestParam(value = "format", required = false, defaultValue=DCM) String format,
+			@Parameter(name = "If nifti, decide converter to use") @Valid
+			@RequestParam(value = "converterId", required = false) Long converterId,
+			HttpServletResponse response) throws RestServiceException, EntityNotFoundException, MalformedURLException, IOException {
 		// STEP 0: Check data integrity
 		if (datasetIds == null || datasetIds.isEmpty()) {
 			throw new RestServiceException(
@@ -380,8 +367,8 @@ public class DatasetApiController implements DatasetApi {
 		// STEP 1: Retrieve all datasets all in one with only the one we can see
 		List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
 
-		datasetDownloaderService.massiveDownload(format, datasets, response, false, null);
-	}	
+		datasetDownloaderService.massiveDownload(format, datasets, response, false, converterId);
+	}
 
 	@Override
 	public void massiveDownloadByStudyId(

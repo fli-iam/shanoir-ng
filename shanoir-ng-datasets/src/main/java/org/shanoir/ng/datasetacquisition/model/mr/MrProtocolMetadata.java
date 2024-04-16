@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -17,6 +17,7 @@ package org.shanoir.ng.datasetacquisition.model.mr;
 import jakarta.persistence.*;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.shanoir.ng.shared.model.EchoTime;
 import org.shanoir.ng.shared.model.FlipAngle;
 
 import java.util.ArrayList;
@@ -24,14 +25,14 @@ import java.util.List;
 
 /**
  * MR protocol.
- * 
+ *
  * @author msimon
  *
  */
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="dtype",
-discriminatorType = DiscriminatorType.INTEGER)
+		discriminatorType = DiscriminatorType.INTEGER)
 @DiscriminatorValue("1")
 public class MrProtocolMetadata extends AbstractEntity {
 
@@ -79,11 +80,11 @@ public class MrProtocolMetadata extends AbstractEntity {
 
 	/** Corresponding Dicom information : (0018,0024) Sequence name. */
 	private String mrSequenceName;
-	
+
 	/** (0018, 0020) Scanning sequence Description  */
 	@ElementCollection
 	private List<Integer> mrScanningSequence;
-	
+
 	/** (0018, 0021) Sequence Variant of the scanning sequence */
 	@ElementCollection
 	private List<Integer> mrSequenceVariant;
@@ -128,33 +129,77 @@ public class MrProtocolMetadata extends AbstractEntity {
 	}
 
 	public MrProtocolMetadata(MrProtocolMetadata mrProcMD) {
-		this.acquisitionContrast = mrProcMD.getAcquisitionContrast().getId();
-		this.contrastAgentConcentration = mrProcMD.getContrastAgentConcentration();
-		this.contrastAgentUsed = mrProcMD.getContrastAgentUsed().getId();
-		this.injectedVolume = mrProcMD.getInjectedVolume();
-		this.magnetizationTransfer = mrProcMD.getMagnetizationTransfer();
-		this.mrSequenceKSpaceFill = mrProcMD.getMrSequenceKSpaceFill().getId();
-		this.mrSequenceName = mrProcMD.getMrSequenceName();
+		if (mrProcMD != null) {
+			if (mrProcMD.getAcquisitionContrast() != null) {
+				this.acquisitionContrast = mrProcMD.getAcquisitionContrast().getId();
+			} else {
+				this.acquisitionContrast = null;
+			}
 
-		this.mrScanningSequence = new ArrayList<>(mrProcMD.getMrScanningSequence().size());
-		for (MrScanningSequence mrss : mrProcMD.getMrScanningSequence()) {
-			this.mrScanningSequence.add(mrss.getId());
+			if (mrProcMD.getContrastAgentConcentration() != null) {
+				this.contrastAgentConcentration = mrProcMD.getContrastAgentConcentration();
+			} else {
+				this.contrastAgentConcentration = null;
+			}
+
+			if (mrProcMD.getContrastAgentUsed() != null) {
+				this.contrastAgentUsed = mrProcMD.getContrastAgentUsed().getId();
+			} else {
+				this.contrastAgentUsed = null;
+			}
+			this.injectedVolume = mrProcMD.getInjectedVolume();
+			this.magnetizationTransfer = mrProcMD.getMagnetizationTransfer();
+
+			if (mrProcMD.getMrSequenceKSpaceFill() != null) {
+				this.mrSequenceKSpaceFill = mrProcMD.getMrSequenceKSpaceFill().getId();
+			} else {
+				this.mrSequenceKSpaceFill = null;
+			}
+			this.mrSequenceName = mrProcMD.getMrSequenceName();
+
+			if (mrProcMD.getMrScanningSequence() != null) {
+				this.mrScanningSequence = new ArrayList<>(mrProcMD.getMrScanningSequence().size());
+				for (MrScanningSequence mrss : mrProcMD.getMrScanningSequence()) {
+					this.mrScanningSequence.add(MrScanningSequence.getScanningSequence(mrss.getId()).getId());
+				}
+			} else {
+				this.mrScanningSequence = null;
+			}
+
+			if (mrProcMD.getMrSequenceVariant() != null) {
+				this.mrSequenceVariant = new ArrayList<>(mrProcMD.getMrSequenceVariant().size());
+				for (MrSequenceVariant mrsv : mrProcMD.getMrSequenceVariant()) {
+					this.mrSequenceVariant.add(mrsv.getId());
+				}
+			} else {
+				this.mrSequenceVariant = null;
+			}
+
+			this.name = mrProcMD.getName();
+			this.parallelAcquisition = mrProcMD.getParallelAcquisition();
+
+			if (mrProcMD.getParallelAcquisitionTechnique() != null) {
+				this.parallelAcquisitionTechnique = mrProcMD.getParallelAcquisitionTechnique().getId();
+			} else {
+				this.parallelAcquisitionTechnique = null;
+			}
+			this.receivingCoilId = mrProcMD.getReceivingCoilId();
+
+			if (mrProcMD.getSliceOrder() != null) {
+				this.sliceOrder = mrProcMD.getSliceOrder().getId();
+			} else {
+				this.sliceOrder = null;
+			}
+
+			if (mrProcMD.getSliceOrientationAtAcquisition() != null) {
+				this.sliceOrientationAtAcquisition = mrProcMD.getSliceOrientationAtAcquisition().getId();
+			} else {
+				this.sliceOrientationAtAcquisition = null;
+			}
+			this.timeReductionFactorForTheInPlaneDirection = mrProcMD.getTimeReductionFactorForTheInPlaneDirection();
+			this.timeReductionFactorForTheOutOfPlaneDirection = mrProcMD.getTimeReductionFactorForTheOutOfPlaneDirection();
+			this.transmittingCoilId = mrProcMD.getTransmittingCoilId();
 		}
-
-		this.mrSequenceVariant =  new ArrayList<>(mrProcMD.getMrSequenceVariant().size());
-		for (MrSequenceVariant mrsv : mrProcMD.getMrSequenceVariant()) {
-			this.mrSequenceVariant.add(mrsv.getId());
-		}
-
-		this.name = mrProcMD.getName();
-		this.parallelAcquisition = mrProcMD.getParallelAcquisition();
-		this.parallelAcquisitionTechnique = mrProcMD.getParallelAcquisitionTechnique().getId();
-		this.receivingCoilId = mrProcMD.getReceivingCoilId();
-		this.sliceOrder = mrProcMD.getSliceOrder().getId();
-		this.sliceOrientationAtAcquisition = mrProcMD.getSliceOrientationAtAcquisition().getId();
-		this.timeReductionFactorForTheInPlaneDirection = mrProcMD.getTimeReductionFactorForTheInPlaneDirection();
-		this.timeReductionFactorForTheOutOfPlaneDirection = mrProcMD.getTimeReductionFactorForTheOutOfPlaneDirection();
-		this.transmittingCoilId = mrProcMD.getTransmittingCoilId();
 	}
 
 	/**
@@ -294,7 +339,7 @@ public class MrProtocolMetadata extends AbstractEntity {
 		}
 	}
 
-	
+
 	public List<MrSequenceVariant> getMrSequenceVariant() {
 		List<MrSequenceVariant> mrSequenceVariantList = new ArrayList<>();
 		if (mrSequenceVariant != null) {
