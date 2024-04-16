@@ -1,5 +1,5 @@
 name: Deploy to qualif
-run-name: deploy ${{ inputs.commit }} to ${{ inputs.neurinfo && 'neurinfo' || '-' }},${{ inputs.ofsep && 'ofsep' || '-'}} by ${{ inputs.owner }}
+run-name: deploy ${{ inputs.commit }} to [${{ inputs.neurinfo && 'neurinfo' || '' }} ${{ inputs.ofsep && 'ofsep' || ''}} ${{ inputs.poc-neurinfo && 'poc-neurinfo' || ''}}] by ${{ inputs.owner }}
 
 on:
   workflow_dispatch:
@@ -117,6 +117,7 @@ jobs:
       DEPLOY_ID: ${{ inputs.DEPLOY_ID }}
     steps:
       - run: sh /run/github-runner/deploy-shanoir post_build ${{ needs.build.result }}
+      - run: echo '${{ needs.prepare.outputs.targets }}'
 
   deploy:
     needs: [ build, post_build ]
