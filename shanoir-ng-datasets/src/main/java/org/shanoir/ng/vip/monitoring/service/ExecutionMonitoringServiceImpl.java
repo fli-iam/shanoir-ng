@@ -121,7 +121,6 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
             resourceDTO.setParameter(dto.getName());
             resourceDTO.setExportFormat(dto.getExportFormat());
             resourceDTO.setGroupBy(dto.getGroupBy());
-            resourceDTO.setConverterId(dto.getConverterId());
 
             resourceDTO.setResourceIds(new ArrayList<>());
 
