@@ -34,7 +34,7 @@ jobs:
     outputs:
       sha:     ${{ steps.prepare.outputs.sha }}
       status:  ${{ steps.prepare.outputs.status }}
-      targets: ${{ fromJson(steps.prepare.outupts.targets) }}
+      targets: ${{ fromJson(steps.prepare.outputs.targets) }}
     permissions:
       packages: read
     steps:
