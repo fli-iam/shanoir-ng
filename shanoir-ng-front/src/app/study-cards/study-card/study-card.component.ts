@@ -116,7 +116,6 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             'name': [this.studyCard.name, [Validators.required, Validators.minLength(2), this.registerOnSubmitValidator('unique', 'name')]],
             'study': [this.studyCard.study, [Validators.required]],
             'acquisitionEquipment': [this.studyCard.acquisitionEquipment, [Validators.required]],
-            'niftiConverter': [this.studyCard.niftiConverter, [Validators.required]],
             'rules': [this.studyCard.rules, [StudyCardRulesComponent.validator]],
             'conditions': new FormArray([]),
         });
