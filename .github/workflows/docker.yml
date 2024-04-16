@@ -45,7 +45,7 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v4
         with:
-          repository: ${{ env.PRODUCTION && github.repository || "fli-iam/shanoir-ng" }}
+          repository: ${{ env.PRODUCTION && github.repository || 'fli-iam/shanoir-ng' }}
           ref: ${{ env.IMAGE_TAG }}
 
       - name: Set up JDK 17
