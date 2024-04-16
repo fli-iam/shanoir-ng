@@ -166,7 +166,7 @@ if [ -n "$deploy" ] ; then
 	
 	# 4. infrastructure services
 	step "start: infrastructure services"
-	for infra_ms in rabbitmq preclinical-bruker2dicom solr
+	for infra_ms in rabbitmq solr
 	do
 		step "start: $infra_ms infrastructure microservice"
 		docker compose up -d "$infra_ms"
@@ -174,7 +174,7 @@ if [ -n "$deploy" ] ; then
 	
 	# 5. Shanoir-NG microservices
 	step "start: sh-ng microservices"
-	for ms in users studies datasets import preclinical 
+	for ms in users studies datasets import preclinical nifti-conversion
 	do
 		step "init: $ms microservice"
 		docker compose run --rm -e SHANOIR_MIGRATION=init "$ms"

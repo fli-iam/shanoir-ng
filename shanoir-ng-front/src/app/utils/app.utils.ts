@@ -445,3 +445,7 @@ export function getSizeStr(size: number): string {
     let unit: string = units[exponent];
     return value + " " + unit;
 }
+
+type UnionKeys<T> = T extends T ? keyof T : never;
+type StrictUnionHelper<T, TAll> = T extends any ? T & Partial<Record<Exclude<UnionKeys<TAll>, keyof T>, never>> : never;
+export type StrictUnion<T> = StrictUnionHelper<T, T>

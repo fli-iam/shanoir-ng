@@ -126,7 +126,6 @@ export class DicomUploadComponent implements OnDestroy {
             // Send to multiple
             let job = new ImportJob();
             job.acquisitionEquipmentId = this.studyCard.acquisitionEquipment.id;
-            job.converterId = this.studyCard.niftiConverter.id;
             job.studyId = this.study.id;
             job.studyName = this.study.name;
             job.studyCardId = this.studyCard.id;

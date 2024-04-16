@@ -26,7 +26,6 @@ import { environment } from "../../environments/environment";
 import { DatasetAcquisition } from '../dataset-acquisitions/shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../dataset-acquisitions/shared/dataset-acquisition.service';
 import { ExecutionDataService } from '../vip/execution.data-service';
-import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
 import { ColumnDefinition } from '../shared/components/table/column.definition.type';
 import { Page, Pageable } from "../shared/components/table/pageable.model";
 import { TableComponent } from "../shared/components/table/table.component";
@@ -44,10 +43,6 @@ import { Clipboard } from '@angular/cdk/clipboard';
 import {StudyService} from "../studies/shared/study.service";
 import {Study} from "../studies/shared/study.model";
 import {ServiceLocator} from "../utils/locator.service";
-import { Observable } from 'rxjs-compat';
-import { SuperPromise } from 'src/app/utils/super-promise';
-import {take} from "rxjs/operators";
-import {Format} from "@angular-devkit/build-angular/src/builders/extract-i18n/schema";
 import { TaskState } from '../async-tasks/task.model';
 import {DatasetCopyDialogComponent} from "../shared/components/dataset-copy-dialog/dataset-copy-dialog.component";
 
@@ -76,6 +71,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     selectedDatasetIds: Set<number> = new Set();
     syntaxError: boolean = false;
     dateOpen: boolean = false;
+    public downloadState: TaskState = new TaskState();
     datasetStudymap: Map<number, number> = new Map();
 
     tab: 'results' | 'selected' = 'results';
@@ -517,7 +513,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
     downloadSelected() {
         if (this.selectedDatasetIds && this.canDownload) {
-            this.downloadService.downloadByIds([...this.selectedDatasetIds]);
+            this.downloadService.downloadByIds([...this.selectedDatasetIds], this.downloadState);
         } else {
             this.consoleService.log('error', "Could not download data, please check your right on the studies for these datasets.")
         }

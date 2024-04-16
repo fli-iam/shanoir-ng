@@ -31,7 +31,6 @@ import java.util.zip.ZipOutputStream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.annotation.PostConstruct;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -65,7 +64,6 @@ import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
@@ -138,12 +136,6 @@ public class DatasetApiController implements DatasetApi {
 
 	/** Number of downloadable datasets. */
 	private static final int DATASET_LIMIT = 500;
-
-	@PostConstruct
-	private void initialize() {
-		// Set timeout to 1mn (consider nifti reconversion can take some time)
-		this.rabbitTemplate.setReplyTimeout(60000);
-	}
 
 	@Override
 	public ResponseEntity<Void> deleteDataset(
@@ -376,7 +368,10 @@ public class DatasetApiController implements DatasetApi {
 			@Parameter(name = "ids of the datasets", required=true) @Valid
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
 			@Parameter(name = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
-			@RequestParam(value = "format", required = false, defaultValue=DCM) String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, MalformedURLException, IOException {
+			@RequestParam(value = "format", required = false, defaultValue=DCM) String format,
+			@Parameter(name = "If nifti, decide converter to use") @Valid
+			@RequestParam(value = "converterId", required = false) Long converterId,
+			HttpServletResponse response) throws RestServiceException, EntityNotFoundException, MalformedURLException, IOException {
 		// STEP 0: Check data integrity
 		if (datasetIds == null || datasetIds.isEmpty()) {
 			throw new RestServiceException(
@@ -392,8 +387,8 @@ public class DatasetApiController implements DatasetApi {
 		// STEP 1: Retrieve all datasets all in one with only the one we can see
 		List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
 
-		datasetDownloaderService.massiveDownload(format, datasets, response, false, null);
-	}	
+		datasetDownloaderService.massiveDownload(format, datasets, response, false, converterId);
+	}
 
 	@Override
 	public void massiveDownloadByStudyId(
