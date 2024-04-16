@@ -35,6 +35,7 @@ jobs:
       sha:     ${{ steps.prepare.outputs.sha }}
       status:  ${{ steps.prepare.outputs.status }}
       targets: ${{ steps.prepare.outputs.targets }}
+      matrix:  ${{ steps.prepare.outputs.matrix }}
     permissions:
       packages: read
     steps:
@@ -98,9 +99,10 @@ jobs:
           if status:
             print("docker images already built")
           targets = [t for t in ("neurinfo", "ofsep", "poc-neurinfo") if inputs[t]]
+          matrix = {"target": targets}
           print(f"sha={sha}\nstatus={status}\ntargets={json.dumps(targets)}\n")
           pathlib.Path(os.environ["GITHUB_OUTPUT"]).write_text(
-            f"sha={sha}\nstatus={status}\ntargets={json.dumps(targets)}\n")
+            f"sha={sha}\nstatus={status}\ntargets={json.dumps(targets)}\nmatrix={json.dumps(matrix)}\n")
 
   build:
     needs: prepare
@@ -120,13 +122,13 @@ jobs:
 
 
   deploy:
-    needs: [ prepare, post_build ]
+    needs: [ prepare, build, post_build ]
     runs-on: ${{ inputs.runner }}
     env:
       DEPLOY_ID: ${{ inputs.DEPLOY_ID }}
+      TARGETS: ${{ needs.prepare.outputs.targets }}
     strategy:
-      matrix:
-        target: ${{ fromJSON(needs.prepare.outputs.targets) }}
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
     steps:
       - run: sh /run/github-runner/deploy-shanoir ${{ matrix.target }}
 
