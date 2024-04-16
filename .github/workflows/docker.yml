@@ -30,9 +30,8 @@ on:
 #        required: true
   workflow_call:
     inputs:
-      sha: 'git commit to be built'
-      commit:
-        description: 
+      sha: 
+        description: 'git commit to be built'
         type: string
         required: true
 #TODO: disable on pull-request
