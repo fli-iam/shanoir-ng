@@ -67,7 +67,7 @@ jobs:
             
             # match by tag/branch
             for prefix in ("", "tags/", "heads/"):
-              if rep := get(f"{repo}/git/ref/{quote_plus(prefix + commit)}")
+              if rep := get(f"{repo}/git/ref/{quote_plus(prefix + commit)}"):
                 assert rep["object"]["type"] == "commit", "intermediate objects not supported (eg: tag objects)"
                 return rep["object"]["sha"]
 
