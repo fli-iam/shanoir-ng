@@ -32,16 +32,16 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     outputs:
-      sha:     ${{ steps.prepare.outputs.sha }}
-      status:  ${{ steps.prepare.outputs.status }}
-      targets: ${{ fromJson(steps.prepare.outputs.targets) }}
+      sha:    ${{ steps.prepare.outputs.sha }}
+      status: ${{ steps.prepare.outputs.status }}
+      matrix: ${{ fromJSON(steps.prepare.outputs.matrix) }}
     permissions:
       packages: read
     steps:
       - name: prepare deployment (resolve git commit, query registry, identify targets)
         id: prepare 
         env:
-          INPUTS: ${{ toJson(inputs) }}
+          INPUTS: ${{ toJSON(inputs) }}
         shell: python
         run: |
           import json, os, pathlib, re, requests
@@ -97,10 +97,10 @@ jobs:
           status = check_docker_images(sha)
           if status:
             print("docker images already built")
-          targets = [t for t in ("neurinfo", "ofsep", "poc-neurinfo") if inputs[t]]
-          print(f"sha={sha}\nstatus={status}\ntargets={json.dumps(targets)}\n")
+          matrix = {"target": [t for t in ("neurinfo", "ofsep", "poc-neurinfo") if inputs[t]]}
+          print(f"sha={sha}\nstatus={status}\nmatrix={json.dumps(matrix)}\n")
           pathlib.Path(os.environ["GITHUB_OUTPUT"]).write_text(
-            f"sha={sha}\nstatus={status}\ntargets={json.dumps(targets)}\n")
+            f"sha={sha}\nstatus={status}\nmatrix={json.dumps(matrix)}\n")
 
   build:
     needs: prepare
@@ -124,8 +124,7 @@ jobs:
     env:
       DEPLOY_ID: ${{ inputs.DEPLOY_ID }}
     strategy:
-      matrix:
-        targets: ${{ needs.prepare.outputs.targets }}
+      matrix: ${{ needs.prepare.outputs.matrix }}
     steps:
       - run: sh /run/github-runner/deploy-shanoir ${{ matrix.target }}
 
