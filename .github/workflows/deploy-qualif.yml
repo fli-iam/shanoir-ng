@@ -127,12 +127,13 @@ jobs:
   deploy:
     needs: [ prepare, build, post_build ]
     runs-on: ${{ inputs.runner }}
+    if: ${{ contains(['success', 'skipped'], needs.build.result)  }}
     env:
       DEPLOY_ID: ${{ inputs.DEPLOY_ID }}
     strategy:
       matrix:
-        target: [ neurinfo, ofsep ]
-        #target: ${{ fromJSON(needs.prepare.outputs.targets) }}
+        #target: [ neurinfo, ofsep ]
+        target: ${{ fromJSON(needs.prepare.outputs.targets) }}
     steps:
       - run: sh /run/github-runner/deploy-shanoir ${{ matrix.target }}
 
