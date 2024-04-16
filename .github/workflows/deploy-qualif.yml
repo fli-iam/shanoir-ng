@@ -90,6 +90,7 @@ jobs:
             return "ok"
 
           inputs = json.loads(os.environ["INPUTS"])
+          print("inputs:", inputs)
           print("git commit to be deployed: {inputs['COMMIT']}")
           sha = resolve_commit(inputs['COMMIT'])
           print(f"  --> resolved to: {sha}")
