@@ -22,6 +22,11 @@ on:
       poc-neurinfo:
         type: boolean
         default: false
+      runner:
+        description: "target runner for the deployment"
+        required: true
+        type: choice
+        options: [ shanoir-deploy, shanoir-2016, eskemm-poc ] # TODO: cleanup
 
 jobs:
   prepare:
@@ -36,10 +41,10 @@ jobs:
       - name: prepare deployment (resolve git commit, query registry, identify targets)
         id: prepare 
         env:
-          COMMIT: ${{ inputs.commit }}
+          INPUTS: ${{ toJson(inputs) }}
         shell: python
         run: |
-          import os, pathlib, re, requests
+          import json, os, pathlib, re, requests
           from urllib.parse import quote_plus
 
           def get(endpoint: str) -> requests.Response:
@@ -84,26 +89,26 @@ jobs:
               return ""
             return "ok"
 
-          print("git commit to be deployed: {os.environ['COMMIT']}")
-          sha = resolve_commit(os.environ["COMMIT"])
+          inputs = json.loads(os.environ["INPUTS"])
+          print("git commit to be deployed: {inputs['COMMIT']}")
+          sha = resolve_commit(inputs['COMMIT'])
           print(f"  --> resolved to: {sha}")
           status = check_docker_images(sha)
           if status:
             print("docker images already built")
-          targets = []
-          print("""
-            ${{ toJson(inputs) }}
-          """)
-          pathlib.Path(os.environ["GITHUB_OUTPUT"]).write_text(f"sha={sha}\nstatus={status}\n")
-          raise
+          targets = [t for t in ("neurinfo", "ofsep", "poc-neurinfo") if inputs[t]]
+          pathlib.Path(os.environ["GITHUB_OUTPUT"]).write_text(
+            f"sha={sha}\nstatus={status}\ntargets={json.dumps(targets)}\n")
 
   build:
+    needs: prepare
+    if: needs.prepare.outputs.status != 'ok'
     uses: ./.github/workflows/docker.yml
     with:
-      commit: "${{ inputs.commit }}"
+      sha: "${{ needs.prepare.outputs.sha }}"
 
   post_build:
-    runs-on: shanoir-deploy
+    runs-on: ${{ inputs.runner }}
     needs: build
     if: ${{ always() }}
     env:
@@ -111,29 +116,39 @@ jobs:
     steps:
       - run: sh /run/github-runner/deploy-shanoir post_build ${{ needs.build.result }}
 
-  deploy-neurinfo:
-    if: ${{ inputs.neurinfo }}
+  deploy:
     needs: [ build, post_build ]
-    runs-on: shanoir-deploy
+    runs-on: ${{ inputs.runner }}
     env:
       DEPLOY_ID: ${{ inputs.DEPLOY_ID }}
-    steps:
-      - run: sh /run/github-runner/deploy-shanoir neurinfo
+    strategy:
+      matrix:
+        targets: ${{ needs.prepare.outputs.targets }}
+      run: sh /run/github-runner/deploy-shanoir ${{ matrix.target }}
 
-  deploy-ofsep:
-    if: ${{ inputs.ofsep }}
-    needs: [ build, post_build ]
-    runs-on: shanoir-deploy
-    env:
-      DEPLOY_ID: ${{ inputs.DEPLOY_ID }}
-    steps:
-      - run: sh /run/github-runner/deploy-shanoir ofsep
-
-  deploy-poc-neurinfo:
-    if: ${{ inputs.poc-neurinfo }}
-    needs: [ build, post_build ]
-    runs-on: shanoir-deploy
-    env:
-      DEPLOY_ID: ${{ inputs.DEPLOY_ID }}
-    steps:
-      - run: sh /run/github-runner/deploy-shanoir poc-neurinfo
+#  deploy-neurinfo:
+#    if: ${{ inputs.neurinfo }}
+#    needs: [ build, post_build ]
+#    runs-on: shanoir-deploy
+#    env:
+#      DEPLOY_ID: ${{ inputs.DEPLOY_ID }}
+#    steps:
+#      - run: sh /run/github-runner/deploy-shanoir neurinfo
+#
+#  deploy-ofsep:
+#    if: ${{ inputs.ofsep }}
+#    needs: [ build, post_build ]
+#    runs-on: shanoir-deploy
+#    env:
+#      DEPLOY_ID: ${{ inputs.DEPLOY_ID }}
+#    steps:
+#      - run: sh /run/github-runner/deploy-shanoir ofsep
+#
+#  deploy-poc-neurinfo:
+#    if: ${{ inputs.poc-neurinfo }}
+#    needs: [ build, post_build ]
+#    runs-on: shanoir-deploy
+#    env:
+#      DEPLOY_ID: ${{ inputs.DEPLOY_ID }}
+#    steps:
+#      - run: sh /run/github-runner/deploy-shanoir poc-neurinfo
