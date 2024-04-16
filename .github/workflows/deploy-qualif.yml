@@ -119,6 +119,13 @@ jobs:
       DEPLOY_ID: ${{ inputs.DEPLOY_ID }}
     steps:
       - run: sh /run/github-runner/deploy-shanoir post_build ${{ needs.build.result }}
+      - shell: python
+        env:
+          TARGETS: ${{ needs.prepare.outputs.targets }}
+        run: |
+          import json, os
+          print(json.dumps(os.environ.TARGETS))
+
 
 
   deploy:
