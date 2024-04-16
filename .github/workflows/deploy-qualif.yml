@@ -127,7 +127,7 @@ jobs:
   deploy:
     needs: [ prepare, build, post_build ]
     runs-on: ${{ inputs.runner }}
-    if: ${{ needs.build.result=='skipped' }}
+    if: ${{ !cancelled() && needs.build.result=='skipped' }}
     env:
       DEPLOY_ID: ${{ inputs.DEPLOY_ID }}
     strategy:
