@@ -259,24 +259,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         }
     }
 
-    /**
-     * auto-select center, equipment from studycard
-     */
-    private selectDataFromStudyCard(studyCard: StudyCard, studyCenterList: StudyCenter[]) {
-        if (studyCard && studyCenterList) {
-            this.acquisitionEquipment = null;
-            let eqFound: AcquisitionEquipment;
-            let scFound: StudyCenter = studyCenterList?.find(sc => {
-                eqFound = sc.center.acquisitionEquipments.find(eq => eq.id == this.studycard.acquisitionEquipment.id);
-                return (!!eqFound);
-            })
-            this.center = scFound ? scFound.center : this.studycard?.acquisitionEquipment?.center;
-            return this.onSelectCenter().then(() => {
-                this.acquisitionEquipment = eqFound;
-            });
-        }
-    }
-
     private getEquipmentOptions(center: Center): Option<AcquisitionEquipment>[] {
         return center?.acquisitionEquipments?.map(acqEq => {
             let option = new Option<AcquisitionEquipment>(acqEq, this.acqEqPipe.transform(acqEq));
@@ -359,7 +341,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     protected getContext(): any {
-        return new ContextData(this.study, this.studycard, this.useStudyCard, this.center, this.acquisitionEquipment,
+        return new ContextData(this.study, this.center, this.acquisitionEquipment,
             this.subject, this.examination, null, null, null, null, null, null);
     }
 
