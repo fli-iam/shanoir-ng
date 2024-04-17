@@ -240,7 +240,7 @@ public class DatasetDownloaderServiceImpl {
 			if (!res.isDirectory()) {
 				// Then send workFolder to zipOutputFile
 				FileSystemResource fileSystemResource = new FileSystemResource(zippedResultPath);
-				ZipEntry zipEntry = new ZipEntry(res.getName() + ".gz");
+				ZipEntry zipEntry = new ZipEntry(res.getName() + (compressed ? ".gz" : ""));
 				zipEntry.setSize(fileSystemResource.contentLength());
 				zipEntry.setTime(System.currentTimeMillis());
 				zipOutputStream.putNextEntry(zipEntry);
