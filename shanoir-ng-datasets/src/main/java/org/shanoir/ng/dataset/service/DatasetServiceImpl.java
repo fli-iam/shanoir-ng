@@ -23,6 +23,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionServiceImpl;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
@@ -100,7 +101,9 @@ public class DatasetServiceImpl implements DatasetService {
 		final Dataset dataset = repository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
 
-		if (dataset != null && dataset.getSourceId() != null) {
+		// Do not delete entity if it is the source. If getSourceId() is not null, it means it's a copy
+		List<Dataset> childDs = repository.findBySourceId(id);
+		if (!CollectionUtils.isEmpty(childDs)) {
 			throw new RestServiceException(
 					new ErrorModel(
 							HttpStatus.UNPROCESSABLE_ENTITY.value(),

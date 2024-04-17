@@ -188,7 +188,9 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
             throw new EntityNotFoundException("Cannot find entity with id = " + id);
         }
 
-        if (entity != null && entity.getSourceId() != null) {
+        // Do not delete entity if it is the source. If getSourceId() is not null, it means it's a copy
+        List<DatasetAcquisition> childDsAc = repository.findBySourceId(id);
+        if (!CollectionUtils.isEmpty(childDsAc)) {
             throw new RestServiceException(
                     new ErrorModel(
                             HttpStatus.UNPROCESSABLE_ENTITY.value(),
@@ -199,10 +201,10 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
             if (datasets != null) {
                 List<Long> datasetIds = new ArrayList<>();
                 for (Dataset ds : datasets) {
-                    datasetService.deleteById(ds.getId());
                     datasetIds.add(ds.getId());
+                    datasetService.deleteById(ds.getId());
                 }
-                solrService.deleteFromIndex(datasetIds);
+                if (!datasetIds.isEmpty()) solrService.deleteFromIndex(datasetIds);
             }
             repository.deleteById(id);
             shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));

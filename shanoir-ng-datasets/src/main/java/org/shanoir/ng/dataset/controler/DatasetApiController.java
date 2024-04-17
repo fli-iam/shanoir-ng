@@ -164,6 +164,7 @@ public class DatasetApiController implements DatasetApi {
 			throws RestServiceException {
 		try {
 			datasetService.deleteByIdIn(datasetIds);
+			solrService.deleteFromIndex(datasetIds);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (RestServiceException e) {
 			throw e;

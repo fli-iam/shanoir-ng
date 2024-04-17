@@ -210,9 +210,10 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 			@Parameter(name = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId)
 			throws RestServiceException {
 		try {
+			Long studyId = datasetAcquisitionService.findById(datasetAcquisitionId).getExamination().getStudyId();
+			
 			datasetAcquisitionService.deleteById(datasetAcquisitionId);
 
-			Long studyId = 1L; //datasetAcquisitionService.findById(datasetAcquisitionId).getExamination().getStudyId();
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
 
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
