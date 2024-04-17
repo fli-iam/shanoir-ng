@@ -229,18 +229,24 @@ public class DatasetDownloaderServiceImpl {
 		List<String> files = new ArrayList<>();
 		for (File res : workFolder.listFiles()) {
 
-			String zippedResultPath = res.getAbsolutePath();
-			boolean compressed = zippedResultPath.endsWith(".nii");
+			String datasetFilePath = res.getAbsolutePath();
+			String fileName = res.getName();
+			boolean compressed = datasetFilePath.endsWith(".nii");
+
 			// Gzip file if necessary in order to always return a .nii.gz file
 			if (compressed) {
-				zippedResultPath += ".gz";
-				DatasetFileUtils.compressGzipFile(res.getAbsolutePath(), zippedResultPath);
+				datasetFilePath = datasetFilePath + ".gz";
+				fileName = fileName + ".gz";
+				File file = new File(datasetFilePath);
+				file.getParentFile().mkdirs();
+				file.createNewFile();
+				DatasetFileUtils.compressGzipFile(res.getAbsolutePath(), datasetFilePath);
 			}
 
 			if (!res.isDirectory()) {
 				// Then send workFolder to zipOutputFile
-				FileSystemResource fileSystemResource = new FileSystemResource(zippedResultPath);
-				ZipEntry zipEntry = new ZipEntry(res.getName() + (compressed ? ".gz" : ""));
+				FileSystemResource fileSystemResource = new FileSystemResource(datasetFilePath);
+				ZipEntry zipEntry = new ZipEntry(fileName);
 				zipEntry.setSize(fileSystemResource.contentLength());
 				zipEntry.setTime(System.currentTimeMillis());
 				zipOutputStream.putNextEntry(zipEntry);
