@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -36,7 +36,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
     constructor(
             private examinationService: ExaminationService,
             private studyService: StudyService) {
-        
+
         super('examination');
         this.studyService.findStudyIdsIcanAdmin().then(ids => this.studiesICanAdmin = ids);
     }
@@ -65,6 +65,8 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
                     return (params.data.subject) ? params.data.subject.name : '';
                 }
             },{
+                headerName: "Comment", field: "comment"
+            },{
                 headerName: "Examination date", field: "examinationDate", type: "date", cellRenderer: function (params: any) {
                     return dateRenderer(params.data.examinationDate);
                 }, width: "100px"
@@ -86,8 +88,8 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
     getOptions() {
         return {
             new: this.keycloakService.isUserAdminOrExpert(),
-            view: true, 
-            edit: this.keycloakService.isUserAdminOrExpert(), 
+            view: true,
+            edit: this.keycloakService.isUserAdminOrExpert(),
             delete: this.keycloakService.isUserAdminOrExpert()
         };
     }
@@ -97,7 +99,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
             ex.subjectStudy &&
 			ex.subjectStudy.subjectStudy &&
 			ex.subjectStudy.subjectStudy.study &&
-            ex.subjectStudy.subjectStudy.study.studyUserList && 
+            ex.subjectStudy.subjectStudy.study.studyUserList &&
             ex.subjectStudy.subjectStudy.study.studyUserList.filter(su => su.studyUserRights.includes(StudyUserRight.CAN_IMPORT)).length > 0
         );
     }
