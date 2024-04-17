@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.commons.lang3.time.DateUtils;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.tasks.AsyncTaskApiController;
+import org.shanoir.ng.tasks.UserSseEmitter;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -34,12 +35,14 @@ public class ShanoirEventsService {
 	public void addEvent(ShanoirEvent event) {
 		// Call repository
 		repository.save(event);
+		// This is sad but with the @CreationTimestamp the date is not returned by the save method 
+		ShanoirEvent saved = repository.findById(event.getId()).orElse(null);
 		// Push notification to UI
 		if (ShanoirEventType.IMPORT_DATASET_EVENT.equals(event.getEventType())
 			  || ShanoirEventType.EXECUTION_MONITORING_EVENT.equals(event.getEventType())
 				|| ShanoirEventType.COPY_DATASET_EVENT.equals(event.getEventType())
 				|| ShanoirEventType.CHECK_QUALITY_EVENT.equals(event.getEventType())) { 
-			sendSseEventsToUI(event);
+			sendSseEventsToUI(saved);
 		}
 	}
 
@@ -78,20 +81,26 @@ public class ShanoirEventsService {
 	 * @param notification the event to send
 	 */
 	public void sendSseEventsToUI(ShanoirEvent notification) {
-        List<SseEmitter> sseEmitterListToRemove = new ArrayList<>();
-        AsyncTaskApiController.emitters.forEach((SseEmitter emitter) -> {
-            try {
-                emitter.send(notification, MediaType.APPLICATION_JSON);
-            } catch (IOException e2) {
-            	emitter.complete();
-                sseEmitterListToRemove.add(emitter);
-                LOG.error("Error while send task to UI ", e2);
-            } catch (Exception e) {
-            	emitter.complete();
-                sseEmitterListToRemove.add(emitter);
-                LOG.error("Error while send task to UI ", e);
-                throw e;
-            }
+        List<UserSseEmitter> sseEmitterListToRemove = new ArrayList<>();
+        AsyncTaskApiController.emitters.forEach((UserSseEmitter emitter) -> {
+			// ! IMPORTANT filter on user id
+			if (notification.getUserId() != null && notification.getUserId().equals(emitter.getUserId())) {
+				if (notification.getLastUpdate() == null) {
+					notification.setLastUpdate(new Date());
+				}
+				try {
+					emitter.send(notification, MediaType.APPLICATION_JSON);
+				} catch (IOException e2) {
+					emitter.complete();
+					sseEmitterListToRemove.add(emitter);
+					LOG.error("Error while send task to UI ", e2);
+				} catch (Exception e) {
+					emitter.complete();
+					sseEmitterListToRemove.add(emitter);
+					LOG.error("Error while send task to UI ", e);
+					throw e;
+				}
+			}
         });
         AsyncTaskApiController.emitters.removeAll(sseEmitterListToRemove);
     }

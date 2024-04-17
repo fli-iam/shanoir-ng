@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.shanoir.anonymization.anonymization.AnonymizationServiceImpl;
-import org.shanoir.ng.importer.dcm2nii.DatasetsCreatorAndNIfTIConverterService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.query.DicomStoreSCPServer;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
@@ -91,9 +90,6 @@ public class ImporterManagerService {
 	private ImagesCreatorAndDicomFileAnalyzerService imagesCreatorAndDicomFileAnalyzer;
 		
 	@Autowired
-	private DatasetsCreatorAndNIfTIConverterService datasetsCreatorAndNIfTIConverter;
-	
-	@Autowired
     private RabbitTemplate rabbitTemplate;
 	
 	@Autowired
@@ -101,6 +97,9 @@ public class ImporterManagerService {
 
 	@Autowired
 	private ShanoirEventService eventService;
+	
+	@Autowired
+	private DatasetsCreatorService datasetsCreatorService;
 	
 	@Autowired
 	StudyUserRightsRepository studyUserRightRepo;
@@ -161,8 +160,8 @@ public class ImporterManagerService {
 				if (!importJob.isFromShanoirUploader()) {
 					pseudonymize(importJob, event, importJobDir, patient);
 				}
-				Long converterId = importJob.getConverterId();
-				datasetsCreatorAndNIfTIConverter.createDatasetsAndRunConversion(patient, importJobDir, converterId, importJob);
+
+				datasetsCreatorService.createDatasets(patient, importJobDir, importJob);
 			}
 			this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_QUEUE_DATASET, objectMapper.writeValueAsString(importJob));
 			long importJobDirSize = ImportUtils.getDirectorySize(importJobDir.toPath());

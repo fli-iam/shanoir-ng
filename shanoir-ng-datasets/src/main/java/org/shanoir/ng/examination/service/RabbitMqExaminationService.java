@@ -57,7 +57,7 @@ public class RabbitMqExaminationService {
 	@Autowired
 	SubjectRepository subjectRepository;
 
-	@RabbitListener(queues = RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	@Transactional()
 	public Long createExamination(Message message) {
@@ -77,7 +77,7 @@ public class RabbitMqExaminationService {
 		}
 	}
 	
-	@RabbitListener(queues = RabbitMQConfiguration.EXAMINATION_EXTRA_DATA_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.EXAMINATION_EXTRA_DATA_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	@Transactional
 	public void addExaminationExtraData(String path) {

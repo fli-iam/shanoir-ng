@@ -11,6 +11,8 @@ public abstract class EmailBase {
 	
     private String studyId;
 
+	private String studyCardId;
+
     private String studyName;
 
 	/**

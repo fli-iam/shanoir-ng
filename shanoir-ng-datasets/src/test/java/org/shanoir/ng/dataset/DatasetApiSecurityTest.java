@@ -244,12 +244,12 @@ public class DatasetApiSecurityTest {
 		assertAccessDenied(api::createProcessedDataset, job);
 		
 		//massiveDownloadByDatasetIds(List<Long>, String, HttpServletResponse)
-		assertAccessAuthorized(api::massiveDownloadByDatasetIds, Utils.toList(1L), "file", null);
-		assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(1L, 3L), "file", null);
-		assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(3L), "file", null);
-		assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(1L, 2L), "file", null);
-		assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(2L), "file", null);
-		assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(4L), "file", null);
+		assertAccessAuthorized(api::massiveDownloadByDatasetIds, Utils.toList(1L), "file", 1L,null);
+		assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(1L, 3L), "file", 1L, null);
+		assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(3L), "file", 1L, null);
+		assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(1L, 2L), "file", 1L, null);
+		assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(2L), "file", 1L, null);
+		assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(4L), "file", 1L, null);
 		
 		//massiveDownloadByStudyId(Long, String, HttpServletResponse)
 		assertAccessAuthorized(api::massiveDownloadByStudyId, 1L, "file", null);
