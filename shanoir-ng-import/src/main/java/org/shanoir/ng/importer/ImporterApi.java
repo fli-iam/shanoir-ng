@@ -93,7 +93,6 @@ public interface ImporterApi {
     		@Parameter(name = "studyId", required = true) @PathVariable("studyId") Long studyId,
     		@Parameter(name = "studyName", required = true) @PathVariable("studyName") String studyName,
     		@Parameter(name = "centerId", required = true) @PathVariable("centerId") Long centerId,
-    		@Parameter(name = "converterId", required = true) @PathVariable("converterId") Long converterId,
     		@Parameter(name = "equipmentId", required = true) @PathVariable("equipmentId") Long equipmentId) throws RestServiceException;
 
     @Operation(summary = "Upload one EEG file", description = "Upload channel and metadata from EEG file")

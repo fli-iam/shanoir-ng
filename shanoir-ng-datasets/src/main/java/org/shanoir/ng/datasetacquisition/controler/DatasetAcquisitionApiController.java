@@ -58,8 +58,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.Parameter;
@@ -104,7 +102,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
 
-	@RabbitListener(queues = RabbitMQConfiguration.IMPORT_EEG_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.IMPORT_EEG_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	@Transactional
 	public int createNewEegDatasetAcquisition(Message importJobAsString) throws IOException {
@@ -117,11 +115,11 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 		return HttpStatus.OK.value();
 	}
 
-	@RabbitListener(queues = RabbitMQConfiguration.IMPORTER_QUEUE_DATASET)
+	@RabbitListener(queues = RabbitMQConfiguration.IMPORTER_QUEUE_DATASET, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	@Transactional
 	@WithMockKeycloakUser(authorities = { "ROLE_ADMIN" })
-	public void createNewDatasetAcquisition(Message importJobStr) throws JsonParseException, JsonMappingException, IOException, AmqpRejectAndDontRequeueException {
+	public void createNewDatasetAcquisition(Message importJobStr) throws IOException, AmqpRejectAndDontRequeueException {
 		ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
 		try {
 			createAllDatasetAcquisitions(importJob, importJob.getUserId());

@@ -27,13 +27,10 @@ import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/ac
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import {DatasetAcquisitionNode} from '../../tree/tree.model';
 import {DatasetService} from "../../datasets/shared/dataset.service";
-import {LoadingBarComponent} from "../../shared/components/loading-bar/loading-bar.component";
 import {StudyUserRight} from "../../studies/shared/study-user-right.enum";
 import {StudyRightsService} from "../../studies/shared/study-rights.service";
 import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { DownloadSetupOptions } from 'src/app/shared/mass-download/download-setup/download-setup.component';
-
 
 @Component({
     selector: 'dataset-acquisition',
@@ -47,9 +44,7 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     acquisitionNode: DatasetAcquisition | DatasetAcquisitionNode;
     hasDownloadRight: boolean = false;
     noDatasets: boolean = false;
-    hasEEG: boolean = false;
     hasDicom: boolean = false;
-    hasBids: boolean = false;
     protected downloadState: TaskState = new TaskState();
 
     constructor(
@@ -81,11 +76,7 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
                 dsAcq.datasets = datasets;
                 this.datasetAcquisition.datasets.forEach(ds => {
                     this.noDatasets = false;
-                    if (ds.type == 'Eeg') {
-                        this.hasEEG = true;
-                    } else if (ds.type == 'BIDS') {
-                        this.hasBids = true;
-                    } else {
+                    if (ds.type != 'Eeg' && ds.type != 'BIDS') {
                         this.hasDicom = true;
                     }
                 });
@@ -141,11 +132,6 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     }
 
     downloadAll() {
-        let options: DownloadSetupOptions = new DownloadSetupOptions();
-        options.hasBids = this.hasBids;
-        options.hasNii = this.hasDicom;
-        options.hasDicom = this.hasDicom;
-        options.hasEeg = this.hasEEG; 
-        this.downloadService.downloadAllByAcquisitionId(this.datasetAcquisition?.id, options, this.downloadState);
+        this.downloadService.downloadAllByAcquisitionId(this.datasetAcquisition?.id, this.downloadState);
     }
 }
