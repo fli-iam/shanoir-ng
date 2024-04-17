@@ -229,16 +229,24 @@ public class DatasetDownloaderServiceImpl {
 		List<String> files = new ArrayList<>();
 		for (File res : workFolder.listFiles()) {
 
+			String zippedResultPath = res.getAbsolutePath();
+			boolean compressed = zippedResultPath.endsWith(".nii");
+			// Gzip file if necessary in order to always return a .nii.gz file
+			if (compressed) {
+				zippedResultPath += ".gz";
+				DatasetFileUtils.compressGzipFile(res.getAbsolutePath(), zippedResultPath);
+			}
+
 			if (!res.isDirectory()) {
 				// Then send workFolder to zipOutputFile
-				FileSystemResource fileSystemResource = new FileSystemResource(res.getAbsolutePath());
-				ZipEntry zipEntry = new ZipEntry(res.getName());
+				FileSystemResource fileSystemResource = new FileSystemResource(zippedResultPath);
+				ZipEntry zipEntry = new ZipEntry(res.getName() + ".gz");
 				zipEntry.setSize(fileSystemResource.contentLength());
 				zipEntry.setTime(System.currentTimeMillis());
 				zipOutputStream.putNextEntry(zipEntry);
 				StreamUtils.copy(fileSystemResource.getInputStream(), zipOutputStream);
 				zipOutputStream.closeEntry();
-				files.add(res.getName());
+				files.add(res.getName() + ".gz");
 			}
 		}
 	}
