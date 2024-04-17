@@ -27,7 +27,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		(onCopy)="copy(i)"
 		(delete)="delete(i)"
 		[showErrors]="showErrors"
-		(click)="clickRule(i)">
+		(click)="clickRule(i)"
+		[addSubForm]="addSubForm">
 	</study-card-rule>
 	<quality-card-rule #qualityCardRule
 		*ngIf="cardType == 'qualitycard'"
@@ -43,7 +44,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		(onCopy)="copy(i)"
 		(delete)="delete(i)"
 		[showErrors]="showErrors"
-		(click)="clickRule(i)">
+		(click)="clickRule(i)"
+		[addSubForm]="addSubForm">
 	</quality-card-rule>
 </ng-container>
 <div *ngIf="mode == 'edit' || mode == 'create'" class="add-container">

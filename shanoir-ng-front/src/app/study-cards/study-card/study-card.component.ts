@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, ViewChild } from '@angular/core';
-import { UntypedFormGroup, Validators } from '@angular/forms';
+import { FormArray, FormGroup, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
@@ -23,8 +23,6 @@ import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
 import { Coil } from '../../coils/shared/coil.model';
 import { CoilService } from '../../coils/shared/coil.service';
-import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
-import { NiftiConverterService } from '../../niftiConverters/nifti.converter.service';
 import { slideDown } from '../../shared/animations/animations';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
@@ -65,14 +63,12 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             private studyCardService: StudyCardService,
             private studyService: StudyService,
             private acqEqService: AcquisitionEquipmentService,
-            private niftiConverterService: NiftiConverterService,
             private studyRightsService: StudyRightsService,
             private acqEqptLabelPipe: AcquisitionEquipmentPipe,
             keycloakService: KeycloakService,
             private centerService: CenterService,
             coilService: CoilService) {
         super(route, 'study-card');
-
         this.mode = this.activatedRoute.snapshot.data['mode'];
         this.selectMode = this.mode == 'view' && this.activatedRoute.snapshot.data['select'];
         this.isAdminOrExpert = keycloakService.isUserAdminOrExpert();
@@ -97,7 +93,6 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     initEdit(): Promise<void> {
         this.hasAdministrateRightPromise = Promise.resolve(false);
         this.fetchStudies();
-        this.fetchNiftiConverters();
         return this.studyCardService.get(this.id).then(sc => {
             this.studyCard = sc;
         });
@@ -113,10 +108,6 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             }
         });
         this.studyCard = new StudyCard();
-        this.fetchNiftiConverters().then(result => {
-            // pre-select dcm2niix
-            this.studyCard.niftiConverter = result.filter(element => element.name === 'dcm2niix')[0];
-        });
         return Promise.resolve();
     }
 
@@ -125,8 +116,8 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             'name': [this.studyCard.name, [Validators.required, Validators.minLength(2), this.registerOnSubmitValidator('unique', 'name')]],
             'study': [this.studyCard.study, [Validators.required]],
             'acquisitionEquipment': [this.studyCard.acquisitionEquipment, [Validators.required]],
-            'niftiConverter': [this.studyCard.niftiConverter, [Validators.required]],
-            'rules': [this.studyCard.rules, [StudyCardRulesComponent.validator]]
+            'rules': [this.studyCard.rules, [StudyCardRulesComponent.validator]],
+            'conditions': new FormArray([]),
         });
         this.subscriptions.push(
             form.get('study').valueChanges.subscribe(study => this.onStudyChange(study, form))
@@ -168,14 +159,6 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             });
     }
 
-    private fetchNiftiConverters(): Promise<NiftiConverter[]> {
-        return this.niftiConverterService.getAll()
-            .then(converters => {
-                this.niftiConverters = converters.map(converter => new IdName(converter.id, converter.name));
-                return converters;
-            });
-    }
-
     private onStudyChange(study: IdName, form: UntypedFormGroup) {
         if (study) {
             this.fetchAcqEq(study.id).then(() => {
@@ -196,8 +179,28 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     }
 
     onShowErrors() {
-        this.form.markAsDirty();
+        this.markControlsDirty(this.form);
         this.showRulesErrors = !this.showRulesErrors;
+    }
+
+    private markControlsDirty(group: FormGroup | FormArray): void {
+        Object.keys(group.controls).forEach((key: string) => {
+            const abstractControl = group.controls[key];
+            if (abstractControl instanceof FormGroup || abstractControl instanceof FormArray) {
+                this.markControlsDirty(abstractControl);
+            } else {
+                abstractControl.markAsDirty();
+            }
+        });
+    }
+
+    addConditionForm(form: FormGroup): FormGroup {
+        if (this.mode != 'view') {
+            setTimeout(() => { // prevent "changed after check" error
+                (this.form.get('conditions') as FormArray).push(form);
+            });
+        }
+        return this.form;
     }
 
     importRules() {

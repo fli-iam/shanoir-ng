@@ -14,10 +14,13 @@
 
 package org.shanoir.ng.download;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.StringReader;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,7 +34,6 @@ import java.util.zip.ZipOutputStream;
 import javax.json.Json;
 import javax.json.stream.JsonParser;
 
-import jakarta.mail.Multipart;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.json.JSONReader;
 import org.shanoir.ng.dataset.model.Dataset;

@@ -26,7 +26,6 @@ import { environment } from "../../environments/environment";
 import { DatasetAcquisition } from '../dataset-acquisitions/shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../dataset-acquisitions/shared/dataset-acquisition.service';
 import { ExecutionDataService } from '../vip/execution.data-service';
-import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
 import { ColumnDefinition } from '../shared/components/table/column.definition.type';
 import { Page, Pageable } from "../shared/components/table/pageable.model";
 import { TableComponent } from "../shared/components/table/table.component";
@@ -44,14 +43,10 @@ import { Clipboard } from '@angular/cdk/clipboard';
 import {StudyService} from "../studies/shared/study.service";
 import {Study} from "../studies/shared/study.model";
 import {ServiceLocator} from "../utils/locator.service";
-import { Observable } from 'rxjs-compat';
-import { SuperPromise } from 'src/app/utils/super-promise';
-import {take} from "rxjs/operators";
-import {Format} from "@angular-devkit/build-angular/src/builders/extract-i18n/schema";
 import { TaskState } from '../async-tasks/task.model';
 import {DatasetCopyDialogComponent} from "../shared/components/dataset-copy-dialog/dataset-copy-dialog.component";
 
-const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags'];
+const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags', 'processed'];
 const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength'];
 export type TextualFacet = typeof TextualFacetNames[number];
 @Component({
@@ -76,6 +71,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     selectedDatasetIds: Set<number> = new Set();
     syntaxError: boolean = false;
     dateOpen: boolean = false;
+    public downloadState: TaskState = new TaskState();
     datasetStudymap: Map<number, number> = new Map();
 
     tab: 'results' | 'selected' = 'results';
@@ -162,7 +158,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     buildForm(): UntypedFormGroup {
-        const searchBarRegex = '^((studyName|subjectName|datasetName|examinationComment|datasetTypes|datasetNatures|acquisitionEquipmentName)[:][*]?[a-zA-Z0-9\\s_\W\.\!\@\#\$\%\^\&\*\(\)\_\+\-\=]+[*]?[;])+$';
+        const searchBarRegex = '^((studyName|subjectName|datasetName|examinationComment|datasetTypes|processed|datasetNatures|acquisitionEquipmentName)[:][*]?[a-zA-Z0-9\\s_\W\.\!\@\#\$\%\^\&\*\(\)\_\+\-\=]+[*]?[;])+$';
         let formGroup = this.formBuilder.group({
             'startDate': [this.solrRequest.datasetStartDate, [DatepickerComponent.validator]],
             'endDate': [this.solrRequest.datasetEndDate, [DatepickerComponent.validator, this.dateOrderValidator]],
@@ -428,6 +424,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         let columnDefs: ColumnDefinition[] = [
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {headerName: "Admin", type: "boolean", cellRenderer: row => this.hasAdminRight(row.data.studyId), awesome: "fa-solid fa-shield", color: "goldenrod", disableSorting: true},
+            {headerName: "", type: "boolean", cellRenderer: row => row.data.processed, awesome: "fa-solid fa-gears", color: "dimgrey", disableSorting: true, tip: item => { return item.processed ? "processed dataset" : "" }},
             {headerName: "Name", field: "datasetName"},
             {headerName: "Tags", field: "tags"},
             {headerName: "Type", field: "datasetType"},
@@ -516,7 +513,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
     downloadSelected() {
         if (this.selectedDatasetIds && this.canDownload) {
-            this.downloadService.downloadByIds([...this.selectedDatasetIds]);
+            this.downloadService.downloadByIds([...this.selectedDatasetIds], this.downloadState);
         } else {
             this.consoleService.log('error', "Could not download data, please check your right on the studies for these datasets.")
         }
@@ -614,6 +611,10 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         modalRef.instance.canCopy = this.hasCopyRight;
         modalRef.instance.lines = this.selectedLines;
     }
+
+    private isProcessed(doc: SolrDocument) {
+        return doc.processed == true;
+    }
 }
 
 export interface SelectionBlock {
@@ -632,7 +633,8 @@ export class SimpleValueSelectionBlock implements SelectionBlock {
 
 export class FacetSelectionBlock implements SelectionBlock {
 
-    constructor(private facetField: FacetField) {}
+    constructor(private facetField: FacetField) {
+    }
 
     get label(): string {
         return this.facetField.value;

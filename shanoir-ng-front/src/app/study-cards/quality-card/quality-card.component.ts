@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, ComponentRef, ViewChild } from '@angular/core';
-import { FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
@@ -146,7 +146,8 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
             'name': [this.qualityCard.name, [Validators.required, Validators.minLength(2), this.registerOnSubmitValidator('unique', 'name')]],
             'study': [this.qualityCard.study, [Validators.required]],
             'toCheckAtImport': [this.qualityCard.toCheckAtImport, [Validators.required]],
-            'rules': [this.qualityCard.rules, [StudyCardRulesComponent.validator]]
+            'rules': [this.qualityCard.rules, [StudyCardRulesComponent.validator]],
+            'conditions': new FormArray([]),
         });
         return form;
     }
@@ -175,8 +176,28 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     }
 
     onShowErrors() {
-        this.form.markAsDirty();
+        this.markControlsDirty(this.form);
         this.showRulesErrors = !this.showRulesErrors;
+    }
+
+    private markControlsDirty(group: FormGroup | FormArray): void {
+        Object.keys(group.controls).forEach((key: string) => {
+            const abstractControl = group.controls[key];
+            if (abstractControl instanceof FormGroup || abstractControl instanceof FormArray) {
+                this.markControlsDirty(abstractControl);
+            } else {
+                abstractControl.markAsDirty();
+            }
+        });
+    }
+
+    addConditionForm(form: FormGroup): FormGroup {
+        if (this.mode != 'view') {
+            setTimeout(() => { // prevent "changed after check" error
+                (this.form.get('conditions') as FormArray).push(form);
+            });
+        }
+        return this.form;
     }
 
     apply() {

@@ -81,7 +81,7 @@ public class BidsImporterService {
 	 * @throws JsonMappingException 
 	 * @throws JsonParseException 
 	 */
-	@RabbitListener(queues = RabbitMQConfiguration.IMPORTER_BIDS_DATASET_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.IMPORTER_BIDS_DATASET_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	@Transactional
 	public void createAllBidsDatasetAcquisition(Message importJobStr) throws AmqpRejectAndDontRequeueException {
@@ -195,10 +195,7 @@ public class BidsImporterService {
 			event.setProgress(progress);
 			eventService.publishEvent(event);
 
-			String name = FilenameUtils.removeExtension(importedFile.getName());
-			if (name.endsWith(".nii")) {
-				name = FilenameUtils.removeExtension(name);
-			}
+			String name = importedFile.getName().replaceAll("\\.", "_");
 
 			// Parse name to get acquisition / session / run / task
 			

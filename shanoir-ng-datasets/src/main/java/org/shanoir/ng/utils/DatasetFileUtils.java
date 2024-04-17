@@ -156,7 +156,7 @@ public class DatasetFileUtils {
 	}
 
 	public static String getFileName(boolean keepName, File srcFile, String subjectName, Dataset dataset, int index) {
-		if (dataset.getDatasetProcessing() != null || dataset.getDatasetAcquisition() == null) {
+		if (keepName || dataset.getDatasetProcessing() != null || dataset.getDatasetAcquisition() == null) {
 			return srcFile.getName();
 		}
 
