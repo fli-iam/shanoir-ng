@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.examination.controler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletRequest;
@@ -201,9 +202,10 @@ public class ExaminationApiController implements ExaminationApi {
 		/* Update examination in db. */
 		try {
 			examinationService.update(examinationMapper.examinationDTOToExamination(examination));
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.RELOAD_BIDS, examination.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, examination.getStudyId()));
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_EXAMINATION_EVENT, examination.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, examination.getStudyId()));
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(examination.getStudyId()));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} catch (EntityNotFoundException e) {
+		} catch (JsonProcessingException | EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		} catch (ShanoirException e) {
 			throw new RestServiceException(new ErrorModel(e.getErrorCode(), e.getMessage()));

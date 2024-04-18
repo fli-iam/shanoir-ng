@@ -23,14 +23,6 @@ public class WADOURLHandler {
 	}
 	
 	public String convertWADO_URI_TO_WADO_RS(String url) {
-		System.out.println("convertWADO début url : " + url);
-		/*String[] patterns = {
-				"wado\\?requestType=WADO", "rs",
-				"&studyUID=", "/studies/",
-				"&seriesUID=", "/series/",
-				"&objectUID=", "/instances/",
-				"&contentType=application/dicom", ""
-		};*/
 		String[] patterns = {
 				"wado\\?requestType=WADO", "rs",
 				"&studyUID=", "/studies/",
@@ -42,7 +34,6 @@ public class WADOURLHandler {
             Matcher matcher = pattern.matcher(url);
             url = matcher.replaceAll(patterns[i + 1]);
         }
-		System.out.println("convertWADO fin url : " + url);
         return url;
     }
 
