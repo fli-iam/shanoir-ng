@@ -191,7 +191,11 @@ public class DefaultHandler extends ResultHandler {
 			processedDataset.setProcessedDatasetType(ProcessedDatasetType.EXECUTION_RESULT);
 			processedDataset.setStudyId(studyId);
 			processedDataset.setStudyName(study.getName());
-			processedDataset.setProcessedDatasetName(file.getName());
+			String datasetName = file.getName();
+			if (datasetName.contains("resource_id")) {
+				datasetName = datasetName.substring(datasetName.lastIndexOf("+") + 1);
+			}
+			processedDataset.setProcessedDatasetName(datasetName);
 
 			if(!inputDatasets.isEmpty()) {
 
