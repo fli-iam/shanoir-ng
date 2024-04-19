@@ -47,6 +47,7 @@ import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.security.ControlerSecurityService;
+import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -138,7 +139,10 @@ public class DatasetApiControllerTest {
 	
 	@MockBean
 	private DatasetDownloaderServiceImpl datasetDownloaderService;
-	
+
+	@MockBean
+	private SolrService solrService;
+
 	@Autowired
 	private ObjectMapper mapper;
 
@@ -151,8 +155,13 @@ public class DatasetApiControllerTest {
 
 	@BeforeEach
 	public void setup() throws ShanoirException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException, SolrServerException, RestServiceException {
+		MrDataset datasetToReturn = new MrDataset();
+		datasetToReturn.setDatasetAcquisition(dsAcq);
+		datasetToReturn.getDatasetAcquisition().setExamination(exam);
+		datasetToReturn.getDatasetAcquisition().getExamination().setStudy(study);
+
+		given(datasetServiceMock.findById(1L)).willReturn(datasetToReturn);
 		doNothing().when(datasetServiceMock).deleteById(1L);
-		given(datasetServiceMock.findById(1L)).willReturn(new MrDataset());
 		given(datasetServiceMock.create(Mockito.mock(MrDataset.class))).willReturn(new MrDataset());
 		given(studyRepo.findById(Mockito.anyLong())).willReturn(Optional.of(study));
 		given(controlerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(Dataset.class))).willReturn(true);
