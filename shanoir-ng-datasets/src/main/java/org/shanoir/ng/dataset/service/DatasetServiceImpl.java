@@ -202,7 +202,7 @@ public class DatasetServiceImpl implements DatasetService {
 		Dataset ds = repository.save(datasetDb);
 		try {
 			Long studyId = ds.getDatasetAcquisition().getExamination().getStudyId();
-			shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, studyId));
+			shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, studyId));
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException("Error while updating a dataset", e);
