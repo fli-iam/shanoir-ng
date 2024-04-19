@@ -235,6 +235,7 @@ export class ExecutionComponent implements OnInit {
         candidate.outputProcessing = this.pipeline.outputProcessing;
         candidate.client = KeycloakService.clientId;
         candidate.refreshToken = this.refreshToken;
+        candidate.converter = this.converter;
         candidate.datasetParameters = [];
         candidate.inputParameters = {};
         this.pipeline.parameters.forEach(
