@@ -2,6 +2,8 @@ package org.shanoir.ng.property.controller;
 
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.property.model.DatasetProperty;
+import org.shanoir.ng.property.model.DatasetPropertyDTO;
+import org.shanoir.ng.property.model.DatasetPropertyMapper;
 import org.shanoir.ng.property.service.DatasetPropertyService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,14 +23,19 @@ public class DatasetPropertyApiController implements DatasetPropertyApi {
     @Autowired
     private DatasetSecurityService securityService;
 
+    @Autowired
+    private DatasetPropertyMapper mapper;
+
 
     @Override
-    public ResponseEntity<List<DatasetProperty>> getPropertiesByDatasetId(Long datasetId) {
-        return new ResponseEntity<>(this.propertyService.getByDatasetId(datasetId), HttpStatus.OK);
+    public ResponseEntity<List<DatasetPropertyDTO>> getPropertiesByDatasetId(Long datasetId) {
+        return new ResponseEntity<>(
+                mapper.datasetPropertiesToDatasetPropertyDTOs(this.propertyService.getByDatasetId(datasetId)),
+                HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<List<DatasetProperty>> getPropertiesByProcessingId(Long processingId) throws EntityNotFoundException {
+    public ResponseEntity<List<DatasetPropertyDTO>> getPropertiesByProcessingId(Long processingId) throws EntityNotFoundException {
         List<DatasetProperty> filteredProperties = new ArrayList<>();
 
         for(DatasetProperty property : this.propertyService.getByDatasetProcessingId(processingId)){
@@ -36,6 +43,9 @@ public class DatasetPropertyApiController implements DatasetPropertyApi {
                 filteredProperties.add(property);
             }
         }
-        return new ResponseEntity<>(filteredProperties, HttpStatus.OK);
+        return new ResponseEntity<>(
+                mapper.datasetPropertiesToDatasetPropertyDTOs(filteredProperties),
+                HttpStatus.OK);
     }
+
 }

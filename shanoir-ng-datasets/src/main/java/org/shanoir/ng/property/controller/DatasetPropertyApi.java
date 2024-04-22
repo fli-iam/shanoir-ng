@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.shanoir.ng.property.model.DatasetProperty;
+import org.shanoir.ng.property.model.DatasetPropertyDTO;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,7 +28,10 @@ public interface DatasetPropertyApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/dataset/{datasetId}", produces = { "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_SEE_ALL')")
-    ResponseEntity<List<DatasetProperty>> getPropertiesByDatasetId(@Parameter(name = "datasetId", description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId);
+    ResponseEntity<List<DatasetPropertyDTO>> getPropertiesByDatasetId(
+            @Parameter(description = "id of the dataset", required = true)
+            @PathVariable("datasetId")
+            Long datasetId);
 
     @Operation(summary = "", description = "Returns the dataset properties associated to the given dataset")
     @ApiResponses(value = {
@@ -37,6 +41,6 @@ public interface DatasetPropertyApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/processing/{processingId}", produces = { "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    ResponseEntity<List<DatasetProperty>> getPropertiesByProcessingId(@Parameter(name = "processingId", description = "id of the processing", required = true) @PathVariable("processingId") Long processingId) throws EntityNotFoundException;
+    ResponseEntity<List<DatasetPropertyDTO>> getPropertiesByProcessingId(@Parameter(description = "id of the processing", required = true) @PathVariable("processingId") Long processingId) throws EntityNotFoundException;
 
 }
