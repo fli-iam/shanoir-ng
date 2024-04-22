@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
 import org.dcm4che3.media.DicomDirReader;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
@@ -98,13 +99,13 @@ public class DicomDirToModelService {
 		Serie serie = new Serie(serieRecord);
 		if (!DicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(serieRecord)) {
 			List<Instance> instances = new ArrayList<Instance>();
-			Attributes instanceRecord = dicomDirReader.findLowerInstanceRecord(serieRecord, true);
+			Attributes instanceRecord = dicomDirReader.findLowerInstanceRecord(serieRecord, false);
 			while(instanceRecord != null) {
 				Instance instance = new Instance(instanceRecord);
 				if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(instanceRecord)) {
 					instances.add(instance);
 				}
-				instanceRecord = dicomDirReader.findNextInstanceRecord(instanceRecord, true);
+				instanceRecord = dicomDirReader.findNextInstanceRecord(instanceRecord, false);
 			}
 			if (!instances.isEmpty()) {
 				instances.sort(new InstanceNumberSorter());
