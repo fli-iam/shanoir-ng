@@ -45,15 +45,7 @@ public interface ExaminationService {
 	 * @throws ShanoirException 
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnExamination(#id, 'CAN_ADMINISTRATE'))")
-	void deleteById(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
-
-	/**
-	 * Delete an examination from a rabbit MQ call, not identified
-	 * 
-	 * @param exam the examination to delete
-	 * @throws EntityNotFoundException
-	 */
-	void deleteFromRabbit(Examination exam) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
+	void deleteById(Long id) throws ShanoirException, SolrServerException, IOException, RestServiceException;
 
 	/**
 	 * Get all examinations for a specific user to support DICOMweb.

@@ -290,6 +290,9 @@ public class ImportUtils {
 		for (SerieTreeNode serieTreeNode : selectedSeries) {
 			Serie serie = serieTreeNode.getSerie();
 			List<String> newFileNamesOfSerie = new ArrayList<String>();
+			if (serie.getInstances() == null) {
+				continue;
+			}
 			for (Instance instance : serie.getInstances()) {
 				File sourceFile = dicomFileAnalyzer.getFileFromInstance(instance, serie, filePathDicomDir, false);
 				String dicomFileName = sourceFile.getAbsolutePath().replace(File.separator, "_") + DcmRcvManager.DICOM_FILE_SUFFIX;
