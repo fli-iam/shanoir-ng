@@ -75,10 +75,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+#          cosign-release: 'v2.1.1'
 
-# TODO: restore maven build
-#      - name: Maven build
-#        run: mvn -f ./shanoir-ng-parent/pom.xml install -DskipTests
+      - name: Maven build
+        run: mvn -f ./shanoir-ng-parent/pom.xml install -DskipTests
 
       # note: ultimately we should build the images with the docker/bake-action
       # (but buildx bake is still experimental)
@@ -87,9 +87,9 @@ jobs:
         run: |
           import os, subprocess, sys
 
-          #TODO: build all images
-          IMAGES = ["database"]
-          #IMAGES = "database datasets import keycloak keycloak-database nginx nifti-conversion preclinical solr studies users".split()
+          IMAGES = """database datasets import keycloak keycloak-database
+                      nginx nifti-conversion preclinical solr studies users
+                      """.split()
 
           env = os.environ
           for image in IMAGES:
