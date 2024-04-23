@@ -20,8 +20,6 @@ import java.util.List;
 @Controller
 public class DatasetPropertyApiController implements DatasetPropertyApi {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DatasetPropertyApiController.class);
-
     @Autowired
     private DatasetPropertyService propertyService;
 
@@ -43,14 +41,9 @@ public class DatasetPropertyApiController implements DatasetPropertyApi {
     public ResponseEntity<List<DatasetPropertyDTO>> getPropertiesByProcessingId(Long processingId) throws EntityNotFoundException {
         List<DatasetProperty> filteredProperties = new ArrayList<>();
 
-        LOG.error("[DEBUG] getPropertiesByProcessingId");
-
         for(DatasetProperty property : this.propertyService.getByDatasetProcessingId(processingId)){
             if(securityService.hasRightOnDataset(property.getDataset().getId(), "CAN_SEE_ALL")){
                 filteredProperties.add(property);
-                LOG.error("[DEBUG] Added [{} : {}]", property.getName(), property.getValue());
-            } else {
-                LOG.error("[DEBUG] No right for dataset [{}]", property.getDataset().getId());
             }
         }
         return new ResponseEntity<>(
