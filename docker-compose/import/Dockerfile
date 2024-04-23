@@ -11,11 +11,11 @@
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 #--------------- common jre base image -------------------------------------
-FROM debian:bookworm
-# NOTE: using bookworm-proposed-updates because of https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1039472
-RUN echo "deb http://deb.debian.org/debian bookworm-proposed-updates main" >> /etc/apt/sources.list \
+FROM debian:trixie
+# NOTE: using trixie for jdk21
+RUN echo "deb http://deb.debian.org/debian trixie-proposed-updates main" >> /etc/apt/sources.list \
     && apt-get update -qq \
-    && apt-get install -qqy openjdk-17-jre-headless ca-certificates-java
+    && apt-get install -qqy openjdk-21-jre-headless ca-certificates-java
 #----------------------------------------------------------------------------
 
 
