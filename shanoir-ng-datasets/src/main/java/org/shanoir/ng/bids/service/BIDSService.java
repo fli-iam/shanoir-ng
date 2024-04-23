@@ -25,14 +25,6 @@ public interface BIDSService {
 	public File exportAsBids(Long studyId, String studyName) throws IOException ;
 
 	/**
-	 * Outdates a study (or deletes it simply) when an update is performed on the study:
-	 * Update, delete subject & study
-	 * Add or delete dataset / examination
-	 * @param  the shnoir event
-	 */
-	public void deleteBids(String event);
-
-	/**
 	 * Deletes the folder of a given study to update / delete
 	 * @param studyId the given study ID
 	 * @param studyName the given study name

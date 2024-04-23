@@ -89,6 +89,9 @@ public class RabbitMqNiftiConversionService {
 			File result = new File(workFolderResult);
 			if (!result.exists()) {
 				result.mkdirs();
+				result.setReadable(true, false);
+				result.setExecutable(true, false);
+				result.setWritable(true, false);
 			}
 
 			boolean conversionResult = converterService.convertToNiftiExec(Long.valueOf(converterId), workFolder, workFolderResult);

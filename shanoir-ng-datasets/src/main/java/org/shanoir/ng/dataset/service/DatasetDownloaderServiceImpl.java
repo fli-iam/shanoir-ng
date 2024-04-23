@@ -74,6 +74,7 @@ public class DatasetDownloaderServiceImpl {
 	private static final String JSON_RESULT_FILENAME = "ERRORS.json";
 
 	private static final Long DEFAULT_NIFTI_CONVERTER_ID = 6L;
+	public static final String GZIP_EXTENSION = ".gz";
 
 	@Autowired
 	DatasetService datasetService;
@@ -229,16 +230,30 @@ public class DatasetDownloaderServiceImpl {
 		List<String> files = new ArrayList<>();
 		for (File res : workFolder.listFiles()) {
 
+			String datasetFilePath = res.getAbsolutePath();
+			String fileName = res.getName();
+			boolean toGzip = datasetFilePath.endsWith(".nii");
+
+			// Gzip file if necessary in order to always return a .nii.gz file
+			if (toGzip) {
+				datasetFilePath = datasetFilePath + GZIP_EXTENSION;
+				fileName = fileName + GZIP_EXTENSION;
+				File file = new File(datasetFilePath);
+				file.getParentFile().mkdirs();
+				file.createNewFile();
+				DatasetFileUtils.compressGzipFile(res.getAbsolutePath(), datasetFilePath);
+			}
+
 			if (!res.isDirectory()) {
 				// Then send workFolder to zipOutputFile
-				FileSystemResource fileSystemResource = new FileSystemResource(res.getAbsolutePath());
-				ZipEntry zipEntry = new ZipEntry(res.getName());
+				FileSystemResource fileSystemResource = new FileSystemResource(datasetFilePath);
+				ZipEntry zipEntry = new ZipEntry(fileName);
 				zipEntry.setSize(fileSystemResource.contentLength());
 				zipEntry.setTime(System.currentTimeMillis());
 				zipOutputStream.putNextEntry(zipEntry);
 				StreamUtils.copy(fileSystemResource.getInputStream(), zipOutputStream);
 				zipOutputStream.closeEntry();
-				files.add(res.getName());
+				files.add(res.getName() + GZIP_EXTENSION);
 			}
 		}
 	}
