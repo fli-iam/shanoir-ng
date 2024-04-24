@@ -24,7 +24,7 @@ import java.util.ResourceBundle;
 
 public class UploadFromFolderActionListener implements ActionListener {
 
-    private static Logger logger = Logger.getLogger(UploadFromCsvActionListener.class);
+    private static Logger logger = Logger.getLogger(UploadFromFolderActionListener.class);
 
     JFileChooser fileChooser;
 
