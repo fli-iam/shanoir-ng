@@ -54,7 +54,6 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
     private ShanoirUploaderServiceClient shanoirUploaderServiceClientNG;
     private IdentifierCalculator identifierCalculator;
 
-
     public ImportFromFolderRunner(FolderImport folderimport, ResourceBundle ressourceBundle, ImportFromFolderWindow importFromFolderWindow, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG, IDicomServerClient dicomServerClient) {
         this.folderimport = folderimport;
         this.resourceBundle = ressourceBundle;
