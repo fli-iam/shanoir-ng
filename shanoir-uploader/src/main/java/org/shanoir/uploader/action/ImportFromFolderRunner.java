@@ -1,10 +1,22 @@
 package org.shanoir.uploader.action;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.io.File;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.Set;
+
+import javax.swing.JTabbedPane;
+import javax.swing.SwingWorker;
+
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
@@ -17,12 +29,16 @@ import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.query.PatientTreeNode;
 import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.dicom.query.StudyTreeNode;
-import org.shanoir.uploader.gui.ImportFromCSVWindow;
 import org.shanoir.uploader.gui.ImportFromFolderWindow;
-import org.shanoir.uploader.model.CsvImport;
 import org.shanoir.uploader.model.ExaminationImport;
 import org.shanoir.uploader.model.FolderImport;
-import org.shanoir.uploader.model.rest.*;
+import org.shanoir.uploader.model.rest.AcquisitionEquipment;
+import org.shanoir.uploader.model.rest.Examination;
+import org.shanoir.uploader.model.rest.ImagedObjectCategory;
+import org.shanoir.uploader.model.rest.Sex;
+import org.shanoir.uploader.model.rest.Study;
+import org.shanoir.uploader.model.rest.Subject;
+import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
@@ -30,19 +46,17 @@ import org.shanoir.uploader.upload.UploadJob;
 import org.shanoir.uploader.upload.UploadJobManager;
 import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.ImportUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.swing.*;
-import java.io.File;
-import java.time.LocalDate;
-import java.time.Month;
-import java.time.ZoneOffset;
-import java.util.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
 
     private static final String DICOMDIR = "DICOMDIR";
 
-    private static Logger logger = Logger.getLogger(ImportFromFolderRunner.class);
+    private static Logger logger = LoggerFactory.getLogger(ImportFromFolderRunner.class);
 
     private DicomDirGeneratorService dicomDirGeneratorService = new DicomDirGeneratorService();
 
