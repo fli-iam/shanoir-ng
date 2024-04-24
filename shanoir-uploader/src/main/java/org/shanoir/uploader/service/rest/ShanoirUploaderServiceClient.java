@@ -398,21 +398,6 @@ public class ShanoirUploaderServiceClient {
 		return null;
 	}
 
-	public List<Subject> findSubjectsByStudy(final Long studyId) throws Exception {
-		URIBuilder b = new URIBuilder(this.serviceURLSubjectsByStudyId + studyId + "/allSubjects");
-		b.addParameter("preclinical",  "null");
-		URL url = b.build().toURL();
-		try (CloseableHttpResponse response = httpService.get(url.toString())) {
-			int code = response.getCode();
-			if (code == HttpStatus.SC_OK) {
-				return Util.getMappedList(response, Subject.class);
-			} else {
-				logger.error("Could not get subjects ids from study id " + studyId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
-			}
-		}
-		return Collections.emptyList();
-	}
-
 	public List<Long> findDatasetIdsByStudyId(Long studyId) throws Exception {
 		if (studyId != null) {
 			List<Long> datasetIds = new ArrayList<Long>();

@@ -1,42 +1,32 @@
 package org.shanoir.uploader.action;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.util.ArrayList;
+
+import javax.swing.JFileChooser;
+
 import org.shanoir.uploader.gui.ImportFromFolderWindow;
 import org.shanoir.uploader.model.ExaminationImport;
 import org.shanoir.uploader.model.FolderImport;
-import org.shanoir.uploader.model.rest.IdList;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
-import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
-import org.shanoir.uploader.utils.FileUtil;
-
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ResourceBundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UploadFromFolderActionListener implements ActionListener {
 
-    private static Logger logger = Logger.getLogger(UploadFromFolderActionListener.class);
+    private static Logger logger = LoggerFactory.getLogger(UploadFromFolderActionListener.class);
 
     JFileChooser fileChooser;
 
     ImportFromFolderWindow importFromFolderWindow;
 
-    private ResourceBundle resourceBundle;
-
-    public UploadFromFolderActionListener(ImportFromFolderWindow importFromFolderWindow, ResourceBundle resourceBundle) {
+    public UploadFromFolderActionListener(ImportFromFolderWindow importFromFolderWindow) {
         this.importFromFolderWindow = importFromFolderWindow;
         this.fileChooser = new JFileChooser();
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        this.resourceBundle = resourceBundle;
     }
 
     @Override

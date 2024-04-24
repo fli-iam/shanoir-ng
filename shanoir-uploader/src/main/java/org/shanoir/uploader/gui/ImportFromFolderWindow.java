@@ -1,29 +1,45 @@
 package org.shanoir.uploader.gui;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GraphicsEnvironment;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Point;
 import java.io.File;
-import java.util.List;
 import java.util.ResourceBundle;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
-import org.apache.log4j.Logger;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
-import org.shanoir.uploader.action.*;
+import org.shanoir.uploader.action.ImportFromFolderActionListener;
+import org.shanoir.uploader.action.UpdateFolderImportStudyListener;
+import org.shanoir.uploader.action.UploadFromFolderActionListener;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.gui.customcomponent.JComboBoxMandatory;
-import org.shanoir.uploader.model.CsvImport;
 import org.shanoir.uploader.model.ExaminationImport;
 import org.shanoir.uploader.model.FolderImport;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ImportFromFolderWindow extends JFrame {
 
     public JButton uploadButton;
     public JButton openButton;
 
-    private static Logger logger = Logger.getLogger(ImportFromFolderWindow.class);
+    private static Logger logger = LoggerFactory.getLogger(ImportFromFolderWindow.class);
 
     FolderImport folderImport;
 
@@ -145,7 +161,7 @@ public class ImportFromFolderWindow extends JFrame {
         openButton.setEnabled(false);
         masterPanel.add(openButton, gBCOpenButton);
 
-        uploadListener = new UploadFromFolderActionListener(this, resourceBundle);
+        uploadListener = new UploadFromFolderActionListener(this);
         openButton.addActionListener(uploadListener);
 
         // initialize others
