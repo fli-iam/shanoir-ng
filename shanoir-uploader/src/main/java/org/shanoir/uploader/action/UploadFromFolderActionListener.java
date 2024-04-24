@@ -24,15 +24,17 @@ import java.util.ResourceBundle;
 
 public class UploadFromFolderActionListener implements ActionListener {
 
-    JFileChooser fileChooser;
-    ImportFromFolderWindow importFromFolderWindow;
-    private ResourceBundle resourceBundle;
-
     private static Logger logger = Logger.getLogger(UploadFromCsvActionListener.class);
+
+    JFileChooser fileChooser;
+
+    ImportFromFolderWindow importFromFolderWindow;
+
+    private ResourceBundle resourceBundle;
 
     public UploadFromFolderActionListener(ImportFromFolderWindow importFromFolderWindow, ResourceBundle resourceBundle) {
         this.importFromFolderWindow = importFromFolderWindow;
-        this.fileChooser = new JFileChooser("/home/jcome/Documents/Shanoir/Data");
+        this.fileChooser = new JFileChooser();
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         this.resourceBundle = resourceBundle;
     }
