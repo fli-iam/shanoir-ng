@@ -51,7 +51,7 @@ export class Study extends Entity {
     timepoints: Timepoint[];
     visibleByDefault: boolean = false;
     withExamination: boolean;
-    studyCardPolicy: string = "OPTIONAL";
+    studyCardPolicy: string = "MANDATORY";
     studyCardList: StudyCard[];
     tags: Tag[];
     studyTags: Tag[];

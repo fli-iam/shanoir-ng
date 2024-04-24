@@ -1,0 +1,1 @@
+UPDATE study SET study_card_policy=0;

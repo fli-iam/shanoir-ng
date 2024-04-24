@@ -3,14 +3,14 @@ package org.shanoir.ng.study.model;
 public enum StudyCardPolicy {
 
     /**
-     * Study card is optional during import
-     */
-    OPTIONAL(1),
-
-    /**
      * Study card is mandatory during import
      */
-    MANDATORY(2),
+    MANDATORY(1),
+
+    /**
+     * Study card is optional during import
+     */
+    OPTIONAL(2),
 
     /**
      * Study card is disabled during import
