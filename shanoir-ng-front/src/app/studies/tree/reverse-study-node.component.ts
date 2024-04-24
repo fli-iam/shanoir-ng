@@ -139,7 +139,7 @@ export class ReverseStudyNodeComponent implements OnChanges {
     private mapProcessingNode(processing: DatasetProcessing): ProcessingNode {
         return new ProcessingNode(
             processing.id,
-            DatasetProcessingType.getLabel(processing.datasetProcessingType),
+            processing.comment ? processing.comment :DatasetProcessingType.getLabel(processing.datasetProcessingType),
             processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],
             this.canAdmin
         );

@@ -15,12 +15,8 @@
 package org.shanoir.ng.configuration.amqp;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.bids.service.BIDSService;
@@ -385,13 +381,17 @@ public class RabbitMQDatasetsService {
 	public void deleteSubject(String eventAsString) throws AmqpRejectAndDontRequeueException {
 		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 		try {
-
 			ShanoirEvent event = objectMapper.readValue(eventAsString, ShanoirEvent.class);
+			Long subjectId = Long.valueOf(event.getObjectId());
 			Set<Long> studyIds = new HashSet<>();
 
+			// Inverse order to remove copied examination before its source (if copied)
+			List<Examination> listExam = examinationRepository.findBySubjectId(subjectId);
+			Collections.reverse(listExam);
+
 			// Delete associated examinations and datasets from solr repository
-			for (Examination exam : examinationRepository.findBySubjectId(Long.valueOf(event.getObjectId()))) {
-				examinationService.deleteFromRabbit(exam);
+			for (Examination exam : listExam) {
+				examinationService.deleteById(exam.getId());
 				studyIds.add(exam.getStudyId());
 			}
 			
@@ -401,7 +401,7 @@ public class RabbitMQDatasetsService {
 			}
 			
 			// Delete subject from datasets database
-			subjectRepository.deleteById(Long.valueOf(event.getObjectId()));
+			subjectRepository.deleteById(subjectId);
 			
 		} catch (Exception e) {
 			LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
@@ -428,7 +428,7 @@ public class RabbitMQDatasetsService {
 
 			// Delete associated examinations and datasets from solr repository then from database
 			for (Examination exam : examinationRepository.findByStudy_Id(Long.valueOf(event.getObjectId()))) {
-				examinationService.deleteFromRabbit(exam);
+				examinationService.deleteById(exam.getId());
 			}
 			// also delete associated study cards
 			for (StudyCard sc : studyCardRepository.findByStudyId(Long.valueOf(event.getObjectId()))) {

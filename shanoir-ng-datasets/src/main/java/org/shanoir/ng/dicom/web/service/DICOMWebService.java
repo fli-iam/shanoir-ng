@@ -31,6 +31,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
@@ -277,13 +278,15 @@ public class DICOMWebService {
 		}
 	}
 
-	public void deleteDicomFilesFromPacs(String url) throws ShanoirException {
+	public void rejectDatasetFromPacs(String url) throws ShanoirException {
 		String rejectURL;
 		if (wadoURLHandler.isWADO_URI(url)) {
 			rejectURL = wadoURLHandler.convertWADO_URI_TO_WADO_RS(url) + REJECT_SUFFIX;
 		} else {
+			url = url.substring(0, url.indexOf("/instances"));
 			rejectURL = url + REJECT_SUFFIX;
 		}
+
 		// STEP 1: Reject from the PACS
 		HttpPost post = new HttpPost(rejectURL);
 		post.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_JSON);
@@ -292,7 +295,7 @@ public class DICOMWebService {
 				LOG.info("Rejected from PACS: " + url);
 			} else {
 				LOG.error(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
-					+ " for rejectURL: " + rejectURL);
+						+ " for rejectURL: " + rejectURL);
 				if (response.getCode() == 404 && response.getReasonPhrase().startsWith("Not Found")) {
 					LOG.error("Could not delete from pacs: " + response.getCode() + " " + response.getReasonPhrase());
 					return;
@@ -305,18 +308,23 @@ public class DICOMWebService {
 			LOG.error("Could not reject instance from PACS: for rejectURL: " + rejectURL, e);
 			throw new ShanoirException("Could not reject instance from PACS: for rejectURL: " + url, e);
 		}
-		// STEP 2: Delete from the PACS
-		String deleteUrl = url.substring(0, url.indexOf("/aets/")) + REJECT_SUFFIX;
-		HttpDelete delete = new HttpDelete(deleteUrl);
-		delete.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_JSON);
-		try (CloseableHttpResponse response = httpClient.execute(delete)) {
+	}
+
+	@Scheduled(cron = "0 0 */6 * * *", zone="Europe/Paris")
+	public void deleteDicomFilesFromPacs() throws ShanoirException {
+		// Doc : https://smart-api.info/ui/be87344696148a41f577aca202ce84df#/IOCM-RS/deleteRejectedInstancesPermanently
+		LOG.info("Scheduled call to delete all rejected instances from pacs.");
+		String url = this.serverURL.substring(0, this.serverURL.indexOf("/aets/")) + REJECT_SUFFIX;
+		HttpDelete httpDelete = new HttpDelete(url);
+		httpDelete.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_JSON);
+		try (CloseableHttpResponse response = httpClient.execute(httpDelete)) {
 			if (response.getCode() == HttpStatus.OK.value()) {
 				LOG.info("Deleted from PACS: " + url);
 			} else {
 				LOG.error(response.getCode() + ": Could not delete instance from PACS: " + response.getReasonPhrase()
-					+ "for deleteURL: " + deleteUrl);
+						+ "for deleteURL: " + url);
 				throw new ShanoirException(response.getCode() + ": Could not delete instance from PACS: " + response.getReasonPhrase()
-				+ "for deleteURL: " + deleteUrl);
+						+ "for deleteURL: " + url);
 			}
 		} catch (IOException e) {
 			LOG.error(e.getMessage(), e);

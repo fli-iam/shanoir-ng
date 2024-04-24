@@ -5,7 +5,7 @@ import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.shanoir.ng.dataset.modality.MeshDataset;
+import org.shanoir.ng.dataset.modality.GenericDataset;
 import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
@@ -191,7 +191,11 @@ public class DefaultHandler extends ResultHandler {
 			processedDataset.setProcessedDatasetType(ProcessedDatasetType.EXECUTION_RESULT);
 			processedDataset.setStudyId(studyId);
 			processedDataset.setStudyName(study.getName());
-			processedDataset.setProcessedDatasetName(execution.getName());
+			String datasetName = file.getName();
+			if (datasetName.contains("resource_id")) {
+				datasetName = datasetName.substring(datasetName.lastIndexOf("+") + 1);
+			}
+			processedDataset.setProcessedDatasetName(datasetName);
 
 			if(!inputDatasets.isEmpty()) {
 
@@ -205,14 +209,9 @@ public class DefaultHandler extends ResultHandler {
 
 					processedDataset.setSubjectId(subject.getId());
 					processedDataset.setSubjectName(subject.getName());
-					processedDataset.setDatasetType(inputDatasets.get(0).getType());
-				} else {
-					processedDataset.setDatasetType(MeshDataset.datasetType);
 				}
-			} else {
-				// default ?
-				processedDataset.setDatasetType(MeshDataset.datasetType);
 			}
+			processedDataset.setDatasetType(GenericDataset.datasetType);
 
 			importerService.createProcessedDataset(processedDataset);
 
