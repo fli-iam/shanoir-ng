@@ -87,6 +87,7 @@ public class RabbitMQDatasetsService {
 
 	@Autowired
 	private DatasetService datasetService;
+
 	@Autowired
 	private DatasetCopyService datasetCopyService;
 
