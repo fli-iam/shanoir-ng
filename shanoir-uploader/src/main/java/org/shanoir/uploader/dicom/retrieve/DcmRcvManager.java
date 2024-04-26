@@ -32,12 +32,12 @@ public class DcmRcvManager {
 
 	/**
 	 * In the brackets '{ggggeeee}' the dicom attribute value is used to be replaced.
-	 * We store all images in folders by studyDate_studyInstanceUID / SeriesInstanceUID /
+	 * We store all images in folders by StudyInstanceUID / SeriesInstanceUID /
 	 * and the image with file name SOPInstanceUID. This allows us to support at the same
 	 * time with one ShUp up and running to receive push images for an exam/study or
 	 * to search in the pacs and download another exam.
 	 */
-	private static final String STORAGE_PATTERN = "{00080020}" + "_" + "{0020000D}" + File.separator + "{0020000E}" + File.separator + "{00080018}";
+	private static final String STORAGE_PATTERN = "{0020000D}" + File.separator + "{0020000E}" + File.separator + "{00080018}";
 	
 	public static final String DICOM_FILE_SUFFIX = ".dcm";
 	
