@@ -37,7 +37,6 @@ public class CsvImport {
 		}
 	}
 	
-	
 	String[] rawData;
 
 	// First part is research criteria (all mandatory)

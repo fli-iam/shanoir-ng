@@ -51,7 +51,7 @@ public class DicomServerClient implements IDicomServerClient {
 		// attention: we use calling here (== ShUp) to inform the DICOM server to send to ShUp,
 		// who becomes the "called" afterwards from the point of view of the DICOM server (switch)
 		queryPACSService.setDicomNodes(calling, called, config.getLocalDicomServerAETCalling());
-		dcmRcvManager.configure(config);
+		dcmRcvManager.configureAndStartSCPServer(config, workFolder.getAbsolutePath());
 	}
 	
 	/* (non-Javadoc)
@@ -111,7 +111,7 @@ public class DicomServerClient implements IDicomServerClient {
 	public synchronized List<String> retrieveDicomFiles(final Collection<SerieTreeNode> selectedSeries, final File uploadFolder) {
 		final List<String> retrievedDicomFiles = new ArrayList<String>();
 		if (!selectedSeries.isEmpty()) {
-			downloadFromDicomServer(selectedSeries, uploadFolder);
+			downloadFromDicomServer(selectedSeries);
 			readDicomFilesFromDisk(selectedSeries, uploadFolder, retrievedDicomFiles);
 		}		
 		return retrievedDicomFiles;
@@ -179,19 +179,15 @@ public class DicomServerClient implements IDicomServerClient {
 		return oldFileNamesAndDICOMFilter;
 	}
 
-	private void downloadFromDicomServer(final Collection<SerieTreeNode> selectedSeries, final File uploadFolder) {
-		// for each exam/patient download: create a new local mini-pacs,
-		// that uses the specific download folder within the workFolder
-		dcmRcvManager.startSCPServer(uploadFolder.getAbsolutePath());
+	private void downloadFromDicomServer(final Collection<SerieTreeNode> selectedSeries) {
 		final String studyInstanceUID = selectedSeries.iterator().next().getParent().getId();
 		final List<String> seriesInstanceUIDs = new ArrayList<String>();
 		selectedSeries.stream().forEach(s -> seriesInstanceUIDs.add(s.getId()));
 		try {
 			queryPACSService.queryCMOVEs(studyInstanceUID, seriesInstanceUIDs);
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			logger.error(uploadFolder.getName() + ":\n\n Download of "
-			+ " DICOM files for DICOM study/exam " + studyInstanceUID + ": " + " has failed.\n\n");
+			logger.error(":\n\n Download of "
+			+ " DICOM files for DICOM study/exam " + studyInstanceUID + ": " + " has failed.\n\n" + e.getMessage(), e);
 		}
 	}
 

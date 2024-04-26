@@ -6,6 +6,7 @@ import java.net.URL;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.query.ConfigBean;
 import org.weasis.dicom.param.AdvancedParams;
 import org.weasis.dicom.param.ConnectOptions;
@@ -14,7 +15,11 @@ import org.weasis.dicom.param.ListenerParams;
 import org.weasis.dicom.tool.DicomListener;
 
 /**
- * The DcmRcvHelper handles the download of DICOM files.
+ * The DcmRcvHelper handles the download of DICOM files and starts one DICOM
+ * SCP server at run up of ShanoirUploader. We start only one and keep him up
+ * and running, first to be more efficient and second to preare for DICOM push
+ * from outside, what requires one DICOM SCP server up and running all time as
+ * long as ShUp has been started.
  * 
  * @author mkain
  *
@@ -27,24 +32,21 @@ public class DcmRcvManager {
 
 	/**
 	 * In the brackets '{ggggeeee}' the dicom attribute value is used to be replaced.
-	 * We store in a folder with the SeriesInstanceUID and the file name of the SOPInstanceUID.
+	 * We store all images in folders by studyDate_studyInstanceUID / SeriesInstanceUID /
+	 * and the image with file name SOPInstanceUID. This allows us to support at the same
+	 * time with one ShUp up and running to receive push images for an exam/study or
+	 * to search in the pacs and download another exam.
 	 */
-	private static final String STORAGE_PATTERN = "{0020000E}" + File.separator + "{00080018}";
+	private static final String STORAGE_PATTERN = "{00080020}" + "_" + "{0020000D}" + File.separator + "{0020000E}" + File.separator + "{00080018}";
 	
 	public static final String DICOM_FILE_SUFFIX = ".dcm";
 	
-	private DicomNode scpNode;
-	
-	private ListenerParams lParams;
-	
-	private DicomListener listener;
-
-	public void configure(final ConfigBean configBean) throws MalformedURLException {
-		logger.info("Configuring local DICOM server with params:"
+	public void configureAndStartSCPServer(final ConfigBean configBean, final String workFolderPath) throws MalformedURLException {
+		logger.info("DICOM SCP server (mini-pacs) configured locally with params:"
 				+ " AET title: " + configBean.getLocalDicomServerAETCalling()
 				+ ", AET host: " + configBean.getLocalDicomServerHost()
 				+ ", AET port: " + configBean.getLocalDicomServerPort());
-        scpNode = new DicomNode(configBean.getLocalDicomServerAETCalling(), configBean.getLocalDicomServerHost(), configBean.getLocalDicomServerPort());
+		DicomNode scpNode = new DicomNode(configBean.getLocalDicomServerAETCalling(), configBean.getLocalDicomServerHost(), configBean.getLocalDicomServerPort());
 		AdvancedParams params = new AdvancedParams();
 		params.setTsuidOrder(AdvancedParams.IVR_LE_ONLY);
         ConnectOptions connectOptions = new ConnectOptions();
@@ -53,28 +55,26 @@ public class DcmRcvManager {
         connectOptions.setMaxOpsPerformed(0);
 		params.setConnectOptions(connectOptions);
 		URL sOPClassesPropertiesFileURL = this.getClass().getResource(SOP_CLASSES_PROPERTIES);
-		lParams = new ListenerParams(params, true, STORAGE_PATTERN + DICOM_FILE_SUFFIX, sOPClassesPropertiesFileURL, null);
+		ListenerParams lParams = new ListenerParams(params, true, STORAGE_PATTERN + DICOM_FILE_SUFFIX, sOPClassesPropertiesFileURL);
+		startSCPServer(workFolderPath, scpNode, lParams);
 	}
 	
 	/**
-	 * Called from a synchronized method only, so should not be a problem for multiple usages.
+	 * Start, when running up ShanoirUploader only one internal mini-pacs,
+	 * that is listening all time: to allow c-moves (DICOM push) all the
+	 * time from outside into this folder and split now by studyDate and
+	 * StudyInstanceUID and support query/c-move as well.
 	 * 
 	 * @param folderPath
 	 */
-	public void startSCPServer(final String folderPath) {
+	private void startSCPServer(final String workFolderPath, DicomNode scpNode, ListenerParams lParams) {
 		try {
-			if(this.listener != null)
-				listener.stop();
-			File storageDir = new File(folderPath);
-	        if (!storageDir.exists()) {
-	        	storageDir.mkdirs();
-	        }
-			this.listener = new DicomListener(storageDir);
-		    this.listener.start(scpNode, lParams);
-	        logger.info("DICOM SCP server successfully initialized: " + this.scpNode.toString() + ", " + folderPath);
+			File storageDir = new File(workFolderPath);
+			DicomListener listener = new DicomListener(storageDir);
+		    listener.start(scpNode, lParams);
+	        logger.info("DICOM SCP server (mini-pacs) successfully initialized: " + scpNode.toString() + ", " + workFolderPath);
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			logger.error("Error during startup of DICOM server (not started): " + e.getMessage());
+			logger.error("DICOM SCP server (mini-pacs): error (not started): " + e.getMessage(), e);
 		}		
 	}
 	

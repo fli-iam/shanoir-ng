@@ -35,8 +35,6 @@ public class SelectionActionListener implements TreeSelectionListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(SelectionActionListener.class);
 
-	private static final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-
 	private MainWindow mainWindow;
 
 	private ResourceBundle resourceBundle;
