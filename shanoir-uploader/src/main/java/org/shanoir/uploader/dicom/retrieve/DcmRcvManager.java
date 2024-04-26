@@ -6,7 +6,6 @@ import java.net.URL;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.query.ConfigBean;
 import org.weasis.dicom.param.AdvancedParams;
 import org.weasis.dicom.param.ConnectOptions;
@@ -34,7 +33,7 @@ public class DcmRcvManager {
 	 * In the brackets '{ggggeeee}' the dicom attribute value is used to be replaced.
 	 * We store all images in folders by StudyInstanceUID / SeriesInstanceUID /
 	 * and the image with file name SOPInstanceUID. This allows us to support at the same
-	 * time with one ShUp up and running to receive push images for an exam/study or
+	 * time with one ShUp (up and running) to receive push images for an exam/study or
 	 * to search in the pacs and download another exam.
 	 */
 	private static final String STORAGE_PATTERN = "{0020000D}" + File.separator + "{0020000E}" + File.separator + "{00080018}";
