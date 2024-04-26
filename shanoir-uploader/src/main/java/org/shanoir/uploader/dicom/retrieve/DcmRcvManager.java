@@ -14,7 +14,7 @@ import org.weasis.dicom.param.ListenerParams;
 import org.weasis.dicom.tool.DicomListener;
 
 /**
- * The DcmRcvHelper handles the download of DICOM files and starts one DICOM
+ * The DcmRcvManager handles the download of DICOM files and starts one DICOM
  * SCP server at run up of ShanoirUploader. We start only one and keep him up
  * and running, first to be more efficient and second to preare for DICOM push
  * from outside, what requires one DICOM SCP server up and running all time as
@@ -31,12 +31,12 @@ public class DcmRcvManager {
 
 	/**
 	 * In the brackets '{ggggeeee}' the dicom attribute value is used to be replaced.
-	 * We store all images in folders by StudyInstanceUID / SeriesInstanceUID /
-	 * and the image with file name SOPInstanceUID. This allows us to support at the same
+	 * We store all images in folders by Patient ID / StudyInstanceUID / SeriesInstanceUID /
+	 * SOPInstanceUID (as image file name). This allows us to support at the same
 	 * time with one ShUp (up and running) to receive push images for an exam/study or
 	 * to search in the pacs and download another exam.
 	 */
-	private static final String STORAGE_PATTERN = "{0020000D}" + File.separator + "{0020000E}" + File.separator + "{00080018}";
+	private static final String STORAGE_PATTERN = "{00100020}" + File.separator + "{0020000D}" + File.separator + "{0020000E}" + File.separator + "{00080018}";
 	
 	public static final String DICOM_FILE_SUFFIX = ".dcm";
 	

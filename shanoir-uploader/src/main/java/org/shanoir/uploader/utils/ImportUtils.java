@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -264,10 +265,10 @@ public class ImportUtils {
 	 * @return
 	 * @throws FileNotFoundException 
 	 */
-	public static List<String> downloadOrCopyFilesIntoUploadFolder(boolean isFromPACS, Set<SerieTreeNode> selectedSeries, File uploadFolder, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, IDicomServerClient dicomServerClient, String filePathDicomDir) throws FileNotFoundException {
+	public static List<String> downloadOrCopyFilesIntoUploadFolder(boolean isFromPACS, Map<String, Set<SerieTreeNode>> studiesWithSelectedSeries, File uploadFolder, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, IDicomServerClient dicomServerClient, String filePathDicomDir) throws FileNotFoundException {
 		List<String> allFileNames = null;
 		if (isFromPACS) {
-			allFileNames = dicomServerClient.retrieveDicomFiles(selectedSeries, uploadFolder);
+			allFileNames = dicomServerClient.retrieveDicomFiles(studiesWithSelectedSeries, uploadFolder);
 			if(allFileNames != null && !allFileNames.isEmpty()) {
 				logger.info(uploadFolder.getName() + ": " + allFileNames.size() + " DICOM files downloaded from PACS.");
 			} else {
@@ -275,7 +276,7 @@ public class ImportUtils {
 				return null;
 			}
 		} else {
-			allFileNames = copyFilesToUploadFolder(dicomFileAnalyzer, selectedSeries, uploadFolder, filePathDicomDir);
+			allFileNames = copyFilesToUploadFolder(dicomFileAnalyzer, studiesWithSelectedSeries, uploadFolder, filePathDicomDir);
 			if(allFileNames != null) {
 				logger.info(uploadFolder.getName() + ": " + allFileNames.size() + " DICOM files copied from CD/DVD/local file system.");
 			} else {
@@ -285,9 +286,9 @@ public class ImportUtils {
 		return allFileNames;
 	}
 
-	public static List<String> copyFilesToUploadFolder(ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, Set<org.shanoir.uploader.dicom.query.SerieTreeNode> selectedSeries, final File uploadFolder, String filePathDicomDir) throws FileNotFoundException {
+	public static List<String> copyFilesToUploadFolder(ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, Map<String, Set<SerieTreeNode>> studiesWithSelectedSeries, final File uploadFolder, String filePathDicomDir) throws FileNotFoundException {
 		List<String> allFileNames = new ArrayList<String>();
-		for (SerieTreeNode serieTreeNode : selectedSeries) {
+		for (SerieTreeNode serieTreeNode : studiesWithSelectedSeries.values().iterator().next()) {
 			Serie serie = serieTreeNode.getSerie();
 			List<String> newFileNamesOfSerie = new ArrayList<String>();
 			if (serie.getInstances() == null) {

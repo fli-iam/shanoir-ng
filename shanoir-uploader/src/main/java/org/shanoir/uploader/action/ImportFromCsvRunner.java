@@ -358,7 +358,9 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		}
 		
 		try {
-			allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(true, selectedSeriesNodes, uploadFolder, this.dicomFileAnalyzer, this.dicomServerClient, null);
+			Map<String, Set<SerieTreeNode>> studiesWithSelectedSeries = new HashMap<>();
+			studiesWithSelectedSeries.put(dicomData.getStudyInstanceUID(), selectedSeriesNodes);
+			allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(true, studiesWithSelectedSeries, uploadFolder, this.dicomFileAnalyzer, this.dicomServerClient, null);
 			/**
 			 * 5. Fill MRI information into serie from first DICOM file of each serie
 			 * This has already been done for CD/DVD import, but not yet here for PACS

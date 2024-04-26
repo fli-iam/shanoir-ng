@@ -2,12 +2,12 @@ package org.shanoir.uploader.action;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
@@ -18,6 +18,8 @@ import org.shanoir.uploader.upload.UploadJob;
 import org.shanoir.uploader.upload.UploadJobManager;
 import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.ImportUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class downloads the files from the PACS or copies
@@ -39,7 +41,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 	
 	private String filePathDicomDir;
 
-	private Set<SerieTreeNode> selectedSeries;
+	private Map<String, Set<SerieTreeNode>> studiesWithSelectedSeries;
 
 	private DicomDataTransferObject dicomData;
 	
@@ -51,7 +53,8 @@ public class DownloadOrCopyRunnable implements Runnable {
 		if(!isFromPACS && filePathDicomDir != null) {
 			this.filePathDicomDir = new String(filePathDicomDir); // used with CD/DVD import
 		}
-		this.selectedSeries = selectedSeries;
+		this.studiesWithSelectedSeries = new HashMap<>();
+		studiesWithSelectedSeries.put(dicomData.getStudyInstanceUID(), selectedSeries);
 		this.dicomData = dicomData;
 	}
 
@@ -63,12 +66,12 @@ public class DownloadOrCopyRunnable implements Runnable {
 			/**
 			 * 1. Download from PACS or copy from CD/DVD/local file system
 			 */
-			allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(this.isFromPACS, selectedSeries, uploadFolder, dicomFileAnalyzer, dicomServerClient, filePathDicomDir);
+			allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(this.isFromPACS, studiesWithSelectedSeries, uploadFolder, dicomFileAnalyzer, dicomServerClient, filePathDicomDir);
 		
 			/**
 			 * 2. Fill MRI information into all series from first DICOM file of each serie
 			 */
-			for (Iterator<SerieTreeNode> iterator = selectedSeries.iterator(); iterator.hasNext();) {
+			for (Iterator<SerieTreeNode> iterator = studiesWithSelectedSeries.get(dicomData.getStudyInstanceUID()).iterator(); iterator.hasNext();) {
 				SerieTreeNode serieTreeNode = (SerieTreeNode) iterator.next();
 				dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(uploadFolder.getAbsolutePath(), serieTreeNode.getSerie(), null, isFromPACS);
 			}
@@ -80,7 +83,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 		 * 3. Write the UploadJob and schedule upload
 		 */
 		UploadJob uploadJob = new UploadJob();
-		ImportUtils.initUploadJob(selectedSeries, dicomData, uploadJob);
+		ImportUtils.initUploadJob(studiesWithSelectedSeries.get(0), dicomData, uploadJob);
 		if (allFileNames == null) {
 			uploadJob.setUploadState(UploadState.ERROR);
 		}
@@ -106,7 +109,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 	@Override
 	public String toString() {
 		return "DownloadOrCopyRunnable [isFromPACS=" + isFromPACS + ", dicomServerClient=" + dicomServerClient
-				+ ", filePathDicomDir=" + filePathDicomDir + ", selectedSeries=" + selectedSeries + ", dicomData="
+				+ ", filePathDicomDir=" + filePathDicomDir + ", selectedSeries=" + studiesWithSelectedSeries.get(0) + ", dicomData="
 				+ dicomData.toString() + "]";
 	}
 

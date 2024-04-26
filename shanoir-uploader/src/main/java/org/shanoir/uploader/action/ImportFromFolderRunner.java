@@ -7,9 +7,11 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
@@ -193,13 +195,15 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
         }
 
         // Create upload folder
-        logger.error("create folder");
+        logger.info("create folder");
         File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(), dicomData);
 
         List<String> allFileNames;
         try {
-            logger.error("copying files");
-            allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(false, selectedSeriesNodes, uploadFolder, this.dicomFileAnalyzer, this.dicomServerClient, importTodo.getPath());
+            logger.info("copying files");
+            Map<String, Set<SerieTreeNode>> studiesWithSelectedSeries = new HashMap<>();
+			studiesWithSelectedSeries.put(dicomData.getStudyInstanceUID(), selectedSeriesNodes);
+            allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(false, studiesWithSelectedSeries, uploadFolder, this.dicomFileAnalyzer, this.dicomServerClient, importTodo.getPath());
             /**
              * 5. Fill MRI information into serie from first DICOM file of each serie
              * This has already been done for CD/DVD import, but not yet here for PACS
