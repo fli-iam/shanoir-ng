@@ -1,14 +1,18 @@
 package org.shanoir.uploader.dicom;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
@@ -18,7 +22,6 @@ import org.shanoir.uploader.dicom.query.PatientTreeNode;
 import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.dicom.query.StudyTreeNode;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
-import org.shanoir.uploader.utils.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.weasis.dicom.param.DicomNode;
@@ -131,15 +134,40 @@ public class DicomServerClient implements IDicomServerClient {
 	@Override
 	public List<String> retrieveDicomFiles(final Map<String, Set<SerieTreeNode>> studiesWithSelectedSeries, final File uploadFolder) {
 		final List<String> retrievedDicomFiles = new ArrayList<String>();
-		if (!studiesWithSelectedSeries.isEmpty()) {
-			downloadFromDicomServer(studiesWithSelectedSeries);
-			readAndCopyDicomFilesToUploadFolder(studiesWithSelectedSeries, uploadFolder, retrievedDicomFiles);
+		if (studiesWithSelectedSeries != null && !studiesWithSelectedSeries.isEmpty()) {
+			try {
+				downloadFromDicomServer(studiesWithSelectedSeries);
+				readAndCopyDicomFilesToUploadFolder(studiesWithSelectedSeries, uploadFolder, retrievedDicomFiles);
+				deleteFolderDownloadFromDicomServer(studiesWithSelectedSeries);
+			} catch (Exception e) {
+				logger.error(":\n\n Download of "
+						+ " DICOM files for DICOM study/exam " + studiesWithSelectedSeries.entrySet().iterator().next() + ": " + " has failed.\n\n"
+						+ e.getMessage(), e);
+			}				
 		}
 		return retrievedDicomFiles;
 	}
 
+	private void deleteFolderDownloadFromDicomServer(Map<String, Set<SerieTreeNode>> studiesWithSelectedSeries) throws IOException {
+		for (String studyInstanceUID : studiesWithSelectedSeries.keySet()) {
+			Set<SerieTreeNode> selectedSeries = studiesWithSelectedSeries.get(studyInstanceUID);
+			if (selectedSeries != null && !selectedSeries.isEmpty()) {
+				SerieTreeNode serieTreeNode = selectedSeries.iterator().next();
+				final StudyTreeNode studyTreeNode = serieTreeNode.getParent();
+				final PatientTreeNode patientTreeNode = studyTreeNode.getParent();
+				final String patientID = patientTreeNode.getPatient().getPatientID();
+				File patientFolder = new File(workFolder + File.separator + patientID);
+				try (Stream<Path> walk = Files.walk(patientFolder.toPath())) {
+					walk.sorted(Comparator.reverseOrder())
+						.map(Path::toFile)
+						.forEach(File::delete);
+				}
+			}
+		}		
+	}
+
 	private void readAndCopyDicomFilesToUploadFolder(final Map<String, Set<SerieTreeNode>> studiesWithSelectedSeries, final File uploadFolder,
-			final List<String> retrievedDicomFiles) {
+			final List<String> retrievedDicomFiles) throws IOException {
 		for (String studyInstanceUID : studiesWithSelectedSeries.keySet()) {
 			Set<SerieTreeNode> selectedSeries = studiesWithSelectedSeries.get(studyInstanceUID);
 			for (SerieTreeNode serieTreeNode : selectedSeries) {
@@ -148,53 +176,43 @@ public class DicomServerClient implements IDicomServerClient {
 				final StudyTreeNode studyTreeNode = serieTreeNode.getParent();
 				final PatientTreeNode patientTreeNode = studyTreeNode.getParent();
 				final String patientID = patientTreeNode.getPatient().getPatientID();
-				try {
-					File serieFolder = new File(workFolder
-						+ File.separator + patientID
-						+ File.separator + studyInstanceUID
-						+ File.separator + seriesInstanceUID);
-					if (serieFolder.exists()) {
-						File[] serieFiles = serieFolder.listFiles();
-						for (int i = 0; i < serieFiles.length; i++) {
-							String dicomFileName = serieFiles[i].getName();
-							fileNamesForSerie.add(dicomFileName);
-							File sourceFileFromPacs = serieFiles[i];
-							File destSerieFolder = new File(uploadFolder.getAbsolutePath()
-								+ File.separator + seriesInstanceUID);
-							if (!destSerieFolder.exists())
-								destSerieFolder.mkdirs();
-							File destDicomFile = new File(destSerieFolder, dicomFileName);
-							FileUtil.copyFile(sourceFileFromPacs, destDicomFile);
-						}
-						serieTreeNode.setFileNames(fileNamesForSerie);
-						serieTreeNode.getSerie().setImagesNumber(fileNamesForSerie.size());
-						retrievedDicomFiles.addAll(fileNamesForSerie);
-						logger.info(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
-								+ " DICOM files for serie " + seriesInstanceUID + ": " + serieTreeNode.getDisplayString()
-								+ " was successful.\n\n");
-					} else {
-						logger.error(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
-								+ " DICOM files for serie " + seriesInstanceUID + ": " + serieTreeNode.getDisplayString()
-								+ " has failed.\n\n");
+				File serieFolder = new File(workFolder
+					+ File.separator + patientID
+					+ File.separator + studyInstanceUID
+					+ File.separator + seriesInstanceUID);
+				if (serieFolder.exists()) {
+					File[] serieFiles = serieFolder.listFiles();
+					for (int i = 0; i < serieFiles.length; i++) {
+						String dicomFileName = serieFiles[i].getName();
+						fileNamesForSerie.add(dicomFileName);
+						File sourceFileFromPacs = serieFiles[i];
+						File destSerieFolder = new File(uploadFolder.getAbsolutePath()
+							+ File.separator + seriesInstanceUID);
+						if (!destSerieFolder.exists())
+							destSerieFolder.mkdirs();
+						File destDicomFile = new File(destSerieFolder, dicomFileName);
+						Files.move(sourceFileFromPacs.toPath(), destDicomFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 					}
-				} catch (final Exception e) {
-					logger.error(e.getMessage(), e);
+					serieTreeNode.setFileNames(fileNamesForSerie);
+					serieTreeNode.getSerie().setImagesNumber(fileNamesForSerie.size());
+					retrievedDicomFiles.addAll(fileNamesForSerie);
+					logger.info(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
+							+ " DICOM files for serie " + seriesInstanceUID + ": " + serieTreeNode.getDisplayString()
+							+ " was successful.\n\n");
+				} else {
+					logger.error(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
+							+ " DICOM files for serie " + seriesInstanceUID + ": " + serieTreeNode.getDisplayString()
+							+ " has failed.\n\n");
 				}
 			}
 		}
 	}
 
-	private void downloadFromDicomServer(final Map<String, Set<SerieTreeNode>> studiesWithSelectedSeries) {
+	private void downloadFromDicomServer(final Map<String, Set<SerieTreeNode>> studiesWithSelectedSeries) throws Exception {
 		for (String studyInstanceUID : studiesWithSelectedSeries.keySet()) {
 			final List<String> seriesInstanceUIDs = new ArrayList<String>();
 			studiesWithSelectedSeries.get(studyInstanceUID).stream().forEach(s -> seriesInstanceUIDs.add(s.getId()));
-			try {
-				queryPACSService.queryCMOVEs(studyInstanceUID, seriesInstanceUIDs);
-			} catch (Exception e) {
-				logger.error(":\n\n Download of "
-						+ " DICOM files for DICOM study/exam " + studyInstanceUID + ": " + " has failed.\n\n"
-						+ e.getMessage(), e);
-			}				
+			queryPACSService.queryCMOVEs(studyInstanceUID, seriesInstanceUIDs);
 		}
 	}
 
