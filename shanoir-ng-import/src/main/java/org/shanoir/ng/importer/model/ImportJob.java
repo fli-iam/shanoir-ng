@@ -22,7 +22,24 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 
 /**
- * @author atouboul
+ * One ImportJob is related to the import of ONE DICOM STUDY,
+ * which equals ONE EXAM in Shanoir. We are doing this, as one
+ * DICOM study can have a size of up to 10Gb nowadays. This means
+ * we process already a huge amount of data for one import, that
+ * can take up to 30-45 minutes. There is no sense in extending this
+ * further for the future to anything like multi-exam in one import,
+ * so the model has to be kept:
+ * 1 ImportJob (1 DICOM study/exam) - 1 subject relation
+ *                                  - 1 exam relation
+ * IF in an ImportJob contains a subject object, it means to create one
+ * in ms studies during the import.
+ * If it contains a subjectName, an existing subject is to use.
+ * Same logic for the exams.
+ * 
+ * @todo: later we will remove the patients list from here, that is a
+ * legacy error, that has to be corrected, e.g. move the subject out into
+ * import job as written above.
+ * 
  * @author mkain
  */
 public class ImportJob implements Serializable {
@@ -41,6 +58,7 @@ public class ImportJob implements Serializable {
 
     private List<Patient> patients;
     
+	// examination: use already existing
     private Long examinationId;
     
     private Long studyCardId;
@@ -56,7 +74,11 @@ public class ImportJob implements Serializable {
 
     private String archive;
 
+	// subject: use already existing
 	private String subjectName;
+
+	// subject: create new subject in ms studies based on these values
+	private Subject subject;
 
 	private String studyName;
 
@@ -254,6 +276,14 @@ public class ImportJob implements Serializable {
 	public void setCenterId(Long centerId) {
 		this.centerId = centerId;
 	}
-	
+
+	public Subject getSubject() {
+		return subject;
+	}
+
+	public void setSubject(Subject subject) {
+		this.subject = subject;
+	}
+
 }
 
