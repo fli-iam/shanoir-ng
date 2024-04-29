@@ -149,16 +149,22 @@ public class DicomServerClient implements IDicomServerClient {
 				final PatientTreeNode patientTreeNode = studyTreeNode.getParent();
 				final String patientID = patientTreeNode.getPatient().getPatientID();
 				try {
-					File serieFolder = new File(workFolder + File.separator + patientID + File.separator + studyInstanceUID
-							+ File.separator + seriesInstanceUID);
+					File serieFolder = new File(workFolder
+						+ File.separator + patientID
+						+ File.separator + studyInstanceUID
+						+ File.separator + seriesInstanceUID);
 					if (serieFolder.exists()) {
 						File[] serieFiles = serieFolder.listFiles();
 						for (int i = 0; i < serieFiles.length; i++) {
 							String dicomFileName = serieFiles[i].getName();
 							fileNamesForSerie.add(dicomFileName);
 							File sourceFileFromPacs = serieFiles[i];
-							File destFile = new File(uploadFolder.getAbsolutePath() + File.separator + dicomFileName);
-							FileUtil.copyFile(sourceFileFromPacs, destFile);
+							File destSerieFolder = new File(uploadFolder.getAbsolutePath()
+								+ File.separator + seriesInstanceUID);
+							if (!destSerieFolder.exists())
+								destSerieFolder.mkdirs();
+							File destDicomFile = new File(destSerieFolder, dicomFileName);
+							FileUtil.copyFile(sourceFileFromPacs, destDicomFile);
 						}
 						serieTreeNode.setFileNames(fileNamesForSerie);
 						serieTreeNode.getSerie().setImagesNumber(fileNamesForSerie.size());

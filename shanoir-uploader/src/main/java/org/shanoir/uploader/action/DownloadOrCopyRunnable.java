@@ -83,7 +83,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 		 * 3. Write the UploadJob and schedule upload
 		 */
 		UploadJob uploadJob = new UploadJob();
-		ImportUtils.initUploadJob(studiesWithSelectedSeries.get(0), dicomData, uploadJob);
+		ImportUtils.initUploadJob(studiesWithSelectedSeries.values().iterator().next(), dicomData, uploadJob);
 		if (allFileNames == null) {
 			uploadJob.setUploadState(UploadState.ERROR);
 		}
