@@ -13,6 +13,20 @@
 ARG BASE_IMAGE="debian:bookworm"
 
 
+FROM $BASE_IMAGE as conda
+
+RUN apt-get -qqy update \
+    && apt-get -qqy --no-install-recommends install curl ca-certificates
+
+# Install miniconda
+RUN curl -LSsf -o miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-py311_24.1.2-0-Linux-x86_64.sh \
+    && bash miniconda.sh -b \
+    && rm   miniconda.sh
+
+# Install dicomifier
+RUN /root/miniconda3/bin/conda install -c conda-forge dicomifier -y
+
+
 FROM $BASE_IMAGE as builder
 
 RUN apt-get -qqy update \
@@ -80,19 +94,6 @@ RUN apt-get update -qq \
     python3-yaml \
     software-properties-common
 
-ENV PATH="/root/miniconda3/bin:${PATH}"
-ARG PATH="/root/miniconda3/bin:${PATH}"
-
-#Install miniconda \
-RUN wget \
-    https://repo.anaconda.com/miniconda/Miniconda3-py311_24.1.2-0-Linux-x86_64.sh \
-    && mkdir /root/.conda \
-    && bash Miniconda3-py311_24.1.2-0-Linux-x86_64.sh -b \
-    && rm -f Miniconda3-py311_24.1.2-0-Linux-x86_64.sh
-
-ENV LC_ALL fr_FR.UTF-8
-ENV LANG fr_FR.UTF-8
-ENV LANGUAGE fr_FR.UTF-8
 RUN mkdir -p /opt/nifti-converters
 
 # Copy converters files
@@ -107,15 +108,13 @@ RUN cp -n           external/mcverter/linux/lib/lib*.so.* /usr/lib/x86_64-linux-
 RUN mkdir -m 1777 /.dcm2nii_2008-03-31
 RUN mkdir -m 1777 /.dcm2nii_2014-08-04
 
-# Install dicomifier
-RUN git -C /opt/nifti-converters clone https://github.com/lamyj/dicomifier.git
-RUN conda install -c conda-forge dicomifier -y
 
 # install animaConvertImage to convert Analyze format into nifti
 RUN install -m 755 external/anima/animaConvertImage /usr/local/bin/
 
-# install the binaries built in the 'builder' stage
+# install the binaries built in the 'builder' & 'conda' stages
 COPY --link --from=builder /target/. /
+COPY --link --from=conda   /root/miniconda3 /root/miniconda3
 
 # update the ld cache (so that the new libraries can be loaded)
 RUN ldconfig
@@ -124,5 +123,10 @@ RUN mkdir -pv /var/log/shanoir-ng-logs
 
 ADD nifti-conversion.jar nifti-conversion.jar
 COPY entrypoint entrypoint_common oneshot /bin/
+
+ENV LC_ALL fr_FR.UTF-8
+ENV LANG fr_FR.UTF-8
+ENV LANGUAGE fr_FR.UTF-8
+ENV PATH="/root/miniconda3/bin:${PATH}"
 
 ENTRYPOINT ["/bin/entrypoint", "java", "-Djava.security.egd=file:/dev/./urandom", "-Djavax.net.ssl.trustStorePassword=changeit", "-jar", "/nifti-conversion.jar"]
