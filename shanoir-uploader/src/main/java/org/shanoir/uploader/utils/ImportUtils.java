@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -18,10 +17,11 @@ import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.InstitutionDicom;
 import org.shanoir.ng.importer.model.Patient;
+import org.shanoir.ng.importer.model.PseudonymusHashValues;
 import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.uploader.ShUpConfig;
-import org.shanoir.uploader.action.DicomDataTransferObject;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.MRI;
 import org.shanoir.uploader.dicom.query.SerieTreeNode;
@@ -29,7 +29,6 @@ import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
 import org.shanoir.uploader.model.rest.IdName;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
-import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
@@ -100,50 +99,51 @@ public class ImportUtils {
 	 * @param dicomData
 	 * @param uploadJob
 	 */
-	public static void initUploadJob(final Set<org.shanoir.uploader.dicom.query.SerieTreeNode> selectedSeries,
-			final DicomDataTransferObject dicomData, UploadJob uploadJob) {
+	public static void initUploadJob(String studyInstanceUID, final List<Serie> selectedSeries,
+			final Subject subject, UploadJob uploadJob) {
 		uploadJob.setUploadState(UploadState.READY);
 		uploadJob.setUploadDate(Util.formatTimePattern(new Date()));
 		/**
 		 * Patient level
 		 */
 		// set hash of subject identifier in any case: pseudonymus mode or not
-		uploadJob.setSubjectIdentifier(dicomData.getSubjectIdentifier());
+		uploadJob.setSubjectIdentifier(subject.getIdentifier());
 		// set all 10 hash values for pseudonymus mode
 		if (ShUpConfig.isModePseudonymus()) {
-			uploadJob.setBirthNameHash1(dicomData.getBirthNameHash1());
-			uploadJob.setBirthNameHash2(dicomData.getBirthNameHash2());
-			uploadJob.setBirthNameHash3(dicomData.getBirthNameHash3());
-			uploadJob.setLastNameHash1(dicomData.getLastNameHash1());
-			uploadJob.setLastNameHash2(dicomData.getLastNameHash2());
-			uploadJob.setLastNameHash3(dicomData.getLastNameHash3());
-			uploadJob.setFirstNameHash1(dicomData.getFirstNameHash1());
-			uploadJob.setFirstNameHash2(dicomData.getFirstNameHash2());
-			uploadJob.setFirstNameHash3(dicomData.getFirstNameHash3());
-			uploadJob.setBirthDateHash(dicomData.getBirthDateHash());
+			PseudonymusHashValues pseudonymusHashValues = subject.getPseudonymusHashValues();
+			uploadJob.setBirthNameHash1(pseudonymusHashValues.getBirthNameHash1());
+			uploadJob.setBirthNameHash2(pseudonymusHashValues.getBirthNameHash2());
+			uploadJob.setBirthNameHash3(pseudonymusHashValues.getBirthNameHash3());
+			uploadJob.setLastNameHash1(pseudonymusHashValues.getLastNameHash1());
+			uploadJob.setLastNameHash2(pseudonymusHashValues.getLastNameHash2());
+			uploadJob.setLastNameHash3(pseudonymusHashValues.getLastNameHash3());
+			uploadJob.setFirstNameHash1(pseudonymusHashValues.getFirstNameHash1());
+			uploadJob.setFirstNameHash2(pseudonymusHashValues.getFirstNameHash2());
+			uploadJob.setFirstNameHash3(pseudonymusHashValues.getFirstNameHash3());
+			uploadJob.setBirthDateHash(pseudonymusHashValues.getBirthDateHash());
 		}
-		LocalDate birthDate = dicomData.getBirthDate();
+		LocalDate birthDate = subject.getBirthDate();
 		if (birthDate != null) {
 			birthDate = birthDate.with(TemporalAdjusters.firstDayOfYear());
 			String birthDateStr = Util.convertLocalDateToString(birthDate); 
 			uploadJob.setPatientBirthDate(birthDateStr);
 		}
-		uploadJob.setPatientSex(dicomData.getSex());
+		uploadJob.setPatientSex(subject.getSex());
 
 		/**
 		 * Study level
 		 */
-		uploadJob.setStudyInstanceUID(dicomData.getStudyInstanceUID());
-		String studyDateStr = Util.convertLocalDateToString(dicomData.getStudyDate());
-		uploadJob.setStudyDate(studyDateStr);
-		uploadJob.setStudyDescription(dicomData.getStudyDescription());
+		uploadJob.setStudyInstanceUID(studyInstanceUID);
+//		String studyDateStr = Util.convertLocalDateToString(dicomData.getStudyDate());
+//		uploadJob.setStudyDate(studyDateStr);
+//		uploadJob.setStudyDescription(dicomData.getStudyDescription());
 
 		/**
 		 * Serie level
 		 */
-		uploadJob.setSeries(selectedSeries);
+//		uploadJob.setSeries(selectedSeries);
 
-		Serie firstSerie = selectedSeries.iterator().next().getSerie();
+		Serie firstSerie = selectedSeries.iterator().next();
 		MRI mriInformation = new MRI();
 		InstitutionDicom institutionDicom = firstSerie.getInstitution();
 		if(institutionDicom != null) {
@@ -234,12 +234,12 @@ public class ImportUtils {
 	 * 
 	 */
 	public static void initDataUploadJob(final UploadJob uploadJob,
-			final DicomDataTransferObject dicomData, NominativeDataUploadJob dataUploadJob) {
-		dataUploadJob.setPatientName(dicomData.getFirstName() + " " + dicomData.getLastName());
-		dataUploadJob.setPatientPseudonymusHash(dicomData.getSubjectIdentifier());
-		String studyDateStr = Util.convertLocalDateToString(dicomData.getStudyDate()); 
-		dataUploadJob.setStudyDate(studyDateStr);
-		dataUploadJob.setIPP(dicomData.getIPP());
+			final Subject subject, NominativeDataUploadJob dataUploadJob) {
+		dataUploadJob.setPatientName(subject.getFirstName() + " " + subject.getLastName());
+		dataUploadJob.setPatientPseudonymusHash(subject.getIdentifier());
+//		String studyDateStr = Util.convertLocalDateToString(dicomData.getStudyDate()); 
+//		dataUploadJob.setStudyDate(studyDateStr);
+//		dataUploadJob.setIPP(dicomData.getIPP());
 		dataUploadJob.setMriSerialNumber(uploadJob.getMriInformation().getManufacturer()
 				+ "(" + uploadJob.getMriInformation().getDeviceSerialNumber() + ")");
 		dataUploadJob.setUploadPercentage("");
@@ -265,10 +265,10 @@ public class ImportUtils {
 	 * @return
 	 * @throws FileNotFoundException 
 	 */
-	public static List<String> downloadOrCopyFilesIntoUploadFolder(boolean isFromPACS, Map<String, Set<SerieTreeNode>> studiesWithSelectedSeries, File uploadFolder, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, IDicomServerClient dicomServerClient, String filePathDicomDir) throws FileNotFoundException {
+	public static List<String> downloadOrCopyFilesIntoUploadFolder(boolean isFromPACS, String studyInstanceUID, List<Serie> selectedSeries, File uploadFolder, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, IDicomServerClient dicomServerClient, String filePathDicomDir) throws FileNotFoundException {
 		List<String> allFileNames = null;
 		if (isFromPACS) {
-			allFileNames = dicomServerClient.retrieveDicomFiles(studiesWithSelectedSeries, uploadFolder);
+			allFileNames = dicomServerClient.retrieveDicomFiles(studyInstanceUID, selectedSeries, uploadFolder);
 			if(allFileNames != null && !allFileNames.isEmpty()) {
 				logger.info(uploadFolder.getName() + ": " + allFileNames.size() + " DICOM files downloaded from PACS.");
 			} else {
@@ -276,7 +276,7 @@ public class ImportUtils {
 				return null;
 			}
 		} else {
-			allFileNames = copyFilesToUploadFolder(dicomFileAnalyzer, studiesWithSelectedSeries, uploadFolder, filePathDicomDir);
+			allFileNames = copyFilesToUploadFolder(dicomFileAnalyzer, selectedSeries, uploadFolder, filePathDicomDir);
 			if(allFileNames != null) {
 				logger.info(uploadFolder.getName() + ": " + allFileNames.size() + " DICOM files copied from CD/DVD/local file system.");
 			} else {
@@ -286,10 +286,9 @@ public class ImportUtils {
 		return allFileNames;
 	}
 
-	public static List<String> copyFilesToUploadFolder(ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, Map<String, Set<SerieTreeNode>> studiesWithSelectedSeries, final File uploadFolder, String filePathDicomDir) throws FileNotFoundException {
+	public static List<String> copyFilesToUploadFolder(ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, List<Serie> selectedSeries, final File uploadFolder, String filePathDicomDir) throws FileNotFoundException {
 		List<String> allFileNames = new ArrayList<String>();
-		for (SerieTreeNode serieTreeNode : studiesWithSelectedSeries.values().iterator().next()) {
-			Serie serie = serieTreeNode.getSerie();
+		for (Serie serie : selectedSeries) {
 			List<String> newFileNamesOfSerie = new ArrayList<String>();
 			if (serie.getInstances() == null) {
 				continue;
@@ -308,7 +307,6 @@ public class ImportUtils {
 				newFileNamesOfSerie.add(dicomFileName);
 				instance.setReferencedFileID(new String[]{dicomFileName});
 			}
-			serieTreeNode.setFileNames(newFileNamesOfSerie);
 			allFileNames.addAll(newFileNamesOfSerie);
 		}
 		return allFileNames;

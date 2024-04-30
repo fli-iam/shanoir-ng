@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.shanoir.ng.importer.model.Patient;
+import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.uploader.dicom.query.SerieTreeNode;
 
 public interface IDicomServerClient {
@@ -36,7 +37,7 @@ public interface IDicomServerClient {
 	 * begin to send all files to a local server implemented in DcmRcvHelper.
 	 * @param selectedSeries
 	 */
-	public List<String> retrieveDicomFiles(Map<String, Set<SerieTreeNode>> studiesWithSelectedSeries, final File tempFolderForUpload);
+	public List<String> retrieveDicomFiles(String studyInstanceUID, List<Serie> selectedSeries, final File tempFolderForUpload);
 	
 	/**
 	 * This method returns the work folder.

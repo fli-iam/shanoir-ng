@@ -2,14 +2,15 @@ package org.shanoir.uploader.action;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.importer.model.Study;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.query.SerieTreeNode;
@@ -56,21 +57,28 @@ public class DownloadOrCopyRunnable implements Runnable {
 
 	@Override
 	public void run() {
-		for (ImportJob importJob : importJobs.values()) {
+		for (String studyInstanceUID : importJobs.keySet()) {
+			List<Serie> selectedSeries = null;
+			ImportJob importJob = importJobs.get(studyInstanceUID);
 			File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(), importJob);
+			List<Study> studies = importJob.getPatients().get(0).getStudies();
+			for (Study study : studies) {
+				if (study.getStudyInstanceUID().equals(studyInstanceUID)) {
+					selectedSeries = study.getSelectedSeries();
+				}
+			}
 			List<String> allFileNames = null;
 			try {
 				/**
 				 * 1. Download from PACS or copy from CD/DVD/local file system
 				 */
-				allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(this.isFromPACS, importJob, uploadFolder, dicomFileAnalyzer, dicomServerClient, filePathDicomDir);
+				allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(this.isFromPACS, studyInstanceUID, selectedSeries, uploadFolder, dicomFileAnalyzer, dicomServerClient, filePathDicomDir);
 			
 				/**
 				 * 2. Fill MRI information into all series from first DICOM file of each serie
 				 */
-				for (Iterator<SerieTreeNode> iterator = studiesWithSelectedSeries.get(dicomData.getStudyInstanceUID()).iterator(); iterator.hasNext();) {
-					SerieTreeNode serieTreeNode = (SerieTreeNode) iterator.next();
-					dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(uploadFolder.getAbsolutePath(), serieTreeNode.getSerie(), null, isFromPACS);
+				for (Serie serie: selectedSeries) {
+					dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(uploadFolder.getAbsolutePath(), serie, null, isFromPACS);
 				}
 			} catch (FileNotFoundException e) {
 				logger.error(e.getMessage(), e);

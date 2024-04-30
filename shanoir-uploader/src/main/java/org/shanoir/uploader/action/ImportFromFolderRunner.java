@@ -155,7 +155,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
 
         logger.error("Loading patients");
         // Create dicom data to be able to move things
-        DicomDataTransferObject dicomData = null;
+        Subject subject = null;
         Set<SerieTreeNode> selectedSeriesNodes = new HashSet<>();
 
         ObjectMapper mapper = new ObjectMapper();
@@ -172,10 +172,10 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
         patNode.addTreeNode(patients.get(0).getPatientID(), stNode);
         String subjectIdentifier = null;
         try {
-            dicomData = new DicomDataTransferObject(null, patNode, stNode);
+            subject = new Subject();
             // calculate identifier
-            subjectIdentifier = stNode.getId() +  this.identifierCalculator.calculateIdentifier(dicomData.getFirstName(), dicomData.getLastName(), "" + (dicomData.getBirthDate() != null ? dicomData.getBirthDate() : LocalDate.of(1990, Month.JANUARY,1)));
-            dicomData.setSubjectIdentifier(subjectIdentifier);
+//            subjectIdentifier = stNode.getId() +  this.identifierCalculator.calculateIdentifier(subject.getFirstName(), subject.getLastName(), "" + (subject.getBirthDate() != null ? subject.getBirthDate() : LocalDate.of(1990, Month.JANUARY,1)));
+            subject.setIdentifier(subjectIdentifier);
 
 
             // Change birth date to first day of year
@@ -186,7 +186,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
                 cal.setTime(Date.from(dicomBirthDate.atStartOfDay().toInstant(ZoneOffset.UTC)));
                 cal.set(Calendar.MONTH, Calendar.JANUARY);
                 cal.set(Calendar.DAY_OF_MONTH, 1);
-                dicomData.setBirthDate(LocalDate.from(cal.toInstant()));
+                subject.setBirthDate(LocalDate.from(cal.toInstant()));
             }
         } catch (Exception e) {
             logger.error("Something wrong happened while analyzing data from the dicom", e);
@@ -196,7 +196,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
 
         // Create upload folder
         logger.info("create folder");
-        File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(), dicomData);
+//        File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(), subject);
 
         List<String> allFileNames;
         try {
@@ -223,7 +223,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
         logger.info("6 Write upload job");
 
         UploadJob uploadJob = new UploadJob();
-        ImportUtils.initUploadJob(selectedSeriesNodes, dicomData, uploadJob);
+        ImportUtils.initUploadJob(selectedSeriesNodes, subject, uploadJob);
 
         if (allFileNames == null) {
             uploadJob.setUploadState(UploadState.ERROR);
@@ -279,9 +279,9 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
 
             subject.setImagedObjectCategory(ImagedObjectCategory.LIVING_HUMAN_BEING);
 
-            subject.setBirthDate(dicomData.getBirthDate());
+            subject.setBirthDate(subject.getBirthDate());
 
-            ImportUtils.addSubjectStudy(study, subject, SubjectType.PATIENT, true, null);
+//            ImportUtils.addSubjectStudy(study, subject, SubjectType.PATIENT, true, null);
 
             // Get center ID from study card
             subject = shanoirUploaderServiceClientNG.createSubject(subject, true, this.folderimport.getStudyCard().getCenterId());
