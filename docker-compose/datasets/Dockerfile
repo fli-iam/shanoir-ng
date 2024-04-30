@@ -10,6 +10,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
+FROM alpine as downloader
+
+# Installation of dcm4che into /opt/dcm4che to manage the store-scu into the
+# PACS dcm4che3, used last version 5.21.0 as available on the 2020-02-14
+# https://sourceforge.net/projects/dcm4che/files/dcm4che3/
+RUN wget -qO dcm4che-bin.zip \
+        https://downloads.sourceforge.net/project/dcm4che/dcm4che3/5.21.0/dcm4che-5.21.0-bin.zip \
+    && mkdir -p /target/opt && cd /target/opt \
+    && unzip /dcm4che-bin.zip && mv dcm4che-* dcm4che \
+    && rm    /dcm4che-bin.zip
+
+
 #--------------- common jre base image -------------------------------------
 FROM debian:bookworm
 # NOTE: using bookworm-proposed-updates because of https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1039472
@@ -21,24 +33,19 @@ RUN echo "deb http://deb.debian.org/debian bookworm-proposed-updates main" >> /e
 
 RUN apt-get update -qq \
     && apt-get install -qqy \
-    unzip \
     pigz \
     gzip \
     locales \
-    locales-all \
-    wget
-
-# Installation of dcm4che to manage the store-scu into the PACS
-# dcm4che3, used last version 5.21.0 as available on the 2020-02-14
-# https://sourceforge.net/projects/dcm4che/files/dcm4che3/
-RUN wget -O dcm4che-5.21.0-bin.zip https://downloads.sourceforge.net/project/dcm4che/dcm4che3/5.21.0/dcm4che-5.21.0-bin.zip
-RUN unzip dcm4che-5.21.0-bin.zip
+    locales-all
 
 # take care of path
-ENV PATH /dcm4che-5.21.0/bin:$PATH
+ENV PATH /opt/dcm4che/bin:$PATH
 ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
+
+# install the files from the 'dowloader' stage
+COPY --link --from=downloader /target/. /
 
 RUN mkdir -pv /var/log/shanoir-ng-logs
 ADD shanoir-ng-datasets.jar shanoir-ng-datasets.jar
