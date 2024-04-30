@@ -22,8 +22,8 @@ RUN echo "deb http://deb.debian.org/debian bookworm-proposed-updates main" >> /e
 RUN apt-get update -qq && apt-get install -qqy openssl
 
 RUN mkdir -pv /var/log/shanoir-ng-logs
-ADD shanoir-ng-users.jar shanoir-ng-users.jar
-COPY entrypoint entrypoint_common oneshot /bin/
+COPY --link shanoir-ng-users.jar shanoir-ng-users.jar
+COPY --link entrypoint entrypoint_common oneshot /bin/
 
 # Use the below line for remote debugging and development profile purpose
 #ENTRYPOINT ["/bin/entrypoint", "java", "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,address=0.0.0.0:9911,suspend=y", "-Djava.security.egd=file:/dev/./urandom", "-Djavax.net.ssl.trustStorePassword=changeit", "-Dspring.profiles.active=dev", "-jar", "/shanoir-ng-users.jar", "--syncAllUsersToKeycloak=true"]

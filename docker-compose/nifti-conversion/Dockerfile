@@ -72,35 +72,30 @@ RUN apt-get update -qqy \
     pigz \
     xvfb
 
-RUN mkdir -p /opt/nifti-converters
-
 # Copy converters files
-RUN mkdir external
-COPY external ./external
-RUN install -m 0755 external/dcm2nii/linux/31MARCH2008/dcm2nii /opt/nifti-converters/dcm2nii_2008-03-31
-RUN install -m 0755 external/dcm2nii/linux/dcm2nii /opt/nifti-converters/dcm2nii_2014-08-04
-
-RUN install -m 0755 external/mcverter/linux/mcverter_* /opt/nifti-converters/
-RUN cp -n           external/mcverter/linux/lib/lib*.so.* /usr/lib/x86_64-linux-gnu/
-
-RUN mkdir -m 1777 /.dcm2nii_2008-03-31
-RUN mkdir -m 1777 /.dcm2nii_2014-08-04
-
+COPY --link --chmod=0755 external/dcm2nii/linux/31MARCH2008/dcm2nii /opt/nifti-converters/dcm2nii_2008-03-31
+COPY --link --chmod=0755 external/dcm2nii/linux/dcm2nii             /opt/nifti-converters/dcm2nii_2014-08-04
+COPY --link --chmod=0755 external/mcverter/linux/mcverter_*         /opt/nifti-converters/
+COPY --link external/mcverter/linux/lib/lib*.so.*                   /usr/local/lib/x86_64-linux-gnu/
+RUN mkdir -m 1777 \
+    /.dcm2nii_2008-03-31 \
+    /.dcm2nii_2014-08-04
 
 # install animaConvertImage to convert Analyze format into nifti
-RUN install -m 755 external/anima/animaConvertImage /usr/local/bin/
+COPY --link --chmod=0755 external/anima/animaConvertImage /usr/local/bin/
 
 # install the binaries built in the 'builder' & 'conda' stages
 COPY --link --from=builder /target/. /
 COPY --link --from=conda   /root/miniconda3 /root/miniconda3
 
 # update the ld cache (so that the new libraries can be loaded)
-RUN ldconfig
+# and make the log dir
+RUN ldconfig \
+    && mkdir -pv /var/log/shanoir-ng-logs
 
-RUN mkdir -pv /var/log/shanoir-ng-logs
-
-ADD nifti-conversion.jar nifti-conversion.jar
-COPY entrypoint entrypoint_common oneshot /bin/
+# install the microservice
+COPY --link nifti-conversion.jar nifti-conversion.jar
+COPY --link entrypoint entrypoint_common oneshot /bin/
 
 ENV LC_ALL fr_FR.UTF-8
 ENV LANG fr_FR.UTF-8
