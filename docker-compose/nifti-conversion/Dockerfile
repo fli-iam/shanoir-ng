@@ -58,41 +58,19 @@ FROM $BASE_IMAGE as final
 # NOTE: using bookworm-proposed-updates because of https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1039472
 RUN echo "deb http://deb.debian.org/debian bookworm-proposed-updates main" >> /etc/apt/sources.list \
     && apt-get update -qq \
-    && apt-get install -qqy openjdk-17-jdk ca-certificates-java
+    && apt-get install -qqy openjdk-17-jre ca-certificates-java
 
-#32 bits packages are necessary
-RUN dpkg --add-architecture i386
-RUN apt-get update
-
-RUN apt-get update -qq \
-    && apt-get install -y \
-    git \
-    curl \
-    cmake \
-    build-essential \
-    pkg-config \
+# xvfb+gtk2 needed by mri_conv (headless mode not supported by DicomToNifti)
+# see: https://populse.github.io/mri_conv/Installation/installation.html#scriptwithoutGUI
+RUN apt-get update -qqy \
+    && apt-get install -qqy \
     libgdcm-tools \
-    libarchive-tools \
-    unzip \
-    pigz \
-    gzip \
-    gnupg \
-    wget \
-    jq \
-    lib32z1 \
-    libgtk2.0-0 \
-    libsm6 \
-    libxext6 \
-    lib32stdc++6 \
-    libtiff6 \
-    libglib2.0-0:i386 \
     locales \
     locales-all \
-    xvfb \
-    python3.11 \
-    python3-werkzeug \
-    python3-yaml \
-    software-properties-common
+    jq \
+    libgtk2.0-0 \
+    pigz \
+    xvfb
 
 RUN mkdir -p /opt/nifti-converters
 

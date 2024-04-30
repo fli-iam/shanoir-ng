@@ -18,32 +18,6 @@ RUN echo "deb http://deb.debian.org/debian bookworm-proposed-updates main" >> /e
     && apt-get install -qqy openjdk-17-jre-headless ca-certificates-java
 #----------------------------------------------------------------------------
 
-
-#32 bits packages are necessary
-RUN dpkg --add-architecture i386
-
-RUN apt-get update -qq \
-    && apt-get install -qqy \
-    git \
-    curl \
-    build-essential \
-    cmake \
-    pkg-config \
-    libgdcm-tools \
-    libarchive-tools \
-    unzip \
-    pigz \
-    gzip \
-    wget \
-    jq \
-    lib32z1 \
-    libgtk2.0-0 \
-    libsm6 \
-    libxext6 \
-    lib32stdc++6 \
-    libtiff6 \
-    libglib2.0-0:i386
-
 RUN mkdir -pv /var/log/shanoir-ng-logs
 
 ADD shanoir-ng-import.jar shanoir-ng-import.jar
