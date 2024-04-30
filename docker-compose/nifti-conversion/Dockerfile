@@ -25,14 +25,14 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-conda \
     && apt-get -qqy --no-install-recommends install curl ca-certificates
 
 # Install miniconda
-RUN --mount=type=cache,target=/root/miniconda3/pkgs \
+RUN --mount=type=cache,target=/opt/miniconda3/pkgs \
     curl -LSsf -o miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-py311_24.1.2-0-Linux-x86_64.sh \
-    && bash miniconda.sh -fb \
+    && bash miniconda.sh -fb -p /opt/miniconda3 \
     && rm   miniconda.sh
 
 # Install dicomifier
-RUN --mount=type=cache,target=/root/miniconda3/pkgs \
-    /root/miniconda3/bin/conda install -c conda-forge dicomifier -y
+RUN --mount=type=cache,target=/opt/miniconda3/pkgs \
+    /opt/miniconda3/bin/conda install -c conda-forge dicomifier -y
 
 
 FROM base_image as builder
@@ -97,7 +97,7 @@ COPY --chmod=0755 external/anima/animaConvertImage /usr/local/bin/
 
 # install the binaries built in the 'builder' & 'conda' stages
 COPY --link --from=builder /target/. /
-COPY --link --from=conda   /root/miniconda3 /root/miniconda3
+COPY --link --from=conda   /opt/miniconda3 /opt/miniconda3
 
 # update the ld cache (so that the new libraries can be loaded)
 # and make the log dir
@@ -111,6 +111,6 @@ COPY entrypoint entrypoint_common oneshot /bin/
 ENV LC_ALL fr_FR.UTF-8
 ENV LANG fr_FR.UTF-8
 ENV LANGUAGE fr_FR.UTF-8
-ENV PATH="/root/miniconda3/bin:${PATH}"
+ENV PATH="/opt/miniconda3/bin:${PATH}"
 
 ENTRYPOINT ["/bin/entrypoint", "java", "-Djava.security.egd=file:/dev/./urandom", "-Djavax.net.ssl.trustStorePassword=changeit", "-jar", "/nifti-conversion.jar"]
