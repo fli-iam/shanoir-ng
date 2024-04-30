@@ -13,8 +13,8 @@
 FROM solr:8.1
 
 USER root
-RUN mkdir -p /etc/shanoir-core-template
-RUN chown solr:solr /etc/shanoir-core-template
+RUN mkdir -p /etc/shanoir-core-template \
+    && chown solr:solr /etc/shanoir-core-template
 USER solr
 
 COPY ./core /etc/shanoir-core-template
