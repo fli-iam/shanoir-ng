@@ -10,26 +10,35 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-ARG BASE_IMAGE="debian:bookworm"
+FROM debian:bookworm as base_image
 
+# - disable the automatic "apt-get clean" command (because we mount
+#   /var/cache/apt from an external volume to speed-up the build)
+# - run "apt-get update" now (to avoid downloading the lists 3 times)
+RUN rm /etc/apt/apt.conf.d/docker-clean \
+    && apt-get update -qq
 
-FROM $BASE_IMAGE as conda
+FROM base_image as conda
 
-RUN apt-get -qqy update \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-conda \
+    apt-get -qqy update \
     && apt-get -qqy --no-install-recommends install curl ca-certificates
 
 # Install miniconda
-RUN curl -LSsf -o miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-py311_24.1.2-0-Linux-x86_64.sh \
-    && bash miniconda.sh -b \
+RUN --mount=type=cache,target=/root/miniconda3/pkgs \
+    curl -LSsf -o miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-py311_24.1.2-0-Linux-x86_64.sh \
+    && bash miniconda.sh -fb \
     && rm   miniconda.sh
 
 # Install dicomifier
-RUN /root/miniconda3/bin/conda install -c conda-forge dicomifier -y
+RUN --mount=type=cache,target=/root/miniconda3/pkgs \
+    /root/miniconda3/bin/conda install -c conda-forge dicomifier -y
 
 
-FROM $BASE_IMAGE as builder
+FROM base_image as builder
 
-RUN apt-get -qqy update \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-builder \
+    apt-get -qqy update \
     && apt-get -qqy install \
         build-essential \
         curl \
@@ -53,16 +62,18 @@ RUN mkdir -p /target/opt/nifti-converters/mriconverter \
     && chmod 0777 . MRIFileManager/MRIManager.jar
 
 
-FROM $BASE_IMAGE as final
+FROM base_image as final
 
 # NOTE: using bookworm-proposed-updates because of https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1039472
-RUN echo "deb http://deb.debian.org/debian bookworm-proposed-updates main" >> /etc/apt/sources.list \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    echo "deb http://deb.debian.org/debian bookworm-proposed-updates main" >> /etc/apt/sources.list \
     && apt-get update -qq \
     && apt-get install -qqy openjdk-17-jre ca-certificates-java
 
 # xvfb+gtk2 needed by mri_conv (headless mode not supported by DicomToNifti)
 # see: https://populse.github.io/mri_conv/Installation/installation.html#scriptwithoutGUI
-RUN apt-get update -qqy \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    apt-get update -qqy \
     && apt-get install -qqy \
     libgdcm-tools \
     locales \
