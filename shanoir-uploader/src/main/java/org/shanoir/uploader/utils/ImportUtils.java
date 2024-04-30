@@ -84,9 +84,9 @@ public class ImportUtils {
 	 * @param dicomData the dicom data to import
 	 * @return the created folder
 	 */
-	public static File createUploadFolder(final File workFolder, final DicomDataTransferObject dicomData) {
+	public static File createUploadFolder(final File workFolder, final ImportJob importJob) {
 		final String timeStamp = Util.getCurrentTimeStampForFS();
-		final String folderName = workFolder.getAbsolutePath() + File.separator + dicomData.getSubjectIdentifier()
+		final String folderName = workFolder.getAbsolutePath() + File.separator + importJob.getSubject().getIdentifier()
 		+ "_" + timeStamp;
 		File uploadFolder = new File(folderName);
 		uploadFolder.mkdirs();

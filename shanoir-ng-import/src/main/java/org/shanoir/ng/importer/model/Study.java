@@ -27,7 +27,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * This class represents a study based on Dicom as used in Shanoir.
+ * This class represents a study based on DICOM as used in Shanoir.
  * 
  * @author atouboul
  * @author mkain

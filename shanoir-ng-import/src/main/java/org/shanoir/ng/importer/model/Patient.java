@@ -25,7 +25,7 @@ import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * This class represents a patient based on Dicom as used in Shanoir.
+ * This class represents a patient based on DICOM as used in Shanoir.
  * 
  * @author atouboul
  * @author mkain

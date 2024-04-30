@@ -32,6 +32,18 @@ public class Subject {
 	@JsonProperty("name")
 	private String name;
 
+	@JsonProperty("lastName")
+	private String lastName;
+
+	@JsonProperty("firstName")
+	private String firstName;
+
+	@JsonProperty("birthName")
+	private String birthName;
+
+	@JsonProperty("identifier")
+	private String identifier;
+
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	private LocalDate birthDate;
 
@@ -43,6 +55,8 @@ public class Subject {
 
 	@JsonProperty("subjectStudyList")
 	private List<SubjectStudy> subjectStudyList;
+
+	private PseudonymusHashValues pseudonymusHashValues;
 	
 	public long getId() {
 		return id;
@@ -102,6 +116,46 @@ public class Subject {
 
 	public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
 		this.subjectStudyList = subjectStudyList;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getIdentifier() {
+		return identifier;
+	}
+
+	public void setIdentifier(String identifier) {
+		this.identifier = identifier;
+	}
+
+	public String getBirthName() {
+		return birthName;
+	}
+
+	public void setBirthName(String birthName) {
+		this.birthName = birthName;
+	}
+
+	public PseudonymusHashValues getPseudonymusHashValues() {
+		return pseudonymusHashValues;
+	}
+
+	public void setPseudonymusHashValues(PseudonymusHashValues pseudonymusHashValues) {
+		this.pseudonymusHashValues = pseudonymusHashValues;
 	}
 
 }

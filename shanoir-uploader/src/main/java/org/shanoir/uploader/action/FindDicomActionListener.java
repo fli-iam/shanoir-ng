@@ -238,7 +238,6 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 		}
 		mainWindow.dicomTreeJScrollPane.setViewportView(mainWindow.dicomTree);
 		mainWindow.dicomTree.addTreeSelectionListener(mainWindow.getSAL());
-		mainWindow.getSAL().setDicomData(null);
 	}
 
 	/**
@@ -270,7 +269,6 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 							studyTreeNode.addTreeNode(serieTreeNode.getId(), serieTreeNode);
 						}
 					}
-					
 				}
 			}
 		}

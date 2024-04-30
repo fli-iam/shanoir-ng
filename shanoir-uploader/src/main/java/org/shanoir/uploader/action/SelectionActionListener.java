@@ -1,34 +1,43 @@
-/**
- * 
- */
 package org.shanoir.uploader.action;
 
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.Set;
 
 import javax.swing.JOptionPane;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.Patient;
+import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.importer.model.Study;
 import org.shanoir.uploader.dicom.DicomTreeNode;
 import org.shanoir.uploader.dicom.query.PatientTreeNode;
 import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.dicom.query.StudyTreeNode;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.utils.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class implements the logic when a node is selected in a DicomTree.
+ * The SelectionActionListener creates the multi-exam import jobs map, that
+ * is used afterwards to know, what studies/series to import.
+ * 
+ * The SelectionActionListener is already prepared to allow multi-patient,
+ * multi-exam (DICOM study) selections, to be ready for the future and not
+ * have to refactor again this component.
  * 
  * @author yyao
+ * @author mkain
  *
  */
 public class SelectionActionListener implements TreeSelectionListener {
@@ -39,9 +48,7 @@ public class SelectionActionListener implements TreeSelectionListener {
 
 	private ResourceBundle resourceBundle;
 
-	private Set<SerieTreeNode> selectedSeries;
-
-	private DicomDataTransferObject dicomData;
+	private Map<String, ImportJob> importJobs;
 
 	public SelectionActionListener(final MainWindow mainWindow, final ResourceBundle resourceBundle) {
 		this.mainWindow = mainWindow;
@@ -53,7 +60,6 @@ public class SelectionActionListener implements TreeSelectionListener {
 	 * in a DicomTree.
 	 */
 	public void valueChanged(TreeSelectionEvent event) {
-		dicomData = null;
 
 		// clean up editPanel when value changed
 		mainWindow.lastNameTF.setEnabled(false);
@@ -69,149 +75,119 @@ public class SelectionActionListener implements TreeSelectionListener {
 		mainWindow.birthDateTF.setText("");
 
 		mainWindow.isDicomObjectSelected = true;
-		selectedSeries = new LinkedHashSet<SerieTreeNode>();
+		importJobs = new HashMap<String, ImportJob>();
 
-		// check if multiple subject have been selected and show error
-		PatientTreeNode patientAlreadySelected = null;
-		// check if multiple studies have been selected and show error
-		Boolean oneStudyIsSelected = true;
-		// save the correct study selected
-		StudyTreeNode selectedStudy = null;
 		// returns all selected paths, which can be patients, studies and/or series
 		TreePath[] paths = mainWindow.dicomTree.getSelectionModel().getSelectionPaths();
 		if (paths != null && paths.length > 0) {
 			for (int i = 0; i < paths.length; i++) {
 				TreePath tp = paths[i];
 				Object o = tp.getLastPathComponent();
-				PatientTreeNode patient = null;
 				// handle if patient in paths has been found
+				// implies: select all studies + series below
 				if (o instanceof PatientTreeNode) {
-					patient = (PatientTreeNode) o;
-					Collection<DicomTreeNode> studies = patient.getTreeNodes().values();
-					int nbStudiesSelected = 0;
-					for (Iterator studiesIt = studies.iterator(); studiesIt.hasNext();) {
-						nbStudiesSelected++;
-						StudyTreeNode study = (StudyTreeNode) studiesIt.next();
-						addSeriesForStudy(selectedSeries, study);
+					PatientTreeNode patientTreeNode = (PatientTreeNode) o;
+					Collection<DicomTreeNode> studies = patientTreeNode.getTreeNodes().values();
+					for (Iterator<DicomTreeNode> studiesIt = studies.iterator(); studiesIt.hasNext();) {
+						StudyTreeNode studyTreeNode = (StudyTreeNode) studiesIt.next();
+						handleStudyTreeNode(patientTreeNode, studyTreeNode, true);
 					}
-					if (nbStudiesSelected != 1)
-						oneStudyIsSelected = false;
-					selectedStudy = (StudyTreeNode) patient.getFirstTreeNode();
 				}
 				// handle if study in paths has been found
+				// implies: select all series below
 				if (o instanceof StudyTreeNode) {
-					StudyTreeNode study = (StudyTreeNode) o;
-					addSeriesForStudy(selectedSeries, study);
-					patient = (PatientTreeNode) tp.getParentPath().getLastPathComponent();
-					if (selectedStudy == null)
-						selectedStudy = study;
-					else
-						oneStudyIsSelected = false;
+					StudyTreeNode studyTreeNode = (StudyTreeNode) o;
+					PatientTreeNode patientTreeNode = (PatientTreeNode) tp.getParentPath().getLastPathComponent();
+					handleStudyTreeNode(patientTreeNode, studyTreeNode, true);
 				}
 				// handle if serie in paths has been found
 				if (o instanceof SerieTreeNode) {
-					patient = (PatientTreeNode) tp.getParentPath().getParentPath().getLastPathComponent();
 					SerieTreeNode serieTreeNode = (SerieTreeNode) o;
-					Collection<DicomTreeNode> studies = patient.getTreeNodes().values();
-					for (Iterator studiesIt = studies.iterator(); studiesIt.hasNext();) {
-						StudyTreeNode study = (StudyTreeNode) studiesIt.next();
-						for (Iterator studySeries = study.getChildren(); studySeries.hasNext();) {
-							Map.Entry pair = (Map.Entry) studySeries.next();
-							SerieTreeNode s = (SerieTreeNode) pair.getValue();
-							if (s.equals(o)) {
-								if (selectedStudy == null || selectedStudy.equals(study))
-									selectedStudy = study;
-								else
-									oneStudyIsSelected = false;
-							}
-						}
-
-					}
-					serieTreeNode.setSelected(true);
-					selectedSeries.add(serieTreeNode);
-				}
-				if (patientAlreadySelected != null && !patientAlreadySelected.equals(patient)) {
-					JOptionPane.showMessageDialog(mainWindow.frame,
-							resourceBundle.getString("shanoir.uploader.select.error.message.subject"),
-							resourceBundle.getString("shanoir.uploader.select.error.title"), JOptionPane.ERROR_MESSAGE);
-					mainWindow.dicomTree.getSelectionModel().clearSelection();
-					return;
-				} else {
-					patientAlreadySelected = patient;
-				}
-				if (!oneStudyIsSelected) {
-					JOptionPane.showMessageDialog(mainWindow.frame,
-							resourceBundle.getString("shanoir.uploader.select.error.message.study"),
-							resourceBundle.getString("shanoir.uploader.select.error.title"), JOptionPane.ERROR_MESSAGE);
-					mainWindow.dicomTree.getSelectionModel().clearSelection();
-					return;
+					StudyTreeNode studyTreeNode = (StudyTreeNode) tp.getParentPath().getLastPathComponent();
+					PatientTreeNode patientTreeNode = (PatientTreeNode) tp.getParentPath().getParentPath().getLastPathComponent();
+					handleStudyTreeNode(patientTreeNode, studyTreeNode, false);
+					serieTreeNode.getSerie().setSelected(true);
 				}
 			}
-			try {
-				dicomData = new DicomDataTransferObject(mainWindow, patientAlreadySelected, selectedStudy);
-			} catch (Exception e) {
-				logger.error(e.getMessage(), e);
+
+			if (!importJobs.isEmpty()) {
+				displayPatientVerification();
+			}
+		}
+	}
+
+	private void displayPatientVerification() {
+		// for the moment use always first patient
+		// idea: the selection listener is already multi-patient ready, but for
+		// the moment we provide only one patient into the verification box
+		ImportJob importJob = importJobs.values().iterator().next();
+		Patient patient = importJob.getPatients().get(0);
+		final String name = patient.getPatientName();
+		String lastName = Util.computeLastName(name);
+		String firstName = Util.computeFirstName(name);
+		String sex = patient.getPatientSex();
+		LocalDate birthDate = patient.getPatientBirthDate();
+		mainWindow.lastNameTF.setText(lastName);
+		mainWindow.lastNameTF.setEnabled(true);
+		mainWindow.birthNameCopyButton.setEnabled(true);
+		mainWindow.firstNameTF.setText(firstName);
+		mainWindow.firstNameTF.setEnabled(true);
+		mainWindow.birthNameTF.setText("");
+		mainWindow.birthNameTF.setEnabled(true);
+		mainWindow.birthDateTF.setEnabled(true);
+		mainWindow.mSexR.setEnabled(true);
+		mainWindow.fSexR.setEnabled(true);
+		// add this exception here for damaged DICOMDIRs without birth date set
+		if (birthDate != null) {
+			String birthDateText = Util.convertLocalDateToString(birthDate);
+			mainWindow.birthDateTF.setText(birthDateText);
+		}
+		if (sex != null && sex.equals("M")) {
+			mainWindow.mSexR.setSelected(true);
+		}
+		if (sex != null && sex.equals("F")) {
+			mainWindow.fSexR.setSelected(true);
+		}
+	}
+
+	private void handleStudyTreeNode(PatientTreeNode patientTreeNode, StudyTreeNode studyTreeNode, boolean selectSeries) {
+		Study study = studyTreeNode.getStudy();
+		String studyInstanceUID = study.getStudyInstanceUID();
+		LocalDate studyDate = study.getStudyDate();
+		if (studyDate == null) {			
+			logger.error("Study date could not be used for import.");
+			if(mainWindow != null) {
 				JOptionPane.showMessageDialog(mainWindow.frame,
-						resourceBundle.getString("shanoir.uploader.select.error.message.subject"),
-						resourceBundle.getString("shanoir.uploader.select.error.title"), JOptionPane.ERROR_MESSAGE);
-				return;
-			}
-
-			if (dicomData != null) {
-				mainWindow.lastNameTF.setText(dicomData.getLastName());
-				mainWindow.lastNameTF.setEnabled(true);
-				mainWindow.birthNameCopyButton.setEnabled(true);
-				mainWindow.firstNameTF.setText(dicomData.getFirstName());
-				mainWindow.firstNameTF.setEnabled(true);
-				mainWindow.birthNameTF.setText(dicomData.getBirthName());
-				mainWindow.birthNameTF.setEnabled(true);
-				mainWindow.birthDateTF.setEnabled(true);
-				mainWindow.mSexR.setEnabled(true);
-				mainWindow.fSexR.setEnabled(true);
-				// add this exception here for damaged DICOMDIRs without birth date set
-				if (dicomData.getBirthDate() != null) {
-					String birthDateText = Util.convertLocalDateToString(dicomData.getBirthDate());
-					mainWindow.birthDateTF.setText(birthDateText);
-				}
-				if (dicomData.getSex() != null && dicomData.getSex().equals("M")) {
-					mainWindow.mSexR.setSelected(true);
-				}
-				if (dicomData.getSex() != null && dicomData.getSex().equals("F")) {
-					mainWindow.fSexR.setSelected(true);
-				}
+				    "Study date could not be used for import: " + study.getStudyDescription(),
+				    "Data error",
+				    JOptionPane.ERROR_MESSAGE);
 			}
 		}
-	}
-
-	/**
-	 * Add all series, if the study node has been selected.
-	 * 
-	 * @param selectedSeries
-	 * @param study
-	 */
-	private void addSeriesForStudy(Set<SerieTreeNode> selectedSeries, StudyTreeNode study) {
-		Collection<DicomTreeNode> series = study.getTreeNodes().values();
-		for (Iterator seriesIt = series.iterator(); seriesIt.hasNext();) {
-			SerieTreeNode serie = (SerieTreeNode) seriesIt.next();
-			serie.setSelected(true);
-			selectedSeries.add(serie);
+		ImportJob importJob = importJobs.get(studyInstanceUID);
+		if (importJob == null) {
+			importJob = new ImportJob();
+			// add always the patient (parent), one per job
+			Patient patient = patientTreeNode.getPatient();
+			if(selectSeries) {
+				List<Study> studies = patient.getStudies();
+				for (Study studyOfAllStudies : studies) {
+					// only select concerned study, not all studies
+					if (studyOfAllStudies.getStudyInstanceUID().equals(studyInstanceUID)) {
+						List<Serie> series = study.getSeries();
+						for (Serie serie : series) {
+							serie.setSelected(true);
+						}
+					}
+				}
+			}
+			List<Patient> patients = new ArrayList<Patient>();
+			patients.add(patient);
+			importJob.setPatients(patients);
 		}
 	}
-
-	public Set<SerieTreeNode> getSelectedSeries() {
-		return selectedSeries;
-	}
-
-	public void setSelectedSeries(Set<SerieTreeNode> selectedSeries) {
-		this.selectedSeries = selectedSeries;
-	}
-
-	public DicomDataTransferObject getDicomData() {
-		return dicomData;
-	}
-
-	public void setDicomData(DicomDataTransferObject dicomData) {
-		this.dicomData = dicomData;
+	
+	public Map<String, ImportJob> getImportJobs() {
+		return importJobs;
 	}
 
 }

@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
+import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.query.SerieTreeNode;
@@ -41,76 +42,71 @@ public class DownloadOrCopyRunnable implements Runnable {
 	
 	private String filePathDicomDir;
 
-	private Map<String, Set<SerieTreeNode>> studiesWithSelectedSeries;
-
-	private DicomDataTransferObject dicomData;
+	private Map<String, ImportJob> importJobs;
 	
-	public DownloadOrCopyRunnable(boolean isFromPACS, final IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, final String filePathDicomDir,
-		final Set<SerieTreeNode> selectedSeries, final DicomDataTransferObject dicomData) {
+	public DownloadOrCopyRunnable(boolean isFromPACS, final IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, final String filePathDicomDir, Map<String, ImportJob> importJobs) {
 		this.isFromPACS = isFromPACS;
 		this.dicomFileAnalyzer = dicomFileAnalyzer;
 		this.dicomServerClient = dicomServerClient; // used with PACS import
 		if(!isFromPACS && filePathDicomDir != null) {
 			this.filePathDicomDir = new String(filePathDicomDir); // used with CD/DVD import
 		}
-		this.studiesWithSelectedSeries = new HashMap<>();
-		studiesWithSelectedSeries.put(dicomData.getStudyInstanceUID(), selectedSeries);
-		this.dicomData = dicomData;
+		this.importJobs = importJobs;
 	}
 
 	@Override
 	public void run() {
-		File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(), dicomData);
-		List<String> allFileNames = null;
-		try {
-			/**
-			 * 1. Download from PACS or copy from CD/DVD/local file system
-			 */
-			allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(this.isFromPACS, studiesWithSelectedSeries, uploadFolder, dicomFileAnalyzer, dicomServerClient, filePathDicomDir);
-		
-			/**
-			 * 2. Fill MRI information into all series from first DICOM file of each serie
-			 */
-			for (Iterator<SerieTreeNode> iterator = studiesWithSelectedSeries.get(dicomData.getStudyInstanceUID()).iterator(); iterator.hasNext();) {
-				SerieTreeNode serieTreeNode = (SerieTreeNode) iterator.next();
-				dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(uploadFolder.getAbsolutePath(), serieTreeNode.getSerie(), null, isFromPACS);
+		for (ImportJob importJob : importJobs.values()) {
+			File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(), importJob);
+			List<String> allFileNames = null;
+			try {
+				/**
+				 * 1. Download from PACS or copy from CD/DVD/local file system
+				 */
+				allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(this.isFromPACS, importJob, uploadFolder, dicomFileAnalyzer, dicomServerClient, filePathDicomDir);
+			
+				/**
+				 * 2. Fill MRI information into all series from first DICOM file of each serie
+				 */
+				for (Iterator<SerieTreeNode> iterator = studiesWithSelectedSeries.get(dicomData.getStudyInstanceUID()).iterator(); iterator.hasNext();) {
+					SerieTreeNode serieTreeNode = (SerieTreeNode) iterator.next();
+					dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(uploadFolder.getAbsolutePath(), serieTreeNode.getSerie(), null, isFromPACS);
+				}
+			} catch (FileNotFoundException e) {
+				logger.error(e.getMessage(), e);
 			}
-		} catch (FileNotFoundException e) {
-			logger.error(e.getMessage(), e);
-		}
-		
-		/**
-		 * 3. Write the UploadJob and schedule upload
-		 */
-		UploadJob uploadJob = new UploadJob();
-		ImportUtils.initUploadJob(studiesWithSelectedSeries.values().iterator().next(), dicomData, uploadJob);
-		if (allFileNames == null) {
-			uploadJob.setUploadState(UploadState.ERROR);
-		}
-		UploadJobManager uploadJobManager = new UploadJobManager(uploadFolder.getAbsolutePath());
-		uploadJobManager.writeUploadJob(uploadJob);
+			/**
+			 * 3. Write the UploadJob and schedule upload
+			 */
+			UploadJob uploadJob = new UploadJob();
+			ImportUtils.initUploadJob(importJob, uploadJob);
+			if (allFileNames == null) {
+				uploadJob.setUploadState(UploadState.ERROR);
+			}
+			UploadJobManager uploadJobManager = new UploadJobManager(uploadFolder.getAbsolutePath());
+			uploadJobManager.writeUploadJob(uploadJob);
 
-		/**
-		 * 4. Write the NominativeDataUploadJobManager for displaying the download state
-		 */
-		NominativeDataUploadJob dataJob = new NominativeDataUploadJob();
-		ImportUtils.initDataUploadJob(uploadJob, dicomData, dataJob);
-		if (allFileNames == null) {
-			dataJob.setUploadState(UploadState.ERROR);
+			/**
+			 * 4. Write the NominativeDataUploadJobManager for displaying the download state
+			 */
+			NominativeDataUploadJob dataJob = new NominativeDataUploadJob();
+			ImportUtils.initDataUploadJob(uploadJob, dicomData, dataJob);
+			if (allFileNames == null) {
+				dataJob.setUploadState(UploadState.ERROR);
+			}
+			NominativeDataUploadJobManager uploadDataJobManager = new NominativeDataUploadJobManager(
+					uploadFolder.getAbsolutePath());
+			uploadDataJobManager.writeUploadDataJob(dataJob);
+			ShUpOnloadConfig.getCurrentNominativeDataController().addNewNominativeData(uploadFolder, dataJob);
+			
+			logger.info(uploadFolder.getName() + ": finished: " + toString());
 		}
-		NominativeDataUploadJobManager uploadDataJobManager = new NominativeDataUploadJobManager(
-				uploadFolder.getAbsolutePath());
-		uploadDataJobManager.writeUploadDataJob(dataJob);
-		ShUpOnloadConfig.getCurrentNominativeDataController().addNewNominativeData(uploadFolder, dataJob);
-		
-		logger.info(uploadFolder.getName() + ": finished: " + toString());
 	}
 
 	@Override
 	public String toString() {
 		return "DownloadOrCopyRunnable [isFromPACS=" + isFromPACS + ", dicomServerClient=" + dicomServerClient
-				+ ", filePathDicomDir=" + filePathDicomDir + ", selectedSeries=" + studiesWithSelectedSeries.get(0) + ", dicomData="
-				+ dicomData.toString() + "]";
+				+ ", filePathDicomDir=" + filePathDicomDir + ", selectedStudies=" + importJobs.values().toString() + "]";
 	}
 
 }

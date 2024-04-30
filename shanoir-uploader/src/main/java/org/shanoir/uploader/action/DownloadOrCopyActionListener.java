@@ -4,24 +4,25 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
-import java.text.ParseException;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.Set;
 
 import javax.swing.JOptionPane;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
+import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.PseudonymusHashValues;
+import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
-import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.utils.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class implements the logic when the download or copy button is clicked.
@@ -63,16 +64,15 @@ public class DownloadOrCopyActionListener implements ActionListener {
 		/**
 		 * 1. Read values from GUI, entered by user
 		 */
-		DicomDataTransferObject dicomData = mainWindow.getSAL().getDicomData();
-		dicomData = completeDicomDataWithGUIValues(dicomData);
-		if (dicomData == null) {
+		Subject subject = createSubjectFromUserValuesInGUI();
+		if (subject == null) {
 			return;
 		}
 		/**
 		 * 2. Generate subject identifier and hash values
 		 */
 		try {
-			dicomData = generateSubjectIdentifierAndHashValues(dicomData);
+			generateSubjectIdentifierAndHashValues(subject);
 		} catch (PseudonymusException e) {
 			logger.error(e.getMessage(), e);
 			JOptionPane.showMessageDialog(mainWindow.frame,
@@ -99,17 +99,19 @@ public class DownloadOrCopyActionListener implements ActionListener {
 		/**
 		 * 3. Download from PACS or copy from CD/DVD and write upload-job.xml + nominative-data-job.xml
 		 */
+		final Map<String, ImportJob> importJobs = mainWindow.getSAL().getImportJobs();
+		// for the moment: one subject, all verified subject data are used with all studies
+		for (ImportJob importJob : importJobs.values()) {
+			importJob.setSubject(subject);
+		}
 		final String filePathDicomDir = mainWindow.getFindDicomActionListener().getFilePathDicomDir();
-		final Set<SerieTreeNode> selectedSeries = mainWindow.getSAL().getSelectedSeries();
-		Runnable runnable = new DownloadOrCopyRunnable(mainWindow.isFromPACS, dicomServerClient, dicomFileAnalyzer,  filePathDicomDir, selectedSeries, dicomData);
+		Runnable runnable = new DownloadOrCopyRunnable(mainWindow.isFromPACS, dicomServerClient, dicomFileAnalyzer,  filePathDicomDir, importJobs);
 		Thread thread = new Thread(runnable);
 		thread.start();
 		
 		// clear previous selection, but keep tree open in the tab
 		mainWindow.isDicomObjectSelected = false;
 		mainWindow.dicomTree.getSelectionModel().clearSelection();
-		mainWindow.getSAL().setDicomData(null);
-		mainWindow.getSAL().setSelectedSeries(null);
 	
 		JOptionPane.showMessageDialog(mainWindow.frame,
 			    resourceBundle.getString("shanoir.uploader.downloadOrCopy.confirmation.message"),
@@ -119,67 +121,66 @@ public class DownloadOrCopyActionListener implements ActionListener {
 
 	/**
 	 * This method reads the data entered by the user with the GUI
-	 * and puts it into the DicomDataTransferObject, when the user
+	 * and puts it into a Subject object, when the user
 	 * clicks on the download or copy button.
 	 * 
 	 * @param dicomData
 	 * @return
 	 */
-	private DicomDataTransferObject completeDicomDataWithGUIValues(final DicomDataTransferObject dicomData) {
-		try {
-			dicomData.setBirthDate(Util.convertStringToLocalDate(mainWindow.birthDateTF.getText()));
-			if (mainWindow.mSexR.isSelected())
-				dicomData.setSex("M");
-			if (mainWindow.fSexR.isSelected())
-				dicomData.setSex("F");
-			return completeDicomData(dicomData);					
-		} catch (ParseException e) {
-			logger.error("Unable to convert BirthDate using formatter", e);
-			return null;
-		}
-	}
-
-	private DicomDataTransferObject completeDicomData(final DicomDataTransferObject dicomData) throws ParseException {
+	private Subject createSubjectFromUserValuesInGUI() {
+		Subject subject = new Subject();
+		LocalDate birthDate = Util.convertStringToLocalDate(mainWindow.birthDateTF.getText());
+		subject.setBirthDate(birthDate);
+		String sex = null;
+		if (mainWindow.mSexR.isSelected())
+			sex = "M";
+		if (mainWindow.fSexR.isSelected())
+			sex = "F";
+		subject.setSex(sex);
 		if (mainWindow.lastNameTF.getText().isEmpty()) {
 			JOptionPane.showMessageDialog(mainWindow.frame,
-				    resourceBundle.getString("shanoir.uploader.import.start.lastname.empty"),
-				    resourceBundle.getString("shanoir.uploader.select.error.title"),
-				    JOptionPane.ERROR_MESSAGE);
+					resourceBundle.getString("shanoir.uploader.import.start.lastname.empty"),
+					resourceBundle.getString("shanoir.uploader.select.error.title"),
+					JOptionPane.ERROR_MESSAGE);
 			return null;
 		}
-		dicomData.setLastName(mainWindow.lastNameTF.getText());
+		String lastName = mainWindow.lastNameTF.getText();
+		subject.setLastName(lastName);
 		if (mainWindow.firstNameTF.getText().isEmpty()) {
 			JOptionPane.showMessageDialog(mainWindow.frame,
-				    resourceBundle.getString("shanoir.uploader.import.start.firstname.empty"),
-				    resourceBundle.getString("shanoir.uploader.select.error.title"),
-				    JOptionPane.ERROR_MESSAGE);
+					resourceBundle.getString("shanoir.uploader.import.start.firstname.empty"),
+					resourceBundle.getString("shanoir.uploader.select.error.title"),
+					JOptionPane.ERROR_MESSAGE);
 			return null;
 		}
-		dicomData.setFirstName(mainWindow.firstNameTF.getText());
+		String firstName = mainWindow.firstNameTF.getText();
+		subject.setFirstName(firstName);
 		if (mainWindow.birthNameTF.getText().isEmpty()) {
 			JOptionPane.showMessageDialog(mainWindow.frame,
-				    resourceBundle.getString("shanoir.uploader.import.start.birthname.empty"),
-				    resourceBundle.getString("shanoir.uploader.select.error.title"),
-				    JOptionPane.ERROR_MESSAGE);
+					resourceBundle.getString("shanoir.uploader.import.start.birthname.empty"),
+					resourceBundle.getString("shanoir.uploader.select.error.title"),
+					JOptionPane.ERROR_MESSAGE);
 			return null;
 		}
-		dicomData.setBirthName(mainWindow.birthNameTF.getText());
-		return dicomData;
+		String birthName = mainWindow.birthNameTF.getText();
+		subject.setBirthName(birthName);
+		return subject;
 	}
 
-	private DicomDataTransferObject generateSubjectIdentifierAndHashValues(DicomDataTransferObject dicomData) throws PseudonymusException, UnsupportedEncodingException, NoSuchAlgorithmException {
-		String subjectIdentifier = null;
+	private void generateSubjectIdentifierAndHashValues(Subject subject) throws PseudonymusException, UnsupportedEncodingException, NoSuchAlgorithmException {
+		String identifier = null;
 		// OFSEP mode
 		if (ShUpConfig.isModePseudonymus()) {
-			dicomData = pseudonymizer.createHashValuesWithPseudonymus(dicomData);
-			subjectIdentifier = identifierCalculator.calculateIdentifierWithHashs(dicomData.getFirstNameHash1(), dicomData.getBirthNameHash1(), dicomData.getBirthDateHash());
+			// use PseudonymusHashValues here
+			pseudonymizer.createHashValuesWithPseudonymus(subject);
+			PseudonymusHashValues pseudonymusHashValues = subject.getPseudonymusHashValues();
+			identifier = identifierCalculator.calculateIdentifierWithHashs(pseudonymusHashValues.getFirstNameHash1(), pseudonymusHashValues.getBirthNameHash1(), pseudonymusHashValues.getBirthDateHash());
 		// Neurinfo mode
 		} else {
-			String birthDate = Util.convertLocalDateToString(dicomData.getBirthDate());
-			subjectIdentifier = identifierCalculator.calculateIdentifier(dicomData.getFirstName(), dicomData.getLastName(), birthDate);
+			String birthDate = Util.convertLocalDateToString(subject.getBirthDate());
+			identifier = identifierCalculator.calculateIdentifier(subject.getFirstName(), subject.getLastName(), birthDate);
 		}
-		dicomData.setSubjectIdentifier(subjectIdentifier);
-		return dicomData;
+		subject.setIdentifier(identifier);
 	}
 
 }
