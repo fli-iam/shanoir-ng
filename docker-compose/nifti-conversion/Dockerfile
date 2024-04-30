@@ -10,7 +10,36 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-FROM debian:bookworm
+ARG BASE_IMAGE="debian:bookworm"
+
+
+FROM $BASE_IMAGE as builder
+
+RUN apt-get -qqy update \
+    && apt-get -qqy install \
+        build-essential \
+        curl \
+        cmake \
+        git \
+        pkg-config
+
+# Compile DCM2NIIX from source
+ENV DCM2NIIX_VERSION=v1.0.20210317
+RUN mkdir /src && cd /src \
+    && curl -LSsf https://github.com/rordenlab/dcm2niix/archive/refs/tags/$DCM2NIIX_VERSION.tar.gz \
+    | tar zx \
+    && cd dcm2niix-* && mkdir build \
+    && cd build && cmake .. && make -j4 && make install DESTDIR=/target
+
+# Install mri_conv
+RUN mkdir -p /target/opt/nifti-converters/mriconverter \
+    && cd       /target/opt/nifti-converters/mriconverter \
+    && curl -LSsf https://github.com/populse/mri_conv/archive/refs/heads/master.tar.gz \
+    | tar zx --strip-components 1 \
+    && chmod 0777 . MRIFileManager/MRIManager.jar
+
+
+FROM $BASE_IMAGE as final
 
 # NOTE: using bookworm-proposed-updates because of https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1039472
 RUN echo "deb http://deb.debian.org/debian bookworm-proposed-updates main" >> /etc/apt/sources.list \
@@ -61,24 +90,9 @@ RUN wget \
     && bash Miniconda3-py311_24.1.2-0-Linux-x86_64.sh -b \
     && rm -f Miniconda3-py311_24.1.2-0-Linux-x86_64.sh
 
-
-# Compile DCM2NIIX from source
-ENV DCMCOMMIT_VERSION=v1.0.20210317
-ENV DCMCOMMIT=1.0.20210317
 ENV LC_ALL fr_FR.UTF-8
 ENV LANG fr_FR.UTF-8
 ENV LANGUAGE fr_FR.UTF-8
-
-WORKDIR /usr/local/
-RUN curl -#L  https://github.com/rordenlab/dcm2niix/archive/refs/tags/$DCMCOMMIT_VERSION.zip | bsdtar -xf- -C .
-WORKDIR /usr/local/dcm2niix-${DCMCOMMIT}
-RUN mkdir build
-WORKDIR /usr/local/dcm2niix-${DCMCOMMIT}/build
-RUN cmake ..
-RUN make install
-
-WORKDIR /
-
 RUN mkdir -p /opt/nifti-converters
 
 # Copy converters files
@@ -90,15 +104,6 @@ RUN install -m 0755 external/dcm2nii/linux/dcm2nii /opt/nifti-converters/dcm2nii
 RUN install -m 0755 external/mcverter/linux/mcverter_* /opt/nifti-converters/
 RUN cp -n           external/mcverter/linux/lib/lib*.so.* /usr/lib/x86_64-linux-gnu/
 
-WORKDIR /opt/nifti-converters
-RUN mkdir mriconverter
-RUN curl -#L  https://github.com/populse/mri_conv/archive/refs/heads/master.zip | bsdtar -xf- -C mriconverter --strip-components 1
-
-RUN chmod 777 /opt/nifti-converters/mriconverter
-RUN chmod 777 /opt/nifti-converters/mriconverter/MRIFileManager/MRIManager.jar
-
-WORKDIR /
-
 RUN mkdir -m 1777 /.dcm2nii_2008-03-31
 RUN mkdir -m 1777 /.dcm2nii_2014-08-04
 
@@ -108,6 +113,12 @@ RUN conda install -c conda-forge dicomifier -y
 
 # install animaConvertImage to convert Analyze format into nifti
 RUN install -m 755 external/anima/animaConvertImage /usr/local/bin/
+
+# install the binaries built in the 'builder' stage
+COPY --link --from=builder /target/. /
+
+# update the ld cache (so that the new libraries can be loaded)
+RUN ldconfig
 
 RUN mkdir -pv /var/log/shanoir-ng-logs
 
