@@ -12,8 +12,13 @@
 
 #--------------- common jre base image -------------------------------------
 FROM debian:bookworm
-# NOTE: using bookworm-proposed-updates because of https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1039472
-RUN echo "deb http://deb.debian.org/debian bookworm-proposed-updates main" >> /etc/apt/sources.list \
+# - disable the automatic "apt-get clean" command (because we mount
+#   /var/cache/apt from an external volume to speed-up the build)
+# - NOTE: using bookworm-proposed-updates because of
+#         https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1039472
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    rm /etc/apt/apt.conf.d/docker-clean \
+    && echo "deb http://deb.debian.org/debian bookworm-proposed-updates main" >> /etc/apt/sources.list \
     && apt-get update -qq \
     && apt-get install -qqy openjdk-17-jre-headless ca-certificates-java
 #----------------------------------------------------------------------------
