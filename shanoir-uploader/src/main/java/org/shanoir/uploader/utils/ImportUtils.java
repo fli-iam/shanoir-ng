@@ -147,7 +147,7 @@ public class ImportUtils {
 		/**
 		 * Serie level
 		 */
-		List<Serie> selectedSeries = importJob.getStudy().getSelectedSeries();
+		List<Serie> selectedSeries = importJob.getSelectedSeries();
 		Serie firstSerie = selectedSeries.iterator().next();
 		MRI mriInformation = new MRI();
 		InstitutionDicom institutionDicom = firstSerie.getInstitution();
@@ -239,7 +239,7 @@ public class ImportUtils {
 	 * 
 	 */
 	public static void initDataUploadJob(final ImportJob importjob, final UploadJob uploadJob, NominativeDataUploadJob dataUploadJob) {
-		Patient patient = importjob.getPatients().get(0);
+		Patient patient = importjob.getPatient();
 		Subject subject = importjob.getSubject();
 		org.shanoir.ng.importer.model.Study study = importjob.getStudy();
 		dataUploadJob.setPatientName(patient.getPatientFirstName() + " " + patient.getPatientLastName());

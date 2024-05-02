@@ -58,9 +58,15 @@ public class ImportJob implements Serializable {
 
 	// @todo: remove this list here later
     private List<Patient> patients;
+
+	// DICOM patient for this import job
+	private Patient patient;
     
 	// DICOM study for this import job
 	private Study study;
+
+	// series to import with this import job
+	private List<Serie> selectedSeries;
 
 	// Shanoir study
     private Long studyId;
@@ -298,5 +304,21 @@ public class ImportJob implements Serializable {
 		this.study = study;
 	}
 
+	public Patient getPatient() {
+		return patient;
+	}
+
+	public void setPatient(Patient patient) {
+		this.patient = patient;
+	}
+
+	public List<Serie> getSelectedSeries() {
+		return selectedSeries;
+	}
+
+	public void setSelectedSeries(List<Serie> selectedSeries) {
+		this.selectedSeries = selectedSeries;
+	}
+	
 }
 

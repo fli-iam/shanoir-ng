@@ -71,7 +71,7 @@ public class DownloadOrCopyActionListener implements ActionListener {
 			// for the moment: first patient verification, extend later for n-patient verification
 			ImportJob firstImportJob = importJobs.values().iterator().next();
 			if (firstImportJob != null)
-				patient = firstImportJob.getPatients().get(0);
+				patient = firstImportJob.getPatient();
 				patient = adjustPatientWithUserGUIValues(patient);
 				/**
 				 * 2. Generate subject identifier and hash values

@@ -106,7 +106,8 @@ public class SelectionActionListener implements TreeSelectionListener {
 					StudyTreeNode studyTreeNode = (StudyTreeNode) tp.getParentPath().getLastPathComponent();
 					PatientTreeNode patientTreeNode = (PatientTreeNode) tp.getParentPath().getParentPath().getLastPathComponent();
 					handleStudyTreeNode(patientTreeNode, studyTreeNode, false);
-					serieTreeNode.getSerie().setSelected(true);
+					ImportJob importJob = importJobs.get(studyTreeNode.getStudy().getStudyInstanceUID());
+					importJob.getSelectedSeries().add(serieTreeNode.getSerie());
 				}
 			}
 
@@ -121,7 +122,7 @@ public class SelectionActionListener implements TreeSelectionListener {
 		// idea: the selection listener is already multi-patient ready, but for
 		// the moment we provide only one patient into the verification box
 		ImportJob importJob = importJobs.values().iterator().next();
-		Patient patient = importJob.getPatients().get(0);
+		Patient patient = importJob.getPatient();
 		final String name = patient.getPatientName();
 		String lastName = Util.computeLastName(name);
 		String firstName = Util.computeFirstName(name);
@@ -150,9 +151,8 @@ public class SelectionActionListener implements TreeSelectionListener {
 		}
 	}
 
-	private void handleStudyTreeNode(PatientTreeNode patientTreeNode, StudyTreeNode studyTreeNode, boolean selectSeries) {
+	private void handleStudyTreeNode(PatientTreeNode patientTreeNode, StudyTreeNode studyTreeNode, boolean addAllSeries) {
 		Study study = studyTreeNode.getStudy();
-		String studyInstanceUID = study.getStudyInstanceUID();
 		LocalDate studyDate = study.getStudyDate();
 		if (studyDate == null) {			
 			logger.error("Study date could not be used for import, study: " + study.getStudyDescription());
@@ -164,28 +164,28 @@ public class SelectionActionListener implements TreeSelectionListener {
 			}
 			return;
 		}
+		String studyInstanceUID = study.getStudyInstanceUID();
 		ImportJob importJob = importJobs.get(studyInstanceUID);
 		if (importJob == null) {
 			importJob = new ImportJob();
-			importJob.setStudy(study);
 			// add always the patient (parent), one per job
 			Patient patient = patientTreeNode.getPatient();
-			if(selectSeries) {
+			importJob.setPatient(patient);
+			importJob.setStudy(study);
+			// use list of selected series here
+			importJob.setSelectedSeries(new ArrayList<Serie>());
+			if(addAllSeries) {
 				List<Study> studies = patient.getStudies();
 				for (Study studyOfAllStudies : studies) {
 					// only select concerned study, not all studies
 					if (studyOfAllStudies.getStudyInstanceUID().equals(studyInstanceUID)) {
 						List<Serie> series = study.getSeries();
 						for (Serie serie : series) {
-							serie.setSelected(true);
+							importJob.getSelectedSeries().add(serie);
 						}
 					}
 				}
 			}
-			// each import job has only one patient, his one
-			List<Patient> patients = new ArrayList<Patient>();
-			patients.add(patient);
-			importJob.setPatients(patients);
 		}
 		importJobs.put(studyInstanceUID, importJob);
 	}

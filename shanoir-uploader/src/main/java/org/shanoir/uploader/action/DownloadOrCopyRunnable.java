@@ -61,7 +61,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 		for (String studyInstanceUID : importJobs.keySet()) {
 			ImportJob importJob = importJobs.get(studyInstanceUID);
 			File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(), importJob.getSubject().getIdentifier());
-			List<Serie> selectedSeries = importJob.getStudy().getSelectedSeries();
+			List<Serie> selectedSeries = importJob.getSelectedSeries();
 			List<String> allFileNames = null;
 			try {
 				/**
@@ -114,7 +114,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 			uploadDataJobManager.writeUploadDataJob(dataJob);
 			ShUpOnloadConfig.getCurrentNominativeDataController().addNewNominativeData(uploadFolder, dataJob);
 			logger.info(uploadFolder.getName() + ": finished for DICOM study: " + importJob.getStudy().getStudyDescription()
-				+ ", " + importJob.getStudy().getStudyDate() + " of patient: " + importJob.getPatients().get(0).getPatientName());
+				+ ", " + importJob.getStudy().getStudyDate() + " of patient: " + importJob.getPatient().getPatientName());
 		}
 	}
 
