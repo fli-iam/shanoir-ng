@@ -78,17 +78,6 @@ public class DownloadOrCopyRunnable implements Runnable {
 			} catch (FileNotFoundException e) {
 				logger.error(e.getMessage(), e);
 			}
-			
-			/**
-			 * Write import-job.json to disk
-			 */
-			try {
-				File importJobJson = new File(uploadFolder, IMPORT_JOB_JSON);
-				importJobJson.createNewFile();
-				Util.objectMapper.writeValue(importJobJson, importJob);
-			} catch (IOException e) {
-				logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
-			}
 
 			/**
 			 * Write the UploadJob and schedule upload
@@ -115,6 +104,19 @@ public class DownloadOrCopyRunnable implements Runnable {
 			ShUpOnloadConfig.getCurrentNominativeDataController().addNewNominativeData(uploadFolder, dataJob);
 			logger.info(uploadFolder.getName() + ": finished for DICOM study: " + importJob.getStudy().getStudyDescription()
 				+ ", " + importJob.getStudy().getStudyDate() + " of patient: " + importJob.getPatient().getPatientName());
+
+			/**
+			 * Write import-job.json to disk and remove unnecessary DICOM information before
+			 */
+			importJob.setPatient(null);
+			importJob.setStudy(null);
+			try {
+				File importJobJson = new File(uploadFolder, IMPORT_JOB_JSON);
+				importJobJson.createNewFile();
+				Util.objectMapper.writeValue(importJobJson, importJob);
+			} catch (IOException e) {
+				logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
+			}
 		}
 	}
 
