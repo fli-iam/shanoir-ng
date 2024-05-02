@@ -85,7 +85,6 @@ jobs:
           images = json.loads(subprocess.check_output(
                   ["docker", "buildx", "bake", "--print", "-f", "docker-compose.yml"])
               )["group"]["default"]["targets"]
-          images = ["database"]
 
           # generate config
           #  - use github cache (for development builds build only)
@@ -93,6 +92,7 @@ jobs:
           #  - set tags & labels
           cache = lambda image: f"type=registry,ref={env['DOCKER_REPOSITORY']}/{image}:cache"
           pathlib.Path("docker-bake.json").write_text(json.dumps({
+            "group": { "default": ["database"] }, # TODO: remove
             "target": {
               image: {
                 "cache-from": ([] if env['PRODUCTION'] else [cache(image)]),
