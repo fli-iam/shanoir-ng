@@ -2,6 +2,7 @@ package org.shanoir.uploader.action;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,6 +18,7 @@ import org.shanoir.uploader.upload.UploadJob;
 import org.shanoir.uploader.upload.UploadJobManager;
 import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.ImportUtils;
+import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +33,8 @@ import org.slf4j.LoggerFactory;
 public class DownloadOrCopyRunnable implements Runnable {
 
 	private static final Logger logger = LoggerFactory.getLogger(DownloadOrCopyRunnable.class);
+
+	public static final String IMPORT_JOB_JSON = "import-job.json";
 	
 	private boolean isFromPACS;
 	
@@ -63,8 +67,8 @@ public class DownloadOrCopyRunnable implements Runnable {
 				/**
 				 * 1. Download from PACS or copy from CD/DVD/local file system
 				 */
-				allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(this.isFromPACS, studyInstanceUID, selectedSeries, uploadFolder, dicomFileAnalyzer, dicomServerClient, filePathDicomDir);
-			
+				allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(
+					this.isFromPACS, studyInstanceUID, selectedSeries, uploadFolder, dicomFileAnalyzer, dicomServerClient, filePathDicomDir);
 				/**
 				 * 2. Fill MRI information into all series from first DICOM file of each serie
 				 */
@@ -74,8 +78,20 @@ public class DownloadOrCopyRunnable implements Runnable {
 			} catch (FileNotFoundException e) {
 				logger.error(e.getMessage(), e);
 			}
+
 			/**
-			 * 3. Write the UploadJob and schedule upload
+			 * Write import-job.json to disk
+			 */
+			try {
+				File importJobJson = new File(uploadFolder, IMPORT_JOB_JSON);
+				importJobJson.createNewFile();
+				Util.objectMapper.writeValue(importJobJson, importJob);
+			} catch (IOException e) {
+				logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
+			}
+
+			/**
+			 * Write the UploadJob and schedule upload
 			 */
 			UploadJob uploadJob = new UploadJob();
 			ImportUtils.initUploadJob(importJob, uploadJob);
@@ -86,7 +102,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 			uploadJobManager.writeUploadJob(uploadJob);
 
 			/**
-			 * 4. Write the NominativeDataUploadJobManager for displaying the download state
+			 * Write the NominativeDataUploadJobManager for displaying the download state
 			 */
 			NominativeDataUploadJob dataJob = new NominativeDataUploadJob();
 			ImportUtils.initDataUploadJob(importJob, uploadJob, dataJob);
@@ -97,14 +113,9 @@ public class DownloadOrCopyRunnable implements Runnable {
 					uploadFolder.getAbsolutePath());
 			uploadDataJobManager.writeUploadDataJob(dataJob);
 			ShUpOnloadConfig.getCurrentNominativeDataController().addNewNominativeData(uploadFolder, dataJob);
-			logger.info(uploadFolder.getName() + ": finished: " + toString());
+			logger.info(uploadFolder.getName() + ": finished for DICOM study: " + importJob.getStudy().getStudyDescription()
+				+ ", " + importJob.getStudy().getStudyDate() + " of patient: " + importJob.getPatients().get(0).getPatientName());
 		}
-	}
-
-	@Override
-	public String toString() {
-		return "DownloadOrCopyRunnable [isFromPACS=" + isFromPACS + ", dicomServerClient=" + dicomServerClient
-				+ ", filePathDicomDir=" + filePathDicomDir + ", selectedStudies=" + importJobs.values().toString() + "]";
 	}
 
 }

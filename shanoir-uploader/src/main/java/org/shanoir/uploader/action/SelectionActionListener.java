@@ -155,13 +155,14 @@ public class SelectionActionListener implements TreeSelectionListener {
 		String studyInstanceUID = study.getStudyInstanceUID();
 		LocalDate studyDate = study.getStudyDate();
 		if (studyDate == null) {			
-			logger.error("Study date could not be used for import.");
+			logger.error("Study date could not be used for import, study: " + study.getStudyDescription());
 			if(mainWindow != null) {
 				JOptionPane.showMessageDialog(mainWindow.frame,
 				    "Study date could not be used for import: " + study.getStudyDescription(),
 				    "Data error",
 				    JOptionPane.ERROR_MESSAGE);
 			}
+			return;
 		}
 		ImportJob importJob = importJobs.get(studyInstanceUID);
 		if (importJob == null) {
@@ -186,6 +187,7 @@ public class SelectionActionListener implements TreeSelectionListener {
 			patients.add(patient);
 			importJob.setPatients(patients);
 		}
+		importJobs.put(studyInstanceUID, importJob);
 	}
 	
 	public Map<String, ImportJob> getImportJobs() {
