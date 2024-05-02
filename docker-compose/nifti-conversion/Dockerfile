@@ -105,8 +105,8 @@ RUN ldconfig \
     && mkdir -pv /var/log/shanoir-ng-logs
 
 # install the microservice
-ADD nifti-conversion.jar nifti-conversion.jar
-COPY entrypoint entrypoint_common oneshot /bin/
+ADD --link nifti-conversion.jar nifti-conversion.jar
+COPY --link entrypoint entrypoint_common oneshot /bin/
 
 ENV LC_ALL fr_FR.UTF-8
 ENV LANG fr_FR.UTF-8
