@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
@@ -54,7 +53,7 @@ public class ImportUtils {
 	 * @param physicallyInvolved is the subject physically involved
 	 * @param identifier the subject identifier
 	 */
-	public static void addSubjectStudy(final Study study, final Subject subject, SubjectType sType, boolean physicallyInvolved, String identifier) {
+	public static void addSubjectStudy(final Study study, final org.shanoir.uploader.model.rest.Subject subject, SubjectType sType, boolean physicallyInvolved, String identifier) {
 		SubjectStudy subjectStudy = new SubjectStudy();
 		subjectStudy.setStudy(new IdName(study.getId(), study.getName()));
 		subjectStudy.setSubject(new IdName(subject.getId(), subject.getName()));
@@ -99,14 +98,14 @@ public class ImportUtils {
 	 * @param dicomData
 	 * @param uploadJob
 	 */
-	public static void initUploadJob(String studyInstanceUID, final List<Serie> selectedSeries,
-			final Subject subject, UploadJob uploadJob) {
+	public static void initUploadJob(ImportJob importJob, UploadJob uploadJob) {
 		uploadJob.setUploadState(UploadState.READY);
 		uploadJob.setUploadDate(Util.formatTimePattern(new Date()));
 		/**
 		 * Patient level
 		 */
 		// set hash of subject identifier in any case: pseudonymus mode or not
+		Subject subject = importJob.getSubject();
 		uploadJob.setSubjectIdentifier(subject.getIdentifier());
 		// set all 10 hash values for pseudonymus mode
 		if (ShUpConfig.isModePseudonymus()) {
@@ -133,16 +132,21 @@ public class ImportUtils {
 		/**
 		 * Study level
 		 */
-		uploadJob.setStudyInstanceUID(studyInstanceUID);
-//		String studyDateStr = Util.convertLocalDateToString(dicomData.getStudyDate());
-//		uploadJob.setStudyDate(studyDateStr);
-//		uploadJob.setStudyDescription(dicomData.getStudyDescription());
+		org.shanoir.ng.importer.model.Study study = importJob.getStudy();
+		uploadJob.setStudyInstanceUID(study.getStudyInstanceUID());
+		String studyDateStr = Util.convertLocalDateToString(study.getStudyDate());
+		uploadJob.setStudyDate(studyDateStr);
+		uploadJob.setStudyDescription(study.getStudyDescription());
+
+		/**
+		 * @todo: only write importJob json to disk to read it afterwards and avoid senseless conversions
+		 * keep xml for the moment for the GUI only
+		 */
 
 		/**
 		 * Serie level
 		 */
-//		uploadJob.setSeries(selectedSeries);
-
+		List<Serie> selectedSeries = importJob.getStudy().getSelectedSeries();
 		Serie firstSerie = selectedSeries.iterator().next();
 		MRI mriInformation = new MRI();
 		InstitutionDicom institutionDicom = firstSerie.getInstitution();
@@ -233,13 +237,15 @@ public class ImportUtils {
 	 * Initializes UploadStatusServiceJob object
 	 * 
 	 */
-	public static void initDataUploadJob(final UploadJob uploadJob,
-			final Subject subject, NominativeDataUploadJob dataUploadJob) {
-		dataUploadJob.setPatientName(subject.getFirstName() + " " + subject.getLastName());
+	public static void initDataUploadJob(final ImportJob importjob, final UploadJob uploadJob, NominativeDataUploadJob dataUploadJob) {
+		Patient patient = importjob.getPatients().get(0);
+		Subject subject = importjob.getSubject();
+		org.shanoir.ng.importer.model.Study study = importjob.getStudy();
+		dataUploadJob.setPatientName(patient.getPatientFirstName() + " " + patient.getPatientLastName());
 		dataUploadJob.setPatientPseudonymusHash(subject.getIdentifier());
-//		String studyDateStr = Util.convertLocalDateToString(dicomData.getStudyDate()); 
-//		dataUploadJob.setStudyDate(studyDateStr);
-//		dataUploadJob.setIPP(dicomData.getIPP());
+		String studyDateStr = Util.convertLocalDateToString(study.getStudyDate()); 
+		dataUploadJob.setStudyDate(studyDateStr);
+		dataUploadJob.setIPP(patient.getPatientID());
 		dataUploadJob.setMriSerialNumber(uploadJob.getMriInformation().getManufacturer()
 				+ "(" + uploadJob.getMriInformation().getDeviceSerialNumber() + ")");
 		dataUploadJob.setUploadPercentage("");

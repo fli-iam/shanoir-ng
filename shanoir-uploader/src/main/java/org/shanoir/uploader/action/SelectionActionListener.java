@@ -166,6 +166,7 @@ public class SelectionActionListener implements TreeSelectionListener {
 		ImportJob importJob = importJobs.get(studyInstanceUID);
 		if (importJob == null) {
 			importJob = new ImportJob();
+			importJob.setStudy(study);
 			// add always the patient (parent), one per job
 			Patient patient = patientTreeNode.getPatient();
 			if(selectSeries) {
@@ -180,6 +181,7 @@ public class SelectionActionListener implements TreeSelectionListener {
 					}
 				}
 			}
+			// each import job has only one patient, his one
 			List<Patient> patients = new ArrayList<Patient>();
 			patients.add(patient);
 			importJob.setPatients(patients);

@@ -13,6 +13,7 @@ import javax.swing.JOptionPane;
 import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.PseudonymusHashValues;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.uploader.ShUpConfig;
@@ -64,46 +65,49 @@ public class DownloadOrCopyActionListener implements ActionListener {
 		/**
 		 * 1. Read values from GUI, entered by user
 		 */
-		Subject subject = createSubjectFromUserValuesInGUI();
-		if (subject == null) {
-			return;
-		}
-		/**
-		 * 2. Generate subject identifier and hash values
-		 */
-		try {
-			generateSubjectIdentifierAndHashValues(subject);
-		} catch (PseudonymusException e) {
-			logger.error(e.getMessage(), e);
-			JOptionPane.showMessageDialog(mainWindow.frame,
-				    resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.phv"),
-				    resourceBundle.getString("shanoir.uploader.select.error.title"),
-				    JOptionPane.ERROR_MESSAGE);
-			return;
-		} catch (UnsupportedEncodingException e) {
-			logger.error(e.getMessage(), e);
-			JOptionPane.showMessageDialog(mainWindow.frame,
-				    resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.phv"),
-				    resourceBundle.getString("shanoir.uploader.select.error.title"),
-				    JOptionPane.ERROR_MESSAGE);
-			return;
-		} catch (NoSuchAlgorithmException e) {
-			logger.error(e.getMessage(), e);
-			JOptionPane.showMessageDialog(mainWindow.frame,
-				    resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.phv"),
-				    resourceBundle.getString("shanoir.uploader.select.error.title"),
-				    JOptionPane.ERROR_MESSAGE);
+		Patient patient = null;
+		final Map<String, ImportJob> importJobs = mainWindow.getSAL().getImportJobs();
+		if (importJobs != null && !importJobs.isEmpty()) {
+			// for the moment: first patient verification, extend later for n-patient verification
+			ImportJob firstImportJob = importJobs.values().iterator().next();
+			if (firstImportJob != null)
+				patient = firstImportJob.getPatients().get(0);
+				patient = adjustPatientWithUserGUIValues(patient);
+				/**
+				 * 2. Generate subject identifier and hash values
+				 */
+				try {
+					Subject subject = createSubjectFromPatient(patient);
+					firstImportJob.setSubject(subject);
+				} catch (PseudonymusException e) {
+					logger.error(e.getMessage(), e);
+					JOptionPane.showMessageDialog(mainWindow.frame,
+							resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.phv"),
+							resourceBundle.getString("shanoir.uploader.select.error.title"),
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				} catch (UnsupportedEncodingException e) {
+					logger.error(e.getMessage(), e);
+					JOptionPane.showMessageDialog(mainWindow.frame,
+							resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.phv"),
+							resourceBundle.getString("shanoir.uploader.select.error.title"),
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				} catch (NoSuchAlgorithmException e) {
+					logger.error(e.getMessage(), e);
+					JOptionPane.showMessageDialog(mainWindow.frame,
+							resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.phv"),
+							resourceBundle.getString("shanoir.uploader.select.error.title"),
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+		} else {
 			return;
 		}
 		
 		/**
 		 * 3. Download from PACS or copy from CD/DVD and write upload-job.xml + nominative-data-job.xml
 		 */
-		final Map<String, ImportJob> importJobs = mainWindow.getSAL().getImportJobs();
-		// for the moment: one subject, all verified subject data are used with all studies
-		for (ImportJob importJob : importJobs.values()) {
-			importJob.setSubject(subject);
-		}
 		final String filePathDicomDir = mainWindow.getFindDicomActionListener().getFilePathDicomDir();
 		Runnable runnable = new DownloadOrCopyRunnable(mainWindow.isFromPACS, dicomServerClient, dicomFileAnalyzer,  filePathDicomDir, importJobs);
 		Thread thread = new Thread(runnable);
@@ -121,22 +125,21 @@ public class DownloadOrCopyActionListener implements ActionListener {
 
 	/**
 	 * This method reads the data entered by the user with the GUI
-	 * and puts it into a Subject object, when the user
-	 * clicks on the download or copy button.
+	 * and puts it into a Patient object to ajdust the already existing
+	 * values coming from the DICOM, when the user clicks on the download or copy button.
 	 * 
-	 * @param dicomData
+	 * @param Patient patient
 	 * @return
 	 */
-	private Subject createSubjectFromUserValuesInGUI() {
-		Subject subject = new Subject();
+	private Patient adjustPatientWithUserGUIValues(Patient patient) {
 		LocalDate birthDate = Util.convertStringToLocalDate(mainWindow.birthDateTF.getText());
-		subject.setBirthDate(birthDate);
+		patient.setPatientBirthDate(birthDate);
 		String sex = null;
 		if (mainWindow.mSexR.isSelected())
 			sex = "M";
 		if (mainWindow.fSexR.isSelected())
 			sex = "F";
-		subject.setSex(sex);
+		patient.setPatientSex(sex);
 		if (mainWindow.lastNameTF.getText().isEmpty()) {
 			JOptionPane.showMessageDialog(mainWindow.frame,
 					resourceBundle.getString("shanoir.uploader.import.start.lastname.empty"),
@@ -145,7 +148,7 @@ public class DownloadOrCopyActionListener implements ActionListener {
 			return null;
 		}
 		String lastName = mainWindow.lastNameTF.getText();
-		subject.setLastName(lastName);
+		patient.setPatientLastName(lastName);
 		if (mainWindow.firstNameTF.getText().isEmpty()) {
 			JOptionPane.showMessageDialog(mainWindow.frame,
 					resourceBundle.getString("shanoir.uploader.import.start.firstname.empty"),
@@ -154,7 +157,7 @@ public class DownloadOrCopyActionListener implements ActionListener {
 			return null;
 		}
 		String firstName = mainWindow.firstNameTF.getText();
-		subject.setFirstName(firstName);
+		patient.setPatientFirstName(firstName);
 		if (mainWindow.birthNameTF.getText().isEmpty()) {
 			JOptionPane.showMessageDialog(mainWindow.frame,
 					resourceBundle.getString("shanoir.uploader.import.start.birthname.empty"),
@@ -163,24 +166,26 @@ public class DownloadOrCopyActionListener implements ActionListener {
 			return null;
 		}
 		String birthName = mainWindow.birthNameTF.getText();
-		subject.setBirthName(birthName);
-		return subject;
+		patient.setPatientBirthName(birthName);
+		return patient;
 	}
 
-	private void generateSubjectIdentifierAndHashValues(Subject subject) throws PseudonymusException, UnsupportedEncodingException, NoSuchAlgorithmException {
-		String identifier = null;
+	private Subject createSubjectFromPatient(Patient patient) throws PseudonymusException, UnsupportedEncodingException, NoSuchAlgorithmException {
+		Subject subject = new Subject();
+		String identifier;
 		// OFSEP mode
 		if (ShUpConfig.isModePseudonymus()) {
-			// use PseudonymusHashValues here
-			pseudonymizer.createHashValuesWithPseudonymus(subject);
-			PseudonymusHashValues pseudonymusHashValues = subject.getPseudonymusHashValues();
+			// create PseudonymusHashValues here, based on Patient info, verified by users in GUI
+			PseudonymusHashValues pseudonymusHashValues = pseudonymizer.createHashValuesWithPseudonymus(patient);
+			subject.setPseudonymusHashValues(pseudonymusHashValues);
 			identifier = identifierCalculator.calculateIdentifierWithHashs(pseudonymusHashValues.getFirstNameHash1(), pseudonymusHashValues.getBirthNameHash1(), pseudonymusHashValues.getBirthDateHash());
 		// Neurinfo mode
 		} else {
-			String birthDate = Util.convertLocalDateToString(subject.getBirthDate());
-			identifier = identifierCalculator.calculateIdentifier(subject.getFirstName(), subject.getLastName(), birthDate);
+			String birthDate = Util.convertLocalDateToString(patient.getPatientBirthDate());
+			identifier = identifierCalculator.calculateIdentifier(patient.getPatientFirstName(), patient.getPatientLastName(), birthDate);
 		}
 		subject.setIdentifier(identifier);
+		return subject;
 	}
 
 }

@@ -38,6 +38,12 @@ public class Patient {
 	@JsonProperty("patientName")
 	private String patientName;
 
+	@JsonProperty("patientLastName")
+	private String patientLastName;
+
+	@JsonProperty("patientFirstName")
+	private String patientFirstName;
+
 	@JsonProperty("patientBirthName")
 	private String patientBirthName;
 
@@ -141,6 +147,22 @@ public class Patient {
 
 	public void setDeIdentificationMethod(String deIdentificationMethod) {
 		this.deIdentificationMethod = deIdentificationMethod;
+	}
+
+	public String getPatientLastName() {
+		return patientLastName;
+	}
+
+	public void setPatientLastName(String patientLastName) {
+		this.patientLastName = patientLastName;
+	}
+
+	public String getPatientFirstName() {
+		return patientFirstName;
+	}
+
+	public void setPatientFirstName(String patientFirstName) {
+		this.patientFirstName = patientFirstName;
 	}
 
 	@Override

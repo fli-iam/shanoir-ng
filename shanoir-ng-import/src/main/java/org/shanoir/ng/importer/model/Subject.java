@@ -32,15 +32,6 @@ public class Subject {
 	@JsonProperty("name")
 	private String name;
 
-	@JsonProperty("lastName")
-	private String lastName;
-
-	@JsonProperty("firstName")
-	private String firstName;
-
-	@JsonProperty("birthName")
-	private String birthName;
-
 	@JsonProperty("identifier")
 	private String identifier;
 
@@ -118,36 +109,12 @@ public class Subject {
 		this.subjectStudyList = subjectStudyList;
 	}
 
-	public String getLastName() {
-		return lastName;
-	}
-
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
-
-	public String getFirstName() {
-		return firstName;
-	}
-
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
 	public String getIdentifier() {
 		return identifier;
 	}
 
 	public void setIdentifier(String identifier) {
 		this.identifier = identifier;
-	}
-
-	public String getBirthName() {
-		return birthName;
-	}
-
-	public void setBirthName(String birthName) {
-		this.birthName = birthName;
 	}
 
 	public PseudonymusHashValues getPseudonymusHashValues() {

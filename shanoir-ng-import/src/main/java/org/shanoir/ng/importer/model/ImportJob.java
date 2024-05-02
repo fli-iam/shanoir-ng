@@ -56,32 +56,37 @@ public class ImportJob implements Serializable {
     
 	private String workFolder;
 
+	// @todo: remove this list here later
     private List<Patient> patients;
     
-	// examination: use already existing
-    private Long examinationId;
-    
-    private Long studyCardId;
-    
+	// DICOM study for this import job
+	private Study study;
+
+	// Shanoir study
     private Long studyId;
+    
+	private String studyName;
+
+    private Long studyCardId;
     
 	private String studyCardName;
 	
 	// todo: remove this later, when front end uses StudyCards
     private Long acquisitionEquipmentId;
 	
-	private String anonymisationProfileToUse;
-
-    private String archive;
-
 	// subject: use already existing
 	private String subjectName;
 
 	// subject: create new subject in ms studies based on these values
 	private Subject subject;
 
-	private String studyName;
+	// examination: use already existing
+    private Long examinationId;
 
+	private String anonymisationProfileToUse;
+
+    private String archive;
+    
 	private ShanoirEvent shanoirEvent;
 
 	private Long userId;
@@ -283,6 +288,14 @@ public class ImportJob implements Serializable {
 
 	public void setSubject(Subject subject) {
 		this.subject = subject;
+	}
+
+	public Study getStudy() {
+		return study;
+	}
+
+	public void setStudy(Study study) {
+		this.study = study;
 	}
 
 }

@@ -2,18 +2,14 @@ package org.shanoir.uploader.action;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Serie;
-import org.shanoir.ng.importer.model.Study;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
-import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
 import org.shanoir.uploader.upload.UploadJob;
@@ -58,15 +54,9 @@ public class DownloadOrCopyRunnable implements Runnable {
 	@Override
 	public void run() {
 		for (String studyInstanceUID : importJobs.keySet()) {
-			List<Serie> selectedSeries = null;
 			ImportJob importJob = importJobs.get(studyInstanceUID);
 			File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(), importJob);
-			List<Study> studies = importJob.getPatients().get(0).getStudies();
-			for (Study study : studies) {
-				if (study.getStudyInstanceUID().equals(studyInstanceUID)) {
-					selectedSeries = study.getSelectedSeries();
-				}
-			}
+			List<Serie> selectedSeries = importJob.getStudy().getSelectedSeries();
 			List<String> allFileNames = null;
 			try {
 				/**
@@ -98,7 +88,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 			 * 4. Write the NominativeDataUploadJobManager for displaying the download state
 			 */
 			NominativeDataUploadJob dataJob = new NominativeDataUploadJob();
-			ImportUtils.initDataUploadJob(uploadJob, dicomData, dataJob);
+			ImportUtils.initDataUploadJob(importJob, uploadJob, dataJob);
 			if (allFileNames == null) {
 				dataJob.setUploadState(UploadState.ERROR);
 			}
@@ -106,7 +96,6 @@ public class DownloadOrCopyRunnable implements Runnable {
 					uploadFolder.getAbsolutePath());
 			uploadDataJobManager.writeUploadDataJob(dataJob);
 			ShUpOnloadConfig.getCurrentNominativeDataController().addNewNominativeData(uploadFolder, dataJob);
-			
 			logger.info(uploadFolder.getName() + ": finished: " + toString());
 		}
 	}
