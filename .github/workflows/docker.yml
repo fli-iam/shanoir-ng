@@ -92,7 +92,7 @@ jobs:
           #  - set tags & labels
           cache = lambda image: f"type=registry,ref={env['DOCKER_REPOSITORY']}/{image}:cache"
           pathlib.Path("docker-bake.json").write_text(json.dumps({
-            "group": { "default": ["database"] }, # TODO: remove
+            "group": { "default": { "targets": ["database"] }}, # TODO: remove
             "target": {
               image: {
                 "cache-from": ([] if env['PRODUCTION'] else [cache(image)]),
