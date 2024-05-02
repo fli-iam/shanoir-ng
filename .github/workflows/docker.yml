@@ -85,16 +85,18 @@ jobs:
           images = json.loads(subprocess.check_output(
                   ["docker", "buildx", "bake", "--print", "-f", "docker-compose.yml"])
               )["group"]["default"]["targets"]
+          images = ["database"]
 
           # generate config
           #  - use github cache (for development builds build only)
           #  - save result to github cache
           #  - set tags & labels
+          cache = lambda image: f"type=registry,ref={env['DOCKER_REPOSITORY']}/{image}:cache"
           pathlib.Path("docker-bake.json").write_text(json.dumps({
             "target": {
               image: {
-                "cache-from": ([] if env['PRODUCTION'] else ["type=gha"]),
-                "cache-to":   ["type=gha,mode=max"],
+                "cache-from": ([] if env['PRODUCTION'] else [cache(image)]),
+                "cache-to":   [f"{cache(image)},mode=max"],
                 "tags": [f"{env['DOCKER_REPOSITORY']}/{image}:{env['IMAGE_TAG']}"],
                 #"labels": {
                 #  "org.opencontainers.image.url":      env['GIT_REPO_URL'],
@@ -107,8 +109,8 @@ jobs:
 
 #          cosign-release: 'v2.1.1'
 
-      - name: Maven build
-        run: mvn -f ./shanoir-ng-parent/pom.xml install -DskipTests
+#      - name: Maven build
+#        run: mvn -f ./shanoir-ng-parent/pom.xml install -DskipTests
 
       - name: Build docker images
         uses: docker/bake-action@v4
