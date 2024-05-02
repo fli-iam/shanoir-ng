@@ -92,31 +92,30 @@ jobs:
           #  - set tags & labels
           cache = lambda image: f"type=registry,ref={env['DOCKER_REPOSITORY']}/{image}:cache"
           pathlib.Path("docker-bake.json").write_text(json.dumps({
-            "group": { "default": { "targets": ["database"] }}, # TODO: remove
+            #"group": { "default": { "targets": ["database"] }}, # TODO: remove
             "target": {
               image: {
                 "cache-from": ([] if env['PRODUCTION'] else [cache(image)]),
-                "cache-to":   [f"{cache(image)},mode=max"],
+                "cache-to":   [f"{cache(image)},mode=max"], # TODO: only for the develop branch
                 "tags": [f"{env['DOCKER_REPOSITORY']}/{image}:{env['IMAGE_TAG']}"],
-                #"labels": {
-                #  "org.opencontainers.image.url":      env['GIT_REPO_URL'],
-                #  "org.opencontainers.image.source":   env['GIT_REPO_URL'],
-                #  "org.opencontainers.image.version":  env['IMAGE_TAG'],
-                #  "org.opencontainers.image.revision": env['SHA'],
-                #},
+                "labels": {
+                  "org.opencontainers.image.url":      env['GIT_REPO_URL'],
+                  "org.opencontainers.image.source":   env['GIT_REPO_URL'],
+                  "org.opencontainers.image.version":  env['IMAGE_TAG'],
+                  "org.opencontainers.image.revision": env['SHA'],
+                },
                 } for image in images }}))
 
 
 #          cosign-release: 'v2.1.1'
 
-#      - name: Maven build
-#        run: mvn -f ./shanoir-ng-parent/pom.xml install -DskipTests
+      - name: Maven build
+        run: mvn -f ./shanoir-ng-parent/pom.xml install -DskipTests
 
       - name: Build docker images
         uses: docker/bake-action@v4
         with:
           push: true
-          sbom: true
 #      # note: ultimately we should build the images with the docker/bake-action
 #      # (but buildx bake is still experimental)
 #      - name: Build docker images
