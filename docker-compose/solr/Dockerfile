@@ -17,6 +17,6 @@ RUN mkdir -p /etc/shanoir-core-template \
     && chown solr:solr /etc/shanoir-core-template
 USER solr
 
-COPY ./core /etc/shanoir-core-template
+COPY --link ./core /etc/shanoir-core-template
 
 CMD ["solr-precreate", "shanoir", "/etc/shanoir-core-template"]

@@ -12,4 +12,4 @@
 
 FROM mysql/mysql-server:5.7
 
-COPY --chmod=0755 1_add_users.sql /docker-entrypoint-initdb.d/
+COPY --link --chmod=0755 1_add_users.sql /docker-entrypoint-initdb.d/

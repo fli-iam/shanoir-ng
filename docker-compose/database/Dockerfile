@@ -12,15 +12,15 @@
 
 FROM mysql/mysql-server:5.7
 
-COPY --chmod=0755 /shanoir-entrypoint.sh /
+COPY --link --chmod=0755 /shanoir-entrypoint.sh /
 ENTRYPOINT ["/shanoir-entrypoint.sh"]
 CMD ["mysqld"]
 
-COPY --chmod=0755 \
+COPY --link --chmod=0755 \
     1_create_databases.sh \
     2_add_users.sql \
     3_add_statistics_procedure.sql \
     4_add_studyStatistics_procedure.sql \
     /docker-entrypoint-initdb.d/
  
-COPY db-changes /opt/db-changes
+COPY --link db-changes /opt/db-changes

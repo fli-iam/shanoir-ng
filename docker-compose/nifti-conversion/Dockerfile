@@ -84,16 +84,16 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     xvfb
 
 # Copy converters files
-COPY --chmod=0755 external/dcm2nii/linux/31MARCH2008/dcm2nii /opt/nifti-converters/dcm2nii_2008-03-31
-COPY --chmod=0755 external/dcm2nii/linux/dcm2nii             /opt/nifti-converters/dcm2nii_2014-08-04
-COPY --chmod=0755 external/mcverter/linux/mcverter_*         /opt/nifti-converters/
-COPY external/mcverter/linux/lib/lib*.so.*                   /usr/local/lib/x86_64-linux-gnu/
+COPY --link --chmod=0755 external/dcm2nii/linux/31MARCH2008/dcm2nii /opt/nifti-converters/dcm2nii_2008-03-31
+COPY --link --chmod=0755 external/dcm2nii/linux/dcm2nii             /opt/nifti-converters/dcm2nii_2014-08-04
+COPY --link --chmod=0755 external/mcverter/linux/mcverter_*         /opt/nifti-converters/
+COPY --link external/mcverter/linux/lib/lib*.so.*                   /usr/local/lib/x86_64-linux-gnu/
 RUN mkdir -m 1777 \
     /.dcm2nii_2008-03-31 \
     /.dcm2nii_2014-08-04
 
 # install animaConvertImage to convert Analyze format into nifti
-COPY --chmod=0755 external/anima/animaConvertImage /usr/local/bin/
+COPY --link --chmod=0755 external/anima/animaConvertImage /usr/local/bin/
 
 # install the binaries built in the 'builder' & 'conda' stages
 COPY --link --from=builder /target/. /
@@ -105,7 +105,7 @@ RUN ldconfig \
     && mkdir -pv /var/log/shanoir-ng-logs
 
 # install the microservice
-ADD --link nifti-conversion.jar nifti-conversion.jar
+COPY --link nifti-conversion.jar nifti-conversion.jar
 COPY --link entrypoint entrypoint_common oneshot /bin/
 
 ENV LC_ALL fr_FR.UTF-8
