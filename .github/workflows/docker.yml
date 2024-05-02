@@ -95,7 +95,8 @@ jobs:
             #"group": { "default": { "targets": ["database"] }}, # TODO: remove
             "target": {
               image: {
-                "cache-from": ([] if env['PRODUCTION'] else [cache(image)]),
+                # TODO: restore
+                #"cache-from": ([] if env['PRODUCTION'] else [cache(image)]), 
                 "cache-to":   [f"{cache(image)},mode=max"], # TODO: only for the develop branch
                 "tags": [f"{env['DOCKER_REPOSITORY']}/{image}:{env['IMAGE_TAG']}"],
                 "labels": {
