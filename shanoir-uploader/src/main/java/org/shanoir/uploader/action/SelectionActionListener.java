@@ -168,10 +168,24 @@ public class SelectionActionListener implements TreeSelectionListener {
 		ImportJob importJob = importJobs.get(studyInstanceUID);
 		if (importJob == null) {
 			importJob = new ImportJob();
+			importJob.setFromShanoirUploader(true);
 			// add always the patient (parent), one per job
 			Patient patient = patientTreeNode.getPatient();
-			importJob.setPatient(patient);
-			importJob.setStudy(study);
+			// create new patient and study here, that tree remains untouched
+			Patient newPatientForJob = new Patient();
+			newPatientForJob.setPatientName(patient.getPatientName());
+			newPatientForJob.setPatientID(patient.getPatientID());
+			newPatientForJob.setPatientLastName(patient.getPatientLastName());
+			newPatientForJob.setPatientFirstName(patient.getPatientFirstName());
+			newPatientForJob.setPatientBirthDate(patient.getPatientBirthDate());
+			newPatientForJob.setPatientBirthName(patient.getPatientBirthName());
+			newPatientForJob.setPatientSex(patient.getPatientSex());
+			importJob.setPatient(newPatientForJob);
+			Study newStudyForJob = new Study();
+			newStudyForJob.setStudyDate(studyDate);
+			newStudyForJob.setStudyInstanceUID(studyInstanceUID);
+			newStudyForJob.setStudyDescription(study.getStudyDescription());
+			importJob.setStudy(newStudyForJob);
 			// use list of selected series here
 			importJob.setSelectedSeries(new ArrayList<Serie>());
 			if(addAllSeries) {

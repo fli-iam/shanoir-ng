@@ -78,7 +78,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 			} catch (FileNotFoundException e) {
 				logger.error(e.getMessage(), e);
 			}
-
+			
 			/**
 			 * Write import-job.json to disk
 			 */
