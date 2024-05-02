@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
@@ -82,9 +83,9 @@ public class ImportUtils {
 	 * @param dicomData the dicom data to import
 	 * @return the created folder
 	 */
-	public static File createUploadFolder(final File workFolder, final ImportJob importJob) {
+	public static File createUploadFolder(final File workFolder, final String subjectIdentifier) {
 		final String timeStamp = Util.getCurrentTimeStampForFS();
-		final String folderName = workFolder.getAbsolutePath() + File.separator + importJob.getSubject().getIdentifier()
+		final String folderName = workFolder.getAbsolutePath() + File.separator + subjectIdentifier
 		+ "_" + timeStamp;
 		File uploadFolder = new File(folderName);
 		uploadFolder.mkdirs();

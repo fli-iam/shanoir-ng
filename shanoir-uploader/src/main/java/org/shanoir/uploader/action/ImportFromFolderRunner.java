@@ -194,59 +194,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
             return false;
         }
 
-        // Create upload folder
-        logger.info("create folder");
-//        File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(), subject);
 
-        List<String> allFileNames;
-        try {
-            logger.info("copying files");
-            Map<String, Set<SerieTreeNode>> studiesWithSelectedSeries = new HashMap<>();
-			studiesWithSelectedSeries.put(dicomData.getStudyInstanceUID(), selectedSeriesNodes);
-            allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(false, studiesWithSelectedSeries, uploadFolder, this.dicomFileAnalyzer, this.dicomServerClient, importTodo.getPath());
-            /**
-             * 5. Fill MRI information into serie from first DICOM file of each serie
-             * This has already been done for CD/DVD import, but not yet here for PACS
-             */
-            logger.info("5 Fill MRI info");
-            for (Iterator<SerieTreeNode> iterator = selectedSeriesNodes.iterator(); iterator.hasNext();) {
-                SerieTreeNode serie = iterator.next();
-                dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(uploadFolder.getAbsolutePath(), serie.getSerie(), null, false);
-            }
-        } catch (Exception e) {
-            logger.error("Could not infer data from local storage", e);
-            importTodo.setMessage(resourceBundle.getString("shanoir.uploader.import.folder.error.copy"));
-            return false;
-        }
-
-         // 6. Write the UploadJob and schedule upload
-        logger.info("6 Write upload job");
-
-        UploadJob uploadJob = new UploadJob();
-        ImportUtils.initUploadJob(selectedSeriesNodes, subject, uploadJob);
-
-        if (allFileNames == null) {
-            uploadJob.setUploadState(UploadState.ERROR);
-            importTodo.setMessage(resourceBundle.getString("shanoir.uploader.import.folder.error.copy"));
-            return false;
-        }
-        UploadJobManager uploadJobManager = new UploadJobManager(uploadFolder.getAbsolutePath());
-        uploadJobManager.writeUploadJob(uploadJob);
-
-        /**
-         * 7. Write the NominativeDataUploadJobManager for displaying the download state
-         */
-        logger.info("7 Write upload job nominative");
-
-        NominativeDataUploadJob dataJob = new NominativeDataUploadJob();
-        ImportUtils.initDataUploadJob(uploadJob, dicomData, dataJob);
-
-        NominativeDataUploadJobManager uploadDataJobManager = new NominativeDataUploadJobManager(
-                uploadFolder.getAbsolutePath());
-        uploadDataJobManager.writeUploadDataJob(dataJob);
-        ShUpOnloadConfig.getCurrentNominativeDataController().addNewNominativeData(uploadFolder, dataJob);
-
-        logger.info(uploadFolder.getName() + ": finished: " + toString());
 
         // 8.  Create subject if necessary
         Subject subjectFound = null;
@@ -257,7 +205,8 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
                 subjectFound = potentialSubject;
             }
         }
-
+/**
+ * 
         Study study = new Study();
         study.setId(importTodo.getParent().getStudy().getId());
         study.setName(importTodo.getParent().getStudy().getName());
@@ -288,7 +237,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
             this.folderimport.getListOfSubjectsForStudy().add(subject);
         }
         if (subject == null) {
-            uploadJob.setUploadState(UploadState.ERROR);
+//            uploadJob.setUploadState(UploadState.ERROR);
             importTodo.setMessage(resourceBundle.getString("shanoir.uploader.import.folder.error.subject"));
             return false;
         }
@@ -306,21 +255,20 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
         Examination createdExam = shanoirUploaderServiceClientNG.createExamination(examDTO);
 
         if (createdExam == null) {
-            uploadJob.setUploadState(UploadState.ERROR);
+//            uploadJob.setUploadState(UploadState.ERROR);
             importTodo.setMessage(resourceBundle.getString("shanoir.uploader.import.folder.error.examination"));
             return false;
         }
+ */
 
-        /**
-         * 10. Fill import-job.json to prepare the import
-         */
         logger.info("10 Import.json");
 
-        ImportJob importJob = ImportUtils.prepareImportJob(uploadJob, subject.getName(), subject.getId(), createdExam.getId(), study, importTodo.getParent().getStudyCard());
-        importJob.setFromShanoirUploader(true);
-        Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, importJob, subject.getName());
-        Thread thread = new Thread(runnable);
-        thread.start();
+//        ImportJob importJob = ImportUtils.prepareImportJob(uploadJob, subject.getName(), subject.getId(), createdExam.getId(), study, importTodo.getParent().getStudyCard());
+//        importJob.setFromShanoirUploader(true);
+//        Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, importJob, subject.getName());
+//        Thread thread = new Thread(runnable);
+//        thread.start();
+
         return true;
     }
 }

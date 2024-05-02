@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
@@ -55,7 +56,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 	public void run() {
 		for (String studyInstanceUID : importJobs.keySet()) {
 			ImportJob importJob = importJobs.get(studyInstanceUID);
-			File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(), importJob);
+			File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(), importJob.getSubject().getIdentifier());
 			List<Serie> selectedSeries = importJob.getStudy().getSelectedSeries();
 			List<String> allFileNames = null;
 			try {
