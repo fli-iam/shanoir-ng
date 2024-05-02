@@ -75,33 +75,68 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Generate docker bake config
+        shell: python
+        run: |
+          import json, os, pathlib, subprocess
+          env = os.environ
+  
+          # extract the list of images to be built from the docker-compose config
+          images = json.loads(subprocess.check_output(
+                  ["docker", "buildx", "bake", "--print", "-f", "docker-compose.yml"])
+              )["group"]["default"]["targets"]
+
+          # generate config
+          #  - use github cache (for development builds build only)
+          #  - save result to github cache
+          #  - set tags & labels
+          pathlib.Path("docker-bake.json").write_text(json.dumps({
+            "target": {
+              image: {
+                "cache-from": ([] if env['PRODUCTION'] else ["type=gha"]),
+                "cache-to":   ["type=gha,mode=max"],
+                "tags": [f"{env['DOCKER_REPOSITORY']}/{image}:{env['IMAGE_TAG']}"],
+                #"labels": {
+                #  "org.opencontainers.image.url":      env['GIT_REPO_URL'],
+                #  "org.opencontainers.image.source":   env['GIT_REPO_URL'],
+                #  "org.opencontainers.image.version":  env['IMAGE_TAG'],
+                #  "org.opencontainers.image.revision": env['SHA'],
+                #},
+                } for image in images }}))
+
+
 #          cosign-release: 'v2.1.1'
 
       - name: Maven build
         run: mvn -f ./shanoir-ng-parent/pom.xml install -DskipTests
 
-      # note: ultimately we should build the images with the docker/bake-action
-      # (but buildx bake is still experimental)
       - name: Build docker images
-        shell: python
-        run: |
-          import os, subprocess, sys
-
-          IMAGES = """database datasets import keycloak keycloak-database
-                      nginx nifti-conversion preclinical solr studies users
-                      """.split()
-
-          env = os.environ
-          for image in IMAGES:
-            repo = f"{env['DOCKER_REPOSITORY']}/{image}"
-            sys.stderr.write(f"#\n#   Building {image}:{env['IMAGE_TAG']}\n#\n")
-            subprocess.check_call(["docker", "buildx", "build",
-              *(["--cache-from=type=gha"] if not env['PRODUCTION'] else []),
-              "--cache-to=type=gha,mode=max",
-              "--tag", f"{ repo }:{ env['IMAGE_TAG'] }",
-              "--label", f"org.opencontainers.image.url={ env['GIT_REPO_URL'] }",
-              "--label", f"org.opencontainers.image.source={ env['GIT_REPO_URL'] }",
-              "--label", f"org.opencontainers.image.version={ env['IMAGE_TAG'] }",
-              "--label", f"org.opencontainers.image.revision={ env['SHA'] }",
-              "--push",
-              f"docker-compose/{image}"])
+        uses: docker/bake-action@v4
+        with:
+          push: true
+          sbom: true
+#      # note: ultimately we should build the images with the docker/bake-action
+#      # (but buildx bake is still experimental)
+#      - name: Build docker images
+#        shell: python
+#        run: |
+#          import os, subprocess, sys
+#
+#          IMAGES = """database datasets import keycloak keycloak-database
+#                      nginx nifti-conversion preclinical solr studies users
+#                      """.split()
+#
+#          env = os.environ
+#          for image in IMAGES:
+#            repo = f"{env['DOCKER_REPOSITORY']}/{image}"
+#            sys.stderr.write(f"#\n#   Building {image}:{env['IMAGE_TAG']}\n#\n")
+#            subprocess.check_call(["docker", "buildx", "build",
+#              *(["--cache-from=type=gha"] if not env['PRODUCTION'] else []),
+#              "--cache-to=type=gha,mode=max",
+#              "--tag", f"{ repo }:{ env['IMAGE_TAG'] }",
+#              "--label", f"org.opencontainers.image.url={ env['GIT_REPO_URL'] }",
+#              "--label", f"org.opencontainers.image.source={ env['GIT_REPO_URL'] }",
+#              "--label", f"org.opencontainers.image.version={ env['IMAGE_TAG'] }",
+#              "--label", f"org.opencontainers.image.revision={ env['SHA'] }",
+#              "--push",
+#              f"docker-compose/{image}"])
