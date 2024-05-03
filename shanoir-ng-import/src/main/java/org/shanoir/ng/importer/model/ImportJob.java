@@ -17,6 +17,7 @@ package org.shanoir.ng.importer.model;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -66,7 +67,7 @@ public class ImportJob implements Serializable {
 	private Study study;
 
 	// series to import with this import job
-	private List<Serie> selectedSeries;
+	private Set<Serie> selectedSeries;
 
 	// Shanoir study
     private Long studyId;
@@ -312,11 +313,11 @@ public class ImportJob implements Serializable {
 		this.patient = patient;
 	}
 
-	public List<Serie> getSelectedSeries() {
+	public Set<Serie> getSelectedSeries() {
 		return selectedSeries;
 	}
 
-	public void setSelectedSeries(List<Serie> selectedSeries) {
+	public void setSelectedSeries(Set<Serie> selectedSeries) {
 		this.selectedSeries = selectedSeries;
 	}
 	

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -187,7 +188,7 @@ public class SelectionActionListener implements TreeSelectionListener {
 			newStudyForJob.setStudyDescription(study.getStudyDescription());
 			importJob.setStudy(newStudyForJob);
 			// use list of selected series here
-			importJob.setSelectedSeries(new ArrayList<Serie>());
+			importJob.setSelectedSeries(new HashSet<Serie>());
 			if(addAllSeries) {
 				List<Study> studies = patient.getStudies();
 				for (Study studyOfAllStudies : studies) {
@@ -200,8 +201,8 @@ public class SelectionActionListener implements TreeSelectionListener {
 					}
 				}
 			}
+			importJobs.put(studyInstanceUID, importJob);
 		}
-		importJobs.put(studyInstanceUID, importJob);
 	}
 	
 	public Map<String, ImportJob> getImportJobs() {

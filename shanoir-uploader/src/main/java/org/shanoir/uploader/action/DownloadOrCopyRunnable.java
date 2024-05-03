@@ -3,6 +3,7 @@ package org.shanoir.uploader.action;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -61,7 +62,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 		for (String studyInstanceUID : importJobs.keySet()) {
 			ImportJob importJob = importJobs.get(studyInstanceUID);
 			File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(), importJob.getSubject().getIdentifier());
-			List<Serie> selectedSeries = importJob.getSelectedSeries();
+			List<Serie> selectedSeries = new ArrayList<>(importJob.getSelectedSeries());
 			List<String> allFileNames = null;
 			try {
 				/**

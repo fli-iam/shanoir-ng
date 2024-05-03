@@ -160,7 +160,7 @@ public class ImportUtils {
 		/**
 		 * Serie level
 		 */
-		List<Serie> selectedSeries = importJob.getSelectedSeries();
+		List<Serie> selectedSeries = new ArrayList<>(importJob.getSelectedSeries());
 		Serie firstSerie = selectedSeries.iterator().next();
 		MRI mriInformation = new MRI();
 		InstitutionDicom institutionDicom = firstSerie.getInstitution();
@@ -235,7 +235,7 @@ public class ImportUtils {
 		List<org.shanoir.ng.importer.model.Study> studiesImportJob = new ArrayList<org.shanoir.ng.importer.model.Study>();
 		org.shanoir.ng.importer.model.Study studyImportJob = new org.shanoir.ng.importer.model.Study();
 		// handle series for study now coming from job itself
-		final List<Serie> series = importJob.getSelectedSeries();
+		final List<Serie> series = new ArrayList<>(importJob.getSelectedSeries());
 		for (Serie serie : series) {
 			List<Instance> instances = serie.getInstances();
 			/**
@@ -245,8 +245,11 @@ public class ImportUtils {
 			 * is necessary, that import-from-pacs with ShUp run on the server.
 			 */
 			for(Instance instance : instances) {
-				String[] myStringArray = {instance.getSopInstanceUID() + DcmRcvManager.DICOM_FILE_SUFFIX};
-				instance.setReferencedFileID(myStringArray);
+				// do not change referencedFileID in case of import from disk
+				if (instance.getReferencedFileID() == null || instance.getReferencedFileID().length == 0) {
+					String[] myStringArray = {instance.getSopInstanceUID() + DcmRcvManager.DICOM_FILE_SUFFIX};
+					instance.setReferencedFileID(myStringArray);
+				}
 			}
 			serie.setSelected(true);
 		}
@@ -327,7 +330,12 @@ public class ImportUtils {
 			}
 			for (Instance instance : serie.getInstances()) {
 				File sourceFile = dicomFileAnalyzer.getFileFromInstance(instance, serie, filePathDicomDir, false);
-				String dicomFileName = sourceFile.getAbsolutePath().replace(File.separator, "_") + DcmRcvManager.DICOM_FILE_SUFFIX;
+				String dicomFileName = null;
+				if (sourceFile.getAbsolutePath().endsWith(DcmRcvManager.DICOM_FILE_SUFFIX)) {
+					dicomFileName = sourceFile.getAbsolutePath().replace(File.separator, "_");
+				} else {
+					dicomFileName = sourceFile.getAbsolutePath().replace(File.separator, "_") + DcmRcvManager.DICOM_FILE_SUFFIX;
+				}
 				// clean Windows file system root here to avoid destFile-path
 				// with two colons in the path, what is forbidden under Windows
 				// and leads therefore to copy failures, that block exports
