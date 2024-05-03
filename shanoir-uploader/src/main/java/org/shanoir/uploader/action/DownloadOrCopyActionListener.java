@@ -67,19 +67,17 @@ public class DownloadOrCopyActionListener implements ActionListener {
 		 * 1. Read values from GUI, entered by user
 		 */
 		Patient patient = null;
+		Patient firstPatient = null;
+		Subject firstSubject = null;
 		final Map<String, ImportJob> importJobs = mainWindow.getSAL().getImportJobs();
-		if (importJobs != null && !importJobs.isEmpty()) {
-			// for the moment: first patient verification, extend later for n-patient verification
-			ImportJob firstImportJob = importJobs.values().iterator().next();
-			if (firstImportJob != null)
-				patient = firstImportJob.getPatient();
-				patient = adjustPatientWithUserGUIValues(patient);
-				/**
-				 * 2. Generate subject identifier and hash values
-				 */
+		for (ImportJob importJob : importJobs.values()) {
+			// for the moment: one patient verification, extend later for n-patient verification
+			patient = adjustPatientWithUserGUIValues(importJob.getPatient());
+			if (firstPatient == null) {
+				firstPatient = patient;
 				try {
-					Subject subject = createSubjectFromPatient(patient);
-					firstImportJob.setSubject(subject);
+					firstSubject = createSubjectFromPatient(patient);
+					importJob.setSubject(firstSubject);
 				} catch (PseudonymusException e) {
 					logger.error(e.getMessage(), e);
 					JOptionPane.showMessageDialog(mainWindow.frame,
@@ -102,8 +100,13 @@ public class DownloadOrCopyActionListener implements ActionListener {
 							JOptionPane.ERROR_MESSAGE);
 					return;
 				}
-		} else {
-			return;
+			} else {
+				if (firstPatient.getPatientID().equals(patient.getPatientID())) {
+					importJob.setSubject(firstSubject);
+				} else {
+					return; // multi-patient not yet implemented, stop here
+				}
+			}
 		}
 		
 		/**
