@@ -11,14 +11,13 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
-
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened || selection?.equipmentId"
+        [class.selected]="this.menuOpened || selection?.equipmentId == node.id"
         [label]="node.label"
         awesome="fas fa-microscope"
-        [(opened)]="node.open"
-        (labelClick)="menuOpened = contextMenu && !menuOpened; selection.equipmentId = node.id;"
+        [(opened)]="node.opened"
+        (labelClick)="menuOpened = withMenu && !menuOpened; selection.equipmentId = node.id;"
         [hasChildren]="false"
         [title]="node.title + ' n°' + node.id">
 

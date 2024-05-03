@@ -38,7 +38,7 @@ import {KeycloakService} from '../../keycloak/keycloak.service';
 import {ShanoirError} from '../../models/error.model';
 import {ConsoleService} from '../../console/console.service';
 import {FooterState} from '../form-footer/footer-state.model';
-import {Entity, EntityRoutes} from './entity.abstract';
+import {Entity, EntityRoutes, EntityType} from './entity.abstract';
 import {EntityService} from './entity.abstract.service';
 import { SuperPromise } from 'src/app/utils/super-promise';
 
@@ -51,6 +51,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     private _entity: T;
     @Input() mode: Mode;
     @Input() id: number; // optional
+    @Input() showTree: boolean = true;
     @Output() close: EventEmitter<any> = new EventEmitter();
     footerState: FooterState;
     protected onSave: Subject<any> = new Subject<any>();
@@ -61,6 +62,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     @ViewChild('formContainer', {static: false}) formContainerElement: ElementRef;
     activeTab: string;
     protected isMainComponent: boolean;
+    @Output() entityNavigation: EventEmitter<{type: EntityType, id: number}> = new EventEmitter();
 
     /* services */
     protected confirmDialogService: ConfirmDialogService;
@@ -428,6 +430,14 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
      */
     public async hasDeleteRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert();
+    }
+
+    navigate(event, type: EntityType, id: number) {
+        this.entityNavigation.emit({type: type, id: id});
+        if (this.entityNavigation.observers.length > 0) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
     }
 
     @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {

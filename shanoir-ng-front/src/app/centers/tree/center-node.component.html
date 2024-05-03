@@ -14,11 +14,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened"
+        [class.selected]="this.menuOpened || selection.centerId == node.id"
         [label]="node.label"
         awesome="fa-regular fa-hospital"
         (firstOpen)="loadEquipments()"
-        [(opened)]="node.open"
+        [(opened)]="node.opened"
         (labelClick)="menuOpened = withMenu && !menuOpened; selection.centerId = node.id"
         [hasChildren]="hasChildren()"
         [title]="node.title + ' n°' + node.id">

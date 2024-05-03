@@ -15,6 +15,8 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from
 import { Router } from '@angular/router';
 
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { Selection } from 'src/app/studies/study/study-tree.component';
+import { SuperPromise } from 'src/app/utils/super-promise';
 import { DatasetAcquisition } from '../../dataset-acquisitions/shared/dataset-acquisition.model';
 import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
 import { Dataset } from '../../datasets/shared/dataset.model';
@@ -29,11 +31,11 @@ import {
     ExaminationNode,
     PreclinicalSubjectNode,
     ProcessingNode,
+    ShanoirNode,
     SubjectNode,
     UNLOADED,
 } from '../../tree/tree.model';
 import { Subject } from '../shared/subject.model';
-import { Selection } from 'src/app/studies/study/study-tree.component';
 
 
 @Component({
@@ -43,7 +45,7 @@ import { Selection } from 'src/app/studies/study/study-tree.component';
 
 export class SubjectNodeComponent implements OnChanges {
 
-    @Input() input: Subject | SubjectNode;
+    @Input() input: SubjectNode | {subject: Subject, parentNode: ShanoirNode};
     @Input() studyId: number;
     @Output() nodeInit: EventEmitter<SubjectNode> = new EventEmitter();
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
@@ -56,45 +58,49 @@ export class SubjectNodeComponent implements OnChanges {
     detailsPath: string = "";
     @Input() selection: Selection = new Selection();
     @Input() withMenu: boolean = true;
+    protected contentLoaded: SuperPromise<void> = new SuperPromise();
 
     constructor(
-        private examinationService: ExaminationService,
-        private router: Router,
-        private examPipe: ExaminationPipe,
-        private downloadService: MassDownloadService) {
+            private examinationService: ExaminationService,
+            private router: Router,
+            private examPipe: ExaminationPipe,
+            private downloadService: MassDownloadService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {
             if (this.input instanceof SubjectNode) {
                 this.node = this.input;
-            } else if (this.input.preclinical){
+            } else if (this.input.subject.preclinical) {
                 this.node = new PreclinicalSubjectNode(
-                    this.input.id,
-                    this.input.name,
+                    this.node,
+                    this.input.subject.id,
+                    this.input.subject.name,
                     [],
                     UNLOADED,
                     null,
                     false);
             } else {
                 this.node = new ClinicalSubjectNode(
-                    this.input.id,
-                    this.input.name,
+                    this.node,
+                    this.input.subject.id,
+                    this.input.subject.name,
                     [],
                     UNLOADED,
                     null,
                     false);
             }
+            this.node.registerOpenPromise(this.contentLoaded);
             this.nodeInit.emit(this.node);
             this.detailsPath = '/' + this.node.title + '/details/' + this.node.id;
             this.showDetails = this.router.url != this.detailsPath;
         }
     }
 
-    loadExaminations() {
+    loadExaminations(): Promise<void> {
         if (this.node.examinations == UNLOADED) {
-            this.loading = true;
-            this.examinationService.findExaminationsBySubjectAndStudy(this.node.id, this.studyId)
+            setTimeout(() => this.loading = true);
+            return this.examinationService.findExaminationsBySubjectAndStudy(this.node.id, this.studyId)
                 .then(examinations => {
                     let sortedExaminations = examinations.sort((a: SubjectExamination, b: SubjectExamination) => {
                         return (new Date(a.examinationDate)).getTime() - (new Date(b.examinationDate)).getTime();
@@ -106,15 +112,24 @@ export class SubjectNodeComponent implements OnChanges {
                         });
                     }
                     this.loading = false;
-                    this.node.open = true;
+                    this.node.open();
                 }).catch(() => {
-                this.loading = false;
-            });
+                    this.loading = false;
+                });
+        } else {
+            return Promise.resolve();
         }
+    }
+
+    onFirstOpen() {
+        this.loadExaminations().then(() => {
+            this.contentLoaded.resolve();
+        });
     }
 
     private mapExamNode(exam: SubjectExamination): ExaminationNode {
         return new ExaminationNode(
+            this.node,
             exam.id,
             this.examPipe.transform(exam),
             exam.datasetAcquisitions ? exam.datasetAcquisitions.map(dsAcq => this.mapAcquisitionNode(dsAcq)) : [],
@@ -125,6 +140,7 @@ export class SubjectNodeComponent implements OnChanges {
 
     private mapAcquisitionNode(dsAcq: DatasetAcquisition): DatasetAcquisitionNode {
         return new DatasetAcquisitionNode(
+            this.node,
             dsAcq.id,
             dsAcq.name,
             dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds, false)) : [],
@@ -134,6 +150,7 @@ export class SubjectNodeComponent implements OnChanges {
 
     private mapDatasetNode(dataset: Dataset, processed: boolean): DatasetNode {
         return new DatasetNode(
+            this.node,
             dataset.id,
             dataset.name,
             dataset.type,
@@ -145,6 +162,7 @@ export class SubjectNodeComponent implements OnChanges {
 
     private mapProcessingNode(processing: DatasetProcessing): ProcessingNode {
         return new ProcessingNode(
+            this.node,
             processing.id,
             DatasetProcessingType.getLabel(processing.datasetProcessingType),
             processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],
@@ -154,7 +172,7 @@ export class SubjectNodeComponent implements OnChanges {
 
     hasChildren(): boolean | 'unknown' {
         if (!this.node.examinations) return false;
-        else if (this.node.examinations == (UNLOADED as any)) return 'unknown';
+        else if (this.node.examinations == UNLOADED) return 'unknown';
         else return this.node.examinations.length > 0;
     }
 

@@ -22,7 +22,7 @@ import { DatepickerComponent } from '../../shared/date-picker/date-picker.compon
 import { IdName } from '../../shared/models/id-name.model';
 import { Option } from '../../shared/select/select.component';
 import { StudyService } from '../../studies/shared/study.service';
-import { ReverseSubjectNode, ClinicalSubjectNode } from '../../tree/tree.model';
+import { ReverseSubjectNode, ClinicalSubjectNode, ShanoirNode } from '../../tree/tree.model';
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
@@ -49,7 +49,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
     private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64), Validators.pattern(this.pattern)];
     forceStudy: Study = null;
     dicomPatientName: string;
-    subjectNode: Subject | ClinicalSubjectNode;
+    subjectNode: {subject: Subject, parentNode: ShanoirNode} | ClinicalSubjectNode;
 
     catOptions: Option<ImagedObjectCategory>[] = [
         new Option<ImagedObjectCategory>(ImagedObjectCategory.PHANTOM, 'Phantom'),
@@ -74,7 +74,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
     public get subject(): Subject { return this.entity; }
     public set subject(subject: Subject) {
         this.entity = subject;
-        this.subjectNode = this.breadcrumbsService.currentStep.data.subjectNode ? this.breadcrumbsService.currentStep.data.subjectNode : subject;
+        this.subjectNode = this.breadcrumbsService.currentStep.data.subjectNode ? this.breadcrumbsService.currentStep.data.subjectNode : {subject: Subject, parentNode: null};
     }
 
     getService(): EntityService<Subject> {

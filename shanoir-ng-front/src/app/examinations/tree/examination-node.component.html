@@ -20,7 +20,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [clickable] = "this.node.id != null"
         [label]="node.label"
         awesome="fas fa-stethoscope"
-        [(opened)]="node.open"
+        [(opened)]="node.opened"
         (labelClick)="menuOpened = withMenu && !menuOpened; selection.examinationId = node.id"
         (firstOpen)="firstOpen()"
         [hasChildren]="hasChildren()"
@@ -41,8 +41,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <ng-container *ngIf="node.open && node.datasetAcquisitions && node.datasetAcquisitions != $any('UNLOADED')">
         <dataset-acquisition-node
                 node
-                *ngFor="let datasetAcq of node.datasetAcquisitions; let i = index"
-                [input]="datasetAcq"
+                *ngFor="let datasetAcqNode of node.datasetAcquisitions; let i = index"
+                [input]="datasetAcqNode"
                 (selectedChange)="selectedChange.emit()"
                 [hasBox]="hasBox"
                 (onAcquisitionDelete)="onAcquisitionDelete(i)"

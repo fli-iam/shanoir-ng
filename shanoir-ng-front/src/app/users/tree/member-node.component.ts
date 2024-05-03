@@ -39,7 +39,7 @@ export class MemberNodeComponent implements OnChanges {
 
     constructor(
             private router: Router,
-            private keycloakService: KeycloakService) {
+            keycloakService: KeycloakService) {
         this.isAdmin = keycloakService.isUserAdmin();
     }
 

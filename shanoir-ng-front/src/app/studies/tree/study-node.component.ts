@@ -32,6 +32,7 @@ import { StudyRightsService } from "../shared/study-rights.service";
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
 import { Selection } from '../study/study-tree.component';
+import { SuperPromise } from 'src/app/utils/super-promise';
 
 @Component({
     selector: 'study-node',
@@ -62,46 +63,48 @@ export class StudyNodeComponent implements OnChanges {
             private studyRightsService: StudyRightsService) {}
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (!changes['input']) {
-            return;
+        if (changes['input']) {
+            this.studyRightsService.getMyRightsForStudy(this.input.id).then(rights => {
+                this.canAdmin =  this.keycloakService.isUserAdmin()
+                    || (this.keycloakService.isUserExpert() && rights.includes(StudyUserRight.CAN_ADMINISTRATE));
+    
+                if (this.input instanceof StudyNode) {
+                    this.node = this.input;
+                } else {
+                    let subjects: SubjectNode[] = this.input.subjectStudyList.map(subjectStudy => {
+                        if(subjectStudy.subject.preclinical){
+                            return new PreclinicalSubjectNode(this.node, subjectStudy.subject.id, this.subjectStudyPipe.transform(subjectStudy), subjectStudy.tags, UNLOADED, subjectStudy.qualityTag, this.canAdmin);
+                        }
+                        return new ClinicalSubjectNode(this.node, subjectStudy.subject.id, this.subjectStudyPipe.transform(subjectStudy), subjectStudy.tags, UNLOADED, subjectStudy.qualityTag, this.canAdmin);
+                    });
+                    let centers: CenterNode[] = this.input.studyCenterList.map(studyCenter => {
+                        return new CenterNode(this.node, studyCenter.center.id, studyCenter.center.name, UNLOADED);
+                    });
+                    let members: MemberNode[] = this.input.studyUserList.map(studyUser => {
+                        let memberNode: MemberNode = null;
+                        let rights: RightNode[] = studyUser.studyUserRights.map(suRight => new RightNode(memberNode, null, StudyUserRight.getLabel(suRight)));
+                        memberNode = new MemberNode(this.node, studyUser.userId, studyUser.userName, []);
+                        return memberNode;
+                    });
+                    members.sort((a: MemberNode, b: MemberNode) => {
+                        return a.label.toLowerCase().localeCompare(b.label.toLowerCase())
+                    })
+    
+                    this.node = new StudyNode(
+                            null,
+                            this.input.id,
+                            this.input.name,
+                            subjects,
+                            centers,
+                            UNLOADED,
+                            members);  // members
+                }
+                this.nodeInit.emit(this.node);
+                this.showDetails = this.router.url != this.detailsPath  + this.node.id;
+            })
         }
-
-        this.studyRightsService.getMyRightsForStudy(this.input.id).then(rights => {
-            this.canAdmin =  this.keycloakService.isUserAdmin()
-                || (this.keycloakService.isUserExpert() && rights.includes(StudyUserRight.CAN_ADMINISTRATE));
-
-            if (this.input instanceof StudyNode) {
-                this.node = this.input;
-            } else {
-                let subjects: SubjectNode[] = this.input.subjectStudyList.map(subjectStudy => {
-                    if(subjectStudy.subject.preclinical){
-                        return new PreclinicalSubjectNode(subjectStudy.subject.id, this.subjectStudyPipe.transform(subjectStudy), subjectStudy.tags, UNLOADED, subjectStudy.qualityTag, this.canAdmin);
-                    }
-                    return new ClinicalSubjectNode(subjectStudy.subject.id, this.subjectStudyPipe.transform(subjectStudy), subjectStudy.tags, UNLOADED, subjectStudy.qualityTag, this.canAdmin);
-                });
-                let centers: CenterNode[] = this.input.studyCenterList.map(studyCenter => {
-                    return new CenterNode(studyCenter.center.id, studyCenter.center.name, UNLOADED);
-                });
-                let members: MemberNode[] = this.input.studyUserList.map(studyUser => {
-                    let rights: RightNode[] = studyUser.studyUserRights.map(suRight => new RightNode(null, StudyUserRight.getLabel(suRight)));
-                    return new MemberNode(studyUser.userId, studyUser.userName, rights);
-                });
-                members.sort((a: MemberNode, b: MemberNode) => {
-                    return a.label.toLowerCase().localeCompare(b.label.toLowerCase())
-                })
-
-                this.node = new StudyNode(
-                        this.input.id,
-                        this.input.name,
-                        subjects,
-                        centers,
-                        UNLOADED,
-                        members);  // members
-            }
-            this.nodeInit.emit(this.node);
-            this.showDetails = this.router.url != this.detailsPath  + this.node.id;
-        })
     }
+    
     hasDependency(dependencyArr: any[] | UNLOADED): boolean | 'unknown' {
         if (!dependencyArr) return false;
         else if (dependencyArr == UNLOADED) return 'unknown';
@@ -109,19 +112,19 @@ export class StudyNodeComponent implements OnChanges {
     }
 
     loadStudyCards() {
-        if (this.node.studyCards == UNLOADED) {
+        if (this.node.studyCardsNode.studycards == UNLOADED) {
             this.studyCardsLoading = true;
             this.studyCardService.getAllForStudy(this.node.id).then(studyCards => {
                 if (studyCards) {
-                   this.node.studyCards = studyCards.map(studyCard => new StudyCardNode(studyCard.id, studyCard.name, this.canAdmin));
-                } else this.node.studyCards = [];
+                   this.node.studyCardsNode.studycards = studyCards.map(studyCard => new StudyCardNode(this.node, studyCard.id, studyCard.name, this.canAdmin));
+                } else this.node.studyCardsNode.studycards = [];
                 this.studyCardsLoading = false;
-                this.node.studycardsOpen = true;
+                this.node.studyCardsNode.open();
             }).catch(() => this.studyCardsLoading = false);
         }
     }
 
     onCardDelete(index: number) {
-        (this.node.studyCards as StudyCardNode[]).splice(index, 1) ;
+        (this.node.studyCardsNode.studycards as StudyCardNode[]).splice(index, 1) ;
     }
 }

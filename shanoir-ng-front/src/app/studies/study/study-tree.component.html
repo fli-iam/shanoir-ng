@@ -16,13 +16,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		[hasBox]="true"
 		[selection]="selection"
 		[withMenu]="false">
-</study-node>
+</study-node> 	
 
-<study-detail *ngIf="selection.studyId" [id]="selection.studyId" mode="view" class="details"></study-detail>
-<subject-detail *ngIf="selection.subjectId" [id]="selection.subjectId" mode="view" class="details"></subject-detail>
-<examination-detail *ngIf="selection.examinationId" [id]="selection.examinationId" mode="view" class="details"></examination-detail>
-<dataset-acquisition-detail *ngIf="selection.acquisitionId" [id]="selection.acquisitionId" mode="view" class="details"></dataset-acquisition-detail>
-<dataset-detail *ngIf="selection.datasetId" [id]="selection.datasetId" mode="view" class="details"></dataset-detail>
-<center-detail *ngIf="selection.centerId" [id]="selection.centerId" mode="view" class="details"></center-detail>
-<acquisition-equipment-detail *ngIf="selection.equipmentId" [id]="selection.equipmentId" mode="view" class="details"></acquisition-equipment-detail>
-<study-card *ngIf="selection.studycardId" [id]="selection.studycardId" mode="view" class="details"></study-card>
+<study-detail *ngIf="selection.studyId" [id]="selection.studyId" mode="view" class="details"  (entityNavigation)="navigate($event)" [showTree]="false"></study-detail>
+<subject-detail *ngIf="selection.subjectId" [id]="selection.subjectId" mode="view" class="details"  (entityNavigation)="navigate($event)" [showTree]="false"></subject-detail>
+<examination-detail *ngIf="selection.examinationId" [id]="selection.examinationId" mode="view" class="details"  (entityNavigation)="navigate($event)" [showTree]="false"></examination-detail>
+<dataset-acquisition-detail *ngIf="selection.acquisitionId" [id]="selection.acquisitionId" mode="view" class="details"  (entityNavigation)="navigate($event)" [showTree]="false"></dataset-acquisition-detail>
+<dataset-detail *ngIf="selection.datasetId" [id]="selection.datasetId" mode="view" class="details"  (entityNavigation)="navigate($event)" [showTree]="false"></dataset-detail>
+<center-detail *ngIf="selection.centerId" [id]="selection.centerId" mode="view" class="details"  (entityNavigation)="navigate($event)" [showTree]="false"></center-detail>
+<acquisition-equipment-detail *ngIf="selection.equipmentId" [id]="selection.equipmentId" mode="view" class="details"  (entityNavigation)="navigate($event)" [showTree]="false"></acquisition-equipment-detail>
+<study-card *ngIf="selection.studycardId" [id]="selection.studycardId" mode="view" class="details"  (entityNavigation)="navigate($event)" [showTree]="false"></study-card>

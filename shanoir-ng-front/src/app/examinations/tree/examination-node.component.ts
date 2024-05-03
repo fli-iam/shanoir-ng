@@ -23,10 +23,11 @@ import { TaskState } from 'src/app/async-tasks/task.model';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { Selection } from 'src/app/studies/study/study-tree.component';
 import { environment } from '../../../environments/environment';
-import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode } from '../../tree/tree.model';
+import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode, ShanoirNode } from '../../tree/tree.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationPipe } from '../shared/examination.pipe';
 import { ExaminationService } from '../shared/examination.service';
+import { SuperPromise } from 'src/app/utils/super-promise';
 
 @Component({
     selector: 'examination-node',
@@ -35,7 +36,7 @@ import { ExaminationService } from '../shared/examination.service';
 
 export class ExaminationNodeComponent implements OnChanges {
 
-    @Input() input: ExaminationNode | Examination;
+    @Input() input: ExaminationNode | {examination: Examination, parentNode: ShanoirNode};
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
     @Output() nodeInit: EventEmitter<ExaminationNode> = new EventEmitter();
     @Output() onExaminationDelete: EventEmitter<void> = new EventEmitter();
@@ -53,6 +54,7 @@ export class ExaminationNodeComponent implements OnChanges {
     detailsPath: string = '/examination/details/';
     @Input() selection: Selection = new Selection();
     @Input() withMenu: boolean = true;
+    private contentLoaded: SuperPromise<void> = new SuperPromise();
 
     constructor(
         private examinationService: ExaminationService,
@@ -71,12 +73,14 @@ export class ExaminationNodeComponent implements OnChanges {
                 }
             } else {
                 this.node = new ExaminationNode(
-                    this.input.id,
-                    this.examPipe.transform(this.input),
+                    this.input.parentNode,
+                    this.input.examination?.id,
+                    this.examPipe.transform(this.input.examination),
                     'UNLOADED',
-                    this.input.extraDataFilePathList,
+                    this.input.examination.extraDataFilePathList,
                     false);
             }
+            this.node.registerOpenPromise(this.contentLoaded);
             this.nodeInit.emit(this.node);
         }
     }
@@ -96,7 +100,11 @@ export class ExaminationNodeComponent implements OnChanges {
     }
 
     firstOpen() {
-        if (this.node.datasetAcquisitions == 'UNLOADED') this.loadDatasetAcquisitions().then(() => this.node.open = true);
+        if (this.node.datasetAcquisitions == 'UNLOADED') {
+            this.loadDatasetAcquisitions().then(() => this.contentLoaded.resolve());
+        } else {
+            this.contentLoaded.resolve();
+        }
     }
 
     loadDatasetAcquisitions(): Promise<void> {
@@ -164,6 +172,7 @@ export class ExaminationNodeComponent implements OnChanges {
 
     mapAcquisitionNode(dsAcq: any): DatasetAcquisitionNode {
         return new DatasetAcquisitionNode(
+            this.node,
             dsAcq.id,
             dsAcq.name,
             dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds, false)) : [],
@@ -173,6 +182,7 @@ export class ExaminationNodeComponent implements OnChanges {
 
     mapDatasetNode(dataset: Dataset, processed: boolean): DatasetNode {
         return new DatasetNode(
+            this.node,
             dataset.id,
             dataset.name,
             dataset.type,
@@ -184,6 +194,7 @@ export class ExaminationNodeComponent implements OnChanges {
 
     mapProcessingNode(processing: DatasetProcessing): ProcessingNode {
         return new ProcessingNode(
+            this.node,
             processing.id,
             DatasetProcessingType.getLabel(processing.datasetProcessingType),
             processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],

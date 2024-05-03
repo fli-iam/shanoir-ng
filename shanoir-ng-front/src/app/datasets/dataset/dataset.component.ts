@@ -12,9 +12,10 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
 import { NiftiConverter } from 'src/app/niftiConverters/nifti.converter.model';
 import { NiftiConverterService } from 'src/app/niftiConverters/nifti.converter.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -27,7 +28,7 @@ import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { Dataset, DatasetMetadata } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
 import { MrDataset } from './mr/dataset.mr.model';
-import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
+import { EntityType } from 'src/app/shared/components/entity/entity.abstract';
 
 
 @Component({

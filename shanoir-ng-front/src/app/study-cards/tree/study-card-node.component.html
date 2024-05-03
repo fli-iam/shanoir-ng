@@ -14,10 +14,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened"
+        [class.selected]="this.menuOpened || selection.studycardId == node.id"
         [label]="node.label"
         awesome="fa-solid fa-shuffle"
-        [(opened)]="node.open"
+        [(opened)]="node.opened"
         (labelClick)="menuOpened = withMenu && !menuOpened; selection.studycardId = node.id"
         [hasChildren]="false"
         [title]="node.title + ' n°' + node.id">

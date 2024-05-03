@@ -21,7 +21,7 @@ import { ExaminationPipe } from '../../examinations/shared/examination.pipe';
 
 import { ExaminationService } from '../../examinations/shared/examination.service';
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
-import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode, ReverseStudyNode, UNLOADED } from '../../tree/tree.model';
+import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode, ReverseStudyNode, ShanoirNode, UNLOADED } from '../../tree/tree.model';
 import { Study } from '../shared/study.model';
 import {KeycloakService} from "../../shared/keycloak/keycloak.service";
 import {StudyRightsService} from "../shared/study-rights.service";
@@ -35,7 +35,7 @@ import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.
 
 export class ReverseStudyNodeComponent implements OnChanges {
 
-    @Input() input: ReverseStudyNode | Study;
+    @Input() input: ReverseStudyNode | {study: Study, parentNode: ShanoirNode};
     @Input() subjectId: number;
     @Output() nodeInit: EventEmitter<ReverseStudyNode> = new EventEmitter();
     @Output() selectedChange: EventEmitter<ReverseStudyNode> = new EventEmitter();
@@ -61,8 +61,8 @@ export class ReverseStudyNodeComponent implements OnChanges {
         if (!changes['input']) {
             return;
         }
-
-        this.studyRightsService.getMyRightsForStudy(this.input.id).then(rights => {
+        let id: number = this.input instanceof ReverseStudyNode ? this.input.id : this.input.study.id;
+        this.studyRightsService.getMyRightsForStudy(id).then(rights => {
             this.canAdmin = this.keycloakService.isUserAdmin()
                 || (this.keycloakService.isUserExpert() && rights.includes(StudyUserRight.CAN_ADMINISTRATE));
 
@@ -70,8 +70,9 @@ export class ReverseStudyNodeComponent implements OnChanges {
                 this.node = this.input;
             } else {
                 this.node = new ReverseStudyNode(
-                    this.input.id,
-                    this.input.name,
+                    this.input.parentNode,
+                    this.input.study.id,
+                    this.input.study.name,
                     [],
                     UNLOADED);
             }
@@ -95,7 +96,7 @@ export class ReverseStudyNodeComponent implements OnChanges {
                     });
                 }
                 this.loading = false;
-                this.node.open = true;
+                this.node.open();
             }).catch(() => {
                 this.loading = false;
             });
@@ -104,6 +105,7 @@ export class ReverseStudyNodeComponent implements OnChanges {
 
     private mapExamNode(exam: SubjectExamination): ExaminationNode {
         return new ExaminationNode(
+            this.node,
             exam.id,
             this.examPipe.transform(exam),
             exam.datasetAcquisitions ? exam.datasetAcquisitions.map(dsAcq => this.mapAcquisitionNode(dsAcq)) : [],
@@ -114,6 +116,7 @@ export class ReverseStudyNodeComponent implements OnChanges {
 
     private mapAcquisitionNode(dsAcq: DatasetAcquisition): DatasetAcquisitionNode {
         return new DatasetAcquisitionNode(
+            this.node,
             dsAcq.id,
             dsAcq.name,
             dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds, false)) : [],
@@ -123,6 +126,7 @@ export class ReverseStudyNodeComponent implements OnChanges {
 
     private mapDatasetNode(dataset: Dataset, processed: boolean): DatasetNode {
         return new DatasetNode(
+            this.node,
             dataset.id,
             dataset.name,
             dataset.type,
@@ -134,6 +138,7 @@ export class ReverseStudyNodeComponent implements OnChanges {
 
     private mapProcessingNode(processing: DatasetProcessing): ProcessingNode {
         return new ProcessingNode(
+            this.node,
             processing.id,
             DatasetProcessingType.getLabel(processing.datasetProcessingType),
             processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],

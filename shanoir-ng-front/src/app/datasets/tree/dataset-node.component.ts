@@ -14,10 +14,11 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
-import {DatasetNode, ProcessingNode, UNLOADED} from '../../tree/tree.model';
+import { DatasetNode, ProcessingNode, UNLOADED} from '../../tree/tree.model';
 import { Dataset } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
 import { Selection } from 'src/app/studies/study/study-tree.component';
+import { last } from 'rxjs/operators';
 
 
 @Component({
@@ -52,10 +53,18 @@ export class DatasetNodeComponent implements OnChanges {
                 throw new Error('not implemented yet');
             }
         }
+        if (changes.selection && this.selection) {
+            this.selection.onSelect.toPromise().then(selection => {
+                selection.datasetId ? this.node.open() : this.node.close();
+            });
+            this.selection.onSelect.subscribe(selection => {
+                selection.datasetId ? this.node.open() : this.node.close();
+            });
+        }
     }
 
     toggleMenu() {
-        this.menuOpened = !this.menuOpened;
+        this.menuOpened = this.withMenu && !this.menuOpened;
     }
 
     download(format: string) {

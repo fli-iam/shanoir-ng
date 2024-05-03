@@ -51,7 +51,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<a [routerLink]="['/study/details/', datasetAcquisition.examination?.study?.id]">
-									{{datasetAcquisition.examination?.study?.name}}
+									<span (click)="navigate($event, 'study', datasetAcquisition.examination?.study?.id)">
+										{{datasetAcquisition.examination?.study?.name}}
+									</span>
 								</a>
 							</ng-template>
 						</span>
@@ -61,7 +63,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <span class="right-col" [ngSwitch]="mode">
                             <ng-template [ngSwitchCase]="'view'">
                                 <a [routerLink]="['/examination/details/', datasetAcquisition.examination?.id]">
-                                    {{datasetAcquisition?.examination?.comment ? datasetAcquisition?.examination?.comment : datasetAcquisition?.examination?.examinationDate  | date: 'dd/MM/yyyy'}}
+									<span (click)="navigate($event, 'examination', datasetAcquisition.examination?.id)">
+										{{datasetAcquisition?.examination?.comment ? datasetAcquisition?.examination?.comment : datasetAcquisition?.examination?.examinationDate  | date: 'dd/MM/yyyy'}}
+									</span>
                                 </a>
                             </ng-template>
                         </span>
@@ -71,7 +75,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<a [routerLink]="['/study-card/details/', datasetAcquisition.studyCard?.id]">
-									{{datasetAcquisition.studyCard?.name}}
+									<span (click)="navigate($event, 'studycard', datasetAcquisition.studyCard?.id)">
+										{{datasetAcquisition.studyCard?.name}}
+									</span>
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault>
@@ -91,7 +97,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<a *ngIf="datasetAcquisition.acquisitionEquipment?.id" [routerLink]="['/acquisition-equipment/details/', datasetAcquisition.acquisitionEquipment.id]">
-									{{datasetAcquisition.acquisitionEquipment | acqEqptLabel}}
+									<span (click)="navigate($event, 'equipment', datasetAcquisition?.acquisitionEquipment?.id)">
+										{{datasetAcquisition.acquisitionEquipment | acqEqptLabel}}
+									</span>
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault>
@@ -141,7 +149,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<pet-protocol *ngIf="datasetAcquisition.type == 'Pet'" [(ngModel)]="datasetAcquisition.protocol" formControlName="protocol"></pet-protocol>
 			</ng-container>
 
-			<fieldset *ngIf="mode=='view'">
+			<fieldset *ngIf="mode=='view' && showTree">
 				<legend i18n="Examination data|Title@@examinationDetailDataTitle">Data</legend>
 				<dataset-acquisition-node
 						[input]="acquisitionNode"

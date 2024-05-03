@@ -21,12 +21,9 @@ import { Subscription } from 'rxjs';
 import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
 import { Selection } from 'src/app/studies/study/study-tree.component';
 import { ConsoleService } from "../../shared/console/console.service";
-import { DatasetAcquisitionNode, DatasetNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
+import { DatasetAcquisitionNode, DatasetNode, ProcessingNode, UNLOADED, ShanoirNode } from '../../tree/tree.model';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from "../shared/dataset-acquisition.service";
-
-
-
 
 @Component({
     selector: 'dataset-acquisition-node',
@@ -36,7 +33,7 @@ import { DatasetAcquisitionService } from "../shared/dataset-acquisition.service
 export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
 
     progressStatus: TaskState;
-    @Input() input: DatasetAcquisitionNode | DatasetAcquisition;
+    @Input() input: DatasetAcquisitionNode | {datasetAcquisition: DatasetAcquisition, parentNode: ShanoirNode} ;
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
     node: DatasetAcquisitionNode;
     loading: boolean = false;
@@ -68,8 +65,8 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
                 }
 
             } else {
-                let label: string = 'Dataset Acquisition n°' + this.input.id;
-                this.node = new DatasetAcquisitionNode(this.input.id, label, UNLOADED,false);
+                let label: string = 'Dataset Acquisition n°' + this.input.datasetAcquisition.id;
+                this.node = new DatasetAcquisitionNode(this.input.parentNode, this.input.datasetAcquisition.id, label, UNLOADED,false);
                 this.loadDatasets();
             }
         }
@@ -107,6 +104,7 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
 
     private mapDatasetNode(dataset: Dataset, processed: boolean): DatasetNode {
         return new DatasetNode(
+            this.node,
             dataset.id,
             dataset.name,
             dataset.type,
@@ -118,6 +116,7 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
 
     private mapProcessingNode(processing: DatasetProcessing): ProcessingNode {
         return new ProcessingNode(
+            this.node,
             processing.id,
             DatasetProcessingType.getLabel(processing.datasetProcessingType),
             processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],

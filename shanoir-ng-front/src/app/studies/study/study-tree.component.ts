@@ -14,14 +14,16 @@
 import { Component, HostListener } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { Subscription } from 'rxjs';
-import { AcquisitionEquipmentService } from 'src/app/acquisition-equipments/shared/acquisition-equipment.service';
+import { Subject, Subscription } from 'rxjs';
 import { BreadcrumbsService } from 'src/app/breadcrumbs/breadcrumbs.service';
+import { EntityType } from 'src/app/shared/components/entity/entity.abstract';
 import { slideDown } from '../../shared/animations/animations';
-import { CenterNode, ClinicalSubjectNode, MemberNode, PreclinicalSubjectNode, RightNode, StudyNode, SubjectNode, UNLOADED } from '../../tree/tree.model';
+import { CenterNode, ClinicalSubjectNode, DatasetAcquisitionNode, ExaminationNode, MemberNode, PreclinicalSubjectNode, RightNode, StudyNode, SubjectNode, UNLOADED } from '../../tree/tree.model';
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
+import { DatasetService } from 'src/app/datasets/shared/dataset.service';
+import { Dataset } from 'src/app/datasets/shared/dataset.model';
 
 @Component({
     selector: 'study-tree',
@@ -32,7 +34,7 @@ import { StudyService } from '../shared/study.service';
 
 export class StudyTreeComponent {
 
-    protected studyNode: StudyNode;
+    protected studyNode: StudyNode = null;
     protected study: Study;
     protected subscriptions: Subscription[] = [];
     protected selection: Selection = new Selection();
@@ -41,25 +43,53 @@ export class StudyTreeComponent {
             private breadcrumbsService: BreadcrumbsService,
             protected activatedRoute: ActivatedRoute,
             private studyService: StudyService,
-            private equipmentService: AcquisitionEquipmentService) {
+            private datasetService: DatasetService) {
 
         this.subscriptions.push(this.activatedRoute.params.subscribe(
             params => {
                 const id = +params['id'];
-                this.init(id).then(() => {
+                this.initStudy(id).then(() => {
                     this.breadcrumbsService.currentStepAsMilestone(this.study.name);
+                    this.initSelection();
                 });
             }
         ));
     }
 
-    init(id: number): Promise<void> {
+    initSelection() {
+        //test
+        this.selection.datasetId = 39;
+        let datasetAlreadyLoaded: boolean = false; 
+        if (!datasetAlreadyLoaded) {
+            this.studyNode.subjectsNode.open().then(() => {
+                this.datasetService.get(39).then(ds => {
+                    let subjectNode: SubjectNode = (this.studyNode.subjectsNode.subjects as SubjectNode[]).find(sn => sn.id == ds.datasetAcquisition?.examination?.subject?.id);
+                    if (subjectNode) {
+                        subjectNode.open().then(() => {
+                            let examNode: ExaminationNode = (subjectNode.examinations as ExaminationNode[])?.find(exam => exam.id == ds.datasetAcquisition?.examination?.id);
+                            if (examNode) {
+                                examNode.open().then(() => {
+                                    let acqNode: DatasetAcquisitionNode = (examNode.datasetAcquisitions as DatasetAcquisitionNode[])?.find(acq => acq.id == ds.datasetAcquisition?.id);
+                                    if (acqNode) {
+                                        acqNode.open();
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+        }
+    }
+
+    initStudy(id: number): Promise<void> {
         let studyPromise: Promise<any> = this.studyService.get(id, null).then(study => {
             this.study = study;
             let subjectNodes: SubjectNode[] = study.subjectStudyList?.map(ss => {
                 let subjectNode: SubjectNode;
                 if (ss.subject?.preclinical){
                     subjectNode = new PreclinicalSubjectNode(
+                        this.studyNode,
                         ss.subject?.id,
                         ss.subject?.name,
                         ss.tags,
@@ -68,6 +98,7 @@ export class StudyTreeComponent {
                         false);
                 } else {
                     subjectNode = new ClinicalSubjectNode(
+                        this.studyNode,
                         ss.subject?.id,
                         ss.subject?.name,
                         ss.tags,
@@ -77,12 +108,21 @@ export class StudyTreeComponent {
                 }
                 return subjectNode;
             });
-            let centerNodes: CenterNode[] = study.studyCenterList?.map(sc => new CenterNode(sc.center.id, sc.center.name, UNLOADED));
-            let memberNodes: MemberNode[] = study.studyUserList?.map(su => new MemberNode(su.user?.id, su.userName, su.studyUserRights?.map(sur => new RightNode(null, StudyUserRight.getLabel(sur)))));
-            this.studyNode = new StudyNode(study.id, study.name, subjectNodes, centerNodes, UNLOADED, memberNodes);
-            this.studyNode.open = true;
+            let centerNodes: CenterNode[] = study.studyCenterList?.map(sc => new CenterNode(this.studyNode, sc.center.id, sc.center.name, UNLOADED));
+            let memberNodes: MemberNode[] = study.studyUserList?.map(su => {
+                let memberNode = null;
+                memberNode = new MemberNode(this.studyNode, su.user?.id || su.userId, su.userName, su.studyUserRights?.map(sur => new RightNode(memberNode, null, StudyUserRight.getLabel(sur))));
+                return memberNode;
+            });
+            this.studyNode = new StudyNode(null, study.id, study.name, subjectNodes, centerNodes, UNLOADED, memberNodes);
+            this.studyNode.open();
         });
         return studyPromise;
+    }
+
+    protected navigate(param: {type: EntityType, id: number}) {
+        this.selection.selectedEntity = param.type;
+        this.selection.id = param.id;
     }
 
     protected onCenterNodeSelect(id: number) {
@@ -157,18 +197,21 @@ export class StudyTreeComponent {
     @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
         if (event.key == '²') {
             console.log('selection', this.selection);
+            console.log('node', this.studyNode);
         }
     }
 }
 
 export class Selection {
 
-    private selectedEntity: 'study' | 'subject' | 'examination' | 'acquisition' | 'dataset' | 'processing' | 'center' | 'equipment' | 'studycard' | 'qualitycard' | 'member';
-    private id: number;
+    public selectedEntity: EntityType;
+    public id: number;
+    public onSelect: Subject<Selection> = new Subject();
 
     set studyId(id: number) {
         this.selectedEntity = 'study';
         this.id = id;
+        this.onSelect.next(this);
     }
 
     get studyId(): number {
@@ -178,6 +221,7 @@ export class Selection {
     set subjectId(id: number) {
         this.selectedEntity = 'subject';
         this.id = id;
+        this.onSelect.next(this);
     }
 
     get subjectId(): number {
@@ -187,6 +231,7 @@ export class Selection {
     set examinationId(id: number) {
         this.selectedEntity = 'examination';
         this.id = id;
+        this.onSelect.next(this);
     }
 
     get examinationId(): number {
@@ -196,6 +241,7 @@ export class Selection {
     set acquisitionId(id: number) {
         this.selectedEntity = 'acquisition';
         this.id = id;
+        this.onSelect.next(this);
     }
 
     get acquisitionId(): number {
@@ -205,6 +251,7 @@ export class Selection {
     set datasetId(id: number) {
         this.selectedEntity = 'dataset';
         this.id = id;
+        this.onSelect.next(this);
     }
 
     get datasetId(): number {
@@ -214,6 +261,7 @@ export class Selection {
     set processingId(id: number) {
         this.selectedEntity = 'processing';
         this.id = id;
+        this.onSelect.next(this);
     }
 
     get processingId(): number {
@@ -223,6 +271,7 @@ export class Selection {
     set centerId(id: number) {
         this.selectedEntity = 'center';
         this.id = id;
+        this.onSelect.next(this);
     }
 
     get centerId(): number {
@@ -232,6 +281,7 @@ export class Selection {
     set equipmentId(id: number) {
         this.selectedEntity = 'equipment';
         this.id = id;
+        this.onSelect.next(this);
     }
 
     get equipmentId(): number {
@@ -241,6 +291,7 @@ export class Selection {
     set studycardId(id: number) {
         this.selectedEntity = 'studycard';
         this.id = id;
+        this.onSelect.next(this);
     }
 
     get studycardId(): number {
@@ -250,6 +301,7 @@ export class Selection {
     set qualitycardId(id: number) {
         this.selectedEntity = 'qualitycard';
         this.id = id;
+        this.onSelect.next(this);
     }
 
     get qualitycardId(): number {
@@ -257,11 +309,12 @@ export class Selection {
     }
 
     set memberId(id: number) {
-        this.selectedEntity = 'member';
+        this.selectedEntity = 'user';
         this.id = id;
+        this.onSelect.next(this);
     }
 
     get memberId(): number {
-        return this.selectedEntity == 'member' ? this.id : null;
+        return this.selectedEntity == 'user' ? this.id : null;
     }
 }

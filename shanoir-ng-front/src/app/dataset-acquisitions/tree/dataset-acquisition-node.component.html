@@ -21,7 +21,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [label]="node.label"
         [clickable] = "this.node.id != null"
         awesome="fas fa-procedures"
-        [(opened)]="node.open"
+        [(opened)]="node.opened"
         (labelClick)="menuOpened = withMenu && !menuOpened; selection.acquisitionId = node.id"
         [hasChildren]="hasChildren()"
         (firstOpen)="loadDatasets()"

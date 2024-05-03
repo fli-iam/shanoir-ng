@@ -17,7 +17,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [class.selected]="this.menuOpened || selection?.datasetId == node.id"
         [label]="node.label"
         awesome="fas fa-camera"
-        [(opened)]="node.open"
+        [(opened)]="node.opened"
         (labelClick)="toggleMenu(); selection.datasetId = node.id"
         [dataLoading]="loading"
         [hasBox]="hasBox"

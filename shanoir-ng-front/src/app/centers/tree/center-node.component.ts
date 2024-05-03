@@ -67,10 +67,10 @@ export class CenterNodeComponent implements OnChanges {
             center =>  {
                 if (center) {
                     this.node.acquisitionEquipments = center.acquisitionEquipments.map(
-                            acqEq => new AcquisitionEquipmentNode(acqEq.id, this.acquisitionEquipmentPipe.transform(acqEq), 'UNLOADED', this.keycloakService.isUserAdminOrExpert()));
+                            acqEq => new AcquisitionEquipmentNode(this.node, acqEq.id, this.acquisitionEquipmentPipe.transform(acqEq), 'UNLOADED', this.keycloakService.isUserAdminOrExpert()));
                 }
                 this.loading = false;
-                this.node.open = true;
+                this.node.open();
             }).catch(() => {
                 this.loading = false;
             });

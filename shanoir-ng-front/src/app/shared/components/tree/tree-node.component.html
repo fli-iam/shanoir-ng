@@ -21,10 +21,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <span *ngIf="dataLoading">
         <div class="fa fa-cog fa-spin"></div>
     </span>
-    <span *ngIf="!dataLoading && pictoUrl" (click)="labelClick.emit()" class="picto" [class.clickable]="isClickable()">
+    <span *ngIf="!dataLoading && pictoUrl" (click)="labelClick.emit()" (dblclick)="toggle()" class="picto" [class.clickable]="isClickable()">
         <img class="picto" src="{{pictoUrl}}" />
     </span>
-    <span *ngIf="!dataLoading && awesome" (click)="labelClick.emit()" class="picto" [class.clickable]="isClickable()">
+    <span *ngIf="!dataLoading && awesome" (click)="labelClick.emit()" (dblclick)="toggle()" class="picto" [class.clickable]="isClickable()">
         <i class="{{awesome}}"></i>
     </span>
     <input #box class="box" type="checkbox" *ngIf="hasBox" [(ngModel)]="value" (change)="chkbxChange.emit(value)" class="clickable" />
@@ -33,7 +33,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <i class="{{buttonPicto}}"></i>
     </span>
     <span *ngIf="!editable" class="label">
-        <span (click)="labelClick.emit()" [class.clickable]="isClickable()">{{label}}</span>
+        <span (click)="labelClick.emit()" (dblclick)="toggle()" [class.clickable]="isClickable()">{{label}}</span>
         <span *ngIf="buttonPicto" class="button-picto clickable" (click)="buttonClick.emit()">
             <i class="{{buttonPicto}}"></i>
         </span>

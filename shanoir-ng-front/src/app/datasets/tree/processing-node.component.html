@@ -17,7 +17,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [label]="node.label"
         [class.selected]="selection.processingId == node.id"
         awesome="fas fa-cog"
-        [(opened)]="node.open"
+        [(opened)]="node.opened"
         (labelClick)="toggleMenu(); selection.processingId = node.id"
         [hasChildren]="hasChildren()"
         [title]="node.title + ' n°' + node.id">

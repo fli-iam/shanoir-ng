@@ -575,8 +575,8 @@ export class StudyComponent extends EntityComponent<Study> {
 
     onTreeSelectedChange(study: StudyNode) {
         let dsIds: number [] = [];
-        if (study.subjects && study.subjects != 'UNLOADED') {
-            study.subjects.forEach(subj => {
+        if (study.subjectsNode.subjects && study.subjectsNode.subjects != 'UNLOADED') {
+            study.subjectsNode.subjects.forEach(subj => {
                 if (subj.examinations && subj.examinations != 'UNLOADED') {
                     subj.examinations.forEach(exam => {
                         if (exam.datasetAcquisitions && exam.datasetAcquisitions != 'UNLOADED') {
@@ -611,7 +611,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     onStudyNodeInit(studyNode: StudyNode) {
-        studyNode.open = true;
+        studyNode.open();
         this.breadcrumbsService.currentStep.data.studyNode = studyNode;
     }
 

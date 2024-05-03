@@ -38,3 +38,5 @@ export class EntityRoutes {
     }
 
 }
+
+export type EntityType = 'study' | 'subject' | 'examination' | 'acquisition' | 'dataset' | 'processing' | 'center' | 'equipment' | 'studycard' | 'qualitycard' | 'user';
