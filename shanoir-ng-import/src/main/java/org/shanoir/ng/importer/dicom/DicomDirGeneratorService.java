@@ -102,6 +102,7 @@ public class DicomDirGeneratorService {
 	private int addRecords(Attributes dataset, int num, String[] fileIDs, char prompt, String iuid, Attributes fmi)
 			throws IOException {
 		String pid = dataset.getString(Tag.PatientID, null);
+		String pBirthDate = dataset.getString(Tag.PatientBirthDate);
 		String styuid = dataset.getString(Tag.StudyInstanceUID, null);
 		String seruid = dataset.getString(Tag.SeriesInstanceUID, null);
 		String seriesDescription = dataset.getString(Tag.SeriesDescription, null);
@@ -114,6 +115,7 @@ public class DicomDirGeneratorService {
 			Attributes patRec = in.findPatientRecord(pid);
 			if (patRec == null) {
 				patRec = recFact.createRecord(RecordType.PATIENT, null, dataset, null, null);
+				patRec.setString(Tag.PatientBirthDate, VR.DA, pBirthDate);
 				out.addRootDirectoryRecord(patRec);
 				num++;
 			}
