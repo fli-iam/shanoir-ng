@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -172,8 +173,6 @@ public class DownloadOrCopyActionListener implements ActionListener {
 
 	private Subject createSubjectFromPatient(Patient patient) throws PseudonymusException, UnsupportedEncodingException, NoSuchAlgorithmException {
 		Subject subject = new Subject();
-		subject.setSex(patient.getPatientSex());
-		subject.setBirthDate(patient.getPatientBirthDate());
 		String identifier;
 		// OFSEP mode
 		if (ShUpConfig.isModePseudonymus()) {
@@ -183,10 +182,19 @@ public class DownloadOrCopyActionListener implements ActionListener {
 			identifier = identifierCalculator.calculateIdentifierWithHashs(pseudonymusHashValues.getFirstNameHash1(), pseudonymusHashValues.getBirthNameHash1(), pseudonymusHashValues.getBirthDateHash());
 		// Neurinfo mode
 		} else {
-			String birthDate = Util.convertLocalDateToString(patient.getPatientBirthDate());
-			identifier = identifierCalculator.calculateIdentifier(patient.getPatientFirstName(), patient.getPatientLastName(), birthDate);
+			String birthDateString = Util.convertLocalDateToString(patient.getPatientBirthDate());
+			identifier = identifierCalculator.calculateIdentifier(patient.getPatientFirstName(), patient.getPatientLastName(), birthDateString);
 		}
 		subject.setIdentifier(identifier);
+		/**
+		 * Keep sex and set birth date in subject to 01.01.year
+		 */
+		subject.setSex(patient.getPatientSex());
+		LocalDate birthDate = patient.getPatientBirthDate();
+		if (birthDate != null) {
+			birthDate = birthDate.with(TemporalAdjusters.firstDayOfYear());
+			subject.setBirthDate(birthDate);
+		}
 		return subject;
 	}
 

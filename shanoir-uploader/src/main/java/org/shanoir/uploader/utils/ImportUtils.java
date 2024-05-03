@@ -140,11 +140,7 @@ public class ImportUtils {
 			uploadJob.setBirthDateHash(pseudonymusHashValues.getBirthDateHash());
 		}
 		LocalDate birthDate = subject.getBirthDate();
-		if (birthDate != null) {
-			birthDate = birthDate.with(TemporalAdjusters.firstDayOfYear());
-			String birthDateStr = Util.convertLocalDateToString(birthDate); 
-			uploadJob.setPatientBirthDate(birthDateStr);
-		}
+		uploadJob.setPatientBirthDate(Util.convertLocalDateToString(birthDate));
 		uploadJob.setPatientSex(subject.getSex());
 
 		/**
