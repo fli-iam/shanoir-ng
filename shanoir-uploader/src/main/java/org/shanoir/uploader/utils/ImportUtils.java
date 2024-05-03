@@ -237,6 +237,17 @@ public class ImportUtils {
 		// handle series for study now coming from job itself
 		final List<Serie> series = importJob.getSelectedSeries();
 		for (Serie serie : series) {
+			List<Instance> instances = serie.getInstances();
+			/**
+			 * Attention: the below switch is important, as all import jobs from ShUp
+			 * are considered as "from-disk" on the server, nevertheless if within ShUp
+			 * they come from a pacs or a local disk, so the below setReferencedFileID
+			 * is necessary, that import-from-pacs with ShUp run on the server.
+			 */
+			for(Instance instance : instances) {
+				String[] myStringArray = {instance.getSopInstanceUID() + DcmRcvManager.DICOM_FILE_SUFFIX};
+				instance.setReferencedFileID(myStringArray);
+			}
 			serie.setSelected(true);
 		}
 		studyImportJob.setSeries(series);
