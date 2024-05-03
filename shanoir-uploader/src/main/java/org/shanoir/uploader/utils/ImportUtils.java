@@ -2,13 +2,13 @@ package org.shanoir.uploader.utils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
@@ -22,6 +22,7 @@ import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.uploader.ShUpConfig;
+import org.shanoir.uploader.action.ImportFinishRunnable;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.MRI;
 import org.shanoir.uploader.dicom.query.SerieTreeNode;
@@ -37,14 +38,30 @@ import org.shanoir.uploader.upload.UploadState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.exc.StreamReadException;
+import com.fasterxml.jackson.databind.DatabindException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 /**
  * This class contains useful methods for data upload that are used multiple times in the application.
  * @author Jcome
+ * @author mkain
  *
  */
 public class ImportUtils {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ImportUtils.class);
+	
+	private static ObjectMapper objectMapper = new ObjectMapper();
+
+	static {
+		objectMapper.registerModule(new JavaTimeModule())
+			.registerModule(new Jdk8Module())
+			.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+	}
 	
 	/**
 	 * Adds a subjectStudy to a given subject with the given study
@@ -167,6 +184,16 @@ public class ImportUtils {
 		logger.info(mriInformation.toString());
 	}
 
+	public static ImportJob readImportJob(File uploadFolder) throws StreamReadException, DatabindException, IOException {
+		File importJobJsonFile = new File(uploadFolder.getAbsolutePath() + File.separator + ImportFinishRunnable.IMPORT_JOB_JSON);
+		if (importJobJsonFile.exists()) {
+			ImportJob importJob = objectMapper.readValue(importJobJsonFile, ImportJob.class);
+			return importJob;
+		} else {
+			throw new IOException(ImportFinishRunnable.IMPORT_JOB_JSON + " missing in folder: " + uploadFolder.getAbsolutePath());
+		}
+	}
+
 	/**
 	 * subjectId and examinationId are created in the window of ImportDialog and are not known before.
 	 * 
@@ -177,10 +204,11 @@ public class ImportUtils {
 	 * @param study
 	 * @param studyCard
 	 * @return
+	 * @throws IOException 
+	 * @throws DatabindException 
+	 * @throws StreamReadException 
 	 */
-	public static ImportJob prepareImportJob(UploadJob uploadJob, String subjectName, Long subjectId, Long examinationId, Study study, StudyCard studyCard) {
-		ImportJob importJob = new ImportJob();
-		importJob.setFromShanoirUploader(true);
+	public static ImportJob prepareImportJob(ImportJob importJob, String subjectName, Long subjectId, Long examinationId, Study study, StudyCard studyCard) {
 		// Handle study and study card
 		importJob.setStudyId(study.getId());
 		importJob.setStudyName(study.getName());
@@ -191,10 +219,16 @@ public class ImportUtils {
 		importJob.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
 		importJob.setExaminationId(examinationId);
 
+		/**
+		 * @todo: refactor to remove patients list from import job.
+		 * for the moment, to finish the first refactor, keep the
+		 * current structure required by the server: patients -
+		 * patient - subject - study - series (selected)
+		 */
 		List<Patient> patients = new ArrayList<>();
 		// handle patient and subject
 		Patient patient = new Patient();
-		patient.setPatientID(uploadJob.getSubjectIdentifier());
+		patient.setPatientID(importJob.getSubject().getIdentifier());
 		org.shanoir.ng.importer.model.Subject subject = new org.shanoir.ng.importer.model.Subject();
 		subject.setId(subjectId);
 		subject.setName(subjectName);
@@ -204,28 +238,10 @@ public class ImportUtils {
 		// handle study dicom == examination in Shanoir
 		List<org.shanoir.ng.importer.model.Study> studiesImportJob = new ArrayList<org.shanoir.ng.importer.model.Study>();
 		org.shanoir.ng.importer.model.Study studyImportJob = new org.shanoir.ng.importer.model.Study();
-		// handle series for study
-		final List<Serie> series = new ArrayList<Serie>();
-		final Collection<SerieTreeNode> serieTreeNodes = uploadJob.getSeries();
-		for (SerieTreeNode serieTreeNode : serieTreeNodes) {
-			Serie serie = new Serie();
-			serie.setSelected(serieTreeNode.isSelected());
-			serie.setIgnored(serieTreeNode.getSerie().isIgnored());
-			serie.setErroneous(serieTreeNode.getSerie().isErroneous());
-			serie.setSeriesInstanceUID(serieTreeNode.getId());
-			serie.setSeriesNumber(serieTreeNode.getSeriesNumber());
-			serie.setModality(serieTreeNode.getModality());
-			serie.setProtocolName(serieTreeNode.getProtocol());
-			List<Instance> instances = new ArrayList<Instance>();
-			for (String filename : serieTreeNode.getFileNames()){
-				Instance instance = new Instance();
-				String[] myStringArray = {filename};
-				instance.setReferencedFileID(myStringArray);
-				instances.add(instance);
-			}
-			serie.setInstances(instances);
-			serie.setImagesNumber(serieTreeNode.getFileNames().size());
-			series.add(serie);
+		// handle series for study now coming from job itself
+		final List<Serie> series = importJob.getSelectedSeries();
+		for (Serie serie : series) {
+			serie.setSelected(true);
 		}
 		studyImportJob.setSeries(series);
 		studiesImportJob.add(studyImportJob);

@@ -172,6 +172,8 @@ public class DownloadOrCopyActionListener implements ActionListener {
 
 	private Subject createSubjectFromPatient(Patient patient) throws PseudonymusException, UnsupportedEncodingException, NoSuchAlgorithmException {
 		Subject subject = new Subject();
+		subject.setSex(patient.getPatientSex());
+		subject.setBirthDate(patient.getPatientBirthDate());
 		String identifier;
 		// OFSEP mode
 		if (ShUpConfig.isModePseudonymus()) {

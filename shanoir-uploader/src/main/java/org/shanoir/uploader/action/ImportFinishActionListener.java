@@ -4,6 +4,7 @@ import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -104,12 +105,23 @@ public class ImportFinishActionListener implements ActionListener {
 		((JButton) event.getSource()).setEnabled(false);
 		mainWindow.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
+		ImportJob importJob = null;
+		try {
+			importJob = ImportUtils.readImportJob(uploadFolder);
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+			JOptionPane.showMessageDialog(mainWindow.frame,
+					mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.import.study"),
+					"Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+
 		/**
 		 * Handle subject here: creation or use existing
 		 */
 		if (subject == null) {
 			try {
-				 subject = fillSubject(mainWindow.importDialog, uploadJob);
+				 subject = fillSubject(mainWindow.importDialog, importJob);
 			} catch (ParseException e) {
 				logger.error(e.getMessage(), e);
 				JOptionPane.showMessageDialog(mainWindow.frame,
@@ -186,9 +198,9 @@ public class ImportFinishActionListener implements ActionListener {
 		}
 				
 		/**
-		 * 3. Fill import-job.json
+		 * 3. Fill importJob, start pseudo and prepare upload
 		 */
-		ImportJob importJob = ImportUtils.prepareImportJob(uploadJob, subject.getName(), subject.getId(), examinationId, (Study) mainWindow.importDialog.studyCB.getSelectedItem(), (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem());
+		ImportUtils.prepareImportJob(importJob, subject.getName(), subject.getId(), examinationId, (Study) mainWindow.importDialog.studyCB.getSelectedItem(), (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem());
 		Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, importJob, subject.getName());
 		Thread thread = new Thread(runnable);
 		thread.start();
@@ -203,24 +215,22 @@ public class ImportFinishActionListener implements ActionListener {
 				ShUpConfig.resourceBundle.getString("shanoir.uploader.import.start.auto.import.message"),
 				"Import", JOptionPane.INFORMATION_MESSAGE);
 	}
-	
 
-
-	private Subject fillSubject(final ImportDialog importDialog, final UploadJob uploadJob) throws ParseException {
+	private Subject fillSubject(final ImportDialog importDialog, final ImportJob importJob) throws ParseException {
 		final Subject subjectDTO = new Subject();
 		/**
-		 * Values coming from UploadJob
+		 * Values coming from subject in import job
 		 */
-		subjectDTO.setIdentifier(uploadJob.getSubjectIdentifier());
-        Date birthDate = ShUpConfig.formatter.parse(uploadJob.getPatientBirthDate());
-		subjectDTO.setBirthDate(Util.convertToLocalDateViaInstant(birthDate));
-		if (uploadJob.getPatientSex().compareTo(Sex.F.name()) == 0) {
+		final org.shanoir.ng.importer.model.Subject subject = importJob.getSubject();
+		subjectDTO.setIdentifier(subject.getIdentifier());
+		subjectDTO.setBirthDate(subject.getBirthDate());
+		if (subject.getSex().compareTo(Sex.F.name()) == 0) {
 			subjectDTO.setSex(Sex.F);
-		} else if (uploadJob.getPatientSex().compareTo(Sex.M.name()) == 0) {
+		} else if (subject.getSex().compareTo(Sex.M.name()) == 0) {
 			subjectDTO.setSex(Sex.M);
 		}
 		if (ShUpConfig.isModePseudonymus()) {
-			fillPseudonymusHashValues(uploadJob, subjectDTO);
+			subjectDTO.setPseudonymusHashValues(subject.getPseudonymusHashValues());
 		}
 		/**
 		 * Values coming from ImportDialog
@@ -243,21 +253,6 @@ public class ImportFinishActionListener implements ActionListener {
 		}
 		subjectDTO.setSubjectStudyList(new ArrayList<SubjectStudy>());
 		return subjectDTO;
-	}
-
-	private void fillPseudonymusHashValues(final UploadJob uploadJob, final Subject subjectDTO) {
-		PseudonymusHashValues pseudonymusHashValues = new PseudonymusHashValues();
-		pseudonymusHashValues.setFirstNameHash1(uploadJob.getFirstNameHash1());
-		pseudonymusHashValues.setFirstNameHash2(uploadJob.getFirstNameHash2());
-		pseudonymusHashValues.setFirstNameHash3(uploadJob.getFirstNameHash3());
-		pseudonymusHashValues.setLastNameHash1(uploadJob.getLastNameHash1());
-		pseudonymusHashValues.setLastNameHash2(uploadJob.getLastNameHash2());
-		pseudonymusHashValues.setLastNameHash3(uploadJob.getLastNameHash3());
-		pseudonymusHashValues.setBirthNameHash1(uploadJob.getBirthNameHash1());
-		pseudonymusHashValues.setBirthNameHash2(uploadJob.getBirthNameHash2());
-		pseudonymusHashValues.setBirthNameHash3(uploadJob.getBirthNameHash3());
-		pseudonymusHashValues.setBirthDateHash(uploadJob.getBirthDateHash());
-		subjectDTO.setPseudonymusHashValues(pseudonymusHashValues);
 	}
 
 }
