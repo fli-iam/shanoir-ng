@@ -254,6 +254,8 @@ public class ImportUtils {
 		studiesImportJob.add(studyImportJob);
 		patient.setStudies(studiesImportJob);
 		importJob.setPatients(patients);
+		// bring back later, but for the moment set to null to reduce file size of json
+		importJob.setSelectedSeries(null);
 		return importJob;
 	}
 
