@@ -23,6 +23,9 @@ env:
   # - commit id (develpment builds)
   IMAGE_TAG: ${{ github.event_name == 'push' && github.ref_name || inputs.sha }}
 
+  # boolean: force rebuilding the docker images from scratch
+  NO_CACHE: $({ inputs.no_cache && '1' || '' }}
+
 on:
   push:
     tags:
@@ -33,6 +36,10 @@ on:
         description: 'git commit to be built'
         type: string
         required: true
+      no_cache:
+        description: 'force rebuilding the docker images from scratch'
+        type: boolean
+        default: false
 
 jobs:
   build_images:
@@ -95,11 +102,12 @@ jobs:
           #
           # Instead we explicitely store the cache in container repository of
           # the project ('type=registry'), under the tag 'cache'
-          # - we pull the cache (cache_from) before every development builds
+          # - we pull the cache (cache_from) before development builds of any
+          #   branch when inputs.no_cache is false
           # - we push the cache (cache_to) after development builds of the
           #   main branch only
-          # - we never use the cache for production builds
-          enable_cache_from = not env['PRODUCTION']
+          # - we never use the cache on production builds
+          enable_cache_from = not env['PRODUCTION'] and not env['NO_CACHE']
           enable_cache_to   = not env['PRODUCTION'] and (
             main_branch_sha == env['IMAGE_TAG'] == env['SHA'])
           print(f"{enable_cache_from = }\n{enable_cache_to = }\n")
