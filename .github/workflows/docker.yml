@@ -24,7 +24,7 @@ env:
   IMAGE_TAG: ${{ github.event_name == 'push' && github.ref_name || inputs.sha }}
 
   # boolean: force rebuilding the docker images from scratch
-  NO_CACHE: $({ inputs.no_cache && '1' || '' }}
+  NO_CACHE: ${{ inputs.no_cache && '1' || '' }}
 
 on:
   push:
