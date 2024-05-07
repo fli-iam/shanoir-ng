@@ -62,13 +62,18 @@ RUN mkdir -p /target/opt/nifti-converters/mriconverter \
     && chmod 0777 . MRIFileManager/MRIManager.jar
 
 
-FROM base_image as final
-
-# NOTE: using bookworm-proposed-updates because of https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1039472
+#--------------- common jre base image -------------------------------------
+FROM debian:bookworm as final
+# - disable the automatic "apt-get clean" command (because we mount
+#   /var/cache/apt from an external volume to speed-up the build)
+# - NOTE: using bookworm-proposed-updates because of
+#         https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1039472
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    echo "deb http://deb.debian.org/debian bookworm-proposed-updates main" >> /etc/apt/sources.list \
+    rm /etc/apt/apt.conf.d/docker-clean \
+    && echo "deb http://deb.debian.org/debian bookworm-proposed-updates main" >> /etc/apt/sources.list \
     && apt-get update -qq \
-    && apt-get install -qqy openjdk-17-jre ca-certificates-java
+    && apt-get install -qqy openjdk-17-jre-headless ca-certificates-java
+#----------------------------------------------------------------------------
 
 # xvfb+gtk2 needed by mri_conv (headless mode not supported by DicomToNifti)
 # see: https://populse.github.io/mri_conv/Installation/installation.html#scriptwithoutGUI
@@ -80,6 +85,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     locales-all \
     jq \
     libgtk2.0-0 \
+    openjdk-17-jre \
     pigz \
     xvfb
 
