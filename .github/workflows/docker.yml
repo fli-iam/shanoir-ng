@@ -122,7 +122,7 @@ jobs:
               )["group"]["default"]["targets"]
 
           # override the bake config (add cache config + set tags & labels)
-          pathlib.Path("docker-bake.json").write_text(json.dumps({
+          config = json.dumps({
             #"group": { "default": { "targets": ["database"] }}, # TODO: remove
             "target": {
               image: {
@@ -135,8 +135,10 @@ jobs:
                   "org.opencontainers.image.version":  env['IMAGE_TAG'],
                   "org.opencontainers.image.revision": env['SHA'],
                 },
-                } for image in images }}))
-
+                } for image in images }}, indent=2)
+          if "${{ runner.debug }}":
+            print(config)
+          pathlib.Path("docker-bake.json").write_text(config)
 
 #          cosign-release: 'v2.1.1'
 
