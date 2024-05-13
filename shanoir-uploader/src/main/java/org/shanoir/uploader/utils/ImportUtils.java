@@ -4,10 +4,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -25,7 +24,6 @@ import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.action.ImportFinishRunnable;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.MRI;
-import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
 import org.shanoir.uploader.model.rest.IdName;
 import org.shanoir.uploader.model.rest.Study;
@@ -188,6 +186,29 @@ public class ImportUtils {
 		} else {
 			throw new IOException(ImportFinishRunnable.IMPORT_JOB_JSON + " missing in folder: " + uploadFolder.getAbsolutePath());
 		}
+	}
+
+	public static ImportJob createNewImportJob(Patient patient, org.shanoir.ng.importer.model.Study study) {
+		ImportJob importJob = new ImportJob();
+		importJob.setFromShanoirUploader(true);
+		// create new patient here, that tree remains untouched
+		Patient newPatientForJob = new Patient();
+		newPatientForJob.setPatientName(patient.getPatientName());
+		newPatientForJob.setPatientID(patient.getPatientID());
+		newPatientForJob.setPatientLastName(patient.getPatientLastName());
+		newPatientForJob.setPatientFirstName(patient.getPatientFirstName());
+		newPatientForJob.setPatientBirthDate(patient.getPatientBirthDate());
+		newPatientForJob.setPatientBirthName(patient.getPatientBirthName());
+		newPatientForJob.setPatientSex(patient.getPatientSex());
+		importJob.setPatient(newPatientForJob);
+		// create new study here, that tree remains untouched
+		org.shanoir.ng.importer.model.Study newStudyForJob = new org.shanoir.ng.importer.model.Study();
+		newStudyForJob.setStudyDate(study.getStudyDate());
+		newStudyForJob.setStudyInstanceUID(study.getStudyInstanceUID());
+		newStudyForJob.setStudyDescription(study.getStudyDescription());
+		importJob.setStudy(newStudyForJob);
+		importJob.setSelectedSeries(new HashSet<Serie>());
+		return importJob;
 	}
 
 	/**

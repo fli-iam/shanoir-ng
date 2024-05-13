@@ -21,19 +21,13 @@ import javax.swing.SwingWorker;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
-import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
-import org.shanoir.uploader.dicom.query.PatientTreeNode;
-import org.shanoir.uploader.dicom.query.SerieTreeNode;
-import org.shanoir.uploader.dicom.query.StudyTreeNode;
 import org.shanoir.uploader.gui.ImportFromCSVWindow;
 import org.shanoir.uploader.model.CsvImport;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
@@ -44,13 +38,13 @@ import org.shanoir.uploader.model.rest.Sex;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectType;
-import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
-import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 import org.shanoir.uploader.upload.UploadJob;
 import org.shanoir.uploader.upload.UploadJobManager;
 import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.ImportUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 
@@ -189,7 +183,6 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 
 		// 2. Select series
 		logger.info("2 Select series");
-
 		List<Serie> selectedSeries = new ArrayList<>();
 
 		Patient pat = null;
@@ -201,14 +194,12 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		String serialNumber = null;
 		String modelName = null;
 		
-		Map<Study, List<Serie>> selectedSeriesByStudy = new HashMap<>();
-
 		Study selectedStudy = null;
+		Map<Study, List<Serie>> selectedSeriesByStudy = new HashMap<>();
 
 		LocalDate minDate;
 		LocalDate selectedStudyDate = LocalDate.now();
 		if (!StringUtils.isBlank(csvImport.getMinDateFilter())) {
-			
 			String[] acceptedFormats = {"yyyy","yyyy-MM-dd","yyyy-MM-dd-HH"};
 			try {
 				minDate = LocalDate.from(DateUtils.parseDate(csvImport.getMinDateFilter(), acceptedFormats).toInstant());
@@ -272,6 +263,19 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));
 			return false;
 		}
+		
+		/**
+		 * For the moment the ImportFromCSVRunner processes line-by-line, study-by-study,
+		 * so we only send one import job to the DownloadOrCopyRunnable, to download only
+		 * one DICOM study, as the code after directly finishes the import of this study.
+		 */
+		HashMap<String, ImportJob> importJobs = new HashMap<String, ImportJob>();
+		ImportJob importJob = ImportUtils.createNewImportJob(pat, selectedStudy);
+		selectedSeries.stream().forEach(s -> importJob.getSelectedSeries().add(s));
+		importJobs.put(importJob.getStudy().getStudyInstanceUID(), importJob);
+		Runnable runnable = new DownloadOrCopyRunnable(true, dicomServerClient, dicomFileAnalyzer,  null, importJobs);
+		Thread thread = new Thread(runnable);
+		thread.start();
 
 		// 3. Check existence of study / study card
 		logger.info("3 Check study card");
@@ -302,15 +306,11 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		logger.info("4 Complete data");
 		Subject subject = new Subject();
 		try {
-			
 			// Calculate identifier
-
 			// #1609 we encounter problems when using same subject data across multiple studies.
 			// We add study id in front of identifier to correct this
 			String subjectIdentifier = stud.getStudyDate() +  this.identifierCalculator.calculateIdentifier(pat.getPatientFirstName(), pat.getPatientLastName(), pat.getPatientBirthDate().toString());
-
 			subject.setIdentifier(subjectIdentifier);
-
 			// Change birth date to first day of year
 			final LocalDate dicomBirthDate = pat.getPatientBirthDate();
 			if (dicomBirthDate != null) {
@@ -320,26 +320,18 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 				cal.set(Calendar.DAY_OF_MONTH, 1);
 				subject.setBirthDate(LocalDate.from(cal.toInstant()));
 			}
-
 		} catch (Exception e) {
 			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));
 			return false;
 		}
 
-		HashMap<String, ImportJob> importJobs = new HashMap<String, ImportJob>();
-		// @todo: create import jobs to manage
-//		Runnable runnable = new DownloadOrCopyRunnable(true, dicomServerClient, dicomFileAnalyzer,  null, importJobs);
-//		Thread thread = new Thread(runnable);
-//		thread.start();
-
-/**
 		Long centerId = sc.getCenterId();
 
 		// 8.  Create subject if necessary
 		Subject subjectFound = null;
 		String subjectStudyIdentifier = null;
 		try {
-			subjectFound = shanoirUploaderServiceClientNG.findSubjectBySubjectIdentifier(subjectIdentifier);
+			subjectFound = shanoirUploaderServiceClientNG.findSubjectBySubjectIdentifier(subject.getIdentifier());
 			if (!subjectFound.getName().equals(csvImport.getCommonName())) {
 				// If the name does not match, change the subjectStudyIdentifier for this study
 				subjectStudyIdentifier = csvImport.getCommonName();
@@ -348,7 +340,6 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 			//Do nothing, if it fails, we'll just create a new subject
 		}
 		
-		Subject subject;
 		if (subjectFound != null) {
 			logger.info("8 Subject exists, just use it");
 			subject = subjectFound;
@@ -356,7 +347,6 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 			subject = shanoirUploaderServiceClientNG.createSubjectStudy(subject);
 		} else {
 			logger.info("8 Creating a new subject");
-	
 			subject = new org.shanoir.uploader.model.rest.Subject();
 			subject.setName(csvImport.getCommonName());
 			if (!StringUtils.isEmpty(pat.getPatientSex())) {
@@ -365,17 +355,18 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 				// Force feminine (girl power ?)
 				subject.setSex(Sex.F);
 			}
-			subject.setIdentifier(subjectIdentifier);
-	
+			subject.setIdentifier(subject.getIdentifier());
 			subject.setImagedObjectCategory(ImagedObjectCategory.LIVING_HUMAN_BEING);
-	
-			subject.setBirthDate(foundPatient.getPatientBirthDate());
-	
+			subject.setBirthDate(subject.getBirthDate());
 			ImportUtils.addSubjectStudy(study2, subject, SubjectType.PATIENT, true, subjectStudyIdentifier);
-	
 			// Get center ID from study card
 			subject = shanoirUploaderServiceClientNG.createSubject(subject, true, centerId);
 		}
+
+		File uploadJobFile = new File(importJob.getWorkFolder() + File.separator + UploadJobManager.UPLOAD_JOB_XML);
+		UploadJobManager uploadJobManager = new UploadJobManager(uploadJobFile);
+		UploadJob uploadJob = uploadJobManager.readUploadJob();
+
 		if (subject == null) {
 			uploadJob.setUploadState(UploadState.ERROR);
 			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.subject"));
@@ -401,13 +392,11 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		}
 
 		logger.info("10 Import.json");
+		ImportUtils.prepareImportJob(importJob, subject.getName(), subject.getId(), createdExam.getId(), study2, sc);
+		Runnable runnable2 = new ImportFinishRunnable(uploadJob, uploadJobFile.getParentFile(), importJob, subject.getName());
+		Thread thread2 = new Thread(runnable2);
+		thread2.start();
 
-		ImportJob importJob = ImportUtils.prepareImportJob(uploadJob, subject.getName(), subject.getId(), createdExam.getId(), study2, sc);
-		importJob.setFromShanoirUploader(true); // @todo: set from csv here for upload
-		Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, importJob, subject.getName());
-		Thread thread = new Thread(runnable);
-		thread.start();
- */
 		return true;
 	}
 

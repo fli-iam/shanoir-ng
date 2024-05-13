@@ -24,9 +24,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class downloads the files from the PACS or copies
- * them from the CD/DVD to an upload folder and creates the
- * upload-job.xml.
+ * This class downloads as a separate thread the DICOM files from the PACS
+ * OR copies the DICOM files from the CD/DVD/local file system to an upload folder.
+ * Multiple DICOM-studies/exams are managed within one thread, each as an
+ * ImportJob. This class creates the import-job.json (and upload-job.xml +
+ * nominative-upload-job.xml for legacy reasons). The .xmls will be removed later.
  * 
  * @author mkain
  *
@@ -62,6 +64,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 		for (String studyInstanceUID : importJobs.keySet()) {
 			ImportJob importJob = importJobs.get(studyInstanceUID);
 			File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(), importJob.getSubject().getIdentifier());
+			importJob.setWorkFolder(uploadFolder.getAbsolutePath());
 			List<Serie> selectedSeries = new ArrayList<>(importJob.getSelectedSeries());
 			List<String> allFileNames = null;
 			try {

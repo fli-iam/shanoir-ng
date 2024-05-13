@@ -1,10 +1,8 @@
 package org.shanoir.uploader.action;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +22,7 @@ import org.shanoir.uploader.dicom.query.PatientTreeNode;
 import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.dicom.query.StudyTreeNode;
 import org.shanoir.uploader.gui.MainWindow;
+import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,6 +152,7 @@ public class SelectionActionListener implements TreeSelectionListener {
 	}
 
 	private void handleStudyTreeNode(PatientTreeNode patientTreeNode, StudyTreeNode studyTreeNode, boolean addAllSeries) {
+		Patient patient = patientTreeNode.getPatient();
 		Study study = studyTreeNode.getStudy();
 		LocalDate studyDate = study.getStudyDate();
 		if (studyDate == null) {			
@@ -168,30 +168,10 @@ public class SelectionActionListener implements TreeSelectionListener {
 		String studyInstanceUID = study.getStudyInstanceUID();
 		ImportJob importJob = importJobs.get(studyInstanceUID);
 		if (importJob == null) {
-			importJob = new ImportJob();
-			importJob.setFromShanoirUploader(true);
-			// add always the patient (parent), one per job
-			Patient patient = patientTreeNode.getPatient();
-			// create new patient and study here, that tree remains untouched
-			Patient newPatientForJob = new Patient();
-			newPatientForJob.setPatientName(patient.getPatientName());
-			newPatientForJob.setPatientID(patient.getPatientID());
-			newPatientForJob.setPatientLastName(patient.getPatientLastName());
-			newPatientForJob.setPatientFirstName(patient.getPatientFirstName());
-			newPatientForJob.setPatientBirthDate(patient.getPatientBirthDate());
-			newPatientForJob.setPatientBirthName(patient.getPatientBirthName());
-			newPatientForJob.setPatientSex(patient.getPatientSex());
-			importJob.setPatient(newPatientForJob);
-			Study newStudyForJob = new Study();
-			newStudyForJob.setStudyDate(studyDate);
-			newStudyForJob.setStudyInstanceUID(studyInstanceUID);
-			newStudyForJob.setStudyDescription(study.getStudyDescription());
-			importJob.setStudy(newStudyForJob);
-			// use list of selected series here
-			importJob.setSelectedSeries(new HashSet<Serie>());
+			importJob = ImportUtils.createNewImportJob(patient, study);
 			if(addAllSeries) {
-				List<Study> studies = patient.getStudies();
-				for (Study studyOfAllStudies : studies) {
+				List<org.shanoir.ng.importer.model.Study> studies = patient.getStudies();
+				for (org.shanoir.ng.importer.model.Study studyOfAllStudies : studies) {
 					// only select concerned study, not all studies
 					if (studyOfAllStudies.getStudyInstanceUID().equals(studyInstanceUID)) {
 						List<Serie> series = study.getSeries();
