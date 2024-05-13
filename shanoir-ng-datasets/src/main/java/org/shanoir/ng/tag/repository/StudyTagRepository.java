@@ -11,17 +11,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+package org.shanoir.ng.tag.repository;
 
-package org.shanoir.ng.tag.repository.repository;
-
-import org.shanoir.ng.tag.model.DatasetTag;
+import org.shanoir.ng.tag.model.StudyTag;
 import org.springframework.data.repository.CrudRepository;
 
 /**
- * Repository for Subject.
+ * @author yyao
  *
- * @author msimon
  */
-public interface DatasetTagRepository extends CrudRepository<DatasetTag, Long> {
-	
+public interface StudyTagRepository extends CrudRepository<StudyTag, Long> {
+
 }

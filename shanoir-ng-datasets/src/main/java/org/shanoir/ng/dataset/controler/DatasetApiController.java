@@ -34,7 +34,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
@@ -55,13 +54,12 @@ import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.error.FieldErrorMap;
-import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.tag.model.StudyTag;
+import org.shanoir.ng.tag.service.StudyTagService;
 import org.shanoir.ng.utils.DatasetFileUtils;
-import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -134,6 +132,9 @@ public class DatasetApiController implements DatasetApi {
 
 	@Autowired
 	private ObjectMapper objectMapper;
+
+	@Autowired
+	private StudyTagService studyTagService;
 
 	/** Number of downloadable datasets. */
 	private static final int DATASET_LIMIT = 500;
@@ -240,6 +241,18 @@ public class DatasetApiController implements DatasetApi {
 		}
 
 		return new ResponseEntity<>(dtos, HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<Void> updateDatasetTags(Long datasetId, List<Long> studyTagIds, BindingResult result) throws RestServiceException, EntityNotFoundException {
+		Dataset ds = datasetService.findById(datasetId);
+		if (ds == null) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+		List<StudyTag> tags = studyTagService.findByIds(studyTagIds);
+		ds.setTags(tags);
+		datasetService.update(ds);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@Override

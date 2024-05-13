@@ -26,6 +26,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+import org.shanoir.ng.tag.model.StudyTag;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -130,6 +131,9 @@ public abstract class Dataset extends AbstractEntity {
 	/** Metadata updated by study card. */
 	@OneToOne(cascade = CascadeType.ALL)
 	private DatasetMetadata updatedMetadata;
+
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "dataset", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<StudyTag> tags;
 
 	private Long sourceId;
 
@@ -447,5 +451,13 @@ public abstract class Dataset extends AbstractEntity {
 
 	public void setSOPInstanceUID(String sOPInstanceUID) {
 		SOPInstanceUID = sOPInstanceUID;
+	}
+
+	public List<StudyTag> getTags() {
+		return tags;
+	}
+
+	public void setTags(List<StudyTag> studyTags) {
+		this.tags = studyTags;
 	}
 }

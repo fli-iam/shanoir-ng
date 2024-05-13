@@ -14,8 +14,8 @@
 
 package org.shanoir.ng.dataset.dto;
 
-import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+import org.shanoir.ng.tag.model.StudyTagDTO;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -49,6 +49,8 @@ public class DatasetDTO {
 	private String name;
 	
 	private String type;
+
+	private List<StudyTagDTO> tags;
 
 	/**
 	 * @return the creationDate
@@ -177,5 +179,13 @@ public class DatasetDTO {
 
 	public void setCenterId(Long centerId) {
 		this.centerId = centerId;
+	}
+
+	public List<StudyTagDTO> getTags() {
+		return tags;
+	}
+
+	public void setTags(List<StudyTagDTO> tags) {
+		this.tags = tags;
 	}
 }
