@@ -82,7 +82,7 @@ public interface ExaminationApi {
 	@GetMapping(value = "", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationDTOPage(returnObject.getBody(), 'CAN_SEE_ALL')")
-	ResponseEntity<Page<ExaminationDTO>> findExaminations(Pageable pageable);
+	ResponseEntity<Page<ExaminationDTO>> findExaminations(Pageable pageable, String searchStr, String searchField);
 
 	@Operation(summary = "", description = "Returns all the examinations")
 	@ApiResponses(value = {

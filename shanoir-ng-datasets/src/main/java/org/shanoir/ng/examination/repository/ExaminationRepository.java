@@ -68,6 +68,15 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	Page<Examination> findAllByPreclinical(Pageable pageable, boolean preclinical);
 
 	/**
+	 * Get a paginated list of examinations
+	 *
+	 * @param preclinical preclinical examination
+	 * @param pageable pagination data.
+	 * @return list of examinations.
+	 */
+	Page<Examination> findAllByPreclinicalAndComment(Pageable pageable, boolean preclinical, String comment);
+
+	/**
 	 * Get a list of examinations for a study.
 	 * 
 	 * @param studyId
@@ -117,4 +126,5 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	 */
 	Examination findBySourceIdAndStudy_Id(Long sourceId, Long studyId);
 
+	Page<Examination> findPageByComment(String comment, Pageable pageable);
 }
