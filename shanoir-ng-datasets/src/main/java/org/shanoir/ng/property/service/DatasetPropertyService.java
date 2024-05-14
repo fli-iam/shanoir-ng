@@ -15,4 +15,5 @@ public interface DatasetPropertyService {
 
     List<DatasetProperty> getByDatasetProcessingId(Long id);
 
+    boolean existsById(Long processingId);
 }

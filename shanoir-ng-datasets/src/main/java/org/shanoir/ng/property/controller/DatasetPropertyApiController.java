@@ -2,6 +2,7 @@ package org.shanoir.ng.property.controller;
 
 import org.shanoir.ng.dataset.controler.DatasetApiController;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
+import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.property.model.DatasetProperty;
 import org.shanoir.ng.property.model.DatasetPropertyDTO;
 import org.shanoir.ng.property.model.DatasetPropertyMapper;
@@ -21,6 +22,9 @@ import java.util.List;
 public class DatasetPropertyApiController implements DatasetPropertyApi {
 
     @Autowired
+    private DatasetService dsSrv;
+
+    @Autowired
     private DatasetPropertyService propertyService;
 
     @Autowired
@@ -32,13 +36,29 @@ public class DatasetPropertyApiController implements DatasetPropertyApi {
 
     @Override
     public ResponseEntity<List<DatasetPropertyDTO>> getPropertiesByDatasetId(Long datasetId) {
+
+        if(!dsSrv.existsById(datasetId)){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        List<DatasetProperty> properties = this.propertyService.getByDatasetId(datasetId);
+
+        if(properties.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
         return new ResponseEntity<>(
-                mapper.datasetPropertiesToDatasetPropertyDTOs(this.propertyService.getByDatasetId(datasetId)),
+                mapper.datasetPropertiesToDatasetPropertyDTOs(properties),
                 HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<List<DatasetPropertyDTO>> getPropertiesByProcessingId(Long processingId) throws EntityNotFoundException {
+
+        if(!propertyService.existsById(processingId)){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
         List<DatasetProperty> filteredProperties = new ArrayList<>();
 
         for(DatasetProperty property : this.propertyService.getByDatasetProcessingId(processingId)){
@@ -46,6 +66,11 @@ public class DatasetPropertyApiController implements DatasetPropertyApi {
                 filteredProperties.add(property);
             }
         }
+
+        if(filteredProperties.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
         return new ResponseEntity<>(
                 mapper.datasetPropertiesToDatasetPropertyDTOs(filteredProperties),
                 HttpStatus.OK);

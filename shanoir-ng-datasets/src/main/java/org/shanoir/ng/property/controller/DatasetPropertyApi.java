@@ -23,8 +23,10 @@ public interface DatasetPropertyApi {
     @Operation(summary = "", description = "Returns the dataset properties associated to the given dataset")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "found dataset properties"),
+            @ApiResponse(responseCode = "204", description = "no dataset properties found"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "dataset does not exists"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/dataset/{datasetId}", produces = { "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_SEE_ALL')")
@@ -33,11 +35,13 @@ public interface DatasetPropertyApi {
             @PathVariable("datasetId")
             Long datasetId);
 
-    @Operation(summary = "", description = "Returns the dataset properties associated to the given dataset")
+    @Operation(summary = "", description = "Returns the dataset properties associated to the given processing")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "found dataset properties"),
+            @ApiResponse(responseCode = "204", description = "no dataset properties found"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "processing does not exists"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/processing/{processingId}", produces = { "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")

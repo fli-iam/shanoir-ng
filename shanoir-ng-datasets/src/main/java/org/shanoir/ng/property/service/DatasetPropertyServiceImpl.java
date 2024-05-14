@@ -33,4 +33,9 @@ public class DatasetPropertyServiceImpl implements DatasetPropertyService {
         return repository.getByProcessingId(id);
     }
 
+    @Override
+    public boolean existsById(Long processingId) {
+        return repository.existsById(processingId);
+    }
+
 }
