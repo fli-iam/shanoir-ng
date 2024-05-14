@@ -4,6 +4,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import jakarta.persistence.TemporalType;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.paging.PageImpl;
@@ -79,7 +80,7 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
 		int subjectNameIndex = -1;
 		int searchStrIndex = -1;
 
-		if (searchField != null && (searchField.equals("center.name") || searchField.equals(""))) {
+		if (StringUtils.isEmpty(searchField) || searchField.equals("center.name")) {
 			queryEndStr += "inner join Center as c on ex.centerId = c.id ";
 		}
 		if (preclinical != null) {
@@ -92,7 +93,7 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
 			subjectNameIndex = nbPreParams;
 			queryEndStr +=  "and ex.subject.name is ?" + subjectNameIndex + " ";
 		}
-		if (searchStr != null && !searchStr.isEmpty()) {
+		if (!StringUtils.isEmpty(searchStr)) {
 			nbPreParams++;
 			searchStrIndex = nbPreParams;
 			if (searchField != null && !searchField.isEmpty()) {

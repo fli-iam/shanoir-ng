@@ -140,25 +140,16 @@ public class ExaminationServiceImpl implements ExaminationService {
 	
 	@Override
 	public Page<Examination> findPage(final Pageable pageable, boolean preclinical, String searchStr, String searchField) {
-		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			System.out.println("findPage admin");
-			if (searchStr != null && searchStr.length() > 1) {
-				return examinationRepository.findAllByPreclinicalAndComment(pageable, preclinical, searchStr);
-			} else {
-				return examinationRepository.findAllByPreclinical(pageable, preclinical);
-			}
-
+		if (searchStr != null && searchStr.length() >= 1) {
+			List<Pair<Long, Long>> studyCenters = new ArrayList<>();
+			Set<Long> unrestrictedStudies = new HashSet<Long>();
+			securityService.getStudyCentersAndUnrestrictedStudies(studyCenters, unrestrictedStudies);
+			return examinationRepository.findPageByStudyCenterOrStudyIdInAndSearch(studyCenters, unrestrictedStudies, pageable, preclinical, searchStr, searchField);
 		} else {
 			List<Pair<Long, Long>> studyCenters = new ArrayList<>();
 			Set<Long> unrestrictedStudies = new HashSet<Long>();
 			securityService.getStudyCentersAndUnrestrictedStudies(studyCenters, unrestrictedStudies);
-
-			if (searchStr != null && searchStr.length() > 1) {
-				return examinationRepository.findPageByStudyCenterOrStudyIdInAndSearch(studyCenters, unrestrictedStudies, pageable, preclinical, searchStr, searchField);
-			} else {
-				return examinationRepository.findPageByStudyCenterOrStudyIdIn(studyCenters, unrestrictedStudies, pageable, preclinical);
-			}
-
+			return examinationRepository.findPageByStudyCenterOrStudyIdIn(studyCenters, unrestrictedStudies, pageable, preclinical);
 		}
 	}
 

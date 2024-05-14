@@ -141,7 +141,7 @@ public class ExaminationApiController implements ExaminationApi {
 	@Override
 	public ResponseEntity<Page<ExaminationDTO>> findExaminations(final Pageable pageable, String searchStr, String searchField) {
 		Page<Examination> examinations = examinationService.findPage(pageable, false, searchStr, searchField);
-		if (examinations != null && examinations.getContent().isEmpty()) {
+		if (examinations == null || examinations.getContent().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<>(examinationMapper.examinationsToExaminationDTOs(examinations), HttpStatus.OK);
