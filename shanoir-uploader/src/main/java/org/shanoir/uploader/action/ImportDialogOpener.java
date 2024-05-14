@@ -290,6 +290,9 @@ public class ImportDialogOpener {
 				importDialog.subjectTextField.setBackground(Color.LIGHT_GRAY);
 				importDialog.subjectTextField.setEnabled(false);
 				importDialog.subjectTextField.setEditable(false);
+				importDialog.existingSubjectsCB.setBackground(Color.LIGHT_GRAY);
+				importDialog.existingSubjectsCB.setEnabled(false);
+				importDialog.existingSubjectsCB.setEditable(false);
 			}
 			importDialog.subjectTextField.setValueSet(false);
 			importDialog.subjectImageObjectCategoryCB.setEnabled(true);
