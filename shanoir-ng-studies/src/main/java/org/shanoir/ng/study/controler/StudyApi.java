@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -31,6 +32,7 @@ import org.shanoir.ng.study.dto.StudyStatisticsDTO;
 import org.shanoir.ng.study.dua.DataUserAgreement;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
+import org.shanoir.ng.tag.model.StudyTagDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -364,5 +366,19 @@ public interface StudyApi {
 	@PreAuthorize("hasRole('ADMIN') or hasRole('EXPERT')")
 	ResponseEntity<List<StudyStatisticsDTO>> getStudyStatistics(
 		@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws RestServiceException, IOException;
+
+	@Operation(summary = "", description = "Updates study tags")
+	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "study tags updated"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@PutMapping(value = "/{studyId}/tags", produces = { "application/json" }, consumes = {
+			"application/json" })
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controlerSecurityService.idMatches(#studyId, #study) and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
+	ResponseEntity<Void> updateStudyTags(
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@RequestParam(value = "studyTags", name="studyTags") List<StudyTagDTO> studyTags,
+			BindingResult result) throws RestServiceException, EntityNotFoundException, MicroServiceCommunicationException;
 
 }

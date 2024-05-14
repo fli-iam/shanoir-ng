@@ -14,40 +14,19 @@
 
 package org.shanoir.ng.study.controler;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.apache.commons.io.FileUtils;
-import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.ErrorDetails;
-import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
-import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
-import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
-import org.shanoir.ng.study.dto.PublicStudyDTO;
-import org.shanoir.ng.study.dto.StudyDTO;
-import org.shanoir.ng.study.dto.StudyStorageVolumeDTO;
-import org.shanoir.ng.study.dto.StudyStatisticsDTO;
+import org.shanoir.ng.study.dto.*;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.dua.DataUserAgreement;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
@@ -58,11 +37,11 @@ import org.shanoir.ng.study.service.RelatedDatasetService;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.study.service.StudyUniqueConstraintManager;
 import org.shanoir.ng.study.service.StudyUserService;
+import org.shanoir.ng.tag.model.StudyTagDTO;
+import org.shanoir.ng.tag.model.StudyTagMapper;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.AmqpException;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -76,10 +55,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 public class StudyApiController implements StudyApi {
@@ -94,6 +80,9 @@ public class StudyApiController implements StudyApi {
 
 	@Autowired
 	private StudyMapper studyMapper;
+
+	@Autowired
+	private StudyTagMapper studyTagMapper;
 
 	@Autowired
 	private StudyFieldEditionSecurityManager fieldEditionSecurityManager;
@@ -565,5 +554,24 @@ public class StudyApiController implements StudyApi {
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while querying the database.", e));
 		}
 	}
+
+	@Override
+	public ResponseEntity<Void> updateStudyTags(Long studyId, List<StudyTagDTO> studyTags, BindingResult result) throws MicroServiceCommunicationException, RestServiceException {
+		Study study = studyService.findById(studyId);
+
+		if(study == null){
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+
+		study.setStudyTags(studyTagMapper.studyTagDTOListToStudyTagList(studyTags));
+
+        try {
+            studyService.update(study);
+        } catch (EntityNotFoundException e) {
+			throw new RestServiceException(new ErrorModel(HttpStatus.NOT_FOUND.value(), "Study [" + studyId + "] not found.", e));
+        }
+
+		return new ResponseEntity<>(HttpStatus.OK);
+    }
 
 }

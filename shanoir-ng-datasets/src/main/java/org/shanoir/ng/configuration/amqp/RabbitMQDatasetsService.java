@@ -53,6 +53,7 @@ import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
+import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -197,6 +198,20 @@ public class RabbitMQDatasetsService {
 			for (Tag tag : stud.getTags()) {
 				tag.setStudy(stud);
 			}
+
+			// STUDY TAGS
+			if (stud.getStudyTags() != null) {
+				stud.getStudyTags().clear();
+			} else {
+				stud.setTags(new ArrayList<>());
+			}
+			if (received.getStudyTags() != null) {
+				stud.getStudyTags().addAll(received.getStudyTags());
+			}
+			for (StudyTag tag : stud.getStudyTags()) {
+				tag.setStudy(stud);
+			}
+
 			if (stud.getId() == null) throw new IllegalStateException("The entity should must have an id ! Received string : \"" + studyStr + "\"");
 			Study studyDb = this.studyRepository.save(stud); 
 

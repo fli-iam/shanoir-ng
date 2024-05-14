@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import org.shanoir.ng.shared.model.Study;
 
 @Entity
-@Table
 public class StudyTag {
     @Id
     private Long id;
