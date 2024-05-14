@@ -33,8 +33,6 @@ import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
 import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { Format } from 'src/app/datasets/shared/dataset.service';
-import { DownloadSetupOptions } from 'src/app/shared/mass-download/download-setup/download-setup.component';
 
 @Component({
     selector: 'examination',
@@ -48,7 +46,6 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     public centers: IdName[];
     public studies: IdName[];
     public subjects: SubjectWithSubjectStudy[];
-    examinationExecutives: Object[];
     files: File[] = [];
     public inImport: boolean;
     public readonly ImagesUrlUtil = ImagesUrlUtil;
@@ -159,17 +156,8 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         });
     }
 
-    download(format: Format) {
-        this.downloadService.downloadAllByExaminationId(this.examination?.id, format);
-    }
-
     downloadAll() {
-        let options: DownloadSetupOptions = new DownloadSetupOptions();
-        options.hasBids = this.hasBids;
-        options.hasDicom = this.hasDicom;
-        options.hasNii = this.hasDicom;
-        options.hasEeg = this.hasEEG;
-        this.downloadService.downloadAllByExaminationId(this.examination?.id, null, options, this.downloadState);
+        this.downloadService.downloadAllByExaminationId(this.examination?.id,this.downloadState);
     }
 
     openViewer() {

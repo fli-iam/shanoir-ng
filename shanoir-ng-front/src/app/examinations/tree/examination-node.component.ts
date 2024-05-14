@@ -12,11 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import {Component, EventEmitter, ViewChild, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
-import {Router} from '@angular/router';
 import {DatasetAcquisitionService} from '../../dataset-acquisitions/shared/dataset-acquisition.service';
 import {DatasetProcessing} from '../../datasets/shared/dataset-processing.model';
 import {Dataset} from '../../datasets/shared/dataset.model';
-import {DatasetService, Format} from '../../datasets/shared/dataset.service';
 import {DatasetProcessingType} from '../../enum/dataset-processing-type.enum';
 import {ConsoleService} from '../../shared/console/console.service';
 
@@ -24,7 +22,6 @@ import {DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode} fr
 import {Examination} from '../shared/examination.model';
 import {ExaminationPipe} from '../shared/examination.pipe';
 import {ExaminationService} from '../shared/examination.service';
-import {LoadingBarComponent} from '../../shared/components/loading-bar/loading-bar.component';
 import {environment} from '../../../environments/environment';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { TaskState } from 'src/app/async-tasks/task.model';
@@ -47,19 +44,15 @@ export class ExaminationNodeComponent implements OnChanges {
     menuOpened: boolean = false;
     @Input() hasBox: boolean = false;
     datasetIds: number[];
-    hasEEG: boolean = false;
     hasDicom: boolean = false;
     downloading = false;
-    hasBids: boolean = false;
     detailsPath: string = '/examination/details/';
 
     constructor(
-        private router: Router,
         private examinationService: ExaminationService,
         private datasetAcquisitionService: DatasetAcquisitionService,
         private examPipe: ExaminationPipe,
-        private datasetService: DatasetService,
-        private downloadService: MassDownloadService,
+        private massDownloadService : MassDownloadService,
         private consoleService: ConsoleService) {
     }
 
@@ -127,11 +120,7 @@ export class ExaminationNodeComponent implements OnChanges {
             } else {
                 dsAcq.datasets.forEach(ds => {
                     datasetIds.push(ds.id);
-                    if (ds.type === 'Eeg') {
-                        this.hasEEG = true;
-                    } else if (ds.type === 'BIDS') {
-                        this.hasBids = true;
-                    } else {
+                    if (ds.type != 'Eeg' && ds.type != 'BIDS') {
                         this.hasDicom = true;
                     }
                 });
@@ -140,27 +129,14 @@ export class ExaminationNodeComponent implements OnChanges {
         this.datasetIds = datasetIds;
     }
 
-    download(format: Format) {
+    download() {
         if (this.downloading) {
             return;
         }
         this.downloading = true;
-        if (this.datasetIds && this.datasetIds.length == 0) return;
-        let datasetIdsReady: Promise<void>;
-        if (this.node.datasetAcquisitions == 'UNLOADED') {
-            datasetIdsReady = this.loadDatasetAcquisitions();
-            if (!this.datasetIds || this.datasetIds.length == 0) {
-                this.consoleService.log('warn', 'Sorry, no dataset for examination n°' + this.node?.id);
-                this.downloading = false;
-                return;
-            }
-        } else {
-            datasetIdsReady = Promise.resolve();
-        }
-        datasetIdsReady.then(() => {
-            this.downloadService.downloadByIds(this.datasetIds, format);
-            this.downloading = false;
-        });
+        this.massDownloadService.downloadAllByExaminationId(this.node.id, this.downloadState)
+            .then(() => this.downloading = false);
+
     }
 
     mapAcquisitionNode(dsAcq: any): DatasetAcquisitionNode {
@@ -186,7 +162,7 @@ export class ExaminationNodeComponent implements OnChanges {
     mapProcessingNode(processing: DatasetProcessing): ProcessingNode {
         return new ProcessingNode(
             processing.id,
-            DatasetProcessingType.getLabel(processing.datasetProcessingType),
+            processing.comment,
             processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],
             this.node.canDelete
         );

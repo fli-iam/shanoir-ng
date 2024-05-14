@@ -19,11 +19,12 @@ import { DatasetService } from '../../datasets/shared/dataset.service';
 import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
 
 import { Subscription } from 'rxjs';
-import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
+import { TaskState } from 'src/app/async-tasks/task.model';
 import { ConsoleService } from "../../shared/console/console.service";
 import { DatasetAcquisitionNode, DatasetNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from "../shared/dataset-acquisition.service";
+import {MassDownloadService} from "../../shared/mass-download/mass-download.service";
 
 
 
@@ -50,12 +51,14 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
     downloading = false;
     hasBids: boolean = false;
     protected subscriptions: Subscription[] = [];
+    protected downloadState: TaskState = new TaskState();
 
     constructor(
         private router: Router,
         private datasetService: DatasetService,
         private datasetAcquisitionService: DatasetAcquisitionService,
-        private consoleService: ConsoleService) {
+        private consoleService: ConsoleService,
+        private massDownloadService: MassDownloadService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -118,7 +121,7 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
     private mapProcessingNode(processing: DatasetProcessing): ProcessingNode {
         return new ProcessingNode(
             processing.id,
-            DatasetProcessingType.getLabel(processing.datasetProcessingType),
+            processing.comment ? processing.comment : DatasetProcessingType.getLabel(processing.datasetProcessingType),
             processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],
             this.node.canDelete
         );
@@ -138,7 +141,7 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
         (this.node.datasets as DatasetNode[]).splice(index, 1) ;
     }
 
-    download(format: string) {
+    download() {
         if (this.downloading) {
             return;
         }
@@ -155,15 +158,7 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
         }
 
         datasetIdsReady.then(() => {
-            this.progressStatus = new TaskState(TaskStatus.IN_PROGRESS, 0);
-            this.subscriptions.push(this.datasetService.downloadDatasets(this.datasetIds, format).subscribe(status => {
-                this.progressStatus = status;
-                if (this.progressStatus?.isActive()) this.downloading = true;
-                else this.downloading = false;
-            }, error => {
-                this.progressStatus.progress = 0;
-                this.progressStatus.status = TaskStatus.ERROR;
-            }));
+            this.massDownloadService.downloadAllByAcquisitionId(this.node.id, this.downloadState);
         });
     }
 

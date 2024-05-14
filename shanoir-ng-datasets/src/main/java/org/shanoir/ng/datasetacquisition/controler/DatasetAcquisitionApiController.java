@@ -33,6 +33,9 @@ import org.shanoir.ng.importer.service.EegImporterService;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -47,6 +50,7 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -58,8 +62,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.Parameter;
@@ -90,7 +92,13 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	
 	@Autowired
 	private ExaminationDatasetAcquisitionMapper examDsAcqMapper;
-	
+
+	@Autowired
+	private ShanoirEventService eventService;
+
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
+
 	@Override
 	public ResponseEntity<Void> createNewDatasetAcquisition(
 			@Parameter(name = "DatasetAcquisition to create", required = true) @Valid @RequestBody ImportJob importJob) throws RestServiceException {
@@ -104,7 +112,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
 
-	@RabbitListener(queues = RabbitMQConfiguration.IMPORT_EEG_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.IMPORT_EEG_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	@Transactional
 	public int createNewEegDatasetAcquisition(Message importJobAsString) throws IOException {
@@ -117,11 +125,11 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 		return HttpStatus.OK.value();
 	}
 
-	@RabbitListener(queues = RabbitMQConfiguration.IMPORTER_QUEUE_DATASET)
+	@RabbitListener(queues = RabbitMQConfiguration.IMPORTER_QUEUE_DATASET, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	@Transactional
 	@WithMockKeycloakUser(authorities = { "ROLE_ADMIN" })
-	public void createNewDatasetAcquisition(Message importJobStr) throws JsonParseException, JsonMappingException, IOException, AmqpRejectAndDontRequeueException {
+	public void createNewDatasetAcquisition(Message importJobStr) throws IOException, AmqpRejectAndDontRequeueException {
 		ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
 		try {
 			createAllDatasetAcquisitions(importJob, importJob.getUserId());
@@ -202,7 +210,12 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 			@Parameter(name = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId)
 			throws RestServiceException {
 		try {
+			Long studyId = datasetAcquisitionService.findById(datasetAcquisitionId).getExamination().getStudyId();
+			
 			datasetAcquisitionService.deleteById(datasetAcquisitionId);
+
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
+
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);

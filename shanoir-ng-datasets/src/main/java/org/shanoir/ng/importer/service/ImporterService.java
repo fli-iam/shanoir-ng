@@ -30,20 +30,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.joda.time.DateTime;
-import org.shanoir.ng.dataset.modality.CalibrationDataset;
-import org.shanoir.ng.dataset.modality.CtDataset;
-import org.shanoir.ng.dataset.modality.EegDataset;
-import org.shanoir.ng.dataset.modality.MegDataset;
-import org.shanoir.ng.dataset.modality.MeshDataset;
-import org.shanoir.ng.dataset.modality.MrDataset;
-import org.shanoir.ng.dataset.modality.XaDataset;
-import org.shanoir.ng.dataset.modality.ParameterQuantificationDataset;
-import org.shanoir.ng.dataset.modality.PetDataset;
-import org.shanoir.ng.dataset.modality.RegistrationDataset;
-import org.shanoir.ng.dataset.modality.SegmentationDataset;
-import org.shanoir.ng.dataset.modality.SpectDataset;
-import org.shanoir.ng.dataset.modality.StatisticalDataset;
-import org.shanoir.ng.dataset.modality.TemplateDataset;
+import org.shanoir.ng.dataset.modality.*;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -74,6 +61,7 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.shared.service.SubjectStudyService;
+import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.QualityException;
@@ -141,6 +129,9 @@ public class ImporterService {
 
     @Autowired
     private WADODownloaderService downloader;
+
+    @Autowired
+    private SolrService solrService;
 
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
 
@@ -253,7 +244,7 @@ public class ImporterService {
             throw new ShanoirException(msg, e);
         } catch (Exception e) {
             event.setStatus(ShanoirEvent.ERROR);
-            event.setMessage("Unexpected error during the import: " + e.getMessage() + ", please contact an administrator.");
+            event.setMessage("Unexpected error during the import: " + e.getClass() + " : " + e.getMessage() + ", please contact an administrator.");
             event.setProgress(-1f);
             eventService.publishEvent(event);
             LOG.error("Error during import for exam: {} : {}", importJob.getExaminationId(), e); 
@@ -459,7 +450,7 @@ public class ImporterService {
      * Create a processed dataset dataset associated with a dataset processing.
      * @param importJob the import job from importer MS.
      */
-    public Dataset createProcessedDataset(final ProcessedDatasetImportJob importJob) throws IOException, Exception {
+    public Dataset createProcessedDataset(final ProcessedDatasetImportJob importJob) throws Exception {
 
         ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getProcessedDatasetFilePath(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS, 0f);
         eventService.publishEvent(event);
@@ -539,6 +530,8 @@ public class ImporterService {
                     originMetadata.setDatasetModalityType(DatasetModalityType.XA_DATASET);
                     break;
                 default:
+                    dataset = new GenericDataset();
+                    originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
                 break;
             }
             
@@ -589,6 +582,7 @@ public class ImporterService {
             dataset.setSubjectId(importJob.getSubjectId());
 
             dataset = datasetService.create(dataset);
+            solrService.indexDataset(dataset.getId());
             
             event.setStatus(ShanoirEvent.SUCCESS);
 
@@ -603,7 +597,7 @@ public class ImporterService {
         } catch (Exception e) {
             LOG.error("Error while importing processed dataset: ", e);
             event.setStatus(ShanoirEvent.ERROR);
-            event.setMessage("Unexpected error during the import of the processed dataset: " + e.getMessage() + ", please contact an administrator.");
+            event.setMessage("Unexpected error during the import: " + e.getClass() + " : " + e.getMessage() + ", please contact an administrator.");
             event.setProgress(-1f);
             eventService.publishEvent(event);
             throw e;

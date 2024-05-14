@@ -16,7 +16,9 @@ import { Router } from '@angular/router';
 
 import {DatasetNode, ProcessingNode, UNLOADED} from '../../tree/tree.model';
 import { Dataset } from '../shared/dataset.model';
-import { DatasetService } from '../shared/dataset.service';
+import { DatasetService, Format } from '../shared/dataset.service';
+import {MassDownloadService} from "../../shared/mass-download/mass-download.service";
+import {TaskState} from "../../async-tasks/task.model";
 
 
 @Component({
@@ -35,10 +37,12 @@ export class DatasetNodeComponent implements OnChanges {
     @Input() related: boolean = false;
     detailsPath: string = '/dataset/details/';
     @Output() onDatasetDelete: EventEmitter<void> = new EventEmitter();
+    public downloadState: TaskState = new TaskState();
 
     constructor(
         private router: Router,
-        private datasetService: DatasetService) {
+        private datasetService: DatasetService,
+        private downloadService: MassDownloadService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -55,12 +59,13 @@ export class DatasetNodeComponent implements OnChanges {
         this.menuOpened = !this.menuOpened;
     }
 
-    download(format: string) {
+    download() {
         if (this.loading) {
             return;
         }
         this.loading = true;
-        this.datasetService.downloadFromId(this.node.id, format).then(() => this.loading = false);
+        this.downloadService.downloadByIds([this.node.id], this.downloadState)
+            .then(() => this.loading = false);
     }
 
     hasChildren(): boolean | 'unknown' {

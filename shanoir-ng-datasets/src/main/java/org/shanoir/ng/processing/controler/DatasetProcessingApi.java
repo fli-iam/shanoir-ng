@@ -20,15 +20,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @Tag(name = "datasetProcessing")
@@ -45,7 +48,7 @@ public interface DatasetProcessingApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<Void> deleteDatasetProcessing(
 			@Parameter(name = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId)
-			throws RestServiceException;
+            throws RestServiceException, ShanoirException, SolrServerException, IOException;
 
 	@Operation(summary = "", description = "If exists, returns the dataset processing corresponding to the given id")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found dataset processing"),
@@ -57,19 +60,6 @@ public interface DatasetProcessingApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<DatasetProcessingDTO> findDatasetProcessingById(
 			@Parameter(name = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId);
-
-	@Operation(summary = "", description = "Returns all the dataset processings")
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "found dataset processings"),
-			@ApiResponse(responseCode = "204", description = "no dataset processing found"),
-			@ApiResponse(responseCode = "401", description = "unauthorized"),
-			@ApiResponse(responseCode = "403", description = "forbidden"),
-			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@GetMapping(value = "/study/{studyId}/subject/{subjectId}", produces = { "application/json" })
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
-	ResponseEntity<List<DatasetProcessingDTO>> findDatasetProcessingsByStudyIdAndSubjectId(
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
 
 	@Operation(summary = "", description = "Returns the dataset processings with given study and subject")
 	@ApiResponses(value = {

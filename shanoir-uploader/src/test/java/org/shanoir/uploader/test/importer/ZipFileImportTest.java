@@ -88,7 +88,6 @@ public class ZipFileImportTest extends AbstractTest {
 		importJob.setAcquisitionEquipmentId(Long.valueOf(1));
 		importJob.setSubjectName(subject.getName());
 		importJob.setExaminationId(examination.getId());
-		importJob.setConverterId(Long.valueOf(6));
 		importJob.setAnonymisationProfileToUse(PROFILE_NEURINFO); // yes we are in ShUp, but use the standard import API
 		String importJobJson = Util.objectWriter.writeValueAsString(importJob);
 		shUpClient.startImportJob(importJobJson);
