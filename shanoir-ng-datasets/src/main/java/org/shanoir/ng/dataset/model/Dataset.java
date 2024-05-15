@@ -132,7 +132,8 @@ public abstract class Dataset extends AbstractEntity {
 	@OneToOne(cascade = CascadeType.ALL)
 	private DatasetMetadata updatedMetadata;
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "dataset", cascade = CascadeType.ALL, orphanRemoval = true)
+	@ManyToMany
+	@JoinTable(name = "DATASET_TAG", joinColumns = @JoinColumn(name = "DATASET_ID"), inverseJoinColumns = @JoinColumn(name = "STUDY_TAG_ID"))
 	private List<StudyTag> tags;
 
 	private Long sourceId;
