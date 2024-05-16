@@ -1,13 +1,14 @@
 package org.shanoir.uploader.action.init;
 
-import java.io.File;
 import java.net.MalformedURLException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.DicomServerClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * This concrete state class defines the state when the ShanoirUploader tests the connection to the PACS
@@ -19,11 +20,18 @@ import org.shanoir.uploader.dicom.DicomServerClient;
  * @author atouboul
  * 
  */
+@Component
 public class PacsConfigurationState implements State {
 	
 	private static final Logger logger = LoggerFactory.getLogger(PacsConfigurationState.class);
 	
-	public static ShUpOnloadConfig shUpOnloadConfig = ShUpOnloadConfig.getInstance();
+	public ShUpOnloadConfig shUpOnloadConfig = ShUpOnloadConfig.getInstance();
+
+	@Autowired
+	private ReadyState readyState;
+
+	@Autowired
+	private PacsManualConfigurationState pacsManualConfigurationState;
 	
 	public void load(StartupStateContext context) {
 		initDicomServerClient();
@@ -31,9 +39,9 @@ public class PacsConfigurationState implements State {
 		 * Test if shanoir is able to contact the configured pacs in dicom_server.properties
 		 */
 		if (shUpOnloadConfig.getDicomServerClient().echoDicomServer()){
-			context.setState(new ReadyState());
+			context.setState(readyState);
 		} else {
-			context.setState(new PacsManualConfigurationState());
+			context.setState(pacsManualConfigurationState);
 		}
 		context.nextState();
 	}
@@ -42,13 +50,6 @@ public class PacsConfigurationState implements State {
 	 * Initialize the DicomServerClient.
 	 */
 	private void initDicomServerClient() {
-		shUpOnloadConfig.setWorkFolder(
-				new File(ShUpConfig.shanoirUploaderFolder + File.separator + ShUpConfig.WORK_FOLDER));
-		if (shUpOnloadConfig.getWorkFolder().exists()) {
-			// do nothing
-		} else {
-			shUpOnloadConfig.getWorkFolder().mkdirs();
-		}
 		DicomServerClient dSC;
 		try {
 			dSC = new DicomServerClient(ShUpConfig.dicomServerProperties, shUpOnloadConfig.getWorkFolder());

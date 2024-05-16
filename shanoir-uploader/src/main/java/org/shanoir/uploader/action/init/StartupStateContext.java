@@ -2,6 +2,8 @@ package org.shanoir.uploader.action.init;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.shanoir.uploader.gui.ShUpStartupDialog;
 
 
@@ -17,6 +19,7 @@ import org.shanoir.uploader.gui.ShUpStartupDialog;
  * @author atouboul
  *  
  */
+@Component
 public class StartupStateContext {
 	
 	private static final Logger logger = LoggerFactory.getLogger(StartupStateContext.class);
@@ -25,8 +28,11 @@ public class StartupStateContext {
 	
 	private ShUpStartupDialog shUpStartupDialog;
 
-	public StartupStateContext() {
-		setState(new InitialStartupState());
+	@Autowired
+	private InitialStartupState initialStartupState;
+
+	public void configure() {
+		setState(initialStartupState);
 	}
 
 	public State getState() {

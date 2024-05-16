@@ -30,6 +30,7 @@ import org.shanoir.uploader.upload.UploadJobManager;
 import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.Util;
 
+@org.springframework.stereotype.Component
 public class CurrentNominativeDataController {
 
 	private static final Logger logger = LoggerFactory.getLogger(CurrentNominativeDataController.class);
@@ -42,8 +43,7 @@ public class CurrentNominativeDataController {
 
 	private CurrentUploadsWindowTable cuw;
 
-	public CurrentNominativeDataController(final File workFolderFilePath, final CurrentUploadsWindowTable cuw) {
-		super();
+	public void configure(final File workFolderFilePath, final CurrentUploadsWindowTable cuw) {
 		this.currentNominativeDataModel = new CurrentNominativeDataModel();
 		currentNominativeDataModel.addObserver(cuw);
 		this.cuw = cuw;

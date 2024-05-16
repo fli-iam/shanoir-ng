@@ -24,6 +24,8 @@ import org.shanoir.uploader.utils.PropertiesUtil;
 import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * This concrete state class is the initial state (entry point) of the state machine.
@@ -41,6 +43,7 @@ import org.slf4j.LoggerFactory;
  *  @author mkain
  * 
  */
+@Component
 public class InitialStartupState implements State {
 
 	private static final Logger logger = LoggerFactory.getLogger(InitialStartupState.class);
@@ -51,8 +54,13 @@ public class InitialStartupState implements State {
 
 	private static final String SU_V7_0_1 = ".su_v7.0.1";
 
+	@Autowired
+	private ProxyConfigurationState proxyConfigurationState;
+
+	@Autowired
+	private ShUpStartupDialog shUpStartupDialog;
+
 	public void load(StartupStateContext context) throws Exception {
-		initShanoirUploaderFolder();
 		logger.info("Start running of ShanoirUploader...");
 		logger.info("Version: " + ShUpConfig.SHANOIR_UPLOADER_VERSION);
 		logger.info("Release Date: " + ShUpConfig.RELEASE_DATE);
@@ -74,7 +82,7 @@ public class InitialStartupState implements State {
 		initProfile();
 		initCredentials();
 		initStartupDialog(context);
-		context.setState(new ProxyConfigurationState());
+		context.setState(proxyConfigurationState);
 		context.nextState();
 	}
 
@@ -181,7 +189,7 @@ public class InitialStartupState implements State {
 	}
 
 	private void initStartupDialog(StartupStateContext context) {
-		ShUpStartupDialog shUpStartupDialog = new ShUpStartupDialog(context);
+		shUpStartupDialog.configure(context);
 		shUpStartupDialog.setVisible(true);
 		context.setShUpStartupDialog(shUpStartupDialog);
 	}
@@ -230,23 +238,6 @@ public class InitialStartupState implements State {
 			out.close();
 			return knum;
 		}
-	}
-	
-	/**
-	 * Initialize personal properties folder of ShanoirUploader.
-	 */
-	private void initShanoirUploaderFolder() {
-		final String userHomeFolderPath = System.getProperty(ShUpConfig.USER_HOME);
-		final String shanoirUploaderFolderPath = userHomeFolderPath
-				+ File.separator + ShUpConfig.SU + "_" + ShUpConfig.SHANOIR_UPLOADER_VERSION;
-		final File shanoirUploaderFolder = new File(shanoirUploaderFolderPath);
-		boolean shanoirUploaderFolderExists = shanoirUploaderFolder.exists();
-		if (shanoirUploaderFolderExists) {
-			// do nothing
-		} else {
-			shanoirUploaderFolder.mkdirs();
-		}
-		ShUpConfig.shanoirUploaderFolder = shanoirUploaderFolder;
 	}
 	
 	/**

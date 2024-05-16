@@ -8,11 +8,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import org.quartz.DisallowConcurrentExecution;
-import org.quartz.Job;
-import org.quartz.JobDataMap;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.action.ImportFinishRunnable;
@@ -25,6 +20,9 @@ import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -36,26 +34,23 @@ import com.fasterxml.jackson.databind.JsonMappingException;
  * @author mkain
  * 
  */
-@DisallowConcurrentExecution
-public class UploadServiceJob implements Job {
+@Component
+public class UploadServiceJob {
 
 	private static final Logger logger = LoggerFactory.getLogger(UploadServiceJob.class);
 
-	private ShanoirUploaderServiceClient uploadServiceClient;
+	@Autowired
+	private ShanoirUploaderServiceClient shanoirUploaderServiceClient;
+
+	@Autowired
+	private CurrentNominativeDataController currentNominativeDataController;
 
 	private String uploadPercentage = "";
 
-	/**
-	 * The execution method
-	 */
-	public void execute(JobExecutionContext context) throws JobExecutionException {
+    @Scheduled(fixedRate = 5000)
+	public void execute() {
 		logger.debug("UploadServiceJob started...");
-		JobDataMap dataMap = context.getJobDetail().getJobDataMap();
-		CurrentNominativeDataController currentNominativeDataController = (CurrentNominativeDataController) dataMap
-				.get("nominativeDataController");
-		uploadServiceClient = (ShanoirUploaderServiceClient) dataMap.get("uploadServiceClient");
-		String workFolderFilePath = dataMap.getString(ShUpConfig.WORK_FOLDER);
-		File workFolder = new File(workFolderFilePath);
+		File workFolder = new File(ShUpConfig.shanoirUploaderFolder.getAbsolutePath() + File.separator + ShUpConfig.WORK_FOLDER);
 		processWorkFolder(workFolder, currentNominativeDataController);
 		logger.debug("UploadServiceJob ended...");
 	}
@@ -146,7 +141,7 @@ public class UploadServiceJob implements Job {
 			UploadJobManager uploadJobManager, NominativeDataUploadJobManager nominativeDataUploadJobManager,
 			CurrentNominativeDataController currentNominativeDataController) {
 		try {
-			String tempDirId = uploadServiceClient.createTempDir();
+			String tempDirId = shanoirUploaderServiceClient.createTempDir();
 			logger.info("Upload: tempDirId for import: " + tempDirId);
 			/**
 			 * Upload all DICOM files, one by one.
@@ -156,7 +151,7 @@ public class UploadServiceJob implements Job {
 				File file = (File) iterator.next();
 				i++;
 				logger.debug("UploadServiceJob started to upload file: " + file.getName());
-				uploadServiceClient.uploadFile(tempDirId, file);
+				shanoirUploaderServiceClient.uploadFile(tempDirId, file);
 				logger.debug("UploadServiceJob finished to upload file: " + file.getName());
 				uploadPercentage = i * 100 / allFiles.size() + " %";
 				nominativeDataUploadJob.setUploadPercentage(uploadPercentage);
@@ -208,7 +203,7 @@ public class UploadServiceJob implements Job {
 			throws IOException, JsonParseException, JsonMappingException, JsonProcessingException, Exception {
 		importJob.setWorkFolder(tempDirId);
 		String importJobJson = Util.objectWriter.writeValueAsString(importJob);
-		uploadServiceClient.startImportJob(importJobJson);
+		shanoirUploaderServiceClient.startImportJob(importJobJson);
 	}
 	
 }

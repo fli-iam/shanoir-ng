@@ -19,6 +19,7 @@ import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.net.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import org.json.JSONObject;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.uploader.ShUpConfig;
@@ -44,6 +45,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
  * @author mkain
  *
  */
+@Component
 public class ShanoirUploaderServiceClient {
 
 	private static final Logger logger = LoggerFactory.getLogger(ShanoirUploaderServiceClient.class);
@@ -140,11 +142,7 @@ public class ShanoirUploaderServiceClient {
 
 	private Map<Integer, String> apiResponseMessages;
 
-	/**
-	 * Constructor: used after profile has been selected to init one
-	 * HttpService with the final server's URL.
-	 */
-	public ShanoirUploaderServiceClient() {
+	public void configure() {
 
 		apiResponseMessages = new HashMap<Integer, String>();
 		apiResponseMessages.put(200, "ok");
