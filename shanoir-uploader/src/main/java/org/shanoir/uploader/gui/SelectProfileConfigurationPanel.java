@@ -34,7 +34,7 @@ public class SelectProfileConfigurationPanel extends JPanel {
 	@Autowired
 	private SelectProfilePanelActionListener selectProfilePanelActionListener;
 
-	public SelectProfileConfigurationPanel(StartupStateContext sSC) {
+	public void configure(StartupStateContext sSC) {
 		Container container = new Container();
 		container.setLayout(new GridBagLayout());
 		GridBagConstraints shanoirStartupGBC = new GridBagConstraints();

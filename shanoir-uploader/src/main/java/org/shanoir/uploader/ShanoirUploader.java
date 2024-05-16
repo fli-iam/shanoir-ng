@@ -11,6 +11,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
  * Introduced in Release 5.2
  * 
  * @author atouboul
+ * @author mkain
  * 
  */
 public class ShanoirUploader {
@@ -25,6 +26,7 @@ public class ShanoirUploader {
 	public static void main(String args[]) {
 		initShanoirUploaderFolders();
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(ShanoirUploaderSpringConfig.class);
+		displayAllBeans(ctx);
 		StartupStateContext sSC = ctx.getBean(StartupStateContext.class);
 		sSC.configure();
 		sSC.nextState();
@@ -53,5 +55,12 @@ public class ShanoirUploader {
 		}
 		shUpOnloadConfig.setWorkFolder(workFolder);
 	}
+
+	public static void displayAllBeans(ApplicationContext ctx) {
+        String[] allBeanNames = ctx.getBeanDefinitionNames();
+        for(String beanName : allBeanNames) {
+            System.out.println(beanName);
+        }
+    }
 
 }

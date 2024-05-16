@@ -52,7 +52,7 @@ public class ProxyConfigurationPanel extends JPanel {
 	@Autowired
 	private ProxyPanelActionListener proxyPanelActionListener;
 
-	public ProxyConfigurationPanel(StartupStateContext sSC) {
+	public void configure(StartupStateContext sSC) {
 		Container container = new Container();
 		container.setLayout(new GridBagLayout());
 		GridBagConstraints shanoirStartupGBC = new GridBagConstraints();
