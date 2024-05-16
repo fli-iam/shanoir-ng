@@ -25,8 +25,6 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
-import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionServiceImpl;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
@@ -62,7 +60,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -121,7 +122,6 @@ public class DatasetServiceImpl implements DatasetService {
 					));
 
 		}
-
 		processingService.removeDatasetFromAllProcessingInput(id);
 		propertyService.deleteByDatasetId(id);
 		repository.deleteById(id);
@@ -158,6 +158,11 @@ public class DatasetServiceImpl implements DatasetService {
 			break;
         }
     }
+
+	@Override
+	public boolean existsById(Long id) {
+		return repository.existsById(id);
+	}
 
 	@Override
 	@Transactional
