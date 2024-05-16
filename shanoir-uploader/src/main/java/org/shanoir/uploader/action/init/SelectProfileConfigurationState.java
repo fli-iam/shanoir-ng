@@ -15,14 +15,20 @@ public class SelectProfileConfigurationState implements State {
 	@Autowired
 	private AuthenticationConfigurationState authenticationConfigurationState;
 
+	@Autowired
+	private SelectProfileManualConfigurationState selectProfileManualConfigurationState;
+
+	@Autowired
+	private SelectProfilePanelActionListener selectProfilePanelActionListener;
+
 	public void load(StartupStateContext context) {
 		if(ShUpConfig.profileSelected == null) {
-			context.setState(new SelectProfileManualConfigurationState());
+			context.setState(selectProfileManualConfigurationState);
 			context.nextState();
 		} else {
 			logger.info("Profile found in basic.properties. Used as default: " + ShUpConfig.profileSelected);
-			SelectProfilePanelActionListener actionListener = new SelectProfilePanelActionListener(null, null);
-			actionListener.configureSelectedProfile(ShUpConfig.profileSelected);
+			selectProfilePanelActionListener.configure(null, null);
+			selectProfilePanelActionListener.configureSelectedProfile(ShUpConfig.profileSelected);
 			context.getShUpStartupDialog().updateStartupText("\nProfile: " + ShUpConfig.profileSelected);
 			context.setState(authenticationConfigurationState);
 			context.nextState();

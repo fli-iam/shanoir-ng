@@ -11,11 +11,13 @@ import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.gui.SelectProfileConfigurationPanel;
 import org.shanoir.uploader.utils.PropertiesUtil;
 
+@Component
 public class SelectProfilePanelActionListener implements ActionListener {
 	
 	private static final Logger logger = LoggerFactory.getLogger(SelectProfilePanelActionListener.class);
@@ -24,7 +26,7 @@ public class SelectProfilePanelActionListener implements ActionListener {
 
 	private StartupStateContext sSC;
 
-	public SelectProfilePanelActionListener(SelectProfileConfigurationPanel selectProfilePanel, StartupStateContext sSC) {
+	public void configure(SelectProfileConfigurationPanel selectProfilePanel, StartupStateContext sSC) {
 		this.selectProfilePanel = selectProfilePanel;
 		this.sSC = sSC;
 	}
@@ -96,4 +98,5 @@ public class SelectProfilePanelActionListener implements ActionListener {
 			}
 		}
 	}
+
 }

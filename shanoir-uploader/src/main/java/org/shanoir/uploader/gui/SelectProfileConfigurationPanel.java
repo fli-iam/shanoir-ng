@@ -18,7 +18,10 @@ import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.action.init.SelectProfilePanelActionListener;
 import org.shanoir.uploader.action.init.StartupStateContext;
 import org.shanoir.uploader.gui.customcomponent.JComboBoxMandatory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 @SuppressWarnings("serial")
 public class SelectProfileConfigurationPanel extends JPanel {
 
@@ -27,6 +30,9 @@ public class SelectProfileConfigurationPanel extends JPanel {
 	public JComboBoxMandatory selectProfileCB;
 	public JButton select;
 	public JRadioButton rbRememberProfile;
+
+	@Autowired
+	private SelectProfilePanelActionListener selectProfilePanelActionListener;
 
 	public SelectProfileConfigurationPanel(StartupStateContext sSC) {
 		Container container = new Container();
@@ -80,8 +86,8 @@ public class SelectProfileConfigurationPanel extends JPanel {
 		shanoirStartupGBC.gridy = 3;
 		container.add(select, shanoirStartupGBC);
 		
-		SelectProfilePanelActionListener sPPAL = new SelectProfilePanelActionListener(this, sSC);
-		select.addActionListener(sPPAL);
-		
+		selectProfilePanelActionListener.configure(this, sSC);
+		select.addActionListener(selectProfilePanelActionListener);
 	}
+
 }

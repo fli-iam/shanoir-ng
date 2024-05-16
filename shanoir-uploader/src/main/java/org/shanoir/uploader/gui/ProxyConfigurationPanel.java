@@ -20,6 +20,8 @@ import javax.swing.border.EmptyBorder;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.action.init.ProxyPanelActionListener;
 import org.shanoir.uploader.action.init.StartupStateContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  *	This class is the Proxy GUI which allows an user to configure the proxy
@@ -30,6 +32,7 @@ import org.shanoir.uploader.action.init.StartupStateContext;
  * 
  */
 @SuppressWarnings("serial")
+@Component
 public class ProxyConfigurationPanel extends JPanel {
 
 	public JLabel enableProxyLabel;
@@ -45,6 +48,9 @@ public class ProxyConfigurationPanel extends JPanel {
 	public JLabel httpPasswordLabel;
 	public JPasswordField httpPasswordText;
 	public JButton httpConnect;
+
+	@Autowired
+	private ProxyPanelActionListener proxyPanelActionListener;
 
 	public ProxyConfigurationPanel(StartupStateContext sSC) {
 		Container container = new Container();
@@ -199,8 +205,7 @@ public class ProxyConfigurationPanel extends JPanel {
 		shanoirStartupGBC.gridx = 2;
 		shanoirStartupGBC.gridy = 6;
 		container.add(httpConnect, shanoirStartupGBC);
-		ProxyPanelActionListener pPAL = new ProxyPanelActionListener(this, sSC);
-		httpConnect.addActionListener(pPAL);
-
+		proxyPanelActionListener.configure(this, sSC);
+		httpConnect.addActionListener(proxyPanelActionListener);
 	}
 }
