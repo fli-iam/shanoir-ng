@@ -139,9 +139,12 @@ public class ExaminationServiceImpl implements ExaminationService {
 	}
 	
 	@Override
-	public Page<Examination> findPage(final Pageable pageable, boolean preclinical) {
-		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			return examinationRepository.findAllByPreclinical(pageable, preclinical);
+	public Page<Examination> findPage(final Pageable pageable, boolean preclinical, String searchStr, String searchField) {
+		if (searchStr != null && searchStr.length() >= 1) {
+			List<Pair<Long, Long>> studyCenters = new ArrayList<>();
+			Set<Long> unrestrictedStudies = new HashSet<Long>();
+			securityService.getStudyCentersAndUnrestrictedStudies(studyCenters, unrestrictedStudies);
+			return examinationRepository.findPageByStudyCenterOrStudyIdInAndSearch(studyCenters, unrestrictedStudies, pageable, preclinical, searchStr, searchField);
 		} else {
 			List<Pair<Long, Long>> studyCenters = new ArrayList<>();
 			Set<Long> unrestrictedStudies = new HashSet<Long>();
