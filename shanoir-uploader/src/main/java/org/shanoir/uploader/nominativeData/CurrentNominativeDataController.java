@@ -10,7 +10,6 @@ import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import javax.swing.JFrame;
@@ -21,14 +20,14 @@ import javax.swing.UIManager;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.action.DeleteDirectory;
 import org.shanoir.uploader.gui.CurrentUploadsWindowTable;
 import org.shanoir.uploader.upload.UploadJob;
 import org.shanoir.uploader.upload.UploadJobManager;
 import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @org.springframework.stereotype.Component
 public class CurrentNominativeDataController {
@@ -181,8 +180,13 @@ public class CurrentNominativeDataController {
 	 * @param workFolder
 	 */
 	private void processWorkFolder(File workFolder) {
-		final List<File> folders = Util.listFolders(workFolder);
-		logger.info("Display function: found " + folders.size() + " folders in work folder.");
+		final File[] folders = workFolder.listFiles((file) -> {
+			if (file.isDirectory() && !file.getName().equals("tmp")) {
+				return true;
+			}
+			return false;
+		});
+		logger.info("Found " + folders.length + " folders in workFolder.");
 		Map<String, NominativeDataUploadJob> currentUploads = new HashMap<String, NominativeDataUploadJob>();
 		for (File f : folders) {
 			NominativeDataUploadJob nominativeDataUploadJob = processFolder(f);
@@ -198,7 +202,7 @@ public class CurrentNominativeDataController {
 	 * @param folder
 	 */
 	private NominativeDataUploadJob processFolder(final File folder) {
-		logger.info("Started processing folder " + folder.getName() + "...");
+		logger.info("Started processing folder " + folder.getName());
 		initNominativeDataUploadJobManager(folder); // NOMINATIVE_DATA_JOB_XML
 		initUploadJobManager(folder); // UPLOAD_JOB_XML
 		if (nominativeDataUploadJobManager != null) {
