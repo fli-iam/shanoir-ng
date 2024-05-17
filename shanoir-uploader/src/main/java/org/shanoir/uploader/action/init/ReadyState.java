@@ -43,6 +43,7 @@ public class ReadyState implements State {
 		MainWindow frame = initJFrame();
 		CurrentUploadsWindowTable cuw = new CurrentUploadsWindowTable(frame);
 		currentNominativeDataController.configure(ShUpOnloadConfig.getWorkFolder(), cuw);
+		ShUpOnloadConfig.setCurrentNominativeDataController(currentNominativeDataController);
 		initNominativeDataFilesBeforeLaunchingJobs();
 	}
 
