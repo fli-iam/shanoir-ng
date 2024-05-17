@@ -19,6 +19,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.tag.model.StudyTag;
+import org.shanoir.ng.tag.model.Tag;
 
 import java.util.List;
 

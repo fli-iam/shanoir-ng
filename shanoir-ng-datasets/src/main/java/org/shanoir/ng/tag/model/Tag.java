@@ -1,7 +1,8 @@
-package org.shanoir.ng.shared.model;
+package org.shanoir.ng.tag.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import org.shanoir.ng.shared.model.Study;
 
 @Entity
 public class Tag {

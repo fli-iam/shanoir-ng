@@ -43,4 +43,5 @@ public class StudyTagDTO {
     public void setStudy(StudyDTO study) {
         this.study = study;
     }
+
 }

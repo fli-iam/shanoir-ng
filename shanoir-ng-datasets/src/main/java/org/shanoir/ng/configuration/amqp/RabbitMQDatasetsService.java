@@ -16,7 +16,6 @@ package org.shanoir.ng.configuration.amqp;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.bids.service.BIDSService;
@@ -41,7 +40,7 @@ import org.shanoir.ng.shared.model.Center;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.model.SubjectStudy;
-import org.shanoir.ng.shared.model.Tag;
+import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.shared.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyRepository;

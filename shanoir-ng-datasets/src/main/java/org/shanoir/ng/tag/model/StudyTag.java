@@ -5,7 +5,8 @@ import jakarta.persistence.*;
 import org.shanoir.ng.shared.model.Study;
 
 @Entity
-public class StudyTag {
+public class StudyTag  {
+
     @Id
     private Long id;
 
@@ -74,4 +75,5 @@ public class StudyTag {
     public void setStudy(Study study) {
         this.study = study;
     }
+
 }

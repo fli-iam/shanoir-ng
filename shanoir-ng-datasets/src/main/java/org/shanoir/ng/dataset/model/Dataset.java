@@ -27,6 +27,7 @@ import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.tag.model.StudyTag;
+import org.shanoir.ng.tag.model.Tag;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -133,7 +134,7 @@ public abstract class Dataset extends AbstractEntity {
 	private DatasetMetadata updatedMetadata;
 
 	@ManyToMany
-	@JoinTable(name = "DATASET_TAG", joinColumns = @JoinColumn(name = "DATASET_ID"), inverseJoinColumns = @JoinColumn(name = "STUDY_TAG_ID"))
+	@JoinTable(name = "DATASET_TAG", joinColumns = @JoinColumn(name = "DATASET_ID"), inverseJoinColumns = @JoinColumn(name = "TAG_ID"))
 	private List<StudyTag> tags;
 
 	private Long sourceId;
@@ -458,7 +459,7 @@ public abstract class Dataset extends AbstractEntity {
 		return tags;
 	}
 
-	public void setTags(List<StudyTag> studyTags) {
-		this.tags = studyTags;
+	public void setTags(List<StudyTag> tags) {
+		this.tags = tags;
 	}
 }
