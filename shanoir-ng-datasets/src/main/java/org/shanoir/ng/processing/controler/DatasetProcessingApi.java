@@ -61,19 +61,6 @@ public interface DatasetProcessingApi {
 	ResponseEntity<DatasetProcessingDTO> findDatasetProcessingById(
 			@Parameter(name = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId);
 
-	@Operation(summary = "", description = "Returns all the dataset processings")
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "found dataset processings"),
-			@ApiResponse(responseCode = "204", description = "no dataset processing found"),
-			@ApiResponse(responseCode = "401", description = "unauthorized"),
-			@ApiResponse(responseCode = "403", description = "forbidden"),
-			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@GetMapping(value = "/study/{studyId}/subject/{subjectId}", produces = { "application/json" })
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
-	ResponseEntity<List<DatasetProcessingDTO>> findDatasetProcessingsByStudyIdAndSubjectId(
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
-
 	@Operation(summary = "", description = "Returns the dataset processings with given study and subject")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found dataset processings"),

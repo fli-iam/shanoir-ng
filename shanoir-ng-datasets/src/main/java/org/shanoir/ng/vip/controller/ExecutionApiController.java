@@ -202,6 +202,7 @@ public class ExecutionApiController implements ExecutionApi {
                 + "?format=" + exportFormat
                 + "&resourceId=" + resourceId
                 + "&token=" + authenticationToken
+                + (candidate.getConverterId()  != null? ("&converter=" + candidate.getConverterId()) : "")
                 + "&refreshToken=" + candidate.getRefreshToken()
                 + "&clientId=" + candidate.getClient()
                 + "&md5=none&type=File";

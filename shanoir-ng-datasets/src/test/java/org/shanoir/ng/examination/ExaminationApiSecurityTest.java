@@ -97,7 +97,7 @@ public class ExaminationApiSecurityTest {
 		given(rightsService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
 		assertAccessDenied(api::deleteExamination, 1L);
 		assertAccessDenied(api::findExaminationById, 1L);
-		assertAccessDenied(api::findExaminations, PageRequest.of(0, 10));
+		assertAccessDenied(api::findExaminations, PageRequest.of(0, 10), "", "");
 		assertAccessDenied((subjectId, studyId) -> api.findExaminationsBySubjectIdStudyId(subjectId, studyId), 1L, 1L);
 		assertAccessDenied(api::findExaminationsBySubjectId, 1L);
 		assertAccessDenied(api::saveNewExamination, new ExaminationDTO(), mockBindingResult);
@@ -121,7 +121,7 @@ public class ExaminationApiSecurityTest {
 	public void testAsAdmin() throws ShanoirException, RestServiceException {
 		assertAccessAuthorized(api::deleteExamination, 1L);
 		assertAccessAuthorized(api::findExaminationById, 1L);
-		assertAccessAuthorized(api::findExaminations, PageRequest.of(0, 10));
+		assertAccessAuthorized(api::findExaminations, PageRequest.of(0, 10), "", "");
 		assertAccessAuthorized((subjectId, studyId) -> api.findExaminationsBySubjectIdStudyId(subjectId, studyId), 1L, 1L);
 		assertAccessAuthorized(api::findExaminationsBySubjectId, 1L);
 		assertAccessAuthorized(api::saveNewExamination, new ExaminationDTO(), mockBindingResult);
@@ -230,8 +230,8 @@ public class ExaminationApiSecurityTest {
 		assertAccessDenied(api::findExaminationById, 4L);
 		
 		// findExaminations(Pageable)
-		assertAccessAuthorized(api::findExaminations, PageRequest.of(0, 10));
-		assertThat(api.findExaminations(PageRequest.of(0, 10)).getBody()).hasSize(1);
+		assertAccessAuthorized(api::findExaminations, PageRequest.of(0, 10), "", "");
+		assertThat(api.findExaminations(PageRequest.of(0, 10), "", "").getBody()).hasSize(1);
 		
 		// findPreclinicalExaminations(Boolean, Pageable)
 		assertAccessAuthorized(api::findPreclinicalExaminations, true, PageRequest.of(0, 10));

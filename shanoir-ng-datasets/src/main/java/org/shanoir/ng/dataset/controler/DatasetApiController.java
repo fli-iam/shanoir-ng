@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
@@ -52,12 +53,18 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.*;
+import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.DatasetFileUtils;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
@@ -117,7 +124,16 @@ public class DatasetApiController implements DatasetApi {
 	ShanoirEventService eventService;
 
 	@Autowired
+	private RabbitTemplate rabbitTemplate;
+
+	@Autowired
+	private SolrService solrService;
+
+	@Autowired
 	DatasetDownloaderServiceImpl datasetDownloaderService;
+
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	/** Number of downloadable datasets. */
 	private static final int DATASET_LIMIT = 500;
@@ -126,7 +142,12 @@ public class DatasetApiController implements DatasetApi {
 	public ResponseEntity<Void> deleteDataset(
 			@Parameter(name = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId) throws EntityNotFoundException, RestServiceException {
 		try {
+			Long studyId = datasetService.findById(datasetId).getDatasetAcquisition().getExamination().getStudyId();
+
 			datasetService.deleteById(datasetId);
+			solrService.deleteFromIndex(datasetId);
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
+
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException | RestServiceException e) {
 			throw e;
@@ -143,6 +164,7 @@ public class DatasetApiController implements DatasetApi {
 			throws RestServiceException {
 		try {
 			datasetService.deleteByIdIn(datasetIds);
+			solrService.deleteFromIndex(datasetIds);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (RestServiceException e) {
 			throw e;
