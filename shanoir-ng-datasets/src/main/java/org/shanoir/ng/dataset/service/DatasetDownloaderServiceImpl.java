@@ -29,6 +29,7 @@ import java.util.zip.ZipOutputStream;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 import org.shanoir.ng.dataset.modality.BidsDataset;
 import org.shanoir.ng.dataset.modality.EegDataset;
@@ -217,45 +218,50 @@ public class DatasetDownloaderServiceImpl {
 		// Create temporary workfolder with dicom files, to be able to convert them
 		workFolder.mkdirs();
 
-		downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset, downloadResult);
+		try {
+			downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset, downloadResult);
 
-		// Convert them, sending to import microservice
-		boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + workFolder.getAbsolutePath());
-		if (!result) {
-			response.setContentType(null);
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Nifti conversion failed", null));
-		}
-		workFolder = new File(workFolder.getAbsolutePath() + File.separator + "result");
-		List<String> files = new ArrayList<>();
-		for (File res : workFolder.listFiles()) {
-
-			String datasetFilePath = res.getAbsolutePath();
-			String fileName = res.getName();
-			boolean toGzip = datasetFilePath.endsWith(".nii");
-
-			// Gzip file if necessary in order to always return a .nii.gz file
-			if (toGzip) {
-				datasetFilePath = datasetFilePath + GZIP_EXTENSION;
-				fileName = fileName + GZIP_EXTENSION;
-				File file = new File(datasetFilePath);
-				file.getParentFile().mkdirs();
-				file.createNewFile();
-				DatasetFileUtils.compressGzipFile(res.getAbsolutePath(), datasetFilePath);
+			// Convert them, sending to import microservice
+			boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + workFolder.getAbsolutePath());
+			if (!result) {
+				response.setContentType(null);
+				throw new RestServiceException(
+						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Nifti conversion failed", null));
 			}
+			workFolder = new File(workFolder.getAbsolutePath() + File.separator + "result");
+			List<String> files = new ArrayList<>();
+			for (File res : workFolder.listFiles()) {
 
-			if (!res.isDirectory()) {
-				// Then send workFolder to zipOutputFile
-				FileSystemResource fileSystemResource = new FileSystemResource(datasetFilePath);
-				ZipEntry zipEntry = new ZipEntry(fileName);
-				zipEntry.setSize(fileSystemResource.contentLength());
-				zipEntry.setTime(System.currentTimeMillis());
-				zipOutputStream.putNextEntry(zipEntry);
-				StreamUtils.copy(fileSystemResource.getInputStream(), zipOutputStream);
-				zipOutputStream.closeEntry();
-				files.add(res.getName() + GZIP_EXTENSION);
+				String datasetFilePath = res.getAbsolutePath();
+				String fileName = res.getName();
+				boolean toGzip = datasetFilePath.endsWith(".nii");
+
+				// Gzip file if necessary in order to always return a .nii.gz file
+				if (toGzip) {
+					datasetFilePath = datasetFilePath + GZIP_EXTENSION;
+					fileName = fileName + GZIP_EXTENSION;
+					File file = new File(datasetFilePath);
+					file.getParentFile().mkdirs();
+					file.createNewFile();
+					DatasetFileUtils.compressGzipFile(res.getAbsolutePath(), datasetFilePath);
+				}
+
+				if (!res.isDirectory()) {
+					// Then send workFolder to zipOutputFile
+					FileSystemResource fileSystemResource = new FileSystemResource(datasetFilePath);
+					ZipEntry zipEntry = new ZipEntry(fileName);
+					zipEntry.setSize(fileSystemResource.contentLength());
+					zipEntry.setTime(System.currentTimeMillis());
+					zipOutputStream.putNextEntry(zipEntry);
+					StreamUtils.copy(fileSystemResource.getInputStream(), zipOutputStream);
+					zipOutputStream.closeEntry();
+					files.add(res.getName() + GZIP_EXTENSION);
+				}
 			}
+		} finally {
+			FileUtils.deleteQuietly(workFolder);
 		}
+
 	}
 
 	private String getSubjectName(Dataset dataset) {
