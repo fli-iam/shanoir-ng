@@ -48,6 +48,7 @@ public class DicomDirToModelService {
 
 	/**
 	 * This method reads a DICOMDIR and returns its higher-level content as a list of patients.
+	 * 
 	 * @param file DICOMDIR file
 	 * @return List<Patient>
 	 * @throws IOException
@@ -77,6 +78,7 @@ public class DicomDirToModelService {
 					study.setSeries(series);
 					studyRecord = dicomDirReader.findNextStudyRecord(studyRecord);
 				}
+				studies.sort(new StudyDateSorter());
 				patient.setStudies(studies);
 				patientRecord = dicomDirReader.findNextPatientRecord(patientRecord);
 			}
