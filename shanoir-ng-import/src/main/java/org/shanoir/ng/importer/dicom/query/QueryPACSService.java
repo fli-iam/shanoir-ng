@@ -45,6 +45,7 @@ import org.dcm4che3.net.service.QueryRetrieveLevel;
 import org.shanoir.ng.importer.dicom.DicomSerieAndInstanceAnalyzer;
 import org.shanoir.ng.importer.dicom.InstanceNumberSorter;
 import org.shanoir.ng.importer.dicom.SeriesNumberSorter;
+import org.shanoir.ng.importer.dicom.StudyDateSorter;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
@@ -418,7 +419,7 @@ public class QueryPACSService {
 			    String dicomResponseStudyDate = studyAttr.getString(Tag.StudyDate);
 			    querySeries(association, study, modality, dicomResponseStudyDate);
 			});
-			studies.sort((p1, p2) -> p1.getStudyDate().compareTo(p2.getStudyDate()));
+			studies.sort(new StudyDateSorter());
 			patient.setStudies(studies);
 		}
 	}
