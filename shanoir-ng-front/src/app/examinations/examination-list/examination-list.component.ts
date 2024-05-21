@@ -46,7 +46,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
     }
 
     getPage(pageable: Pageable): Promise<Page<Examination>> {
-        return this.examinationService.getPage(pageable).then(page => {
+        return this.examinationService.getPage(pageable, false, this.table.filter.searchStr? this.table.filter.searchStr : "", this.table.filter.searchField ? this.table.filter.searchField : "").then(page => {
             return page;
         });
     }
