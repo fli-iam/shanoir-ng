@@ -17,6 +17,7 @@ package org.shanoir.ng.dataset.service;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -259,9 +260,8 @@ public class DatasetDownloaderServiceImpl {
 				}
 			}
 		} finally {
-			FileUtils.deleteQuietly(workFolder);
+			FileUtils.deleteDirectory(workFolder);
 		}
-
 	}
 
 	private String getSubjectName(Dataset dataset) {
