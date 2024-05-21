@@ -30,6 +30,9 @@ public class ProxyConfigurationState implements State {
 	@Autowired
 	private SelectProfileConfigurationState selectProfileConfigurationState;
 
+	@Autowired
+	private ProxyManualConfigurationState proxyManualConfigurationState;
+
 	public void load(StartupStateContext context) {
 		String testURL = ServiceConfiguration.getInstance().getTestURL();
 		int httpResponseCode = 0;
@@ -47,7 +50,7 @@ public class ProxyConfigurationState implements State {
 				break;
 			default:
 				context.getShUpStartupDialog().updateStartupText("\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.proxy.fail"));
-				context.setState(new ProxyManualConfigurationState());
+				context.setState(proxyManualConfigurationState);
 				context.nextState();
 				break;
 		}

@@ -2,25 +2,16 @@ package org.shanoir.uploader.action;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.SimpleScheduleBuilder;
-import org.quartz.Trigger;
-import org.quartz.TriggerBuilder;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.uploader.ShUpConfig;
-import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.anonymize.Anonymizer;
 import org.shanoir.uploader.upload.UploadJob;
 import org.shanoir.uploader.upload.UploadJobManager;
 import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class prepares the upload to a Shanoir server instance,
@@ -87,63 +78,10 @@ public class ImportFinishRunnable implements Runnable {
 			UploadJobManager uploadJobManager = new UploadJobManager(uploadFolder.getAbsolutePath());
 			uploadJobManager.writeUploadJob(uploadJob);
 			logger.info(uploadFolder.getName() + ": DICOM files scheduled for upload.");
-			// try to run the UploadService
-			runUploadService();
 		} else {
 			// NOTIFY THAT ANONYMIZATION HAS FAILED.
 			logger.error(uploadFolder.getName() + ": Error during anonymization.");
 		}
-	}
-
-	/**
-	 * This method starts the UploadService.
-	 */
-	private void runUploadService() {
-		boolean uploadServiceRunning = checkIfUploadServiceIsRunning();
-		if (uploadServiceRunning) {
-			// do nothing
-		} else {
-			Scheduler scheduler = ShUpOnloadConfig.getScheduler();
-			Trigger oldTrigger = ShUpOnloadConfig.getTrigger();
-			Trigger newTrigger = TriggerBuilder
-					.newTrigger()
-					.withSchedule(
-							SimpleScheduleBuilder
-									.simpleSchedule()
-									.withIntervalInSeconds(
-											ShUpConfig.UPLOAD_SERVICE_INTERVAL)
-									.repeatForever()).build();
-			try {
-				scheduler.rescheduleJob(oldTrigger.getKey(), newTrigger);
-			} catch (SchedulerException sE) {
-				logger.error(sE.getMessage(), sE);
-			}
-		}
-	}
-	
-	/**
-	 * This method checks if the UploadService is currently running.
-	 * 
-	 * @return
-	 */
-	private boolean checkIfUploadServiceIsRunning() {
-		List<JobExecutionContext> currentJobs;
-		try {
-			if (ShUpOnloadConfig.getScheduler() != null) {
-				currentJobs = ShUpOnloadConfig.getScheduler()
-						.getCurrentlyExecutingJobs();
-				for (JobExecutionContext jobCtx : currentJobs) {
-					JobKey jobKey = jobCtx.getJobDetail().getKey();
-					if (jobKey.getName().equalsIgnoreCase(
-							ShUpConfig.UPLOAD_SERVICE_JOB)) {
-						return true;
-					}
-				}
-			}
-		} catch (SchedulerException sE) {
-			logger.error(sE.getMessage(), sE);
-		}
-		return false;
 	}
 
 }

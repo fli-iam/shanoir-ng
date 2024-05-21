@@ -47,9 +47,12 @@ public class UploadServiceJob {
 
 	private String uploadPercentage = "";
 
-    @Scheduled(fixedRate = 5000)
+	private boolean uploading;
+
+	@Scheduled(fixedRate = 5000)
 	public void execute() {
 		logger.debug("UploadServiceJob started...");
+		uploading = false;
 		File workFolder = new File(ShUpConfig.shanoirUploaderFolder.getAbsolutePath() + File.separator + ShUpConfig.WORK_FOLDER);
 		processWorkFolder(workFolder, currentNominativeDataController);
 		logger.debug("UploadServiceJob ended...");
@@ -141,6 +144,7 @@ public class UploadServiceJob {
 			UploadJobManager uploadJobManager, NominativeDataUploadJobManager nominativeDataUploadJobManager,
 			CurrentNominativeDataController currentNominativeDataController) {
 		try {
+			uploading = true;
 			String tempDirId = shanoirUploaderServiceClient.createTempDir();
 			logger.info("Upload: tempDirId for import: " + tempDirId);
 			/**
@@ -181,6 +185,8 @@ public class UploadServiceJob {
 //				}
 //			}
 
+			uploading = false;
+
 		} catch (Exception e) {
 			currentNominativeDataController.updateNominativeDataPercentage(folder, UploadState.ERROR.toString());
 			uploadJob.setUploadState(UploadState.ERROR);
@@ -205,5 +211,13 @@ public class UploadServiceJob {
 		String importJobJson = Util.objectWriter.writeValueAsString(importJob);
 		shanoirUploaderServiceClient.startImportJob(importJobJson);
 	}
-	
+
+    public boolean isUploading() {
+		return uploading;
+	}
+
+	public void setUploading(boolean uploading) {
+		this.uploading = uploading;
+	}
+
 }

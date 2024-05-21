@@ -12,8 +12,6 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
-import org.quartz.JobExecutionContext;
-import org.quartz.SchedulerException;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.gui.CurrentUploadsWindowTable;
@@ -22,6 +20,7 @@ import org.shanoir.uploader.gui.ShUpStartupDialog;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
+import org.shanoir.uploader.upload.UploadServiceJob;
 import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +34,9 @@ public class ReadyState implements State {
 
 	@Autowired
 	private CurrentNominativeDataController currentNominativeDataController;
+
+	@Autowired
+	private UploadServiceJob uploadServiceJob;
 	
 	public void load(StartupStateContext context) {
 		ShUpStartupDialog shUpStartupDialog = context.getShUpStartupDialog();
@@ -60,7 +62,7 @@ public class ReadyState implements State {
 			public void windowOpened(WindowEvent e) {
 			}
 			public void windowClosing(WindowEvent e) {
-				if (checkIfUploadServiceIsRunning()) {
+				if (uploadServiceJob.isUploading()) {
 					String message = "ShanoirUploader is still uploading DICOM files. Are you sure to want to close?";
 					UIManager.put("OptionPane.cancelButtonText", "Cancel");
 					UIManager.put("OptionPane.noButtonText", "No");
@@ -118,20 +120,6 @@ public class ReadyState implements State {
 				logger.error("Folder found in workFolder without nominative-data-job.xml.");
 			}
 		}
-	}
-
-	private boolean checkIfUploadServiceIsRunning() {
-		List<JobExecutionContext> currentJobs = null;
-		if (ShUpOnloadConfig.getScheduler() != null){
-			try {
-				currentJobs = ShUpOnloadConfig.getScheduler().getCurrentlyExecutingJobs();
-				if (!currentJobs.isEmpty())
-					return true;
-			} catch (SchedulerException sE) {
-				logger.error(sE.getMessage(), sE);
-			}
-		}
-		return false;
 	}
 	
 }
