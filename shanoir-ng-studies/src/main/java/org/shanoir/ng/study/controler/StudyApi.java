@@ -371,14 +371,15 @@ public interface StudyApi {
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "study tags updated"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "study does not exists"),
 			@ApiResponse(responseCode = "422", description = "bad parameters"),
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PutMapping(value = "/{studyId}/tags", produces = { "application/json" }, consumes = {
 			"application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controlerSecurityService.idMatches(#studyId, #study) and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
 	ResponseEntity<Void> updateStudyTags(
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@RequestParam(value = "studyTags", name="studyTags") List<StudyTagDTO> studyTags,
+			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(description = "study tags", required = true) @RequestBody List<StudyTagDTO> studyTags,
 			BindingResult result) throws RestServiceException, EntityNotFoundException, MicroServiceCommunicationException;
 
 }

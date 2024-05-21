@@ -326,17 +326,18 @@ public interface DatasetApi {
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds);
 
 	@Operation(summary = "", description = "Updates the study tags of a dataset")
-	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "dataset updated"),
+	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "dataset study tags updated"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "dataset does not exists"),
 			@ApiResponse(responseCode = "422", description = "bad parameters"),
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PutMapping(value = "/{datasetId}/tags", produces = { "application/json" }, consumes = {
 			"application/json" })
 	@PreAuthorize("@controlerSecurityService.idMatches(#datasetId, #dataset) and hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasUpdateRightOnDataset(#dataset, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> updateDatasetTags(
-			@Parameter(name = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
-			@RequestParam(value = "studyTagIds", name="studyTagIds") List<Long> studyTagIds,
+			@Parameter(description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
+			@Parameter(description = "array of study tag ids", required = true) @RequestBody List<Long> studyTagIds,
 			BindingResult result) throws RestServiceException, EntityNotFoundException;
 
 }
