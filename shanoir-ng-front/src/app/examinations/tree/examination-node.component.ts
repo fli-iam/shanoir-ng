@@ -80,7 +80,7 @@ export class ExaminationNodeComponent implements OnChanges {
                     this.input.examination.extraDataFilePathList,
                     false);
             }
-            this.node.registerOpenPromise(this.contentLoaded);
+            //this.node.registerOpenPromise(this.contentLoaded);
             this.nodeInit.emit(this.node);
         }
     }
@@ -109,7 +109,6 @@ export class ExaminationNodeComponent implements OnChanges {
 
     loadDatasetAcquisitions(): Promise<void> {
         this.loading = true;
-
         return this.datasetAcquisitionService.getAllForExamination(this.node.id).then(dsAcqs => {
             if (!dsAcqs) dsAcqs = [];
             dsAcqs = dsAcqs.filter(acq => acq.type !== 'Processed');
@@ -188,7 +187,8 @@ export class ExaminationNodeComponent implements OnChanges {
             dataset.type,
             dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : [],
             processed,
-            this.node.canDelete
+            this.node.canDelete,
+            dataset.inPacs
         );
     }
 

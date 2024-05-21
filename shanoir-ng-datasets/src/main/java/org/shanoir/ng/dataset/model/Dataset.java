@@ -448,4 +448,8 @@ public abstract class Dataset extends AbstractEntity {
 	public void setSOPInstanceUID(String sOPInstanceUID) {
 		SOPInstanceUID = sOPInstanceUID;
 	}
+
+	public boolean getInPacs() {
+		return getDatasetExpressions() != null && getDatasetExpressions().size() > 0;
+	}
 }

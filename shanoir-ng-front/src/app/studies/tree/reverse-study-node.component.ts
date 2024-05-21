@@ -132,7 +132,8 @@ export class ReverseStudyNodeComponent implements OnChanges {
             dataset.type,
             dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : [],
             processed,
-            this.canAdmin
+            this.canAdmin,
+            dataset.inPacs
         );
     }
 

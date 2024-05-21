@@ -110,7 +110,8 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
             dataset.type,
             dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : [],
             processed,
-            this.node.canDelete
+            this.node.canDelete,
+            dataset.inPacs
         );
     }
 

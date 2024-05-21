@@ -33,6 +33,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     *ngFor="let dataset of node.datasets; let i = index"
                     [input]="dataset"
                     (onSimpleDatasetDelete)="onSimpleDatasetDelete(i)"
+                    [selection]="selection"
+                    [withMenu]="withMenu"
             >
             </simple-dataset-node>
 

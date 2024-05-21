@@ -27,7 +27,6 @@ import { Selection } from 'src/app/studies/study/study-tree.component';
 export class EquipmentNodeComponent implements OnChanges {
 
     @Input() input: AcquisitionEquipmentNode | AcquisitionEquipment;
-    @Input() contextMenu: boolean = true;
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
     @Output() onEquipmentDelete: EventEmitter<void> = new EventEmitter();
     @Input() selection: Selection = new Selection();

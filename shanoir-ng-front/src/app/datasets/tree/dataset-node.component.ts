@@ -14,11 +14,10 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { DatasetNode, ProcessingNode, UNLOADED} from '../../tree/tree.model';
+import { Selection } from 'src/app/studies/study/study-tree.component';
+import { DatasetNode, ProcessingNode } from '../../tree/tree.model';
 import { Dataset } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
-import { Selection } from 'src/app/studies/study/study-tree.component';
-import { last } from 'rxjs/operators';
 
 
 @Component({
@@ -32,7 +31,7 @@ export class DatasetNodeComponent implements OnChanges {
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
     node: DatasetNode;
     loading: boolean = false;
-    menuOpened: boolean = false;
+    protected menuOpened: boolean = false;
     @Input() hasBox: boolean = false;
     @Input() related: boolean = false;
     detailsPath: string = '/dataset/details/';
@@ -53,17 +52,10 @@ export class DatasetNodeComponent implements OnChanges {
                 throw new Error('not implemented yet');
             }
         }
-        if (changes.selection && this.selection) {
-            this.selection.onSelect.toPromise().then(selection => {
-                selection.datasetId ? this.node.open() : this.node.close();
-            });
-            this.selection.onSelect.subscribe(selection => {
-                selection.datasetId ? this.node.open() : this.node.close();
-            });
-        }
     }
 
     toggleMenu() {
+        console.log(1, this.withMenu)
         this.menuOpened = this.withMenu && !this.menuOpened;
     }
 
@@ -76,9 +68,13 @@ export class DatasetNodeComponent implements OnChanges {
     }
 
     hasChildren(): boolean | 'unknown' {
-        if (!this.node.processings) return false;
-        else if (this.node.processings == 'UNLOADED') return 'unknown';
-        else return this.node.processings.length > 0;
+        if (this.node.inPacs) {
+            return true;
+        } else {
+            if (!this.node.processings) return false;
+            else if (this.node.processings == 'UNLOADED') return 'unknown';
+            else return this.node.processings.length > 0;
+        }
     }
 
     deleteDataset() {

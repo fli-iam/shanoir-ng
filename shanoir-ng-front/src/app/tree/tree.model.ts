@@ -223,7 +223,8 @@ export class DatasetNode extends ShanoirNode {
         public type: string,
         public processings: ProcessingNode[] | UNLOADED,
         public processed: boolean,
-        public canDelete: boolean
+        public canDelete: boolean,
+        public inPacs: boolean
     ) {
         super(parent, id, label);
     }

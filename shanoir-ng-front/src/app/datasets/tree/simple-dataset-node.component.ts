@@ -52,10 +52,10 @@ export class SimpleDatasetNodeComponent implements OnChanges {
                 throw new Error('not implemented yet');
             }
         }
-    }
+    } 
 
     toggleMenu() {
-        this.menuOpened = !this.menuOpened;
+        this.menuOpened = this.withMenu && !this.menuOpened;
     }
 
     download(format: string) {

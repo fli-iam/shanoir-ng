@@ -156,7 +156,8 @@ export class SubjectNodeComponent implements OnChanges {
             dataset.type,
             dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : [],
             processed,
-            this.node.canDeleteChildren
+            this.node.canDeleteChildren,
+            dataset.inPacs
         );
     }
 

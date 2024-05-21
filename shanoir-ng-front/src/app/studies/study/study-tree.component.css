@@ -6,3 +6,8 @@ study-node {
 }
 
 .details { padding-left: 20px; }
+
+dicom-metadata {
+    width: 524px;
+    display: inline-block;
+}

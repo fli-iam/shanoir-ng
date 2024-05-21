@@ -13,21 +13,20 @@
  */
 import { Injectable, Injector } from '@angular/core';
 
+import { DiffusionGradient } from '../../dataset-acquisitions/modality/mr/mr-protocol.model';
+import { DatasetAcquisitionDTO, DatasetAcquisitionDTOService } from '../../dataset-acquisitions/shared/dataset-acquisition.dto';
+import { DatasetAcquisitionUtils } from '../../dataset-acquisitions/shared/dataset-acquisition.utils';
+import { DatasetProcessingService } from '../../datasets/shared/dataset-processing.service';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
+import { Channel, EegDataset, Event } from '../dataset/eeg/dataset.eeg.model';
+import { EchoTime, FlipAngle, InversionTime, MrDataset, MrDatasetNature, MrQualityProcedureType, RepetitionTime } from '../dataset/mr/dataset.mr.model';
+import { DatasetProcessing } from './dataset-processing.model';
 import { DatasetType } from './dataset-type.model';
 import { Dataset, DatasetMetadata } from './dataset.model';
 import { DatasetUtils } from './dataset.utils';
-import { MrDataset, EchoTime, FlipAngle, InversionTime, MrDatasetMetadata, RepetitionTime, MrQualityProcedureType, MrDatasetNature } from '../dataset/mr/dataset.mr.model';
-import { DiffusionGradient } from '../../dataset-acquisitions/modality/mr/mr-protocol.model';
-import { Channel, Event, EegDataset } from '../dataset/eeg/dataset.eeg.model';
-import { DatasetProcessing } from './dataset-processing.model';
-import { DatasetProcessingService } from '../../datasets/shared/dataset-processing.service';
-import { DatasetAcquisitionDTO, DatasetAcquisitionDTOService } from '../../dataset-acquisitions/shared/dataset-acquisition.dto';
-import { DatasetAcquisitionUtils } from '../../dataset-acquisitions/shared/dataset-acquisition.utils';
-import {DatasetExpressionFormat} from "../../enum/dataset-expression-format.enum";
 
 @Injectable()
 export class DatasetDTOService {
@@ -120,6 +119,7 @@ export class DatasetDTOService {
         entity.type = dto.type;
         entity.originMetadata = dto.originMetadata;
         entity.updatedMetadata = dto.updatedMetadata;
+        entity.inPacs = dto.inPacs;
         if (dto.studyId) {
             entity.study = new Study();
             entity.study.id = dto.studyId;
@@ -194,6 +194,7 @@ export class DatasetDTO {
     processings: {id: number}[];
 	datasetProcessing: {id: number};
     datasetAcquisition: DatasetAcquisitionDTO;
+    inPacs: boolean;
 
     constructor(dataset?: Dataset) {
         if (dataset) {

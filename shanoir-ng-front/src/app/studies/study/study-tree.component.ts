@@ -50,19 +50,19 @@ export class StudyTreeComponent {
                 const id = +params['id'];
                 this.initStudy(id).then(() => {
                     this.breadcrumbsService.currentStepAsMilestone(this.study.name);
-                    this.initSelection();
+                    this.selectDataset(4);
                 });
             }
         ));
     }
 
-    initSelection() {
+    selectDataset(id: number) {
         //test
-        this.selection.datasetId = 39;
+        this.selection.datasetId = id;
         let datasetAlreadyLoaded: boolean = false; 
         if (!datasetAlreadyLoaded) {
             this.studyNode.subjectsNode.open().then(() => {
-                this.datasetService.get(39).then(ds => {
+                this.datasetService.get(id).then(ds => {
                     let subjectNode: SubjectNode = (this.studyNode.subjectsNode.subjects as SubjectNode[]).find(sn => sn.id == ds.datasetAcquisition?.examination?.subject?.id);
                     if (subjectNode) {
                         subjectNode.open().then(() => {
@@ -125,75 +125,6 @@ export class StudyTreeComponent {
         this.selection.id = param.id;
     }
 
-    protected onCenterNodeSelect(id: number) {
-        this.resetSelection();
-        this.selection.centerId = id;
-    }
-
-    protected onEquipementNodeSelect(id: number) {
-        this.resetSelection();
-        this.selection.equipmentId = id;
-    }
-
-    protected onMemberNodeSelect(id: number) {
-        this.resetSelection();
-        this.selection.memberId = id;
-    }
-
-    protected onQualityCardNodeSelect(id: number) {
-        this.resetSelection();
-        // TODO
-    }
-
-    protected onStudyCardNodeSelect(id: number) {
-        this.resetSelection();
-        // TODO
-    }
-
-    protected onProcessingNodeSelect(id: number) {
-        this.resetSelection();
-        //TODO
-    }
-
-    protected onDatasetNodeSelect(id: number) {
-        this.resetSelection();
-        this.selection.datasetId = id;
-    }
-
-    protected onAcquisitionNodeSelect(id: number) {
-        this.resetSelection();
-        this.selection.acquisitionId = id;
-    }
-
-    protected onExaminationNodeSelect(id: number) {
-        this.resetSelection();
-        this.selection.examinationId = id;
-    }
-
-    protected onSubjectNodeSelect(id: number) {
-        this.resetSelection();
-        this.selection.subjectId = id;
-    }
-
-    protected onStudyNodeSelect() {
-        this.resetSelection();
-        this.selection.studyId = this.study.id;
-    }
-
-    private resetSelection() {
-        this.selection.studyId = null;
-        this.selection.subjectId = null;
-        this.selection.examinationId = null;
-        this.selection.acquisitionId = null;
-        this.selection.datasetId = null;
-        this.selection.processingId = null;
-        this.selection.centerId = null;
-        this.selection.equipmentId = null;
-        this.selection.studycardId = null;
-        this.selection.qualitycardId = null;
-        this.selection.memberId = null;
-    }
-
     @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
         if (event.key == '²') {
             console.log('selection', this.selection);
@@ -204,14 +135,12 @@ export class StudyTreeComponent {
 
 export class Selection {
 
-    public selectedEntity: EntityType;
+    public selectedEntity: EntityType | 'datasetMetadata';
     public id: number;
-    public onSelect: Subject<Selection> = new Subject();
 
     set studyId(id: number) {
         this.selectedEntity = 'study';
         this.id = id;
-        this.onSelect.next(this);
     }
 
     get studyId(): number {
@@ -221,7 +150,6 @@ export class Selection {
     set subjectId(id: number) {
         this.selectedEntity = 'subject';
         this.id = id;
-        this.onSelect.next(this);
     }
 
     get subjectId(): number {
@@ -231,7 +159,6 @@ export class Selection {
     set examinationId(id: number) {
         this.selectedEntity = 'examination';
         this.id = id;
-        this.onSelect.next(this);
     }
 
     get examinationId(): number {
@@ -241,7 +168,6 @@ export class Selection {
     set acquisitionId(id: number) {
         this.selectedEntity = 'acquisition';
         this.id = id;
-        this.onSelect.next(this);
     }
 
     get acquisitionId(): number {
@@ -251,7 +177,6 @@ export class Selection {
     set datasetId(id: number) {
         this.selectedEntity = 'dataset';
         this.id = id;
-        this.onSelect.next(this);
     }
 
     get datasetId(): number {
@@ -261,7 +186,6 @@ export class Selection {
     set processingId(id: number) {
         this.selectedEntity = 'processing';
         this.id = id;
-        this.onSelect.next(this);
     }
 
     get processingId(): number {
@@ -271,7 +195,6 @@ export class Selection {
     set centerId(id: number) {
         this.selectedEntity = 'center';
         this.id = id;
-        this.onSelect.next(this);
     }
 
     get centerId(): number {
@@ -281,7 +204,6 @@ export class Selection {
     set equipmentId(id: number) {
         this.selectedEntity = 'equipment';
         this.id = id;
-        this.onSelect.next(this);
     }
 
     get equipmentId(): number {
@@ -291,7 +213,6 @@ export class Selection {
     set studycardId(id: number) {
         this.selectedEntity = 'studycard';
         this.id = id;
-        this.onSelect.next(this);
     }
 
     get studycardId(): number {
@@ -301,7 +222,6 @@ export class Selection {
     set qualitycardId(id: number) {
         this.selectedEntity = 'qualitycard';
         this.id = id;
-        this.onSelect.next(this);
     }
 
     get qualitycardId(): number {
@@ -311,10 +231,18 @@ export class Selection {
     set memberId(id: number) {
         this.selectedEntity = 'user';
         this.id = id;
-        this.onSelect.next(this);
     }
 
     get memberId(): number {
         return this.selectedEntity == 'user' ? this.id : null;
+    }
+
+    set datasetMetadataId(id: number) {
+        this.selectedEntity = 'datasetMetadata';
+        this.id = id;
+    }
+
+    get datasetMetadataId(): number {
+        return this.selectedEntity == 'datasetMetadata' ? this.id : null;
     }
 }
