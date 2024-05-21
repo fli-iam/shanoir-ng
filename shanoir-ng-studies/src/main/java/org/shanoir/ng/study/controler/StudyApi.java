@@ -379,7 +379,7 @@ public interface StudyApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controlerSecurityService.idMatches(#studyId, #study) and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
 	ResponseEntity<Void> updateStudyTags(
 			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@Parameter(description = "study tags", required = true) @RequestBody List<StudyTagDTO> studyTags,
+			@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "array of study tags", required = true) @RequestBody List<StudyTagDTO> studyTags,
 			BindingResult result) throws RestServiceException, EntityNotFoundException, MicroServiceCommunicationException;
 
 }

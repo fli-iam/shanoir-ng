@@ -337,7 +337,7 @@ public interface DatasetApi {
 	@PreAuthorize("@controlerSecurityService.idMatches(#datasetId, #dataset) and hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasUpdateRightOnDataset(#dataset, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> updateDatasetTags(
 			@Parameter(description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
-			@Parameter(description = "array of study tag ids", required = true) @RequestBody List<Long> studyTagIds,
+			@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "array of study tag ids", required = true) @RequestBody List<Long> studyTagIds,
 			BindingResult result) throws RestServiceException, EntityNotFoundException;
 
 }
