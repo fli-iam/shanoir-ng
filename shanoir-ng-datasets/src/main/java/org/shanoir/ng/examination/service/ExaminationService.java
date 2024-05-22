@@ -64,7 +64,7 @@ public interface ExaminationService {
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationPage(returnObject, 'CAN_SEE_ALL')")
-	Page<Examination> findPage(final Pageable pageable, boolean preclinical);
+	Page<Examination> findPage(final Pageable pageable, boolean preclinical, String searchStr, String searchField);
 	
 	/**
 	 * Get a paginated list of examinations reachable by connected user.

@@ -247,19 +247,25 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         let studyEquipments: AcquisitionEquipment[] = [];
         if (!study) return Promise.resolve([]);
         /* find equipments for this study - needed for checking studycards compatibilities */
-        study.studyCenterList.forEach(sc => {
-            sc.center.acquisitionEquipments.forEach(eq => {
+        study.studyCenterList.forEach(studyCenter => {
+            studyCenter.center.acquisitionEquipments.forEach(eq => {
                 if (studyEquipments.findIndex(se => se.id == eq.id) == -1) studyEquipments.push(eq);
             });
         });
         /* build the studycards options and set their compatibilies */
-        return this.studycardService.getAllForStudy(study.id).then(studycards => {
-            if (!studycards) studycards = [];
-            return studycards.map(sc => {
-                let opt = new Option(sc, sc.name);
-                let scEq = sc.acquisitionEquipment ? studyEquipments.find(se => se.id == sc.acquisitionEquipment.id) : null;
-                opt.compatible = this.acqEqCompatible(scEq);
-                return opt;
+        return this.centerService.getCentersByStudyId(study.id).then(centers => {
+            let accessibleCenterIds = centers.map(center => center.id);
+            return this.studycardService.getAllForStudy(study.id).then(studyCards => {
+                if (!studyCards) studyCards = [];
+
+                return studyCards.filter(studyCard => {
+                    return accessibleCenterIds.includes(studyCard.acquisitionEquipment.center.id);
+                }).map(studyCard => {
+                    let opt = new Option(studyCard, studyCard.name);
+                    let scEq = studyCard.acquisitionEquipment ? studyEquipments.find(se => se.id == studyCard.acquisitionEquipment.id) : null;
+                    opt.compatible = this.acqEqCompatible(scEq);
+                    return opt;
+                });
             });
         });
     }
