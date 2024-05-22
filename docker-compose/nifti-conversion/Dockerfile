@@ -112,7 +112,7 @@ RUN ldconfig \
 
 # install the microservice
 COPY --link nifti-conversion.jar nifti-conversion.jar
-COPY --link entrypoint entrypoint_common oneshot /bin/
+COPY --link entrypoint entrypoint_common oneshot /usr/bin/
 
 ENV LC_ALL fr_FR.UTF-8
 ENV LANG fr_FR.UTF-8

@@ -26,7 +26,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 RUN mkdir -pv /var/log/shanoir-ng-logs
 
 COPY --link shanoir-ng-import.jar shanoir-ng-import.jar
-COPY --link entrypoint entrypoint_common oneshot /bin/
+COPY --link entrypoint entrypoint_common oneshot /usr/bin/
 
 # Use the below line for remote debugging and to active dev profile
 #ENTRYPOINT ["/bin/entrypoint", "java", "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,address=0.0.0.0:9913,suspend=y", "-Djava.security.egd=file:/dev/./urandom", "-Djavax.net.ssl.trustStorePassword=changeit", "-jar", "/shanoir-ng-import.jar"]

@@ -19,7 +19,7 @@ COPY --link nginx.conf http.conf https.conf shanoir.template.conf shanoir.templa
 COPY --link viewer/app-config.js viewer/ohif-viewer.template.conf /etc/nginx/viewer/
 COPY --link --from=viewer /usr/share/nginx/html/. /etc/nginx/viewer/html/
 
-COPY --link entrypoint entrypoint_common /bin/
+COPY --link entrypoint entrypoint_common /usr/bin/
 
 
 
