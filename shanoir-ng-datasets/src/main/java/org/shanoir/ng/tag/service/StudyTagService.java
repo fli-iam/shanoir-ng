@@ -18,4 +18,8 @@ public class StudyTagService {
         return IterableUtils.toList(repository.findAllById(ids));
     }
 
+    public boolean existsById(Long id){
+        return repository.existsById(id);
+    }
+
 }

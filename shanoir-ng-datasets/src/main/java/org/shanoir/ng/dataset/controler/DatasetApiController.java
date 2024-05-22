@@ -251,7 +251,13 @@ public class DatasetApiController implements DatasetApi {
 	public ResponseEntity<Void> updateDatasetTags(Long datasetId, List<Long> studyTagIds, BindingResult result) throws RestServiceException, EntityNotFoundException {
 		Dataset ds = datasetService.findById(datasetId);
 		if (ds == null) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			throw new EntityNotFoundException(Dataset.class, datasetId);
+		}
+		for(Long id : studyTagIds){
+			if(!studyTagService.existsById(id)){
+				throw new RestServiceException(
+						new ErrorModel(HttpStatus.NOT_FOUND.value(), "Study tag [" + id + "] does not exists."));
+			}
 		}
 		List<StudyTag> tags = studyTagService.findByIds(studyTagIds);
 		ds.setTags(tags);
