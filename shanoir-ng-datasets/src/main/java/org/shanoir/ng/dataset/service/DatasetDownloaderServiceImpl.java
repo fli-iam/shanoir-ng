@@ -212,24 +212,24 @@ public class DatasetDownloaderServiceImpl {
 	private void reconvertToNifti(String format, HttpServletResponse response, Long converterId, Dataset dataset, SimpleDateFormat formatter, List<URL> pathURLs, DatasetDownloadError downloadResult, String subjectName, ZipOutputStream zipOutputStream) throws RestServiceException, IOException {
 		File userDir = DatasetFileUtils.getUserImportDir("/tmp");
 		String tmpFilePath = userDir + File.separator + dataset.getId() + "_" + format;
-		File workFolder = new File(tmpFilePath + "-" + formatter.format(new DateTime().toDate()));
+		File sourceFolder = new File(tmpFilePath + "-" + formatter.format(new DateTime().toDate()));
 
 		DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, downloadResult);
 
 		// Create temporary workfolder with dicom files, to be able to convert them
-		workFolder.mkdirs();
+		sourceFolder.mkdirs();
 
 		try {
-			downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset, downloadResult);
+			downloader.downloadDicomFilesForURLs(pathURLs, sourceFolder, subjectName, dataset, downloadResult);
 
 			// Convert them, sending to import microservice
-			boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + workFolder.getAbsolutePath());
+			boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + sourceFolder.getAbsolutePath());
 			if (!result) {
 				response.setContentType(null);
 				throw new RestServiceException(
 						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Nifti conversion failed", null));
 			}
-			workFolder = new File(workFolder.getAbsolutePath() + File.separator + "result");
+			File workFolder = new File(sourceFolder.getAbsolutePath() + File.separator + "result");
 			List<String> files = new ArrayList<>();
 			for (File res : workFolder.listFiles()) {
 
@@ -260,7 +260,8 @@ public class DatasetDownloaderServiceImpl {
 				}
 			}
 		} finally {
-			FileUtils.deleteDirectory(workFolder);
+			LOG.error("deleting directory " + sourceFolder.getAbsolutePath());
+			FileUtils.deleteDirectory(sourceFolder);
 		}
 	}
 
