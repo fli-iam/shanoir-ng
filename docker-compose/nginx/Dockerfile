@@ -14,16 +14,16 @@ FROM ohif/viewer:v4.12.32.19362 AS viewer
 
 FROM nginx
 
-COPY nginx.conf http.conf https.conf shanoir.template.conf shanoir.template.dev.conf shanoir.template.prod.conf /etc/nginx/
+COPY --link nginx.conf http.conf https.conf shanoir.template.conf shanoir.template.dev.conf shanoir.template.prod.conf /etc/nginx/
 
-COPY viewer/app-config.js viewer/ohif-viewer.template.conf /etc/nginx/viewer/
-COPY --from=viewer /usr/share/nginx/html/. /etc/nginx/viewer/html/
+COPY --link viewer/app-config.js viewer/ohif-viewer.template.conf /etc/nginx/viewer/
+COPY --link --from=viewer /usr/share/nginx/html/. /etc/nginx/viewer/html/
 
-COPY entrypoint entrypoint_common /bin/
+COPY --link entrypoint entrypoint_common /usr/bin/
 
 
 
-COPY webapp/ /etc/nginx/html/
+COPY --link webapp/ /etc/nginx/html/
 
 ENTRYPOINT ["/bin/entrypoint"]
 CMD ["nginx", "-g", "daemon off;"]

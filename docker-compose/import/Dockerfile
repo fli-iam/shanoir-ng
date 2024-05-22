@@ -12,42 +12,21 @@
 
 #--------------- common jre base image -------------------------------------
 FROM debian:bookworm
-# NOTE: using bookworm-proposed-updates because of https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1039472
-RUN echo "deb http://deb.debian.org/debian bookworm-proposed-updates main" >> /etc/apt/sources.list \
+# - disable the automatic "apt-get clean" command (because we mount
+#   /var/cache/apt from an external volume to speed-up the build)
+# - NOTE: using bookworm-proposed-updates because of
+#         https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1039472
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    rm /etc/apt/apt.conf.d/docker-clean \
+    && echo "deb http://deb.debian.org/debian bookworm-proposed-updates main" >> /etc/apt/sources.list \
     && apt-get update -qq \
     && apt-get install -qqy openjdk-17-jre-headless ca-certificates-java
 #----------------------------------------------------------------------------
 
-
-#32 bits packages are necessary
-RUN dpkg --add-architecture i386
-
-RUN apt-get update -qq \
-    && apt-get install -qqy \
-    git \
-    curl \
-    build-essential \
-    cmake \
-    pkg-config \
-    libgdcm-tools \
-    libarchive-tools \
-    unzip \
-    pigz \
-    gzip \
-    wget \
-    jq \
-    lib32z1 \
-    libgtk2.0-0 \
-    libsm6 \
-    libxext6 \
-    lib32stdc++6 \
-    libtiff6 \
-    libglib2.0-0:i386
-
 RUN mkdir -pv /var/log/shanoir-ng-logs
 
-ADD shanoir-ng-import.jar shanoir-ng-import.jar
-COPY entrypoint entrypoint_common oneshot /bin/
+COPY --link shanoir-ng-import.jar shanoir-ng-import.jar
+COPY --link entrypoint entrypoint_common oneshot /usr/bin/
 
 # Use the below line for remote debugging and to active dev profile
 #ENTRYPOINT ["/bin/entrypoint", "java", "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,address=0.0.0.0:9913,suspend=y", "-Djava.security.egd=file:/dev/./urandom", "-Djavax.net.ssl.trustStorePassword=changeit", "-jar", "/shanoir-ng-import.jar"]

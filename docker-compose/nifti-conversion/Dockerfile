@@ -10,108 +10,113 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-FROM debian:bookworm
+FROM debian:bookworm as base_image
 
-# NOTE: using bookworm-proposed-updates because of https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1039472
-RUN echo "deb http://deb.debian.org/debian bookworm-proposed-updates main" >> /etc/apt/sources.list \
-    && apt-get update -qq \
-    && apt-get install -qqy openjdk-17-jdk ca-certificates-java
+# - disable the automatic "apt-get clean" command (because we mount
+#   /var/cache/apt from an external volume to speed-up the build)
+# - run "apt-get update" now (to avoid downloading the lists 3 times)
+RUN rm /etc/apt/apt.conf.d/docker-clean \
+    && apt-get update -qq
 
-#32 bits packages are necessary
-RUN dpkg --add-architecture i386
-RUN apt-get update
+FROM base_image as conda
 
-RUN apt-get update -qq \
-    && apt-get install -y \
-    git \
-    curl \
-    cmake \
-    build-essential \
-    pkg-config \
-    libgdcm-tools \
-    libarchive-tools \
-    unzip \
-    pigz \
-    gzip \
-    gnupg \
-    wget \
-    jq \
-    lib32z1 \
-    libgtk2.0-0 \
-    libsm6 \
-    libxext6 \
-    lib32stdc++6 \
-    libtiff6 \
-    libglib2.0-0:i386 \
-    locales \
-    locales-all \
-    xvfb \
-    python3.11 \
-    python3-werkzeug \
-    python3-yaml \
-    software-properties-common
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-conda \
+    apt-get -qqy update \
+    && apt-get -qqy --no-install-recommends install curl ca-certificates
 
-ENV PATH="/root/miniconda3/bin:${PATH}"
-ARG PATH="/root/miniconda3/bin:${PATH}"
+# Install miniconda
+RUN --mount=type=cache,target=/opt/miniconda3/pkgs \
+    curl -LSsf -o miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-py311_24.1.2-0-Linux-x86_64.sh \
+    && bash miniconda.sh -fb -p /opt/miniconda3 \
+    && rm   miniconda.sh
 
-#Install miniconda \
-RUN wget \
-    https://repo.anaconda.com/miniconda/Miniconda3-py311_24.1.2-0-Linux-x86_64.sh \
-    && mkdir /root/.conda \
-    && bash Miniconda3-py311_24.1.2-0-Linux-x86_64.sh -b \
-    && rm -f Miniconda3-py311_24.1.2-0-Linux-x86_64.sh
+# Install dicomifier
+RUN --mount=type=cache,target=/opt/miniconda3/pkgs \
+    /opt/miniconda3/bin/conda install -c conda-forge dicomifier -y
 
+
+FROM base_image as builder
+
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-builder \
+    apt-get -qqy update \
+    && apt-get -qqy install \
+        build-essential \
+        curl \
+        cmake \
+        git \
+        pkg-config
 
 # Compile DCM2NIIX from source
-ENV DCMCOMMIT_VERSION=v1.0.20210317
-ENV DCMCOMMIT=1.0.20210317
+ENV DCM2NIIX_VERSION=v1.0.20210317
+RUN mkdir /src && cd /src \
+    && curl -LSsf https://github.com/rordenlab/dcm2niix/archive/refs/tags/$DCM2NIIX_VERSION.tar.gz \
+    | tar zx \
+    && cd dcm2niix-* && mkdir build \
+    && cd build && cmake .. && make -j4 && make install DESTDIR=/target
+
+# Install mri_conv
+RUN mkdir -p /target/opt/nifti-converters/mriconverter \
+    && cd       /target/opt/nifti-converters/mriconverter \
+    && curl -LSsf https://github.com/populse/mri_conv/archive/refs/heads/master.tar.gz \
+    | tar zx --strip-components 1 \
+    && chmod 0777 . MRIFileManager/MRIManager.jar
+
+
+#--------------- common jre base image -------------------------------------
+FROM debian:bookworm as final
+# - disable the automatic "apt-get clean" command (because we mount
+#   /var/cache/apt from an external volume to speed-up the build)
+# - NOTE: using bookworm-proposed-updates because of
+#         https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1039472
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    rm /etc/apt/apt.conf.d/docker-clean \
+    && echo "deb http://deb.debian.org/debian bookworm-proposed-updates main" >> /etc/apt/sources.list \
+    && apt-get update -qq \
+    && apt-get install -qqy openjdk-17-jre-headless ca-certificates-java
+#----------------------------------------------------------------------------
+
+# xvfb+gtk2 needed by mri_conv (headless mode not supported by DicomToNifti)
+# see: https://populse.github.io/mri_conv/Installation/installation.html#scriptwithoutGUI
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    apt-get update -qqy \
+    && apt-get install -qqy \
+    libgdcm-tools \
+    locales \
+    locales-all \
+    jq \
+    libgtk2.0-0 \
+    openjdk-17-jre \
+    pigz \
+    xvfb
+
+# Copy converters files
+COPY --link --chmod=0755 external/dcm2nii/linux/31MARCH2008/dcm2nii /opt/nifti-converters/dcm2nii_2008-03-31
+COPY --link --chmod=0755 external/dcm2nii/linux/dcm2nii             /opt/nifti-converters/dcm2nii_2014-08-04
+COPY --link --chmod=0755 external/mcverter/linux/mcverter_*         /opt/nifti-converters/
+COPY --link external/mcverter/linux/lib/lib*.so.*                   /usr/local/lib/x86_64-linux-gnu/
+RUN mkdir -m 1777 \
+    /.dcm2nii_2008-03-31 \
+    /.dcm2nii_2014-08-04
+
+# install animaConvertImage to convert Analyze format into nifti
+COPY --link --chmod=0755 external/anima/animaConvertImage /usr/local/bin/
+
+# install the binaries built in the 'builder' & 'conda' stages
+COPY --link --from=builder /target/. /
+COPY --link --from=conda   /opt/miniconda3 /opt/miniconda3
+
+# update the ld cache (so that the new libraries can be loaded)
+# and make the log dir
+RUN ldconfig \
+    && mkdir -pv /var/log/shanoir-ng-logs
+
+# install the microservice
+COPY --link nifti-conversion.jar nifti-conversion.jar
+COPY --link entrypoint entrypoint_common oneshot /usr/bin/
+
 ENV LC_ALL fr_FR.UTF-8
 ENV LANG fr_FR.UTF-8
 ENV LANGUAGE fr_FR.UTF-8
-
-WORKDIR /usr/local/
-RUN curl -#L  https://github.com/rordenlab/dcm2niix/archive/refs/tags/$DCMCOMMIT_VERSION.zip | bsdtar -xf- -C .
-WORKDIR /usr/local/dcm2niix-${DCMCOMMIT}
-RUN mkdir build
-WORKDIR /usr/local/dcm2niix-${DCMCOMMIT}/build
-RUN cmake ..
-RUN make install
-
-WORKDIR /
-
-RUN mkdir -p /opt/nifti-converters
-
-# Copy converters files
-RUN mkdir external
-COPY external ./external
-RUN install -m 0755 external/dcm2nii/linux/31MARCH2008/dcm2nii /opt/nifti-converters/dcm2nii_2008-03-31
-RUN install -m 0755 external/dcm2nii/linux/dcm2nii /opt/nifti-converters/dcm2nii_2014-08-04
-
-RUN install -m 0755 external/mcverter/linux/mcverter_* /opt/nifti-converters/
-RUN cp -n           external/mcverter/linux/lib/lib*.so.* /usr/lib/x86_64-linux-gnu/
-
-WORKDIR /opt/nifti-converters
-RUN mkdir mriconverter
-RUN curl -#L  https://github.com/populse/mri_conv/archive/refs/heads/master.zip | bsdtar -xf- -C mriconverter --strip-components 1
-
-RUN chmod 777 /opt/nifti-converters/mriconverter
-RUN chmod 777 /opt/nifti-converters/mriconverter/MRIFileManager/MRIManager.jar
-
-WORKDIR /
-
-RUN mkdir -m 1777 /.dcm2nii_2008-03-31
-RUN mkdir -m 1777 /.dcm2nii_2014-08-04
-
-# Install dicomifier
-RUN git -C /opt/nifti-converters clone https://github.com/lamyj/dicomifier.git
-RUN conda install -c conda-forge dicomifier -y
-
-# install animaConvertImage to convert Analyze format into nifti
-RUN install -m 755 external/anima/animaConvertImage /usr/local/bin/
-
-RUN mkdir -pv /var/log/shanoir-ng-logs
-
-ADD nifti-conversion.jar nifti-conversion.jar
-COPY entrypoint entrypoint_common oneshot /bin/
+ENV PATH="/opt/miniconda3/bin:${PATH}"
 
 ENTRYPOINT ["/bin/entrypoint", "java", "-Djava.security.egd=file:/dev/./urandom", "-Djavax.net.ssl.trustStorePassword=changeit", "-jar", "/nifti-conversion.jar"]
