@@ -134,7 +134,7 @@ public abstract class Dataset extends AbstractEntity {
 	private DatasetMetadata updatedMetadata;
 
 	@ManyToMany
-	@JoinTable(name = "DATASET_TAG", joinColumns = @JoinColumn(name = "DATASET_ID"), inverseJoinColumns = @JoinColumn(name = "TAG_ID"))
+	@JoinTable(name = "DATASET_TAG", joinColumns = @JoinColumn(name = "DATASET_ID"), inverseJoinColumns = @JoinColumn(name = "STUDY_TAG_ID"))
 	private List<StudyTag> tags;
 
 	private Long sourceId;

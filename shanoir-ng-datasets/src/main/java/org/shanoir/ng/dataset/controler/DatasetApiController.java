@@ -43,6 +43,7 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -135,6 +136,9 @@ public class DatasetApiController implements DatasetApi {
 
 	@Autowired
 	private StudyTagService studyTagService;
+
+	@Autowired
+	private DatasetRepository datasetRepository;
 
 	/** Number of downloadable datasets. */
 	private static final int DATASET_LIMIT = 500;
@@ -251,7 +255,7 @@ public class DatasetApiController implements DatasetApi {
 		}
 		List<StudyTag> tags = studyTagService.findByIds(studyTagIds);
 		ds.setTags(tags);
-		datasetService.update(ds);
+		datasetRepository.save(ds);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
