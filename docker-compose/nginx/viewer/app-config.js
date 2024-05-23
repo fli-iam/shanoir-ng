@@ -3,10 +3,26 @@ window.config = {
   extensions: [
     {
       id: 'cornerstone',
-      getToolbarModule: '@ohif/extension-default.toolbarModule',
-      getViewportModule: '@ohif/extension-default.viewportModule',
-      getSopClassHandlerModule: '@ohif/extension-default.sopClassHandlerModule',
-      getPanelModule: [],
+      getViewportModule: function() {
+        return {
+          name: 'cornerstone',
+          component: 'cornerstoneViewportComponent',
+        };
+      },
+      getSopClassHandlerModule: function() {
+        return [
+          {
+            name: 'cornerstone',
+            sopClassUIDs: [
+              '1.2.840.10008.5.1.4.1.1.2', // CT Image Storage
+              '1.2.840.10008.5.1.4.1.1.4', // MR Image Storage
+            ],
+          },
+        ];
+      },
+    },
+    {
+      id: 'dicom-p10-downloader',
     },
   ],
   showStudyList: true,
@@ -84,22 +100,22 @@ window.config = {
   sopClassHandlers: [
     {
       sopClassUID: '1.2.840.10008.5.1.4.1.1.2', // CT Image Storage
-      name: '@ohif/extension-cornerstone',
-      scriptSrc: '@ohif/extension-cornerstone/main.js',
+      name: 'cornerstone',
     },
     {
       sopClassUID: '1.2.840.10008.5.1.4.1.1.4', // MR Image Storage
-      name: '@ohif/extension-cornerstone',
-      scriptSrc: '@ohif/extension-cornerstone/main.js',
+      name: 'cornerstone',
     },
   ],
   viewports: [
     {
-      namespace: '@ohif/extension-cornerstone',
+      namespace: 'cornerstone',
       id: 'cornerstone',
-      displaySetsToDisplay: [
-        'displaySet',
-      ],
+      component: 'cornerstoneViewportComponent',
+      defaultOptions: {
+        orientation: 'axial',
+        viewport: 'active',
+      },
     },
   ],
   // Leave maxConcurrentMetadataRequests undefined for no limit, suitable for HTTP/2 enabled servers
