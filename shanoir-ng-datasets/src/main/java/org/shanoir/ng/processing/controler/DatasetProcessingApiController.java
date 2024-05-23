@@ -93,25 +93,6 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 	}
 
 	@Override
-	public ResponseEntity<List<DatasetProcessingDTO>> findDatasetProcessingsByStudyIdAndSubjectId(
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
-		List<DatasetProcessing> datasetProcessings = datasetProcessingService.findAll();
-		if (datasetProcessings.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		datasetProcessings = datasetProcessings.stream().filter(processing -> {
-			return !CollectionUtils.isEmpty(processing.getInputDatasets())
-					&& processing.getInputDatasets().get(0).getStudyId().equals(studyId)
-					&& processing.getInputDatasets().get(0).getSubjectId().equals(subjectId);
-		}).collect(Collectors.toList());
-		if (datasetProcessings.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingsToDatasetProcessingDTOs(datasetProcessings), HttpStatus.OK);
-	}
-
-	@Override
 	public ResponseEntity<List<DatasetDTO>> getInputDatasets(
 			@Parameter(name = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
 		final Optional<DatasetProcessing> datasetProcessing = datasetProcessingService.findById(datasetProcessingId);

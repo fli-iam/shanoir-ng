@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.examination.controler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -26,17 +28,20 @@ import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.*;
+import org.shanoir.ng.shared.model.Center;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -56,6 +61,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class ExaminationApiController implements ExaminationApi {
@@ -76,6 +82,12 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Autowired
 	private ShanoirEventService eventService;
+
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
+
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	private final HttpServletRequest request;
 
@@ -100,6 +112,9 @@ public class ExaminationApiController implements ExaminationApi {
 			examinationService.deleteById(examinationId);
 
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, examinationId.toString(), KeycloakUtil.getTokenUserId(), "" + studyId, ShanoirEvent.SUCCESS, studyId));
+
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
+
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -124,13 +139,14 @@ public class ExaminationApiController implements ExaminationApi {
 	}
 
 	@Override
-	public ResponseEntity<Page<ExaminationDTO>> findExaminations(final Pageable pageable) {
-		Page<Examination> examinations = examinationService.findPage(pageable, false);
-		if (examinations.getContent().isEmpty()) {
+	public ResponseEntity<Page<ExaminationDTO>> findExaminations(final Pageable pageable, String searchStr, String searchField) {
+		Page<Examination> examinations = examinationService.findPage(pageable, false, searchStr, searchField);
+		if (examinations == null || examinations.getContent().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<>(examinationMapper.examinationsToExaminationDTOs(examinations), HttpStatus.OK);
 	}
+
 	
 	@Override
 	public ResponseEntity<Page<ExaminationDTO>> findPreclinicalExaminations(
@@ -138,7 +154,7 @@ public class ExaminationApiController implements ExaminationApi {
 		Page<Examination> examinations;
 
 		// Get examinations reachable by connected user
-		examinations = examinationService.findPage(pageable, isPreclinical);
+		examinations = examinationService.findPage(pageable, isPreclinical, null, null);
 		if (examinations.getContent().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
@@ -190,8 +206,9 @@ public class ExaminationApiController implements ExaminationApi {
 		try {
 			examinationService.update(examinationMapper.examinationDTOToExamination(examination));
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_EXAMINATION_EVENT, examination.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, examination.getStudyId()));
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(examination.getStudyId()));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} catch (EntityNotFoundException e) {
+		} catch (JsonProcessingException | EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		} catch (ShanoirException e) {
 			throw new RestServiceException(new ErrorModel(e.getErrorCode(), e.getMessage()));

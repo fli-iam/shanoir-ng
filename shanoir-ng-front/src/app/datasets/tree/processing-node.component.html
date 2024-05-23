@@ -16,7 +16,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         *ngIf="node"
         [label]="node.label"
         [class.selected]="selection.processingId == node.id"
-        awesome="fas fa-cog"
+        awesome="fas fa-gears"
         [(opened)]="node.opened"
         (labelClick)="toggleMenu(); selection.processingId = node.id"
         [hasChildren]="hasChildren()"

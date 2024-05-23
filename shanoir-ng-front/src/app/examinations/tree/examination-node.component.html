@@ -31,10 +31,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
           <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
         </a>
         <menu-item label="View in OHIF..." awesome="fa-regular fa-eye" (click)="viewExaminationDicoms()"></menu-item>
-        <menu-item *ngIf="hasEEG && datasetIds && datasetIds.length != 0" label="Download all EEG" awesome="fas fa-download" (click)="download('eeg')"></menu-item>
-        <menu-item *ngIf="hasBids && datasetIds && datasetIds.length != 0" label="Download all BIDS" awesome="fas fa-download" (click)="download('BIDS')"></menu-item>
-        <menu-item [disabled]="!hasDicom || (datasetIds && datasetIds.length == 0) || downloading" label="Download all DICOM" awesome="fas fa-download" (click)="download('dcm')"></menu-item>
-        <menu-item [disabled]="!hasDicom || (datasetIds && datasetIds.length == 0) || downloading" label="Download all Nifti" awesome="fas fa-download" (click)="download('nii')"></menu-item>
+        <menu-item [disabled]="(datasetIds && datasetIds.length == 0) || downloading" label="Download" awesome="fas fa-download" (click)="download()"></menu-item>
         <menu-item *ngIf="node.canDelete"  label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteExamination()"></menu-item>
     </dropdown-menu>
 

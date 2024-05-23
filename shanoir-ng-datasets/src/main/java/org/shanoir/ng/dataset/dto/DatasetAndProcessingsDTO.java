@@ -48,12 +48,10 @@ public class DatasetAndProcessingsDTO extends DatasetDTO implements DatasetAndPr
 		this.datasetAcquisition = datasetAcquisition;
 	}
 
-	@Override
 	public DatasetProcessingDTO getDatasetProcessing() {
 		return datasetProcessing;
 	}
 
-	@Override
 	public void setDatasetProcessing(DatasetProcessingDTO datasetProcessing) {
 		this.datasetProcessing = datasetProcessing;
 	}

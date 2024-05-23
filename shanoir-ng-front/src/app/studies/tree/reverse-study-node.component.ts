@@ -27,6 +27,7 @@ import {KeycloakService} from "../../shared/keycloak/keycloak.service";
 import {StudyRightsService} from "../shared/study-rights.service";
 import {StudyUserRight} from "../shared/study-user-right.enum";
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import {TaskState} from "../../async-tasks/task.model";
 
 @Component({
     selector: 'reverse-study-node',
@@ -44,9 +45,11 @@ export class ReverseStudyNodeComponent implements OnChanges {
     menuOpened: boolean = false;
     studyCardsLoading: boolean = false;
     showDetails: boolean;
+    hasDicom: boolean = true;
     @Input() hasBox: boolean = false;
     detailsPath: string = '/study/details/';
     private canAdmin: boolean = false;
+    public downloadState: TaskState = new TaskState();
 
     constructor(
             private router: Router,
@@ -92,7 +95,8 @@ export class ReverseStudyNodeComponent implements OnChanges {
                 this.node.examinations = [];
                 if (sortedExaminations) {
                     sortedExaminations.forEach(exam => {
-                        (this.node.examinations as ExaminationNode[]).push(this.mapExamNode(exam));
+                        let examNode = this.mapExamNode(exam);
+                        (this.node.examinations as ExaminationNode[]).push(examNode);
                     });
                 }
                 this.loading = false;
@@ -141,7 +145,7 @@ export class ReverseStudyNodeComponent implements OnChanges {
         return new ProcessingNode(
             this.node,
             processing.id,
-            DatasetProcessingType.getLabel(processing.datasetProcessingType),
+            processing.comment ? processing.comment :DatasetProcessingType.getLabel(processing.datasetProcessingType),
             processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],
             this.canAdmin
         );
@@ -155,7 +159,7 @@ export class ReverseStudyNodeComponent implements OnChanges {
 
     download() {
         this.loading = true;
-        this.downloadService.downloadAllByStudyIdAndSubjectId(this.node.id, this.subjectId)
+        this.downloadService.downloadAllByStudyIdAndSubjectId(this.node.id, this.subjectId, this.downloadState)
             .finally(() => this.loading = false);
     }
 }

@@ -52,7 +52,7 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
     }
 
     getPage(pageable: Pageable): Promise<Page<Examination>> {
-        return this.examinationService.getPage(pageable, true);
+        return this.examinationService.getPage(pageable, true, "", "");
     }
 
     getColumnDefs(): ColumnDefinition[] {

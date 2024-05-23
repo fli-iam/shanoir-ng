@@ -17,7 +17,6 @@ import { ActivatedRoute } from '@angular/router';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { DownloadSetupOptions } from 'src/app/shared/mass-download/download-setup/download-setup.component';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
@@ -46,9 +45,7 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     acquisitionNode: DatasetAcquisitionNode | {datasetAcquisition: DatasetAcquisition, parentNode: ShanoirNode};
     hasDownloadRight: boolean = false;
     noDatasets: boolean = false;
-    hasEEG: boolean = false;
     hasDicom: boolean = false;
-    hasBids: boolean = false;
     protected downloadState: TaskState = new TaskState();
 
     constructor(
@@ -80,11 +77,7 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
                 dsAcq.datasets = datasets;
                 this.datasetAcquisition.datasets.forEach(ds => {
                     this.noDatasets = false;
-                    if (ds.type == 'Eeg') {
-                        this.hasEEG = true;
-                    } else if (ds.type == 'BIDS') {
-                        this.hasBids = true;
-                    } else {
+                    if (ds.type != 'Eeg' && ds.type != 'BIDS') {
                         this.hasDicom = true;
                     }
                 });
@@ -140,11 +133,6 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     }
 
     downloadAll() {
-        let options: DownloadSetupOptions = new DownloadSetupOptions();
-        options.hasBids = this.hasBids;
-        options.hasNii = this.hasDicom;
-        options.hasDicom = this.hasDicom;
-        options.hasEeg = this.hasEEG; 
-        this.downloadService.downloadAllByAcquisitionId(this.datasetAcquisition?.id, options, this.downloadState);
+        this.downloadService.downloadAllByAcquisitionId(this.datasetAcquisition?.id, this.downloadState);
     }
 }

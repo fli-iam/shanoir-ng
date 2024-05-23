@@ -91,7 +91,6 @@ import { SelectSeriesComponent } from './import/select-series/select-series.comp
 import { DicomArchiveService } from './import/shared/dicom-archive.service';
 import { ImportDataService } from './import/shared/import.data-service';
 import { ImportService } from './import/shared/import.service';
-import { NiftiConverterService } from './niftiConverters/nifti.converter.service';
 import { RoleService } from './roles/role.service';
 import { AutoAdjustInputComponent } from './shared/auto-ajust-input/auto-ajust-input.component';
 import { CheckboxListComponent } from './shared/checkbox-list/checkbox-list.component';
@@ -510,7 +509,6 @@ import { StudyTreeComponent } from './studies/study/study-tree.component';
         BreadcrumbsService,
         GlobalService,
         ImportDataService,
-        NiftiConverterService,
         TaskService,
         StudyRightsService,
         // {

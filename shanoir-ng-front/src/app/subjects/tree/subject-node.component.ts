@@ -36,6 +36,7 @@ import {
     UNLOADED,
 } from '../../tree/tree.model';
 import { Subject } from '../shared/subject.model';
+import { TaskState } from 'src/app/async-tasks/task.model';
 
 
 @Component({
@@ -59,6 +60,7 @@ export class SubjectNodeComponent implements OnChanges {
     @Input() selection: Selection = new Selection();
     @Input() withMenu: boolean = true;
     protected contentLoaded: SuperPromise<void> = new SuperPromise();
+    public downloadState: TaskState = new TaskState();
 
     constructor(
             private examinationService: ExaminationService,
@@ -165,7 +167,7 @@ export class SubjectNodeComponent implements OnChanges {
         return new ProcessingNode(
             this.node,
             processing.id,
-            DatasetProcessingType.getLabel(processing.datasetProcessingType),
+            processing.comment ? processing.comment : DatasetProcessingType.getLabel(processing.datasetProcessingType),
             processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],
             this.node.canDeleteChildren
         );
@@ -190,7 +192,7 @@ export class SubjectNodeComponent implements OnChanges {
 
     download() {
         this.loading = true;
-        this.downloadService.downloadAllByStudyIdAndSubjectId(this.studyId, this.node.id)
+        this.downloadService.downloadAllByStudyIdAndSubjectId(this.studyId, this.node.id, this.downloadState)
             .finally(() => this.loading = false);
     }
 }

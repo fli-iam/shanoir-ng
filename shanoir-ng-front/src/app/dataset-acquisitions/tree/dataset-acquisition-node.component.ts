@@ -18,10 +18,11 @@ import { DatasetService } from '../../datasets/shared/dataset.service';
 import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
 
 import { Subscription } from 'rxjs';
-import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
+import { TaskState } from 'src/app/async-tasks/task.model';
 import { Selection } from 'src/app/studies/study/study-tree.component';
 import { ConsoleService } from "../../shared/console/console.service";
-import { DatasetAcquisitionNode, DatasetNode, ProcessingNode, UNLOADED, ShanoirNode } from '../../tree/tree.model';
+import { MassDownloadService } from "../../shared/mass-download/mass-download.service";
+import { DatasetAcquisitionNode, DatasetNode, ProcessingNode, ShanoirNode, UNLOADED } from '../../tree/tree.model';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from "../shared/dataset-acquisition.service";
 
@@ -49,11 +50,13 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
     protected subscriptions: Subscription[] = [];
     @Input() selection: Selection = new Selection();
     @Input() withMenu: boolean = true;
+    protected downloadState: TaskState = new TaskState();
 
     constructor(
         private datasetService: DatasetService,
         private datasetAcquisitionService: DatasetAcquisitionService,
-        private consoleService: ConsoleService) {
+        private consoleService: ConsoleService,
+        private massDownloadService: MassDownloadService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -119,7 +122,7 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
         return new ProcessingNode(
             this.node,
             processing.id,
-            DatasetProcessingType.getLabel(processing.datasetProcessingType),
+            processing.comment ? processing.comment : DatasetProcessingType.getLabel(processing.datasetProcessingType),
             processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],
             this.node.canDelete
         );
@@ -139,7 +142,7 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
         (this.node.datasets as DatasetNode[]).splice(index, 1) ;
     }
 
-    download(format: string) {
+    download() {
         if (this.downloading) {
             return;
         }
@@ -156,15 +159,7 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
         }
 
         datasetIdsReady.then(() => {
-            this.progressStatus = new TaskState(TaskStatus.IN_PROGRESS, 0);
-            this.subscriptions.push(this.datasetService.downloadDatasets(this.datasetIds, format).subscribe(status => {
-                this.progressStatus = status;
-                if (this.progressStatus?.isActive()) this.downloading = true;
-                else this.downloading = false;
-            }, error => {
-                this.progressStatus.progress = 0;
-                this.progressStatus.status = TaskStatus.ERROR;
-            }));
+            this.massDownloadService.downloadAllByAcquisitionId(this.node.id, this.downloadState);
         });
     }
 

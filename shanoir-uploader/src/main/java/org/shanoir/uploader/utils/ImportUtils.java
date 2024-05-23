@@ -185,7 +185,6 @@ public class ImportUtils {
 		importJob.setStudyCardName(studyCard.getName());
 		importJob.setStudyCardId(studyCard.getId());
 		importJob.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
-		importJob.setConverterId(studyCard.getNiftiConverterId());
 		importJob.setExaminationId(examinationId);
 
 		List<Patient> patients = new ArrayList<>();
@@ -293,6 +292,9 @@ public class ImportUtils {
 		for (SerieTreeNode serieTreeNode : selectedSeries) {
 			Serie serie = serieTreeNode.getSerie();
 			List<String> newFileNamesOfSerie = new ArrayList<String>();
+			if (serie.getInstances() == null) {
+				continue;
+			}
 			for (Instance instance : serie.getInstances()) {
 				File sourceFile = dicomFileAnalyzer.getFileFromInstance(instance, serie, filePathDicomDir, false);
 				String dicomFileName = sourceFile.getAbsolutePath().replace(File.separator, "_") + DcmRcvManager.DICOM_FILE_SUFFIX;
