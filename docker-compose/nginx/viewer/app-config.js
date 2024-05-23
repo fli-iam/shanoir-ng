@@ -1,7 +1,7 @@
 window.config = {
   // default: '/'
   routerBasename: '/',
-  extensions: ['cornerstone', 'dicom-p10-downloader'],
+  extensions: [],
   showStudyList: true,
   filterQueryParam: false,
   disableServersCache: false,
