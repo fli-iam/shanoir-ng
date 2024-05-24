@@ -120,6 +120,24 @@ window.config = {
       },
     },
   ],
+  dataSources: [
+    {
+      friendlyName: 'DICOMWeb',
+      namespace: '@ohif/extension-dicomweb',
+      sourceName: 'dicomweb',
+      configuration: {
+        name: 'SHANOIR-NG',
+        wadoUriRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/shanoir-ng/',
+        qidoRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/dicomweb',
+        wadoRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/dicomweb',
+        qidoSupportsIncludeField: true,
+        imageRendering: 'wadors',
+        thumbnailRendering: 'wadors',
+        enableStudyLazyLoad: true,
+        supportsFuzzyMatching: true,
+      },
+    },
+  ],
   // Leave maxConcurrentMetadataRequests undefined for no limit, suitable for HTTP/2 enabled servers
   // maxConcurrentMetadataRequests: 5,
 };
