@@ -16,8 +16,13 @@ window.config = {
           {
             name: 'cornerstone',
             sopClassUIDs: [
-              '1.2.840.10008.5.1.4.1.1.2', // CT Image Storage
-              '1.2.840.10008.5.1.4.1.1.4', // MR Image Storage
+              '1.2.840.10008.5.1.4.1.1.2', 		// CT Image Storage
+              '1.2.840.10008.5.1.4.1.1.4', 		// MR Image Storage
+			  '1.2.840.10008.5.1.4.1.1.2.1' , 	// Enhanced CT Image Storage
+			  '1.2.840.10008.5.1.4.1.1.4.1', 	// Enhanced MR Image Storage
+			  '1.2.840.10008.5.1.4.1.1.4.3', 	// Enhanced MR Color Image Storage
+			  '1.2.840.10008.5.1.4.1.1.130', 	// Enhanced PET Image Storage
+			  '1.2.840.10008.5.1.4.1.1.20', 	// Nuclear Medicine Image Storage
             ],
           },
         ];
@@ -99,13 +104,34 @@ window.config = {
       isActive: true,
     }
   ],
+
   sopClassHandlers: [
     {
-      sopClassUID: '1.2.840.10008.5.1.4.1.1.2', // CT Image Storage
+      sopClassUID: '1.2.840.10008.5.1.4.1.1.2', 	// CT Image Storage
       name: 'cornerstone',
     },
     {
-      sopClassUID: '1.2.840.10008.5.1.4.1.1.4', // MR Image Storage
+      sopClassUID: '1.2.840.10008.5.1.4.1.1.4', 	// MR Image Storage
+      name: 'cornerstone',
+    },
+    {
+      sopClassUID: '1.2.840.10008.5.1.4.1.1.2.1', 	// Enhanced CT Image Storage
+      name: 'cornerstone',
+    },
+    {
+      sopClassUID: '1.2.840.10008.5.1.4.1.1.4.1', 	// Enhanced MR Image Storage
+      name: 'cornerstone',
+    },
+    {
+      sopClassUID: '1.2.840.10008.5.1.4.1.1.4.3', 	// Enhanced MR Color Image Storage
+      name: 'cornerstone',
+    },
+    {
+      sopClassUID: '1.2.840.10008.5.1.4.1.1.130', 	// Enhanced PET Image Storage
+      name: 'cornerstone',
+    },
+    {
+      sopClassUID: '1.2.840.10008.5.1.4.1.1.20', 	// Nuclear Medicine Image Storage
       name: 'cornerstone',
     },
   ],
