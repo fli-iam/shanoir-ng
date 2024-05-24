@@ -4,10 +4,12 @@ window.config = {
     {
       id: 'cornerstone',
       getViewportModule: function() {
-        return {
-          name: 'cornerstone',
-          component: 'cornerstoneViewportComponent',
-        };
+        return [
+          {
+            name: 'cornerstone',
+            component: 'cornerstoneViewportComponent',
+          },
+        ];
       },
       getSopClassHandlerModule: function() {
         return [
