@@ -257,9 +257,7 @@ public class StudyServiceImpl implements StudyService {
 		studyDb.setClinical(study.isClinical());
 		studyDb.setDownloadableByDefault(study.isDownloadableByDefault());
 		studyDb.setEndDate(study.getEndDate());
-		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			studyDb.setChallenge(study.isChallenge());
-		}
+		studyDb.setChallenge(study.isChallenge());
 		studyDb.setName(study.getName());
 		studyDb.setProfile(study.getProfile());
 		studyDb.setDescription(study.getDescription());
