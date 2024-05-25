@@ -206,7 +206,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 						</span>
 					</li>
-					<li *ngIf="keycloakService.isUserAdmin()">
+					<li>
 						<label i18n="Study detail|Challenge label@@studyDetailChalenge">Challenge</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
