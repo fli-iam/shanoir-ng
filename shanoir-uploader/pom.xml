@@ -295,13 +295,14 @@
 				<version>1.7</version>
 				<executions>
 					<execution>
-						<phase>package</phase>
+						<phase>prepare-package</phase>
 						<configuration>
 							<tasks>
 								<copy file="start-shup-windows-java.bat" tofile="target/start-shup-windows-java.bat" />
 								<copy file="start-shup-linux-mac-java.sh" tofile="target/start-shup-linux-mac-java.sh" />
 								<copy file="downloadDataset.sh" tofile="target/downloadDataset.sh" />
 								<copy file="downloadDataset.bat" tofile="target/downloadDataset.bat" />
+								<copy file="${project.basedir}/shup.jnlp" todir="${project.build.directory}" />
 							</tasks>
 						</configuration>
 						<goals>
@@ -310,6 +311,30 @@
 					</execution>
 				</executions>
 			</plugin>
+			<!-- Maven replacer is used to inject the project.version defined in this pom.xml
+			into the shup.jnlp file -->
+			<plugin>
+            	<groupId>com.google.code.maven-replacer-plugin</groupId>
+            	<artifactId>replacer</artifactId>
+            	<version>1.5.3</version>
+            	<executions>
+                	<execution>
+                    	<phase>package</phase>
+                    	<goals>
+                        	<goal>replace</goal>
+                    	</goals>
+                	</execution>
+            	</executions>
+            	<configuration>
+                	<file>${project.build.directory}/shup.jnlp</file>
+                	<replacements>
+                    	<replacement>
+                        	<token>\$\{project.version\}</token>
+                        	<value>${project.version}</value>
+                    	</replacement>
+                	</replacements>
+            	</configuration>
+        	</plugin>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>

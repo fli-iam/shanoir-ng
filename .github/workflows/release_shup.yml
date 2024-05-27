@@ -1,0 +1,72 @@
+name: Java CI to create and upload Shanoir Uploader release on pull request
+on:
+  push:
+    branches: [ "master" ]
+    paths:
+      - 'shanoir-uploader/**'
+  pull_request:
+    branches: [ "master" ]
+    paths:
+      - 'shanoir-uploader/**'
+
+env:
+  build-number: ${GITHUB_RUN_NUMBER}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Install libxml2-utils
+      run: sudo apt-get update && sudo apt-get install -y libxml2-utils
+
+    - name: Extract Project Version
+      id: get_version
+      run: |
+        VERSION=$(xmllint --xpath "/*[local-name()='project']/*[local-name()='version']/text()" shanoir-uploader/pom.xml)
+        echo ::set-output name=version::$VERSION
+
+    - name: Build shanoir-ng with Maven
+      run: mvn -f shanoir-ng-parent/pom.xml clean install -DskipTests
+
+    - name: Build shanoir-uploader with Maven
+      run: mvn -f shanoir-uploader/pom.xml package
+
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.get_version.outputs.version }}
+        release_name: 'Release ${{ steps.get_version.outputs.version }}'
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: shanoir-uploader/target/shanoir-uploader-${{ steps.get_version.outputs.version }}-jar-with-dependencies.jar
+        asset_name: shanoir-uploader-${{ steps.get_version.outputs.version }}-jar-with-dependencies.jar
+        asset_content_type: application/java-archive
+
+    - name: Upload JNLP Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: shanoir-uploader/target/shup.jnlp
+        asset_name: shup.jnlp
+        asset_content_type: application/x-java-jnlp-file

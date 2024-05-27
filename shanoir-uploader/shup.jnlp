@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<jnlp spec="1.0+" codebase="https://github.com/LaurentPV/shanoir-ng/releases/tag/${project.version}" href="shup.jnlp">
+	<information>
+		<title>Shanoir Uploader</title>
+		<vendor>Empenn Team - Inria</vendor>
+		<homepage href="https://project.inria.fr/shanoir/" />
+		<description>Desktop client for the Shanoir server</description>
+	</information>
+	<security>
+		<all-permissions/>
+	</security>
+	<resources>
+		<j2se version="17+" />
+		<jar href="shanoir-uploader-${project.version}-jar-with-dependencies.jar" />
+	</resources>
+	<application-desc main-class="org.shanoir.uploader.ShanoirUploader" />
+</jnlp>
