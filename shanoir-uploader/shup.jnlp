@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?> 
-<jnlp spec="1.0+" codebase="https://github.com/LaurentPV/shanoir-ng/releases/tag/${project.version}" href="shup.jnlp">
+<jnlp spec="1.0+" codebase="https://github.com/fli-iam/shanoir-ng/releases/tag/${project.version}" href="shup.jnlp">
 	<information>
 		<title>Shanoir Uploader</title>
 		<vendor>Empenn Team - Inria</vendor>
