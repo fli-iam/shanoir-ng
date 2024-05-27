@@ -149,7 +149,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<pet-protocol *ngIf="datasetAcquisition.type == 'Pet'" [(ngModel)]="datasetAcquisition.protocol" formControlName="protocol"></pet-protocol>
 			</ng-container>
 
-			<fieldset *ngIf="mode=='view' && showTree">
+			<fieldset *ngIf="mode=='view' && treeMode">
 				<legend i18n="Examination data|Title@@examinationDetailDataTitle">Data</legend>
 				<dataset-acquisition-node
 						[input]="acquisitionNode"

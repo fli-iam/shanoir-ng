@@ -177,7 +177,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 				</ol>
 			</fieldset>
-			<fieldset *ngIf="mode=='view'">
+			<fieldset *ngIf="mode=='view' && treeMode">
 				<legend i18n="Subject data|Title@@subjectDetailDataTitle">Tree</legend>
 				<reverse-subject-node [input]="subjectNode"
 						(nodeInit)="onSubjectNodeInit($event)"></reverse-subject-node>

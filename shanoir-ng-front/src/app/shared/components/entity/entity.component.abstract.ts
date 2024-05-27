@@ -50,8 +50,9 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
 
     private _entity: T;
     @Input() mode: Mode;
-    @Input() id: number; // optional
-    @Input() showTree: boolean = true;
+    @Input() id: number; // if not given via url
+    @Input() entityInput: T; // if id not given via url
+    @Input() treeMode: boolean = true;
     @Output() close: EventEmitter<any> = new EventEmitter();
     footerState: FooterState;
     protected onSave: Subject<any> = new Subject<any>();
@@ -63,6 +64,9 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     activeTab: string;
     protected isMainComponent: boolean;
     @Output() entityNavigation: EventEmitter<{type: EntityType, id: number}> = new EventEmitter();
+    idPromise: SuperPromise<number> = new SuperPromise();
+    entityPromise: SuperPromise<T> = new SuperPromise();
+
 
     /* services */
     protected confirmDialogService: ConfirmDialogService;
@@ -82,6 +86,8 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     abstract initCreate(): Promise<void>;
 
     abstract buildForm(): UntypedFormGroup;
+
+    protected fetchEntity: () => Promise<T>;
 
     constructor(
         protected activatedRoute: ActivatedRoute,
@@ -105,47 +111,62 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
 
     public set entity(entity: T) {
         this._entity = entity;
+        if (entity) this.entityPromise.resolve(entity);
+    }
+
+    private loadEntity(): Promise<T> {
+        let promise: Promise<T>;
+        if (this.entityInput) {
+            promise = Promise.resolve(this.entityInput);
+        } else {
+            if (this.fetchEntity) {
+                promise = this.fetchEntity();
+            } else {
+                promise = this.idPromise.then(id => this.getService().get(id));
+            }
+        }
+        return promise.then(entity => {
+            this.entity = entity;
+            return entity;
+        });
     }
 
     ngOnInit(): void {
-        let idPromise: SuperPromise<number> = new SuperPromise();
         if (this.id) {
             this.isMainComponent = false;
-            idPromise.resolve(this.id);
+            this.idPromise.resolve(this.id);
         } else {
             this.isMainComponent = true;
             this.subscriptions.push(this.activatedRoute.params.subscribe(
                 params => {
                     const id = +params['id'];
-                    idPromise.resolve(id);
+                    this.id = id;
+                    this.idPromise.resolve(id);
                 })
             );
         }
-        idPromise.then(id => {
-            this.id = id;
-            const choose = (): Promise<void> => {
-                switch (this.mode) {
-                    case 'create' :
-                        return this.initCreate();
-                    case 'edit' :
-                        return this.initEdit();
-                    case 'view' :
-                        return this.initView();
-                    default:
-                        throw Error('mode has to be set!');
-                }
+        const choose = (): Promise<void> => {
+            switch (this.mode) {
+                case 'create' :
+                    return this.loadEntity().then(() => this.initCreate());
+                case 'edit' :
+                    return this.loadEntity().then(() => this.initEdit());
+                case 'view' :
+                    return this.loadEntity().then(() => this.initView());
+                default:
+                    throw Error('mode has to be set!');
             }
-            choose().then(() => {
-                this.footerState = new FooterState(this.mode);
-                this.footerState.backButton = this.isMainComponent;
-                this.hasEditRight().then(right => this.footerState.canEdit = right);
-                this.hasDeleteRight().then(right => this.footerState.canDelete = right);
-                if ((this.mode == 'create' || this.mode == 'edit') && this.breadcrumbsService.currentStep.entity) {
-                    this.entity = this.breadcrumbsService.currentStep.entity as T;
-                }
-                this.breadcrumbsService.currentStep.entity = this.entity;
-                this.manageFormSubscriptions();
-            });
+        }
+        choose().then(() => {
+            this.footerState = new FooterState(this.mode);
+            this.footerState.backButton = this.isMainComponent;
+            this.hasEditRight().then(right => this.footerState.canEdit = right);
+            this.hasDeleteRight().then(right => this.footerState.canDelete = right);
+            if ((this.mode == 'create' || this.mode == 'edit') && this.breadcrumbsService.currentStep.entity) {
+                this.entity = this.breadcrumbsService.currentStep.entity as T;
+            }
+            this.breadcrumbsService.currentStep.entity = this.entity;
+            this.manageFormSubscriptions();
         });
 
         // load called tab
@@ -161,8 +182,13 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
 
     ngOnChanges(changes: SimpleChanges): void {
         if ((changes['id'] && !changes['id'].isFirstChange())
-            || (changes['mode'] && !changes['mode'].isFirstChange()))
+                || (changes['mode'] && !changes['mode'].isFirstChange())) {
+        
             this.ngOnInit();
+        }
+        if (changes['id']) {
+            this.idPromise.resolve(this.id);
+        }
     }
 
     private manageFormSubscriptions() {

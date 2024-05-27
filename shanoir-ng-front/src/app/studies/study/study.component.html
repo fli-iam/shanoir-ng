@@ -413,7 +413,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</fieldset>
 			<fieldset [class.hidden-tab]="activeTab != 'tree'" *ngIf="mode != 'create'" tab="tree">
 				<legend>Tree</legend>
-				<study-node [input]="studyNode"
+				<study-node
+						*ngIf="studyNode" 
+						[input]="studyNode"
 						(selectedChange)="onTreeSelectedChange($event)"
 						(nodeInit)="onStudyNodeInit($event)"
 						[hasBox]="true">
@@ -434,8 +436,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					(delete) = "delete()"
 					(cancel)="goToView()"
 					(back)="goBack()">
-				<button  *ngIf="mode == 'view' && hasDownloadRights()" class="right-icon dl-button" type="button" (click)="downloadAll()">Download study<i class="fas fa-download"></i></button>
-				<button  *ngIf="mode == 'view' && hasDownloadRights()" class="right-icon dl-button" type="button" (click)="downloadSelected()" [disabled]="!selectedDatasetIds">Download selected<i class="fas fa-download"></i></button>
+				<a *ngIf="treeMode" [routerLink]="'/tree/study/' + study.id">
+					<button *ngIf="mode == 'view'" class="right-icon dl-button" type="button">Tree View<i class="fas fa-folder-tree"></i></button>
+				</a>
+				<a *ngIf="!treeMode" [routerLink]="'/study/details/' + study.id">
+					<button *ngIf="mode == 'view'" class="right-icon dl-button" type="button">Details View<i class="fas fa-eye"></i></button>
+				</a>
+				<button *ngIf="mode == 'view' && hasDownloadRights()" class="right-icon dl-button" type="button" (click)="downloadAll()">Download study<i class="fas fa-download"></i></button>
+				<button *ngIf="mode == 'view' && hasDownloadRights()" class="right-icon dl-button" type="button" (click)="downloadSelected()" [disabled]="!selectedDatasetIds">Download selected<i class="fas fa-download"></i></button>
 				<button class="right-icon dl-button" type="button" (click)="goToProcessing()" [disabled]="mode != 'view' || !selectedDatasetIds || selectedDatasetIds.length <= 0">Apply processing on selection<i class="fas fa-rocket"></i></button>
 			</form-footer>
 		</form>

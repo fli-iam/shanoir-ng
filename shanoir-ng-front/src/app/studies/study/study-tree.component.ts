@@ -14,16 +14,16 @@
 import { Component, HostListener } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { Subject, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { BreadcrumbsService } from 'src/app/breadcrumbs/breadcrumbs.service';
+import { DatasetService } from 'src/app/datasets/shared/dataset.service';
 import { EntityType } from 'src/app/shared/components/entity/entity.abstract';
 import { slideDown } from '../../shared/animations/animations';
 import { CenterNode, ClinicalSubjectNode, DatasetAcquisitionNode, ExaminationNode, MemberNode, PreclinicalSubjectNode, RightNode, StudyNode, SubjectNode, UNLOADED } from '../../tree/tree.model';
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
-import { DatasetService } from 'src/app/datasets/shared/dataset.service';
-import { Dataset } from 'src/app/datasets/shared/dataset.model';
+import { Location } from '@angular/common';
 
 @Component({
     selector: 'study-tree',
@@ -43,21 +43,36 @@ export class StudyTreeComponent {
             private breadcrumbsService: BreadcrumbsService,
             protected activatedRoute: ActivatedRoute,
             private studyService: StudyService,
-            private datasetService: DatasetService) {
+            private datasetService: DatasetService,
+            private location: Location) {
 
         this.subscriptions.push(this.activatedRoute.params.subscribe(
             params => {
                 const id = +params['id'];
-                this.initStudy(id).then(() => {
-                    this.breadcrumbsService.currentStepAsMilestone(this.study.name);
-                    this.selectDataset(4);
-                });
+                const entityType: EntityType = this.activatedRoute.snapshot.data['entityType'];
+                if (entityType == 'study') {
+                    this.initStudy(id).then(() => {
+                        this.breadcrumbsService.currentStepAsMilestone(this.study.name);
+                        //this.selectDataset(4);
+                        this.selection.studyId = id;
+                        this.studyNode.subjectsNode.open();
+                    });
+                } else if (entityType == 'dataset') {
+                    this.datasetService.get(id).then(dataset => {
+                        const studyId: number = dataset.datasetAcquisition.examination.study.id;
+                        this.location.replaceState('/tree/study/' + studyId);
+                        this.initStudy(studyId).then(() => {
+                            this.breadcrumbsService.currentStepAsMilestone(this.study.name);
+                            this.selectDataset(id);
+                        });
+                    });
+
+                }
             }
         ));
     }
 
     selectDataset(id: number) {
-        //test
         this.selection.datasetId = id;
         let datasetAlreadyLoaded: boolean = false; 
         if (!datasetAlreadyLoaded) {

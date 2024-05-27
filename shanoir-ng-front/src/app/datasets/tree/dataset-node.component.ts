@@ -59,7 +59,6 @@ export class DatasetNodeComponent implements OnChanges {
     }
 
     toggleMenu() {
-        console.log(1, this.withMenu)
         this.menuOpened = this.withMenu && !this.menuOpened;
     }
 
