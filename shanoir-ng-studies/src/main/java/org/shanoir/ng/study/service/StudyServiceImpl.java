@@ -646,7 +646,7 @@ public class StudyServiceImpl implements StudyService {
 		}
 	}
 
-	private boolean updateStudyName(StudyDTO study) throws MicroServiceCommunicationException {
+	public boolean updateStudyName(StudyDTO study) throws MicroServiceCommunicationException {
 		try {
 			Boolean result = (Boolean) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_NAME_UPDATE_QUEUE,
 					objectMapper.writeValueAsString(study));

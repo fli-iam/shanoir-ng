@@ -43,6 +43,7 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
 import org.shanoir.ng.study.model.Study;
@@ -178,6 +179,7 @@ public class StudyServiceTest {
 
 		updatedStudy.setId(1L);
 		given(studyRepository.save(Mockito.any(Study.class))).willReturn(updatedStudy);
+		given(studyService.updateStudyName(Mockito.any(StudyDTO.class))).willReturn(true);
 		
 		final Study returnedStudy = studyService.update(updatedStudy);
 		Assertions.assertNotNull(returnedStudy);
@@ -209,6 +211,7 @@ public class StudyServiceTest {
 		List<StudyUser> in = new ArrayList<>(); in.add(updated.getStudyUserList().get(1));
 		List<StudyUser> out = new ArrayList<>(); out.add(createStudyUsers(4L, 3L, updated, true, StudyUserRight.CAN_SEE_ALL));
 		given(studyUserRepository.saveAll(in)).willReturn(out);
+		given(studyService.updateStudyName(Mockito.any(StudyDTO.class))).willReturn(true);
 
 		studyService.update(updated);
 	}
