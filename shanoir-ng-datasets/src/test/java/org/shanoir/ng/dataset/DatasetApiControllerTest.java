@@ -29,6 +29,7 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
+import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
@@ -93,6 +94,9 @@ public class DatasetApiControllerTest {
 
 	@MockBean
 	private DatasetService datasetServiceMock;
+
+	@MockBean
+	private DatasetRepository datasetRepositoryMock;
 
 	@MockBean
 	private StudyTagService studyTagServiceMock;
