@@ -376,7 +376,7 @@ public interface StudyApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PutMapping(value = "/{studyId}/tags", produces = { "application/json" }, consumes = {
 			"application/json" })
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controlerSecurityService.idMatches(#studyId, #study) and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
 	ResponseEntity<Void> updateStudyTags(
 			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "array of study tags", required = true) @RequestBody List<StudyTagDTO> studyTags,

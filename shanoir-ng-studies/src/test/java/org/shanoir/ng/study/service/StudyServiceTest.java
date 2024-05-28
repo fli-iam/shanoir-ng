@@ -41,6 +41,7 @@ import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
@@ -160,7 +161,7 @@ public class StudyServiceTest {
 
 	@Test
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
-	public void updateTest() throws AccessDeniedException, EntityNotFoundException, MicroServiceCommunicationException, IOException {
+	public void updateTest() throws ShanoirException, IOException {
 		// Also test protocol file path
 		File protocol = new File(tempFolder.getAbsolutePath() + "/tmp/study-1/old.txt");
 
@@ -191,7 +192,7 @@ public class StudyServiceTest {
 	
 	@Test
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
-	public void updateStudyUsersTest() throws EntityNotFoundException, MicroServiceCommunicationException {
+	public void updateStudyUsersTest() throws ShanoirException {
 		Study existing = createStudy();
 		existing.setStudyUserList(new ArrayList<StudyUser>());
 		existing.getStudyUserList().add(createStudyUsers(1L, 1L, existing, true, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));

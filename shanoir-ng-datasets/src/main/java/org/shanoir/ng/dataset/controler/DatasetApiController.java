@@ -34,6 +34,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
@@ -248,7 +249,7 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<Void> updateDatasetTags(Long datasetId, List<Long> studyTagIds, BindingResult result) throws RestServiceException, EntityNotFoundException {
+	public ResponseEntity<Void> updateDatasetTags(Long datasetId, List<Long> studyTagIds, BindingResult result) throws RestServiceException, EntityNotFoundException, SolrServerException, IOException {
 		Dataset ds = datasetService.findById(datasetId);
 		if (ds == null) {
 			throw new EntityNotFoundException(Dataset.class, datasetId);
@@ -262,6 +263,7 @@ public class DatasetApiController implements DatasetApi {
 		List<StudyTag> tags = studyTagService.findByIds(studyTagIds);
 		ds.setTags(tags);
 		datasetRepository.save(ds);
+		solrService.indexDataset(datasetId);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 

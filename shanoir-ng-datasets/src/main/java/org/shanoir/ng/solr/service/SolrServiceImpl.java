@@ -121,7 +121,7 @@ public class SolrServiceImpl implements SolrService {
 	public void indexDatasets(List<Long> datasetIds) throws SolrServerException, IOException {
 		// Get all associated datasets and index them to solr
 		List<ShanoirMetadata> metadatas = shanoirMetadataRepository.findSolrDocs(datasetIds);
-		indexDocumentsInSolr(metadatas);
+		this.indexDocumentsInSolr(metadatas);
 	}
 
 	@Override
@@ -130,10 +130,7 @@ public class SolrServiceImpl implements SolrService {
 		ShanoirMetadata shanoirMetadata = shanoirMetadataRepository.findOneSolrDoc(datasetId);
 		if (shanoirMetadata == null) throw new IllegalStateException("shanoir metadata with id " +  datasetId + " query failed to return any result");
 		ShanoirSolrDocument doc = getShanoirSolrDocument(shanoirMetadata);
-
-		List<String> tags = this.getTagsAsStrings(shanoirMetadata);
-		doc.setTags(tags);
-
+		doc.setTags(this.getTagsAsStrings(shanoirMetadata));
 		solrJWrapper.addToIndex(doc);
 	}
 
@@ -174,7 +171,7 @@ public class SolrServiceImpl implements SolrService {
 
 		while (docIt.hasNext()) {
 			ShanoirMetadata shanoirMetadata = docIt.next();
-			ShanoirSolrDocument doc = getShanoirSolrDocument(shanoirMetadata);
+			ShanoirSolrDocument doc = this.getShanoirSolrDocument(shanoirMetadata);
 			doc.setTags(this.getTagsAsStrings(shanoirMetadata));
 			solrDocuments.add(doc);
 		}

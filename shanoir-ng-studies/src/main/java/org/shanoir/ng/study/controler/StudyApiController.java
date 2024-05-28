@@ -37,6 +37,7 @@ import org.shanoir.ng.study.service.RelatedDatasetService;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.study.service.StudyUniqueConstraintManager;
 import org.shanoir.ng.study.service.StudyUserService;
+import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.model.StudyTagDTO;
 import org.shanoir.ng.tag.model.StudyTagMapper;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -285,11 +286,11 @@ public class StudyApiController implements StudyApi {
 					KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, studyId));
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		} catch (MicroServiceCommunicationException e) {
+		} catch (ShanoirException e) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Microservice communication error", e));
-		}
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Study [" + studyId + "] couldn't be updated.", e));
+        }
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	@Override
@@ -435,7 +436,7 @@ public class StudyApiController implements StudyApi {
 			Files.createFile(duaPath);
 			file.transferTo(duaPath);
 		} catch (Exception e) {
-			LOG.error("Error while loading files on study: {}. File not uploaded. {}", studyId, e);
+			LOG.error("Error while loading files on study: {}. File not uploaded.", studyId, e);
 		}
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
@@ -563,15 +564,22 @@ public class StudyApiController implements StudyApi {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 
+		List<StudyTag> tags = studyTagMapper.studyTagDTOListToStudyTagList(studyTags);
+		for(StudyTag tag : tags){
+			tag.setStudy(study);
+		}
+
 		study.setStudyTags(studyTagMapper.studyTagDTOListToStudyTagList(studyTags));
 
         try {
             studyService.update(study);
         } catch (EntityNotFoundException e) {
 			throw new RestServiceException(new ErrorModel(HttpStatus.NOT_FOUND.value(), "Study [" + studyId + "] not found.", e));
+        } catch (ShanoirException e) {
+			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Study [" + studyId + "] tags couldn't be updated.", e));
         }
 
-		return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }

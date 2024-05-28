@@ -20,6 +20,7 @@ import java.util.Map;
 import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.study.dto.StudyStatisticsDTO;
 import org.shanoir.ng.study.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.study.model.Study;
@@ -98,7 +99,7 @@ public interface StudyService {
 	 * @throws AccessDeniedException
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#study.id, 'CAN_ADMINISTRATE') and @studySecurityService.studyUsersMatchStudy(#study)")
-	Study update(Study study) throws EntityNotFoundException, MicroServiceCommunicationException;
+	Study update(Study study) throws ShanoirException;
 
 	/**
 	 * Adds one studyUser to a study.

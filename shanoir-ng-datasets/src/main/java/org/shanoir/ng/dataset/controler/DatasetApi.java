@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -338,6 +339,6 @@ public interface DatasetApi {
 	ResponseEntity<Void> updateDatasetTags(
 			@Parameter(description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
 			@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "array of study tag ids", required = true) @RequestBody List<Long> studyTagIds,
-			BindingResult result) throws RestServiceException, EntityNotFoundException;
+			BindingResult result) throws RestServiceException, EntityNotFoundException, SolrServerException, IOException;
 
 }

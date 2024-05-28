@@ -14,13 +14,10 @@
 
 package org.shanoir.ng.study.service;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
@@ -29,6 +26,7 @@ import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyStatisticsDTO;
@@ -61,15 +59,14 @@ import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import jakarta.transaction.Transactional;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Implementation of study service.
@@ -219,7 +216,7 @@ public class StudyServiceImpl implements StudyService {
 			studyDb = studyRepository.save(studyDb);
 		}
 
-		updateStudyName(studyMapper.studyToStudyDTO(studyDb));
+		this.updateStudyName(studyMapper.studyToStudyDTO(studyDb));
 
 		if (studyDb.getStudyUserList() != null) {
 			List<StudyUserCommand> commands = new ArrayList<>();
@@ -244,7 +241,7 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public Study update(Study study) throws EntityNotFoundException, MicroServiceCommunicationException {
+	public Study update(Study study) throws ShanoirException {
 		Study studyDb = studyRepository.findById(study.getId()).orElse(null);
 
 		List<Long> tagsToDelete = getTagsToDelete(study, studyDb);
@@ -357,7 +354,11 @@ public class StudyServiceImpl implements StudyService {
 			studyDb = studyRepository.save(studyDb);
 		}
 
-		updateStudyName(studyMapper.studyToStudyDTO(studyDb));
+		boolean synchro = this.updateStudyName(studyMapper.studyToStudyDTO(studyDb));
+
+		if(!synchro){
+			throw new ShanoirException("Study [" + studyDb.getId() + "] couldn't be sync with other microservices. This entity and dependencies may be linked to others.");
+		}
 
 		return studyDb;
 	}
@@ -371,25 +372,27 @@ public class StudyServiceImpl implements StudyService {
 	 * @return updated study
 	 */
 	private void updateTags(List<SubjectStudy> subjectStudyList, List<Tag> dbStudyTags) {
-		if (subjectStudyList != null && dbStudyTags != null) {
-			for (SubjectStudy subjectStudy : subjectStudyList) {
-				if (subjectStudy.getTags() != null) {
-					for (Tag tag : subjectStudy.getTags()) {
-						if (tag.getId() == null) {
-							Tag dbTag = dbStudyTags.stream().filter(upTag ->
-									upTag.getColor().equals(tag.getColor()) && upTag.getName().equals(tag.getName())
-							).findFirst().orElse(null);
-							if (dbTag != null) {
-								tag.setId(dbTag.getId());
-							} else {
-								throw new IllegalStateException("Cannot link a new tag to a subject-study, this tag does not exist in the study");
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+        if (subjectStudyList == null || dbStudyTags == null) {
+            return;
+        }
+        for (SubjectStudy subjectStudy : subjectStudyList) {
+            if (subjectStudy.getTags() == null) {
+                continue;
+            }
+            for (Tag tag : subjectStudy.getTags()) {
+                if (tag.getId() == null) {
+                    Tag dbTag = dbStudyTags.stream().filter(
+							upTag -> upTag.getColor().equals(tag.getColor())
+									&& upTag.getName().equals(tag.getName())
+                            ).findFirst().orElse(null);
+                    if (dbTag == null) {
+                        throw new IllegalStateException("Cannot link a new tag to a subject-study, this tag does not exist in the study");
+                    }
+					tag.setId(dbTag.getId());
+                }
+            }
+        }
+    }
 
 	private List<Long> getTagsToDelete(Study study, Study studyDb) {
 		List<Long> tagsToDelete = new ArrayList<>();
@@ -645,9 +648,9 @@ public class StudyServiceImpl implements StudyService {
 
 	private boolean updateStudyName(StudyDTO study) throws MicroServiceCommunicationException {
 		try {
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_NAME_UPDATE_QUEUE,
+			Boolean result = (Boolean) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_NAME_UPDATE_QUEUE,
 					objectMapper.writeValueAsString(study));
-			return true;
+			return result != null && result;
 		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException(
 					"Error while communicating with datasets MS to update study name.", e);
