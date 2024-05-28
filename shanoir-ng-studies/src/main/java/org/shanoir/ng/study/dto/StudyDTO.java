@@ -84,7 +84,9 @@ public class StudyDTO {
 	private boolean visibleByDefault;
 
 	private boolean withExamination;
-	
+
+	private String studyCardPolicy;
+
 	private List<StudyUser> studyUserList;
 
 	private boolean challenge;
@@ -400,6 +402,14 @@ public class StudyDTO {
 	 */
 	public void setWithExamination(boolean withExamination) {
 		this.withExamination = withExamination;
+	}
+
+	public String getStudyCardPolicy() {
+		return studyCardPolicy;
+	}
+
+	public void setStudyCardPolicy(String studyCardPolicy) {
+		this.studyCardPolicy = studyCardPolicy;
 	}
 
 	/**

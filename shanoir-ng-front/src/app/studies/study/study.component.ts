@@ -235,6 +235,7 @@ export class StudyComponent extends EntityComponent<Study> {
             'studyStatus': [this.study.studyStatus, [Validators.required]],
             'profile': [this.study.profile, [Validators.required]],
             'withExamination': [this.study.withExamination],
+            'studyCardPolicy': [this.study.studyCardPolicy],
             'clinical': [this.study.clinical],
             'description': [this.study.description],
             'license': [this.study.license],
@@ -667,5 +668,9 @@ export class StudyComponent extends EntityComponent<Study> {
 
     storageVolumePrettyPrint(size: number) {
         return this.studyService.storageVolumePrettyPrint(size);
+    }
+
+    studyCardPolicyStr() {
+        return capitalsAndUnderscoresToDisplayable(this.study.studyCardPolicy);
     }
 }
