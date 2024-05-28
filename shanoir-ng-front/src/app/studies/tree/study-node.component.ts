@@ -22,6 +22,7 @@ import {
     ClinicalSubjectNode,
     MemberNode,
     PreclinicalSubjectNode,
+    QualityCardNode,
     RightNode,
     StudyCardNode,
     StudyNode,
@@ -33,6 +34,7 @@ import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
 import { Selection } from '../study/study-tree.component';
 import { SuperPromise } from 'src/app/utils/super-promise';
+import { QualityCardService } from 'src/app/study-cards/shared/quality-card.service';
 
 @Component({
     selector: 'study-node',
@@ -48,6 +50,7 @@ export class StudyNodeComponent implements OnChanges {
     loading: boolean = false;
     menuOpened: boolean = false;
     studyCardsLoading: boolean = false;
+    qualityCardsLoading: boolean = false;
     showDetails: boolean;
     canAdmin: boolean = false;
     @Input() hasBox: boolean = false;
@@ -59,6 +62,7 @@ export class StudyNodeComponent implements OnChanges {
             private router: Router,
             private subjectStudyPipe: SubjectStudyPipe,
             private studyCardService: StudyCardService,
+            private qualityCardService: QualityCardService,
             private keycloakService: KeycloakService,
             private studyRightsService: StudyRightsService) {}
 
@@ -97,6 +101,7 @@ export class StudyNodeComponent implements OnChanges {
                             subjects,
                             centers,
                             UNLOADED,
+                            UNLOADED,
                             members);  // members
                 }
                 this.nodeInit.emit(this.node);
@@ -112,19 +117,36 @@ export class StudyNodeComponent implements OnChanges {
     }
 
     loadStudyCards() {
-        if (this.node.studyCardsNode.studycards == UNLOADED) {
+        if (this.node.studyCardsNode.cards == UNLOADED) {
             this.studyCardsLoading = true;
             this.studyCardService.getAllForStudy(this.node.id).then(studyCards => {
                 if (studyCards) {
-                   this.node.studyCardsNode.studycards = studyCards.map(studyCard => new StudyCardNode(this.node, studyCard.id, studyCard.name, this.canAdmin));
-                } else this.node.studyCardsNode.studycards = [];
+                   this.node.studyCardsNode.cards = studyCards.map(studyCard => new StudyCardNode(this.node, studyCard.id, studyCard.name, this.canAdmin));
+                } else this.node.studyCardsNode.cards = [];
                 this.studyCardsLoading = false;
                 this.node.studyCardsNode.open();
             }).catch(() => this.studyCardsLoading = false);
         }
     }
 
-    onCardDelete(index: number) {
-        (this.node.studyCardsNode.studycards as StudyCardNode[]).splice(index, 1) ;
+    loadQualityCards() {
+        if (this.node.qualityCardsNode.cards == UNLOADED) {
+            this.qualityCardsLoading = true;
+            this.qualityCardService.getAllForStudy(this.node.id).then(qualityCards => {
+                if (qualityCards) {
+                   this.node.qualityCardsNode.cards = qualityCards.map(studyCard => new QualityCardNode(this.node, studyCard.id, studyCard.name, this.canAdmin));
+                } else this.node.qualityCardsNode.cards = [];
+                this.qualityCardsLoading = false;
+                this.node.qualityCardsNode.open();
+            }).catch(() => this.qualityCardsLoading = false);
+        }
+    }
+
+    onStudyCardDelete(index: number) {
+        (this.node.studyCardsNode.cards as StudyCardNode[]).splice(index, 1) ;
+    }
+
+    onQualityCardDelete(index: number) {
+        (this.node.qualityCardsNode.cards as StudyCardNode[]).splice(index, 1) ;
     }
 }

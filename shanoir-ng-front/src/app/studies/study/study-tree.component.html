@@ -26,5 +26,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <center-detail *ngIf="selection.centerId" [id]="selection.centerId" mode="view" class="details"  (entityNavigation)="navigate($event)" [treeMode]="false"></center-detail>
 <acquisition-equipment-detail *ngIf="selection.equipmentId" [id]="selection.equipmentId" mode="view" class="details"  (entityNavigation)="navigate($event)" [treeMode]="false"></acquisition-equipment-detail>
 <study-card *ngIf="selection.studycardId" [id]="selection.studycardId" mode="view" class="details"  (entityNavigation)="navigate($event)" [treeMode]="false"></study-card>
+<quality-card *ngIf="selection.qualitycardId" [id]="selection.qualitycardId" mode="view" class="details"  (entityNavigation)="navigate($event)" [treeMode]="false"></quality-card>
 <dataset-processing-detail *ngIf="selection.processingId" [id]="selection.processingId" mode="view" class="details"  (entityNavigation)="navigate($event)" [treeMode]="false"></dataset-processing-detail>
 <dicom-metadata *ngIf="selection.datasetMetadataId" [id]="selection.datasetMetadataId" class="details"></dicom-metadata>

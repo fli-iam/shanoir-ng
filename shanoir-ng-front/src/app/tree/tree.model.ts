@@ -65,6 +65,7 @@ export class StudyNode extends ShanoirNode {
         private subjects: SubjectNode[] | UNLOADED,
         private centers: CenterNode[] | UNLOADED,
         private studyCards: StudyCardNode[] | UNLOADED,
+        private qualityCards: QualityCardNode[] | UNLOADED,
         private members: MemberNode[] | UNLOADED
     ) {
         super(parent, id, label);
@@ -73,6 +74,7 @@ export class StudyNode extends ShanoirNode {
     public subjectsNode: SubjectsNode = new SubjectsNode(this, null, 'Subjects', this.subjects);
     public centersNode: CentersNode = new CentersNode(this, null, 'Centers', this.centers);
     public studyCardsNode: StudyCardsNode = new StudyCardsNode(this, null, 'Study Cards', this.studyCards);
+    public qualityCardsNode: QualityCardsNode = new QualityCardsNode(this, null, 'Quality Cards', this.qualityCards);
     public membersNode: MembersNode = new MembersNode(this, null, 'Members', this.members);
     public title = "study"
 }
@@ -105,18 +107,28 @@ export class CentersNode extends ShanoirNode {
     public title = "centers"
 }
 
-export class StudyCardsNode extends ShanoirNode {
+export abstract class CardsNode extends ShanoirNode {
 
     constructor(
         public parent: ShanoirNode,
         public id: number,
         public label: string,
-        public studycards: StudyCardNode[] | UNLOADED
+        public cards: CardNode[] | UNLOADED
     ) {
         super(parent, id, label);
     }
 
+    public abstract title;
+}
+
+export class StudyCardsNode extends CardsNode {
+
     public title = "studycards"
+}
+
+export class QualityCardsNode extends CardsNode {
+
+    public title = "qualitycards"
 }
 
 export class MembersNode extends ShanoirNode {
@@ -287,7 +299,7 @@ export class AcquisitionEquipmentNode extends ShanoirNode {
 }
 
 
-export class StudyCardNode extends ShanoirNode {
+export abstract class CardNode extends ShanoirNode {
 
     constructor(
         public parent: ShanoirNode,
@@ -297,8 +309,23 @@ export class StudyCardNode extends ShanoirNode {
     ) {
         super(parent, id, label);
     }
+    
+    public abstract type: 'studycard' | 'qualitycard';
+    public abstract title: string;
+}
+
+
+export class StudyCardNode extends CardNode {
 
     public title: string = "study-card";
+    public type: 'studycard' | 'qualitycard' = 'studycard';
+}
+
+
+export class QualityCardNode extends CardNode {
+
+    public title: string = "quality-card";
+    public type: 'studycard' | 'qualitycard' = 'qualitycard';
 }
 
 

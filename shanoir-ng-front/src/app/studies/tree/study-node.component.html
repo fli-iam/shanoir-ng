@@ -77,18 +77,43 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             awesome="fa-solid fa-shuffle"
             (firstOpen)="loadStudyCards()"
             [(opened)]="node.studyCardsNode.opened"
-            [hasChildren]="hasDependency(this.node.studyCardsNode.studycards)"
+            [hasChildren]="hasDependency(node.studyCardsNode.cards)"
             [dataLoading]="studyCardsLoading">
 
-        <ng-container *ngIf="node.studyCardsNode.opened && node.studyCardsNode.studycards && node.studyCardsNode.studycards != $any('UNLOADED')">
-            <studycard-node
-                    *ngFor="let studycard of node.studyCardsNode.studycards;let i = index"
+        <ng-container *ngIf="node.studyCardsNode.opened && node.studyCardsNode.cards && node.studyCardsNode.cards != $any('UNLOADED')">
+            <card-node
+                    *ngFor="let studycard of node.studyCardsNode.cards; let i = index"
                     [input]="studycard"
-                    (onCardDelete)="onCardDelete(i)"
+                    (onCardDelete)="onStudyCardDelete(i)"
                     [selection]="selection"
                     [withMenu]="withMenu"
+                    detailsPath="study-card/details"
             >
-            </studycard-node>
+            </card-node>
+        </ng-container>
+
+    </node>
+
+    <node
+            *ngIf="node.open"
+            class="studycards"
+            label="Quality Cards"
+            awesome="fa-solid fa-shuffle"
+            (firstOpen)="loadQualityCards()"
+            [(opened)]="node.qualityCardsNode.opened"
+            [hasChildren]="hasDependency(node.qualityCardsNode.cards)"
+            [dataLoading]="qualityCardsLoading">
+
+        <ng-container *ngIf="node.qualityCardsNode.opened && node.qualityCardsNode.cards && node.qualityCardsNode.cards != $any('UNLOADED')">
+            <card-node
+                    *ngFor="let qualitycard of node.qualityCardsNode.cards; let i = index"
+                    [input]="qualitycard"
+                    (onCardDelete)="onQualityCardDelete(i)"
+                    [selection]="selection"
+                    [withMenu]="withMenu"
+                    detailsPath="quality-card/details"
+            >
+            </card-node>
         </ng-container>
 
     </node>
