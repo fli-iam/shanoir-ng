@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { Subscription } from 'rxjs';
@@ -32,7 +32,7 @@ import { Location } from '@angular/common';
     animations: [slideDown]
 })
 
-export class StudyTreeComponent {
+export class StudyTreeComponent implements OnDestroy {
 
     protected studyNode: StudyNode = null;
     protected study: Study;
@@ -50,12 +50,24 @@ export class StudyTreeComponent {
             params => {
                 const id = +params['id'];
                 const entityType: EntityType = this.activatedRoute.snapshot.data['entityType'];
+
                 if (entityType == 'study') {
                     this.initStudy(id).then(() => {
                         this.breadcrumbsService.currentStepAsMilestone(this.study.name);
-                        //this.selectDataset(4);
-                        this.selection.studyId = id;
-                        this.studyNode.subjectsNode.open();
+                        if (this.breadcrumbsService.currentStep.data.node) {
+                            // if going back, reload previous state
+                            this.studyNode = this.breadcrumbsService.currentStep.data.node;
+                            this.selection = this.breadcrumbsService.currentStep.data.selection;
+                            if (!this.selection) {
+                                this.selection = new Selection();
+                                this.selection.studyId = id;
+                                this.studyNode.subjectsNode.open();
+                            }
+                        } else {
+                            this.selection = new Selection();
+                            this.selection.studyId = id;
+                            this.studyNode.subjectsNode.open();
+                        }
                     });
                 } else if (entityType == 'dataset') {
                     this.datasetService.get(id).then(dataset => {
@@ -70,6 +82,11 @@ export class StudyTreeComponent {
                 }
             }
         ));
+    }
+
+    ngOnDestroy(): void {
+        this.breadcrumbsService.currentStep.data.node = this.studyNode;
+        this.breadcrumbsService.currentStep.data.selection = this.selection;
     }
 
     selectDataset(id: number) {
