@@ -71,6 +71,12 @@ window.config = {
       },
     },
   ],
+  server {
+    location / {
+      add_header Cross-Origin-Opener-Policy same-origin;
+      add_header Cross-Origin-Embedder-Policy require-corp;
+    }
+  },
   httpErrorHandler: error => {
     // This is 429 when rejected from the public idc sandbox too often.
     console.warn(error.status);
