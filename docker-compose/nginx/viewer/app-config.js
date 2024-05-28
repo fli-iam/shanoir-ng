@@ -71,10 +71,10 @@ window.config = {
       },
     },
   ],
-  server {
-    location / {
-      add_header Cross-Origin-Opener-Policy same-origin;
-      add_header Cross-Origin-Embedder-Policy require-corp;
+  devServer: {
+	headers: {
+	  "Cross-Origin-Opener-Policy": "same-origin",
+	  "Cross-Origin-Embedder-Policy": "require-corp"
     }
   },
   httpErrorHandler: error => {
