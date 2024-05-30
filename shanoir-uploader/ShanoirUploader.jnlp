@@ -12,7 +12,7 @@
 	</security>
 	<resources>
 		<j2se version="17+" />
-		<jar href="shanoir-uploader-jar-with-dependencies.jar" />
+		<jar href="shanoir-uploader-${project.version}-jar-with-dependencies.jar" />
 	</resources>
 	<application-desc main-class="org.shanoir.uploader.ShanoirUploader" />
 </jnlp>

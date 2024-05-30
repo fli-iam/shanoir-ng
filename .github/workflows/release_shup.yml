@@ -46,7 +46,7 @@ jobs:
 
 
     - name: Build shanoir-uploader with Maven
-      run: mvn -f shanoir-uploader/pom.xml package
+      run: mvn -f shanoir-uploader/pom.xml package -DskipSigning=false
       env:
         MAVEN_OPTS: "-Djavax.net.ssl.trustStore=shanoir-uploader/keystore.jks -Djavax.net.ssl.trustStorePassword=${{ secrets.KEYSTORE_PASS }}"
         KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
@@ -69,8 +69,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: shanoir-uploader/target/shanoir-uploader-jar-with-dependencies.jar
-        asset_name: shanoir-uploader-jar-with-dependencies.jar
+        asset_path: shanoir-uploader/target/shanoir-uploader-${{ steps.get_version.outputs.version }}-jar-with-dependencies.jar
+        asset_name: shanoir-uploader-${{ steps.get_version.outputs.version }}-jar-with-dependencies.jar
         asset_content_type: application/java-archive
 
     - name: Upload JNLP Asset

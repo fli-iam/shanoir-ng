@@ -22,6 +22,7 @@
 		<junit.jupiter.version>5.8.2</junit.jupiter.version>
 		<junit.platform.version>1.8.2</junit.platform.version>
 		<poi.version>4.1.2</poi.version>
+		<skipSigning>true</skipSigning>
 	</properties>
 
 	<dependencies>
@@ -312,6 +313,28 @@
 				</executions>
 			</plugin>
 			<plugin>
+            	<groupId>com.google.code.maven-replacer-plugin</groupId>
+            	<artifactId>replacer</artifactId>
+            	<version>1.5.3</version>
+            	<executions>
+                	<execution>
+                    	<phase>package</phase>
+                    	<goals>
+                        	<goal>replace</goal>
+                    	</goals>
+                	</execution>
+            	</executions>
+            	<configuration>
+                	<file>${project.build.directory}/ShanoirUploader.jnlp</file>
+                	<replacements>
+                    	<replacement>
+                        	<token>\$\{project.version\}</token>
+                        	<value>${project.version}</value>
+                    	</replacement>
+                	</replacements>
+            	</configuration>
+        	</plugin>
+			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
 					<execution>
@@ -345,7 +368,7 @@
 						</goals>
 						<configuration>
 							<appendAssemblyId>false</appendAssemblyId>
-							<finalName>${project.artifactId}-${maven.build.timestamp}</finalName>
+							<finalName>${project.artifactId}-${project.version}-${maven.build.timestamp}</finalName>
 							<descriptors>
 								<descriptor>src/main/assembly/zip.xml</descriptor>
 							</descriptors>
@@ -364,7 +387,8 @@
             				<goal>sign</goal>
           				</goals>
 						<configuration>
-							<archive>${project.build.directory}/shanoir-uploader-jar-with-dependencies.jar</archive>
+							<skip>${skipSigning}</skip>
+							<archive>${project.build.directory}/shanoir-uploader-${project.version}-jar-with-dependencies.jar</archive>
         					<keystore>${project.basedir}/keystore.jks</keystore>
         					<storepass>${env.KEYSTORE_PASS}</storepass>
 							<keypass>${env.KEYSTORE_PASS}</keypass>
