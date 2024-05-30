@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?> 
-<jnlp spec="1.0+" codebase="https://github.com/fli-iam/shanoir-ng/releases/download/${project.version}" href="shup.jnlp">
+<jnlp spec="1.0+" codebase="https://github.com/fli-iam/shanoir-ng/releases/latest/download/" href="ShanoirUploader.jnlp">
 	<information>
 		<title>Shanoir Uploader</title>
 		<vendor>Empenn Team - Inria</vendor>
 		<homepage href="https://project.inria.fr/shanoir/" />
 		<description>Desktop client for the Shanoir server</description>
+		<icon href="https://raw.githubusercontent.com/fli-iam/shanoir-ng/master/shanoir-uploader/src/main/resources/images/simpleLogo.64x64.png"/>
 	</information>
 	<security>
 		<all-permissions/>
 	</security>
 	<resources>
 		<j2se version="17+" />
-		<jar href="shanoir-uploader-${project.version}-jar-with-dependencies.jar" />
+		<jar href="shanoir-uploader-jar-with-dependencies.jar" />
 	</resources>
 	<application-desc main-class="org.shanoir.uploader.ShanoirUploader" />
 </jnlp>

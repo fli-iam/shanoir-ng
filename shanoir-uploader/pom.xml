@@ -302,7 +302,7 @@
 								<copy file="start-shup-linux-mac-java.sh" tofile="target/start-shup-linux-mac-java.sh" />
 								<copy file="downloadDataset.sh" tofile="target/downloadDataset.sh" />
 								<copy file="downloadDataset.bat" tofile="target/downloadDataset.bat" />
-								<copy file="${project.basedir}/shup.jnlp" todir="${project.build.directory}" />
+								<copy file="${project.basedir}/ShanoirUploader.jnlp" todir="${project.build.directory}" />
 							</tasks>
 						</configuration>
 						<goals>
@@ -311,30 +311,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- Maven replacer is used to inject the project.version defined in this pom.xml
-			into the shup.jnlp file -->
-			<plugin>
-            	<groupId>com.google.code.maven-replacer-plugin</groupId>
-            	<artifactId>replacer</artifactId>
-            	<version>1.5.3</version>
-            	<executions>
-                	<execution>
-                    	<phase>package</phase>
-                    	<goals>
-                        	<goal>replace</goal>
-                    	</goals>
-                	</execution>
-            	</executions>
-            	<configuration>
-                	<file>${project.build.directory}/shup.jnlp</file>
-                	<replacements>
-                    	<replacement>
-                        	<token>\$\{project.version\}</token>
-                        	<value>${project.version}</value>
-                    	</replacement>
-                	</replacements>
-            	</configuration>
-        	</plugin>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
@@ -369,7 +345,7 @@
 						</goals>
 						<configuration>
 							<appendAssemblyId>false</appendAssemblyId>
-							<finalName>${project.artifactId}-${project.version}-${maven.build.timestamp}</finalName>
+							<finalName>${project.artifactId}-${maven.build.timestamp}</finalName>
 							<descriptors>
 								<descriptor>src/main/assembly/zip.xml</descriptor>
 							</descriptors>
@@ -377,6 +353,26 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+      			<groupId>org.apache.maven.plugins</groupId>
+      			<artifactId>maven-jarsigner-plugin</artifactId>
+      			<version>3.0.0</version>
+      			<executions>
+        			<execution>
+						<id>signer</id>
+          				<goals>
+            				<goal>sign</goal>
+          				</goals>
+						<configuration>
+							<archive>${project.build.directory}/shanoir-uploader-jar-with-dependencies.jar</archive>
+        					<keystore>${project.basedir}/keystore.jks</keystore>
+        					<storepass>${env.KEYSTORE_PASS}</storepass>
+							<keypass>${env.KEYSTORE_PASS}</keypass>
+        					<alias>${env.KEY_ALIAS}</alias>
+      					</configuration>
+        			</execution>
+      			</executions>
+    		</plugin>
 		</plugins>
 	</build>
 
