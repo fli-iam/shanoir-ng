@@ -262,9 +262,19 @@ public class ImportDialogOpener {
 		if (subject != null) {
 			// Manage subject values here:
 			importDialog.subjectTextField.setText(subject.getName());
-			importDialog.subjectTextField.setBackground(Color.LIGHT_GRAY);
-			importDialog.subjectTextField.setEnabled(false);
-			importDialog.subjectTextField.setEditable(false);
+			// Common name manual
+			if (ShUpConfig.isModeSubjectCommonNameManual()) {
+				importDialog.subjectTextField.setBackground(Color.WHITE);
+				importDialog.subjectTextField.setEnabled(true);
+				importDialog.subjectTextField.setEditable(true);			
+			} else if (ShUpConfig.isModeSubjectCommonNameAutoIncrement()) {
+				importDialog.subjectTextField.setBackground(Color.LIGHT_GRAY);
+				importDialog.subjectTextField.setEnabled(false);
+				importDialog.subjectTextField.setEditable(false);
+				importDialog.existingSubjectsCB.setBackground(Color.LIGHT_GRAY);
+				importDialog.existingSubjectsCB.setEnabled(false);
+				importDialog.existingSubjectsCB.setEditable(false);
+			}			
 			importDialog.subjectTextField.setValueSet(true);
 			importDialog.subjectImageObjectCategoryCB.setSelectedItem(subject.getImagedObjectCategory());
 			importDialog.subjectImageObjectCategoryCB.setEnabled(false);
@@ -278,7 +288,7 @@ public class ImportDialogOpener {
 			importDialog.subjectPersonalCommentTextArea.setEditable(false);
 		// No existing subject found with identifier:
 		} else {
-			// Common name
+			// Common name manual
 			if (ShUpConfig.isModeSubjectCommonNameManual()) {
 				importDialog.subjectTextField.setText("");
 				importDialog.subjectTextField.setBackground(Color.WHITE);
