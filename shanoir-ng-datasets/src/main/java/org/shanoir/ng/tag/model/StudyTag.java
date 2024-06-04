@@ -75,5 +75,4 @@ public class StudyTag  {
     public void setStudy(Study study) {
         this.study = study;
     }
-
 }

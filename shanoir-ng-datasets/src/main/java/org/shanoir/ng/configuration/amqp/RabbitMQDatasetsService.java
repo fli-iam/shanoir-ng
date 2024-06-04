@@ -123,6 +123,7 @@ public class RabbitMQDatasetsService {
 
 	@Autowired
 	private ObjectMapper objectMapper;
+
 	@Autowired
 	EntityManager entityManager;
 

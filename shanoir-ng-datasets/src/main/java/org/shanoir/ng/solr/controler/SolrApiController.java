@@ -22,10 +22,14 @@ package org.shanoir.ng.solr.controler;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrQuery;
 import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -47,10 +51,21 @@ public class SolrApiController implements SolrApi {
 	
 	@Autowired
 	private SolrService solrService;
-	
+
+	@Autowired
+	private ShanoirEventService eventService;
+
 	@Override
-	public ResponseEntity<Void> indexAll() throws RestServiceException, SolrServerException, IOException {
-		solrService.indexAll();		
+	public ResponseEntity<Void> indexAll() throws SolrServerException, IOException {
+		ShanoirEvent event = new ShanoirEvent(
+				ShanoirEventType.SOLR_INDEX_ALL_EVENT,
+				null,
+				KeycloakUtil.getTokenUserId(),
+				"Indexing all datasets...",
+				ShanoirEvent.IN_PROGRESS,
+				0f);
+		eventService.publishEvent(event);
+		solrService.indexAll(event);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	

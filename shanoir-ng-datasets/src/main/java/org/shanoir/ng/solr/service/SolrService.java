@@ -20,12 +20,14 @@
 package org.shanoir.ng.solr.service;
 
 import org.apache.solr.client.solrj.SolrServerException;
+import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.io.IOException;
@@ -42,7 +44,10 @@ public interface SolrService {
 	
 	void addAllToIndex(List<ShanoirSolrDocument> documents) throws SolrServerException, IOException;
 
+	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
 	void indexAll() throws SolrServerException, IOException;
+
+	void indexAll(ShanoirEvent event) throws SolrServerException, IOException;
 
 	void indexDataset(Long datasetId) throws SolrServerException, IOException;
 	
