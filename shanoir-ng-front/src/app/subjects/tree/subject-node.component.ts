@@ -35,6 +35,7 @@ import {
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from "../shared/subject.service";
 import { TaskState } from "../../async-tasks/task.model";
+import {ConsoleService} from "../../shared/console/console.service";
 
 @Component({
     selector: 'subject-node',
@@ -56,6 +57,7 @@ export class SubjectNodeComponent implements OnChanges {
     public downloadState: TaskState = new TaskState();
 
     constructor(
+        private consoleService: ConsoleService,
         private examinationService: ExaminationService,
         private subjectService: SubjectService,
         private router: Router,
@@ -106,8 +108,10 @@ export class SubjectNodeComponent implements OnChanges {
                     }
                     this.loading = false;
                     this.node.open = true;
-                }).catch(() => {
-                this.loading = false;
+                }).catch(e => {
+                    this.consoleService.log('error', e.toString());
+                    console.log(e)
+                    this.loading = false;
             });
         }
     }

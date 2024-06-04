@@ -135,8 +135,7 @@ export class DatasetNode implements ShanoirNode {
         public processed: boolean,
         public canDelete: boolean
     ) {
-        if (!tags) tags = [];
-        else tags = tags.map(t => t.clone());
+        this.tags = !tags ? [] : tags;
         if(processed){
             this.title = "processed-dataset";
             this.awesome = "fas fa-camera-rotate";
