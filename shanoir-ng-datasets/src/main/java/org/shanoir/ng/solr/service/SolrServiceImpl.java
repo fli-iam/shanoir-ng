@@ -47,6 +47,9 @@ import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.tag.repository.StudyTagRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
+import org.shanoir.ng.vip.resulthandler.DefaultHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -85,6 +88,8 @@ public class SolrServiceImpl implements SolrService {
 	@Autowired
 	private DatasetRepository dsRepository;
 
+	private static final Logger LOG = LoggerFactory.getLogger(SolrServiceImpl.class);
+
 	public void addToIndex (final ShanoirSolrDocument document) throws SolrServerException, IOException {
 		solrJWrapper.addToIndex(document);
 	}
@@ -111,9 +116,11 @@ public class SolrServiceImpl implements SolrService {
 	public void indexAll() throws SolrServerException, IOException {
 		// 1. delete all
 		deleteAll();
+		LOG.error("[SOLR] index cleaned"); // DEBUG
 		// 2. get all datasets
 		List<ShanoirMetadata> documents = shanoirMetadataRepository.findAllAsSolrDoc();
-		indexDocumentsInSolr(documents);
+		LOG.error("[SOLR] [{}] shanoir metadata doc found.", documents.size()); // DEBUG
+		this.indexDocumentsInSolr(documents);
 	}
 
 	@Transactional
@@ -169,13 +176,19 @@ public class SolrServiceImpl implements SolrService {
 
 		List<ShanoirSolrDocument> solrDocuments = new ArrayList<>();
 
+		int cpt = 1; //DEBUG
+
 		while (docIt.hasNext()) {
 			ShanoirMetadata shanoirMetadata = docIt.next();
 			ShanoirSolrDocument doc = this.getShanoirSolrDocument(shanoirMetadata);
 			doc.setTags(this.getTagsAsStrings(shanoirMetadata));
+			LOG.error("[SOLR] [{}] tags", doc.getTags().size()); //DEBUG
 			solrDocuments.add(doc);
+			LOG.error("[SOLR] [{}] doc processed", cpt); //DEBUG
+			cpt++; //DEBUG
 		}
 		solrJWrapper.addAllToIndex(solrDocuments);
+		LOG.error("[{}] docs added to index", cpt); //DEBUG
 	}
 
 	private ShanoirSolrDocument getShanoirSolrDocument(ShanoirMetadata shanoirMetadata) {
