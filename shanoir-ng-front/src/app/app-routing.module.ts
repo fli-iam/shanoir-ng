@@ -237,21 +237,6 @@ let routes: Routes = [
         data: { mode: 'view' },
     },
     {
-        path: 'tree',
-        children: [
-            {
-                path: 'study/:id',
-                component: StudyTreeComponent,
-                data: { entityType: 'study' }
-            },
-            {
-                path: 'dataset/:id',
-                component: StudyTreeComponent,
-                data: { entityType: 'dataset' }
-            }
-        ]
-    },
-    {
         path: 'study/edit/:id',
         component: StudyComponent,
         data: { mode: 'edit' },

@@ -14,11 +14,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened || selection?.datasetId == node.id"
+        [class.selected]="this.menuOpened || treeService.isSelected(node.id, 'dataset')"
         [label]="node.label"
         [awesome]="node.awesome"
         [(opened)]="node.opened"
-        (labelClick)="toggleMenu(); selection.datasetId = node.id"
+        (labelClick)="toggleMenu()"
+        [route]="'/dataset/details/' + node.id"
         [dataLoading]="loading"
         [hasBox]="hasBox"
         [(ngModel)]="node.selected"
@@ -36,8 +37,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
     <node
             *ngIf="node.open && node.inPacs"
-            [class.selected]="selection?.datasetMetadataId == node.id"
-            (labelClick)="selection.datasetMetadataId = node.id"
+            [class.selected]="treeService.isSelected(node.id, 'dicomMetadata')"
+            (labelClick)="null"
+            [route]="'/dataset/details/dicom/' + node.id"
             label="DICOM metadata"
             awesome="fas fa-file-code"
             [hasChildren]="false">
@@ -51,7 +53,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 (selectedChange)="selectedChange.emit()"
                 [hasBox]="hasBox"
                 (onProcessingDelete)="onProcessingDelete(i)"
-                [selection]="selection"
                 [withMenu]="withMenu"
         >
         </processing-node>

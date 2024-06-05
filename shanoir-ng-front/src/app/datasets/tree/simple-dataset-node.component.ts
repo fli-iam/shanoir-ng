@@ -14,7 +14,7 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { Selection } from 'src/app/studies/study/study-tree.component';
+import { Selection, TreeService } from 'src/app/studies/study/tree.service';
 import { TaskState } from "../../async-tasks/task.model";
 import { MassDownloadService } from "../../shared/mass-download/mass-download.service";
 import { DatasetNode, ProcessingNode } from '../../tree/tree.model';
@@ -39,13 +39,13 @@ export class SimpleDatasetNodeComponent implements OnChanges {
     detailsPath: string = '/dataset/details/';
     public downloadState: TaskState = new TaskState();
     @Output() onSimpleDatasetDelete: EventEmitter<void> = new EventEmitter();
-    @Input() selection: Selection = new Selection();
     @Input() withMenu: boolean = true;
 
     constructor(
         private router: Router,
         private datasetService: DatasetService,
-        private downloadService: MassDownloadService) {
+        private downloadService: MassDownloadService,
+        protected treeService: TreeService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {

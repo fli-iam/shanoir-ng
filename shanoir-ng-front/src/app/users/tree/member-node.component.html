@@ -13,11 +13,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 <node
         *ngIf="node"
-        [class.selected]="isAdmin && (this.menuOpened || selection.memberId == node.id)"
+        [class.selected]="isAdmin && (this.menuOpened || treeService.isSelected(node.id, 'user'))"
         [label]="node.label"
         awesome="far fa-user"
         [(opened)]="node.opened"
-        (labelClick)="menuOpened = isAdmin && withMenu && !menuOpened; selection.memberId = node.id"
+        (labelClick)="menuOpened = isAdmin && withMenu && !menuOpened"
+        [route]="'/user/details/' + node.id"
         [hasChildren]="hasChildren()">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="isAdmin">

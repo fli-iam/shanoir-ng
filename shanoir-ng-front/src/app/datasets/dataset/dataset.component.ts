@@ -25,6 +25,7 @@ import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { Dataset, DatasetMetadata } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
 import { MrDataset } from './mr/dataset.mr.model';
+import { Selection } from 'src/app/studies/study/tree.service';
 
 
 @Component({
@@ -58,21 +59,23 @@ export class DatasetComponent extends EntityComponent<Dataset> {
         return this.datasetService;
     }
 
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromDataset(this.dataset);
+    }
+
     initView(): Promise<void> {
-        return this.fetchDataset().then(dataset => {
-            this.dataset = dataset;
-            this.isMRS = this.isSpectro(dataset);
-            if (this.keycloakService.isUserAdmin()) {
-                this.hasAdministrateRight = true;
-                this.hasDownloadRight = true;
-                return;
-            } else {
-                return this.studyRightsService.getMyRightsForStudy(dataset.study.id).then(rights => {
-                    this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
-                    this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
-                });
-            }
-        });
+        if (!this.dataset.updatedMetadata) this.dataset.updatedMetadata = new DatasetMetadata();
+        this.isMRS = this.isSpectro(this.dataset);
+        if (this.keycloakService.isUserAdmin()) {
+            this.hasAdministrateRight = true;
+            this.hasDownloadRight = true;
+            return;
+        } else {
+            return this.studyRightsService.getMyRightsForStudy(this.dataset.study.id).then(rights => {
+                this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
+                this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+            });
+        }
     }
 
     private isSpectro(dataset: Dataset): boolean {
@@ -90,10 +93,9 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     }
 
     initEdit(): Promise<void> {
-        return this.fetchDataset().then(dataset => {
-            this.dataset = dataset;
-            this.dataset.creationDate = new Date(this.dataset.creationDate);
-        });
+        if (!this.dataset.updatedMetadata) this.dataset.updatedMetadata = new DatasetMetadata();
+        this.dataset.creationDate = new Date(this.dataset.creationDate);
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {
@@ -102,15 +104,6 @@ export class DatasetComponent extends EntityComponent<Dataset> {
 
     buildForm(): UntypedFormGroup {
         return this.formBuilder.group({});
-    }
-
-    private fetchDataset(): Promise<Dataset> {
-        if (this.mode != 'create') {
-            return this.datasetService.get(this.id).then((dataset: Dataset) => {
-                if (!dataset.updatedMetadata) dataset.updatedMetadata = new DatasetMetadata();
-                return dataset;
-            });
-        }
     }
 
     downloadAll() {
@@ -130,7 +123,6 @@ export class DatasetComponent extends EntityComponent<Dataset> {
                 });
         });
     }
-
 
     private initPapaya(dataFiles: any): void {
         let buffs = [];

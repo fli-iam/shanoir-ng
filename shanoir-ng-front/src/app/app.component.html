@@ -29,7 +29,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <div *ngIf="menuOpen" class="close-button" (click)="toggleMenu(false)"><i class="fas fa-chevron-left"></i></div>
         <div *ngIf="!menuOpen" class="open-button" (click)="toggleMenu(true)"><i class="fas fa-chevron-right"></i></div>
         <breadcrumbs *ngIf="isAuthenticated()"></breadcrumbs>
-        <router-outlet ></router-outlet>
+        <div class="tree">
+            <study-tree></study-tree>
+        </div>
+        <div class="content">
+            <router-outlet ></router-outlet>
+        </div>
     </div>
     <shanoir-console #console></shanoir-console>
 </ng-container>

@@ -33,6 +33,7 @@ import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
 import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { Selection } from 'src/app/studies/study/tree.service';
 
 @Component({
     selector: 'examination-detail',
@@ -92,6 +93,10 @@ export class ExaminationComponent extends EntityComponent<Examination> {
 
     getService(): EntityService<Examination> {
         return this.examinationService;
+    }
+
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromExamination(this.examination);
     }
 
     set entity(exam: Examination) {

@@ -17,12 +17,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </div>
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened || selection?.acquisitionId == node.id"
+        [class.selected]="this.menuOpened || treeService.isSelected(node.id, 'acquisition')"
         [label]="node.label"
         [clickable] = "this.node.id != null"
         awesome="fas fa-procedures"
         [(opened)]="node.opened"
-        (labelClick)="menuOpened = withMenu && !menuOpened; selection.acquisitionId = node.id"
+        (labelClick)="menuOpened = withMenu && !menuOpened"
+        [route]="'/dataset-acquisition/details/' + node.id"
         [hasChildren]="hasChildren()"
         (firstOpen)="loadDatasets()"
         [title]="node.title + ' n°' + node.id">
@@ -44,7 +45,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             (selectedChange)="selectedChange.emit()"
             [hasBox]="hasBox"
             (onDatasetDelete)="onDatasetDelete(i)"
-            [selection]="selection"
             [withMenu]="withMenu"
         >
         </dataset-node>

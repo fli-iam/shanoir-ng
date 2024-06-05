@@ -38,15 +38,16 @@ import {KeycloakService} from '../../keycloak/keycloak.service';
 import {ShanoirError} from '../../models/error.model';
 import {ConsoleService} from '../../console/console.service';
 import {FooterState} from '../form-footer/footer-state.model';
-import {Entity, EntityRoutes, EntityType} from './entity.abstract';
+import {Entity, EntityRoutes} from './entity.abstract';
 import {EntityService} from './entity.abstract.service';
 import { SuperPromise } from 'src/app/utils/super-promise';
+import { Selection, TreeService } from 'src/app/studies/study/tree.service';
 
 
 export type Mode = "view" | "edit" | "create";
 
 @Directive()
-export abstract class EntityComponent<T extends Entity> implements OnInit, OnDestroy, OnChanges {
+export abstract class EntityComponent<T extends Entity> implements OnDestroy, OnChanges {
 
     private _entity: T;
     @Input() mode: Mode;
@@ -63,10 +64,8 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     @ViewChild('formContainer', {static: false}) formContainerElement: ElementRef;
     activeTab: string;
     protected isMainComponent: boolean;
-    @Output() entityNavigation: EventEmitter<{type: EntityType, id: number}> = new EventEmitter();
     idPromise: SuperPromise<number> = new SuperPromise();
     entityPromise: SuperPromise<T> = new SuperPromise();
-
 
     /* services */
     protected confirmDialogService: ConfirmDialogService;
@@ -77,17 +76,15 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     public keycloakService: KeycloakService;
     protected consoleService: ConsoleService;
     public breadcrumbsService: BreadcrumbsService;
+    public treeService: TreeService;
 
     /* abstract methods */
     abstract initView(): Promise<void>;
-
     abstract initEdit(): Promise<void>;
-
     abstract initCreate(): Promise<void>;
-
     abstract buildForm(): UntypedFormGroup;
-
-    protected fetchEntity: () => Promise<T>;
+    protected getTreeSelection: () => Selection; //optional
+    protected fetchEntity: () => Promise<any>; // optional
 
     constructor(
         protected activatedRoute: ActivatedRoute,
@@ -100,9 +97,24 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         this.formBuilder = ServiceLocator.injector.get(UntypedFormBuilder);
         this.consoleService = ServiceLocator.injector.get(ConsoleService);
         this.breadcrumbsService = ServiceLocator.injector.get(BreadcrumbsService);
+        this.treeService = ServiceLocator.injector.get(TreeService);
 
         this.mode = this.activatedRoute.snapshot.data['mode'];
         this.addBCStep();
+
+        setTimeout(() => { // force it to be after child constructor, we need this.fetchEntity
+            this.subscriptions.push(this.activatedRoute.params.subscribe(
+                params => {
+                    this.isMainComponent = true;
+                    const id = +params['id'];
+                    this.id = id;
+                    this.idPromise = new SuperPromise();
+                    this.entityPromise = new SuperPromise();
+                    this.idPromise.resolve(id);
+                    this.init();
+                })
+            );
+        });
     }
 
     public get entity(): T {
@@ -114,7 +126,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         if (entity) this.entityPromise.resolve(entity);
     }
 
-    private loadEntity(): Promise<T> {
+    private loadEntity(): Promise<T> { 
         let promise: Promise<T>;
         if (this.entityInput) {
             promise = Promise.resolve(this.entityInput);
@@ -122,7 +134,9 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             if (this.fetchEntity) {
                 promise = this.fetchEntity();
             } else {
-                promise = this.idPromise.then(id => this.getService().get(id));
+                promise = this.idPromise.then(id => {
+                    return this.getService().get(id);
+                });
             }
         }
         return promise.then(entity => {
@@ -131,20 +145,10 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         });
     }
 
-    ngOnInit(): void {
-        if (this.id) {
-            this.isMainComponent = false;
-            this.idPromise.resolve(this.id);
-        } else {
-            this.isMainComponent = true;
-            this.subscriptions.push(this.activatedRoute.params.subscribe(
-                params => {
-                    const id = +params['id'];
-                    this.id = id;
-                    this.idPromise.resolve(id);
-                })
-            );
-        }
+    init(): void {
+        this.entityPromise.then(() => {
+            if (this.getTreeSelection) this.treeService.selection = this.getTreeSelection();
+        });
         const choose = (): Promise<void> => {
             switch (this.mode) {
                 case 'create' :
@@ -181,13 +185,17 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        if ((changes['id'] && !changes['id'].isFirstChange())
-                || (changes['mode'] && !changes['mode'].isFirstChange())) {
-        
-            this.ngOnInit();
+        if ((changes['id'] && !changes['id'].isFirstChange()) && this.id !=  changes['id'].previousValue) {
+            this.idPromise = new SuperPromise();
+            this.entityPromise = new SuperPromise();
+            this.init();
         }
         if (changes['id']) {
+            this.isMainComponent = false;
             this.idPromise.resolve(this.id);
+        }
+        if (changes['mode'] && !changes['mode'].isFirstChange()) {
+            this.init();
         }
     }
 
@@ -459,14 +467,6 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
      */
     public async hasDeleteRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert();
-    }
-
-    navigate(event, type: EntityType, id: number) {
-        this.entityNavigation.emit({type: type, id: id});
-        if (this.entityNavigation.observers.length > 0) {
-            event.stopPropagation();
-            event.preventDefault();
-        }
     }
 
     @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {

@@ -13,11 +13,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened || selection?.equipmentId == node.id"
+        [class.selected]="this.menuOpened || treeService.isSelected(node.id, 'equipment')"
         [label]="node.label"
         awesome="fas fa-microscope"
         [(opened)]="node.opened"
-        (labelClick)="menuOpened = withMenu && !menuOpened; selection.equipmentId = node.id;"
+        (labelClick)="menuOpened = withMenu && !menuOpened"
+        [route]="'/acquisition-equipment/details/' + node.id"
         [hasChildren]="false"
         [title]="node.title + ' n°' + node.id">
 

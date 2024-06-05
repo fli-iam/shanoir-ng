@@ -52,13 +52,21 @@ export class DatasetDTOService {
         if (dto.processings) {
             for(let p of dto.processings) {
                 promises.push(this.datasetProcessingService.get(p.id).then(
-                    processing => result.processings.push(processing))
-                );
+                    processing => {
+                        if (!processing.inputDatasets) processing.inputDatasets = [];
+                        if (!processing.inputDatasets.find(inds => inds.id == result.id)) {
+                            processing.inputDatasets.push(result);
+                        }
+                        result.processings.push(processing);
+                    }
+                ));
             }
         }
         if (dto.datasetProcessing) {
     	    promises.push(this.datasetProcessingService.get(dto.datasetProcessing.id).then(
-                processing => result.datasetProcessing = processing
+                processing => {
+                    result.datasetProcessing = processing;
+                }    
             ));
         }
         if (mode == 'eager') {

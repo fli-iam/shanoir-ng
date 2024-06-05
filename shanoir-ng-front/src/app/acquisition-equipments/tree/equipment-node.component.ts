@@ -16,7 +16,7 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from
 import { AcquisitionEquipmentNode } from '../../tree/tree.model';
 import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from "../shared/acquisition-equipment.service";
-import { Selection } from 'src/app/studies/study/study-tree.component';
+import { Selection, TreeService } from 'src/app/studies/study/tree.service';
 
 
 @Component({
@@ -29,7 +29,6 @@ export class EquipmentNodeComponent implements OnChanges {
     @Input() input: AcquisitionEquipmentNode | AcquisitionEquipment;
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
     @Output() onEquipmentDelete: EventEmitter<void> = new EventEmitter();
-    @Input() selection: Selection = new Selection();
     @Input() withMenu: boolean = true;
 
     node: AcquisitionEquipmentNode;
@@ -38,7 +37,8 @@ export class EquipmentNodeComponent implements OnChanges {
     detailsPath: string = '/acquisition-equipment/details/';
 
     constructor(
-        private equipmentService: AcquisitionEquipmentService) {
+        private equipmentService: AcquisitionEquipmentService,
+        protected treeService: TreeService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {

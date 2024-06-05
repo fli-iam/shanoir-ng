@@ -14,12 +14,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened || selection.centerId == node.id"
+        [class.selected]="this.menuOpened || treeService.isSelected(node.id, 'center')"
         [label]="node.label"
         awesome="fa-regular fa-hospital"
         (firstOpen)="loadEquipments()"
         [(opened)]="node.opened"
-        (labelClick)="menuOpened = withMenu && !menuOpened; selection.centerId = node.id"
+        (labelClick)="menuOpened = withMenu && !menuOpened"
+        [route]="'/center/details/' + node.id"
         [hasChildren]="hasChildren()"
         [title]="node.title + ' n°' + node.id">
 
@@ -36,7 +37,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [input]="acquisitionEquipment"
                     (onEquipmentDelete)="onEquipmentDelete(i)"
                     (onNodeSelect)="onEquipementNodeSelect.emit($event)"
-                    [selection]="selection"
                     [withMenu]="withMenu">
             </equipment-node>
     </ng-container>

@@ -29,6 +29,7 @@ import { Center } from '../../centers/shared/center.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ManufacturerModelPipe } from '../shared/manufacturer-model.pipe';
 import {StudyCardService} from "../../study-cards/shared/study-card.service";
+import { Selection } from 'src/app/studies/study/tree.service';
 
 @Component({
     selector: 'acquisition-equipment-detail',
@@ -63,6 +64,10 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
 
     getService(): EntityService<AcquisitionEquipment> {
         return this.acqEquipService;
+    }
+
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromEquipment(this.acqEquip);
     }
 
     async initView(): Promise<void> {

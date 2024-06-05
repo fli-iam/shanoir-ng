@@ -17,7 +17,7 @@ import { Router } from '@angular/router';
 import { DatasetNode, ProcessingNode } from '../../tree/tree.model';
 import { DatasetProcessing } from '../shared/dataset-processing.model';
 import { DatasetProcessingService } from "../shared/dataset-processing.service";
-import { Selection } from 'src/app/studies/study/study-tree.component';
+import { Selection, TreeService } from 'src/app/studies/study/tree.service';
 
 
 @Component({
@@ -34,12 +34,12 @@ export class ProcessingNodeComponent implements OnChanges {
     menuOpened: boolean = false;
     @Input() hasBox: boolean = false;
     @Output() onProcessingDelete: EventEmitter<void> = new EventEmitter();
-    @Input() selection: Selection = new Selection();
     @Input() withMenu: boolean = true;
 
     constructor(
         private router: Router,
-        private processingService: DatasetProcessingService) {
+        private processingService: DatasetProcessingService,
+        protected treeService: TreeService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {

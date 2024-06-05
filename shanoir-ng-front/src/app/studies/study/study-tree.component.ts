@@ -11,19 +11,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, HostListener, OnDestroy } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
+import { Location } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { BreadcrumbsService } from 'src/app/breadcrumbs/breadcrumbs.service';
 import { DatasetService } from 'src/app/datasets/shared/dataset.service';
-import { EntityType } from 'src/app/shared/components/entity/entity.abstract';
 import { slideDown } from '../../shared/animations/animations';
-import { CenterNode, ClinicalSubjectNode, DatasetAcquisitionNode, ExaminationNode, MemberNode, PreclinicalSubjectNode, RightNode, StudyNode, SubjectNode, UNLOADED } from '../../tree/tree.model';
+import { AcquisitionEquipmentNode, CenterNode, ClinicalSubjectNode, DatasetAcquisitionNode, DatasetNode, ExaminationNode, MemberNode, PreclinicalSubjectNode, ProcessingNode, RightNode, ShanoirNode, StudyNode, SubjectNode, UNLOADED } from '../../tree/tree.model';
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
-import { Location } from '@angular/common';
+import { TreeService } from './tree.service';
+import { DatasetAcquisitionService } from 'src/app/dataset-acquisitions/shared/dataset-acquisition.service';
+import { SuperPromise } from 'src/app/utils/super-promise';
+import { Dataset } from 'src/app/datasets/shared/dataset.model';
+import { DatasetProcessingService } from 'src/app/datasets/shared/dataset-processing.service';
+import { AcquisitionEquipmentService } from 'src/app/acquisition-equipments/shared/acquisition-equipment.service';
+
 
 @Component({
     selector: 'study-tree',
@@ -35,75 +41,96 @@ import { Location } from '@angular/common';
 export class StudyTreeComponent implements OnDestroy {
 
     protected studyNode: StudyNode = null;
+    private studyNodePromise: SuperPromise<void> = new SuperPromise();
     protected study: Study;
     protected subscriptions: Subscription[] = [];
-    protected selection: Selection = new Selection();
 
     constructor(
             private breadcrumbsService: BreadcrumbsService,
             protected activatedRoute: ActivatedRoute,
             private studyService: StudyService,
             private datasetService: DatasetService,
-            private location: Location) {
+            private datasetAcquisitionService: DatasetAcquisitionService,
+            private datasetProcessingService: DatasetProcessingService,
+            private acquisitionEquipmentService: AcquisitionEquipmentService,
+            private location: Location,
+            protected treeService: TreeService) {
 
-        this.subscriptions.push(this.activatedRoute.params.subscribe(
-            params => {
-                const id = +params['id'];
-                const entityType: EntityType = this.activatedRoute.snapshot.data['entityType'];
-
-                if (entityType == 'study') {
-                    this.initStudy(id).then(() => {
-                        this.breadcrumbsService.currentStepAsMilestone(this.study.name);
-                        if (this.breadcrumbsService.currentStep.data.node) {
-                            // if going back, reload previous state
-                            this.studyNode = this.breadcrumbsService.currentStep.data.node;
-                            this.selection = this.breadcrumbsService.currentStep.data.selection;
-                            if (!this.selection) {
-                                this.selection = new Selection();
-                                this.selection.studyId = id;
-                                this.studyNode.subjectsNode.open();
-                            }
-                        } else {
-                            this.selection = new Selection();
-                            this.selection.studyId = id;
-                            this.studyNode.subjectsNode.open();
-                        }
-                    });
-                } else if (entityType == 'dataset') {
-                    this.datasetService.get(id).then(dataset => {
-                        const studyId: number = dataset.datasetAcquisition.examination.study.id;
-                        this.location.replaceState('/tree/study/' + studyId);
-                        this.initStudy(studyId).then(() => {
-                            this.breadcrumbsService.currentStepAsMilestone(this.study.name);
-                            this.selectDataset(id);
-                        });
-                    });
-
+        this.subscriptions.push(treeService.change.subscribe(selection => {
+            if (selection?.type == 'study') {
+                this.initStudy(selection.id).then(() => {
+                    this.studyNode.subjectsNode.open();
+                });
+            } else {
+                let studyLoaded: Promise<void>;
+                console.log(selection.studyId)
+                if (this.study?.id && selection.studyId?.includes(this.study?.id)) {
+                    studyLoaded = Promise.resolve();
+                } else if (selection.studyId?.[0]) {
+                    studyLoaded = this.initStudy(selection.studyId[0]);
                 }
+
+                studyLoaded?.then(() => {
+                    if (selection?.type == 'dataset') {
+                        this.selectDataset(selection.id);
+                    } else if (selection?.type == 'dicomMetadata') {
+                        this.selectDicomMetadata(selection.id);
+                    } else if (selection?.type == 'subject') {
+                        this.selectSubject(selection.id);
+                    } else if (selection?.type == 'acquisition') {
+                        this.selectAcquisition(selection.id);
+                    } else if (selection?.type == 'processing') {
+                        this.selectProcessing(selection.id);
+                    } else if (selection?.type == 'center') {
+                        this.selectCenter(selection.id);
+                    } else if (selection?.type == 'equipment') {
+                        this.selectEquipment(selection.id);
+                    } else if (selection?.type == 'qualitycard') {
+                        this.selectQualitycard(selection.id);
+                    } else if (selection?.type == 'studycard') {
+                        this.selectStudycard(selection.id);
+                    } else if (selection?.type == 'user') {
+                        this.selectUser(selection.id);
+                    }
+                    
+                });
             }
-        ));
+        }));    
     }
 
     ngOnDestroy(): void {
-        this.breadcrumbsService.currentStep.data.node = this.studyNode;
-        this.breadcrumbsService.currentStep.data.selection = this.selection;
+        this.subscriptions.forEach(sub => sub.unsubscribe());
     }
 
-    selectDataset(id: number) {
-        this.selection.datasetId = id;
-        let datasetAlreadyLoaded: boolean = false; 
-        if (!datasetAlreadyLoaded) {
-            this.studyNode.subjectsNode.open().then(() => {
-                this.datasetService.get(id).then(ds => {
-                    let subjectNode: SubjectNode = (this.studyNode.subjectsNode.subjects as SubjectNode[]).find(sn => sn.id == ds.datasetAcquisition?.examination?.subject?.id);
+    selectDataset(id: number): Promise<DatasetNode> {
+        return this.studyNodePromise.then(() => {
+            return this.studyNode.subjectsNode.open().then(() => {
+                return this.findDatasetParent(id).then(ret => {
+                    let subjectNode: SubjectNode = (this.studyNode.subjectsNode.subjects as SubjectNode[]).find(sn => {
+                        return sn.id == ret.topParent.datasetAcquisition?.examination?.subject?.id;
+                    });
                     if (subjectNode) {
-                        subjectNode.open().then(() => {
-                            let examNode: ExaminationNode = (subjectNode.examinations as ExaminationNode[])?.find(exam => exam.id == ds.datasetAcquisition?.examination?.id);
+                        return subjectNode.open().then(() => {
+                            let examNode: ExaminationNode = (subjectNode.examinations as ExaminationNode[])?.find(exam => exam.id == ret.topParent.datasetAcquisition?.examination?.id);
                             if (examNode) {
-                                examNode.open().then(() => {
-                                    let acqNode: DatasetAcquisitionNode = (examNode.datasetAcquisitions as DatasetAcquisitionNode[])?.find(acq => acq.id == ds.datasetAcquisition?.id);
+                                return examNode.open().then(() => {
+                                    let acqNode: DatasetAcquisitionNode = (examNode.datasetAcquisitions as DatasetAcquisitionNode[])?.find(acq => acq.id == ret.topParent.datasetAcquisition?.id);
                                     if (acqNode) {
-                                        acqNode.open();
+                                        return acqNode.open()?.then(() => {
+                                            let dsNode: DatasetNode = (acqNode.datasets as DatasetNode[]).find(acqDs => acqDs.id == ret.topParent.id);
+                                            if (dsNode) {
+                                                return dsNode.open().then(() => {
+                                                    if (ret.topParent.id != id) { // if sub processing/datasets 
+                                                        let procNode: ProcessingNode = dsNode.processings[0] as ProcessingNode;
+                                                        if (procNode) {
+                                                            return (dsNode.processings[0] as ProcessingNode).open().then(() => {
+                                                                return (procNode.datasets as DatasetNode[]).find(dsNd => dsNd.id == id);
+                                                            });
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        });
                                     }
                                 });
                             }
@@ -111,7 +138,93 @@ export class StudyTreeComponent implements OnDestroy {
                     }
                 });
             });
-        }
+        });
+    }
+
+    selectDicomMetadata(id: number) {
+        this.selectDataset(id).then(parentDsNode => {
+            parentDsNode?.open();
+        });
+    }
+
+    findDatasetParent(childDatasetId: number, botomChild?: Dataset): Promise<{topParent: Dataset, bottomChild: Dataset}> {
+        return this.datasetService.get(childDatasetId).then(ds => {
+            if (!botomChild) botomChild = ds;
+            if (ds.datasetProcessing) {
+                if (!(ds.datasetProcessing.inputDatasets?.length > 0)) throw Error('no input ds on this processing');
+                return this.findDatasetParent(ds.datasetProcessing.inputDatasets[0].id, botomChild);
+            } else {
+                return {topParent: ds, bottomChild: botomChild};
+            }
+        });
+    }
+
+    selectProcessing(id: number) {
+        this.datasetProcessingService.get(id).then(proc => {
+            this.selectDataset(proc.inputDatasets[0].id).then(parentDsNode => {
+                parentDsNode?.open();
+            });
+        });
+    }
+
+    selectAcquisition(id: number) {
+        this.studyNodePromise.then(() => {
+            this.studyNode.subjectsNode.open().then(() => {
+                this.datasetAcquisitionService.get(id).then(dsa => {
+                    let subjectNode: SubjectNode = (this.studyNode.subjectsNode.subjects as SubjectNode[]).find(sn => sn.id == dsa.examination?.subject?.id);
+                    if (subjectNode) {
+                        subjectNode.open().then(() => {
+                            let examNode: ExaminationNode = (subjectNode.examinations as ExaminationNode[])?.find(exam => exam.id == dsa.examination?.id);
+                            if (examNode) {
+                                examNode.open();
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    }
+
+    selectSubject(id: number) {
+        this.studyNodePromise.then(() => {
+            this.studyNode.subjectsNode.open();
+        });
+    }
+
+    selectCenter(id: number) {
+        this.studyNodePromise.then(() => {
+            this.studyNode.centersNode.open();
+        });
+    }
+
+    selectEquipment(id: number) {
+        this.studyNodePromise.then(() => {
+            this.studyNode.centersNode.open().then(() => {
+                this.acquisitionEquipmentService.get(id).then(acqEq => {
+                    let centerNode: CenterNode = (this.studyNode.centersNode.centers as CenterNode[]).find(cn => acqEq.center.id == cn.id);
+                    centerNode?.open();
+                });
+            });
+
+        });
+    }
+
+    selectQualitycard(id: number) {
+        this.studyNodePromise.then(() => {
+            this.studyNode.qualityCardsNode.open();
+        });
+    }
+
+    selectStudycard(id: number) {
+        this.studyNodePromise.then(() => {
+            this.studyNode.studyCardsNode.open();
+        });
+    }
+
+    selectUser(id: number) {
+        this.studyNodePromise.then(() => {
+            this.studyNode.membersNode.open();
+        });
     }
 
     initStudy(id: number): Promise<void> {
@@ -147,134 +260,18 @@ export class StudyTreeComponent implements OnDestroy {
                 return memberNode;
             });
             this.studyNode = new StudyNode(null, study.id, study.name, subjectNodes, centerNodes, UNLOADED, UNLOADED, memberNodes);
+            this.studyNodePromise.resolve();
             this.studyNode.open();
         });
         return studyPromise;
     }
 
-    protected navigate(param: {type: EntityType, id: number}) {
-        this.selection.selectedEntity = param.type;
-        this.selection.id = param.id;
-    }
-
-    @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
-        if (event.key == '²') {
-            console.log('selection', this.selection);
-            console.log('node', this.studyNode);
-        }
-    }
+    // @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
+    //     if (event.key == '²') {
+    //         console.log('selection', this.selection);
+    //         console.log('node', this.studyNode);
+    //     }
+    // }
 }
 
-export class Selection {
 
-    public selectedEntity: EntityType | 'datasetMetadata';
-    public id: number;
-
-    set studyId(id: number) {
-        this.selectedEntity = 'study';
-        this.id = id;
-    }
-
-    get studyId(): number {
-        return this.selectedEntity == 'study' ? this.id : null;
-    }
-
-    set subjectId(id: number) {
-        this.selectedEntity = 'subject';
-        this.id = id;
-    }
-
-    get subjectId(): number {
-        return this.selectedEntity == 'subject' ? this.id : null;
-    }
-
-    set examinationId(id: number) {
-        this.selectedEntity = 'examination';
-        this.id = id;
-    }
-
-    get examinationId(): number {
-        return this.selectedEntity == 'examination' ? this.id : null;
-    }
-
-    set acquisitionId(id: number) {
-        this.selectedEntity = 'acquisition';
-        this.id = id;
-    }
-
-    get acquisitionId(): number {
-        return this.selectedEntity == 'acquisition' ? this.id : null;
-    }
-
-    set datasetId(id: number) {
-        this.selectedEntity = 'dataset';
-        this.id = id;
-    }
-
-    get datasetId(): number {
-        return this.selectedEntity == 'dataset' ? this.id : null;
-    }
-
-    set processingId(id: number) {
-        this.selectedEntity = 'processing';
-        this.id = id;
-    }
-
-    get processingId(): number {
-        return this.selectedEntity == 'processing' ? this.id : null;
-    }
-
-    set centerId(id: number) {
-        this.selectedEntity = 'center';
-        this.id = id;
-    }
-
-    get centerId(): number {
-        return this.selectedEntity == 'center' ? this.id : null;
-    }
-
-    set equipmentId(id: number) {
-        this.selectedEntity = 'equipment';
-        this.id = id;
-    }
-
-    get equipmentId(): number {
-        return this.selectedEntity == 'equipment' ? this.id : null;
-    }
-
-    set studycardId(id: number) {
-        this.selectedEntity = 'studycard';
-        this.id = id;
-    }
-
-    get studycardId(): number {
-        return this.selectedEntity == 'studycard' ? this.id : null;
-    }
-
-    set qualitycardId(id: number) {
-        this.selectedEntity = 'qualitycard';
-        this.id = id;
-    }
-
-    get qualitycardId(): number {
-        return this.selectedEntity == 'qualitycard' ? this.id : null;
-    }
-
-    set memberId(id: number) {
-        this.selectedEntity = 'user';
-        this.id = id;
-    }
-
-    get memberId(): number {
-        return this.selectedEntity == 'user' ? this.id : null;
-    }
-
-    set datasetMetadataId(id: number) {
-        this.selectedEntity = 'datasetMetadata';
-        this.id = id;
-    }
-
-    get datasetMetadataId(): number {
-        return this.selectedEntity == 'datasetMetadata' ? this.id : null;
-    }
-}

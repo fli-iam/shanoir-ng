@@ -15,7 +15,6 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from
 import { Router } from '@angular/router';
 
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { Selection } from 'src/app/studies/study/study-tree.component';
 import { SuperPromise } from 'src/app/utils/super-promise';
 import { DatasetAcquisition } from '../../dataset-acquisitions/shared/dataset-acquisition.model';
 import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
@@ -37,6 +36,7 @@ import {
 } from '../../tree/tree.model';
 import { Subject } from '../shared/subject.model';
 import { TaskState } from 'src/app/async-tasks/task.model';
+import { Selection, TreeService } from 'src/app/studies/study/tree.service';
 
 
 @Component({
@@ -57,7 +57,6 @@ export class SubjectNodeComponent implements OnChanges {
     showDetails: boolean;
     @Input() hasBox: boolean = false;
     detailsPath: string = "";
-    @Input() selection: Selection = new Selection();
     @Input() withMenu: boolean = true;
     protected contentLoaded: SuperPromise<void> = new SuperPromise();
     public downloadState: TaskState = new TaskState();
@@ -66,7 +65,8 @@ export class SubjectNodeComponent implements OnChanges {
             private examinationService: ExaminationService,
             private router: Router,
             private examPipe: ExaminationPipe,
-            private downloadService: MassDownloadService) {
+            private downloadService: MassDownloadService,
+            protected treeService: TreeService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -104,19 +104,22 @@ export class SubjectNodeComponent implements OnChanges {
             setTimeout(() => this.loading = true);
             return this.examinationService.findExaminationsBySubjectAndStudy(this.node.id, this.studyId)
                 .then(examinations => {
-                    let sortedExaminations = examinations.sort((a: SubjectExamination, b: SubjectExamination) => {
-                        return (new Date(a.examinationDate)).getTime() - (new Date(b.examinationDate)).getTime();
-                    })
                     this.node.examinations = [];
-                    if (sortedExaminations) {
-                        sortedExaminations.forEach(exam => {
-                            (this.node.examinations as ExaminationNode[]).push(this.mapExamNode(exam));
-                        });
+                    if (examinations) {
+                        let sortedExaminations = examinations.sort((a: SubjectExamination, b: SubjectExamination) => {
+                            return (new Date(a.examinationDate)).getTime() - (new Date(b.examinationDate)).getTime();
+                        })
+                        if (sortedExaminations) {
+                            sortedExaminations.forEach(exam => {
+                                (this.node.examinations as ExaminationNode[]).push(this.mapExamNode(exam));
+                            });
+                        }
                     }
                     this.loading = false;
                     this.node.open();
-                }).catch(() => {
+                }).catch(error => {
                     this.loading = false;
+                    throw error;
                 });
         } else {
             return Promise.resolve();

@@ -19,7 +19,7 @@ import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
 
 import { Subscription } from 'rxjs';
 import { TaskState } from 'src/app/async-tasks/task.model';
-import { Selection } from 'src/app/studies/study/study-tree.component';
+import { Selection, TreeService } from 'src/app/studies/study/tree.service';
 import { ConsoleService } from "../../shared/console/console.service";
 import { MassDownloadService } from "../../shared/mass-download/mass-download.service";
 import { DatasetAcquisitionNode, DatasetNode, ProcessingNode, ShanoirNode, UNLOADED } from '../../tree/tree.model';
@@ -48,7 +48,6 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
     downloading = false;
     hasBids: boolean = false;
     protected subscriptions: Subscription[] = [];
-    @Input() selection: Selection = new Selection();
     @Input() withMenu: boolean = true;
     protected downloadState: TaskState = new TaskState();
 
@@ -56,7 +55,8 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
         private datasetService: DatasetService,
         private datasetAcquisitionService: DatasetAcquisitionService,
         private consoleService: ConsoleService,
-        private massDownloadService: MassDownloadService) {
+        private massDownloadService: MassDownloadService,
+        protected treeService: TreeService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {

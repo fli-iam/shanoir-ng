@@ -14,11 +14,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <node
         *ngIf="node"
-        [class.selected]="(showDetails && this.menuOpened) || selection?.studyId == node.id"
+        [class.selected]="(showDetails && this.menuOpened) || treeService.isSelected(node.id, 'study')"
         [label]="node.label"
         awesome="fa-regular fa-folder-open"
         [(opened)]="node.opened"
-        (labelClick)="menuOpened = withMenu && !menuOpened; selection.studyId = node.id"
+        (labelClick)="menuOpened = withMenu && !menuOpened"
+        [route]="'/study/details/' + node.id"
         [hasChildren]="true"
         [clickable]="showDetails">
 
@@ -43,7 +44,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [studyId]="node.id"
                     (selectedChange)="selectedChange.emit(node)"
                     [hasBox]="hasBox"
-                    [selection]="selection"
                     [withMenu]="withMenu"
             >
             </subject-node>
@@ -63,7 +63,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <center-node
                     *ngFor="let center of node.centersNode.centers"
                     [input]="center"
-                    [selection]="selection"
                     [withMenu]="withMenu">
             </center-node>
         </ng-container>
@@ -85,7 +84,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     *ngFor="let studycard of node.studyCardsNode.cards; let i = index"
                     [input]="studycard"
                     (onCardDelete)="onStudyCardDelete(i)"
-                    [selection]="selection"
                     [withMenu]="withMenu"
                     detailsPath="study-card/details"
             >
@@ -109,7 +107,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     *ngFor="let qualitycard of node.qualityCardsNode.cards; let i = index"
                     [input]="qualitycard"
                     (onCardDelete)="onQualityCardDelete(i)"
-                    [selection]="selection"
                     [withMenu]="withMenu"
                     detailsPath="quality-card/details"
             >
@@ -130,7 +127,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <member-node
                     *ngFor="let member of node.membersNode.members"
                     [input]="member"
-                    [selection]="selection"
                     [withMenu]="withMenu">
             </member-node>
         </ng-container>

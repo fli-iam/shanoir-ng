@@ -36,6 +36,7 @@ import { StudyCard, StudyCardRule } from '../shared/study-card.model';
 import { StudyCardService } from '../shared/study-card.service';
 import { StudyCardRuleComponent } from '../study-card-rules/study-card-rule.component';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
+import { Selection } from 'src/app/studies/study/tree.service';
 
 @Component({
     selector: 'study-card',
@@ -77,6 +78,10 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
 
     getService(): EntityService<StudyCard> {
         return this.studyCardService;
+    }
+
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromStudycard(this.studyCard);
     }
 
     get studyCard(): StudyCard { return this.entity; }

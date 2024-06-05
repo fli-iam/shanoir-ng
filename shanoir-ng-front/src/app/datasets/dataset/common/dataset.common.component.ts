@@ -26,7 +26,6 @@ import { Subject } from '../../../subjects/shared/subject.model';
 import { SubjectService } from '../../../subjects/shared/subject.service';
 import { DatasetType } from '../../shared/dataset-type.model';
 import { Dataset } from '../../shared/dataset.model';
-import { Entity, EntityType } from 'src/app/shared/components/entity/entity.abstract';
 
 @Component({
     selector: 'common-dataset-details',
@@ -37,7 +36,6 @@ export class CommonDatasetComponent implements OnChanges {
     @Input() mode: Mode;
     @Input() dataset: Dataset;
     @Input() parentFormGroup: UntypedFormGroup;
-    @Output() entityNavigation: EventEmitter<{type: EntityType, id: number}> = new EventEmitter();
     subjects: Subject[] = [];
     studies: Study[] = [];
 
@@ -123,13 +121,4 @@ export class CommonDatasetComponent implements OnChanges {
             this.studies = studies;
         });
     }
-
-    navigate(event, type: EntityType, id: number) {
-        this.entityNavigation.emit({type: type, id: id});
-        if (this.entityNavigation.observers.length > 0) {
-            event.stopPropagation();
-            event.preventDefault();
-        }
-    }
-
 }

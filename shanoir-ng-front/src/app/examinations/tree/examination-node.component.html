@@ -16,12 +16,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </div>
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened || selection?.examinationId == node.id"
+        [class.selected]="this.menuOpened || treeService.isSelected(node.id, 'examination')"
         [clickable] = "this.node.id != null"
         [label]="node.label"
         awesome="fas fa-stethoscope"
         [(opened)]="node.opened"
-        (labelClick)="menuOpened = withMenu && !menuOpened; selection.examinationId = node.id"
+        (labelClick)="menuOpened = withMenu && !menuOpened"
+        [route]="'/examination/details/' + node.id"
         (firstOpen)="firstOpen()"
         [hasChildren]="hasChildren()"
         [title]="node.title + ' n°' + node.id">
@@ -43,7 +44,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 (selectedChange)="selectedChange.emit()"
                 [hasBox]="hasBox"
                 (onAcquisitionDelete)="onAcquisitionDelete(i)"
-                [selection]="selection"
                 [withMenu]="withMenu"
         >
         </dataset-acquisition-node>

@@ -48,6 +48,7 @@ import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.
 import { DatasetExpressionFormat } from "../../enum/dataset-expression-format.enum";
 import { KeyValue } from "@angular/common";
 import { TaskState } from 'src/app/async-tasks/task.model';
+import { Selection } from './tree.service';
 
 @Component({
     selector: 'study-detail',
@@ -57,7 +58,6 @@ import { TaskState } from 'src/app/async-tasks/task.model';
 })
 
 export class StudyComponent extends EntityComponent<Study> {
-
     @ViewChild('memberTable', { static: false }) table: TableComponent;
     @ViewChild('input', { static: false }) private fileInput: ElementRef;
     @ViewChild('duaInput', { static: false }) private duaFileInput: ElementRef;
@@ -127,6 +127,10 @@ export class StudyComponent extends EntityComponent<Study> {
 
     getService(): EntityService<Study> {
         return this.studyService;
+    }
+
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromStudy(this.study);
     }
 
     fetchEntity: () => Promise<Study> = () => {

@@ -42,6 +42,7 @@ import { TestQualityCardOptionsComponent } from '../test-quality-card-options/te
 import { SuperPromise } from 'src/app/utils/super-promise';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { Selection } from 'src/app/studies/study/tree.service';
 
 @Component({
     selector: 'quality-card',
@@ -102,6 +103,10 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
 
     getService(): EntityService<QualityCard> {
         return this.qualityCardService;
+    }
+
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromQualitycard(this.qualityCard);
     }
 
     get qualityCard(): QualityCard { return this.entity; }

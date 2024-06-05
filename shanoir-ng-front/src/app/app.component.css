@@ -1,9 +1,16 @@
-.main-content { padding: 0 20px 0 20px; position: relative; margin-left: 0; height: 100vh;overflow: auto; }
+.main-content { padding: 0 20px 0 20px; position: relative; margin-left: 0; height: 100vh; white-space: nowrap; }
 .main-content.open { margin-left: 300px; }
 .main-content.reduce-height { height: calc(100vh - 108px); }
-side-menu, .side-menu { overflow-x: hidden; scrollbar-width: none; overflow: -moz-scrollbars-none; -ms-overflow-style: none; }
-.side-menu { width: 300px; position: fixed; top: 0; z-index: 1; }
 
+.content { display: inline-block; }
+side-menu, .side-menu { overflow-x: hidden; scrollbar-width: none; overflow: -moz-scrollbars-none; -ms-overflow-style: none; }
+.side-menu { width: 300px; position: fixed; top: 0; z-index: 2; }
+
+.tree { overflow-x: hidden; scrollbar-width: none; overflow: -moz-scrollbars-none; -ms-overflow-style: none; z-index: 1; 
+    height: 100%; display: inline-block; }
+
+.tree, .content { vertical-align: top; }
+    
 .close-button, 
 .open-button { width: 14px; height: 27px; position: fixed; top: 0; left: 0; cursor: pointer; color: var(--very-light-grey); z-index: 2; }
 

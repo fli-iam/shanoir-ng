@@ -269,6 +269,7 @@ import { TestQualityCardOptionsComponent } from './study-cards/test-quality-card
 import { SessionService } from './shared/services/session.service';
 import { PipelineService } from "./vip/pipelines/pipeline/pipeline.service";
 import { StudyTreeComponent } from './studies/study/study-tree.component';
+import { TreeService } from './studies/study/tree.service';
 
 @NgModule({
     imports: [
@@ -543,6 +544,7 @@ import { StudyTreeComponent } from './studies/study/study-tree.component';
         QualityCardDTOService,
         MassDownloadService,
         SessionService,
+        TreeService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],
     bootstrap: [AppComponent]

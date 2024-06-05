@@ -14,7 +14,7 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { Selection } from 'src/app/studies/study/study-tree.component';
+import { Selection, TreeService } from 'src/app/studies/study/tree.service';
 import { DatasetNode, ProcessingNode } from '../../tree/tree.model';
 import { Dataset } from '../shared/dataset.model';
 import { DatasetService, Format } from '../shared/dataset.service';
@@ -38,14 +38,14 @@ export class DatasetNodeComponent implements OnChanges {
     @Input() related: boolean = false;
     detailsPath: string = '/dataset/details/';
     @Output() onDatasetDelete: EventEmitter<void> = new EventEmitter();
-    @Input() selection: Selection = new Selection();
     @Input() withMenu: boolean = true;
     public downloadState: TaskState = new TaskState();
 
     constructor(
         private router: Router,
         private datasetService: DatasetService,
-        private downloadService: MassDownloadService) {
+        private downloadService: MassDownloadService,
+        protected treeService: TreeService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {

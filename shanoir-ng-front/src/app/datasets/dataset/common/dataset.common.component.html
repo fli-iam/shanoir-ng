@@ -19,9 +19,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label>Processing</label>
             <span class="right-col">
                 <a [routerLink]="['/dataset-processing/details/', dataset?.datasetProcessing?.id]">
-					<span (click)="navigate($event, 'processing', dataset?.datasetProcessing?.id)">
-						Dataset processing n°{{dataset.datasetProcessing?.id}}
-					</span>
+					Dataset processing n°{{dataset.datasetProcessing?.id}}
                 </a>
             </span>
         </li>
@@ -40,9 +38,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<label>Dataset Acquisition</label>
 			<span class="right-col">
 				<a [routerLink]="['/dataset-acquisition/details/', dataset?.datasetAcquisition?.id]">
-					<span (click)="navigate($event, 'acquisition', dataset?.datasetAcquisition?.id)">
-						Dataset acquisition n°{{dataset.datasetAcquisition?.id}}
-					</span>
+					Dataset acquisition n°{{dataset.datasetAcquisition?.id}}
 				</a>
 			</span>
 		</li>
@@ -50,9 +46,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label>Examination</label>
             <span class="right-col">
                 <a [routerLink]="['/examination/details/', dataset?.datasetAcquisition?.examination?.id]">
-					<span (click)="navigate($event, 'examination', dataset?.datasetAcquisition?.examination?.id)">
-						{{dataset.datasetAcquisition?.examination?.comment ? dataset.datasetAcquisition?.examination?.comment : dataset.datasetAcquisition?.examination?.examinationDate  | date: 'dd/MM/yyyy'}}
-					</span>
+					{{dataset.datasetAcquisition?.examination?.comment ? dataset.datasetAcquisition?.examination?.comment : dataset.datasetAcquisition?.examination?.examinationDate  | date: 'dd/MM/yyyy'}}
                 </a>
             </span>
         </li>
@@ -60,9 +54,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<label i18n="Dataset detail|Dataset subject@@datasetDetailSubject">Subject</label>
 			<span class="right-col">
 				<a [routerLink]="[getSubjectLink()]">
-					<span (click)="navigate($event, 'subject', dataset?.subject?.id)">
-						{{dataset.subject?.name}}
-					</span>
+					{{dataset.subject?.name}}
 				</a>
 			</span>
 		</li>
@@ -70,9 +62,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<label i18n="Dataset detail|Dataset study@@datasetDetailStudy">Study</label>
 			<span class="right-col">
 				<a [routerLink]="['/study/details/', dataset.study?.id]">
-					<span (click)="navigate($event, 'dataset', dataset?.study?.id)">
-						{{dataset.study?.name}}
-					</span>
+					{{dataset.study?.name}}
 				</a>
 			</span>
 		</li>

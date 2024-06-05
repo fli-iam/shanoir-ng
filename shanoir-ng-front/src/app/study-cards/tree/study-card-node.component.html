@@ -14,11 +14,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened || (node.type == 'studycard' && selection.studycardId == node.id) || (node.type == 'qualitycard' && selection.qualitycardId == node.id)"
+        [class.selected]="this.menuOpened || (node.type == 'studycard' && treeService.isSelected(node.id, 'studycard')) || (node.type == 'qualitycard' && treeService.isSelected(node.id, 'qualitycard'))"
         [label]="node.label"
         awesome="fa-solid fa-shuffle"
         [(opened)]="node.opened"
-        (labelClick)="menuOpened = withMenu && !menuOpened; node.type == 'studycard' ? selection.studycardId = node.id : selection.qualitycardId = node.id"
+        (labelClick)="menuOpened = withMenu && !menuOpened"
+        [route]="(node.type == 'studycard' ? '/study-card/details/' : '/quality-card/details/') + node.id"
         [hasChildren]="false"
         [title]="node.title + ' n°' + node.id">
 

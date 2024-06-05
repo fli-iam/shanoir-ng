@@ -14,7 +14,7 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 
-import { Selection } from 'src/app/studies/study/study-tree.component';
+import { Selection, TreeService } from 'src/app/studies/study/tree.service';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import { AcquisitionEquipmentNode, CenterNode } from '../../tree/tree.model';
 import { Center } from '../shared/center.model';
@@ -36,13 +36,13 @@ export class CenterNodeComponent implements OnChanges {
     loading: boolean = false;
     menuOpened: boolean = false;
     detailsPath: string = '/center/details/';
-    @Input() selection: Selection = new Selection();
     @Input() withMenu: boolean = true;
 
     constructor(
         private centerService: CenterService,
         private acquisitionEquipmentPipe: AcquisitionEquipmentPipe,
-        private keycloakService: KeycloakService) {
+        private keycloakService: KeycloakService,
+        protected treeService: TreeService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {

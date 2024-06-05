@@ -11,23 +11,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, OnInit } from '@angular/core';
-import { UntypedFormGroup, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
+import { Component } from '@angular/core';
+import { AbstractControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import * as shajs from 'sha.js';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { Selection } from 'src/app/studies/study/tree.service';
 import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 import { IdName } from '../../shared/models/id-name.model';
 import { Option } from '../../shared/select/select.component';
+import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
-import { ReverseSubjectNode, ClinicalSubjectNode, ShanoirNode } from '../../tree/tree.model';
+import { ClinicalSubjectNode, ReverseSubjectNode, ShanoirNode } from '../../tree/tree.model';
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { Study } from '../../studies/shared/study.model';
 
 @Component({
     selector: 'subject-detail',
@@ -36,7 +37,7 @@ import { Study } from '../../studies/shared/study.model';
     animations: [slideDown, preventInitialChildAnimations]
 })
 
-export class SubjectComponent extends EntityComponent<Subject> implements OnInit {
+export class SubjectComponent extends EntityComponent<Subject> {
 
     readonly ImagedObjectCategory = ImagedObjectCategory;
     private readonly HASH_LENGTH: number = 14;
@@ -81,8 +82,12 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
         return this.subjectService;
     }
 
-    ngOnInit() {
-        super.ngOnInit();
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromSubject(this.subject);
+    }
+
+    init() {
+        super.init();
         if (this.mode == 'create') {
             this.firstName = this.breadcrumbsService.currentStep.data.firstName;
             this.lastName = this.breadcrumbsService.currentStep.data.lastName;
@@ -100,12 +105,12 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
 
     initView(): Promise<void> {
         this.loadAllStudies();
-        return this.subjectService.get(this.id).then(subject => { this.subject = subject; });
+        return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
         this.loadAllStudies();
-        return this.subjectService.get(this.id).then(subject => { this.subject = subject; });
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {

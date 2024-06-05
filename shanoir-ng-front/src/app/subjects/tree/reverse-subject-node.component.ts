@@ -17,7 +17,7 @@ import { Router } from '@angular/router';
 import { SimpleStudy } from '../../studies/shared/study.model';
 import { ReverseStudyNode, ReverseSubjectNode, ShanoirNode, UNLOADED } from '../../tree/tree.model';
 import { Subject } from '../shared/subject.model';
-import { Selection } from 'src/app/studies/study/study-tree.component';
+import { Selection, TreeService } from 'src/app/studies/study/tree.service';
 
 
 @Component({
@@ -37,14 +37,14 @@ export class ReverseSubjectNodeComponent implements OnChanges {
     showDetails: boolean;
     @Input() hasBox: boolean = false;
     awesome = "fas fa-user-injured";
-    @Input() selection: Selection = new Selection();
 
     constructor(
-            private router: Router) {
+            private router: Router,
+            protected treeService: TreeService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes['input']) {
+        if (changes['input'] && this.input) {
             if (this.input instanceof ReverseSubjectNode) {
                 this.node = this.input;
             } else {

@@ -61,6 +61,7 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
     @Input() title: string;
     @Input() tags: Tag[];
     @Input() qualityTag: QualityTag;
+    @Input() route: string;
     public isOpen: boolean = false;
     @Input() opened: boolean = false;
     private neverOpened: boolean = true;

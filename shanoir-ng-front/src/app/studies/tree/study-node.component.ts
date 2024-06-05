@@ -15,6 +15,7 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from
 import { Router } from '@angular/router';
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
 
+import { QualityCardService } from 'src/app/study-cards/shared/quality-card.service';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import { SubjectStudyPipe } from '../../subjects/shared/subject-study.pipe';
 import {
@@ -32,9 +33,7 @@ import {
 import { StudyRightsService } from "../shared/study-rights.service";
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
-import { Selection } from '../study/study-tree.component';
-import { SuperPromise } from 'src/app/utils/super-promise';
-import { QualityCardService } from 'src/app/study-cards/shared/quality-card.service';
+import { Selection, TreeService } from '../study/tree.service';
 
 @Component({
     selector: 'study-node',
@@ -55,7 +54,6 @@ export class StudyNodeComponent implements OnChanges {
     canAdmin: boolean = false;
     @Input() hasBox: boolean = false;
     detailsPath: string = '/study/details/';
-    @Input() selection: Selection = new Selection();
     @Input() withMenu: boolean = true;
 
     constructor(
@@ -64,7 +62,8 @@ export class StudyNodeComponent implements OnChanges {
             private studyCardService: StudyCardService,
             private qualityCardService: QualityCardService,
             private keycloakService: KeycloakService,
-            private studyRightsService: StudyRightsService) {}
+            private studyRightsService: StudyRightsService,
+            protected treeService: TreeService) {}
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {

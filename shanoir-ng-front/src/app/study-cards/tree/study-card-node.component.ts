@@ -13,12 +13,12 @@
  */
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 
-import { Selection } from 'src/app/studies/study/study-tree.component';
 import { CardNode } from '../../tree/tree.model';
 import { StudyCard } from '../shared/study-card.model';
 import { StudyCardService } from "../shared/study-card.service";
 import { QualityCard } from '../shared/quality-card.model';
 import { QualityCardService } from '../shared/quality-card.service';
+import { TreeService } from 'src/app/studies/study/tree.service';
 
 
 @Component({
@@ -35,12 +35,12 @@ export class StudyCardNodeComponent implements OnChanges {
     loading: boolean = false;
     menuOpened: boolean = false;
     @Input() detailsPath: string;
-    @Input() selection: Selection = new Selection();
     @Input() withMenu: boolean = true;
 
     constructor(
         private studycardService: StudyCardService,
-        private qualitycardService: QualityCardService) {
+        private qualitycardService: QualityCardService,
+        protected treeService: TreeService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {

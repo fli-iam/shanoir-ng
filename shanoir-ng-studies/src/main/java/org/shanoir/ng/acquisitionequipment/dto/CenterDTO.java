@@ -12,29 +12,28 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-export abstract class Entity {
-    
-    abstract id: number;
-}
+package org.shanoir.ng.acquisitionequipment.dto;
 
-export class EntityRoutes {
+import java.util.List;
 
-    constructor(public routingName: string) {}
+import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.studycenter.StudyCenterDTO;
 
-    public getRouteToView(id: number): string {
-        return '/' + this.routingName + '/details/' + id;
-    }
+/**
+ * DTO for acquisition equipments.
+ * 
+ * @author msimon
+ *
+ */
+public class CenterDTO extends IdName {
 
-    public getRouteToEdit(id: number): string {
-        return '/' + this.routingName + '/edit/' + id;
-    }
+	private List<StudyCenterDTO> studyCenterList;
 
-    public getRouteToCreate(): string {
-        return '/' + this.routingName + '/create';
-    }
+	public List<StudyCenterDTO> getStudyCenterList() {
+		return studyCenterList;
+	}
 
-    public getRouteToList(): string {
-        return '/' + this.routingName + '/list';
-    }
-
+	public void setStudyCenterList(List<StudyCenterDTO> studyCenterList) {
+		this.studyCenterList = studyCenterList;
+	}
 }

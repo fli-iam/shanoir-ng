@@ -20,7 +20,7 @@ import { ConsoleService } from '../../shared/console/console.service';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { Selection } from 'src/app/studies/study/study-tree.component';
+import { Selection, TreeService } from 'src/app/studies/study/tree.service';
 import { SuperPromise } from 'src/app/utils/super-promise';
 import { environment } from '../../../environments/environment';
 import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode, ShanoirNode } from '../../tree/tree.model';
@@ -49,7 +49,6 @@ export class ExaminationNodeComponent implements OnChanges {
     hasDicom: boolean = false;
     downloading = false;
     detailsPath: string = '/examination/details/';
-    @Input() selection: Selection = new Selection();
     @Input() withMenu: boolean = true;
     private contentLoaded: SuperPromise<void> = new SuperPromise();
 
@@ -59,7 +58,8 @@ export class ExaminationNodeComponent implements OnChanges {
         private examPipe: ExaminationPipe,
         private downloadService: MassDownloadService,
         private massDownloadService : MassDownloadService,
-        private consoleService: ConsoleService) {
+        private consoleService: ConsoleService,
+        protected treeService: TreeService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {

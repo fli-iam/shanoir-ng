@@ -13,7 +13,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened || selection?.subjectId == node.id"
+        [class.selected]="this.menuOpened || treeService.isSelected(node.id, 'subject')"
         [label]="node.label"
         [tags]="node.tags"
         [qualityTag]="node.qualityTag"
@@ -21,7 +21,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         (firstOpen)="onFirstOpen()"
         [(opened)]="node.opened"
         [hasChildren]="hasChildren()"
-        (labelClick)="menuOpened = withMenu && !menuOpened; selection.subjectId = node.id"
+        (labelClick)="menuOpened = withMenu && !menuOpened"
+        [route]="'/subject/details/' + node.id"
         [dataLoading]="loading"
         [title]="node.title + ' n°' + node.id">
 
@@ -41,7 +42,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 (selectedChange)="selectedChange.emit()"
                 [hasBox]="hasBox"
                 (onExaminationDelete)="onExaminationDelete(i)"
-                [selection]="selection"
                 [withMenu]="withMenu"
         >
         </examination-node>

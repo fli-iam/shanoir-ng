@@ -14,12 +14,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened || selection?.subjectId == node.id"
+        [class.selected]="this.menuOpened || treeService.isSelected(node.id, 'subject')"
         [label]="node.label"
         [awesome]="awesome"
         [(opened)]="node.opened"
         [hasChildren]="hasChildren()"
-        (labelClick)="menuOpened = !menuOpened; selection.subjectId = node.id"
+        (labelClick)="menuOpened = !menuOpened"
         [dataLoading]="loading"
         [title]="node.title + ' n°' + node.id">
   
