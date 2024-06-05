@@ -44,8 +44,6 @@ shanoir-ng-front/.angular
 .env.bak
 /docker-compose/nginx/webapp/
 /docker-compose/*/shanoir-ng-*.jar
-/docker-compose/*/entrypoint_common
-/docker-compose/*/oneshot
 /tmp
 shanoir-ng-tests/tests/.Python
 shanoir-ng-tests/tests/include/

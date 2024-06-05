@@ -161,12 +161,6 @@
 							<target>
 								<copy file="target/${project.build.finalName}-exec.jar"
 									tofile="${basedir}/../docker-compose/import/${project.artifactId}.jar" />
-								<copy file="../utils/entrypoint_common"
-									tofile="${basedir}/../docker-compose/import/entrypoint_common" />
-								<copy file="../utils/oneshot"
-									tofile="${basedir}/../docker-compose/import/oneshot" />
-								<chmod perm="+x"
-									file="${basedir}/../docker-compose/import/oneshot" />
 							</target>
 						</configuration>
 						<goals>
