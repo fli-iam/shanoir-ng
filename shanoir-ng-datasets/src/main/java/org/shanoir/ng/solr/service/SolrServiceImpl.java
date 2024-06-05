@@ -127,6 +127,7 @@ public class SolrServiceImpl implements SolrService {
 	@Override
 	@Async
 	public void indexAll(ShanoirEvent event) {
+
 		event.setMessage("Cleaning Solr index...");
 		eventService.publishEvent(event);
         try {
@@ -138,13 +139,25 @@ public class SolrServiceImpl implements SolrService {
 			event.setMessage("Error while cleaning Solr index : " + e.getMessage());
 			return;
         }
-		event.setProgress(0.1f);
+		event.setProgress(0.05f);
 		event.setMessage("Fetching data to index...");
 		eventService.publishEvent(event);
-		List<ShanoirMetadata> documents = shanoirMetadataRepository.findAllAsSolrDoc();
-		Map<Long, List<String>> tags = shanoirMetadataRepository.findAllTags(null);
-		event.setProgress(0.3f);
-        try {
+
+		List<ShanoirMetadata> documents;
+		Map<Long, List<String>> tags;
+		try {
+			documents = shanoirMetadataRepository.findAllAsSolrDoc();
+			tags = shanoirMetadataRepository.findAllTags(null);
+		} catch(Exception e){
+			LOG.error("Error while fetching data to index.", e);
+			event.setStatus(ShanoirEvent.ERROR);
+			event.setProgress(-1f);
+			event.setMessage("Error while fetching data to index : " + e.getMessage());
+			return;
+		}
+		event.setProgress(0.2f);
+
+		try {
             this.indexDocumentsInSolr(documents, tags, event);
         } catch (SolrServerException | IOException e) {
 			LOG.error("Error indexing datasets into Solr.", e);
@@ -177,21 +190,29 @@ public class SolrServiceImpl implements SolrService {
 	private void indexDocumentsInSolr(List<ShanoirMetadata> metadatas, Map<Long, List<String>> tags, ShanoirEvent event) throws SolrServerException, IOException {
 
 		int docNb = metadatas.size();
-		Float progress = 0.7f / metadatas.size();
+		Float progress = 0.8f / metadatas.size();
 
 		Iterator<ShanoirMetadata> docIt = metadatas.iterator();
 
 		List<ShanoirSolrDocument> solrDocuments = new ArrayList<>();
 
 		int cpt = 0;
+		long lastTime = System.currentTimeMillis();
 		while (docIt.hasNext()) {
 			cpt++;
-			if(event != null){
-				event.setMessage("Indexing [" + cpt + "/" + docNb + "] datasets...");
-				event.setProgress(event.getProgress() + progress);
-				eventService.publishEvent(event);
-			}
 			ShanoirMetadata shanoirMetadata = docIt.next();
+
+			if(event != null){
+				// send job update only every 3 seconds
+				long currentTime = System.currentTimeMillis();
+				if(currentTime - lastTime >= 3000){
+					lastTime = currentTime;
+					event.setMessage("Indexing [" + cpt + "/" + docNb + "] datasets...");
+					event.setProgress(event.getProgress() + progress);
+					eventService.publishEvent(event);
+				}
+			}
+
 			ShanoirSolrDocument doc = this.getShanoirSolrDocument(shanoirMetadata);
 			doc.setTags(tags.get(shanoirMetadata.getDatasetId()));
 			solrDocuments.add(doc);
