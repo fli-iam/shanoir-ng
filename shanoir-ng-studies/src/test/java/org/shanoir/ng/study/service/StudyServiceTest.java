@@ -179,7 +179,7 @@ public class StudyServiceTest {
 
 		updatedStudy.setId(1L);
 		given(studyRepository.save(Mockito.any(Study.class))).willReturn(updatedStudy);
-		given(studyService.updateStudyName(Mockito.any(StudyDTO.class))).willReturn(true);
+		given(studyService.updateStudyName(Mockito.any(StudyDTO.class))).willReturn("");
 		
 		final Study returnedStudy = studyService.update(updatedStudy);
 		Assertions.assertNotNull(returnedStudy);
@@ -211,7 +211,7 @@ public class StudyServiceTest {
 		List<StudyUser> in = new ArrayList<>(); in.add(updated.getStudyUserList().get(1));
 		List<StudyUser> out = new ArrayList<>(); out.add(createStudyUsers(4L, 3L, updated, true, StudyUserRight.CAN_SEE_ALL));
 		given(studyUserRepository.saveAll(in)).willReturn(out);
-		given(studyService.updateStudyName(Mockito.any(StudyDTO.class))).willReturn(true);
+		given(studyService.updateStudyName(Mockito.any(StudyDTO.class))).willReturn("");
 
 		studyService.update(updated);
 	}
