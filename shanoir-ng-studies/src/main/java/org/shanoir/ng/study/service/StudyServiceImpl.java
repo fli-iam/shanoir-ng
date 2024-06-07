@@ -17,6 +17,7 @@ package org.shanoir.ng.study.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.center.model.Center;
@@ -24,9 +25,7 @@ import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
-import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyStatisticsDTO;
@@ -59,6 +58,8 @@ import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.util.Pair;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -241,6 +242,7 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
+	@Transactional(rollbackOn = {ShanoirException.class})
 	public Study update(Study study) throws ShanoirException {
 		Study studyDb = studyRepository.findById(study.getId()).orElse(null);
 
@@ -354,10 +356,11 @@ public class StudyServiceImpl implements StudyService {
 			studyDb = studyRepository.save(studyDb);
 		}
 
-		boolean synchro = this.updateStudyName(studyMapper.studyToStudyDTO(studyDb));
+		String error = this.updateStudyName(studyMapper.studyToStudyDTO(studyDb));
 
-		if(!synchro){
-			throw new ShanoirException("Study [" + studyDb.getId() + "] couldn't be sync with other microservices. This entity and dependencies may be linked to others.");
+		if(error != null && !error.isEmpty()){
+			LOG.error("Study [" + studyDb.getId() + "] couldn't be sync with datasets microservice : {}", error);
+			throw new ShanoirException(error);
 		}
 
 		return studyDb;
@@ -646,11 +649,10 @@ public class StudyServiceImpl implements StudyService {
 		}
 	}
 
-	public boolean updateStudyName(StudyDTO study) throws MicroServiceCommunicationException {
+	public String updateStudyName(StudyDTO study) throws MicroServiceCommunicationException {
 		try {
-			Boolean result = (Boolean) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_NAME_UPDATE_QUEUE,
+            return (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_NAME_UPDATE_QUEUE,
 					objectMapper.writeValueAsString(study));
-			return result != null && result;
 		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException(
 					"Error while communicating with datasets MS to update study name.", e);

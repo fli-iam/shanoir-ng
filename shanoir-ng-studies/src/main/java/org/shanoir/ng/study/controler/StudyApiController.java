@@ -20,6 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -282,14 +283,15 @@ public class StudyApiController implements StudyApi {
 
 		try {
 			studyService.update(study);
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_STUDY_EVENT, studyId.toString(),
-					KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, studyId));
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		} catch (ShanoirException e) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Study [" + studyId + "] couldn't be updated.", e));
+            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage(), e));
         }
+
+        eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_STUDY_EVENT, studyId.toString(),
+				KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, studyId));
+
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 

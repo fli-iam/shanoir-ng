@@ -63,4 +63,6 @@ public interface SolrService {
 
 	void updateDatasets(List<Long> datasetIds) throws SolrServerException, IOException;
 
+	void updateSubjects(List<Long> subjectIds) throws SolrServerException, IOException;
+
 }

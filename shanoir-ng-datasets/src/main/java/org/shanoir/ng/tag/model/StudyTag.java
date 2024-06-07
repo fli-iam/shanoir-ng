@@ -1,11 +1,16 @@
 package org.shanoir.ng.tag.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.model.Study;
 
+import java.util.Objects;
+
 @Entity
-public class StudyTag  {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class StudyTag extends IdName {
 
     @Id
     private Long id;
@@ -74,5 +79,18 @@ public class StudyTag  {
      */
     public void setStudy(Study study) {
         this.study = study;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StudyTag studyTag = (StudyTag) o;
+        return Objects.equals(id, studyTag.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

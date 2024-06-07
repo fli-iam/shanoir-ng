@@ -26,14 +26,14 @@ import java.util.stream.Collectors;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.Center;
-import org.shanoir.ng.shared.model.SubjectStudy;
-import org.shanoir.ng.tag.model.StudyTag;
-import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.SubjectStudyRepository;
@@ -84,6 +84,9 @@ public class SolrServiceImpl implements SolrService {
 
 	@Autowired
 	private CenterRepository centerRepository;
+
+	@Autowired
+	private ExaminationRepository examRepository;
 
 	@Autowired
 	private DatasetRepository dsRepository;
@@ -139,7 +142,7 @@ public class SolrServiceImpl implements SolrService {
 			event.setMessage("Error while cleaning Solr index : " + e.getMessage());
 			return;
         }
-		event.setProgress(0.05f);
+		event.setProgress(0.25f);
 		event.setMessage("Fetching data to index...");
 		eventService.publishEvent(event);
 
@@ -147,7 +150,13 @@ public class SolrServiceImpl implements SolrService {
 		Map<Long, List<String>> tags;
 		try {
 			documents = shanoirMetadataRepository.findAllAsSolrDoc();
+			event.setProgress(0.5f);
+			event.setMessage("Fetching data to index...");
+			eventService.publishEvent(event);
 			tags = shanoirMetadataRepository.findAllTags(null);
+			event.setProgress(0.75f);
+			event.setMessage("Fetching data to index...");
+			eventService.publishEvent(event);
 		} catch(Exception e){
 			LOG.error("Error while fetching data to index.", e);
 			event.setStatus(ShanoirEvent.ERROR);
@@ -155,7 +164,6 @@ public class SolrServiceImpl implements SolrService {
 			event.setMessage("Error while fetching data to index : " + e.getMessage());
 			return;
 		}
-		event.setProgress(0.2f);
 
 		try {
             this.indexDocumentsInSolr(documents, tags, event);
@@ -190,28 +198,19 @@ public class SolrServiceImpl implements SolrService {
 	private void indexDocumentsInSolr(List<ShanoirMetadata> metadatas, Map<Long, List<String>> tags, ShanoirEvent event) throws SolrServerException, IOException {
 
 		int docNb = metadatas.size();
-		Float progress = 0.8f / metadatas.size();
+
+		if(event != null){
+			event.setMessage("Indexed [0/" + docNb + "] datasets.");
+			event.setStatus(ShanoirEvent.IN_PROGRESS);
+			eventService.publishEvent(event);
+		}
 
 		Iterator<ShanoirMetadata> docIt = metadatas.iterator();
 
 		List<ShanoirSolrDocument> solrDocuments = new ArrayList<>();
 
-		int cpt = 0;
-		long lastTime = System.currentTimeMillis();
 		while (docIt.hasNext()) {
-			cpt++;
 			ShanoirMetadata shanoirMetadata = docIt.next();
-
-			if(event != null){
-				// send job update only every 3 seconds
-				long currentTime = System.currentTimeMillis();
-				if(currentTime - lastTime >= 3000){
-					lastTime = currentTime;
-					event.setMessage("Indexing [" + cpt + "/" + docNb + "] datasets...");
-					event.setProgress(event.getProgress() + progress);
-					eventService.publishEvent(event);
-				}
-			}
 
 			ShanoirSolrDocument doc = this.getShanoirSolrDocument(shanoirMetadata);
 			doc.setTags(tags.get(shanoirMetadata.getDatasetId()));
@@ -219,7 +218,7 @@ public class SolrServiceImpl implements SolrService {
 		}
 		solrJWrapper.addAllToIndex(solrDocuments);
 		if(event != null){
-			event.setMessage("Indexed [" + cpt + "/" + docNb + "] datasets.");
+			event.setMessage("Indexed [" + docNb + "/" + docNb + "] datasets.");
 			event.setProgress(1f);
 			event.setStatus(ShanoirEvent.SUCCESS);
 			eventService.publishEvent(event);
@@ -311,6 +310,22 @@ public class SolrServiceImpl implements SolrService {
 		}
 		this.deleteFromIndex(datasetIds);
 		this.indexDatasets(datasetIds);		
+	}
+
+	@Override
+	@Transactional
+	public void updateSubjects(List<Long> subjectIds) throws SolrServerException, IOException {
+		Set<Long> datasetsToUpdate = new HashSet<>();
+		for (Examination exam : examRepository.findBySubjectIdIn(subjectIds)) {
+			for (DatasetAcquisition acq : exam.getDatasetAcquisitions()) {
+				for (Dataset ds : acq.getDatasets()) {
+					datasetsToUpdate.add(ds.getId());
+				}
+			}
+		}
+		if (!CollectionUtils.isEmpty(datasetsToUpdate)) {
+			this.indexDatasets(new ArrayList<>(datasetsToUpdate));
+		}
 	}
 
 }

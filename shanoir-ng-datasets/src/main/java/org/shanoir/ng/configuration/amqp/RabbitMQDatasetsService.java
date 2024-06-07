@@ -37,14 +37,13 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.model.*;
 import org.shanoir.ng.shared.repository.*;
+import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.shared.subjectstudy.SubjectStudyDTO;
 import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
-import org.shanoir.ng.tag.model.StudyTag;
-import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +52,6 @@ import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -64,6 +62,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * RabbitMQ configuration.
@@ -107,7 +106,7 @@ public class RabbitMQDatasetsService {
 	private ExaminationService examinationService;
 
 	@Autowired
-	ShanoirEventService eventService;
+	public ShanoirEventService eventService;
 
 	@Autowired
 	private ExaminationRepository examinationRepository;
@@ -123,6 +122,9 @@ public class RabbitMQDatasetsService {
 
 	@Autowired
 	private ObjectMapper objectMapper;
+
+	@Autowired
+	private StudyService studyService;
 
 	@Autowired
 	EntityManager entityManager;
@@ -165,103 +167,40 @@ public class RabbitMQDatasetsService {
 		return subjectStudy;
 	}
 
-	@Transactional
 	@RabbitListener(queues = RabbitMQConfiguration.STUDY_NAME_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
 	@RabbitHandler
-	public boolean receiveStudyNameUpdate(final String studyStr) {
+	public String receiveStudyUpdate(final String studyAsString) {
+		try {
 
-        try {
+			Study updated = objectMapper.readValue(studyAsString, Study.class);
 
-            Study received = objectMapper.readValue(studyStr, Study.class);
+			bidsService.deleteBidsFolder(updated.getId(), null);
 
-            bidsService.deleteBidsFolder(received.getId(), null);
-            Study stud = receiveAndUpdateIdNameEntity(studyStr, Study.class, studyRepository);
+			Study current = this.receiveAndUpdateIdNameEntity(studyAsString, Study.class, studyRepository);
 
-            // TAGS
-            if (stud.getTags() != null) {
-                stud.getTags().clear();
-            } else {
-                stud.setTags(new ArrayList<>());
-            }
-            if (received.getTags() != null) {
-                stud.getTags().addAll(received.getTags());
-            }
-            for (Tag tag : stud.getTags()) {
-                tag.setStudy(stud);
-            }
+			List<String> errors = studyService.validate(updated, current);
 
-            // STUDY TAGS
-            if (stud.getStudyTags() != null) {
-                stud.getStudyTags().clear();
-            } else {
-                stud.setTags(new ArrayList<>());
-            }
-            if (received.getStudyTags() != null) {
-                stud.getStudyTags().addAll(received.getStudyTags());
-            }
-            for (StudyTag tag : stud.getStudyTags()) {
-                tag.setStudy(stud);
-            }
-
-            if (stud.getId() == null)
-                throw new IllegalStateException("The entity should must have an id ! Received string : \"" + studyStr + "\"");
-
-			Study studyDb;
-			try {
-                studyDb = this.studyRepository.save(stud);
-            } catch (Exception ex){
-				LOG.error("Data integrity error while saving study [{}].", stud.getId(), ex);
-				return false;
+			if(!errors.isEmpty()){
+				return errors.get(0);
 			}
 
-            // SUBJECT_STUDY
-            if (stud.getSubjectStudyList() != null) {
-                stud.getSubjectStudyList().clear();
-            } else {
-                stud.setSubjectStudyList(new ArrayList<>());
-            }
-            if (received.getSubjectStudyList() != null) {
-                stud.getSubjectStudyList().addAll(received.getSubjectStudyList());
-            }
-            for (SubjectStudy sustu : stud.getSubjectStudyList()) {
-                sustu.setStudy(stud);
-                for (Tag tag : sustu.getTags()) {
-                    if (tag.getId() == null) {
-                        Tag dbTag = studyDb.getTags().stream().filter(upTag ->
-                                upTag.getColor().equals(tag.getColor()) && upTag.getName().equals(tag.getName())
-                        ).findFirst().orElse(null);
-                        if (dbTag != null) {
-                            tag.setId(dbTag.getId());
-                        } else {
-                            throw new IllegalStateException("Cannot link a new tag to a subject-study, this tag does not exist in the study");
-                        }
-                    }
-                }
-            }
-            if (stud.getId() == null) {
-                throw new IllegalStateException("The entity should must have an id ! Received string : \"" + studyStr + "\"");
-            }
+			studyService.updateStudy(updated, current);
 
-			try {
-				this.studyRepository.save(stud);
-			} catch (Exception ex){
-				LOG.error("Data integrity error while saving study [{}].", stud.getId(), ex);
-				return false;
-			}
+			List<Long> subjectIds = current.getSubjectStudyList()
+					.stream().map(subStu ->
+							subStu.getSubject().getId()
+					).collect(Collectors.toList()
+				);
 
-            List<Long> subjectIds = new ArrayList<>();
-            stud.getSubjectStudyList().forEach(subStu -> subjectIds.add(subStu.getSubject().getId()));
+			solrService.updateSubjects(subjectIds);
 
-            updateSolr(subjectIds);
-
-			return true;
-
-        } catch (Exception ex) {
+		} catch (Exception ex) {
 			LOG.error("An error occured while processing study update", ex);
-            throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, ex);
-        }
+			return ex.getMessage();
+		}
 
-    }
+		return "";
+	}
 
 	@Transactional
 	@RabbitListener(queues = RabbitMQConfiguration.SUBJECT_NAME_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
@@ -290,7 +229,7 @@ public class RabbitMQDatasetsService {
 			// Update solr references
 			List<Long> subjectIdList = new ArrayList<Long>();
 			subjectIdList.add(su.getId());
-			updateSolr(subjectIdList);
+			solrService.updateSubjects(subjectIdList);
 			
 			// Update BIDS
 			Set<Long> studyIds = new HashSet<>();
@@ -304,24 +243,6 @@ public class RabbitMQDatasetsService {
 			return true;
 		} catch (Exception e) {
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
-		}
-	}
-
-	/**
-	 * Updates all the solr references for this subject.
-	 * @param subjectIds the subject ID updated
-	 */
-	private void updateSolr(final List<Long> subjectIds) throws SolrServerException, IOException {
-		Set<Long> datasetsToUpdate = new HashSet<>();
-		for (Examination exam : examinationRepository.findBySubjectIdIn(subjectIds)) {
-			for (DatasetAcquisition acq : exam.getDatasetAcquisitions()) {
-				for (Dataset ds : acq.getDatasets()) {
-					datasetsToUpdate.add(ds.getId());
-				}
-			}
-		}
-		if (!CollectionUtils.isEmpty(datasetsToUpdate)) {
-			this.solrService.indexDatasets(new ArrayList<>(datasetsToUpdate));
 		}
 	}
 

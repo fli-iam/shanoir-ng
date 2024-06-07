@@ -15,6 +15,7 @@ package org.shanoir.ng.tag.repository;
 
 import org.shanoir.ng.shared.core.repository.ReadOnlyRepository;
 import org.shanoir.ng.tag.model.StudyTag;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 /**
