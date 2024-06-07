@@ -243,7 +243,7 @@ CMD ["-jar", "/shanoir-ng-users.jar"]
 
 ################ keycloak ##################################################
 
-FROM quay.io/keycloak/keycloak:23.0.5 as keycloak-base
+FROM quay.io/keycloak/keycloak:24.0.5 as keycloak-base
 
 # keycloak options (https://www.keycloak.org/server/all-config)
 #
