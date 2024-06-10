@@ -11,12 +11,11 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
-<study-node *ngIf="studyNode"
-		[input]="studyNode"
-		[hasBox]="true"
-		[withMenu]="false">
-</study-node>
 
-<div>{{treeService.selection?.id}}</div>
-<div>{{treeService.selection?.type}}</div>
-<div>{{treeService.selection?.studyId?.length}}</div>
+<study-node *ngIf="treeService.studyNode"
+		[input]="treeService.studyNode"
+		[canAdmin]="treeService.canAdminStudy"
+		[hasBox]="true"
+		[withMenu]="false"
+		(nodeInit)="treeService.nodeInit = true">
+</study-node>

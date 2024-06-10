@@ -51,7 +51,7 @@ export class StudyNodeComponent implements OnChanges {
     studyCardsLoading: boolean = false;
     qualityCardsLoading: boolean = false;
     showDetails: boolean;
-    canAdmin: boolean = false;
+    @Input() canAdmin: boolean;
     @Input() hasBox: boolean = false;
     detailsPath: string = '/study/details/';
     @Input() withMenu: boolean = true;
@@ -67,10 +67,16 @@ export class StudyNodeComponent implements OnChanges {
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {
-            this.studyRightsService.getMyRightsForStudy(this.input.id).then(rights => {
-                this.canAdmin =  this.keycloakService.isUserAdmin()
-                    || (this.keycloakService.isUserExpert() && rights.includes(StudyUserRight.CAN_ADMINISTRATE));
-    
+            let canAdminPromise: Promise<void>;
+            if (this.canAdmin == undefined) {
+                canAdminPromise = this.studyRightsService.getMyRightsForStudy(this.input.id).then(rights => {
+                    this.canAdmin =  this.keycloakService.isUserAdmin()
+                        || (this.keycloakService.isUserExpert() && rights.includes(StudyUserRight.CAN_ADMINISTRATE));
+                });
+            } else {
+                canAdminPromise = Promise.resolve();
+            }
+            canAdminPromise.then(() => {    
                 if (this.input instanceof StudyNode) {
                     this.node = this.input;
                 } else {

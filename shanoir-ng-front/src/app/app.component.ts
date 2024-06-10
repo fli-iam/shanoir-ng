@@ -38,6 +38,7 @@ export class AppComponent {
 
     @HostBinding('@parent') public menuOpen: boolean = true;
     @ViewChild('console') consoleComponenent: ConsoleComponent;
+    protected treeOpened: boolean = true;
 
     constructor(
             public viewContainerRef: ViewContainerRef,
@@ -69,6 +70,10 @@ export class AppComponent {
 
     toggleMenu(open: boolean) {
         this.menuOpen = open;
+    }
+
+    toggleTree() {
+        this.treeOpened = !this.treeOpened;
     }
 
     isAuthenticated(): boolean {

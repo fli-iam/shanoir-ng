@@ -26,12 +26,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <div class="main-content"
             [class.reduce-height]="consoleComponenent && consoleComponenent.open && consoleComponenent.deployed ? true : false"
             [class.open]="menuOpen" [@slideMarginLeft]="menuOpen ? 'margin' : 'nomargin'">
+        <div class="tree-button" (click)="toggleTree()" [class.closed]="!treeOpened">
+            <i *ngIf="treeOpened" class="fas fa-chevron-left"></i>
+            <i *ngIf="!treeOpened" class="fas fa-chevron-right"></i>
+        </div>
         <div *ngIf="menuOpen" class="close-button" (click)="toggleMenu(false)"><i class="fas fa-chevron-left"></i></div>
         <div *ngIf="!menuOpen" class="open-button" (click)="toggleMenu(true)"><i class="fas fa-chevron-right"></i></div>
         <breadcrumbs *ngIf="isAuthenticated()"></breadcrumbs>
-        <div class="tree">
-            <study-tree></study-tree>
-        </div>
+        <study-tree *ngIf="treeOpened" [class.opened]="treeOpened"></study-tree>
         <div class="content">
             <router-outlet ></router-outlet>
         </div>

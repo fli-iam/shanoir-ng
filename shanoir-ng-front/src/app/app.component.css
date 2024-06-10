@@ -1,4 +1,4 @@
-.main-content { padding: 0 20px 0 20px; position: relative; margin-left: 0; height: 100vh; white-space: nowrap; }
+.main-content { padding: 0 20px 0 20px; position: relative; margin-left: 0; height: 100vh; white-space: nowrap; overflow-y: scroll; }
 .main-content.open { margin-left: 300px; }
 .main-content.reduce-height { height: calc(100vh - 108px); }
 
@@ -6,8 +6,10 @@
 side-menu, .side-menu { overflow-x: hidden; scrollbar-width: none; overflow: -moz-scrollbars-none; -ms-overflow-style: none; }
 .side-menu { width: 300px; position: fixed; top: 0; z-index: 2; }
 
-.tree { overflow-x: hidden; scrollbar-width: none; overflow: -moz-scrollbars-none; -ms-overflow-style: none; z-index: 1; 
+study-tree { scrollbar-width: none; overflow: -moz-scrollbars-none; -ms-overflow-style: none; z-index: 1; 
     height: 100%; display: inline-block; }
+
+study-tree.opened { border-right: 1px solid var(--grey); margin-right: 20px; min-width: 200px; }
 
 .tree, .content { vertical-align: top; }
     
@@ -22,5 +24,4 @@ side-menu, .side-menu { overflow-x: hidden; scrollbar-width: none; overflow: -mo
 .close-button:hover i, 
 .open-button:hover i { color: var(--color-b); }
 
-side-menu, .main-content { transition: 1s ease; }
 shanoir-console { position: absolute; bottom: 0; z-index: 1; }

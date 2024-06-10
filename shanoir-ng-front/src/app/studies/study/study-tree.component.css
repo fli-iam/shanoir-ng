@@ -1,10 +1,9 @@
-:host { white-space: nowrap; }
+:host { position: relative; }
 
 study-node {
     display: inline-block;
-    height: calc(100vh - 80px);
     vertical-align: top;
-    border-right: 1px solid var(--grey);
+    overflow: hidden;
 }
 
 .details { 
@@ -16,4 +15,15 @@ study-node {
 dicom-metadata {
     width: 524px;
     display: inline-block;
+}
+
+.button {
+    border: 1px solid var(--grey); border-radius: 2px 2px 0 0;
+    padding: 2px 10px;
+    position: absolute; top: 0; right: 20px;
+    cursor: pointer;
+}
+
+.button.closed {
+    right: 0px;
 }

@@ -13,7 +13,8 @@
  */
 
 import { Injectable } from "@angular/core";
-import { Subject as RxjsSubject } from "rxjs";
+import { ActivatedRoute } from '@angular/router';
+import { ReplaySubject } from "rxjs";
 import { AcquisitionEquipment } from 'src/app/acquisition-equipments/shared/acquisition-equipment.model';
 import { Center } from 'src/app/centers/shared/center.model';
 import { DatasetAcquisition } from 'src/app/dataset-acquisitions/shared/dataset-acquisition.model';
@@ -26,11 +27,28 @@ import { Subject } from "src/app/subjects/shared/subject.model";
 import { User } from 'src/app/users/shared/user.model';
 import { Study } from "../shared/study.model";
 
+import { Subscription } from 'rxjs';
+import { AcquisitionEquipmentService } from 'src/app/acquisition-equipments/shared/acquisition-equipment.service';
+import { DatasetAcquisitionService } from 'src/app/dataset-acquisitions/shared/dataset-acquisition.service';
+import { DatasetProcessingService } from 'src/app/datasets/shared/dataset-processing.service';
+import { DatasetService } from 'src/app/datasets/shared/dataset.service';
+import { ExaminationService } from 'src/app/examinations/shared/examination.service';
+import { SuperPromise } from 'src/app/utils/super-promise';
+import { CenterNode, ClinicalSubjectNode, DatasetAcquisitionNode, DatasetNode, ExaminationNode, MemberNode, PreclinicalSubjectNode, ProcessingNode, RightNode, StudyNode, SubjectNode, UNLOADED } from '../../tree/tree.model';
+import { StudyUserRight } from '../shared/study-user-right.enum';
+import { StudyService } from '../shared/study.service';
+import { KeycloakService } from "src/app/shared/keycloak/keycloak.service";
+import { StudyRightsService } from "../shared/study-rights.service";
+
 @Injectable()
 export class TreeService {
 
     _selection: Selection = null;
-    public change: RxjsSubject<Selection> = new RxjsSubject();
+    public studyNode: StudyNode = null;
+    private studyNodePromise: SuperPromise<void> = new SuperPromise();
+    protected study: Study;
+    public nodeInit: boolean = false; 
+    public canAdminStudy: boolean;
 
     isSelected(id: number, type: NodeType): boolean {
         return this.selection?.isSelected(id, type);
@@ -42,16 +60,243 @@ export class TreeService {
 
     set selection(selection: Selection) {
         this._selection = selection;
-        this.change.next(this.selection);
+        this.changeSelection();
+    }   
+
+    constructor(
+            protected activatedRoute: ActivatedRoute,
+            private studyService: StudyService,
+            private datasetService: DatasetService,
+            private datasetAcquisitionService: DatasetAcquisitionService,
+            private datasetProcessingService: DatasetProcessingService,
+            private acquisitionEquipmentService: AcquisitionEquipmentService,
+            private examinationService: ExaminationService,
+            private keycloakService: KeycloakService,
+            private studyRightsService: StudyRightsService) {
+    }
+    
+    changeSelection(): void {
+        if (this.selection?.type == 'study') {
+            this.initStudy(this.selection.id).then(() => {
+                this.studyNode.subjectsNode.open();
+            });
+        } else {
+            let studyLoaded: Promise<void>;
+            if (this.study?.id && this.selection.studyId?.includes(this.study?.id)) {
+                studyLoaded = Promise.resolve();
+            } else if (this.selection.studyId?.[0]) {
+                studyLoaded = this.initStudy(this.selection.studyId[0]);
+            }
+
+            studyLoaded?.then(() => {
+                if (this.selection?.type == 'dataset') {
+                    this.selectDataset(this.selection.id);
+                } else if (this.selection?.type == 'dicomMetadata') {
+                    this.selectDicomMetadata(this.selection.id);
+                } else if (this.selection?.type == 'subject') {
+                    this.selectSubject(this.selection.id);
+                } else if (this.selection?.type == 'acquisition') {
+                    this.selectAcquisition(this.selection.id);
+                } else if (this.selection?.type == 'processing') {
+                    this.selectProcessing(this.selection.id);
+                } else if (this.selection?.type == 'examination') {
+                    this.selectExamination(this.selection.id);
+                } else if (this.selection?.type == 'center') {
+                    this.selectCenter(this.selection.id);
+                } else if (this.selection?.type == 'equipment') {
+                    this.selectEquipment(this.selection.id);
+                } else if (this.selection?.type == 'qualitycard') {
+                    this.selectQualitycard(this.selection.id);
+                } else if (this.selection?.type == 'studycard') {
+                    this.selectStudycard(this.selection.id);
+                } else if (this.selection?.type == 'user') {
+                    this.selectUser(this.selection.id);
+                }
+                
+            });
+        }
     }
 
-    // /** when you know the new selected node's study is the one displayed */
-    // update(id: number, type: NodeType) {
-    //     this.selection.id = id;
-    //     this.selection.type = type;
-    //     this.change.next(this.selection);
-    // }
-   
+    selectDataset(id: number): Promise<DatasetNode> {
+        return this.studyNodePromise.then(() => {
+            return this.studyNode.subjectsNode.open().then(() => {
+                return this.findDatasetParent(id).then(ret => {
+                    let subjectNode: SubjectNode = (this.studyNode.subjectsNode.subjects as SubjectNode[]).find(sn => {
+                        return sn.id == ret.topParent.datasetAcquisition?.examination?.subject?.id;
+                    });
+                    if (subjectNode) {
+                        return subjectNode.open().then(() => {
+                            let examNode: ExaminationNode = (subjectNode.examinations as ExaminationNode[])?.find(exam => exam.id == ret.topParent.datasetAcquisition?.examination?.id);
+                            if (examNode) {
+                                return examNode.open().then(() => {
+                                    let acqNode: DatasetAcquisitionNode = (examNode.datasetAcquisitions as DatasetAcquisitionNode[])?.find(acq => acq.id == ret.topParent.datasetAcquisition?.id);
+                                    if (acqNode) {
+                                        return acqNode.open()?.then(() => {
+                                            let dsNode: DatasetNode = (acqNode.datasets as DatasetNode[]).find(acqDs => acqDs.id == ret.topParent.id);
+                                            if (dsNode) {
+                                                return dsNode.open().then(() => {
+                                                    if (ret.topParent.id != id) { // if sub processing/datasets 
+                                                        let procNode: ProcessingNode = dsNode.processings[0] as ProcessingNode;
+                                                        if (procNode) {
+                                                            return (dsNode.processings[0] as ProcessingNode).open().then(() => {
+                                                                return (procNode.datasets as DatasetNode[]).find(dsNd => dsNd.id == id);
+                                                            });
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    }
+
+    selectDicomMetadata(id: number) {
+        this.selectDataset(id).then(parentDsNode => {
+            parentDsNode?.open();
+        });
+    }
+
+    findDatasetParent(childDatasetId: number, botomChild?: Dataset): Promise<{topParent: Dataset, bottomChild: Dataset}> {
+        return this.datasetService.get(childDatasetId).then(ds => {
+            if (!botomChild) botomChild = ds;
+            if (ds.datasetProcessing) {
+                if (!(ds.datasetProcessing.inputDatasets?.length > 0)) throw Error('no input ds on this processing');
+                return this.findDatasetParent(ds.datasetProcessing.inputDatasets[0].id, botomChild);
+            } else {
+                return {topParent: ds, bottomChild: botomChild};
+            }
+        });
+    }
+
+    selectProcessing(id: number) {
+        this.datasetProcessingService.get(id).then(proc => {
+            this.selectDataset(proc.inputDatasets[0].id).then(parentDsNode => {
+                parentDsNode?.open();
+            });
+        });
+    }
+
+    selectAcquisition(id: number) {
+        this.studyNodePromise.then(() => {
+            this.studyNode.subjectsNode.open().then(() => {
+                this.datasetAcquisitionService.get(id).then(dsa => {
+                    let subjectNode: SubjectNode = (this.studyNode.subjectsNode.subjects as SubjectNode[]).find(sn => sn.id == dsa.examination?.subject?.id);
+                    if (subjectNode) {
+                        subjectNode.open().then(() => {
+                            let examNode: ExaminationNode = (subjectNode.examinations as ExaminationNode[])?.find(exam => exam.id == dsa.examination?.id);
+                            if (examNode) {
+                                examNode.open();
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    }
+
+    selectExamination(id: number) {
+        this.studyNodePromise.then(() => {
+            this.studyNode.subjectsNode.open().then(() => {
+                this.examinationService.get(id).then(exam => {
+                    let subjectNode: SubjectNode = (this.studyNode.subjectsNode.subjects as SubjectNode[]).find(sn => sn.id == exam.subject?.id);
+                    if (subjectNode) {
+                        subjectNode.open();
+                    }
+                });
+            });
+        });
+    }
+
+    selectSubject(id: number) {
+        this.studyNodePromise.then(() => {
+            this.studyNode.subjectsNode.open();
+        });
+    }
+
+    selectCenter(id: number) {
+        this.studyNodePromise.then(() => {
+            this.studyNode.centersNode.open();
+        });
+    }
+
+    selectEquipment(id: number) {
+        this.studyNodePromise.then(() => {
+            this.studyNode.centersNode.open().then(() => {
+                this.acquisitionEquipmentService.get(id).then(acqEq => {
+                    let centerNode: CenterNode = (this.studyNode.centersNode.centers as CenterNode[]).find(cn => acqEq.center.id == cn.id);
+                    centerNode?.open();
+                });
+            });
+
+        });
+    }
+
+    selectQualitycard(id: number) {
+        this.studyNodePromise.then(() => {
+            this.studyNode.qualityCardsNode.open();
+        });
+    }
+
+    selectStudycard(id: number) {
+        this.studyNodePromise.then(() => {
+            this.studyNode.studyCardsNode.open();
+        });
+    }
+
+    selectUser(id: number) {
+        this.studyNodePromise.then(() => {
+            this.studyNode.membersNode.open();
+        });
+    }
+
+    initStudy(id: number): Promise<void> {
+        let studyPromise: Promise<any> = this.studyService.get(id, null).then(study => {
+            this.study = study;
+            let subjectNodes: SubjectNode[] = study.subjectStudyList?.map(ss => {
+                let subjectNode: SubjectNode;
+                if (ss.subject?.preclinical){
+                    subjectNode = new PreclinicalSubjectNode(
+                        this.studyNode,
+                        ss.subject?.id,
+                        ss.subject?.name,
+                        ss.tags,
+                        UNLOADED,
+                        null,
+                        false);
+                } else {
+                    subjectNode = new ClinicalSubjectNode(
+                        this.studyNode,
+                        ss.subject?.id,
+                        ss.subject?.name,
+                        ss.tags,
+                        UNLOADED,
+                        null,
+                        false);
+                }
+                return subjectNode;
+            });
+            let centerNodes: CenterNode[] = study.studyCenterList?.map(sc => new CenterNode(this.studyNode, sc.center.id, sc.center.name, UNLOADED));
+            let memberNodes: MemberNode[] = study.studyUserList?.map(su => {
+                let memberNode = null;
+                memberNode = new MemberNode(this.studyNode, su.user?.id || su.userId, su.userName, su.studyUserRights?.map(sur => new RightNode(memberNode, null, StudyUserRight.getLabel(sur))));
+                return memberNode;
+            });
+            this.studyNode = new StudyNode(null, study.id, study.name, subjectNodes, centerNodes, UNLOADED, UNLOADED, memberNodes);
+            this.studyNodePromise.resolve();
+            this.studyNode.open();
+        });
+        let rightsPromise: Promise<void> = this.studyRightsService.getMyRightsForStudy(id).then(rights => {
+            this.canAdminStudy =  this.keycloakService.isUserAdmin()
+                || (this.keycloakService.isUserExpert() && rights.includes(StudyUserRight.CAN_ADMINISTRATE));
+        });
+        return Promise.all([studyPromise, rightsPromise]).then();
+    }
 }
 
 export type NodeType = 'study' | 'subject' | 'examination' | 'acquisition' | 'dataset' | 'processing' | 'center' | 'equipment' | 'studycard' | 'qualitycard' | 'user' | 'dicomMetadata';
