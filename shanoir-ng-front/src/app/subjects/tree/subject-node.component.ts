@@ -110,7 +110,6 @@ export class SubjectNodeComponent implements OnChanges {
                     this.node.open = true;
                 }).catch(e => {
                     this.consoleService.log('error', e.toString());
-                    console.log(e)
                     this.loading = false;
             });
         }

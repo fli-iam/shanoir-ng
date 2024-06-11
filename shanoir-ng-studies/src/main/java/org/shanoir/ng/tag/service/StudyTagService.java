@@ -11,7 +11,6 @@ public interface StudyTagService {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#study.id, 'CAN_ADMINISTRATE') and @studySecurityService.studyUsersMatchStudy(#study)")
     StudyTag create(Study study, StudyTagDTO dto);
 
-
     void update(StudyTagDTO dto) throws EntityNotFoundException;
 
     void delete(Long id);

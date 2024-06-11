@@ -49,6 +49,9 @@ public class StudyServiceImpl implements StudyService {
 	@Transactional
 	public void updateStudy(Study updated, Study current) {
 
+		if (current.getId() == null)
+			throw new IllegalStateException("The entity should have an id.");
+
 		// TAGS
 		if (current.getTags() != null) {
 			current.getTags().clear();
@@ -74,9 +77,6 @@ public class StudyServiceImpl implements StudyService {
 		for (StudyTag tag : current.getStudyTags()) {
 			tag.setStudy(current);
 		}
-
-		if (current.getId() == null)
-			throw new IllegalStateException("The entity should have an id.");
 
 		Study studyDb = this.repository.save(current);
 
@@ -104,9 +104,6 @@ public class StudyServiceImpl implements StudyService {
 					}
 				}
 			}
-		}
-		if (current.getId() == null) {
-			throw new IllegalStateException("The entity should have an id.");
 		}
 		this.repository.save(current);
 	}

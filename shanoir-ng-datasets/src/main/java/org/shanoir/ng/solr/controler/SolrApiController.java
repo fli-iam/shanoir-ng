@@ -57,14 +57,6 @@ public class SolrApiController implements SolrApi {
 
 	@Override
 	public ResponseEntity<Void> indexAll() throws SolrServerException, IOException {
-		ShanoirEvent event = new ShanoirEvent(
-				ShanoirEventType.SOLR_INDEX_ALL_EVENT,
-				null,
-				KeycloakUtil.getTokenUserId(),
-				"Indexing all datasets...",
-				ShanoirEvent.IN_PROGRESS,
-				0f);
-		eventService.publishEvent(event);
 		solrService.indexAll(event);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}

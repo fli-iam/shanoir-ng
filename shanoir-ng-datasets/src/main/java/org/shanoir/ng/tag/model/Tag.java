@@ -1,7 +1,10 @@
 package org.shanoir.ng.tag.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import org.shanoir.ng.shared.model.Study;
 
 @Entity

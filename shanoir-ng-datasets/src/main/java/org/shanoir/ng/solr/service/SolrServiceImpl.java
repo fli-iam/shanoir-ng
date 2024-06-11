@@ -116,6 +116,7 @@ public class SolrServiceImpl implements SolrService {
 		solrJWrapper.deleteAll();
 	}
 
+	@Transactional
 	@Override
 	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
 	public void indexAll() throws SolrServerException, IOException {
