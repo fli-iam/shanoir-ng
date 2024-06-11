@@ -249,21 +249,19 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<Void> updateDatasetTags(Long datasetId, List<Long> studyTagIds, BindingResult result) throws RestServiceException, EntityNotFoundException, SolrServerException, IOException {
+	public ResponseEntity<Void> updateDatasetTags(Long datasetId, List<Long> studyTagIds, BindingResult result) throws EntityNotFoundException, SolrServerException, IOException {
 		Dataset ds = datasetService.findById(datasetId);
 		if (ds == null) {
 			throw new EntityNotFoundException(Dataset.class, datasetId);
 		}
-		for(Long id : studyTagIds){
-			if(!studyTagService.existsById(id)){
-				throw new RestServiceException(
-						new ErrorModel(HttpStatus.NOT_FOUND.value(), "Study tag [" + id + "] does not exists."));
-			}
-		}
+
 		List<StudyTag> tags = studyTagService.findByIds(studyTagIds);
 		ds.setTags(tags);
+
 		datasetRepository.save(ds);
+
 		solrService.indexDataset(datasetId);
+
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
