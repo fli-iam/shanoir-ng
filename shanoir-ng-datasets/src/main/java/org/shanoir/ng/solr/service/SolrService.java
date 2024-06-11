@@ -44,10 +44,7 @@ public interface SolrService {
 	
 	void addAllToIndex(List<ShanoirSolrDocument> documents) throws SolrServerException, IOException;
 
-	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
 	void indexAll() throws SolrServerException, IOException;
-
-	void indexAll(ShanoirEvent event) throws SolrServerException, IOException;
 
 	void indexDataset(Long datasetId) throws SolrServerException, IOException;
 	

@@ -32,6 +32,7 @@ import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.Center;
 import org.shanoir.ng.shared.paging.PageImpl;
@@ -116,53 +117,40 @@ public class SolrServiceImpl implements SolrService {
 		solrJWrapper.deleteAll();
 	}
 
-	@Transactional
-	@Override
-	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
-	public void indexAll() throws SolrServerException, IOException {
-		this.deleteAll();
-		List<ShanoirMetadata> documents = shanoirMetadataRepository.findAllAsSolrDoc();
-		Map<Long, List<String>> tags = shanoirMetadataRepository.findAllTags(null);
-		this.indexDocumentsInSolr(documents, tags,null);
-	}
 
-	
-	@Transactional
 	@Override
 	@Async
-	public void indexAll(ShanoirEvent event) {
+	@Transactional
+	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
+	public void indexAll() {
 
-		event.setMessage("Cleaning Solr index...");
+		ShanoirEvent event = new ShanoirEvent(
+				ShanoirEventType.SOLR_INDEX_ALL_EVENT,
+				null,
+				KeycloakUtil.getTokenUserId(),
+				"Cleaning Solr index...",
+				ShanoirEvent.IN_PROGRESS,
+				0f);
 		eventService.publishEvent(event);
         try {
             deleteAll();
         } catch (SolrServerException | IOException e) {
 			LOG.error("Error while cleaning Solr index.", e);
-            event.setStatus(ShanoirEvent.ERROR);
-			event.setProgress(-1f);
-			event.setMessage("Error while cleaning Solr index : " + e.getMessage());
+			eventService.publishErrorEvent(event, "Error while cleaning Solr index : " + e.getMessage());
 			return;
         }
-		event.setProgress(0.25f);
-		event.setMessage("Fetching data to index...");
-		eventService.publishEvent(event);
+		eventService.publishEvent(event, "Fetching data to index...", 0.25f);
 
 		List<ShanoirMetadata> documents;
 		Map<Long, List<String>> tags;
 		try {
 			documents = shanoirMetadataRepository.findAllAsSolrDoc();
-			event.setProgress(0.5f);
-			event.setMessage("Fetching data to index...");
-			eventService.publishEvent(event);
+			eventService.publishEvent(event, "Fetching data to index...", 0.5f);
 			tags = shanoirMetadataRepository.findAllTags(null);
-			event.setProgress(0.75f);
-			event.setMessage("Fetching data to index...");
-			eventService.publishEvent(event);
+			eventService.publishEvent(event, "Fetching data to index...", 0.75f);
 		} catch(Exception e){
 			LOG.error("Error while fetching data to index.", e);
-			event.setStatus(ShanoirEvent.ERROR);
-			event.setProgress(-1f);
-			event.setMessage("Error while fetching data to index : " + e.getMessage());
+			eventService.publishErrorEvent(event, "Error while fetching data to index : " + e.getMessage());
 			return;
 		}
 
@@ -170,9 +158,7 @@ public class SolrServiceImpl implements SolrService {
             this.indexDocumentsInSolr(documents, tags, event);
         } catch (SolrServerException | IOException e) {
 			LOG.error("Error indexing datasets into Solr.", e);
-			event.setStatus(ShanoirEvent.ERROR);
-			event.setProgress(-1f);
-			event.setMessage("Error indexing datasets into Solr : " + e.getMessage());
+			eventService.publishErrorEvent(event, "Error indexing datasets into Solr : " + e.getMessage());
         }
     }
 
@@ -201,9 +187,7 @@ public class SolrServiceImpl implements SolrService {
 		int docNb = metadatas.size();
 
 		if(event != null){
-			event.setMessage("Indexed [0/" + docNb + "] datasets.");
-			event.setStatus(ShanoirEvent.IN_PROGRESS);
-			eventService.publishEvent(event);
+			eventService.publishEvent(event, "Indexed [0/" + docNb + "] datasets.", event.getProgress());
 		}
 
 		Iterator<ShanoirMetadata> docIt = metadatas.iterator();
@@ -219,10 +203,7 @@ public class SolrServiceImpl implements SolrService {
 		}
 		solrJWrapper.addAllToIndex(solrDocuments);
 		if(event != null){
-			event.setMessage("Indexed [" + docNb + "/" + docNb + "] datasets.");
-			event.setProgress(1f);
-			event.setStatus(ShanoirEvent.SUCCESS);
-			eventService.publishEvent(event);
+			eventService.publishSuccessEvent(event, "Indexed [" + docNb + "/" + docNb + "] datasets.");
 		}
 	}
 
