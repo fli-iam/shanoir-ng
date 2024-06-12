@@ -8,6 +8,6 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
         scheme = "bearer",
         bearerFormat = "JWT",
         name = "BearerAuth",
-        openIdConnectUrl = "https://localhost/auth")
+        description = "Authentication using 'Bearer' JWT token")
 public class BearerAuth {
 }
