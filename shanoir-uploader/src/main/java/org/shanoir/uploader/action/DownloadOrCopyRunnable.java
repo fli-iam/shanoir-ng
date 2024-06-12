@@ -43,7 +43,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 	
 	private IDicomServerClient dicomServerClient;
 	
-	private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer = new ImagesCreatorAndDicomFileAnalyzerService();
+	private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 	
 	private String filePathDicomDir;
 

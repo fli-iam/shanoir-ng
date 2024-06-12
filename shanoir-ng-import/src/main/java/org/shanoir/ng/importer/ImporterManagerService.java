@@ -316,7 +316,8 @@ public class ImporterManagerService {
 
 					String studyInstanceUID = study.getStudyInstanceUID();
 					String seriesInstanceUID = serie.getSeriesInstanceUID();
-					queryPACSService.queryCMOVE(studyInstanceUID, seriesInstanceUID);
+					queryPACSService.queryCFINDInstances(studyInstanceUID, serie);
+					queryPACSService.queryCMOVE(studyInstanceUID, serie);
 					File serieIDFolderDir = new File(importJobDir + File.separator + seriesInstanceUID);
 
 					if(!serieIDFolderDir.exists()) {

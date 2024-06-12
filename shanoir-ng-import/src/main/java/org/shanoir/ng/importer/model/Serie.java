@@ -338,6 +338,8 @@ public class Serie {
 		sB.append(", ");
 		sB.append(this.seriesNumber);
 		sB.append(", ");
+		sB.append(this.numberOfSeriesRelatedInstances);
+		sB.append(", ");
 		sB.append(this.seriesInstanceUID);
 		sB.append(" ]");
 		return sB.toString();

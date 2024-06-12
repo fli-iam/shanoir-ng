@@ -96,4 +96,10 @@ public class Study {
 		this.series = series;
 	}
 
+	@Override
+	public String toString() {
+		return "Study [studyInstanceUID=" + studyInstanceUID + ", studyDate=" + studyDate + ", studyDescription="
+				+ studyDescription + "]";
+	}
+
 }

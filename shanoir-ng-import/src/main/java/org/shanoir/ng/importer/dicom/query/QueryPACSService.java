@@ -209,13 +209,30 @@ public class QueryPACSService {
 		return importJob;
 	}
 
-	public void queryCMOVEs(String studyInstanceUID, List<String> seriesInstanceUIDs) throws Exception {
+	public void queryCFINDInstances(String studyInstanceUID, Serie serie) throws Exception {
+		LOG.info("------------------------------");
+		LOG.info("--- START C-FIND Instances ---");
+		LOG.info("------------------------------");
+		long start = System.currentTimeMillis();
+		Association association = connectAssociation(calling, called, true);
+		LOG.info("Query instances (before c-move) for serie: " + serie.getSeriesDescription());
+		queryInstances(association, studyInstanceUID, serie);
+		releaseAssociation(association);
+		long finish = System.currentTimeMillis();
+		long timeElapsed = finish - start;
+		LOG.info("Duration of all calls of queryCFIND " + timeElapsed + "ms.");
+		LOG.info("------------------------------");
+		LOG.info("--- END C-FIND Instances -----");
+		LOG.info("------------------------------");
+	}
+
+	public void queryCMOVEs(String studyInstanceUID, List<Serie> selectedSeries) throws Exception {
 		LOG.info("--------------------");
 		LOG.info("--- START C-MOVES --");
 		LOG.info("--------------------");
 		long start = System.currentTimeMillis();
 		Association association = connectAssociation(calling, called, false);
-		seriesInstanceUIDs.stream().forEach(s -> queryCMOVEPerSerie(studyInstanceUID, s, association));
+		selectedSeries.stream().forEach(serie -> queryCMOVEPerSerie(studyInstanceUID, serie, association));
 		releaseAssociation(association);
 		long finish = System.currentTimeMillis();
 		long timeElapsed = finish - start;
@@ -225,13 +242,13 @@ public class QueryPACSService {
 		LOG.info("--------------------");
 	}
 	
-	public void queryCMOVE(String studyInstanceUID, String seriesInstanceUID) throws Exception {
+	public void queryCMOVE(String studyInstanceUID, Serie serie) throws Exception {
 		LOG.info("--------------------");
 		LOG.info("--- START C-MOVE ---");
 		LOG.info("--------------------");
 		long start = System.currentTimeMillis();
 		Association association = connectAssociation(calling, called, false);
-		queryCMOVEPerSerie(studyInstanceUID, seriesInstanceUID, association);
+		queryCMOVEPerSerie(studyInstanceUID, serie, association);
 		releaseAssociation(association);
 		long finish = System.currentTimeMillis();
 		long timeElapsed = finish - start;
@@ -241,12 +258,12 @@ public class QueryPACSService {
 		LOG.info("--------------------");
 	}
 
-	private void queryCMOVEPerSerie(String studyInstanceUID, String seriesInstanceUID, Association association) {
+	private void queryCMOVEPerSerie(String studyInstanceUID, Serie serie, Association association) {
 		DicomParam[] params = {
 			new DicomParam(Tag.QueryRetrieveLevel, "SERIES"),
 			new DicomParam(Tag.StudyInstanceUID, studyInstanceUID),
-			new DicomParam(Tag.SeriesInstanceUID, seriesInstanceUID) };
-		LOG.info("Calling PACS, C-MOVE for serie: {} of study: {}", seriesInstanceUID, studyInstanceUID);
+			new DicomParam(Tag.SeriesInstanceUID, serie.getSeriesInstanceUID()) };
+		LOG.info("Calling PACS, C-MOVE for serie: {} of study: {}", serie.getSeriesDescription(), studyInstanceUID);
 		queryCMove(association, params);
 	}
 	
@@ -414,6 +431,7 @@ public class QueryPACSService {
 			studiesAttr.parallelStream().forEach(studyAttr -> {
 			    Study study = new Study(studyAttr);
 			    synchronized (studies) {
+					LOG.info("Study found in PACS: " + study.toString());
 			        studies.add(study);
 			    }
 			    String dicomResponseStudyDate = studyAttr.getString(Tag.StudyDate);
@@ -439,6 +457,7 @@ public class QueryPACSService {
 			studyInstanceUID,
 			studyDate,
 			new DicomParam(Tag.SeriesInstanceUID),
+			new DicomParam(Tag.NumberOfSeriesRelatedInstances),
 			new DicomParam(Tag.SeriesDescription),
 			new DicomParam(Tag.SeriesDate),
 			new DicomParam(Tag.SeriesNumber),
@@ -459,8 +478,7 @@ public class QueryPACSService {
 	private void processDICOMSerie(Attributes serieAttr, Association association, Study study, DicomParam modality, List<Serie> series) {
 		Serie serie = new Serie(serieAttr);
 		if (!DicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(serieAttr)) {
-			queryInstances(association, serie, study, modality);
-			if (!serie.getInstances().isEmpty()) {
+			if (serie.getNumberOfSeriesRelatedInstances() > 0) {
 				DicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, serieAttr);
 				DicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);
 			} else {
@@ -474,6 +492,7 @@ public class QueryPACSService {
 			serie.setSelected(false);
 		}
 		synchronized (series) {
+			LOG.info("Serie found in PACS: " + serie.toString());
 			series.add(serie);			
 		}
 	}
@@ -485,13 +504,12 @@ public class QueryPACSService {
 	 * @param called
 	 * @param serie
 	 */
-	private void queryInstances(Association association, Serie serie, Study study, DicomParam modality) {
-		DicomParam studyInstanceUID = initDicomParam(Tag.StudyInstanceUID, study.getStudyInstanceUID());
-		DicomParam seriesInstanceUID = initDicomParam(Tag.SeriesInstanceUID, serie.getSeriesInstanceUID());
+	private void queryInstances(Association association, String studyInstanceUID, Serie serie) {
+		DicomParam studyInstanceUIDParam = initDicomParam(Tag.StudyInstanceUID, studyInstanceUID);
+		DicomParam seriesInstanceUIDParam = initDicomParam(Tag.SeriesInstanceUID, serie.getSeriesInstanceUID());
 		DicomParam[] params = {
-			modality,
-			studyInstanceUID,
-			seriesInstanceUID,
+			studyInstanceUIDParam,
+			seriesInstanceUIDParam,
 			new DicomParam(Tag.SOPInstanceUID),
 			new DicomParam(Tag.InstanceNumber)
 		};

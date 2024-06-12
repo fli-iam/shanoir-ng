@@ -189,9 +189,10 @@ public class DicomServerClient implements IDicomServerClient {
 	}
 
 	private void downloadFromDicomServer(String studyInstanceUID, List<Serie> selectedSeries) throws Exception {
-		final List<String> seriesInstanceUIDs = new ArrayList<String>();
-		selectedSeries.stream().forEach(s -> seriesInstanceUIDs.add(s.getSeriesInstanceUID()));
-		queryPACSService.queryCMOVEs(studyInstanceUID, seriesInstanceUIDs);
+		for (Serie serie : selectedSeries) {
+			queryPACSService.queryCFINDInstances(studyInstanceUID, serie);	
+		}
+		queryPACSService.queryCMOVEs(studyInstanceUID, selectedSeries);
 	}
 
 	/*
