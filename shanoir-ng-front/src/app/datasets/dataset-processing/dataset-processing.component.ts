@@ -33,6 +33,7 @@ import {ExecutionMonitoring} from 'src/app/vip/models/execution-monitoring.model
 import {ExecutionService} from "../../vip/execution/execution.service";
 import * as AppUtils from "../../utils/app.utils";
 import {formatDate} from "@angular/common";
+import { Selection } from 'src/app/studies/study/tree.service';
 
 @Component({
     selector: 'dataset-processing-detail',
@@ -72,7 +73,6 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     }
 
     ngOnInit(): void {
-        super.ngOnInit();
         this.createColumnDefs();
     }
 
@@ -83,6 +83,9 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         return this.datasetProcessingService;
     }
 
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromProcessing(this.datasetProcessing);
+    }
 
     initView(): Promise<void> {
         return this.datasetProcessingService.get(this.id).then((entity)=> {

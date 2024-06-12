@@ -108,12 +108,13 @@ export class BreadcrumbsService implements OnDestroy {
         this.nextMilestone = false;
     }
 
-    public currentStepAsMilestone() {
-        this.processMilestone();
+    public currentStepAsMilestone(label?: string) {
+        this.processMilestone(label);
     }
     
-    private processMilestone() {
+    private processMilestone(label?: string) {
         this.currentStep.milestone = true;
+        if (label) this.currentStep.label = label;
         for (let i=0; i<this.currentStepIndex; i++) {
             this.steps[i].disabled = true;
         }

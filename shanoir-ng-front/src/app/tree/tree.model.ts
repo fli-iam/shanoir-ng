@@ -1,4 +1,3 @@
-import { ExaminationPipe } from "../examinations/shared/examination.pipe";
 /**
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
@@ -13,44 +12,144 @@ import { ExaminationPipe } from "../examinations/shared/examination.pipe";
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { SubjectExamination } from "../examinations/shared/subject-examination.model";
 import { QualityTag } from "../study-cards/shared/quality-card.model";
 import { Tag } from '../tags/tag.model';
+import { SuperPromise } from "../utils/super-promise";
 
-interface ShanoirNode {
-    open: boolean;
-    id: number;
-    label: string;
-    title: string;
+export abstract class ShanoirNode {
+    abstract title: string;
+    private _opened: boolean = false;
+    private openPromise: Promise<void>;
+
+    constructor(
+        public parent: ShanoirNode,
+        public id: number,
+        public label: string
+    ) {}
+
+    open(): Promise<void> {
+        if (this.parent) {
+            this.parent.open();
+        }
+        this._opened = true;
+        return (this.openPromise || Promise.resolve()).then(() => SuperPromise.timeoutPromise());
+    }
+
+    close() {
+        this._opened = false;
+    }
+
+    registerOpenPromise(promise: Promise<void>) {
+        this.openPromise = promise;
+    }
+
+    get opened(): boolean {
+        return this._opened;
+    }
+
+    set opened(opened: boolean) {
+        opened ? this.open() : this.close();
+    }
 }
 
 export type UNLOADED = 'UNLOADED';
 export const UNLOADED: UNLOADED = 'UNLOADED';
 
 
-export class StudyNode implements ShanoirNode {
+export class StudyNode extends ShanoirNode {
 
     constructor(
+        public parent: ShanoirNode,
         public id: number,
         public label: string,
-        public subjects: SubjectNode[] | UNLOADED,
-        public centers: CenterNode[] | UNLOADED,
-        public studyCards: StudyCardNode[] | UNLOADED,
-        public members: MemberNode[] | UNLOADED
-    ) {}
+        private subjects: SubjectNode[] | UNLOADED,
+        private centers: CenterNode[] | UNLOADED,
+        private studyCards: StudyCardNode[] | UNLOADED,
+        private qualityCards: QualityCardNode[] | UNLOADED,
+        private members: MemberNode[] | UNLOADED
+    ) {
+        super(parent, id, label);
+    }
 
-    public open: boolean = false;
-    public subjectsOpen: boolean = false;
-    public centersOpen: boolean = false;
-    public studycardsOpen: boolean = false;
-    public membersOpen: boolean = false;
+    public subjectsNode: SubjectsNode = new SubjectsNode(this, null, 'Subjects', this.subjects);
+    public centersNode: CentersNode = new CentersNode(this, null, 'Centers', this.centers);
+    public studyCardsNode: StudyCardsNode = new StudyCardsNode(this, null, 'Study Cards', this.studyCards);
+    public qualityCardsNode: QualityCardsNode = new QualityCardsNode(this, null, 'Quality Cards', this.qualityCards);
+    public membersNode: MembersNode = new MembersNode(this, null, 'Members', this.members);
     public title = "study"
 }
 
-
-export abstract class SubjectNode implements ShanoirNode {
+export class SubjectsNode extends ShanoirNode {
 
     constructor(
+        public parent: ShanoirNode,
+        public id: number,
+        public label: string,
+        public subjects: SubjectNode[] | UNLOADED
+    ) {
+        super(parent, id, label);
+    }
+
+    public title = "subjects"
+}
+
+export class CentersNode extends ShanoirNode {
+
+    constructor(
+        public parent: ShanoirNode,
+        public id: number,
+        public label: string,
+        public centers: CenterNode[] | UNLOADED
+    ) {
+        super(parent, id, label);
+    }
+
+    public title = "centers"
+}
+
+export abstract class CardsNode extends ShanoirNode {
+
+    constructor(
+        public parent: ShanoirNode,
+        public id: number,
+        public label: string,
+        public cards: CardNode[] | UNLOADED
+    ) {
+        super(parent, id, label);
+    }
+
+    public abstract title;
+}
+
+export class StudyCardsNode extends CardsNode {
+
+    public title = "studycards"
+}
+
+export class QualityCardsNode extends CardsNode {
+
+    public title = "qualitycards"
+}
+
+export class MembersNode extends ShanoirNode {
+
+    constructor(
+        public parent: ShanoirNode,
+        public id: number,
+        public label: string,
+        public members: MemberNode[] | UNLOADED
+    ) {
+        super(parent, id, label);
+    }
+
+    public title = "members"
+}
+
+
+export abstract class SubjectNode extends ShanoirNode {
+
+    constructor(
+        public parent: ShanoirNode,
         public id: number,
         public label: string,
         public tags: Tag[],
@@ -58,6 +157,7 @@ export abstract class SubjectNode implements ShanoirNode {
         public qualityTag: QualityTag,
         public canDeleteChildren: boolean
     ) {
+        super(parent, id, label);
         if (!tags) tags = [];
         else tags = tags.map(t => t.clone());
         if (qualityTag) {
@@ -77,8 +177,6 @@ export abstract class SubjectNode implements ShanoirNode {
         }
     }
 
-    public open: boolean = false;
-    public title: string;
     public awesome: string;
 }
 
@@ -94,53 +192,59 @@ export class PreclinicalSubjectNode extends SubjectNode {
 }
 
 
-export class ExaminationNode implements ShanoirNode {
+export class ExaminationNode extends ShanoirNode {
 
     constructor(
+        public parent: ShanoirNode,
         public id: number,
         public label: string,
         public datasetAcquisitions: DatasetAcquisitionNode[] | UNLOADED,
         public extraDataFilePathList: string[] | UNLOADED,
         public canDelete: boolean
-    ) {}
+    ) {
+        super(parent, id, label);
+    }
 
-    public open: boolean = false;
     public extraDataOpen: boolean = false;
     public title: string = "examination";
 }
 
 
-export class DatasetAcquisitionNode implements ShanoirNode {
+export class DatasetAcquisitionNode extends ShanoirNode {
 
     constructor(
+        public parent: ShanoirNode,
         public id: number,
         public label: string,
         public datasets: DatasetNode[] | UNLOADED,
         public canDelete: boolean
-    ) {}
+    ) {
+        super(parent, id, label);
+    }
 
-    public open: boolean = false;
     public title: string = "dataset-acquisition";
 }
 
 
-export class DatasetNode implements ShanoirNode {
+export class DatasetNode extends ShanoirNode {
 
     constructor(
+        public parent: ShanoirNode,
         public id: number,
         public label: string,
         public type: string,
         public processings: ProcessingNode[] | UNLOADED,
         public processed: boolean,
-        public canDelete: boolean
+        public canDelete: boolean,
+        public inPacs: boolean
     ) {
+        super(parent, id, label);
         if(processed){
             this.title = "processed-dataset";
             this.awesome = "fas fa-camera-rotate";
         }
     }
 
-    public open: boolean = false;
     public selected: boolean = false;
     public awesome: string = "fas fa-camera"
     public title: string = "dataset";
@@ -148,107 +252,130 @@ export class DatasetNode implements ShanoirNode {
 }
 
 
-export class ProcessingNode implements ShanoirNode {
+export class ProcessingNode extends ShanoirNode {
 
     constructor(
+        public parent: ShanoirNode,
         public id: number,
         public label: string,
         public datasets: DatasetNode[] | UNLOADED,
         public canDelete: boolean
-    ) {}
+    ) {
+        super(parent, id, label);
+    }
 
-    public open: boolean = false;
     public title: string = "processing";
 }
 
 
-export class CenterNode implements ShanoirNode {
+export class CenterNode extends ShanoirNode {
 
     constructor(
+        public parent: ShanoirNode,
         public id: number,
         public label: string,
         public acquisitionEquipments: AcquisitionEquipmentNode[] | UNLOADED
-    ) {}
+    ) {
+        super(parent, id, label);
+    }
 
-    public open: boolean = false;
     public title: string = "center";
 }
 
 
-export class AcquisitionEquipmentNode implements ShanoirNode {
+export class AcquisitionEquipmentNode extends ShanoirNode {
 
     constructor(
+        public parent: ShanoirNode,
         public id: number,
         public label: string,
         public studyCards: StudyCardNode[] | UNLOADED,
         public canDelete: boolean
-    ) {}
+    ) {
+        super(parent, id, label);
+    }
 
-    public open: boolean = false;
     public title: string = "acquisition-equipment";
 }
 
 
-export class StudyCardNode implements ShanoirNode {
+export abstract class CardNode extends ShanoirNode {
 
     constructor(
+        public parent: ShanoirNode,
         public id: number,
         public label: string,
         public canDelete: boolean
-    ) {}
-
-    public open: boolean = false;
-    public title: string = "study-card";
+    ) {
+        super(parent, id, label);
+    }
+    
+    public abstract type: 'studycard' | 'qualitycard';
+    public abstract title: string;
 }
 
 
-export class MemberNode implements ShanoirNode {
+export class StudyCardNode extends CardNode {
+
+    public title: string = "study-card";
+    public type: 'studycard' | 'qualitycard' = 'studycard';
+}
+
+
+export class QualityCardNode extends CardNode {
+
+    public title: string = "quality-card";
+    public type: 'studycard' | 'qualitycard' = 'qualitycard';
+}
+
+
+export class MemberNode extends ShanoirNode {
 
     constructor(
+        public parent: ShanoirNode,
         public id: number,
         public label: string,
         public rights: RightNode[] | UNLOADED
-    ) {}
+    ) {
+        super(parent, id, label);
+    }
 
-    public open: boolean = false;
     public title: string = "member";
 }
 
 
-export class RightNode implements ShanoirNode {
+export class RightNode extends ShanoirNode {
 
-    constructor(
-        public id: number,
-        public label: string
-    ) {}
-
-    public open: boolean = false;
     public title: string = "right";
 }
 
 
-export class ReverseSubjectNode implements ShanoirNode {
+export class ReverseSubjectNode extends ShanoirNode {
 
     constructor(
+        public parent: ShanoirNode,
         public id: number,
         public label: string,
         public studies: ReverseStudyNode[] | UNLOADED
-    ) {}
+    ) {
+        super(parent, id, label);
+    }
 
-    public open: boolean = false;
     public title: string = "subject";
 }
 
 
-export class ReverseStudyNode implements ShanoirNode {
+export class ReverseStudyNode extends ShanoirNode {
 
     constructor(
+        public parent: ShanoirNode,
         public id: number,
         public label: string,
         public tags: Tag[],
         public examinations: ExaminationNode[] | UNLOADED
-    ) {}
+    ) {
+        super(parent, id, label);
+    }
 
-    public open: boolean = false;
     public title: string = "study";
 }

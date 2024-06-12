@@ -48,6 +48,7 @@ import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.
 import { DatasetExpressionFormat } from "../../enum/dataset-expression-format.enum";
 import { KeyValue } from "@angular/common";
 import { TaskState } from 'src/app/async-tasks/task.model';
+import { Selection } from './tree.service';
 
 @Component({
     selector: 'study-detail',
@@ -57,7 +58,6 @@ import { TaskState } from 'src/app/async-tasks/task.model';
 })
 
 export class StudyComponent extends EntityComponent<Study> {
-
     @ViewChild('memberTable', { static: false }) table: TableComponent;
     @ViewChild('input', { static: false }) private fileInput: ElementRef;
     @ViewChild('duaInput', { static: false }) private duaFileInput: ElementRef;
@@ -113,93 +113,91 @@ export class StudyComponent extends EntityComponent<Study> {
     public get study(): Study { return this.entity; }
 
     public set study(study: Study) {
-        this.studyNode = this.breadcrumbsService.currentStep.data.studyNode ? this.breadcrumbsService.currentStep.data.studyNode : study;
         this.entity = study;
+    }
+
+    public set entity(study: Study) {
+        super.entity = study;
+        this.studyNode = this.breadcrumbsService.currentStep.data.studyNode ? this.breadcrumbsService.currentStep.data.studyNode : study;
+    }
+
+    public get entity(): Study {
+        return super.entity;
     }
 
     getService(): EntityService<Study> {
         return this.studyService;
     }
 
-    initView(): Promise<void> {
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromStudy(this.study);
+    }
 
+    fetchEntity: () => Promise<Study> = () => {
+        return this.idPromise.then(() => this.studyService.get(this.id, null));
+    }
+
+    initView(): Promise<void> {
         this.studyRightsService.getMyRightsForStudy(this.id).then(rights => {
             this.hasDownloadRight = this.keycloakService.isUserAdmin() || rights.includes(StudyUserRight.CAN_DOWNLOAD);
         })
-        let studyPromise: Promise<Study> = this.studyService.get(this.id, null).then(study => {
 
-          this.study = study;
-          this.setLabeledSizes(this.study);
+        this.setLabeledSizes(this.study);
 
-          if (study.profile == null) {
-                let pro = new Profile();
-                pro.profileName = "Profile Neurinfo";
-                study.profile = pro;
-            }
-            study.subjectStudyList = study.subjectStudyList.sort(
-                function(a: SubjectStudy, b:SubjectStudy) {
-                    let aname = a.subjectStudyIdentifier ? a.subjectStudyIdentifier : a.subject.name;
-                    let bname = b.subjectStudyIdentifier ? b.subjectStudyIdentifier : b.subject.name;
-                    return aname.localeCompare(bname);
-                });
+        if (this.study.profile == null) {
+            let pro = new Profile();
+            pro.profileName = "Profile Neurinfo";
+            this.study.profile = pro;
+        }
+        this.study.subjectStudyList = this.study.subjectStudyList.sort(
+            function(a: SubjectStudy, b:SubjectStudy) {
+                let aname = a.subjectStudyIdentifier ? a.subjectStudyIdentifier : a.subject.name;
+                let bname = b.subjectStudyIdentifier ? b.subjectStudyIdentifier : b.subject.name;
+                return aname.localeCompare(bname);
+            });
 
-            this.hasStudyAdminRight().then(val => this.isStudyAdmin = val);
+        this.hasStudyAdminRight().then(val => this.isStudyAdmin = val);
 
-            return Promise.resolve(study)
-        });
         if (this.keycloakService.isUserAdmin()) {
             this.accessRequestService.findByStudy(this.id).then(accessReqs => {
                 this.accessRequests = accessReqs;
             });
         }
         if (this.keycloakService.isUserAdminOrExpert()) {
-            return Promise.all([
-                studyPromise,
-                this.fetchUsers()
-            ]).then(([study, users]) => {
-                Study.completeMembers(study, users);
+            return this.fetchUsers().then(users => {
+                Study.completeMembers(this.study, users);
             });
         } else {
-            return studyPromise.then();
+            return Promise.resolve();
         }
     }
 
     initEdit(): Promise<void> {
-        let studyPromise: Promise<Study> = this.studyService.get(this.id, null).then(study => {
-            this.study = study;
 
-            if (this.study.profile == null) {
-              let profile = new Profile();
-              profile.profileName = "Profile Neurinfo";
-              this.study.profile = profile;
-            }
+        if (this.study.profile == null) {
+            let profile = new Profile();
+            profile.profileName = "Profile Neurinfo";
+            this.study.profile = profile;
+        }
 
-            this.hasStudyAdminRight().then(val => this.isStudyAdmin = val);
+        this.hasStudyAdminRight().then(val => this.isStudyAdmin = val);
 
-            return study;
-        });
         this.getAllSubjects();
 
         this.protocolFiles = [];
 
-        Promise.all([
-            studyPromise,
-            this.fetchUsers(),
-        ]).then(([study, users]) => {
-            Study.completeMembers(study, users);
+        this.fetchUsers().then(users => {
+            Study.completeMembers(this.study, users);
         });
         if (this.keycloakService.isUserAdmin()) {
             this.accessRequestService.findByStudy(this.id).then(accessReqs => {
                 this.accessRequests = accessReqs;
             });
         }
-        Promise.all([
-            studyPromise,
-            this.getCenters()
-        ]).then(([study, centers]) => {
+        this.getCenters().then(centers => {
             this.onMonoMultiChange();
         });
-        return studyPromise.then(() => null);
+        return Promise.resolve();
     }
 
     async initCreate(): Promise<void> {
@@ -575,8 +573,8 @@ export class StudyComponent extends EntityComponent<Study> {
 
     onTreeSelectedChange(study: StudyNode) {
         let dsIds: number [] = [];
-        if (study.subjects && study.subjects != 'UNLOADED') {
-            study.subjects.forEach(subj => {
+        if (study.subjectsNode.subjects && study.subjectsNode.subjects != 'UNLOADED') {
+            study.subjectsNode.subjects.forEach(subj => {
                 if (subj.examinations && subj.examinations != 'UNLOADED') {
                     subj.examinations.forEach(exam => {
                         if (exam.datasetAcquisitions && exam.datasetAcquisitions != 'UNLOADED') {
@@ -611,7 +609,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     onStudyNodeInit(studyNode: StudyNode) {
-        studyNode.open = true;
+        studyNode.open();
         this.breadcrumbsService.currentStep.data.studyNode = studyNode;
     }
 

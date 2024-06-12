@@ -22,6 +22,7 @@ import {TableComponent} from "../../../shared/components/table/table.component";
 import {ColumnDefinition} from "../../../shared/components/table/column.definition.type";
 import {DicomMetadata} from "./dicom-metadata.model";
 import {BrowserPaging} from "../../../shared/components/table/browser-paging.model";
+import { Selection, TreeService } from 'src/app/studies/study/tree.service';
 
 
 @Component({
@@ -42,7 +43,8 @@ export class MetadataComponent {
         private activatedRoute: ActivatedRoute,
         private dicomService: DicomService,
         private breadcrumbsService: BreadcrumbsService,
-        private location: Location) {
+        private location: Location,
+        private treeService: TreeService) {
             breadcrumbsService.nameStep('Dicom metadata');
             this.columnDefs = this.getColumnDefs();
             this.loadMetadata().then(() => {
@@ -53,6 +55,11 @@ export class MetadataComponent {
 
     private loadMetadata() {
         const id: number = +this.activatedRoute.snapshot.params['id'];
+
+        this.datasetService.get(id).then(ds => {
+            this.treeService.selection = new Selection(id, 'dicomMetadata', [ds.study.id]);
+        });
+
         return Promise.all([this.datasetService.downloadDicomMetadata(id), this.dicomService.getDicomTags()]).then(([data, tags]) => {
             if (!data) {
                 return;

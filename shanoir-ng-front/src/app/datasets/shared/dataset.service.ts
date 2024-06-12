@@ -164,9 +164,8 @@ export class DatasetService extends EntityService<Dataset> {
     }
 
     protected mapEntity = (dto: DatasetDTO, quickResult?: Dataset, mode: 'eager' | 'lazy' = 'eager'): Promise<Dataset> => {
-        let result: Dataset = DatasetUtils.getDatasetInstance(dto.type);
-        this.datasetDTOService.toEntity(dto, result, mode);
-        return Promise.resolve(result);
+        quickResult = DatasetUtils.getDatasetInstance(dto.type);
+        return this.datasetDTOService.toEntity(dto, quickResult, mode);
     }
 
     protected mapEntityList = (dtos: DatasetDTO[]): Promise<Dataset[]> => {

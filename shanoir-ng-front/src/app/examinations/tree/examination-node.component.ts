@@ -11,20 +11,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {Component, EventEmitter, ViewChild, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
-import {DatasetAcquisitionService} from '../../dataset-acquisitions/shared/dataset-acquisition.service';
-import {DatasetProcessing} from '../../datasets/shared/dataset-processing.model';
-import {Dataset} from '../../datasets/shared/dataset.model';
-import {DatasetProcessingType} from '../../enum/dataset-processing-type.enum';
-import {ConsoleService} from '../../shared/console/console.service';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { DatasetAcquisitionService } from '../../dataset-acquisitions/shared/dataset-acquisition.service';
+import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
+import { Dataset } from '../../datasets/shared/dataset.model';
+import { ConsoleService } from '../../shared/console/console.service';
 
-import {DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode} from '../../tree/tree.model';
-import {Examination} from '../shared/examination.model';
-import {ExaminationPipe} from '../shared/examination.pipe';
-import {ExaminationService} from '../shared/examination.service';
-import {environment} from '../../../environments/environment';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+
 import { TaskState } from 'src/app/async-tasks/task.model';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { Selection, TreeService } from 'src/app/studies/study/tree.service';
+import { SuperPromise } from 'src/app/utils/super-promise';
+import { environment } from '../../../environments/environment';
+import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode, ShanoirNode } from '../../tree/tree.model';
+import { Examination } from '../shared/examination.model';
+import { ExaminationPipe } from '../shared/examination.pipe';
+import { ExaminationService } from '../shared/examination.service';
 
 @Component({
     selector: 'examination-node',
@@ -33,7 +35,7 @@ import { TaskState } from 'src/app/async-tasks/task.model';
 
 export class ExaminationNodeComponent implements OnChanges {
 
-    @Input() input: ExaminationNode | Examination;
+    @Input() input: ExaminationNode | {examination: Examination, parentNode: ShanoirNode};
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
     @Output() nodeInit: EventEmitter<ExaminationNode> = new EventEmitter();
     @Output() onExaminationDelete: EventEmitter<void> = new EventEmitter();
@@ -47,13 +49,17 @@ export class ExaminationNodeComponent implements OnChanges {
     hasDicom: boolean = false;
     downloading = false;
     detailsPath: string = '/examination/details/';
+    @Input() withMenu: boolean = true;
+    private contentLoaded: SuperPromise<void> = new SuperPromise();
 
     constructor(
         private examinationService: ExaminationService,
         private datasetAcquisitionService: DatasetAcquisitionService,
         private examPipe: ExaminationPipe,
+        private downloadService: MassDownloadService,
         private massDownloadService : MassDownloadService,
-        private consoleService: ConsoleService) {
+        private consoleService: ConsoleService,
+        protected treeService: TreeService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -65,12 +71,14 @@ export class ExaminationNodeComponent implements OnChanges {
                 }
             } else {
                 this.node = new ExaminationNode(
-                    this.input.id,
-                    this.examPipe.transform(this.input),
+                    this.input.parentNode,
+                    this.input.examination?.id,
+                    this.examPipe.transform(this.input.examination),
                     'UNLOADED',
-                    this.input.extraDataFilePathList,
+                    this.input.examination.extraDataFilePathList,
                     false);
             }
+            //this.node.registerOpenPromise(this.contentLoaded);
             this.nodeInit.emit(this.node);
         }
     }
@@ -90,12 +98,15 @@ export class ExaminationNodeComponent implements OnChanges {
     }
 
     firstOpen() {
-        if (this.node.datasetAcquisitions == 'UNLOADED') this.loadDatasetAcquisitions().then(() => this.node.open = true);
+        if (this.node.datasetAcquisitions == 'UNLOADED') {
+            this.loadDatasetAcquisitions().then(() => this.contentLoaded.resolve());
+        } else {
+            this.contentLoaded.resolve();
+        }
     }
 
     loadDatasetAcquisitions(): Promise<void> {
         this.loading = true;
-
         return this.datasetAcquisitionService.getAllForExamination(this.node.id).then(dsAcqs => {
             if (!dsAcqs) dsAcqs = [];
             dsAcqs = dsAcqs.filter(acq => acq.type !== 'Processed');
@@ -141,6 +152,7 @@ export class ExaminationNodeComponent implements OnChanges {
 
     mapAcquisitionNode(dsAcq: any): DatasetAcquisitionNode {
         return new DatasetAcquisitionNode(
+            this.node,
             dsAcq.id,
             dsAcq.name,
             dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds, false)) : [],
@@ -150,17 +162,20 @@ export class ExaminationNodeComponent implements OnChanges {
 
     mapDatasetNode(dataset: Dataset, processed: boolean): DatasetNode {
         return new DatasetNode(
+            this.node,
             dataset.id,
             dataset.name,
             dataset.type,
             dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : [],
             processed,
-            this.node.canDelete
+            this.node.canDelete,
+            dataset.inPacs
         );
     }
 
     mapProcessingNode(processing: DatasetProcessing): ProcessingNode {
         return new ProcessingNode(
+            this.node,
             processing.id,
             processing.comment,
             processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],

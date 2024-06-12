@@ -21,6 +21,7 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { Selection } from 'src/app/studies/study/tree.service';
 
 @Component({
     selector: 'center-detail',
@@ -46,6 +47,10 @@ export class CenterComponent extends EntityComponent<Center> {
 
     getService(): EntityService<Center> {
         return this.centerService;
+    }
+
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromCenter(this.center);
     }
 
     initView(): Promise<void> {

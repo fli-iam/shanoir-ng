@@ -12,15 +12,28 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-export class FooterState {
+package org.shanoir.ng.acquisitionequipment.dto;
 
-    constructor(
-        public mode: "view" | "edit" | "create",
-        public backButton: boolean = true,
-        public canEdit: boolean = true,
-        public canDelete: boolean = true,
-        public valid: boolean = false,
-        public dirty: boolean = false,
-        public loading: boolean = false
-    ) {}
+import java.util.List;
+
+import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.studycenter.StudyCenterDTO;
+
+/**
+ * DTO for acquisition equipments.
+ * 
+ * @author msimon
+ *
+ */
+public class CenterDTO extends IdName {
+
+	private List<StudyCenterDTO> studyCenterList;
+
+	public List<StudyCenterDTO> getStudyCenterList() {
+		return studyCenterList;
+	}
+
+	public void setStudyCenterList(List<StudyCenterDTO> studyCenterList) {
+		this.studyCenterList = studyCenterList;
+	}
 }

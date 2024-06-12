@@ -385,7 +385,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
 
     onExaminationNodeInit(node: ExaminationNode) {
-        node.open = true;
+        node.open();
         this.breadcrumbsService.currentStep.data.examinationNode = node;
     }
 

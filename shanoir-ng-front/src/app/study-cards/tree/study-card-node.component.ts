@@ -12,36 +12,40 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import { Router } from '@angular/router';
 
-import { StudyCardNode } from '../../tree/tree.model';
+import { CardNode } from '../../tree/tree.model';
 import { StudyCard } from '../shared/study-card.model';
-import {StudyCardService} from "../shared/study-card.service";
+import { StudyCardService } from "../shared/study-card.service";
+import { QualityCard } from '../shared/quality-card.model';
+import { QualityCardService } from '../shared/quality-card.service';
+import { TreeService } from 'src/app/studies/study/tree.service';
 
 
 @Component({
-    selector: 'studycard-node',
+    selector: 'card-node',
     templateUrl: 'study-card-node.component.html'
 })
 
 export class StudyCardNodeComponent implements OnChanges {
 
-    @Input() input: StudyCardNode | StudyCard;
+    @Input() input: CardNode | StudyCard | QualityCard;
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
     @Output() onCardDelete: EventEmitter<void> = new EventEmitter();
-    node: StudyCardNode;
+    node: CardNode;
     loading: boolean = false;
     menuOpened: boolean = false;
-    detailsPath: string = '/study-card/details/';
+    @Input() detailsPath: string;
+    @Input() withMenu: boolean = true;
 
     constructor(
-        private router: Router,
-        private cardService: StudyCardService) {
+        private studycardService: StudyCardService,
+        private qualitycardService: QualityCardService,
+        protected treeService: TreeService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {
-            if (this.input instanceof StudyCardNode) {
+            if (this.input instanceof CardNode) {
                 this.node = this.input;
             } else {
                 throw new Error('not implemented yet');
@@ -50,8 +54,10 @@ export class StudyCardNodeComponent implements OnChanges {
     }
 
     deleteStudyCard() {
-        this.cardService.get(this.node.id).then(entity => {
-            this.cardService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
+        const service = this.node.type == 'studycard' ? this.studycardService : this.qualitycardService;
+
+        service.get(this.node.id).then(entity => {
+            service.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
                 if (deleted) {
                     this.onCardDelete.emit();
                 }

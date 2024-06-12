@@ -61,8 +61,10 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
     @Input() title: string;
     @Input() tags: Tag[];
     @Input() qualityTag: QualityTag;
+    @Input() route: string;
     public isOpen: boolean = false;
     @Input() opened: boolean = false;
+    private neverOpened: boolean = true;
     @Output() openedChange: EventEmitter<boolean> = new EventEmitter();
     public checked: boolean | 'indeterminate';
     @ViewChild('box') boxElt: CheckboxComponent;
@@ -110,7 +112,10 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
         this.dataLoading = false;
         this.isOpen = true;
         this.openedChange.emit(this.isOpen);
-        if (this.hasChildren == 'unknown') this.firstOpen.emit(this);
+        if (this.hasChildren == 'unknown' || this.neverOpened) {
+            this.neverOpened = false;
+            this.firstOpen.emit(this);
+        }
     }
 
     public close() {

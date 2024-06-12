@@ -28,14 +28,15 @@ import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { StudyService } from '../../studies/shared/study.service';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
-import { ExaminationNode } from '../../tree/tree.model';
+import { ExaminationNode, ShanoirNode } from '../../tree/tree.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
 import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { Selection } from 'src/app/studies/study/tree.service';
 
 @Component({
-    selector: 'examination',
+    selector: 'examination-detail',
     templateUrl: 'examination.component.html'
 })
 
@@ -54,7 +55,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     hasImportRight: boolean = false;
     hasDownloadRight: boolean = false;
     pattern: string = '[^:|<>&\/]+';
-    examNode: Examination | ExaminationNode;
+    examNode: ExaminationNode | {examination: Examination, parentNode: ShanoirNode};
     downloadState: TaskState = new TaskState();
 
     datasetIds: Promise<number[]> = new Promise((resolve, reject) => {});
@@ -86,12 +87,16 @@ export class ExaminationComponent extends EntityComponent<Examination> {
 
     set examination(examination: Examination) {
         this.entity = examination;
-        this.examNode = this.breadcrumbsService.currentStep.data.examinationNode ? this.breadcrumbsService.currentStep.data.examinationNode : examination;
+        this.examNode = this.breadcrumbsService.currentStep.data.examinationNode ? this.breadcrumbsService.currentStep.data.examinationNode : {examination: examination, parentNode: null};
     }
     get examination(): Examination { return this.entity; }
 
     getService(): EntityService<Examination> {
         return this.examinationService;
+    }
+
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromExamination(this.examination);
     }
 
     set entity(exam: Examination) {
@@ -251,9 +256,11 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
 
     onExaminationNodeInit(node: ExaminationNode) {
-        node.open = true;
-        this.breadcrumbsService.currentStep.data.examinationNode = node;
-        this.fetchDatasetIdsFromTree();
+        setTimeout(() => {
+            node.open();
+            this.breadcrumbsService.currentStep.data.examinationNode = node;
+            this.fetchDatasetIdsFromTree();
+        });
     }
 
     fetchDatasetIdsFromTree() {

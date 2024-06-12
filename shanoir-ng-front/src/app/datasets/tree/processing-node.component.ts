@@ -14,11 +14,10 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
-import {DatasetNode, ProcessingNode, UNLOADED} from '../../tree/tree.model';
+import { DatasetNode, ProcessingNode } from '../../tree/tree.model';
 import { DatasetProcessing } from '../shared/dataset-processing.model';
-import {DatasetService} from "../shared/dataset.service";
-import {ExecutionDataService} from "../../vip/execution.data-service";
-import {DatasetProcessingService} from "../shared/dataset-processing.service";
+import { DatasetProcessingService } from "../shared/dataset-processing.service";
+import { Selection, TreeService } from 'src/app/studies/study/tree.service';
 
 
 @Component({
@@ -35,10 +34,12 @@ export class ProcessingNodeComponent implements OnChanges {
     menuOpened: boolean = false;
     @Input() hasBox: boolean = false;
     @Output() onProcessingDelete: EventEmitter<void> = new EventEmitter();
+    @Input() withMenu: boolean = true;
 
     constructor(
         private router: Router,
-        private processingService: DatasetProcessingService) {
+        private processingService: DatasetProcessingService,
+        protected treeService: TreeService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {

@@ -50,6 +50,8 @@ public class DatasetDTO {
 	
 	private String type;
 
+	private boolean inPacs;
+
 	/**
 	 * @return the creationDate
 	 */
@@ -178,4 +180,13 @@ public class DatasetDTO {
 	public void setCenterId(Long centerId) {
 		this.centerId = centerId;
 	}
+
+	public boolean isInPacs() {
+		return inPacs;
+	}
+
+	public void setInPacs(boolean inPacs) {
+		this.inPacs = inPacs;
+	}
+
 }
