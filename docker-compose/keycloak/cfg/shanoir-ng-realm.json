@@ -1016,7 +1016,7 @@
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "http://localhost*"
+        "SHANOIR_URL_SCHEME://SHANOIR_URL_HOST/*"
       ],
       "webOrigins": [
         "/*"
