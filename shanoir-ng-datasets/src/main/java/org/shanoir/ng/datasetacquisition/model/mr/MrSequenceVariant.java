@@ -95,7 +95,11 @@ public enum MrSequenceVariant {
 		if (TOF.equals(type)) { // see GitHub issue #561
 			return MrSequenceVariant.SS;
 		}
-		return MrSequenceVariant.valueOf(type);
+		try {
+			return MrSequenceVariant.valueOf(type);
+		} catch (IllegalArgumentException exception) {
+			return UNKNOWN;
+		}
 	}
 	
 	/**
