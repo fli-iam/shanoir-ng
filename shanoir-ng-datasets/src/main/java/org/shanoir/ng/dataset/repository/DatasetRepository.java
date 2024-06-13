@@ -15,6 +15,7 @@
 package org.shanoir.ng.dataset.repository;
 
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.tag.model.StudyTag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -66,4 +67,6 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 	List<Object[]> findExpressionSizesTotalByStudyIdGroupByFormat(List<Long> studyIds);
 
     List<Dataset> deleteByDatasetProcessingId(Long id);
+
+	boolean existsByTagsContains(StudyTag tag);
 }

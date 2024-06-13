@@ -14,8 +14,6 @@
 
 package org.shanoir.ng.dataset.dto.mapper;
 
-import java.util.List;
-
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
@@ -28,6 +26,8 @@ import org.shanoir.ng.processing.dto.mapper.DatasetProcessingMapper;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.data.domain.Page;
+
+import java.util.List;
 
 /**
  * Mapper for datasets.

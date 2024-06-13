@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -324,5 +325,20 @@ public interface DatasetApi {
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_SEE_ALL'))")
 	ResponseEntity<List<DatasetAndProcessingsDTOInterface>> findDatasetsByIds(
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds);
+
+	@Operation(summary = "", description = "Updates the study tags of a dataset")
+	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "dataset study tags updated"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "dataset does not exists"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@PutMapping(value = "/{datasetId}/tags", produces = { "application/json" }, consumes = {
+			"application/json" })
+	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasUpdateRightOnDataset(#dataset, 'CAN_ADMINISTRATE'))")
+	ResponseEntity<Void> updateDatasetTags(
+			@Parameter(description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
+			@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "array of study tag ids", required = true) @RequestBody List<Long> studyTagIds,
+			BindingResult result) throws RestServiceException, EntityNotFoundException, SolrServerException, IOException;
 
 }

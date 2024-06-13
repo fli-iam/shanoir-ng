@@ -44,6 +44,7 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -55,13 +56,12 @@ import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.error.FieldErrorMap;
-import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.tag.model.StudyTag;
+import org.shanoir.ng.tag.service.StudyTagService;
 import org.shanoir.ng.utils.DatasetFileUtils;
-import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -134,6 +134,12 @@ public class DatasetApiController implements DatasetApi {
 
 	@Autowired
 	private ObjectMapper objectMapper;
+
+	@Autowired
+	private StudyTagService studyTagService;
+
+	@Autowired
+	private DatasetRepository datasetRepository;
 
 	/** Number of downloadable datasets. */
 	private static final int DATASET_LIMIT = 500;
@@ -243,6 +249,23 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
+	public ResponseEntity<Void> updateDatasetTags(Long datasetId, List<Long> studyTagIds, BindingResult result) throws EntityNotFoundException, SolrServerException, IOException {
+		Dataset ds = datasetService.findById(datasetId);
+		if (ds == null) {
+			throw new EntityNotFoundException(Dataset.class, datasetId);
+		}
+
+		List<StudyTag> tags = studyTagService.findByIds(studyTagIds);
+		ds.setTags(tags);
+
+		datasetRepository.save(ds);
+
+		solrService.indexDataset(datasetId);
+
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+
+  @Override
 	public ResponseEntity<List<DatasetDTO>> findDatasetsByExaminationId(Long examinationId) {
 		List<Dataset> datasets = datasetService.findByExaminationId(examinationId);
 		if (datasets.isEmpty()) {

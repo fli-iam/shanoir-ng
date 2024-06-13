@@ -152,6 +152,7 @@ export class ExaminationNodeComponent implements OnChanges {
         return new DatasetNode(
             dataset.id,
             dataset.name,
+            dataset.tags,
             dataset.type,
             dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : [],
             processed,
