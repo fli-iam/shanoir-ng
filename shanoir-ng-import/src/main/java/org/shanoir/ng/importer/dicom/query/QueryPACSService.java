@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -333,7 +334,7 @@ public class QueryPACSService {
 		List<Attributes> studies = queryCFind(association, params, QueryRetrieveLevel.STUDY);
 		// list of all corresponding DICOM studies received
 		if (studies != null) {
-			List<Patient> patients = new ArrayList<>();
+			List<Patient> patients = new CopyOnWriteArrayList<Patient>();
 			studies.parallelStream().forEach(s -> processDICOMStudy(s, association, modality, patients));
 			importJob.setPatients(patients);
 		}
@@ -343,7 +344,7 @@ public class QueryPACSService {
 			List<Patient> patients) {
 		// handle patient: create patient from attributes
 		Patient patient = new Patient(studyAttr);
-		patient.setStudies(new ArrayList<Study>());
+		patient.setStudies(new CopyOnWriteArrayList<Study>());
 		boolean newPatient = true;
 		for (Iterator<Patient> iterator = patients.iterator(); iterator.hasNext();) {
 			Patient existingPatient = iterator.next();
