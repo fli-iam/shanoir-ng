@@ -20,7 +20,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -38,8 +37,6 @@ import org.shanoir.ng.study.service.RelatedDatasetService;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.study.service.StudyUniqueConstraintManager;
 import org.shanoir.ng.study.service.StudyUserService;
-import org.shanoir.ng.tag.model.StudyTag;
-import org.shanoir.ng.tag.model.StudyTagDTO;
 import org.shanoir.ng.tag.model.StudyTagMapper;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
@@ -557,31 +554,5 @@ public class StudyApiController implements StudyApi {
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while querying the database.", e));
 		}
 	}
-
-	@Override
-	public ResponseEntity<Void> updateStudyTags(Long studyId, List<StudyTagDTO> studyTags, BindingResult result) throws MicroServiceCommunicationException, RestServiceException {
-		Study study = studyService.findById(studyId);
-
-		if(study == null){
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-
-		List<StudyTag> tags = studyTagMapper.studyTagDTOListToStudyTagList(studyTags);
-		for(StudyTag tag : tags){
-			tag.setStudy(study);
-		}
-
-		study.setStudyTags(studyTagMapper.studyTagDTOListToStudyTagList(studyTags));
-
-        try {
-            studyService.update(study);
-        } catch (EntityNotFoundException e) {
-			throw new RestServiceException(new ErrorModel(HttpStatus.NOT_FOUND.value(), "Study [" + studyId + "] not found.", e));
-        } catch (ShanoirException e) {
-			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Study [" + studyId + "] tags couldn't be updated.", e));
-        }
-
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
 
 }

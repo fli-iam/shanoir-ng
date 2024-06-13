@@ -14,32 +14,6 @@
 
 package org.shanoir.ng.study.controler;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
-import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
-import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.security.rights.StudyUserRight;
-import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
-import org.shanoir.ng.study.dto.PublicStudyDTO;
-import org.shanoir.ng.study.dto.StudyDTO;
-import org.shanoir.ng.study.dto.StudyStorageVolumeDTO;
-import org.shanoir.ng.study.dto.StudyStatisticsDTO;
-import org.shanoir.ng.study.dua.DataUserAgreement;
-import org.shanoir.ng.study.model.Study;
-import org.shanoir.ng.study.model.StudyUser;
-import org.shanoir.ng.tag.model.StudyTagDTO;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -47,6 +21,25 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.dto.*;
+import org.shanoir.ng.study.dua.DataUserAgreement;
+import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.model.StudyUser;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 
 @Tag(name = "studies", description = "the studies API")
@@ -366,20 +359,5 @@ public interface StudyApi {
 	@PreAuthorize("hasRole('ADMIN') or hasRole('EXPERT')")
 	ResponseEntity<List<StudyStatisticsDTO>> getStudyStatistics(
 		@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws RestServiceException, IOException;
-
-	@Operation(summary = "", description = "Updates study tags")
-	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "study tags updated"),
-			@ApiResponse(responseCode = "401", description = "unauthorized"),
-			@ApiResponse(responseCode = "403", description = "forbidden"),
-			@ApiResponse(responseCode = "404", description = "study does not exists"),
-			@ApiResponse(responseCode = "422", description = "bad parameters"),
-			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@PutMapping(value = "/{studyId}/tags", produces = { "application/json" }, consumes = {
-			"application/json" })
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
-	ResponseEntity<Void> updateStudyTags(
-			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "array of study tags", required = true) @RequestBody List<StudyTagDTO> studyTags,
-			BindingResult result) throws RestServiceException, EntityNotFoundException, MicroServiceCommunicationException;
-
+	
 }
