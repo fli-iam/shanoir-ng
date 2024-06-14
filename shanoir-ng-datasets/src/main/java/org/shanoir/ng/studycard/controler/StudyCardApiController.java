@@ -27,6 +27,7 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.studycard.dto.DicomTag;
+import org.shanoir.ng.studycard.model.Cardinality;
 import org.shanoir.ng.studycard.model.DicomTagType;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.StudyCardApply;
