@@ -48,7 +48,7 @@ export class TreeService {
     public nodeInit: boolean = false; 
     public canAdminStudy: boolean;
     private _treeOpened: boolean = true;
-    public treeActivated: boolean = false;
+    public treeAvailable: boolean = false;
 
     isSelected(id: number, type: NodeType): boolean {
         return this.selection?.isSelected(id, type);
@@ -92,12 +92,15 @@ export class TreeService {
         this.treeOpened = localStorage.getItem('treeOpened') == 'true';
         router.events.subscribe(event => {
             if (event instanceof ActivationStart) {
-                console.log(event.snapshot)
                 setTimeout(() => {
-                    console.log(event?.snapshot?.data?.['crotte']);
+                    this.treeAvailable = event?.snapshot?.data?.['treeAvailable'];
                 });
             }
         });
+    }
+
+    activateTree(activatedRoute: ActivatedRoute) {
+        activatedRoute.snapshot.data['treeAvailable'] = true;
     }
     
     private changeSelection(): void {
