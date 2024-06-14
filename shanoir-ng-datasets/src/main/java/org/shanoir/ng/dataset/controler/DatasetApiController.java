@@ -256,7 +256,14 @@ public class DatasetApiController implements DatasetApi {
 		}
 
 		List<StudyTag> tags = studyTagService.findByIds(studyTagIds);
-		ds.setTags(tags);
+
+		ds.setTags(new ArrayList<>());
+
+		for(StudyTag tag : tags){
+			if(tag.getStudy().getId().equals(ds.getStudyId())){
+				ds.getTags().add(tag);
+			}
+		}
 
 		datasetRepository.save(ds);
 
