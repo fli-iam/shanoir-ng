@@ -66,6 +66,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     protected isMainComponent: boolean;
     idPromise: SuperPromise<number> = new SuperPromise();
     entityPromise: SuperPromise<T> = new SuperPromise();
+    static ActivateTreeOnThisPage: boolean = true;
 
     /* services */
     protected confirmDialogService: ConfirmDialogService;
@@ -98,13 +99,15 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
         this.consoleService = ServiceLocator.injector.get(ConsoleService);
         this.breadcrumbsService = ServiceLocator.injector.get(BreadcrumbsService);
         this.treeService = ServiceLocator.injector.get(TreeService);
-
+        
+        this.activatedRoute.snapshot.data['crotte'] = 'bite'
         this.mode = this.activatedRoute.snapshot.data['mode'];
         this.addBCStep();
 
         setTimeout(() => { // force it to be after child constructor, we need this.fetchEntity
             this.subscriptions.push(this.activatedRoute.params.subscribe(
                 params => {
+                    this.treeService.treeActivated = true;
                     this.isMainComponent = true;
                     const id = +params['id'];
                     this.id = id;
@@ -446,6 +449,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     }
 
     ngOnDestroy() {
+        this.treeService.treeActivated = false;
         for (let subscribtion of this.subscriptions) {
             subscribtion.unsubscribe();
         }

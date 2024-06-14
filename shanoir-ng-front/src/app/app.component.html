@@ -18,24 +18,28 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div class="main-content">
     <router-outlet></router-outlet>
 </div> -->
-
 <ng-container *ngIf="isAuthenticated()">
     <div class="side-menu" *ngIf="menuOpen" @slideRight>
-        <side-menu [class.reduce-height]="consoleComponenent && consoleComponenent.open ? true : false"></side-menu>
+        <side-menu [class.reduce-height]="consoleComponenent && consoleComponenent.open ? true : false">
+            <div *ngIf="!treeService.treeOpened && treeService.treeActivated" class="tree-open-button" (click)="toggleTree(true)">
+                <i class="fa-solid fa-folder-tree"></i>
+                <!-- <i *ngIf="!treeOpened" class="fas fa-chevron-right"></i> -->
+            </div>
+        </side-menu>
     </div>
     <div class="main-content"
             [class.reduce-height]="consoleComponenent && consoleComponenent.open && consoleComponenent.deployed ? true : false"
             [class.open]="menuOpen" [@slideMarginLeft]="menuOpen ? 'margin' : 'nomargin'">
-        <div class="tree-button" (click)="toggleTree()" [class.closed]="!treeOpened">
-            <i *ngIf="treeOpened" class="fas fa-chevron-left"></i>
-            <i *ngIf="!treeOpened" class="fas fa-chevron-right"></i>
-        </div>
-        <div *ngIf="menuOpen" class="close-button" (click)="toggleMenu(false)"><i class="fas fa-chevron-left"></i></div>
+    <div *ngIf="menuOpen" class="close-button" (click)="toggleMenu(false)"><i class="fas fa-chevron-left"></i></div>
         <div *ngIf="!menuOpen" class="open-button" (click)="toggleMenu(true)"><i class="fas fa-chevron-right"></i></div>
         <breadcrumbs *ngIf="isAuthenticated()"></breadcrumbs>
-        <study-tree *ngIf="treeOpened" [class.opened]="treeOpened"></study-tree>
+        <study-tree *ngIf="treeService.treeOpened && treeService.studyNode" [class.opened]="true">
+            <div class="tree-close-button" (click)="toggleTree(false)">
+                <i class="fas fa-chevron-left"></i>
+            </div>
+        </study-tree>
         <div class="content">
-            <router-outlet ></router-outlet>
+            <router-outlet></router-outlet>
         </div>
     </div>
     <shanoir-console #console></shanoir-console>

@@ -99,7 +99,6 @@ export class UserComponent extends EntityComponent<User> {
                     }
                 })
             });
-            console.log(studyUserList)
             user.studyUserList = studyUserList;
         });
         let rolesPromise = this.getRoles().then(() => {

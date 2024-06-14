@@ -51,7 +51,7 @@ ul li a:after {
     border-top: 13px solid transparent;
     border-bottom: 13px solid transparent;
     border-left: 13px solid var(--bg-color);
-    position: absolute; right: -13px; top: 0;	
+    position: absolute; right: -12px; top: 0;
 }
 
 ul li a:before {

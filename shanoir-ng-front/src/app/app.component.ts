@@ -14,8 +14,8 @@
 
 import { Component, ElementRef, HostBinding, HostListener, ViewChild, ViewContainerRef } from '@angular/core';
 
-import { Router } from '@angular/router';
-import { parent, slideMarginLeft, slideRight } from './shared/animations/animations';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { parent, slideMarginLeft, slideRight, slideRightWithMargins } from './shared/animations/animations';
 import { ConfirmDialogService } from './shared/components/confirm-dialog/confirm-dialog.service';
 import { ConsoleComponent } from './shared/console/console.component';
 import { KeycloakService } from './shared/keycloak/keycloak.service';
@@ -25,6 +25,7 @@ import { KeycloakSessionService } from './shared/session/keycloak-session.servic
 import { StudyService } from './studies/shared/study.service';
 import { UserService } from './users/shared/user.service';
 import { ServiceLocator } from './utils/locator.service';
+import { TreeService } from './studies/study/tree.service';
 
 
 @Component({
@@ -38,7 +39,6 @@ export class AppComponent {
 
     @HostBinding('@parent') public menuOpen: boolean = true;
     @ViewChild('console') consoleComponenent: ConsoleComponent;
-    protected treeOpened: boolean = true;
 
     constructor(
             public viewContainerRef: ViewContainerRef,
@@ -49,7 +49,8 @@ export class AppComponent {
             private confirmService: ConfirmDialogService,
             protected router: Router,
             private studyService: StudyService,
-            private userService: UserService) {
+            private userService: UserService,
+            public treeService: TreeService) {
         
         ServiceLocator.rootViewContainerRef = this.viewContainerRef;
     }
@@ -72,8 +73,8 @@ export class AppComponent {
         this.menuOpen = open;
     }
 
-    toggleTree() {
-        this.treeOpened = !this.treeOpened;
+    toggleTree(open: boolean) {
+        this.treeService.treeOpened = open;    
     }
 
     isAuthenticated(): boolean {
