@@ -108,7 +108,6 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
             this.subscriptions.push(this.activatedRoute.params.subscribe(
                 params => {
                     this.treeService.activateTree(this.activatedRoute); // at each routing event
-                    this.treeService.treeAvailable = true;
                     this.isMainComponent = true;
                     const id = +params['id'];
                     this.id = id;
@@ -450,7 +449,6 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     }
 
     ngOnDestroy() {
-        this.treeService.treeAvailable = false;
         for (let subscribtion of this.subscriptions) {
             subscribtion.unsubscribe();
         }

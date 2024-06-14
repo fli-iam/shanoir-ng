@@ -45,6 +45,7 @@ export class MetadataComponent {
         private breadcrumbsService: BreadcrumbsService,
         private location: Location,
         private treeService: TreeService) {
+            treeService.activateTree(activatedRoute);
             breadcrumbsService.nameStep('Dicom metadata');
             this.columnDefs = this.getColumnDefs();
             this.loadMetadata().then(() => {
