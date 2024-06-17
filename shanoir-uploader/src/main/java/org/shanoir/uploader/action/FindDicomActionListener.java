@@ -167,8 +167,8 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 					String replacement = "";
 					lastNamePartIntroduced = lastNamePartIntroduced.replaceAll(
 							regex, replacement);
-					if (lastNamePartIntroduced.length() < 4) {
-						String message = "\"The wildcard \"*\" can not be used on the last Name unless introducing at least 4 characters\"\n";
+					if (lastNamePartIntroduced.length() < 3) {
+						String message = "\"The wildcard \"*\" can not be used on the last Name unless introducing at least 3 characters\"\n";
 						JOptionPane.showMessageDialog(new JFrame(), message,
 								"ERROR", JOptionPane.ERROR_MESSAGE);
 						mainWindow.patientNameTF.setText("");

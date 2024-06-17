@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -45,6 +44,7 @@ import org.dcm4che3.net.pdu.PresentationContext;
 import org.dcm4che3.net.service.QueryRetrieveLevel;
 import org.shanoir.ng.importer.dicom.DicomSerieAndInstanceAnalyzer;
 import org.shanoir.ng.importer.dicom.InstanceNumberSorter;
+import org.shanoir.ng.importer.dicom.PatientNameSorter;
 import org.shanoir.ng.importer.dicom.SeriesNumberSorter;
 import org.shanoir.ng.importer.dicom.StudyDateSorter;
 import org.shanoir.ng.importer.model.ImportJob;
@@ -312,6 +312,7 @@ public class QueryPACSService {
 			        queryStudies(association, dicomQuery, patient);
 			    }
 			});
+			patients.sort(new PatientNameSorter());
 			importJob.setPatients(patients);
 		}
 	}
@@ -334,8 +335,9 @@ public class QueryPACSService {
 		List<Attributes> studies = queryCFind(association, params, QueryRetrieveLevel.STUDY);
 		// list of all corresponding DICOM studies received
 		if (studies != null) {
-			List<Patient> patients = new CopyOnWriteArrayList<Patient>();
+			List<Patient> patients = new ArrayList<Patient>();
 			studies.parallelStream().forEach(s -> processDICOMStudy(s, association, modality, patients));
+			patients.sort(new PatientNameSorter());
 			importJob.setPatients(patients);
 		}
 	}
@@ -344,13 +346,16 @@ public class QueryPACSService {
 			List<Patient> patients) {
 		// handle patient: create patient from attributes
 		Patient patient = new Patient(studyAttr);
-		patient.setStudies(new CopyOnWriteArrayList<Study>());
+		patient.setStudies(new ArrayList<Study>());
 		boolean newPatient = true;
-		for (Iterator<Patient> iterator = patients.iterator(); iterator.hasNext();) {
-			Patient existingPatient = iterator.next();
-			if (existingPatient.getPatientID().equals(patient.getPatientID())) {
-				patient = existingPatient;
-				newPatient = false;
+		// patient already exists?
+		synchronized (patients) {
+			for (Iterator<Patient> iterator = patients.iterator(); iterator.hasNext();) {
+				Patient existingPatient = iterator.next();
+				if (existingPatient.getPatientID().equals(patient.getPatientID())) {
+					patient = existingPatient;
+					newPatient = false;
+				}
 			}
 		}
 		boolean maxPatientsFromPACSReached = false;
@@ -369,22 +374,23 @@ public class QueryPACSService {
 			}
 		}
 		if (!maxPatientsFromPACSReached) {
-			// handle study
-			Study study = new Study(studyAttr);
-			patient.getStudies().add(study);
-			// use now study date returned from the DICOM server
-			String dicomResponseStudyDate = studyAttr.getString(Tag.StudyDate);
-			querySeries(association, study, modality, dicomResponseStudyDate);
+			handleStudy(studyAttr, association, modality, patient);
 		} else {
 			if (!newPatient) { // only process existing patients, in case
-				// handle study
-				Study study = new Study(studyAttr);
-				patient.getStudies().add(study);
-				// use now study date returned from the DICOM server
-				String dicomResponseStudyDate = studyAttr.getString(Tag.StudyDate);
-				querySeries(association, study, modality, dicomResponseStudyDate);						
+				handleStudy(studyAttr, association, modality, patient);
 			}
 		}
+	}
+
+	private void handleStudy(Attributes studyAttr, Association association, DicomParam modality,
+			Patient patient) {
+		Study study = new Study(studyAttr);
+		synchronized (patient.getStudies()) {
+			patient.getStudies().add(study);
+		}
+		// use now study date returned from the DICOM server
+		String dicomResponseStudyDate = studyAttr.getString(Tag.StudyDate);
+		querySeries(association, study, modality, dicomResponseStudyDate);
 	}
 	
 	/**
