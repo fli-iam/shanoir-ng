@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -36,6 +36,7 @@ import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyStatisticsDTO;
@@ -81,7 +82,7 @@ import jakarta.transaction.Transactional;
 
 /**
  * Implementation of study service.
- * 
+ *
  * @author msimon
  * @author mkain
  *
@@ -258,7 +259,8 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public Study update(Study study) throws EntityNotFoundException, MicroServiceCommunicationException {
+	@Transactional(rollbackOn = {ShanoirException.class})
+	public Study update(Study study) throws ShanoirException {
 		Study studyDb = studyRepository.findById(study.getId()).orElse(null);
 
 		List<Long> tagsToDelete = getTagsToDelete(study, studyDb);
@@ -271,15 +273,14 @@ public class StudyServiceImpl implements StudyService {
 		studyDb.setClinical(study.isClinical());
 		studyDb.setDownloadableByDefault(study.isDownloadableByDefault());
 		studyDb.setEndDate(study.getEndDate());
-		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			studyDb.setChallenge(study.isChallenge());
-		}
+		studyDb.setChallenge(study.isChallenge());
 		studyDb.setName(study.getName());
 		studyDb.setProfile(study.getProfile());
 		studyDb.setDescription(study.getDescription());
 		studyDb.setLicense(study.getLicense());
 		studyDb.setStudyStatus(study.getStudyStatus());
 		studyDb.setVisibleByDefault(study.isVisibleByDefault());
+		studyDb.setStudyCardPolicy(study.getStudyCardPolicy());
 		studyDb.setWithExamination(study.isWithExamination());
 		studyDb.setMonoCenter(study.isMonoCenter());
 
@@ -357,7 +358,7 @@ public class StudyServiceImpl implements StudyService {
 			}
 			studyDb = studyRepository.save(studyDb);
 		}
-		
+
 		// Actually delete subjects
 		for (Subject subjectToDelete : toBeDeleted) {
 			subjectService.deleteById(subjectToDelete.getId());
@@ -372,7 +373,12 @@ public class StudyServiceImpl implements StudyService {
 			studyDb = studyRepository.save(studyDb);
 		}
 
-		updateStudyName(studyMapper.studyToStudyDTODetailed(studyDb));
+		String error = this.updateStudyName(studyMapper.studyToStudyDTODetailed(studyDb));
+
+		if(error != null && !error.isEmpty()){
+			LOG.error("Study [" + studyDb.getId() + "] couldn't be sync with datasets microservice : {}", error);
+			throw new ShanoirException(error);
+		}
 
 		return studyDb;
 	}
@@ -380,31 +386,33 @@ public class StudyServiceImpl implements StudyService {
 	/**
 	 * For each subject study tag of study, set the fresh tag id by looking into studyDb tags, 
 	 * then update db subject study tags lists with the given study
-	 * 
+	 *
 	 * @param subjectStudyList
 	 * @param dbStudyTags
 	 * @return updated study
 	 */
 	private void updateTags(List<SubjectStudy> subjectStudyList, List<Tag> dbStudyTags) {
-		if (subjectStudyList != null && dbStudyTags != null) {
-			for (SubjectStudy subjectStudy : subjectStudyList) {
-				if (subjectStudy.getTags() != null) {
-					for (Tag tag : subjectStudy.getTags()) {
-						if (tag.getId() == null) {
-							Tag dbTag = dbStudyTags.stream().filter(upTag -> 
-							upTag.getColor().equals(tag.getColor()) && upTag.getName().equals(tag.getName())
-									).findFirst().orElse(null);
-							if (dbTag != null) {
-								tag.setId(dbTag.getId());							
-							} else {
-								throw new IllegalStateException("Cannot link a new tag to a subject-study, this tag does not exist in the study");
-							}
-						}
-					}
-				}
-			}	
-		} 
-	}
+        if (subjectStudyList == null || dbStudyTags == null) {
+            return;
+        }
+        for (SubjectStudy subjectStudy : subjectStudyList) {
+            if (subjectStudy.getTags() == null) {
+                continue;
+            }
+            for (Tag tag : subjectStudy.getTags()) {
+                if (tag.getId() == null) {
+                    Tag dbTag = dbStudyTags.stream().filter(
+							upTag -> upTag.getColor().equals(tag.getColor())
+									&& upTag.getName().equals(tag.getName())
+                            ).findFirst().orElse(null);
+                    if (dbTag == null) {
+                        throw new IllegalStateException("Cannot link a new tag to a subject-study, this tag does not exist in the study");
+                    }
+					tag.setId(dbTag.getId());
+                }
+            }
+        }
+    }
 
 	private List<Long> getTagsToDelete(Study study, Study studyDb) {
 		List<Long> tagsToDelete = new ArrayList<>();
@@ -442,7 +450,7 @@ public class StudyServiceImpl implements StudyService {
 
 	/**
 	 * Gets the protocol or data user agreement file path
-	 * 
+	 *
 	 * @param studyId  id of the study
 	 * @param fileName name of the file
 	 * @return the file path of the file
@@ -543,12 +551,12 @@ public class StudyServiceImpl implements StudyService {
 		for (StudyUser su : studyDb.getStudyUserList()) {
 			existing.put(su.getId(), su);
 		}
-		
+
 		boolean addNewDua = CollectionUtils.isEmpty(studyDb.getDataUserAgreementPaths()) && !CollectionUtils.isEmpty(study.getDataUserAgreementPaths());
 		boolean deleteDua = !CollectionUtils.isEmpty(studyDb.getDataUserAgreementPaths()) && CollectionUtils.isEmpty(study.getDataUserAgreementPaths());
-		boolean updateDua = !CollectionUtils.isEmpty(studyDb.getDataUserAgreementPaths()) 
-						 && !CollectionUtils.isEmpty(study.getDataUserAgreementPaths())
-						 && !study.getDataUserAgreementPaths().get(0).equals(studyDb.getDataUserAgreementPaths().get(0));
+		boolean updateDua = !CollectionUtils.isEmpty(studyDb.getDataUserAgreementPaths())
+				&& !CollectionUtils.isEmpty(study.getDataUserAgreementPaths())
+				&& !study.getDataUserAgreementPaths().get(0).equals(studyDb.getDataUserAgreementPaths().get(0));
 
 		Map<Long, StudyUser> replacing = new HashMap<>();
 		for (StudyUser su : study.getStudyUserList()) {
@@ -662,7 +670,7 @@ public class StudyServiceImpl implements StudyService {
 		File archiveFile = new File(this.getStudyFilePath(study.getId(), "archive_" + formatter.format(new Date()) + "_" + study.getDataUserAgreementPaths().get(0)));
 		deletedFile.renameTo(archiveFile);
 	}
-	
+
 	private void sendStudyUserReport(Study study, List<StudyUser> created) {
 		// Get all recipients
 		List<Long> recipients = new ArrayList<Long>();
@@ -723,11 +731,10 @@ public class StudyServiceImpl implements StudyService {
 		}
 	}
 
-	private boolean updateStudyName(StudyDTO study) throws MicroServiceCommunicationException {
+	public String updateStudyName(StudyDTO study) throws MicroServiceCommunicationException {
 		try {
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_NAME_UPDATE_QUEUE,
+            return (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_NAME_UPDATE_QUEUE,
 					objectMapper.writeValueAsString(study));
-			return true;
 		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException(
 					"Error while communicating with datasets MS to update study name.", e);
@@ -821,14 +828,14 @@ public class StudyServiceImpl implements StudyService {
 		}
 
 		this.studyRepository.findAllById(studyIds).forEach( study -> {
-				if(!detailedStorageVolumes.containsKey(study.getId())){
-					return;
+					if(!detailedStorageVolumes.containsKey(study.getId())){
+						return;
+					}
+					Long filesSize = this.getStudyFilesSize(study);
+					StudyStorageVolumeDTO dto = detailedStorageVolumes.get(study.getId());
+					dto.setExtraDataSize(filesSize + dto.getExtraDataSize());
+					dto.setTotal(filesSize + dto.getTotal());
 				}
-				Long filesSize = this.getStudyFilesSize(study);
-				StudyStorageVolumeDTO dto = detailedStorageVolumes.get(study.getId());
-				dto.setExtraDataSize(filesSize + dto.getExtraDataSize());
-				dto.setTotal(filesSize + dto.getTotal());
-			}
 		);
 
 		return detailedStorageVolumes;

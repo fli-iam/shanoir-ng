@@ -118,4 +118,5 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	 */
 	Examination findBySourceIdAndStudy_Id(Long sourceId, Long studyId);
 
+	Page<Examination> findPageByComment(String comment, Pageable pageable);
 }

@@ -150,4 +150,6 @@ public interface DatasetService {
 	
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#dataset.getId(), 'CAN_ADMINISTRATE'))")
 	void deleteDatasetFromPacs(Dataset dataset) throws ShanoirException;
+
+	boolean existsById(Long id);
 }

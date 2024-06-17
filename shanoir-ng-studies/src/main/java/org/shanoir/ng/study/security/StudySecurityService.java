@@ -37,6 +37,8 @@ import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
+import org.shanoir.ng.tag.model.StudyTag;
+import org.shanoir.ng.tag.repository.StudyTagRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -60,6 +62,9 @@ public class StudySecurityService {
 	@Autowired
 	DataUserAgreementRepository dataUserAgreementRepository;
 
+	@Autowired
+	StudyTagRepository studyTagRepository;
+
 	/**
 	 * Check that the connected user has the given right for the given study.
 	 * 
@@ -77,6 +82,15 @@ public class StudySecurityService {
 			throw new EntityNotFoundException("Cannot find study with id " + studyId);
 		}
 		return hasPrivilege(study, right);
+	}
+
+	public boolean hasRightOnStudyTag(Long id, String rightStr) throws EntityNotFoundException {
+		StudyTag tag = studyTagRepository.findById(id)
+				.orElseThrow(() ->
+						new EntityNotFoundException("Cannot find study tag with id [" + id + "]"));
+		return this.hasRightOnStudy(tag.getStudy().getId(), rightStr) &&
+				this.studyUsersMatchStudy(tag.getStudy());
+
 	}
 
 	public boolean filterVolumesHasRightOnStudies(List<Long> studyIds, String rightStr) throws EntityNotFoundException {

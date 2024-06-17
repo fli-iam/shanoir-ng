@@ -138,6 +138,7 @@ export class StudyDTOService {
         //entity.timepoints = dto.timepoints;
         entity.visibleByDefault = dto.visibleByDefault;
         entity.withExamination = dto.withExamination;
+        entity.studyCardPolicy = dto.studyCardPolicy;
         if (dto.studyUserList) {
             entity.nbMembers = dto.studyUserList.length;
         }
@@ -287,6 +288,7 @@ export class StudyDTO {
     //timepoints: Timepoint[];
     visibleByDefault: boolean;
     withExamination: boolean;
+    studyCardPolicy: string;
     tags: Tag[];
     studyTags: Tag[];
     studyCards: StudyCardDTO[];
@@ -325,6 +327,7 @@ export class StudyDTO {
             return dto;
         }) : null;
         this.visibleByDefault = study.visibleByDefault;
+        this.studyCardPolicy = study.studyCardPolicy;
         this.withExamination = study.withExamination;
         this.tags = study.tags;
         this.studyTags = study.studyTags;

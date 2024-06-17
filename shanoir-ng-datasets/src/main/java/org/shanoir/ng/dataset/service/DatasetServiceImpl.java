@@ -25,8 +25,6 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
-import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionServiceImpl;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
@@ -62,7 +60,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -100,6 +101,7 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Value("${dcm4chee-arc.dicom.web}")
 	private boolean dicomWeb;
+
 	@Autowired
 	private DatasetProcessingService processingService;
 
@@ -121,7 +123,6 @@ public class DatasetServiceImpl implements DatasetService {
 					));
 
 		}
-
 		processingService.removeDatasetFromAllProcessingInput(id);
 		propertyService.deleteByDatasetId(id);
 		repository.deleteById(id);
@@ -160,6 +161,11 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
 	@Override
+	public boolean existsById(Long id) {
+		return repository.existsById(id);
+	}
+
+	@Override
 	@Transactional
 	public void deleteByIdIn(List<Long> ids) throws ShanoirException, SolrServerException, IOException, RestServiceException {
 		for(Long id : ids){
@@ -185,7 +191,13 @@ public class DatasetServiceImpl implements DatasetService {
 	@Override
 	public Dataset create(final Dataset dataset) throws SolrServerException, IOException {
 		Dataset ds = repository.save(dataset);
-		Long studyId = ds.getDatasetAcquisition().getExamination().getStudyId();
+		Long studyId;
+		if (ds.getDatasetAcquisition() != null) {
+			studyId = ds.getDatasetAcquisition().getExamination().getStudyId();
+		} else {
+			// We have a processed dataset -> acquisition is null but study id is set.
+			studyId = ds.getStudyId();
+		}
 
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, ds.getStudyId()));
 		rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
