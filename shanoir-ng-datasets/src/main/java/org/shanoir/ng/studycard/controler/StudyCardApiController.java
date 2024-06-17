@@ -27,6 +27,7 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.studycard.dto.DicomTag;
+import org.shanoir.ng.studycard.model.Cardinality;
 import org.shanoir.ng.studycard.model.DicomTagType;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.StudyCardApply;
@@ -184,8 +185,8 @@ public class StudyCardApiController implements StudyCardApi {
                     if (field.getType().getName() == "int") {
                         int tagCode = field.getInt(null);
                         VR tagVr = StandardElementDictionary.INSTANCE.vrOf(tagCode);
-                        DicomTagType tagType = DicomTagType.valueOf(tagVr);
                         VM tagVm = VM.of(tagCode);
+                        DicomTagType tagType = DicomTagType.valueOf(tagVr, tagVm);
                         dicomTags.add(new DicomTag(tagCode, field.getName(), tagType, tagVm));
                     }
                     // longs actually code a date and a time, see Tag.class
@@ -196,10 +197,12 @@ public class StudyCardApiController implements StudyCardApi {
                         String timeStr = hexStr.substring(8);
                         int dateTagCode = Integer.parseInt(dateStr, 16);
                         int timeTagCode = Integer.parseInt(timeStr, 16);
-                        DicomTagType dateTagType = DicomTagType.valueOf(StandardElementDictionary.INSTANCE.vrOf(dateTagCode));
-                        DicomTagType timeTagType = DicomTagType.valueOf(StandardElementDictionary.INSTANCE.vrOf(timeTagCode));
-                        dicomTags.add(new DicomTag(dateTagCode, name + "Date", dateTagType, VM.of(dateTagCode)));
-                        dicomTags.add(new DicomTag(timeTagCode, name + "Time", timeTagType, VM.of(timeTagCode)));
+                        VM dateVm = VM.of(dateTagCode);
+                        VM timeVm = VM.of(timeTagCode);
+                        DicomTagType dateTagType = DicomTagType.valueOf(StandardElementDictionary.INSTANCE.vrOf(dateTagCode), dateVm);
+                        DicomTagType timeTagType = DicomTagType.valueOf(StandardElementDictionary.INSTANCE.vrOf(timeTagCode), timeVm);
+                        dicomTags.add(new DicomTag(dateTagCode, name + "Date", dateTagType, dateVm));
+                        dicomTags.add(new DicomTag(timeTagCode, name + "Time", timeTagType, timeVm));
                     }
                 }
             }
