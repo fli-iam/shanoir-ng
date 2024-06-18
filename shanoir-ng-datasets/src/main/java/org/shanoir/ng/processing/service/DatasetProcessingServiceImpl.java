@@ -22,6 +22,7 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,6 +83,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     }
 
     @Override
+    @Transactional
     public void deleteById(final Long id) throws EntityNotFoundException {
         final Optional<DatasetProcessing> entity = repository.findById(id);
         entity.orElseThrow(() -> new EntityNotFoundException("Cannot find dataset processing [" + id + "]"));
