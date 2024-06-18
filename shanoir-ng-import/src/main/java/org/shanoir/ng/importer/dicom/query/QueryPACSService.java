@@ -184,19 +184,18 @@ public class QueryPACSService {
 		long start = System.currentTimeMillis();
 		Association association = connectAssociation(calling, called, true);
 		ImportJob importJob = new ImportJob();
-		/**
-		 * In case of any patient specific search field is filled, work on patient level. Highest priority.
-		 */
 		if (StringUtils.isNotBlank(dicomQuery.getPatientName())
 			|| StringUtils.isNotBlank(dicomQuery.getPatientID())
-			|| StringUtils.isNotBlank(dicomQuery.getPatientBirthDate())) {
-			queryPatientLevel(association, dicomQuery, importJob);
-		/**
-		 * In case of any study specific search field is filled, work on study level. Second priority.
-		 */
-		} else if (StringUtils.isNotBlank(dicomQuery.getStudyDescription())
+			|| StringUtils.isNotBlank(dicomQuery.getPatientBirthDate())
+			|| StringUtils.isNotBlank(dicomQuery.getStudyDescription())
 			|| StringUtils.isNotBlank(dicomQuery.getStudyDate())) {
-			queryStudyLevel(association, dicomQuery, importJob);
+			// patient root query level
+			if (!dicomQuery.isStudyRootQuery()) {
+				queryPatientLevel(association, dicomQuery, importJob);
+			// study root query level
+			} else {
+				queryStudyLevel(association, dicomQuery, importJob);
+			}
 		} else {
 			throw new ShanoirImportException("DicomQuery: missing parameters.");
 		}
@@ -293,7 +292,9 @@ public class QueryPACSService {
 		DicomParam patientName = initDicomParam(Tag.PatientName, dicomQuery.getPatientName());
 		DicomParam patientID = initDicomParam(Tag.PatientID, dicomQuery.getPatientID());
 		DicomParam patientBirthDate = initDicomParam(Tag.PatientBirthDate, dicomQuery.getPatientBirthDate());
-		DicomParam[] params = {modality, patientName, patientID, patientBirthDate, new DicomParam(Tag.PatientBirthName), new DicomParam(Tag.PatientSex) };
+		DicomParam studyDescription = initDicomParam(Tag.StudyDescription, dicomQuery.getStudyDescription());
+		DicomParam studyDate = initDicomParam(Tag.StudyDate, dicomQuery.getStudyDate());
+		DicomParam[] params = {modality, patientName, patientID, patientBirthDate, new DicomParam(Tag.PatientBirthName), new DicomParam(Tag.PatientSex), studyDescription, studyDate };
 		List<Attributes> patientsAttr = queryCFind(association, params, QueryRetrieveLevel.PATIENT);
 		if (patientsAttr != null) {
 			// Limit the max number of patients returned
@@ -329,9 +330,12 @@ public class QueryPACSService {
 		DicomParam modality = initDicomParam(Tag.Modality, dicomQuery.getModality());
 		DicomParam studyDescription = initDicomParam(Tag.StudyDescription, dicomQuery.getStudyDescription());
 		DicomParam studyDate = initDicomParam(Tag.StudyDate, dicomQuery.getStudyDate());
+		DicomParam patientName = initDicomParam(Tag.PatientName, dicomQuery.getPatientName());
+		DicomParam patientID = initDicomParam(Tag.PatientID, dicomQuery.getPatientID());
+		DicomParam patientBirthDate = initDicomParam(Tag.PatientBirthDate, dicomQuery.getPatientBirthDate());
 		DicomParam[] params = { modality, studyDescription, studyDate, new DicomParam(Tag.PatientName),
 			new DicomParam(Tag.PatientID), new DicomParam(Tag.PatientBirthDate), new DicomParam(Tag.PatientBirthName),
-			new DicomParam(Tag.PatientSex), new DicomParam(Tag.StudyInstanceUID) };
+			new DicomParam(Tag.PatientSex), new DicomParam(Tag.StudyInstanceUID), patientName, patientID, patientBirthDate };
 		List<Attributes> studies = queryCFind(association, params, QueryRetrieveLevel.STUDY);
 		// list of all corresponding DICOM studies received
 		if (studies != null) {
@@ -379,6 +383,9 @@ public class QueryPACSService {
 			if (!newPatient) { // only process existing patients, in case
 				handleStudy(studyAttr, association, modality, patient);
 			}
+		}
+		synchronized (patient.getStudies()) {
+			patient.getStudies().sort(new StudyDateSorter());
 		}
 	}
 
