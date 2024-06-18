@@ -207,7 +207,12 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 							modality = "NM";
 						}
 					}
+					boolean studyRootQuery = false;
+					if (mainWindow.sRB.isSelected()) {
+						studyRootQuery = true;
+					}
 					List<Patient> patients = dicomServerClient.queryDicomServer(
+							studyRootQuery,
 							modality, patientNameFinal, mainWindow.patientIDTF.getText(),
 							mainWindow.studyDescriptionTF.getText(),
 							mainWindow.dateRS, mainWindow.studyDate);

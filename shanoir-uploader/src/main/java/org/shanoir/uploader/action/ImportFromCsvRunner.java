@@ -166,7 +166,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		List<Patient> patients = null;
 		try {
 			if (!StringUtils.isEmpty(csvImport.getIpp())) {
-				patients = dicomServerClient.queryDicomServer("MR", "", csvImport.getIpp(), "", null, null);
+				patients = dicomServerClient.queryDicomServer(false, "MR", "", csvImport.getIpp(), "", null, null);
 			}
 			if (patients == null) {
 				String name = csvImport.getName().toUpperCase();
@@ -174,7 +174,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 					name+="^";
 					name+=csvImport.getSurname().toUpperCase();
 				}
-				patients = dicomServerClient.queryDicomServer("MR", name, "", "", null, null);
+				patients = dicomServerClient.queryDicomServer(false, "MR", name, "", "", null, null);
 			}
 		} catch (Exception e) {
 			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));

@@ -28,7 +28,7 @@ public interface IDicomServerClient {
 	 * @param seriesDescription
 	 * @return Media object representing a tree model structure or null
 	 */
-	public List<Patient> queryDicomServer(String modality, String patientName, String patientID,
+	public List<Patient> queryDicomServer(boolean studyRootQuery, String modality, String patientName, String patientID,
 			String studyDescription, String birthDate, String studyDate) throws Exception;
 
 	/**

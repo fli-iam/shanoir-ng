@@ -104,13 +104,15 @@ public class DicomServerClient implements IDicomServerClient {
 	 */
 	@Override
 	public List<Patient> queryDicomServer(
-			final String modality,
-			final String patientName,
-			final String patientID,
-			final String studyDescription,
-			final String patientBirthDate,
-			final String studyDate) throws Exception {
+		final boolean studyRootQuery, 
+		final String modality,
+		final String patientName,
+		final String patientID,
+		final String studyDescription,
+		final String patientBirthDate,
+		final String studyDate) throws Exception {
 		DicomQuery query = new DicomQuery();
+		query.setStudyRootQuery(studyRootQuery);
 		query.setModality(modality);
 		query.setPatientName(patientName);
 		query.setPatientID(patientID);
