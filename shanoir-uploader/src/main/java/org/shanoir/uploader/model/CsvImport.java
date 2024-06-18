@@ -41,6 +41,8 @@ public class CsvImport {
 
 	// First part is research criteria (all mandatory)
 
+	private String modality;
+
 	String ipp;
 
 	String name;

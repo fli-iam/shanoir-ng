@@ -78,7 +78,9 @@ public class MainWindow extends JFrame {
 	public JTextField seriesDescriptionTF;
 	public ButtonGroup modalityRG;
 	public JRadioButton mrRB, ctRB, ptRB, nmRB, noRB;
-	
+	public ButtonGroup queryLevelRG;
+	public JRadioButton pRB, sRB;
+
 	public JPanel editPanel;
 	public ButtonGroup anonymisedBG;
 	public JLabel lastNameLabel;
@@ -168,7 +170,6 @@ public class MainWindow extends JFrame {
 		/**
 		 * Handle menu bar here:
 		 */
-		
 		JMenuBar menuBar = new JMenuBar();
 		contentPane.add(menuBar, BorderLayout.NORTH);
 
@@ -296,13 +297,41 @@ public class MainWindow extends JFrame {
 		gbc_queryPanelLabel.gridy = 0;
 		queryPanel.add(queryPanelLabel, gbc_queryPanelLabel);
 
+		JLabel queryLevelLabel = new JLabel(resourceBundle.getString("shanoir.uploader.queryLevelLabel"));
+		GridBagConstraints gbc_queryLevelLabel = new GridBagConstraints();
+		gbc_queryLevelLabel.anchor = GridBagConstraints.EAST;
+		gbc_queryLevelLabel.insets = new Insets(5, 5, 0, 0);
+		gbc_queryLevelLabel.gridx = 0;
+		gbc_queryLevelLabel.gridy = 1;
+		queryPanel.add(queryLevelLabel, gbc_queryLevelLabel);
+		
+		queryLevelRG = new ButtonGroup();
+		pRB = new JRadioButton("Patient");
+		pRB.setSelected(true);
+		queryLevelRG.add(pRB);
+		GridBagConstraints gBC_pRB = new GridBagConstraints();
+		gBC_pRB.insets = new Insets(2, 2, 2, 2);
+		gBC_pRB.fill = GridBagConstraints.HORIZONTAL;
+		gBC_pRB.gridx = 1;
+		gBC_pRB.gridy = 1;
+		queryPanel.add(pRB, gBC_pRB);
+
+		sRB = new JRadioButton("Study");
+		queryLevelRG.add(sRB);
+		GridBagConstraints gBC_sRB = new GridBagConstraints();
+		gBC_sRB.insets = new Insets(2, 2, 2, 2);
+		gBC_sRB.fill = GridBagConstraints.HORIZONTAL;
+		gBC_sRB.gridx = 2;
+		gBC_sRB.gridy = 1;
+		queryPanel.add(sRB, gBC_sRB);
+
 		JLabel patientNameLabel = new JLabel(resourceBundle.getString("shanoir.uploader.patientNameLabel"));
 		patientNameLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		GridBagConstraints gbc_patientNameLabel = new GridBagConstraints();
 		gbc_patientNameLabel.anchor = GridBagConstraints.EAST;
 		gbc_patientNameLabel.insets = new Insets(5, 5, 0, 0);
 		gbc_patientNameLabel.gridx = 0;
-		gbc_patientNameLabel.gridy = 1;
+		gbc_patientNameLabel.gridy = 2;
 		queryPanel.add(patientNameLabel, gbc_patientNameLabel);
 
 		patientNameTF = new JTextField();
@@ -311,7 +340,7 @@ public class MainWindow extends JFrame {
 		gbc_patientNameTF.fill = GridBagConstraints.HORIZONTAL;
 		gbc_patientNameTF.gridwidth = 6;
 		gbc_patientNameTF.gridx = 1;
-		gbc_patientNameTF.gridy = 1;
+		gbc_patientNameTF.gridy = 2;
 		queryPanel.add(patientNameTF, gbc_patientNameTF);
 		patientNameTF.setColumns(15);
 		patientNameTF.setText("");
@@ -324,7 +353,7 @@ public class MainWindow extends JFrame {
 		GridBagConstraints gbc_HelpButton = new GridBagConstraints();
 		gbc_HelpButton.insets = new Insets(5, 2, 0, 2);
 		gbc_HelpButton.gridx = 7;
-		gbc_HelpButton.gridy = 1;
+		gbc_HelpButton.gridy = 2;
 		queryPanel.add(helpButton, gbc_HelpButton);
 
 		helpButton.addActionListener(new java.awt.event.ActionListener() {
@@ -406,7 +435,7 @@ public class MainWindow extends JFrame {
 		gbc_PatientIDLabel.anchor = GridBagConstraints.EAST;
 		gbc_PatientIDLabel.insets = new Insets(5, 5, 0, 0);
 		gbc_PatientIDLabel.gridx = 0;
-		gbc_PatientIDLabel.gridy = 2;
+		gbc_PatientIDLabel.gridy = 3;
 		queryPanel.add(PatientIDLabel, gbc_PatientIDLabel);
 
 		patientIDTF = new JTextField();
@@ -415,7 +444,7 @@ public class MainWindow extends JFrame {
 		gbc_patientIDTF.fill = GridBagConstraints.HORIZONTAL;
 		gbc_patientIDTF.gridwidth = 6;
 		gbc_patientIDTF.gridx = 1;
-		gbc_patientIDTF.gridy = 2;
+		gbc_patientIDTF.gridy = 3;
 		queryPanel.add(patientIDTF, gbc_patientIDTF);
 		patientIDTF.setColumns(15);
 		patientIDTF.setText("");
@@ -427,7 +456,7 @@ public class MainWindow extends JFrame {
 		gbc_birthDateReasearchLabel.anchor = GridBagConstraints.EAST;
 		gbc_birthDateReasearchLabel.insets = new Insets(5, 5, 0, 0);
 		gbc_birthDateReasearchLabel.gridx = 0;
-		gbc_birthDateReasearchLabel.gridy = 3;
+		gbc_birthDateReasearchLabel.gridy = 4;
 		queryPanel.add(birthDateReasearchLabel, gbc_birthDateReasearchLabel);
 
 		birthDateModel = new UtilDateModel();
@@ -446,7 +475,7 @@ public class MainWindow extends JFrame {
 		gbc_birthDateResearchTF.fill = GridBagConstraints.HORIZONTAL;
 		gbc_birthDateResearchTF.gridwidth = 6;
 		gbc_birthDateResearchTF.gridx = 1;
-		gbc_birthDateResearchTF.gridy = 3;
+		gbc_birthDateResearchTF.gridy = 4;
 		queryPanel.add(datePicker, gbc_birthDateResearchTF);
 
 		datePicker.addActionListener(new ActionListener() {
@@ -473,7 +502,7 @@ public class MainWindow extends JFrame {
 		gbc_studyDescriptionLabel.anchor = GridBagConstraints.EAST;
 		gbc_studyDescriptionLabel.insets = new Insets(5, 5, 0, 0);
 		gbc_studyDescriptionLabel.gridx = 0;
-		gbc_studyDescriptionLabel.gridy = 4;
+		gbc_studyDescriptionLabel.gridy = 5;
 		queryPanel.add(studyDescriptionLabel, gbc_studyDescriptionLabel);
 
 		studyDescriptionTF = new JTextField();
@@ -482,7 +511,7 @@ public class MainWindow extends JFrame {
 		gbc_studyDescriptionTF.fill = GridBagConstraints.HORIZONTAL;
 		gbc_studyDescriptionTF.gridwidth = 6;
 		gbc_studyDescriptionTF.gridx = 1;
-		gbc_studyDescriptionTF.gridy = 4;
+		gbc_studyDescriptionTF.gridy = 5;
 		queryPanel.add(studyDescriptionTF, gbc_studyDescriptionTF);
 		studyDescriptionTF.setColumns(15);
 		studyDescriptionTF.setText("");
@@ -495,7 +524,7 @@ public class MainWindow extends JFrame {
 		gbc_studyDateLabel.anchor = GridBagConstraints.EAST;
 		gbc_studyDateLabel.insets = new Insets(5, 5, 0, 0);
 		gbc_studyDateLabel.gridx = 0;
-		gbc_studyDateLabel.gridy = 5;
+		gbc_studyDateLabel.gridy = 6;
 		queryPanel.add(studyDateLabel, gbc_studyDateLabel);
 
 		studyDateModel = new UtilDateModel();
@@ -514,7 +543,7 @@ public class MainWindow extends JFrame {
 		gbc_studyDatePicker.fill = GridBagConstraints.HORIZONTAL;
 		gbc_studyDatePicker.gridwidth = 6;
 		gbc_studyDatePicker.gridx = 1;
-		gbc_studyDatePicker.gridy = 5;
+		gbc_studyDatePicker.gridy = 6;
 		queryPanel.add(studyDatePicker, gbc_studyDatePicker);
 
 		studyDatePicker.addActionListener(new ActionListener() {
@@ -542,7 +571,7 @@ public class MainWindow extends JFrame {
 		gbc_modalityLabel.anchor = GridBagConstraints.EAST;
 		gbc_modalityLabel.insets = new Insets(5, 5, 0, 0);
 		gbc_modalityLabel.gridx = 0;
-		gbc_modalityLabel.gridy = 6;
+		gbc_modalityLabel.gridy = 7;
 		queryPanel.add(modalityLabel, gbc_modalityLabel);
 		
 		modalityRG = new ButtonGroup();
@@ -553,7 +582,7 @@ public class MainWindow extends JFrame {
 		gBC_mrRB.insets = new Insets(2, 2, 2, 2);
 		gBC_mrRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_mrRB.gridx = 1;
-		gBC_mrRB.gridy = 6;
+		gBC_mrRB.gridy = 7;
 		queryPanel.add(mrRB, gBC_mrRB);
 
 		ctRB = new JRadioButton("CT");
@@ -562,7 +591,7 @@ public class MainWindow extends JFrame {
 		gBC_ctRB.insets = new Insets(2, 2, 2, 2);
 		gBC_ctRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_ctRB.gridx = 2;
-		gBC_ctRB.gridy = 6;
+		gBC_ctRB.gridy = 7;
 		queryPanel.add(ctRB, gBC_ctRB);
 
 		ptRB = new JRadioButton("PT");
@@ -571,7 +600,7 @@ public class MainWindow extends JFrame {
 		gBC_ptRB.insets = new Insets(2, 2, 2, 2);
 		gBC_ptRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_ptRB.gridx = 3;
-		gBC_ptRB.gridy = 6;
+		gBC_ptRB.gridy = 7;
 		queryPanel.add(ptRB, gBC_ptRB);
 
 		nmRB = new JRadioButton("NM");
@@ -580,7 +609,7 @@ public class MainWindow extends JFrame {
 		gBC_nmRB.insets = new Insets(2, 2, 2, 2);
 		gBC_nmRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_nmRB.gridx = 4;
-		gBC_nmRB.gridy = 6;
+		gBC_nmRB.gridy = 7;
 		queryPanel.add(nmRB, gBC_nmRB);
 
 		noRB = new JRadioButton("None");
@@ -589,7 +618,7 @@ public class MainWindow extends JFrame {
 		gBC_noRB.insets = new Insets(2, 2, 2, 2);
 		gBC_noRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_noRB.gridx = 5;
-		gBC_noRB.gridy = 6;
+		gBC_noRB.gridy = 7;
 		queryPanel.add(noRB, gBC_noRB);
 		
 		queryButton = new JButton(resourceBundle.getString("shanoir.uploader.queryButton"), searchIcon);
@@ -597,7 +626,7 @@ public class MainWindow extends JFrame {
 		gbc_queryButton.insets = new Insets(5, 5, 5, 0);
 		gbc_queryButton.gridwidth = 7;
 		gbc_queryButton.gridx = 0;
-		gbc_queryButton.gridy = 7;
+		gbc_queryButton.gridy = 8;
 		queryPanel.add(queryButton, gbc_queryButton);
 		queryButton.setEnabled(false);
 		frame.getRootPane().setDefaultButton(queryButton);
@@ -607,7 +636,7 @@ public class MainWindow extends JFrame {
 		GridBagConstraints gbc_separator = new GridBagConstraints();
 		gbc_separator.insets = new Insets(10, 10, 10, 10);
 		gbc_separator.gridx = 1;
-		gbc_separator.gridy = 6;
+		gbc_separator.gridy = 7;
 		queryPanel.add(separator, gbc_separator);
 
 		/**

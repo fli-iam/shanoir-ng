@@ -20,9 +20,10 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 /**
- * ImportFromPACS: the user can query a PACS to chose
- * his series to be imported by Shanoir. This class contains
- * the query executed by the end user and send to the PACS.
+ * This class contains the C-FIND query attributes entered
+ * by the user and send to the PACS to retrieve entities.
+ * By default, patient root query is used, that is why the
+ * attribute studyRootQuery is false by default.
  * 
  * @author mkain
  *
@@ -57,6 +58,10 @@ public class DicomQuery {
     @JsonProperty("modality")
     private String modality;
 
+	// default is patient root query
+	@JsonProperty("studyRootQuery")
+	private boolean studyRootQuery;
+
 	public String getPatientName() {
 		return patientName;
 	}
@@ -67,6 +72,14 @@ public class DicomQuery {
 
 	public String getPatientBirthDate() {
 		return patientBirthDate;
+	}
+
+	public boolean isStudyRootQuery() {
+		return studyRootQuery;
+	}
+
+	public void setStudyRootQuery(boolean studyRootQuery) {
+		this.studyRootQuery = studyRootQuery;
 	}
 
 	public String getStudyDescription() {
