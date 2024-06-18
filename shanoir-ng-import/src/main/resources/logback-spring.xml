@@ -21,9 +21,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <include resource="org/springframework/boot/logging/logback/file-appender.xml" />
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-        	<pattern>${CONSOLE_LOG_PATTERN}</pattern>
-        </encoder>
+        <encoder><pattern> %clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) [%mdc{username}] %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}</pattern></encoder>
+
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter"> 
             <level>${SHANOIR_CONSOLE_LOG_LEVEL}</level>
         </filter>
