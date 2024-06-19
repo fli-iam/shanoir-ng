@@ -18,6 +18,9 @@ import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.servers.Server;
 import org.shanoir.ng.shared.paging.PageSerializer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -32,7 +35,12 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableSpringDataWebSupport
 @EnableScheduling
-@OpenAPIDefinition
+@OpenAPIDefinition(
+		info = @Info(title = "Shanoir datasets API", version = "1.0"),
+		servers = @Server(url = "/shanoir-ng/datasets", description = "Datasets"),
+		security = { @SecurityRequirement(name = "BearerAuth"), @SecurityRequirement(name = "OAuth2Auth") }
+)
+
 public class ShanoirDatasetApplication {
 
 	public static void main(String[] args) {

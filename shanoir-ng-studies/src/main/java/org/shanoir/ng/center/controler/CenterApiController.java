@@ -67,7 +67,7 @@ public class CenterApiController implements CenterApi {
 
 	@Override
 	public ResponseEntity<Void> deleteCenter(
-			@Parameter(name = "id of the center", required = true) @PathVariable("centerId") final Long centerId)
+			@Parameter(description = "id of the center", required = true) @PathVariable("centerId") final Long centerId)
 					throws RestServiceException {
 		try {
 			if (centerId.equals(0L)) {
@@ -86,7 +86,7 @@ public class CenterApiController implements CenterApi {
 
 	@Override
 	public ResponseEntity<CenterDTO> findCenterById(
-			@Parameter(name = "id of the center", required = true) @PathVariable("centerId") final Long centerId) {
+			@Parameter(description = "id of the center", required = true) @PathVariable("centerId") final Long centerId) {
 		final Optional<Center> center = centerService.findById(centerId);
 		if (center.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -107,7 +107,7 @@ public class CenterApiController implements CenterApi {
 
 	@Override
 	public ResponseEntity<List<CenterDTO>> findCentersByStudy (
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
 		final List<Center> centers = centerService.findByStudy(studyId);
 		if (centers.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -129,7 +129,7 @@ public class CenterApiController implements CenterApi {
 
 	@Override
 	public ResponseEntity<List<IdName>> findCentersNames(
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
 		final List<IdName> centers = centerService.findIdsAndNames(studyId);
 		if (centers.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -139,7 +139,7 @@ public class CenterApiController implements CenterApi {
 
 	@Override
 	public ResponseEntity<CenterDTO> saveNewCenter(
-			@Parameter(name = "the center to create", required = true) @RequestBody @Valid final Center center,
+			@Parameter(description = "the center to create", required = true) @RequestBody @Valid final Center center,
 			final BindingResult result) throws RestServiceException {
 
 		forceCentersOfStudyCenterList(center);
@@ -153,8 +153,8 @@ public class CenterApiController implements CenterApi {
 
 	@Override
 	public ResponseEntity<Void> updateCenter(
-			@Parameter(name = "id of the center", required = true) @PathVariable("centerId") final Long centerId,
-			@Parameter(name = "the center to update", required = true) @RequestBody @Valid final Center center,
+			@Parameter(description = "id of the center", required = true) @PathVariable("centerId") final Long centerId,
+			@Parameter(description = "the center to update", required = true) @RequestBody @Valid final Center center,
 			final BindingResult result) throws RestServiceException {
 		try {
 			if (centerId.equals(0L)) {

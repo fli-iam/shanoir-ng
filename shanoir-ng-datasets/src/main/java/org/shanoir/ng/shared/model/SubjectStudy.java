@@ -28,6 +28,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 import org.shanoir.ng.shared.quality.QualityTag;
+import org.shanoir.ng.tag.model.Tag;
 
 import java.util.List;
 

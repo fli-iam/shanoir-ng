@@ -24,15 +24,36 @@ RUN rm /etc/apt/apt.conf.d/docker-clean \
 
 
 ################ common image for the java microservices ###################
-
-FROM base-debian as base-microservice
-
-# - NOTE: using bookworm-proposed-updates because of
-#         https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1039472
+# - we use the temurin packages because they are more up-to-date that the
+#   debian packages
+# - we use the system ssl trust store at /etc/ssl/certs/java/cacerts
+#   (rather that temurin's default /etc/ssl/certs/adoptium/cacerts)
+#   to keep the location independent of the implementation (in case users need
+#   to mount it from an external volume)
+FROM base-debian as adoptium-key
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    echo "deb http://deb.debian.org/debian bookworm-proposed-updates main" >> /etc/apt/sources.list \
-    && apt-get update -qq \
-    && apt-get install -qqy openjdk-17-jre-headless ca-certificates-java
+    apt-get update -qq && apt-get install -qqy wget gnupg
+RUN wget -qO - https://packages.adoptium.net/artifactory/api/gpg/key/public \
+    | gpg --dearmor > /adoptium.gpg
+
+FROM base-debian as base-debian-with-adoptium
+COPY --link --from=adoptium-key /adoptium.gpg /etc/apt/keyrings/
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    apt-get update -qq && apt install -qqy apt-transport-https ca-certificates \
+    && echo "deb [signed-by=/etc/apt/keyrings/adoptium.gpg]" \
+            "https://packages.adoptium.net/artifactory/deb" \
+            "$(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" \
+    | tee /etc/apt/sources.list.d/adoptium.list
+
+FROM base-debian-with-adoptium as jdk
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    apt-get update -qq && apt-get install -qqy temurin-21-jdk maven bzip2 git
+
+FROM base-debian-with-adoptium as base-microservice
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    apt-get update -qq \
+    && apt-get install -qqy temurin-21-jre ca-certificates-java \
+    && update-ca-certificates
 
 RUN mkdir -pv /var/log/shanoir-ng-logs
 
@@ -41,8 +62,9 @@ COPY --link \
     common/oneshot \
     /usr/bin/
 
-ENTRYPOINT ["/bin/entrypoint", "java", "-Djava.security.egd=file:/dev/urandom", "-Djavax.net.ssl.trustStorePassword=changeit"]
-
+ENTRYPOINT ["/bin/entrypoint", "java", "-Djava.security.egd=file:/dev/urandom", \
+    "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts", \
+    "-Djavax.net.ssl.trustStorePassword=changeit"]
 
 
 ################ datasets ##################################################

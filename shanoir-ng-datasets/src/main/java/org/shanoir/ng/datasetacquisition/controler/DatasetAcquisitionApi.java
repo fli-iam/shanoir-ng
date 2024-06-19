@@ -50,7 +50,7 @@ public interface DatasetAcquisitionApi {
         consumes = { "application/json" },
         method = RequestMethod.POST)
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#importJob.getExaminationId(), 'CAN_IMPORT'))")
-    ResponseEntity<Void> createNewDatasetAcquisition(@Parameter(name = "DatasetAcquisition to create" ,required=true ) @Valid @RequestBody ImportJob importJob) throws RestServiceException;
+    ResponseEntity<Void> createNewDatasetAcquisition(@Parameter(description = "DatasetAcquisition to create" ,required=true ) @Valid @RequestBody ImportJob importJob) throws RestServiceException;
 
 	@Operation(summary = "", description = "If exists, returns the dataset acquisitions corresponding to the given study card")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found dataset acquisitions"),
@@ -62,7 +62,7 @@ public interface DatasetAcquisitionApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findByStudyCard(
-			@Parameter(name = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId);
+			@Parameter(description = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId);
 	
 	@Operation(summary = "", description = "Deletes a datasetAcquisition")
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "datasetAcquisition deleted"),
@@ -73,7 +73,7 @@ public interface DatasetAcquisitionApi {
 	@RequestMapping(value = "/datasetacquisition/{datasetAcquisitionId}", produces = { "application/json" }, method = RequestMethod.DELETE)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnDatasetAcquisition(#datasetAcquisitionId, 'CAN_ADMINISTRATE')")
 	ResponseEntity<Void> deleteDatasetAcquisition(
-			@Parameter(name = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId)
+			@Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId)
 			throws RestServiceException;
 
 	@Operation(summary = "", description = "If exists, returns the datasetAcquisition corresponding to the given id")
@@ -86,7 +86,7 @@ public interface DatasetAcquisitionApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or returnObject == null or returnObject.getBody() == null or @datasetSecurityService.hasRightOnTrustedExaminationDTO(returnObject.getBody().getExamination(), 'CAN_SEE_ALL')")
 	ResponseEntity<DatasetAcquisitionDTO> findDatasetAcquisitionById(
-			@Parameter(name = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId);
+			@Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId);
 	
 	@Operation(summary = "", description = "If exists, returns the datasetAcquisitions corresponding to the given examination id")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found datasetAcquisition"),
@@ -98,7 +98,7 @@ public interface DatasetAcquisitionApi {
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL'))")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationDatasetAcquisitionDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findDatasetAcquisitionByExaminationId(
-			@Parameter(name = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId);
+			@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId);
 		
 	@Operation(summary = "", description = "If exists, returns the datasetAcquisitions corresponding to the given dataset ids")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found datasetAcquisition"),
@@ -110,7 +110,7 @@ public interface DatasetAcquisitionApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findDatasetAcquisitionByDatasetIds(
-			@Parameter(name = "ids of the datasets", required = true) @RequestBody Long[] datasetIds);
+			@Parameter(description = "ids of the datasets", required = true) @RequestBody Long[] datasetIds);
 	
 	@Operation(summary = "", description = "Returns a dataset acquisitions page")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found dataset acquisitions"),
@@ -133,8 +133,8 @@ public interface DatasetAcquisitionApi {
 			"application/json" }, method = RequestMethod.PUT)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and #datasetAcquisitionId == #datasetAcquisition.getId() and @datasetSecurityService.hasRightOnExamination(#datasetAcquisition.examination.id, 'CAN_ADMINISTRATE')")
 	ResponseEntity<Void> updateDatasetAcquisition(
-			@Parameter(name = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
-			@Parameter(name = "datasetAcquisition to update", required = true) @Valid @RequestBody DatasetAcquisitionDTO datasetAcquisition, BindingResult result)
+			@Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
+			@Parameter(description = "datasetAcquisition to update", required = true) @Valid @RequestBody DatasetAcquisitionDTO datasetAcquisition, BindingResult result)
 			throws RestServiceException;
 
 }
