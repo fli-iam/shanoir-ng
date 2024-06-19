@@ -28,16 +28,6 @@ window.config = {
   //   // regex: /(https:\/\/hospital.com(\/[0-9A-Za-z.]+)*)|(https:\/\/othersite.com(\/[0-9A-Za-z.]+)*)/
   //   regex: /.*/,
   // },
-  oidc: [
-    {
-      authority: 'SHANOIR_URL_SCHEME://SHANOIR_URL_HOST/auth/realms/shanoir-ng',
-      client_id: 'ohif-viewer',
-      redirect_uri: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/callback',
-      response_type: 'code',
-      scope: 'openid',
-      post_logout_redirect_uri: 'SHANOIR_URL_SCHEME://SHANOIR_URL_HOST'
-    }
-  ],
   dataSources: [
     {
       namespace: '@ohif/extension-default.dataSourcesModule.dicomweb',
