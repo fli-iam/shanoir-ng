@@ -3,7 +3,10 @@ window.config = {
   // whiteLabeling: {},
   extensions: [],
   modes: [],
-  customizationService: {},
+  customizationService: {
+    dicomUploadComponent:
+      '@ohif/extension-cornerstone.customizationModule.cornerstoneDicomUploadComponent',
+  },
   showStudyList: true,
   // some windows systems have issues with more than 3 web workers
   maxNumberOfWebWorkers: 3,
@@ -13,13 +16,6 @@ window.config = {
   showLoadingIndicator: true,
   strictZSpacingForVolumeViewport: true,
   groupEnabledModesFirst: true,
-  maxNumRequests: {
-    interaction: 100,
-    thumbnail: 75,
-    // Prefetch number is dependent on the http protocol. For http 2 or
-    // above, the number of requests can be go a lot higher.
-    prefetch: 25,
-  },
   // filterQueryParam: false,
   defaultDataSourceName: 'dicomweb',
   /* Dynamic config allows user to pass "configUrl" query string this allows to load config without recompiling application. The regex will ensure valid configuration source */
@@ -53,10 +49,12 @@ window.config = {
         qidoRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/dicomweb',
         wadoRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/dicomweb',
         qidoSupportsIncludeField: true,
+        supportsReject: true,
         imageRendering: 'wadors',
         thumbnailRendering: 'wadors',
         enableStudyLazyLoad: true,
-        supportsFuzzyMatching: false,
+        useBulkDataURI: false,
+        supportsFuzzyMatching: true,
         supportsWildcard: true,
         staticWado: true,
         singlepart: 'bulkdata,video',
