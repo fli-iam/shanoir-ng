@@ -26,6 +26,8 @@ public class Cardinality {
 
 	boolean isMultiplier; 
 
+	public static Cardinality ONE = new Cardinality(1); 
+
 	Cardinality(String str) {
 		String strCopy = new String(str);
 		if ("n".equals(str)) {
@@ -61,6 +63,18 @@ public class Cardinality {
 
 	public void setMultiplier(boolean isMultiplier) {
 		this.isMultiplier = isMultiplier;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj != null && obj instanceof Cardinality 
+			&& ((Cardinality) obj).isMultiplier() == this.isMultiplier()
+			&& ((Cardinality) obj).getNumber() == this.getNumber();
+	}
+
+	@Override
+	public String toString() {
+		return getNumber() + (isMultiplier() ? "N" : "");
 	}
 
 }

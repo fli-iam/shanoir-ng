@@ -91,4 +91,9 @@ public class ShanoirEventType {
 	public static final String USER_ADD_TO_STUDY_EVENT = "userAddToStudy.event";
 
 	public static final String CHECK_QUALITY_EVENT = "checkQuality.event";
+
+	/**
+	 * Index all datasets in solr
+	 */
+	public static final String SOLR_INDEX_ALL_EVENT = "solrIndexAll.event";
 }
