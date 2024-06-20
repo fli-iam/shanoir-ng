@@ -8,6 +8,17 @@ window.config = {
   strictZSpacingForVolumeViewport: true,
   showCPUFallbackMessage: true,
   defaultDataSourceName: 'dicomweb',
+  filterQueryParam: false,
+  disableServersCache: false,
+  studyPrefetcher: {
+    enabled: true,
+    order: 'closest',
+    displaySetCount: 3,
+    preventCache: false,
+    prefetchDisplaySetsTimeout: 300,
+    displayProgress: true,
+    includeActiveDisplaySet: true,
+  },
   dataSources: [
     {
       namespace: '@ohif/extension-default.dataSourcesModule.dicomweb',
@@ -15,7 +26,7 @@ window.config = {
       configuration: {
         friendlyName: 'DCM4CHEE Server',
         name: 'SHANOIR-NG',
-        wadoUriRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/dicomweb/',
+        wadoUriRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/shanoir-ng/',
         qidoRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/dicomweb',
         wadoRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/dicomweb',
         qidoSupportsIncludeField: true,
@@ -132,9 +143,4 @@ window.config = {
       keys: ['9'],
     },
   ],
-  i18n: {
-    LOCIZE_PROJECTID: 'a8da3f9a-e467-4dd6-af33-474d582a0294',
-    LOCIZE_API_KEY: null, // Developers can use this to do in-context editing. DO NOT COMMIT THIS KEY!
-    USE_LOCIZE: true,
-  },
 };
