@@ -40,7 +40,7 @@ window.config = {
       client_id: 'ohif-viewer',
       redirect_uri: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/callback',
       response_type: 'code',
-      scope: 'openid',
+      scope: 'email profile openid',
       post_logout_redirect_uri: 'SHANOIR_URL_SCHEME://SHANOIR_URL_HOST'
     }
   ],
