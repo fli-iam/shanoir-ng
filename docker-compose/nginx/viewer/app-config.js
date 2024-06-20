@@ -47,7 +47,7 @@ window.config = {
   ],
   oidc: [
     {
-      authority: 'SHANOIR_URL_SCHEME://SHANOIR_URL_HOST/auth/realms/shanoir-ng',
+      authority: 'SHANOIR_URL_SCHEME://SHANOIR_URL_HOST/realms/shanoir-ng',
       client_id: 'ohif-viewer',
       redirect_uri: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/callback',
       response_type: 'code',
