@@ -18,6 +18,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.shanoir.ng.utils.MDCFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -31,6 +33,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.web.cors.CorsConfiguration;
@@ -52,6 +55,9 @@ public class SecurityConfiguration {
 	@Value("${front.server.url}")
 	private String frontServerUrl;
 
+	@Autowired
+	private MDCFilter mdcFilter;
+
 	/**
 	 * Defines the session authentication strategy.
 	 */
@@ -65,6 +71,7 @@ public class SecurityConfiguration {
 		http
 			.sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.csrf(AbstractHttpConfigurer::disable)
+			.addFilterAfter(mdcFilter, FilterSecurityInterceptor.class)
 			.authorizeHttpRequests(
 				matcher -> matcher.requestMatchers("/accountrequest", "/extensionrequest", "/last_login_date")
 					// the swagger API is not exposed here for security reasons (MK)
