@@ -57,8 +57,10 @@ Then the shanoir-downloader project can be simply managed as a normal git repo (
     - Delete, if needed, %appData%/Docker/settings.json (Docker will create another one, see https://forums.docker.com/t/solved-docker-failed-to-start-docker-desktop-for-windows/106976/6)
     
 * Install Java 17
-    - Download and install : https://www.oracle.com/fr/java/technologies/javase/jdk11-archive-downloads.html
-    - Add enviromnent variable : JAVA_HOME = C:\Program Files\Java\jdk-11.0.16
+    - Download and install : https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html
+    - Add enviromnent variable :
+      		On Windows (as environment variable): JAVA_HOME = C:\Program Files\Java\jdk-17.0.10
+      		On Mac (in your .bashrc or .zshrc file): export JAVA_HOME=$(/usr/libexec/java_home)
 
 * Install Maven
     - Download : https://maven.apache.org/download.cgi

@@ -55,11 +55,11 @@ jobs:
           repository: ${{ env.PRODUCTION && github.repository || 'fli-iam/shanoir-ng' }}
           ref: ${{ env.IMAGE_TAG }}
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4.2.0
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
         with:
-          java-version: 17
-          distribution: oracle
+          distribution: temurin
+          java-version: 21
 
       # maven cache only enabled on development builds
       - name: Set up Maven cache

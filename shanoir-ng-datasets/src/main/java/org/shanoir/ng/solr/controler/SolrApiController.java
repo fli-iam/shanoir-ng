@@ -22,10 +22,14 @@ package org.shanoir.ng.solr.controler;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrQuery;
 import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -47,22 +51,25 @@ public class SolrApiController implements SolrApi {
 	
 	@Autowired
 	private SolrService solrService;
-	
+
+	@Autowired
+	private ShanoirEventService eventService;
+
 	@Override
-	public ResponseEntity<Void> indexAll() throws RestServiceException, SolrServerException, IOException {
-		solrService.indexAll();		
+	public ResponseEntity<Void> indexAll() throws SolrServerException, IOException {
+		solrService.indexAll();
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
 	@Override
 	public ResponseEntity<SolrResultPage<ShanoirSolrDocument>> facetSearch(
-			@Parameter(name = "facets", required = true) @Valid @RequestBody ShanoirSolrQuery facet, Pageable pageable) throws RestServiceException {
+			@Parameter(description = "facets", required = true) @Valid @RequestBody ShanoirSolrQuery facet, Pageable pageable) throws RestServiceException {
 		SolrResultPage<ShanoirSolrDocument> documents = solrService.facetSearch(facet, pageable);
 		return new ResponseEntity<>(documents, HttpStatus.OK);
 	}
 	
 	@Override
-	public ResponseEntity<Page<ShanoirSolrDocument>> findByIdIn(@Parameter(name = "dataset ids", required = true) @Valid @RequestBody List<Long> datasetIds, Pageable pageable) throws RestServiceException {
+	public ResponseEntity<Page<ShanoirSolrDocument>> findByIdIn(@Parameter(description = "dataset ids", required = true) @Valid @RequestBody List<Long> datasetIds, Pageable pageable) throws RestServiceException {
 		Page<ShanoirSolrDocument> documents = solrService.getByIdIn(datasetIds, pageable);
 		if (documents.getContent().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
