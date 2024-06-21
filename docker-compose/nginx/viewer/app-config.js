@@ -32,6 +32,7 @@ window.config = {
 		bulkDataURI: {
 			enabled: true,
 			relativeResolution: 'studies',
+		},
       },
     },
   ],
