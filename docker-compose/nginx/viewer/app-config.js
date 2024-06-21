@@ -35,6 +35,11 @@ window.config = {
       },
     },
   ],
+  httpErrorHandler: (e) => {
+	console.log("erreur e : ", e),
+    console.warn(e.status), 
+	console.warn("test, navigate to https://ohif.org/")
+  },
   oidc: [
     {
       authority: 'SHANOIR_URL_SCHEME://SHANOIR_URL_HOST/realms/shanoir-ng',
