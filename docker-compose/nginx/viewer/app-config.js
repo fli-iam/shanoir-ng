@@ -28,15 +28,10 @@ window.config = {
         supportsFuzzyMatching: true,
         supportsWildcard: true,
         omitQuotationForMultipartRequest: true,
-		requestOptions: {
-			ServerToken: (options) => { return options.ServerToken },
-			ServerURL: (options) => { return options.ServerURL},
-		}
       },
     },
   ],
   httpErrorHandler: (e) => {
-	console.log("erreur e : ", e),
     console.warn(e.status), 
 	console.warn("test, navigate to https://ohif.org/")
   },
