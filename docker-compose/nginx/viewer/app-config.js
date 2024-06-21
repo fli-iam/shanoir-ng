@@ -17,9 +17,9 @@ window.config = {
       configuration: {
         friendlyName: 'DCM4CHEE Server',
         name: 'SHANOIR-NG',
-        wadoUriRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/shanoir-ng/',
-        qidoRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/dicomweb',
-        wadoRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/dicomweb',
+        wadoUriRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/shanoir-ng/dcm4chee-arc/aets/DCM4CHEE/wado',
+        qidoRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/dicomweb/dcm4chee-arc/aets/DCM4CHEE/rs',
+        wadoRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/dicomweb/dcm4chee-arc/aets/DCM4CHEE/rs',
         qidoSupportsIncludeField: false,
         supportsReject: true,
         imageRendering: 'wadors',
