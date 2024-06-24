@@ -327,7 +327,7 @@ public interface DatasetApi {
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds);
 
 	@Operation(summary = "", description = "Updates the study tags of a dataset")
-	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "dataset study tags updated"),
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "dataset study tags updated"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
 			@ApiResponse(responseCode = "404", description = "dataset does not exists"),
