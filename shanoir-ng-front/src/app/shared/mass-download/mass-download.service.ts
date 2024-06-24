@@ -378,6 +378,9 @@ export class MassDownloadService {
     }
 
     private buildAcquisitionPath(dataset: Dataset): string {
+        if (dataset.datasetProcessing) {
+            return this.buildAcquisitionPath(dataset.datasetProcessing.inputDatasets[0]);
+        }
         return dataset.datasetAcquisition?.examination?.subject?.name
                 + '_' + dataset.datasetAcquisition?.examination?.subject?.id
                 + '/'
