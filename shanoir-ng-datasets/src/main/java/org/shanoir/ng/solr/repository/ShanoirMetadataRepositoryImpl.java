@@ -28,9 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -304,6 +302,17 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			+ " WHERE d.updated_metadata_id = dm.id AND cd.id = d.id";
 	public static final String RESULTSET_MAPPING = "SolrResult";
 
+	public static final String SUBJECT_TAG_QUERY = "SELECT d.id AS dataset_id, tag.name AS tag" +
+			" FROM dataset d" +
+			" LEFT JOIN subject_study substu ON d.subject_id = substu.subject_id" +
+			" LEFT JOIN subject_study_tag substutag ON substu.id = substutag.subject_study_id" +
+			" LEFT JOIN tag ON substutag.tags_id = tag.id";
+
+	public static final String STUDY_TAG_QUERY = "SELECT d.id AS dataset_id, tag.name AS tag" +
+			" FROM dataset d " +
+			" LEFT JOIN dataset_tag dstag ON d.id = dstag.dataset_id " +
+			" LEFT JOIN study_tag tag ON dstag.study_tag_id = tag.id";
+
 	@PersistenceContext
 	private EntityManager em;
 	
@@ -385,5 +394,35 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 	private List<ShanoirMetadata> findSolrProcessed(String clause){
 		Query processedQuery = em.createNativeQuery(PROCESSED_QUERY + clause, RESULTSET_MAPPING);
 		return processedQuery.getResultList();
+	}
+
+	@Override
+	public Map<Long, List<String>> findAllTags(List<Long> datasetIds){
+
+		List<Object[]> result = new ArrayList<>();
+
+		String clause = "";
+
+		if(datasetIds != null && !datasetIds.isEmpty()){
+			String ids = datasetIds.stream().map(Object::toString).collect(Collectors.joining(","));
+			clause = " AND d.id IN (" + ids + ")";
+		}
+
+		Query subjectTagQuery = em.createNativeQuery(SUBJECT_TAG_QUERY + clause);
+		result.addAll(subjectTagQuery.getResultList());
+
+		Query studyTagQuery = em.createNativeQuery(STUDY_TAG_QUERY + clause);
+		result.addAll(studyTagQuery.getResultList());
+
+		Map<Long, List<String>> tags = new HashMap<>();
+
+		for(Object[] row : result){
+			Long id = (Long) row[0];
+			tags.putIfAbsent(id, new ArrayList<>());
+			tags.get(id).add((String) row[1]);
+		}
+
+		return tags;
+
 	}
 }
