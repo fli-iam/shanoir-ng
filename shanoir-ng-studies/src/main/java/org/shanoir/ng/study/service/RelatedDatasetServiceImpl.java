@@ -84,7 +84,6 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 	public void addSubjectStudyToNewStudy(List<String> subjectIdStudyId, Long studyId) {
 		List<Long> subjectIds = new ArrayList<>();
 		List<Long> studySourceId = new ArrayList<>();
-		System.out.println("subjectIdStudyId : " + subjectIdStudyId);
 		for (String s : subjectIdStudyId) {
 			subjectIds.add(Long.valueOf(s.substring(0, s.indexOf("/"))));
 			studySourceId.add(Long.valueOf(s.substring(s.indexOf("/") + 1, s.length())));
@@ -93,27 +92,20 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 		Study studyTarget = studyService.findById(Long.valueOf(studyId));
 		Boolean toAdd = true;
 		Iterable<Subject> subjects = subjectRepository.findAllById(subjectIds);
-		System.out.println("FOR");
 		for (Subject subject : subjects) {
-			System.out.println("    subject : " + subject);
 			List<SubjectStudy> subjectStudyList = studyTarget.getSubjectStudyList();
 			for (SubjectStudy subjectStudy : subjectStudyList) {
-				System.out.println("    subjectStudy : " + subjectStudy);
 				if (subjectStudy.getSubject().equals(subject)) {
-					System.out.println("    subject already in study");
 					toAdd = false;
 					break;
 				} else {
-					System.out.println("    subject not in study");
 					toAdd = true;
 				}
 			}
 
 			if (toAdd) {
-				System.out.println("toAdd");
 				SubjectStudy ssToAdd = new SubjectStudy();
 				for (int i = 0; i < subjectIds.size(); i++) {
-					System.out.println("subjectId = " + subjectIds.get(i) + " / subject.getId = " + subject.getId());
 					if (subjectIds.get(i).equals(subject.getId())) {
 						SubjectStudy type = subjectStudyRepository.findByStudyIdAndSubjectId(studySourceId.get(i), subjectIds.get(i));
 						ssToAdd.setSubjectType(type.getSubjectType());
@@ -121,12 +113,11 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 				}
 				ssToAdd.setStudy(studyTarget);
 				ssToAdd.setSubject(subject);
-				System.out.println("subjectStudy to add is set : " + ssToAdd.getId() + " / " + ssToAdd.getSubjectType() + " / " + ssToAdd.getSubject().getName());
 
 				subjectStudyList.add(ssToAdd);
 				studyTarget.setSubjectStudyList(subjectStudyList);
+
 				studyRepository.save(studyTarget);
-				System.out.println("add subject to study and save study");
 				// then send it to dataset ms which has a duplicated table
 				try {
 					subjectStudyUpdateBroadcastService.send(subjectStudyList);
