@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.datasetacquisition.model.mr;
 
+import org.apache.commons.lang3.EnumUtils;
+
 /**
  * Sequence Variant.
  * 
@@ -95,11 +97,7 @@ public enum MrSequenceVariant {
 		if (TOF.equals(type)) { // see GitHub issue #561
 			return MrSequenceVariant.SS;
 		}
-		try {
-			return MrSequenceVariant.valueOf(type);
-		} catch (IllegalArgumentException exception) {
-			return UNKNOWN;
-		}
+		return EnumUtils.isValidEnum(MrSequenceVariant.class, type) ? MrSequenceVariant.valueOf(type): UNKNOWN;
 	}
 	
 	/**
