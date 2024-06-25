@@ -23,7 +23,7 @@ import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.solr.service.SolrServiceImpl;
+import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,7 +53,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     private DatasetService datasetService;
 
     @Autowired
-    private SolrServiceImpl solrService;
+    private SolrService solrService;
 
     protected DatasetProcessing updateValues(final DatasetProcessing from, final DatasetProcessing to) {
 		to.setDatasetProcessingType(from.getDatasetProcessingType());
