@@ -152,6 +152,7 @@ public class RabbitMQDatasetsService {
 			}			
 			subjectStudyRepository.saveAll(subjectStudies);
 		} catch (Exception e) {
+			LOG.error("Error during copy of dataset : ", e);
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
 		}
 	}
