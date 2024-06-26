@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.17.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: import
+  name: import
+spec:
+  ports:
+  - name: "9903"
+    port: 9903
+    targetPort: 9903
+  - name: "9913"
+    port: 9913
+    targetPort: 9913
+  selector:
+    io.kompose.service: import
+status:
+  loadBalancer: {}
