@@ -26,7 +26,7 @@ export class SolrDocument {
     examinationComment: string;
     centerName: string;
     centerId: string;
-    tags: string;
+    tags: string[];
     examinationDate: Date;
     subjectName: string;
     subjectType: string;
