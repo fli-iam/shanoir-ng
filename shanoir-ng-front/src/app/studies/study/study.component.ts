@@ -48,6 +48,7 @@ import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.
 import { DatasetExpressionFormat } from "../../enum/dataset-expression-format.enum";
 import { KeyValue } from "@angular/common";
 import { TaskState } from 'src/app/async-tasks/task.model';
+import {ShanoirError} from "../../shared/models/error.model";
 
 @Component({
     selector: 'study-detail',
@@ -552,8 +553,14 @@ export class StudyComponent extends EntityComponent<Study> {
                         this.dataUserAgreement = null;
                     }));
             }
-            return Promise.all(uploads).then(() => null);
+            return Promise.all(uploads).then();
         }).then(study => {
+            if(!study){
+                if(this.saveError){
+                    this.consoleService.log('warn', this.saveError.message);
+                }
+                return;
+            }
             this.studyCardService.getAllForStudy(study.id).then(studyCards => {
                 if (!studyCards || studyCards.length == 0) {
                     this.confirmDialogService.confirm('Create a Study Card',

@@ -25,6 +25,7 @@ import org.shanoir.ng.study.model.StudyType;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.studycenter.StudyCenterDTO;
 import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
+import org.shanoir.ng.tag.model.StudyTagDTO;
 import org.shanoir.ng.tag.model.TagDTO;
 import org.shanoir.ng.timepoint.TimepointDTO;
 
@@ -63,7 +64,7 @@ public class StudyDTO {
 
 	private List<TagDTO> tags;
 
-	private List<TagDTO> studyTags;
+	private List<StudyTagDTO> studyTags;
 
 	@LocalDateAnnotations
 	private LocalDate startDate;
@@ -461,11 +462,11 @@ public class StudyDTO {
 		this.tags = tags;
 	}
 
-	public List<TagDTO> getStudyTags() {
+	public List<StudyTagDTO> getStudyTags() {
 		return studyTags;
 	}
 
-	public void setStudyTags(List<TagDTO> studyTags) {
+	public void setStudyTags(List<StudyTagDTO> studyTags) {
 		this.studyTags = studyTags;
 	}
 
