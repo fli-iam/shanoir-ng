@@ -68,7 +68,7 @@ public interface SolrApi {
 		@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
-	ResponseEntity<SolrResultPage<ShanoirSolrDocument>> facetSearch(@Parameter(name = "facets", required = true) @Valid @RequestBody ShanoirSolrQuery query, Pageable pageable) throws RestServiceException;
+	ResponseEntity<SolrResultPage<ShanoirSolrDocument>> facetSearch(@Parameter(description = "facets", required = true) @Valid @RequestBody ShanoirSolrQuery query, Pageable pageable) throws RestServiceException;
 
 	@Operation(summary = "", description = "Returns solr documents matching the given dataset ids")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found documents"),
@@ -77,6 +77,6 @@ public interface SolrApi {
 		@ApiResponse(responseCode = "403", description = "forbidden"),
 		@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/byIds", consumes = {"application/json" }, produces = { "application/json" }, method = RequestMethod.POST)
-	ResponseEntity<Page<ShanoirSolrDocument>> findByIdIn(@Parameter(name = "dataset ids", required = true) @Valid @RequestBody List<Long> datasetIds, Pageable pageable) throws RestServiceException;
+	ResponseEntity<Page<ShanoirSolrDocument>> findByIdIn(@Parameter(description = "dataset ids", required = true) @Valid @RequestBody List<Long> datasetIds, Pageable pageable) throws RestServiceException;
 	
 }

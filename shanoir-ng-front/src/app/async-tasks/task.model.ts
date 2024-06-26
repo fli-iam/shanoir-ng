@@ -101,6 +101,8 @@ export class Task extends Entity {
             }
         } else if (this.eventType === 'executionMonitoring.event' && this.status != -1) {
             return '/dataset-processing/details/' + this.objectId
+        } else if (this.eventType === 'solrIndexAll.event' && this.status != -1) {
+            return '/solr-search';
         } else if (this.eventType === 'copyDataset.event' && this.status != -1 && this.message.lastIndexOf('study [') != -1) {
             return '/study/details/' + this.message.slice(this.message.lastIndexOf("[") + 1, this.message.lastIndexOf("]"));
         }
