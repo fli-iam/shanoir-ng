@@ -43,7 +43,7 @@ import java.time.LocalDate;
 				@ColumnResult(name="centerName", type = String.class), @ColumnResult(name="centerId", type = Long.class),
 				@ColumnResult(name="sliceThickness", type = Double.class), @ColumnResult(name="pixelBandwidth", type = Double.class),
 				@ColumnResult(name="magneticFieldStrength", type = Double.class),
-				@ColumnResult(name="processed", type = Boolean.class)
+				@ColumnResult(name="processed", type = Boolean.class), @ColumnResult(name="importDate", type = LocalDate.class)
 		})
 })
 
@@ -94,6 +94,9 @@ public class ShanoirMetadata {
 
 	private boolean processed;
 
+	@LocalDateAnnotations
+	private LocalDate importDate;
+
 	public ShanoirMetadata () {
 
 	}
@@ -101,7 +104,7 @@ public class ShanoirMetadata {
 	public ShanoirMetadata (Long datasetId, String datasetName, Integer datasetType, Integer datasetNature,
 							LocalDate datasetCreationDate, Long examinationId, String examinationComment, LocalDate examinationDate, String acquisitionEquipmentName,
 							String subjectName, Integer subjectType, Long subjectId, String studyName, Long studyId, String centerName, Long centerId, Double sliceThickness,
-							Double pixelBandwidth, Double magneticFieldStrength, boolean processed) {
+							Double pixelBandwidth, Double magneticFieldStrength, boolean processed, LocalDate importDate) {
 		this.datasetId = datasetId;
 		this.datasetName = datasetName;
 		this.datasetType = datasetType;
@@ -122,6 +125,7 @@ public class ShanoirMetadata {
 		this.pixelBandwidth = pixelBandwidth;
 		this.magneticFieldStrength = magneticFieldStrength;
 		this.processed = processed;
+		this.importDate = importDate;
 	}
 
 	/**
@@ -364,5 +368,13 @@ public class ShanoirMetadata {
 
 	public void setProcessed(boolean processed) {
 		this.processed = processed;
+	}
+
+	public LocalDate getImportDate() {
+		return importDate;
+	}
+
+	public void setImportDate(LocalDate importDate) {
+		this.importDate = importDate;
 	}
 }
