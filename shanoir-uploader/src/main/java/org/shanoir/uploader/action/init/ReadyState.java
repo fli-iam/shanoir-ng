@@ -12,14 +12,6 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
-import org.apache.log4j.Logger;
-import org.quartz.JobBuilder;
-import org.quartz.JobExecutionContext;
-import org.quartz.SchedulerException;
-import org.quartz.SchedulerFactory;
-import org.quartz.SimpleScheduleBuilder;
-import org.quartz.TriggerBuilder;
-import org.quartz.impl.StdSchedulerFactory;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.gui.CurrentUploadsWindowTable;
@@ -30,10 +22,21 @@ import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
 import org.shanoir.uploader.upload.UploadServiceJob;
 import org.shanoir.uploader.utils.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ReadyState implements State {
 
-	private static Logger logger = Logger.getLogger(ReadyState.class);
+	private static final Logger logger = LoggerFactory.getLogger(ReadyState.class);
+
+	@Autowired
+	private CurrentNominativeDataController currentNominativeDataController;
+
+	@Autowired
+	private UploadServiceJob uploadServiceJob;
 	
 	public void load(StartupStateContext context) {
 		ShUpStartupDialog shUpStartupDialog = context.getShUpStartupDialog();
@@ -41,45 +44,44 @@ public class ReadyState implements State {
 		shUpStartupDialog.dispose();
 		MainWindow frame = initJFrame();
 		CurrentUploadsWindowTable cuw = new CurrentUploadsWindowTable(frame);
-		ShUpOnloadConfig.setCurrentNominativeDataController(
-				new CurrentNominativeDataController(ShUpOnloadConfig.getWorkFolder(), cuw));
-		initUploadService();
+		currentNominativeDataController.configure(ShUpOnloadConfig.getWorkFolder(), cuw);
+		ShUpOnloadConfig.setCurrentNominativeDataController(currentNominativeDataController);
 		initNominativeDataFilesBeforeLaunchingJobs();
 	}
-	
+
 	/**
-	 * Initialize the UploadService.
+	 * Set the frame size and location, and make it visible.
+	 * 
+	 * @param frame
 	 */
-	private void initUploadService() {
-		try {
-			try {
-				ShUpOnloadConfig.getJobDataMapMain().put("uploadServiceClient", ShUpOnloadConfig.getShanoirUploaderServiceClient());					
-				ShUpOnloadConfig.getJobDataMapMain().put("nominativeDataController", ShUpOnloadConfig.getCurrentNominativeDataController());
-				ShUpOnloadConfig.setUploadServiceJob(JobBuilder.newJob(UploadServiceJob.class)
-						.usingJobData(ShUpConfig.WORK_FOLDER,ShUpOnloadConfig.getWorkFolder().getAbsolutePath())
-						.usingJobData(ShUpOnloadConfig.getJobDataMapMain())
-						.withIdentity(ShUpConfig.UPLOAD_SERVICE_JOB).build());
-				// specify the running period of the job
-				ShUpOnloadConfig.setTrigger(TriggerBuilder
-						.newTrigger()
-						.withSchedule(
-								SimpleScheduleBuilder
-										.simpleSchedule()
-										.withIntervalInSeconds(
-												ShUpConfig.UPLOAD_SERVICE_INTERVAL)
-										.repeatForever()).build());
-				// schedule the job
-				SchedulerFactory schFactory = new StdSchedulerFactory();
-				ShUpOnloadConfig.setScheduler(schFactory.getScheduler());
-				ShUpOnloadConfig.getScheduler().start();
-				ShUpOnloadConfig.getScheduler().scheduleJob(ShUpOnloadConfig.getUploadServiceJob(), ShUpOnloadConfig.getTrigger());
-				logger.info("UploadService successfully initialized.");
-			} catch (SchedulerException e) {
-				logger.error(e.getMessage(), e);
+	private MainWindow initJFrame() {
+		MainWindow frame = new MainWindow(ShUpOnloadConfig.getDicomServerClient(), ShUpConfig.shanoirUploaderFolder,
+				ShUpOnloadConfig.getUrlConfig(), ShUpConfig.resourceBundle);
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		frame.addWindowListener(new WindowAdapter() {
+			public void windowOpened(WindowEvent e) {
 			}
-		} catch (Exception e) {
-			logger.error("shanoir uploader error starting wsdl uploadService", e);
-		}
+			public void windowClosing(WindowEvent e) {
+				if (uploadServiceJob.isUploading()) {
+					String message = "ShanoirUploader is still uploading DICOM files. Are you sure to want to close?";
+					UIManager.put("OptionPane.cancelButtonText", "Cancel");
+					UIManager.put("OptionPane.noButtonText", "No");
+					UIManager.put("OptionPane.okButtonText", "Ok");
+					UIManager.put("OptionPane.yesButtonText", "Yes");
+					if (JOptionPane.showConfirmDialog(null, message, "Confirmation", 1) == JOptionPane.YES_OPTION) {
+						System.exit(0);
+					}
+				} else {
+					System.exit(0);
+				}
+			}
+		});
+		frame.setPreferredSize(new Dimension(920, 910));
+		frame.pack();
+		frame.setLocationRelativeTo(null);
+		frame.setVisible(true);
+		logger.info("JFrame successfully initialized.");
+		return frame;
 	}
 	
 	/**
@@ -118,55 +120,6 @@ public class ReadyState implements State {
 				logger.error("Folder found in workFolder without nominative-data-job.xml.");
 			}
 		}
-	}
-	
-	/**
-	 * Set the frame size and location, and make it visible.
-	 * 
-	 * @param frame
-	 */
-	private MainWindow initJFrame() {
-		MainWindow frame = new MainWindow(ShUpOnloadConfig.getDicomServerClient(), ShUpConfig.shanoirUploaderFolder,
-				ShUpOnloadConfig.getUrlConfig(), ShUpConfig.resourceBundle);
-		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		frame.addWindowListener(new WindowAdapter() {
-			public void windowOpened(WindowEvent e) {
-			}
-			public void windowClosing(WindowEvent e) {
-				if (checkIfUploadServiceIsRunning()) {
-					String message = "ShanoirUploader is still uploading DICOM files. Are you sure to want to close?";
-					UIManager.put("OptionPane.cancelButtonText", "Cancel");
-					UIManager.put("OptionPane.noButtonText", "No");
-					UIManager.put("OptionPane.okButtonText", "Ok");
-					UIManager.put("OptionPane.yesButtonText", "Yes");
-					if (JOptionPane.showConfirmDialog(null, message, "Confirmation", 1) == JOptionPane.YES_OPTION) {
-						System.exit(0);
-					}
-				} else {
-					System.exit(0);
-				}
-			}
-		});
-		frame.setPreferredSize(new Dimension(920, 910));
-		frame.pack();
-		frame.setLocationRelativeTo(null);
-		frame.setVisible(true);
-		logger.info("JFrame successfully initialized.");
-		return frame;
-	}
-
-	private boolean checkIfUploadServiceIsRunning() {
-		List<JobExecutionContext> currentJobs = null;
-		if (ShUpOnloadConfig.getScheduler() != null){
-			try {
-				currentJobs = ShUpOnloadConfig.getScheduler().getCurrentlyExecutingJobs();
-				if (!currentJobs.isEmpty())
-					return true;
-			} catch (SchedulerException sE) {
-				logger.error(sE.getMessage(), sE);
-			}
-		}
-		return false;
 	}
 	
 }

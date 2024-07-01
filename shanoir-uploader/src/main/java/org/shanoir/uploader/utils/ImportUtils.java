@@ -2,51 +2,64 @@ package org.shanoir.uploader.utils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.time.LocalDate;
-import java.time.temporal.TemporalAdjuster;
-import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
-import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
-import org.apache.log4j.Logger;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.InstitutionDicom;
 import org.shanoir.ng.importer.model.Patient;
+import org.shanoir.ng.importer.model.PseudonymusHashValues;
 import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.uploader.ShUpConfig;
-import org.shanoir.uploader.action.DicomDataTransferObject;
+import org.shanoir.uploader.action.ImportFinishRunnable;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.MRI;
-import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
 import org.shanoir.uploader.model.rest.IdName;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
-import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
 import org.shanoir.uploader.upload.UploadJob;
 import org.shanoir.uploader.upload.UploadState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.exc.StreamReadException;
+import com.fasterxml.jackson.databind.DatabindException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 /**
  * This class contains useful methods for data upload that are used multiple times in the application.
  * @author Jcome
+ * @author mkain
  *
  */
 public class ImportUtils {
 	
-	private static Logger logger = Logger.getLogger(ImportUtils.class);
+	private static final Logger logger = LoggerFactory.getLogger(ImportUtils.class);
+	
+	private static ObjectMapper objectMapper = new ObjectMapper();
+
+	static {
+		objectMapper.registerModule(new JavaTimeModule())
+			.registerModule(new Jdk8Module())
+			.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+	}
 	
 	/**
 	 * Adds a subjectStudy to a given subject with the given study
@@ -56,7 +69,7 @@ public class ImportUtils {
 	 * @param physicallyInvolved is the subject physically involved
 	 * @param identifier the subject identifier
 	 */
-	public static void addSubjectStudy(final Study study, final Subject subject, SubjectType sType, boolean physicallyInvolved, String identifier) {
+	public static void addSubjectStudy(final Study study, final org.shanoir.uploader.model.rest.Subject subject, SubjectType sType, boolean physicallyInvolved, String identifier) {
 		SubjectStudy subjectStudy = new SubjectStudy();
 		subjectStudy.setStudy(new IdName(study.getId(), study.getName()));
 		subjectStudy.setSubject(new IdName(subject.getId(), subject.getName()));
@@ -85,9 +98,9 @@ public class ImportUtils {
 	 * @param dicomData the dicom data to import
 	 * @return the created folder
 	 */
-	public static File createUploadFolder(final File workFolder, final DicomDataTransferObject dicomData) {
+	public static File createUploadFolder(final File workFolder, final String subjectIdentifier) {
 		final String timeStamp = Util.getCurrentTimeStampForFS();
-		final String folderName = workFolder.getAbsolutePath() + File.separator + dicomData.getSubjectIdentifier()
+		final String folderName = workFolder.getAbsolutePath() + File.separator + subjectIdentifier
 		+ "_" + timeStamp;
 		File uploadFolder = new File(folderName);
 		uploadFolder.mkdirs();
@@ -101,50 +114,52 @@ public class ImportUtils {
 	 * @param dicomData
 	 * @param uploadJob
 	 */
-	public static void initUploadJob(final Set<org.shanoir.uploader.dicom.query.SerieTreeNode> selectedSeries,
-			final DicomDataTransferObject dicomData, UploadJob uploadJob) {
+	public static void initUploadJob(ImportJob importJob, UploadJob uploadJob) {
 		uploadJob.setUploadState(UploadState.READY);
 		uploadJob.setUploadDate(Util.formatTimePattern(new Date()));
 		/**
 		 * Patient level
 		 */
 		// set hash of subject identifier in any case: pseudonymus mode or not
-		uploadJob.setSubjectIdentifier(dicomData.getSubjectIdentifier());
+		Subject subject = importJob.getSubject();
+		uploadJob.setSubjectIdentifier(subject.getIdentifier());
 		// set all 10 hash values for pseudonymus mode
 		if (ShUpConfig.isModePseudonymus()) {
-			uploadJob.setBirthNameHash1(dicomData.getBirthNameHash1());
-			uploadJob.setBirthNameHash2(dicomData.getBirthNameHash2());
-			uploadJob.setBirthNameHash3(dicomData.getBirthNameHash3());
-			uploadJob.setLastNameHash1(dicomData.getLastNameHash1());
-			uploadJob.setLastNameHash2(dicomData.getLastNameHash2());
-			uploadJob.setLastNameHash3(dicomData.getLastNameHash3());
-			uploadJob.setFirstNameHash1(dicomData.getFirstNameHash1());
-			uploadJob.setFirstNameHash2(dicomData.getFirstNameHash2());
-			uploadJob.setFirstNameHash3(dicomData.getFirstNameHash3());
-			uploadJob.setBirthDateHash(dicomData.getBirthDateHash());
+			PseudonymusHashValues pseudonymusHashValues = subject.getPseudonymusHashValues();
+			uploadJob.setBirthNameHash1(pseudonymusHashValues.getBirthNameHash1());
+			uploadJob.setBirthNameHash2(pseudonymusHashValues.getBirthNameHash2());
+			uploadJob.setBirthNameHash3(pseudonymusHashValues.getBirthNameHash3());
+			uploadJob.setLastNameHash1(pseudonymusHashValues.getLastNameHash1());
+			uploadJob.setLastNameHash2(pseudonymusHashValues.getLastNameHash2());
+			uploadJob.setLastNameHash3(pseudonymusHashValues.getLastNameHash3());
+			uploadJob.setFirstNameHash1(pseudonymusHashValues.getFirstNameHash1());
+			uploadJob.setFirstNameHash2(pseudonymusHashValues.getFirstNameHash2());
+			uploadJob.setFirstNameHash3(pseudonymusHashValues.getFirstNameHash3());
+			uploadJob.setBirthDateHash(pseudonymusHashValues.getBirthDateHash());
 		}
-		LocalDate birthDate = dicomData.getBirthDate();
-		if (birthDate != null) {
-			birthDate = birthDate.with(TemporalAdjusters.firstDayOfYear());
-			String birthDateStr = Util.convertLocalDateToString(birthDate); 
-			uploadJob.setPatientBirthDate(birthDateStr);
-		}
-		uploadJob.setPatientSex(dicomData.getSex());
+		LocalDate birthDate = subject.getBirthDate();
+		uploadJob.setPatientBirthDate(Util.convertLocalDateToString(birthDate));
+		uploadJob.setPatientSex(subject.getSex());
 
 		/**
 		 * Study level
 		 */
-		uploadJob.setStudyInstanceUID(dicomData.getStudyInstanceUID());
-		String studyDateStr = Util.convertLocalDateToString(dicomData.getStudyDate());
+		org.shanoir.ng.importer.model.Study study = importJob.getStudy();
+		uploadJob.setStudyInstanceUID(study.getStudyInstanceUID());
+		String studyDateStr = Util.convertLocalDateToString(study.getStudyDate());
 		uploadJob.setStudyDate(studyDateStr);
-		uploadJob.setStudyDescription(dicomData.getStudyDescription());
+		uploadJob.setStudyDescription(study.getStudyDescription());
+
+		/**
+		 * @todo: only write importJob json to disk to read it afterwards and avoid senseless conversions
+		 * keep xml for the moment for the GUI only
+		 */
 
 		/**
 		 * Serie level
 		 */
-		uploadJob.setSeries(selectedSeries);
-
-		Serie firstSerie = selectedSeries.iterator().next().getSerie();
+		List<Serie> selectedSeries = new ArrayList<>(importJob.getSelectedSeries());
+		Serie firstSerie = selectedSeries.iterator().next();
 		MRI mriInformation = new MRI();
 		InstitutionDicom institutionDicom = firstSerie.getInstitution();
 		if(institutionDicom != null) {
@@ -163,6 +178,39 @@ public class ImportUtils {
 		logger.info(mriInformation.toString());
 	}
 
+	public static ImportJob readImportJob(File uploadFolder) throws StreamReadException, DatabindException, IOException {
+		File importJobJsonFile = new File(uploadFolder.getAbsolutePath() + File.separator + ImportFinishRunnable.IMPORT_JOB_JSON);
+		if (importJobJsonFile.exists()) {
+			ImportJob importJob = objectMapper.readValue(importJobJsonFile, ImportJob.class);
+			return importJob;
+		} else {
+			throw new IOException(ImportFinishRunnable.IMPORT_JOB_JSON + " missing in folder: " + uploadFolder.getAbsolutePath());
+		}
+	}
+
+	public static ImportJob createNewImportJob(Patient patient, org.shanoir.ng.importer.model.Study study) {
+		ImportJob importJob = new ImportJob();
+		importJob.setFromShanoirUploader(true);
+		// create new patient here, that tree remains untouched
+		Patient newPatientForJob = new Patient();
+		newPatientForJob.setPatientName(patient.getPatientName());
+		newPatientForJob.setPatientID(patient.getPatientID());
+		newPatientForJob.setPatientLastName(patient.getPatientLastName());
+		newPatientForJob.setPatientFirstName(patient.getPatientFirstName());
+		newPatientForJob.setPatientBirthDate(patient.getPatientBirthDate());
+		newPatientForJob.setPatientBirthName(patient.getPatientBirthName());
+		newPatientForJob.setPatientSex(patient.getPatientSex());
+		importJob.setPatient(newPatientForJob);
+		// create new study here, that tree remains untouched
+		org.shanoir.ng.importer.model.Study newStudyForJob = new org.shanoir.ng.importer.model.Study();
+		newStudyForJob.setStudyDate(study.getStudyDate());
+		newStudyForJob.setStudyInstanceUID(study.getStudyInstanceUID());
+		newStudyForJob.setStudyDescription(study.getStudyDescription());
+		importJob.setStudy(newStudyForJob);
+		importJob.setSelectedSeries(new HashSet<Serie>());
+		return importJob;
+	}
+
 	/**
 	 * subjectId and examinationId are created in the window of ImportDialog and are not known before.
 	 * 
@@ -173,10 +221,11 @@ public class ImportUtils {
 	 * @param study
 	 * @param studyCard
 	 * @return
+	 * @throws IOException 
+	 * @throws DatabindException 
+	 * @throws StreamReadException 
 	 */
-	public static ImportJob prepareImportJob(UploadJob uploadJob, String subjectName, Long subjectId, Long examinationId, Study study, StudyCard studyCard) {
-		ImportJob importJob = new ImportJob();
-		importJob.setFromShanoirUploader(true);
+	public static ImportJob prepareImportJob(ImportJob importJob, String subjectName, Long subjectId, Long examinationId, Study study, StudyCard studyCard) {
 		// Handle study and study card
 		importJob.setStudyId(study.getId());
 		importJob.setStudyName(study.getName());
@@ -187,10 +236,16 @@ public class ImportUtils {
 		importJob.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
 		importJob.setExaminationId(examinationId);
 
+		/**
+		 * @todo: refactor to remove patients list from import job.
+		 * for the moment, to finish the first refactor, keep the
+		 * current structure required by the server: patients -
+		 * patient - subject - study - series (selected)
+		 */
 		List<Patient> patients = new ArrayList<>();
 		// handle patient and subject
 		Patient patient = new Patient();
-		patient.setPatientID(uploadJob.getSubjectIdentifier());
+		patient.setPatientID(importJob.getSubject().getIdentifier());
 		org.shanoir.ng.importer.model.Subject subject = new org.shanoir.ng.importer.model.Subject();
 		subject.setId(subjectId);
 		subject.setName(subjectName);
@@ -200,33 +255,31 @@ public class ImportUtils {
 		// handle study dicom == examination in Shanoir
 		List<org.shanoir.ng.importer.model.Study> studiesImportJob = new ArrayList<org.shanoir.ng.importer.model.Study>();
 		org.shanoir.ng.importer.model.Study studyImportJob = new org.shanoir.ng.importer.model.Study();
-		// handle series for study
-		final List<Serie> series = new ArrayList<Serie>();
-		final Collection<SerieTreeNode> serieTreeNodes = uploadJob.getSeries();
-		for (SerieTreeNode serieTreeNode : serieTreeNodes) {
-			Serie serie = new Serie();
-			serie.setSelected(serieTreeNode.isSelected());
-			serie.setIgnored(serieTreeNode.getSerie().isIgnored());
-			serie.setErroneous(serieTreeNode.getSerie().isErroneous());
-			serie.setSeriesInstanceUID(serieTreeNode.getId());
-			serie.setSeriesNumber(serieTreeNode.getSeriesNumber());
-			serie.setModality(serieTreeNode.getModality());
-			serie.setProtocolName(serieTreeNode.getProtocol());
-			List<Instance> instances = new ArrayList<Instance>();
-			for (String filename : serieTreeNode.getFileNames()){
-				Instance instance = new Instance();
-				String[] myStringArray = {filename};
-				instance.setReferencedFileID(myStringArray);
-				instances.add(instance);
+		// handle series for study now coming from job itself
+		final List<Serie> series = new ArrayList<>(importJob.getSelectedSeries());
+		for (Serie serie : series) {
+			List<Instance> instances = serie.getInstances();
+			/**
+			 * Attention: the below switch is important, as all import jobs from ShUp
+			 * are considered as "from-disk" on the server, nevertheless if within ShUp
+			 * they come from a pacs or a local disk, so the below setReferencedFileID
+			 * is necessary, that import-from-pacs with ShUp run on the server.
+			 */
+			for(Instance instance : instances) {
+				// do not change referencedFileID in case of import from disk
+				if (instance.getReferencedFileID() == null || instance.getReferencedFileID().length == 0) {
+					String[] myStringArray = {instance.getSopInstanceUID() + DcmRcvManager.DICOM_FILE_SUFFIX};
+					instance.setReferencedFileID(myStringArray);
+				}
 			}
-			serie.setInstances(instances);
-			serie.setImagesNumber(serieTreeNode.getFileNames().size());
-			series.add(serie);
+			serie.setSelected(true);
 		}
 		studyImportJob.setSeries(series);
 		studiesImportJob.add(studyImportJob);
 		patient.setStudies(studiesImportJob);
 		importJob.setPatients(patients);
+		// bring back later, but for the moment set to null to reduce file size of json
+		importJob.setSelectedSeries(null);
 		return importJob;
 	}
 
@@ -234,13 +287,15 @@ public class ImportUtils {
 	 * Initializes UploadStatusServiceJob object
 	 * 
 	 */
-	public static void initDataUploadJob(final UploadJob uploadJob,
-			final DicomDataTransferObject dicomData, NominativeDataUploadJob dataUploadJob) {
-		dataUploadJob.setPatientName(dicomData.getFirstName() + " " + dicomData.getLastName());
-		dataUploadJob.setPatientPseudonymusHash(dicomData.getSubjectIdentifier());
-		String studyDateStr = Util.convertLocalDateToString(dicomData.getStudyDate()); 
+	public static void initDataUploadJob(final ImportJob importjob, final UploadJob uploadJob, NominativeDataUploadJob dataUploadJob) {
+		Patient patient = importjob.getPatient();
+		Subject subject = importjob.getSubject();
+		org.shanoir.ng.importer.model.Study study = importjob.getStudy();
+		dataUploadJob.setPatientName(patient.getPatientFirstName() + " " + patient.getPatientLastName());
+		dataUploadJob.setPatientPseudonymusHash(subject.getIdentifier());
+		String studyDateStr = Util.convertLocalDateToString(study.getStudyDate()); 
 		dataUploadJob.setStudyDate(studyDateStr);
-		dataUploadJob.setIPP(dicomData.getIPP());
+		dataUploadJob.setIPP(patient.getPatientID());
 		dataUploadJob.setMriSerialNumber(uploadJob.getMriInformation().getManufacturer()
 				+ "(" + uploadJob.getMriInformation().getDeviceSerialNumber() + ")");
 		dataUploadJob.setUploadPercentage("");
@@ -266,10 +321,10 @@ public class ImportUtils {
 	 * @return
 	 * @throws FileNotFoundException 
 	 */
-	public static List<String> downloadOrCopyFilesIntoUploadFolder(boolean isFromPACS, Set<SerieTreeNode> selectedSeries, File uploadFolder, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, IDicomServerClient dicomServerClient, String filePathDicomDir) throws FileNotFoundException {
+	public static List<String> downloadOrCopyFilesIntoUploadFolder(boolean isFromPACS, String studyInstanceUID, List<Serie> selectedSeries, File uploadFolder, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, IDicomServerClient dicomServerClient, String filePathDicomDir) throws FileNotFoundException {
 		List<String> allFileNames = null;
 		if (isFromPACS) {
-			allFileNames = dicomServerClient.retrieveDicomFiles(selectedSeries, uploadFolder);
+			allFileNames = dicomServerClient.retrieveDicomFiles(studyInstanceUID, selectedSeries, uploadFolder);
 			if(allFileNames != null && !allFileNames.isEmpty()) {
 				logger.info(uploadFolder.getName() + ": " + allFileNames.size() + " DICOM files downloaded from PACS.");
 			} else {
@@ -287,17 +342,21 @@ public class ImportUtils {
 		return allFileNames;
 	}
 
-	public static List<String> copyFilesToUploadFolder(ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, Set<org.shanoir.uploader.dicom.query.SerieTreeNode> selectedSeries, final File uploadFolder, String filePathDicomDir) throws FileNotFoundException {
+	public static List<String> copyFilesToUploadFolder(ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, List<Serie> selectedSeries, final File uploadFolder, String filePathDicomDir) throws FileNotFoundException {
 		List<String> allFileNames = new ArrayList<String>();
-		for (SerieTreeNode serieTreeNode : selectedSeries) {
-			Serie serie = serieTreeNode.getSerie();
+		for (Serie serie : selectedSeries) {
 			List<String> newFileNamesOfSerie = new ArrayList<String>();
 			if (serie.getInstances() == null) {
 				continue;
 			}
 			for (Instance instance : serie.getInstances()) {
 				File sourceFile = dicomFileAnalyzer.getFileFromInstance(instance, serie, filePathDicomDir, false);
-				String dicomFileName = sourceFile.getAbsolutePath().replace(File.separator, "_") + DcmRcvManager.DICOM_FILE_SUFFIX;
+				String dicomFileName = null;
+				if (sourceFile.getAbsolutePath().endsWith(DcmRcvManager.DICOM_FILE_SUFFIX)) {
+					dicomFileName = sourceFile.getAbsolutePath().replace(File.separator, "_");
+				} else {
+					dicomFileName = sourceFile.getAbsolutePath().replace(File.separator, "_") + DcmRcvManager.DICOM_FILE_SUFFIX;
+				}
 				// clean Windows file system root here to avoid destFile-path
 				// with two colons in the path, what is forbidden under Windows
 				// and leads therefore to copy failures, that block exports
@@ -309,7 +368,6 @@ public class ImportUtils {
 				newFileNamesOfSerie.add(dicomFileName);
 				instance.setReferencedFileID(new String[]{dicomFileName});
 			}
-			serieTreeNode.setFileNames(newFileNamesOfSerie);
 			allFileNames.addAll(newFileNamesOfSerie);
 		}
 		return allFileNames;

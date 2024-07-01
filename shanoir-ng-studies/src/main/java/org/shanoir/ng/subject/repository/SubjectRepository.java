@@ -14,14 +14,16 @@
 
 package org.shanoir.ng.subject.repository;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.shanoir.ng.subject.model.Subject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-
-import java.util.List;
 
 /**
  * Repository for Subject.
@@ -39,6 +41,9 @@ import java.util.List;
  */
 public interface SubjectRepository extends CrudRepository<Subject, Long>, SubjectRepositoryCustom {
 
+	@EntityGraph(attributePaths = { "subjectStudyList.study.name", "subjectStudyList.study.tags", "subjectStudyList.subjectStudyTags", "subjectStudyList.study.studyUserList" })
+	Optional<Subject> findById(Long id);
+	
 	/**
 	 * Find subject by name.
 	 *
@@ -73,8 +78,9 @@ public interface SubjectRepository extends CrudRepository<Subject, Long>, Subjec
 
 	Iterable<Subject> findBySubjectStudyListStudyIdInAndIdIn(Iterable<Long> studyIds, Iterable<Long> ids);
 
+	@EntityGraph(attributePaths = { "subjectStudyList.study.name" , "subjectStudyList.study.tags"})
     List<Subject> findByPreclinical(boolean preclinical);
 
-
 	boolean existsByName(String name);
+
 }

@@ -17,6 +17,8 @@ import javax.swing.border.EmptyBorder;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.action.init.LoginPanelActionListener;
 import org.shanoir.uploader.action.init.StartupStateContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * 
@@ -25,6 +27,7 @@ import org.shanoir.uploader.action.init.StartupStateContext;
  * @author atouboul
  * 
  */
+@Component
 public class LoginConfigurationPanel extends JPanel {
 
 	public JLabel loginLabel;
@@ -33,7 +36,10 @@ public class LoginConfigurationPanel extends JPanel {
 	public JPasswordField passwordText;
 	public JButton connect;
 
-	public LoginConfigurationPanel(StartupStateContext sSC) {
+	@Autowired
+	private LoginPanelActionListener loginPanelActionListener;
+
+	public void configure(StartupStateContext sSC) {
 		Container container = new Container();
 		container.setLayout(new GridBagLayout());
 		GridBagConstraints shanoirStartupGBC = new GridBagConstraints();
@@ -90,8 +96,8 @@ public class LoginConfigurationPanel extends JPanel {
 		shanoirStartupGBC.gridy = 2;
 		container.add(connect, shanoirStartupGBC);
 		
-		LoginPanelActionListener lPAL = new LoginPanelActionListener(this, sSC);
-		connect.addActionListener(lPAL);
-		
+		loginPanelActionListener.configure(this, sSC);
+		connect.addActionListener(loginPanelActionListener);
 	}
+
 }

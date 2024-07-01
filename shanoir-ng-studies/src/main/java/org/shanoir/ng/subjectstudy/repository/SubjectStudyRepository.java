@@ -16,29 +16,39 @@ package org.shanoir.ng.subjectstudy.repository;
 
 import java.util.List;
 
-import org.shanoir.ng.shared.subjectstudy.SubjectType;
-import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
+import org.shanoir.ng.subjectstudy.model.SubjectStudyTag;
+import org.shanoir.ng.tag.model.Tag;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 /**
- * Repository for Subject.
+ * Repository for SubjectStudy.
  *
  * @author msimon
  */
 public interface SubjectStudyRepository extends CrudRepository<SubjectStudy, Long> {
 
-	/**
-	 * Find template by data.
-	 *
-	 * @param data
-	 *            data.
-	 * @return a template.
-	 */
-	List<SubjectStudy> findByStudy(Study study);
+	@EntityGraph(attributePaths = { "subjectStudyTags.tag.name", "subjectStudyTags.tag.study.name", "subject", "study" })
+    @Query("SELECT ss FROM SubjectStudy ss " +
+           "LEFT JOIN FETCH ss.subjectStudyTags sst " +
+           "LEFT JOIN FETCH sst.tag t " +
+           "WHERE ss.study.id = :studyId")
+    List<SubjectStudy> findByStudyId(@Param("studyId") Long studyId);
 
 	SubjectStudy findByStudyIdAndSubjectId(Long studyId, Long subjectId);
 
 	long countBySubject(Subject subject);
+	
+    int countByStudyId(@Param("studyId") Long studyId);
+    
+    @Query("SELECT s.study.id, COUNT(s) FROM SubjectStudy s GROUP BY s.study.id")
+    List<Object[]> countByStudyIdGroupBy();
+
+    @Query("SELECT sst FROM SubjectStudyTag sst WHERE sst.subjectStudy.study.id = :studyId and sst.subjectStudy.subject.id = :subjectId")
+    List<SubjectStudyTag> findSubjectStudyTagsByStudyIdAndSubjectId(@Param("studyId") Long studyId, @Param("subjectId") Long subjectId);
+
 }

@@ -2,6 +2,8 @@ package org.shanoir.uploader.model;
 
 import java.util.Date;
 
+import org.shanoir.ng.importer.model.PseudonymusHashValues;
+
 public class Subject {
 
 	private Long id;

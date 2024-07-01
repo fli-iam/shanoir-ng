@@ -96,9 +96,7 @@ public class SubjectApiController implements SubjectApi {
 
 	@Override
 	public ResponseEntity<List<SubjectDTO>> findSubjects(boolean preclinical, boolean clinical) {
-
 		List<Subject> subjects = new ArrayList<>();
-
 		if(preclinical && clinical){
 			subjects = subjectService.findAll();
 		} else if (preclinical) {
@@ -106,11 +104,9 @@ public class SubjectApiController implements SubjectApi {
 		} else if (clinical) {
 			subjects = subjectService.findByPreclinical(false);
 		}
-
 		if (subjects.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-
 		return new ResponseEntity<>(subjectMapper.subjectsToSubjectDTOs(subjects), HttpStatus.OK);
 	}
 
@@ -160,7 +156,6 @@ public class SubjectApiController implements SubjectApi {
 		validate(subject, result);
 		try {
 			subjectService.update(subject);
-
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_SUBJECT_EVENT, subject.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
@@ -176,7 +171,7 @@ public class SubjectApiController implements SubjectApi {
 			@Parameter(description="preclinical", required = false) @RequestParam(value="preclinical", required = false) String preclinical) {
 		final List<SimpleSubjectDTO> simpleSubjectDTOList;
 		if ("null".equals(preclinical)) {
-			simpleSubjectDTOList = subjectService.findAllSubjectsOfStudy(studyId);
+			simpleSubjectDTOList = subjectService.findAllSubjectsOfStudyId(studyId);
 		} else {
 			simpleSubjectDTOList = subjectService.findAllSubjectsOfStudyAndPreclinical(studyId, Boolean.parseBoolean(preclinical));
 		}
@@ -217,12 +212,11 @@ public class SubjectApiController implements SubjectApi {
 	public ResponseEntity<Page<SubjectDTO>> findClinicalSubjectsPageByName(Pageable page, String name) {
 		// Get all allowed studies
 		List<Study> studies = this.studyService.findAll();
-		
 		Page<Subject> subjects = this.subjectService.getClinicalFilteredPageByStudies(page, name, studies);
-		
 		if (subjects.getContent().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<>(subjectMapper.subjectsToSubjectDTOs(subjects), HttpStatus.OK);
 	}
+
 }

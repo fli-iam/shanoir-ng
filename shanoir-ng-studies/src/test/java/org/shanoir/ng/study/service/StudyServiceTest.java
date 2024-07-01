@@ -157,7 +157,7 @@ public class StudyServiceTest {
 	@Test
 	public void saveTest() throws MicroServiceCommunicationException, JsonMappingException, JsonProcessingException {
 		studyService.create(createStudy());
-		Mockito.verify(studyRepository, Mockito.times(3)).save(Mockito.any(Study.class));
+		Mockito.verify(studyRepository, Mockito.times(1)).save(Mockito.any(Study.class));
 	}
 
 	@Test

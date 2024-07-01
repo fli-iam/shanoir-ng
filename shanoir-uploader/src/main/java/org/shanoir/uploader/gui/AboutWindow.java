@@ -21,12 +21,13 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.ShUpConfig;
 
 public class AboutWindow extends JFrame {
 
-	private static Logger logger = Logger.getLogger(AboutWindow.class);
+	private static final Logger logger = LoggerFactory.getLogger(AboutWindow.class);
 
 	String supportMail = "imagerie@ofsep.org";
 

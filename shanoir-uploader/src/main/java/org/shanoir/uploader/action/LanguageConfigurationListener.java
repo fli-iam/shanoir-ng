@@ -13,13 +13,14 @@ import java.util.Properties;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.gui.LanguageConfigurationWindow;
 
 public class LanguageConfigurationListener implements ActionListener {
 
-	private static Logger logger = Logger.getLogger(LanguageConfigurationListener.class);
+	private static final Logger logger = LoggerFactory.getLogger(LanguageConfigurationListener.class);
 	final String ENGLISH_LANGUAGE = "ENGLISH";
 	final String FRENCH_LANGUAGE = "FRENCH";
 

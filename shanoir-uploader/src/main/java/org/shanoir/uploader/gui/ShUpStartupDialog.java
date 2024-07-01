@@ -17,7 +17,10 @@ import javax.swing.JTextArea;
 import javax.swing.JTextPane;
 import javax.swing.border.EmptyBorder;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.action.init.StartupStateContext;
 import org.shanoir.uploader.service.rest.ServiceConfiguration;
@@ -32,24 +35,34 @@ import org.shanoir.uploader.service.rest.ServiceConfiguration;
  *
  */
 @SuppressWarnings("serial")
+@Component
 public class ShUpStartupDialog extends JFrame {
 
-	private static Logger logger = Logger.getLogger(ShUpStartupDialog.class);
+	private static final Logger logger = LoggerFactory.getLogger(ShUpStartupDialog.class);
 
 	public JFrame frame = this;
 	public JPanel contentPanel;
 	public JPanel startupPanel;
 	public JPanel imagePanel;
+
+	@Autowired
 	public ProxyConfigurationPanel proxyPanel;
+
+	@Autowired
 	public LoginConfigurationPanel loginPanel;
+
+	@Autowired
 	public SelectProfileConfigurationPanel selectProfilePanel;
+	
 	public JPanel logPanel;
+	
 	public JPanel additionalPanel = null; // handle the additional panel that can be info, proxy or login panel
+	
 	private static JTextPane startupText;
 
 	public JTextArea startupTextArea;
 
-	public ShUpStartupDialog(StartupStateContext sSC) {
+	public void configure(StartupStateContext sSC) {
 		setTitle("ShanoirUploader " + ShUpConfig.SHANOIR_UPLOADER_VERSION);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(new FlowLayout());
@@ -102,15 +115,15 @@ public class ShUpStartupDialog extends JFrame {
 	}
 
 	private void initProxyPanel(StartupStateContext sSC) {
-		proxyPanel = new ProxyConfigurationPanel(sSC);
+		proxyPanel.configure(sSC);
 	}
 
 	private void initLoginPanel(StartupStateContext sSC) {
-		loginPanel = new LoginConfigurationPanel(sSC);
+		loginPanel.configure(sSC);
 	}
 	
 	private void initSelectProfileManualConfigurationPanel(StartupStateContext sSC) {
-		selectProfilePanel = new SelectProfileConfigurationPanel(sSC);
+		selectProfilePanel.configure(sSC);
 	}
 
 	private void initStartupText() {

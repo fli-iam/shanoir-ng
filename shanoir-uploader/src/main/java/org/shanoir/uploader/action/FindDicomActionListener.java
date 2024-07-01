@@ -7,7 +7,6 @@ import java.io.File;
 import java.net.ConnectException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -16,13 +15,11 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import org.apache.log4j.Logger;
 import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
-import org.shanoir.uploader.dicom.DicomTreeNode;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.query.Media;
 import org.shanoir.uploader.dicom.query.PatientTreeNode;
@@ -30,6 +27,8 @@ import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.dicom.query.StudyTreeNode;
 import org.shanoir.uploader.gui.DicomTree;
 import org.shanoir.uploader.gui.MainWindow;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class implements the logic when the open file from CD/DVD menu or the
@@ -41,10 +40,11 @@ import org.shanoir.uploader.gui.MainWindow;
  */
 public class FindDicomActionListener extends JPanel implements ActionListener {
 
-	private static final String DICOMDIR = "DICOMDIR";
+	private static final Logger logger = LoggerFactory.getLogger(FindDicomActionListener.class);
 
-	private static Logger logger = Logger
-			.getLogger(FindDicomActionListener.class);
+	private static final long serialVersionUID = 7126127792556196772L;
+
+	private static final String DICOMDIR = "DICOMDIR";
 
 	private MainWindow mainWindow;
 
@@ -120,7 +120,6 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 					+ mainWindow.patientNameTF.getText() + " "
 					+ mainWindow.patientIDTF.getText() + " "
 					+ mainWindow.studyDescriptionTF.getText() + " "
-					+ mainWindow.seriesDescriptionTF.getText() + " "
 					+ mainWindow.studyDate.toString()) ;
 			this.mainWindow.isFromPACS = true;
 
@@ -168,8 +167,8 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 					String replacement = "";
 					lastNamePartIntroduced = lastNamePartIntroduced.replaceAll(
 							regex, replacement);
-					if (lastNamePartIntroduced.length() < 4) {
-						String message = "\"The wildcard \"*\" can not be used on the last Name unless introducing at least 4 characters\"\n";
+					if (lastNamePartIntroduced.length() < 3) {
+						String message = "\"The wildcard \"*\" can not be used on the last Name unless introducing at least 3 characters\"\n";
 						JOptionPane.showMessageDialog(new JFrame(), message,
 								"ERROR", JOptionPane.ERROR_MESSAGE);
 						mainWindow.patientNameTF.setText("");
@@ -196,11 +195,27 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 				// can not echo a GE PACS => control omitted
 				if (!exitFlag /* && dicomServerClient.echoDicomServer() */) {
 					// query Dicom Server
+					String modality = null;
+					if (!mainWindow.noRB.isSelected()) {
+						if (mainWindow.mrRB.isSelected()) {
+							modality = "MR";
+						} else if (mainWindow.ctRB.isSelected()) {
+							modality = "CT";
+						} else if (mainWindow.ptRB.isSelected()) {
+							modality = "PT";
+						} else if (mainWindow.nmRB.isSelected()) {
+							modality = "NM";
+						}
+					}
+					boolean studyRootQuery = false;
+					if (mainWindow.sRB.isSelected()) {
+						studyRootQuery = true;
+					}
 					List<Patient> patients = dicomServerClient.queryDicomServer(
-							patientNameFinal, mainWindow.patientIDTF.getText(),
+							studyRootQuery,
+							modality, patientNameFinal, mainWindow.patientIDTF.getText(),
 							mainWindow.studyDescriptionTF.getText(),
-							mainWindow.seriesDescriptionTF.getText(),
-							mainWindow.dateRS, mainWindow.studyDate);
+							mainWindow.birthDate, mainWindow.studyDate);
 					fillMediaWithPatients(media, patients);
 				} else {
 					media = null;
@@ -220,7 +235,6 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 						"Connection error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
-		media = sortTree(media);
 		// set values for display in the GUI tree
 		mainWindow.dicomTree = new DicomTree(media);
 		// expand entire JTree after creation
@@ -229,7 +243,6 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 		}
 		mainWindow.dicomTreeJScrollPane.setViewportView(mainWindow.dicomTree);
 		mainWindow.dicomTree.addTreeSelectionListener(mainWindow.getSAL());
-		mainWindow.getSAL().setDicomData(null);
 	}
 
 	/**
@@ -261,7 +274,6 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 							studyTreeNode.addTreeNode(serieTreeNode.getId(), serieTreeNode);
 						}
 					}
-					
 				}
 			}
 		}
@@ -269,78 +281,6 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 
 	public String getFilePathDicomDir() {
 		return filePathDicomDir;
-	}
-
-	/**
-	 * @param Media
-	 *            : root of tree
-	 * @return sorted elements alphabetically
-	 */
-	public static Media sortTree(Media media) {
-		logger.debug("Begin media sorting");
-		try {		
-			Iterator patientsIterator = media.getChildren();
-			// Count nb results in Media
-			int nbMediaElements = 0;
-			while (patientsIterator.hasNext()) {
-				Map.Entry pair = (Map.Entry) patientsIterator.next();
-				nbMediaElements++;
-			}
-			logger.debug("Nb elements in media : " + nbMediaElements );
-
-			// Create a table of patientNames and a table of patientNodes
-			String[] patientNames = new String[nbMediaElements];
-			DicomTreeNode[] patientNodes = new DicomTreeNode[nbMediaElements];
-			int counter = 0;
-			patientsIterator = media.getChildren();
-			while (patientsIterator.hasNext()) {
-				Map.Entry pair = (Map.Entry) patientsIterator.next();
-				String patientKey = pair.getKey().toString();
-				patientNames[counter] = patientKey.substring(patientKey.indexOf(" ") + 1);
-				DicomTreeNode patient = (DicomTreeNode) pair.getValue();
-				patientNodes[counter] = patient;
-				logger.debug("Queried Subject Name " + counter + " : " + patientNames[counter].toString() );
-				logger.debug("Queried Subject Node " + counter + " : " + patientNodes [counter].toString() );
-				counter++;
-			}
-
-			// Sort elements in patientNames table and patientNodes table based on
-			// patient's Names
-			for (int i = 0; i < nbMediaElements; i++) {
-				String name1 = patientNames[i];
-				for (int j = 1; j < nbMediaElements-i; j++) {
-					String name2 = patientNames[j-1];
-					String name3 = patientNames[j];
-					if (name2 != null && !"".equals(name2) && name3 != null
-							&& !"".equals(name3)
-							&& name2.compareToIgnoreCase(name3) > 0) {
-						patientNames[j-1] = name3;
-						patientNames[j] = name2;
-						DicomTreeNode temp = patientNodes[j-1];
-						patientNodes[j-1] = patientNodes[j];
-						patientNodes[j] = temp;
-					}
-				}
-			}
-			
-			for (int i = 0; i < nbMediaElements; i++) {
-				logger.debug("Sorted Subject Name " + i + " : " + patientNames[i].toString() );
-				logger.debug("Sorted Subject Node " + i + " : " + patientNodes[i].toString() );
-			}
-			
-			// Create Sorted Media
-			DicomTreeNode sortedMedia = new Media();
-			for (int i = 0; i < nbMediaElements; i++) {
-				sortedMedia.addTreeNode(patientNodes[i].getId(), patientNodes[i]);
-			}
-			
-			logger.debug("Sorted Media : " + sortedMedia.toString());
-			logger.debug("End media sorting");
-			return (Media) sortedMedia;
-		} catch (Exception e) {
-			logger.error("Not able to sort tree ", e);
-			return null;
-		}
 	}
 
 }

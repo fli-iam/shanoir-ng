@@ -1,11 +1,5 @@
 package org.shanoir.uploader.action;
 
-import org.apache.log4j.Logger;
-import org.shanoir.uploader.gui.ImportFromFolderWindow;
-import org.shanoir.uploader.model.rest.IdList;
-import org.shanoir.uploader.model.rest.Study;
-import org.shanoir.uploader.model.rest.StudyCard;
-import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -13,9 +7,17 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.shanoir.uploader.gui.ImportFromFolderWindow;
+import org.shanoir.uploader.model.rest.IdList;
+import org.shanoir.uploader.model.rest.Study;
+import org.shanoir.uploader.model.rest.StudyCard;
+import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class UpdateFolderImportStudyListener implements ItemListener {
 
-    private static Logger logger = Logger.getLogger(UpdateFolderImportStudyListener.class);
+    private static Logger logger = LoggerFactory.getLogger(UpdateFolderImportStudyListener.class);
 
     private final ImportFromFolderWindow window;
     private final ShanoirUploaderServiceClient shanoirUploaderServiceClient;

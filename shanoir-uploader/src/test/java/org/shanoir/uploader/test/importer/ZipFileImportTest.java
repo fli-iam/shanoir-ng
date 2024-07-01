@@ -7,19 +7,22 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
+import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Center;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.IdName;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
 import org.shanoir.uploader.model.rest.Sex;
+import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.StudyCenter;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectStudy;
@@ -31,10 +34,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 public class ZipFileImportTest extends AbstractTest {
 
+	private static final Logger logger = LoggerFactory.getLogger(ZipFileImportTest.class);
+	
 	private static final String PROFILE_NEURINFO = "Profile Neurinfo";
 
-	private static Logger logger = Logger.getLogger(ZipFileImportTest.class);
-	
 	private static final String IN_PROGRESS = "IN_PROGRESS";
 
 	private static final String ACR_PHANTOM_T1_ZIP = "acr_phantom_t1.zip";
@@ -42,7 +45,7 @@ public class ZipFileImportTest extends AbstractTest {
 	@Test
 	public void importDicomZipTest() throws Exception {
 		org.shanoir.uploader.model.rest.Study study = createStudyAndCenterAndStudyCard();
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 0; i++) {
 			ImportJob importJob = step1UploadDicom(ACR_PHANTOM_T1_ZIP);
 			if (!importJob.getPatients().isEmpty()) {
 				selectAllSeriesForImport(importJob);
@@ -58,6 +61,7 @@ public class ZipFileImportTest extends AbstractTest {
 		final String randomStudyName = "Study-Name-" + UUID.randomUUID().toString();
 		study.setName(randomStudyName);
 		study.setStudyStatus(IN_PROGRESS);
+		// add center to study
 		List<StudyCenter> studyCenterList = new ArrayList<StudyCenter>();
 		final StudyCenter studyCenter = new StudyCenter();
 		Center createdCenter = createCenter();
@@ -65,7 +69,26 @@ public class ZipFileImportTest extends AbstractTest {
 		studyCenter.setCenter(createdCenter);
 		studyCenterList.add(studyCenter);
 		study.setStudyCenterList(studyCenterList);
-		return shUpClient.createStudy(study);
+		// create study
+		study = shUpClient.createStudy(study);
+		Assertions.assertNotNull(study);
+		// create equipment
+		AcquisitionEquipment createdEquipment = createEquipment(createdCenter);
+		Assertions.assertNotNull(createdEquipment);
+		// create study card and add to study
+		StudyCard studyCard = new StudyCard();
+		final String randomStudyCardName = "Study-Card-Name-" + UUID.randomUUID().toString();
+		studyCard.setName(randomStudyCardName);
+		studyCard.setAcquisitionEquipmentId(createdEquipment.getId());
+		studyCard.setAcquisitionEquipment(createdEquipment);
+		studyCard.setCenterId(createdCenter.getId());
+		studyCard.setStudyId(study.getId());
+		shUpClient.createStudyCard(studyCard);
+		Assertions.assertNotNull(studyCard);
+		List<StudyCard> studyCards = new ArrayList<>();
+		studyCards.add(studyCard);
+		study.setStudyCards(studyCards);
+		return study;
 	}
 
 	private void createSubjectStudy(org.shanoir.uploader.model.rest.Study study, Subject subject) {
@@ -83,9 +106,10 @@ public class ZipFileImportTest extends AbstractTest {
 			throws JsonProcessingException, Exception {
 		importJob.setStudyId(study.getId());
 		importJob.setStudyName(study.getName());
-		importJob.setStudyCardId(Long.valueOf(3)); // @todo better create one on your own
-		importJob.setStudyCardName("StudyCard1");
-		importJob.setAcquisitionEquipmentId(Long.valueOf(1));
+		StudyCard studyCard = study.getStudyCards().get(0);
+		importJob.setStudyCardId(studyCard.getId());
+		importJob.setStudyCardName(studyCard.getName());
+		importJob.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipment().getId());
 		importJob.setSubjectName(subject.getName());
 		importJob.setExaminationId(examination.getId());
 		importJob.setAnonymisationProfileToUse(PROFILE_NEURINFO); // yes we are in ShUp, but use the standard import API
@@ -152,7 +176,7 @@ public class ZipFileImportTest extends AbstractTest {
 		        return shUpClient.uploadDicom(file);
 		    }
 		} catch (Exception e) {
-		    logger.error("Error while reading file", e);
+		    logger.error("Error while reading file: ", e);
 		}
 		return null;
 	}

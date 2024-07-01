@@ -89,7 +89,7 @@ export class StudyDTOService {
         entity.monoCenter = dto.monoCenter;
         entity.name = dto.name;
         entity.nbExaminations = dto.nbExaminations;
-        entity.nbSujects = dto.nbSujects;
+        entity.nbSubjects = dto.nbSubjects;
         entity.protocolFilePaths = dto.protocolFilePaths;
         entity.profile = dto.profile;
         entity.description = dto.description;
@@ -274,7 +274,7 @@ export class StudyDTO {
     challenge: boolean;
     name: string;
     nbExaminations: number;
-    nbSujects: number;
+    nbSubjects: number;
     nbMembers: number;
     protocolFilePaths: string[];
     dataUserAgreementPaths: string[];
@@ -363,8 +363,9 @@ export class CenterStudyDTO {
     tags: Tag[];
 }
 
-export class PublicStudyData {
+export class StudyLight {
   downloadableByDefault: boolean;
+  challenge: boolean;
   endDate: Date;
   id: number;
   name: string;

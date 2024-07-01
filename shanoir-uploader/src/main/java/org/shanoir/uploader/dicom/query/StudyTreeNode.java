@@ -22,7 +22,7 @@ import org.shanoir.uploader.dicom.DicomTreeNode;
  */
 public class StudyTreeNode implements DicomTreeNode {
 
-	private DicomTreeNode parent;
+	private PatientTreeNode parent;
 	
 	private Study study;
 
@@ -92,7 +92,7 @@ public class StudyTreeNode implements DicomTreeNode {
 	 * @see org.shanoir.dicom.model.DicomTreeNode#getDisplayString()
 	 */
 	public String getDisplayString() {
-		return  "[" + study.getStudyDate() + "] " + study.getStudyDescription();
+		return  study.toTreeString();
 	}
 	
 	public LocalDate getStudyDate() {
@@ -163,8 +163,8 @@ public class StudyTreeNode implements DicomTreeNode {
 	 * @param parent
 	 *            parent
 	 */
-	public void setParent(final DicomTreeNode parent) {
-		this.parent = parent;
+	public void setParent(DicomTreeNode parent) {
+		this.parent = (PatientTreeNode) parent;
 	}
 
 	/**
@@ -200,6 +200,10 @@ public class StudyTreeNode implements DicomTreeNode {
 	}
 
 	public void addTreeNodes(DicomTreeNode firstLevelChild, DicomTreeNode secondLevelChild, DicomTreeNode thirdLevelChild) {
+	}
+
+	public PatientTreeNode getParent() {
+		return this.parent;
 	}
 	
 }

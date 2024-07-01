@@ -2,10 +2,6 @@ package org.shanoir.uploader;
 
 import java.io.File;
 
-import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-import org.quartz.Scheduler;
-import org.quartz.Trigger;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
@@ -24,16 +20,6 @@ public class ShUpOnloadConfig {
 	private static File workFolder;
 
 	private static IDicomServerClient dicomServerClient;
-
-	private static JobDataMap jobDataMap = new JobDataMap();
-
-	private static JobDataMap jobDataMapMain = new JobDataMap();
-
-	private static JobDetail uploadServiceJob;
-
-	private static Trigger trigger;
-
-	private static Scheduler scheduler;
 
 	private static CurrentNominativeDataController currentNominativeDataController;
 
@@ -71,46 +57,6 @@ public class ShUpOnloadConfig {
 
 	public static void setDicomServerClient(IDicomServerClient dicomServerClient) {
 		ShUpOnloadConfig.dicomServerClient = dicomServerClient;
-	}
-
-	public static JobDataMap getJobDataMap() {
-		return jobDataMap;
-	}
-
-	public static void setJobDataMap(JobDataMap jobDataMap) {
-		ShUpOnloadConfig.jobDataMap = jobDataMap;
-	}
-
-	public static JobDataMap getJobDataMapMain() {
-		return jobDataMapMain;
-	}
-
-	public static void setJobDataMapMain(JobDataMap jobDataMapMain) {
-		ShUpOnloadConfig.jobDataMapMain = jobDataMapMain;
-	}
-
-	public static JobDetail getUploadServiceJob() {
-		return uploadServiceJob;
-	}
-
-	public static void setUploadServiceJob(JobDetail uploadServiceJob) {
-		ShUpOnloadConfig.uploadServiceJob = uploadServiceJob;
-	}
-
-	public static Trigger getTrigger() {
-		return trigger;
-	}
-
-	public static void setTrigger(Trigger trigger) {
-		ShUpOnloadConfig.trigger = trigger;
-	}
-
-	public static Scheduler getScheduler() {
-		return scheduler;
-	}
-
-	public static void setScheduler(Scheduler scheduler) {
-		ShUpOnloadConfig.scheduler = scheduler;
 	}
 
 	public static CurrentNominativeDataController getCurrentNominativeDataController() {

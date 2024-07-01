@@ -27,7 +27,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * This class represents a study based on Dicom as used in Shanoir.
+ * This class represents a study based on DICOM as used in Shanoir.
  * 
  * @author atouboul
  * @author mkain
@@ -51,9 +51,12 @@ public class Study {
 	public Study() {}
 
 	public Study(final Attributes attributes) {
-		this.studyInstanceUID = attributes.getString(Tag.StudyInstanceUID);
-		this.studyDate = DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.StudyDate));
-		this.studyDescription = attributes.getString(Tag.StudyDescription);
+		studyInstanceUID = attributes.getString(Tag.StudyInstanceUID);
+		// try to remove confusing spaces, in case DICOM server sends them wrongly
+		if (studyInstanceUID != null)
+			studyInstanceUID = studyInstanceUID.trim();
+		studyDate = DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.StudyDate));
+		studyDescription = attributes.getString(Tag.StudyDescription);
 	}
 
 	public String getStudyInstanceUID() {
@@ -91,6 +94,16 @@ public class Study {
 
 	public void setSeries(List<Serie> series) {
 		this.series = series;
+	}
+
+	@Override
+	public String toString() {
+		return "Study [studyInstanceUID=" + studyInstanceUID + ", studyDate=" + studyDate + ", studyDescription="
+				+ studyDescription + "]";
+	}
+
+	public String toTreeString() {
+		return "[" + studyDate + "] " + studyDescription + " [studyInstanceUID=" + studyInstanceUID + "]";
 	}
 
 }

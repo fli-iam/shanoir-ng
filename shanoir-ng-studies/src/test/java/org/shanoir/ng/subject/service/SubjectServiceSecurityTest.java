@@ -30,6 +30,7 @@ import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
+import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
@@ -68,6 +69,9 @@ public class SubjectServiceSecurityTest {
 	@MockBean
 	private StudyRepository studyRepository;
 	
+	@MockBean
+	private StudyUserRepository studyUserRepository;
+	
 	@BeforeEach
 	public void setup() {
 		mockNew = ModelsUtil.createSubject();
@@ -79,7 +83,7 @@ public class SubjectServiceSecurityTest {
 	@WithAnonymousUser
 	public void testAsAnonymous() throws ShanoirException {
 		assertAccessDenied(service::findAll);
-		assertAccessDenied(service::findAllSubjectsOfStudy, 1L);
+		assertAccessDenied(service::findAllSubjectsOfStudyId, 1L);
 		
 		assertAccessDenied(service::findByData, "data");
 		assertAccessDenied(service::findById, ENTITY_ID);
@@ -132,6 +136,7 @@ public class SubjectServiceSecurityTest {
 		Subject subjectMock1 = buildSubjectMock(ENTITY_ID);
 		addStudyToMock(subjectMock1, 1L, StudyUserRight.CAN_IMPORT);
 		given(studyRepository.findAllById(Arrays.asList(new Long[]{1L}))).willReturn(studiesMock);
+		given(studyUserRepository.findByStudy_Id(1L)).willReturn(studiesMock.get(0).getStudyUserList());
 		assertAccessAuthorized(service::update, subjectMock1);
 		
 		Subject subjectMock2 = buildSubjectMock(ENTITY_ID);
@@ -149,7 +154,7 @@ public class SubjectServiceSecurityTest {
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
 	public void testAsAdmin() throws ShanoirException {
 		assertAccessAuthorized(service::findAll);
-		assertAccessAuthorized(service::findAllSubjectsOfStudy, 1L);
+		assertAccessAuthorized(service::findAllSubjectsOfStudyId, 1L);
 		assertAccessAuthorized(service::findByData, "data");
 		assertAccessAuthorized(service::findById, ENTITY_ID);
 		assertAccessAuthorized(service::findByIdentifier, "identifier");
@@ -240,6 +245,7 @@ public class SubjectServiceSecurityTest {
 		studiesMock = new ArrayList<>();
 		studiesMock.add(buildStudyMock(13L, StudyUserRight.CAN_IMPORT));
 		given(studyRepository.findAllById(Arrays.asList(new Long[] { 13L }))).willReturn(studiesMock);
+		given(studyUserRepository.findByStudy_Id(13L)).willReturn(studiesMock.get(0).getStudyUserList());
 		newSubjectMock = buildSubjectMock(null);
 		addStudyToMock(newSubjectMock, 13L);
 		assertAccessAuthorized(service::create, newSubjectMock);

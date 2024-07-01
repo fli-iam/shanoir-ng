@@ -15,6 +15,9 @@
 package org.shanoir.ng.manufacturermodel.model;
 
 import jakarta.persistence.*;
+
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.Length;
 import org.shanoir.ng.shared.core.model.IdName;
@@ -51,7 +54,8 @@ public class ManufacturerModel extends HalEntity {
 
 	private Double magneticField;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.EAGER)
+	@Fetch(FetchMode.JOIN)
 	@NotNull
 	private Manufacturer manufacturer;
 

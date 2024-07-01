@@ -7,7 +7,8 @@ import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
 import jakarta.xml.bind.Unmarshaller;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class manages NominativeDataUploadJob.
@@ -16,7 +17,7 @@ import org.apache.log4j.Logger;
  */
 public class NominativeDataUploadJobManager {
 	
-	private static Logger logger = Logger.getLogger(NominativeDataUploadJobManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(NominativeDataUploadJobManager.class);
 
 	public static final String NOMINATIVE_DATA_JOB_XML = "nominative-data-job.xml";
 
@@ -64,7 +65,7 @@ public class NominativeDataUploadJobManager {
 			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 			jaxbMarshaller.marshal(nominativeDataUploadJob, nominativeDataJobFile);
 		} catch (JAXBException e) {
-			logger.error(e);
+			logger.error(e.getMessage());
 		}
 	}
 
@@ -79,7 +80,7 @@ public class NominativeDataUploadJobManager {
 			final NominativeDataUploadJob uploadJob = (NominativeDataUploadJob) jaxbUnmarshaller.unmarshal(nominativeDataJobFile);
 			return uploadJob;
 		} catch (JAXBException e) {
-			logger.error(e);
+			logger.error(e.getMessage());
 		}
 		return null;
 	}

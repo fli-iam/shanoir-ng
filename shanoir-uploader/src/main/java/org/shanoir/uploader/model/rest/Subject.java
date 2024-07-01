@@ -17,6 +17,8 @@ package org.shanoir.uploader.model.rest;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.shanoir.ng.importer.model.PseudonymusHashValues;
+
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -188,6 +190,11 @@ public class Subject {
 
 	public void setPseudonymusHashValues(PseudonymusHashValues pseudonymusHashValues) {
 		this.pseudonymusHashValues = pseudonymusHashValues;
+	}
+	
+	@Override
+	public String toString() {
+		return name;
 	}
 
 }

@@ -8,18 +8,16 @@ public class InstanceNumberSorter implements Comparator<Instance> {
 
 	@Override
 	public int compare(Instance i1, Instance i2) {
-		String i1InstanceNumberStr = i1.getInstanceNumber();
-		String i2InstanceNumberStr = i2.getInstanceNumber();
-		int i1InstanceNumberInt = Integer.parseInt(i1InstanceNumberStr);
-		int i2InstanceNumberInt = Integer.parseInt(i2InstanceNumberStr);
-		if (i1InstanceNumberInt == i2InstanceNumberInt) {
+		int i1InstanceNumberInt = parseInstanceNumber(i1.getInstanceNumber());
+		int i2InstanceNumberInt = parseInstanceNumber(i2.getInstanceNumber());
+		return Integer.compare(i1InstanceNumberInt, i2InstanceNumberInt);
+	}
+
+	int parseInstanceNumber(String instanceNumberStr) {
+		try {
+			return instanceNumberStr != null ? Integer.parseInt(instanceNumberStr) : 0;
+		} catch (NumberFormatException e) {
 			return 0;
-		} else {
-			if (i1InstanceNumberInt < i2InstanceNumberInt) {
-				return -1;
-			} else {
-				return 1;
-			}
 		}
 	}
 

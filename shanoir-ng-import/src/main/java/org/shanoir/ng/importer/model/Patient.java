@@ -25,7 +25,7 @@ import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * This class represents a patient based on Dicom as used in Shanoir.
+ * This class represents a patient based on DICOM as used in Shanoir.
  * 
  * @author atouboul
  * @author mkain
@@ -37,6 +37,12 @@ public class Patient {
 
 	@JsonProperty("patientName")
 	private String patientName;
+
+	@JsonProperty("patientLastName")
+	private String patientLastName;
+
+	@JsonProperty("patientFirstName")
+	private String patientFirstName;
 
 	@JsonProperty("patientBirthName")
 	private String patientBirthName;
@@ -143,10 +149,30 @@ public class Patient {
 		this.deIdentificationMethod = deIdentificationMethod;
 	}
 
+	public String getPatientLastName() {
+		return patientLastName;
+	}
+
+	public void setPatientLastName(String patientLastName) {
+		this.patientLastName = patientLastName;
+	}
+
+	public String getPatientFirstName() {
+		return patientFirstName;
+	}
+
+	public void setPatientFirstName(String patientFirstName) {
+		this.patientFirstName = patientFirstName;
+	}
+
 	@Override
 	public String toString() {
 		return "Patient [patientID=" + patientID + ", patientName=" + patientName + ", patientBirthName="
 				+ patientBirthName + ", patientBirthDate=" + patientBirthDate + "]";
+	}
+
+	public String toTreeString() {
+		return patientName + " [patientID=" + patientID + ", patientBirthDate=" + patientBirthDate + "]";
 	}
 
 }

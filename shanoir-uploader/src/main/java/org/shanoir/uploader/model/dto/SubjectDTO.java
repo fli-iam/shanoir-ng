@@ -4,7 +4,7 @@ import java.util.List;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.shanoir.uploader.model.PseudonymusHashValues;
+import org.shanoir.ng.importer.model.PseudonymusHashValues;
 
 public class SubjectDTO {
 

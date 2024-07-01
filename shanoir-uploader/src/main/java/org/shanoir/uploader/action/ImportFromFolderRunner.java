@@ -1,10 +1,24 @@
 package org.shanoir.uploader.action;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.io.File;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Set;
+
+import javax.swing.JTabbedPane;
+import javax.swing.SwingWorker;
+
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
@@ -17,12 +31,16 @@ import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.query.PatientTreeNode;
 import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.dicom.query.StudyTreeNode;
-import org.shanoir.uploader.gui.ImportFromCSVWindow;
 import org.shanoir.uploader.gui.ImportFromFolderWindow;
-import org.shanoir.uploader.model.CsvImport;
 import org.shanoir.uploader.model.ExaminationImport;
 import org.shanoir.uploader.model.FolderImport;
-import org.shanoir.uploader.model.rest.*;
+import org.shanoir.uploader.model.rest.AcquisitionEquipment;
+import org.shanoir.uploader.model.rest.Examination;
+import org.shanoir.uploader.model.rest.ImagedObjectCategory;
+import org.shanoir.uploader.model.rest.Sex;
+import org.shanoir.uploader.model.rest.Study;
+import org.shanoir.uploader.model.rest.Subject;
+import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
@@ -30,19 +48,17 @@ import org.shanoir.uploader.upload.UploadJob;
 import org.shanoir.uploader.upload.UploadJobManager;
 import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.ImportUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.swing.*;
-import java.io.File;
-import java.time.LocalDate;
-import java.time.Month;
-import java.time.ZoneOffset;
-import java.util.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
 
     private static final String DICOMDIR = "DICOMDIR";
 
-    private static Logger logger = Logger.getLogger(ImportFromFolderRunner.class);
+    private static Logger logger = LoggerFactory.getLogger(ImportFromFolderRunner.class);
 
     private DicomDirGeneratorService dicomDirGeneratorService = new DicomDirGeneratorService();
 
@@ -53,7 +69,6 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
     private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
     private ShanoirUploaderServiceClient shanoirUploaderServiceClientNG;
     private IdentifierCalculator identifierCalculator;
-
 
     public ImportFromFolderRunner(FolderImport folderimport, ResourceBundle ressourceBundle, ImportFromFolderWindow importFromFolderWindow, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG, IDicomServerClient dicomServerClient) {
         this.folderimport = folderimport;
@@ -140,7 +155,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
 
         logger.error("Loading patients");
         // Create dicom data to be able to move things
-        DicomDataTransferObject dicomData = null;
+        Subject subject = null;
         Set<SerieTreeNode> selectedSeriesNodes = new HashSet<>();
 
         ObjectMapper mapper = new ObjectMapper();
@@ -157,10 +172,10 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
         patNode.addTreeNode(patients.get(0).getPatientID(), stNode);
         String subjectIdentifier = null;
         try {
-            dicomData = new DicomDataTransferObject(null, patNode, stNode);
+            subject = new Subject();
             // calculate identifier
-            subjectIdentifier = stNode.getId() +  this.identifierCalculator.calculateIdentifier(dicomData.getFirstName(), dicomData.getLastName(), "" + (dicomData.getBirthDate() != null ? dicomData.getBirthDate() : LocalDate.of(1990, Month.JANUARY,1)));
-            dicomData.setSubjectIdentifier(subjectIdentifier);
+//            subjectIdentifier = stNode.getId() +  this.identifierCalculator.calculateIdentifier(subject.getFirstName(), subject.getLastName(), "" + (subject.getBirthDate() != null ? subject.getBirthDate() : LocalDate.of(1990, Month.JANUARY,1)));
+            subject.setIdentifier(subjectIdentifier);
 
 
             // Change birth date to first day of year
@@ -171,7 +186,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
                 cal.setTime(Date.from(dicomBirthDate.atStartOfDay().toInstant(ZoneOffset.UTC)));
                 cal.set(Calendar.MONTH, Calendar.JANUARY);
                 cal.set(Calendar.DAY_OF_MONTH, 1);
-                dicomData.setBirthDate(LocalDate.from(cal.toInstant()));
+                subject.setBirthDate(LocalDate.from(cal.toInstant()));
             }
         } catch (Exception e) {
             logger.error("Something wrong happened while analyzing data from the dicom", e);
@@ -179,57 +194,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
             return false;
         }
 
-        // Create upload folder
-        logger.error("create folder");
-        File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(), dicomData);
 
-        List<String> allFileNames;
-        try {
-            logger.error("copying files");
-            allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(false, selectedSeriesNodes, uploadFolder, this.dicomFileAnalyzer, this.dicomServerClient, importTodo.getPath());
-            /**
-             * 5. Fill MRI information into serie from first DICOM file of each serie
-             * This has already been done for CD/DVD import, but not yet here for PACS
-             */
-            logger.info("5 Fill MRI info");
-            for (Iterator<SerieTreeNode> iterator = selectedSeriesNodes.iterator(); iterator.hasNext();) {
-                SerieTreeNode serie = iterator.next();
-                dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(uploadFolder.getAbsolutePath(), serie.getSerie(), null, false);
-            }
-        } catch (Exception e) {
-            logger.error("Could not infer data from local storage", e);
-            importTodo.setMessage(resourceBundle.getString("shanoir.uploader.import.folder.error.copy"));
-            return false;
-        }
-
-         // 6. Write the UploadJob and schedule upload
-        logger.info("6 Write upload job");
-
-        UploadJob uploadJob = new UploadJob();
-        ImportUtils.initUploadJob(selectedSeriesNodes, dicomData, uploadJob);
-
-        if (allFileNames == null) {
-            uploadJob.setUploadState(UploadState.ERROR);
-            importTodo.setMessage(resourceBundle.getString("shanoir.uploader.import.folder.error.copy"));
-            return false;
-        }
-        UploadJobManager uploadJobManager = new UploadJobManager(uploadFolder.getAbsolutePath());
-        uploadJobManager.writeUploadJob(uploadJob);
-
-        /**
-         * 7. Write the NominativeDataUploadJobManager for displaying the download state
-         */
-        logger.info("7 Write upload job nominative");
-
-        NominativeDataUploadJob dataJob = new NominativeDataUploadJob();
-        ImportUtils.initDataUploadJob(uploadJob, dicomData, dataJob);
-
-        NominativeDataUploadJobManager uploadDataJobManager = new NominativeDataUploadJobManager(
-                uploadFolder.getAbsolutePath());
-        uploadDataJobManager.writeUploadDataJob(dataJob);
-        ShUpOnloadConfig.getCurrentNominativeDataController().addNewNominativeData(uploadFolder, dataJob);
-
-        logger.info(uploadFolder.getName() + ": finished: " + toString());
 
         // 8.  Create subject if necessary
         Subject subjectFound = null;
@@ -240,7 +205,8 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
                 subjectFound = potentialSubject;
             }
         }
-
+/**
+ * 
         Study study = new Study();
         study.setId(importTodo.getParent().getStudy().getId());
         study.setName(importTodo.getParent().getStudy().getName());
@@ -262,16 +228,16 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
 
             subject.setImagedObjectCategory(ImagedObjectCategory.LIVING_HUMAN_BEING);
 
-            subject.setBirthDate(dicomData.getBirthDate());
+            subject.setBirthDate(subject.getBirthDate());
 
-            ImportUtils.addSubjectStudy(study, subject, SubjectType.PATIENT, true, null);
+//            ImportUtils.addSubjectStudy(study, subject, SubjectType.PATIENT, true, null);
 
             // Get center ID from study card
             subject = shanoirUploaderServiceClientNG.createSubject(subject, true, this.folderimport.getStudyCard().getCenterId());
             this.folderimport.getListOfSubjectsForStudy().add(subject);
         }
         if (subject == null) {
-            uploadJob.setUploadState(UploadState.ERROR);
+//            uploadJob.setUploadState(UploadState.ERROR);
             importTodo.setMessage(resourceBundle.getString("shanoir.uploader.import.folder.error.subject"));
             return false;
         }
@@ -289,21 +255,20 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
         Examination createdExam = shanoirUploaderServiceClientNG.createExamination(examDTO);
 
         if (createdExam == null) {
-            uploadJob.setUploadState(UploadState.ERROR);
+//            uploadJob.setUploadState(UploadState.ERROR);
             importTodo.setMessage(resourceBundle.getString("shanoir.uploader.import.folder.error.examination"));
             return false;
         }
+ */
 
-        /**
-         * 10. Fill import-job.json to prepare the import
-         */
         logger.info("10 Import.json");
 
-        ImportJob importJob = ImportUtils.prepareImportJob(uploadJob, subject.getName(), subject.getId(), createdExam.getId(), study, importTodo.getParent().getStudyCard());
-        importJob.setFromShanoirUploader(true);
-        Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, importJob, subject.getName());
-        Thread thread = new Thread(runnable);
-        thread.start();
+//        ImportJob importJob = ImportUtils.prepareImportJob(uploadJob, subject.getName(), subject.getId(), createdExam.getId(), study, importTodo.getParent().getStudyCard());
+//        importJob.setFromShanoirUploader(true);
+//        Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, importJob, subject.getName());
+//        Thread thread = new Thread(runnable);
+//        thread.start();
+
         return true;
     }
 }

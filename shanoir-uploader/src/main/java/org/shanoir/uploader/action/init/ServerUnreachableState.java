@@ -1,6 +1,7 @@
 package org.shanoir.uploader.action.init;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This concrete state class defines the state where application startup
@@ -13,7 +14,7 @@ import org.apache.log4j.Logger;
  */
 public class ServerUnreachableState implements State {
 
-	private static Logger logger = Logger.getLogger(ServerUnreachableState.class);
+	private static final Logger logger = LoggerFactory.getLogger(ServerUnreachableState.class);
 	
 	public void load(StartupStateContext context) {
 		context.getShUpStartupDialog().updateStartupText("\nShanoir server unreachable, ShanoirUploader stopped.");

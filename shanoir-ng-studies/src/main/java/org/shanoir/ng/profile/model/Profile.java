@@ -31,7 +31,7 @@ import jakarta.persistence.Entity;
  *
  */
 @Entity
-@JsonPropertyOrder({ "_links", "id", "profileName" })
+@JsonPropertyOrder({ "id", "profileName" })
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 public class Profile extends HalEntity {
 
@@ -45,7 +45,6 @@ public class Profile extends HalEntity {
 	private String profileName;
 
 	public Profile() {
-
 	}
 
 	public Profile(String profileName) {
@@ -66,6 +65,5 @@ public class Profile extends HalEntity {
 	public void setProfileName(String profileName) {
 		this.profileName = profileName;
 	}
-
 
 }

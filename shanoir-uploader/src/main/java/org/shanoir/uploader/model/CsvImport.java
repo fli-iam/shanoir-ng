@@ -37,10 +37,11 @@ public class CsvImport {
 		}
 	}
 	
-	
 	String[] rawData;
 
 	// First part is research criteria (all mandatory)
+
+	private String modality;
 
 	String ipp;
 

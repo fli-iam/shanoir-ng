@@ -89,12 +89,12 @@ public class CenterApiControllerTest {
 
 	@BeforeEach
 	public void setup() throws EntityNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException  {
-		given(centerMapperMock.centersToCenterDTOs(Mockito.anyList()))
+		given(centerMapperMock.centersToCenterDTOsFlat(Mockito.anyList()))
 				.willReturn(Arrays.asList(new CenterDTO()));
 		Center center = new Center();
 		center.setId(Long.valueOf(123));
 		IdName idNameCenter = new IdName(1L, "naIme");
-		given(centerMapperMock.centerToCenterDTO(Mockito.any(Center.class))).willReturn(new CenterDTO());
+		given(centerMapperMock.centerToCenterDTOFlat(Mockito.any(Center.class))).willReturn(new CenterDTO());
 		doNothing().when(centerServiceMock).deleteById(1L);
 		given(centerServiceMock.findAll()).willReturn(Arrays.asList(center));
 		given(centerServiceMock.findById(1L)).willReturn(Optional.of(center));
