@@ -20,8 +20,6 @@ import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.model.Tag;
-import org.shanoir.ng.tag.repository.StudyTagRepository;
-import org.shanoir.ng.vip.resulthandler.ResultHandlerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +38,9 @@ public class StudyServiceImpl implements StudyService {
 
 	@Autowired
 	private DatasetRepository dsRepository;
-	
+
+	private static final Logger LOG = LoggerFactory.getLogger(StudyServiceImpl.class);
+
 	@Override
 	public Study findById(final Long id) {
 		return repository.findById(id).orElse(null);
@@ -78,8 +78,14 @@ public class StudyServiceImpl implements StudyService {
 			tag.setStudy(current);
 		}
 
+		long startTime = System.currentTimeMillis();
+		long endTime = System.currentTimeMillis();
 		Study studyDb = this.repository.save(current);
+		LOG.error("UpdateStudy tag 1" + (endTime - startTime) + " + milliseconds");
 
+
+		startTime = System.currentTimeMillis();
+		endTime = System.currentTimeMillis();
 		// SUBJECT_STUDY
 		if (current.getSubjectStudyList() != null) {
 			current.getSubjectStudyList().clear();
@@ -89,7 +95,10 @@ public class StudyServiceImpl implements StudyService {
 		if (updated.getSubjectStudyList() != null) {
 			current.getSubjectStudyList().addAll(updated.getSubjectStudyList());
 		}
+		LOG.error("UpdateStudy tag 1" + (endTime - startTime) + " milliseconds");
 
+		startTime = System.currentTimeMillis();
+		endTime = System.currentTimeMillis();
 		for (SubjectStudy sustu : current.getSubjectStudyList()) {
 			sustu.setStudy(current);
 			for (Tag tag : sustu.getTags()) {
@@ -106,6 +115,7 @@ public class StudyServiceImpl implements StudyService {
 			}
 		}
 		this.repository.save(current);
+		LOG.error("Sustu tag fin" + (endTime - startTime) + " milliseconds");
 	}
 
 	@Override
