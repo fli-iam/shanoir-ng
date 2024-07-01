@@ -100,6 +100,9 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 
 	private Long sourceId;
 
+	/** Name of the user who did the import */
+	private String username;
+
 	public DatasetAcquisition() {
 	}
 
@@ -114,6 +117,7 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 		this.sortingIndex = other.sortingIndex;
 		this.importDate = other.importDate;
 		this.sourceId = other.sourceId;
+		this.username = other.username;
 	}
 
 	/**
@@ -250,5 +254,13 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 
 	public void setSourceId(Long sourceId) {
 		this.sourceId = sourceId;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
 	}
 }

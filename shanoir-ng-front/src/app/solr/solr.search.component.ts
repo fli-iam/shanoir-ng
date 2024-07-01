@@ -452,6 +452,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                     return dateRenderer(params.data.importDate);
                 }
             },
+            {headerName: "Imported by", field:"username"},
             {headerName: "Slice", field: "sliceThickness"},
             {headerName: "Pixel", field: "pixelBandwidth"},
             {headerName: "Mag. strength", field: "magneticFieldStrength"},
