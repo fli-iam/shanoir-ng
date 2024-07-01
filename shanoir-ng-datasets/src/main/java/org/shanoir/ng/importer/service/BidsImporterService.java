@@ -271,6 +271,9 @@ public class BidsImporterService {
 		datasetAcquisition.setDatasets(new ArrayList<>(datasets));
 		datasetAcquisition.setAcquisitionEquipmentId(equipmentId);
 		datasetAcquisition.setImportDate(LocalDateTime.now().toLocalDate());
+		datasetAcquisition.setUsername(importJob.getUsername());
+
+
 		datasetAcquisitionRepository.save(datasetAcquisition);
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, datasetAcquisition.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, examination.getStudyId()));
 		

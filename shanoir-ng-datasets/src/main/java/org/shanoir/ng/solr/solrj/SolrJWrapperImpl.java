@@ -78,6 +78,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 	private static final String TAGS_FACET = "tags";
 	private static final String PROCESSED_FACET = "processed";
 	private static final String IMPORT_DATE_FACET = "importDate";
+	private static final String USERNAME_IMPORT_FACET = "username";
 
 	private static final String[] DOCUMENT_FACET_LIST = {
 			DOCUMENT_ID_FACET,
@@ -102,7 +103,8 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 			MAGNETIC_FIELD_STRENGHT_FACET,
 			TAGS_FACET,
 			PROCESSED_FACET,
-			IMPORT_DATE_FACET
+			IMPORT_DATE_FACET,
+			USERNAME_IMPORT_FACET
 	};
 
 	private static final String[] TEXTUAL_FACET_LIST = {
@@ -412,6 +414,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 			solrDoc.setMagneticFieldStrength((Double) document.getFirstValue("magneticFieldStrength"));
 			solrDoc.setProcessed((Boolean) document.getFirstValue("processed"));
 			solrDoc.setImportDate((Date) document.getFirstValue("importDate"));
+			solrDoc.setUsername((String) document.getFirstValue("username"));
 			solrDocuments.add(solrDoc);
 		}
 		SolrResultPage<ShanoirSolrDocument> page = new SolrResultPage<>(solrDocuments, pageable, documents.getNumFound(), null);

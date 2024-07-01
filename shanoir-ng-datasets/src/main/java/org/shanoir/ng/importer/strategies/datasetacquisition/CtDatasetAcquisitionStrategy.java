@@ -63,6 +63,7 @@ public class CtDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}",serie.getSequenceName(), serie.getProtocolName(), rank);
 		
 		datasetAcquisition.setImportDate(LocalDate.now());
+		datasetAcquisition.setUsername(importJob.getUsername());
 		datasetAcquisition.setRank(rank);
 		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
 		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
