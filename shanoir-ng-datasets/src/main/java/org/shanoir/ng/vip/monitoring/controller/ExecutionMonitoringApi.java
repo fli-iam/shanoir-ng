@@ -31,7 +31,7 @@ public interface ExecutionMonitoringApi {
         @GetMapping(value = "/{id}", produces = { "application/json" })
         @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
         ResponseEntity<ExecutionMonitoringDTO> findExecutionMonitoringById(
-                        @Parameter(name = "id of the execution monitoring", required = true) @PathVariable("id") Long id);
+                        @Parameter(description = "id of the execution monitoring", required = true) @PathVariable("id") Long id);
 
         @Operation(summary = "", description = "Return all execution monitorings")
         @ApiResponses(value = {

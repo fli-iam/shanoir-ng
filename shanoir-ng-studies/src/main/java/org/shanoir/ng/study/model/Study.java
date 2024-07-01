@@ -148,6 +148,8 @@ public class Study extends HalEntity {
 	/** Is with examination. */
 	private boolean withExamination;
 
+	private StudyCardPolicy studyCardPolicy;
+
 	private boolean challenge;
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -478,6 +480,14 @@ public class Study extends HalEntity {
 	 */
 	public void setWithExamination(boolean withExamination) {
 		this.withExamination = withExamination;
+	}
+
+	public StudyCardPolicy getStudyCardPolicy() {
+		return studyCardPolicy;
+	}
+
+	public void setStudyCardPolicy(StudyCardPolicy studyCardPolicy) {
+		this.studyCardPolicy = studyCardPolicy;
 	}
 
 	/**

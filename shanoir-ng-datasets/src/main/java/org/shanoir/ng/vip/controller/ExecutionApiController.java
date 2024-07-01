@@ -87,7 +87,7 @@ public class ExecutionApiController implements ExecutionApi {
      */
     @Override
     public ResponseEntity<IdName> createExecution(
-            @Parameter(name = "execution", required = true) @RequestBody final ExecutionCandidateDTO candidate) throws EntityNotFoundException, SecurityException, RestServiceException {
+            @Parameter(description = "execution", required = true) @RequestBody final ExecutionCandidateDTO candidate) throws EntityNotFoundException, SecurityException, RestServiceException {
 
         // 1: Get dataset and check rights
         List<Dataset> inputDatasets = this.getDatasetsFromParams(candidate.getDatasetParameters());
@@ -231,13 +231,13 @@ public class ExecutionApiController implements ExecutionApi {
     }
 
     @Override
-    public ResponseEntity<VipExecutionDTO> getExecution(@Parameter(name = "The execution identifier", required=true) @PathVariable("identifier") String identifier) {
+    public ResponseEntity<VipExecutionDTO> getExecution(@Parameter(description = "The execution identifier", required=true) @PathVariable("identifier") String identifier) {
         return ResponseEntity.ok(vipClient.getExecution(identifier).block());
     }
 
 
     @Override
-    public ResponseEntity<ExecutionStatus> getExecutionStatus(@Parameter(name = "The execution identifier", required=true) @PathVariable("identifier") String identifier) {
+    public ResponseEntity<ExecutionStatus> getExecutionStatus(@Parameter(description = "The execution identifier", required=true) @PathVariable("identifier") String identifier) {
         return ResponseEntity.ok(vipClient.getExecution(identifier).map(VipExecutionDTO::getStatus).block());
     }
 

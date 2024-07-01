@@ -101,6 +101,7 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Value("${dcm4chee-arc.dicom.web}")
 	private boolean dicomWeb;
+
 	@Autowired
 	private DatasetProcessingService processingService;
 
@@ -190,7 +191,13 @@ public class DatasetServiceImpl implements DatasetService {
 	@Override
 	public Dataset create(final Dataset dataset) throws SolrServerException, IOException {
 		Dataset ds = repository.save(dataset);
-		Long studyId = ds.getDatasetAcquisition().getExamination().getStudyId();
+		Long studyId;
+		if (ds.getDatasetAcquisition() != null) {
+			studyId = ds.getDatasetAcquisition().getExamination().getStudyId();
+		} else {
+			// We have a processed dataset -> acquisition is null but study id is set.
+			studyId = ds.getStudyId();
+		}
 
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, ds.getStudyId()));
 		rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
