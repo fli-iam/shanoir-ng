@@ -79,13 +79,12 @@ public class StudyServiceImpl implements StudyService {
 		}
 
 		long startTime = System.currentTimeMillis();
-		long endTime = System.currentTimeMillis();
 		Study studyDb = this.repository.save(current);
+		long endTime = System.currentTimeMillis();
 		LOG.error("UpdateStudy tag 1" + (endTime - startTime) + " + milliseconds");
 
 
 		startTime = System.currentTimeMillis();
-		endTime = System.currentTimeMillis();
 		// SUBJECT_STUDY
 		if (current.getSubjectStudyList() != null) {
 			current.getSubjectStudyList().clear();
@@ -95,10 +94,10 @@ public class StudyServiceImpl implements StudyService {
 		if (updated.getSubjectStudyList() != null) {
 			current.getSubjectStudyList().addAll(updated.getSubjectStudyList());
 		}
+		endTime = System.currentTimeMillis();
 		LOG.error("UpdateStudy tag 1" + (endTime - startTime) + " milliseconds");
 
 		startTime = System.currentTimeMillis();
-		endTime = System.currentTimeMillis();
 		for (SubjectStudy sustu : current.getSubjectStudyList()) {
 			sustu.setStudy(current);
 			for (Tag tag : sustu.getTags()) {
@@ -115,6 +114,7 @@ public class StudyServiceImpl implements StudyService {
 			}
 		}
 		this.repository.save(current);
+		endTime = System.currentTimeMillis();
 		LOG.error("Sustu tag fin" + (endTime - startTime) + " milliseconds");
 	}
 
