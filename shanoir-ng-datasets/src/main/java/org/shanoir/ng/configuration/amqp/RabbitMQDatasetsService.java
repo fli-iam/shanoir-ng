@@ -170,21 +170,20 @@ public class RabbitMQDatasetsService {
 	@RabbitHandler
 	public String receiveStudyUpdate(final String studyAsString) {
 		try {
-
 			long startTime = System.currentTimeMillis();
-			long endTime = System.currentTimeMillis();
 			Study updated = objectMapper.readValue(studyAsString, Study.class);
-			bidsService.deleteBidsFolder(updated.getId(), null);
+			long endTime = System.currentTimeMillis();
 			LOG.error("Get and delete BIDS" + (endTime - startTime) + " milliseconds");
+			bidsService.deleteBidsFolder(updated.getId(), null);
 
 			startTime = System.currentTimeMillis();
-			endTime = System.currentTimeMillis();
 			Study current = this.receiveAndUpdateIdNameEntity(studyAsString, Study.class, studyRepository);
+			endTime = System.currentTimeMillis();
 			LOG.error("Update Study IdName" + (endTime - startTime) + " milliseconds");
 
 			startTime = System.currentTimeMillis();
-			endTime = System.currentTimeMillis();
 			List<String> errors = studyService.validate(updated, current);
+			endTime = System.currentTimeMillis();
 			LOG.error("Validate" + (endTime - startTime) + " milliseconds");
 
 			if(!errors.isEmpty()){
@@ -192,8 +191,8 @@ public class RabbitMQDatasetsService {
 			}
 
 			startTime = System.currentTimeMillis();
-			endTime = System.currentTimeMillis();
 			studyService.updateStudy(updated, current);
+			endTime = System.currentTimeMillis();
 			LOG.error("UpdateStudy" + (endTime - startTime) + " milliseconds");
 
 
