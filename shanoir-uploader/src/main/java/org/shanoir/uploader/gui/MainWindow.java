@@ -9,8 +9,13 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.io.File;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
@@ -21,6 +26,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -41,19 +47,23 @@ import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.CaretListener;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
-import org.shanoir.uploader.action.*;
+import org.shanoir.uploader.action.DownloadOrCopyActionListener;
+import org.shanoir.uploader.action.FindDicomActionListener;
+import org.shanoir.uploader.action.ImportDialogOpener;
+import org.shanoir.uploader.action.RSDocumentListener;
+import org.shanoir.uploader.action.SelectionActionListener;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.service.rest.UrlConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -114,7 +124,7 @@ public class MainWindow extends JFrame {
 
 	public UtilDateModel birthDateModel;
 	public UtilDateModel studyDateModel;
-	public String dateRS = "";
+	public String birthDate = "";
 	public String studyDate = "";
 	JScrollPane scrollPaneUpload;
 
@@ -419,7 +429,7 @@ public class MainWindow extends JFrame {
 				if (patientNameTF.getText().length() != 0
 						|| patientIDTF.getText().length() != 0
 						|| studyDescriptionTF.getText().length() != 0
-						|| dateRS.length() != 0 || studyDate.length() != 0) {
+						|| birthDate.length() != 0 || studyDate.length() != 0) {
 					queryButton.setEnabled(true);
 				} else {
 					queryButton.setEnabled(false);
@@ -465,28 +475,62 @@ public class MainWindow extends JFrame {
 		p.put("text.today", "Today");
 		p.put("text.month", "Month");
 		p.put("text.year", "Year");
-		JDatePanelImpl datePanel = new JDatePanelImpl(birthDateModel, p);
+		JDatePanelImpl birthDatePanel = new JDatePanelImpl(birthDateModel, p);
 		DateLabelFormatter dLP = new DateLabelFormatter();
-		birthDateModel.getValue();
+		final JDatePickerImpl birthDatePicker = new JDatePickerImpl(birthDatePanel, dLP);
+		birthDatePicker.setTextEditable(true);
 
-		final JDatePickerImpl datePicker = new JDatePickerImpl(datePanel, dLP);
 		GridBagConstraints gbc_birthDateResearchTF = new GridBagConstraints();
 		gbc_birthDateResearchTF.insets = new Insets(5, 5, 0, 0);
 		gbc_birthDateResearchTF.fill = GridBagConstraints.HORIZONTAL;
 		gbc_birthDateResearchTF.gridwidth = 6;
 		gbc_birthDateResearchTF.gridx = 1;
 		gbc_birthDateResearchTF.gridy = 4;
-		queryPanel.add(datePicker, gbc_birthDateResearchTF);
+		queryPanel.add(birthDatePicker, gbc_birthDateResearchTF);
 
-		datePicker.addActionListener(new ActionListener() {
+		final SimpleDateFormat manualFormatter = new SimpleDateFormat("dd/MM/yyyy");
+		final SimpleDateFormat dicomFormatter = new SimpleDateFormat("yyyyMMdd");
+		JFormattedTextField birthDateTextField = birthDatePicker.getJFormattedTextField();
+        birthDateTextField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                try {
+					String birthDateText = birthDateTextField.getText();
+					if (birthDateText != null && !"".equals(birthDateText)) {
+						Date birthDateDate = manualFormatter.parse(birthDateText);
+						birthDateModel.setValue(birthDateDate);
+						birthDate = dicomFormatter.format(birthDateDate);
+						queryButton.setEnabled(true);
+					} else {
+						birthDate = "";
+						if (patientNameTF.getText().length() == 0
+								&& patientIDTF.getText().length() == 0
+								&& studyDescriptionTF.getText().length() == 0
+								&& studyDate.length() == 0) {
+							queryButton.setEnabled(false);
+						}
+					}
+                } catch (ParseException ex) {
+                    logger.error(ex.getMessage(), e);
+					birthDate = "";
+					if (patientNameTF.getText().length() == 0
+							&& patientIDTF.getText().length() == 0
+							&& studyDescriptionTF.getText().length() == 0
+							&& studyDate.length() == 0) {
+						queryButton.setEnabled(false);
+					}
+                }
+            }
+        });
+
+		birthDatePicker.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				final SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
 				if (birthDateModel.getValue() != null) {
-					dateRS = formatter.format(birthDateModel.getValue());
+					birthDate = dicomFormatter.format(birthDateModel.getValue());
 					queryButton.setEnabled(true);
 				} else {
-					dateRS = "";
+					birthDate = "";
 					if (patientNameTF.getText().length() == 0
 							&& patientIDTF.getText().length() == 0
 							&& studyDescriptionTF.getText().length() == 0
@@ -537,6 +581,7 @@ public class MainWindow extends JFrame {
 		DateLabelFormatter studyDLP = new DateLabelFormatter();
 		final JDatePickerImpl studyDatePicker = new JDatePickerImpl(
 				studyDatePanel, studyDLP);
+		studyDatePicker.setTextEditable(true);
 
 		GridBagConstraints gbc_studyDatePicker = new GridBagConstraints();
 		gbc_studyDatePicker.insets = new Insets(5, 5, 0, 0);
@@ -546,20 +591,50 @@ public class MainWindow extends JFrame {
 		gbc_studyDatePicker.gridy = 6;
 		queryPanel.add(studyDatePicker, gbc_studyDatePicker);
 
+		JFormattedTextField studyDateTextField = studyDatePicker.getJFormattedTextField();
+		studyDateTextField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                try {
+					String studyDateText = studyDateTextField.getText();
+					if (studyDateText != null && !"".equals(studyDateText)) {
+						Date studyDateDate = manualFormatter.parse(studyDateText);
+						studyDateModel.setValue(studyDateDate);
+						studyDate = dicomFormatter.format(studyDateDate);
+						queryButton.setEnabled(true);
+					} else {
+						studyDate = "";
+						if (patientNameTF.getText().length() == 0
+								&& patientIDTF.getText().length() == 0
+								&& studyDescriptionTF.getText().length() == 0
+								&& birthDate.length() == 0) {
+							queryButton.setEnabled(false);
+						}
+					}
+				} catch (ParseException ex) {
+                    logger.error(ex.getMessage(), e);
+					studyDate = "";
+					if (patientNameTF.getText().length() == 0
+							&& patientIDTF.getText().length() == 0
+							&& studyDescriptionTF.getText().length() == 0
+							&& birthDate.length() == 0) {
+						queryButton.setEnabled(false);
+					}
+                }
+            }
+        });
 		studyDatePicker.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				queryButton.setEnabled(true);
-				final SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
 				if (studyDateModel.getValue() != null) {
-					studyDate = formatter.format(studyDateModel.getValue());
+					studyDate = dicomFormatter.format(studyDateModel.getValue());
 					queryButton.setEnabled(true);
 				} else {
 					studyDate = "";
 					if (patientNameTF.getText().length() == 0
 							&& patientIDTF.getText().length() == 0
 							&& studyDescriptionTF.getText().length() == 0
-							&& dateRS.length() == 0) {
+							&& birthDate.length() == 0) {
 						queryButton.setEnabled(false);
 					}
 				}

@@ -95,11 +95,7 @@ public class PatientTreeNode implements DicomTreeNode {
 	 * @see org.shanoir.dicom.model.DicomTreeNode#getDisplayString()
 	 */
 	public String getDisplayString() {
-		final String name = this.patient.getPatientName();
-		if (name != null && !"".equals(name)) {
-			return name;
-		}
-		return this.patient.getPatientID();
+		return this.patient.toTreeString();
 	}
 
 	/**

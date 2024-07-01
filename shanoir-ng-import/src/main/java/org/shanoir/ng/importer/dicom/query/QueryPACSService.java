@@ -303,7 +303,7 @@ public class QueryPACSService {
 				patientsNbre = maxPatientsFromPACS;
 			}
 			List<Patient> patients = new ArrayList<Patient>();
-			IntStream.range(0, patientsNbre).parallel().forEach(i -> {
+			IntStream.range(0, patientsNbre).sequential().forEach(i -> {
 			    Patient patient = new Patient(patientsAttr.get(i));
 			    boolean patientExists = patients.parallelStream().anyMatch(p -> p.getPatientID().equals(patient.getPatientID()));
 			    if (!patientExists) {

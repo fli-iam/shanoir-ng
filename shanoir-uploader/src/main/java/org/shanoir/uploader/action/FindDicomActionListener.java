@@ -215,7 +215,7 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 							studyRootQuery,
 							modality, patientNameFinal, mainWindow.patientIDTF.getText(),
 							mainWindow.studyDescriptionTF.getText(),
-							mainWindow.dateRS, mainWindow.studyDate);
+							mainWindow.birthDate, mainWindow.studyDate);
 					fillMediaWithPatients(media, patients);
 				} else {
 					media = null;

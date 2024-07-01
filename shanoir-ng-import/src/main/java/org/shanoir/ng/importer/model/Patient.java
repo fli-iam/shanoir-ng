@@ -171,4 +171,8 @@ public class Patient {
 				+ patientBirthName + ", patientBirthDate=" + patientBirthDate + "]";
 	}
 
+	public String toTreeString() {
+		return patientName + " [patientID=" + patientID + ", patientBirthDate=" + patientBirthDate + "]";
+	}
+
 }

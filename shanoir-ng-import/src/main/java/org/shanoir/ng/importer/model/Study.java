@@ -102,4 +102,8 @@ public class Study {
 				+ studyDescription + "]";
 	}
 
+	public String toTreeString() {
+		return "[" + studyDate + "] " + studyDescription + " [studyInstanceUID=" + studyInstanceUID + "]";
+	}
+
 }
