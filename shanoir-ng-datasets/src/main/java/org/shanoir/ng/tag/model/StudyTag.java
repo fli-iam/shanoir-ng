@@ -20,7 +20,7 @@ public class StudyTag extends IdName {
     private String color;
 
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "study_id")
     private Study study;
 
