@@ -29,7 +29,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 @Component
@@ -52,33 +54,29 @@ public class StudyServiceImpl implements StudyService {
 		if (current.getId() == null)
 			throw new IllegalStateException("The entity should have an id.");
 
-		// TAGS
-		if (current.getTags() != null) {
-			current.getTags().clear();
-		} else {
-			current.setTags(new ArrayList<>());
-		}
-		if (updated.getTags() != null) {
-			current.getTags().addAll(updated.getTags());
-		}
-		for (Tag tag : current.getTags()) {
-			tag.setStudy(current);
-		}
 
-		// STUDY TAGS
-		if (current.getStudyTags() != null) {
-			current.getStudyTags().clear();
-		} else {
-			current.setTags(new ArrayList<>());
-		}
-		if (updated.getStudyTags() != null) {
-			current.getStudyTags().addAll(updated.getStudyTags());
-		}
-		for (StudyTag tag : current.getStudyTags()) {
-			tag.setStudy(current);
-		}
+		Set<Tag> currentTags = new HashSet<>(current.getTags());
+		Set<Tag> updatedTags = new HashSet<>(updated.getTags());
 
-		Study studyDb = this.repository.save(current);
+		for(Tag tag : current.getTags()){
+			if(!updatedTags.contains(tag)){
+				currentTags.remove(tag);
+			}
+		}
+		currentTags.addAll(updatedTags);
+		current.setTags(currentTags.stream().toList());
+
+		Set<StudyTag> currentStudyTags = new HashSet<>(current.getStudyTags());
+		Set<StudyTag> updatedStudyTags = new HashSet<>(updated.getStudyTags());
+
+		for(StudyTag tag : current.getStudyTags()){
+			if(!updatedStudyTags.contains(tag)){
+				currentStudyTags.remove(tag);
+			}
+		}
+		currentStudyTags.addAll(updatedStudyTags);
+		current.setStudyTags(currentStudyTags.stream().toList());
+
 
 		// SUBJECT_STUDY
 		if (current.getSubjectStudyList() != null) {
@@ -94,7 +92,7 @@ public class StudyServiceImpl implements StudyService {
 			sustu.setStudy(current);
 			for (Tag tag : sustu.getTags()) {
 				if (tag.getId() == null) {
-					Tag dbTag = studyDb.getTags().stream().filter(upTag ->
+					Tag dbTag = current.getTags().stream().filter(upTag ->
 							upTag.getColor().equals(tag.getColor()) && upTag.getName().equals(tag.getName())
 					).findFirst().orElse(null);
 					if (dbTag != null) {

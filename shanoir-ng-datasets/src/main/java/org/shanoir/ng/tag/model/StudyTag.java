@@ -81,16 +81,17 @@ public class StudyTag extends IdName {
         this.study = study;
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         StudyTag studyTag = (StudyTag) o;
-        return Objects.equals(id, studyTag.id);
+        return Objects.equals(id, studyTag.id) && Objects.equals(name, studyTag.name) && Objects.equals(color, studyTag.color) && Objects.equals(study, studyTag.study);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, name, color, study);
     }
 }
