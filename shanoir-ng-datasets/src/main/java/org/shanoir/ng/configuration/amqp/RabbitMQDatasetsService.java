@@ -179,11 +179,11 @@ public class RabbitMQDatasetsService {
 
 			Study current = this.receiveAndUpdateIdNameEntity(studyAsString, Study.class, studyRepository);
 
-			List<String> errors = studyService.validate(updated, current);
-
-			if(!errors.isEmpty()){
-				return errors.get(0);
-			}
+//			List<String> errors = studyService.validate(updated, current);
+//
+//			if(!errors.isEmpty()){
+//				return errors.get(0);
+//			}
 
 			studyService.updateStudy(updated, current);
 

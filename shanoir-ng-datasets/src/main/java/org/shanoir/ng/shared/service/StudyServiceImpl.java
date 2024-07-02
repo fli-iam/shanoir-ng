@@ -55,28 +55,19 @@ public class StudyServiceImpl implements StudyService {
 			throw new IllegalStateException("The entity should have an id.");
 
 
-//		Set<Tag> currentTags = new HashSet<>(current.getTags());
-//		Set<Tag> updatedTags = new HashSet<>(updated.getTags());
-//
-//		for(Tag tag : current.getTags()){
-//			if(!updatedTags.contains(tag)){
-//				currentTags.remove(tag);
-//			}
-//		}
-//		currentTags.addAll(updatedTags);
-//		current.setTags(currentTags.stream().toList());
-//
-//		Set<StudyTag> currentStudyTags = new HashSet<>(current.getStudyTags());
-//		Set<StudyTag> updatedStudyTags = new HashSet<>(updated.getStudyTags());
-//
-//		for(StudyTag tag : current.getStudyTags()){
-//			if(!updatedStudyTags.contains(tag)){
-//				currentStudyTags.remove(tag);
-//			}
-//		}
-//		currentStudyTags.addAll(updatedStudyTags);
-//		current.setStudyTags(currentStudyTags.stream().toList());
+		Set<Tag> currentTags = new HashSet<>(current.getTags());
+		Set<Tag> updatedTags = new HashSet<>(updated.getTags());
 
+		for(Tag tag : current.getTags()){
+			if(!updatedTags.contains(tag)){
+				currentTags.remove(tag);
+			}
+		}
+		currentTags.addAll(updatedTags);
+		current.setTags(currentTags.stream().toList());
+
+        current.getStudyTags().removeIf(tag -> !updated.getStudyTags().contains(tag));
+		current.getStudyTags().addAll(updated.getStudyTags());
 
 		// SUBJECT_STUDY
 		if (current.getSubjectStudyList() != null) {
