@@ -83,7 +83,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <li>
                         <label>Import date</label>
                         <span class="right-col" *ngIf="mode == 'view'">
-                                {{datasetAcquisition.creationDate}}
+                                {{datasetAcquisition.importDate}}
+                        </span>
+                    </li>
+                    <li>
+                        <label>Imported by user</label>
+                        <span class="right-col" *ngIf="mode == 'view'">
+                                {{datasetAcquisition.username}}
                         </span>
                     </li>
 					<li>

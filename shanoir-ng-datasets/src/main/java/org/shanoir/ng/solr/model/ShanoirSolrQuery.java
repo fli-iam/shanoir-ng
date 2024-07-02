@@ -72,6 +72,8 @@ public class ShanoirSolrQuery {
 	private Range<Float> magneticFieldStrength;
 
 	private Collection<Boolean> processed;
+
+	private Collection<String> username;
 	
 	private Map<String, FacetPageable> facetPaging;
 	
@@ -325,5 +327,13 @@ public class ShanoirSolrQuery {
 
 	public void setProcessed(Collection<Boolean> processed) {
 		this.processed = processed;
+	}
+
+	public Collection<String> getUsername() {
+		return username;
+	}
+
+	public void setUsername(Collection<String> username) {
+		this.username = username;
 	}
 }

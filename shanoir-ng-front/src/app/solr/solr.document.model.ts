@@ -35,6 +35,7 @@ export class SolrDocument {
     studyName: string;
     studyId: string;
     id: number; // only for the table component..
+    username: string;
 }
 
 export class SolrRequest {
@@ -56,6 +57,7 @@ export class SolrRequest {
     datasetNature: string[];
     tags: string[];
     searchText: string;
+    username: string[];
     expertMode: boolean = false;
     sliceThickness: Range = new Range(null, null);
     pixelBandwidth: Range = new Range(null, null);

@@ -102,13 +102,19 @@ public class ShanoirSolrDocument {
 	@Field
 	private boolean processed;
 
+	@Field
+	private Date importDate;
+
+	@Field
+	private String username;
+
 	public ShanoirSolrDocument () {		
 	}
 	
 	public ShanoirSolrDocument (String id, Long datasetId, String datasetName, String datasetType, String datasetNature,
 			Date datasetCreationDate, Long examinationId, String examinationComment, Date examinationDate, String acquisitionEquipmentName,
 			String subjectName, String subjectType, Long subjectId, String studyName, Long studyId, String centerName, Long centerId, Double sliceThickness,
-			Double pixelBandwidth, Double magneticFieldStrength, boolean processed) {
+			Double pixelBandwidth, Double magneticFieldStrength, boolean processed, Date importDate, String username) {
 		this.id = id;
 		this.datasetId = datasetId;
 		this.datasetName = datasetName;
@@ -130,6 +136,8 @@ public class ShanoirSolrDocument {
 		this.pixelBandwidth = pixelBandwidth;
 		this.magneticFieldStrength = magneticFieldStrength;
 		this.processed = processed;
+		this.importDate = importDate;
+		this.username = username;
 	}
 
 	public String getId() {
@@ -366,5 +374,21 @@ public class ShanoirSolrDocument {
 
 	public void setProcessed(boolean processed) {
 		this.processed = processed;
+	}
+
+	public Date getImportDate() {
+		return importDate;
+	}
+
+	public void setImportDate(Date importDate) {
+		this.importDate = importDate;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
 	}
 }
