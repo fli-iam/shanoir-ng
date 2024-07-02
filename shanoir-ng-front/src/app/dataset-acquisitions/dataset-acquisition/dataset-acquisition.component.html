@@ -87,7 +87,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         </span>
                     </li>
 					<li>
-						<label>Acquisition equipment</label>
+						<label>Center equipment</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<a *ngIf="datasetAcquisition.acquisitionEquipment?.id" [routerLink]="['/acquisition-equipment/details/', datasetAcquisition.acquisitionEquipment.id]">

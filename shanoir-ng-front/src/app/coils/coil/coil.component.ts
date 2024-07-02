@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -34,7 +34,7 @@ import { ManufacturerModelPipe } from '../../acquisition-equipments/shared/manuf
     styleUrls: ['coil.component.css']
 })
 export class CoilComponent extends EntityComponent<Coil> {
-   
+
     @Input() acqEquip: AcquisitionEquipment;
     centers: Center[] = [];
     manufModels: ManufacturerModel[] = [];
@@ -44,7 +44,7 @@ export class CoilComponent extends EntityComponent<Coil> {
 
     constructor(
             private route: ActivatedRoute,
-            private coilService: CoilService, 
+            private coilService: CoilService,
             private centerService: CenterService,
             public manufModelPipe: ManufacturerModelPipe) {
         super(route, 'coil');
@@ -56,7 +56,7 @@ export class CoilComponent extends EntityComponent<Coil> {
     getService(): EntityService<Coil> {
         return this.coilService;
     }
-    
+
     initView(): Promise<void> {
         return this.coilService.get(this.id).then(coil => {
             this.coil = coil;
@@ -151,7 +151,7 @@ export class CoilComponent extends EntityComponent<Coil> {
 
     openNewManufModel() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/acquisition-equipment/create']).then(success => {
+        this.router.navigate(['/center-equipment/create']).then(success => {
             this.breadcrumbsService.currentStep.addPrefilled('center', this.coil.center);
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {

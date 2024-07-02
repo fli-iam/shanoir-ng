@@ -489,7 +489,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
 
     public openCreateAcqEqt() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/acquisition-equipment/create'], { state: { fromImport: this.importedEquipmentDataStr } }).then(success => {
+        this.router.navigate(['/center-equipment/create'], { state: { fromImport: this.importedEquipmentDataStr } }).then(success => {
 
             this.breadcrumbsService.currentStep.addPrefilled('center', this.center);
 
