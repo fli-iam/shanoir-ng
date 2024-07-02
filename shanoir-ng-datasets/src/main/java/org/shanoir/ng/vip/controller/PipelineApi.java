@@ -60,7 +60,7 @@ public interface PipelineApi {
     @RequestMapping(value = "/{identifier}/{version}",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
-    ResponseEntity<String> getPipeline(@Parameter(name = "The pipeline identifier", required=true) @PathVariable("identifier") String identifier, @Parameter(name = "The pipeline version", required=true) @PathVariable("version") String version) throws SecurityException;
+    ResponseEntity<String> getPipeline(@Parameter(description = "The pipeline identifier", required=true) @PathVariable("identifier") String identifier, @Parameter(description = "The pipeline version", required=true) @PathVariable("version") String version) throws SecurityException;
 
 
 }

@@ -58,7 +58,7 @@ public class QualityCardApiController implements QualityCardApi {
 
 	@Override
 	public ResponseEntity<Void> deleteQualityCard(
-			@Parameter(name = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId) throws RestServiceException {
+			 Long qualityCardId) throws RestServiceException {
 		try {
 			qualityCardService.deleteById(qualityCardId);
 		} catch (EntityNotFoundException e) {
@@ -72,7 +72,7 @@ public class QualityCardApiController implements QualityCardApi {
 
 	@Override
 	public ResponseEntity<QualityCard> findQualityCardById(
-			@Parameter(name = "id of the study card", required = true) @PathVariable("qualityCardId") Long qualityCardId) {
+			 Long qualityCardId) {
 		final QualityCard qualityCard = qualityCardService.findById(qualityCardId);
 		if (qualityCard == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -83,7 +83,7 @@ public class QualityCardApiController implements QualityCardApi {
 
 	@Override
 	public ResponseEntity<List<QualityCard>> findQualityCardByStudyId(
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+			 Long studyId) {
 		final List<QualityCard> qualityCards = qualityCardService.findByStudy(studyId);
 		if (qualityCards.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -102,7 +102,7 @@ public class QualityCardApiController implements QualityCardApi {
 
 	@Override
 	public ResponseEntity<QualityCard> saveNewQualityCard(
-			@Parameter(name = "Quality Card to create", required = true) @RequestBody QualityCard qualityCard,
+			@Parameter(description = "Quality Card to create", required = true) @RequestBody QualityCard qualityCard,
 			final BindingResult result) throws RestServiceException {
 		validate(qualityCard, result);
 		QualityCard createdQualityCard;
@@ -117,8 +117,8 @@ public class QualityCardApiController implements QualityCardApi {
 
 	@Override
 	public ResponseEntity<Void> updateQualityCard(
-			@Parameter(name = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId,
-			@Parameter(name = "quality card to update", required = true) @RequestBody QualityCard qualityCard,
+			 Long qualityCardId,
+			@Parameter(description = "quality card to update", required = true) @RequestBody QualityCard qualityCard,
 			final BindingResult result) throws RestServiceException {
 
 		validate(qualityCard, result);
@@ -152,7 +152,7 @@ public class QualityCardApiController implements QualityCardApi {
 
 	@Override
     public ResponseEntity<QualityCardResult> applyQualityCardOnStudy(
-	        @Parameter(name = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException {
+	         Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException {
 		
 	    final QualityCard qualityCard = qualityCardService.findById(qualityCardId);
 	    if (qualityCard == null) {
@@ -165,7 +165,7 @@ public class QualityCardApiController implements QualityCardApi {
 	
 	@Override
     public ResponseEntity<QualityCardResult> testQualityCardOnStudy(
-            @Parameter(name = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException {
+             Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException {
         
         final QualityCard qualityCard = qualityCardService.findById(qualityCardId);
         if (qualityCard == null) {
@@ -178,9 +178,9 @@ public class QualityCardApiController implements QualityCardApi {
 
 	@Override
     public ResponseEntity<QualityCardResult> testQualityCardOnStudy(
-        @Parameter(name = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId,
-		@Parameter(name = "examination number start ", required = true) @PathVariable("start") int start,
-		@Parameter(name = "examination number stop", required = true) @PathVariable("stop") int stop) throws RestServiceException, MicroServiceCommunicationException {
+         Long qualityCardId,
+		 int start,
+		 int stop) throws RestServiceException, MicroServiceCommunicationException {
 
         final QualityCard qualityCard = qualityCardService.findById(qualityCardId);
         if (qualityCard == null) {

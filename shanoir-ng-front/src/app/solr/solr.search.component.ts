@@ -426,7 +426,9 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {headerName: "Admin", type: "boolean", cellRenderer: row => this.hasAdminRight(row.data.studyId), awesome: "fa-solid fa-shield", color: "goldenrod", disableSorting: true},
             {headerName: "", type: "boolean", cellRenderer: row => row.data.processed, awesome: "fa-solid fa-gears", color: "dimgrey", disableSorting: true, tip: item => { return item.processed ? "processed dataset" : "" }},
             {headerName: "Name", field: "datasetName"},
-            {headerName: "Tags", field: "tags"},
+            {headerName: "Tags", field: "tags", cellRenderer: (params: any) => {
+                    return params?.data?.tags ? params.data.tags.join(', ') : '';
+                }},
             {headerName: "Type", field: "datasetType"},
             {headerName: "Nature", field: "datasetNature"},
             {headerName: "Series date", field: "datasetCreationDate", type: "date", hidden: true, cellRenderer: (params: any) => dateRenderer(params.data.datasetCreationDate)},
