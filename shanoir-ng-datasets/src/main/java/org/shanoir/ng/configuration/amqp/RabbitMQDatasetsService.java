@@ -17,7 +17,6 @@ package org.shanoir.ng.configuration.amqp;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.dataset.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -58,7 +57,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.util.*;
@@ -172,21 +170,34 @@ public class RabbitMQDatasetsService {
 	@RabbitHandler
 	public String receiveStudyUpdate(final String studyAsString) {
 		try {
-
+			long startTime = System.currentTimeMillis();
 			Study updated = objectMapper.readValue(studyAsString, Study.class);
-
+			long endTime = System.currentTimeMillis();
+			LOG.error("Get and delete BIDS" + (endTime - startTime) + " milliseconds");
 			bidsService.deleteBidsFolder(updated.getId(), null);
 
+			startTime = System.currentTimeMillis();
 			Study current = this.receiveAndUpdateIdNameEntity(studyAsString, Study.class, studyRepository);
+			endTime = System.currentTimeMillis();
+			LOG.error("Update Study IdName" + (endTime - startTime) + " milliseconds");
 
+			startTime = System.currentTimeMillis();
 			List<String> errors = studyService.validate(updated, current);
+			endTime = System.currentTimeMillis();
+			LOG.error("Validate" + (endTime - startTime) + " milliseconds");
 
 			if(!errors.isEmpty()){
 				return errors.get(0);
 			}
 
+			startTime = System.currentTimeMillis();
 			studyService.updateStudy(updated, current);
+			endTime = System.currentTimeMillis();
+			LOG.error("UpdateStudy" + (endTime - startTime) + " milliseconds");
 
+
+			startTime = System.currentTimeMillis();
+			endTime = System.currentTimeMillis();
 			List<Long> subjectIds = current.getSubjectStudyList()
 					.stream().map(subStu ->
 							subStu.getSubject().getId()
@@ -194,6 +205,7 @@ public class RabbitMQDatasetsService {
 				);
 
 			solrService.updateSubjects(subjectIds);
+			LOG.error("Update subjects in solr" + (endTime - startTime) + " milliseconds");
 
 		} catch (Exception ex) {
 			LOG.error("An error occured while processing study update", ex);

@@ -17,7 +17,6 @@ package org.shanoir.ng.study.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.center.model.Center;
@@ -25,7 +24,9 @@ import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
-import org.shanoir.ng.shared.exception.*;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyStatisticsDTO;
@@ -58,8 +59,6 @@ import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.util.Pair;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -244,10 +243,16 @@ public class StudyServiceImpl implements StudyService {
 	@Override
 	@Transactional(rollbackOn = {ShanoirException.class})
 	public Study update(Study study) throws ShanoirException {
+		long startTime = System.currentTimeMillis();
 		Study studyDb = studyRepository.findById(study.getId()).orElse(null);
+		long endTime = System.currentTimeMillis();
+		LOG.error("findById" + (endTime - startTime) + " milliseconds");
 
+		startTime = System.currentTimeMillis();
 		List<Long> tagsToDelete = getTagsToDelete(study, studyDb);
 		List<Long> studyTagsToDelete = getStudyTagsToDelete(study, studyDb);
+		endTime = System.currentTimeMillis();
+		LOG.error("tags" + (endTime - startTime) + " milliseconds");
 
 		if (studyDb == null) {
 			throw new EntityNotFoundException(Study.class, study.getId());
@@ -267,28 +272,40 @@ public class StudyServiceImpl implements StudyService {
 		studyDb.setWithExamination(study.isWithExamination());
 		studyDb.setMonoCenter(study.isMonoCenter());
 
+		startTime = System.currentTimeMillis();
 		if (study.getStudyCenterList() != null) {
 			ListDependencyUpdate.updateWith(studyDb.getStudyCenterList(), study.getStudyCenterList());
 			for (StudyCenter studyCenter : studyDb.getStudyCenterList()) {
 				studyCenter.setStudy(studyDb);
 			}
 		}
+		endTime = System.currentTimeMillis();
+		LOG.error("getStudyCenterList" + (endTime - startTime) + " milliseconds");
 
+		startTime = System.currentTimeMillis();
 		if (study.getTags() != null) {
 			ListDependencyUpdate.updateWithNoRemove(studyDb.getTags(), study.getTags());
 			for (Tag tag : studyDb.getTags()) {
 				tag.setStudy(studyDb);
 			}
 		}
+		endTime = System.currentTimeMillis();
+		LOG.error("tags" + (endTime - startTime) + " milliseconds");
+
+
+		startTime = System.currentTimeMillis();
 		if (study.getStudyTags() != null) {
 			ListDependencyUpdate.updateWithNoRemove(studyDb.getStudyTags(), study.getStudyTags());
 			for (StudyTag tag : studyDb.getStudyTags()) {
 				tag.setStudy(studyDb);
 			}
 		}
+		endTime = System.currentTimeMillis();
+		LOG.error("study tags" + (endTime - startTime) + " milliseconds");
 
 		List<Subject> toBeDeleted = new ArrayList<Subject>();
 
+		startTime = System.currentTimeMillis();
 		if (study.getSubjectStudyList() != null) {
 
 			// Find all ids from new study
@@ -312,6 +329,9 @@ public class StudyServiceImpl implements StudyService {
 				}
 			}
 		}
+		endTime = System.currentTimeMillis();
+		LOG.error("subjectStudyList" + (endTime - startTime) + " milliseconds");
+
 
 		if (studyDb.getProtocolFilePaths() != null) {
 			for (String filePath : studyDb.getProtocolFilePaths()) {
@@ -331,8 +351,12 @@ public class StudyServiceImpl implements StudyService {
 			studyDb.setDataUserAgreementPaths(study.getDataUserAgreementPaths());
 		}
 
+		startTime = System.currentTimeMillis();
 		studyDb = studyRepository.save(studyDb);
+		endTime = System.currentTimeMillis();
+		LOG.error("save" + (endTime - startTime) + " milliseconds");
 
+		startTime = System.currentTimeMillis();
 		if (study.getSubjectStudyList() != null) {
 			updateTags(study.getSubjectStudyList(), studyDb.getTags());
 			ListDependencyUpdate.updateWith(studyDb.getSubjectStudyList(), study.getSubjectStudyList());
@@ -342,6 +366,10 @@ public class StudyServiceImpl implements StudyService {
 			studyDb = studyRepository.save(studyDb);
 		}
 
+		endTime = System.currentTimeMillis();
+		LOG.error("subjectStudyList" + (endTime - startTime) + " milliseconds");
+
+		startTime = System.currentTimeMillis();
 		// Actually delete subjects
 		for (Subject subjectToDelete : toBeDeleted) {
 			subjectService.deleteById(subjectToDelete.getId());
@@ -355,8 +383,13 @@ public class StudyServiceImpl implements StudyService {
 			studyDb.getStudyTags().removeIf(tag -> studyTagsToDelete.contains(tag.getId()));
 			studyDb = studyRepository.save(studyDb);
 		}
+		endTime = System.currentTimeMillis();
+		LOG.error("les tags la merde" + (endTime - startTime) + " milliseconds");
 
+		startTime = System.currentTimeMillis();
 		String error = this.updateStudyName(studyMapper.studyToStudyDTO(studyDb));
+		endTime = System.currentTimeMillis();
+		LOG.error("appels datasets" + (endTime - startTime) + " milliseconds");
 
 		if(error != null && !error.isEmpty()){
 			LOG.error("Study [" + studyDb.getId() + "] couldn't be sync with datasets microservice : {}", error);
@@ -456,7 +489,7 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Transactional
-	protected void updateStudyUsers(Study studyDb, Study study) {
+	public void updateStudyUsers(Study studyDb, Study study) {
 		if (study.getStudyUserList() == null) {
 			study.setStudyUserList(new ArrayList<>());
 		}

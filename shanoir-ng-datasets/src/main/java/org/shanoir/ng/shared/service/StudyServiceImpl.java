@@ -20,8 +20,6 @@ import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.model.Tag;
-import org.shanoir.ng.tag.repository.StudyTagRepository;
-import org.shanoir.ng.vip.resulthandler.ResultHandlerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +38,9 @@ public class StudyServiceImpl implements StudyService {
 
 	@Autowired
 	private DatasetRepository dsRepository;
-	
+
+	private static final Logger LOG = LoggerFactory.getLogger(StudyServiceImpl.class);
+
 	@Override
 	public Study findById(final Long id) {
 		return repository.findById(id).orElse(null);
@@ -69,7 +69,7 @@ public class StudyServiceImpl implements StudyService {
 		if (current.getStudyTags() != null) {
 			current.getStudyTags().clear();
 		} else {
-			current.setTags(new ArrayList<>());
+			current.setStudyTags(new ArrayList<>());
 		}
 		if (updated.getStudyTags() != null) {
 			current.getStudyTags().addAll(updated.getStudyTags());
@@ -78,8 +78,13 @@ public class StudyServiceImpl implements StudyService {
 			tag.setStudy(current);
 		}
 
+		long startTime = System.currentTimeMillis();
 		Study studyDb = this.repository.save(current);
+		long endTime = System.currentTimeMillis();
+		LOG.error("UpdateStudy tag first " + (endTime - startTime) + " + milliseconds");
 
+
+		startTime = System.currentTimeMillis();
 		// SUBJECT_STUDY
 		if (current.getSubjectStudyList() != null) {
 			current.getSubjectStudyList().clear();
@@ -89,7 +94,10 @@ public class StudyServiceImpl implements StudyService {
 		if (updated.getSubjectStudyList() != null) {
 			current.getSubjectStudyList().addAll(updated.getSubjectStudyList());
 		}
+		endTime = System.currentTimeMillis();
+		LOG.error("UpdateStudy tag second " + (endTime - startTime) + " milliseconds");
 
+		startTime = System.currentTimeMillis();
 		for (SubjectStudy sustu : current.getSubjectStudyList()) {
 			sustu.setStudy(current);
 			for (Tag tag : sustu.getTags()) {
@@ -106,6 +114,8 @@ public class StudyServiceImpl implements StudyService {
 			}
 		}
 		this.repository.save(current);
+		endTime = System.currentTimeMillis();
+		LOG.error("Sustu tag fin" + (endTime - startTime) + " milliseconds");
 	}
 
 	@Override
