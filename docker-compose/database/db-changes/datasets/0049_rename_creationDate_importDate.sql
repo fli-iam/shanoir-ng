@@ -1,0 +1,1 @@
+ALTER TABLE dataset_acquisition CHANGE creation_date import_date date default NULL
