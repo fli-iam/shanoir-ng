@@ -38,7 +38,7 @@ public class Study extends IdName {
 	
 	protected String name;
 	
-	@ManyToMany
+	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(name = "related_datasets", joinColumns = @JoinColumn(name = "study_id"), inverseJoinColumns = @JoinColumn(name = "dataset_id"))
 	private List<Dataset> relatedDatasets;
 	
