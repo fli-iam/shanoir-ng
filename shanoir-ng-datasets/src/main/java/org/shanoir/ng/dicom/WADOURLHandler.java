@@ -27,7 +27,7 @@ public class WADOURLHandler {
 				"wado\\?requestType=WADO", "rs",
 				"&studyUID=", "/studies/",
 				"&seriesUID=", "/series/",
-				"&ObjectUID=", "/instances/",
+				"&objectUID=", "/instances/",
 				"&contentType=application/dicom", ""
 		};
         for (int i = 0; i < patterns.length; i += 2) {
