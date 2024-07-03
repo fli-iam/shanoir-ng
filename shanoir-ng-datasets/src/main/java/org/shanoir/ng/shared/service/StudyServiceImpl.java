@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.shared.service;
 
+import org.shanoir.ng.configuration.amqp.RabbitMQDatasetsService;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.SubjectStudy;
@@ -42,6 +43,8 @@ public class StudyServiceImpl implements StudyService {
 
 	@Autowired
 	private DatasetRepository dsRepository;
+
+	private static final Logger LOG = LoggerFactory.getLogger(StudyServiceImpl.class);
 	
 	@Override
 	public Study findById(final Long id) {
@@ -79,6 +82,7 @@ public class StudyServiceImpl implements StudyService {
 			current.getSubjectStudyList().addAll(updated.getSubjectStudyList());
 		}
 
+		LOG.error("for (SubjectStudy sustu : current.getSubjectStudyList())...");
 		for (SubjectStudy sustu : current.getSubjectStudyList()) {
 			sustu.setStudy(current);
 			for (Tag tag : sustu.getTags()) {
@@ -94,6 +98,8 @@ public class StudyServiceImpl implements StudyService {
 				}
 			}
 		}
+
+		LOG.error("studyService.updateStudy(updated, current);");
 		this.repository.save(current);
 	}
 
@@ -102,6 +108,7 @@ public class StudyServiceImpl implements StudyService {
 
 		List<String> errors = new ArrayList<>();
 
+		LOG.error("for(StudyTag tag : current.getStudyTags())...");
 		for(StudyTag tag : current.getStudyTags()){
             if (!updated.getStudyTags().contains(tag)
 					&& this.dsRepository.existsByTagsContains(tag)) {

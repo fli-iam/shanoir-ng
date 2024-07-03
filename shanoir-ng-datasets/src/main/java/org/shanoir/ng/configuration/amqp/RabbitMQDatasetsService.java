@@ -173,26 +173,33 @@ public class RabbitMQDatasetsService {
 	public String receiveStudyUpdate(final String studyAsString) {
 		try {
 
+			LOG.error("Study updated = objectMapper.readValue(studyAsString, Study.class);");
 			Study updated = objectMapper.readValue(studyAsString, Study.class);
 
+			LOG.error("bidsService.deleteBidsFolder(updated.getId(), null);");
 			bidsService.deleteBidsFolder(updated.getId(), null);
 
+			LOG.error("Study current = this.receiveAndUpdateIdNameEntity(studyAsString, Study.class, studyRepository);");
 			Study current = this.receiveAndUpdateIdNameEntity(studyAsString, Study.class, studyRepository);
 
+			LOG.error("studyService.validate(updated, current);");
 			List<String> errors = studyService.validate(updated, current);
 
 			if(!errors.isEmpty()){
 				return errors.get(0);
 			}
 
+			LOG.error("studyService.updateStudy(updated, current);");
 			studyService.updateStudy(updated, current);
 
+			LOG.error("List<Long> subjectIds = current.getSubjectStudyList()...");
 			List<Long> subjectIds = current.getSubjectStudyList()
 					.stream().map(subStu ->
 							subStu.getSubject().getId()
 					).collect(Collectors.toList()
 				);
 
+			LOG.error("solrService.updateSubjects(subjectIds);");
 			solrService.updateSubjects(subjectIds);
 
 		} catch (Exception ex) {
