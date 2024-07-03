@@ -33,9 +33,7 @@ public class WADOURLHandler {
         for (int i = 0; i < patterns.length; i += 2) {
             Pattern pattern = Pattern.compile(patterns[i]);
             Matcher matcher = pattern.matcher(url);
-			if (matcher.matches()) {
-				url = matcher.replaceAll(patterns[i + 1]);
-			}
+			url = matcher.replaceAll(patterns[i + 1]);
         }
         return url;
     }
