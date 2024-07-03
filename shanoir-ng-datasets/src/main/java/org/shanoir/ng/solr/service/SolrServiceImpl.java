@@ -312,4 +312,12 @@ public class SolrServiceImpl implements SolrService {
 		}
 	}
 
+	@Override
+	public void updateStudy(Long studyId) throws SolrServerException, IOException {
+		Iterable<Dataset> datasets = this.dsRepository.findByDatasetAcquisition_Examination_Study_Id(studyId);
+		List<Long> ids = new ArrayList<>();
+		datasets.forEach(ds -> ids.add(ds.getId()));
+		this.updateDatasets(ids);
+	}
+
 }

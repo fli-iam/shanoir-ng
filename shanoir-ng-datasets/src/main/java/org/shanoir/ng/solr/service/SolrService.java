@@ -62,4 +62,5 @@ public interface SolrService {
 
 	void updateSubjects(List<Long> subjectIds) throws SolrServerException, IOException;
 
+	void updateStudy(Long studyId) throws SolrServerException, IOException;
 }
