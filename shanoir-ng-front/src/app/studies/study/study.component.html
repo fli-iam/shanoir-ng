@@ -56,6 +56,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <li [class.active]="activeTab == 'tree'" class="disabled" replaceUrl="true">Tree</li>
 					<li [class.active]="activeTab == 'bids'" class="disabled" replaceUrl="true">BIDS</li>
 				</ng-container>
+                <li class="tags" [class.active]="activeTab == 'history'" [routerLink]="'.'" [fragment]="'history'" replaceUrl="true">
+                    <span class="tags">History</span>
+                </li>
 			</ul>
 
 			<fieldset [class.hidden-tab]="activeTab != 'general'" tab="general">
@@ -412,6 +415,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <fieldset *ngIf="mode == 'view'" [class.hidden-tab]="activeTab != 'bids'" tab="bids">
 				        <legend>BIDS tree</legend>
                 <bids-tree [studyId]="id" [studyName]="study.name"></bids-tree>
+            </fieldset>
+            <fieldset *ngIf="mode == 'view'" [class.hidden-tab]="activeTab != 'history'" tab="history">
+                <legend>History</legend>
+                <shanoir-table #table
+                   [getPage]="getPage.bind(this)"
+                   [columnDefs]="historyColumns">
+                </shanoir-table>
             </fieldset>
 			<form-footer
 					[state]="footerState"

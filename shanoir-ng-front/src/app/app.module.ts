@@ -268,6 +268,7 @@ import { DownloadSetupAltComponent } from './shared/mass-download/download-setup
 import { TestQualityCardOptionsComponent } from './study-cards/test-quality-card-options/test-quality-card-options.component';
 import { SessionService } from './shared/services/session.service';
 import { PipelineService } from "./vip/pipelines/pipeline/pipeline.service";
+import {ShanoirEventService} from "./users/shanoir-event/shanoir-event.service";
 
 @NgModule({
     imports: [
@@ -541,6 +542,7 @@ import { PipelineService } from "./vip/pipelines/pipeline/pipeline.service";
         QualityCardDTOService,
         MassDownloadService,
         SessionService,
+        ShanoirEventService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],
     bootstrap: [AppComponent]

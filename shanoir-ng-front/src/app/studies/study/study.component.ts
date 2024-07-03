@@ -13,7 +13,7 @@
  */
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { AbstractControl, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
@@ -47,8 +47,13 @@ import { DatasetService } from "../../datasets/shared/dataset.service";
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { DatasetExpressionFormat } from "../../enum/dataset-expression-format.enum";
 import { KeyValue } from "@angular/common";
-import { TaskState } from 'src/app/async-tasks/task.model';
-import {ShanoirError} from "../../shared/models/error.model";
+import { TaskState} from 'src/app/async-tasks/task.model';
+import { Page, Pageable } from "../../shared/components/table/pageable.model";
+import { ColumnDefinition } from "../../shared/components/table/column.definition.type";
+import { BrowserPaging } from "../../shared/components/table/browser-paging.model";
+import { ShanoirEvent } from "../../users/shanoir-event/shanoir-event.model";
+import { ShanoirEventService } from "../../users/shanoir-event/shanoir-event.service";
+import { ServiceLocator } from "../../utils/locator.service";
 
 @Component({
     selector: 'study-detail',
@@ -72,6 +77,7 @@ export class StudyComponent extends EntityComponent<Study> {
     users: User[] = [];
     studyNode: Study | StudyNode;
     uploading: boolean = false;
+    history: ShanoirEvent[]=[];
 
     protected protocolFiles: File[];
     protected dataUserAgreement: File;
@@ -94,6 +100,21 @@ export class StudyComponent extends EntityComponent<Study> {
         return b.value - a.value;
     };
 
+    historyColumns: ColumnDefinition[] = [
+        {headerName: 'Creation date', field: 'creationDate', type: 'dateTime'},
+        {headerName: 'User', field: 'username'},
+        {headerName: 'Event type', field: 'eventType', cellRenderer: function (params: any) {
+                if (params.data.eventType.includes(".event")) {
+                    params.data.eventType = params.data.eventType.replace(".event", "");
+                }
+                return params.data.eventType;
+            }
+        },
+        {headerName: 'ObjectId', field: 'objectId'
+        },
+        {headerName: 'Message', field: 'message'}
+    ];
+
     constructor(
             private route: ActivatedRoute,
             private centerService: CenterService,
@@ -105,7 +126,9 @@ export class StudyComponent extends EntityComponent<Study> {
             private studyCardService: StudyCardService,
             private accessRequestService: AccessRequestService,
             private processingService: ExecutionDataService,
-            private downloadService: MassDownloadService) {
+            private downloadService: MassDownloadService,
+            private shanoirEventService: ShanoirEventService,
+            ) {
 
         super(route, 'study');
         this.activeTab = 'general';
@@ -156,13 +179,16 @@ export class StudyComponent extends EntityComponent<Study> {
         if (this.keycloakService.isUserAdminOrExpert()) {
             return Promise.all([
                 studyPromise,
-                this.fetchUsers()
-            ]).then(([study, users]) => {
+                this.fetchUsers(),
+                this.fetchHistory(this.id),
+            ]).then(([study, users, history]) => {
                 Study.completeMembers(study, users);
+                this.history = history;
             });
         } else {
             return studyPromise.then();
         }
+
     }
 
     initEdit(): Promise<void> {
@@ -228,6 +254,17 @@ export class StudyComponent extends EntityComponent<Study> {
         });
     }
 
+    private fetchHistory(studyId: number): Promise<ShanoirEvent[]> {
+        return this.shanoirEventService.requestHistory(studyId).then(history => {
+            console.log("history ", history);
+            return history;
+        });
+    }
+
+    getPage = (pageable: Pageable): Promise<Page<ShanoirEvent>> => {
+        return Promise.resolve(new BrowserPaging(this.history, this.historyColumns).getPage(pageable));
+    }
+
     buildForm(): UntypedFormGroup {
         let formGroup = this.formBuilder.group({
             'name': [this.study.name, [Validators.required, Validators.minLength(2), Validators.maxLength(200), this.registerOnSubmitValidator('unique', 'name')]],
@@ -260,7 +297,6 @@ export class StudyComponent extends EntityComponent<Study> {
         }));
         return formGroup;
     }
-
     private setLabeledSizes(study: Study): Promise<void> {
         let waitUploads: Promise<void> = this.studyService.fileUploads.has(study.id)
             ? this.studyService.fileUploads.get(study.id)

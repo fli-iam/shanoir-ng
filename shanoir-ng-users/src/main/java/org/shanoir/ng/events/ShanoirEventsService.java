@@ -1,14 +1,16 @@
 package org.shanoir.ng.events;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.tasks.AsyncTaskApiController;
 import org.shanoir.ng.tasks.UserSseEmitter;
+import org.shanoir.ng.user.model.User;
+import org.shanoir.ng.user.model.dto.UserDTO;
+import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -29,6 +31,9 @@ public class ShanoirEventsService {
 
 	@Autowired
 	ShanoirEventRepository repository;
+
+	@Autowired
+	UserRepository userRepository;
 
 	private static final Logger LOG = LoggerFactory.getLogger(ShanoirEventsService.class);
 
@@ -125,5 +130,32 @@ public class ShanoirEventsService {
 	public ShanoirEvent findById(Long taskId) {
 		Long userId = KeycloakUtil.getTokenUserId();
 		return repository.findByIdAndUserId(taskId, userId);
+	}
+
+	public List<ShanoirEvent> findByStudyId(Long studyId) {
+		List<ShanoirEvent> events = repository.findByStudyIdOrderByCreationDateDesc(studyId);
+		List<Long> userIds = getUniqueEventIds(events);
+		HashMap<Long, String> userIdName = new HashMap<>();
+
+		for (Long userId : userIds) {
+			User user = userRepository.findById(userId).orElse(null);
+			if (user != null) {
+				userIdName.put(userId, user.getUsername());
+			}
+		}
+
+		for (ShanoirEvent e : events) {
+			e.setUsername(userIdName.get(e.getUserId()));
+		}
+
+		return events;
+	}
+
+	private List<Long> getUniqueEventIds(List<ShanoirEvent> events) {
+		// Use streams to map, distinct, and collect the unique IDs
+		return events.stream()
+				.map(ShanoirEvent::getUserId)
+				.distinct()
+				.collect(Collectors.toList());
 	}
 }
