@@ -298,6 +298,7 @@ public class SolrServiceImpl implements SolrService {
 	@Transactional
 	public void updateSubjects(List<Long> subjectIds) throws SolrServerException, IOException {
 		Set<Long> datasetsToUpdate = new HashSet<>();
+		LOG.error("for (Examination exam : examRepository.findBySubjectIdIn(subjectIds))...");
 		for (Examination exam : examRepository.findBySubjectIdIn(subjectIds)) {
 			for (DatasetAcquisition acq : exam.getDatasetAcquisitions()) {
 				for (Dataset ds : acq.getDatasets()) {
@@ -306,6 +307,7 @@ public class SolrServiceImpl implements SolrService {
 			}
 		}
 		if (!CollectionUtils.isEmpty(datasetsToUpdate)) {
+			LOG.error("this.indexDatasets(new ArrayList<>(datasetsToUpdate));");
 			this.indexDatasets(new ArrayList<>(datasetsToUpdate));
 		}
 	}
