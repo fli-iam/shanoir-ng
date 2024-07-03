@@ -166,8 +166,11 @@ public class SolrServiceImpl implements SolrService {
 	@Override
 	public void indexDatasets(List<Long> datasetIds) throws SolrServerException, IOException {
 		// Get all associated datasets and index them to solr
+		LOG.error("List<ShanoirMetadata> metadatas = shanoirMetadataRepository.findSolrDocs(datasetIds);");
 		List<ShanoirMetadata> metadatas = shanoirMetadataRepository.findSolrDocs(datasetIds);
+		LOG.error("Map<Long, List<String>> tags = shanoirMetadataRepository.findAllTags(datasetIds);");
 		Map<Long, List<String>> tags = shanoirMetadataRepository.findAllTags(datasetIds);
+		LOG.error("this.indexDocumentsInSolr(metadatas, tags, null);");
 		this.indexDocumentsInSolr(metadatas, tags, null);
 	}
 
@@ -290,7 +293,9 @@ public class SolrServiceImpl implements SolrService {
 		if (CollectionUtils.isEmpty(datasetIds)) {
 			return;
 		}
+		LOG.error("this.deleteFromIndex(datasetIds);");
 		this.deleteFromIndex(datasetIds);
+		LOG.error("this.indexDatasets(datasetIds);");
 		this.indexDatasets(datasetIds);		
 	}
 
@@ -314,9 +319,12 @@ public class SolrServiceImpl implements SolrService {
 
 	@Override
 	public void updateStudy(Long studyId) throws SolrServerException, IOException {
+		LOG.error("Iterable<Dataset> datasets = this.dsRepository.findByDatasetAcquisition_Examination_Study_Id(studyId);");
 		Iterable<Dataset> datasets = this.dsRepository.findByDatasetAcquisition_Examination_Study_Id(studyId);
 		List<Long> ids = new ArrayList<>();
+		LOG.error("datasets.forEach(ds -> ids.add(ds.getId()));");
 		datasets.forEach(ds -> ids.add(ds.getId()));
+		LOG.error("this.updateDatasets(ids);");
 		this.updateDatasets(ids);
 	}
 

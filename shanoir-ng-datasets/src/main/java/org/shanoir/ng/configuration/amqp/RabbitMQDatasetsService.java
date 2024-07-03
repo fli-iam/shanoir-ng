@@ -200,6 +200,7 @@ public class RabbitMQDatasetsService {
 			return ex.getMessage();
 		}
 
+		LOG.error("return \"\";");
 		return "";
 	}
 
