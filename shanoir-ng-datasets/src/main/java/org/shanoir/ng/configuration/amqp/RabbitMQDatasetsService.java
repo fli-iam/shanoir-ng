@@ -186,14 +186,8 @@ public class RabbitMQDatasetsService {
 			}
 
 			studyService.updateStudy(updated, current);
-
-			List<Long> subjectIds = current.getSubjectStudyList()
-					.stream().map(subStu ->
-							subStu.getSubject().getId()
-					).collect(Collectors.toList()
-				);
-
-			solrService.updateSubjects(subjectIds);
+			
+			solrService.updateStudy(current.getId());
 
 		} catch (Exception ex) {
 			LOG.error("An error occured while processing study update", ex);

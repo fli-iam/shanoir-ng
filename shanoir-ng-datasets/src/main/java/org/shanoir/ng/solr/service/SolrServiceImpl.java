@@ -297,17 +297,14 @@ public class SolrServiceImpl implements SolrService {
 	@Override
 	@Transactional
 	public void updateSubjects(List<Long> subjectIds) throws SolrServerException, IOException {
-		Set<Long> datasetsToUpdate = new HashSet<>();
-		for (Examination exam : examRepository.findBySubjectIdIn(subjectIds)) {
-			for (DatasetAcquisition acq : exam.getDatasetAcquisitions()) {
-				for (Dataset ds : acq.getDatasets()) {
-					datasetsToUpdate.add(ds.getId());
-				}
-			}
-		}
-		if (!CollectionUtils.isEmpty(datasetsToUpdate)) {
-			this.indexDatasets(new ArrayList<>(datasetsToUpdate));
-		}
+		List<Long> ids = this.dsRepository.findIdsBySubjectIdIn(subjectIds);
+		this.updateDatasets(ids);
+	}
+
+	@Override
+	public void updateStudy(Long studyId) throws SolrServerException, IOException {
+		List<Long> ids = this.dsRepository.findIdsByStudyId(studyId);
+		this.updateDatasets(ids);
 	}
 
 }
