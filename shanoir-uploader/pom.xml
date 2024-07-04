@@ -24,7 +24,7 @@
 		<json.version>20231013</json.version>
 		<junit.jupiter.version>5.8.2</junit.jupiter.version>
 		<junit.platform.version>1.8.2</junit.platform.version>
-		<poi.version>5.2.5</poi.version>
+		<poi.version>4.1.2</poi.version>
 	</properties>
 
 	<dependencies>
