@@ -58,8 +58,6 @@ public class ShanoirEventLight {
 	@Transient
 	private Boolean hasReport;
 
-	private String username;
-
 	public ShanoirEventLight() {
 		// Default empty constructor for json deserializer.
 	}
@@ -216,11 +214,4 @@ public class ShanoirEventLight {
 		return id == null ? null : id.toString();
 	}
 
-	public String getUsername() {
-		return username;
-	}
-
-	public void setUsername(String username) {
-		this.username = username;
-	}
 }

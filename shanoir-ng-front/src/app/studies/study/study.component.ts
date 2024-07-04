@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import {Component, ElementRef, EventEmitter, Output, ViewChild} from '@angular/core';
 import { AbstractControl, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
 
@@ -67,7 +67,7 @@ export class StudyComponent extends EntityComponent<Study> {
     @ViewChild('memberTable', { static: false }) table: TableComponent;
     @ViewChild('input', { static: false }) private fileInput: ElementRef;
     @ViewChild('duaInput', { static: false }) private duaFileInput: ElementRef;
-
+    @Output() fetchHistory = new EventEmitter<string>();
     protected pdfDownloadState: TaskState = new TaskState();
     protected duaDownloadState: TaskState = new TaskState();
     protected studyDownloadState: TaskState = new TaskState();
@@ -77,7 +77,6 @@ export class StudyComponent extends EntityComponent<Study> {
     users: User[] = [];
     studyNode: Study | StudyNode;
     uploading: boolean = false;
-    history: ShanoirEvent[]=[];
 
     protected protocolFiles: File[];
     protected dataUserAgreement: File;
@@ -100,20 +99,7 @@ export class StudyComponent extends EntityComponent<Study> {
         return b.value - a.value;
     };
 
-    historyColumns: ColumnDefinition[] = [
-        {headerName: 'Creation date', field: 'creationDate', type: 'dateTime'},
-        {headerName: 'User', field: 'username'},
-        {headerName: 'Event type', field: 'eventType', cellRenderer: function (params: any) {
-                if (params.data.eventType.includes(".event")) {
-                    params.data.eventType = params.data.eventType.replace(".event", "");
-                }
-                return params.data.eventType;
-            }
-        },
-        {headerName: 'ObjectId', field: 'objectId'
-        },
-        {headerName: 'Message', field: 'message'}
-    ];
+    public keycloakService: KeycloakService;
 
     constructor(
             private route: ActivatedRoute,
@@ -127,7 +113,6 @@ export class StudyComponent extends EntityComponent<Study> {
             private accessRequestService: AccessRequestService,
             private processingService: ExecutionDataService,
             private downloadService: MassDownloadService,
-            private shanoirEventService: ShanoirEventService,
             ) {
 
         super(route, 'study');
@@ -143,6 +128,11 @@ export class StudyComponent extends EntityComponent<Study> {
 
     getService(): EntityService<Study> {
         return this.studyService;
+    }
+
+    loadHistory() {
+        console.log("load history");
+        this.fetchHistory.emit("1");
     }
 
     initView(): Promise<void> {
@@ -179,11 +169,9 @@ export class StudyComponent extends EntityComponent<Study> {
         if (this.keycloakService.isUserAdminOrExpert()) {
             return Promise.all([
                 studyPromise,
-                this.fetchUsers(),
-                this.fetchHistory(this.id),
-            ]).then(([study, users, history]) => {
+                this.fetchUsers()
+            ]).then(([study, users]) => {
                 Study.completeMembers(study, users);
-                this.history = history;
             });
         } else {
             return studyPromise.then();
@@ -252,17 +240,6 @@ export class StudyComponent extends EntityComponent<Study> {
             this.users = users;
             return users;
         });
-    }
-
-    private fetchHistory(studyId: number): Promise<ShanoirEvent[]> {
-        return this.shanoirEventService.requestHistory(studyId).then(history => {
-            console.log("history ", history);
-            return history;
-        });
-    }
-
-    getPage = (pageable: Pageable): Promise<Page<ShanoirEvent>> => {
-        return Promise.resolve(new BrowserPaging(this.history, this.historyColumns).getPage(pageable));
     }
 
     buildForm(): UntypedFormGroup {

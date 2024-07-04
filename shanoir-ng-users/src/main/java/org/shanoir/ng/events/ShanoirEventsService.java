@@ -134,28 +134,6 @@ public class ShanoirEventsService {
 
 	public List<ShanoirEvent> findByStudyId(Long studyId) {
 		List<ShanoirEvent> events = repository.findByStudyIdOrderByCreationDateDesc(studyId);
-		List<Long> userIds = getUniqueEventIds(events);
-		HashMap<Long, String> userIdName = new HashMap<>();
-
-		for (Long userId : userIds) {
-			User user = userRepository.findById(userId).orElse(null);
-			if (user != null) {
-				userIdName.put(userId, user.getUsername());
-			}
-		}
-
-		for (ShanoirEvent e : events) {
-			e.setUsername(userIdName.get(e.getUserId()));
-		}
-
 		return events;
-	}
-
-	private List<Long> getUniqueEventIds(List<ShanoirEvent> events) {
-		// Use streams to map, distinct, and collect the unique IDs
-		return events.stream()
-				.map(ShanoirEvent::getUserId)
-				.distinct()
-				.collect(Collectors.toList());
 	}
 }

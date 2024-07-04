@@ -470,7 +470,8 @@ public class RabbitMQDatasetsService {
 					userId,
 					"Copy of dataset " + countProgress++ + "/" + countTotal + " to study [" + studyId + "].",
 					ShanoirEvent.IN_PROGRESS,
-					Float.valueOf(countProgress/countTotal)
+					Float.valueOf(countProgress/countTotal),
+					studyId
 			);
 			event.setReport("");
 
@@ -508,6 +509,7 @@ public class RabbitMQDatasetsService {
 					countProcessed + " are processed datasets and cannot be copied.");
 			event.setStatus(ShanoirEvent.SUCCESS);
 			event.setProgress(1.0f);
+			event.setStudyId(studyId);
 			eventService.publishEvent(event);
 			solrService.indexDatasets(newDatasets);
 
