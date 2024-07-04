@@ -54,6 +54,7 @@ import { BrowserPaging } from "../../shared/components/table/browser-paging.mode
 import { ShanoirEvent } from "../../users/shanoir-event/shanoir-event.model";
 import { ShanoirEventService } from "../../users/shanoir-event/shanoir-event.service";
 import { ServiceLocator } from "../../utils/locator.service";
+import {StudyHistoryComponent} from "../study-history/study-history.component";
 
 @Component({
     selector: 'study-detail',
@@ -67,7 +68,7 @@ export class StudyComponent extends EntityComponent<Study> {
     @ViewChild('memberTable', { static: false }) table: TableComponent;
     @ViewChild('input', { static: false }) private fileInput: ElementRef;
     @ViewChild('duaInput', { static: false }) private duaFileInput: ElementRef;
-    @Output() fetchHistory = new EventEmitter<string>();
+    @ViewChild('studyHistory', {static: false}) studyHistory: StudyHistoryComponent;
     protected pdfDownloadState: TaskState = new TaskState();
     protected duaDownloadState: TaskState = new TaskState();
     protected studyDownloadState: TaskState = new TaskState();
@@ -112,7 +113,7 @@ export class StudyComponent extends EntityComponent<Study> {
             private studyCardService: StudyCardService,
             private accessRequestService: AccessRequestService,
             private processingService: ExecutionDataService,
-            private downloadService: MassDownloadService,
+            private downloadService: MassDownloadService
             ) {
 
         super(route, 'study');
@@ -132,7 +133,7 @@ export class StudyComponent extends EntityComponent<Study> {
 
     loadHistory() {
         console.log("load history");
-        this.fetchHistory.emit("1");
+        this.studyHistory.onFetchHistory();
     }
 
     initView(): Promise<void> {

@@ -1,5 +1,4 @@
-<shanoir-table
-    (fetchHistory)="onFetchHistory($event)"
+<shanoir-table #table
     [columnDefs]="historyColumns"
     [getPage]="getPage.bind(this)">
 </shanoir-table>

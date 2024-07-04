@@ -7,4 +7,5 @@ export class ShanoirEvent {
     creationDate: Date;
     studyId: number;
     username: string;
+    userId: number;
 }
