@@ -26,7 +26,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<h2 class="header command-zone" i18n="Create study|Title@@studyDetailCreateTitle">Create study</h2>
 				</ng-template>
 			</span>
-
 			<ul class="tabs">
 				<li [class.active]="activeTab == 'general'" [routerLink]="'.'" [fragment]="'general'" replaceUrl="true">
 					<span class="general">General</span>
@@ -419,6 +418,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <fieldset *ngIf="mode == 'view'" [class.hidden-tab]="activeTab != 'history'" tab="history">
                 <legend>History</legend>
                 <study-history #studyHistory
+                   [eventHistory]="openHistory"
                    [study]="study">
                 </study-history>
             </fieldset>

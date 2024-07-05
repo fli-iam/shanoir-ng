@@ -55,6 +55,7 @@ import { ShanoirEvent } from "../../users/shanoir-event/shanoir-event.model";
 import { ShanoirEventService } from "../../users/shanoir-event/shanoir-event.service";
 import { ServiceLocator } from "../../utils/locator.service";
 import {StudyHistoryComponent} from "../study-history/study-history.component";
+import {SuperPromise} from "../../utils/super-promise";
 
 @Component({
     selector: 'study-detail',
@@ -68,7 +69,6 @@ export class StudyComponent extends EntityComponent<Study> {
     @ViewChild('memberTable', { static: false }) table: TableComponent;
     @ViewChild('input', { static: false }) private fileInput: ElementRef;
     @ViewChild('duaInput', { static: false }) private duaFileInput: ElementRef;
-    @ViewChild('studyHistory', {static: false}) studyHistory: StudyHistoryComponent;
     protected pdfDownloadState: TaskState = new TaskState();
     protected duaDownloadState: TaskState = new TaskState();
     protected studyDownloadState: TaskState = new TaskState();
@@ -78,10 +78,9 @@ export class StudyComponent extends EntityComponent<Study> {
     users: User[] = [];
     studyNode: Study | StudyNode;
     uploading: boolean = false;
-
     protected protocolFiles: File[];
     protected dataUserAgreement: File;
-
+    openHistory: SuperPromise<void> = new SuperPromise<void>();
     public selectedDatasetIds: number[];
     protected hasDownloadRight: boolean;
     accessRequests: AccessRequest[];
@@ -120,6 +119,17 @@ export class StudyComponent extends EntityComponent<Study> {
         this.activeTab = 'general';
     }
 
+    public set activeTab(param : string) {
+        super.activeTab = param;
+        if(this.activeTab == "history") {
+            this.openHistory.resolve();
+        }
+    }
+
+    public get activeTab():string {
+        return super.activeTab;
+    }
+
     public get study(): Study { return this.entity; }
 
     public set study(study: Study) {
@@ -132,8 +142,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     loadHistory() {
-        console.log("load history");
-        this.studyHistory.onFetchHistory();
+        this.openHistory.resolve();
     }
 
     initView(): Promise<void> {

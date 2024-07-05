@@ -103,6 +103,15 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         this._entity = entity;
     }
 
+    public get activeTab(): string {
+        return this._activeTab;
+    }
+
+    public set activeTab(param: string) {
+        console.log("super set activetab");
+        this._activeTab = param;
+    }
+
     ngOnInit(): void {
         //if (!this.id) this.id = +this.activatedRoute.snapshot.params['id'];
         this.subscriptions.push(this.activatedRoute.params.subscribe(

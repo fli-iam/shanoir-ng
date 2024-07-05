@@ -7,6 +7,7 @@ import {Page, Pageable} from "../../shared/components/table/pageable.model";
 import {BrowserPaging} from "../../shared/components/table/browser-paging.model";
 import {TableComponent} from "../../shared/components/table/table.component";
 import {StudyUser} from "../shared/study-user.model";
+import {Observable} from "rxjs";
 
 @Component({
   selector: 'study-history',
@@ -17,6 +18,7 @@ export class StudyHistoryComponent {
 
     @ViewChild('table', {static: false}) table: TableComponent;
     @Input() study: Study;
+    @Input() eventHistory: Promise<any>;
 
     history: ShanoirEvent[]=[];
 
@@ -30,7 +32,20 @@ export class StudyHistoryComponent {
                 return params.data.eventType;
             }
         },
-        {headerName: 'ObjectId', field: 'objectId'},
+        {headerName: 'ObjectId', field: 'objectId', route: function(params:ShanoirEvent) {
+            let event = params.eventType;
+            let id = params.objectId;
+            if (event.includes("create")) {
+                if (event.includes("Dataset") && !event.includes("Acquisition")) { return "/dataset/details/" + id; }
+                else if (event.includes("Examination")) { return "/examination/details/" + id; }
+                else if (event.includes("Acquisition")) { return "/dataset-acquisition/details/" + id; }
+                else if (event.includes("Subject")) { return "/subject/details/" + id; }
+            } else if (event.includes("update")) {
+                if (event.includes("Study")) { return "/study/details/" + id; }
+                else if (event.includes("Examination")) { return "/examination/details/" + id; }
+                else if (event.includes("Subject")) { return "/subject/details/" + id; }
+            }
+        }},
         {headerName: 'Message', field: 'message'}
     ];
 
@@ -38,7 +53,7 @@ export class StudyHistoryComponent {
         private shanoirEventService: ShanoirEventService
     ) {}
     ngOnInit() {
-        console.log("ngOnInit study-history: study ", this.study);
+        this.eventHistory.then( () => this.onFetchHistory());
     }
 
     public onFetchHistory() {

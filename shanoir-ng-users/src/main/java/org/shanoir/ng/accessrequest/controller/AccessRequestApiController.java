@@ -163,7 +163,8 @@ public class AccessRequestApiController implements AccessRequestApi {
 					resolvedRequest.getStudyId().toString(),
 					resolvedRequest.getUser().getId(),
 					resolvedRequest.getUser().getUsername(),
-					ShanoirEvent.SUCCESS);
+					ShanoirEvent.SUCCESS,
+					resolvedRequest.getStudyId());
 
 			this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE, mapper.writeValueAsString(subscription));
 		} else {
