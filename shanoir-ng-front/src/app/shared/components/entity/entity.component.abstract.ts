@@ -58,7 +58,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     protected saveError: ShanoirError;
     protected onSubmitValidatedFields: string[] = [];
     @ViewChild('formContainer', {static: false}) formContainerElement: ElementRef;
-    activeTab: string;
+    _activeTab: string;
 
     /* services */
     protected confirmDialogService: ConfirmDialogService;
