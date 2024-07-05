@@ -17,7 +17,6 @@ package org.shanoir.ng.configuration.amqp;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.dataset.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -58,11 +57,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * RabbitMQ configuration.
@@ -187,7 +184,7 @@ public class RabbitMQDatasetsService {
 
 			studyService.updateStudy(updated, current);
 			
-			solrService.updateStudy(current.getId());
+			solrService.updateStudyAsync(current.getId());
 
 		} catch (Exception ex) {
 			LOG.error("An error occured while processing study update", ex);
@@ -221,11 +218,6 @@ public class RabbitMQDatasetsService {
 			if (su.getId() == null) throw new IllegalStateException("The entity should must have an id ! Received string : \"" + subjectStr + "\"");
 			subjectRepository.save(su);
 			
-			// Update solr references
-			List<Long> subjectIdList = new ArrayList<Long>();
-			subjectIdList.add(su.getId());
-			solrService.updateSubjects(subjectIdList);
-			
 			// Update BIDS
 			Set<Long> studyIds = new HashSet<>();
 
@@ -235,6 +227,12 @@ public class RabbitMQDatasetsService {
 			for (Study stud : studyRepository.findAllById(studyIds)) {
 				bidsService.deleteBidsFolder(stud.getId(), stud.getName());
 			}
+
+			// Update solr references
+			List<Long> subjectIdList = new ArrayList<Long>();
+			subjectIdList.add(su.getId());
+			solrService.updateSubjectsAsync(subjectIdList);
+
 			return true;
 		} catch (Exception e) {
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);

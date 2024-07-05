@@ -20,14 +20,13 @@
 package org.shanoir.ng.solr.service;
 
 import org.apache.solr.client.solrj.SolrServerException;
-import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.io.IOException;
@@ -60,8 +59,10 @@ public interface SolrService {
 
 	void updateDatasets(List<Long> datasetIds) throws SolrServerException, IOException;
 
-	void updateSubjects(List<Long> subjectIds) throws SolrServerException, IOException;
+	void updateDatasetsAsync(List<Long> datasetIds) throws SolrServerException, IOException;
 
-	void updateStudy(Long studyId) throws SolrServerException, IOException;
+	void updateSubjectsAsync(List<Long> subjectIds) throws SolrServerException, IOException;
+
+	void updateStudyAsync(Long studyId) throws SolrServerException, IOException;
 
 }
