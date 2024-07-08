@@ -1,9 +1,9 @@
 package org.shanoir.ng.dicom;
 
+import org.springframework.stereotype.Component;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.springframework.stereotype.Component;
 
 /**
  * This class manages WADO-URLs, either WADO-RS or WADO-URI.
@@ -27,12 +27,13 @@ public class WADOURLHandler {
 				"wado\\?requestType=WADO", "rs",
 				"&studyUID=", "/studies/",
 				"&seriesUID=", "/series/",
+				"&objectUID=", "/instances/",
 				"&contentType=application/dicom", ""
 		};
         for (int i = 0; i < patterns.length; i += 2) {
             Pattern pattern = Pattern.compile(patterns[i]);
             Matcher matcher = pattern.matcher(url);
-            url = matcher.replaceAll(patterns[i + 1]);
+			url = matcher.replaceAll(patterns[i + 1]);
         }
         return url;
     }

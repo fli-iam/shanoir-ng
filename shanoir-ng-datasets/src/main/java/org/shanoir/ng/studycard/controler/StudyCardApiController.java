@@ -252,7 +252,7 @@ public class StudyCardApiController implements StudyCardApi {
         }
         
         // Update solr metadata
-        solrService.updateDatasets(datasetIds);
+        solrService.updateDatasetsAsync(datasetIds);
         
         return new ResponseEntity<Void>(HttpStatus.OK);
     }
