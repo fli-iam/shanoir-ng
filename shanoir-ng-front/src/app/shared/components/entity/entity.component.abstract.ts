@@ -108,7 +108,6 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     public set activeTab(param: string) {
-        console.log("super set activetab");
         this._activeTab = param;
     }
 

@@ -57,7 +57,6 @@ export class StudyHistoryComponent {
     }
 
     public onFetchHistory() {
-        console.log("onFetchHistory");
         this.shanoirEventService.requestHistory(this.study.id).then(history => {
 
             history.forEach(item => {

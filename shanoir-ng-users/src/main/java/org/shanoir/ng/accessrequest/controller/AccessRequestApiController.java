@@ -97,7 +97,13 @@ public class AccessRequestApiController implements AccessRequestApi {
 		createdRequest.setUser(user);
 
 		// Send event
-		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.ACCESS_REQUEST_EVENT, "" + createdRequest.getId(), KeycloakUtil.getTokenUserId(), "", 1, createdRequest.getStudyId()));
+		eventService.publishEvent(new ShanoirEvent(
+				ShanoirEventType.ACCESS_REQUEST_EVENT,
+				"",
+				KeycloakUtil.getTokenUserId(),
+				"New access request for " + user.getUsername(),
+				1,
+				createdRequest.getStudyId()));
 
 		// Send notification to study admin
 		emailService.notifyStudyManagerAccessRequest(createdRequest);
@@ -157,14 +163,16 @@ public class AccessRequestApiController implements AccessRequestApi {
 			if (resolvedRequest.getUser().isAccountRequestDemand() != null && resolvedRequest.getUser().isAccountRequestDemand()) {
 				this.userService.confirmAccountRequest(resolvedRequest.getUser());
 			}
+
 			// Update study to add a new user
 			ShanoirEvent subscription = new ShanoirEvent(
 					ShanoirEventType.USER_ADD_TO_STUDY_EVENT,
 					resolvedRequest.getStudyId().toString(),
-					resolvedRequest.getUser().getId(),
+					KeycloakUtil.getTokenUserId(),
 					resolvedRequest.getUser().getUsername(),
 					ShanoirEvent.SUCCESS,
 					resolvedRequest.getStudyId());
+			eventService.publishEvent(subscription);
 
 			this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE, mapper.writeValueAsString(subscription));
 		} else {
@@ -201,6 +209,16 @@ public class AccessRequestApiController implements AccessRequestApi {
 		} else {
 			user = this.userService.findByUsernameForInvitation(emailOrLogin);
 		}
+
+		// Update study to add a new user
+		ShanoirEvent subscription = new ShanoirEvent(
+				ShanoirEventType.USER_ADD_TO_STUDY_EVENT,
+				String.valueOf(studyId),
+				KeycloakUtil.getTokenUserId(),
+				"Invite and add user " + user.get().getUsername(),
+				ShanoirEvent.SUCCESS,
+				studyId);
+		eventService.publishEvent(subscription);
 
 		// User exists => return an access request to be added
 		if (user.isPresent()) {
