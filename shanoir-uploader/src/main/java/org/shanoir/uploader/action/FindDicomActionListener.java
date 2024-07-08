@@ -132,34 +132,29 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 				 * sensitive and request becomes in the form
 				 * "lastName, firstName1, firstName2"
 				 */
-
-				// extract lastName, firstName1 and firstName2 from the field
-				// PatientName
+				// extract lastName, firstName1 and firstName2 from the field PatientName
 				String patientName = mainWindow.patientNameTF.getText();
 				String patientNameFinal = "";
 				String lastName = "";
 				String firstName1 = "";
 				String firstName2 = "";
-
-				if (patientName.contains(",")) {
-					lastName = patientName.substring(0,
-							patientName.indexOf(","));
-					patientName = patientName.substring(
-							patientName.indexOf(",") + 2, patientName.length());
-					if (patientName.contains(",")) {
-						firstName1 = patientName.substring(0,
-								patientName.indexOf(","));
-						firstName2 = patientName.substring(
-								patientName.indexOf(",") + 2,
-								patientName.length());
-					} else {
-						firstName1 = patientName;
+		
+				// Use regular expression to split by either "," or ", "
+				String[] nameParts = patientName.split(",\\s*");
+				if (nameParts.length > 1) {
+					lastName = nameParts[0];
+					if (nameParts.length > 1) {
+						firstName1 = nameParts[1];
+						if (nameParts.length > 2) {
+							firstName2 = nameParts[2];
+						}
 					}
-				} else
-					lastName = patientName;
+				} else {
+					lastName = patientName + "*";
+				}
 
 				// Users can't use the wildcard "*" on the lastName unless they
-				// introduce at least 4 characters
+				// introduce at least 3 characters
 				boolean exitFlag = false;
 				if (lastName.contains("*")) {
 					String lastNamePartIntroduced = lastName;
@@ -168,7 +163,7 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 					lastNamePartIntroduced = lastNamePartIntroduced.replaceAll(
 							regex, replacement);
 					if (lastNamePartIntroduced.length() < 3) {
-						String message = "\"The wildcard \"*\" can not be used on the last Name unless introducing at least 3 characters\"\n";
+						String message = "\"The wildcard \"*\" can not be used on the last name unless introducing at least 3 characters\"\n";
 						JOptionPane.showMessageDialog(new JFrame(), message,
 								"ERROR", JOptionPane.ERROR_MESSAGE);
 						mainWindow.patientNameTF.setText("");
@@ -187,14 +182,9 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 					patientNameFinal = lastName.toUpperCase() + "^"
 							+ firstName1.toUpperCase();
 				else
-					patientNameFinal = patientName.toUpperCase();
+					patientNameFinal = lastName.toUpperCase();
 
-				// exitFlag: verify that the request is well written
-				// dicomServerClient.echoDicomServer(): verify that a connection
-				// is established to the PACS
-				// can not echo a GE PACS => control omitted
-				if (!exitFlag /* && dicomServerClient.echoDicomServer() */) {
-					// query Dicom Server
+				if (!exitFlag) {
 					String modality = null;
 					if (!mainWindow.noRB.isSelected()) {
 						if (mainWindow.mrRB.isSelected()) {
