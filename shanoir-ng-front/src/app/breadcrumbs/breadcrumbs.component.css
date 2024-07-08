@@ -2,7 +2,8 @@
 :host {
     display: block;
     height: 30px;
-    margin: 15px 0; 
+    margin: 15px 0;
+    position: relative;
     
     --bg-color: var(--color-b);
     --bg-hover: var(--color-b-light2);
@@ -11,6 +12,10 @@
     --w-color: var(--color-c);
     --wl-color: var(--color-c-light);
 }
+
+ul { white-space: nowrap; }
+
+ul li { display: inline-block; }
 
 ul li a {
 	display: block;
