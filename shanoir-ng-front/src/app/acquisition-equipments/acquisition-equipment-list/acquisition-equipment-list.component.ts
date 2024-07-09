@@ -42,7 +42,7 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
     constructor(
             private acqEquipService: AcquisitionEquipmentService,
             private viewContainerRef: ViewContainerRef) {
-        super('center-equipment');
+        super('acquisition-equipment');
     }
 
     getService(): EntityService<AcquisitionEquipment> {
@@ -94,7 +94,7 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
                 headerName: "Serial number", field: "serialNumber", width: "200px"
             },
             {
-                headerName: "Center", field: "center.name",
+                headerName: "Acquisition Center", field: "center.name",
                 route: (acqEquip: AcquisitionEquipment) => '/center/details/' + acqEquip.center.id
             }
         ];

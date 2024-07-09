@@ -61,7 +61,7 @@ export class CoilListComponent extends BrowserPaginEntityListComponent<Coil> {
             route: (coil: Coil) => '/manufacturer-model/details/' + coil.manufacturerModel.id
             },
 
-            { headerName: "Center", field: "center.name",
+            { headerName: "Acquisition Center", field: "center.name",
             route: (coil: Coil) => '/center/details/' + coil.center.id
             },
 

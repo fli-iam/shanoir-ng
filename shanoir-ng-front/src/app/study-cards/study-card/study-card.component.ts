@@ -243,7 +243,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
 
     createAcqEq() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/center-equipment/create']).then(success => {
+        this.router.navigate(['/acquisition-equipment/create']).then(success => {
             this.breadcrumbsService.currentStep.addPrefilled("sc_center", this.centers);
             if (this.centers.length == 1) {
                 this.breadcrumbsService.currentStep.addPrefilled('center', this.centers[0]);

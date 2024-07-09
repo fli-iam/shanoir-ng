@@ -438,7 +438,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {headerName: "Subject", field: "subjectName",
                 route: item => '/subject/details/' + item.subjectId
             },
-            {headerName: "Center", field: "centerName",
+            {headerName: "Acquisition Center", field: "centerName",
                 route: item => '/center/details/' + item.centerId
             },
             {headerName: "Exam", field: "examinationComment",

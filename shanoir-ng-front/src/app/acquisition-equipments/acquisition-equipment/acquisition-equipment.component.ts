@@ -56,7 +56,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
             public manufacturerModelPipe: ManufacturerModelPipe,
             protected router: Router) {
 
-        super(route, 'center-equipment');
+        super(route, 'acquisition-equipment');
 
         this.fromImport = this.router.getCurrentNavigation()?.extras?.state?.fromImport;
     }

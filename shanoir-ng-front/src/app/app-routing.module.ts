@@ -391,7 +391,7 @@ let routes: Routes = [
         canActivate: [AuthAdminOrExpertGuard],
     },
     {
-        path: 'center-equipment/create',
+        path: 'acquisition-equipment/create',
         component: AcquisitionEquipmentComponent,
         data: { mode: 'create' },
         canActivate: [AuthAdminOrExpertGuard],
