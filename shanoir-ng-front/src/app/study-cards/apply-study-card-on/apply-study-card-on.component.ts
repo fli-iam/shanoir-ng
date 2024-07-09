@@ -191,7 +191,7 @@ export class ApplyStudyCardOnComponent implements OnInit {
             { headerName: "Examination date", type: 'date', field: 'examination.examinationDate', cellRenderer: (params: any) => {
                 return this.dateRenderer(params.data.examination?.examinationDate);
             }},
-            { headerName: "Center", field: "acquisitionEquipment.center.name", disableSorting: true,
+            { headerName: "Acquisition Center", field: "acquisitionEquipment.center.name", disableSorting: true,
 				route: (dsAcq: DatasetAcquisition) => dsAcq?.acquisitionEquipment?.center? '/center/details/' + dsAcq?.acquisitionEquipment?.center?.id : null
 			},
             { headerName: "Last StudyCard", field: "studyCard.name"},

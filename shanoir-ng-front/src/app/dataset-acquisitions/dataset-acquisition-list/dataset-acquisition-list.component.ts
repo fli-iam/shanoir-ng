@@ -71,7 +71,7 @@ export class DatasetAcquisitionListComponent extends EntityListComponent<Dataset
             { headerName: "Examination date", type: 'date', field: 'examination.examinationDate', cellRenderer: (params: any) => {
                 return this.dateRenderer(params.data.examination.examinationDate);
             }},
-            { headerName: "Center", field: "acquisitionEquipment.center.name", orderBy: ['examination.centerId'],
+            { headerName: "Acquisition Center", field: "acquisitionEquipment.center.name", orderBy: ['examination.centerId'],
 				route: (dsAcq: DatasetAcquisition) => (dsAcq.acquisitionEquipment && dsAcq.acquisitionEquipment.center) ? '/center/details/' + dsAcq.acquisitionEquipment?.center.id : null
 			},
             { headerName: "StudyCard", field: "studyCard.name",
