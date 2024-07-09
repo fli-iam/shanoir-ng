@@ -57,7 +57,7 @@ export class SolrRequest {
     datasetNature: string[];
     tags: string[];
     searchText: string;
-    username: string[];
+    username: string;
     expertMode: boolean = false;
     sliceThickness: Range = new Range(null, null);
     pixelBandwidth: Range = new Range(null, null);
