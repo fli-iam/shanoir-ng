@@ -125,8 +125,13 @@ export class BreadcrumbsService implements OnDestroy {
         }
     }
 
-    public goToStep(index: number) {
+    public goToStepIndex(index: number) {
         history.go(index - this.currentStepIndex);
+    }
+
+    public goToStep(step: Step) {
+        const index: number = this.steps.findIndex(s => s.id == step.id);
+        this.goToStepIndex(index);
     }
 
     private removeStepsAfter(index: number) {

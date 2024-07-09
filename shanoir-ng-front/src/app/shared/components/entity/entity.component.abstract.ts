@@ -108,6 +108,8 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
             this.subscriptions.push(this.activatedRoute.params.subscribe(
                 params => {
                     this.treeService.activateTree(this.activatedRoute); // at each routing event
+                    this.mode = this.activatedRoute.snapshot.data['mode'];
+                    this.addBCStep();
                     this.isMainComponent = true;
                     const id = +params['id'];
                     this.id = id;

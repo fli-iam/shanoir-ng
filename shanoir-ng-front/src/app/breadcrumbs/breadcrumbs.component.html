@@ -16,7 +16,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<li><a (click)="goHome()"><span class="before-icon"><i class="fas fa-home"></i></span>Home</a></li>
 		<ng-container *ngFor="let step of displayedSteps; let i = index">
 			<li *ngIf="!step.disabled && step.label" [class.waiting]="step.isWaiting && step.displayWaitStatus">
-				<a (click)="clickStep(i)">{{step.label}}
+				<a (click)="clickStep(step)">{{step.label}}
 				<span class="after-icon" *ngIf="step.isWaiting && step.displayWaitStatus"><i class="fas fa-edit"></i></span></a>
 			</li>
 		</ng-container>

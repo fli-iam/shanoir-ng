@@ -80,9 +80,8 @@ export class BreadcrumbsComponent implements AfterViewInit, OnDestroy, AfterView
         });
     }
 
-    clickStep(index: number) {
-        if (index < this.steps.length - 1)
-            this.service.goToStep(index);
+    clickStep(step: Step) {
+        this.service.goToStep(step);
     }    
 
     goHome() {
