@@ -164,7 +164,6 @@ export class ExecutionComponent implements OnInit {
         this.datasetsPromise.then(() => {
 
             let availableDatasets: Dataset[] = Array.from(this.selectedDatasets);
-            let excludedDatasetsCount = 0;
 
             this.datasetsOptions = [];
             availableDatasets.forEach(dataset => {
@@ -188,11 +187,7 @@ export class ExecutionComponent implements OnInit {
                         let paramDatasets: Dataset[] = [];
 
                         availableDatasets.forEach(dataset => {
-                            if(dataset.datasetProcessing){
-                                excludedDatasetsCount++;
-                            } else if (nameFilter.test(dataset.name)) {
-                                paramDatasets.push(dataset);
-                            }
+                            paramDatasets.push(dataset);
                         });
 
                         paramDatasets.forEach(dataset => {
@@ -204,9 +199,6 @@ export class ExecutionComponent implements OnInit {
                     }
                 }
             )
-            if(excludedDatasetsCount > 0){
-                this.consoleService.log('warn', "[" + excludedDatasetsCount + "] processed datasets has been excluded from the selection.");
-            }
         });
     }
 
