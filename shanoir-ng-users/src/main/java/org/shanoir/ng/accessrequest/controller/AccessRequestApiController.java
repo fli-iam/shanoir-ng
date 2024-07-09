@@ -201,30 +201,31 @@ public class AccessRequestApiController implements AccessRequestApi {
 
 		boolean isEmail = emailOrLogin.contains("@");
 
-		Optional<User> user;
+		User user;
 
 		if (isEmail) {
 			// Check if user with such email/username exists
-			user = this.userService.findByEmail(emailOrLogin);
+			user = this.userService.findByEmail(emailOrLogin).orElse(null);
 		} else {
-			user = this.userService.findByUsernameForInvitation(emailOrLogin);
+			user = this.userService.findByUsernameForInvitation(emailOrLogin).orElse(null);
 		}
 
-		// Update study to add a new user
-		ShanoirEvent subscription = new ShanoirEvent(
-				ShanoirEventType.USER_ADD_TO_STUDY_EVENT,
-				String.valueOf(studyId),
-				KeycloakUtil.getTokenUserId(),
-				"Invite and add user " + user.get().getUsername(),
-				ShanoirEvent.SUCCESS,
-				studyId);
-		eventService.publishEvent(subscription);
+		if (user != null) {
+			// Update study to add a new user
+			ShanoirEvent subscription = new ShanoirEvent(
+					ShanoirEventType.USER_ADD_TO_STUDY_EVENT,
+					String.valueOf(studyId),
+					KeycloakUtil.getTokenUserId(),
+					"Invite and add user " + user.getUsername(),
+					ShanoirEvent.SUCCESS,
+					studyId);
+			eventService.publishEvent(subscription);
 
-		// User exists => return an access request to be added
-		if (user.isPresent()) {
+
+			// User exists => return an access request to be added
 			// create a new access request to return
 			AccessRequest request = new AccessRequest();
-			request.setUser(user.get());
+			request.setUser(user);
 			request.setStudyId(studyId);
 			request.setStudyName(studyName);
 			request.setMotivation("From study manager");
