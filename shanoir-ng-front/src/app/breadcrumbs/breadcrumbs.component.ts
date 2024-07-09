@@ -33,8 +33,9 @@ export class BreadcrumbsComponent implements AfterViewInit, OnDestroy, AfterView
     private onResizeEnd: WaitBurstEnd;
     private onViewCheck: WaitBurstEnd;
     private checkWidthBurst: WaitBurstEnd;
-    private steps: Step[];
+    protected steps: Step[];
     protected displayedSteps: Step[];
+    protected nbHidden: number = 0;
 
     constructor(
         private service: BreadcrumbsService,
@@ -102,35 +103,44 @@ export class BreadcrumbsComponent implements AfterViewInit, OnDestroy, AfterView
         let listWidth: number = this.elementRef.nativeElement.scrollWidth;
         let nbSteps: number = this.steps.filter(s => !s.disabled)?.length;
         if (!this.nbDisplayedSteps) this.nbDisplayedSteps = nbSteps;
+        let end: Promise<void>;
         if (listWidth > componentWidth) { // if overflow, reduce
-            this.reduceUntilFit();
+            end = this.reduceUntilFit();
         } else if (this.nbDisplayedSteps > 0 && this.nbDisplayedSteps < nbSteps) { // else, try to expand
-            this.tryToExpand();
+            end = this.tryToExpand();
+        } else {
+            end = Promise.resolve();
         }
+        end.then(() => {
+            this.nbHidden = this.steps?.length - this.displayedSteps?.length;
+        });
     }
 
-    private tryToExpand() {
-        if (this.nbDisplayedSteps >= this.steps.filter(s => !s.disabled)?.length) return;
+    private tryToExpand(): Promise<void> {
+        if (this.nbDisplayedSteps >= this.steps.filter(s => !s.disabled)?.length) return Promise.resolve();
         this.nbDisplayedSteps++;
-        this.onViewChecked.pipe(take(1)).subscribe(() => {
+        return this.onViewChecked.pipe(take(1)).toPromise().then(() => {
             let componentWidth: number = this.elementRef.nativeElement.offsetWidth;
             let listWidth: number = this.elementRef.nativeElement.scrollWidth;
             if (listWidth > componentWidth) { // if overflow, finally reduce
                 this.nbDisplayedSteps--;
+                return this.onViewChecked.pipe(take(1)).toPromise();
             } else { // else continue
-                this.tryToExpand();
+                return this.tryToExpand();
             }
         });
     }
 
-    private reduceUntilFit() {
-        if (this.nbDisplayedSteps <= 0) return;
+    private reduceUntilFit(): Promise<void> {
+        if (this.nbDisplayedSteps <= 0) return Promise.resolve();
         this.nbDisplayedSteps--;
-        this.onViewChecked.pipe(take(1)).subscribe(() => {
+        return this.onViewChecked.pipe(take(1)).toPromise().then(() => {
             let componentWidth: number = this.elementRef.nativeElement.offsetWidth;
             let listWidth: number = this.elementRef.nativeElement.scrollWidth;
             if (listWidth > componentWidth) { // if overflow, reduce again
-                this.reduceUntilFit();
+                return this.reduceUntilFit();
+            } else {
+                return Promise.resolve();
             }
         });
     }

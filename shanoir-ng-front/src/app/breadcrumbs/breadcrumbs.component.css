@@ -87,3 +87,4 @@ ul li:first-child a{
 }
 
 a.disabled { background-color: yellow !important; }
+.ellipsis { opacity: 0.5; }

@@ -14,6 +14,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div id="my-breadcrumbs">
 	<ul>
 		<li><a (click)="goHome()"><span class="before-icon"><i class="fas fa-home"></i></span>Home</a></li>
+		<li *ngIf="nbHidden > 0" class="ellipsis">
+			<a>
+				<i class="fa-solid fa-ellipsis"></i> 
+				<!-- +{{steps?.length - displayedSteps?.length}} -->
+			</a>
+		</li>
 		<ng-container *ngFor="let step of displayedSteps; let i = index">
 			<li *ngIf="!step.disabled && step.label" [class.waiting]="step.isWaiting && step.displayWaitStatus">
 				<a (click)="clickStep(step)">{{step.label}}
