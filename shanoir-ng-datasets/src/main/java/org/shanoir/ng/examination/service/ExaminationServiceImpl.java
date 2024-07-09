@@ -24,10 +24,9 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
+import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
-import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -244,7 +243,22 @@ public class ExaminationServiceImpl implements ExaminationService {
 				}
 			}
 		}
-		examinationDb.setSubject(examination.getSubject());
+		// If we updated the subject, we need to update datasets and processed datasets too
+		if (!examination.getSubject().getId().equals(examinationDb.getSubject().getId())) {
+			examinationDb.setSubject(examination.getSubject());
+			for (DatasetAcquisition acquisition : examinationDb.getDatasetAcquisitions()) {
+				for (Dataset ds : acquisition.getDatasets()) {
+					ds.setSubjectId(examination.getSubject().getId());
+					// Processed datasets
+					for (DatasetProcessing processing : ds.getProcessings()) {
+						for (Dataset procDs : processing.getOutputDatasets()) {
+							procDs.setSubjectId(examination.getSubject().getId());
+						}
+					}
+				}
+			}
+		}
+
 		examinationDb.setCenterId(examination.getCenterId());
 		examinationDb.setComment(examination.getComment());
 		examinationDb.setExaminationDate(examination.getExaminationDate());
