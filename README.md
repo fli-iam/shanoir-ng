@@ -178,7 +178,7 @@ The **bootstrap.sh** script automates the build and the deployment of shanoir.
 volumes configured in the docker-compose.yml). It is not recommended to use on a
 production host.
 
-To deploy shanoir from scratch on a development machine you can just launch the
+To deploy shanoir from scratch on a development machine you can just put the files in /src/ folder, launch the
 following command and have a coffee.
 ```
 ./bootstrap.sh --clean
