@@ -22,6 +22,7 @@ import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.model.Tag;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author yyao
@@ -56,7 +57,7 @@ public class Study extends IdName {
     private List<Examination> examinations;
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<StudyTag> studyTags;
+	private Set<StudyTag> studyTags;
 	
 
 	/**
@@ -140,11 +141,11 @@ public class Study extends IdName {
         this.examinations = examinations;
     }
 
-	public List<StudyTag> getStudyTags() {
+	public Set<StudyTag> getStudyTags() {
 		return studyTags;
 	}
 
-	public void setStudyTags(List<StudyTag> studyTags) {
+	public void setStudyTags(Set<StudyTag> studyTags) {
 		this.studyTags = studyTags;
 	}
 }

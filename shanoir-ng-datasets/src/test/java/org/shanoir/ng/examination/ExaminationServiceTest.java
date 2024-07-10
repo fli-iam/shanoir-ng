@@ -35,7 +35,6 @@ import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -131,7 +130,7 @@ public class ExaminationServiceTest {
 	public void updateAsAdminTest() throws ShanoirException {
 		// We update the subject -> admin -> SUCCESS
 		Examination updatedExam = createExamination();
-		updatedExam.setSubject(null);
+		updatedExam.setSubject(new Subject(5L, "new name"));
 		final Examination updatedExamination = examinationService.update(updatedExam);
 
 		Assertions.assertNotNull(updatedExamination);
