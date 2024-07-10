@@ -25,18 +25,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.uploader.action.ImportFromCsvActionListener;
-import org.shanoir.uploader.action.UploadFromCsvActionListener;
+import org.shanoir.uploader.action.UploadFromTableActionListener;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.model.CsvImport;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 
-public class ImportFromCSVWindow extends JFrame {
+public class ImportFromTableWindow extends JFrame {
+
+	private static final Logger logger = LoggerFactory.getLogger(ImportFromTableWindow.class);
 
 	public JButton uploadButton;
 	public JButton openButton;
 	public JProgressBar progressBar;
-
-	private static final Logger logger = LoggerFactory.getLogger(ImportFromCSVWindow.class);
 
 	public File shanoirUploaderFolder;
 	public ResourceBundle resourceBundle;
@@ -48,14 +48,14 @@ public class ImportFromCSVWindow extends JFrame {
 
 	JTable table;
 
-	UploadFromCsvActionListener uploadListener;
+	UploadFromTableActionListener uploadListener;
 	ImportFromCsvActionListener importListener;
 	IDicomServerClient dicomServerClient;
 	ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 	ShanoirUploaderServiceClient shanoirUploaderServiceClient;
 	public JScrollPane scrollPaneUpload;
 
-	public ImportFromCSVWindow(File shanoirUploaderFolder, ResourceBundle resourceBundle, JScrollPane scrollPaneUpload, IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG) {
+	public ImportFromTableWindow(File shanoirUploaderFolder, ResourceBundle resourceBundle, JScrollPane scrollPaneUpload, IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG) {
 		this.shanoirUploaderFolder = shanoirUploaderFolder;
 		this.resourceBundle = resourceBundle;
 		this.dicomServerClient = dicomServerClient;
@@ -64,7 +64,7 @@ public class ImportFromCSVWindow extends JFrame {
 		this.scrollPaneUpload = scrollPaneUpload;
 
 		// Create the frame.
-		frame = new JFrame(resourceBundle.getString("shanoir.uploader.import.csv.title"));
+		frame = new JFrame(resourceBundle.getString("shanoir.uploader.import.table.title"));
 		frame.setSize(1600, 700);
 		this.setSize(1600, 700);
 
@@ -78,7 +78,7 @@ public class ImportFromCSVWindow extends JFrame {
 		frame.setContentPane(masterPanel);
 
 		// CSV description here
-		this.csvDetail.setText(resourceBundle.getString("shanoir.uploader.import.csv.detail"));
+		this.csvDetail.setText(resourceBundle.getString("shanoir.uploader.import.table.detail"));
 		GridBagConstraints gBCcsvDetail = new GridBagConstraints();
 		gBCcsvDetail.anchor = GridBagConstraints.NORTHWEST;
 		gBCcsvDetail.gridx = 0;
@@ -94,7 +94,7 @@ public class ImportFromCSVWindow extends JFrame {
 		masterPanel.add(this.error, gBCError);
 
 		// OPEN button here
-		openButton = new JButton(resourceBundle.getString("shanoir.uploader.import.csv.button.open"));
+		openButton = new JButton(resourceBundle.getString("shanoir.uploader.import.table.button.open"));
 		GridBagConstraints gBCOpenButton = new GridBagConstraints();
 		gBCOpenButton.anchor = GridBagConstraints.NORTHWEST;
 		gBCOpenButton.gridx = 0;
@@ -102,24 +102,28 @@ public class ImportFromCSVWindow extends JFrame {
 		openButton.setEnabled(true);
 		masterPanel.add(openButton, gBCOpenButton);
 
-		uploadListener = new UploadFromCsvActionListener(this, resourceBundle);
+		uploadListener = new UploadFromTableActionListener(this, resourceBundle);
 
 		openButton.addActionListener(uploadListener);
 
 		// CSV display here
 		//headers for the table
 		String[] columns = new String[] {
-				resourceBundle.getString("shanoir.uploader.import.csv.column.ipp"),
-				resourceBundle.getString("shanoir.uploader.import.csv.column.name"),
-				resourceBundle.getString("shanoir.uploader.import.csv.column.surname"),
-				resourceBundle.getString("shanoir.uploader.import.csv.column.study.id"),
-				resourceBundle.getString("shanoir.uploader.import.csv.column.studycard"),
-				resourceBundle.getString("shanoir.uploader.import.csv.column.common.name"),
-				resourceBundle.getString("shanoir.uploader.import.csv.column.study.filter"),
-				resourceBundle.getString("shanoir.uploader.import.csv.column.acquisition.filter"),
-				resourceBundle.getString("shanoir.uploader.import.csv.column.min.date"),
-				resourceBundle.getString("shanoir.uploader.import.csv.column.comment"),
-				resourceBundle.getString("shanoir.uploader.import.csv.column.error")
+			resourceBundle.getString("shanoir.uploader.import.table.column.dicom.query.level"),
+			resourceBundle.getString("shanoir.uploader.import.table.column.dicom.patient.name"),
+			resourceBundle.getString("shanoir.uploader.import.table.column.dicom.patient.id"),
+			resourceBundle.getString("shanoir.uploader.import.table.column.dicom.patient.birth.date"),
+			resourceBundle.getString("shanoir.uploader.import.table.column.dicom.study.description"),
+			resourceBundle.getString("shanoir.uploader.import.table.column.dicom.study.date"),
+			resourceBundle.getString("shanoir.uploader.import.table.column.dicom.modality"),
+			resourceBundle.getString("shanoir.uploader.import.table.column.study.id"),
+			resourceBundle.getString("shanoir.uploader.import.table.column.studycard"),
+			resourceBundle.getString("shanoir.uploader.import.table.column.common.name"),
+			resourceBundle.getString("shanoir.uploader.import.table.column.study.filter"),
+			resourceBundle.getString("shanoir.uploader.import.table.column.acquisition.filter"),
+			resourceBundle.getString("shanoir.uploader.import.table.column.min.date"),
+			resourceBundle.getString("shanoir.uploader.import.table.column.comment"),
+			resourceBundle.getString("shanoir.uploader.import.table.column.error")
 		};
 		// Create table with data
 		table = new JTable();
@@ -156,7 +160,7 @@ public class ImportFromCSVWindow extends JFrame {
 		tablePanel.add(scrollPane);
 
 		// IMPORT button here when necessary
-		uploadButton = new JButton(resourceBundle.getString("shanoir.uploader.import.csv.button.import"));
+		uploadButton = new JButton(resourceBundle.getString("shanoir.uploader.import.table.button.import"));
 		GridBagConstraints gBCuploadButton = new GridBagConstraints();
 		gBCuploadButton.anchor = GridBagConstraints.NORTHWEST;
 		gBCuploadButton.gridx = 0;
@@ -206,7 +210,7 @@ public class ImportFromCSVWindow extends JFrame {
 			model.addRow(importRaw.getRawData());
 			if (importRaw.getErrorMessage() != null) {
 				inError= true;
-				this.error.setText(resourceBundle.getString("shanoir.uploader.import.csv.error.after.import"));
+				this.error.setText(resourceBundle.getString("shanoir.uploader.import.table.error.after.import"));
 			}
 		}
 		this.error.setVisible(inError);

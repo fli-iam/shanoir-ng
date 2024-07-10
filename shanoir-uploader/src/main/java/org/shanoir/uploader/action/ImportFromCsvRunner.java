@@ -28,7 +28,7 @@ import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.uploader.dicom.IDicomServerClient;
-import org.shanoir.uploader.gui.ImportFromCSVWindow;
+import org.shanoir.uploader.gui.ImportFromTableWindow;
 import org.shanoir.uploader.model.CsvImport;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Examination;
@@ -55,13 +55,13 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 
 	private List<CsvImport> csvImports;
 	private ResourceBundle resourceBundle;
-	private ImportFromCSVWindow importFromCSVWindow;
+	private ImportFromTableWindow importFromCSVWindow;
 	private IdentifierCalculator identifierCalculator;
 	private IDicomServerClient dicomServerClient;
 	private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 	private ShanoirUploaderServiceClient shanoirUploaderServiceClientNG;
 
-	public ImportFromCsvRunner(List<CsvImport> csvImports, ResourceBundle ressourceBundle, ImportFromCSVWindow importFromCSVWindow, IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG) {
+	public ImportFromCsvRunner(List<CsvImport> csvImports, ResourceBundle ressourceBundle, ImportFromTableWindow importFromCSVWindow, IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG) {
 		this.csvImports = csvImports;
 		this.resourceBundle = ressourceBundle;
 		this.importFromCSVWindow = importFromCSVWindow;

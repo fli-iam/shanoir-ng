@@ -8,7 +8,7 @@ import java.util.ResourceBundle;
 
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.uploader.dicom.IDicomServerClient;
-import org.shanoir.uploader.gui.ImportFromCSVWindow;
+import org.shanoir.uploader.gui.ImportFromTableWindow;
 import org.shanoir.uploader.model.CsvImport;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 
@@ -21,7 +21,7 @@ import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
  */
 public class ImportFromCsvActionListener implements ActionListener {
 
-	ImportFromCSVWindow importFromCSVWindow;
+	ImportFromTableWindow importFromCSVWindow;
 	IDicomServerClient dicomServerClient;
 	ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 	File shanoirUploaderFolder;
@@ -30,7 +30,7 @@ public class ImportFromCsvActionListener implements ActionListener {
 	ShanoirUploaderServiceClient shanoirUploaderServiceClientNG;
 	private ResourceBundle resourceBundle;
 
-	public ImportFromCsvActionListener(ImportFromCSVWindow importFromCSVWindow, ResourceBundle resourceBundle, IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, File shanoirUploaderFolder, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG) {
+	public ImportFromCsvActionListener(ImportFromTableWindow importFromCSVWindow, ResourceBundle resourceBundle, IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, File shanoirUploaderFolder, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG) {
 		this.importFromCSVWindow = importFromCSVWindow;
 		this.dicomServerClient = dicomServerClient;
 		this.dicomFileAnalyzer = dicomFileAnalyzer;

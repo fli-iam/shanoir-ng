@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 
 /**
@@ -49,7 +50,10 @@ public class ImportJob implements Serializable {
 	
 	private long timestamp;
 
-    private boolean fromDicomZip;
+	/* DicomQuery, that has been used to extract the DICOM study = ImportJob */
+	private DicomQuery dicomQuery;
+
+	private boolean fromDicomZip;
 
     private boolean fromShanoirUploader;
 
@@ -320,6 +324,14 @@ public class ImportJob implements Serializable {
 	public void setSelectedSeries(Set<Serie> selectedSeries) {
 		this.selectedSeries = selectedSeries;
 	}
-	
+
+    public DicomQuery getDicomQuery() {
+		return dicomQuery;
+	}
+
+	public void setDicomQuery(DicomQuery dicomQuery) {
+		this.dicomQuery = dicomQuery;
+	}
+
 }
 
