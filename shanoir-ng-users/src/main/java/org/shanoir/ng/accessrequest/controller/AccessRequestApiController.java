@@ -99,9 +99,9 @@ public class AccessRequestApiController implements AccessRequestApi {
 		// Send event
 		eventService.publishEvent(new ShanoirEvent(
 				ShanoirEventType.ACCESS_REQUEST_EVENT,
-				"" + createdRequest.getId(),
+				"",
 				KeycloakUtil.getTokenUserId(),
-				"New access request for " + user.getUsername(),
+				"New access request from " + user.getUsername(),
 				1,
 				createdRequest.getStudyId()));
 
@@ -168,7 +168,7 @@ public class AccessRequestApiController implements AccessRequestApi {
 			ShanoirEvent subscription = new ShanoirEvent(
 					ShanoirEventType.USER_ADD_TO_STUDY_EVENT,
 					resolvedRequest.getStudyId().toString(),
-					KeycloakUtil.getTokenUserId(),
+					resolvedRequest.getUser().getId(),
 					resolvedRequest.getUser().getUsername(),
 					ShanoirEvent.SUCCESS,
 					resolvedRequest.getStudyId());
