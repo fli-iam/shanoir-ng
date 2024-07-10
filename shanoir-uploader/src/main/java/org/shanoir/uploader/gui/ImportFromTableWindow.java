@@ -132,13 +132,13 @@ public class ImportFromTableWindow extends JFrame {
 		DefaultTableModel model = (DefaultTableModel) table.getModel();
 		model.setColumnIdentifiers(columns);
 		// 1100 to go
-		table.getColumnModel().getColumn(0).setMinWidth(30);
-		table.getColumnModel().getColumn(1).setMinWidth(90);
-		table.getColumnModel().getColumn(2).setMinWidth(90);
-		table.getColumnModel().getColumn(3).setMinWidth(5);
-		table.getColumnModel().getColumn(4).setMinWidth(90);
-		table.getColumnModel().getColumn(5).setMinWidth(100);
-		table.getColumnModel().getColumn(6).setMinWidth(90);
+		table.getColumnModel().getColumn(0).setMinWidth(150);
+		table.getColumnModel().getColumn(1).setMinWidth(150);
+		table.getColumnModel().getColumn(2).setMinWidth(130);
+		table.getColumnModel().getColumn(3).setMinWidth(200);
+		table.getColumnModel().getColumn(4).setMinWidth(200);
+		table.getColumnModel().getColumn(5).setMinWidth(150);
+		table.getColumnModel().getColumn(6).setMinWidth(120);
 		table.getColumnModel().getColumn(7).setMinWidth(90);
 		table.getColumnModel().getColumn(8).setMinWidth(30);
 		table.getColumnModel().getColumn(9).setMinWidth(90);
