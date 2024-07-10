@@ -99,7 +99,7 @@ public class AccessRequestApiController implements AccessRequestApi {
 		// Send event
 		eventService.publishEvent(new ShanoirEvent(
 				ShanoirEventType.ACCESS_REQUEST_EVENT,
-				"",
+				"" + createdRequest.getId(),
 				KeycloakUtil.getTokenUserId(),
 				"New access request for " + user.getUsername(),
 				1,
@@ -172,7 +172,6 @@ public class AccessRequestApiController implements AccessRequestApi {
 					resolvedRequest.getUser().getUsername(),
 					ShanoirEvent.SUCCESS,
 					resolvedRequest.getStudyId());
-			eventService.publishEvent(subscription);
 
 			this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE, mapper.writeValueAsString(subscription));
 		} else {
