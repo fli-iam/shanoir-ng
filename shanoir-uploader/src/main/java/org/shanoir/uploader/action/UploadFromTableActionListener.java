@@ -2,30 +2,27 @@ package org.shanoir.uploader.action;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.shanoir.ng.importer.dicom.query.DicomQuery;
+import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.uploader.gui.ImportFromTableWindow;
-import org.shanoir.uploader.model.CsvImport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -35,11 +32,11 @@ public class UploadFromTableActionListener implements ActionListener {
 	private static final Logger logger = LoggerFactory.getLogger(UploadFromTableActionListener.class);
 
 	private JFileChooser fileChooser;
-	private ImportFromTableWindow importFromCSVWindow;
+	private ImportFromTableWindow importFromTableWindow;
 	private ResourceBundle resourceBundle;
 
-	public UploadFromTableActionListener(ImportFromTableWindow importFromCSVWindow, ResourceBundle resourceBundle) {
-		this.importFromCSVWindow = importFromCSVWindow;
+	public UploadFromTableActionListener(ImportFromTableWindow importFromTableWindow, ResourceBundle resourceBundle) {
+		this.importFromTableWindow = importFromTableWindow;
 		this.fileChooser = new JFileChooser();
 		// Create a file filter for .xlsx files
         FileNameExtensionFilter filter = new FileNameExtensionFilter("Excel Files", "xlsx", "xls");
@@ -49,7 +46,7 @@ public class UploadFromTableActionListener implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		int result = fileChooser.showOpenDialog(importFromCSVWindow);
+		int result = fileChooser.showOpenDialog(importFromTableWindow);
 		if (result == JFileChooser.APPROVE_OPTION) {
 			analyzeFile(fileChooser.getSelectedFile());
 		}
@@ -61,6 +58,7 @@ public class UploadFromTableActionListener implements ActionListener {
 	 * @param selectedFile the selected table file
 	 */
 	private void analyzeFile(File selectedFile) {
+		Map<String, ImportJob> importJobs = new HashMap<String, ImportJob>();;
 		try (XSSFWorkbook myWorkBook = new XSSFWorkbook(selectedFile)) {
 			XSSFSheet mySheet = myWorkBook.getSheetAt(0);
 			Iterator<Row> rowIterator = mySheet.iterator();
@@ -71,49 +69,75 @@ public class UploadFromTableActionListener implements ActionListener {
 				if (rowNumber == 0) {
 					// do nothing with header
 				} else {
-					Iterator<Cell> cellIterator = row.cellIterator();
-					while (cellIterator.hasNext()) {
-						Cell cell = cellIterator.next();
-						handleCell(cell);
-					}
+					addImportJob(importJobs, row);
 				}
 			}
 		} catch (InvalidFormatException | IOException | IllegalStateException e) {
 			logger.error("Error while parsing the input file: ", e);
-			this.importFromCSVWindow.displayError(resourceBundle.getString("shanoir.uploader.import.table.error.csv"));
+			this.importFromTableWindow.displayError(resourceBundle.getString("shanoir.uploader.import.table.error.csv"));
 			return;
 		}
 
 		// this.importFromCSVWindow.displayCsv(subjects);
 	}
 
-private void handleCell(Cell cell) {
-        switch (cell.getCellType()) {
-            case STRING:
-				logger.info(cell.getStringCellValue());
-                break;
-            case NUMERIC:
-                if (DateUtil.isCellDateFormatted(cell)) {
-                    logger.info("Date cell: " + cell.getDateCellValue());
-                } else {
-                    double numericValue = cell.getNumericCellValue();
-	                String textValue = String.valueOf(numericValue);
-					logger.info(textValue);
-                }
-                break;
-            case BOOLEAN:
-                break;
-            case FORMULA:
-                break;
-            case BLANK:
-                break;
-            case _NONE:
-                break;
-            case ERROR:
-                break;
-            default:
-                break;
-        }
+	private void addImportJob(Map<String, ImportJob> importJobs, Row row) {
+		int rowNumber = row.getRowNum();
+		ImportJob importJob = new ImportJob();
+		importJobs.put(String.valueOf(rowNumber), importJob);
+		createDicomQuery(row, importJob);
+	}
+
+	private void createDicomQuery(Row row, ImportJob importJob) {
+		DicomQuery dicomQuery = new DicomQuery();
+		Cell dicomQueryLevel = row.getCell(0);
+		String value = handleCell(dicomQueryLevel);
+		if ("STUDY".equals(value)) {
+			dicomQuery.setStudyRootQuery(true);
+		}
+		Cell dicomPatientName = row.getCell(1);
+		value = handleCell(dicomPatientName);
+		dicomQuery.setPatientName(value);
+		Cell dicomPatientID = row.getCell(2);
+		value = handleCell(dicomPatientID);
+		dicomQuery.setPatientID(value);
+		Cell dicomPatientBirthDate = row.getCell(3);
+		value = handleCell(dicomPatientBirthDate);
+		dicomQuery.setPatientBirthDate(value);
+		Cell dicomStudyDescription = row.getCell(4);
+		value = handleCell(dicomStudyDescription);
+		dicomQuery.setStudyDescription(value);
+		Cell dicomStudyDate = row.getCell(5);
+		value = handleCell(dicomStudyDate);
+		dicomQuery.setStudyDate(value);
+		Cell dicomModality = row.getCell(6);
+		value = handleCell(dicomModality);
+		dicomQuery.setModality(value);
+		importJob.setDicomQuery(dicomQuery);
+	}
+
+	private String handleCell(Cell cell) {
+		if (cell != null) {
+			switch (cell.getCellType()) {
+				case STRING:
+					return cell.getStringCellValue();
+				case NUMERIC:
+					break;
+				case BOOLEAN:
+					break;
+				case FORMULA:
+					break;
+				case BLANK:
+					break;
+				case _NONE:
+					break;
+				case ERROR:
+					break;
+				default:
+					break;
+			}
+		}
+		return "";
     }
 
 }
