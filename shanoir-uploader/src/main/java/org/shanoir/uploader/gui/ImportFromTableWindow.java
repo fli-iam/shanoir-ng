@@ -9,6 +9,7 @@ import java.awt.GridBagLayout;
 import java.awt.Point;
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
@@ -24,6 +25,7 @@ import javax.swing.table.DefaultTableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
+import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.uploader.action.ImportFromCsvActionListener;
 import org.shanoir.uploader.action.UploadFromTableActionListener;
 import org.shanoir.uploader.dicom.IDicomServerClient;
@@ -201,24 +203,25 @@ public class ImportFromTableWindow extends JFrame {
 		this.error.setVisible(true);
 	}
 
-	public void displayCsv(List<CsvImport> imports) {
+	public void displayImportJobs(Map<String, ImportJob> importJobs) {
 		DefaultTableModel model = (DefaultTableModel) table.getModel();
 		model.getDataVector().removeAllElements();
 
 		boolean inError = false;
-		for (CsvImport importRaw : imports) {
-			model.addRow(importRaw.getRawData());
-			if (importRaw.getErrorMessage() != null) {
-				inError= true;
-				this.error.setText(resourceBundle.getString("shanoir.uploader.import.table.error.after.import"));
-			}
+		for (ImportJob importJob : importJobs.values()) {
+			model.addRow(importJob.getDicomQuery().getAllFieldValues());
+			// if (importRaw.getErrorMessage() != null) {
+			// 	inError= true;
+			// 	this.error.setText(resourceBundle.getString("shanoir.uploader.import.table.error.after.import"));
+			// }
 		}
 		this.error.setVisible(inError);
 
 		model.fireTableDataChanged();
 		table.getParent().setVisible(true);
-		this.importListener.setCsvImports(imports);
+//		this.importListener.setCsvImports(imports);
 
 		uploadButton.setEnabled(!inError);
 	}
+
 }

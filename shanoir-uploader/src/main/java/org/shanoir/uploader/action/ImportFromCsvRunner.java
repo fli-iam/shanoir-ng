@@ -145,7 +145,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 			this.importFromCSVWindow.frame.setVisible(false);
 			this.importFromCSVWindow.frame.dispose();
 		} else {
-			this.importFromCSVWindow.displayCsv(csvImports);
+//			this.importFromCSVWindow.displayImportJobs(csvImports);
 			importFromCSVWindow.openButton.setEnabled(true);
 			importFromCSVWindow.uploadButton.setEnabled(false);
 		}

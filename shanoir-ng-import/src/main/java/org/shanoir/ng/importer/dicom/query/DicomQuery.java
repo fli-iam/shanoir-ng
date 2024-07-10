@@ -31,32 +31,32 @@ import jakarta.validation.constraints.Size;
 public class DicomQuery {
 
 	@NotNull
-	@Size(max=64)
-    @JsonProperty("patientName")
-    private String patientName;
-    
+	@Size(max = 64)
+	@JsonProperty("patientName")
+	private String patientName;
+
 	@NotNull
-	@Size(max=64)
-    @JsonProperty("patientID")
-    private String patientID;
-    
+	@Size(max = 64)
+	@JsonProperty("patientID")
+	private String patientID;
+
 	@NotNull
-	@Size(max=8)
-    @JsonProperty("patientBirthDate")
-    private String patientBirthDate;
-    
+	@Size(max = 8)
+	@JsonProperty("patientBirthDate")
+	private String patientBirthDate;
+
 	@NotNull
-	@Size(max=64)
-    @JsonProperty("studyDescription")
-    private String studyDescription;
-    
+	@Size(max = 64)
+	@JsonProperty("studyDescription")
+	private String studyDescription;
+
 	@NotNull
-	@Size(max=8)
-    @JsonProperty("studyDate")
-    private String studyDate;
-	
-    @JsonProperty("modality")
-    private String modality;
+	@Size(max = 8)
+	@JsonProperty("studyDate")
+	private String studyDate;
+
+	@JsonProperty("modality")
+	private String modality;
 
 	// default is patient root query
 	@JsonProperty("studyRootQuery")
@@ -117,5 +117,23 @@ public class DicomQuery {
 	public void setModality(String modality) {
 		this.modality = modality;
 	}
-    
+
+	public String[] getAllFieldValues() {
+		String queryLevel = null;
+		if (studyRootQuery) {
+			queryLevel = "STUDY";
+		} else {
+			queryLevel = "PATIENT";
+		}
+		return new String[] {
+				queryLevel,
+				patientName,
+				patientID,
+				patientBirthDate,
+				studyDescription,
+				studyDate,
+				modality
+		};
+	}
+
 }

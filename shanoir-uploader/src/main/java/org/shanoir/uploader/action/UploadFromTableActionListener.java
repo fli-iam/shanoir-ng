@@ -14,7 +14,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -24,9 +23,6 @@ import org.shanoir.uploader.gui.ImportFromTableWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * 
- */
 public class UploadFromTableActionListener implements ActionListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(UploadFromTableActionListener.class);
@@ -48,7 +44,7 @@ public class UploadFromTableActionListener implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		int result = fileChooser.showOpenDialog(importFromTableWindow);
 		if (result == JFileChooser.APPROVE_OPTION) {
-			analyzeFile(fileChooser.getSelectedFile());
+			readImportJobsFromFile(fileChooser.getSelectedFile());
 		}
 	}
 
@@ -57,7 +53,7 @@ public class UploadFromTableActionListener implements ActionListener {
 	 * 
 	 * @param selectedFile the selected table file
 	 */
-	private void analyzeFile(File selectedFile) {
+	private void readImportJobsFromFile(File selectedFile) {
 		Map<String, ImportJob> importJobs = new HashMap<String, ImportJob>();;
 		try (XSSFWorkbook myWorkBook = new XSSFWorkbook(selectedFile)) {
 			XSSFSheet mySheet = myWorkBook.getSheetAt(0);
@@ -77,8 +73,7 @@ public class UploadFromTableActionListener implements ActionListener {
 			this.importFromTableWindow.displayError(resourceBundle.getString("shanoir.uploader.import.table.error.csv"));
 			return;
 		}
-
-		// this.importFromCSVWindow.displayCsv(subjects);
+		this.importFromTableWindow.displayImportJobs(importJobs);
 	}
 
 	private void addImportJob(Map<String, ImportJob> importJobs, Row row) {
