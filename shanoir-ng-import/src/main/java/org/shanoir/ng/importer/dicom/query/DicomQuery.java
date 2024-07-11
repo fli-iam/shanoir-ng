@@ -62,6 +62,12 @@ public class DicomQuery {
 	@JsonProperty("studyRootQuery")
 	private boolean studyRootQuery;
 
+	private	String studyFilter;
+
+	private String minStudyDateFilter;
+
+	private String serieFilter;
+
 	public String getPatientName() {
 		return patientName;
 	}
@@ -118,7 +124,7 @@ public class DicomQuery {
 		this.modality = modality;
 	}
 
-	public String[] getAllFieldValues() {
+	public String[] getAllQueryValues() {
 		String queryLevel = null;
 		if (studyRootQuery) {
 			queryLevel = "STUDY";
@@ -134,6 +140,30 @@ public class DicomQuery {
 				studyDate,
 				modality
 		};
+	}
+
+	public String getStudyFilter() {
+		return studyFilter;
+	}
+
+	public void setStudyFilter(String studyFilter) {
+		this.studyFilter = studyFilter;
+	}
+
+	public String getMinStudyDateFilter() {
+		return minStudyDateFilter;
+	}
+
+	public void setMinStudyDateFilter(String minStudyDateFilter) {
+		this.minStudyDateFilter = minStudyDateFilter;
+	}
+
+	public String getSerieFilter() {
+		return serieFilter;
+	}
+
+	public void setSerieFilter(String serieFilter) {
+		this.serieFilter = serieFilter;
 	}
 
 }

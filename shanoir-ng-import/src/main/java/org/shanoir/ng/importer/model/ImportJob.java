@@ -94,6 +94,8 @@ public class ImportJob implements Serializable {
 	// examination: use already existing
     private Long examinationId;
 
+	private String examinationComment;
+
 	private String anonymisationProfileToUse;
 
     private String archive;
@@ -103,6 +105,8 @@ public class ImportJob implements Serializable {
 	private Long userId;
 
 	private Long centerId;
+
+	private String errorMessage;
 
 	public long getTimestamp() {
         return timestamp;
@@ -190,7 +194,6 @@ public class ImportJob implements Serializable {
 
 	public void setAcquisitionEquipmentId(final Long acquisitionEquipmentId) {
 		this.acquisitionEquipmentId = acquisitionEquipmentId;
-
 	}
 
 	public Long getStudyCardId() {
@@ -331,6 +334,22 @@ public class ImportJob implements Serializable {
 
 	public void setDicomQuery(DicomQuery dicomQuery) {
 		this.dicomQuery = dicomQuery;
+	}
+
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
+
+	public String getExaminationComment() {
+		return examinationComment;
+	}
+
+	public void setExaminationComment(String examinationComment) {
+		this.examinationComment = examinationComment;
 	}
 
 }

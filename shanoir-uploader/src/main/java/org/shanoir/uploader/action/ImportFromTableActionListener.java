@@ -21,57 +21,26 @@ public class ImportFromTableActionListener implements ActionListener {
 	private ImportFromTableWindow importFromTableWindow;
 	private IDicomServerClient dicomServerClient;
 	private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
-	private File shanoirUploaderFolder;
 
 	private Map<String, ImportJob> importJobs;
 
 	private ShanoirUploaderServiceClient shanoirUploaderServiceClientNG;
 	private ResourceBundle resourceBundle;
+	private DownloadOrCopyActionListener dOCAL;
 
-	public ImportFromTableActionListener(ImportFromTableWindow importFromTableWindow, ResourceBundle resourceBundle, IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, File shanoirUploaderFolder, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG) {
+	public ImportFromTableActionListener(ImportFromTableWindow importFromTableWindow, ResourceBundle resourceBundle, IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG, DownloadOrCopyActionListener dOCAL) {
 		this.importFromTableWindow = importFromTableWindow;
 		this.dicomServerClient = dicomServerClient;
 		this.dicomFileAnalyzer = dicomFileAnalyzer;
-		this.shanoirUploaderFolder = shanoirUploaderFolder;
 		this.shanoirUploaderServiceClientNG = shanoirUploaderServiceClientNG;
 		this.resourceBundle = resourceBundle;
+		this.dOCAL = dOCAL;
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		importFromTableWindow.openButton.setEnabled(false);
-		importFromTableWindow.uploadButton.setEnabled(false);
-
-		importFromTableWindow.progressBar.setStringPainted(true);
-		importFromTableWindow.progressBar.setString("Preparing import...");
-		importFromTableWindow.progressBar.setVisible(true);
-
-		for (ImportJob importJob : importJobs.values()) {
-			// query pacs
-
-			// for disk volume reasons: only download one STUDY at a time
-			Map<String, ImportJob> oneImportJob = new HashMap<>();
-			oneImportJob.put("x", importJob);
-			Runnable runnable = new DownloadOrCopyRunnable(true, dicomServerClient, dicomFileAnalyzer,  null, oneImportJob);
-			Thread thread = new Thread(runnable);
-			thread.start();
-		}
-
-//		ImportFromCsvRunner importer = new ImportFromCsvRunner(csvImports, resourceBundle, importFromCSVWindow, dicomServerClient, dicomFileAnalyzer, shanoirUploaderServiceClientNG);
-//		importer.execute();
-
-		boolean success = true;
-		if (success) {
-			importFromTableWindow.progressBar.setString("Success !");
-			importFromTableWindow.progressBar.setValue(100);
-			// Open current import tab and close table import panel
-			((JTabbedPane) this.importFromTableWindow.scrollPaneUpload.getParent().getParent()).setSelectedComponent(this.importFromTableWindow.scrollPaneUpload.getParent());
-			this.importFromTableWindow.frame.setVisible(false);
-			this.importFromTableWindow.frame.dispose();
-		} else {
-			importFromTableWindow.openButton.setEnabled(true);
-			importFromTableWindow.uploadButton.setEnabled(false);
-		}
+		ImportFromTableRunner importer = new ImportFromTableRunner(importJobs, resourceBundle, importFromTableWindow, dicomServerClient, dicomFileAnalyzer, shanoirUploaderServiceClientNG, dOCAL);
+		importer.execute();
 	}
 
 	public Map<String, ImportJob> getImportJobs() {

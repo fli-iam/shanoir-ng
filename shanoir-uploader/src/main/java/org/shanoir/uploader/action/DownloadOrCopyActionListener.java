@@ -174,7 +174,7 @@ public class DownloadOrCopyActionListener implements ActionListener {
 		return patient;
 	}
 
-	private Subject createSubjectFromPatient(Patient patient) throws PseudonymusException, UnsupportedEncodingException, NoSuchAlgorithmException {
+	public Subject createSubjectFromPatient(Patient patient) throws PseudonymusException, UnsupportedEncodingException, NoSuchAlgorithmException {
 		Subject subject = new Subject();
 		String identifier;
 		// OFSEP mode

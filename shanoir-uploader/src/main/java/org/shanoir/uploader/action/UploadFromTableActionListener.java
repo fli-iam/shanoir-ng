@@ -81,6 +81,19 @@ public class UploadFromTableActionListener implements ActionListener {
 		ImportJob importJob = new ImportJob();
 		importJobs.put(String.valueOf(rowNumber), importJob);
 		createDicomQuery(row, importJob);
+		readImportJobValues(row, importJob);
+	}
+
+	private void readImportJobValues(Row row, ImportJob importJob) {
+		Cell studyCardName = row.getCell(10);
+		String value = handleCell(studyCardName);
+		importJob.setStudyCardName(value);
+		Cell subjectName = row.getCell(11);
+		value = handleCell(subjectName);
+		importJob.setSubjectName(value);
+		Cell examComment = row.getCell(12);
+		value = handleCell(examComment);
+		importJob.setExaminationComment(value);
 	}
 
 	private void createDicomQuery(Row row, ImportJob importJob) {
@@ -108,6 +121,15 @@ public class UploadFromTableActionListener implements ActionListener {
 		Cell dicomModality = row.getCell(6);
 		value = handleCell(dicomModality);
 		dicomQuery.setModality(value);
+		Cell dicomStudyFilter = row.getCell(7);
+		value = handleCell(dicomStudyFilter);
+		dicomQuery.setStudyFilter(value);
+		Cell dicomMinStudyDateFilter = row.getCell(8);
+		value = handleCell(dicomMinStudyDateFilter);
+		dicomQuery.setMinStudyDateFilter(value);
+		Cell dicomSerieFilter = row.getCell(9);
+		value = handleCell(dicomSerieFilter);
+		dicomQuery.setSerieFilter(value);
 		importJob.setDicomQuery(dicomQuery);
 	}
 

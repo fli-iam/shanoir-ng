@@ -8,7 +8,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Point;
 import java.io.File;
-import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -23,18 +22,17 @@ import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.uploader.action.DownloadOrCopyActionListener;
 import org.shanoir.uploader.action.ImportFromTableActionListener;
-import org.shanoir.uploader.action.UpdateFolderImportStudyListener;
 import org.shanoir.uploader.action.UpdateTableImportStudyListener;
 import org.shanoir.uploader.action.UploadFromTableActionListener;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.gui.customcomponent.JComboBoxMandatory;
-import org.shanoir.uploader.model.CsvImport;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ImportFromTableWindow extends JFrame {
 
@@ -64,14 +62,16 @@ public class ImportFromTableWindow extends JFrame {
 	ShanoirUploaderServiceClient shanoirUploaderServiceClient;
 	public JScrollPane scrollPaneUpload;
 	UpdateTableImportStudyListener updateTableImportStudyListener;
+	private DownloadOrCopyActionListener dOCAL;
 
-	public ImportFromTableWindow(File shanoirUploaderFolder, ResourceBundle resourceBundle, JScrollPane scrollPaneUpload, IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG) {
+	public ImportFromTableWindow(File shanoirUploaderFolder, ResourceBundle resourceBundle, JScrollPane scrollPaneUpload, IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG, DownloadOrCopyActionListener dOCAL) {
 		this.updateTableImportStudyListener = new UpdateTableImportStudyListener(shanoirUploaderServiceClientNG, this);
 		this.shanoirUploaderFolder = shanoirUploaderFolder;
 		this.resourceBundle = resourceBundle;
 		this.dicomServerClient = dicomServerClient;
 		this.dicomFileAnalyzer = dicomFileAnalyzer;
 		this.shanoirUploaderServiceClient = shanoirUploaderServiceClientNG;
+		this.dOCAL = dOCAL;
 		this.scrollPaneUpload = scrollPaneUpload;
 
 		// Create the frame.
@@ -147,7 +147,6 @@ public class ImportFromTableWindow extends JFrame {
 			resourceBundle.getString("shanoir.uploader.import.table.column.dicom.study.description"),
 			resourceBundle.getString("shanoir.uploader.import.table.column.dicom.study.date"),
 			resourceBundle.getString("shanoir.uploader.import.table.column.dicom.modality"),
-			resourceBundle.getString("shanoir.uploader.import.table.column.study.id"),
 			resourceBundle.getString("shanoir.uploader.import.table.column.studycard"),
 			resourceBundle.getString("shanoir.uploader.import.table.column.common.name"),
 			resourceBundle.getString("shanoir.uploader.import.table.column.study.filter"),
@@ -207,7 +206,7 @@ public class ImportFromTableWindow extends JFrame {
 		progressBar.setVisible(false);
 		masterPanel.add(progressBar, gBCProgressBar);
 	
-		importListener = new ImportFromTableActionListener(this, resourceBundle, dicomServerClient, dicomFileAnalyzer, shanoirUploaderFolder, shanoirUploaderServiceClientNG);
+		importListener = new ImportFromTableActionListener(this, resourceBundle, dicomServerClient, dicomFileAnalyzer, shanoirUploaderServiceClientNG, dOCAL);
 		uploadButton.addActionListener(importListener);
 
 		// center the frame
@@ -237,7 +236,7 @@ public class ImportFromTableWindow extends JFrame {
 
 		boolean inError = false;
 		for (ImportJob importJob : importJobs.values()) {
-			model.addRow(importJob.getDicomQuery().getAllFieldValues());
+			model.addRow(importJob.getDicomQuery().getAllQueryValues());
 			// if (importRaw.getErrorMessage() != null) {
 			// 	inError= true;
 			// 	this.error.setText(resourceBundle.getString("shanoir.uploader.import.table.error.after.import"));
