@@ -147,11 +147,11 @@ public class ImportFromTableWindow extends JFrame {
 			resourceBundle.getString("shanoir.uploader.import.table.column.dicom.study.description"),
 			resourceBundle.getString("shanoir.uploader.import.table.column.dicom.study.date"),
 			resourceBundle.getString("shanoir.uploader.import.table.column.dicom.modality"),
+			resourceBundle.getString("shanoir.uploader.import.table.column.dicom.filter.study.description"),
+			resourceBundle.getString("shanoir.uploader.import.table.column.dicom.filter.study.min.date"),
+			resourceBundle.getString("shanoir.uploader.import.table.column.dicom.filter.serie.description"),
 			resourceBundle.getString("shanoir.uploader.import.table.column.studycard"),
 			resourceBundle.getString("shanoir.uploader.import.table.column.common.name"),
-			resourceBundle.getString("shanoir.uploader.import.table.column.study.filter"),
-			resourceBundle.getString("shanoir.uploader.import.table.column.acquisition.filter"),
-			resourceBundle.getString("shanoir.uploader.import.table.column.min.date"),
 			resourceBundle.getString("shanoir.uploader.import.table.column.comment"),
 			resourceBundle.getString("shanoir.uploader.import.table.column.error")
 		};

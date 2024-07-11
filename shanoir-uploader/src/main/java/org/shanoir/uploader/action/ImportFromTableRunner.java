@@ -3,8 +3,11 @@ package org.shanoir.uploader.action;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -147,19 +150,17 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.missing.data"));
 			return false;
 		}
-
-		logger.info("2. Select series");
-		List<Serie> selectedSeries = new ArrayList<>();
-
-		Patient pat = null;
-		Study stud = null;
 		if (patients == null || patients.isEmpty()) {
 			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.missing.data"));
 			return false;
 		}
+
+		logger.info("2. Select series");
+		List<Serie> selectedSeries = new ArrayList<>();
+		Patient pat = null;
+		Study stud = null;
 		String serialNumber = null;
 		String modelName = null;
-		
 		Study selectedStudy = null;
 		Map<Study, List<Serie>> selectedSeriesByStudy = new HashMap<>();
 
@@ -175,9 +176,10 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				return false;
 			}
 		} else {
-			Calendar cal = Calendar.getInstance();
-			cal.set(1000, 0, 1, 0, 0, 0);
-			minDate = LocalDate.from(cal.toInstant());
+			Instant instant = Instant.parse("1000-01-05T23:00:00.829Z");
+	        ZonedDateTime zonedDateTime = instant.atZone(ZoneId.of("UTC"));
+        	LocalDate localDate = zonedDateTime.toLocalDate();
+			minDate = localDate;
 		}
 
 		boolean foundPatient = false;
@@ -191,18 +193,17 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			LocalDate currentDate = LocalDate.now();
 			for (Study study : studies) {
 				LocalDate studyDate = study.getStudyDate();
-				if (studyDate.isAfter(currentDate) || studyDate.isAfter(minDate)) {
+				if (studyDate.isAfter(currentDate) || studyDate.isBefore(minDate)) {
 					// We take the first valid date, if we are after on valid date, don't check the data
 					continue;
 				}
-				
 				if (!searchField(study.getStudyDescription(), importJob.getDicomQuery().getStudyFilter())) {
 					continue;
 				}
 				stud = study;
 				pat = patient;
 				selectedSeriesByStudy.put(stud, new ArrayList<>());
-				Collection<Serie> series = study.getSelectedSeries();
+				Collection<Serie> series = study.getSeries();
 				for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
 					// Filter on serie
 					Serie serie = seriesIt.next();
@@ -231,14 +232,22 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		}
 		
 		/**
+		 * Possible @todo: add 4 columns to Excel with patient information
+		 * to create correct hash here, as verified in the GUI in patient
+		 * verification.
+		 */
+		Subject subject = dOCAL.createSubjectFromPatient(pat);
+
+		/**
 		 * For the moment the ImportFromTableRunner processes line-by-line, study-by-study,
 		 * so we only send one import job to the DownloadOrCopyRunnable, to download only
 		 * one DICOM study, as the code after directly finishes the import of this study.
 		 */
 		HashMap<String, ImportJob> downloadImportJobs = new HashMap<String, ImportJob>();
 		ImportJob downloadImportJob = ImportUtils.createNewImportJob(pat, selectedStudy);
-		selectedSeries.stream().forEach(s -> importJob.getSelectedSeries().add(s));
-		downloadImportJobs.put(importJob.getStudy().getStudyInstanceUID(), downloadImportJob);
+		downloadImportJob.setSubject(subject);
+		selectedSeries.stream().forEach(s -> downloadImportJob.getSelectedSeries().add(s));
+		downloadImportJobs.put(downloadImportJob.getStudy().getStudyInstanceUID(), downloadImportJob);
 		Runnable downloadRunnable = new DownloadOrCopyRunnable(true, dicomServerClient, dicomFileAnalyzer,  null, downloadImportJobs);
 		Thread downloadThread = new Thread(downloadRunnable);
 		downloadThread.start();
@@ -269,12 +278,6 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		}
 
 		logger.info("4. Complete data");
-		/**
-		 * Possible @todo: add 4 columns to Excel with patient information
-		 * to create correct hash here, as verified in the GUI in patient
-		 * verification.
-		 */
-		Subject subject = dOCAL.createSubjectFromPatient(pat);
 		Long centerId = sc.getCenterId();
 
 		// 4 Create subject if necessary
