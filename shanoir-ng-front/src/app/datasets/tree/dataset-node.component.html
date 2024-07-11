@@ -16,6 +16,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         *ngIf="node"
         [class.selected]="this.menuOpened || treeService.isSelected(node.id, 'dataset')"
         [label]="node.label"
+        [tags]="node.tags"
         [awesome]="node.awesome"
         [(opened)]="node.opened"
         (labelClick)="toggleMenu()"

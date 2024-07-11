@@ -21,6 +21,7 @@ import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
+import { Tag } from "../../tags/tag.model";
 import { Channel, EegDataset, Event } from '../dataset/eeg/dataset.eeg.model';
 import { EchoTime, FlipAngle, InversionTime, MrDataset, MrDatasetNature, MrQualityProcedureType, RepetitionTime } from '../dataset/mr/dataset.mr.model';
 import { DatasetProcessing } from './dataset-processing.model';
@@ -42,7 +43,7 @@ export class DatasetDTOService {
      * Warning : DO NOT USE THIS IN A LOOP, use toEntityList instead
      * @param result can be used to get an immediate temporary result without waiting async data
      */
-    public toEntity(dto: DatasetDTO, result?: Dataset, mode: 'eager' | 'lazy' = 'eager'): Promise<Dataset> {   
+    public toEntity(dto: DatasetDTO, result?: Dataset, mode: 'eager' | 'lazy' = 'eager'): Promise<Dataset> {
         if(!this.datasetProcessingService) {
             this.datasetProcessingService = this.injector.get<DatasetProcessingService>(DatasetProcessingService);
         }
@@ -159,6 +160,7 @@ export class DatasetDTOService {
             process.id = dto.datasetProcessing.id;
 			entity.datasetProcessing = process;
 		}
+        entity.tags = dto.tags ? dto.tags : [];
         return entity;
     }
 
@@ -203,6 +205,7 @@ export class DatasetDTO {
 	datasetProcessing: {id: number};
     datasetAcquisition: DatasetAcquisitionDTO;
     inPacs: boolean;
+    tags: Tag[];
 
     constructor(dataset?: Dataset) {
         if (dataset) {
@@ -219,6 +222,7 @@ export class DatasetDTO {
             if(dataset.datasetAcquisition) {
                 this.datasetAcquisition = new DatasetAcquisitionDTO(dataset.datasetAcquisition);
             }
+            this.tags = dataset.tags;
         }
     }
 }

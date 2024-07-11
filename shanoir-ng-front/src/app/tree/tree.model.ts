@@ -232,6 +232,7 @@ export class DatasetNode extends ShanoirNode {
         public parent: ShanoirNode,
         public id: number,
         public label: string,
+        public tags: Tag[],
         public type: string,
         public processings: ProcessingNode[] | UNLOADED,
         public processed: boolean,
@@ -239,6 +240,7 @@ export class DatasetNode extends ShanoirNode {
         public inPacs: boolean
     ) {
         super(parent, id, label);
+        this.tags = !tags ? [] : tags;
         if(processed){
             this.title = "processed-dataset";
             this.awesome = "fas fa-camera-rotate";

@@ -29,6 +29,7 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
+import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
@@ -48,6 +49,8 @@ import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.security.ControlerSecurityService;
 import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.tag.mapper.StudyTagMapper;
+import org.shanoir.ng.tag.service.StudyTagService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -93,7 +96,16 @@ public class DatasetApiControllerTest {
 	private DatasetService datasetServiceMock;
 
 	@MockBean
+	private DatasetRepository datasetRepositoryMock;
+
+	@MockBean
+	private StudyTagService studyTagServiceMock;
+
+	@MockBean
 	private DatasetMapper datasetMapperMock;
+
+	@MockBean
+	private StudyTagMapper studyTagMapperMock;
 
 	@MockBean
 	private MrDatasetMapper mrDatasetMapperMock;

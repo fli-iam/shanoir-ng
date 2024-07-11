@@ -14,7 +14,9 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
+import { TaskState } from 'src/app/async-tasks/task.model';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { TreeService } from 'src/app/studies/study/tree.service';
 import { SuperPromise } from 'src/app/utils/super-promise';
 import { DatasetAcquisition } from '../../dataset-acquisitions/shared/dataset-acquisition.model';
 import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
@@ -35,8 +37,8 @@ import {
     UNLOADED,
 } from '../../tree/tree.model';
 import { Subject } from '../shared/subject.model';
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { Selection, TreeService } from 'src/app/studies/study/tree.service';
+import { ConsoleService } from 'src/app/shared/console/console.service';
+import { SubjectService } from '../shared/subject.service';
 
 
 @Component({
@@ -66,7 +68,9 @@ export class SubjectNodeComponent implements OnChanges {
             private router: Router,
             private examPipe: ExaminationPipe,
             private downloadService: MassDownloadService,
-            protected treeService: TreeService) {
+            protected treeService: TreeService,
+            private consoleService: ConsoleService,
+            private subjectService: SubjectService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -119,7 +123,7 @@ export class SubjectNodeComponent implements OnChanges {
                     this.node.open();
                 }).catch(error => {
                     this.loading = false;
-                    throw error;
+                    this.consoleService.log('error', error.toString());
                 });
         } else {
             return Promise.resolve();
@@ -158,6 +162,7 @@ export class SubjectNodeComponent implements OnChanges {
             this.node,
             dataset.id,
             dataset.name,
+            dataset.tags,
             dataset.type,
             dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : [],
             processed,

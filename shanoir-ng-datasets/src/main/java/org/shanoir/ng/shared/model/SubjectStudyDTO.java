@@ -1,6 +1,7 @@
 package org.shanoir.ng.shared.model;
 
 import org.shanoir.ng.shared.subjectstudy.SubjectType;
+import org.shanoir.ng.tag.model.Tag;
 
 import java.util.List;
 

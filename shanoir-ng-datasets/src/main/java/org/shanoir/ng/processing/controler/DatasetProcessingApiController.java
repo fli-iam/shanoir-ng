@@ -59,7 +59,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
 	@Override
 	public ResponseEntity<Void> deleteDatasetProcessing(
-			@Parameter(name = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId)
+			@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId)
 			throws RestServiceException {
 
 		try {
@@ -74,7 +74,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
 	@Override
 	public ResponseEntity<DatasetProcessingDTO> findDatasetProcessingById(
-			@Parameter(name = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
+			@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
 		
 		final Optional<DatasetProcessing> datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
 		if (!datasetProcessing.isPresent()) {
@@ -94,7 +94,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
 	@Override
 	public ResponseEntity<List<DatasetDTO>> getInputDatasets(
-			@Parameter(name = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
+			@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
 		final Optional<DatasetProcessing> datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
 		List<Dataset> inputDatasets = datasetProcessing.get().getInputDatasets();
 		return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(inputDatasets), HttpStatus.OK);
@@ -102,7 +102,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
 	@Override
 	public ResponseEntity<List<DatasetDTO>> getOutputDatasets(
-			@Parameter(name = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
+			@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
 		final Optional<DatasetProcessing> datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
 		List<Dataset> outputDatasets = datasetProcessing.get().getOutputDatasets();
 		return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(outputDatasets), HttpStatus.OK);
@@ -110,7 +110,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
 	@Override
 	public ResponseEntity<DatasetProcessingDTO> saveNewDatasetProcessing(
-			@Parameter(name = "dataset processing to create", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
+			@Parameter(description = "dataset processing to create", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
 			final BindingResult result) throws RestServiceException {
 		
 		/* Validation */
@@ -123,8 +123,8 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
 	@Override
 	public ResponseEntity<Void> updateDatasetProcessing(
-			@Parameter(name = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId,
-			@Parameter(name = "dataset processing to update", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
+			@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId,
+			@Parameter(description = "dataset processing to update", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
 			final BindingResult result) throws RestServiceException {
 
 		validate(result);
