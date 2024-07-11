@@ -113,12 +113,16 @@ public class DicomServerClient implements IDicomServerClient {
 		final String studyDate) throws Exception {
 		DicomQuery query = new DicomQuery();
 		query.setStudyRootQuery(studyRootQuery);
-		query.setModality(modality);
 		query.setPatientName(patientName);
 		query.setPatientID(patientID);
 		query.setPatientBirthDate(patientBirthDate);
 		query.setStudyDescription(studyDescription);
 		query.setStudyDate(studyDate);
+		query.setModality(modality);
+		return queryPACSService.queryCFIND(query).getPatients();
+	}
+
+	public List<Patient> queryDicomServer(DicomQuery query) throws Exception {
 		return queryPACSService.queryCFIND(query).getPatients();
 	}
 

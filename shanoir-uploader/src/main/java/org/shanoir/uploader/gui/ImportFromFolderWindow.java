@@ -71,7 +71,6 @@ public class ImportFromFolderWindow extends JFrame {
     ShanoirUploaderServiceClient shanoirUploaderServiceClient;
     UpdateFolderImportStudyListener updateFolderImportStudyListener;
 
-
     public ImportFromFolderWindow(File shanoirUploaderFolder, ResourceBundle resourceBundle, JScrollPane scrollPaneUpload, IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG) {
         this.updateFolderImportStudyListener = new UpdateFolderImportStudyListener(shanoirUploaderServiceClientNG, this);
         this.shanoirUploaderFolder = shanoirUploaderFolder;
@@ -165,7 +164,7 @@ public class ImportFromFolderWindow extends JFrame {
         openButton.addActionListener(uploadListener);
 
         // initialize others
-        this.updateFolderImportStudyListener.updateImportDialogForStudyAndStudyCard();
+        this.updateFolderImportStudyListener.updateFolderImportForStudyAndStudyCard();
 
         // list of import display here
         //headers for the table

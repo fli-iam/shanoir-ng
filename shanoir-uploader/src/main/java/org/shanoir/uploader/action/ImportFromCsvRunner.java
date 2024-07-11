@@ -55,7 +55,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 
 	private List<CsvImport> csvImports;
 	private ResourceBundle resourceBundle;
-	private ImportFromTableWindow importFromCSVWindow;
+	private ImportFromTableWindow importFromTableWindow;
 	private IdentifierCalculator identifierCalculator;
 	private IDicomServerClient dicomServerClient;
 	private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
@@ -64,7 +64,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 	public ImportFromCsvRunner(List<CsvImport> csvImports, ResourceBundle ressourceBundle, ImportFromTableWindow importFromCSVWindow, IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG) {
 		this.csvImports = csvImports;
 		this.resourceBundle = ressourceBundle;
-		this.importFromCSVWindow = importFromCSVWindow;
+		this.importFromTableWindow = importFromCSVWindow;
 		this.identifierCalculator = new IdentifierCalculator();
 		this.dicomServerClient = dicomServerClient;
 		this.dicomFileAnalyzer = dicomFileAnalyzer;
@@ -77,12 +77,12 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		Set<Long> idList = new HashSet<>();
 		Map<String, ArrayList<StudyCard>> studyCardsByStudy = new HashMap<>();
 
-		importFromCSVWindow.openButton.setEnabled(false);
-		importFromCSVWindow.uploadButton.setEnabled(false);
+		importFromTableWindow.openButton.setEnabled(false);
+		importFromTableWindow.uploadButton.setEnabled(false);
 
-		importFromCSVWindow.progressBar.setStringPainted(true);
-		importFromCSVWindow.progressBar.setString("Preparing import...");
-		importFromCSVWindow.progressBar.setVisible(true);
+		importFromTableWindow.progressBar.setStringPainted(true);
+		importFromTableWindow.progressBar.setString("Preparing import...");
+		importFromTableWindow.progressBar.setVisible(true);
 
 		// Get the list of studies, study card, center, equipments to check their existence
 		for (CsvImport importTodo : this.csvImports) {
@@ -119,7 +119,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 				studyCardsByStudy.get(studyCard.getStudyId().toString()).add(studyCard);
 			}
 		} catch (Exception e1) {
-			this.importFromCSVWindow.error.setText(resourceBundle.getString("shanoir.uploader.import.csv.error.studycard"));
+			this.importFromTableWindow.error.setText(resourceBundle.getString("shanoir.uploader.import.csv.error.studycard"));
 			return null;
 		}
 
@@ -127,8 +127,8 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		int i = 1;
 
 		for (CsvImport importTodo : this.csvImports) {
-			importFromCSVWindow.progressBar.setString("Preparing import " + i + "/" + this.csvImports.size());
-			importFromCSVWindow.progressBar.setValue(100*i/this.csvImports.size() + 1);
+			importFromTableWindow.progressBar.setString("Preparing import " + i + "/" + this.csvImports.size());
+			importFromTableWindow.progressBar.setValue(100*i/this.csvImports.size() + 1);
 
 			org.shanoir.uploader.model.rest.Study study = studies.stream().filter(element -> element.getId().toString().equals(importTodo.getStudyId())).findFirst().get();
 			success = importData(importTodo, studyCardsByStudy.get(importTodo.getStudyId()), study ) && success;
@@ -136,18 +136,18 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		}
 
 		if (success) {
-			importFromCSVWindow.progressBar.setString("Success !");
-			importFromCSVWindow.progressBar.setValue(100);
+			importFromTableWindow.progressBar.setString("Success !");
+			importFromTableWindow.progressBar.setValue(100);
 
 			// Open current import tab and close csv import panel
-			((JTabbedPane) this.importFromCSVWindow.scrollPaneUpload.getParent().getParent()).setSelectedComponent(this.importFromCSVWindow.scrollPaneUpload.getParent());
+			((JTabbedPane) this.importFromTableWindow.scrollPaneUpload.getParent().getParent()).setSelectedComponent(this.importFromTableWindow.scrollPaneUpload.getParent());
 
-			this.importFromCSVWindow.frame.setVisible(false);
-			this.importFromCSVWindow.frame.dispose();
+			this.importFromTableWindow.frame.setVisible(false);
+			this.importFromTableWindow.frame.dispose();
 		} else {
 //			this.importFromCSVWindow.displayImportJobs(csvImports);
-			importFromCSVWindow.openButton.setEnabled(true);
-			importFromCSVWindow.uploadButton.setEnabled(false);
+			importFromTableWindow.openButton.setEnabled(true);
+			importFromTableWindow.uploadButton.setEnabled(false);
 		}
 		return null;
 	}

@@ -84,7 +84,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 			}
 
 			/**
-			 * Write the UploadJob and schedule upload
+			 * Write the UploadJob
 			 */
 			UploadJob uploadJob = new UploadJob();
 			ImportUtils.initUploadJob(importJob, uploadJob);

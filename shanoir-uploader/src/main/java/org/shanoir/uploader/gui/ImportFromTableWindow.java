@@ -20,21 +20,28 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
-import org.shanoir.uploader.action.ImportFromCsvActionListener;
+import org.shanoir.uploader.action.ImportFromTableActionListener;
+import org.shanoir.uploader.action.UpdateFolderImportStudyListener;
+import org.shanoir.uploader.action.UpdateTableImportStudyListener;
 import org.shanoir.uploader.action.UploadFromTableActionListener;
 import org.shanoir.uploader.dicom.IDicomServerClient;
+import org.shanoir.uploader.gui.customcomponent.JComboBoxMandatory;
 import org.shanoir.uploader.model.CsvImport;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 
 public class ImportFromTableWindow extends JFrame {
 
 	private static final Logger logger = LoggerFactory.getLogger(ImportFromTableWindow.class);
+
+    public JLabel studyLabel;
+    public JComboBoxMandatory studyCB;
 
 	public JButton uploadButton;
 	public JButton openButton;
@@ -51,13 +58,15 @@ public class ImportFromTableWindow extends JFrame {
 	JTable table;
 
 	UploadFromTableActionListener uploadListener;
-	ImportFromCsvActionListener importListener;
+	ImportFromTableActionListener importListener;
 	IDicomServerClient dicomServerClient;
 	ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 	ShanoirUploaderServiceClient shanoirUploaderServiceClient;
 	public JScrollPane scrollPaneUpload;
+	UpdateTableImportStudyListener updateTableImportStudyListener;
 
 	public ImportFromTableWindow(File shanoirUploaderFolder, ResourceBundle resourceBundle, JScrollPane scrollPaneUpload, IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG) {
+		this.updateTableImportStudyListener = new UpdateTableImportStudyListener(shanoirUploaderServiceClientNG, this);
 		this.shanoirUploaderFolder = shanoirUploaderFolder;
 		this.resourceBundle = resourceBundle;
 		this.dicomServerClient = dicomServerClient;
@@ -79,19 +88,39 @@ public class ImportFromTableWindow extends JFrame {
 		masterPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 		frame.setContentPane(masterPanel);
 
-		// CSV description here
+		// Study selection
+        GridBagConstraints studyLabelGBC = new GridBagConstraints();
+        studyLabel = new JLabel(resourceBundle.getString("shanoir.uploader.studyLabel") + " *");
+        studyLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        studyLabelGBC.anchor = GridBagConstraints.NORTHWEST;
+        studyLabelGBC.gridx = 0;
+        studyLabelGBC.gridy = 0;
+        masterPanel.add(studyLabel, studyLabelGBC);
+        studyLabel.setVisible(true);
+
+        GridBagConstraints studyGBC = new GridBagConstraints();
+        studyCB = new JComboBoxMandatory();
+        studyCB.setBackground(Color.WHITE);
+        studyGBC.anchor = GridBagConstraints.NORTHWEST;
+        studyGBC.gridx = 0;
+        studyGBC.gridy = 1;
+        masterPanel.add(studyCB, studyGBC);
+        studyCB.addItemListener(updateTableImportStudyListener);
+        studyCB.setVisible(true);
+
+		// Table description here
 		this.csvDetail.setText(resourceBundle.getString("shanoir.uploader.import.table.detail"));
 		GridBagConstraints gBCcsvDetail = new GridBagConstraints();
 		gBCcsvDetail.anchor = GridBagConstraints.NORTHWEST;
 		gBCcsvDetail.gridx = 0;
-		gBCcsvDetail.gridy = 0;
+		gBCcsvDetail.gridy = 2;
 		masterPanel.add(this.csvDetail, gBCcsvDetail);
 
 		// Potential error here
 		GridBagConstraints gBCError = new GridBagConstraints();
 		gBCError.anchor = GridBagConstraints.NORTHWEST;
 		gBCError.gridx = 0;
-		gBCError.gridy = 1;
+		gBCError.gridy = 3;
 		this.error.setForeground(Color.RED);
 		masterPanel.add(this.error, gBCError);
 
@@ -100,16 +129,16 @@ public class ImportFromTableWindow extends JFrame {
 		GridBagConstraints gBCOpenButton = new GridBagConstraints();
 		gBCOpenButton.anchor = GridBagConstraints.NORTHWEST;
 		gBCOpenButton.gridx = 0;
-		gBCOpenButton.gridy = 2;
+		gBCOpenButton.gridy = 4;
 		openButton.setEnabled(true);
 		masterPanel.add(openButton, gBCOpenButton);
 
 		uploadListener = new UploadFromTableActionListener(this, resourceBundle);
-
 		openButton.addActionListener(uploadListener);
 
-		// CSV display here
-		//headers for the table
+		this.updateTableImportStudyListener.updateTableImportForStudy();
+
+		// headers for the table
 		String[] columns = new String[] {
 			resourceBundle.getString("shanoir.uploader.import.table.column.dicom.query.level"),
 			resourceBundle.getString("shanoir.uploader.import.table.column.dicom.patient.name"),
@@ -149,7 +178,7 @@ public class ImportFromTableWindow extends JFrame {
 		GridBagConstraints gBCTableanchor = new GridBagConstraints();
 		gBCTableanchor.anchor = GridBagConstraints.NORTHWEST;
 		gBCTableanchor.gridx = 0;
-		gBCTableanchor.gridy = 3;
+		gBCTableanchor.gridy = 5;
 		tablePanel.setSize(1500, 500);
 		masterPanel.add(tablePanel , gBCTableanchor);
 
@@ -166,7 +195,7 @@ public class ImportFromTableWindow extends JFrame {
 		GridBagConstraints gBCuploadButton = new GridBagConstraints();
 		gBCuploadButton.anchor = GridBagConstraints.NORTHWEST;
 		gBCuploadButton.gridx = 0;
-		gBCuploadButton.gridy = 4;
+		gBCuploadButton.gridy = 6;
 		uploadButton.setEnabled(false);
 		masterPanel.add(uploadButton, gBCuploadButton);
 		
@@ -174,12 +203,11 @@ public class ImportFromTableWindow extends JFrame {
 		GridBagConstraints gBCProgressBar = new GridBagConstraints();
 		gBCProgressBar.anchor = GridBagConstraints.NORTHWEST;
 		gBCProgressBar.gridx = 0;
-		gBCProgressBar.gridy = 5;
+		gBCProgressBar.gridy = 7;
 		progressBar.setVisible(false);
 		masterPanel.add(progressBar, gBCProgressBar);
 	
-		importListener = new ImportFromCsvActionListener(this, resourceBundle, dicomServerClient, dicomFileAnalyzer, shanoirUploaderFolder, shanoirUploaderServiceClientNG);
-
+		importListener = new ImportFromTableActionListener(this, resourceBundle, dicomServerClient, dicomFileAnalyzer, shanoirUploaderFolder, shanoirUploaderServiceClientNG);
 		uploadButton.addActionListener(importListener);
 
 		// center the frame
@@ -219,7 +247,7 @@ public class ImportFromTableWindow extends JFrame {
 
 		model.fireTableDataChanged();
 		table.getParent().setVisible(true);
-//		this.importListener.setCsvImports(imports);
+		this.importListener.setImportJobs(importJobs);
 
 		uploadButton.setEnabled(!inError);
 	}

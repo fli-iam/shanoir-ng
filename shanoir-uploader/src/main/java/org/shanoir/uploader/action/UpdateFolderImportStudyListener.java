@@ -52,7 +52,7 @@ public class UpdateFolderImportStudyListener implements ItemListener {
         }
     }
 
-    public void updateImportDialogForStudyAndStudyCard() {
+    public void updateFolderImportForStudyAndStudyCard() {
         window.studyCB.removeAllItems();
         window.studyCardCB.removeAllItems();
         try {

@@ -1,14 +1,11 @@
 package org.shanoir.uploader.dicom;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
+import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
-import org.shanoir.uploader.dicom.query.SerieTreeNode;
 
 public interface IDicomServerClient {
 
@@ -30,6 +27,8 @@ public interface IDicomServerClient {
 	 */
 	public List<Patient> queryDicomServer(boolean studyRootQuery, String modality, String patientName, String patientID,
 			String studyDescription, String birthDate, String studyDate) throws Exception;
+
+	public List<Patient> queryDicomServer(DicomQuery query) throws Exception;
 
 	/**
 	 * This method initializes the download of DICOM files from the DICOM server.
