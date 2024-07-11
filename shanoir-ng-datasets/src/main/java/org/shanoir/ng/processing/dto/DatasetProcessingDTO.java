@@ -14,11 +14,11 @@
 
 package org.shanoir.ng.processing.dto;
 
-import org.shanoir.ng.dataset.dto.DatasetDTO;
-import org.shanoir.ng.processing.model.DatasetProcessingType;
-
 import java.time.LocalDate;
 import java.util.List;
+
+import org.shanoir.ng.dataset.dto.DatasetDTO;
+import org.shanoir.ng.processing.model.DatasetProcessingType;
 
 
 /**
@@ -38,8 +38,6 @@ public class DatasetProcessingDTO {
 	private List<DatasetDTO> inputDatasets;
 
 	private List<DatasetDTO> outputDatasets;
-
-	private List<DatasetDTO> inputDatasets;
 
 	private LocalDate processingDate;
 	
@@ -109,13 +107,5 @@ public class DatasetProcessingDTO {
 
 	public void setParentId(Long parentId) {
 		this.parentId = parentId;
-	}
-
-	public List<DatasetDTO> getInputDatasets() {
-		return inputDatasets;
-	}
-
-	public void setInputDatasets(List<DatasetDTO> inputDatasets) {
-		this.inputDatasets = inputDatasets;
 	}
 }
