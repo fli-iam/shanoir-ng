@@ -16,9 +16,10 @@ import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/ac
 
 import { Selection, TreeService } from 'src/app/studies/study/tree.service';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
-import { AcquisitionEquipmentNode, CenterNode } from '../../tree/tree.model';
+import { AcquisitionEquipmentNode, CenterNode, CoilNode } from '../../tree/tree.model';
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
+import { CoilService } from 'src/app/coils/shared/coil.service';
 
 
 @Component({
@@ -41,6 +42,7 @@ export class CenterNodeComponent implements OnChanges {
     constructor(
         private centerService: CenterService,
         private acquisitionEquipmentPipe: AcquisitionEquipmentPipe,
+        private coilService: CoilService,
         private keycloakService: KeycloakService,
         protected treeService: TreeService) {
     }
@@ -68,6 +70,20 @@ export class CenterNodeComponent implements OnChanges {
                 if (center) {
                     this.node.acquisitionEquipments = center.acquisitionEquipments.map(
                             acqEq => new AcquisitionEquipmentNode(this.node, acqEq.id, this.acquisitionEquipmentPipe.transform(acqEq), 'UNLOADED', this.keycloakService.isUserAdminOrExpert()));
+                }
+                this.loading = false;
+                this.node.open();
+            }).catch(() => {
+                this.loading = false;
+            });
+    }
+
+    loadCoils() {
+        this.loading = true;
+        this.coilService.findByCenter(this.node.id).then(
+            coils =>  {
+                if (coils) {
+                    this.node.coils = coils.map(coil => new CoilNode(this.node, coil.id, coil.name));
                 }
                 this.loading = false;
                 this.node.open();

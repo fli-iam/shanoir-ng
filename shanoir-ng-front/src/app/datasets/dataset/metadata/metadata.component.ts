@@ -58,7 +58,7 @@ export class MetadataComponent {
         const id: number = +this.activatedRoute.snapshot.params['id'];
 
         this.datasetService.get(id).then(ds => {
-            this.treeService.selection = new Selection(id, 'dicomMetadata', [ds.study.id]);
+            this.treeService.selection = new Selection(id, 'dicomMetadata', [ds.study.id], ds);
         });
 
         return Promise.all([this.datasetService.downloadDicomMetadata(id), this.dicomService.getDicomTags()]).then(([data, tags]) => {

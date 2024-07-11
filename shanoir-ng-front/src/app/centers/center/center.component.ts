@@ -54,15 +54,11 @@ export class CenterComponent extends EntityComponent<Center> {
     }
 
     initView(): Promise<void> {
-        return this.centerService.get(this.id).then(center => {
-            this.center = center;
-        });
+        return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
-        return this.centerService.get(this.id).then(center => {
-            this.center = center;
-        });
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {

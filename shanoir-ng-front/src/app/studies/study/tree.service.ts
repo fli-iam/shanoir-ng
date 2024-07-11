@@ -37,6 +37,9 @@ import { CenterNode, ClinicalSubjectNode, DatasetAcquisitionNode, DatasetNode, E
 import { StudyRightsService } from "../shared/study-rights.service";
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyService } from '../shared/study.service';
+import { CoilService } from "src/app/coils/shared/coil.service";
+import { Coil } from "src/app/coils/shared/coil.model";
+import { Entity } from "src/app/shared/components/entity/entity.abstract";
 
 @Injectable()
 export class TreeService {
@@ -84,6 +87,7 @@ export class TreeService {
             private datasetAcquisitionService: DatasetAcquisitionService,
             private datasetProcessingService: DatasetProcessingService,
             private acquisitionEquipmentService: AcquisitionEquipmentService,
+            private coilService: CoilService,
             private examinationService: ExaminationService,
             private keycloakService: KeycloakService,
             private studyRightsService: StudyRightsService,
@@ -118,37 +122,39 @@ export class TreeService {
 
             studyLoaded?.then(() => {
                 if (this.selection?.type == 'dataset') {
-                    this.selectDataset(this.selection.id);
+                    this.selectDataset(this.selection.entity as Dataset);
                 } else if (this.selection?.type == 'dicomMetadata') {
-                    this.selectDicomMetadata(this.selection.id);
+                    this.selectDicomMetadata(this.selection.entity as Dataset);
                 } else if (this.selection?.type == 'subject') {
-                    this.selectSubject(this.selection.id);
+                    this.selectSubject();
                 } else if (this.selection?.type == 'acquisition') {
-                    this.selectAcquisition(this.selection.id);
+                    this.selectAcquisition(this.selection.entity as DatasetAcquisition);
                 } else if (this.selection?.type == 'processing') {
-                    this.selectProcessing(this.selection.id);
+                    this.selectProcessing(this.selection.entity as DatasetProcessing);
                 } else if (this.selection?.type == 'examination') {
-                    this.selectExamination(this.selection.id);
+                    this.selectExamination(this.selection.entity as Examination);
                 } else if (this.selection?.type == 'center') {
-                    this.selectCenter(this.selection.id);
+                    this.selectCenter();
                 } else if (this.selection?.type == 'equipment') {
-                    this.selectEquipment(this.selection.id);
+                    this.selectEquipment(this.selection.entity as AcquisitionEquipment);
                 } else if (this.selection?.type == 'qualitycard') {
-                    this.selectQualitycard(this.selection.id);
+                    this.selectQualitycard();
                 } else if (this.selection?.type == 'studycard') {
-                    this.selectStudycard(this.selection.id);
+                    this.selectStudycard();
                 } else if (this.selection?.type == 'user') {
-                    this.selectUser(this.selection.id);
+                    this.selectUser();
+                } else if (this.selection?.type == 'coil') {
+                    this.selectCoil(this.selection.entity as Coil);
                 }
                 
             });
         }
     }
 
-    private selectDataset(id: number): Promise<DatasetNode> {
+    private selectDataset(dataset: number | Dataset): Promise<DatasetNode> {
         return this.studyNodePromise.then(() => {
             return this.studyNode.subjectsNode.open().then(() => {
-                return this.findDatasetParent(id).then(ret => {
+                return this.findDatasetParent(dataset).then(ret => {
                     let subjectNode: SubjectNode = (this.studyNode.subjectsNode.subjects as SubjectNode[]).find(sn => {
                         return sn.id == ret.topParent.datasetAcquisition?.examination?.subject?.id;
                     });
@@ -163,11 +169,11 @@ export class TreeService {
                                             let dsNode: DatasetNode = (acqNode.datasets as DatasetNode[]).find(acqDs => acqDs.id == ret.topParent.id);
                                             if (dsNode) {
                                                 return dsNode.open().then(() => {
-                                                    if (ret.topParent.id != id) { // if sub processing/datasets 
+                                                    if (ret.topParent.id != (typeof dataset == 'number' ? dataset : dataset.id)) { // if sub processing/datasets 
                                                         let procNode: ProcessingNode = dsNode.processings[0] as ProcessingNode;
                                                         if (procNode) {
                                                             return (dsNode.processings[0] as ProcessingNode).open().then(() => {
-                                                                return (procNode.datasets as DatasetNode[]).find(dsNd => dsNd.id == id);
+                                                                return (procNode.datasets as DatasetNode[]).find(dsNd => dsNd.id == (typeof dataset == 'number' ? dataset : dataset.id));
                                                             });
                                                         }
                                                     }
@@ -184,14 +190,20 @@ export class TreeService {
         });
     }
 
-    private selectDicomMetadata(id: number) {
-        this.selectDataset(id).then(parentDsNode => {
+    private selectDicomMetadata(ds: number | Dataset) {
+        this.selectDataset(ds).then(parentDsNode => {
             parentDsNode?.open();
         });
     }
 
-    private findDatasetParent(childDatasetId: number, botomChild?: Dataset): Promise<{topParent: Dataset, bottomChild: Dataset}> {
-        return this.datasetService.get(childDatasetId).then(ds => {
+    private findDatasetParent(childDataset: number | Dataset, botomChild?: Dataset): Promise<{topParent: Dataset, bottomChild: Dataset}> {
+        let childDatasetPromise: Promise<Dataset>;
+        if (typeof childDataset == 'number') {
+            childDatasetPromise = this.datasetService.get(childDataset);
+        } else {
+            childDatasetPromise = Promise.resolve(childDataset);
+        }
+        return childDatasetPromise.then(ds => {
             if (!botomChild) botomChild = ds;
             if (ds.datasetProcessing) {
                 if (!(ds.datasetProcessing.inputDatasets?.length > 0)) throw Error('no input ds on this processing');
@@ -202,18 +214,30 @@ export class TreeService {
         });
     }
 
-    private selectProcessing(id: number) {
-        this.datasetProcessingService.get(id).then(proc => {
+    private selectProcessing(processing: number | DatasetProcessing) {
+        let processingPromise: Promise<DatasetProcessing>;
+        if (typeof processing == 'number') {
+            processingPromise = this.datasetProcessingService.get(processing);
+        } else {
+            processingPromise = Promise.resolve(processing);
+        }
+        processingPromise.then(proc => {
             this.selectDataset(proc.inputDatasets[0].id).then(parentDsNode => {
                 parentDsNode?.open();
             });
         });
     }
 
-    private selectAcquisition(id: number) {
+    private selectAcquisition(acq: number | DatasetAcquisition) {
         this.studyNodePromise.then(() => {
             this.studyNode.subjectsNode.open().then(() => {
-                this.datasetAcquisitionService.get(id).then(dsa => {
+                let acqPromise: Promise<DatasetAcquisition>;
+                if (typeof acq == 'number') {
+                    acqPromise = this.datasetAcquisitionService.get(acq);
+                } else {
+                    acqPromise = Promise.resolve(acq);
+                }
+                acqPromise.then(dsa => {
                     let subjectNode: SubjectNode = (this.studyNode.subjectsNode.subjects as SubjectNode[]).find(sn => sn.id == dsa.examination?.subject?.id);
                     if (subjectNode) {
                         subjectNode.open().then(() => {
@@ -228,10 +252,16 @@ export class TreeService {
         });
     }
 
-    private selectExamination(id: number) {
+    private selectExamination(examination: number | Examination) {
         this.studyNodePromise.then(() => {
             this.studyNode.subjectsNode.open().then(() => {
-                this.examinationService.get(id).then(exam => {
+                let examPromise: Promise<Examination>;
+                if (typeof examination == 'number') {
+                    examPromise = this.examinationService.get(examination);
+                } else {
+                    examPromise = Promise.resolve(examination);
+                }
+                examPromise.then(exam => {
                     let subjectNode: SubjectNode = (this.studyNode.subjectsNode.subjects as SubjectNode[]).find(sn => sn.id == exam.subject?.id);
                     if (subjectNode) {
                         subjectNode.open();
@@ -241,22 +271,25 @@ export class TreeService {
         });
     }
 
-    private selectSubject(id: number) {
+    private selectSubject() {
         this.studyNodePromise.then(() => {
             this.studyNode.subjectsNode.open();
         });
     }
 
-    private selectCenter(id: number) {
+    private selectCenter() {
         this.studyNodePromise.then(() => {
             this.studyNode.centersNode.open();
         });
     }
 
-    private selectEquipment(id: number) {
+    private selectEquipment(equipment: number | AcquisitionEquipment) {
         this.studyNodePromise.then(() => {
             this.studyNode.centersNode.open().then(() => {
-                this.acquisitionEquipmentService.get(id).then(acqEq => {
+                (typeof equipment == 'number' 
+                    ? this.acquisitionEquipmentService.get(equipment)
+                    : Promise.resolve(equipment)
+                ).then(acqEq => {
                     let centerNode: CenterNode = (this.studyNode.centersNode.centers as CenterNode[]).find(cn => acqEq.center.id == cn.id);
                     centerNode?.open();
                 });
@@ -265,19 +298,34 @@ export class TreeService {
         });
     }
 
-    private selectQualitycard(id: number) {
+    private selectCoil(coil: number | Coil) {
+        this.studyNodePromise.then(() => {
+            this.studyNode.centersNode.open().then(() => {
+                (typeof coil == 'number' 
+                    ? this.coilService.get(coil)
+                    : Promise.resolve(coil)
+                ).then(coil => {
+                    let centerNode: CenterNode = (this.studyNode.centersNode.centers as CenterNode[]).find(cn => coil.center.id == cn.id);
+                    centerNode?.open();
+                });
+            });
+
+        });
+    }
+
+    private selectQualitycard() {
         this.studyNodePromise.then(() => {
             this.studyNode.qualityCardsNode.open();
         });
     }
 
-    private selectStudycard(id: number) {
+    private selectStudycard() {
         this.studyNodePromise.then(() => {
             this.studyNode.studyCardsNode.open();
         });
     }
 
-    private selectUser(id: number) {
+    private selectUser() {
         this.studyNodePromise.then(() => {
             this.studyNode.membersNode.open();
         });
@@ -312,7 +360,7 @@ export class TreeService {
                     }
                     return subjectNode;
                 });
-                let centerNodes: CenterNode[] = study.studyCenterList?.map(sc => new CenterNode(this.studyNode, sc.center.id, sc.center.name, UNLOADED));
+                let centerNodes: CenterNode[] = study.studyCenterList?.map(sc => new CenterNode(this.studyNode, sc.center.id, sc.center.name, UNLOADED, UNLOADED));
                 let memberNodes: MemberNode[] = study.studyUserList?.map(su => {
                     let memberNode = null;
                     memberNode = new MemberNode(this.studyNode, su.user?.id || su.userId, su.userName, su.studyUserRights?.map(sur => new RightNode(memberNode, null, StudyUserRight.getLabel(sur))));
@@ -331,14 +379,15 @@ export class TreeService {
     }
 }
 
-export type NodeType = 'study' | 'subject' | 'examination' | 'acquisition' | 'dataset' | 'processing' | 'center' | 'equipment' | 'studycard' | 'qualitycard' | 'user' | 'dicomMetadata';
+export type NodeType = 'study' | 'subject' | 'examination' | 'acquisition' | 'dataset' | 'processing' | 'center' | 'equipment' | 'coil' | 'studycard' | 'qualitycard' | 'user' | 'dicomMetadata';
 
 export class Selection {
 
     constructor(
         public id: number,
         public type: NodeType,
-        public studyId: number[]
+        public studyId: number[],
+        public entity?: Entity
     ) {}
 
     isSelected(id: number, type: NodeType): boolean {
@@ -346,50 +395,54 @@ export class Selection {
     }
 
     static fromStudy(study: Study): Selection {
-        return new Selection(study.id, 'study', [study.id]);
+        return new Selection(study.id, 'study', [study.id], study);
     }
 
     static fromSubject(subject: Subject): Selection {
-        return new Selection(subject.id, 'subject', subject.subjectStudyList.map(ss => ss.study.id));
+        return new Selection(subject.id, 'subject', subject.subjectStudyList.map(ss => ss.study.id), subject);
     }
 
     static fromExamination(examination: Examination): Selection {
-        return new Selection(examination.id, 'examination', [examination.study.id]);
+        return new Selection(examination.id, 'examination', [examination.study.id], examination);
     }
 
     static fromAcquisition(acquisition: DatasetAcquisition): Selection {
-        return new Selection(acquisition.id, 'acquisition', [acquisition.examination.study.id]);
+        return new Selection(acquisition.id, 'acquisition', [acquisition.examination.study.id], acquisition);
     }
 
     static fromDataset(dataset: Dataset): Selection {
-        return new Selection(dataset.id, 'dataset', [dataset.datasetProcessing ? dataset.datasetProcessing.outputDatasets?.[0]?.study.id : dataset.datasetAcquisition.examination.study.id]);
+        return new Selection(dataset.id, 'dataset', [dataset.datasetProcessing ? dataset.datasetProcessing.outputDatasets?.[0]?.study.id : dataset.datasetAcquisition.examination.study.id], dataset);
     }
 
     static fromProcessing(processing: DatasetProcessing): Selection {
-        return new Selection(processing.id, 'processing', [processing.studyId]);
+        return new Selection(processing.id, 'processing', [processing.studyId], processing);
     }
 
     static fromCenter(center: Center): Selection {
-        return new Selection(center.id, 'center', center.studyCenterList.map(sc => sc.study.id));
+        return new Selection(center.id, 'center', center.studyCenterList.map(sc => sc.study.id), center);
     }
 
     static fromEquipment(equipment: AcquisitionEquipment): Selection {
-        return new Selection(equipment.id, 'equipment', equipment.center.studyCenterList?.map(sc => sc.study.id));
+        return new Selection(equipment.id, 'equipment', equipment.center.studyCenterList?.map(sc => sc.study.id), equipment);
+    }
+
+    static fromCoil(coil: Coil): Selection {
+        return new Selection(coil.id, 'coil', coil.center.studyCenterList?.map(sc => sc.study.id), coil);
     }
 
     static fromStudycard(studycard: StudyCard): Selection {
-        return new Selection(studycard.id, 'studycard', [studycard.study.id]);
+        return new Selection(studycard.id, 'studycard', [studycard.study.id], studycard);
     }
 
     static fromQualitycard(qualitycard: QualityCard): Selection {
-        return new Selection(qualitycard.id, 'qualitycard', [qualitycard.study.id]);
+        return new Selection(qualitycard.id, 'qualitycard', [qualitycard.study.id], qualitycard);
     }
 
     static fromUser(user: User): Selection {
-        return new Selection(user.id, 'user', user.studyUserList?.map(su => su.studyId));
+        return new Selection(user.id, 'user', user.studyUserList?.map(su => su.studyId), user);
     }
 
     static fromDicomMetadata(dataset: Dataset): Selection {
-        return new Selection(dataset.id, 'dicomMetadata', [dataset.datasetAcquisition.examination.study.id]);
+        return new Selection(dataset.id, 'dicomMetadata', [dataset.datasetAcquisition.examination.study.id], dataset);
     }
 }

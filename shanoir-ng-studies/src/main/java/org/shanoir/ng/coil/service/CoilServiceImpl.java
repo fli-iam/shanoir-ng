@@ -57,6 +57,10 @@ public class CoilServiceImpl implements CoilService {
 	public List<Coil> findAll() {
 		return Utils.toList(repository.findAll());
 	}
+
+	public List<Coil> findByCenterId(Long centerId) {
+		return Utils.toList(repository.findByCenterId(centerId));
+	}
 	
 	public Coil create(final Coil entity) {
 		Coil savedEntity = repository.save(entity);

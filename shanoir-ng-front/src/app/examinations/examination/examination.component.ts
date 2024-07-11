@@ -109,35 +109,32 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
 
     initView(): Promise<void> {
-        return this.examinationService.get(this.id).then((examination: Examination) => {
-            this.examination = examination;
-            if(!this.examination.weightUnitOfMeasure){
-                this.examination.weightUnitOfMeasure = this.defaultUnit;
-            }
-            if (this.keycloakService.isUserAdmin()) {
-                this.hasAdministrateRight = true;
-                this.hasDownloadRight = true;
-                this.hasImportRight = true;
-                return;
-            } else {
-                return this.studyRightsService.getMyRightsForStudy(examination.study.id).then(rights => {
-                    this.hasImportRight = rights.includes(StudyUserRight.CAN_IMPORT);
-                    this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
-                    this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
-                });
-            }
-        });
+        if(!this.examination.weightUnitOfMeasure){
+            this.examination.weightUnitOfMeasure = this.defaultUnit;
+        }
+        if (this.keycloakService.isUserAdmin()) {
+            this.hasAdministrateRight = true;
+            this.hasDownloadRight = true;
+            this.hasImportRight = true;
+            return Promise.resolve();
+        } else {
+            return this.studyRightsService.getMyRightsForStudy(this.examination.study.id).then(rights => {
+                this.hasImportRight = rights.includes(StudyUserRight.CAN_IMPORT);
+                this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
+                this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+            });
+        }
     }
 
     initEdit(): Promise<void> {
         this.getCenters();
         this.getStudies();
-        return this.examinationService.get(this.id).then((examination: Examination) => {
-            this.examination = examination
-            if(!this.examination.weightUnitOfMeasure){
-                this.examination.weightUnitOfMeasure = this.defaultUnit;
-            }
-        }).then(exam => this.getSubjects());
+
+        if(!this.examination.weightUnitOfMeasure){
+            this.examination.weightUnitOfMeasure = this.defaultUnit;
+        }
+        this.getSubjects();
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {

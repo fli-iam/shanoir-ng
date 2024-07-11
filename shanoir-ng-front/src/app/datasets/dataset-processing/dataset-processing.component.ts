@@ -88,29 +88,23 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     }
 
     initView(): Promise<void> {
-        return this.datasetProcessingService.get(this.id).then((entity)=> {
-            // checking if the datasetProcessing is not execution monitoring
-            this.executionMonitoringService.getExecutionMonitoring(entity.id).subscribe(
-                (executionMonitoring: ExecutionMonitoring) => {
-                    this.setExecutionMonitoring(executionMonitoring);
-                }, (error) => {
-                    // 404 : if it's not found then it's not execution monitoring !
-                    this.resetExecutionMonitoring();
-                }
-            )
-
-            this.datasetProcessing = entity;
-            this.fetchOneStudy(this.datasetProcessing?.studyId).then(() => {
-                this.study = this.studyOptions?.[0]?.value;
-            });
-        })
+        // checking if the datasetProcessing is not execution monitoring
+        this.executionMonitoringService.getExecutionMonitoring(this.datasetProcessing.id).subscribe(
+            (executionMonitoring: ExecutionMonitoring) => {
+                this.setExecutionMonitoring(executionMonitoring);
+            }, (error) => {
+                // 404 : if it's not found then it's not execution monitoring !
+                this.resetExecutionMonitoring();
+            }
+        )
+        this.fetchOneStudy(this.datasetProcessing?.studyId).then(() => {
+            this.study = this.studyOptions?.[0]?.value;
+        });
+        return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
-        let processingPromise: Promise<void> = this.datasetProcessingService.get(this.id).then(entity => {
-            this.datasetProcessing = entity;
-        });
-        Promise.all([this.fetchStudies(), processingPromise]).then(() => {
+        this.fetchStudies().then(() => {
             this.study = this.studyOptions?.find(opt => opt.value.id == this.datasetProcessing.studyId)?.value;
             let subjectId = this.datasetProcessing.inputDatasets?.[0]?.subject?.id;
             this.fetchSubjects().then(() => {
@@ -119,7 +113,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
                 return this.fetchDatasets();
             });
         });
-        return processingPromise;
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {

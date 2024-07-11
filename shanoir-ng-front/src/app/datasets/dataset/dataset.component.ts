@@ -44,11 +44,11 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     isMRS: boolean = false; // MR Spectroscopy
 
     constructor(
-        private datasetService: DatasetService,
-        route: ActivatedRoute,
-        private dicomArchiveService: DicomArchiveService,
-        private studyRightsService: StudyRightsService,
-        private downloadService: MassDownloadService) {
+            private datasetService: DatasetService,
+            route: ActivatedRoute,
+            private dicomArchiveService: DicomArchiveService,
+            private studyRightsService: StudyRightsService,
+            private downloadService: MassDownloadService) {
         super(route, 'dataset');
     }
 

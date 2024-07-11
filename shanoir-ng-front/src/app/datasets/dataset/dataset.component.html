@@ -46,9 +46,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     (delete) = "delete()"
 					(back)="goBack()"
 					(save)="save()">
-				<a *ngIf="treeMode" [routerLink]="'/tree/dataset/' + dataset.id">
-					<button *ngIf="mode == 'view'" class="right-icon dl-button" type="button">Tree View<i class="fas fa-folder-tree"></i></button>
-				</a>
 				<a *ngIf="!treeMode" [routerLink]="'/dataset/details/' + dataset.id">
 					<button *ngIf="mode == 'view'" class="right-icon dl-button" type="button">Details View<i class="fas fa-eye"></i></button>
 				</a>

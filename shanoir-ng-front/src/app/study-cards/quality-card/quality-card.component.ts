@@ -113,20 +113,14 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     set qualityCard(qc: QualityCard) { this.entity = qc; }
 
     initView(): Promise<void> {
-        let scFetchPromise: Promise<void> = this.qualityCardService.get(this.id).then(sc => {
-            this.qualityCard = sc;
-        });
-        this.hasAdministrateRightPromise = scFetchPromise.then(() => this.hasAdminRightsOnStudy().then(res => this.isStudyAdmin = res));
-        return scFetchPromise;
+        this.hasAdministrateRightPromise = this.hasAdminRightsOnStudy().then(res => this.isStudyAdmin = res);
+        return Promise.resolve();  
     }
 
     initEdit(): Promise<void> {
-        let scFetchPromise: Promise<void> = this.qualityCardService.get(this.id).then(sc => {
-            this.qualityCard = sc;
-        });
-        this.hasAdministrateRightPromise = scFetchPromise.then(() => this.hasAdminRightsOnStudy().then(res => this.isStudyAdmin = res));
+        this.hasAdministrateRightPromise = this.hasAdminRightsOnStudy().then(res => this.isStudyAdmin = res);
         this.fetchStudies();
-        return scFetchPromise;
+        return Promise.resolve();  
     }
 
     initCreate(): Promise<void> {

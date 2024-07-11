@@ -87,7 +87,7 @@ export class StudyNodeComponent implements OnChanges {
                         return new ClinicalSubjectNode(this.node, subjectStudy.subject.id, this.subjectStudyPipe.transform(subjectStudy), subjectStudy.tags, UNLOADED, subjectStudy.qualityTag, this.canAdmin);
                     });
                     let centers: CenterNode[] = this.input.studyCenterList.map(studyCenter => {
-                        return new CenterNode(this.node, studyCenter.center.id, studyCenter.center.name, UNLOADED);
+                        return new CenterNode(this.node, studyCenter.center.id, studyCenter.center.name, UNLOADED, UNLOADED);
                     });
                     let members: MemberNode[] = this.input.studyUserList.map(studyUser => {
                         let memberNode: MemberNode = null;

@@ -27,6 +27,7 @@ import { Coil } from '../shared/coil.model';
 import { CoilService } from '../shared/coil.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ManufacturerModelPipe } from '../../acquisition-equipments/shared/manufacturer-model.pipe';
+import { Selection } from 'src/app/studies/study/tree.service';
 
 @Component({
     selector: 'coil',
@@ -56,23 +57,21 @@ export class CoilComponent extends EntityComponent<Coil> {
     getService(): EntityService<Coil> {
         return this.coilService;
     }
+
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromCoil(this.coil);
+    }
     
     initView(): Promise<void> {
-        return this.coilService.get(this.id).then(coil => {
-            this.coil = coil;
-        });
+        return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
-        return Promise.all([
-            this.centerService.getAll(),
-            this.coilService.get(this.id)
-        ]).then(([centers, coil]) => {
+        return this.centerService.getAll().then(centers => {
             this.centers = centers;
-            this.coil = coil;
             if (this.acqEquip) {
-                coil.center = this.acqEquip.center;
-                coil.manufacturerModel = this.acqEquip.manufacturerModel;
+                this.coil.center = this.acqEquip.center;
+                this.coil.manufacturerModel = this.acqEquip.manufacturerModel;
             } else {
                 this.coil.center = this.centers.filter(center => center.id == this.coil.center.id)[0];
                 this.updateManufList(this.coil.center?.id);

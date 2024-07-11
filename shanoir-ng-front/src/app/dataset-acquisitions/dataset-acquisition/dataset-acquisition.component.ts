@@ -76,36 +76,29 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     }
 
     initView(): Promise<void> {
-        return this.datasetAcquisitionService.get(this.id).then(dsAcq => {
-            this.datasetAcquisition = dsAcq;
-            this.datasetService.getByAcquisitionId(dsAcq.id).then(datasets => {
-                dsAcq.datasets = datasets;
-                this.datasetAcquisition.datasets?.forEach(ds => {
-                    this.noDatasets = false;
-                    if (ds.type != 'Eeg' && ds.type != 'BIDS') {
-                        this.hasDicom = true;
-                    }
-                });
-            })
-
-            if (this.keycloakService.isUserAdmin()) {
-                this.hasDownloadRight = true;
-                return;
-            } else {
-                return this.studyRightsService.getMyRightsForStudy(dsAcq.examination.study.id).then(rights => {
-                    this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
-                });
-            }
-
-        });
+        this.datasetService.getByAcquisitionId(this.datasetAcquisition.id).then(datasets => {
+            this.datasetAcquisition.datasets = datasets;
+            this.datasetAcquisition.datasets?.forEach(ds => {
+                this.noDatasets = false;
+                if (ds.type != 'Eeg' && ds.type != 'BIDS') {
+                    this.hasDicom = true;
+                }
+            });
+        })
+        if (this.keycloakService.isUserAdmin()) {
+            this.hasDownloadRight = true;
+            return Promise.resolve();
+        } else {
+            return this.studyRightsService.getMyRightsForStudy(this.datasetAcquisition.examination.study.id).then(rights => {
+                this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+            });
+        }
     }
 
     initEdit(): Promise<void> {
         this.studyCardService.getAll().then(scs => this.studyCards = scs);
         this.acqEqService.getAll().then(aes => this.acquisitionEquipments = aes);
-        return this.datasetAcquisitionService.get(this.id).then(dsAcq => {
-            this.datasetAcquisition = dsAcq;
-        });
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {

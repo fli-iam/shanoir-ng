@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.coil.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.shanoir.ng.coil.model.Coil;
@@ -33,5 +34,7 @@ public interface CoilRepository extends CrudRepository<Coil, Long> {
 	 * @return a coil.
 	 */
 	Optional<Coil> findByName(String name);
+
+	List<Coil> findByCenterId(Long centerId);
 
 }

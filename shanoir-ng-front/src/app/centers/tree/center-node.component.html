@@ -17,7 +17,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [class.selected]="this.menuOpened || treeService.isSelected(node.id, 'center')"
         [label]="node.label"
         awesome="fa-regular fa-hospital"
-        (firstOpen)="loadEquipments()"
+        (firstOpen)="loadEquipments(); loadCoils()"
         [(opened)]="node.opened"
         (labelClick)="menuOpened = withMenu && !menuOpened"
         [route]="'/center/details/' + node.id"
@@ -31,13 +31,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </dropdown-menu>
 
     <ng-container *ngIf="node.open && node.acquisitionEquipments && node.acquisitionEquipments != $any('UNLOADED')">
-            <equipment-node
-                    node
-                    *ngFor="let acquisitionEquipment of node.acquisitionEquipments; let i = index"
-                    [input]="acquisitionEquipment"
-                    (onEquipmentDelete)="onEquipmentDelete(i)"
-                    (onNodeSelect)="onEquipementNodeSelect.emit($event)"
-                    [withMenu]="withMenu">
-            </equipment-node>
+        <equipment-node
+                node
+                *ngFor="let acquisitionEquipment of node.acquisitionEquipments; let i = index"
+                [input]="acquisitionEquipment"
+                (onEquipmentDelete)="onEquipmentDelete(i)"
+                (onNodeSelect)="onEquipementNodeSelect.emit($event)"
+                [withMenu]="withMenu">
+        </equipment-node>
+    </ng-container>
+    <ng-container *ngIf="node.open && node.coils && node.coils != $any('UNLOADED')">
+        <coil-node
+                node
+                *ngFor="let coil of node.coils; let i = index"
+                [input]="coil">
+        </coil-node>
     </ng-container>
 </node>

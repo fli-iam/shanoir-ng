@@ -102,43 +102,37 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
 
     initView(): Promise<void> {
-        return this.examinationService.get(this.id).then(examination => {
-            this.examination = examination;
-            if(!this.examination.weightUnitOfMeasure){
-                this.examination.weightUnitOfMeasure = this.defaultUnit;
-            }
-            this.updateExam();
-            //this.loadExaminationAnesthetic();
-            if(this.examination && this.examination.subject && this.examination.subject.id ){
-                this.animalSubjectService
-        			.getAnimalSubject(this.examination.subject.id)
-        			.then(animalSubject => this.animalSubjectId = animalSubject.id)
-                    .catch((error) => {});
-
-        	}
-        });
+        if(!this.examination.weightUnitOfMeasure){
+            this.examination.weightUnitOfMeasure = this.defaultUnit;
+        }
+        this.updateExam();
+        //this.loadExaminationAnesthetic();
+        if(this.examination && this.examination.subject && this.examination.subject.id ){
+            this.animalSubjectService
+                .getAnimalSubject(this.examination.subject.id)
+                .then(animalSubject => this.animalSubjectId = animalSubject.id)
+                .catch((error) => {});
+        }
+        return Promise.resolve();
     }
 
 
     initEdit(): Promise<void> {
         this.getCenters();
         this.getStudies();
-        return this.examinationService.get(this.id).then(examination => {
-            this.examination = examination;
-            if(!this.examination.weightUnitOfMeasure){
-                this.examination.weightUnitOfMeasure = this.defaultUnit;
-            }
-            this.updateExam();
-            //this.loadExaminationAnesthetic(this.id);
-            if(this.examination && this.examination.subject && this.examination.subject.id){
-                this.animalSubjectService
-        			.getAnimalSubject(this.examination.subject.id)
-        			.then(animalSubject => this.animalSubjectId = animalSubject.id)
-                    .catch((error) => {});
+        if(!this.examination.weightUnitOfMeasure){
+            this.examination.weightUnitOfMeasure = this.defaultUnit;
+        }
+        this.updateExam();
+        //this.loadExaminationAnesthetic(this.id);
+        if(this.examination && this.examination.subject && this.examination.subject.id){
+            this.animalSubjectService
+                .getAnimalSubject(this.examination.subject.id)
+                .then(animalSubject => this.animalSubjectId = animalSubject.id)
+                .catch((error) => {});
 
-        	}
-        });
-
+        }
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {

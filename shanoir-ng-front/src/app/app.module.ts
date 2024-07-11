@@ -270,6 +270,7 @@ import { SessionService } from './shared/services/session.service';
 import { PipelineService } from "./vip/pipelines/pipeline/pipeline.service";
 import { StudyTreeComponent } from './studies/study/study-tree.component';
 import { TreeService } from './studies/study/tree.service';
+import { CoilNodeComponent } from './coils/coil/tree/coil-node.component';
 
 @NgModule({
     imports: [
@@ -458,7 +459,8 @@ import { TreeService } from './studies/study/tree.service';
         DownloadSetupComponent,
         DownloadSetupAltComponent,
         TestQualityCardOptionsComponent,
-        StudyTreeComponent
+        StudyTreeComponent,
+        CoilNodeComponent
     ],
     providers: [
         AcquisitionEquipmentService,

@@ -274,7 +274,8 @@ export class CenterNode extends ShanoirNode {
         public parent: ShanoirNode,
         public id: number,
         public label: string,
-        public acquisitionEquipments: AcquisitionEquipmentNode[] | UNLOADED
+        public acquisitionEquipments: AcquisitionEquipmentNode[] | UNLOADED,
+        public coils: CoilNode[] | UNLOADED
     ) {
         super(parent, id, label);
     }
@@ -296,6 +297,20 @@ export class AcquisitionEquipmentNode extends ShanoirNode {
     }
 
     public title: string = "acquisition-equipment";
+}
+
+
+export class CoilNode extends ShanoirNode {
+
+    constructor(
+        public parent: ShanoirNode,
+        public id: number,
+        public label: string
+    ) {
+        super(parent, id, label);
+    }
+
+    public title: string = "coil";
 }
 
 
