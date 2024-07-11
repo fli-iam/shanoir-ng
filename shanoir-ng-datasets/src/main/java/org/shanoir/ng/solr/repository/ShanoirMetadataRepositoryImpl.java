@@ -322,14 +322,14 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 
 	public static final String SUBJECT_TAG_QUERY = "SELECT d.id AS dataset_id, tag.name AS tag" +
 			" FROM dataset d" +
-			" LEFT JOIN subject_study substu ON d.subject_id = substu.subject_id" +
-			" LEFT JOIN subject_study_tag substutag ON substu.id = substutag.subject_study_id" +
-			" LEFT JOIN tag ON substutag.tags_id = tag.id";
+			" INNER JOIN subject_study substu ON d.subject_id = substu.subject_id" +
+			" INNER JOIN subject_study_tag substutag ON substu.id = substutag.subject_study_id" +
+			" INNER JOIN tag ON substutag.tags_id = tag.id";
 
 	public static final String STUDY_TAG_QUERY = "SELECT d.id AS dataset_id, tag.name AS tag" +
 			" FROM dataset d " +
-			" LEFT JOIN dataset_tag dstag ON d.id = dstag.dataset_id " +
-			" LEFT JOIN study_tag tag ON dstag.study_tag_id = tag.id";
+			" INNER JOIN dataset_tag dstag ON d.id = dstag.dataset_id " +
+			" INNER JOIN study_tag tag ON dstag.study_tag_id = tag.id";
 
 	@PersistenceContext
 	private EntityManager em;
