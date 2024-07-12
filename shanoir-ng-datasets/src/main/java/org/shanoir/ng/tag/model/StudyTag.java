@@ -20,7 +20,7 @@ public class StudyTag extends IdName {
     private String color;
 
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "study_id")
     private Study study;
 
@@ -86,11 +86,11 @@ public class StudyTag extends IdName {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         StudyTag studyTag = (StudyTag) o;
-        return Objects.equals(id, studyTag.id);
+        return Objects.equals(id, studyTag.id) && Objects.equals(name, studyTag.name) && Objects.equals(color, studyTag.color);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, name, color);
     }
 }

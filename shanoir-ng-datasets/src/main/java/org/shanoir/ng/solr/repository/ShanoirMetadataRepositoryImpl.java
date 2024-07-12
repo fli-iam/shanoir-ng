@@ -58,6 +58,8 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"c.id as centerId, mrp.slice_thickness as sliceThickness, " +
 			"mrp.pixel_bandwidth as pixelBandwidth, " +
 			"mrp.magnetic_field_strength as magneticFieldStrength, " +
+			"da.import_date as importDate, " +
+			"da.username as username, " +
 			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
@@ -87,6 +89,8 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"c.id as centerId, null as sliceThickness, " +
 			"null as pixelBandwidth, " +
 			"null as magneticFieldStrength, " +
+			"da.import_date as importDate, " +
+			"da.username as username, " +
 			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
@@ -114,6 +118,8 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as sliceThickness, " +
 			"null as pixelBandwidth, " +
 			"null as magneticFieldStrength, " +
+			"da.import_date as importDate, " +
+			"da.username as username, " +
 			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
@@ -143,6 +149,8 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as sliceThickness, " +
 			"null as pixelBandwidth, " +
 			"null as magneticFieldStrength, " +
+			"da.import_date as importDate, " +
+			"da.username as username, " +
 			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
@@ -170,6 +178,8 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as sliceThickness, " +
 			"null as pixelBandwidth, " +
 			"null as magneticFieldStrength, " +
+			"da.import_date as importDate, " +
+			"da.username as username, " +
 			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
@@ -199,6 +209,8 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as sliceThickness, " +
 			"null as pixelBandwidth, " +
 			"null as magneticFieldStrength, " +
+			"da.import_date as importDate, " +
+			"da.username as username, " +
 			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
@@ -228,6 +240,8 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			+ ", null as sliceThickness"
 			+ ", null as pixelBandwidth"
 			+ ", null as magneticFieldStrength"
+			+ ", da.import_date as importDate"
+			+ ", da.username as username"
 			+ ", 1 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset dp ON dp.id ="
@@ -260,6 +274,8 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			+ "null as sliceThickness, " +
 			"null as pixelBandwidth, " +
 			"null as magneticFieldStrength, " +
+			"da.import_date as importDate, " +
+			"da.username as username, " +
 			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset refd ON refd.id = d.referenced_dataset_for_superimposition_id"
@@ -290,6 +306,8 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as sliceThickness, " +
 			"null as pixelBandwidth, " +
 			"null as magneticFieldStrength, " +
+			"da.import_date as importDate, " +
+			"da.username as username, " +
 			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
@@ -304,14 +322,14 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 
 	public static final String SUBJECT_TAG_QUERY = "SELECT d.id AS dataset_id, tag.name AS tag" +
 			" FROM dataset d" +
-			" LEFT JOIN subject_study substu ON d.subject_id = substu.subject_id" +
-			" LEFT JOIN subject_study_tag substutag ON substu.id = substutag.subject_study_id" +
-			" LEFT JOIN tag ON substutag.tags_id = tag.id";
+			" INNER JOIN subject_study substu ON d.subject_id = substu.subject_id" +
+			" INNER JOIN subject_study_tag substutag ON substu.id = substutag.subject_study_id" +
+			" INNER JOIN tag ON substutag.tags_id = tag.id";
 
 	public static final String STUDY_TAG_QUERY = "SELECT d.id AS dataset_id, tag.name AS tag" +
 			" FROM dataset d " +
-			" LEFT JOIN dataset_tag dstag ON d.id = dstag.dataset_id " +
-			" LEFT JOIN study_tag tag ON dstag.study_tag_id = tag.id";
+			" INNER JOIN dataset_tag dstag ON d.id = dstag.dataset_id " +
+			" INNER JOIN study_tag tag ON dstag.study_tag_id = tag.id";
 
 	@PersistenceContext
 	private EntityManager em;
