@@ -157,11 +157,9 @@ public class SubjectServiceImpl implements SubjectService {
 
 
 	private List<IdName> getIdNamesFromSubjects(Iterable<Subject> subjects) {
-
 		if (subjects == null) {
 			return new ArrayList<>();
 		}
-
 		List<IdName> names = new ArrayList<>();
 		for (Subject subject : subjects) {
 			IdName name = new IdName(subject.getId(), subject.getName());
@@ -336,11 +334,13 @@ public class SubjectServiceImpl implements SubjectService {
 	public Subject findByIdentifier(String identifier) {
 		Subject subject = subjectRepository.findByIdentifier(identifier);
 		List<SubjectStudy> subjectStudyList = subject.getSubjectStudyList();
-		// do this here to avoid two bags violation exception and load subjectStudyTags
-		subjectStudyList.stream().forEach(ss -> {
-			ss.setSubjectStudyTags(subjectStudyRepository.findSubjectStudyTagsByStudyIdAndSubjectId(ss.getStudy().getId(), ss.getSubject().getId()));
-			ss.getStudy().setTags(studyRepository.findStudyWithTagsById(ss.getStudy().getId()).getTags());
-		});
+		if (subjectStudyList != null) {
+			// do this here to avoid two bags violation exception and load subjectStudyTags
+			subjectStudyList.stream().forEach(ss -> {
+				ss.setSubjectStudyTags(subjectStudyRepository.findSubjectStudyTagsByStudyIdAndSubjectId(ss.getStudy().getId(), ss.getSubject().getId()));
+				ss.getStudy().setTags(studyRepository.findStudyWithTagsById(ss.getStudy().getId()).getTags());
+			});
+		}
 		return subject;
 	}
 
@@ -363,11 +363,13 @@ public class SubjectServiceImpl implements SubjectService {
 		List<Subject> subjects = subjectRepository.findByPreclinical(preclinical);
 		subjects.stream().forEach(s -> {
 			List<SubjectStudy> subjectStudyList = s.getSubjectStudyList();
-			// do this here to avoid two bags violation exception and load subjectStudyTags
-			subjectStudyList.stream().forEach(ss -> {
-				ss.setSubjectStudyTags(subjectStudyRepository.findSubjectStudyTagsByStudyIdAndSubjectId(ss.getStudy().getId(), ss.getSubject().getId()));
-				ss.getStudy().setTags(studyRepository.findStudyWithTagsById(ss.getStudy().getId()).getTags());
-			});
+			if (subjectStudyList != null) {
+				// do this here to avoid two bags violation exception and load subjectStudyTags
+				subjectStudyList.stream().forEach(ss -> {
+					ss.setSubjectStudyTags(subjectStudyRepository.findSubjectStudyTagsByStudyIdAndSubjectId(ss.getStudy().getId(), ss.getSubject().getId()));
+					ss.getStudy().setTags(studyRepository.findStudyWithTagsById(ss.getStudy().getId()).getTags());
+				});
+			}
 		});
 		return subjects;
 	}
