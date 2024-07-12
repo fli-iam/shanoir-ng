@@ -43,6 +43,7 @@ import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyDecorator;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.model.SubjectStudyTag;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
+import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ListDependencyUpdate;
 import org.shanoir.ng.utils.Utils;
@@ -112,12 +113,9 @@ public class SubjectServiceImpl implements SubjectService {
 		if (subject.isEmpty()) {
 			throw new EntityNotFoundException(Subject.class, id);
 		}
-		
 		// Delete all associated study_examination
 		studyExaminationRepository.deleteBySubject(subject.get());
-		
 		subjectRepository.deleteById(id);
-
 		// Propagate deletion
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_SUBJECT_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 	}
@@ -127,7 +125,6 @@ public class SubjectServiceImpl implements SubjectService {
 		// copyList is to prevent a bug with @postFilter
 		return Utils.copyList(Utils.toList(subjectRepository.findAll()));
 	}
-	
 
 	@Override
 	public List<IdName> findAllNames() {
@@ -154,7 +151,6 @@ public class SubjectServiceImpl implements SubjectService {
 		}
 		return getIdNamesFromSubjects(subjects);
 	}
-
 
 	private List<IdName> getIdNamesFromSubjects(Iterable<Subject> subjects) {
 		if (subjects == null) {
@@ -259,14 +255,12 @@ public class SubjectServiceImpl implements SubjectService {
 		subjectDb.setLanguageHemisphericDominance(subject.getLanguageHemisphericDominance());
 		subjectDb.setImagedObjectCategory(subject.getImagedObjectCategory());
 		subjectDb.setUserPersonalCommentList(subject.getUserPersonalCommentList());
-		
 		if (subject.getSubjectStudyList() != null) {
 			ListDependencyUpdate.updateWith(subjectDb.getSubjectStudyList(), subject.getSubjectStudyList());
 			for (SubjectStudy subjectStudy : subjectDb.getSubjectStudyList()) {
 				subjectStudy.setSubject(subjectDb);
 			}
 		}
-		
 		return subjectDb;
 	}
 	
@@ -289,7 +283,10 @@ public class SubjectServiceImpl implements SubjectService {
 		if (subjectStudyList != null) {
 			subjectStudyList.stream().forEach(ss -> {
 				ss.setSubjectStudyTags(subjectStudyRepository.findSubjectStudyTagsByStudyIdAndSubjectId(studyId, ss.getSubject().getId()));
-				ss.getStudy().setTags(studyRepository.findStudyWithTagsById(studyId).getTags());
+				Study studyWithTags = studyRepository.findStudyWithTagsById(studyId);
+				if (studyWithTags != null) {
+					ss.getStudy().setTags(studyWithTags.getTags());
+				}
 			});
 			for (SubjectStudy rel : subjectStudyList) {
 				SimpleSubjectDTO simpleSubjectDTO = new SimpleSubjectDTO();
@@ -313,7 +310,10 @@ public class SubjectServiceImpl implements SubjectService {
 		if (subjectStudyList != null) {
 			subjectStudyList.stream().forEach(ss -> {
 				ss.setSubjectStudyTags(subjectStudyRepository.findSubjectStudyTagsByStudyIdAndSubjectId(studyId, ss.getSubject().getId()));
-				ss.getStudy().setTags(studyRepository.findStudyWithTagsById(studyId).getTags());
+				Study studyWithTags = studyRepository.findStudyWithTagsById(studyId);
+				if (studyWithTags != null) {
+					ss.getStudy().setTags(studyWithTags.getTags());
+				}
 			});
 			for (SubjectStudy rel : subjectStudyList) {
 				SimpleSubjectDTO simpleSubjectDTO = new SimpleSubjectDTO();
@@ -333,14 +333,7 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	public Subject findByIdentifier(String identifier) {
 		Subject subject = subjectRepository.findByIdentifier(identifier);
-		List<SubjectStudy> subjectStudyList = subject.getSubjectStudyList();
-		if (subjectStudyList != null) {
-			// do this here to avoid two bags violation exception and load subjectStudyTags
-			subjectStudyList.stream().forEach(ss -> {
-				ss.setSubjectStudyTags(subjectStudyRepository.findSubjectStudyTagsByStudyIdAndSubjectId(ss.getStudy().getId(), ss.getSubject().getId()));
-				ss.getStudy().setTags(studyRepository.findStudyWithTagsById(ss.getStudy().getId()).getTags());
-			});
-		}
+		loadSubjectStudyTags(subject);
 		return subject;
 	}
 
@@ -362,14 +355,7 @@ public class SubjectServiceImpl implements SubjectService {
 	public List<Subject> findByPreclinical(boolean preclinical) {
 		List<Subject> subjects = subjectRepository.findByPreclinical(preclinical);
 		subjects.stream().forEach(s -> {
-			List<SubjectStudy> subjectStudyList = s.getSubjectStudyList();
-			if (subjectStudyList != null) {
-				// do this here to avoid two bags violation exception and load subjectStudyTags
-				subjectStudyList.stream().forEach(ss -> {
-					ss.setSubjectStudyTags(subjectStudyRepository.findSubjectStudyTagsByStudyIdAndSubjectId(ss.getStudy().getId(), ss.getSubject().getId()));
-					ss.getStudy().setTags(studyRepository.findStudyWithTagsById(ss.getStudy().getId()).getTags());
-				});
-			}
+			loadSubjectStudyTags(s);
 		});
 		return subjects;
 	}
@@ -378,5 +364,23 @@ public class SubjectServiceImpl implements SubjectService {
     public boolean existsSubjectWithName(String name) {
         return this.subjectRepository.existsByName(name);
     }
+
+	/**
+	 * Use this method to avoid two bags violation exception and load subjectStudyTags.
+	 * 
+	 * @param subject
+	 */
+	private void loadSubjectStudyTags(Subject subject) {
+		List<SubjectStudy> subjectStudyList = subject.getSubjectStudyList();
+		if (subjectStudyList != null) {
+			subjectStudyList.stream().forEach(ss -> {
+				ss.setSubjectStudyTags(subjectStudyRepository.findSubjectStudyTagsByStudyIdAndSubjectId(ss.getStudy().getId(), ss.getSubject().getId()));
+				Study studyWithTags = studyRepository.findStudyWithTagsById(ss.getStudy().getId());
+				if (studyWithTags != null) {
+					ss.getStudy().setTags(studyWithTags.getTags());
+				}
+			});
+		}
+	}
 
 }
