@@ -83,11 +83,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <li>
                         <label>Import date</label>
                         <span class="right-col" *ngIf="mode == 'view'">
-                                {{datasetAcquisition.creationDate}}
+                                {{datasetAcquisition.importDate}}
+                        </span>
+                    </li>
+                    <li>
+                        <label>Imported by user</label>
+                        <span class="right-col" *ngIf="mode == 'view'">
+                                {{datasetAcquisition.username}}
                         </span>
                     </li>
 					<li>
-						<label>Acquisition equipment</label>
+						<label>Center equipment</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<a *ngIf="datasetAcquisition.acquisitionEquipment?.id" [routerLink]="['/acquisition-equipment/details/', datasetAcquisition.acquisitionEquipment.id]">
