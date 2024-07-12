@@ -18,6 +18,7 @@ import { ActivatedRoute } from '@angular/router';
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { Selection } from 'src/app/studies/study/tree.service';
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 import { AcquisitionEquipmentService } from '../../acquisition-equipments/shared/acquisition-equipment.service';
@@ -27,11 +28,9 @@ import { StudyRightsService } from "../../studies/shared/study-rights.service";
 import { StudyUserRight } from "../../studies/shared/study-user-right.enum";
 import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
-import { DatasetAcquisitionNode, ShanoirNode } from '../../tree/tree.model';
 import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.model';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../shared/dataset-acquisition.service';
-import { Selection } from 'src/app/studies/study/tree.service';
 
 
 @Component({
@@ -43,7 +42,6 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
 
     public studyCards: StudyCard[];
     public acquisitionEquipments: AcquisitionEquipment[];
-    acquisitionNode: DatasetAcquisitionNode | {datasetAcquisition: DatasetAcquisition, parentNode: ShanoirNode};
     hasDownloadRight: boolean = false;
     noDatasets: boolean = false;
     hasDicom: boolean = false;
@@ -71,7 +69,6 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
 
     get datasetAcquisition(): DatasetAcquisition { return this.entity; }
     set datasetAcquisition(datasetAcquisition: DatasetAcquisition) {
-        this.acquisitionNode = this.breadcrumbsService.currentStep.data.datasetAcquisitionNode ? this.breadcrumbsService.currentStep.data.datasetAcquisitionNode : {datasetAcquisition: datasetAcquisition, parentNode: null};
         this.entity = datasetAcquisition;
     }
 
@@ -123,11 +120,6 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
 
     public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert(); // TODO
-    }
-
-    onNodeInit(node: DatasetAcquisitionNode) {
-        node.open();
-        this.breadcrumbsService.currentStep.data.datasetAcquisitionNode = node;
     }
 
     downloadAll() {

@@ -15,7 +15,10 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
+import { TaskState } from 'src/app/async-tasks/task.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { Selection } from 'src/app/studies/study/tree.service';
 import { environment } from '../../../environments/environment';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
@@ -28,12 +31,8 @@ import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { StudyService } from '../../studies/shared/study.service';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
-import { ExaminationNode, ShanoirNode } from '../../tree/tree.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
-import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { Selection } from 'src/app/studies/study/tree.service';
 
 @Component({
     selector: 'examination-detail',
@@ -55,7 +54,6 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     hasImportRight: boolean = false;
     hasDownloadRight: boolean = false;
     pattern: string = '[^:|<>&\/]+';
-    examNode: ExaminationNode | {examination: Examination, parentNode: ShanoirNode};
     downloadState: TaskState = new TaskState();
 
     datasetIds: Promise<number[]> = new Promise((resolve, reject) => {});
@@ -87,7 +85,6 @@ export class ExaminationComponent extends EntityComponent<Examination> {
 
     set examination(examination: Examination) {
         this.entity = examination;
-        this.examNode = this.breadcrumbsService.currentStep.data.examinationNode ? this.breadcrumbsService.currentStep.data.examinationNode : {examination: examination, parentNode: null};
     }
     get examination(): Examination { return this.entity; }
 
@@ -250,48 +247,6 @@ export class ExaminationComponent extends EntityComponent<Examination> {
 
     getFileName(element): string {
         return element.split('\\').pop().split('/').pop();
-    }
-
-    onExaminationNodeInit(node: ExaminationNode) {
-        setTimeout(() => {
-            node.open();
-            this.breadcrumbsService.currentStep.data.examinationNode = node;
-            this.fetchDatasetIdsFromTree();
-        });
-    }
-
-    fetchDatasetIdsFromTree() {
-        if (!this.datasetIdsLoaded) {
-            let node: ExaminationNode = this.breadcrumbsService.currentStep.data.examinationNode;
-            let found: boolean = false;
-            // first look into the tree
-            let datasetIds: number[] = [];
-            if (node && node.datasetAcquisitions != 'UNLOADED') {
-                found = true;
-                node.datasetAcquisitions.forEach(dsAcq => {
-                    if (dsAcq.datasets != 'UNLOADED') {
-                        dsAcq.datasets.forEach(ds => {
-                            datasetIds.push(ds.id);
-							if (ds.type == 'Eeg') {
-								this.hasEEG = true;
-							} else if (ds.type == 'BIDS') {
-                                this.hasBids = true;
-                            } else {
-								this.hasDicom = true;
-							}
-                        });
-                    } else {
-                        found = false;
-                        return;
-                    }
-                });
-            }
-            if (found) {
-                this.datasetIdsLoaded = true;
-                this.datasetIds = Promise.resolve(datasetIds);
-                this.noDatasets = datasetIds.length == 0;
-            }
-        }
     }
 
     getUnit(key: string) {

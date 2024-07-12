@@ -141,13 +141,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<pet-protocol *ngIf="datasetAcquisition.type == 'Pet'" [(ngModel)]="datasetAcquisition.protocol" formControlName="protocol"></pet-protocol>
 			</ng-container>
 
-			<fieldset *ngIf="mode=='view' && !treeMode">
-				<legend i18n="Examination data|Title@@examinationDetailDataTitle">Data</legend>
-				<dataset-acquisition-node
-						[input]="acquisitionNode"
-						(nodeInit)="onNodeInit($event)"></dataset-acquisition-node >
-			</fieldset>
-
 			<progress-bar *ngIf="downloadState.status > 1" [progress]="downloadState?.progress" [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
 			<form-footer
 				[state]="footerState"

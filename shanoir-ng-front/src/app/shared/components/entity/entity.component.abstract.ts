@@ -53,7 +53,6 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     @Input() mode: Mode;
     @Input() id: number; // if not given via url
     @Input() entityInput: T; // if id not given via url
-    @Input() treeMode: boolean = true;
     @Output() close: EventEmitter<any> = new EventEmitter();
     footerState: FooterState;
     protected onSave: Subject<any> = new Subject<any>();

@@ -158,12 +158,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </li>
 				</ol>
 			</fieldset>
-			<fieldset *ngIf="mode=='view' && !treeMode">
-				<legend i18n="Examination data|Title@@examinationDetailDataTitle">Data</legend>
-				<examination-node
-						[input]="examNode"
-						(nodeInit)="onExaminationNodeInit($event)"></examination-node>
-			</fieldset>
 			<form-footer
 					[state]="footerState"
 					(save)="save()"

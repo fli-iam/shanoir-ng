@@ -58,7 +58,6 @@ export class StudyNodeComponent implements OnChanges {
 
     constructor(
             private router: Router,
-            private subjectStudyPipe: SubjectStudyPipe,
             private studyCardService: StudyCardService,
             private qualityCardService: QualityCardService,
             private keycloakService: KeycloakService,
@@ -79,35 +78,10 @@ export class StudyNodeComponent implements OnChanges {
             canAdminPromise.then(() => {    
                 if (this.input instanceof StudyNode) {
                     this.node = this.input;
+                } else if (this.input instanceof Study) {
+                    this.node = this.treeService.buildStudyNode(this.input, this.canAdmin);
                 } else {
-                    let subjects: SubjectNode[] = this.input.subjectStudyList.map(subjectStudy => {
-                        if(subjectStudy.subject.preclinical){
-                            return new PreclinicalSubjectNode(this.node, subjectStudy.subject.id, this.subjectStudyPipe.transform(subjectStudy), subjectStudy.tags, UNLOADED, subjectStudy.qualityTag, this.canAdmin);
-                        }
-                        return new ClinicalSubjectNode(this.node, subjectStudy.subject.id, this.subjectStudyPipe.transform(subjectStudy), subjectStudy.tags, UNLOADED, subjectStudy.qualityTag, this.canAdmin);
-                    });
-                    let centers: CenterNode[] = this.input.studyCenterList.map(studyCenter => {
-                        return new CenterNode(this.node, studyCenter.center.id, studyCenter.center.name, UNLOADED, UNLOADED);
-                    });
-                    let members: MemberNode[] = this.input.studyUserList.map(studyUser => {
-                        let memberNode: MemberNode = null;
-                        let rights: RightNode[] = studyUser.studyUserRights.map(suRight => new RightNode(memberNode, null, StudyUserRight.getLabel(suRight)));
-                        memberNode = new MemberNode(this.node, studyUser.userId, studyUser.userName, []);
-                        return memberNode;
-                    });
-                    members.sort((a: MemberNode, b: MemberNode) => {
-                        return a.label.toLowerCase().localeCompare(b.label.toLowerCase())
-                    })
-    
-                    this.node = new StudyNode(
-                            null,
-                            this.input.id,
-                            this.input.name,
-                            subjects,
-                            centers,
-                            UNLOADED,
-                            UNLOADED,
-                            members);  // members
+                    throw new Error('Illegal argument type');
                 }
                 this.nodeInit.emit(this.node);
                 this.showDetails = this.router.url != this.detailsPath  + this.node.id;

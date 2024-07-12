@@ -25,7 +25,6 @@ import { IdName } from '../../shared/models/id-name.model';
 import { Option } from '../../shared/select/select.component';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
-import { ClinicalSubjectNode, ReverseSubjectNode, ShanoirNode } from '../../tree/tree.model';
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
@@ -50,7 +49,6 @@ export class SubjectComponent extends EntityComponent<Subject> {
     private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64), Validators.pattern(this.pattern)];
     forceStudy: Study = null;
     dicomPatientName: string;
-    subjectNode: {subject: Subject, parentNode: ShanoirNode} | ClinicalSubjectNode;
 
     catOptions: Option<ImagedObjectCategory>[] = [
         new Option<ImagedObjectCategory>(ImagedObjectCategory.PHANTOM, 'Phantom'),
@@ -75,7 +73,6 @@ export class SubjectComponent extends EntityComponent<Subject> {
     public get subject(): Subject { return this.entity; }
     public set subject(subject: Subject) {
         this.entity = subject;
-        this.subjectNode = this.breadcrumbsService.currentStep.data.subjectNode ? this.breadcrumbsService.currentStep.data.subjectNode : {subject: Subject, parentNode: null};
     }
 
     getService(): EntityService<Subject> {
@@ -226,10 +223,6 @@ export class SubjectComponent extends EntityComponent<Subject> {
 
     public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert();
-    }
-
-    onSubjectNodeInit(node: ReverseSubjectNode) {
-        this.breadcrumbsService.currentStep.data.subjectNode = node;
     }
 
     public toggleAnonymised() {

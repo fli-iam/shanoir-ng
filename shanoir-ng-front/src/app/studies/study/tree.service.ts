@@ -40,6 +40,8 @@ import { StudyService } from '../shared/study.service';
 import { CoilService } from "src/app/coils/shared/coil.service";
 import { Coil } from "src/app/coils/shared/coil.model";
 import { Entity } from "src/app/shared/components/entity/entity.abstract";
+import { SubjectStudy } from "src/app/subjects/shared/subject-study.model";
+import { SubjectStudyPipe } from "src/app/subjects/shared/subject-study.pipe";
 
 @Injectable()
 export class TreeService {
@@ -91,6 +93,7 @@ export class TreeService {
             private examinationService: ExaminationService,
             private keycloakService: KeycloakService,
             private studyRightsService: StudyRightsService,
+            private subjectStudyPipe: SubjectStudyPipe,
             private router: Router) {
 
         this.treeOpened = localStorage.getItem('treeOpened') == 'true';
@@ -335,49 +338,76 @@ export class TreeService {
         if (this.study?.id == id) {
             return Promise.resolve();
         } else {
-            let studyPromise: Promise<any> = this.studyService.get(id, null).then(study => {
-                this.study = study;
-                let subjectNodes: SubjectNode[] = study.subjectStudyList?.map(ss => {
-                    let subjectNode: SubjectNode;
-                    if (ss.subject?.preclinical){
-                        subjectNode = new PreclinicalSubjectNode(
-                            this.studyNode,
-                            ss.subject?.id,
-                            ss.subject?.name,
-                            ss.tags,
-                            UNLOADED,
-                            null,
-                            false);
-                    } else {
-                        subjectNode = new ClinicalSubjectNode(
-                            this.studyNode,
-                            ss.subject?.id,
-                            ss.subject?.name,
-                            ss.tags,
-                            UNLOADED,
-                            null,
-                            false);
-                    }
-                    return subjectNode;
-                });
-                let centerNodes: CenterNode[] = study.studyCenterList?.map(sc => new CenterNode(this.studyNode, sc.center.id, sc.center.name, UNLOADED, UNLOADED));
-                let memberNodes: MemberNode[] = study.studyUserList?.map(su => {
-                    let memberNode = null;
-                    memberNode = new MemberNode(this.studyNode, su.user?.id || su.userId, su.userName, su.studyUserRights?.map(sur => new RightNode(memberNode, null, StudyUserRight.getLabel(sur))));
-                    return memberNode;
-                });
-                this.studyNode = new StudyNode(null, study.id, study.name, subjectNodes, centerNodes, UNLOADED, UNLOADED, memberNodes);
-                this.studyNodePromise.resolve();
-                this.studyNode.open();
-            });
+            let studyPromise: Promise<any> = this.studyService.get(id, null).then(study => this.study = study);
             let rightsPromise: Promise<void> = this.studyRightsService.getMyRightsForStudy(id).then(rights => {
                 this.canAdminStudy =  this.keycloakService.isUserAdmin()
                     || (this.keycloakService.isUserExpert() && rights.includes(StudyUserRight.CAN_ADMINISTRATE));
             });
-            return Promise.all([studyPromise, rightsPromise]).then();
+            return Promise.all([studyPromise, rightsPromise]).then(() => {
+                this.studyNode = this.buildStudyNode(this.study, this.canAdminStudy);
+                this.studyNodePromise.resolve();
+                this.studyNode.open();
+            });
         }
     }
+
+    private sortSubjects(study: Study) {
+        study.subjectStudyList = study.subjectStudyList.sort(
+            function(a: SubjectStudy, b:SubjectStudy) {
+                let aname = a.subjectStudyIdentifier ? a.subjectStudyIdentifier : a.subject.name;
+                let bname = b.subjectStudyIdentifier ? b.subjectStudyIdentifier : b.subject.name;
+                return aname.localeCompare(bname);
+            });
+    }
+
+    public buildStudyNode(study: Study, canAdmin: boolean): StudyNode {
+        let node: StudyNode;
+        let subjects: SubjectNode[] = study.subjectStudyList.map(subjectStudy => {
+            if(subjectStudy.subject.preclinical){
+                return new PreclinicalSubjectNode(
+                    node, 
+                    subjectStudy.subject.id, 
+                    this.subjectStudyPipe.transform(subjectStudy), 
+                    subjectStudy.tags, 
+                    UNLOADED, 
+                    subjectStudy.qualityTag, 
+                    canAdmin);
+            } else {
+                return new ClinicalSubjectNode(
+                    node, 
+                    subjectStudy.subject.id, 
+                    this.subjectStudyPipe.transform(subjectStudy), 
+                    subjectStudy.tags, 
+                    UNLOADED, 
+                    subjectStudy.qualityTag, 
+                    canAdmin);
+            }
+        });
+        let centers: CenterNode[] = study.studyCenterList.map(studyCenter => {
+            return new CenterNode(node, studyCenter.center.id, studyCenter.center.name, UNLOADED, UNLOADED);
+        });
+        let members: MemberNode[] = study.studyUserList.map(studyUser => {
+            let memberNode: MemberNode = null;
+            let rights: RightNode[] = studyUser.studyUserRights.map(suRight => new RightNode(memberNode, null, StudyUserRight.getLabel(suRight)));
+            memberNode = new MemberNode(node, studyUser.user?.id || studyUser.userId, studyUser.userName, rights);
+            return memberNode;
+        });
+        members.sort((a: MemberNode, b: MemberNode) => {
+            return a.label.toLowerCase().localeCompare(b.label.toLowerCase())
+        })
+        node = new StudyNode(
+                null,
+                study.id,
+                study.name,
+                subjects,
+                centers,
+                UNLOADED,
+                UNLOADED,
+                members);
+        return node;
+    }
 }
+
 
 export type NodeType = 'study' | 'subject' | 'examination' | 'acquisition' | 'dataset' | 'processing' | 'center' | 'equipment' | 'coil' | 'studycard' | 'qualitycard' | 'user' | 'dicomMetadata';
 
