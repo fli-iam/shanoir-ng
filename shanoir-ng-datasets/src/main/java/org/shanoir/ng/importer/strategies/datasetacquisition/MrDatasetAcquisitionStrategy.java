@@ -83,7 +83,8 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
 		MrDatasetAcquisition mrDatasetAcquisition = new MrDatasetAcquisition();
 		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}", serie.getSequenceName(), serie.getProtocolName(), rank);
-		mrDatasetAcquisition.setCreationDate(LocalDate.now());
+		mrDatasetAcquisition.setUsername(importJob.getUsername());
+		mrDatasetAcquisition.setImportDate(LocalDate.now());
 		mrDatasetAcquisition.setRank(rank);
 		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
 		mrDatasetAcquisition.setSortingIndex(serie.getSeriesNumber());
