@@ -245,6 +245,7 @@ public class DatasetDownloaderServiceImpl {
 				if (!res.isDirectory()) {
 					// Then send workFolder to zipOutputFile
 					FileSystemResource fileSystemResource = new FileSystemResource(datasetFilePath);
+					LOG.error("Creating file: " + fileName);
 					ZipEntry zipEntry = new ZipEntry(fileName);
 					zipEntry.setSize(fileSystemResource.contentLength());
 					zipEntry.setTime(System.currentTimeMillis());
@@ -256,7 +257,7 @@ public class DatasetDownloaderServiceImpl {
 			}
 		} finally {
 			LOG.error("deleting directory " + sourceFolder.getAbsolutePath());
-			FileUtils.deleteDirectory(sourceFolder);
+			FileUtils.deleteQuietly(sourceFolder);
 		}
 	}
 
