@@ -2,12 +2,14 @@
 .main-content.open { margin-left: 300px; }
 .main-content.reduce-height { height: calc(100vh - 108px); }
 
-.content { display: inline-block; }
+.lower-content { display: flex; }
+
+.content { display: inline-block; white-space: initial; }
 side-menu, .side-menu { overflow-x: hidden; scrollbar-width: none; overflow: -moz-scrollbars-none; -ms-overflow-style: none; }
 .side-menu { width: 300px; position: fixed; top: 0; z-index: 0; }
 
 study-tree { scrollbar-width: none; overflow: -moz-scrollbars-none; -ms-overflow-style: none; z-index: 1; 
-    height: 100%; display: inline-block; overflow: hidden; position: relative; }
+    height: 100%; display: inline-block; overflow: hidden; position: relative; min-width: fit-content; }
 
 study-tree.opened { border-right: 1px solid var(--grey); margin-right: 20px; }
 

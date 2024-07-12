@@ -50,27 +50,27 @@ export class DatasetDTOService {
         if (!result) result = DatasetUtils.getDatasetInstance(dto.type);
         DatasetDTOService.mapSyncFields(dto, result);
         let promises: Promise<any>[] = [];
-        if (dto.processings) {
-            for(let p of dto.processings) {
-                promises.push(this.datasetProcessingService.get(p.id).then(
-                    processing => {
-                        if (!processing.inputDatasets) processing.inputDatasets = [];
-                        if (!processing.inputDatasets.find(inds => inds.id == result.id)) {
-                            processing.inputDatasets.push(result);
+        if (mode == 'eager') {
+            if (dto.processings) {
+                for(let p of dto.processings) {
+                    promises.push(this.datasetProcessingService.get(p.id).then(
+                        processing => {
+                            if (!processing.inputDatasets) processing.inputDatasets = [];
+                            if (!processing.inputDatasets.find(inds => inds.id == result.id)) {
+                                processing.inputDatasets.push(result);
+                            }
+                            result.processings.push(processing);
                         }
-                        result.processings.push(processing);
-                    }
+                    ));
+                }
+            }
+            if (dto.datasetProcessing) {
+                promises.push(this.datasetProcessingService.get(dto.datasetProcessing.id).then(
+                    processing => {
+                        result.datasetProcessing = processing;
+                    }    
                 ));
             }
-        }
-        if (dto.datasetProcessing) {
-    	    promises.push(this.datasetProcessingService.get(dto.datasetProcessing.id).then(
-                processing => {
-                    result.datasetProcessing = processing;
-                }    
-            ));
-        }
-        if (mode == 'eager') {
             if (dto.studyId) promises.push(this.studyService.get(dto.studyId).then(study => result.study = study));
             if (dto.subjectId) promises.push(this.subjectService.get(dto.subjectId).then(subject => result.subject = subject));
             return Promise.all(promises).then(([]) => {
