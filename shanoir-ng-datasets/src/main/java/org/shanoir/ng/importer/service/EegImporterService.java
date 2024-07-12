@@ -88,6 +88,8 @@ public class EegImporterService {
             datasetAcquisition.setAcquisitionEquipmentId(importJob.getAcquisitionEquipmentId());
             datasetAcquisition.setRank(0);
             datasetAcquisition.setSortingIndex(0);
+            datasetAcquisition.setUsername(importJob.getUsername());
+            datasetAcquisition.setImportDate(LocalDate.now());
 
             List<Dataset> datasets = new ArrayList<>();
             float progress = 0f;
