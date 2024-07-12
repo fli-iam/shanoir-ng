@@ -1,5 +1,5 @@
 window.config = {
-  routerBasename: '/',
+  routerBasename: '/ohif-viewer/',
   modes: [],
   extensions: [],
   showStudyList: true,
@@ -7,9 +7,8 @@ window.config = {
   showWarningMessageForCrossOrigin: true,
   strictZSpacingForVolumeViewport: true,
   showCPUFallbackMessage: true,
+  showLoadingIndicator: true,
   defaultDataSourceName: 'dicomweb',
-  filterQueryParam: false,
-  disableServersCache: false,
   dataSources: [
     {
       namespace: '@ohif/extension-default.dataSourcesModule.dicomweb',
@@ -17,26 +16,19 @@ window.config = {
       configuration: {
         friendlyName: 'DCM4CHEE Server',
         name: 'SHANOIR-NG',
-        wadoUriRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/shanoir-ng/dcm4chee-arc/aets/DCM4CHEE/wado',
-        qidoRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/dicomweb/dcm4chee-arc/aets/DCM4CHEE/rs',
-        wadoRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/dicomweb/dcm4chee-arc/aets/DCM4CHEE/rs',
+        wadoUriRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/pacs',
+        qidoRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/pacs',
+        wadoRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/pacs',
         qidoSupportsIncludeField: false,
-        supportsReject: false,
         imageRendering: 'wadors',
         thumbnailRendering: 'wadors',
-        enableStudyLazyLoad: true,
-        supportsFuzzyMatching: false,
-        supportsWildcard: true,
-        staticWado: true,
-		singlepart: 'bulkdata,video',
-		bulkDataURI: {
-			enabled: true,
-			relativeResolution: 'studies',
-		},
+		dicomUploadEnabled: true,
+		omitQuotationForMultipartRequest: true,
       },
     },
   ],
   httpErrorHandler: (e) => {
+    console.log("test"),
     console.warn(e.status), 
 	console.warn("test, navigate to https://ohif.org/")
   },
@@ -54,5 +46,4 @@ window.config = {
 	  useAuthorizationCodeFlow: true,
     }
   ],
-  defaultDataSourceName: 'dicomweb',
 };
