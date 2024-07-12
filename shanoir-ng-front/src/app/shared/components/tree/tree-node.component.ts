@@ -82,9 +82,13 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.opened) {
             if (!this.opened && this.isOpen) {
-                this.close();
+                setTimeout(() => {
+                    this.close();
+                });
             } else if (this.opened && !this.isOpen) {
-                this.open();
+                setTimeout(() => {
+                    this.open();
+                });
             }
         }
     }
