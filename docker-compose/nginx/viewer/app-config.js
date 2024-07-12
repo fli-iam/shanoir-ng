@@ -51,6 +51,7 @@ window.config = {
 	  revoke_uri: 'https://accounts.google.com/o/oauth2/revoke?token=',
       automaticSilentRenew: true,
       revokeAccessTokenOnSignout: true,
+	  useAuthorizationCodeFlow: true,
     }
   ],
   defaultDataSourceName: 'dicomweb',
