@@ -35,6 +35,7 @@ import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.gui.ImportFromTableWindow;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Examination;
+import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.IdList;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
 import org.shanoir.uploader.model.rest.Sex;
@@ -157,8 +158,8 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 
 		logger.info("2. Select series");
 		List<Serie> selectedSeries = new ArrayList<>();
-		Patient pat = null;
-		Study stud = null;
+		Patient dicomPatient = null;
+		Study dicomStudy = null;
 		String serialNumber = null;
 		String modelName = null;
 		Study selectedStudy = null;
@@ -200,16 +201,16 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				if (!searchField(study.getStudyDescription(), importJob.getDicomQuery().getStudyFilter())) {
 					continue;
 				}
-				stud = study;
-				pat = patient;
-				selectedSeriesByStudy.put(stud, new ArrayList<>());
+				dicomStudy = study;
+				dicomPatient = patient;
+				selectedSeriesByStudy.put(dicomStudy, new ArrayList<>());
 				Collection<Serie> series = study.getSeries();
 				for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
 					// Filter on serie
 					Serie serie = seriesIt.next();
 					if (searchField(serie.getSeriesDescription(), importJob.getDicomQuery().getSerieFilter())) {
-						selectedSeriesByStudy.get(stud).add(serie);
-						selectedStudy = stud;
+						selectedSeriesByStudy.get(dicomStudy).add(serie);
+						selectedStudy = dicomStudy;
 						// TOOD: get these
 						serialNumber = serie.getEquipment().getDeviceSerialNumber();
 						modelName = serie.getEquipment().getManufacturerModelName();
@@ -236,7 +237,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		 * to create correct hash here, as verified in the GUI in patient
 		 * verification.
 		 */
-		Subject subject = dOCAL.createSubjectFromPatient(pat);
+		Subject subject = dOCAL.createSubjectFromPatient(dicomPatient);
 
 		/**
 		 * For the moment the ImportFromTableRunner processes line-by-line, study-by-study,
@@ -244,7 +245,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		 * one DICOM study, as the code after directly finishes the import of this study.
 		 */
 		HashMap<String, ImportJob> downloadImportJobs = new HashMap<String, ImportJob>();
-		ImportJob downloadImportJob = ImportUtils.createNewImportJob(pat, selectedStudy);
+		ImportJob downloadImportJob = ImportUtils.createNewImportJob(dicomPatient, selectedStudy);
 		downloadImportJob.setSubject(subject);
 		selectedSeries.stream().forEach(s -> downloadImportJob.getSelectedSeries().add(s));
 		downloadImportJobs.put(downloadImportJob.getStudy().getStudyInstanceUID(), downloadImportJob);
@@ -254,67 +255,53 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 
 		// 3. Check existence of study / study card
 		logger.info("3. Check study card");
-		StudyCard sc = null;
+		StudyCard studyCard = null;
 		for (StudyCard studyc : studyCards) {
 			if (serialNumber != null && serialNumber.equals(studyc.getAcquisitionEquipment().getSerialNumber())) {
-				sc = studyc;
+				studyCard = studyc;
 				break;
 			}
 			if (modelName != null && modelName.equals(studyc.getAcquisitionEquipment().getManufacturerModel().getName())) {
-				sc = studyc;
+				studyCard = studyc;
 				break;
 			}
 		}
 
 		// No study card by default => get the one in the file (if existing of course)
-		if (sc == null) {
+		if (studyCard == null) {
 			Optional<StudyCard> scOpt = studyCards.stream().filter(element -> element.getName().equals(importJob.getStudyCardName())).findFirst();
 			if (!scOpt.isPresent()) {
 				importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.studycard"));
 				return false;
 			} else {
-				sc = scOpt.get();
+				studyCard = scOpt.get();
 			}
 		}
 
 		logger.info("4. Complete data");
-		Long centerId = sc.getCenterId();
+		Long centerId = studyCard.getCenterId();
 
 		// 4 Create subject if necessary
-		org.shanoir.uploader.model.rest.Subject subjectFound = null;
+		org.shanoir.uploader.model.rest.Subject subjectREST = null;
 		String subjectStudyIdentifier = null;
 		try {
-			subjectFound = shanoirUploaderServiceClientNG.findSubjectBySubjectIdentifier(subject.getIdentifier());
-			if (!subjectFound.getName().equals(importJob.getSubjectName())) {
+			subjectREST = shanoirUploaderServiceClientNG.findSubjectBySubjectIdentifier(subject.getIdentifier());
+			if (!subjectREST.getName().equals(importJob.getSubjectName())) {
 				// If the name does not match, change the subjectStudyIdentifier for this study
 				subjectStudyIdentifier = importJob.getSubjectName();
 			}
 		} catch (Exception e) {
-			//Do nothing, if it fails, we'll just create a new subject
-		}
-		
-		if (subjectFound != null) {
-			logger.info("5. Subject exists, just use it");
-			ImportUtils.addSubjectStudy(studyREST, subjectFound, SubjectType.PATIENT, true, subjectStudyIdentifier);
-			subjectFound = shanoirUploaderServiceClientNG.createSubjectStudy(subjectFound);
-		} else {
-			logger.info("5. Creating a new subject");
-			subjectFound = new org.shanoir.uploader.model.rest.Subject();
-			subjectFound.setName(importJob.getSubjectName());
-			if (!StringUtils.isEmpty(pat.getPatientSex())) {
-				subjectFound.setSex(Sex.valueOf(pat.getPatientSex()));
-			} else {
-				// Force feminine (girl power ?)
-				subjectFound.setSex(Sex.F);
-			}
-			subjectFound.setIdentifier(subject.getIdentifier());
-			subjectFound.setImagedObjectCategory(ImagedObjectCategory.LIVING_HUMAN_BEING);
-			subjectFound.setBirthDate(subject.getBirthDate());
-			ImportUtils.addSubjectStudy(studyREST, subjectFound, SubjectType.PATIENT, true, subjectStudyIdentifier);
-			// Get center ID from study card
-			subjectFound = shanoirUploaderServiceClientNG.createSubject(subjectFound, true, centerId);
+			logger.error(e.getMessage(), e);
+			// Do nothing, if it fails, we'll just create a new subject
 		}
 
+		if (!ImportUtils.manageSubject(subjectREST,
+			subject, importJob.getSubjectName(), ImagedObjectCategory.LIVING_HUMAN_BEING, HemisphericDominance.Left.toString(), HemisphericDominance.Left.toString(),
+			null, SubjectType.PATIENT, false, false, subjectStudyIdentifier, studyREST, studyCard)) {
+				importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.subject"));
+				return false;
+		}
+		
 		File uploadJobFile = new File(importJob.getWorkFolder() + File.separator + UploadJobManager.UPLOAD_JOB_XML);
 		UploadJobManager uploadJobManager = new UploadJobManager(uploadJobFile);
 		UploadJob uploadJob = uploadJobManager.readUploadJob();
@@ -325,26 +312,22 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			return false;
 		}
 
-		// 9. Create examination
-		logger.info("6. Create exam");
-
-		Examination examDTO = new Examination();
-		examDTO.setCenterId(centerId);
-		examDTO.setComment(importJob.getExaminationComment());
-		examDTO.setExaminationDate(Date.from(selectedStudyDate.atStartOfDay().toInstant(ZoneOffset.UTC)));
-		examDTO.setPreclinical(false);
-		examDTO.setStudyId(Long.valueOf(importJob.getStudyId()));
-		examDTO.setSubjectId(subject.getId());
-		Examination createdExam = shanoirUploaderServiceClientNG.createExamination(examDTO);
-
-		if (createdExam == null) {
+		logger.info("6. Create examination");
+		/**
+		 * For the moment always create new examination: attention, when examination with the same date
+		 * exists already for the same subject. This might be necessary to extend later.
+		 */
+		Instant studyDateInstant = dicomStudy.getStudyDate().atStartOfDay(ZoneId.systemDefault()).toInstant();
+        Date studyDate = Date.from(studyDateInstant);
+		Long examinationId = ImportUtils.createExamination(studyREST, subjectREST, studyDate, dicomStudy.getStudyDescription(), centerId);
+		if (examinationId == null) {
 			uploadJob.setUploadState(UploadState.ERROR);
 			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.examination"));
 			return false;
 		}
 
 		logger.info("7. Import.json");
-		ImportUtils.prepareImportJob(importJob, subject.getName(), subject.getId(), createdExam.getId(), studyREST, sc);
+		ImportUtils.prepareImportJob(importJob, subject.getName(), subject.getId(), examinationId, studyREST, studyCard);
 		Runnable importRunnable = new ImportFinishRunnable(uploadJob, uploadJobFile.getParentFile(), importJob, subject.getName());
 		Thread importThread = new Thread(importRunnable);
 		importThread.start();

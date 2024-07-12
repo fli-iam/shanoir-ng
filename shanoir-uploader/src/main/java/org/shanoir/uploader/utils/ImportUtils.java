@@ -3,14 +3,20 @@ package org.shanoir.uploader.utils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
+import org.apache.poi.ss.usermodel.Color;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
@@ -21,11 +27,17 @@ import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.uploader.ShUpConfig;
+import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.action.ImportFinishRunnable;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.MRI;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
+import org.shanoir.uploader.gui.ImportDialog;
+import org.shanoir.uploader.model.rest.Examination;
+import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.IdName;
+import org.shanoir.uploader.model.rest.ImagedObjectCategory;
+import org.shanoir.uploader.model.rest.Sex;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.SubjectStudy;
@@ -63,20 +75,22 @@ public class ImportUtils {
 	
 	/**
 	 * Adds a subjectStudy to a given subject with the given study
+	 * and in case subject is already in study, nothing is made.
+	 * 
 	 * @param study the added study
 	 * @param subject the subject we add a subjectStudy on
-	 * @param sType the type of suject
+	 * @param subjectType the type of suject
 	 * @param physicallyInvolved is the subject physically involved
-	 * @param identifier the subject identifier
+	 * @param subjectStudyIdentifier the subject study identifier
 	 */
-	public static void addSubjectStudy(final Study study, final org.shanoir.uploader.model.rest.Subject subject, SubjectType sType, boolean physicallyInvolved, String identifier) {
+	public static void addSubjectStudy(final Study study, final org.shanoir.uploader.model.rest.Subject subject, String subjectStudyIdentifier, SubjectType subjectType, boolean physicallyInvolved) {
 		SubjectStudy subjectStudy = new SubjectStudy();
 		subjectStudy.setStudy(new IdName(study.getId(), study.getName()));
 		subjectStudy.setSubject(new IdName(subject.getId(), subject.getName()));
-		if (!StringUtils.isEmpty(identifier)) {
-			subjectStudy.setSubjectStudyIdentifier(identifier);
+		if (!StringUtils.isEmpty(subjectStudyIdentifier)) {
+			subjectStudy.setSubjectStudyIdentifier(subjectStudyIdentifier);
 		}
-		subjectStudy.setSubjectType(sType);
+		subjectStudy.setSubjectType(subjectType);
 		subjectStudy.setPhysicallyInvolved(physicallyInvolved);
 		if (subject.getSubjectStudyList() == null) {
 			subject.setSubjectStudyList(new ArrayList<>());
@@ -371,6 +385,84 @@ public class ImportUtils {
 			allFileNames.addAll(newFileNamesOfSerie);
 		}
 		return allFileNames;
+	}
+
+	public static boolean manageSubject(org.shanoir.uploader.model.rest.Subject subjectREST, Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom, SubjectStudy subjectStudy, SubjectType subjectType, boolean existingSubjectInStudy, boolean isPhysicallyInvolved, String subjectStudyIdentifier, Study study, StudyCard studyCard) {
+		if (subjectREST == null) {
+			try {
+				subjectREST = fillSubjectREST(subject, subjectName, category, languageHemDom, manualHemDom);
+			} catch (ParseException e) {
+				logger.error(e.getMessage(), e);
+				return false;
+			}
+			addSubjectStudy(study, subjectREST, subjectStudyIdentifier, subjectType, isPhysicallyInvolved);
+			// create subject with subject-study filled to avoid access denied exception because of rights check
+			Long centerId = studyCard.getAcquisitionEquipment().getCenter().getId();
+			subjectREST = ShUpOnloadConfig.getShanoirUploaderServiceClient().createSubject(subjectREST, ShUpConfig.isModeSubjectCommonNameManual(), centerId);
+			if (subjectREST == null) {
+				return false;
+			} else {
+				logger.info("Subject created on server with ID: " + subject.getId());
+			}
+		} else {
+			// if rel-subject-study does not exist for existing subject, create one
+			if (subjectStudy == null && !existingSubjectInStudy) {
+				addSubjectStudy(study, subjectREST, subjectStudyIdentifier, subjectType, isPhysicallyInvolved);
+				if (ShUpOnloadConfig.getShanoirUploaderServiceClient().createSubjectStudy(subjectREST) == null) {
+					return false;
+				}
+			}
+			logger.info("Subject used on server with ID: " + subjectREST.getId());
+		}
+		return true;
+	}
+	
+	private static org.shanoir.uploader.model.rest.Subject fillSubjectREST(Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom) throws ParseException {
+		org.shanoir.uploader.model.rest.Subject subjectREST = new org.shanoir.uploader.model.rest.Subject();
+		subjectREST.setIdentifier(subject.getIdentifier());
+		subjectREST.setBirthDate(subject.getBirthDate());
+		if (subject.getSex().compareTo(Sex.F.name()) == 0) {
+			subjectREST.setSex(Sex.F);
+		} else if (subject.getSex().compareTo(Sex.M.name()) == 0) {
+			subjectREST.setSex(Sex.M);
+		} else if (subject.getSex().compareTo(Sex.O.name()) == 0) {
+			subjectREST.setSex(Sex.O);
+		}
+		if (ShUpConfig.isModePseudonymus()) {
+			subjectREST.setPseudonymusHashValues(subject.getPseudonymusHashValues());
+		}
+		if (ShUpConfig.isModeSubjectCommonNameManual()) {
+			subjectREST.setName(subjectName);
+		}
+		subjectREST.setImagedObjectCategory(category);
+		if (HemisphericDominance.Left.getName().compareTo(languageHemDom) == 0) {
+			subjectREST.setLanguageHemisphericDominance(HemisphericDominance.Left);
+		} else if (HemisphericDominance.Right.getName().compareTo(languageHemDom) == 0) {
+			subjectREST.setLanguageHemisphericDominance(HemisphericDominance.Right);
+		}
+		if (HemisphericDominance.Left.getName().compareTo(manualHemDom) == 0) {
+			subjectREST.setManualHemisphericDominance(HemisphericDominance.Left);
+		} else if (HemisphericDominance.Right.getName().compareTo(manualHemDom) == 0) {
+			subjectREST.setManualHemisphericDominance(HemisphericDominance.Right);
+		}
+		subjectREST.setSubjectStudyList(new ArrayList<SubjectStudy>());
+		return subjectREST;
+	}
+
+	public static Long createExamination(Study study, org.shanoir.uploader.model.rest.Subject subjectREST, Date examinationDate, String examinationComment, Long centerId) {
+		Examination examinationREST = new Examination();
+		examinationREST.setStudyId(study.getId());
+		examinationREST.setSubjectId(subjectREST.getId());
+		examinationREST.setCenterId(centerId);
+		examinationREST.setExaminationDate(examinationDate);
+		examinationREST.setComment(examinationComment);
+		examinationREST = ShUpOnloadConfig.getShanoirUploaderServiceClient().createExamination(examinationREST);
+		if (examinationREST == null) {
+			return null;
+		} else {
+			logger.info("Examination created on server with ID: " + examinationREST.getId());
+			return examinationREST.getId();
+		}
 	}
 
 }
