@@ -52,14 +52,8 @@ public interface SubjectRepository extends CrudRepository<Subject, Long>, Subjec
 	 * @return a Subject.
 	 */
 	Subject findByName(String name);
-	
-	/**
-	 * Find subject by identifier.
-	 *
-	 * @param identifier
-	 *            
-	 * @return a Subject.
-	 */
+
+	@EntityGraph(attributePaths = { "subjectStudyList.study.name" , "subjectStudyList.study.tags"})
 	Subject findByIdentifier(String identifier);
 	
 	@Query(value = "SELECT * FROM subject WHERE name LIKE :centerCode AND name REGEXP '^[0-9]+$' ORDER BY name DESC LIMIT 1", nativeQuery = true)

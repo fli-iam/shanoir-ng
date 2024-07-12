@@ -334,7 +334,14 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Override
 	public Subject findByIdentifier(String identifier) {
-		return subjectRepository.findByIdentifier(identifier);
+		Subject subject = subjectRepository.findByIdentifier(identifier);
+		List<SubjectStudy> subjectStudyList = subject.getSubjectStudyList();
+		// do this here to avoid two bags violation exception and load subjectStudyTags
+		subjectStudyList.stream().forEach(ss -> {
+			ss.setSubjectStudyTags(subjectStudyRepository.findSubjectStudyTagsByStudyIdAndSubjectId(ss.getStudy().getId(), ss.getSubject().getId()));
+			ss.getStudy().setTags(studyRepository.findStudyWithTagsById(ss.getStudy().getId()).getTags());
+		});
+		return subject;
 	}
 
 	@Override
