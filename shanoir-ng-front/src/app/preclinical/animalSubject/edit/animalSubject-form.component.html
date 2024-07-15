@@ -15,6 +15,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div #formContainer class="content-component detail" [@preventInitialChildAnimations]>
 	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
 		<div class="layout" [ngClass]="{'left': mode=='view'}">
+			<form-footer
+				[state]="footerState"
+				(save)="save()"
+				(edit)="goToEdit()"
+                (delete) = "deleteBySubject(this.entity.subject)"
+				(cancel)="goToView(this.entity.animalSubject.id)"
+				(back)="goBack()">
+			</form-footer>
 			<span class="right-col" [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
 					<div class="header command-zone" i18n="View subject|Title">View subject</div>
@@ -164,14 +172,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     			</fieldset>
                 <subject-therapy-list #therapiesComponent [mode]="mode" (onEvent)="validateForm($event)" [preclinicalSubject]="preclinicalSubject"></subject-therapy-list>
             </div>
-			<form-footer
-				[state]="footerState"
-				(save)="save()"
-				(edit)="goToEdit()"
-                (delete) = "deleteBySubject(this.entity.subject)"
-				(cancel)="goToView(this.entity.animalSubject.id)"
-				(back)="goBack()">
-			</form-footer>
 		</div>
     </form>
 </div>

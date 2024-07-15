@@ -4,7 +4,7 @@
 
 .lower-content { display: flex; max-height: calc(100% - 60px); overflow: hidden; }
 
-.content { display: inline-block; white-space: initial; max-height: 100%; overflow: auto; padding-right: 20px; }
+.content { display: inline-block; white-space: initial; max-height: 100%; overflow: auto; padding-right: 20px; flex-grow: 100; }
 side-menu, .side-menu { overflow-x: hidden; scrollbar-width: none; overflow: -moz-scrollbars-none; -ms-overflow-style: none; }
 .side-menu { width: 300px; position: fixed; top: 0; z-index: 0; }
 
@@ -14,11 +14,11 @@ study-tree { scrollbar-width: none; overflow: -moz-scrollbars-none; -ms-overflow
 study-tree.opened { border-right: 1px solid var(--grey); margin-right: 20px; }
 
 .tree, .content { vertical-align: top; }
-    
+    /*  */
 .close-button, 
 .open-button { width: 14px; height: 27px; position: fixed; top: 0; left: 0; cursor: pointer; color: var(--very-light-grey); z-index: 2; }
 
-.open-button { border-radius: 0 2px 2px 0; background-color: var(--color-a); }
+/* .open-button { border-radius: 0 2px 2px 0; background-color: var(--color-a); } */
 
 .close-button i, 
 .open-button i { vertical-align: -5px; padding: 6px 2px; }

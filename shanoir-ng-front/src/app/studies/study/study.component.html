@@ -15,6 +15,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div #formContainer class="content-component detail max-content">
 	<div class="layout" [ngClass]="{'left': mode=='view'}">
 		<form *ngIf="form" [formGroup]="form" novalidate [class.disabled]="footerState.loading">
+			<form-footer
+					[state]="footerState"
+					(save)="save()"
+					(edit)="goToEdit()"
+					(delete) = "delete()"
+					(cancel)="goToView()"
+					(back)="goBack()">
+				<button *ngIf="mode == 'view' && hasDownloadRights()" class="right-icon dl-button" type="button" (click)="downloadAll()">Download study<i class="fas fa-download"></i></button>
+				<button *ngIf="mode == 'view' && hasDownloadRights()" class="right-icon dl-button" type="button" (click)="downloadSelected()" [disabled]="!selectedDatasetIds">Download selected<i class="fas fa-download"></i></button>
+				<button class="right-icon dl-button" type="button" (click)="goToProcessing()" [disabled]="mode != 'view' || !selectedDatasetIds || selectedDatasetIds.length <= 0">Apply processing on selection<i class="fas fa-rocket"></i></button>
+			</form-footer>
+
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
 					<h2 class="header command-zone" i18n="View study|Title@@studyDetailViewTitle">Details on study</h2>
@@ -403,17 +415,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				        <legend>BIDS tree</legend>
                 <bids-tree [studyId]="id" [studyName]="study.name"></bids-tree>
             </fieldset>
-			<form-footer
-					[state]="footerState"
-					(save)="save()"
-					(edit)="goToEdit()"
-					(delete) = "delete()"
-					(cancel)="goToView()"
-					(back)="goBack()">
-				<button *ngIf="mode == 'view' && hasDownloadRights()" class="right-icon dl-button" type="button" (click)="downloadAll()">Download study<i class="fas fa-download"></i></button>
-				<button *ngIf="mode == 'view' && hasDownloadRights()" class="right-icon dl-button" type="button" (click)="downloadSelected()" [disabled]="!selectedDatasetIds">Download selected<i class="fas fa-download"></i></button>
-				<button class="right-icon dl-button" type="button" (click)="goToProcessing()" [disabled]="mode != 'view' || !selectedDatasetIds || selectedDatasetIds.length <= 0">Apply processing on selection<i class="fas fa-rocket"></i></button>
-			</form-footer>
 		</form>
 	</div>
 </div>

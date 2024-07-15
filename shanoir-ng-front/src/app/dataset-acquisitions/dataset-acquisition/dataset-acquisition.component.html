@@ -15,6 +15,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div #formContainer class="content-component">
 	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
 		<div class="layout">
+			<form-footer
+				[state]="footerState"
+				(save)="save()"
+				(edit)="goToEdit()"
+                (delete) = "delete()"
+				(cancel)="goToView()"
+				(back)="goBack()"
+			>
+				<button  *ngIf="mode == 'view' && hasDownloadRight && !noDatasets" class="right-icon dl-button" type="button" (click)="downloadAll()" [disabled]="downloadState?.isActive()">Download<i class="fas fa-download"></i></button>
+            </form-footer>
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
 					<h2 class="header command-zone">Dataset acquisition details</h2>
@@ -142,16 +152,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</ng-container>
 
 			<progress-bar *ngIf="downloadState.status > 1" [progress]="downloadState?.progress" [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
-			<form-footer
-				[state]="footerState"
-				(save)="save()"
-				(edit)="goToEdit()"
-                (delete) = "delete()"
-				(cancel)="goToView()"
-				(back)="goBack()"
-			>
-			<button  *ngIf="mode == 'view' && hasDownloadRight && !noDatasets" class="right-icon dl-button" type="button" (click)="downloadAll()" [disabled]="downloadState?.isActive()">Download<i class="fas fa-download"></i></button>
-            </form-footer>
 		</div>
 	</form>
 </div>

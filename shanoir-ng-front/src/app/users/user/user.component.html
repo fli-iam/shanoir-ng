@@ -14,6 +14,43 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div #formContainer class="content-component">
     <form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="denyLoading || acceptLoading || footerState.loading">
+        <form-footer
+            [state]="footerState"
+            (save)="save()"
+            (edit)="goToEdit()"
+            (cancel)="goToView()"
+            (back)="goBack()">
+            <button type="submit" *ngIf="mode != 'create' && user.accountRequestDemand" (click)="deny()" i18n="Edit user|Deny account request button label@@editUserDenyAccountRequestButton"
+                    class="Button">
+                Deny creation
+                <span *ngIf="!denyLoading">
+                    <i class="fas fa-times"></i>
+                </span><span *ngIf="denyLoading">
+                    <i class="fa fa-cog fa-spin"></i>
+                </span>
+            </button>
+            <button type="submit" *ngIf="mode != 'create' && user.extensionRequestDemand" (click)="deny()" i18n="Edit user|Deny extension request button label@@editUserDenyExtensionRequestButton"
+                    class="Button">
+                Deny extension
+                <span *ngIf="!denyLoading">
+                    <i class="fas fa-times"></i>
+                </span><span *ngIf="denyLoading">
+                    <i class="fa fa-cog fa-spin"></i>
+                </span>
+            </button>
+            <button type="submit" *ngIf="mode != 'create' && (user.accountRequestDemand || user.extensionRequestDemand)" (click)="accept()"
+                    i18n="Edit user|Accept account request button label@@editUserAcceptAccountRequestButton" [disabled]="!form.valid">
+                Accept
+                <span *ngIf="!acceptLoading">
+                    <i class="fas fa-check"></i>
+                </span><span *ngIf="acceptLoading">
+                    <i class="fa fa-cog fa-spin"></i>
+                </span>
+            </button>
+            <button *ngIf="mode == 'view' && (user.id == keycloakService.getUserId())" type="submit" (click)="changePassword()" i18n="Edit user|Accept account request button label@@editUserAcceptAccountRequestButton">
+                Change password
+            </button>
+        </form-footer>
         <h2 class="header command-zone"*ngIf="mode == 'create'" i18n="Create user|Title@@createUserTitle">Create user</h2>
         <h2 class="header command-zone"*ngIf="mode != 'create'" i18n="Edit user|Title@@editUserTitle">Edit user</h2>
         <fieldset>
@@ -138,43 +175,5 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </li>
             </ol>
         </fieldset>
-
-        <form-footer
-            [state]="footerState"
-            (save)="save()"
-            (edit)="goToEdit()"
-            (cancel)="goToView()"
-            (back)="goBack()">
-            <button type="submit" *ngIf="mode != 'create' && user.accountRequestDemand" (click)="deny()" i18n="Edit user|Deny account request button label@@editUserDenyAccountRequestButton"
-                    class="Button">
-                Deny creation
-                <span *ngIf="!denyLoading">
-                    <i class="fas fa-times"></i>
-                </span><span *ngIf="denyLoading">
-                    <i class="fa fa-cog fa-spin"></i>
-                </span>
-            </button>
-            <button type="submit" *ngIf="mode != 'create' && user.extensionRequestDemand" (click)="deny()" i18n="Edit user|Deny extension request button label@@editUserDenyExtensionRequestButton"
-                    class="Button">
-                Deny extension
-                <span *ngIf="!denyLoading">
-                    <i class="fas fa-times"></i>
-                </span><span *ngIf="denyLoading">
-                    <i class="fa fa-cog fa-spin"></i>
-                </span>
-            </button>
-            <button type="submit" *ngIf="mode != 'create' && (user.accountRequestDemand || user.extensionRequestDemand)" (click)="accept()"
-                    i18n="Edit user|Accept account request button label@@editUserAcceptAccountRequestButton" [disabled]="!form.valid">
-                Accept
-                <span *ngIf="!acceptLoading">
-                    <i class="fas fa-check"></i>
-                </span><span *ngIf="acceptLoading">
-                    <i class="fa fa-cog fa-spin"></i>
-                </span>
-            </button>
-            <button *ngIf="mode == 'view' && (user.id == keycloakService.getUserId())" type="submit" (click)="changePassword()" i18n="Edit user|Accept account request button label@@editUserAcceptAccountRequestButton">
-                Change password
-            </button>
-        </form-footer>
     </form>
 </div>
