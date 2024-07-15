@@ -18,7 +18,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.modality.CtDataset;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -63,7 +62,8 @@ public class CtDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		CtDatasetAcquisition datasetAcquisition = new CtDatasetAcquisition();
 		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}",serie.getSequenceName(), serie.getProtocolName(), rank);
 		
-		datasetAcquisition.setCreationDate(LocalDate.now());
+		datasetAcquisition.setImportDate(LocalDate.now());
+		datasetAcquisition.setUsername(importJob.getUsername());
 		datasetAcquisition.setRank(rank);
 		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
 		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
