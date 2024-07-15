@@ -207,7 +207,9 @@ public class DatasetDownloaderServiceImpl {
 	private void reconvertToNifti(String format, HttpServletResponse response, Long converterId, Dataset dataset, SimpleDateFormat formatter, List<URL> pathURLs, DatasetDownloadError downloadResult, String subjectName, ZipOutputStream zipOutputStream) throws RestServiceException, IOException {
 		File userDir = DatasetFileUtils.getUserImportDir("/tmp");
 		String tmpFilePath = userDir + File.separator + dataset.getId() + "_" + format;
-		File sourceFolder = new File(tmpFilePath + "-" + formatter.format(new DateTime().toDate()));
+		UUID uuid = UUID.randomUUID();
+
+		File sourceFolder = new File(tmpFilePath + "-" + uuid);
 
 		DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, downloadResult);
 
