@@ -22,7 +22,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				(edit)="goToEdit()"
 				(cancel)="goToView()"
 				(back)="goBack()"
-			></form-footer>
+			>
+			<button  *ngIf="mode == 'view' && hasDownloadRight" class="right-icon dl-button" type="button" (click)="download()" [disabled]="downloadState.isActive()">Download<i class="fas fa-download"></i></button>
+			</form-footer>
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
 					<h2 class="header command-zone"i18n="View subject|Title@@subjectDetailViewTitle">Details on subject</h2>

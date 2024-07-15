@@ -89,6 +89,7 @@ export class ExaminationNodeComponent implements OnChanges {
         else return (this.node.datasetAcquisitions && this.node.datasetAcquisitions.length > 0)
                 || (this.node.extraDataFilePathList && this.node.extraDataFilePathList.length > 0);
     }
+    
     viewExaminationDicoms() {
         window.open(environment.viewerUrl + '/viewer/1.4.9.12.34.1.8527.' + this.node.id, '_blank');
     }

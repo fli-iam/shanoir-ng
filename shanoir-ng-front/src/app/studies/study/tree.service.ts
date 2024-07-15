@@ -49,7 +49,7 @@ export class TreeService {
     _selection: Selection = null;
     public studyNode: StudyNode = null;
     private studyNodePromise: SuperPromise<void> = new SuperPromise();
-    protected study: Study;
+    study: Study;
     public nodeInit: boolean = false; 
     public canAdminStudy: boolean;
     private _treeOpened: boolean = true;

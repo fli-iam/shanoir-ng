@@ -28,6 +28,10 @@ import { StudyService } from '../../studies/shared/study.service';
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { TaskState } from 'src/app/async-tasks/task.model';
+import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
+import { StudyRightsService } from 'src/app/studies/shared/study-rights.service';
 
 @Component({
     selector: 'subject-detail',
@@ -49,6 +53,8 @@ export class SubjectComponent extends EntityComponent<Subject> {
     private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64), Validators.pattern(this.pattern)];
     forceStudy: Study = null;
     dicomPatientName: string;
+    downloadState: TaskState = new TaskState();
+    hasDownloadRight: boolean = false;
 
     catOptions: Option<ImagedObjectCategory>[] = [
         new Option<ImagedObjectCategory>(ImagedObjectCategory.PHANTOM, 'Phantom'),
@@ -65,7 +71,9 @@ export class SubjectComponent extends EntityComponent<Subject> {
 
     constructor(private route: ActivatedRoute,
             private subjectService: SubjectService,
-            private studyService: StudyService) {
+            private studyService: StudyService,
+            private downloadService: MassDownloadService,
+            private studyRightsService: StudyRightsService) {
 
         super(route, 'subject');
     }
@@ -102,6 +110,15 @@ export class SubjectComponent extends EntityComponent<Subject> {
 
     initView(): Promise<void> {
         this.loadAllStudies();
+        if (this.keycloakService.isUserAdmin()) {
+            this.hasDownloadRight = true;
+            return;
+        } else {
+            // TODO make it dynamic
+            return this.studyRightsService.getMyRightsForStudy(this.treeService.study.id).then(rights => {
+                this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+            });
+        }
         return Promise.resolve();
     }
 
@@ -231,5 +248,10 @@ export class SubjectComponent extends EntityComponent<Subject> {
         } else if (!this.isAlreadyAnonymized && this.subjectNamePrefix && this.dicomPatientName) {
             this.subject.name = this.subjectNamePrefix;
         }
+    }
+
+    download() {
+        // TODO : select study
+        this.downloadService.downloadAllByStudyIdAndSubjectId(this.treeService.study.id, this.subject.id, this.downloadState);
     }
 }
