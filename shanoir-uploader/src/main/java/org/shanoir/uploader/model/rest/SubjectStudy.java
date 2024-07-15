@@ -14,6 +14,8 @@
 
 package org.shanoir.uploader.model.rest;
 
+import java.util.List;
+
 /**
  * DTO for subject of a study.
  * 
@@ -33,6 +35,8 @@ public class SubjectStudy {
 	private SubjectType subjectType;
 
 	private boolean physicallyInvolved;
+
+	private List<String> tags;
 
 	public Long getId() {
 		return id;
@@ -101,6 +105,14 @@ public class SubjectStudy {
 	 */
 	public void setPhysicallyInvolved(boolean physicallyInvolved) {
 		this.physicallyInvolved = physicallyInvolved;
+	}
+
+	public List<String> getTags() {
+		return tags;
+	}
+
+	public void setTags(List<String> tags) {
+		this.tags = tags;
 	}
 
 }

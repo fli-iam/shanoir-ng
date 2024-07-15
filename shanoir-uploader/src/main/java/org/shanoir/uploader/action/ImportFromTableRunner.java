@@ -27,6 +27,7 @@ import org.apache.commons.lang.time.DateUtils;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
+import org.shanoir.ng.importer.model.PatientVerification;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.importer.model.Subject;
@@ -232,11 +233,13 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			return false;
 		}
 		
-		/**
-		 * Possible @todo: add 4 columns to Excel with patient information
-		 * to create correct hash here, as verified in the GUI in patient
-		 * verification.
-		 */
+		PatientVerification patientVerification = importJob.getPatientVerification();
+		dicomPatient = ImportUtils.adjustPatientWithPatientVerification(
+			dicomPatient,
+			patientVerification.getFirstName(),
+			patientVerification.getLastName(),
+			patientVerification.getBirthName(),
+			patientVerification.getBirthDate());
 		Subject subject = dOCAL.createSubjectFromPatient(dicomPatient);
 
 		/**

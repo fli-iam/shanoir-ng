@@ -17,6 +17,7 @@ import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.PseudonymusHashValues;
 import org.shanoir.ng.importer.model.Subject;
+import org.shanoir.ng.utils.ImportUtils;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
@@ -72,7 +73,7 @@ public class DownloadOrCopyActionListener implements ActionListener {
 		final Map<String, ImportJob> importJobs = mainWindow.getSAL().getImportJobs();
 		for (ImportJob importJob : importJobs.values()) {
 			// for the moment: one patient verification, extend later for n-patient verification
-			patient = adjustPatientWithUserGUIValues(importJob.getPatient());
+			patient = adjustPatientWithPatientVerificationGUIValues(importJob.getPatient());
 			if (firstPatient == null) {
 				firstPatient = patient;
 				try {
@@ -135,24 +136,7 @@ public class DownloadOrCopyActionListener implements ActionListener {
 	 * @param Patient patient
 	 * @return
 	 */
-	private Patient adjustPatientWithUserGUIValues(Patient patient) {
-		LocalDate birthDate = Util.convertStringToLocalDate(mainWindow.birthDateTF.getText());
-		patient.setPatientBirthDate(birthDate);
-		String sex = null;
-		if (mainWindow.mSexR.isSelected())
-			sex = "M";
-		if (mainWindow.fSexR.isSelected())
-			sex = "F";
-		patient.setPatientSex(sex);
-		if (mainWindow.lastNameTF.getText().isEmpty()) {
-			JOptionPane.showMessageDialog(mainWindow.frame,
-					resourceBundle.getString("shanoir.uploader.import.start.lastname.empty"),
-					resourceBundle.getString("shanoir.uploader.select.error.title"),
-					JOptionPane.ERROR_MESSAGE);
-			return null;
-		}
-		String lastName = mainWindow.lastNameTF.getText();
-		patient.setPatientLastName(lastName);
+	private Patient adjustPatientWithPatientVerificationGUIValues(Patient patient) {
 		if (mainWindow.firstNameTF.getText().isEmpty()) {
 			JOptionPane.showMessageDialog(mainWindow.frame,
 					resourceBundle.getString("shanoir.uploader.import.start.firstname.empty"),
@@ -161,7 +145,14 @@ public class DownloadOrCopyActionListener implements ActionListener {
 			return null;
 		}
 		String firstName = mainWindow.firstNameTF.getText();
-		patient.setPatientFirstName(firstName);
+		if (mainWindow.lastNameTF.getText().isEmpty()) {
+			JOptionPane.showMessageDialog(mainWindow.frame,
+					resourceBundle.getString("shanoir.uploader.import.start.lastname.empty"),
+					resourceBundle.getString("shanoir.uploader.select.error.title"),
+					JOptionPane.ERROR_MESSAGE);
+			return null;
+		}
+		String lastName = mainWindow.lastNameTF.getText();
 		if (mainWindow.birthNameTF.getText().isEmpty()) {
 			JOptionPane.showMessageDialog(mainWindow.frame,
 					resourceBundle.getString("shanoir.uploader.import.start.birthname.empty"),
@@ -170,8 +161,8 @@ public class DownloadOrCopyActionListener implements ActionListener {
 			return null;
 		}
 		String birthName = mainWindow.birthNameTF.getText();
-		patient.setPatientBirthName(birthName);
-		return patient;
+		String birthDate = mainWindow.birthDateTF.getText();
+		return org.shanoir.uploader.utils.ImportUtils.adjustPatientWithPatientVerification(patient, firstName, lastName, birthName, birthDate);
 	}
 
 	public Subject createSubjectFromPatient(Patient patient) throws PseudonymusException, UnsupportedEncodingException, NoSuchAlgorithmException {

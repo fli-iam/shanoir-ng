@@ -66,6 +66,8 @@ public class ImportJob implements Serializable {
 
 	// DICOM patient for this import job
 	private Patient patient;
+
+	private PatientVerification patientVerification;
     
 	// DICOM study for this import job
 	private Study study;
@@ -82,7 +84,6 @@ public class ImportJob implements Serializable {
     
 	private String studyCardName;
 	
-	// todo: remove this later, when front end uses StudyCards
     private Long acquisitionEquipmentId;
 	
 	// subject: use already existing
@@ -350,6 +351,14 @@ public class ImportJob implements Serializable {
 
 	public void setExaminationComment(String examinationComment) {
 		this.examinationComment = examinationComment;
+	}
+
+	public PatientVerification getPatientVerification() {
+		return patientVerification;
+	}
+
+	public void setPatientVerification(PatientVerification patientVerification) {
+		this.patientVerification = patientVerification;
 	}
 
 }

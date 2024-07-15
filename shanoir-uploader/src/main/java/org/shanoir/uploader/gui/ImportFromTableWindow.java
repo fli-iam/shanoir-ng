@@ -8,8 +8,10 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Point;
 import java.io.File;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.stream.Stream;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -150,6 +152,10 @@ public class ImportFromTableWindow extends JFrame {
 			resourceBundle.getString("shanoir.uploader.import.table.column.dicom.filter.study.description"),
 			resourceBundle.getString("shanoir.uploader.import.table.column.dicom.filter.study.min.date"),
 			resourceBundle.getString("shanoir.uploader.import.table.column.dicom.filter.serie.description"),
+			"PATIENT_VERIFICATION_FIRSTNAME",
+			"PATIENT_VERIFICATION_LASTNAME",
+			"PATIENT_VERIFICATION_BIRTHNAME",
+			"PATIENT_VERIFICATION_BIRTHDATE",
 			resourceBundle.getString("shanoir.uploader.import.table.column.studycard"),
 			resourceBundle.getString("shanoir.uploader.import.table.column.common.name"),
 			resourceBundle.getString("shanoir.uploader.import.table.column.comment"),
@@ -233,14 +239,17 @@ public class ImportFromTableWindow extends JFrame {
 	public void displayImportJobs(Map<String, ImportJob> importJobs) {
 		DefaultTableModel model = (DefaultTableModel) table.getModel();
 		model.getDataVector().removeAllElements();
-
 		boolean inError = false;
 		for (ImportJob importJob : importJobs.values()) {
-			model.addRow(importJob.getDicomQuery().getAllQueryValues());
-			// if (importRaw.getErrorMessage() != null) {
-			// 	inError= true;
-			// 	this.error.setText(resourceBundle.getString("shanoir.uploader.import.table.error.after.import"));
-			// }
+			String[] dicomQuery = importJob.getDicomQuery().displayDicomQuery();
+			String[] patientVerification = importJob.getPatientVerification().displayPatientVerification();
+			String[] importJobStrArray = {importJob.getStudyCardName(), importJob.getSubjectName(), importJob.getExaminationComment()};
+			String[] combinedArray1 = Stream.concat(
+				Arrays.stream(dicomQuery),
+				Arrays.stream(patientVerification)).toArray(String[]::new);
+			String[] combinedArray2 = Stream.concat(Arrays.stream(combinedArray1), Arrays.stream(importJobStrArray)).toArray(String[]::new);
+			model.addRow(combinedArray2);
+
 		}
 		this.error.setVisible(inError);
 

@@ -19,6 +19,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.PatientVerification;
 import org.shanoir.uploader.gui.ImportFromTableWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,23 +81,41 @@ public class UploadFromTableActionListener implements ActionListener {
 		int rowNumber = row.getRowNum();
 		ImportJob importJob = new ImportJob();
 		importJobs.put(String.valueOf(rowNumber), importJob);
-		createDicomQuery(row, importJob);
-		readImportJobValues(row, importJob);
+		readDicomQuery(row, importJob);
+		readPatientVerification(row, importJob);
+		readImportJob(row, importJob);
 	}
 
-	private void readImportJobValues(Row row, ImportJob importJob) {
-		Cell studyCardName = row.getCell(10);
+	private void readPatientVerification(Row row, ImportJob importJob) {
+		PatientVerification patientVerification = new PatientVerification();
+		Cell firstName = row.getCell(10);
+		String value = handleCell(firstName);
+		patientVerification.setFirstName(value);
+		Cell lastName = row.getCell(11);
+		value = handleCell(lastName);
+		patientVerification.setLastName(value);
+		Cell birthName = row.getCell(12);
+		value = handleCell(birthName);
+		patientVerification.setBirthName(value);
+		Cell birthDate = row.getCell(13);
+		value = handleCell(birthDate);
+		patientVerification.setBirthDate(value);
+		importJob.setPatientVerification(patientVerification);
+	}
+
+	private void readImportJob(Row row, ImportJob importJob) {
+		Cell studyCardName = row.getCell(14);
 		String value = handleCell(studyCardName);
 		importJob.setStudyCardName(value);
-		Cell subjectName = row.getCell(11);
+		Cell subjectName = row.getCell(15);
 		value = handleCell(subjectName);
 		importJob.setSubjectName(value);
-		Cell examComment = row.getCell(12);
+		Cell examComment = row.getCell(16);
 		value = handleCell(examComment);
 		importJob.setExaminationComment(value);
 	}
 
-	private void createDicomQuery(Row row, ImportJob importJob) {
+	private void readDicomQuery(Row row, ImportJob importJob) {
 		DicomQuery dicomQuery = new DicomQuery();
 		Cell dicomQueryLevel = row.getCell(0);
 		String value = handleCell(dicomQueryLevel);

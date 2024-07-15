@@ -124,7 +124,7 @@ public class DicomQuery {
 		this.modality = modality;
 	}
 
-	public String[] getAllQueryValues() {
+	public String[] displayDicomQuery() {
 		String queryLevel = null;
 		if (studyRootQuery) {
 			queryLevel = "STUDY";
@@ -138,7 +138,10 @@ public class DicomQuery {
 				patientBirthDate,
 				studyDescription,
 				studyDate,
-				modality
+				modality,
+				studyFilter,
+				minStudyDateFilter,
+				serieFilter
 		};
 	}
 

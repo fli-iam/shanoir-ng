@@ -8,15 +8,12 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
-import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
-import org.apache.poi.ss.usermodel.Color;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
@@ -32,7 +29,6 @@ import org.shanoir.uploader.action.ImportFinishRunnable;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.MRI;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
-import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.IdName;
@@ -83,7 +79,7 @@ public class ImportUtils {
 	 * @param physicallyInvolved is the subject physically involved
 	 * @param subjectStudyIdentifier the subject study identifier
 	 */
-	public static void addSubjectStudy(final Study study, final org.shanoir.uploader.model.rest.Subject subject, String subjectStudyIdentifier, SubjectType subjectType, boolean physicallyInvolved) {
+	public static boolean addSubjectStudy(final Study study, final org.shanoir.uploader.model.rest.Subject subject, String subjectStudyIdentifier, SubjectType subjectType, boolean physicallyInvolved) {
 		SubjectStudy subjectStudy = new SubjectStudy();
 		subjectStudy.setStudy(new IdName(study.getId(), study.getName()));
 		subjectStudy.setSubject(new IdName(subject.getId(), subject.getName()));
@@ -99,11 +95,12 @@ public class ImportUtils {
 			for (SubjectStudy sustu : subject.getSubjectStudyList()) {
 				if (sustu.getStudy().getId().equals(study.getId())) {
 					// Do not add a new subject study if it already exists
-					return;
+					return false;
 				}
 			}
 		}
 		subject.getSubjectStudyList().add(subjectStudy);
+		return true;
 	}
 
 	/**
@@ -395,23 +392,23 @@ public class ImportUtils {
 				logger.error(e.getMessage(), e);
 				return false;
 			}
-			addSubjectStudy(study, subjectREST, subjectStudyIdentifier, subjectType, isPhysicallyInvolved);
-			// create subject with subject-study filled to avoid access denied exception because of rights check
-			Long centerId = studyCard.getAcquisitionEquipment().getCenter().getId();
-			subjectREST = ShUpOnloadConfig.getShanoirUploaderServiceClient().createSubject(subjectREST, ShUpConfig.isModeSubjectCommonNameManual(), centerId);
-			if (subjectREST == null) {
-				return false;
-			} else {
-				logger.info("Subject created on server with ID: " + subject.getId());
+			if(addSubjectStudy(study, subjectREST, subjectStudyIdentifier, subjectType, isPhysicallyInvolved)) {
+				// create subject with subject-study filled to avoid access denied exception because of rights check
+				Long centerId = studyCard.getAcquisitionEquipment().getCenter().getId();
+				subjectREST = ShUpOnloadConfig.getShanoirUploaderServiceClient().createSubject(subjectREST, ShUpConfig.isModeSubjectCommonNameManual(), centerId);
+				if (subjectREST == null) {
+					return false;
+				} else {
+					logger.info("Subject created on server with ID: " + subject.getId());
+				}
 			}
 		} else {
 			// if rel-subject-study does not exist for existing subject, create one
-			if (subjectStudy == null && !existingSubjectInStudy) {
-				addSubjectStudy(study, subjectREST, subjectStudyIdentifier, subjectType, isPhysicallyInvolved);
+			if (addSubjectStudy(study, subjectREST, subjectStudyIdentifier, subjectType, isPhysicallyInvolved)) {
 				if (ShUpOnloadConfig.getShanoirUploaderServiceClient().createSubjectStudy(subjectREST) == null) {
 					return false;
 				}
-			}
+			} // in case subject is already in study, do nothing
 			logger.info("Subject used on server with ID: " + subjectREST.getId());
 		}
 		return true;
@@ -463,6 +460,24 @@ public class ImportUtils {
 			logger.info("Examination created on server with ID: " + examinationREST.getId());
 			return examinationREST.getId();
 		}
+	}
+
+	public static Patient adjustPatientWithPatientVerification(Patient patient, String firstName, String lastName, String birthName, String birthDateString) {
+		if (firstName.isEmpty()) {
+			return null;
+		}
+		patient.setPatientFirstName(firstName);
+		if (lastName.isEmpty()) {
+			return null;
+		}
+		patient.setPatientLastName(lastName);
+		if (birthName.isEmpty()) {
+			return null;
+		}
+		patient.setPatientBirthName(birthName);
+		LocalDate birthDate = Util.convertStringToLocalDate(birthDateString);
+		patient.setPatientBirthDate(birthDate);
+		return patient;
 	}
 
 }
