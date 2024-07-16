@@ -111,6 +111,11 @@ export class MassDownloadService {
     private downloadByDatasets(inputIds: DownloadInputIds, downloadState?: TaskState): Promise<void> {
         return this.openModal(inputIds).then(ret => {
             if (ret != 'cancel') {
+
+                // TODO: remove:
+                return this._downloadAlt(ret.datasets.map(ds => ds.id), ret.format, ret.converter, downloadState);
+
+                /*
                 return this._downloadDatasets(ret, downloadState).catch(error => {
                     if (ret.datasets.length > this.datasetService.MAX_DATASETS_IN_ZIP_DL) {
                         this.dialogService.error('Too many datasets', 'You are trying to download '
@@ -119,6 +124,7 @@ export class MassDownloadService {
                             "https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker#browser_compatibility" );
                     }
                 });
+                */
             } else return Promise.resolve();
         }).catch(error => {
             if (error == this.BROWSER_COMPAT_ERROR_MSG) {
