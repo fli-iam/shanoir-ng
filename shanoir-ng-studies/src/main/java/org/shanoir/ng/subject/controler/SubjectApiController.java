@@ -141,7 +141,6 @@ public class SubjectApiController implements SubjectApi {
 			createdSubject = subjectService.createAutoIncrement(subject, centerId);
 		}
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_SUBJECT_EVENT, createdSubject.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-
 		final SubjectDTO subjectDTO = subjectMapper.subjectToSubjectDTO(createdSubject);
 		return new ResponseEntity<SubjectDTO>(subjectDTO, HttpStatus.OK);
 	}

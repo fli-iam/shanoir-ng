@@ -13,6 +13,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -232,6 +233,9 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.missing.data"));
 			return false;
 		}
+		importJob.setStudy(selectedStudy);
+		importJob.setSelectedSeries(new HashSet<Serie>());
+		selectedSeries.stream().forEach(s -> importJob.getSelectedSeries().add(s));
 		
 		PatientVerification patientVerification = importJob.getPatientVerification();
 		dicomPatient = ImportUtils.adjustPatientWithPatientVerification(
@@ -240,24 +244,27 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			patientVerification.getLastName(),
 			patientVerification.getBirthName(),
 			patientVerification.getBirthDate());
+		importJob.setPatient(dicomPatient);
 		Subject subject = dOCAL.createSubjectFromPatient(dicomPatient);
+		importJob.setSubject(subject);
 
+		logger.info("3. Download from PACS");
 		/**
 		 * For the moment the ImportFromTableRunner processes line-by-line, study-by-study,
 		 * so we only send one import job to the DownloadOrCopyRunnable, to download only
 		 * one DICOM study, as the code after directly finishes the import of this study.
 		 */
 		HashMap<String, ImportJob> downloadImportJobs = new HashMap<String, ImportJob>();
-		ImportJob downloadImportJob = ImportUtils.createNewImportJob(dicomPatient, selectedStudy);
-		downloadImportJob.setSubject(subject);
-		selectedSeries.stream().forEach(s -> downloadImportJob.getSelectedSeries().add(s));
-		downloadImportJobs.put(downloadImportJob.getStudy().getStudyInstanceUID(), downloadImportJob);
+		downloadImportJobs.put(dicomStudy.getStudyInstanceUID(), importJob);
 		Runnable downloadRunnable = new DownloadOrCopyRunnable(true, dicomServerClient, dicomFileAnalyzer,  null, downloadImportJobs);
 		Thread downloadThread = new Thread(downloadRunnable);
 		downloadThread.start();
+		while (downloadThread.isAlive()) {
+			// wait for download thread to finish 
+		}
 
 		// 3. Check existence of study / study card
-		logger.info("3. Check study card");
+		logger.info("4. Check study card");
 		StudyCard studyCard = null;
 		for (StudyCard studyc : studyCards) {
 			if (serialNumber != null && serialNumber.equals(studyc.getAcquisitionEquipment().getSerialNumber())) {
@@ -281,21 +288,18 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			}
 		}
 
-		logger.info("4. Complete data");
-		Long centerId = studyCard.getCenterId();
-
-		// 4 Create subject if necessary
+		logger.info("5. Create subject or use existing one (add subject-study, if necessary)");
 		org.shanoir.uploader.model.rest.Subject subjectREST = null;
 		String subjectStudyIdentifier = null;
 		try {
 			subjectREST = shanoirUploaderServiceClientNG.findSubjectBySubjectIdentifier(subject.getIdentifier());
-			if (!subjectREST.getName().equals(importJob.getSubjectName())) {
-				// If the name does not match, change the subjectStudyIdentifier for this study
+			// If the name does not match, change the subjectStudyIdentifier for this study
+			if (subjectREST != null && !subjectREST.getName().equals(importJob.getSubjectName())) {
 				subjectStudyIdentifier = importJob.getSubjectName();
 			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
-			// Do nothing, if it fails, we'll just create a new subject
+			return false;
 		}
 
 		if (!ImportUtils.manageSubject(subjectREST,
@@ -309,7 +313,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		UploadJobManager uploadJobManager = new UploadJobManager(uploadJobFile);
 		UploadJob uploadJob = uploadJobManager.readUploadJob();
 
-		if (subject == null) {
+		if (subjectREST == null) {
 			uploadJob.setUploadState(UploadState.ERROR);
 			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.subject"));
 			return false;
@@ -322,6 +326,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		 */
 		Instant studyDateInstant = dicomStudy.getStudyDate().atStartOfDay(ZoneId.systemDefault()).toInstant();
         Date studyDate = Date.from(studyDateInstant);
+		Long centerId = studyCard.getCenterId();
 		Long examinationId = ImportUtils.createExamination(studyREST, subjectREST, studyDate, dicomStudy.getStudyDescription(), centerId);
 		if (examinationId == null) {
 			uploadJob.setUploadState(UploadState.ERROR);
@@ -329,9 +334,9 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			return false;
 		}
 
-		logger.info("7. Import.json");
-		ImportUtils.prepareImportJob(importJob, subject.getName(), subject.getId(), examinationId, studyREST, studyCard);
-		Runnable importRunnable = new ImportFinishRunnable(uploadJob, uploadJobFile.getParentFile(), importJob, subject.getName());
+		logger.info("7. Start import to server (upload files + start import job)");
+		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examinationId, studyREST, studyCard);
+		Runnable importRunnable = new ImportFinishRunnable(uploadJob, uploadJobFile.getParentFile(), importJob, subjectREST.getName());
 		Thread importThread = new Thread(importRunnable);
 		importThread.start();
 

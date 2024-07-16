@@ -394,7 +394,7 @@ public class ImportUtils {
 			}
 			if(addSubjectStudy(study, subjectREST, subjectStudyIdentifier, subjectType, isPhysicallyInvolved)) {
 				// create subject with subject-study filled to avoid access denied exception because of rights check
-				Long centerId = studyCard.getAcquisitionEquipment().getCenter().getId();
+				Long centerId = studyCard.getCenterId();
 				subjectREST = ShUpOnloadConfig.getShanoirUploaderServiceClient().createSubject(subjectREST, ShUpConfig.isModeSubjectCommonNameManual(), centerId);
 				if (subjectREST == null) {
 					return false;
@@ -462,21 +462,34 @@ public class ImportUtils {
 		}
 	}
 
+	/**
+	 * This method adjusts patient values, coming from the DICOM,
+	 * with external values entered by better knowing users. Either
+	 * added into the Excel table of the mass import or by-patient
+	 * added into the GUI of ShUp. If nothing is added for modification,
+	 * we assume, that the values from the DICOMs are correct and continue.
+	 * 
+	 * @param patient
+	 * @param firstName
+	 * @param lastName
+	 * @param birthName
+	 * @param birthDateString
+	 * @return
+	 */
 	public static Patient adjustPatientWithPatientVerification(Patient patient, String firstName, String lastName, String birthName, String birthDateString) {
-		if (firstName.isEmpty()) {
-			return null;
+		if (firstName != null && !firstName.isEmpty()) {
+			patient.setPatientFirstName(firstName);
 		}
-		patient.setPatientFirstName(firstName);
-		if (lastName.isEmpty()) {
-			return null;
+		if (lastName != null && !lastName.isEmpty()) {
+			patient.setPatientLastName(lastName);
 		}
-		patient.setPatientLastName(lastName);
-		if (birthName.isEmpty()) {
-			return null;
+		if (birthName != null && !birthName.isEmpty()) {
+			patient.setPatientBirthName(birthName);
 		}
-		patient.setPatientBirthName(birthName);
-		LocalDate birthDate = Util.convertStringToLocalDate(birthDateString);
-		patient.setPatientBirthDate(birthDate);
+		if (birthDateString != null && !birthDateString.isEmpty()) {
+			LocalDate birthDate = Util.convertStringToLocalDate(birthDateString);
+			patient.setPatientBirthDate(birthDate);	
+		}
 		return patient;
 	}
 
