@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
@@ -39,14 +38,12 @@ import jakarta.persistence.ColumnResult;
 import jakarta.persistence.ConstructorResult;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.Index;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.SqlResultSetMapping;
 import jakarta.persistence.Table;
-import jakarta.persistence.Index;
 
 @Entity
 @Table(indexes = @Index(name = "subject_name_idx", columnList = "name", unique = true))
@@ -84,7 +81,6 @@ public class Subject extends HalEntity {
 
 	/** Manual Hemispheric dominance. */
 	private Integer manualHemisphericDominance;
-
 
 	/** Flag to set the subject as pre-clinical subject */
 	@Column(nullable=false)
@@ -211,4 +207,5 @@ public class Subject extends HalEntity {
 	public void setPreclinical(boolean preclinical) {
 		this.preclinical = preclinical;
 	}
+
 }
