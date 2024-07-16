@@ -271,20 +271,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
                     </li>
                 </ol>
-                <ol>
-                    <li>
-                        <label i18n="Study detail|Visible by default label@@studyDetailVisibleByDefault">Display as public</label>
-                        <span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								<span *ngIf="study.visibleByDefault" class="bool-true"><i class="fas fa-check"></i></span>
-								<span *ngIf="!study.visibleByDefault" class="bool-false"><i class="fas fa-times"></i></span>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<checkbox [(ngModel)]="study.visibleByDefault" formControlName="visibleByDefault"></checkbox>
-							</ng-template>
-						</span>
-                    </li>
-                </ol>
             </fieldset>
             <fieldset [class.hidden-tab]="activeTab != 'subjects'" tab="subjects">
                 <legend>Subject tags</legend>
@@ -333,7 +319,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<input type="hidden" formControlName="studyCenterList" [(ngModel)]="study.studyCenterList"/>
 							<table>
 								<tr>
-									<th>Center</th>
+									<th>Acquisition Center</th>
 									<th></th>
 									<th>Subject Prefix (optional) <tool-tip>A default prefix for the new subjects created when importing datasets in this study</tool-tip></th>
 									<th></th>
