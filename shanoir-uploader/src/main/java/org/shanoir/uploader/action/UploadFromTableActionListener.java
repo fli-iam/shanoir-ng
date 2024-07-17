@@ -14,6 +14,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -158,6 +159,9 @@ public class UploadFromTableActionListener implements ActionListener {
 				case STRING:
 					return cell.getStringCellValue();
 				case NUMERIC:
+					if (DateUtil.isCellDateFormatted(cell)) {
+						return String.valueOf(cell.getDateCellValue());
+					}
 					break;
 				case BOOLEAN:
 					break;
