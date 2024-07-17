@@ -384,34 +384,34 @@ public class ImportUtils {
 		return allFileNames;
 	}
 
-	public static boolean manageSubject(org.shanoir.uploader.model.rest.Subject subjectREST, Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom, SubjectStudy subjectStudy, SubjectType subjectType, boolean existingSubjectInStudy, boolean isPhysicallyInvolved, String subjectStudyIdentifier, Study study, StudyCard studyCard) {
+	public static org.shanoir.uploader.model.rest.Subject manageSubject(org.shanoir.uploader.model.rest.Subject subjectREST, Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom, SubjectStudy subjectStudy, SubjectType subjectType, boolean existingSubjectInStudy, boolean isPhysicallyInvolved, String subjectStudyIdentifier, Study study, StudyCard studyCard) {
 		if (subjectREST == null) {
 			try {
 				subjectREST = fillSubjectREST(subject, subjectName, category, languageHemDom, manualHemDom);
 			} catch (ParseException e) {
 				logger.error(e.getMessage(), e);
-				return false;
+				return null;
 			}
 			if(addSubjectStudy(study, subjectREST, subjectStudyIdentifier, subjectType, isPhysicallyInvolved)) {
 				// create subject with subject-study filled to avoid access denied exception because of rights check
-				Long centerId = studyCard.getCenterId();
+				Long centerId = studyCard.getAcquisitionEquipment().getCenter().getId();
 				subjectREST = ShUpOnloadConfig.getShanoirUploaderServiceClient().createSubject(subjectREST, ShUpConfig.isModeSubjectCommonNameManual(), centerId);
 				if (subjectREST == null) {
-					return false;
+					return null;
 				} else {
-					logger.info("Subject created on server with ID: " + subject.getId());
+					logger.info("Subject created on server with ID: " + subjectREST.getId());
 				}
 			}
 		} else {
 			// if rel-subject-study does not exist for existing subject, create one
 			if (addSubjectStudy(study, subjectREST, subjectStudyIdentifier, subjectType, isPhysicallyInvolved)) {
 				if (ShUpOnloadConfig.getShanoirUploaderServiceClient().createSubjectStudy(subjectREST) == null) {
-					return false;
+					return null;
 				}
 			} // in case subject is already in study, do nothing
 			logger.info("Subject used on server with ID: " + subjectREST.getId());
 		}
-		return true;
+		return subjectREST;
 	}
 	
 	private static org.shanoir.uploader.model.rest.Subject fillSubjectREST(Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom) throws ParseException {

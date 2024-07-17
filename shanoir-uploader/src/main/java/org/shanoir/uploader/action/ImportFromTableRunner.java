@@ -302,9 +302,11 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			return false;
 		}
 
-		if (!ImportUtils.manageSubject(subjectREST,
-			subject, importJob.getSubjectName(), ImagedObjectCategory.LIVING_HUMAN_BEING, HemisphericDominance.Left.toString(), HemisphericDominance.Left.toString(),
-			null, SubjectType.PATIENT, false, false, subjectStudyIdentifier, studyREST, studyCard)) {
+		subjectREST = ImportUtils.manageSubject(subjectREST,
+			subject, importJob.getSubjectName(), ImagedObjectCategory.LIVING_HUMAN_BEING,
+			HemisphericDominance.Left.toString(), HemisphericDominance.Left.toString(),
+			null, SubjectType.PATIENT, false, false, subjectStudyIdentifier, studyREST, studyCard);
+		if (subjectREST == null) {
 				importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.subject"));
 				return false;
 		}

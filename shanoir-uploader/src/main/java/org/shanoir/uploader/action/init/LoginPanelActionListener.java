@@ -47,11 +47,13 @@ public class LoginPanelActionListener implements ActionListener {
 				ShUpOnloadConfig.setTokenString(token);
 				sSC.getShUpStartupDialog().updateStartupText(
 				"\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.success"));
+				logger.info("Login successful with username: " + username);
 				sSC.setState(pacsConfigurationState);
 			} else {
 				sSC.getShUpStartupDialog().updateStartupText(
 						"\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.fail"));
 				sSC.setState(authenticationManualConfigurationState);
+				logger.info("Login error with username: " + username);
 				ShUpConfig.username = null;
 			}
 		} catch (Exception e1) {

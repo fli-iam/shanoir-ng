@@ -46,12 +46,12 @@ public class ImportFinishActionListener implements ActionListener {
 	
 	private ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBILNG;
 
-	public ImportFinishActionListener(final MainWindow mainWindow, UploadJob uploadJob, File uploadFolder, Subject subject,
+	public ImportFinishActionListener(final MainWindow mainWindow, UploadJob uploadJob, File uploadFolder, Subject subjectREST,
 			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBILNG) {
 		this.mainWindow = mainWindow;
 		this.uploadJob = uploadJob;
 		this.uploadFolder = uploadFolder;
-		this.subjectREST = subject;
+		this.subjectREST = subjectREST;
 		this.importStudyAndStudyCardCBILNG = importStudyAndStudyCardCBILNG;
 	}
 
@@ -118,10 +118,11 @@ public class ImportFinishActionListener implements ActionListener {
 		String subjectStudyIdentifier = mainWindow.importDialog.subjectStudyIdentifierTF.getText();
 		SubjectType subjectType = (SubjectType) mainWindow.importDialog.subjectTypeCB.getSelectedItem();
 		boolean isPhysicallyInvolved = mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.isSelected();
-		if(!ImportUtils.manageSubject(
+		subjectREST = ImportUtils.manageSubject(
 			subjectREST, importJob.getSubject(), subjectName, category, languageHemDom, manualHemDom,
 			subjectStudy, subjectType, existingSubjectInStudy, isPhysicallyInvolved, subjectStudyIdentifier,
-			study, studyCard)) {
+			study, studyCard);
+		if(subjectREST == null) {
 			JOptionPane.showMessageDialog(mainWindow.frame,
 				mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.subjectcreator.createSubjectFromShup"),
 			"Error", JOptionPane.ERROR_MESSAGE);
