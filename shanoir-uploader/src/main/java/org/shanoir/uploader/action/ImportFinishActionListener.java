@@ -69,12 +69,12 @@ public class ImportFinishActionListener implements ActionListener {
 					"Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-		boolean existingSubjectInStudy = false;
 
 		/**
 		 * In case of Neurinfo: the user can either enter a new common name to create a new subject
 		 * or select an existing subject from the combo box. This is not possible for OFSEP profile.
 		 */
+		boolean existingSubjectInStudy = false;
 		if (ShUpConfig.isModeSubjectCommonNameManual()) {
 			// minimal length for subject common name is 2, same for subject study identifier
 			// if nothing is entered, use existing subject selected
@@ -109,26 +109,29 @@ public class ImportFinishActionListener implements ActionListener {
 			return;
 		}
 
-		// common name: entered by the user in the GUI
-		String subjectName = mainWindow.importDialog.subjectTextField.getText();
-		ImagedObjectCategory category = (ImagedObjectCategory) mainWindow.importDialog.subjectImageObjectCategoryCB.getSelectedItem();
-		String languageHemDom = (String) mainWindow.importDialog.subjectLanguageHemisphericDominanceCB.getSelectedItem();
-		String manualHemDom = (String) mainWindow.importDialog.subjectManualHemisphericDominanceCB.getSelectedItem();
-		SubjectStudy subjectStudy = importStudyAndStudyCardCBILNG.getSubjectStudy();
-		String subjectStudyIdentifier = mainWindow.importDialog.subjectStudyIdentifierTF.getText();
-		SubjectType subjectType = (SubjectType) mainWindow.importDialog.subjectTypeCB.getSelectedItem();
-		boolean isPhysicallyInvolved = mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.isSelected();
-		subjectREST = ImportUtils.manageSubject(
-			subjectREST, importJob.getSubject(), subjectName, category, languageHemDom, manualHemDom,
-			subjectStudy, subjectType, existingSubjectInStudy, isPhysicallyInvolved, subjectStudyIdentifier,
-			study, studyCard);
-		if(subjectREST == null) {
-			JOptionPane.showMessageDialog(mainWindow.frame,
-				mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.subjectcreator.createSubjectFromShup"),
-			"Error", JOptionPane.ERROR_MESSAGE);
-			mainWindow.setCursor(null); // turn off the wait cursor
-			((JButton) event.getSource()).setEnabled(true);
-			return;
+		// In case user selects existing subject from study, just use it
+		if (!existingSubjectInStudy) {
+			// common name: entered by the user in the GUI
+			String subjectName = mainWindow.importDialog.subjectTextField.getText();
+			ImagedObjectCategory category = (ImagedObjectCategory) mainWindow.importDialog.subjectImageObjectCategoryCB.getSelectedItem();
+			String languageHemDom = (String) mainWindow.importDialog.subjectLanguageHemisphericDominanceCB.getSelectedItem();
+			String manualHemDom = (String) mainWindow.importDialog.subjectManualHemisphericDominanceCB.getSelectedItem();
+			SubjectStudy subjectStudy = importStudyAndStudyCardCBILNG.getSubjectStudy();
+			String subjectStudyIdentifier = mainWindow.importDialog.subjectStudyIdentifierTF.getText();
+			SubjectType subjectType = (SubjectType) mainWindow.importDialog.subjectTypeCB.getSelectedItem();
+			boolean isPhysicallyInvolved = mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.isSelected();
+			subjectREST = ImportUtils.manageSubject(
+				subjectREST, importJob.getSubject(), subjectName, category, languageHemDom, manualHemDom,
+				subjectStudy, subjectType, existingSubjectInStudy, isPhysicallyInvolved, subjectStudyIdentifier,
+				study, studyCard);
+			if(subjectREST == null) {
+				JOptionPane.showMessageDialog(mainWindow.frame,
+					mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.subjectcreator.createSubjectFromShup"),
+				"Error", JOptionPane.ERROR_MESSAGE);
+				mainWindow.setCursor(null); // turn off the wait cursor
+				((JButton) event.getSource()).setEnabled(true);
+				return;
+			}
 		}
 		
 		Long examinationId = null;
