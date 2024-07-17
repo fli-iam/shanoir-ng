@@ -6,10 +6,8 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -36,11 +34,9 @@ import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.gui.ImportFromTableWindow;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
-import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.IdList;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
-import org.shanoir.uploader.model.rest.Sex;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
@@ -263,7 +259,6 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			// wait for download thread to finish 
 		}
 
-		// 3. Check existence of study / study card
 		logger.info("4. Check study card");
 		StudyCard studyCard = null;
 		for (StudyCard studyc : studyCards) {
