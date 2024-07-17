@@ -271,7 +271,8 @@ public class ImportDialogOpener {
 				importDialog.subjectTextField.setBackground(Color.LIGHT_GRAY);
 				importDialog.subjectTextField.setEnabled(false);
 				importDialog.subjectTextField.setEditable(false);
-				importDialog.existingSubjectsCB.setBackground(Color.LIGHT_GRAY);
+				importDialog.existingSubjectsCB.setVisible(false);
+				importDialog.existingSubjectsCB.setBackground(Color.BLACK);
 				importDialog.existingSubjectsCB.setEnabled(false);
 				importDialog.existingSubjectsCB.setEditable(false);
 			}			
@@ -284,7 +285,7 @@ public class ImportDialogOpener {
 			importDialog.subjectManualHemisphericDominanceCB
 					.setSelectedItem(subject.getManualHemisphericDominance());
 			importDialog.subjectManualHemisphericDominanceCB.setEnabled(false);
-			importDialog.subjectPersonalCommentTextArea.setBackground(Color.LIGHT_GRAY);
+			importDialog.subjectPersonalCommentTextArea.setBackground(Color.BLACK);
 			importDialog.subjectPersonalCommentTextArea.setEditable(false);
 		// No existing subject found with identifier:
 		} else {
@@ -300,7 +301,8 @@ public class ImportDialogOpener {
 				importDialog.subjectTextField.setBackground(Color.LIGHT_GRAY);
 				importDialog.subjectTextField.setEnabled(false);
 				importDialog.subjectTextField.setEditable(false);
-				importDialog.existingSubjectsCB.setBackground(Color.LIGHT_GRAY);
+				importDialog.existingSubjectsCB.setVisible(false);
+				importDialog.existingSubjectsCB.setBackground(Color.BLACK);
 				importDialog.existingSubjectsCB.setEnabled(false);
 				importDialog.existingSubjectsCB.setEditable(false);
 			}
