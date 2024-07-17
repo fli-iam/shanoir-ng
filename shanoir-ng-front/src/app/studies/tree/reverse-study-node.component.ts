@@ -95,7 +95,7 @@ export class ReverseStudyNodeComponent implements OnChanges {
                 this.node.examinations = [];
                 if (sortedExaminations) {
                     sortedExaminations.forEach(exam => {
-                        let examNode = this.mapExamNode(exam);
+                        let examNode = ExaminationNode.fromExam(exam, this.node, this.canAdmin);
                         (this.node.examinations as ExaminationNode[]).push(examNode);
                     });
                 }
@@ -105,51 +105,6 @@ export class ReverseStudyNodeComponent implements OnChanges {
                 this.loading = false;
             });
         }
-    }
-
-    private mapExamNode(exam: SubjectExamination): ExaminationNode {
-        return new ExaminationNode(
-            this.node,
-            exam.id,
-            this.examPipe.transform(exam),
-            exam.datasetAcquisitions ? exam.datasetAcquisitions.map(dsAcq => this.mapAcquisitionNode(dsAcq)) : [],
-            exam.extraDataFilePathList,
-            this.canAdmin
-        );
-    }
-
-    private mapAcquisitionNode(dsAcq: DatasetAcquisition): DatasetAcquisitionNode {
-        return new DatasetAcquisitionNode(
-            this.node,
-            dsAcq.id,
-            dsAcq.name,
-            dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds, false)) : [],
-            this.canAdmin
-        );
-    }
-
-    private mapDatasetNode(dataset: Dataset, processed: boolean): DatasetNode {
-        return new DatasetNode(
-            this.node,
-            dataset.id,
-            dataset.name,
-            dataset.tags,
-            dataset.type,
-            dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : [],
-            processed,
-            this.canAdmin,
-            dataset.inPacs
-        );
-    }
-
-    private mapProcessingNode(processing: DatasetProcessing): ProcessingNode {
-        return new ProcessingNode(
-            this.node,
-            processing.id,
-            processing.comment ? processing.comment :DatasetProcessingType.getLabel(processing.datasetProcessingType),
-            processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],
-            this.canAdmin
-        );
     }
 
     hasDependency(dependencyArr: any[] | UNLOADED): boolean | 'unknown' {

@@ -115,7 +115,7 @@ export class SubjectNodeComponent implements OnChanges {
                         })
                         if (sortedExaminations) {
                             sortedExaminations.forEach(exam => {
-                                (this.node.examinations as ExaminationNode[]).push(this.mapExamNode(exam));
+                                (this.node.examinations as ExaminationNode[]).push(ExaminationNode.fromExam(exam, this.node, this.node.canDeleteChildren));
                             });
                         }
                     }
@@ -134,51 +134,6 @@ export class SubjectNodeComponent implements OnChanges {
         this.loadExaminations().then(() => {
             this.contentLoaded.resolve();
         });
-    }
-
-    private mapExamNode(exam: SubjectExamination): ExaminationNode {
-        return new ExaminationNode(
-            this.node,
-            exam.id,
-            this.examPipe.transform(exam),
-            exam.datasetAcquisitions ? exam.datasetAcquisitions.map(dsAcq => this.mapAcquisitionNode(dsAcq)) : [],
-            exam.extraDataFilePathList,
-            this.node.canDeleteChildren
-        );
-    }
-
-    private mapAcquisitionNode(dsAcq: DatasetAcquisition): DatasetAcquisitionNode {
-        return new DatasetAcquisitionNode(
-            this.node,
-            dsAcq.id,
-            dsAcq.name,
-            dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds, false)) : [],
-            this.node.canDeleteChildren
-        );
-    }
-
-    private mapDatasetNode(dataset: Dataset, processed: boolean): DatasetNode {
-        return new DatasetNode(
-            this.node,
-            dataset.id,
-            dataset.name,
-            dataset.tags,
-            dataset.type,
-            dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : [],
-            processed,
-            this.node.canDeleteChildren,
-            dataset.inPacs
-        );
-    }
-
-    private mapProcessingNode(processing: DatasetProcessing): ProcessingNode {
-        return new ProcessingNode(
-            this.node,
-            processing.id,
-            processing.comment ? processing.comment : DatasetProcessingType.getLabel(processing.datasetProcessingType),
-            processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],
-            this.node.canDeleteChildren
-        );
     }
 
     hasChildren(): boolean | 'unknown' {

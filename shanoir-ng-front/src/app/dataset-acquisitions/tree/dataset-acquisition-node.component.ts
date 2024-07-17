@@ -83,7 +83,7 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
     loadDatasets() {
         if (this.node.datasets == UNLOADED) {
             this.datasetService.getByAcquisitionId(this.node.id).then(datasets => {
-                this.node.datasets = datasets.map(ds => this.mapDatasetNode(ds, false)).sort();
+                this.node.datasets = datasets.map(ds => DatasetNode.fromDataset(ds, false, this.node, this.node.canDelete)).sort();
                 this.setDatasetIds(this.node.datasets);
             });
         }
@@ -103,30 +103,6 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
                 this.hasDicom = true;
             }
         });
-    }
-
-    private mapDatasetNode(dataset: Dataset, processed: boolean): DatasetNode {
-        return new DatasetNode(
-            this.node,
-            dataset.id,
-            dataset.name,
-            dataset.tags,
-            dataset.type,
-            dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : [],
-            processed,
-            this.node.canDelete,
-            dataset.inPacs
-        );
-    }
-
-    private mapProcessingNode(processing: DatasetProcessing): ProcessingNode {
-        return new ProcessingNode(
-            this.node,
-            processing.id,
-            processing.comment ? processing.comment : DatasetProcessingType.getLabel(processing.datasetProcessingType),
-            processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],
-            this.node.canDelete
-        );
     }
 
     deleteAcquisition() {

@@ -111,7 +111,7 @@ export class ExaminationNodeComponent implements OnChanges {
         return this.datasetAcquisitionService.getAllForExamination(this.node.id).then(dsAcqs => {
             if (!dsAcqs) dsAcqs = [];
             dsAcqs = dsAcqs.filter(acq => acq.type !== 'Processed');
-            this.node.datasetAcquisitions = dsAcqs.map(dsAcq => this.mapAcquisitionNode(dsAcq));
+            this.node.datasetAcquisitions = dsAcqs.map(dsAcq => DatasetAcquisitionNode.fromAcquisition(dsAcq, this.node, this.node.canDelete));
             this.fetchDatasetIds(this.node.datasetAcquisitions);
             this.nodeInit.emit(this.node);
             this.loading = false;
@@ -149,40 +149,6 @@ export class ExaminationNodeComponent implements OnChanges {
         this.massDownloadService.downloadAllByExaminationId(this.node.id, this.downloadState)
             .then(() => this.downloading = false);
 
-    }
-
-    mapAcquisitionNode(dsAcq: any): DatasetAcquisitionNode {
-        return new DatasetAcquisitionNode(
-            this.node,
-            dsAcq.id,
-            dsAcq.name,
-            dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds, false)) : [],
-            this.node.canDelete
-        );
-    }
-
-    mapDatasetNode(dataset: Dataset, processed: boolean): DatasetNode {
-        return new DatasetNode(
-            this.node,
-            dataset.id,
-            dataset.name,
-            dataset.tags,
-            dataset.type,
-            dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : [],
-            processed,
-            this.node.canDelete,
-            dataset.inPacs
-        );
-    }
-
-    mapProcessingNode(processing: DatasetProcessing): ProcessingNode {
-        return new ProcessingNode(
-            this.node,
-            processing.id,
-            processing.comment,
-            processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],
-            this.node.canDelete
-        );
     }
 
     deleteExamination() {

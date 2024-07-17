@@ -27,21 +27,20 @@ import { User } from 'src/app/users/shared/user.model';
 import { Study } from "../shared/study.model";
 
 import { AcquisitionEquipmentService } from 'src/app/acquisition-equipments/shared/acquisition-equipment.service';
+import { Coil } from "src/app/coils/shared/coil.model";
+import { CoilService } from "src/app/coils/shared/coil.service";
 import { DatasetAcquisitionService } from 'src/app/dataset-acquisitions/shared/dataset-acquisition.service';
 import { DatasetProcessingService } from 'src/app/datasets/shared/dataset-processing.service';
 import { DatasetService } from 'src/app/datasets/shared/dataset.service';
 import { ExaminationService } from 'src/app/examinations/shared/examination.service';
+import { Entity } from "src/app/shared/components/entity/entity.abstract";
 import { KeycloakService } from "src/app/shared/keycloak/keycloak.service";
+import { SubjectStudy } from "src/app/subjects/shared/subject-study.model";
 import { SuperPromise } from 'src/app/utils/super-promise';
-import { CenterNode, ClinicalSubjectNode, DatasetAcquisitionNode, DatasetNode, ExaminationNode, MemberNode, PreclinicalSubjectNode, ProcessingNode, RightNode, StudyNode, SubjectNode, UNLOADED } from '../../tree/tree.model';
+import { AcquisitionEquipmentNode, CenterNode, CentersNode, ClinicalSubjectNode, CoilNode, DatasetAcquisitionNode, DatasetNode, ExaminationNode, MemberNode, MembersNode, MetadataNode, PreclinicalSubjectNode, ProcessingNode, QualityCardNode, RightNode, ShanoirNode, StudyCardNode, StudyNode, SubjectNode, SubjectsNode, UNLOADED } from '../../tree/tree.model';
 import { StudyRightsService } from "../shared/study-rights.service";
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyService } from '../shared/study.service';
-import { CoilService } from "src/app/coils/shared/coil.service";
-import { Coil } from "src/app/coils/shared/coil.model";
-import { Entity } from "src/app/shared/components/entity/entity.abstract";
-import { SubjectStudy } from "src/app/subjects/shared/subject-study.model";
-import { SubjectStudyPipe } from "src/app/subjects/shared/subject-study.pipe";
 
 @Injectable()
 export class TreeService {
@@ -54,6 +53,7 @@ export class TreeService {
     public canAdminStudy: boolean;
     private _treeOpened: boolean = true;
     public treeAvailable: boolean = false;
+    selectedNode: ShanoirNode;
 
     isSelected(id: number, type: NodeType): boolean {
         return this.selection?.isSelected(id, type);
@@ -93,7 +93,6 @@ export class TreeService {
             private examinationService: ExaminationService,
             private keycloakService: KeycloakService,
             private studyRightsService: StudyRightsService,
-            private subjectStudyPipe: SubjectStudyPipe,
             private router: Router) {
 
         this.treeOpened = localStorage.getItem('treeOpened') == 'true';
@@ -104,6 +103,20 @@ export class TreeService {
                 });
             }
         });
+    }
+
+    removeCurrentNode() {
+        const route: string = this.selectedNode.route;
+        Object.entries(this.selectedNode.parent).forEach((entry, index) => {
+            if (Array.isArray(entry[1])) {
+                let i: number = entry[1].findIndex(node => node.route == route);
+                entry[1].splice(i, 1);
+            }
+        });
+    }
+
+    goToParent() {
+        this.router.navigate([this.selectedNode?.parent?.route]);
     }
 
     activateTree(activatedRoute: ActivatedRoute) {
@@ -123,36 +136,40 @@ export class TreeService {
                 studyLoaded = this.initStudy(this.selection.studyId[0]);
             }
 
-            studyLoaded?.then(() => {
-                if (this.selection?.type == 'dataset') {
-                    this.selectDataset(this.selection.entity as Dataset);
-                } else if (this.selection?.type == 'dicomMetadata') {
-                    this.selectDicomMetadata(this.selection.entity as Dataset);
-                } else if (this.selection?.type == 'subject') {
-                    this.selectSubject();
-                } else if (this.selection?.type == 'acquisition') {
-                    this.selectAcquisition(this.selection.entity as DatasetAcquisition);
-                } else if (this.selection?.type == 'processing') {
-                    this.selectProcessing(this.selection.entity as DatasetProcessing);
-                } else if (this.selection?.type == 'examination') {
-                    this.selectExamination(this.selection.entity as Examination);
-                } else if (this.selection?.type == 'center') {
-                    this.selectCenter();
-                } else if (this.selection?.type == 'equipment') {
-                    this.selectEquipment(this.selection.entity as AcquisitionEquipment);
-                } else if (this.selection?.type == 'qualitycard') {
-                    this.selectQualitycard();
-                } else if (this.selection?.type == 'studycard') {
-                    this.selectStudycard();
-                } else if (this.selection?.type == 'user') {
-                    this.selectUser();
-                } else if (this.selection?.type == 'coil') {
-                    this.selectCoil(this.selection.entity as Coil);
-                }
-                
+            studyLoaded?.then(() => this.selectNode(this.selection)).then(node => {
+                this.selectedNode = node;
             });
         }
     }
+
+    selectNode(selection: Selection): Promise<ShanoirNode> {
+        if (selection?.type == 'dataset') {
+            return this.selectDataset(selection.entity as Dataset);
+        } else if (selection?.type == 'dicomMetadata') {
+            return this.selectDicomMetadata(selection.entity as Dataset);
+        } else if (selection?.type == 'subject') {
+            return this.selectSubject(selection.id);
+        } else if (selection?.type == 'acquisition') {
+            return this.selectAcquisition(selection.entity as DatasetAcquisition);
+        } else if (selection?.type == 'processing') {
+            return this.selectProcessing(selection.entity as DatasetProcessing);
+        } else if (selection?.type == 'examination') {
+            return this.selectExamination(selection.entity as Examination);
+        } else if (selection?.type == 'center') {
+            return this.selectCenter(selection.id);
+        } else if (selection?.type == 'equipment') {
+            return this.selectEquipment(selection.entity as AcquisitionEquipment);
+        } else if (selection?.type == 'qualitycard') {
+            return this.selectQualitycard(selection.id);
+        } else if (selection?.type == 'studycard') {
+            return this.selectStudycard(selection.id);
+        } else if (selection?.type == 'user') {
+            return this.selectUser(selection.id);
+        } else if (selection?.type == 'coil') {
+            return this.selectCoil(selection.entity as Coil);
+        }
+    }
+
 
     private selectDataset(dataset: number | Dataset): Promise<DatasetNode> {
         return this.studyNodePromise.then(() => {
@@ -179,6 +196,8 @@ export class TreeService {
                                                                 return (procNode.datasets as DatasetNode[]).find(dsNd => dsNd.id == (typeof dataset == 'number' ? dataset : dataset.id));
                                                             });
                                                         }
+                                                    } else {
+                                                        return dsNode;
                                                     }
                                                 });
                                             }
@@ -193,9 +212,10 @@ export class TreeService {
         });
     }
 
-    private selectDicomMetadata(ds: number | Dataset) {
-        this.selectDataset(ds).then(parentDsNode => {
+    private selectDicomMetadata(ds: number | Dataset): Promise<MetadataNode> {
+        return this.selectDataset(ds).then(parentDsNode => {
             parentDsNode?.open();
+            return new MetadataNode(parentDsNode, parentDsNode?.id, 'Dicom Metadata')
         });
     }
 
@@ -217,36 +237,40 @@ export class TreeService {
         });
     }
 
-    private selectProcessing(processing: number | DatasetProcessing) {
+    private selectProcessing(processing: number | DatasetProcessing): Promise<ProcessingNode> {
         let processingPromise: Promise<DatasetProcessing>;
         if (typeof processing == 'number') {
             processingPromise = this.datasetProcessingService.get(processing);
         } else {
             processingPromise = Promise.resolve(processing);
         }
-        processingPromise.then(proc => {
-            this.selectDataset(proc.inputDatasets[0].id).then(parentDsNode => {
-                parentDsNode?.open();
+        return processingPromise.then(proc => {
+            return this.selectDataset(proc.inputDatasets[0].id).then(parentDsNode => {
+                return parentDsNode?.open().then(() => {
+                    return (parentDsNode.processings as ProcessingNode[])?.find(pnode => pnode.id == proc.id);
+                });
             });
         });
     }
 
-    private selectAcquisition(acq: number | DatasetAcquisition) {
-        this.studyNodePromise.then(() => {
-            this.studyNode.subjectsNode.open().then(() => {
+    private selectAcquisition(acq: number | DatasetAcquisition): Promise<DatasetAcquisitionNode> {
+        return this.studyNodePromise.then(() => {
+            return this.studyNode.subjectsNode.open().then(() => {
                 let acqPromise: Promise<DatasetAcquisition>;
                 if (typeof acq == 'number') {
                     acqPromise = this.datasetAcquisitionService.get(acq);
                 } else {
                     acqPromise = Promise.resolve(acq);
                 }
-                acqPromise.then(dsa => {
+                return acqPromise.then(dsa => {
                     let subjectNode: SubjectNode = (this.studyNode.subjectsNode.subjects as SubjectNode[]).find(sn => sn.id == dsa.examination?.subject?.id);
                     if (subjectNode) {
-                        subjectNode.open().then(() => {
+                        return subjectNode.open().then(() => {
                             let examNode: ExaminationNode = (subjectNode.examinations as ExaminationNode[])?.find(exam => exam.id == dsa.examination?.id);
                             if (examNode) {
-                                examNode.open();
+                                return examNode.open().then(() => {
+                                    return (examNode.datasetAcquisitions as DatasetAcquisitionNode[]).find(dsan => dsan.id == dsa.id);
+                                });
                             }
                         });
                     }
@@ -255,82 +279,97 @@ export class TreeService {
         });
     }
 
-    private selectExamination(examination: number | Examination) {
-        this.studyNodePromise.then(() => {
-            this.studyNode.subjectsNode.open().then(() => {
+    private selectExamination(examination: number | Examination): Promise<ExaminationNode> {
+        return this.studyNodePromise.then(() => {
+            return this.studyNode.subjectsNode.open().then(() => {
                 let examPromise: Promise<Examination>;
                 if (typeof examination == 'number') {
                     examPromise = this.examinationService.get(examination);
                 } else {
                     examPromise = Promise.resolve(examination);
                 }
-                examPromise.then(exam => {
+                return examPromise.then(exam => {
                     let subjectNode: SubjectNode = (this.studyNode.subjectsNode.subjects as SubjectNode[]).find(sn => sn.id == exam.subject?.id);
                     if (subjectNode) {
-                        subjectNode.open();
+                        return subjectNode.open().then(() => {
+                            return (subjectNode.examinations as ExaminationNode[]).find(en => en.id == exam.id);
+                        });
                     }
                 });
             });
         });
     }
 
-    private selectSubject() {
-        this.studyNodePromise.then(() => {
-            this.studyNode.subjectsNode.open();
+    private selectSubject(subjectId: number): Promise<SubjectNode> {
+        return this.studyNodePromise.then(() => {
+            return this.studyNode.subjectsNode.open().then(() => {
+                return (this.studyNode.subjectsNode.subjects as SubjectNode[]).find(sn => sn.id == subjectId);
+            });
         });
     }
 
-    private selectCenter() {
-        this.studyNodePromise.then(() => {
-            this.studyNode.centersNode.open();
+    private selectCenter(centerId: number): Promise<CenterNode> {
+        return this.studyNodePromise.then(() => {
+            return this.studyNode.centersNode.open().then(() => {
+                return (this.studyNode.centersNode.centers as CenterNode[]).find(cn => cn.id == centerId);
+            });
         });
     }
 
-    private selectEquipment(equipment: number | AcquisitionEquipment) {
-        this.studyNodePromise.then(() => {
-            this.studyNode.centersNode.open().then(() => {
-                (typeof equipment == 'number' 
+    private selectEquipment(equipment: number | AcquisitionEquipment): Promise<AcquisitionEquipmentNode> {
+        return this.studyNodePromise.then(() => {
+            return this.studyNode.centersNode.open().then(() => {
+                return (typeof equipment == 'number' 
                     ? this.acquisitionEquipmentService.get(equipment)
                     : Promise.resolve(equipment)
                 ).then(acqEq => {
                     let centerNode: CenterNode = (this.studyNode.centersNode.centers as CenterNode[]).find(cn => acqEq.center.id == cn.id);
-                    centerNode?.open();
+                    return centerNode?.open().then(() => {
+                        return (centerNode.acquisitionEquipments as AcquisitionEquipmentNode[]).find(aen => aen.id == acqEq.id);
+                    });
                 });
             });
-
         });
     }
 
-    private selectCoil(coil: number | Coil) {
-        this.studyNodePromise.then(() => {
-            this.studyNode.centersNode.open().then(() => {
-                (typeof coil == 'number' 
+    private selectCoil(coil: number | Coil): Promise<CoilNode> {
+        return this.studyNodePromise.then(() => {
+            return this.studyNode.centersNode.open().then(() => {
+                return (typeof coil == 'number' 
                     ? this.coilService.get(coil)
                     : Promise.resolve(coil)
                 ).then(coil => {
                     let centerNode: CenterNode = (this.studyNode.centersNode.centers as CenterNode[]).find(cn => coil.center.id == cn.id);
-                    centerNode?.open();
+                    return centerNode?.open().then(() => {
+                        return (centerNode.coils as CoilNode[]).find(cn => cn.id == coil.id);
+                    });
                 });
             });
 
         });
     }
 
-    private selectQualitycard() {
-        this.studyNodePromise.then(() => {
-            this.studyNode.qualityCardsNode.open();
+    private selectQualitycard(qualityCardId: number): Promise<QualityCardNode> {
+        return this.studyNodePromise.then(() => {
+            return this.studyNode.qualityCardsNode.open().then(() => {
+                return (this.studyNode.qualityCardsNode.cards as QualityCardNode[]).find(qcn => qcn.id == qualityCardId);
+            });
         });
     }
 
-    private selectStudycard() {
-        this.studyNodePromise.then(() => {
-            this.studyNode.studyCardsNode.open();
+    private selectStudycard(studyCardId: number): Promise<StudyCardNode> {
+        return this.studyNodePromise.then(() => {
+            return this.studyNode.studyCardsNode.open().then(() => {
+                return (this.studyNode.studyCardsNode.cards as StudyCardNode[]).find(scn => scn.id == studyCardId);
+            });
         });
     }
 
-    private selectUser() {
-        this.studyNodePromise.then(() => {
-            this.studyNode.membersNode.open();
+    private selectUser(userId: number): Promise<MemberNode> {
+        return this.studyNodePromise.then(() => {
+            return this.studyNode.membersNode.open().then(() => {
+                return (this.studyNode.membersNode.members as MemberNode[]).find(mn => mn.id == userId);
+            });
         });
     }
 
@@ -361,50 +400,40 @@ export class TreeService {
     }
 
     public buildStudyNode(study: Study, canAdmin: boolean): StudyNode {
-        let node: StudyNode;
+        let studyNode: StudyNode = new StudyNode(
+            null,
+            study.id,
+            study.name,
+            null, //subjects
+            null, //centers,
+            UNLOADED,
+            UNLOADED,
+            null //members
+        );
+            
         let subjects: SubjectNode[] = study.subjectStudyList.map(subjectStudy => {
             if(subjectStudy.subject.preclinical){
-                return new PreclinicalSubjectNode(
-                    node, 
-                    subjectStudy.subject.id, 
-                    this.subjectStudyPipe.transform(subjectStudy), 
-                    subjectStudy.tags, 
-                    UNLOADED, 
-                    subjectStudy.qualityTag, 
-                    canAdmin);
+                return PreclinicalSubjectNode.fromSubjectStudy(subjectStudy, studyNode, canAdmin);
             } else {
-                return new ClinicalSubjectNode(
-                    node, 
-                    subjectStudy.subject.id, 
-                    this.subjectStudyPipe.transform(subjectStudy), 
-                    subjectStudy.tags, 
-                    UNLOADED, 
-                    subjectStudy.qualityTag, 
-                    canAdmin);
+                return ClinicalSubjectNode.fromSubjectStudy(subjectStudy, studyNode, canAdmin);
             }
         });
         let centers: CenterNode[] = study.studyCenterList.map(studyCenter => {
-            return new CenterNode(node, studyCenter.center.id, studyCenter.center.name, UNLOADED, UNLOADED);
+            return new CenterNode(studyNode, studyCenter.center.id, studyCenter.center.name, UNLOADED, UNLOADED);
         });
         let members: MemberNode[] = study.studyUserList.map(studyUser => {
             let memberNode: MemberNode = null;
             let rights: RightNode[] = studyUser.studyUserRights.map(suRight => new RightNode(memberNode, null, StudyUserRight.getLabel(suRight)));
-            memberNode = new MemberNode(node, studyUser.user?.id || studyUser.userId, studyUser.userName, rights);
+            memberNode = new MemberNode(studyNode, studyUser.user?.id || studyUser.userId, studyUser.userName, rights);
             return memberNode;
         });
         members.sort((a: MemberNode, b: MemberNode) => {
             return a.label.toLowerCase().localeCompare(b.label.toLowerCase())
         })
-        node = new StudyNode(
-                null,
-                study.id,
-                study.name,
-                subjects,
-                centers,
-                UNLOADED,
-                UNLOADED,
-                members);
-        return node;
+        studyNode.subjectsNode = new SubjectsNode(studyNode, null, 'Subjects', subjects);
+        studyNode.centersNode = new CentersNode(studyNode, null, 'Centers', centers);
+        studyNode.membersNode = new MembersNode(studyNode, null, 'Members', members);
+        return studyNode;
     }
 }
 
@@ -453,7 +482,7 @@ export class Selection {
     }
 
     static fromEquipment(equipment: AcquisitionEquipment): Selection {
-        return new Selection(equipment.id, 'equipment', equipment.center.studyCenterList?.map(sc => sc.study.id), equipment);
+        return new Selection(equipment.id, 'equipment', equipment.center.studyCenterList?.map(sc => sc.study.id), equipment, );
     }
 
     static fromCoil(coil: Coil): Selection {

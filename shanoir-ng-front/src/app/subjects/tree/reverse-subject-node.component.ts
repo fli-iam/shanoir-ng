@@ -18,6 +18,7 @@ import { SimpleStudy } from '../../studies/shared/study.model';
 import { ReverseStudyNode, ReverseSubjectNode, ShanoirNode, UNLOADED } from '../../tree/tree.model';
 import { Subject } from '../shared/subject.model';
 import { Selection, TreeService } from 'src/app/studies/study/tree.service';
+import { Tag } from 'src/app/tags/tag.model';
 
 
 @Component({
@@ -52,36 +53,22 @@ export class ReverseSubjectNodeComponent implements OnChanges {
                     this.input.parentNode,
                     this.input.subject.id,
                     this.input.subject.name,
-                    this.input.subject.subjectStudyList?.map(subjectStudy => this.mapStudy(subjectStudy.study)));
-                    if(this.input.subject.preclinical){
-                        this.awesome = "fas fa-hippo"
-                    }
+                    this.input.subject.subjectStudyList?.map(subjectStudy => {
+                        let tags: Tag[] = [];
+                        if (!(this.input instanceof ReverseSubjectNode)) {
+                            tags = this.input.subject.subjectStudyList[this.input.subject.subjectStudyList.findIndex(element => element.study.id == subjectStudy.study.id)].tags;
+                        }
+                        return ReverseStudyNode.fromStudy(subjectStudy.study, tags, this.node);
+                    })
+                );
+                if(this.input.subject.preclinical){
+                    this.awesome = "fas fa-hippo"
+                }
             }
             this.nodeInit.emit(this.node);
             this.showDetails = this.router.url != '/subject/details/' + this.node.id;
         }
     }
-
-    private mapStudy(study: SimpleStudy): ReverseStudyNode {
-        if (!(this.input instanceof ReverseSubjectNode)) {
-            return new ReverseStudyNode(
-                this.node,
-                study.id,
-                study.name,
-                this.input.subject.subjectStudyList[this.input.subject.subjectStudyList.findIndex(element => element.study.id == study.id)].tags,
-                UNLOADED
-            );
-        } else {
-            return new ReverseStudyNode(
-                this.node,
-                study.id,
-                study.name,
-                [],
-                UNLOADED
-            );
-        }
-    }
-
 
     hasChildren(): boolean | 'unknown' {
         if (!this.node.studies) return false;

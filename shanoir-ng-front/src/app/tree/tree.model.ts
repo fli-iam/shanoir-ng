@@ -12,7 +12,17 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { ExaminationDatasetAcquisitionDTO } from "../dataset-acquisitions/shared/dataset-acquisition.dto";
+import { DatasetAcquisition } from "../dataset-acquisitions/shared/dataset-acquisition.model";
+import { DatasetProcessing } from "../datasets/shared/dataset-processing.model";
+import { Dataset } from "../datasets/shared/dataset.model";
+import { DatasetProcessingType } from "../enum/dataset-processing-type.enum";
+import { ExaminationPipe } from "../examinations/shared/examination.pipe";
+import { SubjectExamination } from "../examinations/shared/subject-examination.model";
+import { SimpleStudy } from "../studies/shared/study.model";
 import { QualityTag } from "../study-cards/shared/quality-card.model";
+import { SubjectStudy } from "../subjects/shared/subject-study.model";
+import { SubjectStudyPipe } from "../subjects/shared/subject-study.pipe";
 import { Tag } from '../tags/tag.model';
 import { SuperPromise } from "../utils/super-promise";
 
@@ -20,6 +30,7 @@ export abstract class ShanoirNode {
     abstract title: string;
     private _opened: boolean = false;
     private openPromise: Promise<void>;
+    protected readonly routeBase: string;
 
     constructor(
         public parent: ShanoirNode,
@@ -50,6 +61,10 @@ export abstract class ShanoirNode {
     set opened(opened: boolean) {
         opened ? this.open() : this.close();
     }
+
+    get route(): string {
+        return this.routeBase + this.id;
+    }
 }
 
 export type UNLOADED = 'UNLOADED';
@@ -76,7 +91,8 @@ export class StudyNode extends ShanoirNode {
     public studyCardsNode: StudyCardsNode = new StudyCardsNode(this, null, 'Study Cards', this.studyCards);
     public qualityCardsNode: QualityCardsNode = new QualityCardsNode(this, null, 'Quality Cards', this.qualityCards);
     public membersNode: MembersNode = new MembersNode(this, null, 'Members', this.members);
-    public title = "study"
+    title = 'study';
+    protected readonly routeBase = '/study/details/';
 }
 
 export class SubjectsNode extends ShanoirNode {
@@ -90,7 +106,7 @@ export class SubjectsNode extends ShanoirNode {
         super(parent, id, label);
     }
 
-    public title = "subjects"
+    public title = "subjects";
 }
 
 export class CentersNode extends ShanoirNode {
@@ -104,7 +120,7 @@ export class CentersNode extends ShanoirNode {
         super(parent, id, label);
     }
 
-    public title = "centers"
+    public title = "centers";
 }
 
 export abstract class CardsNode extends ShanoirNode {
@@ -123,12 +139,12 @@ export abstract class CardsNode extends ShanoirNode {
 
 export class StudyCardsNode extends CardsNode {
 
-    public title = "studycards"
+    public title = "studycards";
 }
 
 export class QualityCardsNode extends CardsNode {
 
-    public title = "qualitycards"
+    public title = "qualitycards";
 }
 
 export class MembersNode extends ShanoirNode {
@@ -142,7 +158,7 @@ export class MembersNode extends ShanoirNode {
         super(parent, id, label);
     }
 
-    public title = "members"
+    public title = "members";
 }
 
 
@@ -178,17 +194,40 @@ export abstract class SubjectNode extends ShanoirNode {
     }
 
     public awesome: string;
+    protected readonly routeBase = '/subject/details/';
 }
 
 export class ClinicalSubjectNode extends SubjectNode {
     public title = "subject";
     public awesome = "fas fa-user-injured";
     qualityTag: QualityTag;
+
+    public static fromSubjectStudy(subjectStudy: SubjectStudy, parent: ShanoirNode, canDeleteChildren: boolean): ClinicalSubjectNode {
+        return new ClinicalSubjectNode(
+            parent, 
+            subjectStudy.subject.id, 
+            new SubjectStudyPipe().transform(subjectStudy), 
+            subjectStudy.tags, 
+            UNLOADED, 
+            subjectStudy.qualityTag, 
+            canDeleteChildren);
+    }
 }
 
 export class PreclinicalSubjectNode extends SubjectNode {
     public title = "preclinical-subject";
     public awesome = "fas fa-hippo";
+
+    public static fromSubjectStudy(subjectStudy: SubjectStudy, parent: ShanoirNode, canDeleteChildren: boolean): PreclinicalSubjectNode {
+        return new PreclinicalSubjectNode(
+            parent, 
+            subjectStudy.subject.id, 
+            new SubjectStudyPipe().transform(subjectStudy), 
+            subjectStudy.tags, 
+            UNLOADED, 
+            subjectStudy.qualityTag, 
+            canDeleteChildren);
+    }
 }
 
 
@@ -207,6 +246,20 @@ export class ExaminationNode extends ShanoirNode {
 
     public extraDataOpen: boolean = false;
     public title: string = "examination";
+    protected readonly routeBase = '/examination/details/';
+
+    public static fromExam(exam: SubjectExamination, parent: ShanoirNode, canDelete: boolean): ExaminationNode {
+        let node: ExaminationNode = new ExaminationNode(
+            parent,
+            exam.id,
+            new ExaminationPipe().transform(exam),
+            null,
+            exam.extraDataFilePathList,
+            canDelete
+        );
+        node.datasetAcquisitions = exam.datasetAcquisitions ? exam.datasetAcquisitions.map(dsAcq => DatasetAcquisitionNode.fromAcquisition(dsAcq, node, canDelete)) : [];
+        return node;
+    }
 }
 
 
@@ -223,6 +276,19 @@ export class DatasetAcquisitionNode extends ShanoirNode {
     }
 
     public title: string = "dataset-acquisition";
+    protected readonly routeBase = '/dataset-acquisition/details/';
+
+    public static fromAcquisition(dsAcq: DatasetAcquisition | ExaminationDatasetAcquisitionDTO, parent: ShanoirNode, canDelete: boolean): DatasetAcquisitionNode {
+        let node: DatasetAcquisitionNode = new DatasetAcquisitionNode(
+            parent,
+            dsAcq.id,
+            dsAcq.name,
+            null,
+            canDelete
+        );
+        node.datasets = dsAcq.datasets ? dsAcq.datasets.map(ds => DatasetNode.fromDataset(ds, false, node, canDelete)) : [];
+        return node;
+    }
 }
 
 
@@ -250,7 +316,23 @@ export class DatasetNode extends ShanoirNode {
     public selected: boolean = false;
     public awesome: string = "fas fa-camera"
     public title: string = "dataset";
+    protected readonly routeBase = '/dataset/details/';
 
+    public static fromDataset(dataset: Dataset, processed: boolean, parent: ShanoirNode, canDelete: boolean): DatasetNode {
+        let node: DatasetNode = new DatasetNode(
+            parent,
+            dataset.id,
+            dataset.name,
+            dataset.tags,
+            dataset.type,
+            null,
+            processed,
+            canDelete,
+            dataset.inPacs
+        );
+        node.processings = dataset.processings ? dataset.processings.map(proc => ProcessingNode.fromProcessing(proc, node, canDelete)) : [];
+        return node;
+    }
 }
 
 
@@ -267,6 +349,19 @@ export class ProcessingNode extends ShanoirNode {
     }
 
     public title: string = "processing";
+    protected readonly routeBase = '/dataset-processing/details/';
+
+    public static fromProcessing(processing: DatasetProcessing, parent: ShanoirNode, canDelete: boolean): ProcessingNode {
+        let node: ProcessingNode = new ProcessingNode(
+            parent,
+            processing.id,
+            processing.comment ? processing.comment : DatasetProcessingType.getLabel(processing.datasetProcessingType),
+            null,
+            canDelete
+        );
+        node.datasets = processing.outputDatasets ? processing.outputDatasets.map(ds => DatasetNode.fromDataset(ds, true, node, canDelete)) : [];
+        return node;
+    }
 }
 
 
@@ -283,6 +378,7 @@ export class CenterNode extends ShanoirNode {
     }
 
     public title: string = "center";
+    protected readonly routeBase = '/center/details/';
 }
 
 
@@ -299,6 +395,7 @@ export class AcquisitionEquipmentNode extends ShanoirNode {
     }
 
     public title: string = "acquisition-equipment";
+    protected readonly routeBase = '/acquisition-equipment/details/';
 }
 
 
@@ -313,6 +410,7 @@ export class CoilNode extends ShanoirNode {
     }
 
     public title: string = "coil";
+    protected readonly routeBase = '/coil/details/';
 }
 
 
@@ -336,6 +434,7 @@ export class StudyCardNode extends CardNode {
 
     public title: string = "study-card";
     public type: 'studycard' | 'qualitycard' = 'studycard';
+    protected readonly routeBase = '/study-card/details/';
 }
 
 
@@ -343,6 +442,7 @@ export class QualityCardNode extends CardNode {
 
     public title: string = "quality-card";
     public type: 'studycard' | 'qualitycard' = 'qualitycard';
+    protected readonly routeBase = '/quality-card/details/';
 }
 
 
@@ -358,6 +458,7 @@ export class MemberNode extends ShanoirNode {
     }
 
     public title: string = "member";
+    protected readonly routeBase = '/user/details/';
 }
 
 
@@ -379,6 +480,7 @@ export class ReverseSubjectNode extends ShanoirNode {
     }
 
     public title: string = "subject";
+    protected readonly routeBase = '/subject/details/';
 }
 
 
@@ -395,4 +497,21 @@ export class ReverseStudyNode extends ShanoirNode {
     }
 
     public title: string = "study";
+    protected readonly routeBase = '/study/details/';
+
+    public static fromStudy(study: SimpleStudy, tags: Tag[], parent: ShanoirNode): ReverseStudyNode {
+        return new ReverseStudyNode(
+            parent,
+            study.id,
+            study.name,
+            tags,
+            UNLOADED
+        );
+    }
+}
+
+export class MetadataNode extends ShanoirNode {
+
+    public title: string = "metadata";
+    protected readonly routeBase = '/dataset/details/dicom/';
 }

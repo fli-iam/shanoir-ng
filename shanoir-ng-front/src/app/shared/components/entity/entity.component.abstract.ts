@@ -400,7 +400,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     protected openDeleteConfirmDialog = (entity: T) => {
         this.getService().deleteWithConfirmDialog(this.ROUTING_NAME, entity).then(deleted => {
             if (deleted) {
-                this.goToList();
+                this.goToParent();
             }
         });
     }
@@ -439,6 +439,11 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
 
     goToList(): void {
         this.router.navigate([this.entityRoutes.getRouteToList()]);
+    }
+
+    goToParent(): void {
+        this.treeService.goToParent();
+        this.treeService.removeCurrentNode();
     }
 
     goBack(): void {
