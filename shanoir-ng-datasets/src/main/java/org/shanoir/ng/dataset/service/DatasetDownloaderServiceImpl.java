@@ -19,6 +19,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.joda.time.DateTime;
 import org.shanoir.ng.dataset.modality.BidsDataset;
 import org.shanoir.ng.dataset.modality.EegDataset;
@@ -72,7 +73,12 @@ public class DatasetDownloaderServiceImpl {
 	private static final String JSON_RESULT_FILENAME = "ERRORS.json";
 
 	private static final Long DEFAULT_NIFTI_CONVERTER_ID = 6L;
+
 	public static final String GZIP_EXTENSION = ".gz";
+
+    public static final String NII_GZ = ".nii.gz";
+	
+	public static final String CONVERSION_FAILED_ERROR_MSG = "Nifti conversion failed, you may try to select another one.";
 
 	@Autowired
 	DatasetService datasetService;
@@ -208,9 +214,8 @@ public class DatasetDownloaderServiceImpl {
 	private void reconvertToNifti(String format, HttpServletResponse response, Long converterId, Dataset dataset, SimpleDateFormat formatter, List<URL> pathURLs, DatasetDownloadError downloadResult, String subjectName, ZipOutputStream zipOutputStream) throws RestServiceException, IOException {
 		File userDir = DatasetFileUtils.getUserImportDir("/tmp");
 		String tmpFilePath = userDir + File.separator + dataset.getId() + "_" + format;
-		UUID uuid = UUID.randomUUID();
 
-		File sourceFolder = new File(tmpFilePath + "-" + uuid);
+		File sourceFolder = new File(tmpFilePath + "-" + UUID.randomUUID());
 
 		DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, downloadResult);
 
@@ -223,23 +228,25 @@ public class DatasetDownloaderServiceImpl {
 			// Convert them, sending to import microservice
 			boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + sourceFolder.getAbsolutePath());
 			if (!result) {
-				response.setContentType(null);
-				throw new RestServiceException(
-						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Nifti conversion failed", null));
+				downloadResult.update(CONVERSION_FAILED_ERROR_MSG, DatasetDownloadError.ERROR);
+				return;
 			}
 			File workFolder = new File(sourceFolder.getAbsolutePath() + File.separator + "result");
-			List<String> files = new ArrayList<>();
-			for (File res : workFolder.listFiles()) {
+			File[] files = workFolder.listFiles();
 
+			if (ArrayUtils.isEmpty(files)) {
+				downloadResult.update(CONVERSION_FAILED_ERROR_MSG, DatasetDownloadError.ERROR);
+				return;
+			}
+
+			for (File res : files) {
 				String datasetFilePath = res.getAbsolutePath();
 				String fileName = res.getName();
-				String extension = fileName.endsWith(".nii.gz") ? ".nii.gz" : "." + FilenameUtils.getExtension(fileName);
+				String extension = fileName.endsWith(NII_GZ) ? NII_GZ : "." + FilenameUtils.getExtension(fileName);
 				String fileNameToSet = getDatasetFileName(dataset) + extension;
 
-				boolean toGzip = fileNameToSet.endsWith(".nii");
-
 				// Gzip file if necessary in order to always return a .nii.gz file
-				if (toGzip) {
+				if (".nii".equals(extension)) {
 					datasetFilePath = datasetFilePath + GZIP_EXTENSION;
 					fileNameToSet = fileNameToSet + GZIP_EXTENSION;
 					File file = new File(datasetFilePath);
@@ -257,11 +264,10 @@ public class DatasetDownloaderServiceImpl {
 					zipOutputStream.putNextEntry(zipEntry);
 					StreamUtils.copy(fileSystemResource.getInputStream(), zipOutputStream);
 					zipOutputStream.closeEntry();
-					files.add(res.getName() + GZIP_EXTENSION);
 				}
 			}
 		} finally {
-			LOG.info("deleting directory " + sourceFolder.getAbsolutePath());
+			LOG.info("Deleting directory [{}]", sourceFolder.getAbsolutePath());
 			FileUtils.deleteQuietly(sourceFolder);
 		}
 	}
