@@ -165,18 +165,30 @@ public class ImportFromTableWindow extends JFrame {
 		table = new JTable();
 		DefaultTableModel model = (DefaultTableModel) table.getModel();
 		model.setColumnIdentifiers(columns);
-		// 1100 to go
-		table.getColumnModel().getColumn(0).setMinWidth(150);
+		// DicomQuery: 7 columns + 3 filter
+		table.getColumnModel().getColumn(0).setMinWidth(140);
 		table.getColumnModel().getColumn(1).setMinWidth(150);
 		table.getColumnModel().getColumn(2).setMinWidth(130);
 		table.getColumnModel().getColumn(3).setMinWidth(200);
 		table.getColumnModel().getColumn(4).setMinWidth(200);
 		table.getColumnModel().getColumn(5).setMinWidth(150);
 		table.getColumnModel().getColumn(6).setMinWidth(120);
-		table.getColumnModel().getColumn(7).setMinWidth(90);
-		table.getColumnModel().getColumn(8).setMinWidth(30);
-		table.getColumnModel().getColumn(9).setMinWidth(90);
-		table.getColumnModel().getColumn(10).setMinWidth(350);
+		// filters
+		table.getColumnModel().getColumn(7).setMinWidth(180);
+		table.getColumnModel().getColumn(8).setMinWidth(180);
+		table.getColumnModel().getColumn(9).setMinWidth(180);
+		// PatientVerification: 4 columns
+		table.getColumnModel().getColumn(10).setMinWidth(230);
+		table.getColumnModel().getColumn(11).setMinWidth(230);
+		table.getColumnModel().getColumn(12).setMinWidth(230);
+		table.getColumnModel().getColumn(13).setMinWidth(230);
+		// ImportJob
+		table.getColumnModel().getColumn(14).setMinWidth(150);
+		table.getColumnModel().getColumn(15).setMinWidth(150);
+		table.getColumnModel().getColumn(16).setMinWidth(150);
+		// State
+		table.getColumnModel().getColumn(17).setMinWidth(350);
+		
 
 		// Add the table to the frame
 		JPanel tablePanel = new JPanel(new BorderLayout());
