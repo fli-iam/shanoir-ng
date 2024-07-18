@@ -294,7 +294,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		 */
 		Instant studyDateInstant = dicomStudy.getStudyDate().atStartOfDay(ZoneId.systemDefault()).toInstant();
         Date studyDate = Date.from(studyDateInstant);
-		Long centerId = studyCard.getCenterId();
+		Long centerId = studyCard.getAcquisitionEquipment().getCenter().getId();
 		Long examinationId = ImportUtils.createExamination(studyREST, subjectREST, studyDate, dicomStudy.getStudyDescription(), centerId);
 		if (examinationId == null) {
 			uploadJob.setUploadState(UploadState.ERROR);
