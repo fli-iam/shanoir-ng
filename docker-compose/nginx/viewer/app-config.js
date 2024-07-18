@@ -20,7 +20,7 @@ window.config = {
 				enableStudyLazyLoad: true, 
 				supportsFuzzyMatching: true, 
 				supportsWildcard: true, 
-				omitQuotationForMultipartRequest: true, 
+				omitQuotationForMultipartRequest: false, 
 			}, 
 		}, 
 	], 
