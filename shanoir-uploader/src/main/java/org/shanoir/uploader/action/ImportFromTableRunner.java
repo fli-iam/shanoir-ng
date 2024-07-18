@@ -136,12 +136,10 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		Map<Study, List<Serie>> selectedSeriesByStudy = new HashMap<>();
 
 		LocalDate minDate;
-		LocalDate selectedStudyDate = LocalDate.now();
 		if (!StringUtils.isBlank(importJob.getDicomQuery().getMinStudyDateFilter())) {
 			String[] acceptedFormats = {"yyyy","yyyy-MM-dd","yyyy-MM-dd-HH"};
 			try {
 				minDate = LocalDate.from(DateUtils.parseDate(importJob.getDicomQuery().getMinStudyDateFilter(), acceptedFormats).toInstant());
-				selectedStudyDate = minDate;
 			} catch (Exception e) {
 				importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.date.format"));
 				return false;
@@ -183,7 +181,6 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 						selectedStudy = dicomStudy;
 						foundPatient = true;
 						currentDate = studyDate;
-						selectedStudyDate = studyDate;
 					}
 				}
 			}
@@ -234,6 +231,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		logger.info("4. Find matching study card");
 		StudyCard studyCard = null;
 		List<StudyCard> studyCards = studyREST.getStudyCards();
+		String deviceSerialNumberDicom = uploadJob.getMriInformation().getDeviceSerialNumber();
 		try {
 			if (acquisitionEquipments == null) {
 				throw new Exception("Error while retrieving acquisition equipments.");
@@ -241,7 +239,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			// Iterate over study cards to get equipment + fill study => SC map
 			for (StudyCard studyCardIt : studyCards) {
 				Long acquisitionEquipmentId = studyCardIt.getAcquisitionEquipmentId();
-				if (ImportUtils.flagStudyCardCompatible(studyCardIt, acquisitionEquipmentId, acquisitionEquipments, uploadJob.getMriInformation().getDeviceSerialNumber())) {
+				if (ImportUtils.flagStudyCardCompatible(studyCardIt, acquisitionEquipmentId, acquisitionEquipments, deviceSerialNumberDicom)) {
 					studyCard = studyCardIt;
 					logger.info("Matching study card found: " + studyCard.getName());
 					break;
@@ -255,12 +253,34 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		// No study card by default => get the one in the file (if existing of course)
 		if (studyCard == null) {
 			Optional<StudyCard> scOpt = studyCards.stream().filter(element -> element.getName().equals(importJob.getStudyCardName())).findFirst();
-			if (!scOpt.isPresent()) {
-				importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.studycard"));
-				return false;
-			} else {
+			if (scOpt.isPresent()) {
 				studyCard = scOpt.get();
 			}
+		}
+		// create new study card in case
+		if (studyCard == null) {
+			studyCard = new StudyCard();
+			studyCard.setName(acquisitionEquipments.get(0).getCenter().getName() + " " + deviceSerialNumberDicom);
+			studyCard.setStudyId(studyREST.getId());
+			studyCard.setCenterId(acquisitionEquipments.get(0).getCenter().getId()); // which center to use?
+			boolean compatibleEquipmentFound = false;
+			for (AcquisitionEquipment acquisitionEquipment : acquisitionEquipments) {
+				compatibleEquipmentFound = ImportUtils.checkAcquisitionEquipmentForSerialNumber(acquisitionEquipment, deviceSerialNumberDicom);
+				if (compatibleEquipmentFound) {
+					studyCard.setAcquisitionEquipmentId(acquisitionEquipment.getId());
+					studyCard.setAcquisitionEquipment(acquisitionEquipment);
+					break;
+				}
+			}
+			if (!compatibleEquipmentFound) {
+				AcquisitionEquipment equipment = new AcquisitionEquipment();
+				equipment.setSerialNumber(deviceSerialNumberDicom);
+				equipment.setCenter(acquisitionEquipments.get(0).getCenter()); // which center to use?
+				equipment.setManufacturerModel(acquisitionEquipments.get(0).getManufacturerModel()); // which model to create/use?
+				equipment = shanoirUploaderServiceClientNG.createEquipment(equipment);
+				studyCard.setAcquisitionEquipment(equipment);
+			}
+			studyCard = shanoirUploaderServiceClientNG.createStudyCard(studyCard);
 		}
 
 		logger.info("5. Create subject or use existing one (add subject-study, if necessary)");
@@ -286,6 +306,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.subject"));
 				return false;
 		}
+		importJob.setSubjectName(subjectREST.getName());
 
 		logger.info("6. Create examination");
 		/**
@@ -301,8 +322,10 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.examination"));
 			return false;
 		}
+		importJob.setExaminationId(examinationId);
 
 		logger.info("7. Start import to server (upload files + start import job)");
+		importJob.setDicomQuery(null); // clean up, as not necessary anymore
 		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examinationId, studyREST, studyCard);
 		Runnable importRunnable = new ImportFinishRunnable(uploadJob, uploadJobFile.getParentFile(), importJob, subjectREST.getName());
 		Thread importThread = new Thread(importRunnable);

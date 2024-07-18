@@ -511,33 +511,30 @@ public class ImportUtils {
 			// find the correct equipment
 			if (acquisitionEquipment.getId().equals(acquisitionEquipmentId)) {
 				studyCard.setAcquisitionEquipment(acquisitionEquipment);
-				String deviceSerialNumberEquipment = acquisitionEquipment.getSerialNumber();
-				// check if values from server are complete, no sense for comparison if no serial number on server
-				if (acquisitionEquipment != null
-					&& acquisitionEquipment.getManufacturerModel() != null
-					&& acquisitionEquipment.getManufacturerModel().getManufacturer() != null
-					&& deviceSerialNumberEquipment != null) {
-					// check if values are present in DICOM
-					if (deviceSerialNumberDicom != null && !"".equals(deviceSerialNumberDicom)) {
-						if (deviceSerialNumberEquipment.compareToIgnoreCase(deviceSerialNumberDicom) == 0
-							|| deviceSerialNumberDicom.contains(deviceSerialNumberEquipment)) {
-							studyCard.setCompatible(true);
-							return true;
-						} else {
-							studyCard.setCompatible(false);
-						}
-					// no match with server
-					} else {
-						studyCard.setCompatible(false); // no match, as no value from DICOM or from server exists
-					}
-				// set in-compatible in case of missing server values
-				} else {
-					studyCard.setCompatible(false);
-				}								
+				boolean isCompatible = checkAcquisitionEquipmentForSerialNumber(acquisitionEquipment, deviceSerialNumberDicom);
+				studyCard.setCompatible(isCompatible);
 				break; // correct equipment found, break for-loop acqEquip
 			}
 		}
 		return false;
+	}
+
+	public static boolean checkAcquisitionEquipmentForSerialNumber(AcquisitionEquipment acquisitionEquipment, String deviceSerialNumberDicom) {
+		String deviceSerialNumberEquipment = acquisitionEquipment.getSerialNumber();
+		// check if values from server are complete, no sense for comparison if no serial number on server
+		if (acquisitionEquipment != null
+			&& acquisitionEquipment.getManufacturerModel() != null
+			&& acquisitionEquipment.getManufacturerModel().getManufacturer() != null
+			&& deviceSerialNumberEquipment != null) {
+			// check if values are present in DICOM and compare with server values
+			if (deviceSerialNumberDicom != null && !"".equals(deviceSerialNumberDicom)) {
+				if (deviceSerialNumberEquipment.compareToIgnoreCase(deviceSerialNumberDicom) == 0
+					|| deviceSerialNumberDicom.contains(deviceSerialNumberEquipment)) {
+					return true;
+				}
+			}
+		}
+		return false;		
 	}
 
 }

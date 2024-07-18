@@ -608,16 +608,16 @@ public class ShanoirUploaderServiceClient {
 		return null;
 	}
 
-	public Center createStudyCard(final StudyCard studyCard) {
+	public StudyCard createStudyCard(final StudyCard studyCard) {
 		try {
 			String json = Util.objectWriter.writeValueAsString(studyCard);
 			try (CloseableHttpResponse response = httpService.post(this.serviceURLStudyCardsCreate, json, false)) {
 				int code = response.getCode();
 				if (code == HttpStatus.SC_OK) {
-					Center centerCreated = Util.getMappedObject(response, Center.class);
-					return centerCreated;
+					StudyCard studyCardCreated = Util.getMappedObject(response, StudyCard.class);
+					return studyCardCreated;
 				} else {
-					logger.error("Error in createStudy: with study " + studyCard.getName()
+					logger.error("Error in createStudyCard: with study " + studyCard.getName()
 						+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 				}
 			}
