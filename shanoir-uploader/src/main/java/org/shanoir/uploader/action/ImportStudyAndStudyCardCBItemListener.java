@@ -81,8 +81,10 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 		try {
 			List<Subject> subjects = serviceClient.findSubjectsByStudy(study.getId());
 			mainWindow.importDialog.existingSubjectsCB.removeAllItems();
-			for (Subject subject : subjects) {
-				mainWindow.importDialog.existingSubjectsCB.addItem(subject);
+			if (subjects != null) {
+				for (Subject subject : subjects) {
+					mainWindow.importDialog.existingSubjectsCB.addItem(subject);
+				}
 			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
