@@ -137,5 +137,4 @@ public class ProcessedDatasetImportJob implements Serializable {
 	public void setShanoirEvent(ShanoirEvent shanoirEvent) {
 		this.shanoirEvent = shanoirEvent;
 	}
-
 }

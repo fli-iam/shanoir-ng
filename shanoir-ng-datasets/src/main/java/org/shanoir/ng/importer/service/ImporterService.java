@@ -470,7 +470,7 @@ public class ImporterService {
 
         try {
             DatasetProcessing datasetProcessing = importJob.getDatasetProcessing();
-            Dataset dataset = null;
+            Dataset dataset;
             
             switch(importJob.getDatasetType()) {
                 case CalibrationDataset.datasetType:
@@ -580,6 +580,11 @@ public class ImporterService {
             dataset.setUpdatedMetadata(dataset.getOriginMetadata());
             dataset.setStudyId(importJob.getStudyId());
             dataset.setSubjectId(importJob.getSubjectId());
+
+            if(datasetProcessing.getInputDatasets() != null && !datasetProcessing.getInputDatasets().isEmpty()){
+                DatasetAcquisition acquisition = datasetProcessing.getInputDatasets().get(0).getDatasetAcquisition();
+                dataset.setDatasetAcquisition(datasetAcquisitionService.findById(acquisition.getId()));
+            }
 
             dataset = datasetService.create(dataset);
             solrService.indexDataset(dataset.getId());
