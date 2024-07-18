@@ -242,6 +242,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			for (StudyCard studyCardIt : studyCards) {
 				Long acquisitionEquipmentId = studyCardIt.getAcquisitionEquipmentId();
 				if (ImportUtils.flagStudyCardCompatible(studyCardIt, acquisitionEquipmentId, acquisitionEquipments, uploadJob.getMriInformation().getDeviceSerialNumber())) {
+					logger.info("Matching study card found: " + studyCard.getName());
 					studyCard = studyCardIt;
 					break;
 				}
