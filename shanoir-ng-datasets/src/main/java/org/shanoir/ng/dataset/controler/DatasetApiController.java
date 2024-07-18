@@ -147,7 +147,16 @@ public class DatasetApiController implements DatasetApi {
 	public ResponseEntity<Void> deleteDataset(
 			final Long datasetId) throws EntityNotFoundException, RestServiceException {
 		try {
-			Long studyId = datasetService.findById(datasetId).getDatasetAcquisition().getExamination().getStudyId();
+			Dataset ds = datasetService.findById(datasetId);
+			if (ds == null) {
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			}
+			Long studyId;
+			if (ds.getDatasetProcessing() != null) {
+				studyId = ds.getDatasetProcessing().getStudyId();
+			} else {
+				studyId = ds.getDatasetAcquisition().getExamination().getStudyId();
+			}
 
 			datasetService.deleteById(datasetId);
 			solrService.deleteFromIndex(datasetId);

@@ -103,7 +103,8 @@ export class DatasetAcquisitionDTOService {
         entity.softwareRelease = dto.softwareRelease;
         entity.sortingIndex = dto.sortingIndex;
         entity.type = dto.type;
-        entity.creationDate = dto.creationDate;
+        entity.importDate = dto.importDate;
+        entity.username = dto.username;
         if (dto.acquisitionEquipmentId) {
             entity.acquisitionEquipment = new AcquisitionEquipment();
             entity.acquisitionEquipment.id = dto.acquisitionEquipmentId;
@@ -129,7 +130,7 @@ export class DatasetAcquisitionDTOService {
                 (entity as XaDatasetAcquisition).protocol = Object.assign(new XaProtocol(), (dto as XaDatasetAcquisitionDTO).protocol);
                 break;
             }
-            
+
         }
         return entity;
     }
@@ -154,7 +155,8 @@ export class DatasetAcquisitionDTO {
         this.softwareRelease = dsAcq.softwareRelease;
         this.sortingIndex = dsAcq.sortingIndex;
         this.type = dsAcq.type;
-        this.creationDate = dsAcq.creationDate;
+        this.importDate = dsAcq.importDate;
+        this.username = dsAcq.username;
     }
 
     id: number;
@@ -164,8 +166,9 @@ export class DatasetAcquisitionDTO {
     rank: number;
     softwareRelease: string;
     sortingIndex: number;
-    creationDate: Date;
+    importDate: Date;
     type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Xa' | 'Generic' | 'Processed' | 'BIDS';
+    username: string;
 }
 
 export class MrDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
