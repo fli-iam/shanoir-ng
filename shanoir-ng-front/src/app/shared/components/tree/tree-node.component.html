@@ -27,6 +27,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <a *ngIf="!dataLoading && awesome" [routerLink]="route" (click)="labelClick.emit()" (dblclick)="toggle()" class="picto" [class.clickable]="isClickable()">
         <i class="{{awesome}}"></i>
     </a>
+    <a *ngIf="!downloadable" (click)="labelClick.emit()" (dblclick)="toggle()" class="picto" [class.clickable]="isClickable()">
+        <i class="fa-solid fa-lock"></i>
+    </a>
     <input #box class="box" type="checkbox" *ngIf="hasBox" [(ngModel)]="value" (change)="chkbxChange.emit(value)" class="clickable" />
     <input #editableLabel *ngIf="editable" type="text" [(ngModel)]="label" (change)="labelChange.emit(label)" />
     <span *ngIf="editable && buttonPicto" class="button-picto clickable" (click)="buttonClick.emit()">

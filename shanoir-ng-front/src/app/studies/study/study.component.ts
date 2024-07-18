@@ -72,7 +72,6 @@ export class StudyComponent extends EntityComponent<Study> {
     protected protocolFiles: File[];
     protected dataUserAgreement: File;
 
-    public selectedDatasetIds: number[];
     protected hasDownloadRight: boolean;
     accessRequests: AccessRequest[];
     isStudyAdmin: boolean;
@@ -99,7 +98,6 @@ export class StudyComponent extends EntityComponent<Study> {
             private studyRightsService: StudyRightsService,
             private studyCardService: StudyCardService,
             private accessRequestService: AccessRequestService,
-            private processingService: ExecutionDataService,
             private downloadService: MassDownloadService) {
 
         super(route, 'study');
@@ -602,11 +600,6 @@ export class StudyComponent extends EntityComponent<Study> {
         this.router.navigate(["/access-request/details/" + accessRequest.id]);
     }
 
-    goToProcessing() {
-        this.processingService.setDatasets(new Set(this.selectedDatasetIds));
-        this.router.navigate(['pipelines']);
-    }
-
     reloadSubjectStudies() {
         setTimeout(() => {
             this.studyService.get(this.id).then(study => {
@@ -617,10 +610,6 @@ export class StudyComponent extends EntityComponent<Study> {
 
     downloadAll() {
         this.downloadService.downloadAllByStudyId(this.study.id,  this.studyDownloadState);
-    }
-
-    downloadSelected() {
-        this.downloadService.downloadByIds(this.selectedDatasetIds, this.studyDownloadState);
     }
 
     storageVolumePrettyPrint(size: number) {

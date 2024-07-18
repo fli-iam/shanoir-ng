@@ -25,6 +25,7 @@ import { MassDownloadService } from "../../shared/mass-download/mass-download.se
 import { DatasetAcquisitionNode, DatasetNode, ProcessingNode, ShanoirNode, UNLOADED } from '../../tree/tree.model';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from "../shared/dataset-acquisition.service";
+import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
 
 @Component({
     selector: 'dataset-acquisition-node',
@@ -34,7 +35,7 @@ import { DatasetAcquisitionService } from "../shared/dataset-acquisition.service
 export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
 
     progressStatus: TaskState;
-    @Input() input: DatasetAcquisitionNode | {datasetAcquisition: DatasetAcquisition, parentNode: ShanoirNode} ;
+    @Input() input: DatasetAcquisitionNode | {datasetAcquisition: DatasetAcquisition, parentNode: ShanoirNode, studyRights: StudyUserRight[]} ;
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
     node: DatasetAcquisitionNode;
     loading: boolean = false;
@@ -66,10 +67,16 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
                 if(this.node.datasets != "UNLOADED"){
                     this.setDatasetIds(this.node.datasets);
                 }
-
             } else {
                 let label: string = 'Dataset Acquisition n°' + this.input.datasetAcquisition.id;
-                this.node = new DatasetAcquisitionNode(this.input.parentNode, this.input.datasetAcquisition.id, label, UNLOADED,false);
+                this.node = new DatasetAcquisitionNode(
+                    this.input.parentNode,
+                    this.input.datasetAcquisition.id,
+                    label,
+                    UNLOADED,
+                    this.input.studyRights.includes(StudyUserRight.CAN_ADMINISTRATE),
+                    this.input.studyRights.includes(StudyUserRight.CAN_DOWNLOAD)
+                );
                 this.loadDatasets();
             }
         }
@@ -83,7 +90,7 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
     loadDatasets() {
         if (this.node.datasets == UNLOADED) {
             this.datasetService.getByAcquisitionId(this.node.id).then(datasets => {
-                this.node.datasets = datasets.map(ds => DatasetNode.fromDataset(ds, false, this.node, this.node.canDelete)).sort();
+                this.node.datasets = datasets.map(ds => DatasetNode.fromDataset(ds, false, this.node, this.node.canDelete, this.node.canDownload)).sort();
                 this.setDatasetIds(this.node.datasets);
             });
         }

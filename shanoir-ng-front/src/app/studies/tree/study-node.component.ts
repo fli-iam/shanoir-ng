@@ -16,24 +16,18 @@ import { Router } from '@angular/router';
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
 
 import { QualityCardService } from 'src/app/study-cards/shared/quality-card.service';
+import { SuperPromise } from 'src/app/utils/super-promise';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
-import { SubjectStudyPipe } from '../../subjects/shared/subject-study.pipe';
 import {
-    CenterNode,
-    ClinicalSubjectNode,
-    MemberNode,
-    PreclinicalSubjectNode,
     QualityCardNode,
-    RightNode,
     StudyCardNode,
     StudyNode,
-    SubjectNode,
     UNLOADED
 } from '../../tree/tree.model';
 import { StudyRightsService } from "../shared/study-rights.service";
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
-import { Selection, TreeService } from '../study/tree.service';
+import { TreeService } from '../study/tree.service';
 
 @Component({
     selector: 'study-node',
@@ -42,7 +36,7 @@ import { Selection, TreeService } from '../study/tree.service';
 
 export class StudyNodeComponent implements OnChanges {
 
-    @Input() input: StudyNode | Study;
+    @Input() input: StudyNode | {study: Study, rights: StudyUserRight[]};
     @Output() nodeInit: EventEmitter<StudyNode> = new EventEmitter();
     @Output() selectedChange: EventEmitter<StudyNode> = new EventEmitter();
     node: StudyNode;
@@ -51,10 +45,11 @@ export class StudyNodeComponent implements OnChanges {
     studyCardsLoading: boolean = false;
     qualityCardsLoading: boolean = false;
     showDetails: boolean;
-    @Input() canAdmin: boolean;
     @Input() hasBox: boolean = false;
     detailsPath: string = '/study/details/';
     @Input() withMenu: boolean = true;
+    idPromise: SuperPromise<number> = new SuperPromise();
+    protected rights: StudyUserRight[];
 
     constructor(
             private router: Router,
@@ -62,30 +57,35 @@ export class StudyNodeComponent implements OnChanges {
             private qualityCardService: QualityCardService,
             private keycloakService: KeycloakService,
             private studyRightsService: StudyRightsService,
-            protected treeService: TreeService) {}
+            protected treeService: TreeService) {
+
+        this.idPromise.then(id => {
+            (this.keycloakService.isUserAdmin
+                ? Promise.resolve(StudyUserRight.all())
+                : this.studyRightsService.getMyRightsForStudy(id)
+            ).then(rights => {
+                this.rights = rights;
+            });
+        });
+    }
+
+    get canAdmin(): boolean {
+        return this.rights.includes(StudyUserRight.CAN_ADMINISTRATE);
+    }
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {
-            let canAdminPromise: Promise<void>;
-            if (this.canAdmin == undefined) {
-                canAdminPromise = this.studyRightsService.getMyRightsForStudy(this.input.id).then(rights => {
-                    this.canAdmin =  this.keycloakService.isUserAdmin()
-                        || (this.keycloakService.isUserExpert() && rights.includes(StudyUserRight.CAN_ADMINISTRATE));
-                });
+            let id: number = this.input instanceof StudyNode ? this.input.id : this.input.study.id;
+            this.idPromise.resolve(id);
+            if (this.input instanceof StudyNode) {
+                this.node = this.input;
+            } else if (this.input.study && this.input.rights) {
+                this.node = this.treeService.buildStudyNode(this.input.study, this.input.rights);
             } else {
-                canAdminPromise = Promise.resolve();
+                throw new Error('Illegal argument type');
             }
-            canAdminPromise.then(() => {    
-                if (this.input instanceof StudyNode) {
-                    this.node = this.input;
-                } else if (this.input instanceof Study) {
-                    this.node = this.treeService.buildStudyNode(this.input, this.canAdmin);
-                } else {
-                    throw new Error('Illegal argument type');
-                }
-                this.nodeInit.emit(this.node);
-                this.showDetails = this.router.url != this.detailsPath  + this.node.id;
-            })
+            this.nodeInit.emit(this.node);
+            this.showDetails = this.router.url != this.detailsPath  + this.node.id;
         }
     }
     

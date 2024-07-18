@@ -11,13 +11,17 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
+<div class="commands">
+    <button class="right-icon dl-button" type="button" (click)="downloadSelected()" [disabled]="!(selectedDatasetNodes?.length > 0)">Download selection<i class="fas fa-download"></i></button>
+    <button class="right-icon dl-button" type="button" (click)="goToProcessing()" [disabled]="!(selectedDatasetNodes?.length > 0)">Process selection<i class="fas fa-rocket"></i></button>
+</div>
 
 <study-node *ngIf="treeService.studyNode"
 		[input]="treeService.studyNode"
-		[canAdmin]="treeService.canAdminStudy"
 		[hasBox]="true"
 		[withMenu]="false"
-		(nodeInit)="treeService.nodeInit = true">
+		(nodeInit)="treeService.nodeInit = true"
+		(selectedChange)="onSelectedChange($event)">
 </study-node>
 
 <ng-content></ng-content>

@@ -28,6 +28,7 @@ import {StudyRightsService} from "../shared/study-rights.service";
 import {StudyUserRight} from "../shared/study-user-right.enum";
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import {TaskState} from "../../async-tasks/task.model";
+import { SuperPromise } from 'src/app/utils/super-promise';
 
 @Component({
     selector: 'reverse-study-node',
@@ -49,7 +50,9 @@ export class ReverseStudyNodeComponent implements OnChanges {
     @Input() hasBox: boolean = false;
     detailsPath: string = '/study/details/';
     private canAdmin: boolean = false;
+    private canDownload: boolean = false;
     public downloadState: TaskState = new TaskState();
+    idPromise: SuperPromise<number> = new SuperPromise();
 
     constructor(
             private router: Router,
@@ -58,6 +61,16 @@ export class ReverseStudyNodeComponent implements OnChanges {
             private keycloakService: KeycloakService,
             private studyRightsService: StudyRightsService,
             private downloadService: MassDownloadService) {
+
+        this.idPromise.then(id => {
+            (this.keycloakService.isUserAdmin
+                ? Promise.resolve(StudyUserRight.all())
+                : this.studyRightsService.getMyRightsForStudy(id)
+            ).then(rights => {
+                this.canAdmin = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
+                this.canDownload = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+            });
+        });
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -65,46 +78,44 @@ export class ReverseStudyNodeComponent implements OnChanges {
             return;
         }
         let id: number = this.input instanceof ReverseStudyNode ? this.input.id : this.input.study.id;
-        this.studyRightsService.getMyRightsForStudy(id).then(rights => {
-            this.canAdmin = this.keycloakService.isUserAdmin()
-                || (this.keycloakService.isUserExpert() && rights.includes(StudyUserRight.CAN_ADMINISTRATE));
-
-            if (this.input instanceof ReverseStudyNode) {
-                this.node = this.input;
-            } else {
-                this.node = new ReverseStudyNode(
-                    this.input.parentNode,
-                    this.input.study.id,
-                    this.input.study.name,
-                    [],
-                    UNLOADED);
-            }
-            this.nodeInit.emit(this.node);
-            this.showDetails = this.router.url != '/study/details/' + this.node.id;
-        });
+        this.idPromise.resolve(id);
+        if (this.input instanceof ReverseStudyNode) {
+            this.node = this.input;
+        } else {
+            this.node = new ReverseStudyNode(
+                this.input.parentNode,
+                this.input.study.id,
+                this.input.study.name,
+                [],
+                UNLOADED);
+        }
+        this.nodeInit.emit(this.node);
+        this.showDetails = this.router.url != '/study/details/' + this.node.id;
     }
 
     loadExaminations() {
-        if (this.node.examinations == UNLOADED) {
-            this.loading = true;
-            this.examinationService.findExaminationsBySubjectAndStudy(this.subjectId, this.node.id)
-            .then(examinations => {
-                let sortedExaminations = examinations.sort((a: SubjectExamination, b: SubjectExamination) => {
-                    return (new Date(a.examinationDate)).getTime() - (new Date(b.examinationDate)).getTime();
-                })
-                this.node.examinations = [];
-                if (sortedExaminations) {
-                    sortedExaminations.forEach(exam => {
-                        let examNode = ExaminationNode.fromExam(exam, this.node, this.canAdmin);
-                        (this.node.examinations as ExaminationNode[]).push(examNode);
-                    });
-                }
-                this.loading = false;
-                this.node.open();
-            }).catch(() => {
-                this.loading = false;
-            });
-        }
+        this.idPromise.then(() => {
+            if (this.node.examinations == UNLOADED) {
+                this.loading = true;
+                this.examinationService.findExaminationsBySubjectAndStudy(this.subjectId, this.node.id)
+                .then(examinations => {
+                    let sortedExaminations = examinations.sort((a: SubjectExamination, b: SubjectExamination) => {
+                        return (new Date(a.examinationDate)).getTime() - (new Date(b.examinationDate)).getTime();
+                    })
+                    this.node.examinations = [];
+                    if (sortedExaminations) {
+                        sortedExaminations.forEach(exam => {
+                            let examNode = ExaminationNode.fromExam(exam, this.node, this.canAdmin, this.canDownload);
+                            (this.node.examinations as ExaminationNode[]).push(examNode);
+                        });
+                    }
+                    this.loading = false;
+                    this.node.open();
+                }).catch(() => {
+                    this.loading = false;
+                });
+            }
+        });
     }
 
     hasDependency(dependencyArr: any[] | UNLOADED): boolean | 'unknown' {

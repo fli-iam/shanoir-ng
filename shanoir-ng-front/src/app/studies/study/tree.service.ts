@@ -50,7 +50,7 @@ export class TreeService {
     private studyNodePromise: SuperPromise<void> = new SuperPromise();
     study: Study;
     public nodeInit: boolean = false; 
-    public canAdminStudy: boolean;
+    private studyRights: StudyUserRight[]; 
     private _treeOpened: boolean = true;
     public treeAvailable: boolean = false;
     selectedNode: ShanoirNode;
@@ -80,6 +80,14 @@ export class TreeService {
             this.changeSelection();
         }
         this._treeOpened = opened;
+    }
+
+    get canAdminStudy(): boolean {
+        return this.studyRights.includes(StudyUserRight.CAN_ADMINISTRATE);
+    }
+
+    get canDownloadStudy(): boolean {
+        return this.studyRights.includes(StudyUserRight.CAN_DOWNLOAD);
     }
 
     constructor(
@@ -378,28 +386,23 @@ export class TreeService {
             return Promise.resolve();
         } else {
             let studyPromise: Promise<any> = this.studyService.get(id, null).then(study => this.study = study);
-            let rightsPromise: Promise<void> = this.studyRightsService.getMyRightsForStudy(id).then(rights => {
-                this.canAdminStudy =  this.keycloakService.isUserAdmin()
-                    || (this.keycloakService.isUserExpert() && rights.includes(StudyUserRight.CAN_ADMINISTRATE));
+
+            let rightsPromise: Promise<StudyUserRight[]> = (this.keycloakService.isUserAdmin
+                ? Promise.resolve(StudyUserRight.all())
+                : this.studyRightsService.getMyRightsForStudy(id)
+            ).then(rights => {
+                this.studyRights = rights;
+                return rights;
             });
             return Promise.all([studyPromise, rightsPromise]).then(() => {
-                this.studyNode = this.buildStudyNode(this.study, this.canAdminStudy);
+                this.studyNode = this.buildStudyNode(this.study, this.studyRights);
                 this.studyNodePromise.resolve();
                 this.studyNode.open();
             });
         }
     }
 
-    private sortSubjects(study: Study) {
-        study.subjectStudyList = study.subjectStudyList.sort(
-            function(a: SubjectStudy, b:SubjectStudy) {
-                let aname = a.subjectStudyIdentifier ? a.subjectStudyIdentifier : a.subject.name;
-                let bname = b.subjectStudyIdentifier ? b.subjectStudyIdentifier : b.subject.name;
-                return aname.localeCompare(bname);
-            });
-    }
-
-    public buildStudyNode(study: Study, canAdmin: boolean): StudyNode {
+    public buildStudyNode(study: Study, rights: StudyUserRight[]): StudyNode {
         let studyNode: StudyNode = new StudyNode(
             null,
             study.id,
@@ -408,14 +411,25 @@ export class TreeService {
             null, //centers,
             UNLOADED,
             UNLOADED,
-            null //members
+            null, //members
+            rights
         );
             
         let subjects: SubjectNode[] = study.subjectStudyList.map(subjectStudy => {
             if(subjectStudy.subject.preclinical){
-                return PreclinicalSubjectNode.fromSubjectStudy(subjectStudy, studyNode, canAdmin);
+                return PreclinicalSubjectNode.fromSubjectStudy(
+                    subjectStudy, 
+                    studyNode, 
+                    this.canAdminStudy, 
+                    this.canDownloadStudy
+                );
             } else {
-                return ClinicalSubjectNode.fromSubjectStudy(subjectStudy, studyNode, canAdmin);
+                return ClinicalSubjectNode.fromSubjectStudy(
+                    subjectStudy, 
+                    studyNode, 
+                    this.canAdminStudy, 
+                    this.canDownloadStudy
+                );
             }
         });
         let centers: CenterNode[] = study.studyCenterList.map(studyCenter => {

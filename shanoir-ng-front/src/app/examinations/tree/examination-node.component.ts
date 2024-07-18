@@ -35,7 +35,7 @@ import { ExaminationService } from '../shared/examination.service';
 
 export class ExaminationNodeComponent implements OnChanges {
 
-    @Input() input: ExaminationNode | {examination: Examination, parentNode: ShanoirNode};
+    @Input() input: ExaminationNode | {examination: Examination, parentNode: ShanoirNode, hasDeleteRights: boolean, hasDownloadRights: boolean};
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
     @Output() nodeInit: EventEmitter<ExaminationNode> = new EventEmitter();
     @Output() onExaminationDelete: EventEmitter<void> = new EventEmitter();
@@ -76,7 +76,8 @@ export class ExaminationNodeComponent implements OnChanges {
                     this.examPipe.transform(this.input.examination),
                     'UNLOADED',
                     this.input.examination.extraDataFilePathList,
-                    false);
+                    this.input.hasDeleteRights,
+                    this.input.hasDownloadRights);
             }
             //this.node.registerOpenPromise(this.contentLoaded);
             this.nodeInit.emit(this.node);
@@ -111,7 +112,7 @@ export class ExaminationNodeComponent implements OnChanges {
         return this.datasetAcquisitionService.getAllForExamination(this.node.id).then(dsAcqs => {
             if (!dsAcqs) dsAcqs = [];
             dsAcqs = dsAcqs.filter(acq => acq.type !== 'Processed');
-            this.node.datasetAcquisitions = dsAcqs.map(dsAcq => DatasetAcquisitionNode.fromAcquisition(dsAcq, this.node, this.node.canDelete));
+            this.node.datasetAcquisitions = dsAcqs.map(dsAcq => DatasetAcquisitionNode.fromAcquisition(dsAcq, this.node, this.node.canDelete, this.node.canDownload));
             this.fetchDatasetIds(this.node.datasetAcquisitions);
             this.nodeInit.emit(this.node);
             this.loading = false;

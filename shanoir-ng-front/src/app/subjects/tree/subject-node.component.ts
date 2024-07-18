@@ -39,6 +39,7 @@ import {
 import { Subject } from '../shared/subject.model';
 import { ConsoleService } from 'src/app/shared/console/console.service';
 import { SubjectService } from '../shared/subject.service';
+import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
 
 
 @Component({
@@ -49,6 +50,7 @@ import { SubjectService } from '../shared/subject.service';
 export class SubjectNodeComponent implements OnChanges {
 
     @Input() input: SubjectNode | {subject: Subject, parentNode: ShanoirNode};
+    @Input() rights: StudyUserRight[];
     @Input() studyId: number;
     @Output() nodeInit: EventEmitter<SubjectNode> = new EventEmitter();
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
@@ -85,7 +87,9 @@ export class SubjectNodeComponent implements OnChanges {
                     [],
                     UNLOADED,
                     null,
-                    false);
+                    this.rights.includes(StudyUserRight.CAN_ADMINISTRATE),
+                    this.rights.includes(StudyUserRight.CAN_DOWNLOAD),
+                );
             } else {
                 this.node = new ClinicalSubjectNode(
                     this.node,
@@ -94,7 +98,9 @@ export class SubjectNodeComponent implements OnChanges {
                     [],
                     UNLOADED,
                     null,
-                    false);
+                    this.rights.includes(StudyUserRight.CAN_ADMINISTRATE),
+                    this.rights.includes(StudyUserRight.CAN_DOWNLOAD)
+                );
             }
             this.node.registerOpenPromise(this.contentLoaded);
             this.nodeInit.emit(this.node);
@@ -115,7 +121,7 @@ export class SubjectNodeComponent implements OnChanges {
                         })
                         if (sortedExaminations) {
                             sortedExaminations.forEach(exam => {
-                                (this.node.examinations as ExaminationNode[]).push(ExaminationNode.fromExam(exam, this.node, this.node.canDeleteChildren));
+                                (this.node.examinations as ExaminationNode[]).push(ExaminationNode.fromExam(exam, this.node, this.node.canDeleteChildren, this.node.canDownload));
                             });
                         }
                     }

@@ -19,6 +19,7 @@ import { Dataset } from "../datasets/shared/dataset.model";
 import { DatasetProcessingType } from "../enum/dataset-processing-type.enum";
 import { ExaminationPipe } from "../examinations/shared/examination.pipe";
 import { SubjectExamination } from "../examinations/shared/subject-examination.model";
+import { StudyUserRight } from "../studies/shared/study-user-right.enum";
 import { SimpleStudy } from "../studies/shared/study.model";
 import { QualityTag } from "../study-cards/shared/quality-card.model";
 import { SubjectStudy } from "../subjects/shared/subject-study.model";
@@ -81,7 +82,8 @@ export class StudyNode extends ShanoirNode {
         private centers: CenterNode[] | UNLOADED,
         private studyCards: StudyCardNode[] | UNLOADED,
         private qualityCards: QualityCardNode[] | UNLOADED,
-        private members: MemberNode[] | UNLOADED
+        private members: MemberNode[] | UNLOADED,
+        public rights: StudyUserRight[]
     ) {
         super(parent, id, label);
     }
@@ -171,7 +173,8 @@ export abstract class SubjectNode extends ShanoirNode {
         public tags: Tag[],
         public examinations: ExaminationNode[] | UNLOADED,
         public qualityTag: QualityTag,
-        public canDeleteChildren: boolean
+        public canDeleteChildren: boolean,
+        public canDownload: boolean
     ) {
         super(parent, id, label);
         if (!tags) tags = [];
@@ -202,7 +205,7 @@ export class ClinicalSubjectNode extends SubjectNode {
     public awesome = "fas fa-user-injured";
     qualityTag: QualityTag;
 
-    public static fromSubjectStudy(subjectStudy: SubjectStudy, parent: ShanoirNode, canDeleteChildren: boolean): ClinicalSubjectNode {
+    public static fromSubjectStudy(subjectStudy: SubjectStudy, parent: ShanoirNode, canDeleteChildren: boolean, canDownload: boolean): ClinicalSubjectNode {
         return new ClinicalSubjectNode(
             parent, 
             subjectStudy.subject.id, 
@@ -210,7 +213,8 @@ export class ClinicalSubjectNode extends SubjectNode {
             subjectStudy.tags, 
             UNLOADED, 
             subjectStudy.qualityTag, 
-            canDeleteChildren);
+            canDeleteChildren,
+            canDownload);
     }
 }
 
@@ -218,7 +222,7 @@ export class PreclinicalSubjectNode extends SubjectNode {
     public title = "preclinical-subject";
     public awesome = "fas fa-hippo";
 
-    public static fromSubjectStudy(subjectStudy: SubjectStudy, parent: ShanoirNode, canDeleteChildren: boolean): PreclinicalSubjectNode {
+    public static fromSubjectStudy(subjectStudy: SubjectStudy, parent: ShanoirNode, canDeleteChildren: boolean, canDownload: boolean): PreclinicalSubjectNode {
         return new PreclinicalSubjectNode(
             parent, 
             subjectStudy.subject.id, 
@@ -226,7 +230,8 @@ export class PreclinicalSubjectNode extends SubjectNode {
             subjectStudy.tags, 
             UNLOADED, 
             subjectStudy.qualityTag, 
-            canDeleteChildren);
+            canDeleteChildren,
+            canDownload);
     }
 }
 
@@ -239,7 +244,8 @@ export class ExaminationNode extends ShanoirNode {
         public label: string,
         public datasetAcquisitions: DatasetAcquisitionNode[] | UNLOADED,
         public extraDataFilePathList: string[] | UNLOADED,
-        public canDelete: boolean
+        public canDelete: boolean,
+        public canDownload
     ) {
         super(parent, id, label);
     }
@@ -248,16 +254,17 @@ export class ExaminationNode extends ShanoirNode {
     public title: string = "examination";
     protected readonly routeBase = '/examination/details/';
 
-    public static fromExam(exam: SubjectExamination, parent: ShanoirNode, canDelete: boolean): ExaminationNode {
+    public static fromExam(exam: SubjectExamination, parent: ShanoirNode, canDelete: boolean, canDownload: boolean): ExaminationNode {
         let node: ExaminationNode = new ExaminationNode(
             parent,
             exam.id,
             new ExaminationPipe().transform(exam),
             null,
             exam.extraDataFilePathList,
-            canDelete
+            canDelete,
+            canDownload
         );
-        node.datasetAcquisitions = exam.datasetAcquisitions ? exam.datasetAcquisitions.map(dsAcq => DatasetAcquisitionNode.fromAcquisition(dsAcq, node, canDelete)) : [];
+        node.datasetAcquisitions = exam.datasetAcquisitions ? exam.datasetAcquisitions.map(dsAcq => DatasetAcquisitionNode.fromAcquisition(dsAcq, node, canDelete, canDownload)) : [];
         return node;
     }
 }
@@ -270,7 +277,8 @@ export class DatasetAcquisitionNode extends ShanoirNode {
         public id: number,
         public label: string,
         public datasets: DatasetNode[] | UNLOADED,
-        public canDelete: boolean
+        public canDelete: boolean,
+        public canDownload: boolean
     ) {
         super(parent, id, label);
     }
@@ -278,15 +286,16 @@ export class DatasetAcquisitionNode extends ShanoirNode {
     public title: string = "dataset-acquisition";
     protected readonly routeBase = '/dataset-acquisition/details/';
 
-    public static fromAcquisition(dsAcq: DatasetAcquisition | ExaminationDatasetAcquisitionDTO, parent: ShanoirNode, canDelete: boolean): DatasetAcquisitionNode {
+    public static fromAcquisition(dsAcq: DatasetAcquisition | ExaminationDatasetAcquisitionDTO, parent: ShanoirNode, canDelete: boolean, canDownload: boolean): DatasetAcquisitionNode {
         let node: DatasetAcquisitionNode = new DatasetAcquisitionNode(
             parent,
             dsAcq.id,
             dsAcq.name,
             null,
-            canDelete
+            canDelete,
+            canDownload
         );
-        node.datasets = dsAcq.datasets ? dsAcq.datasets.map(ds => DatasetNode.fromDataset(ds, false, node, canDelete)) : [];
+        node.datasets = dsAcq.datasets ? dsAcq.datasets.map(ds => DatasetNode.fromDataset(ds, false, node, canDelete, canDownload)) : [];
         return node;
     }
 }
@@ -303,6 +312,7 @@ export class DatasetNode extends ShanoirNode {
         public processings: ProcessingNode[] | UNLOADED,
         public processed: boolean,
         public canDelete: boolean,
+        public canDownload: boolean,
         public inPacs: boolean
     ) {
         super(parent, id, label);
@@ -318,7 +328,7 @@ export class DatasetNode extends ShanoirNode {
     public title: string = "dataset";
     protected readonly routeBase = '/dataset/details/';
 
-    public static fromDataset(dataset: Dataset, processed: boolean, parent: ShanoirNode, canDelete: boolean): DatasetNode {
+    public static fromDataset(dataset: Dataset, processed: boolean, parent: ShanoirNode, canDelete: boolean, canDownload: boolean): DatasetNode {
         let node: DatasetNode = new DatasetNode(
             parent,
             dataset.id,
@@ -328,9 +338,10 @@ export class DatasetNode extends ShanoirNode {
             null,
             processed,
             canDelete,
+            canDownload,
             dataset.inPacs
         );
-        node.processings = dataset.processings ? dataset.processings.map(proc => ProcessingNode.fromProcessing(proc, node, canDelete)) : [];
+        node.processings = dataset.processings ? dataset.processings.map(proc => ProcessingNode.fromProcessing(proc, node, canDelete, canDownload)) : [];
         return node;
     }
 }
@@ -351,7 +362,7 @@ export class ProcessingNode extends ShanoirNode {
     public title: string = "processing";
     protected readonly routeBase = '/dataset-processing/details/';
 
-    public static fromProcessing(processing: DatasetProcessing, parent: ShanoirNode, canDelete: boolean): ProcessingNode {
+    public static fromProcessing(processing: DatasetProcessing, parent: ShanoirNode, canDelete: boolean, canDownload: boolean): ProcessingNode {
         let node: ProcessingNode = new ProcessingNode(
             parent,
             processing.id,
@@ -359,7 +370,7 @@ export class ProcessingNode extends ShanoirNode {
             null,
             canDelete
         );
-        node.datasets = processing.outputDatasets ? processing.outputDatasets.map(ds => DatasetNode.fromDataset(ds, true, node, canDelete)) : [];
+        node.datasets = processing.outputDatasets ? processing.outputDatasets.map(ds => DatasetNode.fromDataset(ds, true, node, canDelete, canDownload)) : [];
         return node;
     }
 }
