@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.JOptionPane;
@@ -31,6 +32,7 @@ import org.shanoir.uploader.dicom.MRI;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
+import org.shanoir.uploader.model.rest.IdList;
 import org.shanoir.uploader.model.rest.IdName;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
 import org.shanoir.uploader.model.rest.Sex;
@@ -491,6 +493,16 @@ public class ImportUtils {
 			patient.setPatientBirthDate(birthDate);	
 		}
 		return patient;
+	}
+
+	public static List<StudyCard> getAllStudyCards(List<Study> studies) throws Exception {
+		IdList idList = new IdList();
+		for (Iterator<Study> iterator = studies.iterator(); iterator.hasNext();) {
+			Study study = (Study) iterator.next();
+			idList.getIdList().add(study.getId());
+		}
+		List<StudyCard> studyCards = ShUpOnloadConfig.getShanoirUploaderServiceClient().findStudyCardsByStudyIds(idList);
+		return studyCards;
 	}
 
 }
