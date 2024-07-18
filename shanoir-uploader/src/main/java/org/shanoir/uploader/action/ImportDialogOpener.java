@@ -128,37 +128,8 @@ public class ImportDialogOpener {
 						if (study.getId().equals(studyCard.getStudyId())) {
 							studyCardsStudy.add(studyCard);
 							Long acquisitionEquipmentId = studyCard.getAcquisitionEquipmentId();
-							for (Iterator<AcquisitionEquipment> acquisitionEquipmentsIt = acquisitionEquipments.iterator(); acquisitionEquipmentsIt.hasNext();) {
-								AcquisitionEquipment acquisitionEquipment = (AcquisitionEquipment) acquisitionEquipmentsIt.next();
-								// find the correct equipment
-								if (acquisitionEquipment.getId().equals(acquisitionEquipmentId)) {
-									studyCard.setAcquisitionEquipment(acquisitionEquipment);
-									// check if values from server are complete, no sense for comparison if no serial number on server
-									if (acquisitionEquipment != null
-										&& acquisitionEquipment.getManufacturerModel() != null
-										&& acquisitionEquipment.getManufacturerModel().getManufacturer() != null
-										&& acquisitionEquipment.getSerialNumber() != null) {
-										// check if values are present in DICOM
-										String deviceSerialNumber = uploadJob.getMriInformation().getDeviceSerialNumber();
-										if (deviceSerialNumber != null && !"".equals(deviceSerialNumber)) {
-											if (acquisitionEquipment.getSerialNumber().compareToIgnoreCase(deviceSerialNumber) == 0
-												|| deviceSerialNumber.contains(acquisitionEquipment.getSerialNumber())) {
-												studyCard.setCompatible(true);
-												compatibleStudyCard = true;
-											} else {
-												studyCard.setCompatible(false);
-											}
-										// no match with server
-										} else {
-											studyCard.setCompatible(false); // no match, as no value from DICOM or from server exists
-										}
-									// set in-compatible in case of missing server values
-									} else {
-										studyCard.setCompatible(false);
-									}								
-									break; // correct equipment found, break for-loop acqEquip
-								}
-							}
+							compatibleStudyCard = ImportUtils.flagStudyCardCompatible(
+								studyCard, acquisitionEquipmentId, acquisitionEquipments, uploadJob.getMriInformation().getDeviceSerialNumber());
 						}
 					}
 					if (compatibleStudyCard) {

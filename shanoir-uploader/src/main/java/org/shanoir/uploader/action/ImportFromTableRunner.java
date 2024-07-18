@@ -82,35 +82,9 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		importFromTableWindow.progressBar.setString("Preparing import...");
 		importFromTableWindow.progressBar.setVisible(true);
 
+		logger.info("Preparing import: loading acquisition equipments and add them to study cards");
 		org.shanoir.uploader.model.rest.Study study = (org.shanoir.uploader.model.rest.Study) importFromTableWindow.studyCB.getSelectedItem();
-		List<StudyCard> studyCards;
-		try {
-			IdList idList = new IdList();
-			idList.getIdList().add(study.getId());
-			studyCards = shanoirUploaderServiceClientNG.findStudyCardsByStudyIds(idList);
-			if (studyCards == null) {
-				throw new Exception(resourceBundle.getString("shanoir.uploader.import.table.error.studycard"));
-			}
-			List<AcquisitionEquipment> acquisitionEquipments = shanoirUploaderServiceClientNG.findAcquisitionEquipments();
-			if (acquisitionEquipments == null) {
-				throw new Exception("Error while retrieving acquisition equipments.");
-			}
-			// Iterate over study cards to get equipment + fill study => SC map
-			for (StudyCard studyCard : studyCards) {
-				Long acquisitionEquipmentIdSC = studyCard.getAcquisitionEquipmentId();
-				for (Iterator<AcquisitionEquipment> acquisitionEquipmentsIt = acquisitionEquipments.iterator(); acquisitionEquipmentsIt.hasNext();) {
-					AcquisitionEquipment acquisitionEquipment = (AcquisitionEquipment) acquisitionEquipmentsIt.next();
-					if (acquisitionEquipment.getId().equals(acquisitionEquipmentIdSC)) {
-						studyCard.setAcquisitionEquipment(acquisitionEquipment);
-						studyCard.setCenterId(acquisitionEquipment.getCenter().getId());
-						break;
-					}
-				}
-			}
-		} catch (Exception e) {
-			this.importFromTableWindow.error.setText(resourceBundle.getString("shanoir.uploader.import.table.error.studycard"));
-			return null;
-		}
+		List<AcquisitionEquipment> acquisitionEquipments = shanoirUploaderServiceClientNG.findAcquisitionEquipments();
 
 		boolean success = true;
 		int i = 1;
@@ -119,7 +93,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			importFromTableWindow.progressBar.setString("Preparing import " + i + "/" + this.importJobs.size());
 			importFromTableWindow.progressBar.setValue(100*i/this.importJobs.size() + 1);
 			try {
-				success = importData(importJob, studyCards, study ) && success;
+				success = importData(importJob, study, acquisitionEquipments) && success;
 			} catch(Exception exception) {
 				logger.error(exception.getMessage(), exception);
 			}
@@ -140,7 +114,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		return null;
 	}
 
-	private boolean importData(ImportJob importJob, List<StudyCard> studyCards, org.shanoir.uploader.model.rest.Study studyREST) throws UnsupportedEncodingException, NoSuchAlgorithmException, PseudonymusException {
+	private boolean importData(ImportJob importJob, org.shanoir.uploader.model.rest.Study studyREST, List<AcquisitionEquipment> acquisitionEquipments) throws UnsupportedEncodingException, NoSuchAlgorithmException, PseudonymusException {
 		logger.info("1. Query PACS");
 		List<Patient> patients = null;
 		try {
@@ -158,8 +132,6 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		List<Serie> selectedSeries = new ArrayList<>();
 		Patient dicomPatient = null;
 		Study dicomStudy = null;
-		String serialNumber = null;
-		String modelName = null;
 		Study selectedStudy = null;
 		Map<Study, List<Serie>> selectedSeriesByStudy = new HashMap<>();
 
@@ -209,9 +181,6 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 					if (searchField(serie.getSeriesDescription(), importJob.getDicomQuery().getSerieFilter())) {
 						selectedSeriesByStudy.get(dicomStudy).add(serie);
 						selectedStudy = dicomStudy;
-						// TOOD: get these
-						serialNumber = serie.getEquipment().getDeviceSerialNumber();
-						modelName = serie.getEquipment().getManufacturerModelName();
 						foundPatient = true;
 						currentDate = studyDate;
 						selectedStudyDate = studyDate;
@@ -258,18 +227,28 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		while (downloadThread.isAlive()) {
 			// wait for download thread to finish 
 		}
+		File uploadJobFile = new File(importJob.getWorkFolder() + File.separator + UploadJobManager.UPLOAD_JOB_XML);
+		UploadJobManager uploadJobManager = new UploadJobManager(uploadJobFile);
+		UploadJob uploadJob = uploadJobManager.readUploadJob();
 
-		logger.info("4. Check study card");
+		logger.info("4. Find matching study card");
 		StudyCard studyCard = null;
-		for (StudyCard studyc : studyCards) {
-			if (serialNumber != null && serialNumber.equals(studyc.getAcquisitionEquipment().getSerialNumber())) {
-				studyCard = studyc;
-				break;
+		List<StudyCard> studyCards = studyREST.getStudyCards();
+		try {
+			if (acquisitionEquipments == null) {
+				throw new Exception("Error while retrieving acquisition equipments.");
 			}
-			if (modelName != null && modelName.equals(studyc.getAcquisitionEquipment().getManufacturerModel().getName())) {
-				studyCard = studyc;
-				break;
+			// Iterate over study cards to get equipment + fill study => SC map
+			for (StudyCard studyCardIt : studyCards) {
+				Long acquisitionEquipmentId = studyCardIt.getAcquisitionEquipmentId();
+				if (ImportUtils.flagStudyCardCompatible(studyCardIt, acquisitionEquipmentId, acquisitionEquipments, uploadJob.getMriInformation().getDeviceSerialNumber())) {
+					studyCard = studyCardIt;
+					break;
+				}
 			}
+		} catch (Exception e) {
+			this.importFromTableWindow.error.setText(resourceBundle.getString("shanoir.uploader.import.table.error.studycard"));
+			return false;
 		}
 
 		// No study card by default => get the one in the file (if existing of course)
@@ -302,18 +281,9 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			HemisphericDominance.Left.toString(), HemisphericDominance.Left.toString(),
 			null, SubjectType.PATIENT, false, false, subjectStudyIdentifier, studyREST, studyCard);
 		if (subjectREST == null) {
+				uploadJob.setUploadState(UploadState.ERROR);
 				importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.subject"));
 				return false;
-		}
-		
-		File uploadJobFile = new File(importJob.getWorkFolder() + File.separator + UploadJobManager.UPLOAD_JOB_XML);
-		UploadJobManager uploadJobManager = new UploadJobManager(uploadJobFile);
-		UploadJob uploadJob = uploadJobManager.readUploadJob();
-
-		if (subjectREST == null) {
-			uploadJob.setUploadState(UploadState.ERROR);
-			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.subject"));
-			return false;
 		}
 
 		logger.info("6. Create examination");

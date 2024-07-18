@@ -30,6 +30,7 @@ import org.shanoir.uploader.action.ImportFinishRunnable;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.MRI;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
+import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.IdList;
@@ -503,6 +504,40 @@ public class ImportUtils {
 		}
 		List<StudyCard> studyCards = ShUpOnloadConfig.getShanoirUploaderServiceClient().findStudyCardsByStudyIds(idList);
 		return studyCards;
+	}
+
+	public static boolean flagStudyCardCompatible(StudyCard studyCard, Long acquisitionEquipmentId, List<AcquisitionEquipment> acquisitionEquipments, String deviceSerialNumberDicom) {
+		for (AcquisitionEquipment acquisitionEquipment : acquisitionEquipments) {
+			// find the correct equipment
+			if (acquisitionEquipment.getId().equals(acquisitionEquipmentId)) {
+				studyCard.setAcquisitionEquipment(acquisitionEquipment);
+				String deviceSerialNumberEquipment = acquisitionEquipment.getSerialNumber();
+				// check if values from server are complete, no sense for comparison if no serial number on server
+				if (acquisitionEquipment != null
+					&& acquisitionEquipment.getManufacturerModel() != null
+					&& acquisitionEquipment.getManufacturerModel().getManufacturer() != null
+					&& deviceSerialNumberEquipment != null) {
+					// check if values are present in DICOM
+					if (deviceSerialNumberDicom != null && !"".equals(deviceSerialNumberDicom)) {
+						if (deviceSerialNumberEquipment.compareToIgnoreCase(deviceSerialNumberDicom) == 0
+							|| deviceSerialNumberDicom.contains(deviceSerialNumberEquipment)) {
+							studyCard.setCompatible(true);
+							return true;
+						} else {
+							studyCard.setCompatible(false);
+						}
+					// no match with server
+					} else {
+						studyCard.setCompatible(false); // no match, as no value from DICOM or from server exists
+					}
+				// set in-compatible in case of missing server values
+				} else {
+					studyCard.setCompatible(false);
+				}								
+				break; // correct equipment found, break for-loop acqEquip
+			}
+		}
+		return false;
 	}
 
 }
