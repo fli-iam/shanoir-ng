@@ -58,7 +58,7 @@ export class ExecutionComponent implements OnInit {
     isLoading = true;
     isSubmitted = true;
     datasetsPromise: Promise<void>;
-    converter: number;
+    converterId: number;
 
     niftiConverters: Option<number>[] = [
         new Option<number>(1, 'DCM2NII_2008_03_31', null, null, null, false),
@@ -227,7 +227,7 @@ export class ExecutionComponent implements OnInit {
         candidate.outputProcessing = this.pipeline.outputProcessing;
         candidate.client = KeycloakService.clientId;
         candidate.refreshToken = this.refreshToken;
-        candidate.converter = this.converter;
+        candidate.converterId = this.converterId;
         candidate.datasetParameters = [];
         candidate.inputParameters = {};
         this.pipeline.parameters.forEach(
