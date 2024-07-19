@@ -226,7 +226,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		UploadJobManager uploadJobManager = new UploadJobManager(uploadJobFile);
 		UploadJob uploadJob = uploadJobManager.readUploadJob();
 
-		logger.info("4. Find matching study card");
+		logger.info("4. Find matching study card or create a new study card");
 		StudyCard studyCard = null;
 		List<StudyCard> studyCards = studyREST.getStudyCards();
 		String deviceSerialNumberDicom = uploadJob.getMriInformation().getDeviceSerialNumber();
@@ -255,33 +255,15 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				studyCard = scOpt.get();
 			}
 		}
-		// create new study card in case
+		
 		if (studyCard == null) {
-			studyCard = new StudyCard();
-			studyCard.setName(acquisitionEquipments.get(0).getCenter().getName() + " " + deviceSerialNumberDicom);
-			studyCard.setStudyId(studyREST.getId());
-			studyCard.setCenterId(acquisitionEquipments.get(0).getCenter().getId()); // which center to use?
-			boolean compatibleEquipmentFound = false;
-			for (AcquisitionEquipment acquisitionEquipment : acquisitionEquipments) {
-				compatibleEquipmentFound = ImportUtils.checkAcquisitionEquipmentForSerialNumber(acquisitionEquipment, deviceSerialNumberDicom);
-				if (compatibleEquipmentFound) {
-					studyCard.setAcquisitionEquipmentId(acquisitionEquipment.getId());
-					studyCard.setAcquisitionEquipment(acquisitionEquipment);
-					break;
-				}
-			}
-			if (!compatibleEquipmentFound) {
-				AcquisitionEquipment equipment = new AcquisitionEquipment();
-				equipment.setSerialNumber(deviceSerialNumberDicom);
-				equipment.setCenter(acquisitionEquipments.get(0).getCenter()); // which center to use?
-				equipment.setManufacturerModel(acquisitionEquipments.get(0).getManufacturerModel()); // which model to create/use?
-				equipment = shanoirUploaderServiceClientNG.createEquipment(equipment);
-				studyCard.setAcquisitionEquipment(equipment);
-			}
-			studyCard = shanoirUploaderServiceClientNG.createStudyCard(studyCard);
+			studyCard = ImportUtils.createNewStudyCard(studyREST, acquisitionEquipments, uploadJob, importJob);
 		}
-		importJob.setStudyCardId(studyCard.getId());
-		importJob.setStudyCardName(studyCard.getName());
+
+		if (studyCard == null) {
+			this.importFromTableWindow.error.setText(resourceBundle.getString("shanoir.uploader.import.table.error.studycard"));
+			return false;
+		}
 
 		logger.info("5. Create subject or use existing one (add subject-study, if necessary)");
 		org.shanoir.uploader.model.rest.Subject subjectREST = null;

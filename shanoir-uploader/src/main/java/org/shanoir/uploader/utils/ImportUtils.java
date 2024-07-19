@@ -31,6 +31,7 @@ import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.MRI;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
+import org.shanoir.uploader.model.rest.Center;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.IdList;
@@ -39,6 +40,7 @@ import org.shanoir.uploader.model.rest.ImagedObjectCategory;
 import org.shanoir.uploader.model.rest.Sex;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
+import org.shanoir.uploader.model.rest.StudyCenter;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
@@ -522,7 +524,7 @@ public class ImportUtils {
 		return false;
 	}
 
-	public static boolean checkAcquisitionEquipmentForSerialNumber(AcquisitionEquipment acquisitionEquipment, String deviceSerialNumberDicom) {
+	private static boolean checkAcquisitionEquipmentForSerialNumber(AcquisitionEquipment acquisitionEquipment, String deviceSerialNumberDicom) {
 		String deviceSerialNumberEquipment = acquisitionEquipment.getSerialNumber();
 		// check if values from server are complete, no sense for comparison if no serial number on server
 		if (acquisitionEquipment != null
@@ -538,6 +540,61 @@ public class ImportUtils {
 			}
 		}
 		return false;		
+	}
+
+	public static StudyCard createNewStudyCard(Study studyREST, List<AcquisitionEquipment> acquisitionEquipments, UploadJob uploadJob, ImportJob importJob) {
+		StudyCard studyCard = new StudyCard();
+		studyCard.setStudyId(studyREST.getId());
+		IdName centerIdName = null;
+		// try to find equipment via device serial number, equipment points to center for study card
+		String deviceSerialNumberDicom = uploadJob.getMriInformation().getDeviceSerialNumber();
+		boolean compatibleEquipmentFound = false;
+		for (AcquisitionEquipment acquisitionEquipment : acquisitionEquipments) {
+			compatibleEquipmentFound = checkAcquisitionEquipmentForSerialNumber(acquisitionEquipment, deviceSerialNumberDicom);
+			if (compatibleEquipmentFound) {
+				studyCard.setAcquisitionEquipmentId(acquisitionEquipment.getId());
+				studyCard.setAcquisitionEquipment(acquisitionEquipment);
+				centerIdName = acquisitionEquipment.getCenter();
+				studyCard.setCenterId(centerIdName.getId());
+				break;
+			}
+		}
+		// if no equipment found, try to find center of study with DICOM institution name
+		if (centerIdName == null) {
+			Center center = findCenterOfStudy(studyREST, uploadJob);
+			if (center == null) {
+				return null;
+			}
+			studyCard.setCenterId(center.getId());
+			centerIdName = new IdName(center.getId(), center.getName());		
+		}
+		// if center found, but no equipment: create equipment
+		if (!compatibleEquipmentFound) {
+			AcquisitionEquipment equipment = new AcquisitionEquipment();
+			equipment.setSerialNumber(deviceSerialNumberDicom);
+			equipment.setCenter(centerIdName); // which center to use?
+			equipment.setManufacturerModel(acquisitionEquipments.get(0).getManufacturerModel()); // which model to create/use?
+			equipment = ShUpOnloadConfig.getShanoirUploaderServiceClient().createEquipment(equipment);
+			studyCard.setAcquisitionEquipment(equipment);
+		}
+		String studyCardName = studyREST.getName() + " - " + centerIdName.getName() + " - " + deviceSerialNumberDicom;
+		studyCard.setName(studyCardName);
+		studyCard = ShUpOnloadConfig.getShanoirUploaderServiceClient().createStudyCard(studyCard);
+		importJob.setStudyCardId(studyCard.getId());
+		importJob.setStudyCardName(studyCard.getName());
+		return studyCard;
+	}
+
+	private static Center findCenterOfStudy(Study studyREST, UploadJob uploadJob) {
+		String institutionName = uploadJob.getMriInformation().getInstitutionName().toLowerCase();
+		List<StudyCenter> studyCenters = studyREST.getStudyCenterList();
+		for (StudyCenter studyCenter : studyCenters) {
+			String centerName = studyCenter.getCenter().getName().toLowerCase();
+			if (centerName.contains(institutionName) || institutionName.contains(centerName)) {
+				return studyCenter.getCenter();
+			}
+		}
+		return null;
 	}
 
 }
