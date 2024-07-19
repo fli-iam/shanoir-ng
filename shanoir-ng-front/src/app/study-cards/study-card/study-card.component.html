@@ -83,7 +83,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li>
-						<label>Center(s)</label>
+						<label>Acquisition Center(s)</label>
 						<span class="right-col" *ngIf="studyCard.study" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								{{studyCard.acquisitionEquipment?.center?.name}}
@@ -96,7 +96,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li>
-						<label>Acquisition equipment</label>
+						<label>Center equipment</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 							    <a [routerLink]="['/acquisition-equipment/details/', studyCard.acquisitionEquipment?.id]">

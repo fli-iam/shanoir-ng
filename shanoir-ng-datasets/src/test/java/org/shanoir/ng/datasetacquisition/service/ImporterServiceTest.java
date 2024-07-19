@@ -145,6 +145,9 @@ public class ImporterServiceTest {
 		examination.setExaminationDate(LocalDate.now());
 		examination.setDatasetAcquisitions(new ArrayList<>());
 		examination.setSubject(subject);
+		examination.setStudy(new org.shanoir.ng.shared.model.Study());
+		examination.getStudy().setId(1L);
+		examination.getStudy().setSubjectStudyList(new ArrayList<>());
 		when(examinationRepository.findById(importJob.getExaminationId())).thenReturn(Optional.of(examination));
 		DatasetAcquisition datasetAcq = new MrDatasetAcquisition();
 

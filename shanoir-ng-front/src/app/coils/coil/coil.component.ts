@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -16,8 +16,11 @@ import { Component, Input } from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { Selection } from 'src/app/studies/study/tree.service';
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { ManufacturerModel } from '../../acquisition-equipments/shared/manufacturer-model.model';
+import { ManufacturerModelPipe } from '../../acquisition-equipments/shared/manufacturer-model.pipe';
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
@@ -25,9 +28,6 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { CoilType } from '../shared/coil-type.enum';
 import { Coil } from '../shared/coil.model';
 import { CoilService } from '../shared/coil.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { ManufacturerModelPipe } from '../../acquisition-equipments/shared/manufacturer-model.pipe';
-import { Selection } from 'src/app/studies/study/tree.service';
 
 @Component({
     selector: 'coil',
@@ -35,7 +35,7 @@ import { Selection } from 'src/app/studies/study/tree.service';
     styleUrls: ['coil.component.css']
 })
 export class CoilComponent extends EntityComponent<Coil> {
-   
+
     @Input() acqEquip: AcquisitionEquipment;
     centers: Center[] = [];
     manufModels: ManufacturerModel[] = [];
@@ -45,7 +45,7 @@ export class CoilComponent extends EntityComponent<Coil> {
 
     constructor(
             private route: ActivatedRoute,
-            private coilService: CoilService, 
+            private coilService: CoilService,
             private centerService: CenterService,
             public manufModelPipe: ManufacturerModelPipe) {
         super(route, 'coil');

@@ -70,6 +70,8 @@ public class ImportJob implements Serializable {
     private ShanoirEvent shanoirEvent;
     
     private Long userId;
+
+    private String username;
     
     public long getTimestamp() {
         return timestamp;
@@ -85,6 +87,14 @@ public class ImportJob implements Serializable {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getArchive() {
