@@ -47,12 +47,13 @@ export class BreadcrumbsComponent implements AfterViewInit, OnDestroy, AfterView
             this.checkWidthBurst = new WaitBurstEnd(this._checkWidth.bind(this), 200);
 
             this.subscriptions.push(service.onUpdateSteps.subscribe(ret => {
-                this.steps = ret.steps;
+                this.steps = ret.steps.filter(step => !step.disabled);
+                console.log(ret.steps.length, this.steps.length)
                 setTimeout(() => {
                     if (ret.operation == 'ADD') {
                         this.nbDisplayedSteps++;
                     }
-                    this.displayedSteps = ret.steps?.slice(-this.nbDisplayedSteps);
+                    this.displayedSteps = this.steps?.slice(-this.nbDisplayedSteps);
                     this.checkWidth();
                 });
             }));
@@ -113,6 +114,7 @@ export class BreadcrumbsComponent implements AfterViewInit, OnDestroy, AfterView
         }
         end.then(() => {
             this.nbHidden = this.steps?.length - this.displayedSteps?.length;
+            console.log(this.steps?.length);
         });
     }
 

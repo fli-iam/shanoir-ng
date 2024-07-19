@@ -58,7 +58,7 @@ export class HomeComponent {
             private keycloakService: KeycloakService,
             private userService: UserService,
             private taskService: TaskService) {
-        //this.breadcrumbsService.nameStep('Home');
+        this.breadcrumbsService.nameStep('Home');
         this.breadcrumbsService.markMilestone();
         this.load();
     }

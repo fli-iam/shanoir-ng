@@ -17,11 +17,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<li *ngIf="nbHidden > 0" class="ellipsis">
 			<a>
 				<i class="fa-solid fa-ellipsis"></i> 
-				<!-- +{{steps?.length - displayedSteps?.length}} -->
 			</a>
 		</li>
 		<ng-container *ngFor="let step of displayedSteps; let i = index">
-			<li *ngIf="!step.disabled && step.label" [class.waiting]="step.isWaiting && step.displayWaitStatus">
+			<li *ngIf="!step.disabled && step.label && step.label != 'Home'" [class.waiting]="step.isWaiting && step.displayWaitStatus">
 				<a (click)="clickStep(step)">{{step.label}}
 				<span class="after-icon" *ngIf="step.isWaiting && step.displayWaitStatus"><i class="fas fa-edit"></i></span></a>
 			</li>

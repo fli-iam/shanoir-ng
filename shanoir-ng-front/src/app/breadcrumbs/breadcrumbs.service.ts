@@ -30,7 +30,7 @@ export class BreadcrumbsService implements OnDestroy {
     private nextMilestone: boolean = false;
     private ignoreNavigationEnd: boolean = false;
     private subscriptions: Subscription[] = [];
-    onUpdateSteps: BehaviorSubject<{steps: Step[], operation?: 'ADD' | 'REMOVE'}> = new BehaviorSubject({steps: this.steps});
+    onUpdateSteps: BehaviorSubject<{steps: Step[], operation?: 'ADD' | 'REMOVE' | 'MILESTONE'}> = new BehaviorSubject({steps: this.steps});
 
     constructor(
             private router: Router, 
@@ -97,6 +97,7 @@ export class BreadcrumbsService implements OnDestroy {
         for (let i=index+1; i<this.steps.length; i++) {
             this.steps[i].disabled = true;
         }
+        this.onUpdateSteps.next({steps: this.steps, operation: 'MILESTONE'});
     }
 
     public nameStep(label: string) {
@@ -120,8 +121,13 @@ export class BreadcrumbsService implements OnDestroy {
     private processMilestone(label?: string) {
         this.currentStep.milestone = true;
         if (label) this.currentStep.label = label;
+        let update: boolean = false;
         for (let i=0; i<this.currentStepIndex; i++) {
             this.steps[i].disabled = true;
+            update = true;
+        }
+        if (update) {
+            this.onUpdateSteps.next({steps: this.steps, operation: 'MILESTONE'});
         }
     }
 
