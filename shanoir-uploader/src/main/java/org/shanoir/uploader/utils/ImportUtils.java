@@ -513,7 +513,10 @@ public class ImportUtils {
 				studyCard.setAcquisitionEquipment(acquisitionEquipment);
 				boolean isCompatible = checkAcquisitionEquipmentForSerialNumber(acquisitionEquipment, deviceSerialNumberDicom);
 				studyCard.setCompatible(isCompatible);
-				return true; // correct equipment found, break for-loop acqEquip
+				if (isCompatible) {
+					return true; // correct equipment found, break for-loop acqEquip
+				}
+				return false;
 			}
 		}
 		return false;
