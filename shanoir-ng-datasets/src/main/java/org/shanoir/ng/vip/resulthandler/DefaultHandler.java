@@ -5,7 +5,7 @@ import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.shanoir.ng.dataset.modality.MeshDataset;
+import org.shanoir.ng.dataset.modality.GenericDataset;
 import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
@@ -176,8 +176,10 @@ public class DefaultHandler extends ResultHandler {
 		// Create dataset processing
 		DatasetProcessing processing = this.createProcessing(execution, inputDatasets);
 
-		Study study = studyRepository.findById(execution.getStudyId())
-				.orElseThrow(() -> new NotFoundException("Study [" + execution.getStudyId() + "] not found."));
+		Long studyId = inputDatasets.get(0).getStudyId();
+
+		Study study = studyRepository.findById(studyId)
+				.orElseThrow(() -> new NotFoundException("Study [" + studyId + "] not found."));
 
 		for (File file : processedFiles) {
 
@@ -186,12 +188,16 @@ public class DefaultHandler extends ResultHandler {
 			ProcessedDatasetImportJob processedDataset = new ProcessedDatasetImportJob();
 			processedDataset.setDatasetProcessing(processing);
 			processedDataset.setProcessedDatasetFilePath(file.getAbsolutePath());
-			processedDataset.setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
-			processedDataset.setStudyId(execution.getStudyId());
+			processedDataset.setProcessedDatasetType(ProcessedDatasetType.EXECUTION_RESULT);
+			processedDataset.setStudyId(studyId);
 			processedDataset.setStudyName(study.getName());
-			processedDataset.setProcessedDatasetName(execution.getName());
+			String datasetName = file.getName();
+			if (datasetName.contains("resource_id")) {
+				datasetName = datasetName.substring(datasetName.lastIndexOf("+") + 1);
+			}
+			processedDataset.setProcessedDatasetName(datasetName);
 
-			if(inputDatasets.size() != 0) {
+			if(!inputDatasets.isEmpty()) {
 
 				List<Long> subjectIds = inputDatasets.stream().map(Dataset::getSubjectId).collect(Collectors.toList());
 
@@ -203,14 +209,9 @@ public class DefaultHandler extends ResultHandler {
 
 					processedDataset.setSubjectId(subject.getId());
 					processedDataset.setSubjectName(subject.getName());
-					processedDataset.setDatasetType(inputDatasets.get(0).getType());
-				} else {
-					processedDataset.setDatasetType(MeshDataset.datasetType);
 				}
-			} else {
-				// default ?
-				processedDataset.setDatasetType(MeshDataset.datasetType);
 			}
+			processedDataset.setDatasetType(GenericDataset.datasetType);
 
 			importerService.createProcessedDataset(processedDataset);
 
@@ -224,6 +225,7 @@ public class DefaultHandler extends ResultHandler {
 
 	private DatasetProcessing createProcessing(ExecutionMonitoring execution, List<Dataset> inputDatasets) {
 		DatasetProcessing processing = new DatasetProcessing();
+		processing.setParent(execution);
 		processing.setComment(execution.getPipelineIdentifier());
 		processing.setInputDatasets(inputDatasets);
 		processing.setProcessingDate(execution.getProcessingDate());

@@ -14,11 +14,10 @@
 
 package org.shanoir.ng.datasetacquisition.controler;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.validation.Valid;
+import java.io.IOException;
+import java.util.Comparator;
+import java.util.List;
+
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDatasetsDTO;
@@ -28,14 +27,20 @@ import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.dto.mapper.ExaminationDatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
-import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.EegImportJob;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.service.EegImporterService;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.error.FieldErrorMap;
-import org.shanoir.ng.shared.exception.*;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ErrorDetails;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -45,6 +50,7 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -56,9 +62,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.io.IOException;
-import java.util.Comparator;
-import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 
 @Controller
 public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
@@ -85,10 +92,16 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	
 	@Autowired
 	private ExaminationDatasetAcquisitionMapper examDsAcqMapper;
-	
+
+	@Autowired
+	private ShanoirEventService eventService;
+
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
+
 	@Override
 	public ResponseEntity<Void> createNewDatasetAcquisition(
-			@Parameter(name = "DatasetAcquisition to create", required = true) @Valid @RequestBody ImportJob importJob) throws RestServiceException {
+			@Parameter(description = "DatasetAcquisition to create", required = true) @Valid @RequestBody ImportJob importJob) throws RestServiceException {
 		try {
 			importerService.createAllDatasetAcquisition(importJob, KeycloakUtil.getTokenUserId());
 		} catch (ShanoirException e) {
@@ -99,7 +112,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
 
-	@RabbitListener(queues = RabbitMQConfiguration.IMPORT_EEG_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.IMPORT_EEG_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	@Transactional
 	public int createNewEegDatasetAcquisition(Message importJobAsString) throws IOException {
@@ -112,12 +125,12 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 		return HttpStatus.OK.value();
 	}
 
-	@RabbitListener(queues = RabbitMQConfiguration.IMPORTER_QUEUE_DATASET)
+	@RabbitListener(queues = RabbitMQConfiguration.IMPORTER_QUEUE_DATASET, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	@Transactional
 	@WithMockKeycloakUser(authorities = { "ROLE_ADMIN" })
-	public void createNewDatasetAcquisition(Message importJobStr) throws JsonParseException, JsonMappingException, IOException, AmqpRejectAndDontRequeueException {
-	    ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
+	public void createNewDatasetAcquisition(Message importJobStr) throws IOException, AmqpRejectAndDontRequeueException {
+		ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
 		try {
 			createAllDatasetAcquisitions(importJob, importJob.getUserId());
 		} catch (Exception e) {
@@ -142,7 +155,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	
 	@Override
 	public ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findByStudyCard(
-			@Parameter(name = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) {
+			  Long studyCardId) {
 		List<DatasetAcquisition> daList = datasetAcquisitionService.findByStudyCard(studyCardId);
 		if (daList == null || daList.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -152,8 +165,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	}
 
 	@Override
-	public ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findDatasetAcquisitionByExaminationId(
-			@Parameter(name = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId) {
+	public ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findDatasetAcquisitionByExaminationId(Long examinationId) {
 		
 		List<DatasetAcquisition> daList = datasetAcquisitionService.findByExamination(examinationId);
 		daList.sort(new Comparator<DatasetAcquisition>() {
@@ -173,7 +185,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	
 	@Override
 	public ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findDatasetAcquisitionByDatasetIds(
-			@Parameter(name = "ids of the datasets", required = true) @RequestBody Long[] datasetIds) {
+			@Parameter(description = "ids of the datasets", required = true) @RequestBody Long[] datasetIds) {
 		
 		List<DatasetAcquisition> daList = datasetAcquisitionService.findByDatasetId(datasetIds);
 		
@@ -194,10 +206,15 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	
 	@Override
 	public ResponseEntity<Void> deleteDatasetAcquisition(
-			@Parameter(name = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId)
+			  Long datasetAcquisitionId)
 			throws RestServiceException {
 		try {
+			Long studyId = datasetAcquisitionService.findById(datasetAcquisitionId).getExamination().getStudyId();
+			
 			datasetAcquisitionService.deleteById(datasetAcquisitionId);
+
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
+
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -209,7 +226,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
 	@Override
 	public ResponseEntity<DatasetAcquisitionDTO> findDatasetAcquisitionById(
-			@Parameter(name = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId) {
+			  Long datasetAcquisitionId) {
 		
 		final DatasetAcquisition datasetAcquisition = datasetAcquisitionService.findById(datasetAcquisitionId);
 		if (datasetAcquisition == null) {
@@ -231,8 +248,8 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
 	@Override
 	public ResponseEntity<Void> updateDatasetAcquisition(
-			@Parameter(name = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
-			@Parameter(name = "datasetAcquisition to update", required = true) @Valid @RequestBody DatasetAcquisitionDTO datasetAcquisition,
+			  Long datasetAcquisitionId,
+			@Parameter(description = "datasetAcquisition to update", required = true) @Valid @RequestBody DatasetAcquisitionDTO datasetAcquisition,
 			final BindingResult result) throws RestServiceException {
 
 		validate(result);

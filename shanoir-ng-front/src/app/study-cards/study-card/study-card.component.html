@@ -56,7 +56,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li>
-						<label>Center(s)</label>
+						<label>Acquisition Center(s)</label>
 						<span class="right-col" *ngIf="studyCard.study" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								{{studyCard.acquisitionEquipment?.center?.name}}
@@ -69,7 +69,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li>
-						<label>Acquisition equipment</label>
+						<label>Center equipment</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 							    <a [routerLink]="['/acquisition-equipment/details/', studyCard.acquisitionEquipment?.id]">
@@ -82,22 +82,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										(userChange)="onChangeAcqEq()"
 										[options]="acquisitionEquipments"
 										(onNewClick)="createAcqEq()">
-								</select-box>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label>Nifti converter
-						<tool-tip class="larger">
-							If you don't know what to choose, please select dcm2niix.
-						</tool-tip>
-						</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{studyCard.niftiConverter.name}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<select-box formControlName="niftiConverter" [(ngModel)]="studyCard.niftiConverter" [optionArr]="niftiConverters">
 								</select-box>
 							</ng-template>
 						</span>
@@ -131,13 +115,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					[allCoils]="allCoils"
 					[showErrors]="showRulesErrors"
 					(selectedRulesChange)="selectedRules = $event"
-					(importRules)="importRules()">
+					(importRules)="importRules()"
+					[addSubForm]="addConditionForm.bind(this)">
 				</study-card-rules>
 			</fieldset>
 			<form-footer
 				[state]="footerState"
 				(save)="save()"
-                (delete) = "delete()"
+                (delete)="delete()"
 				(edit)="goToEdit()"
 				(cancel)="goToView()"
 				(back)="goBack()">

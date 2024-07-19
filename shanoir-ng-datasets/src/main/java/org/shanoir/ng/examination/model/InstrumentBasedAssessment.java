@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -47,6 +48,20 @@ public class InstrumentBasedAssessment extends AbstractEntity {
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "instrumentBasedAssessment")
 	private List<VariableAssessment> variableAssessmentList;
+
+	public InstrumentBasedAssessment() {
+
+	}
+
+	public InstrumentBasedAssessment(InstrumentBasedAssessment other) {
+		this.examination = other.examination;
+		this.instrument = other.instrument;
+
+		this.variableAssessmentList = new ArrayList<>(other.getVariableAssessmentList().size());
+		for (VariableAssessment var : other.getVariableAssessmentList()) {
+			this.variableAssessmentList.add(new VariableAssessment(var));
+		}
+	}
 
 	/**
 	 * @return the examination

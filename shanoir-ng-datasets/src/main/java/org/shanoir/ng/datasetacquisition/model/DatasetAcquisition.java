@@ -28,6 +28,7 @@ import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.eeg.EegDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.validation.DatasetsModalityTypeCheck;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
@@ -53,7 +54,8 @@ import java.util.List;
 	@Type(value = PetDatasetAcquisition.class, name = "Pet"),
 	@Type(value = GenericDatasetAcquisition.class, name = "Generic"),
 	@Type(value = EegDatasetAcquisition.class, name = "Eeg"),
-	@Type(value = BidsDatasetAcquisition.class, name = "BIDS")})
+	@Type(value = BidsDatasetAcquisition.class, name = "BIDS"),
+	@Type(value = XaDatasetAcquisition.class, name = "Xa")})
 public abstract class DatasetAcquisition extends AbstractEntity {
 
 	/**
@@ -94,7 +96,29 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 
 	/** Represents the date the acquisition was created on shanoir AND NOT the acquisition date in itself. */
 	@LocalDateAnnotations
-	private LocalDate creationDate;
+	private LocalDate importDate;
+
+	private Long sourceId;
+
+	/** Name of the user who did the import */
+	private String username;
+
+	public DatasetAcquisition() {
+	}
+
+	public DatasetAcquisition(DatasetAcquisition other) {
+		this.acquisitionEquipmentId = other.acquisitionEquipmentId;
+
+		this.examination = other.examination;
+		this.studyCard = null;
+		this.studyCardTimestamp = other.studyCardTimestamp;
+		this.rank = other.rank;
+		this.softwareRelease = other.softwareRelease;
+		this.sortingIndex = other.sortingIndex;
+		this.importDate = other.importDate;
+		this.sourceId = other.sourceId;
+		this.username = other.username;
+	}
 
 	/**
 	 * @return the acquisitionEquipmentId
@@ -205,15 +229,15 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	/**
 	 * @return the creationDate
 	 */
-	public LocalDate getCreationDate() {
-		return creationDate;
+	public LocalDate getImportDate() {
+		return importDate;
 	}
 
 	/**
 	 * @param creationDate the creationDate to set
 	 */
-	public void setCreationDate(LocalDate creationDate) {
-		this.creationDate = creationDate;
+	public void setImportDate(LocalDate creationDate) {
+		this.importDate = creationDate;
 	}
 
 	/**
@@ -224,4 +248,19 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	@Transient
 	public abstract String getType();
 
+	public Long getSourceId() {
+		return sourceId;
+	}
+
+	public void setSourceId(Long sourceId) {
+		this.sourceId = sourceId;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
 }

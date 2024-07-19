@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.configuration.security;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.shanoir.ng.dicom.web.StowRSMultipartRelatedRequestFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -89,7 +91,7 @@ public class SecurityConfiguration {
 	}
 
 	@Bean
-	public FilterRegistrationBean corsFilter() {
+	public FilterRegistrationBean shanoirCorsFilter() {
 		final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		final CorsConfiguration config = new CorsConfiguration();
 		config.setAllowCredentials(true);

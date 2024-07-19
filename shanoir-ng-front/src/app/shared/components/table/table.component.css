@@ -51,7 +51,7 @@ td { padding: 0 5px; border: none; white-space: nowrap; text-overflow: ellipsis;
 	td + td { border-left: 1px solid var(--light-grey); }
 	td.bool, td.progress { text-align: center; }
 	td.cell input:not([type='checkbox']), td.cell select { z-index: 1; position: inherit; width: auto; border: none; padding-right: 10px; }
-    td.cell input[type='text'] { border-bottom: 1px solid var(--grey)};
+    td.cell input[type='text'] { border-bottom: 1px solid var(--grey)}
 	td.cell-date { text-align: right; }
 	td.cell-number { text-align: right; }
 	td.cell-nofield { text-align: center; }
@@ -66,7 +66,7 @@ td { padding: 0 5px; border: none; white-space: nowrap; text-overflow: ellipsis;
 	.cell-container.multiselect a, .cell-container.wrap a { white-space: initial; width: auto; height: 100%; }
 	/*.cell-container:empty:after { content: '.'; visibility: hidden; }*/
 	.cell-container:not(.wrap) .default-data-parent { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.cell-container.wrap .default-data-parent { white-space-collapse: break-spaces; }
+ .cell-container.wrap .default-data-parent { white-space: break-spaces; }
   	.cell-new-tab { line-height:21px; height: inherit; display: block; text-decoration: none; color: black; width: auto; }
 
 .loader { float: right; border-left: none !important; }
@@ -128,3 +128,11 @@ tr.opened { border-left: 1px solid var(--grey); border-top: 1px solid var(--grey
 .block i, .block .label { white-space: nowrap; }
 .dark { color:white; }
 .table-edit { height: auto !important; }
+
+ input[type="number"] {
+     -moz-appearance: textfield;
+ }
+ input[type="number"]:hover,
+ input[type="number"]:focus {
+     -moz-appearance: number-input;
+ }

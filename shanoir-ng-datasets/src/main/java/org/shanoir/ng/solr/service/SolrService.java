@@ -26,6 +26,7 @@ import org.shanoir.ng.solr.model.ShanoirSolrQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.io.IOException;
@@ -57,5 +58,11 @@ public interface SolrService {
 	Page<ShanoirSolrDocument> getByIdIn(List<Long> datasetIds, Pageable pageable) throws RestServiceException;
 
 	void updateDatasets(List<Long> datasetIds) throws SolrServerException, IOException;
+
+	void updateDatasetsAsync(List<Long> datasetIds) throws SolrServerException, IOException;
+
+	void updateSubjectsAsync(List<Long> subjectIds) throws SolrServerException, IOException;
+
+	void updateStudyAsync(Long studyId) throws SolrServerException, IOException;
 
 }

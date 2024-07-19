@@ -44,8 +44,8 @@ public enum AnestheticType {
 	 *
 	 */
 	public static class Values {
-		public static final String GAS = "Gas";
-		public static final String INJECTION = "Injection";
+		public static final String GAS = "GAS";
+		public static final String INJECTION = "INJECTION";
 	}
 
 }

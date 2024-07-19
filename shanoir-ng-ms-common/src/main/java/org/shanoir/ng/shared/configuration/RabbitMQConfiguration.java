@@ -16,6 +16,13 @@ package org.shanoir.ng.shared.configuration;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.listener.MessageListenerContainer;
+import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.listener.RabbitListenerEndpoint;
+import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -31,6 +38,30 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 @Profile("!test")
 public class RabbitMQConfiguration {
+
+	@Autowired
+	private ConnectionFactory connectionFactory;
+
+	@Bean(name = "multipleConsumersFactory")
+	public SimpleRabbitListenerContainerFactory multipleConsumersFactory() {
+		SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+		factory.setConnectionFactory(connectionFactory);
+		factory.setMaxConcurrentConsumers(100);
+		factory.setConcurrentConsumers(10);
+		factory.setStartConsumerMinInterval(100L);
+		factory.setConsecutiveActiveTrigger(1);
+		factory.setAutoStartup(true);
+		factory.setPrefetchCount(1);
+		return factory;
+	}
+
+	@Bean(name = "singleConsumerFactory")
+	public SimpleRabbitListenerContainerFactory singleConsumerFactory() {
+		SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+		factory.setConnectionFactory(connectionFactory);
+		factory.setConcurrentConsumers(1);
+		return factory;
+	}
 
 	////////////////// QUEUES //////////////////
 
@@ -52,8 +83,11 @@ public class RabbitMQConfiguration {
 	/** Update / create a study user to import MS. */
 	public static final String STUDY_USER_QUEUE_IMPORT = "study-user-queue-import";
 
-	/** Queue to notify when a user / study is update / deleted. */
+	/** Queue to notify when a user / study is updated / deleted. */
 	public static final String STUDY_USER_QUEUE = "study-user";
+
+	/** Queue to notify when a subject / study is updated / deleted. */
+	public static final String SUBJECT_STUDY_QUEUE = "subject-study";
 
 	/** BIDS purpose => Get a list of subjects to create bids participants file. */
 	public static final String SUBJECTS_QUEUE = "subjects-queue";
@@ -73,9 +107,12 @@ public class RabbitMQConfiguration {
 	/** Get the list of subjects for a given study. */
 	public static final String DATASET_SUBJECT_QUEUE = "dataset-subjects-queue";
 
+	public static final String COPY_DATASETS_TO_STUDY_QUEUE = "copy-datasets-to-study-queue";
 	public static final String STUDY_DATASETS_DETAILED_STORAGE_VOLUME = "study-datasets-detailed-storage-volume";
 
 	public static final String STUDY_DATASETS_TOTAL_STORAGE_VOLUME = "study-datasets-total-storage-volume";
+
+	public static final String EXECUTION_MONITORING_TASK = "execution-monitoring-task";
 
 	/** Get the type of dataset from a given study. */
 	public static final String STUDY_DATASET_TYPE = "study-dataset-type";
@@ -104,10 +141,11 @@ public class RabbitMQConfiguration {
 	/** Queue to retrieve informations about studyc cards. */
 	public static final String FIND_STUDY_CARD_QUEUE = "find-study-card-queue";
 
-	/** Queue to retrieve the center ID from an acquisition equipement ID. */
-	public static final String ACQUISITION_EQUIPEMENT_CENTER_QUEUE = "acquisition-equipement-center-queue";
-	/** Queue to retrieve the center ID from an acquisition equipement ID. */
-	public static final String ACQUISITION_EQUIPEMENT_UPDATE_QUEUE = "acquisition-equipement-update-queue";
+	/** Queue to retrieve the center ID from an acquisition equipment ID. */
+	public static final String ACQUISITION_EQUIPMENT_CENTER_QUEUE = "acquisition-equipment-center-queue";
+
+	/** Queue to retrieve the center ID from an acquisition equipment ID. */
+	public static final String ACQUISITION_EQUIPEMENT_UPDATE_QUEUE = "acquisition-equipment-update-queue";
 	
 	/** Queue to create exam for import bids. */
 	public static final String EXAMINATION_CREATION_QUEUE = "examination-creation-queue";
@@ -132,6 +170,9 @@ public class RabbitMQConfiguration {
 
 	/** Queue to consume BIDS related events */
 	public static final String BIDS_EVENT_QUEUE = "bids-event-queue";
+
+	/** Queue to consume BIDS related events */
+	public static final String RELOAD_BIDS = "reload-bids-queue";
 	
 	/** Queue to create examination extra data from import */
 	public static final String EXAMINATION_EXTRA_DATA_QUEUE = "examination-extra-data-queue";
@@ -140,7 +181,7 @@ public class RabbitMQConfiguration {
 	public static final String IMPORTER_BIDS_DATASET_QUEUE = "importer-bids-dataset-queue";
 
 	/** Queue to create get equipment ID from code. */
-	public static final String ACQUISITION_EQUIPEMENT_CODE_QUEUE = "acquisition-equipment-code-queue";
+	public static final String ACQUISITION_EQUIPMENT_CODE_QUEUE = "acquisition-equipment-code-queue";
 
 	/** Queue to get the study card from a equipment code. */
 	public static final String IMPORT_STUDY_CARD_QUEUE="import-study-card-queue";
@@ -169,38 +210,22 @@ public class RabbitMQConfiguration {
 	/** Queue used to get anonymisation profile of a study. */
 	public static final String STUDY_ANONYMISATION_PROFILE_QUEUE = "study-anonymisation-profile-queue";
 
-	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
-	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
-	
-	private static final String CENTER_QUEUE_NAME_OUT = "center_queue_from_ng";
+    /** Queue used to make bruker to dicom conversion. */
+    public static final String BRUKER_CONVERSION_QUEUE = "bruker-conversion-queue";
 
-	private static final String COIL_QUEUE_NAME_OUT = "coil_queue_from_ng";
-	
-	private static final String DELETE_ACQ_EQPT_QUEUE_NAME_OUT = "delete_acq_eqpt_queue_from_ng";
+    /** Queue used to make anima to nifti conversion. */
+    public static final String ANIMA_CONVERSION_QUEUE = "anima-conversion-queue";
 
-	private static final String DELETE_CENTER_QUEUE_NAME_OUT = "delete_center_queue_from_ng";
-
-	private static final String DELETE_COIL_QUEUE_NAME_OUT = "delete_coil_queue_from_ng";
-
-	private static final String STUDY_QUEUE_NAME_IN = "study_queue_to_ng";
-
-	private static final String STUDY_DELETE_QUEUE_NAME_IN = "study_delete_queue_to_ng";
-
-	private static final String STUDY_QUEUE_NAME_OUT = "study_queue_from_ng";
-
-	private static final String SUBJECT_RPC_QUEUE_OUT = "subject_queue_with_RPC_from_ng";
-
-	private static final String SUBJECT_RPC_QUEUE_IN = "subject_queue_with_RPC_to_ng";
-
-	private static final String SUBJECT_QUEUE_OUT = "subject_queue_from_ng";
-	
 	////////////////// EXCHANGES //////////////////
 
 	/** Exchange used to publish / treat all sort of shanoir events. */
 	public static final String EVENTS_EXCHANGE = "events-exchange";
 
-	/** Exchange to notify when a user / study is update / deleted. */
+	/** Exchange to notify when a user / study is updated / deleted. */
 	public static final String STUDY_USER_EXCHANGE = "study-user-exchange";
+
+	/** Exchange to notify when a subject / study is updated / deleted. */
+	public static final String SUBJECT_STUDY_EXCHANGE = "subject-study-exchange";
 
     @Bean
     public static Queue getMSUsersToMSStudiesUserDelete() {
@@ -246,6 +271,10 @@ public class RabbitMQConfiguration {
 	public static Queue datasetSubjectQueue() {
 		return new Queue(DATASET_SUBJECT_QUEUE, true);
 	}
+	@Bean
+	public static Queue copyDatasetToStudyQueue() {
+		return new Queue(COPY_DATASETS_TO_STUDY_QUEUE, true);
+	}
 
 	@Bean
 	public static Queue studyDatasetsDetailedStorageVolumeQueue() {
@@ -258,11 +287,21 @@ public class RabbitMQConfiguration {
 	}
 
 	@Bean
+	public static Queue sexecutionMonitoringEventQueue() {
+		return new Queue(EXECUTION_MONITORING_TASK, true);
+	}
+
+	@Bean
 	public static Queue studyDatasetTypeQueue() { return new Queue(STUDY_DATASET_TYPE, true); }
 
 	@Bean
 	public static Queue datasetSubjectStudyQueue() {
 		return new Queue(DATASET_SUBJECT_STUDY_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue subjectStudyQueue() {
+		return new Queue(SUBJECT_STUDY_QUEUE, true);
 	}
 	
 	@Bean
@@ -317,7 +356,7 @@ public class RabbitMQConfiguration {
 
 	@Bean
 	public static Queue acquisitionEquipementCenterQueue() {
-		return new Queue(ACQUISITION_EQUIPEMENT_CENTER_QUEUE, true);
+		return new Queue(ACQUISITION_EQUIPMENT_CENTER_QUEUE, true);
 	}
 	@Bean
 	public static Queue acquisitionEquipementUpdateQueue() {
@@ -348,10 +387,15 @@ public class RabbitMQConfiguration {
 	public static Queue importDatasetMailQueue() {
 		return new Queue(IMPORT_DATASET_MAIL_QUEUE, true);
 	}
-	
+
 	@Bean
 	public static Queue bidsEventQueue() {
 		return new Queue(BIDS_EVENT_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue reloadBidsQueue() {
+		return new Queue(RELOAD_BIDS, true);
 	}
 
 	@Bean
@@ -376,7 +420,12 @@ public class RabbitMQConfiguration {
 
 	@Bean
 	public static Queue acquisitionEquipmentCodeQueue() {
-		return new Queue(ACQUISITION_EQUIPEMENT_CODE_QUEUE, true);
+		return new Queue(ACQUISITION_EQUIPMENT_CODE_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue equipmentFromCodeQueue() {
+		return new Queue(EQUIPMENT_FROM_CODE_QUEUE, true);
 	}
 
 	@Bean
@@ -403,10 +452,6 @@ public class RabbitMQConfiguration {
 	public static Queue importStudyCardQueue() {
 		return new Queue(IMPORT_STUDY_CARD_QUEUE, true);
 	}
-	@Bean
-	public static Queue equipmentFromCodeQueue() {
-		return new Queue(EQUIPMENT_FROM_CODE_QUEUE, true);
-	}
 
 	@Bean
 	public static Queue studyAdminQueue() {
@@ -427,5 +472,16 @@ public class RabbitMQConfiguration {
 	public static Queue studyAnonymisationProfileQueue() {
 		return new Queue(STUDY_ANONYMISATION_PROFILE_QUEUE, true);
 	}
+
+	@Bean
+	public static Queue brukerConversionQueue() {
+		return new Queue(BRUKER_CONVERSION_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue animaConversionQueue() {
+		return new Queue(ANIMA_CONVERSION_QUEUE, true);
+	}
+
 
 }

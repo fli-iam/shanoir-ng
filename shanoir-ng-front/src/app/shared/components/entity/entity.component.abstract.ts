@@ -138,6 +138,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             this.activatedRoute.fragment.subscribe(fragment => {
                 if (fragment) {
                     this.activeTab = fragment;
+                    this.reloadRequiredStyles();
                 }
             })
         );
@@ -173,16 +174,23 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     private styleRequiredLabels() {
-        if (this.formContainerElement) {
+        if (this.formContainerElement && this.form?.controls) {
             for (const field in this.form.controls) {
                 const control = this.form.get(field);
                 if (this.hasRequiredField(control)) {
                     const input = this.formContainerElement.nativeElement.querySelector('li [formControlName="' + field + '"]');
                     if (input) {
+                        // adding * to input labels
                         const li = input.closest('li');
                         if (li) {
                             const label = li.querySelector(':scope > label');
                             if (label) label.classList.add('required-label');
+                        }
+                        // adding * to tab labels
+                        const tabName = input.closest('fieldset')?.getAttribute('tab');
+                        if (tabName) {
+                            const tabLabelElt = this.formContainerElement.nativeElement.querySelector('ul.tabs .' + tabName);
+                            tabLabelElt?.classList.add('required-label');
                         }
                     }
                 }
@@ -243,36 +251,37 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         return false;
     }
 
-    /**
-     * Chooses between create() and update(), saves the entity and return a promise
-     */
-    private modeSpecificSave(): Promise<T> {
+    private modeSpecificSave(afterSave?: () => Promise<void>): Promise<T> {
         if (this.mode == 'create') {
             return this.getService().create(this.entity).then((entity) => {
                 this.entity.id = entity.id;
                 this.onSave.next(entity);
-                this.chooseRouteAfterSave(entity);
-                if (entity['name']) {
-                    this.consoleService.log('info', this.ROUTING_NAME[0].toUpperCase() + this.ROUTING_NAME.slice(1) + ' ' + entity['name'] + ' has been successfully saved under the id ' + entity.id);
-                } else {
-                    this.consoleService.log('info', 'New ' + this.ROUTING_NAME + ' successfully saved with n° ' + entity.id);
-                }
-                this._entity.id = entity.id;
-                return entity;
+                return (afterSave ? afterSave() : Promise.resolve()).then(() => {
+                    this.chooseRouteAfterSave(entity);
+                    if (entity['name']) {
+                        this.consoleService.log('info', this.ROUTING_NAME[0].toUpperCase() + this.ROUTING_NAME.slice(1) + ' ' + entity['name'] + ' has been successfully saved under the id ' + entity.id);
+                    } else {
+                        this.consoleService.log('info', 'New ' + this.ROUTING_NAME + ' successfully saved with n° ' + entity.id);
+                    }
+                    this._entity.id = entity.id;
+                    return entity;
+                });
             });
         } else if (this.mode == 'edit') {
             return this.getService().update(this.entity.id, this.entity).then(() => {
                 this.onSave.next(this.entity);
-                this.chooseRouteAfterSave(this.entity);
-                this.consoleService.log('info', this.ROUTING_NAME + ' n°' + this.entity.id + ' successfully updated');
-                return this.entity;
+                return (afterSave ? afterSave() : Promise.resolve()).then(() => {
+                    this.chooseRouteAfterSave(this.entity);
+                    this.consoleService.log('info', this.ROUTING_NAME + ' n°' + this.entity.id + ' successfully updated');
+                    return this.entity;
+                });
             });
         }
     }
 
-    save(): Promise<T> {
+    save(afterSave?: () => Promise<void>): Promise<T> {
         this.footerState.loading = true;
-        return this.modeSpecificSave()
+        return this.modeSpecificSave(afterSave)
             .then(study => {
                 this.footerState.loading = false;
                 return study;
@@ -284,6 +293,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 return null;
             });
     }
+
 
     protected catchSavingErrors = (reason: any) => {
         if (reason && reason.error && reason.error.code == 422) {
@@ -358,6 +368,9 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     goToEdit(id?: number): void {
+        if (this.activeTab == "quality" || this.activeTab == "tree" || this.activeTab == "bids") {
+            this.activeTab = "general";
+        }
         if (!id) {
             if (this.mode == 'edit') return;
             else if (this.mode == 'view') id = this.entity.id;

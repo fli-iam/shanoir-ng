@@ -48,11 +48,7 @@ import org.jdatepicker.impl.UtilDateModel;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
-import org.shanoir.uploader.action.DownloadOrCopyActionListener;
-import org.shanoir.uploader.action.FindDicomActionListener;
-import org.shanoir.uploader.action.ImportDialogOpener;
-import org.shanoir.uploader.action.RSDocumentListener;
-import org.shanoir.uploader.action.SelectionActionListener;
+import org.shanoir.uploader.action.*;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.exception.PseudonymusException;
@@ -144,7 +140,7 @@ public class MainWindow extends JFrame {
 		this.dicomFileAnalyzer = new ImagesCreatorAndDicomFileAnalyzerService();
 		this.shanoirUploaderFolder=shanoirUploaderFolder;
 		this.resourceBundle=resourceBundle;
-		String JFRAME_TITLE = "ShanoirUploader " + ShUpConfig.SHANOIR_UPLOADER_VERSION + " Release: 2023-03-28";
+		String JFRAME_TITLE = "ShanoirUploader " + ShUpConfig.SHANOIR_UPLOADER_VERSION + " " + ShUpConfig.RELEASE_DATE;
 		try {
 			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
 				if ("Nimbus".equals(info.getName())) {
@@ -184,7 +180,7 @@ public class MainWindow extends JFrame {
 
 		ImageIcon searchIcon = new ImageIcon(getClass().getClassLoader().getResource("images/search.png"));
 		JMenuItem mntmOpenDicomFromCD = new JMenuItem(resourceBundle.getString("shanoir.uploader.fileMenu.openCD"), searchIcon);
-		fAL = new FindDicomActionListener(this, fileChooser, dicomServerClient, dicomFileAnalyzer);
+		fAL = new FindDicomActionListener(this, fileChooser, dicomServerClient);
 		mntmOpenDicomFromCD.addActionListener(fAL);
 		mnFile.add(mntmOpenDicomFromCD);
 
@@ -196,11 +192,21 @@ public class MainWindow extends JFrame {
 		
 		JMenuItem mnImportExcell = new JMenuItem(resourceBundle.getString("shanoir.uploader.importMenu.csv"));
 		mnImport.add(mnImportExcell);
-		
+
 		mnImportExcell.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				ImportFromCSVWindow importcsv = new ImportFromCSVWindow(shanoirUploaderFolder, resourceBundle, scrollPaneUpload, dicomServerClient, dicomFileAnalyzer, ShUpOnloadConfig.getShanoirUploaderServiceClient());
+			}
+		});
+
+		JMenuItem mnImportFolder = new JMenuItem(resourceBundle.getString("shanoir.uploader.importMenu.folder"));
+		mnImport.add(mnImportFolder);
+
+		mnImportFolder.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ImportFromFolderWindow importFolder = new ImportFromFolderWindow(shanoirUploaderFolder, resourceBundle, scrollPaneUpload, dicomServerClient, dicomFileAnalyzer, ShUpOnloadConfig.getShanoirUploaderServiceClient());
 			}
 		});
 

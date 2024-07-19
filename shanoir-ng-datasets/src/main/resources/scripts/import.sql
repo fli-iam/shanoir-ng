@@ -44,34 +44,4 @@ VALUES
 INSERT INTO study_cards
 	(id, acquisition_equipment_id, disabled, last_edit_timestamp, name, nifti_converter_id, study_id)
 VALUES 
-	(1,1,false,0,'StudyCard1',1,1),
-	(2,null,false,0,'QualityCard_UCAN',null,1);
-
-INSERT INTO study_card_rule
-	(id, study_card_id, scope,or_conditions)
-VALUES
-	(1,2,'DatasetAcquisition',false),
-	(2,2,'Dataset',false);
-
-INSERT INTO study_card_condition
-	(id, dicom_tag, operation, scope, cardinality)
-VALUES 
-	(1,2,4,'StudyCardDICOMCondition', 1),
-	(2,2,4,'StudyCardDICOMCondition', 1);
-
-INSERT INTO study_card_condition_join
-	(study_card_rule_id, condition_id) 
-VALUES
-	(1,1),
-	(2,2);
-
-INSERT INTO study_card_condition_values
-	(study_card_condition_id, value)
-VALUES
-	(1,'tof'),
-	(1,'flight'),
-	(2,'gado'),
-	(2,'gd'),
-	(2,'gadolinium'),
-	(2,'contrast'),
-	(2,'enhanced');
+	(1,1,false,0,'StudyCard1',1,1);

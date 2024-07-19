@@ -30,6 +30,8 @@ import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.mode
 import { MrProtocol } from '../modality/mr/mr-protocol.model';
 import { PetDatasetAcquisition } from '../modality/pet/pet-dataset-acquisition.model';
 import { PetProtocol } from '../modality/pet/pet-protocol.model';
+import { XaDatasetAcquisition } from '../modality/xa/xa-dataset-acquisition.model';
+import { XaProtocol } from '../modality/xa/xa-protocol.model';
 import { DatasetAcquisition } from './dataset-acquisition.model';
 import { DatasetAcquisitionUtils } from './dataset-acquisition.utils';
 
@@ -101,7 +103,8 @@ export class DatasetAcquisitionDTOService {
         entity.softwareRelease = dto.softwareRelease;
         entity.sortingIndex = dto.sortingIndex;
         entity.type = dto.type;
-        entity.creationDate = dto.creationDate;
+        entity.importDate = dto.importDate;
+        entity.username = dto.username;
         if (dto.acquisitionEquipmentId) {
             entity.acquisitionEquipment = new AcquisitionEquipment();
             entity.acquisitionEquipment.id = dto.acquisitionEquipmentId;
@@ -123,6 +126,11 @@ export class DatasetAcquisitionDTOService {
                 (entity as CtDatasetAcquisition).protocol = Object.assign(new CtProtocol(), (dto as CtDatasetAcquisitionDTO).protocol);
                 break;
             }
+            case 'Xa': {
+                (entity as XaDatasetAcquisition).protocol = Object.assign(new XaProtocol(), (dto as XaDatasetAcquisitionDTO).protocol);
+                break;
+            }
+
         }
         return entity;
     }
@@ -147,7 +155,8 @@ export class DatasetAcquisitionDTO {
         this.softwareRelease = dsAcq.softwareRelease;
         this.sortingIndex = dsAcq.sortingIndex;
         this.type = dsAcq.type;
-        this.creationDate = dsAcq.creationDate;
+        this.importDate = dsAcq.importDate;
+        this.username = dsAcq.username;
     }
 
     id: number;
@@ -157,8 +166,9 @@ export class DatasetAcquisitionDTO {
     rank: number;
     softwareRelease: string;
     sortingIndex: number;
-    creationDate: Date;
-    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Generic' | 'Processed' | 'BIDS';
+    importDate: Date;
+    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Xa' | 'Generic' | 'Processed' | 'BIDS';
+    username: string;
 }
 
 export class MrDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
@@ -173,6 +183,10 @@ export class CtDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
     protocol: any;
 }
 
+export class XaDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
+    protocol: any;
+}
+
 export class ProcessedDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
    	parentAcquisitions: any[];
 }
@@ -180,7 +194,7 @@ export class ProcessedDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
 export class ExaminationDatasetAcquisitionDTO {
     id: number;
     name: string;
-    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Generic' | 'Processed' | 'BIDS';
+    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Xa' | 'Generic' | 'Processed' | 'BIDS';
     datasets: any;
 }
 

@@ -21,25 +21,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.shanoir.ng.dataset.modality.CalibrationDataset;
-import org.shanoir.ng.dataset.modality.CtDataset;
-import org.shanoir.ng.dataset.modality.EegDataset;
-import org.shanoir.ng.dataset.modality.MegDataset;
-import org.shanoir.ng.dataset.modality.MeshDataset;
-import org.shanoir.ng.dataset.modality.MrDataset;
-import org.shanoir.ng.dataset.modality.ParameterQuantificationDataset;
-import org.shanoir.ng.dataset.modality.PetDataset;
-import org.shanoir.ng.dataset.modality.RegistrationDataset;
-import org.shanoir.ng.dataset.modality.SegmentationDataset;
-import org.shanoir.ng.dataset.modality.SpectDataset;
-import org.shanoir.ng.dataset.modality.StatisticalDataset;
-import org.shanoir.ng.dataset.modality.TemplateDataset;
+import org.joda.time.DateTime;
+import org.shanoir.ng.dataset.modality.*;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -70,7 +61,9 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.shared.service.SubjectStudyService;
+import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
+import org.shanoir.ng.studycard.model.ExaminationData;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.QualityException;
 import org.shanoir.ng.studycard.model.StudyCard;
@@ -138,6 +131,11 @@ public class ImporterService {
     @Autowired
     private WADODownloaderService downloader;
 
+    @Autowired
+    private SolrService solrService;
+
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+
     private static final String SUBJECT_PREFIX = "sub-";
     
     private static final String PROCESSED_DATASET_PREFIX = "processed-dataset";
@@ -171,7 +169,9 @@ public class ImporterService {
                     .filter(ss -> ss.getStudy().getId().equals(examination.getStudy().getId()))
                     .findFirst().orElse(null);
                 QualityTag tagSave = subjectStudy != null ? subjectStudy.getQualityTag() : null;
-                QualityCardResult qualityResult = checkQuality(examination, importJob);                				
+                ExaminationData examData = new ExaminationData(examination);
+                examData.setDatasetAcquisitions(Utils.toList(generatedAcquisitions));
+                QualityCardResult qualityResult = checkQuality(examData, importJob);                				
                 // Has quality check passed ?
                 if (qualityResult.hasError()) {
                     throw new QualityException(examination, qualityResult);
@@ -193,7 +193,7 @@ public class ImporterService {
                         // revert quality tag
                         subjectStudy.setQualityTag(tagSave);
                         subjectStudyService.update(qualityResult.getUpdatedSubjectStudies());
-                        throw new ShanoirException("Error while saving data in pacs, the import is canceled and acquisitions were not saved");
+                        throw new ShanoirException("Error while saving data in pacs, the import is canceled and acquisitions were not saved", e);
                     }
                 }
             } else {
@@ -247,7 +247,7 @@ public class ImporterService {
             throw new ShanoirException(msg, e);
         } catch (Exception e) {
             event.setStatus(ShanoirEvent.ERROR);
-            event.setMessage("Unexpected error during the import: " + e.getMessage() + ", please contact an administrator.");
+            event.setMessage("Unexpected error during the import: " + e.getClass() + " : " + e.getMessage() + ", please contact an administrator.");
             event.setProgress(-1f);
             eventService.publishEvent(event);
             LOG.error("Error during import for exam: {} : {}", importJob.getExaminationId(), e); 
@@ -297,14 +297,16 @@ public class ImporterService {
         return generatedAcquisitions;
     }
 
-    private QualityCardResult checkQuality(Examination examination, ImportJob importJob) throws ShanoirException {
-        ExaminationAttributes<String> dicomAttributes = null;          
+    private QualityCardResult checkQuality(ExaminationData examination, ImportJob importJob) throws ShanoirException {
+        List<QualityCard> qualityCards = qualityCardService.findByStudy(examination.getStudyId());   
+        if (!hasQualityChecksAtImport(qualityCards)) {
+            return new QualityCardResult();
+        }     
         Study firstStudy = importJob.getFirstStudy();
         if (firstStudy == null) {
-            throw new ShanoirException("The given import job does not provide any serie. Examination : " + examination.getId());
+            throw new ShanoirException("The given import job does not provide any serie. Examination : " + importJob.getExaminationId());
         }
-        dicomAttributes = dicomProcessing.getDicomExaminationAttributes(firstStudy);
-        List<QualityCard> qualityCards = qualityCardService.findByStudy(examination.getStudyId());
+        ExaminationAttributes<String> dicomAttributes = dicomProcessing.getDicomExaminationAttributes(firstStudy);
         QualityCardResult qualityResult = new QualityCardResult();
         for (QualityCard qualityCard : qualityCards) {
             if (qualityCard.isToCheckAtImport()) {
@@ -312,6 +314,18 @@ public class ImporterService {
             }
         }
         return qualityResult;
+    }
+
+    private boolean hasQualityChecksAtImport(List<QualityCard> qualityCards) {
+        if (qualityCards == null || qualityCards.isEmpty()) {
+            return false;
+        }
+        for (QualityCard qualityCard : qualityCards) {
+            if (qualityCard.isToCheckAtImport()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     StudyCard getStudyCard(ImportJob importJob) {
@@ -424,7 +438,7 @@ public class ImporterService {
      * Create a processed dataset dataset associated with a dataset processing.
      * @param importJob the import job from importer MS.
      */
-    public Dataset createProcessedDataset(final ProcessedDatasetImportJob importJob) throws IOException, Exception {
+    public Dataset createProcessedDataset(final ProcessedDatasetImportJob importJob) throws Exception {
 
         ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getProcessedDatasetFilePath(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS, 0f);
         eventService.publishEvent(event);
@@ -499,7 +513,13 @@ public class ImporterService {
                     dataset = new TemplateDataset();
                     originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
                     break;
+                case XaDataset.datasetType:
+                    dataset = new TemplateDataset();
+                    originMetadata.setDatasetModalityType(DatasetModalityType.XA_DATASET);
+                    break;
                 default:
+                    dataset = new GenericDataset();
+                    originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
                 break;
             }
             
@@ -515,7 +535,7 @@ public class ImporterService {
             String filePath = importJob.getProcessedDatasetFilePath();
             File srcFile = new File(filePath);
             String originalNiftiName = srcFile.getName();
-            File destFile = new File(outDir.getAbsolutePath() + File.separator + originalNiftiName);
+            File destFile = new File(outDir.getAbsolutePath() + File.separator + formatter.format(LocalDateTime.now()) + File.separator + originalNiftiName);
 
             // Save file
             Path location;
@@ -550,6 +570,7 @@ public class ImporterService {
             dataset.setSubjectId(importJob.getSubjectId());
 
             dataset = datasetService.create(dataset);
+            solrService.indexDataset(dataset.getId());
             
             event.setStatus(ShanoirEvent.SUCCESS);
 
@@ -564,7 +585,7 @@ public class ImporterService {
         } catch (Exception e) {
             LOG.error("Error while importing processed dataset: ", e);
             event.setStatus(ShanoirEvent.ERROR);
-            event.setMessage("Unexpected error during the import of the processed dataset: " + e.getMessage() + ", please contact an administrator.");
+            event.setMessage("Unexpected error during the import: " + e.getClass() + " : " + e.getMessage() + ", please contact an administrator.");
             event.setProgress(-1f);
             eventService.publishEvent(event);
             throw e;

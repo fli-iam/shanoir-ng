@@ -185,4 +185,23 @@ public class Utils {
             zos.finish();
         }
     }
+
+	public static <T> List<T> buildArrayList(T...items) {
+		List<T> ret = new ArrayList<>();
+		if (items != null) {
+			for (T item : items) {
+				ret.add(item);
+			}
+		}
+		return ret;
+	}
+    
+	public static String removeLeadingZeroes(String s) {
+	    StringBuilder sb = new StringBuilder(s);
+	    while (sb.length() > 0 && sb.charAt(0) == '0') {
+	        sb.deleteCharAt(0);
+	    }
+	    return sb.toString();
+	}
+
 }

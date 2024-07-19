@@ -56,7 +56,7 @@ public interface ExaminationApi {
 	@DeleteMapping(value = "/{examinationId}", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> deleteExamination(
-			@Parameter(name = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId)
+			@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId)
 			throws RestServiceException;
 
 	@Operation(summary = "", description = "If exists, returns the examination corresponding to the given id")
@@ -69,7 +69,7 @@ public interface ExaminationApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL')")
 	ResponseEntity<ExaminationDTO> findExaminationById(
-			@Parameter(name = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId)
+			@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId)
 			throws RestServiceException;
 
 	@Operation(summary = "", description = "Returns all the examinations")
@@ -82,7 +82,7 @@ public interface ExaminationApi {
 	@GetMapping(value = "", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationDTOPage(returnObject.getBody(), 'CAN_SEE_ALL')")
-	ResponseEntity<Page<ExaminationDTO>> findExaminations(Pageable pageable);
+	ResponseEntity<Page<ExaminationDTO>> findExaminations(Pageable pageable, String searchStr, String searchField);
 
 	@Operation(summary = "", description = "Returns all the examinations")
 	@ApiResponses(value = {
@@ -94,7 +94,7 @@ public interface ExaminationApi {
 	@GetMapping(value = "/preclinical/{isPreclinical}", produces = { "application/json" })
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationDTOPage(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<Page<ExaminationDTO>> findPreclinicalExaminations(
-			@Parameter(name = "preclinical", required = true) @PathVariable("isPreclinical") Boolean isPreclinical, Pageable pageable);
+			@Parameter(description = "preclinical", required = true) @PathVariable("isPreclinical") Boolean isPreclinical, Pageable pageable);
 
 	@Operation(summary = "", description = "Returns the list of examinations by subject id and study id")
 	@ApiResponses(value = {
@@ -107,8 +107,8 @@ public interface ExaminationApi {
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterSubjectExaminationDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<SubjectExaminationDTO>> findExaminationsBySubjectIdStudyId(
-			@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId);
+			@Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
+			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
 	@Operation(summary = "", description = "Returns the list of examinations by study id")
 	@ApiResponses(value = {
@@ -120,7 +120,7 @@ public interface ExaminationApi {
 	@GetMapping(value = "/study/{studyId}", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
 	ResponseEntity<List<Long>> findExaminationsByStudyId(
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId);
+			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
 	@Operation(summary = "", description = "Returns the list of examinations by subject id")
 	@ApiResponses(value = {
@@ -133,7 +133,7 @@ public interface ExaminationApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<ExaminationDTO>> findExaminationsBySubjectId(
-			@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
+			@Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
 
 	// Attention: this method is used by ShanoirUploader!!!
 	@Operation(summary = "", description = "Saves a new examination")
@@ -146,7 +146,7 @@ public interface ExaminationApi {
 			"application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudyCenter(#examinationDTO.getCenterId(), #examinationDTO.getStudyId(), 'CAN_IMPORT'))")
 	ResponseEntity<ExaminationDTO> saveNewExamination(
-			@Parameter(name = "examination to create", required = true) @Valid @RequestBody ExaminationDTO examinationDTO,
+			@Parameter(description = "examination to create", required = true) @Valid @RequestBody ExaminationDTO examinationDTO,
 			final BindingResult result) throws RestServiceException;
 
 	@Operation(summary = "", description = "Updates an examination")
@@ -159,8 +159,8 @@ public interface ExaminationApi {
 			"application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and #examination.getId().equals(#examinationId) and @datasetSecurityService.hasRightOnExamination(#examination.getId(), 'CAN_IMPORT'))")
 	ResponseEntity<Void> updateExamination(
-			@Parameter(name = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
-			@Parameter(name = "examination to update", required = true) @Valid @RequestBody ExaminationDTO examination,
+			@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
+			@Parameter(description = "examination to update", required = true) @Valid @RequestBody ExaminationDTO examination,
 			final BindingResult result) throws RestServiceException;
 
 	@Operation(summary = "", description = "Add extra data to an examination")
@@ -174,8 +174,8 @@ public interface ExaminationApi {
     consumes = { "multipart/form-data" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_IMPORT'))")
 	ResponseEntity<Void> addExtraData(
-			@Parameter(name = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
-			@Parameter(name = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException;
+			@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
+			@Parameter(description = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException;
 
 	@Operation(summary = "", description = "Create an examination and add extra data")
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "examination created and data added"),
@@ -188,9 +188,9 @@ public interface ExaminationApi {
     consumes = { "multipart/form-data" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnSubjectName(#subjectName, 'CAN_IMPORT'))")
 	ResponseEntity<Void> createExaminationAndAddExtraData(
-			@Parameter(name = "name of the subject", required = true) @PathVariable("subjectName") String subjectName,
-			@Parameter(name = "id of the center", required = true) @PathVariable("centerId") Long centerId,
-			@Parameter(name = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException;
+			@Parameter(description = "name of the subject", required = true) @PathVariable("subjectName") String subjectName,
+			@Parameter(description = "id of the center", required = true) @PathVariable("centerId") Long centerId,
+			@Parameter(description = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException;
 	
 	@Operation(summary = "", description = "Download extra data from an examination", tags = {})
 	@ApiResponses(value = {
@@ -202,7 +202,7 @@ public interface ExaminationApi {
 	@GetMapping(value = "extra-data-download/{examinationId}/{fileName:.+}/")
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL'))")
 	void downloadExtraData(
-			@Parameter(name = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
-			@Parameter(name = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
+			@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
+			@Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
 
 }

@@ -1,0 +1,4 @@
+ALTER TABLE contrast_agent MODIFY COLUMN injection_interval ENUM('BEFORE', 'DURING');
+ALTER TABLE contrast_agent MODIFY COLUMN injection_site ENUM('INTRACEREBRAL', 'CAUDAL VEIN');
+ALTER TABLE contrast_agent MODIFY COLUMN injection_type ENUM('BOLUS', 'INFUSION');
+ALTER TABLE therapy MODIFY COLUMN therapy_type ENUM('DRUG', 'RADIATION', 'SURGERY', 'ULTRASOUND');

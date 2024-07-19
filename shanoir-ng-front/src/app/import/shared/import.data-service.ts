@@ -16,7 +16,6 @@ import { Injectable } from '@angular/core';
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { Center } from '../../centers/shared/center.model';
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
-import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
 import { Study } from '../../studies/shared/study.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { ImportJob, PatientDicom } from './dicom-data.model';
@@ -37,7 +36,6 @@ export class ContextData {
         public acquisitionEquipment: AcquisitionEquipment,
         public subject: SubjectWithSubjectStudy,
         public examination: SubjectExamination,
-        public niftiConverter: NiftiConverter,
         public datasetType: DatasetType,
         public processedDatasetFilePath: string,
         public processedDatasetType: ProcessedDatasetType,
@@ -57,7 +55,6 @@ export class EegContextData  {
         public acquisitionEquipment: AcquisitionEquipment,
         public subject: SubjectWithSubjectStudy,
         public examination: SubjectExamination,
-        public niftiConverter: NiftiConverter,
         public coordinatesSystem: string,
         public datasetType: DatasetType,
         public processedDatasetFilePath: string,

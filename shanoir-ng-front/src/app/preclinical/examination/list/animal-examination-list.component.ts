@@ -52,7 +52,7 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
     }
 
     getPage(pageable: Pageable): Promise<Page<Examination>> {
-        return this.examinationService.getPage(pageable, true);
+        return this.examinationService.getPage(pageable, true, "", "");
     }
 
     getColumnDefs(): ColumnDefinition[] {
@@ -78,7 +78,7 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
                 route: (examination: Examination) => examination.study ? '/study/details/' + examination.study.id : null
             },
             {
-                headerName: "Center", field: "center.name",
+                headerName: "Acquisition Center", field: "center.name",
                 route: (examination: Examination) => examination.center ? '/center/details/' + examination.center.id : null
             }
         ];

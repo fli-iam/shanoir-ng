@@ -8,8 +8,6 @@ import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.utils.ImportUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 /**
  * This class is a helper class, that will in the future be used to detect
@@ -23,6 +21,8 @@ public class DicomSerieAndInstanceAnalyzer {
 	private static final Logger LOG = LoggerFactory.getLogger(DicomSerieAndInstanceAnalyzer.class);
 
 	private static final String RTPLAN = "RTPLAN";
+
+	private static final String OT = "OT";
 
 	private static final String RTDOSE = "RTDOSE";
 
@@ -69,11 +69,8 @@ public class DicomSerieAndInstanceAnalyzer {
 	 */
 	public static boolean checkSerieIsIgnored(Attributes attributes) {
 		String modality = attributes.getString(Tag.Modality);
-		if (AcquisitionModality.codeOf(modality) != null || RTSTRUCT.equals(modality) || RTDOSE.equals(modality) || RTPLAN.equals(modality)) {
-			return false;
-		}
-		return true;
-	}
+        return AcquisitionModality.codeOf(modality) == null && !RTSTRUCT.equals(modality) && !RTDOSE.equals(modality) && !RTPLAN.equals(modality);
+    }
 
 	public static void checkSerieIsSpectroscopy(Serie serie) {
 		final String sopClassUID = serie.getSopClassUID();

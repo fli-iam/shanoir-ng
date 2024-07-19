@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -37,17 +37,17 @@ export class TherapyFormComponent extends EntityComponent<Therapy>{
 
     TherapyType = TherapyType;
     public isTherapyUnique: Boolean = true;
-    
+
     constructor(
         private route: ActivatedRoute,
-        private therapyService: TherapyService, 
+        private therapyService: TherapyService,
         private referenceService: ReferenceService) {
 
             super(route, 'preclinical-therapy');
         }
-   
+
     get therapy(): Therapy { return this.entity; }
-    set therapy(therapy: Therapy) { this.entity = therapy; }
+    set therapy(therapy: Therapy) { this.entity = therapy; }
 
     getService(): EntityService<Therapy> {
         return this.therapyService;
@@ -72,7 +72,7 @@ export class TherapyFormComponent extends EntityComponent<Therapy>{
 
     buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
-            'name': [this.therapy.name, Validators.required],
+            'name': [this.therapy.name, [Validators.required, this.registerOnSubmitValidator('unique', 'name')]],
             'therapyType': [this.therapy.therapyType, Validators.required],
             'comment': [this.therapy.comment]
         });

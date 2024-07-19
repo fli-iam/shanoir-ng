@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -21,16 +21,18 @@ import { SuperPromise } from 'src/app/utils/super-promise';
     styleUrls: ['confirm-dialog.component.css']
 })
 export class ConfirmDialogComponent {
-    
+
     title: string;
     mode: 'confirm' | 'choose' | 'info' | 'error';
     private _message: string;
+    link: string;
     buttons: {yes: string, no?: string, cancel: string};
     private closePromise: SuperPromise<any> = new SuperPromise();
 
     public get message(): string {
         return this._message;
     }
+
     public set message(value: string) {
         this._message = value?.split(' ').map(w => w.startsWith('https://') ? '<a target="_blank" href="' + w + '">' + w + '</a>' : w).join(' ');
     }
@@ -58,9 +60,10 @@ export class ConfirmDialogComponent {
         return this.closePromise;
     }
 
-    public openError(title: string, message: string): Promise<boolean> {
+    public openError(title: string, message: string, link?: string): Promise<boolean> {
         this.title = title;
         this.message = message;
+        this.link = link;
         this.mode = 'error';
         return this.closePromise;
     }
@@ -68,5 +71,4 @@ export class ConfirmDialogComponent {
     public close(answer: any) {
         this.closePromise.resolve(answer); // forces boolean to be returned
     }
-
 }

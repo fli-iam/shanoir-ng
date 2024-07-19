@@ -129,15 +129,22 @@ export class DatasetNode implements ShanoirNode {
     constructor(
         public id: number,
         public label: string,
+        public tags: Tag[],
         public type: string,
         public processings: ProcessingNode[] | UNLOADED,
         public processed: boolean,
         public canDelete: boolean
-    ) {}
+    ) {
+        this.tags = !tags ? [] : tags;
+        if(processed){
+            this.title = "processed-dataset";
+            this.awesome = "fas fa-camera-rotate";
+        }
+    }
 
     public open: boolean = false;
     public selected: boolean = false;
-
+    public awesome: string = "fas fa-camera"
     public title: string = "dataset";
 
 }

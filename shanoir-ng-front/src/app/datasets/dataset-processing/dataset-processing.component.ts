@@ -12,30 +12,27 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ViewChild } from '@angular/core';
-import { UntypedFormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-import { Option } from '../../shared/select/select.component';
-import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
-import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
-import { Dataset } from '../shared/dataset.model';
-import { DatasetService } from '../shared/dataset.service';
-import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
-import { DatasetProcessingService } from '../shared/dataset-processing.service';
-import { StudyService } from '../../studies/shared/study.service';
-import { Study } from '../../studies/shared/study.model';
-import { Subject } from '../../subjects/shared/subject.model';
-import { EntityService } from '../../shared/components/entity/entity.abstract.service';
-import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
-import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
-import { TableComponent } from '../../shared/components/table/table.component';
-import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
-import { ExecutionMonitoringService } from 'src/app/vip/shared/execution-monitoring.service';
-import { ExecutionMonitoring } from 'src/app/vip/models/execution-monitoring.model';
-import { SuperPromise } from '../../utils/super-promise';
-import {VipClientService} from "../../vip/shared/vip-client.service";
-import {HttpResponse} from "@angular/common/http";
+import {Component, ViewChild} from '@angular/core';
+import {UntypedFormGroup, Validators} from '@angular/forms';
+import {ActivatedRoute} from '@angular/router';
+import {Option} from '../../shared/select/select.component';
+import {EntityComponent} from '../../shared/components/entity/entity.component.abstract';
+import {DatasetProcessingType} from '../../enum/dataset-processing-type.enum';
+import {Dataset} from '../shared/dataset.model';
+import {DatasetService} from '../shared/dataset.service';
+import {DatasetProcessing} from '../../datasets/shared/dataset-processing.model';
+import {DatasetProcessingService} from '../shared/dataset-processing.service';
+import {StudyService} from '../../studies/shared/study.service';
+import {Study} from '../../studies/shared/study.model';
+import {Subject} from '../../subjects/shared/subject.model';
+import {EntityService} from '../../shared/components/entity/entity.abstract.service';
+import {TableComponent} from '../../shared/components/table/table.component';
+import {ColumnDefinition} from '../../shared/components/table/column.definition.type';
+import {ExecutionMonitoringService} from 'src/app/vip/execution-monitorings/execution-monitoring.service';
+import {ExecutionMonitoring} from 'src/app/vip/models/execution-monitoring.model';
+import {ExecutionService} from "../../vip/execution/execution.service";
 import * as AppUtils from "../../utils/app.utils";
+import {formatDate} from "@angular/common";
 
 @Component({
     selector: 'dataset-processing-detail',
@@ -68,7 +65,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             private datasetService: DatasetService,
             private datasetProcessingService: DatasetProcessingService,
             private executionMonitoringService: ExecutionMonitoringService,
-            private vipClientService: VipClientService
+            private vipClientService: ExecutionService
             ) {
 
         super(route, 'dataset-processing');
@@ -289,5 +286,35 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             type: 'text/plain'
         });
         AppUtils.browserDownloadFile(blob, filename);
+    }
+
+    public formatDate(millis: number) : string {
+        return millis ? formatDate(new Date(millis), 'dd/MM/YYYY HH:mm:ss', 'en-US') : "";
+    }
+
+    public getDuration(){
+
+        let start = this.executionMonitoring?.startDate;
+        let end = this.executionMonitoring?.endDate;
+
+        if(!start || !end){
+            return "";
+        }
+
+        let duration = end - start;
+
+        if(duration <= 0){
+            return "";
+        }
+
+        let milliseconds = Math.floor((duration % 1000));
+        let seconds = Math.floor((duration / 1000) % 60);
+        let minutes = Math.floor((duration / (1000 * 60)) % 60);
+        let hours = Math.floor((duration / (1000 * 60 * 60)));
+
+        return String(hours).padStart(2, "0") + ":" +
+            String(minutes).padStart(2, "0") + ":" +
+            String(seconds).padStart(2, "0") + "." +
+            String(milliseconds).padStart(3, "0")
     }
 }

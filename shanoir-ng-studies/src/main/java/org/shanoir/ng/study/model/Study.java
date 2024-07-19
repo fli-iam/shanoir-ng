@@ -16,8 +16,10 @@ package org.shanoir.ng.study.model;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import jakarta.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -42,21 +44,6 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.ColumnResult;
-import jakarta.persistence.ConstructorResult;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OrderBy;
-import jakarta.persistence.PostLoad;
-import jakarta.persistence.SqlResultSetMapping;
 import jakarta.validation.constraints.NotNull;
 
 /**
@@ -154,12 +141,14 @@ public class Study extends HalEntity {
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	@OrderBy("rank asc")
 	private List<Timepoint> timepoints;
-	
+
 	/** Is visible by default. */
 	private boolean visibleByDefault;
 
 	/** Is with examination. */
 	private boolean withExamination;
+
+	private StudyCardPolicy studyCardPolicy;
 
 	private boolean challenge;
 	
@@ -491,6 +480,14 @@ public class Study extends HalEntity {
 	 */
 	public void setWithExamination(boolean withExamination) {
 		this.withExamination = withExamination;
+	}
+
+	public StudyCardPolicy getStudyCardPolicy() {
+		return studyCardPolicy;
+	}
+
+	public void setStudyCardPolicy(StudyCardPolicy studyCardPolicy) {
+		this.studyCardPolicy = studyCardPolicy;
 	}
 
 	/**

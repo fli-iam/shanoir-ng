@@ -1,19 +1,22 @@
 <div class="cell">
     <form #window class="window" [formGroup]="form">
         <h2 class="header">Download Datasets</h2>
-        <fieldset class="body">
+        <div *ngIf="loading">
+            <i *ngIf="loading" class="fas fa-cog fa-spin"></i> Retrieving download informations...
+        </div>
+        <fieldset class="body" disabled="loading">
             <ol>
-                <!-- <li>
-                    <label>Number of parallel downloading queues</label>
-                    <span class="right-col">
-                        <input type="number" formControlName="nbQueues" min="1" max="1024">
-                    </span>
-                </li> -->
-                <li>
+                <li *ngIf="hasDicom">
                     <label>Dataset files format</label>
                     <span class="right-col">
                         <select-box formControlName="format" [options]="formatOptions"></select-box>
                     </span>
+                </li>
+                <li *ngIf="hasDicom && form.get('format').value == 'nii'">
+                <label>Nifti converter</label>
+                <span class="right-col">
+                    <select-box formControlName="converter" [options]="niftiConverters" [(ngModel)]="converter"></select-box>
+                </span>
                 </li>
                 <li>
                     <label>Unzip datasets (slower)</label>
@@ -23,6 +26,15 @@
                             <i class="fas fa-exclamation-triangle"></i>
                             The unzipping will run on your computer
                         </span>
+                    </span>
+                </li>
+                <li *ngIf="winOs">
+                    <label>
+                        Short paths
+                        <tool-tip>Windows cannot unzip files to a path longer than 260 characters. If you encounter this problem while trying to download and/or unzip files, you may try this option (and / or choose a target directory with a shorter path).</tool-tip>
+                    </label>
+                    <span class="right-col">
+                        <checkbox formControlName="shortPath"></checkbox>
                     </span>
                 </li>
             </ol>

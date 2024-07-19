@@ -26,6 +26,7 @@ public class ShanoirEventType {
 	public static final String CREATE_DATASET_EVENT = "createDataset.event";
 	public static final String UPDATE_DATASET_EVENT = "updateDataset.event";
 	public static final String DELETE_DATASET_EVENT = "deleteDataset.event";
+	public static final String COPY_DATASET_EVENT = "copyDataset.event";
 
 	/** Dataset **/
 	public static final String CREATE_DATASET_ACQUISITION_EVENT = "createDatasetAcquisition.event";
@@ -74,6 +75,9 @@ public class ShanoirEventType {
 	/** Import Dataset **/
 	public static final String IMPORT_DATASET_EVENT = "importDataset.event";
 
+	/** Execution monitoring **/
+	public static final String EXECUTION_MONITORING_EVENT = "executionMonitoring.event";
+
 	/** Download dataset. */
 	public static final String DOWNLOAD_DATASET_EVENT = "downloadDataset.event";
 
@@ -87,4 +91,9 @@ public class ShanoirEventType {
 	public static final String USER_ADD_TO_STUDY_EVENT = "userAddToStudy.event";
 
 	public static final String CHECK_QUALITY_EVENT = "checkQuality.event";
+
+	/**
+	 * Index all datasets in solr
+	 */
+	public static final String SOLR_INDEX_ALL_EVENT = "solrIndexAll.event";
 }

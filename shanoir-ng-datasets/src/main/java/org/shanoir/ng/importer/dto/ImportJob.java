@@ -27,17 +27,19 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
  */
 public class ImportJob implements Serializable {
 
-    public static final String RANK_PROPERTY = "rank";
-    
-    public static final String INDEX_PROPERTY = "index";
-    
-    private static final long serialVersionUID = 8804929608059674037L;
-    
+	public static final String RANK_PROPERTY = "rank";
+	
+	public static final String INDEX_PROPERTY = "index";
+	
+	private static final long serialVersionUID = 8804929608059674037L;
+
     private long timestamp;
 
     private boolean fromDicomZip;
 
-    private boolean fromShanoirUploader;
+	private Map<String, String> properties = new HashMap<>();
+
+	private boolean fromShanoirUploader;
 
     private boolean fromPacs;
 
@@ -68,6 +70,8 @@ public class ImportJob implements Serializable {
     private ShanoirEvent shanoirEvent;
     
     private Long userId;
+
+    private String username;
     
     public long getTimestamp() {
         return timestamp;
@@ -85,7 +89,13 @@ public class ImportJob implements Serializable {
         this.userId = userId;
     }
 
-    private Map<String, String> properties = new HashMap();
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
     public String getArchive() {
         return archive;

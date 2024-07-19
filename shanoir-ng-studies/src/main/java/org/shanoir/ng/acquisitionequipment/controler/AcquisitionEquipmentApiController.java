@@ -23,6 +23,7 @@ import org.shanoir.ng.acquisitionequipment.dto.AcquisitionEquipmentDTO;
 import org.shanoir.ng.acquisitionequipment.dto.mapper.AcquisitionEquipmentMapper;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.service.AcquisitionEquipmentService;
+import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -54,11 +55,11 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 	private AcquisitionEquipmentService acquisitionEquipmentService;
 
 	@Autowired
-	ShanoirEventService eventService;
+	private ShanoirEventService eventService;
 
 	@Override
 	public ResponseEntity<Void> deleteAcquisitionEquipment(
-			@Parameter(name = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") final Long acquisitionEquipmentId) {
+			@Parameter(description = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") final Long acquisitionEquipmentId) {
 		try {
 			if (acquisitionEquipmentId.equals(0L)) {
 				throw new EntityNotFoundException("Cannot update unknown equipment");
@@ -73,7 +74,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 
 	@Override
 	public ResponseEntity<AcquisitionEquipmentDTO> findAcquisitionEquipmentById(
-			@Parameter(name = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") final Long acquisitionEquipmentId) {
+			@Parameter(description = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") final Long acquisitionEquipmentId) {
 		final AcquisitionEquipment equipment = acquisitionEquipmentService.findById(acquisitionEquipmentId).orElse(null);
 		if (equipment == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -93,7 +94,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 				acquisitionEquipmentMapper.acquisitionEquipmentsToAcquisitionEquipmentDTOs(equipments), HttpStatus.OK);
 	}
 	
-	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByCenter(@Parameter(name = "id of the center", required = true) @PathVariable("centerId") Long centerId) {
+	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByCenter(@Parameter(description = "id of the center", required = true) @PathVariable("centerId") Long centerId) {
 		final List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAllByCenterId(centerId);
 		if (equipments.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -102,7 +103,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 				acquisitionEquipmentMapper.acquisitionEquipmentsToAcquisitionEquipmentDTOs(equipments), HttpStatus.OK);
 	}
 	
-	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByStudy(@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByStudy(@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
 		List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAllByStudyId(studyId);
 		// Remove "unknown" equipment
 		equipments = equipments.stream().filter(equipment -> equipment.getId() != 0).collect(Collectors.toList());
@@ -115,7 +116,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 
 	@Override
 	public ResponseEntity<AcquisitionEquipmentDTO> saveNewAcquisitionEquipment(
-			@Parameter(name = "acquisition equipment to create", required = true) @RequestBody final AcquisitionEquipment acquisitionEquipment,
+			@Parameter(description = "acquisition equipment to create", required = true) @RequestBody final AcquisitionEquipment acquisitionEquipment,
 			final BindingResult result) throws RestServiceException {
 
 		validate(result);
@@ -135,8 +136,8 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 
 	@Override
 	public ResponseEntity<Void> updateAcquisitionEquipment(
-			@Parameter(name = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") final Long acquisitionEquipmentId,
-			@Parameter(name = "acquisition equipment to update", required = true) @RequestBody final AcquisitionEquipment acquisitionEquipment,
+			@Parameter(description = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") final Long acquisitionEquipmentId,
+			@Parameter(description = "acquisition equipment to update", required = true) @RequestBody final AcquisitionEquipment acquisitionEquipment,
 			final BindingResult result) throws RestServiceException {
 
 		validate(result);
@@ -179,4 +180,32 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 			}
 		}
 	}
+
+	@Override
+	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsBySerialNumber(
+			@Parameter(description = "serial number of the acquisition equipment", required = true) @PathVariable("serialNumber") final String serialNumber) {
+		List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAllBySerialNumber(serialNumber);
+		// Remove "unknown" equipment
+		equipments = equipments.stream().filter(equipment -> equipment.getId() != 0).collect(Collectors.toList());
+		if (equipments.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<>(
+				acquisitionEquipmentMapper.acquisitionEquipmentsToAcquisitionEquipmentDTOs(equipments), HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsOrCreateOneByEquipmentDicom(
+			@Parameter(description = "equipment dicom to find or create an equipment", required = true) @RequestBody final EquipmentDicom equipmentDicom,
+			final BindingResult result) {
+		List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAcquisitionEquipmentsOrCreateOneByEquipmentDicom(equipmentDicom);
+		// Remove "unknown" equipment
+		equipments = equipments.stream().filter(equipment -> equipment.getId() != 0).collect(Collectors.toList());
+		if (equipments.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<>(
+				acquisitionEquipmentMapper.acquisitionEquipmentsToAcquisitionEquipmentDTOs(equipments), HttpStatus.OK);
+	}
+
 }

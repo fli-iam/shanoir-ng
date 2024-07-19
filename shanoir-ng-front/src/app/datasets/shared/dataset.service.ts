@@ -24,13 +24,15 @@ import { Dataset } from './dataset.model';
 import { MrDataset } from '../dataset/mr/dataset.mr.model';
 import { DatasetUtils } from './dataset.utils';
 import {DatasetDTO, MrDatasetDTO, DatasetDTOService} from "./dataset.dto";
+import {BidsElement} from "../../bids/model/bidsElement.model";
 
-export type Format = 'eeg' | 'nii' | 'BIDS' | 'dcm';
+export type Format = 'nii' | 'dcm';
 
 @Injectable()
 export class DatasetService extends EntityService<Dataset> {
     
-    API_URL = AppUtils.BACKEND_API_DATASET_URL;
+    readonly API_URL = AppUtils.BACKEND_API_DATASET_URL;
+    readonly MAX_DATASETS_IN_ZIP_DL: number = 500;
 
     httpOptions = {
         headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -46,6 +48,18 @@ export class DatasetService extends EntityService<Dataset> {
     deleteAll(ids: number[]) {
         return this.http.request<void>('delete', this.API_URL + '/delete', { body: JSON.stringify(ids) })
                 .toPromise();
+    }
+
+    getBidsStructure(studyId: number): Promise<BidsElement> {
+        if (!studyId) throw Error('study id is required');
+        return this.http.get<BidsElement>(AppUtils.BACKEND_API_BIDS_STRUCTURE_URL + '/studyId/' + studyId)
+            .toPromise();
+    }
+
+    refreshBidsStructure(studyId: number, studyName: string): Promise<BidsElement> {
+        if (!studyId) throw Error('study id is required');
+        return this.http.get<BidsElement>(AppUtils.BACKEND_API_BIDS_REFRESH_URL + '/studyId/' + studyId + '/studyName/' + studyName)
+            .toPromise();
     }
 
     getEntityInstance(entity: Dataset) {
@@ -76,12 +90,6 @@ export class DatasetService extends EntityService<Dataset> {
                 .then(dtos => this.datasetDTOService.toEntityList(dtos));
     }
 
-    getByStudycardId(studycardId: number): Promise<Dataset[]> {
-        return this.http.get<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/studycard/' + studycardId)
-            .toPromise()
-            .then(dtos => this.datasetDTOService.toEntityList(dtos));
-    }
-
     getByStudyId(studyId: number): Promise<Dataset[]> {
         return this.http.get<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/study/' + studyId)
                 .toPromise()
@@ -105,30 +113,20 @@ export class DatasetService extends EntityService<Dataset> {
             .then(dtos => this.datasetDTOService.toEntityList(Array.from(dtos)));
     }
 
-    public downloadDatasets(ids: number[], format: string, state?: TaskState): Observable<TaskState> {
+    countDatasetsByStudyId(studyId: number): Promise<number> {
+        return this.http.get<number>(AppUtils.BACKEND_API_DATASET_URL + '/study/nb-datasets/' + studyId)
+        .toPromise();
+    }
+    
+    public downloadDatasets(ids: number[], format: string, converter ? : number, state?: TaskState): Observable<TaskState> {
         const formData: FormData = new FormData();
         formData.set('datasetIds', ids.join(","));
         formData.set("format", format);
+        if (converter) {
+            formData.set("converterId", "" + converter);
+        }
         const url: string = AppUtils.BACKEND_API_DATASET_URL + '/massiveDownload';
         return AppUtils.downloadWithStatusPOST(url, formData, state);
-    }
-
-    public downloadDatasetsByStudy(studyId: number, format: string, state?: TaskState): Observable<TaskState>  {
-        let params = new HttpParams().set("studyId", '' + studyId).set("format", format);
-        let url: string = AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByStudy';
-        return AppUtils.downloadWithStatusGET(url, params, state);
-    }
-
-    public downloadDatasetsByExamination(examinationId: number, format: string, state?: TaskState): Observable<TaskState>  {
-        let params = new HttpParams().set("examinationId", '' + examinationId).set("format", format);
-        let url: string = AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByExamination';
-        return AppUtils.downloadWithStatusGET(url, params, state);
-    }
-
-    public downloadDatasetsByAcquisition(acquisitionId: number, format: string, state?: TaskState): Observable<TaskState> {
-        let params = new HttpParams().set("acquisitionId", '' + acquisitionId).set("format", format);
-        let url: string = AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByAcquisition';
-        return AppUtils.downloadWithStatusGET(url, params, state);
     }
 
     downloadStatistics(studyNameInRegExp: string, studyNameOutRegExp: string, subjectNameInRegExp: string, subjectNameOutRegExp: string) {
@@ -146,27 +144,11 @@ export class DatasetService extends EntityService<Dataset> {
         )
     }
 
-    download(dataset: Dataset, format: Format, converterId: number = null): Promise<void> {
-        if (!dataset.id) throw Error('Cannot download a dataset without an id');
-        return this.downloadFromId(dataset.id, format, converterId);
-    }
-
     downloadDicomMetadata(datasetId: number): Promise<any> {
         return this.http.get(
             AppUtils.BACKEND_API_DATASET_URL + '/dicom-metadata/' + datasetId,
             { responseType: 'json' }
         ).toPromise();
-    }
-
-    downloadFromId(datasetId: number, format: string, converterId: number = null, state?: TaskState): Promise<void> {
-        if (!datasetId) throw Error('Cannot download a dataset without an id');
-        return this.downloadToBlob(datasetId, format, converterId).then(
-            response => {
-                this.downloadIntoBrowser(response);
-            }
-        ).catch(error => {
-            this.errorService. handleError(error);
-        });
     }
 
     downloadToBlob(id: number, format: string, converterId: number = null): Promise<HttpResponse<Blob>> {
@@ -175,28 +157,6 @@ export class DatasetService extends EntityService<Dataset> {
             AppUtils.BACKEND_API_DATASET_URL + '/download/' + id + '?format=' + format + (converterId ? ('&converterId=' + converterId) : ''),
             { observe: 'response', responseType: 'blob' }
         ).toPromise();
-    }
-
-    exportBIDSBySubjectId(subjectId: number, subjectName: string, studyName: string): void {
-        if (!subjectId) throw Error('subject id is required');
-        this.http.get(AppUtils.BACKEND_API_DATASET_URL + '/exportBIDS/subjectId/' + subjectId
-            + '/subjectName/' + subjectName + '/studyName/' + studyName,
-            { observe: 'response', responseType: 'blob' }
-        ).toPromise().then(response => {this.downloadIntoBrowser(response);});
-    }
-
-    getUrls(id: number): Observable<HttpResponse<any>> {
-        if (!id) throw Error('Cannot get the urls of a dataset without an id');
-        return this.http.get<any>(AppUtils.BACKEND_API_DATASET_URL + '/urls/' + id);
-    }
-
-    prepareUrl(id: number, url: string, format: string): Observable<any> {
-        if (!id) throw Error('Cannot get the urls of a dataset without an id');
-        // return this.http.get<any>(AppUtils.BACKEND_API_DATASET_URL + '/urls/' + id + '/url/?url=' + url + '&format=' + format);
-
-        let httpOptions: any = Object.assign( { responseType: 'text' }, this.httpOptions);
-
-        return this.http.post<string>(`${AppUtils.BACKEND_API_DATASET_URL}/prepare-url/${encodeURIComponent(id)}?format=${encodeURIComponent(format)}`, { url: url }, httpOptions);
     }
 
     private downloadIntoBrowser(response: HttpResponse<Blob>){

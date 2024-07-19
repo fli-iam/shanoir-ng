@@ -127,7 +127,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
 
     protected getContext(): EegContextData {
         return new EegContextData(this.study, null, false, this.center, this.acquisitionEquipment,
-            this.subject, this.examination, null, this.coordsystem, null, null, null, null, null, null);
+            this.subject, this.examination, this.coordsystem, null, null, null, null, null, null);
     }
 
     get valid(): boolean {

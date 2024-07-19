@@ -26,7 +26,9 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -62,7 +64,7 @@ public class BrukerApiControllerTest {
 	private MockMvc mvc;
 
 	@MockBean
-	private RestTemplate restTemplate;
+	RabbitTemplate rabbitTemplate;
 
 	@TempDir
 	public File tempFolder;
@@ -79,7 +81,8 @@ public class BrukerApiControllerTest {
 	@WithMockUser
 	public void uploadBrukerFileTest() throws Exception {
 		String r = "test";
-		given(restTemplate.exchange(Mockito.anyString(), Mockito.any(), Mockito.any(HttpEntity.class), ArgumentMatchers.<Class<String>>any())).willReturn(new ResponseEntity<>(r, HttpStatus.OK));
+		given(rabbitTemplate.convertSendAndReceive(Mockito.eq(RabbitMQConfiguration.BRUKER_CONVERSION_QUEUE), Mockito.anyString())).willReturn(true);
+
 		MockMultipartFile firstFile = new MockMultipartFile("files", "2dseq", "text/plain", "some xml".getBytes());
 		mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH_UPLOAD_BRUKER).file(firstFile))
 				.andExpect(status().isOk());

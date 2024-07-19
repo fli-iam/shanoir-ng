@@ -16,7 +16,7 @@
 	<parent>
 		<groupId>org.shanoir-ng</groupId>
 		<artifactId>shanoir-ng-back</artifactId>
-		<version>3.1.2</version>
+		<version>3.2.2</version>
 		<relativePath>../shanoir-ng-back</relativePath>
 	</parent>
 
@@ -35,22 +35,22 @@
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-ms-common</artifactId>
-			<version>3.1.2</version>
+			<version>3.2.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-study-rights</artifactId>
-			<version>3.1.2</version>
+			<version>3.2.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.shanoir.anonymization</groupId>
 			<artifactId>anonymization</artifactId>
-			<version>3.1.2</version>
+			<version>3.2.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-exchange</artifactId>
-			<version>3.1.2</version>
+			<version>3.2.2</version>
 		</dependency>
 
 		<dependency>
@@ -161,12 +161,6 @@
 							<target>
 								<copy file="target/${project.build.finalName}-exec.jar"
 									tofile="${basedir}/../docker-compose/import/${project.artifactId}.jar" />
-								<copy file="../utils/entrypoint_common"
-									tofile="${basedir}/../docker-compose/import/entrypoint_common" />
-								<copy file="../utils/oneshot"
-									tofile="${basedir}/../docker-compose/import/oneshot" />
-								<chmod perm="+x"
-									file="${basedir}/../docker-compose/import/oneshot" />
 							</target>
 						</configuration>
 						<goals>

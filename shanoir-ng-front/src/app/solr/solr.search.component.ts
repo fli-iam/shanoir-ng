@@ -12,12 +12,12 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { formatDate } from '@angular/common';
-import { AfterContentInit, Component, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { AfterContentInit, Component, ComponentRef, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
-import { DatasetService, Format } from '../datasets/shared/dataset.service';
+import { DatasetService } from '../datasets/shared/dataset.service';
 import { slideDown } from '../shared/animations/animations';
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
 
@@ -25,8 +25,7 @@ import { AfterViewChecked } from "@angular/core";
 import { environment } from "../../environments/environment";
 import { DatasetAcquisition } from '../dataset-acquisitions/shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../dataset-acquisitions/shared/dataset-acquisition.service';
-import { ProcessingService } from '../processing/processing.service';
-import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
+import { ExecutionDataService } from '../vip/execution.data-service';
 import { ColumnDefinition } from '../shared/components/table/column.definition.type';
 import { Page, Pageable } from "../shared/components/table/pageable.model";
 import { TableComponent } from "../shared/components/table/table.component";
@@ -41,9 +40,13 @@ import { FacetPreferences, SolrPagingCriterionComponent } from './criteria/solr.
 import { FacetField, FacetPageable, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
 import { SolrService } from "./solr.service";
 import { Clipboard } from '@angular/cdk/clipboard';
+import {StudyService} from "../studies/shared/study.service";
+import {Study} from "../studies/shared/study.model";
+import {ServiceLocator} from "../utils/locator.service";
 import { TaskState } from '../async-tasks/task.model';
+import {DatasetCopyDialogComponent} from "../shared/components/dataset-copy-dialog/dataset-copy-dialog.component";
 
-const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags'];
+const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags', 'processed'];
 const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength'];
 export type TextualFacet = typeof TextualFacetNames[number];
 @Component({
@@ -68,6 +71,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     selectedDatasetIds: Set<number> = new Set();
     syntaxError: boolean = false;
     dateOpen: boolean = false;
+    public downloadState: TaskState = new TaskState();
     datasetStudymap: Map<number, number> = new Map();
 
     tab: 'results' | 'selected' = 'results';
@@ -79,12 +83,18 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     canDownload: boolean = true;
     solrRequest: SolrRequest = new SolrRequest();
     private facetPageable: Map<string, FacetPageable>;
+    contentPage: SolrResultPage[] = [];
+
+    studies: Study[];
+    selectedStudies: string[]=[];
+    hasCopyRight: boolean = false;
+    selectedLines: SolrDocument[]=[];
 
     constructor(
             private breadcrumbsService: BreadcrumbsService, private formBuilder: UntypedFormBuilder,
             private solrService: SolrService, private router: Router, private datasetService: DatasetService, private datasetAcquisitionService: DatasetAcquisitionService,
             private keycloakService: KeycloakService, private studyRightsService: StudyRightsService, private downloadService: MassDownloadService, private clipboard: Clipboard,
-            private confirmDialogService: ConfirmDialogService, private consoleService: ConsoleService, private processingService: ProcessingService) {
+            private confirmDialogService: ConfirmDialogService, private consoleService: ConsoleService, private processingService: ExecutionDataService, private studyService: StudyService) {
 
         this.getRole();
         if (this.role != 'admin') this.getRights();
@@ -97,6 +107,9 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         this.selectionColumnDefs = this.getSelectionColumnDefs();
         this.customActionDefs = this.getCustomActionsDefs();
         this.selectionCustomActionDefs = this.getSelectionCustomActionsDefs();
+        this.studyService.getAll().then(studies => {
+            this.studies = studies;
+        });
 
         let input: string = this.router.getCurrentNavigation().extras && this.router.getCurrentNavigation().extras.state ? this.router.getCurrentNavigation().extras.state['input'] : null;
         if (input) {
@@ -120,8 +133,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
 
     hasAdminRight(studyId: number) {
         if (this.role == 'admin') return true;
-        else if (this.role == 'user') return false;
-        else if (this.role == 'expert') return this.rights && this.rights.has(studyId) && this.rights.get(studyId).includes(StudyUserRight.CAN_ADMINISTRATE);
+        else return this.rights && this.rights.has(studyId) && this.rights.get(studyId).includes(StudyUserRight.CAN_ADMINISTRATE);
     }
 
     hasDownloadRight(studyId: number) {
@@ -146,7 +158,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     buildForm(): UntypedFormGroup {
-        const searchBarRegex = '^((studyName|subjectName|datasetName|examinationComment|datasetTypes|datasetNatures|acquisitionEquipmentName)[:][*]?[a-zA-Z0-9\\s_\W\.\!\@\#\$\%\^\&\*\(\)\_\+\-\=]+[*]?[;])+$';
+        const searchBarRegex = '^((studyName|subjectName|datasetName|examinationComment|datasetTypes|processed|datasetNatures|acquisitionEquipmentName)[:][*]?[a-zA-Z0-9\\s_\W\.\!\@\#\$\%\^\&\*\(\)\_\+\-\=]+[*]?[;])+$';
         let formGroup = this.formBuilder.group({
             'startDate': [this.solrRequest.datasetStartDate, [DatepickerComponent.validator]],
             'endDate': [this.solrRequest.datasetEndDate, [DatepickerComponent.validator, this.dateOrderValidator]],
@@ -266,11 +278,12 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         if (this.form.valid) {
             this.saveState();
             this.solrRequest.facetPaging = this.facetPageable ? this.facetPageable : this.buildFacetPageable();
-            return this.solrService.search(this.solrRequest, pageable).then(solrResultPage => {
+            let facetPagingTmp: Map<String, FacetPageable> = new Map(this.solrRequest.facetPaging); // shallow copy
+            let search = this.solrService.search(this.solrRequest, pageable).then(solrResultPage => {
                 // populate criteria
                 if (solrResultPage) {
                     this.pagingCriterion.forEach(criterionComponent => {
-                        if (this.solrRequest.facetPaging.has(criterionComponent.facetName)) {
+                        if (facetPagingTmp?.has(criterionComponent.facetName)) {
                             let facetPage: FacetResultPage = solrResultPage.facetResultPages.find(facetResPage => facetResPage.content[0]?.key?.name == criterionComponent.facetName)
                             if (!facetPage) facetPage = new FacetResultPage();
                             criterionComponent.refresh(facetPage);
@@ -278,16 +291,18 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                     });
                 }
                 this.firstPageLoaded = true;
+                this.contentPage.push(solrResultPage);
+
                 return solrResultPage;
             }).catch(reason => {
                 if (reason?.error?.code == 422 && reason.error.message == 'solr query failed') {
                     this.syntaxError = true;
                     return new SolrResultPage();
                 } else throw reason;
-            }).finally(() => {
-                this.solrRequest.facetPaging = null;
-                this.facetPageable = null;
             });
+            this.solrRequest.facetPaging = null;
+            this.facetPageable = null;
+            return search;
         } else {
             return Promise.resolve(new SolrResultPage());
         }
@@ -348,7 +363,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                 'Are you sure you want to delete ' + this.selectedDatasetIds.size + ' dataset(s) ?'
             ).then(res => {
                 if (res) {
-                    this.datasetService.deleteAll([...this.selectedDatasetIds]).then(() => {
+                    this.datasetService.deleteAll([...this.selectedDatasetIds]).then((deleted) => {
                         this.selectedDatasetIds = new Set();
                         if (this.tab == 'selected') this.selectionTable.refresh();
                         this.table.refresh().then(() => {
@@ -361,6 +376,11 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                                 + 'You cannot delete those datasets. Please select only datasets that you can administrate (see the yellow shield icon) and try again. '
                                 +' If you really need to delete those datasets, contact an administrator for the corresponding study '
                                 + ' and ask him to grant you the administrator role in the study.');
+                        }
+                        if(reason?.status == 422) {
+                            let warn = 'At least on of the selected dataset is linked to other entities, it was not deleted.';
+                            this.consoleService.log('warn', warn);
+                            return false;
                         } else throw Error(reason);
                     });
                 }
@@ -404,26 +424,35 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         let columnDefs: ColumnDefinition[] = [
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {headerName: "Admin", type: "boolean", cellRenderer: row => this.hasAdminRight(row.data.studyId), awesome: "fa-solid fa-shield", color: "goldenrod", disableSorting: true},
+            {headerName: "", type: "boolean", cellRenderer: row => row.data.processed, awesome: "fa-solid fa-gears", color: "dimgrey", disableSorting: true, tip: item => { return item.processed ? "processed dataset" : "" }},
             {headerName: "Name", field: "datasetName"},
-            {headerName: "Tags", field: "tags"},
+            {headerName: "Tags", field: "tags", cellRenderer: (params: any) => {
+                    return params?.data?.tags ? params.data.tags.join(', ') : '';
+                }},
             {headerName: "Type", field: "datasetType"},
             {headerName: "Nature", field: "datasetNature"},
-            {headerName: "Creation", field: "datasetCreationDate", type: "date", hidden: true, cellRenderer: (params: any) => dateRenderer(params.data.datasetCreationDate)},
+            {headerName: "Series date", field: "datasetCreationDate", type: "date", hidden: true, cellRenderer: (params: any) => dateRenderer(params.data.datasetCreationDate)},
             {headerName: "Study", field: "studyName",
                 route: item => '/study/details/' + item.studyId
             },
             {headerName: "Subject", field: "subjectName",
                 route: item => '/subject/details/' + item.subjectId
             },
-            {headerName: "Center", field: "centerName",
+            {headerName: "Acquisition Center", field: "centerName",
                 route: item => '/center/details/' + item.centerId
             },
             {headerName: "Exam", field: "examinationComment",
                 route: item => '/examination/details/' + item.examinationId
             },
             {headerName: "Exam Date", field:"examinationDate", type: "date", cellRenderer: (params: any) => {
-                return dateRenderer(params.data.examinationDate);
-              }},
+                    return dateRenderer(params.data.examinationDate);
+                }
+            },
+            {headerName: "Import Date", field:"importDate", type: "date", cellRenderer: (params: any) => {
+                    return dateRenderer(params.data.importDate);
+                }
+            },
+            {headerName: "Imported by", field:"username"},
             {headerName: "Slice", field: "sliceThickness"},
             {headerName: "Pixel", field: "pixelBandwidth"},
             {headerName: "Mag. strength", field: "magneticFieldStrength"},
@@ -453,7 +482,9 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         columnDefs.unshift({ headerName: "", type: "button", awesome: "fa-solid fa-ban", action: item => {
             this.selectedDatasetIds.delete(item.id);
             this.selectionTable.refresh();
+            this.prepareForCopy();
         }})
+
         return columnDefs;
     }
 
@@ -465,7 +496,8 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoSelected: true},
             {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode() ,disabledIfNoSelected: true },
             {title: "Download", awesome: "fa-solid fa-download", action: () => this.downloadSelected(), disabledIfNoSelected: true},
-            {title: "Copy selected ids", awesome: "fa-solid fa-copy", action: () => this.copyIds(), disabledIfNoSelected: true }
+            {title: "Copy selected ids", awesome: "fa-solid fa-copy", action: () => this.copyIds(), disabledIfNoSelected: true },
+            {title: "Copy to study", awesome: "fa-solid fa-copy", action: () => this.copyToStudy(), disabledIfNoSelected: true }
         );
         return customActionDefs;
     }
@@ -481,14 +513,15 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {title: "Delete selected", awesome: "fa-regular fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoResult: true},
             {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoResult: true},
             {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode() ,disabledIfNoResult: true },
-            {title: "Download", awesome: "fa-solid fa-download", action: () => this.downloadSelected(), disabledIfNoSelected: true},
-            {title: "Copy selected ids", awesome: "fa-solid fa-copy", action: () => this.copyIds(), disabledIfNoSelected: true }
+            {title: "Download", awesome: "fa-solid fa-download", action: () => this.downloadSelected(), disabledIfNoResult: true},
+            {title: "Copy selected ids", awesome: "fa-solid fa-copy", action: () => this.copyIds(), disabledIfNoResult: true },
+            {title: "Copy to study", awesome: "fa-solid fa-copy", action: () => this.copyToStudy(), disabledIfNoResult: true }
         );
         return customActionDefs;
     }
     downloadSelected() {
         if (this.selectedDatasetIds && this.canDownload) {
-            this.downloadService.downloadByIds([...this.selectedDatasetIds]);
+            this.downloadService.downloadByIds([...this.selectedDatasetIds], this.downloadState);
         } else {
             this.consoleService.log('error', "Could not download data, please check your right on the studies for these datasets.")
         }
@@ -513,6 +546,28 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         this.canDownload = downloadable;
 
         this.selectedDatasetIds = selection;
+        this.prepareForCopy();
+    }
+
+    prepareForCopy() {
+        // Fill arrays with needed info for "copy to study" action
+        this.selectedStudies = [];
+        this.selectedLines = [];
+        this.hasCopyRight = false;
+        for (let page of this.contentPage) {
+            for (let line of page.content) {
+                if (this.selectedDatasetIds.has(Number(line.datasetId))) {
+                    this.selectedLines.push(line);
+                    if (!this.selectedStudies.includes(line.studyId)) {
+                        this.selectedStudies.push(line.studyId);
+                    }
+                }
+            }
+        }
+        this.hasCopyRight = this.selectedStudies.every(data => {
+            return (this.hasAdminRight(Number(data)) == true)
+        });
+        if (this.selectedDatasetIds.size == 0) this.hasCopyRight = false;
     }
 
     rowClick(item): string {
@@ -544,7 +599,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                     + 'Remove datasets that belongs to the following study(ies) from your selection : ' + [...noAdminStudies].join(', '));
             }else{
                 this.processingService.setDatasets(this.selectedDatasetIds);
-                this.router.navigate(['/processing']);
+                this.router.navigate(['pipelines']);
             }
         });
     }
@@ -553,6 +608,21 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         this.clipboard.copy(Array.from(this.selectedDatasetIds || []).toString());
     }
 
+    copyToStudy() {
+        let modalRef: ComponentRef<DatasetCopyDialogComponent> = ServiceLocator.rootViewContainerRef.createComponent(DatasetCopyDialogComponent);
+        modalRef.instance.title = "Copy of datasets to study";
+        modalRef.instance.studies = this.studies;
+        modalRef.instance.datasetsIds = Array.from(this.selectedDatasetIds);
+        modalRef.instance.message = "You need admin rights on dataset's study AND destination study. Also, note that the dataset's center will be added to destination study.";
+        modalRef.instance.statusMessage = 'Ready';
+        modalRef.instance.ownRef = modalRef;
+        modalRef.instance.canCopy = this.hasCopyRight;
+        modalRef.instance.lines = this.selectedLines;
+    }
+
+    private isProcessed(doc: SolrDocument) {
+        return doc.processed == true;
+    }
 }
 
 export interface SelectionBlock {
@@ -571,7 +641,8 @@ export class SimpleValueSelectionBlock implements SelectionBlock {
 
 export class FacetSelectionBlock implements SelectionBlock {
 
-    constructor(private facetField: FacetField) {}
+    constructor(private facetField: FacetField) {
+    }
 
     get label(): string {
         return this.facetField.value;

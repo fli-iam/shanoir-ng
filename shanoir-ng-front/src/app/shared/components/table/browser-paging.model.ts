@@ -76,15 +76,15 @@ export class BrowserPaging<T> {
     /**
      * Sort items by col, then by id
      */
-    private sortItemsByCol(items: T[], col: any, asc: boolean): T[] {
+    private sortItemsByCol(items: T[], col: ColumnDefinition, asc: boolean): T[] {
         // Some columns are incompatible with sorting
-        if (col["disableSorting"] || col["type"] == "button") {
+        if (col.disableSorting || col.type == "button") {
             return;
         }
         // Regarding the data type, we set a neg infinity because unless this,
         // null values can't be compared
         let negInf: any;
-        switch (col["type"]) {
+        switch (col.type) {
             case "number":
                 negInf = -1 * Infinity;
                 break;
@@ -98,10 +98,13 @@ export class BrowserPaging<T> {
         items.sort((n1, n2) => {
             let cell1 = TableComponent.getCellValue(n1, col);
             let cell2 = TableComponent.getCellValue(n2, col);
-            if (col["type"] == "date" || col["type"] == "number") {
+            if (col.type == "number") {
                 // Real value for date
-                cell1 = TableComponent.getFieldRawValue(n1, col["field"])
-                cell2 = TableComponent.getFieldRawValue(n2, col["field"])
+                cell1 = TableComponent.getFieldRawValue(n1, col.field)
+                cell2 = TableComponent.getFieldRawValue(n2, col.field)
+            } else if ((col.type == "date" || col.type == "dateTime") && !col.cellRenderer) {
+                cell1 = TableComponent.harmonizeToDate(cell1)?.getTime();
+                cell2 = TableComponent.harmonizeToDate(cell2)?.getTime();
             }
             // If equality, test the id so the order is always the same
             if (cell1 == cell2) {

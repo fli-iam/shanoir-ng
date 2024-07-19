@@ -19,21 +19,28 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.examination.service.ExaminationServiceImpl;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.service.SecurityService;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.util.*;
@@ -59,6 +66,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     @Autowired
     private DatasetService datasetService;
 
+    private static final Logger LOG = LoggerFactory.getLogger(DatasetAcquisitionServiceImpl.class);
     @Override
     public List<DatasetAcquisition> findByStudyCard(Long studyCardId) {
         if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
@@ -174,20 +182,33 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
     @Override
     @Transactional
-    public void deleteById(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException {
+    public void deleteById(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException {
         final DatasetAcquisition entity = repository.findById(id).orElse(null);
         if (entity == null) {
             throw new EntityNotFoundException("Cannot find entity with id = " + id);
         }
-        // Remove from solr index and PACS
-        if (entity.getDatasets() != null) {
-            for (Dataset ds : entity.getDatasets()) {
-                solrService.deleteFromIndex(ds.getId());
-                datasetService.deleteDatasetFromPacs(ds);
+
+        // Do not delete entity if it is the source. If getSourceId() is not null, it means it's a copy
+        List<DatasetAcquisition> childDsAc = repository.findBySourceId(id);
+        if (!CollectionUtils.isEmpty(childDsAc)) {
+            throw new RestServiceException(
+                    new ErrorModel(
+                            HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                            "This datasetAcquisition is linked to another datasetAcquisition that was copied."
+                    ));
+        } else {
+            List<Dataset> datasets = entity.getDatasets();
+            if (datasets != null) {
+                List<Long> datasetIds = new ArrayList<>();
+                for (Dataset ds : datasets) {
+                    datasetIds.add(ds.getId());
+                    datasetService.deleteById(ds.getId());
+                }
+                if (!datasetIds.isEmpty()) solrService.deleteFromIndex(datasetIds);
             }
+            repository.deleteById(id);
+            shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
         }
-        repository.deleteById(id);
-        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
     }
     
     @Override

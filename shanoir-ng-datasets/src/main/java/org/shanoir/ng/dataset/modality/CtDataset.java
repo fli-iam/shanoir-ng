@@ -35,7 +35,14 @@ public class CtDataset extends Dataset {
 //	private String imageFlavor;
 //	
 //	private String derivedPixelContrast;
-	
+
+	public CtDataset() {
+	}
+
+	public CtDataset(Dataset other) {
+		super(other);
+	}
+
 	/**
 	 * UID
 	 */

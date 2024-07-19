@@ -26,6 +26,8 @@ export enum TaskStatus {
 
 export class TaskState {
 
+    errors: any;
+
     constructor(public status?: TaskStatus, public progress?: number) {}
 
     isActive(): boolean {
@@ -49,7 +51,8 @@ export class Task extends Entity {
     objectId: number;
     route: string;
     hasReport: boolean;
-    private readonly FIELDS: string[] = ['id', 'creationDate', 'lastUpdate','_status','_message', '_progress', '_eventType', 'eventLabel', 'objectId', 'route', 'report'];
+    sessionId: string;
+    private readonly FIELDS: string[] = ['id', 'creationDate', 'lastUpdate','_status','_message', '_progress', '_eventType', 'eventLabel', 'objectId', 'route', 'report', 'sessionId'];
 
     set eventType(eventType: string) {
         this._eventType = eventType;
@@ -95,15 +98,19 @@ export class Task extends Entity {
             } else if (this.message.indexOf('dataset [') != -1) {
                 let substring = this.message.match(/dataset \[\d+\]/g)[0];
                 return '/dataset/details/' + substring.slice(substring.lastIndexOf("[") + 1, substring.lastIndexOf("]"));
-            } else if (this.message.indexOf('VIP Execution') != -1) {
-               return '/dataset-processing/details/' + this.objectId
             }
+        } else if (this.eventType === 'executionMonitoring.event' && this.status != -1) {
+            return '/dataset-processing/details/' + this.objectId
+        } else if (this.eventType === 'solrIndexAll.event' && this.status != -1) {
+            return '/solr-search';
+        } else if (this.eventType === 'copyDataset.event' && this.status != -1 && this.message.lastIndexOf('study [') != -1) {
+            return '/study/details/' + this.message.slice(this.message.lastIndexOf("[") + 1, this.message.lastIndexOf("]"));
         }
         return null;
     }
 
     stringify(): string {
-        return JSON.stringify(this, this.FIELDS); 
+        return JSON.stringify(this, this.FIELDS);
     }
 
     clone(): Task {

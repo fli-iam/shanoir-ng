@@ -25,8 +25,9 @@ spring:
     username: import
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari.maximum-pool-size: 40
+    hikari.minimum-idle: 40
   jpa:
-    database-platform: org.hibernate.dialect.MySQL57Dialect
     defer-datasource-initialization: true
     generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
     hibernate:
@@ -49,6 +50,9 @@ spring:
     init:
       data-locations: classpath:/scripts/import.sql
       mode: never
+  threads:
+    virtual:
+      enabled: true
 ##### Others #####
   jackson:
     mapper:
@@ -75,10 +79,13 @@ spring:
 
 springdoc:
   api-docs:
-    path: /api-docs
-  swagger-ui:
-    path: /swagger-ui.html
+    path: '/api-docs'
     enabled: true
+  swagger-ui:
+    url: /shanoir-ng/import/api-docs
+    config-url: /shanoir-ng/import/api-docs/swagger-config
+    enabled: true
+    disable-swagger-default-url: true
 
 front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
@@ -88,7 +95,6 @@ front.server:
 ms.url:
   shanoir-ng-datasets: http://${SHANOIR_PREFIX}datasets:9904/datasetacquisition
   shanoir-ng-datasets-eeg: http://${SHANOIR_PREFIX}datasets:9904/datasetacquisition_eeg
-  dicom2nifti: http://${SHANOIR_PREFIX}preclinical-bruker2dicom:5000/dicom2nifti
   shanoir-ng-studies-name: http://${SHANOIR_PREFIX}studies:9902/studies/names
   shanoir-ng-studies-subjects-names: http://${SHANOIR_PREFIX}studies:9902/subjects/names
   shanoir-ng-create-examination: http://${SHANOIR_PREFIX}datasets:9904/examinations
@@ -130,13 +136,6 @@ shanoir:
       # this long name has been kept, as Elise and Isabelle know it like this; to find it for further adaptions in later time
       # Also during the nifti conversion, it will be reconstructed as 4D volumes.
       seriesProperties: seriesDescription==*ASL*;seriesDescription==*asl*;protocolName==*ASL*;seriesDescription==*VIBE*DYN*;seriesDescription==*MoCoSeries*;seriesDescription==*DIFF*;seriesDescription==*Diff*;seriesDescription==*diff*;seriesDescription==*DTI*;seriesDescription==*DWI*;seriesDescription==*PERF*;seriesDescription==*Perf*;seriesDescription==*perf*;seriesDescription==*BOLD*;seriesDescription==*Bold*;seriesDescription==*bold*;seriesDescription==*intermediate t-Map*;protocolName==*DYN*;protocolName==*Dyn*;protocolName==*dyn*;seriesDescription==*QSM*;seriesDescription==*qsm*;seriesDescription==*RELAXO*;seriesDescription==*relaxo*;seriesDescription==*Relaxo*;seriesDescription==IRMF;protocolName==IRMF;seriesDescription==*mc*gse*;protocolName==*mc*gse*;seriesDescription==*MULTIGRE*;protocolName==*MULTIGRE*;seriesDescription==*multigre*;protocolName==*multigre*;seriesDescription==*Multigre*;protocolName==*Multigre*;
-  conversion:
-    converters:
-      path: /opt/nifti-converters/
-        # Format "tag==value;". If in the serie, the dicom value equals the "value" for the "tag", then use clidcm instead of dcmnii to convert from dicom to nifti
-      convertwithclidcm: seriesDescription==*Diff*;seriesDescription==*DIFF*;seriesDescription==*diff*;seriesDescription==*DTI*;seriesDescription==*DWI*;seriesDescription==*PERF*;seriesDescription==*Perf*;seriesDescription==*perf*; 
-        # Format "tag==value;". If in the serie, the dicom value equals the "value" for the "tag", then output niftii file will be reconstructed as 4D volumes
-      mriconverter: "/opt/nifti-converters/mriconverter/MRIFileManager/MRIManager.jar"
 
 ---
 
@@ -165,13 +164,15 @@ spring:
   sql:
     init:
       mode: always
+  threads:
+    virtual:
+      enabled: true
 front.server:
   address: https://shanoir-ng-nginx/shanoir-ng/
   url: https://shanoir-ng-nginx
 ms.url:
   shanoir-ng-datasets: http://localhost:9904/datasetacquisition
   shanoir-ng-datasets-eeg: http://localhost:9904/datasetacquisition_eeg
-  dicom2nifti: http://localhost:5000/dicom2nifti
   shanoir-ng-studies-name: http://localhost:9902/studies/names
   shanoir-ng-studies-subjects-names: http://localhost:9902/subjects/names
   shanoir-ng-create-examination: http://localhost:9904/examinations
@@ -219,8 +220,8 @@ spring:
   datasource:
     url: jdbc:h2:mem:SHANOIR_NG_IMPORT;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;DATABASE_TO_UPPER=false
     username: sa
-    password: 
-    driver-class-name: org.h2.Driver
+    password:
+    driverClassName: org.h2.Driver
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     defer-datasource-initialization: true

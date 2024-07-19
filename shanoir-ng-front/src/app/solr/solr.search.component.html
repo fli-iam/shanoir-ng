@@ -54,6 +54,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </solr-paging-criterion>
 
         <solr-paging-criterion
+            label="Processed Dataset"
+            awesome="fa-solid fa-gears"
+            facetName="processed"
+            [getPage]="getFacetFieldPage.bind(this)"
+            [(ngModel)]="solrRequest.processed"
+            [ngModelOptions]="{standalone: true}"
+            (onChange)="updateSelections(); refreshTable('processed')">
+        </solr-paging-criterion>
+
+        <solr-paging-criterion
                 label="Tags"
                 awesome="fa-solid fa-tags"
                 facetName="tags"
@@ -96,7 +106,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </solr-paging-criterion>
 
         <solr-paging-criterion
-                label="Center"
+                label="Acquisition Center"
                 awesome="fa-regular fa-hospital"
                 facetName="centerName"
                 [getPage]="getFacetFieldPage.bind(this)"
@@ -126,7 +136,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </solr-paging-criterion>
 
         <solr-paging-criterion
-            label="Acquisition equipment"
+            label="Center equipment"
             awesome="fa-solid fa-x-ray"
             facetName="acquisitionEquipmentName"
             [getPage]="getFacetFieldPage.bind(this)"

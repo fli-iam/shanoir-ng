@@ -15,9 +15,11 @@
 package org.shanoir.ng.dataset.repository;
 
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.tag.model.StudyTag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+//import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -26,12 +28,34 @@ import java.util.List;
 
 public interface DatasetRepository extends PagingAndSortingRepository<Dataset, Long>, CrudRepository<Dataset, Long>, DatasetRepositoryCustom {
 
+	@Query(value="SELECT COUNT(*) FROM dataset as ds " +
+			"INNER JOIN dataset_acquisition as acq ON ds.dataset_acquisition_id=acq.id " +
+			"INNER JOIN examination as ex ON acq.examination_id=ex.id " +
+			"WHERE ds.source_id=:datasetParentId AND ex.study_id=:studyId", nativeQuery = true)
+	Long countDatasetsBySourceIdAndStudyId(Long datasetParentId, Long studyId);
+
+	List<Dataset> findBySourceId(Long sourceDatasetId);
+
+	List<Dataset> findBySourceIdIn(List<Long> sourceDatasetId);
+
 	Page<Dataset> findByDatasetAcquisitionExaminationStudy_IdIn(Iterable<Long> studyIds, Pageable pageable);
 
 	Iterable<Dataset> findByDatasetAcquisitionExaminationStudy_IdIn(Iterable<Long> studyIds, Sort sort);
 
 	Iterable<Dataset> findByDatasetAcquisition_Examination_Study_Id(Long studyId);
-	
+
+	int countByDatasetAcquisition_Examination_Study_Id(Long studyId);
+
+	@Query(value = "SELECT ds.id FROM dataset ds " +
+			"INNER JOIN dataset_acquisition acq ON ds.dataset_acquisition_id = acq.id " +
+			"INNER JOIN examination ex ON acq.examination_id = ex.id " +
+			"WHERE ex.study_id = ?1", nativeQuery = true)
+	List<Long> findIdsByStudyId(Long studyId);
+
+	@Query(value = "SELECT ds.id FROM dataset ds " +
+			"WHERE ds.subject_id IN (?1)", nativeQuery = true)
+	List<Long> findIdsBySubjectIdIn(List<Long> subjectIds);
+
 	Iterable<Dataset> findByDatasetAcquisitionId(Long acquisitionId);
 	
 	Iterable<Dataset> findBydatasetAcquisitionStudyCardId(Long studycardId);
@@ -51,4 +75,8 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 			"WHERE expr.dataset.datasetAcquisition.examination.study.id in (:studyIds) AND expr.size IS NOT NULL " +
 			"GROUP BY expr.dataset.datasetAcquisition.examination.study.id, expr.datasetExpressionFormat")
 	List<Object[]> findExpressionSizesTotalByStudyIdGroupByFormat(List<Long> studyIds);
+
+    List<Dataset> deleteByDatasetProcessingId(Long id);
+
+	boolean existsByTagsContains(StudyTag tag);
 }

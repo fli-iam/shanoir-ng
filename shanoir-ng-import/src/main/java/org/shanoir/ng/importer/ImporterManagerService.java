@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.shanoir.anonymization.anonymization.AnonymizationServiceImpl;
-import org.shanoir.ng.importer.dcm2nii.DatasetsCreatorAndNIfTIConverterService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.query.DicomStoreSCPServer;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
@@ -91,9 +90,6 @@ public class ImporterManagerService {
 	private ImagesCreatorAndDicomFileAnalyzerService imagesCreatorAndDicomFileAnalyzer;
 		
 	@Autowired
-	private DatasetsCreatorAndNIfTIConverterService datasetsCreatorAndNIfTIConverter;
-	
-	@Autowired
     private RabbitTemplate rabbitTemplate;
 	
 	@Autowired
@@ -101,6 +97,9 @@ public class ImporterManagerService {
 
 	@Autowired
 	private ShanoirEventService eventService;
+	
+	@Autowired
+	private DatasetsCreatorService datasetsCreatorService;
 	
 	@Autowired
 	StudyUserRightsRepository studyUserRightRepo;
@@ -114,6 +113,7 @@ public class ImporterManagerService {
 	    event.setTimestamp(importJob.getTimestamp());
 		eventService.publishEvent(event);
 		importJob.setShanoirEvent(event);
+		importJob.setUsername(KeycloakUtil.getTokenUserName());
 		try {
 			// Always create a userId specific folder in the import work folder (the root of everything):
 			// split imports to clearly separate them into separate folders for each user
@@ -161,8 +161,8 @@ public class ImporterManagerService {
 				if (!importJob.isFromShanoirUploader()) {
 					pseudonymize(importJob, event, importJobDir, patient);
 				}
-				Long converterId = importJob.getConverterId();
-				datasetsCreatorAndNIfTIConverter.createDatasetsAndRunConversion(patient, importJobDir, converterId, importJob);
+
+				datasetsCreatorService.createDatasets(patient, importJobDir, importJob);
 			}
 			this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_QUEUE_DATASET, objectMapper.writeValueAsString(importJob));
 			long importJobDirSize = ImportUtils.getDirectorySize(importJobDir.toPath());
@@ -315,9 +315,10 @@ public class ImporterManagerService {
 					event.setMessage("Downloading DICOM files from PACS for serie [" + (serie.getProtocolName() == null ? serie.getSeriesInstanceUID() : serie.getProtocolName()) + "] (" + cpt + "/" + nbSeries + ")");
 					eventService.publishEvent(event);
 
-					queryPACSService.queryCMOVE(serie);
-					String serieID = serie.getSeriesInstanceUID();
-					File serieIDFolderDir = new File(importJobDir + File.separator + serieID);
+					String studyInstanceUID = study.getStudyInstanceUID();
+					String seriesInstanceUID = serie.getSeriesInstanceUID();
+					queryPACSService.queryCMOVE(studyInstanceUID, seriesInstanceUID);
+					File serieIDFolderDir = new File(importJobDir + File.separator + seriesInstanceUID);
 
 					if(!serieIDFolderDir.exists()) {
 						serieIDFolderDir.mkdirs();
@@ -327,9 +328,9 @@ public class ImporterManagerService {
 					for (Iterator<Instance> iterator = serie.getInstances().iterator(); iterator.hasNext();) {
 						Instance instance = iterator.next();
 						String sopInstanceUID = instance.getSopInstanceUID();
-						File oldFile = new File(dicomStoreSCPServer.getStorageDirPath() + File.separator + serieID + File.separator + sopInstanceUID + DicomStoreSCPServer.DICOM_FILE_SUFFIX);
+						File oldFile = new File(dicomStoreSCPServer.getStorageDirPath() + File.separator + seriesInstanceUID + File.separator + sopInstanceUID + DicomStoreSCPServer.DICOM_FILE_SUFFIX);
 						if (oldFile.exists()) {
-							File newFile = new File(importJobDir.getAbsolutePath() + File.separator + serieID + File.separator + oldFile.getName());
+							File newFile = new File(importJobDir.getAbsolutePath() + File.separator + seriesInstanceUID + File.separator + oldFile.getName());
 							oldFile.renameTo(newFile);
 							LOG.debug("Moving file: {} to ", oldFile.getAbsolutePath(), newFile.getAbsolutePath());
 						} else {

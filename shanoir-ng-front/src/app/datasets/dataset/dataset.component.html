@@ -17,10 +17,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<div class="layout">
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
-					<h2 class="header command-zone"i18n="View dataset|Title@@datasetDetailViewTitle">Details on dataset</h2>
+					<h2 class="header command-zone"i18n="View dataset|Title@@datasetDetailViewTitle">Details on {{dataset.datasetProcessing ? 'processed ' : '' }}dataset</h2>
 				</ng-template>
 				<ng-template [ngSwitchCase]="'edit'">
-					<h2 class="header command-zone"i18n="Edit dataset|Title@@datasetDetailEditTitle">Edit dataset</h2>
+					<h2 class="header command-zone"i18n="Edit dataset|Title@@datasetDetailEditTitle">Edit {{dataset.datasetProcessing ? 'processed ' : '' }}dataset</h2>
 				</ng-template>
 				<ng-template [ngSwitchCase]="'create'">
 					<h2 class="header command-zone"i18n="Create dataset|Title@@datasetDetailCreateTitle">Create dataset</h2>
@@ -32,17 +32,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <eeg-dataset-details *ngIf="dataset.type == 'Eeg'" [mode]="mode" [dataset]="dataset"></eeg-dataset-details>
 
 			<!-- TODO : other types -->
-
-			<div>
-				<button *ngIf="mode=='view' && !isMRS && hasDownloadRight && dataset.type != 'Eeg' && !dataset.datasetProcessing && dataset.type != 'BIDS'  && dataset.type != 'Measurement'" [disabled]="downloadState.isActive()" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="convertNiftiToggle()">Convert nifti<i class="fas fa-download"></i></button>
-				<node [opened]="false" [hasChildren]="false">
-					<dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
-						<ng-template ngFor let-converter [ngForOf]="converters">
-							<menu-item label="{{converter.name}}" awesome="fas fa-download" (click)="convertNifti(converter.id)"></menu-item>
-						</ng-template>
-					</dropdown-menu>
-				</node>
-			</div>
 
 			<fieldset *ngIf="mode=='view' && !isMRS && hasDownloadRight && dataset.type != 'Eeg' && dataset.type != 'BIDS' && dataset.type != 'Measurement'">
 				<legend>Preview</legend>
@@ -58,8 +47,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					(back)="goBack()"
 					(save)="save()">
 				<button  *ngIf="mode == 'view' && hasDownloadRight" class="right-icon dl-button" type="button" (click)="downloadAll()" [disabled]="downloadState.isActive()">Download<i class="fas fa-download"></i></button>
-            	<!-- <button *ngIf="mode=='view' && hasDownloadRight && dataset.datasetProcessing" [disabled]="downloading" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('nii')">Download processed data<i class="fas fa-download"></i></button> -->
-				<button *ngIf="mode=='view' && hasDownloadRight && dataset.type != 'Eeg' && !dataset.datasetProcessing" type="button" class="right-icon" (click)="seeDicomMetadata()">Show DICOM metadata<i class="fas fa-file-code"></i></button>
+				<button *ngIf="mode=='view' && hasDownloadRight && this.dataset.type != 'Eeg' && this.dataset.type != 'BIDS' && !this.dataset.datasetProcessing" type="button" class="right-icon" (click)="seeDicomMetadata()">Show DICOM metadata<i class="fas fa-file-code"></i></button>
             </form-footer>
 		</div>
 	</form>

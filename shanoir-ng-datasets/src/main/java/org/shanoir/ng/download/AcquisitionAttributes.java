@@ -45,6 +45,7 @@ public class AcquisitionAttributes<T> {
 	}
 
 	public void addDatasetAttributes(T id, Attributes attributes) {
+		if (id == null) throw new IllegalArgumentException("id cant be null here");
 		this.datasetMap.put(id, Optional.ofNullable(attributes));
 	}
 

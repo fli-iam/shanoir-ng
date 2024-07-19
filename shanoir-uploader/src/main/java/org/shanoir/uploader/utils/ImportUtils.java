@@ -2,6 +2,9 @@ package org.shanoir.uploader.utils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjuster;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -11,15 +14,19 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.apache.log4j.Logger;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
+import org.shanoir.ng.importer.model.InstitutionDicom;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.action.DicomDataTransferObject;
 import org.shanoir.uploader.dicom.IDicomServerClient;
+import org.shanoir.uploader.dicom.MRI;
 import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
 import org.shanoir.uploader.model.rest.IdName;
@@ -116,49 +123,44 @@ public class ImportUtils {
 			uploadJob.setFirstNameHash3(dicomData.getFirstNameHash3());
 			uploadJob.setBirthDateHash(dicomData.getBirthDateHash());
 		}
-		Date patientBirthDateFirstDayOfYear = getFirstDayOfTheYear(dicomData.getBirthDate());
-		uploadJob.setPatientBirthDate(ShUpConfig.formatter.format(patientBirthDateFirstDayOfYear));
-
+		LocalDate birthDate = dicomData.getBirthDate();
+		if (birthDate != null) {
+			birthDate = birthDate.with(TemporalAdjusters.firstDayOfYear());
+			String birthDateStr = Util.convertLocalDateToString(birthDate); 
+			uploadJob.setPatientBirthDate(birthDateStr);
+		}
 		uploadJob.setPatientSex(dicomData.getSex());
 
 		/**
 		 * Study level
 		 */
 		uploadJob.setStudyInstanceUID(dicomData.getStudyInstanceUID());
-		uploadJob.setStudyDate(ShUpConfig.formatter.format(dicomData.getStudyDate()));
+		String studyDateStr = Util.convertLocalDateToString(dicomData.getStudyDate());
+		uploadJob.setStudyDate(studyDateStr);
 		uploadJob.setStudyDescription(dicomData.getStudyDescription());
 
 		/**
 		 * Serie level
 		 */
 		uploadJob.setSeries(selectedSeries);
-	}
 
-	/**
-	 * For OFSEP, do not transfer the real birth date but the first day of the year
-	 *
-	 * @return the date of the first day of the year
-	 */
-	private static Date getFirstDayOfTheYear(Date pBirthDate) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("getFirstDayOfTheYear : Begin");
-			logger.debug("getFirstDayOfTheYear : current subject birth date=" + pBirthDate);
+		Serie firstSerie = selectedSeries.iterator().next().getSerie();
+		MRI mriInformation = new MRI();
+		InstitutionDicom institutionDicom = firstSerie.getInstitution();
+		if(institutionDicom != null) {
+			mriInformation.setInstitutionName(institutionDicom.getInstitutionName());
+			mriInformation.setInstitutionAddress(institutionDicom.getInstitutionAddress());
 		}
-		if (pBirthDate != null) {
-			final GregorianCalendar birthDate = new GregorianCalendar();
-			birthDate.setTime(pBirthDate);
-			// set day and month to 01/01
-			birthDate.set(Calendar.MONTH, Calendar.JANUARY);
-			birthDate.set(Calendar.DAY_OF_MONTH, 1);
-			birthDate.set(Calendar.HOUR, 1);
-			if (logger.isDebugEnabled()) {
-				logger.debug("getFirstDayOfTheYear : anonymity birth date=" + birthDate.getTime());
-				logger.debug("getFirstDayOfTheYear : End");
-			}
-			return birthDate.getTime();
+		EquipmentDicom equipmentDicom = firstSerie.getEquipment();
+		if(equipmentDicom != null) {
+			mriInformation.setManufacturer(equipmentDicom.getManufacturer());
+			mriInformation.setManufacturersModelName(equipmentDicom.getManufacturerModelName());
+			mriInformation.setDeviceSerialNumber(equipmentDicom.getDeviceSerialNumber());
+			mriInformation.setStationName(equipmentDicom.getStationName());
+			mriInformation.setMagneticFieldStrength(equipmentDicom.getMagneticFieldStrength());
 		}
-		logger.debug("getFirstDayOfTheYear : End - return null");
-		return null;
+		uploadJob.setMriInformation(mriInformation);
+		logger.info(mriInformation.toString());
 	}
 
 	/**
@@ -183,7 +185,6 @@ public class ImportUtils {
 		importJob.setStudyCardName(studyCard.getName());
 		importJob.setStudyCardId(studyCard.getId());
 		importJob.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
-		importJob.setConverterId(studyCard.getNiftiConverterId());
 		importJob.setExaminationId(examinationId);
 
 		List<Patient> patients = new ArrayList<>();
@@ -233,15 +234,15 @@ public class ImportUtils {
 	 * Initializes UploadStatusServiceJob object
 	 * 
 	 */
-	public static void initDataUploadJob(final Set<org.shanoir.uploader.dicom.query.SerieTreeNode> selectedSeries,
+	public static void initDataUploadJob(final UploadJob uploadJob,
 			final DicomDataTransferObject dicomData, NominativeDataUploadJob dataUploadJob) {
 		dataUploadJob.setPatientName(dicomData.getFirstName() + " " + dicomData.getLastName());
 		dataUploadJob.setPatientPseudonymusHash(dicomData.getSubjectIdentifier());
-		dataUploadJob.setStudyDate(ShUpConfig.formatter.format(dicomData.getStudyDate()));
+		String studyDateStr = Util.convertLocalDateToString(dicomData.getStudyDate()); 
+		dataUploadJob.setStudyDate(studyDateStr);
 		dataUploadJob.setIPP(dicomData.getIPP());
-		SerieTreeNode firstSerie = selectedSeries.iterator().next();
-		dataUploadJob.setMriSerialNumber(firstSerie.getMriInformation().getManufacturer()
-				+ "(" + firstSerie.getMriInformation().getDeviceSerialNumber() + ")");
+		dataUploadJob.setMriSerialNumber(uploadJob.getMriInformation().getManufacturer()
+				+ "(" + uploadJob.getMriInformation().getDeviceSerialNumber() + ")");
 		dataUploadJob.setUploadPercentage("");
 		dataUploadJob.setUploadState(UploadState.READY);
 	}
@@ -291,12 +292,22 @@ public class ImportUtils {
 		for (SerieTreeNode serieTreeNode : selectedSeries) {
 			Serie serie = serieTreeNode.getSerie();
 			List<String> newFileNamesOfSerie = new ArrayList<String>();
+			if (serie.getInstances() == null) {
+				continue;
+			}
 			for (Instance instance : serie.getInstances()) {
 				File sourceFile = dicomFileAnalyzer.getFileFromInstance(instance, serie, filePathDicomDir, false);
 				String dicomFileName = sourceFile.getAbsolutePath().replace(File.separator, "_") + DcmRcvManager.DICOM_FILE_SUFFIX;
+				// clean Windows file system root here to avoid destFile-path
+				// with two colons in the path, what is forbidden under Windows
+				// and leads therefore to copy failures, that block exports
+				if (SystemUtils.IS_OS_WINDOWS) {
+					dicomFileName = dicomFileName.replace(":", "");
+				}
 				File destFile = new File(uploadFolder.getAbsolutePath() + File.separator + dicomFileName);
 				FileUtil.copyFile(sourceFile, destFile);
-				newFileNamesOfSerie.add(dicomFileName);	
+				newFileNamesOfSerie.add(dicomFileName);
+				instance.setReferencedFileID(new String[]{dicomFileName});
 			}
 			serieTreeNode.setFileNames(newFileNamesOfSerie);
 			allFileNames.addAll(newFileNamesOfSerie);
