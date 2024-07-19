@@ -154,7 +154,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 	@Override
 	public Page<Examination> findPage(final Pageable pageable, String patientName) {
-		if (patientName != null && patientName.length() > 64) {
+		if (patientName.length() > 64) {
 			throw new IllegalArgumentException("A patient name cannot be longer than 64 chars, it exceed the data representation limit");
 		}
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
