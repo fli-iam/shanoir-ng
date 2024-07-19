@@ -48,7 +48,6 @@ export class BreadcrumbsComponent implements AfterViewInit, OnDestroy, AfterView
 
             this.subscriptions.push(service.onUpdateSteps.subscribe(ret => {
                 this.steps = ret.steps.filter(step => !step.disabled);
-                console.log(ret.steps.length, this.steps.length)
                 setTimeout(() => {
                     if (ret.operation == 'ADD') {
                         this.nbDisplayedSteps++;
@@ -114,7 +113,6 @@ export class BreadcrumbsComponent implements AfterViewInit, OnDestroy, AfterView
         }
         end.then(() => {
             this.nbHidden = this.steps?.length - this.displayedSteps?.length;
-            console.log(this.steps?.length);
         });
     }
 
