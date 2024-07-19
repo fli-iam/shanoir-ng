@@ -156,7 +156,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
         const choose = (): Promise<void> => {
             switch (this.mode) {
                 case 'create' :
-                    return this.loadEntity().then(() => this.initCreate());
+                    return this.initCreate();
                 case 'edit' :
                     return this.loadEntity().then(() => this.initEdit());
                 case 'view' :

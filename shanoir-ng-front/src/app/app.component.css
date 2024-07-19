@@ -9,9 +9,9 @@ side-menu, .side-menu { overflow-x: hidden; scrollbar-width: none; overflow: -mo
 .side-menu { width: 300px; position: fixed; top: 0; z-index: 0; }
 
 study-tree { scrollbar-width: none; overflow: -moz-scrollbars-none; -ms-overflow-style: none; z-index: 1; 
-    max-height: 100%; display: inline-block; overflow-y: scroll; position: relative; min-width: fit-content; margin-top: 10px; }
+    max-height: calc(100% - 10px); display: inline-block; overflow-y: scroll; position: relative; min-width: fit-content; margin-top: 10px; }
 
-study-tree.opened { border-right: 1px solid var(--grey); margin-right: 20px; }
+.tree-frame { border-right: 1px solid var(--grey); margin-right: 20px; }
 
 .tree, .content { vertical-align: top; }
     /*  */
@@ -28,5 +28,7 @@ study-tree.opened { border-right: 1px solid var(--grey); margin-right: 20px; }
 
 shanoir-console { position: absolute; bottom: 0; z-index: 1; }
 
-.tree-close-button { position: absolute; top: 0; right: 5px; z-index: 100; color: var(--color-a); cursor: pointer; }
+.tree-close-button { position: absolute; top: 50px; right: 0; z-index: 100; color: var(--color-a); cursor: pointer;
+    border: 1px solid var(--grey); border-right: none; border-radius: 5px 0 0 5px; padding: 2px 4px; }
 .tree-open-button { position: absolute; top: 120px; right: 16px; z-index: 100; color: bisque; cursor: pointer; }
+.tree-frame { position: relative; }

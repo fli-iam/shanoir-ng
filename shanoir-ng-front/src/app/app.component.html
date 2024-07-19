@@ -34,11 +34,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <div *ngIf="!menuOpen" class="open-button" (click)="toggleMenu(true)"><i class="fas fa-chevron-right"></i></div>
         <breadcrumbs *ngIf="isAuthenticated()"></breadcrumbs>
         <div class="lower-content">
-            <study-tree *ngIf="treeService.treeOpened && treeService.studyNode && treeService.treeAvailable" [class.opened]="true">
+            <div class="tree-frame" *ngIf="treeService.treeOpened && treeService.studyNode && treeService.treeAvailable">
                 <div class="tree-close-button" (click)="toggleTree(false)">
                     <i class="fas fa-chevron-left"></i>
                 </div>
-            </study-tree>
+                <study-tree>
+                </study-tree>
+            </div>
             <div class="content">
                 <router-outlet></router-outlet>
             </div>

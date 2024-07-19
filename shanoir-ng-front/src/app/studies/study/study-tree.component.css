@@ -1,4 +1,4 @@
-:host { position: relative; }
+:host { position: relative; padding-right: 10px; }
 
 study-node {
     display: inline-block;
@@ -10,20 +10,7 @@ study-node {
     padding-left: 20px;
     display: inline-block;
     ;
-}
-
-dicom-metadata {
-    width: 524px;
-    display: inline-block;
-}
-
-.button {
-    border: 1px solid var(--grey); border-radius: 2px 2px 0 0;
-    padding: 2px 10px;
-    position: absolute; top: 0; right: 20px;
-    cursor: pointer;
-}
-
+} 
 .button.closed {
     right: 0px;
 }

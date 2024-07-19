@@ -75,11 +75,11 @@ export class TreeService {
     }
 
     set treeOpened(opened: boolean) {
-        localStorage.setItem('treeOpened', this.treeOpened ? 'true' : 'false');
         if (!this._treeOpened && opened) {
             this.changeSelection();
         }
         this._treeOpened = opened;
+        localStorage.setItem('treeOpened', this._treeOpened ? 'true' : 'false');
     }
 
     get canAdminStudy(): boolean {

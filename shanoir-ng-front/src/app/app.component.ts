@@ -14,8 +14,8 @@
 
 import { Component, ElementRef, HostBinding, HostListener, ViewChild, ViewContainerRef } from '@angular/core';
 
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
-import { parent, slideMarginLeft, slideRight, slideRightWithMargins } from './shared/animations/animations';
+import { Router } from '@angular/router';
+import { parent, slideMarginLeft, slideRight } from './shared/animations/animations';
 import { ConfirmDialogService } from './shared/components/confirm-dialog/confirm-dialog.service';
 import { ConsoleComponent } from './shared/console/console.component';
 import { KeycloakService } from './shared/keycloak/keycloak.service';
@@ -23,9 +23,9 @@ import { GlobalService } from './shared/services/global.service';
 import { WindowService } from './shared/services/window.service';
 import { KeycloakSessionService } from './shared/session/keycloak-session.service';
 import { StudyService } from './studies/shared/study.service';
+import { TreeService } from './studies/study/tree.service';
 import { UserService } from './users/shared/user.service';
 import { ServiceLocator } from './utils/locator.service';
-import { TreeService } from './studies/study/tree.service';
 
 
 @Component({
