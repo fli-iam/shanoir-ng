@@ -81,6 +81,7 @@ public class UploadFromTableActionListener implements ActionListener {
 	private void addImportJob(Map<String, ImportJob> importJobs, Row row) {
 		int rowNumber = row.getRowNum();
 		ImportJob importJob = new ImportJob();
+		importJob.setFromShanoirUploader(true);
 		importJobs.put(String.valueOf(rowNumber), importJob);
 		readDicomQuery(row, importJob);
 		readPatientVerification(row, importJob);

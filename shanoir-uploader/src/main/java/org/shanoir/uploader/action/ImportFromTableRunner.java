@@ -157,7 +157,6 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				// Get only one patient => Once we've selected a serie with interesting data, do not iterate more
 				break;
 			}
-
 			List<Study> studies = patient.getStudies();
 			LocalDate currentDate = LocalDate.now();
 			for (Study study : studies) {
@@ -185,7 +184,6 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				}
 			}
 		}
-
 		if (selectedStudy == null) {
 			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.missing.data"));
 			return false;
@@ -282,6 +280,8 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			}
 			studyCard = shanoirUploaderServiceClientNG.createStudyCard(studyCard);
 		}
+		importJob.setStudyCardId(studyCard.getId());
+		importJob.setStudyCardName(studyCard.getName());
 
 		logger.info("5. Create subject or use existing one (add subject-study, if necessary)");
 		org.shanoir.uploader.model.rest.Subject subjectREST = null;
@@ -326,6 +326,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 
 		logger.info("7. Start import to server (upload files + start import job)");
 		importJob.setDicomQuery(null); // clean up, as not necessary anymore
+		importJob.setPatientVerification(null); // avoid sending patient info to server
 		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examinationId, studyREST, studyCard);
 		Runnable importRunnable = new ImportFinishRunnable(uploadJob, uploadJobFile.getParentFile(), importJob, subjectREST.getName());
 		Thread importThread = new Thread(importRunnable);
