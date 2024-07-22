@@ -319,6 +319,7 @@ public class ImporterService {
 
     private boolean hasQualityChecksAtImport(List<QualityCard> qualityCards) {
         if (qualityCards == null || qualityCards.isEmpty()) {
+            LOG.warn("No qualitycard given for this import");
             return false;
         }
         for (QualityCard qualityCard : qualityCards) {
