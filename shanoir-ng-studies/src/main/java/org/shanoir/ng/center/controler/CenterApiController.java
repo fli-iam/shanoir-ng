@@ -25,6 +25,7 @@ import org.shanoir.ng.center.security.CenterFieldEditionSecurityManager;
 import org.shanoir.ng.center.service.CenterService;
 import org.shanoir.ng.center.service.CenterUniqueConstraintManager;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -92,6 +93,17 @@ public class CenterApiController implements CenterApi {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<>(centerMapper.centerToCenterDTOStudyCenters(center.orElseThrow()), HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<CenterDTO> findCenterOrCreateByInstitutionDicom(
+		@Parameter(description = "institution dicom to find or create a center", required = true)
+		@RequestBody InstitutionDicom institutionDicom, BindingResult result) {
+			final Center center = centerService.findByName(institutionDicom.getInstitutionName());
+			if (center == null) {
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			}
+			return new ResponseEntity<>(centerMapper.centerToCenterDTOStudyCenters(center), HttpStatus.OK);			
 	}
 
 	@Override

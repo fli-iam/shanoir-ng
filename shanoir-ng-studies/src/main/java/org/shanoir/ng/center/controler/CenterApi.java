@@ -19,6 +19,7 @@ import java.util.List;
 import org.shanoir.ng.center.dto.CenterDTO;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -60,6 +61,18 @@ public interface CenterApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<CenterDTO> findCenterById(
 			@Parameter(description = "id of the center", required = true) @PathVariable("centerId") Long centerId);
+	
+	@Operation(summary = "", description = "If exists, returns the center corresponding to the given InstitutionDicom or create a new center")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found center"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "no center found"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@RequestMapping(value = "/byDicom", produces = { "application/json" }, method = RequestMethod.POST)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	ResponseEntity<CenterDTO> findCenterOrCreateByInstitutionDicom(
+		@Parameter(description = "institution dicom to find or create a center", required = true)
+		@RequestBody InstitutionDicom institutionDicom, BindingResult result);
 
 	@Operation(summary = "", description = "Returns all the centers")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found centers"),
