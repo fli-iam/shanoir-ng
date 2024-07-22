@@ -123,6 +123,8 @@ public class DatasetServiceImpl implements DatasetService {
 					));
 
 		}
+		// Remove parent processing to avoid errors
+		dataset.setDatasetProcessing(null);
 		processingService.removeDatasetFromAllProcessingInput(id);
 		propertyService.deleteByDatasetId(id);
 		repository.deleteById(id);
