@@ -98,12 +98,15 @@ public class CenterApiController implements CenterApi {
 	@Override
 	public ResponseEntity<CenterDTO> findCenterOrCreateByInstitutionDicom(
 		@Parameter(description = "institution dicom to find or create a center", required = true)
-		@RequestBody InstitutionDicom institutionDicom, BindingResult result) {
-			final Center center = centerService.findByName(institutionDicom.getInstitutionName());
-			if (center == null) {
-				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-			}
-			return new ResponseEntity<>(centerMapper.centerToCenterDTOStudyCenters(center), HttpStatus.OK);			
+		@RequestBody InstitutionDicom institutionDicom, BindingResult result) throws RestServiceException {
+		Center center = centerService.findByName(institutionDicom.getInstitutionName());
+		if (center == null) {
+			center = new Center();
+			center.setName(institutionDicom.getInstitutionName());
+			center.setStreet(institutionDicom.getInstitutionAddress());
+			return saveNewCenter(center, result);
+		}
+		return new ResponseEntity<>(centerMapper.centerToCenterDTOStudyCenters(center), HttpStatus.OK);			
 	}
 
 	@Override
@@ -152,10 +155,8 @@ public class CenterApiController implements CenterApi {
 	public ResponseEntity<CenterDTO> saveNewCenter(
 			@Parameter(description = "the center to create", required = true) @RequestBody @Valid final Center center,
 			final BindingResult result) throws RestServiceException {
-
 		forceCentersOfStudyCenterList(center);
 		validate(center, result);
-
 		/* Save center in db. */
 		final Center createdCenter = centerService.create(center);
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_CENTER_EVENT, createdCenter.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));

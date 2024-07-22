@@ -72,7 +72,7 @@ public interface CenterApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<CenterDTO> findCenterOrCreateByInstitutionDicom(
 		@Parameter(description = "institution dicom to find or create a center", required = true)
-		@RequestBody InstitutionDicom institutionDicom, BindingResult result);
+		@RequestBody InstitutionDicom institutionDicom, BindingResult result) throws RestServiceException;
 
 	@Operation(summary = "", description = "Returns all the centers")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found centers"),
