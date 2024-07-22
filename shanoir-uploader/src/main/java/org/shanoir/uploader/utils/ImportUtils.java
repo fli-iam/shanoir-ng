@@ -11,19 +11,17 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.swing.JOptionPane;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
-import org.shanoir.ng.importer.model.InstitutionDicom;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.PseudonymusHashValues;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
+import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.action.ImportFinishRunnable;
