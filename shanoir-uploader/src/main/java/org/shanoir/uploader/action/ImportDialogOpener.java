@@ -127,9 +127,14 @@ public class ImportDialogOpener {
 						// filter all study cards related to the selected study
 						if (study.getId().equals(studyCard.getStudyId())) {
 							studyCardsStudy.add(studyCard);
-							Long acquisitionEquipmentId = studyCard.getAcquisitionEquipmentId();
+							for (AcquisitionEquipment acquisitionEquipment : acquisitionEquipments) {
+								// find the correct equipment for each study card and add it
+								if (acquisitionEquipment.getId().equals(studyCard.getAcquisitionEquipmentId())) {
+									studyCard.setAcquisitionEquipment(acquisitionEquipment);
+								}
+							}
 							compatibleStudyCard = ImportUtils.flagStudyCardCompatible(
-								studyCard, acquisitionEquipmentId, acquisitionEquipments, uploadJob.getMriInformation().getDeviceSerialNumber());
+								studyCard, uploadJob.getMriInformation().getDeviceSerialNumber());
 						}
 					}
 					if (compatibleStudyCard) {

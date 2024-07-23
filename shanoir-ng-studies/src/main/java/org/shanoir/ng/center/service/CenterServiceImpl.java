@@ -184,7 +184,7 @@ public class CenterServiceImpl implements CenterService {
 	}
 
 	@Override
-	public Center findByName(String name) {
+	public Optional<Center> findByName(String name) {
 		return centerRepository.findByName(name);
 	}
 	

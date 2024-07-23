@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.json.JSONObject;
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.model.dto.StudyCardOnStudyResultDTO;
@@ -63,6 +64,8 @@ public class ShanoirUploaderServiceClient {
 	private static final String SERVICE_STUDYCARDS_APPLY_ON_STUDY = "service.studycards.apply.on.study";
 	
 	private static final String SERVICE_CENTERS_CREATE = "service.centers.create";
+
+	private static final String SERVICE_CENTERS_FIND_OR_CREATE_BY_INSTITUTION_DICOM = "service.centers.find.or.create.by.institution.dicom";
 
 	private static final String SERVICE_ACQUISITION_EQUIPMENTS = "service.acquisition.equipments";
 	
@@ -109,6 +112,8 @@ public class ShanoirUploaderServiceClient {
 	private String serviceURLStudyCardsApplyOnStudy;
 	
 	private String serviceURLCentersCreate;
+
+	private String serviceURLCentersFindOrCreateByInstitutionDicom;
 
 	private String serviceURLAcquisitionEquipments;
 	
@@ -165,6 +170,8 @@ public class ShanoirUploaderServiceClient {
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_STUDYCARDS_APPLY_ON_STUDY);
 		this.serviceURLCentersCreate = this.serverURL
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_CENTERS_CREATE);
+		this.serviceURLCentersFindOrCreateByInstitutionDicom = this.serverURL
+				+ ShUpConfig.endpointProperties.getProperty(SERVICE_CENTERS_FIND_OR_CREATE_BY_INSTITUTION_DICOM);
 		this.serviceURLAcquisitionEquipments = this.serverURL
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_ACQUISITION_EQUIPMENTS);
 		this.serviceURLAcquisitionEquipmentsBySerialNumber = this.serverURL
@@ -640,6 +647,27 @@ public class ShanoirUploaderServiceClient {
 				} else {
 					logger.error("Error in createCenter: with center " + center.getName() + " (status code: " + code
 							+ ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				}
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		} catch (JsonProcessingException e) {
+			logger.error(e.getMessage(), e);
+		}
+		return null;
+	}
+
+	public Center findCenterOrCreateByInstitutionDicom(final InstitutionDicom institutionDicom, Long studyId) {
+		try {
+			String json = Util.objectWriter.writeValueAsString(institutionDicom);
+			try (CloseableHttpResponse response = httpService.post(this.serviceURLCentersFindOrCreateByInstitutionDicom + "/" + studyId, json, false)) {
+				int code = response.getCode();
+				if (code == HttpStatus.SC_OK) {
+					Center center = Util.getMappedObject(response, Center.class);
+					return center;
+				} else {
+					logger.error("Error in findCenterOrCreateByInstitutionDicom: with institution dicom " + institutionDicom.getInstitutionName() 
+						+ " (status code: " + code	+ ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 				}
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);

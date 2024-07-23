@@ -30,12 +30,13 @@ import org.shanoir.ng.importer.model.PatientVerification;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.importer.model.Subject;
+import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.gui.ImportFromTableWindow;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
+import org.shanoir.uploader.model.rest.Center;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
-import org.shanoir.uploader.model.rest.IdList;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.SubjectType;
@@ -84,7 +85,20 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 
 		logger.info("Preparing import: loading acquisition equipments and add them to study cards");
 		org.shanoir.uploader.model.rest.Study study = (org.shanoir.uploader.model.rest.Study) importFromTableWindow.studyCB.getSelectedItem();
+		List<StudyCard> studyCards = study.getStudyCards();
+		// Important use all equipments from database here, as they can be used in N studies
 		List<AcquisitionEquipment> acquisitionEquipments = shanoirUploaderServiceClientNG.findAcquisitionEquipments();
+		if (acquisitionEquipments == null) {
+			throw new Exception("Error while retrieving acquisition equipments.");
+		}
+		for (AcquisitionEquipment acquisitionEquipment : acquisitionEquipments) {
+			for (StudyCard studyCard : studyCards) {
+				// find the correct equipment for each study card and add it
+				if (acquisitionEquipment.getId().equals(studyCard.getAcquisitionEquipmentId())) {
+					studyCard.setAcquisitionEquipment(acquisitionEquipment);
+				}
+			}
+		}
 
 		boolean success = true;
 		int i = 1;
@@ -229,17 +243,22 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		logger.info("4. Find matching study card or create a new study card");
 		StudyCard studyCard = null;
 		List<StudyCard> studyCards = studyREST.getStudyCards();
-		String deviceSerialNumberDicom = uploadJob.getMriInformation().getDeviceSerialNumber();
-		try {
-			if (acquisitionEquipments == null) {
-				throw new Exception("Error while retrieving acquisition equipments.");
+		// 4.1 Study card configured in Excel: use it (user knows best)
+		if (studyCard == null) {
+			Optional<StudyCard> scOpt = studyCards.stream().filter(element -> element.getName().equals(importJob.getStudyCardName())).findFirst();
+			if (scOpt.isPresent()) {
+				studyCard = scOpt.get();
+				logger.info("Matching study card found by name from table: " + studyCard.getName());
 			}
-			// Iterate over study cards to get equipment + fill study => SC map
+		}
+		// 4.2 Find matching study card on study using device serial number from DICOM
+		String deviceSerialNumberDicom = uploadJob.getMriInformation().getDeviceSerialNumber();
+		logger.info("Device serial number used: " + deviceSerialNumberDicom);
+		try {
 			for (StudyCard studyCardIt : studyCards) {
-				Long acquisitionEquipmentId = studyCardIt.getAcquisitionEquipmentId();
-				if (ImportUtils.flagStudyCardCompatible(studyCardIt, acquisitionEquipmentId, acquisitionEquipments, deviceSerialNumberDicom)) {
+				if (ImportUtils.flagStudyCardCompatible(studyCardIt, deviceSerialNumberDicom)) {
 					studyCard = studyCardIt;
-					logger.info("Matching study card found: " + studyCard.getName());
+					logger.info("Matching study card found via device serial number: " + studyCard.getName());
 					break;
 				}
 			}
@@ -247,16 +266,14 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			this.importFromTableWindow.error.setText(resourceBundle.getString("shanoir.uploader.import.table.error.studycard"));
 			return false;
 		}
-
-		// No study card by default => get the one in the file (if existing of course)
+		// 4.3 No study card found: create one
 		if (studyCard == null) {
-			Optional<StudyCard> scOpt = studyCards.stream().filter(element -> element.getName().equals(importJob.getStudyCardName())).findFirst();
-			if (scOpt.isPresent()) {
-				studyCard = scOpt.get();
-			}
-		}
-		
-		if (studyCard == null) {
+			// 4.3.1 find center or create one
+			InstitutionDicom institutionDicom = new InstitutionDicom();
+			institutionDicom.setInstitutionName(uploadJob.getMriInformation().getInstitutionName());
+			institutionDicom.setInstitutionAddress(uploadJob.getMriInformation().getInstitutionAddress());
+			Center center = shanoirUploaderServiceClientNG.findCenterOrCreateByInstitutionDicom(institutionDicom, studyREST.getId());
+			// 4.3.2 find equipment or create one
 			studyCard = ImportUtils.createNewStudyCard(studyREST, acquisitionEquipments, uploadJob, importJob);
 		}
 

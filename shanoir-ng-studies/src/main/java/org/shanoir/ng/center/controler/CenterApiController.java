@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.center.controler;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,6 +36,8 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.UndeletableDependenciesException;
+import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +59,9 @@ public class CenterApiController implements CenterApi {
 
 	@Autowired
 	private CenterService centerService;
+
+	@Autowired
+	private StudyService studyService;
 
 	@Autowired
 	private CenterFieldEditionSecurityManager fieldEditionSecurityManager;
@@ -97,16 +103,48 @@ public class CenterApiController implements CenterApi {
 
 	@Override
 	public ResponseEntity<CenterDTO> findCenterOrCreateByInstitutionDicom(
+		@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 		@Parameter(description = "institution dicom to find or create a center", required = true)
 		@RequestBody InstitutionDicom institutionDicom, BindingResult result) throws RestServiceException {
-		Center center = centerService.findByName(institutionDicom.getInstitutionName());
-		if (center == null) {
-			center = new Center();
+		Optional<Center> centerOpt = centerService.findByName(institutionDicom.getInstitutionName());
+		if (centerOpt.isEmpty()) {
+			Center center = new Center();
 			center.setName(institutionDicom.getInstitutionName());
 			center.setStreet(institutionDicom.getInstitutionAddress());
+			StudyCenter studyCenter = new StudyCenter();
+			Study study = studyService.findById(studyId);
+			studyCenter.setStudy(study);
+			studyCenter.setCenter(center);
+			List<StudyCenter> studyCenterList = new ArrayList<>();
+			studyCenterList.add(studyCenter);
+			center.setStudyCenterList(studyCenterList);
 			return saveNewCenter(center, result);
+		} else {
+			Center center = centerOpt.orElseThrow();
+			List<StudyCenter> studyCenterList = center.getStudyCenterList();
+			boolean centerInStudy = false;
+			for (StudyCenter studyCenter : studyCenterList) {
+				if (studyCenter.getStudy().getId().equals(studyId)) {
+					centerInStudy = true;
+					break;
+				}
+			}
+			if(!centerInStudy) {
+				StudyCenter studyCenter = new StudyCenter();
+				Study study = studyService.findById(studyId);
+				studyCenter.setStudy(study);
+				studyCenter.setCenter(center);
+				center.getStudyCenterList().add(studyCenter);
+				try {
+					/* Update center in db. */
+					centerService.update(center);
+					eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_CENTER_EVENT, center.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+				} catch (EntityNotFoundException e) {
+					return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+				}	
+			}
 		}
-		return new ResponseEntity<>(centerMapper.centerToCenterDTOStudyCenters(center), HttpStatus.OK);			
+		return new ResponseEntity<>(centerMapper.centerToCenterDTOFlat(centerOpt.orElseThrow()), HttpStatus.OK);			
 	}
 
 	@Override

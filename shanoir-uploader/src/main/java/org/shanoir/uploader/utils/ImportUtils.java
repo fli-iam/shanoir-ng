@@ -506,18 +506,11 @@ public class ImportUtils {
 		return studyCards;
 	}
 
-	public static boolean flagStudyCardCompatible(StudyCard studyCard, Long acquisitionEquipmentId, List<AcquisitionEquipment> acquisitionEquipments, String deviceSerialNumberDicom) {
-		for (AcquisitionEquipment acquisitionEquipment : acquisitionEquipments) {
-			// find the correct equipment
-			if (acquisitionEquipment.getId().equals(acquisitionEquipmentId)) {
-				studyCard.setAcquisitionEquipment(acquisitionEquipment);
-				boolean isCompatible = checkAcquisitionEquipmentForSerialNumber(acquisitionEquipment, deviceSerialNumberDicom);
-				studyCard.setCompatible(isCompatible);
-				if (isCompatible) {
-					return true; // correct equipment found, break for-loop acqEquip
-				}
-				return false;
-			}
+	public static boolean flagStudyCardCompatible(StudyCard studyCard, String deviceSerialNumberDicom) {
+		boolean isCompatible = checkAcquisitionEquipmentForSerialNumber(studyCard.getAcquisitionEquipment(), deviceSerialNumberDicom);
+		studyCard.setCompatible(isCompatible);
+		if (isCompatible) {
+			return true; // correct equipment found, break for-loop acqEquip
 		}
 		return false;
 	}
