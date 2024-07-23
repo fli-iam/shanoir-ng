@@ -121,8 +121,8 @@ public class CenterApiController implements CenterApi {
 			return saveNewCenter(center, result);
 		} else {
 			Center center = centerOpt.orElseThrow();
-			List<StudyCenter> studyCenterList = center.getStudyCenterList();
 			boolean centerInStudy = false;
+			List<StudyCenter> studyCenterList = center.getStudyCenterList();
 			for (StudyCenter studyCenter : studyCenterList) {
 				if (studyCenter.getStudy().getId().equals(studyId)) {
 					centerInStudy = true;
