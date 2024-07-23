@@ -188,13 +188,7 @@ public class DatasetServiceImpl implements DatasetService {
 	@Override
 	public Dataset create(final Dataset dataset) throws SolrServerException, IOException {
 		Dataset ds = repository.save(dataset);
-		Long studyId;
-		if (ds.getDatasetAcquisition() != null) {
-			studyId = ds.getDatasetAcquisition().getExamination().getStudyId();
-		} else {
-			// We have a processed dataset -> acquisition is null but study id is set.
-			studyId = ds.getStudyId();
-		}
+		Long studyId = this.getStudyId(dataset);
 
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, ds.getStudyId()));
 		rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
@@ -210,7 +204,7 @@ public class DatasetServiceImpl implements DatasetService {
 		this.updateDatasetValues(datasetDb, dataset);
 		Dataset ds = repository.save(datasetDb);
 		try {
-			Long studyId = ds.getDatasetAcquisition().getExamination().getStudyId();
+			Long studyId = getStudyId(ds);
 			shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, studyId));
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
 		} catch (JsonProcessingException e) {
@@ -364,21 +358,13 @@ public class DatasetServiceImpl implements DatasetService {
 	 */
 	@Override
 	public Long getStudyId(Dataset dataset){
-		if(dataset.getDatasetAcquisition() != null){
+		if (dataset.getDatasetProcessing() != null) {
+			return dataset.getDatasetProcessing().getStudyId();
+		}
+		if(dataset.getDatasetAcquisition() != null && dataset.getDatasetAcquisition().getExamination() != null){
 			return dataset.getDatasetAcquisition().getExamination().getStudyId();
 		}
-        if (dataset.getDatasetProcessing() == null) {
-            return null;
-        }
-        if(dataset.getDatasetProcessing().getInputDatasets() != null){
-            for(Dataset ds : dataset.getDatasetProcessing().getInputDatasets()){
-                Long id =  this.getStudyId(ds);
-                if(id != null){
-                    return id;
-                }
-            }
-        }
-        return null;
+		return null;
 	}
 
 	/**

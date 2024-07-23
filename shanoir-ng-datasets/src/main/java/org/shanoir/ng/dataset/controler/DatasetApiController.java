@@ -151,12 +151,7 @@ public class DatasetApiController implements DatasetApi {
 			if (ds == null) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
-			Long studyId;
-			if (ds.getDatasetProcessing() != null) {
-				studyId = ds.getDatasetProcessing().getStudyId();
-			} else {
-				studyId = ds.getDatasetAcquisition().getExamination().getStudyId();
-			}
+			Long studyId = datasetService.getStudyId(ds);
 
 			datasetService.deleteById(datasetId);
 			solrService.deleteFromIndex(datasetId);

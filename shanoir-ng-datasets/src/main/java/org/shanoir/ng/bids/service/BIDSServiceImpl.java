@@ -406,7 +406,8 @@ public class BIDSServiceImpl implements BIDSService {
 	private void createDatasetBidsFiles(final Dataset dataset, final File workDir, final String studyName, final String subjectName) throws IOException {
 		File dataFolder = null;
 
-		if (dataset.getDatasetAcquisition() == null && dataset.getDatasetProcessing() != null) {
+		if (dataset.getDatasetProcessing() != null) {
+			LOG.warn("Submitted dataset is a processed dataset.");
 			return;
 		}
 		String subjectNameUpdated = this.formatLabel(subjectName);
@@ -530,6 +531,9 @@ public class BIDSServiceImpl implements BIDSService {
 	}
 
 	private File createSpecificDataFolder(Dataset dataset, File workDir, File dataFolder, String subjectName, String studyName) throws IOException {
+
+
+
 		// Create specific files (EEG, MS, MEG, etc..)
 		if (dataset instanceof EegDataset) {
 			dataFolder = createDataFolder("eeg", workDir);
