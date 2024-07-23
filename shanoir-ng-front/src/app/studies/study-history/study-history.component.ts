@@ -1,13 +1,12 @@
-import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {Component, Input, ViewChild} from '@angular/core';
 import {ColumnDefinition} from "../../shared/components/table/column.definition.type";
 import {ShanoirEvent} from "../../users/shanoir-event/shanoir-event.model";
 import {ShanoirEventService} from "../../users/shanoir-event/shanoir-event.service";
 import {Study} from "../shared/study.model";
 import {Page, Pageable} from "../../shared/components/table/pageable.model";
-import {BrowserPaging} from "../../shared/components/table/browser-paging.model";
 import {TableComponent} from "../../shared/components/table/table.component";
 import {StudyUser} from "../shared/study-user.model";
-import {Observable} from "rxjs";
+import {Examination} from "../../examinations/shared/examination.model";
 
 @Component({
   selector: 'study-history',
@@ -19,8 +18,7 @@ export class StudyHistoryComponent {
     @ViewChild('table', {static: false}) table: TableComponent;
     @Input() study: Study;
     @Input() eventHistory: Promise<any>;
-
-    history: ShanoirEvent[]=[];
+    users: Map<number, string> = new Map();
 
     historyColumns: ColumnDefinition[] = [
         {headerName: 'Creation date', field: 'creationDate', type: 'dateTime'},
@@ -36,25 +34,25 @@ export class StudyHistoryComponent {
             }
         },
         {headerName: 'ObjectId', field: 'objectId', route: function(params:ShanoirEvent) {
-            let event = params.eventType;
-            let id = params.objectId;
-            if (event.includes("create")) {
-                if (event.includes("Dataset") && !event.includes("Acquisition")) { return "/dataset/details/" + id; }
-                else if (event.includes("Examination")) { return "/examination/details/" + id; }
-                else if (event.includes("Acquisition")) { return "/dataset-acquisition/details/" + id; }
-                else if (event.includes("Subject")) { return "/subject/details/" + id; }
-            } else if (event.includes("update")) {
-                if (event.includes("Study")) { return "/study/details/" + id; }
-                else if (event.includes("Examination")) { return "/examination/details/" + id; }
-                else if (event.includes("Subject")) { return "/subject/details/" + id; }
-            } else if (event.includes("import")) {
-                if (event.includes("Dataset")) params.objectId = null;
-            } else {
-                if (event.includes("userAddToStudy")) {
-                    params.objectId = null;
+                let event = params.eventType;
+                let id = params.objectId;
+                if (event.includes("create")) {
+                    if (event.includes("Dataset") && !event.includes("Acquisition")) { return "/dataset/details/" + id; }
+                    else if (event.includes("Examination")) { return "/examination/details/" + id; }
+                    else if (event.includes("Acquisition")) { return "/dataset-acquisition/details/" + id; }
+                    else if (event.includes("Subject")) { return "/subject/details/" + id; }
+                } else if (event.includes("update")) {
+                    if (event.includes("Study")) { return "/study/details/" + id; }
+                    else if (event.includes("Examination")) { return "/examination/details/" + id; }
+                    else if (event.includes("Subject")) { return "/subject/details/" + id; }
+                } else if (event.includes("import")) {
+                    if (event.includes("Dataset")) params.objectId = null;
+                } else {
+                    if (event.includes("userAddToStudy")) {
+                        params.objectId = null;
+                    }
                 }
-            }
-        }},
+            }},
         {headerName: 'Message', field: 'message'}
     ];
 
@@ -62,26 +60,24 @@ export class StudyHistoryComponent {
         private shanoirEventService: ShanoirEventService
     ) {}
     ngOnInit() {
-        this.eventHistory.then( () => this.onFetchHistory());
+        this.eventHistory.then( () => this.getPage);
     }
 
-    public onFetchHistory() {
-        this.shanoirEventService.requestHistory(this.study.id).then(history => {
-
-            history.forEach(item => {
-                let studyUser : StudyUser;
-                studyUser = this.study.studyUserList.find(user => user.userId == item.userId);
-                if (studyUser) {
-                    item.username = studyUser.userName;
+    getPage(pageable: Pageable): Promise<Page<ShanoirEvent>> {
+        return this.shanoirEventService.getPage(pageable, this.study.id, this.table.filter.searchStr? this.table.filter.searchStr : "", this.table.filter.searchField ? this.table.filter.searchField : "").then(page => {
+            page.content.forEach(item => {
+                if (this.users.get(item.userId) == undefined) {
+                    let studyUser : StudyUser;
+                    studyUser = this.study.studyUserList.find(user => user.userId == item.userId);
+                    if (studyUser) {
+                        this.users.set(item.userId, studyUser.userName);
+                        item.username = studyUser.userName;
+                    }
+                } else {
+                    item.username = this.users.get(item.userId).valueOf();
                 }
             });
-            this.history = history;
-
-            this.table.refresh();
+            return page;
         });
-    }
-
-    getPage = (pageable: Pageable): Promise<Page<ShanoirEvent>> => {
-        return Promise.resolve(new BrowserPaging(this.history, this.historyColumns).getPage(pageable));
     }
 }

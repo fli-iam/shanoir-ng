@@ -96,7 +96,6 @@ public class EegImporterService {
                 progress += 1f / importJob.getDatasets().size();
                 event.setMessage("Dataset " + datasetDto.getName() + " for examination " + importJob.getExaminationId());
                 event.setProgress(progress);
-                event.setStudyId(importJob.getStudyId());
                 eventService.publishEvent(event);
                 // Metadata
                 DatasetMetadata originMetadata = new DatasetMetadata();
@@ -196,7 +195,6 @@ public class EegImporterService {
             event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")]"
                     +" Successfully created datasets for subject [" + importJob.getSubjectName()
                     + "] in examination [" + examination.getId() + "]");
-            event.setStudyId(importJob.getStudyId());
             eventService.publishEvent(event);
 
             // Send mail
@@ -206,7 +204,6 @@ public class EegImporterService {
             event.setStatus(ShanoirEvent.ERROR);
             event.setMessage("An unexpected error occured, please contact an administrator.");
             event.setProgress(-1f);
-            event.setStudyId(importJob.getStudyId());
             eventService.publishEvent(event);
 
             // Send failure mail

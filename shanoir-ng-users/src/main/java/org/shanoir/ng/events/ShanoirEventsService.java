@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.tasks.AsyncTaskApiController;
@@ -16,8 +17,15 @@ import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.util.Pair;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -31,6 +39,8 @@ public class ShanoirEventsService {
 
 	@Autowired
 	ShanoirEventRepository repository;
+	@Autowired
+	ShanoirEventRepositoryCustom repositoryCustom;
 
 	@Autowired
 	UserRepository userRepository;
@@ -132,8 +142,8 @@ public class ShanoirEventsService {
 		return repository.findByIdAndUserId(taskId, userId);
 	}
 
-	public List<ShanoirEvent> findByStudyId(Long studyId) {
-		List<ShanoirEvent> events = repository.findByStudyIdOrderByCreationDateDesc(studyId);
+	public Page<ShanoirEvent> findByStudyId(final Pageable pageable,Long studyId, String searchStr, String searchField) {
+		Page<ShanoirEvent> events = repositoryCustom.findByStudyIdOrderByCreationDateDescAndSearch(pageable, studyId, searchStr, searchField);
 		return events;
 	}
 }

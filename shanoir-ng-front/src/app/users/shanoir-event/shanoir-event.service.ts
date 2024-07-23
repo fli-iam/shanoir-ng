@@ -3,6 +3,9 @@ import {EntityService} from "../../shared/components/entity/entity.abstract.serv
 import * as AppUtils from "../../utils/app.utils";
 import {HttpClient} from "@angular/common/http";
 import {ShanoirEvent} from "./shanoir-event.model";
+import {Page, Pageable} from "../../shared/components/table/pageable.model";
+import {DatasetAcquisition} from "../../dataset-acquisitions/shared/dataset-acquisition.model";
+import {DatasetAcquisitionDTO} from "../../dataset-acquisitions/shared/dataset-acquisition.dto";
 
 @Injectable()
 export class ShanoirEventService extends EntityService<ShanoirEvent> implements OnDestroy {
@@ -13,9 +16,13 @@ export class ShanoirEventService extends EntityService<ShanoirEvent> implements 
         super(http);
     }
 
-    requestHistory(studyId: number): Promise<ShanoirEvent[]> {
-        return this.http.get<ShanoirEvent[]>(this.API_URL + '/' + studyId)
-            .toPromise();
+    getPage(pageable : Pageable, studyId: number, searchStr : string, searchField : string): Promise<Page<ShanoirEvent>> {
+        let params = { 'params': pageable.toParams() };
+        params['params']['searchStr'] = searchStr;
+        params['params']['searchField'] = searchField;
+        return this.http.get<Page<ShanoirEvent>>(this.API_URL + '/' + studyId, params)
+            .toPromise()
+            .then(this.mapPage);
     }
 
     getEntityInstance(entity?: ShanoirEvent): ShanoirEvent {

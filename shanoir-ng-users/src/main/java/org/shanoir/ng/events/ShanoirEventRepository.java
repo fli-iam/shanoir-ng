@@ -3,6 +3,8 @@ package org.shanoir.ng.events;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -29,5 +31,5 @@ public interface ShanoirEventRepository extends CrudRepository<ShanoirEvent, Lon
 
     ShanoirEvent findByIdAndUserId(Long taskId, long userId);
 
-    List<ShanoirEvent> findByStudyIdOrderByCreationDateDesc(Long studyId);
+
 }

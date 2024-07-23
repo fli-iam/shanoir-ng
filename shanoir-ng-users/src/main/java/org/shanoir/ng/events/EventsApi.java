@@ -6,6 +6,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,9 +28,6 @@ public interface EventsApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @RequestMapping(value = "/{studyId}", produces = { "application/json" }, method = RequestMethod.GET)
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT'))")
-    ResponseEntity<List<ShanoirEvent>> findEventsByStudyId(
-            @Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws RestServiceException;
-
-
+    ResponseEntity<Page<ShanoirEvent>> findEventsByStudyId(Pageable pageable, @Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,  String searchStr, String searchField) throws RestServiceException;
 
 }

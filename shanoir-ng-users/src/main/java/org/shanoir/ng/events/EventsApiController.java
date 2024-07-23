@@ -1,11 +1,12 @@
 package org.shanoir.ng.events;
 
-import org.shanoir.ng.accessrequest.controller.AccessRequestService;
-import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -18,9 +19,9 @@ public class EventsApiController implements EventsApi {
     private ShanoirEventsService shanoirEventsService;
 
     @Override
-    public ResponseEntity<List<ShanoirEvent>> findEventsByStudyId(Long studyId) throws RestServiceException {
+    public ResponseEntity<Page<ShanoirEvent>> findEventsByStudyId(final Pageable pageable, Long studyId, String searchStr, String searchField) throws RestServiceException {
         try {
-            List<ShanoirEvent> events = shanoirEventsService.findByStudyId(studyId);
+            Page<ShanoirEvent> events = shanoirEventsService.findByStudyId(pageable, studyId, searchStr, searchField);
 
             if (events == null) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
