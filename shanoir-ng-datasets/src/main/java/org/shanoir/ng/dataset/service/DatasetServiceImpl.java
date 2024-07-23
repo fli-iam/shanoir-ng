@@ -27,6 +27,7 @@ import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
+import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.property.service.DatasetPropertyService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
@@ -39,7 +40,6 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
-import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -83,9 +83,6 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Autowired
 	private ShanoirEventService shanoirEventService;
-
-	@Autowired
-	private SolrService solrService;
 
 	@Autowired
 	private DICOMWebService dicomWebService;
@@ -357,6 +354,53 @@ public class DatasetServiceImpl implements DatasetService {
 	@Override
 	public List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception {
 		return repository.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
+	}
+
+	/**
+	 * Get study Id from dataset. If processed, recursively get it through processing inputs
+	 *
+	 * @param dataset
+	 * @return
+	 */
+	@Override
+	public Long getStudyId(Dataset dataset){
+		if(dataset.getDatasetAcquisition() != null){
+			return dataset.getDatasetAcquisition().getExamination().getStudyId();
+		}
+        if (dataset.getDatasetProcessing() == null) {
+            return null;
+        }
+        if(dataset.getDatasetProcessing().getInputDatasets() != null){
+            for(Dataset ds : dataset.getDatasetProcessing().getInputDatasets()){
+                Long id =  this.getStudyId(ds);
+                if(id != null){
+                    return id;
+                }
+            }
+        }
+        return null;
+	}
+
+	/**
+	 * Get examination from dataset. If processed, recursively get it through processing inputs
+	 *
+	 * @param dataset
+	 * @return
+	 */
+	@Override
+	public Examination getExamination(Dataset dataset){
+		if(dataset.getDatasetAcquisition() != null){
+			return dataset.getDatasetAcquisition().getExamination();
+		}
+		if(dataset.getDatasetProcessing().getInputDatasets() != null){
+			for(Dataset ds : dataset.getDatasetProcessing().getInputDatasets()){
+				Examination exam = this.getExamination(ds);
+				if(exam != null){
+					return exam;
+				}
+			}
+		}
+		return null;
 	}
 
 }

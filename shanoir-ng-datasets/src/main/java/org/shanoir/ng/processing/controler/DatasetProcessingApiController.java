@@ -20,6 +20,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 import org.shanoir.ng.processing.dto.mapper.DatasetProcessingMapper;
 import org.shanoir.ng.processing.model.DatasetProcessing;
@@ -56,6 +57,9 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
 	@Autowired
 	private DatasetProcessingService datasetProcessingService;
+
+	@Autowired
+	private DatasetService datasetService;
 
 	@Override
 	public ResponseEntity<Void> deleteDatasetProcessing(
@@ -115,6 +119,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 		
 		/* Validation */
 		validate(result);
+		validateProcessingInput(datasetProcessing);
 
 		/* Save dataset processing in db. */
 		final DatasetProcessing createdDatasetProcessing = datasetProcessingService.create(datasetProcessing);
@@ -128,6 +133,8 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 			final BindingResult result) throws RestServiceException {
 
 		validate(result);
+		validateProcessingInput(datasetProcessing);
+
 		try {
 			datasetProcessingService.update(datasetProcessing);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -136,7 +143,24 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
-	
+
+
+	private void validateProcessingInput(DatasetProcessing processing) throws RestServiceException {
+		if(processing.getStudyId() == null){
+			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Processing must be linked to a study.", null);
+			throw new RestServiceException(error);
+		}
+		if(processing.getInputDatasets() == null || processing.getInputDatasets().isEmpty()){
+			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "There must be at least one input dataset.", null);
+			throw new RestServiceException(error);
+		}
+		for(Dataset dataset : processing.getInputDatasets()){
+			if (processing.getStudyId().equals(datasetService.getStudyId(dataset))){
+				ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Input dataset [" + dataset.getId() + "] is not linked to the processing study.", null);
+				throw new RestServiceException(error);
+			}
+		}
+	}
 	
 	private void validate(BindingResult result) throws RestServiceException {
 		final FieldErrorMap errors = new FieldErrorMap(result);

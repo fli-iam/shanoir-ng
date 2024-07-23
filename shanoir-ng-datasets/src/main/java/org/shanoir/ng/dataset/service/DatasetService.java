@@ -17,6 +17,7 @@ package org.shanoir.ng.dataset.service;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -147,9 +148,14 @@ public interface DatasetService {
 	@PreAuthorize("hasRole('ADMIN')")
 	List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception;
 	
-	
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#dataset.getId(), 'CAN_ADMINISTRATE'))")
 	void deleteDatasetFromPacs(Dataset dataset) throws ShanoirException;
 
 	boolean existsById(Long id);
+
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostAuthorize("hasRole('ADMIN') or returnObject == null or @datasetSecurityService.hasRightOnTrustedDataset(returnObject, 'CAN_SEE_ALL')")
+	Long getStudyId(Dataset dataset);
+
+	Examination getExamination(Dataset dataset);
 }
