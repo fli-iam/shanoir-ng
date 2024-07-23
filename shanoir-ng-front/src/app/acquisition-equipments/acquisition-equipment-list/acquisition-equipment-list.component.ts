@@ -67,7 +67,7 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
     getColumnDefs(): ColumnDefinition[] {
         let columnDefs: ColumnDefinition[] = [
             {
-                headerName: "Acquisition equipment", field: "name", cellRenderer: function (params: any) {
+                headerName: "Center equipment", field: "name", cellRenderer: function (params: any) {
                     let acqEquip: AcquisitionEquipment = params.data;
                     if (!acqEquip) return;
                     return acqEquip.manufacturerModel.manufacturer.name + " - " + acqEquip.manufacturerModel.name + " "
@@ -81,12 +81,20 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
                 route: (acqEquip: AcquisitionEquipment) => '/manufacturer/details/' + acqEquip.manufacturerModel.manufacturer.id
             },
             {
+                headerName: "Modality", field: "manufacturerModel.datasetModalityType", cellRenderer: function (params: any) {
+                    let mod = DatasetModalityType.all().find(dsMod => dsMod.toString() == params.data.manufacturerModel.datasetModalityType);
+                    if (mod) return DatasetModalityType.getLabel(mod);
+                }
+            },
+            {
                 headerName: "Manufacturer model name", field: "manufacturerModel.name",
                 route: (acqEquip: AcquisitionEquipment) => '/manufacturer-model/details/' + acqEquip.manufacturerModel.id
             },
-            { headerName: "Serial number", field: "serialNumber", width: "200px" },
             {
-                headerName: "Center", field: "center.name",
+                headerName: "Serial number", field: "serialNumber", width: "200px"
+            },
+            {
+                headerName: "Acquisition Center", field: "center.name",
                 route: (acqEquip: AcquisitionEquipment) => '/center/details/' + acqEquip.center.id
             }
         ];

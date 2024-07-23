@@ -431,22 +431,28 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                 }},
             {headerName: "Type", field: "datasetType"},
             {headerName: "Nature", field: "datasetNature"},
-            {headerName: "Creation", field: "datasetCreationDate", type: "date", hidden: true, cellRenderer: (params: any) => dateRenderer(params.data.datasetCreationDate)},
+            {headerName: "Series date", field: "datasetCreationDate", type: "date", hidden: true, cellRenderer: (params: any) => dateRenderer(params.data.datasetCreationDate)},
             {headerName: "Study", field: "studyName",
                 route: item => '/study/details/' + item.studyId
             },
             {headerName: "Subject", field: "subjectName",
                 route: item => '/subject/details/' + item.subjectId
             },
-            {headerName: "Center", field: "centerName",
+            {headerName: "Acquisition Center", field: "centerName",
                 route: item => '/center/details/' + item.centerId
             },
             {headerName: "Exam", field: "examinationComment",
                 route: item => '/examination/details/' + item.examinationId
             },
             {headerName: "Exam Date", field:"examinationDate", type: "date", cellRenderer: (params: any) => {
-                return dateRenderer(params.data.examinationDate);
-              }},
+                    return dateRenderer(params.data.examinationDate);
+                }
+            },
+            {headerName: "Import Date", field:"importDate", type: "date", cellRenderer: (params: any) => {
+                    return dateRenderer(params.data.importDate);
+                }
+            },
+            {headerName: "Imported by", field:"username"},
             {headerName: "Slice", field: "sliceThickness"},
             {headerName: "Pixel", field: "pixelBandwidth"},
             {headerName: "Mag. strength", field: "magneticFieldStrength"},
