@@ -171,7 +171,6 @@ public class ImporterService {
                 QualityTag tagSave = subjectStudy != null ? subjectStudy.getQualityTag() : null;
                 ExaminationData examData = new ExaminationData(examination);
                 examData.setDatasetAcquisitions(Utils.toList(generatedAcquisitions));
-                examData.setStudyId(examination.getStudy().getId());
                 QualityCardResult qualityResult = checkQuality(examData, importJob);                				
                 // Has quality check passed ?
                 if (qualityResult.hasError()) {
