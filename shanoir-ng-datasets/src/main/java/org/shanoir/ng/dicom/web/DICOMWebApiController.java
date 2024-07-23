@@ -52,7 +52,13 @@ public class DICOMWebApiController implements DICOMWebApi {
 		Pageable pageable = PageRequest.of(offset, limit);
 		// Search for studies with patient name (DICOM patientID does not make sense in case of Shanoir)
 		String patientName = allParams.get("PatientName");
-		Page<Examination> examinations = examinationService.findPage(pageable, patientName);
+		Page<Examination> examinations;
+		if (patientName != null) examinations = examinationService.findPage(pageable, patientName);
+		else {
+			String examId = allParams.get("StudyInstanceUIDs");
+			examId = examId.substring(examId.lastIndexOf(".") + 1, examId.length());
+			examinations = examinationService.findPage(pageable, examId);
+		}
 		if (examinations.getContent().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
