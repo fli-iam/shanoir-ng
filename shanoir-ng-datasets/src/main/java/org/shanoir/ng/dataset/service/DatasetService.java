@@ -152,4 +152,6 @@ public interface DatasetService {
 	void deleteDatasetFromPacs(Dataset dataset) throws ShanoirException;
 
 	boolean existsById(Long id);
+
+	void deleteNiftis(Long studyId);
 }

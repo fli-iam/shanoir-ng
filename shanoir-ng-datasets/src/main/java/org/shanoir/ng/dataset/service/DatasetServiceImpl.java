@@ -60,6 +60,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -357,6 +358,36 @@ public class DatasetServiceImpl implements DatasetService {
 	@Override
 	public List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception {
 		return repository.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
+	}
+
+	@Override
+	public void deleteNiftis(Long studyId) {
+		List<Dataset> datasets = this.findByStudyId(studyId);
+		for (Dataset dataset : datasets) {
+			deleteNifti(dataset);
+		}
+	}
+
+	/**
+	 * Deletes nifti on file server
+	 * @param dataset
+	 */
+	private void deleteNifti(Dataset dataset) {
+		for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+			if (!DatasetExpressionFormat.NIFTI_SINGLE_FILE.equals(expression.getDatasetExpressionFormat())) {
+				continue;
+			}
+			for (DatasetFile file : expression.getDatasetFiles()) {
+				URL url = null;
+				try {
+					url = new URL(file.getPath().replaceAll("%20", " "));
+					File srcFile = new File(UriUtils.decode(url.getPath(), StandardCharsets.UTF_8.name()));
+					FileUtils.deleteQuietly(srcFile);
+				} catch (MalformedURLException e) {
+					LOG.error("Could not delete nifti file: {}", file.getPath());
+				}
+			}
+		}
 	}
 
 }
