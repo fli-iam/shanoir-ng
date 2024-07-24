@@ -180,7 +180,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     locales-all \
     jq \
     libgtk2.0-0 \
-    openjdk-17-jre \
+    temurin-21-jre \
     pigz \
     xvfb
 
