@@ -31,9 +31,15 @@ public class ShanoirEventRepositoryImpl implements ShanoirEventRepositoryCustom 
 
     private Pair<List<ShanoirEvent>, Long> find(Long studyId, Pageable pageable, String searchStr, String searchField) {
         
-        String queryEndStr = "from ShanoirEvent as e where ";
+        String queryEndStr = "from ShanoirEvent as e ";
         int nbPreParams = 1;
         int searchStrIndex = -1;
+
+        if (!StringUtils.isEmpty(searchStr) || pageable.getSort().toString().indexOf("username") != -1) {
+            queryEndStr += "inner join User as u on e.userId = u.id ";
+        }
+
+        queryEndStr += "where ";
 
         if (!StringUtils.isEmpty(searchStr)) {
             nbPreParams++;
@@ -42,7 +48,7 @@ public class ShanoirEventRepositoryImpl implements ShanoirEventRepositoryCustom 
                 if (searchField.equals("objectId")) {
                     queryEndStr += "CAST(e.objectId as String) LIKE CONCAT('%', ?" + searchStrIndex + ", '%') ";
                 } else if (searchField.equals("userId") || searchField.equals("username")) {
-                    queryEndStr += "CAST(e.userId as String) LIKE CONCAT('%', ?" + searchStrIndex + ", '%') ";
+                    queryEndStr += "u.username LIKE CONCAT('%', ?" + searchStrIndex + ", '%') ";
                 } else if (searchField.equals("eventType")) {
                     queryEndStr += "e.eventType LIKE CONCAT('%', ?" + searchStrIndex + ", '%') ";
                 } else if (searchField.equals("message")) {
@@ -55,27 +61,36 @@ public class ShanoirEventRepositoryImpl implements ShanoirEventRepositoryCustom 
             } else {
                 // filter '*'
                 queryEndStr += "(CAST(e.objectId as String) LIKE CONCAT('%', ?" + searchStrIndex + ", '%') ";
-                queryEndStr += "or CAST(e.userId as String) LIKE CONCAT('%', ?" + searchStrIndex + ", '%') ";
+                queryEndStr += "or u.username LIKE CONCAT('%', ?" + searchStrIndex + ", '%') ";
                 queryEndStr += "or e.eventType LIKE CONCAT('%', ?" + searchStrIndex + ", '%') ";
                 queryEndStr += "or CAST(DATE_FORMAT(e.creationDate, '%d/%m/%Y') as String) LIKE CONCAT('%', ?" + searchStrIndex + ", '%') ";
                 queryEndStr += "or e.message LIKE CONCAT('%', ?" + searchStrIndex + ", '%')) ";
             }
             queryEndStr += " and ";
         }
-        queryEndStr += " e.studyId = ?1 order by creationDate desc";
+        queryEndStr += " e.studyId = ?1";
+
         String queryStr = "select e " + queryEndStr;
 
         if (pageable != null && pageable.getSort() != null && pageable.getSort().isSorted()) {
-            queryStr += "order by ";
+            queryStr += " order by ";
             int isort = 0;
             for (Sort.Order order : pageable.getSort()) {
                 if (isort >= 1) {
                     queryStr += ",";
                 }
-                queryStr += "e." + order.getProperty();
+                if ("username".equals(order.getProperty())) {
+                    queryStr += "u." + order.getProperty();
+                } else {
+                    queryStr += "e." + order.getProperty();
+                }
                 queryStr += " " + order.getDirection() + " ";
                 isort ++;
             }
+            queryStr += ", e.creationDate desc";
+        }
+        if (pageable == null || "unsorted".equals(pageable.getSort().toString().toLowerCase())) {
+            queryStr += " order by e.creationDate desc ";
         }
 
         Query query = entityManager.createQuery(queryStr);

@@ -27,9 +27,6 @@ export class StudyHistoryComponent {
                 if (params.data.eventType.includes(".event")) {
                     params.data.eventType = params.data.eventType.replace(".event", "");
                 }
-                if (params.data.eventType.includes("userAddToStudy")) {
-                    params.data.message = "User " + params.data.username + " access granted"
-                }
                 return params.data.eventType;
             }
         },
@@ -46,9 +43,9 @@ export class StudyHistoryComponent {
                     else if (event.includes("Examination")) { return "/examination/details/" + id; }
                     else if (event.includes("Subject")) { return "/subject/details/" + id; }
                 } else if (event.includes("import")) {
-                    if (event.includes("Dataset")) params.objectId = null;
+                    if (event.includes("Dataset")) { return "/examination/details/" + id; }
                 } else {
-                    if (event.includes("userAddToStudy")) {
+                    if (event.includes("userAddToStudy") || event.includes("delete")) {
                         params.objectId = null;
                     }
                 }
