@@ -268,6 +268,9 @@ import { DownloadSetupAltComponent } from './shared/mass-download/download-setup
 import { TestQualityCardOptionsComponent } from './study-cards/test-quality-card-options/test-quality-card-options.component';
 import { SessionService } from './shared/services/session.service';
 import { PipelineService } from "./vip/pipelines/pipeline/pipeline.service";
+import { StudyTreeComponent } from './studies/study/study-tree.component';
+import { TreeService } from './studies/study/tree.service';
+import { CoilNodeComponent } from './coils/coil/tree/coil-node.component';
 
 @NgModule({
     imports: [
@@ -455,7 +458,9 @@ import { PipelineService } from "./vip/pipelines/pipeline/pipeline.service";
         TaskStatusComponent,
         DownloadSetupComponent,
         DownloadSetupAltComponent,
-        TestQualityCardOptionsComponent
+        TestQualityCardOptionsComponent,
+        StudyTreeComponent,
+        CoilNodeComponent
     ],
     providers: [
         AcquisitionEquipmentService,
@@ -541,6 +546,7 @@ import { PipelineService } from "./vip/pipelines/pipeline/pipeline.service";
         QualityCardDTOService,
         MassDownloadService,
         SessionService,
+        TreeService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],
     bootstrap: [AppComponent]

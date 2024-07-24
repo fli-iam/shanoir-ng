@@ -15,14 +15,14 @@
 import { LocationStrategy } from '@angular/common';
 import { Injectable, OnDestroy } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { Event, NavigationEnd, Router } from '@angular/router';
-import { Subject, Subscription } from 'rxjs';
+import { NavigationEnd, Router } from '@angular/router';
+import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { ImportMode } from '../import/import.component';
 
 @Injectable()
 export class BreadcrumbsService implements OnDestroy {
 
-    public steps: Step[] = [];
+    steps: Step[] = [];
     
     private popFoundedStepIndex: number;
     public currentStepIndex: number;
@@ -30,6 +30,7 @@ export class BreadcrumbsService implements OnDestroy {
     private nextMilestone: boolean = false;
     private ignoreNavigationEnd: boolean = false;
     private subscriptions: Subscription[] = [];
+    onUpdateSteps: BehaviorSubject<{steps: Step[], operation?: 'ADD' | 'REMOVE' | 'MILESTONE'}> = new BehaviorSubject({steps: this.steps});
 
     constructor(
             private router: Router, 
@@ -57,7 +58,10 @@ export class BreadcrumbsService implements OnDestroy {
                     return;
                 }
                 const timestamp: number = new Date().getTime();
-                if (this.router.getCurrentNavigation().extras?.replaceUrl) this.steps.pop();
+                if (this.router.getCurrentNavigation().extras?.replaceUrl) {
+                    this.steps.pop();
+                    this.onUpdateSteps.next({steps: this.steps, operation: 'REMOVE'});
+                }
                 if (this.popFoundedStepIndex != undefined && this.popFoundedStepIndex != null && this.popFoundedStepIndex >= 0 && this.popFoundedStepIndex < this.steps.length) {
                     this.focusStep(this.popFoundedStepIndex);
                     this.currentStepIndex = this.popFoundedStepIndex;
@@ -65,6 +69,7 @@ export class BreadcrumbsService implements OnDestroy {
                 } else {
                     this.removeStepsAfter(this.currentStepIndex);
                     this.steps.push(new Step(this.nextLabel, this.router.url, timestamp));
+                    this.onUpdateSteps.next({steps: this.steps, operation: 'ADD'});
                     this.currentStepIndex = this.steps.length - 1;
                     locationStrategy.replaceState(timestamp, 'todo', this.router.url, '');
                     titleService.setTitle('Shanoir' + (this.nextLabel ? ' - ' + this.nextLabel : ''));
@@ -92,6 +97,7 @@ export class BreadcrumbsService implements OnDestroy {
         for (let i=index+1; i<this.steps.length; i++) {
             this.steps[i].disabled = true;
         }
+        this.onUpdateSteps.next({steps: this.steps, operation: 'MILESTONE'});
     }
 
     public nameStep(label: string) {
@@ -108,23 +114,35 @@ export class BreadcrumbsService implements OnDestroy {
         this.nextMilestone = false;
     }
 
-    public currentStepAsMilestone() {
-        this.processMilestone();
+    public currentStepAsMilestone(label?: string) {
+        this.processMilestone(label);
     }
     
-    private processMilestone() {
+    private processMilestone(label?: string) {
         this.currentStep.milestone = true;
+        if (label) this.currentStep.label = label;
+        let update: boolean = false;
         for (let i=0; i<this.currentStepIndex; i++) {
             this.steps[i].disabled = true;
+            update = true;
+        }
+        if (update) {
+            this.onUpdateSteps.next({steps: this.steps, operation: 'MILESTONE'});
         }
     }
 
-    public goToStep(index: number) {
+    public goToStepIndex(index: number) {
         history.go(index - this.currentStepIndex);
+    }
+
+    public goToStep(step: Step) {
+        const index: number = this.steps.findIndex(s => s.id == step.id);
+        this.goToStepIndex(index);
     }
 
     private removeStepsAfter(index: number) {
         this.steps = this.steps.slice(0, index + 1);
+        this.onUpdateSteps.next({steps: this.steps, operation: 'REMOVE'});
         if (this.currentStep) {
             this.currentStep.disabled = false;
             this.currentStep.resetWait();

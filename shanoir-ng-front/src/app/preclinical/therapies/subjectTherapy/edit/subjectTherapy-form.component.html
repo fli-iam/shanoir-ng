@@ -132,7 +132,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<div class="footer command-zone">
 			<button type="button" i18n="Edit subjectTherapy|CancelButton label" class="Button right-icon" (click)="cancelTherapy()">Cancel</button>
 			<button type="button" *ngIf="canUpdateTherapy()" (click)="updateTherapy()" i18n="Edit subjectTherapy|SaveButton label" class="Button right-icon" [disabled]="!form.valid">Update<i class="far fa-save"></i></button>
-			<button type="button" *ngIf="canAddTherapy()" i18n="Edit subjectTherapy|CreateButton label" (click)="addTherapy()" class="Button right-icon" [disabled]="!form.valid">Create<i class="far fa-save"></i></button>
+			<button type="button" *ngIf="canAddTherapy()" i18n="Edit subjectTherapy|CreateButton label" (click)="addTherapy()" class="Button right-icon" [disabled]="!form.valid">Save<i class="far fa-save"></i></button>
 
 		</div>
     </form>

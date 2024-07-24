@@ -17,6 +17,7 @@ import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 
 import { MemberNode } from '../../tree/tree.model';
 import { User } from '../shared/user.model';
+import { Selection, TreeService } from 'src/app/studies/study/tree.service';
 
 
 @Component({
@@ -33,10 +34,12 @@ export class MemberNodeComponent implements OnChanges {
     menuOpened: boolean = false;
     isAdmin: boolean;
     detailsPath: string = '/user/details/';
+    @Input() withMenu: boolean = true;
 
     constructor(
             private router: Router,
-            private keycloakService: KeycloakService) {
+            keycloakService: KeycloakService,
+            protected treeService: TreeService) {
         this.isAdmin = keycloakService.isUserAdmin();
     }
 

@@ -14,6 +14,45 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div #formContainer class="content-component">
 	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
 		<div class="layout">
+			<form-footer
+				[state]="footerState"
+				(save)="save()"
+                (delete) = "delete()"
+				(edit)="goToEdit()"
+				(cancel)="goToView()"
+				(back)="goBack()">
+				<button *ngIf="mode != 'view'"
+						type="button" 
+						class="Button right-icon show-errors" 
+						(click)="onShowErrors()"
+						[disabled]="footerState.valid || showRulesErrors || qualityCard.rules?.length == 0">
+					Show all errors<i class="fas fa-bug"></i>
+				</button>
+				<button 
+						*ngIf="mode == 'view' && isStudyAdmin"
+						type="button"
+						class="right-icon apply test" 
+						(click)="test()" 
+						[disabled]="applying || testing">
+					Test
+                    <i *ngIf="!testing" class="fa-solid fa-play"></i>
+                    <i *ngIf="testing" class="fa fa-cog fa-spin"></i> 
+                </button>
+				<button 
+						*ngIf="mode == 'view' && isStudyAdmin"
+						type="button"
+						class="alt right-icon apply" 
+						(click)="apply()" 
+						[disabled]="applying || testing">
+					Apply now
+					<i *ngIf="!applying" class="fa-solid fa-play"></i>
+                    <i *ngIf="applying" class="fa fa-cog fa-spin"></i> 
+                </button>
+				<button *ngIf="report" type="button" class="apply right-icon" (click)="downloadReport()">
+					Download error report
+					<i class="fas fa-floppy-disk"></i>
+				</button>
+			</form-footer>
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
 					<h2 class="header command-zone">Details on quality card</h2>
@@ -104,45 +143,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [collapseControls]="true"
                 ></shanoir-table>
 			</fieldset>
-			<form-footer
-				[state]="footerState"
-				(save)="save()"
-                (delete) = "delete()"
-				(edit)="goToEdit()"
-				(cancel)="goToView()"
-				(back)="goBack()">
-				<button *ngIf="mode != 'view'"
-						type="button" 
-						class="Button right-icon show-errors" 
-						(click)="onShowErrors()"
-						[disabled]="footerState.valid || showRulesErrors || qualityCard.rules?.length == 0">
-					Show all errors<i class="fas fa-bug"></i>
-				</button>
-				<button 
-						*ngIf="mode == 'view' && isStudyAdmin"
-						type="button"
-						class="right-icon apply test" 
-						(click)="test()" 
-						[disabled]="applying || testing">
-					Test
-                    <i *ngIf="!testing" class="fa-solid fa-play"></i>
-                    <i *ngIf="testing" class="fa fa-cog fa-spin"></i> 
-                </button>
-				<button 
-						*ngIf="mode == 'view' && isStudyAdmin"
-						type="button"
-						class="alt right-icon apply" 
-						(click)="apply()" 
-						[disabled]="applying || testing">
-					Apply now
-					<i *ngIf="!applying" class="fa-solid fa-play"></i>
-                    <i *ngIf="applying" class="fa fa-cog fa-spin"></i> 
-                </button>
-				<button *ngIf="report" type="button" class="apply right-icon" (click)="downloadReport()">
-					Download error report
-					<i class="fas fa-floppy-disk"></i>
-				</button>
-			</form-footer>
 		</div>
 	</form>
 </div>

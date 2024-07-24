@@ -14,7 +14,10 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
+import { TaskState } from 'src/app/async-tasks/task.model';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { TreeService } from 'src/app/studies/study/tree.service';
+import { SuperPromise } from 'src/app/utils/super-promise';
 import { DatasetAcquisition } from '../../dataset-acquisitions/shared/dataset-acquisition.model';
 import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
 import { Dataset } from '../../datasets/shared/dataset.model';
@@ -29,13 +32,15 @@ import {
     ExaminationNode,
     PreclinicalSubjectNode,
     ProcessingNode,
+    ShanoirNode,
     SubjectNode,
     UNLOADED,
 } from '../../tree/tree.model';
 import { Subject } from '../shared/subject.model';
-import { SubjectService } from "../shared/subject.service";
-import { TaskState } from "../../async-tasks/task.model";
-import {ConsoleService} from "../../shared/console/console.service";
+import { ConsoleService } from 'src/app/shared/console/console.service';
+import { SubjectService } from '../shared/subject.service';
+import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
+
 
 @Component({
     selector: 'subject-node',
@@ -44,120 +49,102 @@ import {ConsoleService} from "../../shared/console/console.service";
 
 export class SubjectNodeComponent implements OnChanges {
 
-    @Input() input: Subject | SubjectNode;
+    @Input() input: SubjectNode | {subject: Subject, parentNode: ShanoirNode};
+    @Input() rights: StudyUserRight[];
     @Input() studyId: number;
     @Output() nodeInit: EventEmitter<SubjectNode> = new EventEmitter();
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
+    @Output() onNodeSelect: EventEmitter<number> = new EventEmitter();
     node: SubjectNode;
     loading: boolean = false;
     menuOpened: boolean = false;
     showDetails: boolean;
     @Input() hasBox: boolean = false;
     detailsPath: string = "";
+    @Input() withMenu: boolean = true;
+    protected contentLoaded: SuperPromise<void> = new SuperPromise();
     public downloadState: TaskState = new TaskState();
 
     constructor(
-        private consoleService: ConsoleService,
-        private examinationService: ExaminationService,
-        private subjectService: SubjectService,
-        private router: Router,
-        private examPipe: ExaminationPipe,
-        private downloadService: MassDownloadService) {
+            private examinationService: ExaminationService,
+            private router: Router,
+            private examPipe: ExaminationPipe,
+            private downloadService: MassDownloadService,
+            protected treeService: TreeService,
+            private consoleService: ConsoleService,
+            private subjectService: SubjectService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {
             if (this.input instanceof SubjectNode) {
                 this.node = this.input;
-            } else if (this.input.preclinical){
+            } else if (this.input.subject.preclinical) {
                 this.node = new PreclinicalSubjectNode(
-                    this.input.id,
-                    this.input.name,
+                    this.node,
+                    this.input.subject.id,
+                    this.input.subject.name,
                     [],
                     UNLOADED,
                     null,
-                    false);
+                    this.rights.includes(StudyUserRight.CAN_ADMINISTRATE),
+                    this.rights.includes(StudyUserRight.CAN_DOWNLOAD),
+                );
             } else {
                 this.node = new ClinicalSubjectNode(
-                    this.input.id,
-                    this.input.name,
+                    this.node,
+                    this.input.subject.id,
+                    this.input.subject.name,
                     [],
                     UNLOADED,
                     null,
-                    false);
+                    this.rights.includes(StudyUserRight.CAN_ADMINISTRATE),
+                    this.rights.includes(StudyUserRight.CAN_DOWNLOAD)
+                );
             }
+            this.node.registerOpenPromise(this.contentLoaded);
             this.nodeInit.emit(this.node);
             this.detailsPath = '/' + this.node.title + '/details/' + this.node.id;
             this.showDetails = this.router.url != this.detailsPath;
         }
     }
 
-    loadExaminations() {
+    loadExaminations(): Promise<void> {
         if (this.node.examinations == UNLOADED) {
-            this.loading = true;
-            this.examinationService.findExaminationsBySubjectAndStudy(this.node.id, this.studyId)
+            setTimeout(() => this.loading = true);
+            return this.examinationService.findExaminationsBySubjectAndStudy(this.node.id, this.studyId)
                 .then(examinations => {
-                    let sortedExaminations = examinations.sort((a: SubjectExamination, b: SubjectExamination) => {
-                        return (new Date(a.examinationDate)).getTime() - (new Date(b.examinationDate)).getTime();
-                    })
                     this.node.examinations = [];
-                    if (sortedExaminations) {
-                        sortedExaminations.forEach(exam => {
-                            (this.node.examinations as ExaminationNode[]).push(this.mapExamNode(exam));
-                        });
+                    if (examinations) {
+                        let sortedExaminations = examinations.sort((a: SubjectExamination, b: SubjectExamination) => {
+                            return (new Date(a.examinationDate)).getTime() - (new Date(b.examinationDate)).getTime();
+                        })
+                        if (sortedExaminations) {
+                            sortedExaminations.forEach(exam => {
+                                (this.node.examinations as ExaminationNode[]).push(ExaminationNode.fromExam(exam, this.node, this.node.canDeleteChildren, this.node.canDownload));
+                            });
+                        }
                     }
                     this.loading = false;
-                    this.node.open = true;
-                }).catch(e => {
-                    this.consoleService.log('error', e.toString());
+                    this.node.open();
+                }).catch(error => {
                     this.loading = false;
-            });
+                    this.consoleService.log('error', error.toString());
+                });
+        } else {
+            return Promise.resolve();
         }
     }
 
-    private mapExamNode(exam: SubjectExamination): ExaminationNode {
-        return new ExaminationNode(
-            exam.id,
-            this.examPipe.transform(exam),
-            exam.datasetAcquisitions ? exam.datasetAcquisitions.map(dsAcq => this.mapAcquisitionNode(dsAcq)) : [],
-            exam.extraDataFilePathList,
-            this.node.canDeleteChildren
-        );
-    }
-
-    private mapAcquisitionNode(dsAcq: DatasetAcquisition): DatasetAcquisitionNode {
-        return new DatasetAcquisitionNode(
-            dsAcq.id,
-            dsAcq.name,
-            dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds, false)) : [],
-            this.node.canDeleteChildren
-        );
-    }
-
-    private mapDatasetNode(dataset: Dataset, processed: boolean): DatasetNode {
-        return new DatasetNode(
-            dataset.id,
-            dataset.name,
-            dataset.tags,
-            dataset.type,
-            dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : [],
-            processed,
-            this.node.canDeleteChildren
-        );
-    }
-
-    private mapProcessingNode(processing: DatasetProcessing): ProcessingNode {
-        return new ProcessingNode(
-            processing.id,
-            processing.comment ? processing.comment : DatasetProcessingType.getLabel(processing.datasetProcessingType),
-            processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],
-            this.node.canDeleteChildren
-        );
+    onFirstOpen() {
+        this.loadExaminations().then(() => {
+            this.contentLoaded.resolve();
+        });
     }
 
     hasChildren(): boolean | 'unknown' {
         if (!this.node.examinations) return false;
-        else if (this.node.examinations == (UNLOADED as any)) return 'unknown';
+        else if (this.node.examinations == UNLOADED) return 'unknown';
         else return this.node.examinations.length > 0;
     }
 

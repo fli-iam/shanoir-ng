@@ -14,6 +14,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div #formContainer class="PhysiologicalDataFormComponent content-component">
 	<form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
+		<div *ngIf="isStandalone" class="footer command-zone">
+			<form-footer
+				[state]="footerState"
+				(save)="save()"
+				(edit)="goToEdit()"
+				(back)="goBack()">
+			</form-footer>
+		</div>  
+
 		<span *ngIf="isStandalone" class="right-col" [ngSwitch]="mode">
 			<ng-template [ngSwitchCase]="'view'"> 
 				<div class="header command-zone" i18n="View physiodata|Title">View physiological data</div>
@@ -100,15 +109,5 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</li>				
 			</ol>
 		</fieldset>
-
-	
-		<div *ngIf="isStandalone" class="footer command-zone">
-				<form-footer
-				[state]="footerState"
-				(save)="save()"
-				(edit)="goToEdit()"
-				(back)="goBack()">
-		</form-footer>
-		</div>  
 	</form>  
 </div>

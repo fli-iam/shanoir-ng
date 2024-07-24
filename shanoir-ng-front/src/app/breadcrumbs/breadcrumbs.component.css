@@ -2,7 +2,8 @@
 :host {
     display: block;
     height: 30px;
-    margin: 15px 0; 
+    margin: 15px 0;
+    position: relative;
     
     --bg-color: var(--color-b);
     --bg-hover: var(--color-b-light2);
@@ -11,6 +12,10 @@
     --w-color: var(--color-c);
     --wl-color: var(--color-c-light);
 }
+
+ul { white-space: nowrap; }
+
+ul li { display: inline-block; }
 
 ul li a {
 	display: block;
@@ -51,7 +56,7 @@ ul li a:after {
     border-top: 13px solid transparent;
     border-bottom: 13px solid transparent;
     border-left: 13px solid var(--bg-color);
-    position: absolute; right: -13px; top: 0;	
+    position: absolute; right: -12px; top: 0;
 }
 
 ul li a:before {
@@ -82,3 +87,4 @@ ul li:first-child a{
 }
 
 a.disabled { background-color: yellow !important; }
+.ellipsis { opacity: 0.5; }

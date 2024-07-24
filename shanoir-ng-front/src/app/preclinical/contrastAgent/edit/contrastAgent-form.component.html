@@ -15,6 +15,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div #formContainer class="ContrastAgentFormComponent content-component">
 	<form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>validate> 
 		<table class="layout">
+			<div *ngIf="isStandalone">
+				<form-footer
+					[state]="footerState"
+					(save)="save()"
+					(edit)="goToEdit()"
+					(back)="goBack()">
+				</form-footer>
+			</div>
 			<tr><td colspan="2">
 				<span class="right-col" [ngSwitch]="mode">
 					<ng-template [ngSwitchCase]="'view'"> 
@@ -153,18 +161,5 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</td>
 			</tr>
 		</table>
-		
-		
-    <div *ngIf="isStandalone">
-		<form-footer
-			[state]="footerState"
-			(save)="save()"
-			(edit)="goToEdit()"
-			(back)="goBack()">
-		</form-footer>
-   	</div>
-   	
-     </form> 
-    
-    
+	</form>  
 </div>

@@ -14,12 +14,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened"
+        [class.selected]="this.menuOpened || treeService.isSelected(node.id, 'dataset')"
         [label]="node.label"
         [tags]="node.tags"
         [awesome]="node.awesome"
-        [(opened)]="node.open"
+        [(opened)]="node.opened"
         (labelClick)="toggleMenu()"
+        [route]="'/dataset/details/' + node.id"
         [dataLoading]="loading"
         [hasBox]="hasBox"
         [(ngModel)]="node.selected"
@@ -27,13 +28,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [hasChildren]="hasChildren()"
         [title]="node.title + ' n°' + node.id">
 
-    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
+    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu">
         <a [routerLink]="this.detailsPath + this.node.id" class="open-new-tab">
           <menu-item *ngIf="!related" label="Details..." awesome="fa-regular fa-eye"></menu-item>
         </a>
         <menu-item [disabled]="loading" label="Download" awesome="fas fa-download" (click)="download()"></menu-item>
         <menu-item *ngIf="this.node.canDelete"  label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteDataset()"></menu-item>
     </dropdown-menu>
+
+    <node
+            *ngIf="node.open && node.inPacs"
+            [class.selected]="treeService.isSelected(node.id, 'dicomMetadata')"
+            (labelClick)="null"
+            [route]="'/dataset/details/dicom/' + node.id"
+            label="DICOM metadata"
+            awesome="fas fa-file-code"
+            [hasChildren]="false">
+    </node>
 
     <ng-container *ngIf="node.open && node.processings && node.processings != $any('UNLOADED')">
         <processing-node
@@ -43,6 +54,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 (selectedChange)="selectedChange.emit()"
                 [hasBox]="hasBox"
                 (onProcessingDelete)="onProcessingDelete(i)"
+                [withMenu]="withMenu"
         >
         </processing-node>
 

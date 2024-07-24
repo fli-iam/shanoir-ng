@@ -14,12 +14,11 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { ExaminationPipe } from '../../examinations/shared/examination.pipe';
-import { ExaminationService } from '../../examinations/shared/examination.service';
-import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
-import { SimpleStudy, Study } from '../../studies/shared/study.model';
-import { ReverseStudyNode, ReverseSubjectNode, UNLOADED } from '../../tree/tree.model';
+import { SimpleStudy } from '../../studies/shared/study.model';
+import { ReverseStudyNode, ReverseSubjectNode, ShanoirNode, UNLOADED } from '../../tree/tree.model';
 import { Subject } from '../shared/subject.model';
+import { Selection, TreeService } from 'src/app/studies/study/tree.service';
+import { Tag } from 'src/app/tags/tag.model';
 
 
 @Component({
@@ -29,11 +28,11 @@ import { Subject } from '../shared/subject.model';
 
 export class ReverseSubjectNodeComponent implements OnChanges {
 
-    @Input() input: Subject | ReverseSubjectNode;
+    @Input() input: ReverseSubjectNode | { subject: Subject, parentNode: ShanoirNode };
     @Input() studyId: number;
     @Output() nodeInit: EventEmitter<ReverseSubjectNode> = new EventEmitter();
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
-    node: ReverseSubjectNode;
+    node: ReverseSubjectNode = null;
     loading: boolean = false;
     menuOpened: boolean = false;
     showDetails: boolean;
@@ -41,47 +40,35 @@ export class ReverseSubjectNodeComponent implements OnChanges {
     awesome = "fas fa-user-injured";
 
     constructor(
-            private examinationService: ExaminationService,
             private router: Router,
-            private examPipe: ExaminationPipe) {
+            protected treeService: TreeService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes['input']) {
+        if (changes['input'] && this.input) {
             if (this.input instanceof ReverseSubjectNode) {
                 this.node = this.input;
             } else {
-                this.node  = new ReverseSubjectNode(
-                    this.input.id,
-                    this.input.name,
-                    this.input.subjectStudyList.map(subjectStudy => this.mapStudy(subjectStudy.study)));
-                    if(this.input.preclinical){
-                        this.awesome = "fas fa-hippo"
-                    }
+                this.node = new ReverseSubjectNode(
+                    this.input.parentNode,
+                    this.input.subject.id,
+                    this.input.subject.name,
+                    this.input.subject.subjectStudyList?.map(subjectStudy => {
+                        let tags: Tag[] = [];
+                        if (!(this.input instanceof ReverseSubjectNode)) {
+                            tags = this.input.subject.subjectStudyList[this.input.subject.subjectStudyList.findIndex(element => element.study.id == subjectStudy.study.id)].tags;
+                        }
+                        return ReverseStudyNode.fromStudy(subjectStudy.study, tags, this.node);
+                    })
+                );
+                if(this.input.subject.preclinical){
+                    this.awesome = "fas fa-hippo"
+                }
             }
             this.nodeInit.emit(this.node);
             this.showDetails = this.router.url != '/subject/details/' + this.node.id;
         }
     }
-
-    private mapStudy(study: SimpleStudy): ReverseStudyNode {
-        if (this.input instanceof Subject) {
-            return new ReverseStudyNode(
-                study.id,
-                study.name,
-                this.input.subjectStudyList[this.input.subjectStudyList.findIndex(element => element.study.id == study.id)].tags,
-                UNLOADED
-            );
-        } else {
-            return new ReverseStudyNode(
-                study.id,
-                study.name,
-                [],
-                UNLOADED
-            );
-        }
-    }
-
 
     hasChildren(): boolean | 'unknown' {
         if (!this.node.studies) return false;
