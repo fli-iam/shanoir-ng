@@ -91,7 +91,7 @@ jobs:
           main_branch_sha = requests.get(
               f"${{ github.api_url }}/repos/{MAIN_REPO}/branches/{MAIN_BRANCH}",
               headers={"Authorization": "Bearer ${{ github.token }}"},
-            ).json().get("sha")
+            ).json().get("commit", {}).get("sha")
 
           # cache configuration
           #
