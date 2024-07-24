@@ -1,10 +1,10 @@
 package org.shanoir.ng.dicom.web;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
@@ -14,14 +14,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
-import java.util.Iterator;
-import java.util.Map;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 public class DICOMWebApiController implements DICOMWebApi {
@@ -47,19 +52,34 @@ public class DICOMWebApiController implements DICOMWebApi {
 
 	@Override
 	public ResponseEntity<String> findStudies(Map<String, String> allParams) throws RestServiceException, JsonMappingException, JsonProcessingException {
+		Page<Examination> examinations = null;
 		int offset = Integer.valueOf(allParams.get("offset"));
 		int limit = Integer.valueOf(allParams.get("limit"));
 		Pageable pageable = PageRequest.of(offset, limit);
-		// Search for studies with patient name (DICOM patientID does not make sense in case of Shanoir)
+		// 1. Search for studies with patient name
+		// (DICOM patientID does not make sense in case of Shanoir)
 		String patientName = allParams.get("PatientName");
-		Page<Examination> examinations;
-		if (patientName != null) examinations = examinationService.findPage(pageable, patientName);
-		else {
-			String examId = allParams.get("StudyInstanceUIDs");
-			examId = examId.substring(examId.lastIndexOf(".") + 1, examId.length());
-			examinations = examinationService.findPage(pageable, examId);
+		if (patientName != null) {
+			examinations = examinationService.findPage(pageable, patientName);
+		} else {
+			// 2. Try StudyInstanceUIDs, in case no patient name
+			// Manage already multiple study instance UIDs
+			String studyInstanceUIDs = allParams.get("StudyInstanceUIDs");
+			if (studyInstanceUIDs != null) {
+				List<Examination> examinationList = new ArrayList<>();
+				String[] studyInstanceUIDArray = studyInstanceUIDs.split(",");
+				for(String studyInstanceUID : studyInstanceUIDArray) {
+					String examinationIdString = studyInstanceUID.substring(studyInstanceUID.lastIndexOf(".") + 1, studyInstanceUID.length());
+					Examination examination = examinationService.findById(Long.valueOf(examinationIdString));
+					examinationList.add(examination);
+				}
+				examinations = new PageImpl<>(examinationList);
+			// 3. No param, return page of examinations in db
+			} else {
+				examinations = examinationService.findPage(pageable, null);
+			}
 		}
-		if (examinations.getContent().isEmpty()) {
+		if (examinations == null || examinations.getContent().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		StringBuffer studies = new StringBuffer();
