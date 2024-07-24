@@ -313,6 +313,7 @@ server directly:
    interface and receive the new password is by e-mail. In development, if you
    do hot have a configured SMTP relay, then you may choose to overide the
    password manually and set `Temporary password: No` to make it persistent.
+   Go to the "Attributes" tab of your User page and create a new attribute "userId" and set the value with a random number not taken by another user.
 
 
 ### PACS dcm4chee
