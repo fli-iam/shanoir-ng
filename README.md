@@ -56,10 +56,10 @@ Then the shanoir-downloader project can be simply managed as a normal git repo (
     - Run Docker in admin mode
     - Delete, if needed, %appData%/Docker/settings.json (Docker will create another one, see https://forums.docker.com/t/solved-docker-failed-to-start-docker-desktop-for-windows/106976/6)
     
-* Install Java 17
-    - Download and install : https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html
+* Install Java 21
+    - Download and install : https://www.oracle.com/java/technologies/javase/jdk21-archive-downloads.html
     - Add enviromnent variable :
-      		On Windows (as environment variable): JAVA_HOME = C:\Program Files\Java\jdk-17.0.10
+      		On Windows (as environment variable): JAVA_HOME = C:\Program Files\Java\jdk-21.0.1
       		On Mac (in your .bashrc or .zshrc file): export JAVA_HOME=$(/usr/libexec/java_home)
 
 * Install Maven
@@ -138,7 +138,7 @@ Please note, that the MS Users does for security reasons not publicly expose his
 # Requirements
 
 To build and deploy Shanoir, you will need:
-* Java 17 (since migration to Spring Boot 3.1.2)
+* Java 21 (since migration to Spring Boot 3.1.2)
 * docker (https://docs.docker.com/install/)
 * docker-compose 3 (https://docs.docker.com/compose/install/)
 * maven 3
