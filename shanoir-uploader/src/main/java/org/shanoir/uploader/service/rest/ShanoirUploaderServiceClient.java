@@ -351,6 +351,8 @@ public class ShanoirUploaderServiceClient {
 			if (code == HttpStatus.SC_OK) {
 				Subject subject = Util.getMappedObject(response, Subject.class);
 				return subject;
+			} else if (code == HttpStatus.SC_NO_CONTENT) {
+				return null; // no content, not found is fine as well
 			} else {
 				logger.warn("Could not find subject with identifier (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 				throw new Exception(code + " Error with subjectBySubjectIdentifier search");
