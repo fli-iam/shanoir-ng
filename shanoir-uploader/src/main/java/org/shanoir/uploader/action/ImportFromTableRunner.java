@@ -107,7 +107,17 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			importFromTableWindow.progressBar.setString("Preparing import " + i + "/" + this.importJobs.size());
 			importFromTableWindow.progressBar.setValue(100*i/this.importJobs.size() + 1);
 			try {
+				String patientName = importJob.getDicomQuery().getPatientName();
+				String patientID = importJob.getDicomQuery().getPatientID();
+				String studyDate = importJob.getDicomQuery().getStudyDate();
+				String importJobIdentifier = "[Line: " + i + ", patientName: " + patientName + ", patientID: " + patientID + ", studyDate: " + studyDate + "]";
+				logger.info("\r\n------------------------------------------------------\r\n"
+					+ "Starting importJob " + importJobIdentifier + "\r\n"
+					+ "------------------------------------------------------");
 				success = importData(importJob, study, acquisitionEquipments) && success;
+				logger.info("\r\n------------------------------------------------------\r\n"
+					+ "Finished importJob " + importJobIdentifier + ", success?: " + success+ "\r\n"
+					+ "------------------------------------------------------");
 			} catch(Exception exception) {
 				logger.error(exception.getMessage(), exception);
 			}
