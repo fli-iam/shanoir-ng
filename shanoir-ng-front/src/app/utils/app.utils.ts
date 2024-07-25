@@ -221,7 +221,7 @@ export function downloadWithStatusGET(url: string, params?: HttpParams, state ?:
             responseType: 'blob',
             params: params
         }
-    );
+    ).shareReplay();
     obs.toPromise().then(response => browserDownloadFileFromResponse(response as HttpResponse<Blob>));
     return obs.mergeMap(event => {
         return extractState(event).then(s => {
@@ -241,7 +241,7 @@ export function downloadWithStatusPOST(url: string, formData: FormData, state ?:
             observe: 'events',
             responseType: 'blob'
         }
-    );
+    ).shareReplay();
     obs.toPromise().then(response => browserDownloadFileFromResponse(response as HttpResponse<Blob>));
     return obs.mergeMap(event => {
         return extractState(event).then(s => {
