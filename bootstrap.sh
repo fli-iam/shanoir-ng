@@ -93,7 +93,7 @@ if [ -n "$build" ] ; then
 	docker build -t "$DEV_IMG" --target=jdk docker-compose
 
 	# 2. run the maven build
-	mkdir -p /tmp/home
+	mkdir -p /src/tmp/home
 	docker run --rm -t -i -v "$PWD:/src" -u "`id -u`:`id -g`" -e HOME="/src/tmp/home" \
 		-e MAVEN_OPTS="-Dmaven.repo.local=/src/tmp/home/.m2/repository"	\
 		-w /src "$DEV_IMG" sh -c 'git config --global --add safe.directory /src && cd shanoir-ng-parent && mvn clean install -DskipTests'
@@ -144,7 +144,7 @@ if [ -n "$deploy" ] ; then
 
 		step "start: keycloak"
 		docker compose up -d keycloak
-		utils/oneshot --pgrp '\| *'				\
+		docker-compose/common/oneshot --pgrp '\| *'				\
 				' INFO  \[io.quarkus\] .* Keycloak .* started in [0-9]*'	\
 				-- docker compose logs --no-color --follow keycloak >/dev/null
 
