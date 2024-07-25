@@ -466,7 +466,7 @@ public final class Util {
 			result = new ArrayList<File>();
 			final File[] listFiles = serieFolder.listFiles();
 			for (final File file : listFiles) {
-				if (file.isDirectory()) {
+				if (file.isDirectory() && !file.getName().equals("tmp")) {
 					result.add(file);
 				}
 			}
