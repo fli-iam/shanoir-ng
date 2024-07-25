@@ -371,15 +371,17 @@ public class SubjectServiceImpl implements SubjectService {
 	 * @param subject
 	 */
 	private void loadSubjectStudyTags(Subject subject) {
-		List<SubjectStudy> subjectStudyList = subject.getSubjectStudyList();
-		if (subjectStudyList != null) {
-			subjectStudyList.stream().forEach(ss -> {
-				ss.setSubjectStudyTags(subjectStudyRepository.findSubjectStudyTagsByStudyIdAndSubjectId(ss.getStudy().getId(), ss.getSubject().getId()));
-				Study studyWithTags = studyRepository.findStudyWithTagsById(ss.getStudy().getId());
-				if (studyWithTags != null) {
-					ss.getStudy().setTags(studyWithTags.getTags());
-				}
-			});
+		if (subject != null) {
+			List<SubjectStudy> subjectStudyList = subject.getSubjectStudyList();
+			if (subjectStudyList != null) {
+				subjectStudyList.stream().forEach(ss -> {
+					ss.setSubjectStudyTags(subjectStudyRepository.findSubjectStudyTagsByStudyIdAndSubjectId(ss.getStudy().getId(), ss.getSubject().getId()));
+					Study studyWithTags = studyRepository.findStudyWithTagsById(ss.getStudy().getId());
+					if (studyWithTags != null) {
+						ss.getStudy().setTags(studyWithTags.getTags());
+					}
+				});
+			}
 		}
 	}
 
