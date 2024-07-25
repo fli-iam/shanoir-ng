@@ -150,6 +150,7 @@ public class CenterServiceImpl implements CenterService {
 		to.setPostalCode(from.getPostalCode());
 		to.setStreet(from.getStreet());
 		to.setWebsite(from.getWebsite());
+		to.setStudyCenterList(from.getStudyCenterList());
 		return to;
 	}
 	
