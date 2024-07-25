@@ -113,6 +113,7 @@ public class ImporterManagerService {
 	    event.setTimestamp(importJob.getTimestamp());
 		eventService.publishEvent(event);
 		importJob.setShanoirEvent(event);
+		importJob.setUsername(KeycloakUtil.getTokenUserName());
 		try {
 			// Always create a userId specific folder in the import work folder (the root of everything):
 			// split imports to clearly separate them into separate folders for each user

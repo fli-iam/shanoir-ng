@@ -353,6 +353,7 @@ public class ImporterApiController implements ImporterApi {
 			importJob.setUserId(userId);
 			importJob.setArchive(eegFile.getOriginalFilename());
 			importJob.setWorkFolder(importJobDir.getAbsolutePath());
+			importJob.setUsername(KeycloakUtil.getTokenUserName());
 			return new ResponseEntity<>(importJob, HttpStatus.OK);
 		} catch (IOException ioe) {
 			throw new RestServiceException(ioe, new ErrorModel(HttpStatus.BAD_REQUEST.value(), "Invalid file"));
@@ -399,6 +400,7 @@ public class ImporterApiController implements ImporterApi {
 			}
 
 			importJob.setDatasets(datasets);
+			importJob.setUsername(KeycloakUtil.getTokenUserName());
 
 			return new ResponseEntity<>(importJob, HttpStatus.OK);
 		} catch (ShanoirImportException e) {
@@ -624,6 +626,7 @@ public class ImporterApiController implements ImporterApi {
 			@Parameter(name = "EegImportJob", required = true) @Valid @RequestBody final EegImportJob importJob) {
 		// Comment: Anonymisation is not necessary for pure brainvision EEGs data
 		try {
+			importJob.setUsername(KeycloakUtil.getTokenUserName());
 			Integer integg = (Integer) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.IMPORT_EEG_QUEUE,  objectMapper.writeValueAsString(importJob));
 			return new ResponseEntity<Void>(HttpStatusCode.valueOf(integg.intValue()));			
 		} catch (Exception e) {

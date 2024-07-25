@@ -24,10 +24,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import org.apache.solr.client.solrj.SolrServerException;
-import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
-import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -213,7 +210,7 @@ public class SolrServiceImpl implements SolrService {
 				shanoirMetadata.getExaminationId(), shanoirMetadata.getExaminationComment(), DateTimeUtils.localDateToDate(shanoirMetadata.getExaminationDate()), shanoirMetadata.getAcquisitionEquipmentName(),
 				shanoirMetadata.getSubjectName(), SubjectType.getType(shanoirMetadata.getSubjectType()) != null ? SubjectType.getType(shanoirMetadata.getSubjectType()).name() : null, shanoirMetadata.getSubjectId(), shanoirMetadata.getStudyName(), shanoirMetadata.getStudyId(), shanoirMetadata.getCenterName(),
 				shanoirMetadata.getCenterId(), shanoirMetadata.getSliceThickness(), shanoirMetadata.getPixelBandwidth(), shanoirMetadata.getMagneticFieldStrength(),
-				shanoirMetadata.isProcessed());
+				shanoirMetadata.isProcessed(), DateTimeUtils.localDateToDate(shanoirMetadata.getImportDate()), shanoirMetadata.getUsername());
 	}
 
 	@Transactional
@@ -295,19 +292,24 @@ public class SolrServiceImpl implements SolrService {
 	}
 
 	@Override
+	@Async
+	public void updateDatasetsAsync(List<Long> datasetIds) throws SolrServerException, IOException {
+		this.updateDatasets(datasetIds);
+	}
+
+	@Override
+	@Async
 	@Transactional
-	public void updateSubjects(List<Long> subjectIds) throws SolrServerException, IOException {
-		Set<Long> datasetsToUpdate = new HashSet<>();
-		for (Examination exam : examRepository.findBySubjectIdIn(subjectIds)) {
-			for (DatasetAcquisition acq : exam.getDatasetAcquisitions()) {
-				for (Dataset ds : acq.getDatasets()) {
-					datasetsToUpdate.add(ds.getId());
-				}
-			}
-		}
-		if (!CollectionUtils.isEmpty(datasetsToUpdate)) {
-			this.indexDatasets(new ArrayList<>(datasetsToUpdate));
-		}
+	public void updateSubjectsAsync(List<Long> subjectIds) throws SolrServerException, IOException {
+		List<Long> ids = this.dsRepository.findIdsBySubjectIdIn(subjectIds);
+		this.updateDatasets(ids);
+	}
+
+	@Override
+	@Async
+	public void updateStudyAsync(Long studyId) throws SolrServerException, IOException {
+		List<Long> ids = this.dsRepository.findIdsByStudyId(studyId);
+		this.updateDatasets(ids);
 	}
 
 }

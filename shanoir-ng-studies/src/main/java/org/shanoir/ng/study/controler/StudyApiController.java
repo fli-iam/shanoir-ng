@@ -260,6 +260,7 @@ public class StudyApiController implements StudyApi {
 			relatedDatasetService.addSubjectStudyToNewStudy(subjectIdStudyId, studyId);
 
 		} catch (Exception e) {
+			LOG.error("Error during copy for datasetsIds : " + datasetIds + ", studyId : " + studyIdAsStr + ", centersId : " + centerIds + ". Error : ", e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return new ResponseEntity<>(res, HttpStatus.OK);

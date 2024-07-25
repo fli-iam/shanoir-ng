@@ -45,7 +45,17 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 	Iterable<Dataset> findByDatasetAcquisition_Examination_Study_Id(Long studyId);
 
 	int countByDatasetAcquisition_Examination_Study_Id(Long studyId);
-	
+
+	@Query(value = "SELECT ds.id FROM dataset ds " +
+			"INNER JOIN dataset_acquisition acq ON ds.dataset_acquisition_id = acq.id " +
+			"INNER JOIN examination ex ON acq.examination_id = ex.id " +
+			"WHERE ex.study_id = ?1", nativeQuery = true)
+	List<Long> findIdsByStudyId(Long studyId);
+
+	@Query(value = "SELECT ds.id FROM dataset ds " +
+			"WHERE ds.subject_id IN (?1)", nativeQuery = true)
+	List<Long> findIdsBySubjectIdIn(List<Long> subjectIds);
+
 	Iterable<Dataset> findByDatasetAcquisitionId(Long acquisitionId);
 	
 	Iterable<Dataset> findBydatasetAcquisitionStudyCardId(Long studycardId);
