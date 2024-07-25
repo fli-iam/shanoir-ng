@@ -25,6 +25,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
@@ -375,18 +376,27 @@ public class DatasetServiceImpl implements DatasetService {
 	 */
 	@Override
 	public Examination getExamination(Dataset dataset){
+		DatasetAcquisition acquisition = this.getAcquisition(dataset);
+		if(acquisition != null){
+			return acquisition.getExamination();
+		}
+		return null;
+	}
+
+    @Override
+    public DatasetAcquisition getAcquisition(Dataset dataset) {
 		if(dataset.getDatasetAcquisition() != null){
-			return dataset.getDatasetAcquisition().getExamination();
+			return dataset.getDatasetAcquisition();
 		}
 		if(dataset.getDatasetProcessing().getInputDatasets() != null){
 			for(Dataset ds : dataset.getDatasetProcessing().getInputDatasets()){
-				Examination exam = this.getExamination(ds);
-				if(exam != null){
-					return exam;
+				DatasetAcquisition acq = this.getAcquisition(ds);
+				if(acq != null){
+					return acq;
 				}
 			}
 		}
 		return null;
-	}
+    }
 
 }

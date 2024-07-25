@@ -143,7 +143,7 @@ public class ExecutionApiController implements ExecutionApi {
      * @param executionMonitoring
      * @return
      */
-    private VipExecutionDTO createVipExecution(ExecutionCandidateDTO candidate, ExecutionMonitoring executionMonitoring) {
+    private VipExecutionDTO createVipExecution(ExecutionCandidateDTO candidate, ExecutionMonitoring executionMonitoring) throws EntityNotFoundException {
         VipExecutionDTO dto = new VipExecutionDTO();
         dto.setName(candidate.getName());
         dto.setPipelineIdentifier(candidate.getPipelineIdentifier());
@@ -163,7 +163,7 @@ public class ExecutionApiController implements ExecutionApi {
      * @param candidate
      * @return
      */
-    private Map<String, java.lang.Object> getInputValues(ExecutionMonitoring createdMonitoring, ExecutionCandidateDTO candidate) {
+    private Map<String, java.lang.Object> getInputValues(ExecutionMonitoring createdMonitoring, ExecutionCandidateDTO candidate) throws EntityNotFoundException {
 
         Map<String, Object> inputValues = new HashMap<>(candidate.getInputParameters());
 

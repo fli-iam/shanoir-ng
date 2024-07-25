@@ -66,5 +66,5 @@ public interface ExecutionMonitoringService {
 
     List<ExecutionMonitoring> findAllRunning();
 
-    List<ParameterResourceDTO> createProcessingResources(ExecutionMonitoring createdProcessing, List<DatasetParameterDTO> parameterDatasets);
+    List<ParameterResourceDTO> createProcessingResources(ExecutionMonitoring createdProcessing, List<DatasetParameterDTO> parameterDatasets) throws EntityNotFoundException;
 }
