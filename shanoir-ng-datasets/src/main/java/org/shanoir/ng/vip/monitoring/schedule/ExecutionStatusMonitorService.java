@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
@@ -119,9 +120,11 @@ public class ExecutionStatusMonitorService {
 						stop.set(true);
 						break;
 				}
-			}catch (ResultHandlerException e){
-				LOG.error(e.getMessage(), e.getCause());
-				this.setJobInError(event, execLabel + " : " + e.getMessage());
+			} catch (Exception e){
+				// Unwrap ReactiveException thrown from async method
+				Throwable ex = Exceptions.unwrap(e);
+				LOG.error(ex.getMessage(), ex.getCause());
+				this.setJobInError(event, execLabel + " : " + ex.getMessage());
 				LOG.warn("Stopping thread...");
 				stop.set(true);
 			}
