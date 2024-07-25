@@ -14,26 +14,11 @@
 
 package org.shanoir.ng.download;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.StringReader;
-import java.net.URL;
-import java.nio.file.Files;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-
-import javax.json.Json;
-import javax.json.stream.JsonParser;
-
+import jakarta.annotation.PostConstruct;
+import jakarta.mail.BodyPart;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMultipart;
+import jakarta.mail.util.ByteArrayDataSource;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.json.JSONReader;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -46,22 +31,22 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.mail.BodyPart;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMultipart;
-import jakarta.mail.util.ByteArrayDataSource;
+import javax.json.Json;
+import javax.json.stream.JsonParser;
+import java.io.*;
+import java.net.URL;
+import java.nio.file.Files;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * This class is used to download files on using WADO URLs:
@@ -317,7 +302,8 @@ public class WADODownloaderService {
 			}
 		}
 		AcquisitionAttributes<Long> dAcquisitionAttributes = new AcquisitionAttributes<>();
-		datasets.parallelStream().forEach(
+		// remove this ?
+		datasets.forEach(
 			dataset -> {
 				try {
 					dAcquisitionAttributes.addDatasetAttributes(dataset.getId(), getDicomAttributesForDataset(dataset));
