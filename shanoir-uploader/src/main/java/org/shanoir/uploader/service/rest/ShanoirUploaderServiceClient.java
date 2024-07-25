@@ -23,6 +23,8 @@ import org.springframework.stereotype.Component;
 import org.json.JSONObject;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.model.dto.StudyCardOnStudyResultDTO;
@@ -350,7 +352,7 @@ public class ShanoirUploaderServiceClient {
 				return subject;
 			} else {
 				logger.warn("Could not find subject with identifier (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
-				return null;
+				throw new Exception(code + " Error with subjectBySubjectIdentifier search");
 			}
 		}
 	}
