@@ -27,6 +27,7 @@ import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.*;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,6 +117,9 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 	public ResponseEntity<DatasetProcessingDTO> saveNewDatasetProcessing(
 			@Parameter(description = "dataset processing to create", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
 			final BindingResult result) throws RestServiceException {
+
+		/* set authenticated username */
+		datasetProcessing.setUsername(KeycloakUtil.getTokenUserName());
 		
 		/* Validation */
 		validate(result);

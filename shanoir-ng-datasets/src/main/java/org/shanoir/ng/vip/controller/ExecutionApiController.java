@@ -227,6 +227,7 @@ public class ExecutionApiController implements ExecutionApi {
         executionMonitoring.setDatasetProcessingType(DatasetProcessingType.valueOf(execution.getProcessingType()));
         executionMonitoring.setOutputProcessing(execution.getOutputProcessing());
         executionMonitoring.setInputDatasets(inputDatasets);
+        executionMonitoring.setUsername(KeycloakUtil.getTokenUserName());
         return this.executionMonitoringService.create(executionMonitoring);
     }
 

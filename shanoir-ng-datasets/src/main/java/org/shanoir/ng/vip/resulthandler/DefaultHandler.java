@@ -227,6 +227,7 @@ public class DefaultHandler extends ResultHandler {
 		DatasetProcessing processing = new DatasetProcessing();
 		processing.setParent(execution);
 		processing.setComment(execution.getPipelineIdentifier());
+		processing.setUsername(execution.getUsername());
 		processing.setInputDatasets(inputDatasets);
 		processing.setProcessingDate(execution.getProcessingDate());
 		processing.setStudyId(execution.getStudyId());
