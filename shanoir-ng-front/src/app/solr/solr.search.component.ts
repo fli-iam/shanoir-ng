@@ -465,7 +465,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {headerName: "Pixel", field: "pixelBandwidth"},
             {headerName: "Mag. strength", field: "magneticFieldStrength"},
             {headerName: "OHIF Viewer", type: "button", awesome: "fa-solid fa-up-right-from-square",
-              condition: item => (item.datasetType.includes("MR") || item.datasetType.includes("Pet") || item.datasetType.includes("Ct")),
+              condition: item => (!item.processed && (item.datasetType.includes("MR") || item.datasetType.includes("Pet") || item.datasetType.includes("Ct"))),
               action: item => {
                 window.open(environment.viewerUrl + '/viewer/1.4.9.12.34.1.8527.' + item.examinationId, '_blank');
               }
