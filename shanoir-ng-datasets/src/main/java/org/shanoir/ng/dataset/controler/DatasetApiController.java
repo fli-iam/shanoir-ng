@@ -188,6 +188,12 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
+	public ResponseEntity<Void> deleteNiftisFromStudy(long studyId) {
+		this.datasetService.deleteNiftis(studyId);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
+
+	@Override
 	public ResponseEntity<DatasetAndProcessingsDTOInterface> findDatasetById(
 			final Long datasetId) {
 

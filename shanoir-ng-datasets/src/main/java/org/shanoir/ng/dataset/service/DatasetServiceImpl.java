@@ -24,8 +24,10 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.repository.DatasetExpressionRepository;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetfile.DatasetFile;
+import org.shanoir.ng.datasetfile.DatasetFileRepository;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.property.service.DatasetPropertyService;
@@ -60,6 +62,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -104,6 +107,12 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Autowired
 	private DatasetProcessingService processingService;
+
+	@Autowired
+	private DatasetFileRepository datasetFileRepository;
+
+	@Autowired
+	private DatasetExpressionRepository datasetExpressionRepository;
 
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
@@ -357,6 +366,44 @@ public class DatasetServiceImpl implements DatasetService {
 	@Override
 	public List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception {
 		return repository.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
+	}
+
+	@Override
+	public void deleteNiftis(Long studyId) {
+		List<Dataset> datasets = this.findByStudyId(studyId);
+		for (Dataset dataset : datasets) {
+			deleteNifti(dataset);
+		}
+	}
+
+	/**
+	 * Deletes nifti on file server
+	 * @param dataset
+	 */
+	private void deleteNifti(Dataset dataset) {
+		List<DatasetExpression> datasetExpressionToDelete = new ArrayList<>();
+
+		for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+			if (!DatasetExpressionFormat.NIFTI_SINGLE_FILE.equals(expression.getDatasetExpressionFormat())) {
+				continue;
+			}
+			for (DatasetFile file : expression.getDatasetFiles()) {
+				URL url = null;
+				try {
+					// Delete file from disc
+					url = new URL(file.getPath().replaceAll("%20", " "));
+					File srcFile = new File(UriUtils.decode(url.getPath(), StandardCharsets.UTF_8.name()));
+					FileUtils.deleteQuietly(srcFile);
+				} catch (Exception e) {
+					LOG.error("Could not delete nifti file: {}", file.getPath(), e);
+				}
+			}
+			LOG.error("We add " + expression.getId());
+			datasetExpressionToDelete.add(expression);
+		}
+
+		LOG.error("We delete " + datasetExpressionToDelete.size());
+		this.datasetExpressionRepository.deleteAll(datasetExpressionToDelete);
 	}
 
 }
