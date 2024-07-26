@@ -192,7 +192,7 @@ public class DefaultHandler extends ResultHandler {
 
 			if(!inputDatasets.isEmpty()) {
 
-				Long studyId = inputDatasets.get(0).getStudyId();
+				Long studyId = datasetService.getStudyId(inputDatasets.get(0));
 				Study study = studyRepository.findById(studyId)
 						.orElseThrow(() -> new NotFoundException("Study [" + studyId + "] not found."));
 
