@@ -433,16 +433,24 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {headerName: "Nature", field: "datasetNature"},
             {headerName: "Series date", field: "datasetCreationDate", type: "date", hidden: true, cellRenderer: (params: any) => dateRenderer(params.data.datasetCreationDate)},
             {headerName: "Study", field: "studyName",
-                route: item => '/study/details/' + item.studyId
+                route: function(item) {
+                    return item.studyId ? '/study/details/' + item.studyId : null;
+                }
             },
             {headerName: "Subject", field: "subjectName",
-                route: item => '/subject/details/' + item.subjectId
+                route: function(item) {
+                    return item.subjectId ? '/subject/details/' + item.subjectId : null;
+                }
             },
             {headerName: "Acquisition Center", field: "centerName",
-                route: item => '/center/details/' + item.centerId
+                route: function(item) {
+                    return item.centerId ? '/center/details/' + item.centerId : null;
+                }
             },
             {headerName: "Exam", field: "examinationComment",
-                route: item => '/examination/details/' + item.examinationId
+                route: function(item) {
+                    return item.examinationId ? '/examination/details/' + item.examinationId : null;
+                }
             },
             {headerName: "Exam Date", field:"examinationDate", type: "date", cellRenderer: (params: any) => {
                     return dateRenderer(params.data.examinationDate);
