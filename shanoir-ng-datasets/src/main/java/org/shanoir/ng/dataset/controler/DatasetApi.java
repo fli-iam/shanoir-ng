@@ -77,6 +77,7 @@ public interface DatasetApi {
 			@ApiResponse(responseCode = "403", description = "forbidden"),
 			@ApiResponse(responseCode = "404", description = "no dataset found"),
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping(value = "/deleteNiftis", produces = { "application/json" })
 	ResponseEntity<Void> deleteNiftisFromStudy(
 			@Parameter(description = "Id of the study from which we want to delete the niftis", required=true) @Valid

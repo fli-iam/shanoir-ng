@@ -24,8 +24,10 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.repository.DatasetExpressionRepository;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetfile.DatasetFile;
+import org.shanoir.ng.datasetfile.DatasetFileRepository;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.property.service.DatasetPropertyService;
@@ -105,6 +107,12 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Autowired
 	private DatasetProcessingService processingService;
+
+	@Autowired
+	private DatasetFileRepository datasetFileRepository;
+
+	@Autowired
+	private DatasetExpressionRepository datasetExpressionRepository;
 
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
@@ -377,15 +385,27 @@ public class DatasetServiceImpl implements DatasetService {
 			if (!DatasetExpressionFormat.NIFTI_SINGLE_FILE.equals(expression.getDatasetExpressionFormat())) {
 				continue;
 			}
+			List<DatasetFile> filesToDelete = new ArrayList<>();
 			for (DatasetFile file : expression.getDatasetFiles()) {
 				URL url = null;
 				try {
+					// Delete file from disc
 					url = new URL(file.getPath().replaceAll("%20", " "));
 					File srcFile = new File(UriUtils.decode(url.getPath(), StandardCharsets.UTF_8.name()));
 					FileUtils.deleteQuietly(srcFile);
+
+					// Delete associated dataset File
+					filesToDelete.add(file);
 				} catch (MalformedURLException e) {
 					LOG.error("Could not delete nifti file: {}", file.getPath());
 				}
+			}
+			// Delete all dataset files in DB
+			datasetFileRepository.deleteAll(filesToDelete);
+
+			// Delete dataset expression if necessary (can be done in a loop ?)
+			if (expression.getDatasetFiles().isEmpty()) {
+				this.datasetExpressionRepository.delete(expression);
 			}
 		}
 	}
