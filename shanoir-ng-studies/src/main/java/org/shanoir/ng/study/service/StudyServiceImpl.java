@@ -351,9 +351,11 @@ public class StudyServiceImpl implements StudyService {
 		studyDb = studyRepository.save(studyDb);
 
 		if (study.getSubjectStudyList() != null) {
-			updateTags(study.getSubjectStudyList(), studyDb.getTags());
-			ListDependencyUpdate.updateWith(studyDb.getSubjectStudyList(), study.getSubjectStudyList());
-			for (SubjectStudy dbSubjectStudy : studyDb.getSubjectStudyList()) {
+			List<SubjectStudy> subjectStudyListDb = studyDb.getSubjectStudyList();
+			List<SubjectStudy> subjectStudyListNew = study.getSubjectStudyList();
+			subjectStudyListDb.clear();
+			subjectStudyListDb.addAll(subjectStudyListNew);
+			for (SubjectStudy dbSubjectStudy : subjectStudyListDb) {
 				dbSubjectStudy.setStudy(studyDb);
 			}
 			studyDb = studyRepository.save(studyDb);
