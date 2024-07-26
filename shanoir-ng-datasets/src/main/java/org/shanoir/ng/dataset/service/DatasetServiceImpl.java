@@ -381,11 +381,12 @@ public class DatasetServiceImpl implements DatasetService {
 	 * @param dataset
 	 */
 	private void deleteNifti(Dataset dataset) {
+		List<DatasetExpression> datasetExpressionToDelete = new ArrayList<>();
+
 		for (DatasetExpression expression : dataset.getDatasetExpressions()) {
 			if (!DatasetExpressionFormat.NIFTI_SINGLE_FILE.equals(expression.getDatasetExpressionFormat())) {
 				continue;
 			}
-			List<DatasetFile> filesToDelete = new ArrayList<>();
 			for (DatasetFile file : expression.getDatasetFiles()) {
 				URL url = null;
 				try {
@@ -393,21 +394,16 @@ public class DatasetServiceImpl implements DatasetService {
 					url = new URL(file.getPath().replaceAll("%20", " "));
 					File srcFile = new File(UriUtils.decode(url.getPath(), StandardCharsets.UTF_8.name()));
 					FileUtils.deleteQuietly(srcFile);
-
-					// Delete associated dataset File
-					filesToDelete.add(file);
-				} catch (MalformedURLException e) {
-					LOG.error("Could not delete nifti file: {}", file.getPath());
+				} catch (Exception e) {
+					LOG.error("Could not delete nifti file: {}", file.getPath(), e);
 				}
 			}
-			// Delete all dataset files in DB
-			datasetFileRepository.deleteAll(filesToDelete);
-
-			// Delete dataset expression if necessary (can be done in a loop ?)
-			if (expression.getDatasetFiles().isEmpty()) {
-				this.datasetExpressionRepository.delete(expression);
-			}
+			LOG.error("We add " + expression.getId());
+			datasetExpressionToDelete.add(expression);
 		}
+
+		LOG.error("We delete " + datasetExpressionToDelete.size());
+		this.datasetExpressionRepository.deleteAll(datasetExpressionToDelete);
 	}
 
 }
