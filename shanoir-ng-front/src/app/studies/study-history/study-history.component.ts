@@ -45,7 +45,7 @@ export class StudyHistoryComponent {
                 } else if (event.includes("import")) {
                     if (event.includes("Dataset")) { return "/examination/details/" + id; }
                 } else {
-                    if (event.includes("userAddToStudy") || event.includes("delete")) {
+                    if (event.includes("userAddToStudy")) {
                         params.objectId = null;
                     }
                 }
