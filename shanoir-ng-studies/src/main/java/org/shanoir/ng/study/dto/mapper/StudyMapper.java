@@ -58,10 +58,21 @@ public interface StudyMapper {
 	@Named("study.detailed")
 	StudyDTO studyToStudyDTODetailed(Study study);
 
+	@Named("studies.light")
+	@IterableMapping(qualifiedByName = "study.light")
 	List<StudyLightDTO> studiesToStudyLightDTOs(List<Study> studies);
 
+	@Named("study.light")
 	@Mapping(target = "studyTags", ignore = true)
 	StudyLightDTO studyToStudyLightDTO(Study study);
+
+	@Named("study.light.no.paths")
+	@Mappings({
+		@Mapping(target = "studyTags", ignore = true),
+		@Mapping(target = "protocolFilePaths", ignore = true),
+		@Mapping(target = "dataUserAgreementPaths", ignore = true)
+	})
+	StudyLightDTO studyToStudyLightDTONoFilePaths(Study study);
 
 	@Named("studies.idname")
 	@IterableMapping(qualifiedByName = "study.idname")

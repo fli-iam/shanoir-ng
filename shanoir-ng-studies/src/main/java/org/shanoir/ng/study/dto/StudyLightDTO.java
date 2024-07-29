@@ -58,6 +58,10 @@ public class StudyLightDTO {
 
 	private List<StudyTagDTO> studyTags;
 
+	private List<String> protocolFilePaths;
+	
+	private List<String> dataUserAgreementPaths;
+
 	/**
 	 * Default constructor.
 	 */
@@ -230,6 +234,22 @@ public class StudyLightDTO {
 
 	public void setStudyTags(List<StudyTagDTO> studyTags) {
 		this.studyTags = studyTags;
+	}
+
+	public List<String> getProtocolFilePaths() {
+		return protocolFilePaths;
+	}
+
+	public void setProtocolFilePaths(List<String> protocolFilePaths) {
+		this.protocolFilePaths = protocolFilePaths;
+	}
+
+	public List<String> getDataUserAgreementPaths() {
+		return dataUserAgreementPaths;
+	}
+
+	public void setDataUserAgreementPaths(List<String> dataUserAgreementPaths) {
+		this.dataUserAgreementPaths = dataUserAgreementPaths;
 	}
 
 }

@@ -481,6 +481,7 @@ public class StudyServiceImpl implements StudyService {
 			s.getStudyUserList().stream().forEach(ss -> ss.setCenters(studyUserRepository.findDistinctCentersByStudyId(ss.getStudyId())));
 		});
 		setNumberOfSubjectsAndExaminations(studies);
+		setFilePaths(studies);
 		// Utils.copyList is used to prevent a bug with @PostFilter
 		return Utils.copyList(studies);
 	}
@@ -536,6 +537,13 @@ public class StudyServiceImpl implements StudyService {
         	} else {
         		s.setNbExaminations(0);
         	}
+		});
+	}
+
+	private void setFilePaths(List<Study> studies) {
+		studies.stream().forEach(s -> {
+			s.setProtocolFilePaths(studyRepository.findProtocolFilePathsByStudyId(s.getId()));
+			s.setDataUserAgreementPaths(studyRepository.findDataUserAgreementPathsByStudyId(s.getId()));
 		});
 	}
 

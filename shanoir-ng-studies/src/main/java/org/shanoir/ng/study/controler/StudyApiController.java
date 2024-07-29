@@ -519,7 +519,7 @@ public class StudyApiController implements StudyApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		for (Study study : studies) {
-			studiesDTO.add(studyMapper.studyToStudyLightDTO(study));
+			studiesDTO.add(studyMapper.studyToStudyLightDTONoFilePaths(study));
 		}
 		return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
 	}

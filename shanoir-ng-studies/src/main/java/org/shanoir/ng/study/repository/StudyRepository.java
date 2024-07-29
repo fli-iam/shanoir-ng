@@ -47,4 +47,10 @@ public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepos
     @Query("SELECT s FROM Study s WHERE s.id = :studyId")
     Study findStudyWithTagsById(@Param("studyId") Long studyId);
 
+	@Query("SELECT s.protocolFilePaths FROM Study s WHERE s.id = :studyId")
+    List<String> findProtocolFilePathsByStudyId(Long studyId);
+
+	@Query("SELECT s.dataUserAgreementPaths FROM Study s WHERE s.id = :studyId")
+    List<String> findDataUserAgreementPathsByStudyId(Long studyId);
+
 }
