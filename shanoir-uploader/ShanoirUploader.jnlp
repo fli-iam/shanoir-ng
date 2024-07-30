@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <jnlp spec="1.0+" codebase="https://github.com/fli-iam/shanoir-ng/releases/latest/download/" href="ShanoirUploader.jnlp">
 	<information>
-		<title>Shanoir Uploader</title>
+		<title>ShanoirUploader</title>
 		<vendor>Empenn Team - Inria</vendor>
 		<homepage href="https://project.inria.fr/shanoir/" />
 		<description>Desktop client for the Shanoir server</description>
