@@ -82,13 +82,15 @@ public class SubjectServiceSecurityTest {
 	@Test
 	@WithAnonymousUser
 	public void testAsAnonymous() throws ShanoirException {
+		List<Study> studiesMock = new ArrayList<>();
+		studiesMock.add(buildStudyMock(1L));
 		assertAccessDenied(service::findAll);
 		assertAccessDenied(service::findAllSubjectsOfStudyId, 1L);
 		
 		assertAccessDenied(service::findByData, "data");
 		assertAccessDenied(service::findById, ENTITY_ID);
-		assertAccessDenied(service::findByIdentifier, "identifier");
-		assertAccessDenied(service::findByIdWithSubjecStudies, ENTITY_ID);
+		assertAccessDenied(service::findByIdentifierInStudiesWithRights, "identifier", studiesMock);
+		assertAccessDenied(service::findByIdWithSubjectStudies, ENTITY_ID);
 		assertAccessDenied(service::findSubjectFromCenterCode, "centerCode");
 		
 		assertAccessDenied(service::create, mockNew);
@@ -114,7 +116,6 @@ public class SubjectServiceSecurityTest {
 		assertAccessDenied(service::update, mockExisting);
 		assertAccessDenied(service::deleteById, ENTITY_ID);
 	}
-	
 	
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
@@ -153,12 +154,14 @@ public class SubjectServiceSecurityTest {
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
 	public void testAsAdmin() throws ShanoirException {
+		List<Study> studiesMock = new ArrayList<>();
+		studiesMock.add(buildStudyMock(1L));
 		assertAccessAuthorized(service::findAll);
 		assertAccessAuthorized(service::findAllSubjectsOfStudyId, 1L);
 		assertAccessAuthorized(service::findByData, "data");
 		assertAccessAuthorized(service::findById, ENTITY_ID);
-		assertAccessAuthorized(service::findByIdentifier, "identifier");
-		assertAccessAuthorized(service::findByIdWithSubjecStudies, ENTITY_ID);
+		assertAccessAuthorized(service::findByIdentifierInStudiesWithRights, "identifier", studiesMock);
+		assertAccessAuthorized(service::findByIdWithSubjectStudies, ENTITY_ID);
 		assertAccessAuthorized(service::findSubjectFromCenterCode, "centerCode");
 		assertAccessAuthorized(service::create, mockNew);
 		assertAccessAuthorized(service::update, mockExisting);
@@ -171,39 +174,33 @@ public class SubjectServiceSecurityTest {
 		Subject subjectMockNoRights = buildSubjectMock(1L);
 		given(repository.findByName(NAME)).willReturn(subjectMockNoRights);
 		given(repository.findById(1L)).willReturn(Optional.of(subjectMockNoRights));
-		given(repository.findByIdentifier("identifier")).willReturn(subjectMockNoRights);
 		given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockNoRights);
 		given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockNoRights);
 		assertAccessDenied(service::findByData, NAME);
 		assertAccessDenied(service::findById, 1L);
-		assertAccessDenied(service::findByIdentifier, "identifier");
-		assertAccessDenied(service::findByIdWithSubjecStudies, 1L);
+		assertAccessDenied(service::findByIdWithSubjectStudies, 1L);
 		assertAccessDenied(service::findSubjectFromCenterCode, "centerCode");
 		
 		Subject subjectMockWrongRights = buildSubjectMock(1L);
 		addStudyToMock(subjectMockWrongRights, 100L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT);
 		given(repository.findByName(NAME)).willReturn(subjectMockWrongRights);
 		given(repository.findById(1L)).willReturn(Optional.of(subjectMockWrongRights));
-		given(repository.findByIdentifier("identifier")).willReturn(subjectMockWrongRights);
 		given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockWrongRights);
 		given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockWrongRights);
 		assertAccessDenied(service::findByData, NAME);
 		assertAccessDenied(service::findById, 1L);
-		assertAccessDenied(service::findByIdentifier, "identifier");
-		assertAccessDenied(service::findByIdWithSubjecStudies, 1L);
+		assertAccessDenied(service::findByIdWithSubjectStudies, 1L);
 		assertAccessDenied(service::findSubjectFromCenterCode, "centerCode");
 		
 		Subject subjectMockRightRights = buildSubjectMock(1L);
 		addStudyToMock(subjectMockRightRights, 100L, StudyUserRight.CAN_SEE_ALL);
 		given(repository.findByName(NAME)).willReturn(subjectMockRightRights);
 		given(repository.findById(1L)).willReturn(Optional.of(subjectMockRightRights));
-		given(repository.findByIdentifier("identifier")).willReturn(subjectMockRightRights);
 		given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockRightRights);
 		given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockRightRights);
 		assertAccessAuthorized(service::findByData, NAME);
 		assertAccessAuthorized(service::findById, 1L);
-		assertAccessAuthorized(service::findByIdentifier, "identifier");
-		assertAccessAuthorized(service::findByIdWithSubjecStudies, 1L);
+		assertAccessAuthorized(service::findByIdWithSubjectStudies, 1L);
 		assertAccessAuthorized(service::findSubjectFromCenterCode, "centerCode");
 	}
 

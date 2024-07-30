@@ -41,9 +41,7 @@ import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyDecorator;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
-import org.shanoir.ng.subjectstudy.model.SubjectStudyTag;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
-import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ListDependencyUpdate;
 import org.shanoir.ng.utils.Utils;
@@ -175,7 +173,7 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 
 	@Override
-	public Subject findByIdWithSubjecStudies(final Long id) {
+	public Subject findByIdWithSubjectStudies(final Long id) {
 		return subjectRepository.findSubjectWithSubjectStudyById(id);
 	}
 	
@@ -331,8 +329,9 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 
 	@Override
-	public Subject findByIdentifier(String identifier) {
-		Subject subject = subjectRepository.findByIdentifier(identifier);
+	public Subject findByIdentifierInStudiesWithRights(String identifier, List<Study> studies) {
+		Iterable<Long> studyIds = studies.stream().map(AbstractEntity::getId).collect(Collectors.toList());
+		Subject subject = subjectRepository.findDistinctByIdentifierAndSubjectStudyListStudyIdIn(identifier, studyIds);
 		loadSubjectStudyTags(subject);
 		return subject;
 	}
