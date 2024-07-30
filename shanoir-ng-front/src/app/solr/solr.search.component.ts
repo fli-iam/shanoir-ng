@@ -168,6 +168,9 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         formGroup.valueChanges.subscribe(() => {
             formGroup.get('importEndDate').updateValueAndValidity({ emitEvent: false });
         });
+        formGroup.valueChanges.subscribe(() => {
+            formGroup.get('endDate').updateValueAndValidity({ emitEvent: false });
+        });
 
         return formGroup;
     }
@@ -191,6 +194,8 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     dateOrderValidator = (control: AbstractControl): ValidationErrors | null => {
+        this.solrRequest.datasetStartDate = this.form?.get('startDate')?.value;
+        this.solrRequest.datasetEndDate = this.form?.get('endDate')?.value;
         this.solrRequest.importStartDate = this.form?.get('importStartDate')?.value;
         this.solrRequest.importEndDate = this.form?.get('importEndDate')?.value;
         if (this.solrRequest.datasetStartDate && this.solrRequest.datasetEndDate
@@ -281,7 +286,6 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     onDateChange(date: Date | 'invalid') {
-        console.log("onDateChange : ", date);
         if (this.loaded && (date === null || (date && ('invalid' != date)))) {
             this.updateSelections();
             this.refreshTable();
