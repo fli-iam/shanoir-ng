@@ -198,7 +198,7 @@ public class ImportDialogOpener {
 	 */
 	private Subject getSubject(final UploadJob uploadJob) throws Exception {
 		Subject foundSubject = null;
-		if (uploadJob.getSubjectIdentifier() != null) {
+		if (uploadJob.getSubjectIdentifier() != null && ShUpConfig.isModeSubjectCommonNameAutoIncrement()) {
 			foundSubject = shanoirUploaderServiceClient
 					.findSubjectBySubjectIdentifier(uploadJob.getSubjectIdentifier());
 		}
@@ -226,19 +226,18 @@ public class ImportDialogOpener {
 		}
 		// Existing subject found with identifier:
 		if (subject != null) {
-			// Manage subject values here:
-			importDialog.subjectTextField.setText(subject.getName());
 			// Common name manual
 			if (ShUpConfig.isModeSubjectCommonNameManual()) {
 				importDialog.subjectTextField.setBackground(Color.WHITE);
 				importDialog.subjectTextField.setEnabled(true);
-				importDialog.subjectTextField.setEditable(true);			
+				importDialog.subjectTextField.setEditable(true);		
 			} else if (ShUpConfig.isModeSubjectCommonNameAutoIncrement()) {
+				importDialog.subjectTextField.setText(subject.getName());
 				importDialog.subjectTextField.setBackground(Color.LIGHT_GRAY);
 				importDialog.subjectTextField.setEnabled(false);
 				importDialog.subjectTextField.setEditable(false);
 				importDialog.existingSubjectsCB.setVisible(false);
-				importDialog.existingSubjectsCB.setBackground(Color.BLACK);
+				importDialog.existingSubjectsCB.setBackground(Color.LIGHT_GRAY);
 				importDialog.existingSubjectsCB.setEnabled(false);
 				importDialog.existingSubjectsCB.setEditable(false);
 			}			
@@ -251,7 +250,7 @@ public class ImportDialogOpener {
 			importDialog.subjectManualHemisphericDominanceCB
 					.setSelectedItem(subject.getManualHemisphericDominance());
 			importDialog.subjectManualHemisphericDominanceCB.setEnabled(false);
-			importDialog.subjectPersonalCommentTextArea.setBackground(Color.BLACK);
+			importDialog.subjectPersonalCommentTextArea.setBackground(Color.LIGHT_GRAY);
 			importDialog.subjectPersonalCommentTextArea.setEditable(false);
 		// No existing subject found with identifier:
 		} else {
@@ -268,7 +267,7 @@ public class ImportDialogOpener {
 				importDialog.subjectTextField.setEnabled(false);
 				importDialog.subjectTextField.setEditable(false);
 				importDialog.existingSubjectsCB.setVisible(false);
-				importDialog.existingSubjectsCB.setBackground(Color.BLACK);
+				importDialog.existingSubjectsCB.setBackground(Color.LIGHT_GRAY);
 				importDialog.existingSubjectsCB.setEnabled(false);
 				importDialog.existingSubjectsCB.setEditable(false);
 			}
