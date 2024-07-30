@@ -375,7 +375,6 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 		addFilterQueryFromRange(query, PIXEL_BANDWIDTH_FACET, shanoirQuery.getPixelBandwidth());
 		addFilterQueryFromRange(query, MAGNETIC_FIELD_STRENGHT_FACET, shanoirQuery.getMagneticFieldStrength());
 		addFilterQueryFromDateRange(query, DATASET_CREATION_DATE_FACET, shanoirQuery.getDatasetDateRange());
-		addFilterQueryFromDateRange(query, IMPORT_DATE_FACET, shanoirQuery.getImportDateRange());
 
 		if (shanoirQuery.getSearchText() != null && !shanoirQuery.getSearchText().trim().isEmpty()) {
 			if (shanoirQuery.isExpertMode()) {

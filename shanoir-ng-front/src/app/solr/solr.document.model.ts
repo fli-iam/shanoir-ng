@@ -36,6 +36,7 @@ export class SolrDocument {
     studyId: string;
     id: number; // only for the table component..
     username: string;
+
     importDate: Date;
 }
 
@@ -53,8 +54,6 @@ export class SolrRequest {
     datasetName: string[];
     datasetStartDate: Date | 'invalid';
     datasetEndDate: Date | 'invalid';
-    importStartDate: Date | 'invalid';
-    importEndDate: Date | 'invalid';
     datasetType: string[];
     processed: boolean[];
     datasetNature: string[];
