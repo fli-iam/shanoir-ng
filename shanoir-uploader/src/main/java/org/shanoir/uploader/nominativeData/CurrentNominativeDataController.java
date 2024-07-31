@@ -55,7 +55,7 @@ public class CurrentNominativeDataController {
 				int row = cuw.table.getSelectedRow();
 				int col = cuw.table.getSelectedColumn();
 				int rows = cuw.table.getRowCount();
-				// Last row and last column: delete all
+				// Last row and last column: delete all imports whatever their status
 				if (col == cuw.deleteColumn && row == rows - 1) {
 					String message = cuw.frame.resourceBundle
 							.getString("shanoir.uploader.currentUploads.Action.deleteAll.confirmation.message");
@@ -90,17 +90,17 @@ public class CurrentNominativeDataController {
 						}
 						processWorkFolder(workFolderFilePath);
 					}
-				// delete one import: ready (to gain disk space) or finished
+				// Delete one import: ready (to gain disk space) or finished
 				} else if (col == cuw.deleteColumn && row != -1) {
 					String uploadState = (String) cuw.table.getModel().getValueAt(row, cuw.uploadStateColumn);
 					if (uploadState.equals(cuw.finishedUploadState)
 							|| uploadState.equals(cuw.readyUploadState)) {
 						showDeleteConfirmationDialog(workFolderFilePath, cuw, row);					
 					}
-				// start the import
+				// Start the import or try reimporting an exam with status "ERROR"
 				} else if (col == cuw.importColumn && row != -1) {
 					String uploadState = (String) cuw.table.getModel().getValueAt(row, cuw.uploadStateColumn);
-					if (uploadState.equals(cuw.readyUploadState)) {
+					if (uploadState.equals(cuw.readyUploadState) || uploadState.equals(cuw.errorUploadState)) {
 						String uploadJobFilePath = (String) cuw.table.getModel().getValueAt(row, 0) + File.separator + UploadJobManager.UPLOAD_JOB_XML;
 						File uploadJobFile = new File(uploadJobFilePath);
 						uploadJobManager = new UploadJobManager(uploadJobFile);
