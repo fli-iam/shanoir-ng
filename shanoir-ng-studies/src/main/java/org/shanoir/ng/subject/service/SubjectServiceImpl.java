@@ -43,7 +43,6 @@ import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyDecorator;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
-import org.shanoir.ng.utils.ListDependencyUpdate;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -239,6 +238,9 @@ public class SubjectServiceImpl implements SubjectService {
 
 	/*
 	 * Update some values of template to save them in database.
+	 * Intentially this update method does not modify the pseudonymus
+	 * hash values, that are only added by createSubject to avoid any
+	 * maniplation.
 	 *
 	 * @param templateDb template found in database.
 	 * @param template template with new values.
@@ -247,7 +249,6 @@ public class SubjectServiceImpl implements SubjectService {
 	private Subject updateSubjectValues(final Subject subjectDb, final Subject subject) throws MicroServiceCommunicationException {
 		subjectDb.setName(subject.getName());
 		subjectDb.setIdentifier(subject.getIdentifier());
-		subjectDb.setPseudonymusHashValues(subject.getPseudonymusHashValues());
 		subjectDb.setSex(subject.getSex());
 		subjectDb.setManualHemisphericDominance(subject.getManualHemisphericDominance());
 		subjectDb.setLanguageHemisphericDominance(subject.getLanguageHemisphericDominance());
