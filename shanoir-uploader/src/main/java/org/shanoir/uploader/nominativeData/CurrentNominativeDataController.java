@@ -156,9 +156,7 @@ public class CurrentNominativeDataController {
 				int x = e.getX() - bounds.x;
 				int y = e.getY() - bounds.y;
 				cuw.rowsNb = cuw.table.getRowCount();
-				if (cuw.selectedRow == cuw.rowsNb - 1 && col == cuw.importColumn) {
-					cuw.table.getColumnModel().getColumn(col).setCellRenderer(new DeleteAllRenderer());
-				} else if (col == cuw.importColumn) {
+				if (col == cuw.deleteColumn) {
 					try {
 						cuw.table.getColumnModel().getColumn(col).setCellRenderer(new Delete_Renderer());
 					} catch (Exception exp) {
@@ -273,41 +271,6 @@ public class CurrentNominativeDataController {
 		currentNominativeDataModel.addUpload(folder.getAbsolutePath(), nominativeDataUploadJob);
 	}
 
-	public class DeleteAllRenderer extends DefaultTableCellRenderer {
-		DeleteAllRenderer() {
-		}
-
-		@Override
-		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
-				int row, int column) {
-			Component tableCellRendererComponent = super.getTableCellRendererComponent(table, value, isSelected,
-					hasFocus, row, column);
-			tableCellRendererComponent.setBackground(Color.LIGHT_GRAY);
-			setHorizontalAlignment(SwingConstants.CENTER);
-			tableCellRendererComponent.setFont(tableCellRendererComponent.getFont().deriveFont(Font.BOLD));
-			if (row == cuw.rowsNb - 1) {
-				if (value instanceof String) {
-					String string = (String) value;
-					setText(getHTML(string));
-					setToolTipText(cuw.frame.resourceBundle
-							.getString("shanoir.uploader.currentUploads.Action.deleteAll.tooltip"));
-				}
-			}
-			return tableCellRendererComponent;
-		}
-
-		private String getHTML(String string) {
-			StringBuilder sb = new StringBuilder();
-			sb.append("<html>");
-			sb.append("<span style=\"color: red;\"><b>");
-			sb.append(string);
-			sb.append("</b></span>");
-			sb.append("</html>");
-			return sb.toString();
-		}
-
-	}
-
 	public class Delete_Renderer extends DefaultTableCellRenderer {
 		Delete_Renderer() {
 		}
@@ -320,21 +283,35 @@ public class CurrentNominativeDataController {
 			tableCellRendererComponent.setBackground(Color.LIGHT_GRAY);
 			setHorizontalAlignment(SwingConstants.CENTER);
 			tableCellRendererComponent.setFont(tableCellRendererComponent.getFont().deriveFont(Font.BOLD));
-			if (row == cuw.selectedRow) {
-				if (value instanceof String) {
-					String string = (String) value;
-					setText(getHTML(string));
+			if (value instanceof String) {
+				String string = (String) value;
+				if (row != cuw.rowsNb - 1) {
+					setText(getDeleteHTML(string));
 					setToolTipText(cuw.frame.resourceBundle
 							.getString("shanoir.uploader.currentUploads.Action.delete.tooltip"));
+				} else {
+					setText(getDeleteAllHTML(string));
+					setToolTipText(cuw.frame.resourceBundle
+							.getString("shanoir.uploader.currentUploads.Action.deleteAll.tooltip"));
 				}
 			}
 			return tableCellRendererComponent;
 		}
 
-		private String getHTML(String string) {
+		private String getDeleteHTML(String string) {
 			StringBuilder sb = new StringBuilder();
 			sb.append("<html>");
 			sb.append("<span style=\"color: blue;\"><b>");
+			sb.append(string);
+			sb.append("</b></span>");
+			sb.append("</html>");
+			return sb.toString();
+		}
+
+		private String getDeleteAllHTML(String string) {
+			StringBuilder sb = new StringBuilder();
+			sb.append("<html>");
+			sb.append("<span style=\"color: red;\"><b>");
 			sb.append(string);
 			sb.append("</b></span>");
 			sb.append("</html>");

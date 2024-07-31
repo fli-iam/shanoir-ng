@@ -119,7 +119,7 @@ public class CurrentUploadsWindowTable implements Observer {
 			model.addRow(new Object[] { key, nominativeDataUploadJob.getPatientPseudonymusHash(),
 				nominativeDataUploadJob.getPatientName(), nominativeDataUploadJob.getIPP(),
 				nominativeDataUploadJob.getStudyDate(), nominativeDataUploadJob.getMriSerialNumber(),
-				nominativeDataUploadJob.getUploadState().toString(), "",
+				nominativeDataUploadJob.getUploadState().toString(),
 				(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.reimport"),
 				(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete") });
 		} else {
