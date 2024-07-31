@@ -184,7 +184,7 @@ public class SolrServiceImpl implements SolrService {
 		int docNb = metadatas.size();
 
 		if(event != null){
-			eventService.publishEvent(event, "Indexed [0/" + docNb + "] datasets.", event.getProgress());
+			eventService.publishEvent(event, "Indexing [" + docNb + "] datasets...", event.getProgress());
 		}
 
 		Iterator<ShanoirMetadata> docIt = metadatas.iterator();
@@ -193,14 +193,13 @@ public class SolrServiceImpl implements SolrService {
 
 		while (docIt.hasNext()) {
 			ShanoirMetadata shanoirMetadata = docIt.next();
-
 			ShanoirSolrDocument doc = this.getShanoirSolrDocument(shanoirMetadata);
 			doc.setTags(tags.get(shanoirMetadata.getDatasetId()));
 			solrDocuments.add(doc);
 		}
 		solrJWrapper.addAllToIndex(solrDocuments);
 		if(event != null){
-			eventService.publishSuccessEvent(event, "Indexed [" + docNb + "/" + docNb + "] datasets.");
+			eventService.publishSuccessEvent(event, "Indexed [" + docNb + "] datasets.");
 		}
 	}
 

@@ -63,7 +63,7 @@ public interface EegDatasetMapper {
 	 * @return dataset DTO.
 	 */
 	@Named(value = "withProcessings")
-	EegDatasetAndProcessingsDTO datasetToDatasetAndProcessingsDTO(EegDataset dataset);
+	EegDatasetWithDependenciesDTO datasetToDatasetAndProcessingsDTO(EegDataset dataset);
 	/**
 	 * Map a @Dataset to a @DatasetDTO.
 	 * 

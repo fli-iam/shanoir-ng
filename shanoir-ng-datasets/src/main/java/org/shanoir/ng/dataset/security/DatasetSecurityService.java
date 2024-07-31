@@ -502,33 +502,34 @@ public class DatasetSecurityService {
         if (dataset == null) {
 			throw new IllegalArgumentException("Dataset cannot be null here.");
 		}
-        if (dataset.getDatasetAcquisition() == null 
-                || dataset.getDatasetAcquisition().getExamination() == null
-                || dataset.getDatasetAcquisition().getExamination().getStudyId() == null) {
-            
-            if (dataset.getDatasetProcessing() != null && dataset.getDatasetProcessing().getInputDatasets() != null) {
-                for (Dataset inputDs : dataset.getDatasetProcessing().getInputDatasets()) {
-                    if (hasRightOnTrustedDataset(inputDs, rightStr)) {
-                        return true;
-                    }
-                }
-                return false;
-            } else {
-                throw new IllegalStateException("Cannot check dataset n°" + dataset.getId() + " rights, this dataset has neither examination nor processing parent !");                
-            }
-		} else {
-		    Long studyId = dataset.getDatasetAcquisition().getExamination().getStudyId();
-		    Set<Long> studies = new HashSet<>();
-		    studies.add(studyId);
-		    List<Long> studiesRelated = studyRepository.findByDatasetId(studyId).stream().map(BigInteger::longValue).collect(Collectors.toList());
-		    if (studiesRelated != null && !studiesRelated.isEmpty()) {
-		        studies.addAll(studiesRelated);
-		    }
-		    return hasRightOnStudiesCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), studies, rightStr);
+
+		Long studyId = getStudyIdFromDataset(dataset);
+
+		Set<Long> studies = new HashSet<>();
+		studies.add(studyId);
+		List<Long> studiesRelated = studyRepository.findByDatasetId(studyId).stream().map(BigInteger::longValue).toList();
+		if (!studiesRelated.isEmpty()) {
+			studies.addAll(studiesRelated);
 		}
+		return hasRightOnStudiesCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), studies, rightStr);
     }
 
-    public boolean hasRightOnStudyCenter(Long centerId, Long studyId, String rightStr) {
+	private static Long getStudyIdFromDataset(Dataset dataset) {
+		Long studyId;
+		if(dataset.getDatasetProcessing() != null){
+			studyId = dataset.getDatasetProcessing().getStudyId();
+		}else if (dataset.getDatasetAcquisition() != null
+				&& dataset.getDatasetAcquisition().getExamination() != null
+				&& dataset.getDatasetAcquisition().getExamination().getStudyId() != null) {
+			studyId = dataset.getDatasetAcquisition().getExamination().getStudyId();
+		}else{
+			throw new IllegalStateException("Cannot check dataset n°" + dataset.getId() + " rights, this dataset has neither examination nor processing parent !");
+		}
+		return studyId;
+	}
+
+
+	public boolean hasRightOnStudyCenter(Long centerId, Long studyId, String rightStr) {
     	return commService.hasRightOnStudy(studyId, rightStr) && commService.hasRightOnCenter(studyId, centerId);
     }
 

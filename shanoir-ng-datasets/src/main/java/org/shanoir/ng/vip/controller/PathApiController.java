@@ -1,9 +1,6 @@
 package org.shanoir.ng.vip.controller;
 
-import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -15,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
 import java.util.List;
@@ -35,12 +30,8 @@ public class PathApiController implements PathApi {
     private ProcessingResourceService processingResourceService;
 
     @Override
-    public ResponseEntity<?> getPath(
-            @Parameter(description = "the complete path on which to request information. It can contain non-encoded slashes. Except for the \"exists\" action, any request on a non-existing path should return an error", required = true) @PathVariable("completePath") String completePath,
-            @NotNull @Parameter(description = "The \"content\" action downloads the raw file. If the path points to a directory, a tarball of this directory is returned. The \"exists\" action returns a BooleanResponse object (see definition) indicating if the path exists or not. The \"properties\" action returns a Path object (see definition) with the path properties. The \"list\" action returns a DirectoryList object (see definition) with the properties of all the files of the directory (if the path is not a directory an error must be returned). The \"md5\" action is optional and returns a PathMd5 object (see definition).", required = true) @Valid @RequestParam(value = "action", required = true, defaultValue = "content") String action,
-            @Valid @RequestParam(value = "format", required = false, defaultValue = DCM) final String format,
-            @Valid @RequestParam(value  = "converter", required  = false) Long converter,
-            HttpServletResponse response) throws IOException, RestServiceException, EntityNotFoundException {
+    public ResponseEntity<?> getPath(String completePath, String action, final String format, Long converterId, HttpServletResponse response)
+            throws IOException, RestServiceException, EntityNotFoundException {
         // TODO implement those actions
         switch (action) {
             case "exists":
@@ -57,7 +48,7 @@ public class PathApiController implements PathApi {
                     return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
                 }
 
-                datasetDownloaderService.massiveDownload(format, datasets, response, true, converter);
+                datasetDownloaderService.massiveDownload(format, datasets, response, true, converterId);
 
                 return new ResponseEntity<Void>(HttpStatus.OK);
         }
