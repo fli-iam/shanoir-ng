@@ -19,6 +19,16 @@ import java.util.List;
 /**
  * DTO for subject of a study.
  * 
+ * There is a conflict in the DTO mapping. ShUp receives a SubjectDTO
+ * from the server in findByIdentifier, but to call updateSubject on
+ * the server a Subject type is required. E.g. the difference is, that
+ * in the SubjectDTO tags are the subject-study-tags and in the Subject
+ * class the list is called subjectStudyTags. This causes problems on the
+ * server, when updateSubject is called as the subjectStudyTags are missing.
+ * The work-around is: copy when receiving the SubjectDTO directly into the
+ * parallel list subjectStudyTags, that the mapping back on the server for
+ * the update fits.
+ * 
  * @author msimon
  *
  */
@@ -36,7 +46,9 @@ public class SubjectStudy {
 
 	private boolean physicallyInvolved;
 
-	private List<String> tags;
+	private List<Tag> tags;
+
+	private List<Tag> subjectStudyTags;
 
 	public Long getId() {
 		return id;
@@ -107,12 +119,21 @@ public class SubjectStudy {
 		this.physicallyInvolved = physicallyInvolved;
 	}
 
-	public List<String> getTags() {
+	public List<Tag> getTags() {
 		return tags;
 	}
 
-	public void setTags(List<String> tags) {
+	public void setTags(List<Tag> tags) {
 		this.tags = tags;
+		this.subjectStudyTags = tags;
+	}
+
+	public List<Tag> getSubjectStudyTags() {
+		return subjectStudyTags;
+	}
+
+	public void setSubjectStudyTags(List<Tag> subjectStudyTags) {
+		this.subjectStudyTags = subjectStudyTags;
 	}
 
 }
