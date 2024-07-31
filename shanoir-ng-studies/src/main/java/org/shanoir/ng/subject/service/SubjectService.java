@@ -101,19 +101,19 @@ public interface SubjectService {
 	Subject findById(Long id);
 
 	/**
-	 * Find subject by its identifier and a list of studies with rights.
+	 * Find subject by its identifier and a list of studies (based on the rights).
 	 * 
-	 * As the study list is already filtered by the rights in SubjectApiController
-	 * and as only the list of accessible studies is used here, that is rights filtered,
+	 * As only the list of accessible studies is used here, that is rights filtered,
 	 * I remove here the additional PostAuthorize filter to check again the rights
 	 * on the subject. We do not want to impact performance to heavily with double
 	 * or triple rights checks.
 	 *
-	 * @param indentifier
+	 * @param identifier - hash to search a subject
+	 * @param studies - list of studies to search with identifier
 	 * @return the subject or null
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	Subject findByIdentifierInStudiesWithRights(String indentifier, List<Study> studies);
+	Subject findByIdentifierInStudiesWithRights(String identifier, List<Study> studies);
 	
 	/**
 	 * Find a subject by its subject-study relationship id.

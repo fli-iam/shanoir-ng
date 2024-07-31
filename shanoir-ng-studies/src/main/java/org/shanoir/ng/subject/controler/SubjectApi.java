@@ -167,10 +167,9 @@ public interface SubjectApi {
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@GetMapping(value = "/findByIdentifier/{subjectIdentifier}", produces = {
-			"application/json" })
+	@GetMapping(value = "/findByIdentifier/{subjectIdentifier}", produces = {"application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterSubjectDTOsHasRightInOneStudy(returnObject.getBody(), 'CAN_SEE_ALL')")
+	// PostAuthorize removed here: only a subject can be returned from studies with correct rights
 	ResponseEntity<SubjectDTO> findSubjectByIdentifier(
 			@Parameter(description = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier);
 

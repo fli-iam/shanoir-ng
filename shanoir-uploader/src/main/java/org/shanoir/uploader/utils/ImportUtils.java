@@ -91,6 +91,7 @@ public class ImportUtils {
 		}
 		subjectStudy.setSubjectType(subjectType);
 		subjectStudy.setPhysicallyInvolved(physicallyInvolved);
+		subjectStudy.setTags(new ArrayList<>());
 		if (subject.getSubjectStudyList() == null) {
 			subject.setSubjectStudyList(new ArrayList<>());
 		} else {
@@ -292,8 +293,6 @@ public class ImportUtils {
 		studiesImportJob.add(studyImportJob);
 		patient.setStudies(studiesImportJob);
 		importJob.setPatients(patients);
-		// bring back later, but for the moment set to null to reduce file size of json
-		importJob.setSelectedSeries(null);
 		return importJob;
 	}
 

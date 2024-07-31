@@ -254,9 +254,12 @@ public class SubjectServiceImpl implements SubjectService {
 		subjectDb.setImagedObjectCategory(subject.getImagedObjectCategory());
 		subjectDb.setUserPersonalCommentList(subject.getUserPersonalCommentList());
 		if (subject.getSubjectStudyList() != null) {
-			ListDependencyUpdate.updateWith(subjectDb.getSubjectStudyList(), subject.getSubjectStudyList());
-			for (SubjectStudy subjectStudy : subjectDb.getSubjectStudyList()) {
-				subjectStudy.setSubject(subjectDb);
+			List<SubjectStudy> subjectStudyListDb = subjectDb.getSubjectStudyList();
+			List<SubjectStudy> subjectStudyListNew = subject.getSubjectStudyList();
+			subjectStudyListDb.clear();
+			subjectStudyListDb.addAll(subjectStudyListNew);
+			for (SubjectStudy dbSubjectStudy : subjectStudyListDb) {
+				dbSubjectStudy.setSubject(subjectDb);
 			}
 		}
 		return subjectDb;

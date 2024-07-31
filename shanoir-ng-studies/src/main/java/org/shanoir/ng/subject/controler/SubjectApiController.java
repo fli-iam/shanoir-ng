@@ -191,7 +191,8 @@ public class SubjectApiController implements SubjectApi {
 	public ResponseEntity<SubjectDTO> findSubjectByIdentifier(
 			@Parameter(description = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier) {
 		// Get all allowed studies
-		List<Study> studies = this.studyService.findAll();
+		List<Study> studies = studyService.findAll();
+		// As only studies are used to find a subject, in which the user has rights, no need for further rights checks
 		final Subject subject = subjectService.findByIdentifierInStudiesWithRights(subjectIdentifier, studies);
 		if (subject == null) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
