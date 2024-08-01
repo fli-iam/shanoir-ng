@@ -420,11 +420,11 @@ public class ImportUtils {
 		org.shanoir.uploader.model.rest.Subject subjectREST = new org.shanoir.uploader.model.rest.Subject();
 		subjectREST.setIdentifier(subject.getIdentifier());
 		subjectREST.setBirthDate(subject.getBirthDate());
-		if (subject.getSex().compareTo(Sex.F.name()) == 0) {
+		if (Sex.F.name().equals(subject.getSex())) {
 			subjectREST.setSex(Sex.F);
-		} else if (subject.getSex().compareTo(Sex.M.name()) == 0) {
+		} else if (Sex.M.name().equals(subject.getSex())) {
 			subjectREST.setSex(Sex.M);
-		} else if (subject.getSex().compareTo(Sex.O.name()) == 0) {
+		} else if (Sex.O.name().equals(subject.getSex())) {
 			subjectREST.setSex(Sex.O);
 		}
 		if (ShUpConfig.isModePseudonymus()) {
