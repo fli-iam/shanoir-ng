@@ -660,6 +660,7 @@ public class MainWindow extends JFrame {
 		gBC_mrRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_mrRB.gridx = 1;
 		gBC_mrRB.gridy = 7;
+		gBC_mrRB.weightx = 1.0;
 		queryPanel.add(mrRB, gBC_mrRB);
 
 		ctRB = new JRadioButton("CT");
@@ -669,6 +670,7 @@ public class MainWindow extends JFrame {
 		gBC_ctRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_ctRB.gridx = 2;
 		gBC_ctRB.gridy = 7;
+		gBC_ctRB.weightx = 1.0;
 		queryPanel.add(ctRB, gBC_ctRB);
 
 		ptRB = new JRadioButton("PT");
@@ -678,6 +680,7 @@ public class MainWindow extends JFrame {
 		gBC_ptRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_ptRB.gridx = 3;
 		gBC_ptRB.gridy = 7;
+		gBC_ptRB.weightx = 1.0;
 		queryPanel.add(ptRB, gBC_ptRB);
 
 		nmRB = new JRadioButton("NM");
@@ -687,6 +690,7 @@ public class MainWindow extends JFrame {
 		gBC_nmRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_nmRB.gridx = 4;
 		gBC_nmRB.gridy = 7;
+		gBC_nmRB.weightx = 1.0;
 		queryPanel.add(nmRB, gBC_nmRB);
 
 		noRB = new JRadioButton("None");
@@ -696,6 +700,7 @@ public class MainWindow extends JFrame {
 		gBC_noRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_noRB.gridx = 5;
 		gBC_noRB.gridy = 7;
+		gBC_noRB.weightx = 1.0;
 		queryPanel.add(noRB, gBC_noRB);
 		
 		queryButton = new JButton(resourceBundle.getString("shanoir.uploader.queryButton"), searchIcon);
@@ -866,18 +871,21 @@ public class MainWindow extends JFrame {
 		gBCFSexR.fill = GridBagConstraints.HORIZONTAL;
 		gBCFSexR.gridx = 1;
 		gBCFSexR.gridy = 5;
+		gBCFSexR.weightx = 1.0;
 		editPanel.add(fSexR, gBCFSexR);
 		GridBagConstraints gBCMSexR = new GridBagConstraints();
 		gBCMSexR.insets = new Insets(10, 10, 10, 10);
 		gBCMSexR.fill = GridBagConstraints.HORIZONTAL;
 		gBCMSexR.gridx = 2;
 		gBCMSexR.gridy = 5;
+		gBCMSexR.weightx = 1.0;
 		editPanel.add(mSexR, gBCMSexR);
 		GridBagConstraints gBCOSexR = new GridBagConstraints();
 		gBCOSexR.insets = new Insets(10, 10, 10, 10);
 		gBCOSexR.fill = GridBagConstraints.HORIZONTAL;
 		gBCOSexR.gridx = 3;
 		gBCOSexR.gridy = 5;
+		gBCOSexR.weightx = 1.0;
 		editPanel.add(oSexR, gBCOSexR);
 
 		/**
