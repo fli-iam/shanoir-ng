@@ -346,7 +346,11 @@ public class ShanoirUploaderServiceClient {
 	}
 
 	public Subject findSubjectBySubjectIdentifier(String subjectIdentifier) throws Exception {
+		long startTime = System.currentTimeMillis();
 		try (CloseableHttpResponse response = httpService.get(this.serviceURLSubjectsFindByIdentifier + URLEncoder.encode(subjectIdentifier, "UTF-8"))) {
+			long stopTime = System.currentTimeMillis();
+			long elapsedTime = stopTime - startTime;
+			logger.info("findSubjectBySubjectIdentifier: " + elapsedTime + "ms");
 			int code = response.getCode();
 			if (code == HttpStatus.SC_OK) {
 				Subject subject = Util.getMappedObject(response, Subject.class);
@@ -361,13 +365,18 @@ public class ShanoirUploaderServiceClient {
 	}
 
 	public List<Subject> findSubjectsByStudy(Long studyId) throws Exception {
+		long startTime = System.currentTimeMillis();
 		URIBuilder b = new URIBuilder(this.serviceURLSubjectsByStudyId + studyId + "/allSubjects");
 		b.addParameter("preclinical",  "null");
 		URL url = b.build().toURL();
 		try (CloseableHttpResponse response = httpService.get(url.toString())) {
+			long stopTime = System.currentTimeMillis();
+			long elapsedTime = stopTime - startTime;
+			logger.info("findSubjectsByStudy: " + elapsedTime + "ms");
 			int code = response.getCode();
 			if (code == HttpStatus.SC_OK) {
 				List<Subject> subjects = Util.getMappedList(response, Subject.class);
+				logger.info("findSubjectsByStudy: " + subjects.size() + " subjects found for study: " + studyId);
 				return subjects;
 			} else {
 				logger.error("Could not get subjects from study id " + studyId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
