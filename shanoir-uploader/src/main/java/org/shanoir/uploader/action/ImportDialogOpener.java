@@ -58,10 +58,9 @@ public class ImportDialogOpener {
 			// get items on server
 			Subject subject = getSubject(uploadJob);
 			List<Study> studiesWithStudyCards = getStudiesWithStudyCards(uploadJob);
-			List<Examination> examinationDTOs = getExaminations(subject);
 			// init components of GUI and listeners
 			ImportStudyCardFilterDocumentListener importStudyCardFilterDocumentListener = new ImportStudyCardFilterDocumentListener(this.mainWindow);
-			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, subject, examinationDTOs, studyDate, importStudyCardFilterDocumentListener, shanoirUploaderServiceClient);
+			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, subject, studyDate, importStudyCardFilterDocumentListener, shanoirUploaderServiceClient);
 			ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, uploadJob, uploadFolder, subject, importStudyAndStudyCardCBIL);
 			importDialog = new ImportDialog(this.mainWindow,
 					ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
@@ -282,15 +281,6 @@ public class ImportDialogOpener {
 			importDialog.subjectPersonalCommentTextArea.setBackground(Color.WHITE);
 			importDialog.subjectPersonalCommentTextArea.setEditable(true);
 		}
-	}
-	
-	private List<Examination> getExaminations(Subject subjectDTO) throws Exception {
-		if (subjectDTO != null) {
-			List<Examination> examinationList = shanoirUploaderServiceClient
-					.findExaminationsBySubjectId(subjectDTO.getId());
-			return examinationList;
-		}
-		return null;
 	}
 
 	private void updateImportDialogForNewExamFields(Date studyDate, String studyDescription)

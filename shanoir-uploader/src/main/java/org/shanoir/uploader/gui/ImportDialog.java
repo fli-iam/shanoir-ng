@@ -472,6 +472,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridy = 13;
 		importDialogGBC.gridwidth = 1;
 		container.add(existingSubjectsCB, importDialogGBC);
+		existingSubjectsCB.addItemListener(importStudyAndStudyCardCBIL);
 		
 		subjectImageObjectCategoryLabel = new JLabel(
 				resourceBundle.getString("shanoir.uploader.subjectImageObjectCategoryLabel") + " *");

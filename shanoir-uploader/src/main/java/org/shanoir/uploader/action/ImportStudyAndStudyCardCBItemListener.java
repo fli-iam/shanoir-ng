@@ -42,10 +42,9 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 	
 	private ShanoirUploaderServiceClient serviceClient;
 
-	public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, Subject subject, List<Examination> examinationDTOs, Date studyDate, ImportStudyCardFilterDocumentListener importStudyCardDocumentListener, ShanoirUploaderServiceClient serviceClient) {
+	public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, Subject subject, Date studyDate, ImportStudyCardFilterDocumentListener importStudyCardDocumentListener, ShanoirUploaderServiceClient serviceClient) {
 		this.mainWindow = mainWindow;
 		this.subject = subject;
-		this.examinationsOfSubject = examinationDTOs;
 		this.studyDate = studyDate;
 		this.importStudyCardDocumentListener = importStudyCardDocumentListener;
 		this.serviceClient = serviceClient;
@@ -73,7 +72,14 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 					IdName center = acqEquipment.getCenter();
 					mainWindow.importDialog.mrExaminationCenterCB.addItem(center);
 				}
-			}			
+			}
+			// the selection of an existing subject defines the list of existing exams
+			if (e.getSource().equals(mainWindow.importDialog.existingSubjectsCB)) {
+				Study study = (Study) mainWindow.importDialog.studyCB.getSelectedItem();
+				Subject subject = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
+				examinationsOfSubject = updateExaminations(subject);
+				filterExistingExamsForSelectedStudy(study);			
+			}		
 		} // ignore otherwise
 	}
 
@@ -89,6 +95,18 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
+	}
+
+	private List<Examination> updateExaminations(Subject subject) {
+		try {
+			if (subject != null) {
+				List<Examination> examinationList = serviceClient.findExaminationsBySubjectId(subject.getId());
+				return examinationList;
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+		return null;
 	}
 
 	/**
