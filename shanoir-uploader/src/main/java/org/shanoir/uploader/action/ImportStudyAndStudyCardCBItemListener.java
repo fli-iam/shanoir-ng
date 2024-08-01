@@ -56,8 +56,11 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 			if (e.getSource().equals(mainWindow.importDialog.studyCB)) {
 				Study study = (Study) e.getItem();
 				updateStudyCards(study);
-				updateSubjects(study);
+				if (ShUpConfig.isModeSubjectCommonNameManual()) {
+					updateExistingSubjects(study);
+				}
 				updateSubjectStudy(study);
+				examinationsOfSubject = updateExaminations(subject);
 				filterExistingExamsForSelectedStudy(study);
 			}
 			// the selection of the StudyCard and its center defines
@@ -76,14 +79,15 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 			// the selection of an existing subject defines the list of existing exams
 			if (e.getSource().equals(mainWindow.importDialog.existingSubjectsCB)) {
 				Study study = (Study) mainWindow.importDialog.studyCB.getSelectedItem();
-				Subject subject = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
+				this.subject = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
 				examinationsOfSubject = updateExaminations(subject);
+				updateSubjectStudy(study);
 				filterExistingExamsForSelectedStudy(study);			
 			}		
 		} // ignore otherwise
 	}
 
-	private void updateSubjects(Study study) {
+	private void updateExistingSubjects(Study study) {
 		try {
 			List<Subject> subjects = serviceClient.findSubjectsByStudy(study.getId());
 			mainWindow.importDialog.existingSubjectsCB.removeAllItems();
