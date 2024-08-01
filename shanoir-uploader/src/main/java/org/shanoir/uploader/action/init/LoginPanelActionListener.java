@@ -48,6 +48,7 @@ public class LoginPanelActionListener implements ActionListener {
 				sSC.getShUpStartupDialog().updateStartupText(
 				"\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.success"));
 				logger.info("Login successful with username: " + username);
+				ShUpConfig.username = username;
 				sSC.setState(pacsConfigurationState);
 			} else {
 				sSC.getShUpStartupDialog().updateStartupText(

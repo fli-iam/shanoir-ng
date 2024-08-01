@@ -17,7 +17,6 @@ import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.PseudonymusHashValues;
 import org.shanoir.ng.importer.model.Subject;
-import org.shanoir.ng.utils.ImportUtils;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;

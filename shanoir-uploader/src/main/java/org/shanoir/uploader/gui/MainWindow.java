@@ -14,7 +14,6 @@ import java.awt.event.FocusEvent;
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
 import java.util.ResourceBundle;
@@ -262,8 +261,11 @@ public class MainWindow extends JFrame {
 			}
 		});
 
-		JMenu profileSelected = new JMenu("<html><b>" + resourceBundle.getString("shanoir.uploader.profileMenu") + ShUpConfig.profileSelected + "</b></html>");
-		menuBar.add(Box.createRigidArea(new Dimension(400,5)));
+		JMenu profileSelected = new JMenu("<html>"
+			+ "[ " + resourceBundle.getString("shanoir.uploader.profileMenu") + ShUpConfig.profileSelected + " ]"
+			+ " "
+			+ "[ " + resourceBundle.getString("shanoir.uploader.accountMenu") + ShUpConfig.username + " ]</html>");
+		menuBar.add(Box.createRigidArea(new Dimension(200,5)));
 		menuBar.add(profileSelected);
 
 		/**
