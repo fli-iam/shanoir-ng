@@ -27,7 +27,7 @@ public interface EventsApi {
             @ApiResponse(responseCode = "404", description = "no user found"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @RequestMapping(value = "/{studyId}", produces = { "application/json" }, method = RequestMethod.GET)
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT')) and @shanoirUsersManagement.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
     ResponseEntity<Page<ShanoirEvent>> findEventsByStudyId(Pageable pageable, @Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,  String searchStr, String searchField) throws RestServiceException;
 
 }

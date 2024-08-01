@@ -60,7 +60,7 @@ export class StudyHistoryComponent {
         this.eventHistory.then( () => this.getPage);
     }
 
-    getPage(pageable: Pageable): Promise<Page<ShanoirEvent>> {
+    getPage(pageable: Pageable): Promise<Page<ShanoirEvent> | void> {
         return this.shanoirEventService.getPage(pageable, this.study.id, this.table.filter.searchStr? this.table.filter.searchStr : "", this.table.filter.searchField ? this.table.filter.searchField : "").then(page => {
             page.content.forEach(item => {
                 if (this.users.get(item.userId) == undefined) {
@@ -75,6 +75,10 @@ export class StudyHistoryComponent {
                 }
             });
             return page;
+        }).catch(reason => {
+            if(reason?.error?.code != 403) {
+                throw Error(reason);
+            }
         });
     }
 }
