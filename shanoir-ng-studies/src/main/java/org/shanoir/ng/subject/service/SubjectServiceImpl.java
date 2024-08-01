@@ -261,6 +261,9 @@ public class SubjectServiceImpl implements SubjectService {
 			subjectStudyListDb.addAll(subjectStudyListNew);
 			for (SubjectStudy dbSubjectStudy : subjectStudyListDb) {
 				dbSubjectStudy.setSubject(subjectDb);
+				if (dbSubjectStudy.getSubjectStudyTags() == null) {
+					dbSubjectStudy.setSubjectStudyTags(new ArrayList<>());
+				}
 			}
 		}
 		return subjectDb;
