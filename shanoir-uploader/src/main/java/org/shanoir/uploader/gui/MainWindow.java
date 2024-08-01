@@ -101,7 +101,7 @@ public class MainWindow extends JFrame {
 	public JTextField birthNameTF;
 	public JTextField birthDateTF;
 	public ButtonGroup sexRG;
-	public JRadioButton mSexR, fSexR;
+	public JRadioButton fSexR, mSexR, oSexR;
 	public JButton downloadOrCopyButton;
 	
 	public JButton queryButton;
@@ -838,7 +838,7 @@ public class MainWindow extends JFrame {
 				new RSDocumentListener(this));
 
 		/**
-		 * Radio buttons for sex: M or F
+		 * Radio buttons for sex: F, M or O
 		 */
 		JLabel sexLabel = new JLabel(resourceBundle.getString("shanoir.uploader.sexLabel"));
 		sexLabel.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -849,26 +849,36 @@ public class MainWindow extends JFrame {
 		gBCSexLabel.gridy = 5;
 		editPanel.add(sexLabel, gBCSexLabel);
 		sexRG = new ButtonGroup();
-		mSexR = new JRadioButton("M");
-		mSexR.setEnabled(false);
-		sexRG.add(mSexR);
-		editPanel.add(mSexR);
 		fSexR = new JRadioButton("F");
 		fSexR.setEnabled(false);
 		sexRG.add(fSexR);
 		editPanel.add(fSexR);
+		mSexR = new JRadioButton("M");
+		mSexR.setEnabled(false);
+		sexRG.add(mSexR);
+		editPanel.add(mSexR);
+		oSexR = new JRadioButton("O");
+		oSexR.setEnabled(false);
+		sexRG.add(oSexR);
+		editPanel.add(oSexR);
+		GridBagConstraints gBCFSexR = new GridBagConstraints();
+		gBCFSexR.insets = new Insets(10, 10, 10, 10);
+		gBCFSexR.fill = GridBagConstraints.HORIZONTAL;
+		gBCFSexR.gridx = 1;
+		gBCFSexR.gridy = 5;
+		editPanel.add(fSexR, gBCFSexR);
 		GridBagConstraints gBCMSexR = new GridBagConstraints();
 		gBCMSexR.insets = new Insets(10, 10, 10, 10);
 		gBCMSexR.fill = GridBagConstraints.HORIZONTAL;
-		gBCMSexR.gridx = 1;
+		gBCMSexR.gridx = 2;
 		gBCMSexR.gridy = 5;
 		editPanel.add(mSexR, gBCMSexR);
-		GridBagConstraints gBCFSexR = new GridBagConstraints();
-		gBCFSexR.insets = new Insets(10, 10, 10, 10);
-		gBCMSexR.fill = GridBagConstraints.HORIZONTAL;
-		gBCFSexR.gridx = 2;
-		gBCFSexR.gridy = 5;
-		editPanel.add(fSexR, gBCFSexR);
+		GridBagConstraints gBCOSexR = new GridBagConstraints();
+		gBCOSexR.insets = new Insets(10, 10, 10, 10);
+		gBCOSexR.fill = GridBagConstraints.HORIZONTAL;
+		gBCOSexR.gridx = 3;
+		gBCOSexR.gridy = 5;
+		editPanel.add(oSexR, gBCOSexR);
 
 		/**
 		 * Last button for download or copy action:

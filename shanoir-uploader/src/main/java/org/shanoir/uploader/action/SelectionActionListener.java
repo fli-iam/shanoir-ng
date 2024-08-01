@@ -67,8 +67,9 @@ public class SelectionActionListener implements TreeSelectionListener {
 		mainWindow.firstNameTF.setEnabled(false);
 		mainWindow.birthNameTF.setEnabled(false);
 		mainWindow.birthDateTF.setEnabled(false);
-		mainWindow.mSexR.setEnabled(false);
 		mainWindow.fSexR.setEnabled(false);
+		mainWindow.mSexR.setEnabled(false);
+		mainWindow.oSexR.setEnabled(false);
 		mainWindow.lastNameTF.setText("");
 		mainWindow.firstNameTF.setText("");
 		mainWindow.birthNameTF.setText("");
@@ -136,18 +137,24 @@ public class SelectionActionListener implements TreeSelectionListener {
 		mainWindow.birthNameTF.setText("");
 		mainWindow.birthNameTF.setEnabled(true);
 		mainWindow.birthDateTF.setEnabled(true);
-		mainWindow.mSexR.setEnabled(true);
 		mainWindow.fSexR.setEnabled(true);
+		mainWindow.mSexR.setEnabled(true);
+		mainWindow.oSexR.setEnabled(true);
 		// add this exception here for damaged DICOMDIRs without birth date set
 		if (birthDate != null) {
 			String birthDateText = Util.convertLocalDateToString(birthDate);
 			mainWindow.birthDateTF.setText(birthDateText);
 		}
-		if (sex != null && sex.equals("M")) {
-			mainWindow.mSexR.setSelected(true);
-		}
-		if (sex != null && sex.equals("F")) {
-			mainWindow.fSexR.setSelected(true);
+		if (sex != null) {
+			if (sex.equals("F")) {
+				mainWindow.fSexR.setSelected(true);
+			}
+			if (sex.equals("M")) {
+				mainWindow.mSexR.setSelected(true);
+			}
+			if (sex.equals("O")) {
+				mainWindow.oSexR.setSelected(true);
+			}
 		}
 	}
 
