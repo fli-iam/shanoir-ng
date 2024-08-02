@@ -77,43 +77,47 @@ public class SelectionActionListener implements TreeSelectionListener {
 		mainWindow.isDicomObjectSelected = true;
 		importJobs = new HashMap<String, ImportJob>();
 
-		// returns all selected paths, which can be patients, studies and/or series
-		TreePath[] paths = mainWindow.dicomTree.getSelectionModel().getSelectionPaths();
-		if (paths != null && paths.length > 0) {
-			for (int i = 0; i < paths.length; i++) {
-				TreePath tp = paths[i];
-				Object o = tp.getLastPathComponent();
-				// handle if patient in paths has been found
-				// implies: select all studies + series below
-				if (o instanceof PatientTreeNode) {
-					PatientTreeNode patientTreeNode = (PatientTreeNode) o;
-					Collection<DicomTreeNode> studies = patientTreeNode.getTreeNodes().values();
-					for (Iterator<DicomTreeNode> studiesIt = studies.iterator(); studiesIt.hasNext();) {
-						StudyTreeNode studyTreeNode = (StudyTreeNode) studiesIt.next();
+		try {
+			// returns all selected paths, which can be patients, studies and/or series
+			TreePath[] paths = mainWindow.dicomTree.getSelectionModel().getSelectionPaths();
+			if (paths != null && paths.length > 0) {
+				for (int i = 0; i < paths.length; i++) {
+					TreePath tp = paths[i];
+					Object o = tp.getLastPathComponent();
+					// handle if patient in paths has been found
+					// implies: select all studies + series below
+					if (o instanceof PatientTreeNode) {
+						PatientTreeNode patientTreeNode = (PatientTreeNode) o;
+						Collection<DicomTreeNode> studies = patientTreeNode.getTreeNodes().values();
+						for (Iterator<DicomTreeNode> studiesIt = studies.iterator(); studiesIt.hasNext();) {
+							StudyTreeNode studyTreeNode = (StudyTreeNode) studiesIt.next();
+							handleStudyTreeNode(patientTreeNode, studyTreeNode, true);
+						}
+					}
+					// handle if study in paths has been found
+					// implies: select all series below
+					if (o instanceof StudyTreeNode) {
+						StudyTreeNode studyTreeNode = (StudyTreeNode) o;
+						PatientTreeNode patientTreeNode = (PatientTreeNode) tp.getParentPath().getLastPathComponent();
 						handleStudyTreeNode(patientTreeNode, studyTreeNode, true);
 					}
-				}
-				// handle if study in paths has been found
-				// implies: select all series below
-				if (o instanceof StudyTreeNode) {
-					StudyTreeNode studyTreeNode = (StudyTreeNode) o;
-					PatientTreeNode patientTreeNode = (PatientTreeNode) tp.getParentPath().getLastPathComponent();
-					handleStudyTreeNode(patientTreeNode, studyTreeNode, true);
-				}
-				// handle if serie in paths has been found
-				if (o instanceof SerieTreeNode) {
-					SerieTreeNode serieTreeNode = (SerieTreeNode) o;
-					StudyTreeNode studyTreeNode = (StudyTreeNode) tp.getParentPath().getLastPathComponent();
-					PatientTreeNode patientTreeNode = (PatientTreeNode) tp.getParentPath().getParentPath().getLastPathComponent();
-					handleStudyTreeNode(patientTreeNode, studyTreeNode, false);
-					ImportJob importJob = importJobs.get(studyTreeNode.getStudy().getStudyInstanceUID());
-					importJob.getSelectedSeries().add(serieTreeNode.getSerie());
+					// handle if serie in paths has been found
+					if (o instanceof SerieTreeNode) {
+						SerieTreeNode serieTreeNode = (SerieTreeNode) o;
+						StudyTreeNode studyTreeNode = (StudyTreeNode) tp.getParentPath().getLastPathComponent();
+						PatientTreeNode patientTreeNode = (PatientTreeNode) tp.getParentPath().getParentPath().getLastPathComponent();
+						handleStudyTreeNode(patientTreeNode, studyTreeNode, false);
+						ImportJob importJob = importJobs.get(studyTreeNode.getStudy().getStudyInstanceUID());
+						importJob.getSelectedSeries().add((Serie)serieTreeNode.getSerie().clone());
+					}
 				}
 			}
+		} catch (CloneNotSupportedException e) {
+			logger.error(e.getMessage(), e);
+		}
 
-			if (!importJobs.isEmpty()) {
-				displayPatientVerification();
-			}
+		if (!importJobs.isEmpty()) {
+			displayPatientVerification();
 		}
 	}
 
@@ -151,7 +155,7 @@ public class SelectionActionListener implements TreeSelectionListener {
 		}
 	}
 
-	private void handleStudyTreeNode(PatientTreeNode patientTreeNode, StudyTreeNode studyTreeNode, boolean addAllSeries) {
+	private void handleStudyTreeNode(PatientTreeNode patientTreeNode, StudyTreeNode studyTreeNode, boolean addAllSeries) throws CloneNotSupportedException {
 		Patient patient = patientTreeNode.getPatient();
 		Study study = studyTreeNode.getStudy();
 		LocalDate studyDate = study.getStudyDate();
@@ -176,7 +180,7 @@ public class SelectionActionListener implements TreeSelectionListener {
 					if (studyOfAllStudies.getStudyInstanceUID().equals(studyInstanceUID)) {
 						List<Serie> series = study.getSeries();
 						for (Serie serie : series) {
-							importJob.getSelectedSeries().add(serie);
+							importJob.getSelectedSeries().add((Serie)serie.clone());
 						}
 					}
 				}

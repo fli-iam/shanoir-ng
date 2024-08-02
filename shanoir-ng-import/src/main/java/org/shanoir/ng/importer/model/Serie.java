@@ -15,6 +15,7 @@
 package org.shanoir.ng.importer.model;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.dcm4che3.data.Attributes;
@@ -32,7 +33,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author atouboul
  * @author mkain
  */
-public class Serie {
+public class Serie implements Cloneable {
 	
 	@JsonProperty("selected")
 	private boolean selected;
@@ -134,6 +135,17 @@ public class Serie {
 				attributes.getString(Tag.StationName),
 				attributes.getString(Tag.MagneticFieldStrength));
 		setEquipment(equipmentDicom);
+	}
+
+	public Object clone() throws CloneNotSupportedException {
+		Serie cloned = (Serie) super.clone();
+		if (this.instances != null) {
+			cloned.instances = new ArrayList<Instance>();
+			for (Instance instance : this.instances) {
+				cloned.instances.add((Instance) instance.clone());
+			}
+		}
+		return cloned;
 	}
 
 	public boolean getSelected() {
