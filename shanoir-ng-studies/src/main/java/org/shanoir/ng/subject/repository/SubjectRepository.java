@@ -75,7 +75,7 @@ public interface SubjectRepository extends CrudRepository<Subject, Long>, Subjec
 
 	Iterable<Subject> findBySubjectStudyListStudyIdInAndIdIn(Iterable<Long> studyIds, Iterable<Long> ids);
 
-	@EntityGraph(attributePaths = { "subjectStudyList.study.name" , "subjectStudyList.study.tags"})
+	@EntityGraph(attributePaths = { "subjectStudyList.study.name" , "subjectStudyList.study.tags", "subjectStudyList.study.studyUserList"})
     List<Subject> findByPreclinical(boolean preclinical);
 
 	boolean existsByName(String name);
