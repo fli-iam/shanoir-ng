@@ -17,6 +17,7 @@ import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
+import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.DicomTreeNode;
 import org.shanoir.uploader.dicom.query.PatientTreeNode;
 import org.shanoir.uploader.dicom.query.SerieTreeNode;
@@ -137,9 +138,12 @@ public class SelectionActionListener implements TreeSelectionListener {
 		mainWindow.birthNameTF.setText("");
 		mainWindow.birthNameTF.setEnabled(true);
 		mainWindow.birthDateTF.setEnabled(true);
-		mainWindow.fSexR.setEnabled(true);
-		mainWindow.mSexR.setEnabled(true);
-		mainWindow.oSexR.setEnabled(true);
+		// If profile Neurinfo is selected, the user can't modify Patient's Sex
+		if (ShUpConfig.isModeSubjectCommonNameManual()) {
+			mainWindow.fSexR.setEnabled(true);
+			mainWindow.mSexR.setEnabled(true);
+			mainWindow.oSexR.setEnabled(true);
+		}
 		// add this exception here for damaged DICOMDIRs without birth date set
 		if (birthDate != null) {
 			String birthDateText = Util.convertLocalDateToString(birthDate);

@@ -303,7 +303,7 @@ public class MainWindow extends JFrame {
 		GridBagConstraints gbc_queryPanelLabel = new GridBagConstraints();
 		gbc_queryPanelLabel.anchor = GridBagConstraints.WEST;
 		gbc_queryPanelLabel.fill = GridBagConstraints.HORIZONTAL;
-		gbc_queryPanelLabel.insets = new Insets(5, 5, 0, 0);
+		gbc_queryPanelLabel.insets = new Insets(10, 10, 10, 10);
 		gbc_queryPanelLabel.gridwidth = 3;
 		gbc_queryPanelLabel.gridx = 0;
 		gbc_queryPanelLabel.gridy = 0;
@@ -312,7 +312,7 @@ public class MainWindow extends JFrame {
 		JLabel queryLevelLabel = new JLabel(resourceBundle.getString("shanoir.uploader.queryLevelLabel"));
 		GridBagConstraints gbc_queryLevelLabel = new GridBagConstraints();
 		gbc_queryLevelLabel.anchor = GridBagConstraints.EAST;
-		gbc_queryLevelLabel.insets = new Insets(5, 5, 0, 0);
+		gbc_queryLevelLabel.insets = new Insets(5, 5, 2, 0);
 		gbc_queryLevelLabel.gridx = 0;
 		gbc_queryLevelLabel.gridy = 1;
 		queryPanel.add(queryLevelLabel, gbc_queryLevelLabel);
@@ -322,7 +322,7 @@ public class MainWindow extends JFrame {
 		pRB.setSelected(true);
 		queryLevelRG.add(pRB);
 		GridBagConstraints gBC_pRB = new GridBagConstraints();
-		gBC_pRB.insets = new Insets(2, 2, 2, 2);
+		gBC_pRB.insets = new Insets(2, 5, 0, 2);
 		gBC_pRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_pRB.gridx = 1;
 		gBC_pRB.gridy = 1;
@@ -331,7 +331,7 @@ public class MainWindow extends JFrame {
 		sRB = new JRadioButton("Study");
 		queryLevelRG.add(sRB);
 		GridBagConstraints gBC_sRB = new GridBagConstraints();
-		gBC_sRB.insets = new Insets(2, 2, 2, 2);
+		gBC_sRB.insets = new Insets(2, 2, 0, 2);
 		gBC_sRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_sRB.gridx = 2;
 		gBC_sRB.gridy = 1;
@@ -656,7 +656,7 @@ public class MainWindow extends JFrame {
 		mrRB.setSelected(true);
 		modalityRG.add(mrRB);
 		GridBagConstraints gBC_mrRB = new GridBagConstraints();
-		gBC_mrRB.insets = new Insets(2, 2, 2, 2);
+		gBC_mrRB.insets = new Insets(2, 5, 0, 2);
 		gBC_mrRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_mrRB.gridx = 1;
 		gBC_mrRB.gridy = 7;
@@ -666,7 +666,7 @@ public class MainWindow extends JFrame {
 		ctRB = new JRadioButton("CT");
 		modalityRG.add(ctRB);
 		GridBagConstraints gBC_ctRB = new GridBagConstraints();
-		gBC_ctRB.insets = new Insets(2, 2, 2, 2);
+		gBC_ctRB.insets = new Insets(2, 2, 0, 2);
 		gBC_ctRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_ctRB.gridx = 2;
 		gBC_ctRB.gridy = 7;
@@ -676,7 +676,7 @@ public class MainWindow extends JFrame {
 		ptRB = new JRadioButton("PT");
 		modalityRG.add(ptRB);
 		GridBagConstraints gBC_ptRB = new GridBagConstraints();
-		gBC_ptRB.insets = new Insets(2, 2, 2, 2);
+		gBC_ptRB.insets = new Insets(2, 2, 0, 2);
 		gBC_ptRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_ptRB.gridx = 3;
 		gBC_ptRB.gridy = 7;
@@ -686,7 +686,7 @@ public class MainWindow extends JFrame {
 		nmRB = new JRadioButton("NM");
 		modalityRG.add(nmRB);
 		GridBagConstraints gBC_nmRB = new GridBagConstraints();
-		gBC_nmRB.insets = new Insets(2, 2, 2, 2);
+		gBC_nmRB.insets = new Insets(2, 2, 0, 2);
 		gBC_nmRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_nmRB.gridx = 4;
 		gBC_nmRB.gridy = 7;
@@ -696,7 +696,7 @@ public class MainWindow extends JFrame {
 		noRB = new JRadioButton("None");
 		modalityRG.add(noRB);
 		GridBagConstraints gBC_noRB = new GridBagConstraints();
-		gBC_noRB.insets = new Insets(2, 2, 2, 2);
+		gBC_noRB.insets = new Insets(2, 2, 0, 2);
 		gBC_noRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_noRB.gridx = 5;
 		gBC_noRB.gridy = 7;
@@ -705,8 +705,10 @@ public class MainWindow extends JFrame {
 		
 		queryButton = new JButton(resourceBundle.getString("shanoir.uploader.queryButton"), searchIcon);
 		GridBagConstraints gbc_queryButton = new GridBagConstraints();
-		gbc_queryButton.insets = new Insets(5, 5, 5, 0);
-		gbc_queryButton.gridwidth = 7;
+		gbc_queryButton.anchor = GridBagConstraints.CENTER;
+		gbc_queryButton.insets = new Insets(5, 5, 5, 5);
+		gbc_queryButton.weightx = 1.0;
+		gbc_queryButton.gridwidth = 8;
 		gbc_queryButton.gridx = 0;
 		gbc_queryButton.gridy = 8;
 		queryPanel.add(queryButton, gbc_queryButton);
