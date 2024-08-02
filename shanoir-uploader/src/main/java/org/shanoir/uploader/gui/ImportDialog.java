@@ -32,6 +32,7 @@ import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
 import org.shanoir.uploader.action.CancelButtonActionListener;
 import org.shanoir.uploader.action.ImportCreateNewExamCBItemListener;
+import org.shanoir.uploader.action.ImportSubjectNameDocumentFilter;
 import org.shanoir.uploader.gui.customcomponent.JComboBoxMandatory;
 import org.shanoir.uploader.gui.customcomponent.JTextFieldMandatory;
 
@@ -450,6 +451,8 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridy = 12;
 		importDialogGBC.gridwidth = 1;
 		container.add(subjectTextField, importDialogGBC);
+		ImportSubjectNameDocumentFilter subjectNameFilter = new ImportSubjectNameDocumentFilter(mainWindow);
+		subjectTextField.getDocument().addDocumentListener(subjectNameFilter);
 
 		existingSubjectsLabel = new JLabel(resourceBundle.getString("shanoir.uploader.existingSubjectsLabel") + " *");
 

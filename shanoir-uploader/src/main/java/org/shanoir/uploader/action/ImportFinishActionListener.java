@@ -74,22 +74,20 @@ public class ImportFinishActionListener implements ActionListener {
 		 * In case of Neurinfo: the user can either enter a new common name to create a new subject
 		 * or select an existing subject from the combo box. This is not possible for OFSEP profile.
 		 */
-		boolean existingSubjectInStudy = false;
+		boolean useExistingSubjectInStudy = false;
 		if (ShUpConfig.isModeSubjectCommonNameManual()) {
-			// minimal length for subject common name is 2, same for subject study identifier
+			// minimal length for subject common name is 1, same for subject study identifier
 			// if nothing is entered, use existing subject selected
-			if (mainWindow.importDialog.subjectTextField.getText().length() < 2
-				|| !mainWindow.importDialog.subjectStudyIdentifierTF.getText().isEmpty()
-						&& mainWindow.importDialog.subjectStudyIdentifierTF.getText().length() < 2) {
+			if (mainWindow.importDialog.existingSubjectsCB.isEnabled()) {
 				subjectREST = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
-				if (subjectREST == null) {
+				if (subjectREST != null) {
+					logger.info("Existing subject used from server with ID: " + subjectREST.getId() + ", name: " + subjectREST.getName());
+					useExistingSubjectInStudy = true;
+				} else {
 					JOptionPane.showMessageDialog(mainWindow.frame,
 							mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.subject.creation"),
 							"Error", JOptionPane.ERROR_MESSAGE);
 					return;
-				} else {
-					logger.info("Existing subject used from server with ID: " + subjectREST.getId() + ", name: " + subjectREST.getName());
-					existingSubjectInStudy = true;
 				}
 			}
 		}
@@ -110,7 +108,7 @@ public class ImportFinishActionListener implements ActionListener {
 		}
 
 		// In case user selects existing subject from study, just use it
-		if (!existingSubjectInStudy) {
+		if (!useExistingSubjectInStudy) {
 			// common name: entered by the user in the GUI
 			String subjectName = mainWindow.importDialog.subjectTextField.getText();
 			ImagedObjectCategory category = (ImagedObjectCategory) mainWindow.importDialog.subjectImageObjectCategoryCB.getSelectedItem();
@@ -122,7 +120,7 @@ public class ImportFinishActionListener implements ActionListener {
 			boolean isPhysicallyInvolved = mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.isSelected();
 			subjectREST = ImportUtils.manageSubject(
 				subjectREST, importJob.getSubject(), subjectName, category, languageHemDom, manualHemDom,
-				subjectStudy, subjectType, existingSubjectInStudy, isPhysicallyInvolved, subjectStudyIdentifier,
+				subjectStudy, subjectType, useExistingSubjectInStudy, isPhysicallyInvolved, subjectStudyIdentifier,
 				study, studyCard);
 			if(subjectREST == null) {
 				JOptionPane.showMessageDialog(mainWindow.frame,
