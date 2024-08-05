@@ -179,7 +179,6 @@ public class SubjectApiControllerTest {
 		list.add(subject);
 		
 		given(subjectServiceMock.findAllSubjectsOfStudyId(1L)).willReturn(list);
-
 		
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/1/allSubjects").param("preclinical", "null").accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(subject)))
