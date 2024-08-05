@@ -1,6 +1,7 @@
 package org.shanoir.uploader.nominativeData;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Observable;
 
@@ -25,9 +26,9 @@ public class CurrentNominativeDataModel extends Observable {
 
 	public HashMap<String, NominativeDataUploadJob> getCurrentUploads() {
 		if (currentUploads == null) {
-			return new HashMap<String, NominativeDataUploadJob>();
+			return new LinkedHashMap<String, NominativeDataUploadJob>();
 		}
-		return (HashMap<String, NominativeDataUploadJob>) currentUploads;
+		return (LinkedHashMap<String, NominativeDataUploadJob>) currentUploads;
 	}
 
 	public void setCurrentUploads(Map<String, NominativeDataUploadJob> currentUploads) {

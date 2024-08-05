@@ -21,6 +21,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
@@ -470,8 +472,13 @@ public final class Util {
 					result.add(file);
 				}
 			}
-
 		}
+		Collections.sort(result, new Comparator<File>() {
+			@Override
+			public int compare(File f1, File f2) {
+				return Long.compare(f1.lastModified(), f2.lastModified());
+			}
+		});
 		return result;
 	}
 

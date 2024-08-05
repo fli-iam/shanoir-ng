@@ -10,6 +10,8 @@ import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.JFrame;
@@ -180,14 +182,9 @@ public class CurrentNominativeDataController {
 	 * @param workFolder
 	 */
 	private void processWorkFolder(File workFolder) {
-		final File[] folders = workFolder.listFiles((file) -> {
-			if (file.isDirectory() && !file.getName().equals("tmp")) {
-				return true;
-			}
-			return false;
-		});
-		logger.info("Found " + folders.length + " folders in workFolder.");
-		Map<String, NominativeDataUploadJob> currentUploads = new HashMap<String, NominativeDataUploadJob>();
+		List<File> folders = Util.listFolders(workFolder);
+		logger.info("Found " + folders.size() + " folders in workFolder.");
+		Map<String, NominativeDataUploadJob> currentUploads = new LinkedHashMap<String, NominativeDataUploadJob>();
 		for (File f : folders) {
 			NominativeDataUploadJob nominativeDataUploadJob = processFolder(f);
 			if (nominativeDataUploadJob != null)
@@ -341,4 +338,5 @@ public class CurrentNominativeDataController {
 			return sb.toString();
 		}
 	}
+
 }
