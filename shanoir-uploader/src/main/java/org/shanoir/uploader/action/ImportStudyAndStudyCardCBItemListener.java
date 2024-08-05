@@ -94,14 +94,23 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 	}
 
 	private void updateImportDialogForExistingSubject(Subject subject, ImportDialog importDialog) {
-		importDialog.subjectImageObjectCategoryCB.setSelectedItem(subject.getImagedObjectCategory());
 		importDialog.subjectImageObjectCategoryCB.setEnabled(false);
-		importDialog.subjectLanguageHemisphericDominanceCB
-				.setSelectedItem(subject.getLanguageHemisphericDominance());
+		if (subject.getImagedObjectCategory() != null) {
+			importDialog.subjectImageObjectCategoryCB.setSelectedItem(subject.getImagedObjectCategory());
+		}
 		importDialog.subjectLanguageHemisphericDominanceCB.setEnabled(false);
-		importDialog.subjectManualHemisphericDominanceCB
-				.setSelectedItem(subject.getManualHemisphericDominance());
-		importDialog.subjectManualHemisphericDominanceCB.setEnabled(false);
+		if (subject.getLanguageHemisphericDominance() != null) {
+			importDialog.subjectLanguageHemisphericDominanceCB.setSelectedItem(subject.getLanguageHemisphericDominance().getName());
+		} else {
+			importDialog.subjectLanguageHemisphericDominanceCB.setSelectedItem("");
+		}
+		importDialog.subjectManualHemisphericDominanceCB.setEnabled(false);		
+		if (subject.getManualHemisphericDominance() != null) {
+			importDialog.subjectManualHemisphericDominanceCB.setSelectedItem(subject.getManualHemisphericDominance().getName());
+		} else {
+			importDialog.subjectManualHemisphericDominanceCB.setSelectedItem("");
+		}
+		// not used anymore on server: remove later
 		importDialog.subjectPersonalCommentTextArea.setBackground(Color.LIGHT_GRAY);
 		importDialog.subjectPersonalCommentTextArea.setEditable(false);
 	}

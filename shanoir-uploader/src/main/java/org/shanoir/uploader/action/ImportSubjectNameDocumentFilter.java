@@ -73,10 +73,10 @@ public class ImportSubjectNameDocumentFilter implements DocumentListener {
             mainWindow.importDialog.subjectImageObjectCategoryCB.setSelectedItem(subject.getImagedObjectCategory());
 			mainWindow.importDialog.subjectImageObjectCategoryCB.setEnabled(false);
 			mainWindow.importDialog.subjectLanguageHemisphericDominanceCB
-					.setSelectedItem(subject.getLanguageHemisphericDominance());
+					.setSelectedItem(subject.getLanguageHemisphericDominance().getName());
             mainWindow.importDialog.subjectLanguageHemisphericDominanceCB.setEnabled(false);
             mainWindow.importDialog.subjectManualHemisphericDominanceCB
-					.setSelectedItem(subject.getManualHemisphericDominance());
+					.setSelectedItem(subject.getManualHemisphericDominance().getName());
             mainWindow.importDialog.subjectManualHemisphericDominanceCB.setEnabled(false);
             mainWindow.importDialog.subjectPersonalCommentTextArea.setBackground(Color.LIGHT_GRAY);
             mainWindow.importDialog.subjectPersonalCommentTextArea.setEditable(false);
