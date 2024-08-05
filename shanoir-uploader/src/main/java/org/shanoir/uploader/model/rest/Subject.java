@@ -43,6 +43,8 @@ public class Subject {
 	private Sex sex;
 
 	private List<SubjectStudy> subjectStudyList;
+
+	private SubjectStudy subjectStudy;
 	
 	private PseudonymusHashValues pseudonymusHashValues;
 
@@ -195,6 +197,14 @@ public class Subject {
 	@Override
 	public String toString() {
 		return name;
+	}
+
+	public SubjectStudy getSubjectStudy() {
+		return subjectStudy;
+	}
+
+	public void setSubjectStudy(SubjectStudy subjectStudy) {
+		this.subjectStudy = subjectStudy;
 	}
 
 }
