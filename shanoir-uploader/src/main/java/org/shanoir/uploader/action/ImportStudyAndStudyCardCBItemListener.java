@@ -93,7 +93,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 		} // ignore otherwise
 	}
 
-	private void updateImportDialogForExistingSubject(Subject subject, ImportDialog importDialog) {
+	public static void updateImportDialogForExistingSubject(Subject subject, ImportDialog importDialog) {
 		importDialog.subjectImageObjectCategoryCB.setEnabled(false);
 		if (subject.getImagedObjectCategory() != null) {
 			importDialog.subjectImageObjectCategoryCB.setSelectedItem(subject.getImagedObjectCategory());

@@ -69,18 +69,7 @@ public class ImportSubjectNameDocumentFilter implements DocumentListener {
         } else {
             mainWindow.importDialog.existingSubjectsCB.setEnabled(true);
             Subject subject = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
-            // Update subject information
-            mainWindow.importDialog.subjectImageObjectCategoryCB.setSelectedItem(subject.getImagedObjectCategory());
-			mainWindow.importDialog.subjectImageObjectCategoryCB.setEnabled(false);
-			mainWindow.importDialog.subjectLanguageHemisphericDominanceCB
-					.setSelectedItem(subject.getLanguageHemisphericDominance().getName());
-            mainWindow.importDialog.subjectLanguageHemisphericDominanceCB.setEnabled(false);
-            mainWindow.importDialog.subjectManualHemisphericDominanceCB
-					.setSelectedItem(subject.getManualHemisphericDominance().getName());
-            mainWindow.importDialog.subjectManualHemisphericDominanceCB.setEnabled(false);
-            mainWindow.importDialog.subjectPersonalCommentTextArea.setBackground(Color.LIGHT_GRAY);
-            mainWindow.importDialog.subjectPersonalCommentTextArea.setEditable(false);
-            // Update subject-study
+            ImportStudyAndStudyCardCBItemListener.updateImportDialogForExistingSubject(subject, mainWindow.importDialog);
             ImportStudyAndStudyCardCBItemListener.updateSubjectStudyInImportDialog(subject.getSubjectStudy(), mainWindow.importDialog);
             // Update examinations and clear cache
             if (examinationsOfExistingSubject.isEmpty()) {
