@@ -231,16 +231,7 @@ public class ImportDialogOpener {
 			importDialog.existingSubjectsCB.setBackground(Color.LIGHT_GRAY);
 			importDialog.existingSubjectsCB.setEnabled(false);
 			importDialog.existingSubjectsCB.setEditable(false);
-			importDialog.subjectImageObjectCategoryCB.setSelectedItem(subject.getImagedObjectCategory());
-			importDialog.subjectImageObjectCategoryCB.setEnabled(false);
-			importDialog.subjectLanguageHemisphericDominanceCB
-					.setSelectedItem(subject.getLanguageHemisphericDominance());
-			importDialog.subjectLanguageHemisphericDominanceCB.setEnabled(false);
-			importDialog.subjectManualHemisphericDominanceCB
-					.setSelectedItem(subject.getManualHemisphericDominance());
-			importDialog.subjectManualHemisphericDominanceCB.setEnabled(false);
-			importDialog.subjectPersonalCommentTextArea.setBackground(Color.LIGHT_GRAY);
-			importDialog.subjectPersonalCommentTextArea.setEditable(false);
+			ImportStudyAndStudyCardCBItemListener.updateImportDialogForExistingSubject(subject, importDialog);
 		// No existing subject found with identifier:
 		} else {
 			// Profile Neurinfo: enable manual edition
