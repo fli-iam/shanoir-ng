@@ -18,9 +18,9 @@ public class ShUpConfig {
 	/**
 	 * Constants
 	 */
-	public static final String SHANOIR_UPLOADER_VERSION = "v8.0.0";
+	public static final String SHANOIR_UPLOADER_VERSION = "v9.0.0";
 	
-	public static final String RELEASE_DATE = "2024-07-08 15:21 - Release Brehat Plage Du Guerzido";
+	public static final String RELEASE_DATE = "2024-08-05";
 	
 	public static final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 	

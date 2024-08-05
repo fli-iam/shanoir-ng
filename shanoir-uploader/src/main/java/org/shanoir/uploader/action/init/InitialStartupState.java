@@ -54,6 +54,8 @@ public class InitialStartupState implements State {
 
 	private static final String SU_V7_0_1 = ".su_v7.0.1";
 
+	private static final String SU_V8_0_0 = ".su_v8.0.0";
+
 	@Autowired
 	private ProxyConfigurationState proxyConfigurationState;
 
@@ -90,6 +92,7 @@ public class InitialStartupState implements State {
 		// as properties, that exist already are not replaced/changed, start with the last version before,
 		// as considered as more important
 		// overwrite with properties from ShanoirUploader v7.0.1, v6.0.4 or v6.0.3, if existing
+		migrateFromVersion(SU_V8_0_0);
 		migrateFromVersion(SU_V7_0_1);
 		migrateFromVersion(SU_V6_0_4);
 		migrateFromVersion(SU_V6_0_3);
