@@ -300,6 +300,9 @@ public class SubjectServiceImpl implements SubjectService {
 					simpleSubjectDTO.setId(sub.getId());
 					simpleSubjectDTO.setName(sub.getName());
 					simpleSubjectDTO.setIdentifier(sub.getIdentifier());
+					simpleSubjectDTO.setImagedObjectCategory(sub.getImagedObjectCategory());
+					simpleSubjectDTO.setLanguageHemisphericDominance(sub.getLanguageHemisphericDominance());
+					simpleSubjectDTO.setManualHemisphericDominance(sub.getManualHemisphericDominance());
 					simpleSubjectDTO.setSubjectStudy(subjectStudyMapper.subjectStudyToSubjectStudyDTO(rel));
 					simpleSubjectDTOList.add(simpleSubjectDTO);
 				}
@@ -327,6 +330,9 @@ public class SubjectServiceImpl implements SubjectService {
 					simpleSubjectDTO.setId(sub.getId());
 					simpleSubjectDTO.setName(sub.getName());
 					simpleSubjectDTO.setIdentifier(sub.getIdentifier());
+					simpleSubjectDTO.setImagedObjectCategory(sub.getImagedObjectCategory());
+					simpleSubjectDTO.setLanguageHemisphericDominance(sub.getLanguageHemisphericDominance());
+					simpleSubjectDTO.setManualHemisphericDominance(sub.getManualHemisphericDominance());
 					simpleSubjectDTO.setSubjectStudy(subjectStudyMapper.subjectStudyToSubjectStudyDTO(rel));
 					simpleSubjectDTOList.add(simpleSubjectDTO);
 				}

@@ -14,7 +14,6 @@ import org.shanoir.uploader.dicom.MRI;
 import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
-import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
 import org.shanoir.uploader.model.rest.Study;
@@ -55,8 +54,11 @@ public class ImportDialogOpener {
 	public void openImportDialog(UploadJob uploadJob, File uploadFolder) {
 		try {
 			Date studyDate = ShUpConfig.formatter.parse(uploadJob.getStudyDate());
-			// get items on server
-			Subject subject = getSubject(uploadJob);
+			Subject subject = null;
+			// Profile OFSEP: search with identifier
+			if (ShUpConfig.isModeSubjectCommonNameAutoIncrement()) {
+				subject = getSubject(uploadJob);
+			} // else Profile Neurinfo: no search with identifier, user selects existing subject 
 			List<Study> studiesWithStudyCards = getStudiesWithStudyCards(uploadJob);
 			// init components of GUI and listeners
 			ImportStudyCardFilterDocumentListener importStudyCardFilterDocumentListener = new ImportStudyCardFilterDocumentListener(this.mainWindow);
@@ -191,17 +193,12 @@ public class ImportDialogOpener {
 		importDialog.studyCB.setValueSet(false);
 	}
 
-	/**
-	 * @param dicomData
-	 * @throws Exception
-	 */
 	private Subject getSubject(final UploadJob uploadJob) throws Exception {
-		Subject foundSubject = null;
-		if (uploadJob.getSubjectIdentifier() != null && ShUpConfig.isModeSubjectCommonNameAutoIncrement()) {
-			foundSubject = shanoirUploaderServiceClient
-					.findSubjectBySubjectIdentifier(uploadJob.getSubjectIdentifier());
+		if (uploadJob.getSubjectIdentifier() != null) {
+			return shanoirUploaderServiceClient
+				.findSubjectBySubjectIdentifier(uploadJob.getSubjectIdentifier());
 		}
-		return foundSubject;
+		return null;
 	}
 
 	private void updateImportDialogForSubject(Subject subject) {
@@ -223,24 +220,17 @@ public class ImportDialogOpener {
 		for (int i = 0; i < SubjectType.values().length; i++) {
 			importDialog.subjectTypeCB.addItem(SubjectType.values()[i]);
 		}
-		// Existing subject found with identifier:
+		// Existing subject found with identifier: only profile OFSEP, not Neurinfo
 		if (subject != null) {
-			// Common name manual
-			if (ShUpConfig.isModeSubjectCommonNameManual()) {
-				importDialog.subjectTextField.setBackground(Color.WHITE);
-				importDialog.subjectTextField.setEnabled(true);
-				importDialog.subjectTextField.setEditable(true);		
-			} else if (ShUpConfig.isModeSubjectCommonNameAutoIncrement()) {
-				importDialog.subjectTextField.setText(subject.getName());
-				importDialog.subjectTextField.setBackground(Color.LIGHT_GRAY);
-				importDialog.subjectTextField.setEnabled(false);
-				importDialog.subjectTextField.setEditable(false);
-				importDialog.existingSubjectsCB.setVisible(false);
-				importDialog.existingSubjectsCB.setBackground(Color.LIGHT_GRAY);
-				importDialog.existingSubjectsCB.setEnabled(false);
-				importDialog.existingSubjectsCB.setEditable(false);
-			}			
+			importDialog.subjectTextField.setText(subject.getName());
+			importDialog.subjectTextField.setBackground(Color.LIGHT_GRAY);
+			importDialog.subjectTextField.setEnabled(false);
+			importDialog.subjectTextField.setEditable(false);
 			importDialog.subjectTextField.setValueSet(true);
+			importDialog.existingSubjectsCB.setVisible(false);
+			importDialog.existingSubjectsCB.setBackground(Color.LIGHT_GRAY);
+			importDialog.existingSubjectsCB.setEnabled(false);
+			importDialog.existingSubjectsCB.setEditable(false);
 			importDialog.subjectImageObjectCategoryCB.setSelectedItem(subject.getImagedObjectCategory());
 			importDialog.subjectImageObjectCategoryCB.setEnabled(false);
 			importDialog.subjectLanguageHemisphericDominanceCB
@@ -253,12 +243,13 @@ public class ImportDialogOpener {
 			importDialog.subjectPersonalCommentTextArea.setEditable(false);
 		// No existing subject found with identifier:
 		} else {
-			// Common name manual
+			// Profile Neurinfo: enable manual edition
 			if (ShUpConfig.isModeSubjectCommonNameManual()) {
 				importDialog.subjectTextField.setText("");
 				importDialog.subjectTextField.setBackground(Color.WHITE);
 				importDialog.subjectTextField.setEnabled(true);
 				importDialog.subjectTextField.setEditable(true);
+			// Profile OFSEP: display, that subject will be created automatically
 			} else if (ShUpConfig.isModeSubjectCommonNameAutoIncrement()) {
 				importDialog.subjectTextField
 						.setText(resourceBundle.getString("shanoir.uploader.import.subject.autofill"));
