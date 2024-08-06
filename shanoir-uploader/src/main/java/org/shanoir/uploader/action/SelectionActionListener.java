@@ -142,12 +142,6 @@ public class SelectionActionListener implements TreeSelectionListener {
 		mainWindow.birthNameTF.setText("");
 		mainWindow.birthNameTF.setEnabled(true);
 		mainWindow.birthDateTF.setEnabled(true);
-		// If profile Neurinfo is selected, the user can't modify Patient's Sex
-		if (ShUpConfig.isModeSubjectCommonNameManual()) {
-			mainWindow.fSexR.setEnabled(true);
-			mainWindow.mSexR.setEnabled(true);
-			mainWindow.oSexR.setEnabled(true);
-		}
 		// add this exception here for damaged DICOMDIRs without birth date set
 		if (birthDate != null) {
 			String birthDateText = Util.convertLocalDateToString(birthDate);
