@@ -101,7 +101,7 @@ public class MainWindow extends JFrame {
 	public JTextField birthNameTF;
 	public JTextField birthDateTF;
 	public ButtonGroup sexRG;
-	public JRadioButton mSexR, fSexR;
+	public JRadioButton fSexR, mSexR, oSexR;
 	public JButton downloadOrCopyButton;
 	
 	public JButton queryButton;
@@ -303,7 +303,7 @@ public class MainWindow extends JFrame {
 		GridBagConstraints gbc_queryPanelLabel = new GridBagConstraints();
 		gbc_queryPanelLabel.anchor = GridBagConstraints.WEST;
 		gbc_queryPanelLabel.fill = GridBagConstraints.HORIZONTAL;
-		gbc_queryPanelLabel.insets = new Insets(5, 5, 0, 0);
+		gbc_queryPanelLabel.insets = new Insets(10, 10, 10, 10);
 		gbc_queryPanelLabel.gridwidth = 3;
 		gbc_queryPanelLabel.gridx = 0;
 		gbc_queryPanelLabel.gridy = 0;
@@ -312,7 +312,7 @@ public class MainWindow extends JFrame {
 		JLabel queryLevelLabel = new JLabel(resourceBundle.getString("shanoir.uploader.queryLevelLabel"));
 		GridBagConstraints gbc_queryLevelLabel = new GridBagConstraints();
 		gbc_queryLevelLabel.anchor = GridBagConstraints.EAST;
-		gbc_queryLevelLabel.insets = new Insets(5, 5, 0, 0);
+		gbc_queryLevelLabel.insets = new Insets(5, 5, 2, 0);
 		gbc_queryLevelLabel.gridx = 0;
 		gbc_queryLevelLabel.gridy = 1;
 		queryPanel.add(queryLevelLabel, gbc_queryLevelLabel);
@@ -322,7 +322,7 @@ public class MainWindow extends JFrame {
 		pRB.setSelected(true);
 		queryLevelRG.add(pRB);
 		GridBagConstraints gBC_pRB = new GridBagConstraints();
-		gBC_pRB.insets = new Insets(2, 2, 2, 2);
+		gBC_pRB.insets = new Insets(2, 5, 0, 2);
 		gBC_pRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_pRB.gridx = 1;
 		gBC_pRB.gridy = 1;
@@ -331,7 +331,7 @@ public class MainWindow extends JFrame {
 		sRB = new JRadioButton("Study");
 		queryLevelRG.add(sRB);
 		GridBagConstraints gBC_sRB = new GridBagConstraints();
-		gBC_sRB.insets = new Insets(2, 2, 2, 2);
+		gBC_sRB.insets = new Insets(2, 2, 0, 2);
 		gBC_sRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_sRB.gridx = 2;
 		gBC_sRB.gridy = 1;
@@ -656,52 +656,59 @@ public class MainWindow extends JFrame {
 		mrRB.setSelected(true);
 		modalityRG.add(mrRB);
 		GridBagConstraints gBC_mrRB = new GridBagConstraints();
-		gBC_mrRB.insets = new Insets(2, 2, 2, 2);
+		gBC_mrRB.insets = new Insets(2, 5, 0, 2);
 		gBC_mrRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_mrRB.gridx = 1;
 		gBC_mrRB.gridy = 7;
+		gBC_mrRB.weightx = 1.0;
 		queryPanel.add(mrRB, gBC_mrRB);
 
 		ctRB = new JRadioButton("CT");
 		modalityRG.add(ctRB);
 		GridBagConstraints gBC_ctRB = new GridBagConstraints();
-		gBC_ctRB.insets = new Insets(2, 2, 2, 2);
+		gBC_ctRB.insets = new Insets(2, 2, 0, 2);
 		gBC_ctRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_ctRB.gridx = 2;
 		gBC_ctRB.gridy = 7;
+		gBC_ctRB.weightx = 1.0;
 		queryPanel.add(ctRB, gBC_ctRB);
 
 		ptRB = new JRadioButton("PT");
 		modalityRG.add(ptRB);
 		GridBagConstraints gBC_ptRB = new GridBagConstraints();
-		gBC_ptRB.insets = new Insets(2, 2, 2, 2);
+		gBC_ptRB.insets = new Insets(2, 2, 0, 2);
 		gBC_ptRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_ptRB.gridx = 3;
 		gBC_ptRB.gridy = 7;
+		gBC_ptRB.weightx = 1.0;
 		queryPanel.add(ptRB, gBC_ptRB);
 
 		nmRB = new JRadioButton("NM");
 		modalityRG.add(nmRB);
 		GridBagConstraints gBC_nmRB = new GridBagConstraints();
-		gBC_nmRB.insets = new Insets(2, 2, 2, 2);
+		gBC_nmRB.insets = new Insets(2, 2, 0, 2);
 		gBC_nmRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_nmRB.gridx = 4;
 		gBC_nmRB.gridy = 7;
+		gBC_nmRB.weightx = 1.0;
 		queryPanel.add(nmRB, gBC_nmRB);
 
 		noRB = new JRadioButton("None");
 		modalityRG.add(noRB);
 		GridBagConstraints gBC_noRB = new GridBagConstraints();
-		gBC_noRB.insets = new Insets(2, 2, 2, 2);
+		gBC_noRB.insets = new Insets(2, 2, 0, 2);
 		gBC_noRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_noRB.gridx = 5;
 		gBC_noRB.gridy = 7;
+		gBC_noRB.weightx = 1.0;
 		queryPanel.add(noRB, gBC_noRB);
 		
 		queryButton = new JButton(resourceBundle.getString("shanoir.uploader.queryButton"), searchIcon);
 		GridBagConstraints gbc_queryButton = new GridBagConstraints();
-		gbc_queryButton.insets = new Insets(5, 5, 5, 0);
-		gbc_queryButton.gridwidth = 7;
+		gbc_queryButton.anchor = GridBagConstraints.CENTER;
+		gbc_queryButton.insets = new Insets(5, 5, 5, 5);
+		gbc_queryButton.weightx = 1.0;
+		gbc_queryButton.gridwidth = 8;
 		gbc_queryButton.gridx = 0;
 		gbc_queryButton.gridy = 8;
 		queryPanel.add(queryButton, gbc_queryButton);
@@ -838,7 +845,7 @@ public class MainWindow extends JFrame {
 				new RSDocumentListener(this));
 
 		/**
-		 * Radio buttons for sex: M or F
+		 * Radio buttons for sex: F, M or O
 		 */
 		JLabel sexLabel = new JLabel(resourceBundle.getString("shanoir.uploader.sexLabel"));
 		sexLabel.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -849,26 +856,39 @@ public class MainWindow extends JFrame {
 		gBCSexLabel.gridy = 5;
 		editPanel.add(sexLabel, gBCSexLabel);
 		sexRG = new ButtonGroup();
-		mSexR = new JRadioButton("M");
-		mSexR.setEnabled(false);
-		sexRG.add(mSexR);
-		editPanel.add(mSexR);
 		fSexR = new JRadioButton("F");
 		fSexR.setEnabled(false);
 		sexRG.add(fSexR);
 		editPanel.add(fSexR);
+		mSexR = new JRadioButton("M");
+		mSexR.setEnabled(false);
+		sexRG.add(mSexR);
+		editPanel.add(mSexR);
+		oSexR = new JRadioButton("O");
+		oSexR.setEnabled(false);
+		sexRG.add(oSexR);
+		editPanel.add(oSexR);
+		GridBagConstraints gBCFSexR = new GridBagConstraints();
+		gBCFSexR.insets = new Insets(10, 10, 10, 10);
+		gBCFSexR.fill = GridBagConstraints.HORIZONTAL;
+		gBCFSexR.gridx = 1;
+		gBCFSexR.gridy = 5;
+		gBCFSexR.weightx = 1.0;
+		editPanel.add(fSexR, gBCFSexR);
 		GridBagConstraints gBCMSexR = new GridBagConstraints();
 		gBCMSexR.insets = new Insets(10, 10, 10, 10);
 		gBCMSexR.fill = GridBagConstraints.HORIZONTAL;
-		gBCMSexR.gridx = 1;
+		gBCMSexR.gridx = 2;
 		gBCMSexR.gridy = 5;
+		gBCMSexR.weightx = 1.0;
 		editPanel.add(mSexR, gBCMSexR);
-		GridBagConstraints gBCFSexR = new GridBagConstraints();
-		gBCFSexR.insets = new Insets(10, 10, 10, 10);
-		gBCMSexR.fill = GridBagConstraints.HORIZONTAL;
-		gBCFSexR.gridx = 2;
-		gBCFSexR.gridy = 5;
-		editPanel.add(fSexR, gBCFSexR);
+		GridBagConstraints gBCOSexR = new GridBagConstraints();
+		gBCOSexR.insets = new Insets(10, 10, 10, 10);
+		gBCOSexR.fill = GridBagConstraints.HORIZONTAL;
+		gBCOSexR.gridx = 3;
+		gBCOSexR.gridy = 5;
+		gBCOSexR.weightx = 1.0;
+		editPanel.add(oSexR, gBCOSexR);
 
 		/**
 		 * Last button for download or copy action:
