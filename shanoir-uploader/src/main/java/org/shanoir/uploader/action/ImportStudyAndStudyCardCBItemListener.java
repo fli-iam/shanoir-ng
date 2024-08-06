@@ -155,7 +155,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 		// Exams exist, but maybe not for the study selected
 		if (examinationsOfSubject != null && !examinationsOfSubject.isEmpty()) {
 			List<Examination> examinationsFilteredByStudy = examinationsOfSubject.parallelStream()
-				.filter(e -> e.getStudyId() == study.getId())
+				.filter(e -> e.getStudyId().equals(study.getId()))
 				.collect(Collectors.toList());
 			for (Iterator iterator = examinationsFilteredByStudy.iterator(); iterator.hasNext();) {
 				Examination examination = (Examination) iterator.next();

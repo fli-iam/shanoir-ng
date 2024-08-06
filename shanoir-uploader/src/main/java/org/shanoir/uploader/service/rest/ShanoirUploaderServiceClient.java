@@ -408,6 +408,7 @@ public class ShanoirUploaderServiceClient {
 				int code = response.getCode();
 				if (code == HttpStatus.SC_OK) {
 					List<Examination> examinations = Util.getMappedList(response, Examination.class);
+					logger.info("findExaminationsBySubjectId: " + examinations.size() + " examinations found for subject: " + subjectId);
 					return examinations;
 				} else {
 					logger.warn("Could not get exam(s) for subject with id " + subjectId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");					
