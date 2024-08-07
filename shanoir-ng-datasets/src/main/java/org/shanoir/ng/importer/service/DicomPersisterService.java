@@ -71,17 +71,30 @@ public class DicomPersisterService {
 					if (expressionFormat.getType().equals("dcm")) {
 						List<DatasetFile> datasetFiles = expressionFormat.getDatasetFiles();
 						if (datasetFiles != null && !datasetFiles.isEmpty()) {
-							DatasetFile firstDatasetFile = datasetFiles.get(0);
-							if (firstDatasetFile.getPath() != null && !firstDatasetFile.getPath().isEmpty()) {
-								File firstDicomFile = new File(firstDatasetFile.getPath());
-								File directoryWithDicomFiles = firstDicomFile.getParentFile();
-								if (dicomWeb) {
-									dicomWebService.sendDicomFilesToPacs(directoryWithDicomFiles);
+							// Iterate over all dataset files (DICOM files), in case all files might be
+							// distributed over multiple parent directories and therefore require multiple
+							// calls to sendDicomFilesToPacs (advantage: do not create to big multiparts)
+							File lastParentFile = null;
+							for (DatasetFile datasetFile : datasetFiles) {
+								String path = datasetFile.getPath();
+								if (path != null && !path.isEmpty()) {
+									File dicomFile = new File(path);
+									if (dicomFile.exists()) {
+										File parentFile = dicomFile.getParentFile();
+										if (lastParentFile == null || !parentFile.equals(lastParentFile)) {
+											if (dicomWeb) {
+												dicomWebService.sendDicomFilesToPacs(parentFile);
+											} else {
+												dimseService.sendDicomFilesToPacs(parentFile);
+											}
+											lastParentFile = parentFile;	
+										}
+									} else {
+										throw new ShanoirException("Send Dicoms to Pacs: dicomFile not existing on disk.");
+									}
 								} else {
-									dimseService.sendDicomFilesToPacs(directoryWithDicomFiles);
+									throw new ShanoirException("Send Dicoms to Pacs: DatasetFile with empty path found in db.");
 								}
-							} else {
-								throw new ShanoirException("Send Dicoms to Pacs: DatasetFile with empty path found.");
 							}
 						} else {
 							throw new ShanoirException("Send Dicoms to Pacs: DatasetFiles null or empty.");
