@@ -3,15 +3,6 @@ window.config = {
 	extensions: [], 
 	modes: [], 
 	showStudyList: true,
-	studyPrefetcher: {
-		enabled: true,
-		order: 'closest',
-		displaySetCount: 3,
-		preventCache: false,
-		prefetchDisplaySetsTimeout: 300,
-		displayProgress: true,
-		includeActiveDisplaySet: true,
-	},
 	dataSources: [ 
 		{ 
 			namespace: '@ohif/extension-default.dataSourcesModule.dicomweb', 
