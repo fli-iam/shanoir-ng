@@ -43,7 +43,6 @@ public interface CenterMapper {
 	@Named("centerToCenterDTOFlat")
 	@Mappings({
 		@Mapping(target = "acquisitionEquipments", ignore = true),
-		@Mapping(target = "studyCenterList", ignore = true),
 		@Mapping(target = "compatible", ignore = true)
 	})
 	CenterDTO centerToCenterDTOFlat(Center center);
