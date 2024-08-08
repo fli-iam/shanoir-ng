@@ -38,6 +38,7 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.shared.security.ControlerSecurityService;
+import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,6 +75,9 @@ public class CenterApiControllerTest {
 
 	@MockBean
 	private CenterService centerServiceMock;
+
+	@MockBean
+	private StudyService studyServiceMock;
 	
 	@MockBean
 	private CenterFieldEditionSecurityManager fieldEditionSecurityManager;
@@ -89,12 +93,12 @@ public class CenterApiControllerTest {
 
 	@BeforeEach
 	public void setup() throws EntityNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException  {
-		given(centerMapperMock.centersToCenterDTOs(Mockito.anyList()))
+		given(centerMapperMock.centersToCenterDTOsFlat(Mockito.anyList()))
 				.willReturn(Arrays.asList(new CenterDTO()));
 		Center center = new Center();
 		center.setId(Long.valueOf(123));
 		IdName idNameCenter = new IdName(1L, "naIme");
-		given(centerMapperMock.centerToCenterDTO(Mockito.any(Center.class))).willReturn(new CenterDTO());
+		given(centerMapperMock.centerToCenterDTOFlat(Mockito.any(Center.class))).willReturn(new CenterDTO());
 		doNothing().when(centerServiceMock).deleteById(1L);
 		given(centerServiceMock.findAll()).willReturn(Arrays.asList(center));
 		given(centerServiceMock.findById(1L)).willReturn(Optional.of(center));

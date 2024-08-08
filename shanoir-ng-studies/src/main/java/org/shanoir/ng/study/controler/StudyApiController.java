@@ -14,19 +14,36 @@
 
 package org.shanoir.ng.study.controler;
 
-import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.shared.exception.*;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ErrorDetails;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
-import org.shanoir.ng.study.dto.*;
+import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
+import org.shanoir.ng.study.dto.StudyDTO;
+import org.shanoir.ng.study.dto.StudyLightDTO;
+import org.shanoir.ng.study.dto.StudyStatisticsDTO;
+import org.shanoir.ng.study.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.dua.DataUserAgreement;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
@@ -54,17 +71,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 
 @Controller
 public class StudyApiController implements StudyApi {
@@ -100,7 +110,6 @@ public class StudyApiController implements StudyApi {
 
 	@Autowired
 	private RelatedDatasetService relatedDatasetService;
-
 
 	private static final Logger LOG = LoggerFactory.getLogger(StudyApiController.class);
 
@@ -151,8 +160,15 @@ public class StudyApiController implements StudyApi {
 		if (studies.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-
 		return new ResponseEntity<>(studyMapper.studiesToStudyDTOs(studies), HttpStatus.OK);
+	}
+	
+	public ResponseEntity<List<StudyLightDTO>> findStudiesLight() {
+		List<Study> studies = studyService.findAll();
+		if (studies.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(studyMapper.studiesToStudyLightDTOs(studies), HttpStatus.OK);
 	}
 
 	@Override
@@ -171,7 +187,7 @@ public class StudyApiController implements StudyApi {
 	@Override
 	public ResponseEntity<List<IdNameCenterStudyDTO>> findStudiesNamesAndCenters() throws RestServiceException {
 		List<IdNameCenterStudyDTO> studiesDTO = new ArrayList<>();
-		final List<Study> studies = studyService.findAll();
+		final List<Study> studies = studyService.findAllWithCenters();
 		if (studies.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
@@ -184,19 +200,14 @@ public class StudyApiController implements StudyApi {
 	@Override
 	public ResponseEntity<StudyDTO> findStudyById(@PathVariable("studyId") final Long studyId, boolean withStorageVolume) {
 		Study study = studyService.findById(studyId);
-
 		if (study == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-
-		StudyDTO dto = studyMapper.studyToStudyDTO(study);
-
+		StudyDTO dto = studyMapper.studyToStudyDTODetailed(study);
 		if(withStorageVolume){
 			dto.setStorageVolume(studyService.getDetailedStorageVolume(dto.getId()));
 		}
-
 		return new ResponseEntity<>(dto, HttpStatus.OK);
-
 	}
 
 	@Override
@@ -501,25 +512,23 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<List<PublicStudyDTO>> findPublicStudiesData() {
-		List<PublicStudyDTO> studiesDTO = new ArrayList<>();
-
+	public ResponseEntity<List<StudyLightDTO>> findPublicStudiesData() {
+		List<StudyLightDTO> studiesDTO = new ArrayList<>();
 		List<Study> studies = studyService.findPublicStudies();
 		if (studies.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-
 		for (Study study : studies) {
-			studiesDTO.add(studyMapper.studyToPublicStudyDTO(study));
+			studiesDTO.add(studyMapper.studyToStudyLightDTONoFilePaths(study));
 		}
 		return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
 	}
 
 	/**
-	 * This method allows to filter studies by ont the one the given user is not part in
+	 * This method allows to filter studies by on the one the given user is not part in
 	 * @param studies the list of studies to filter
 	 * @param tokenUserId the user to filter with
-	 * @return the list fo filtered studies
+	 * @return the list of filtered studies
 	 */
 	private List<Study> filterStudies(List<Study> studies, Long tokenUserId) {
 		List<Study> filteredStudies = new ArrayList<Study>();
