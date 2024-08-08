@@ -58,7 +58,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     protected saveError: ShanoirError;
     protected onSubmitValidatedFields: string[] = [];
     @ViewChild('formContainer', {static: false}) formContainerElement: ElementRef;
-    activeTab: string;
+    _activeTab: string;
 
     /* services */
     protected confirmDialogService: ConfirmDialogService;
@@ -101,6 +101,14 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
 
     public set entity(entity: T) {
         this._entity = entity;
+    }
+
+    public get activeTab(): string {
+        return this._activeTab;
+    }
+
+    public set activeTab(param: string) {
+        this._activeTab = param;
     }
 
     ngOnInit(): void {

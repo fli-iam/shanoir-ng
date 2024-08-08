@@ -32,6 +32,7 @@ export const SILENT_CHECK_SSO_URL = url.protocol + "//" + url.hostname + "/shano
 // Users http api
 export const BACKEND_API_USERS_MS_URL: string = BACKEND_API_URL + "/users";
 export const BACKEND_API_USER_URL: string = BACKEND_API_USERS_MS_URL + '/users';
+export const BACKEND_API_USER_EVENTS: string = BACKEND_API_USERS_MS_URL + '/events';
 export const BACKEND_API_USER_ACCOUNT_REQUEST_URL: string = BACKEND_API_USERS_MS_URL + '/accountrequest';
 export const BACKEND_API_USER_CONFIRM_ACCOUNT_REQUEST_URL: string = '/confirmaccountrequest';
 export const BACKEND_API_USER_DENY_ACCOUNT_REQUEST_URL: string = '/denyaccountrequest';

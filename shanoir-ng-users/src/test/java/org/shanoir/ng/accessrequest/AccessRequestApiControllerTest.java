@@ -29,6 +29,7 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.user.model.User;
+import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.user.service.UserService;
 import org.shanoir.ng.user.service.VIPUserService;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -58,6 +59,9 @@ public class AccessRequestApiControllerTest {
 
 	@MockBean
 	private ShanoirEventService eventService;
+
+	@MockBean
+	private UserRepository userRepository;
 
 	@MockBean
 	private AccessRequestService accessRequestService;
@@ -356,7 +360,7 @@ public class AccessRequestApiControllerTest {
 		Mockito.when(this.userService.findByEmail("mail@mail")).thenReturn(Optional.empty());
 		//Mockito.when(this.userService.findByUsername("mail")).thenReturn(Optional.empty());
 
-		
+
 		Map<String, Object> theMap = new LinkedHashMap<>();
 		theMap.put("studyId", 1l);
 		theMap.put("studyName", "name");

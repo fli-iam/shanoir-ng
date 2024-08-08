@@ -67,7 +67,7 @@ public class EegImporterService {
     public void createEegDataset(final EegImportJob importJob) throws IOException {
 
         Long userId = KeycloakUtil.getTokenUserId();
-        ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), userId, "Starting import...", ShanoirEvent.IN_PROGRESS, 0f);
+        ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), userId, "Starting import...", ShanoirEvent.IN_PROGRESS, 0f, importJob.getStudyId());
         eventService.publishEvent(event);
 
         if (importJob == null || importJob.getDatasets() == null || importJob.getDatasets().isEmpty()) {

@@ -11,9 +11,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import {Component, ElementRef, EventEmitter, Output, ViewChild} from '@angular/core';
 import { AbstractControl, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
@@ -47,8 +47,15 @@ import { DatasetService } from "../../datasets/shared/dataset.service";
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { DatasetExpressionFormat } from "../../enum/dataset-expression-format.enum";
 import { KeyValue } from "@angular/common";
-import { TaskState } from 'src/app/async-tasks/task.model';
-import {ShanoirError} from "../../shared/models/error.model";
+import { TaskState} from 'src/app/async-tasks/task.model';
+import { Page, Pageable } from "../../shared/components/table/pageable.model";
+import { ColumnDefinition } from "../../shared/components/table/column.definition.type";
+import { BrowserPaging } from "../../shared/components/table/browser-paging.model";
+import { ShanoirEvent } from "../../users/shanoir-event/shanoir-event.model";
+import { ShanoirEventService } from "../../users/shanoir-event/shanoir-event.service";
+import { ServiceLocator } from "../../utils/locator.service";
+import {StudyHistoryComponent} from "../study-history/study-history.component";
+import {SuperPromise} from "../../utils/super-promise";
 
 @Component({
     selector: 'study-detail',
@@ -62,7 +69,6 @@ export class StudyComponent extends EntityComponent<Study> {
     @ViewChild('memberTable', { static: false }) table: TableComponent;
     @ViewChild('input', { static: false }) private fileInput: ElementRef;
     @ViewChild('duaInput', { static: false }) private duaFileInput: ElementRef;
-
     protected pdfDownloadState: TaskState = new TaskState();
     protected duaDownloadState: TaskState = new TaskState();
     protected studyDownloadState: TaskState = new TaskState();
@@ -72,10 +78,9 @@ export class StudyComponent extends EntityComponent<Study> {
     users: User[] = [];
     studyNode: Study | StudyNode;
     uploading: boolean = false;
-
     protected protocolFiles: File[];
     protected dataUserAgreement: File;
-
+    openHistory: SuperPromise<void> = new SuperPromise<void>();
     public selectedDatasetIds: number[];
     protected hasDownloadRight: boolean;
     accessRequests: AccessRequest[];
@@ -94,6 +99,8 @@ export class StudyComponent extends EntityComponent<Study> {
         return b.value - a.value;
     };
 
+    public keycloakService: KeycloakService;
+
     constructor(
             private route: ActivatedRoute,
             private centerService: CenterService,
@@ -105,10 +112,22 @@ export class StudyComponent extends EntityComponent<Study> {
             private studyCardService: StudyCardService,
             private accessRequestService: AccessRequestService,
             private processingService: ExecutionDataService,
-            private downloadService: MassDownloadService) {
+            private downloadService: MassDownloadService
+            ) {
 
         super(route, 'study');
         this.activeTab = 'general';
+    }
+
+    public set activeTab(param : string) {
+        super.activeTab = param;
+        if(this.activeTab == "history") {
+            this.openHistory.resolve();
+        }
+    }
+
+    public get activeTab():string {
+        return super.activeTab;
     }
 
     public get study(): Study { return this.entity; }
@@ -120,6 +139,10 @@ export class StudyComponent extends EntityComponent<Study> {
 
     getService(): EntityService<Study> {
         return this.studyService;
+    }
+
+    loadHistory() {
+        this.openHistory.resolve();
     }
 
     initView(): Promise<void> {
@@ -163,6 +186,7 @@ export class StudyComponent extends EntityComponent<Study> {
         } else {
             return studyPromise.then();
         }
+
     }
 
     initEdit(): Promise<void> {
@@ -260,7 +284,6 @@ export class StudyComponent extends EntityComponent<Study> {
         }));
         return formGroup;
     }
-
     private setLabeledSizes(study: Study): Promise<void> {
         let waitUploads: Promise<void> = this.studyService.fileUploads.has(study.id)
             ? this.studyService.fileUploads.get(study.id)

@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.quality.SubjectStudyQualityTagDTO;
@@ -49,7 +50,7 @@ public class RabbitMQStudiesService {
 
 	@Autowired
 	private StudyService studyService;
-	
+
 	@Autowired
 	private SubjectStudyRepository subjectStudyRepository;
 	
@@ -59,6 +60,8 @@ public class RabbitMQStudiesService {
 	@Autowired
 	private ObjectMapper objectMapper;
 
+	@Autowired
+	ShanoirEventService eventService;
 	/**
 	 * Receives a shanoirEvent as a json object, concerning an examination creation
 	 * @param commandArrStr the task as a json string.
@@ -177,6 +180,7 @@ public class RabbitMQStudiesService {
 			subscription.setReceiveStudyUserReport(false);
 			subscription.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD));
 			subscription.setUserName(event.getMessage());
+
 			if (studyToUpdate.getDataUserAgreementPaths() != null && !studyToUpdate.getDataUserAgreementPaths().isEmpty()) {
 				subscription.setConfirmed(false);
 				dataUserAgreementService.createDataUserAgreementForUserInStudy(studyToUpdate, subscription.getUserId());
@@ -184,6 +188,7 @@ public class RabbitMQStudiesService {
 				subscription.setConfirmed(true);
 			}
 			studyService.addStudyUserToStudy(subscription, studyToUpdate);
+			eventService.publishEvent(event);
 			return true;
 		} catch (Exception e) {
 			LOG.error("Could not directly subscribe a user to the study: ", e);

@@ -268,6 +268,8 @@ import { DownloadSetupAltComponent } from './shared/mass-download/download-setup
 import { TestQualityCardOptionsComponent } from './study-cards/test-quality-card-options/test-quality-card-options.component';
 import { SessionService } from './shared/services/session.service';
 import { PipelineService } from "./vip/pipelines/pipeline/pipeline.service";
+import {ShanoirEventService} from "./users/shanoir-event/shanoir-event.service";
+import {StudyHistoryComponent} from "./studies/study-history/study-history.component";
 
 @NgModule({
     imports: [
@@ -295,6 +297,7 @@ import { PipelineService } from "./vip/pipelines/pipeline/pipeline.service";
         CenterListComponent,
         ConfirmDialogComponent,
         DatasetCopyDialogComponent,
+        StudyHistoryComponent,
         DropdownMenuComponent,
         UserComponent,
         ExaminationListComponent,
@@ -503,7 +506,7 @@ import { PipelineService } from "./vip/pipelines/pipeline/pipeline.service";
         AnestheticService,
         ImportBrukerService,
         EnumUtils,
-        { provide: HTTP_INTERCEPTORS, useClass: KeycloakHttpInterceptor, multi: true },
+        {provide: HTTP_INTERCEPTORS, useClass: KeycloakHttpInterceptor, multi: true},
         BreadcrumbsService,
         GlobalService,
         ImportDataService,
@@ -541,7 +544,8 @@ import { PipelineService } from "./vip/pipelines/pipeline/pipeline.service";
         QualityCardDTOService,
         MassDownloadService,
         SessionService,
-        { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
+        ShanoirEventService,
+        {provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true}
     ],
     bootstrap: [AppComponent]
 })
