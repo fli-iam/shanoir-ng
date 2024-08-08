@@ -2,7 +2,8 @@ package org.shanoir.uploader.test.datasets.studycard;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.jupiter.api.Test;
 import org.shanoir.uploader.model.dto.StudyCardOnStudyResultDTO;
 import org.shanoir.uploader.test.AbstractTest;
@@ -10,7 +11,7 @@ import org.shanoir.uploader.test.datasets.dicom.web.StowDicomSRTest;
 
 public class StudyCardTest extends AbstractTest {
 
-	private static Logger logger = Logger.getLogger(StudyCardTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(StudyCardTest.class);
 	
 	@Test
 	public void applyStudyCardOnStudy() throws Exception {

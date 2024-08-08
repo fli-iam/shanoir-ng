@@ -196,9 +196,10 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 
 	@Override
 	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsOrCreateOneByEquipmentDicom(
+		@Parameter(description = "id of the center", required = true) @PathVariable("centerId") Long centerId,
 			@Parameter(description = "equipment dicom to find or create an equipment", required = true) @RequestBody final EquipmentDicom equipmentDicom,
 			final BindingResult result) {
-		List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAcquisitionEquipmentsOrCreateOneByEquipmentDicom(equipmentDicom);
+		List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAcquisitionEquipmentsOrCreateOneByEquipmentDicom(centerId, equipmentDicom);
 		// Remove "unknown" equipment
 		equipments = equipments.stream().filter(equipment -> equipment.getId() != 0).collect(Collectors.toList());
 		if (equipments.isEmpty()) {

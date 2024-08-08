@@ -7,9 +7,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
 import org.jboss.seam.util.Hex;
 import org.shanoir.uploader.cryptography.BlowfishAlgorithm;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is used to crypt/uncrypt the user and proxy passwords
@@ -19,7 +20,7 @@ import org.shanoir.uploader.cryptography.BlowfishAlgorithm;
  */
 public class Encryption {
 
-	private Logger logger = Logger.getLogger(Encryption.class);
+	private static final Logger logger = LoggerFactory.getLogger(Encryption.class);
 	
 	private BlowfishAlgorithm blow;
 	
