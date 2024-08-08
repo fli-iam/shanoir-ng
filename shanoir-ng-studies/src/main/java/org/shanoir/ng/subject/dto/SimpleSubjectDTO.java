@@ -17,6 +17,8 @@
  */
 package org.shanoir.ng.subject.dto;
 
+import org.shanoir.ng.subject.model.HemisphericDominance;
+import org.shanoir.ng.subject.model.ImagedObjectCategory;
 import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 
 /**
@@ -32,6 +34,12 @@ public class SimpleSubjectDTO {
     private String name;
     
     private String identifier;
+
+	private HemisphericDominance languageHemisphericDominance;
+
+	private HemisphericDominance manualHemisphericDominance;
+
+	private ImagedObjectCategory imagedObjectCategory;
     
     private SubjectStudyDTO subjectStudy;
 
@@ -65,6 +73,30 @@ public class SimpleSubjectDTO {
 
 	public void setSubjectStudy(SubjectStudyDTO subjectStudy) {
 		this.subjectStudy = subjectStudy;
+	}
+
+	public HemisphericDominance getLanguageHemisphericDominance() {
+		return languageHemisphericDominance;
+	}
+
+	public void setLanguageHemisphericDominance(HemisphericDominance languageHemisphericDominance) {
+		this.languageHemisphericDominance = languageHemisphericDominance;
+	}
+
+	public HemisphericDominance getManualHemisphericDominance() {
+		return manualHemisphericDominance;
+	}
+
+	public void setManualHemisphericDominance(HemisphericDominance manualHemisphericDominance) {
+		this.manualHemisphericDominance = manualHemisphericDominance;
+	}
+
+	public ImagedObjectCategory getImagedObjectCategory() {
+		return imagedObjectCategory;
+	}
+
+	public void setImagedObjectCategory(ImagedObjectCategory imagedObjectCategory) {
+		this.imagedObjectCategory = imagedObjectCategory;
 	}
 
 }

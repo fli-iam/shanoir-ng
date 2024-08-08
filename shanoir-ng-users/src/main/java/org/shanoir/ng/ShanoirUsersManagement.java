@@ -14,14 +14,16 @@
 
 package org.shanoir.ng;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RoleResource;
 import org.keycloak.admin.client.resource.UserResource;
-import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.shanoir.ng.email.EmailService;
@@ -264,5 +266,4 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 		}
 		return commService.hasRightOnStudy(studyId, rightStr);
 	}
-
 }
