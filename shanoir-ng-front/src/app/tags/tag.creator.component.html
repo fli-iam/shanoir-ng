@@ -19,7 +19,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </span>
         {{dtag.tag.name}}
     </span>
-    <span *ngIf="!addTagVisible && mode != 'view'" (click)="addTagVisible = true" class="clickable new">
+    <span *ngIf="!addTagVisible && mode != 'view'" (click)="addTagVisible = true; focus();" class="clickable new">
         <i class="fas fa-plus"></i>
     </span>
     <span *ngIf="addTagVisible" class="tag edit-new" [style.background-color]="selectedColor" [class.dark]="newTagDarkFont">
@@ -30,7 +30,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <i class="fa-solid fa-palette"></i>
             <input type="color" [(ngModel)]="selectedColor" (ngModelChange)="onColorChange()"/>
         </span>
-        <input type="text" [(ngModel)]="text" placeholder="enter tag label..."/>
+        <input #input type="text" [(ngModel)]="text" (keyup.enter)="addTag()" placeholder="enter tag label..."/>
         <span (click)="addTag()" class="save" [class.disabled]="text == null || selectedColor == null">
             <i class="fas fa-save"></i>
         </span>
