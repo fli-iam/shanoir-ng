@@ -9,7 +9,7 @@ CREATE TABLE `study_user` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `study_user_idx` (`study_id`,`user_id`),
   CONSTRAINT `FKc4ftmuoc0u0ghw43dxth2m8we` FOREIGN KEY (`study_id`) REFERENCES `study` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=latin1
+);
 
 
 CREATE TABLE `study_user_center` (
@@ -17,7 +17,7 @@ CREATE TABLE `study_user_center` (
   `study_user_id` bigint(20) NOT NULL,
   KEY `FK8jvoy3dqkninlrimnrb8endp3` (`study_user_id`),
   CONSTRAINT `FK8jvoy3dqkninlrimnrb8endp3` FOREIGN KEY (`study_user_id`) REFERENCES `study_user` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1
+);
 
 
 CREATE TABLE `study_user_study_user_rights` (
@@ -25,4 +25,4 @@ CREATE TABLE `study_user_study_user_rights` (
   `study_user_id` bigint(20) NOT NULL,
   KEY `FK6ipbom6lji60h38bd3ok2r098` (`study_user_id`),
   CONSTRAINT `FK6ipbom6lji60h38bd3ok2r098` FOREIGN KEY (`study_user_id`) REFERENCES `study_user` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1
+);
