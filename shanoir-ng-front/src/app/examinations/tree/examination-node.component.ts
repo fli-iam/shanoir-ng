@@ -82,7 +82,7 @@ export class ExaminationNodeComponent implements OnChanges {
                 || (this.node.extraDataFilePathList && this.node.extraDataFilePathList.length > 0);
     }
     viewExaminationDicoms() {
-        window.open(environment.viewerUrl + '/viewer/1.4.9.12.34.1.8527.' + this.node.id, '_blank');
+        window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.node.id, '_blank');
     }
 
     downloadFile(file) {
