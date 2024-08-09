@@ -35,6 +35,7 @@ import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.IdList;
 import org.shanoir.uploader.model.rest.IdName;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
+import org.shanoir.uploader.model.rest.ManufacturerModel;
 import org.shanoir.uploader.model.rest.Sex;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
@@ -505,8 +506,8 @@ public class ImportUtils {
 		return studyCards;
 	}
 
-	public static boolean flagStudyCardCompatible(StudyCard studyCard, String deviceSerialNumberDicom) {
-		boolean isCompatible = checkAcquisitionEquipmentForSerialNumber(studyCard.getAcquisitionEquipment(), deviceSerialNumberDicom);
+	public static boolean flagStudyCardCompatible(StudyCard studyCard, String manufacturerModelName, String deviceSerialNumber) {
+		boolean isCompatible = checkEquipment(studyCard.getAcquisitionEquipment(),manufacturerModelName, deviceSerialNumber);
 		studyCard.setCompatible(isCompatible);
 		if (isCompatible) {
 			return true; // correct equipment found, break for-loop acqEquip
@@ -514,65 +515,67 @@ public class ImportUtils {
 		return false;
 	}
 
-	private static boolean checkAcquisitionEquipmentForSerialNumber(AcquisitionEquipment acquisitionEquipment, String deviceSerialNumberDicom) {
-		String deviceSerialNumberEquipment = acquisitionEquipment.getSerialNumber();
-		// check if values from server are complete, no sense for comparison if no serial number on server
-		if (acquisitionEquipment != null
-			&& acquisitionEquipment.getManufacturerModel() != null
-			&& acquisitionEquipment.getManufacturerModel().getManufacturer() != null
-			&& deviceSerialNumberEquipment != null) {
-			// check if values are present in DICOM and compare with server values
-			if (deviceSerialNumberDicom != null && !"".equals(deviceSerialNumberDicom)) {
-				if (deviceSerialNumberEquipment.compareToIgnoreCase(deviceSerialNumberDicom) == 0
-					|| deviceSerialNumberDicom.contains(deviceSerialNumberEquipment)) {
-					return true;
-				}
+	private static boolean checkEquipment(AcquisitionEquipment acquisitionEquipment, String manufacturerModelName, String deviceSerialNumber) {
+		if (acquisitionEquipment == null
+			|| acquisitionEquipment.getManufacturerModel() == null
+			|| acquisitionEquipment.getManufacturerModel().getName().isBlank()
+			|| acquisitionEquipment.getSerialNumber() == null
+			|| acquisitionEquipment.getSerialNumber().isBlank()) {
+			return false;
+		}
+		if (acquisitionEquipment.getManufacturerModel().getName().equalsIgnoreCase(manufacturerModelName)) {
+			if (acquisitionEquipment.getSerialNumber().equalsIgnoreCase(deviceSerialNumber)
+				|| deviceSerialNumber.contains(acquisitionEquipment.getSerialNumber())) {
+				return true;
 			}
 		}
 		return false;		
 	}
 
-	public static StudyCard createNewStudyCard(Study studyREST, List<AcquisitionEquipment> acquisitionEquipments, UploadJob uploadJob, ImportJob importJob) {
+	public static StudyCard createStudyCard(Study studyREST, AcquisitionEquipment equipment, ImportJob importJob) {
 		StudyCard studyCard = new StudyCard();
 		studyCard.setStudyId(studyREST.getId());
-		IdName centerIdName = null;
-		// try to find equipment via device serial number, equipment points to center for study card
-		String deviceSerialNumberDicom = uploadJob.getMriInformation().getDeviceSerialNumber();
-		boolean compatibleEquipmentFound = false;
-		for (AcquisitionEquipment acquisitionEquipment : acquisitionEquipments) {
-			compatibleEquipmentFound = checkAcquisitionEquipmentForSerialNumber(acquisitionEquipment, deviceSerialNumberDicom);
-			if (compatibleEquipmentFound) {
-				studyCard.setAcquisitionEquipmentId(acquisitionEquipment.getId());
-				studyCard.setAcquisitionEquipment(acquisitionEquipment);
-				centerIdName = acquisitionEquipment.getCenter();
-				studyCard.setCenterId(centerIdName.getId());
-				break;
-			}
-		}
-		// if no equipment found, try to find center of study with DICOM institution name
-		if (centerIdName == null) {
-			Center center = findCenterOfStudy(studyREST, uploadJob);
-			if (center == null) {
-				return null;
-			}
-			studyCard.setCenterId(center.getId());
-			centerIdName = new IdName(center.getId(), center.getName());		
-		}
-		// if center found, but no equipment: create equipment
-		if (!compatibleEquipmentFound) {
-			AcquisitionEquipment equipment = new AcquisitionEquipment();
-			equipment.setSerialNumber(deviceSerialNumberDicom);
-			equipment.setCenter(centerIdName); // which center to use?
-			equipment.setManufacturerModel(acquisitionEquipments.get(0).getManufacturerModel()); // which model to create/use?
-			equipment = ShUpOnloadConfig.getShanoirUploaderServiceClient().createEquipment(equipment);
-			studyCard.setAcquisitionEquipment(equipment);
-		}
-		String studyCardName = studyREST.getName() + " - " + centerIdName.getName() + " - " + deviceSerialNumberDicom;
+		String studyCardName = studyREST.getName() + " - " + equipment.getCenter().getName() + " - " + equipment.getSerialNumber();
 		studyCard.setName(studyCardName);
 		studyCard = ShUpOnloadConfig.getShanoirUploaderServiceClient().createStudyCard(studyCard);
 		importJob.setStudyCardId(studyCard.getId());
 		importJob.setStudyCardName(studyCard.getName());
 		return studyCard;
+	}
+
+	public static AcquisitionEquipment createEquipment(Center center, ManufacturerModel manufacturerModel, String deviceSerialNumber) {
+		AcquisitionEquipment equipment = new AcquisitionEquipment();
+		IdName centerIdName = new IdName();
+		centerIdName.setId(center.getId());
+		centerIdName.setName(center.getName());
+		equipment.setCenter(centerIdName);
+		equipment.setSerialNumber(deviceSerialNumber);
+		equipment.setManufacturerModel(manufacturerModel); // which model to create/use?
+		equipment = ShUpOnloadConfig.getShanoirUploaderServiceClient().createEquipment(equipment);
+		return equipment;
+	}
+
+	/**
+	 * Find matching equipment via manufacturer model name + device serial number
+	 * from entire database, no study restriction, equipment points to center for
+	 * study card.
+	 * 
+	 * @param acquisitionEquipments
+	 * @param manufacturerModelName
+	 * @param deviceSerialNumber
+	 * @return
+	 */
+	public static AcquisitionEquipment findEquipmentAndManufacturerModelInAllEquipments(List<AcquisitionEquipment> acquisitionEquipments, String manufacturer, String manufacturerModelName, String deviceSerialNumber, ManufacturerModel manufacturerModel) {
+		for (AcquisitionEquipment acquisitionEquipment : acquisitionEquipments) {
+			if(checkEquipment(acquisitionEquipment, manufacturerModelName, deviceSerialNumber)) {
+				return acquisitionEquipment;
+			}
+			if (acquisitionEquipment.getManufacturerModel().getManufacturer().getName().equalsIgnoreCase(manufacturer)
+				&& acquisitionEquipment.getManufacturerModel().getName().equalsIgnoreCase(manufacturerModelName)) {
+				manufacturerModel = acquisitionEquipment.getManufacturerModel();
+			}
+		}
+		return null;
 	}
 
 	private static Center findCenterOfStudy(Study studyREST, UploadJob uploadJob) {

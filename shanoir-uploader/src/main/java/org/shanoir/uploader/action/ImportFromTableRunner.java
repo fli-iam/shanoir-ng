@@ -38,6 +38,7 @@ import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Center;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
+import org.shanoir.uploader.model.rest.ManufacturerModel;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
@@ -250,41 +251,78 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		UploadJobManager uploadJobManager = new UploadJobManager(uploadJobFile);
 		UploadJob uploadJob = uploadJobManager.readUploadJob();
 
-		logger.info("4. Find matching study card or create a new study card");
+		logger.info("4. Find matching study card in selected study or create a new study card");
 		StudyCard studyCard = null;
 		List<StudyCard> studyCards = studyREST.getStudyCards();
-		// 4.1 Study card configured in Excel: use it (user knows best)
-		if (studyCard == null) {
-			Optional<StudyCard> scOpt = studyCards.stream().filter(element -> element.getName().equals(importJob.getStudyCardName())).findFirst();
-			if (scOpt.isPresent()) {
-				studyCard = scOpt.get();
-				logger.info("Matching study card found by name from table: " + studyCard.getName());
-			}
-		}
-		// 4.2 Find matching study card on study using device serial number from DICOM
-		String deviceSerialNumberDicom = uploadJob.getMriInformation().getDeviceSerialNumber();
-		logger.info("Device serial number used: " + deviceSerialNumberDicom);
-		try {
-			for (StudyCard studyCardIt : studyCards) {
-				if (ImportUtils.flagStudyCardCompatible(studyCardIt, deviceSerialNumberDicom)) {
-					studyCard = studyCardIt;
-					logger.info("Matching study card found via device serial number: " + studyCard.getName());
-					break;
+		if (studyCards != null) {
+			// 4.1 Check if study card configured in Excel: use it (user knows best), no DICOM info necessary
+			if (importJob.getStudyCardName() != null && !importJob.getStudyCardName().isEmpty()) {
+				Optional<StudyCard> scOpt = studyCards.stream().filter(
+					element -> element.getName().equals(importJob.getStudyCardName())).findFirst();
+				if (scOpt.isPresent()) {
+					studyCard = scOpt.get();
+					logger.info("Matching study card found in study by name from table: " + studyCard.getName());
+				} else {
+					uploadJob.setUploadState(UploadState.ERROR);
+					importJob.setErrorMessage("Error: study card configured in table, but not found in study: " + importJob.getStudyCardName());
+					return false;
 				}
 			}
-		} catch (Exception e) {
-			this.importFromTableWindow.error.setText(resourceBundle.getString("shanoir.uploader.import.table.error.studycard"));
+		}
+		// 4.2 Find matching study card on study using info from DICOM
+		String manufacturer = uploadJob.getMriInformation().getManufacturer();
+		String manufacturerModelName = uploadJob.getMriInformation().getManufacturersModelName();
+		String deviceSerialNumber = uploadJob.getMriInformation().getDeviceSerialNumber();
+		if (manufacturer == null || manufacturer.isBlank()
+			|| manufacturerModelName == null || manufacturerModelName.isBlank()
+			|| deviceSerialNumber == null || deviceSerialNumber.isBlank()) {
+			uploadJob.setUploadState(UploadState.ERROR);
+			importJob.setErrorMessage("Error: no manufacturer or model name or device serial number in DICOM.");
 			return false;
+		}
+		logger.info("Manufacturer used from DICOM: " + manufacturer);
+		logger.info("Manufacturer model name used from DICOM: " + manufacturerModelName);
+		logger.info("Device serial number used from DICOM: " + deviceSerialNumber);
+		if (studyCards != null) {
+			try {
+				for (StudyCard studyCardIt : studyCards) {
+					if (ImportUtils.flagStudyCardCompatible(studyCardIt, manufacturerModelName, deviceSerialNumber)) {
+						studyCard = studyCardIt;
+						logger.info("Matching study card found in study: " + studyCard.getName()
+							+ " via manufacturer model name: " + manufacturerModelName
+							+ " and device serial number: " + deviceSerialNumber);
+						break;
+					}
+				}
+			} catch (Exception e) {
+				this.importFromTableWindow.error.setText(resourceBundle.getString("shanoir.uploader.import.table.error.studycard"));
+				return false;
+			}
 		}
 		// 4.3 No study card found: create one
 		if (studyCard == null) {
-			// 4.3.1 find center or create one
-			InstitutionDicom institutionDicom = new InstitutionDicom();
-			institutionDicom.setInstitutionName(uploadJob.getMriInformation().getInstitutionName());
-			institutionDicom.setInstitutionAddress(uploadJob.getMriInformation().getInstitutionAddress());
-			Center center = shanoirUploaderServiceClientNG.findCenterOrCreateByInstitutionDicom(institutionDicom, studyREST.getId());
-			// 4.3.2 find equipment or create one
-			studyCard = ImportUtils.createNewStudyCard(studyREST, acquisitionEquipments, uploadJob, importJob);
+			// 4.3.1 try to find equipment and use it for study card creation
+			// Use center behind equipment already
+			ManufacturerModel manufacturerModel = null;
+			AcquisitionEquipment equipment = ImportUtils.findEquipmentAndManufacturerModelInAllEquipments(acquisitionEquipments, manufacturer, manufacturerModelName, deviceSerialNumber, manufacturerModel);
+			if (equipment != null) {
+				studyCard = ImportUtils.createStudyCard(studyREST, equipment, importJob);
+			// No equipment found: create one
+			} else {
+				String institutionNameDicom = uploadJob.getMriInformation().getInstitutionName();
+				if (institutionNameDicom == null || institutionNameDicom.isBlank()) {
+					uploadJob.setUploadState(UploadState.ERROR);
+					importJob.setErrorMessage("Error: no institution name in DICOM.");
+					return false;
+				}
+				// 4.3.2 find center or create one, and add it into study for import (study-center)
+				InstitutionDicom institutionDicom = new InstitutionDicom();
+				institutionDicom.setInstitutionName(institutionNameDicom);
+				institutionDicom.setInstitutionAddress(uploadJob.getMriInformation().getInstitutionAddress());
+				Center center = shanoirUploaderServiceClientNG.findCenterOrCreateByInstitutionDicom(institutionDicom, studyREST.getId());	
+				equipment = ImportUtils.createEquipment(center, manufacturerModel, deviceSerialNumber);
+				studyCard = ImportUtils.createStudyCard(studyREST, equipment, importJob);
+			}
 		}
 
 		if (studyCard == null) {
@@ -340,7 +378,9 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		Runnable importRunnable = new ImportFinishRunnable(uploadJob, uploadJobFile.getParentFile(), importJob, subjectREST.getName());
 		Thread importThread = new Thread(importRunnable);
 		importThread.start();
-
+		while (importThread.isAlive()) {
+			// wait for import thread to finish 
+		}
 		return true;
 	}
 
