@@ -507,7 +507,7 @@ public class ImportUtils {
 	}
 
 	public static boolean flagStudyCardCompatible(StudyCard studyCard, String manufacturerModelName, String deviceSerialNumber) {
-		boolean isCompatible = checkEquipment(studyCard.getAcquisitionEquipment(),manufacturerModelName, deviceSerialNumber);
+		boolean isCompatible = checkEquipment(studyCard.getAcquisitionEquipment(), manufacturerModelName, deviceSerialNumber);
 		studyCard.setCompatible(isCompatible);
 		if (isCompatible) {
 			return true; // correct equipment found, break for-loop acqEquip
@@ -537,10 +537,10 @@ public class ImportUtils {
 		studyCard.setStudyId(studyREST.getId());
 		String studyCardName = studyREST.getName() + " - " + equipment.getCenter().getName() + " - " + equipment.getSerialNumber();
 		studyCard.setName(studyCardName);
-		studyCard = ShUpOnloadConfig.getShanoirUploaderServiceClient().createStudyCard(studyCard);
-		importJob.setStudyCardId(studyCard.getId());
-		importJob.setStudyCardName(studyCard.getName());
-		return studyCard;
+		studyCard.setAcquisitionEquipmentId(equipment.getId());
+		studyCard.setAcquisitionEquipment(equipment);
+		studyCard.setCenterId(equipment.getCenter().getId());
+		return ShUpOnloadConfig.getShanoirUploaderServiceClient().createStudyCard(studyCard);
 	}
 
 	public static AcquisitionEquipment createEquipment(Center center, ManufacturerModel manufacturerModel, String deviceSerialNumber) {
@@ -550,9 +550,8 @@ public class ImportUtils {
 		centerIdName.setName(center.getName());
 		equipment.setCenter(centerIdName);
 		equipment.setSerialNumber(deviceSerialNumber);
-		equipment.setManufacturerModel(manufacturerModel); // which model to create/use?
-		equipment = ShUpOnloadConfig.getShanoirUploaderServiceClient().createEquipment(equipment);
-		return equipment;
+		equipment.setManufacturerModel(manufacturerModel);
+		return ShUpOnloadConfig.getShanoirUploaderServiceClient().createEquipment(equipment);
 	}
 
 	/**
@@ -565,14 +564,20 @@ public class ImportUtils {
 	 * @param deviceSerialNumber
 	 * @return
 	 */
-	public static AcquisitionEquipment findEquipmentAndManufacturerModelInAllEquipments(List<AcquisitionEquipment> acquisitionEquipments, String manufacturer, String manufacturerModelName, String deviceSerialNumber, ManufacturerModel manufacturerModel) {
+	public static AcquisitionEquipment findEquipmentInAllEquipments(List<AcquisitionEquipment> acquisitionEquipments, String manufacturerModelName, String deviceSerialNumber) {
 		for (AcquisitionEquipment acquisitionEquipment : acquisitionEquipments) {
 			if(checkEquipment(acquisitionEquipment, manufacturerModelName, deviceSerialNumber)) {
 				return acquisitionEquipment;
 			}
+		}
+		return null;
+	}
+
+	public static ManufacturerModel findManufacturerModelInAllEquipments(List<AcquisitionEquipment> acquisitionEquipments, String manufacturer, String manufacturerModelName) {
+		for (AcquisitionEquipment acquisitionEquipment : acquisitionEquipments) {
 			if (acquisitionEquipment.getManufacturerModel().getManufacturer().getName().equalsIgnoreCase(manufacturer)
 				&& acquisitionEquipment.getManufacturerModel().getName().equalsIgnoreCase(manufacturerModelName)) {
-				manufacturerModel = acquisitionEquipment.getManufacturerModel();
+				return acquisitionEquipment.getManufacturerModel();
 			}
 		}
 		return null;
