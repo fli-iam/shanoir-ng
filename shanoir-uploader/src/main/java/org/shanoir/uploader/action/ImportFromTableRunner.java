@@ -31,6 +31,7 @@ import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
+import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.gui.ImportFromTableWindow;
@@ -356,15 +357,26 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		logger.info("5. Create subject or use existing one (add subject-study, if necessary)");
 		org.shanoir.uploader.model.rest.Subject subjectREST = null;
 		String subjectStudyIdentifier = null;
-		try {
-			subjectREST = shanoirUploaderServiceClientNG.findSubjectBySubjectIdentifier(subject.getIdentifier());
-			// If the name does not match, change the subjectStudyIdentifier for this study
-			if (subjectREST != null && !subjectREST.getName().equals(importJob.getSubjectName())) {
-				subjectStudyIdentifier = importJob.getSubjectName();
+		// Profile Neurinfo
+		if (ShUpConfig.isModeSubjectCommonNameManual()) {
+			if (importJob.getSubjectName() == null || importJob.getSubjectName().isBlank()) {
+				uploadJob.setUploadState(UploadState.ERROR);
+				importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.subject"));
+				logger.error(importJob.getErrorMessage());
+				return false;
 			}
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return false;
+		// Profile OFSEP
+		} else {
+			try {
+				subjectREST = shanoirUploaderServiceClientNG.findSubjectBySubjectIdentifier(subject.getIdentifier());
+				// If the name does not match, change the subjectStudyIdentifier for this study
+				if (subjectREST != null && !subjectREST.getName().equals(importJob.getSubjectName())) {
+					subjectStudyIdentifier = importJob.getSubjectName();
+				}
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+				return false;
+			}	
 		}
 
 		subjectREST = ImportUtils.manageSubject(subjectREST,
