@@ -14,18 +14,29 @@
 
 package org.shanoir.ng.study.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.Tuple;
-import jakarta.transaction.Transactional;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
-import org.shanoir.ng.shared.exception.*;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyStatisticsDTO;
@@ -40,7 +51,9 @@ import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.study.rights.command.CommandType;
 import org.shanoir.ng.study.rights.command.StudyUserCommand;
 import org.shanoir.ng.studycenter.StudyCenter;
+import org.shanoir.ng.studycenter.StudyCenterRepository;
 import org.shanoir.ng.studyexamination.StudyExamination;
+import org.shanoir.ng.studyexamination.StudyExaminationRepository;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subject.service.SubjectService;
@@ -58,16 +71,14 @@ import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.util.Pair;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.transaction.Transactional;
 
 /**
  * Implementation of study service.
@@ -116,6 +127,12 @@ public class StudyServiceImpl implements StudyService {
 
 	@Autowired
 	private SubjectStudyRepository subjectStudyRepository;
+	
+	@Autowired
+	private StudyExaminationRepository studyExaminationRepository;
+	
+	@Autowired
+	private StudyCenterRepository studyCenterRepository;
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
@@ -193,7 +210,7 @@ public class StudyServiceImpl implements StudyService {
 		study.setSubjectStudyList(null);
 		Study studyDb = studyRepository.save(study);
 
-		if (subjectStudyListSave != null) {
+		if (subjectStudyListSave != null && !subjectStudyListSave.isEmpty()) {
 			updateTags(subjectStudyListSave, studyDb.getTags());
 			studyDb.setSubjectStudyList(new ArrayList<>());
 			for (SubjectStudy subjectStudy : subjectStudyListSave) {
@@ -217,7 +234,7 @@ public class StudyServiceImpl implements StudyService {
 			studyDb = studyRepository.save(studyDb);
 		}
 
-		this.updateStudyName(studyMapper.studyToStudyDTO(studyDb));
+		updateStudyName(studyMapper.studyToStudyDTODetailed(studyDb));
 
 		if (studyDb.getStudyUserList() != null) {
 			List<StudyUserCommand> commands = new ArrayList<>();
@@ -334,9 +351,11 @@ public class StudyServiceImpl implements StudyService {
 		studyDb = studyRepository.save(studyDb);
 
 		if (study.getSubjectStudyList() != null) {
-			updateTags(study.getSubjectStudyList(), studyDb.getTags());
-			ListDependencyUpdate.updateWith(studyDb.getSubjectStudyList(), study.getSubjectStudyList());
-			for (SubjectStudy dbSubjectStudy : studyDb.getSubjectStudyList()) {
+			List<SubjectStudy> subjectStudyListDb = studyDb.getSubjectStudyList();
+			List<SubjectStudy> subjectStudyListNew = study.getSubjectStudyList();
+			subjectStudyListDb.clear();
+			subjectStudyListDb.addAll(subjectStudyListNew);
+			for (SubjectStudy dbSubjectStudy : subjectStudyListDb) {
 				dbSubjectStudy.setStudy(studyDb);
 			}
 			studyDb = studyRepository.save(studyDb);
@@ -356,7 +375,7 @@ public class StudyServiceImpl implements StudyService {
 			studyDb = studyRepository.save(studyDb);
 		}
 
-		String error = this.updateStudyName(studyMapper.studyToStudyDTO(studyDb));
+		String error = this.updateStudyName(studyMapper.studyToStudyDTODetailed(studyDb));
 
 		if(error != null && !error.isEmpty()){
 			LOG.error("Study [" + studyDb.getId() + "] couldn't be sync with datasets microservice : {}", error);
@@ -445,14 +464,87 @@ public class StudyServiceImpl implements StudyService {
 
 	@Override
 	public List<Study> findAll() {
-		// Utils.copyList is used to prevent a bug with @PostFilter
+		List<Study> studies;
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			return Utils.copyList(studyRepository.findAll());
+			studies = studyRepository.findAll();
 		} else {
-			return Utils.copyList(studyRepository
-					.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(
-							KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId(), true));
+			studies = studyRepository
+				.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(
+					KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId(), true);
 		}
+		// the below is necessary for the StudySecurityService, it is not possible for the above methods (findAll+findByXXX)
+		// to have an EntityQuery with two bags contained, that is why I have to get back to the database separately:
+		studies.stream().forEach(s -> {
+			s.setStudyUserList(studyUserRepository.findByStudy_Id(s.getId()));
+			// same for the below: two bags issue: findByStudy_Id is already annotated with "studyUserRights",
+			// so I call a second repository method to load the ss.centers from the database, as required by JSON
+			s.getStudyUserList().stream().forEach(ss -> ss.setCenters(studyUserRepository.findDistinctCentersByStudyId(ss.getStudyId())));
+		});
+		setNumberOfSubjectsAndExaminations(studies);
+		setFilePaths(studies);
+		// Utils.copyList is used to prevent a bug with @PostFilter
+		return Utils.copyList(studies);
+	}
+	
+	@Override
+	public List<Study> findAllWithCenters() {
+		List<Study> studies;
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			studies = studyRepository.findAll();
+		} else {
+			studies = studyRepository
+				.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(
+					KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId(), true);
+		}
+		// the below is necessary for the StudySecurityService, it is not possible for the above method
+		// to have an EntityQuery with two bags contained, that is why I get back to the database:
+		studies.stream().forEach(s -> s.setStudyUserList(studyUserRepository.findByStudy_Id(s.getId())));
+		studies.stream().forEach(s -> s.setStudyCenterList(studyCenterRepository.findByStudy_Id(s.getId())));
+		// Utils.copyList is used to prevent a bug with @PostFilter
+		return Utils.copyList(studies);
+	}
+
+	/**
+	 * This method optimizes the queries to the database, only two selects to get all counts.
+	 * Instead of x00+ selects for all studies in Shanoir. Use HashMap to avoid N+N iteration.
+	 * @param studies
+	 */
+	private void setNumberOfSubjectsAndExaminations(List<Study> studies) {
+		List<Object[]> subjectsCount = subjectStudyRepository.countByStudyIdGroupBy();
+		HashMap<Long, Long> studyIdSubjectsCountMap = new HashMap<>();
+        for (Object[] row : subjectsCount) {
+            Long studyId = (Long) row[0];
+            Long count = (Long) row[1];
+            studyIdSubjectsCountMap.put(studyId, count);
+        }
+		List<Object[]> examinationsCount = studyExaminationRepository.countByStudyIdGroupBy();
+		HashMap<Long, Long> studyIdExaminationsCountMap = new HashMap<>();
+        for (Object[] row : examinationsCount) {
+            Long studyId = (Long) row[0];
+            Long count = (Long) row[1];
+            studyIdExaminationsCountMap.put(studyId, count);
+        }
+        studies.stream().forEach(s -> {
+        	Long nbSubjects = studyIdSubjectsCountMap.get(s.getId());
+        	if (nbSubjects != null) {
+        		s.setNbSubjects(nbSubjects.intValue());
+        	} else {
+        		s.setNbSubjects(0);
+        	}
+        	Long nbExaminations = studyIdExaminationsCountMap.get(s.getId());
+        	if (nbExaminations != null) {
+        		s.setNbExaminations(nbExaminations.intValue());
+        	} else {
+        		s.setNbExaminations(0);
+        	}
+		});
+	}
+
+	private void setFilePaths(List<Study> studies) {
+		studies.stream().forEach(s -> {
+			s.setProtocolFilePaths(studyRepository.findProtocolFilePathsByStudyId(s.getId()));
+			s.setDataUserAgreementPaths(studyRepository.findDataUserAgreementPathsByStudyId(s.getId()));
+		});
 	}
 
 	@Transactional
@@ -704,12 +796,13 @@ public class StudyServiceImpl implements StudyService {
 
 	@Override
 	public List<Study> findPublicStudies() {
-		return this.studyRepository.findByVisibleByDefaultTrue();
+		List<Study> studies = this.studyRepository.findByVisibleByDefaultTrue();
+		setNumberOfSubjectsAndExaminations(studies);
+		return studies;
 	}
 
 	@Override
 	public StudyStorageVolumeDTO getDetailedStorageVolume(Long studyId){
-
 		StudyStorageVolumeDTO dto;
 		try {
 			String dtoAsString = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_DATASETS_DETAILED_STORAGE_VOLUME, studyId);
@@ -722,14 +815,10 @@ public class StudyServiceImpl implements StudyService {
 			LOG.error("Error while fetching study [{}] datasets volume storage details.", studyId, e);
 			return null;
 		}
-
 		long filesSize = this.getStudyFilesSize(studyId);
-
 		dto.setExtraDataSize(filesSize + dto.getExtraDataSize());
 		dto.setTotal(filesSize + dto.getTotal());
-
 		return dto;
-
 	}
 
 	@Override

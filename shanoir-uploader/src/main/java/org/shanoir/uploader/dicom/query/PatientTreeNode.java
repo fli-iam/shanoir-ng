@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -41,7 +42,7 @@ public class PatientTreeNode implements DicomTreeNode {
 	 */
 	public PatientTreeNode(final Patient patient) {
 		this.patient = patient;
-		this.relatedStudies = new HashMap<String, DicomTreeNode>();
+		this.relatedStudies = new LinkedHashMap<String, DicomTreeNode>();
 	}
 	
 
@@ -76,9 +77,7 @@ public class PatientTreeNode implements DicomTreeNode {
 	 * @see org.richfaces.model.TreeNodeImpl#getChildren()
 	 */
 	public Iterator getChildren() {
-		List<Entry<String, DicomTreeNode>> child = new ArrayList<Entry<String, DicomTreeNode>>(relatedStudies.entrySet());
-		Collections.sort(child, new StudyComparator());
-		return child.iterator();
+		return relatedStudies.entrySet().iterator();
 	}
 
 	/*
@@ -96,11 +95,7 @@ public class PatientTreeNode implements DicomTreeNode {
 	 * @see org.shanoir.dicom.model.DicomTreeNode#getDisplayString()
 	 */
 	public String getDisplayString() {
-		final String name = this.patient.getPatientName();
-		if (name != null && !"".equals(name)) {
-			return name;
-		}
-		return this.patient.getPatientID();
+		return this.patient.toTreeString();
 	}
 
 	/**

@@ -2,6 +2,8 @@ package org.shanoir.uploader.action.init;
 
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * This concrete state class defines the state when the ShanoirUploader tests
@@ -18,13 +20,20 @@ import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
  * @author mkain
  * 
  */
+@Component
 public class AuthenticationConfigurationState implements State {
 
+	@Autowired
+	private ShanoirUploaderServiceClient shanoirUploaderServiceClient;
+
+	@Autowired
+	private AuthenticationManualConfigurationState authenticationManualConfigurationState;
+
 	public void load(StartupStateContext context) {
-		ShanoirUploaderServiceClient shanoirUploaderServiceClient = new ShanoirUploaderServiceClient();
+		shanoirUploaderServiceClient.configure();
 		ShUpOnloadConfig.setShanoirUploaderServiceClient(shanoirUploaderServiceClient);
 		// https://github.com/fli-iam/shanoir-ng/issues/615, KeycloakInstalled removed here as not working in CHUs
-		context.setState(new AuthenticationManualConfigurationState());
+		context.setState(authenticationManualConfigurationState);
 		context.nextState();
 		return;
 	}

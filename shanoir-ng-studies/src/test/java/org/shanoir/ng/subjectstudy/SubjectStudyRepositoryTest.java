@@ -47,7 +47,7 @@ public class SubjectStudyRepositoryTest {
 	public void findByStudyTest() throws Exception {
 		final Study study = new Study();
 		study.setId(STUDY_TEST_1_ID);
-		List<SubjectStudy> subjectDb = subjectStudyRepository.findByStudy(study);
+		List<SubjectStudy> subjectDb = subjectStudyRepository.findByStudyId(study.getId());
 		assertNotNull(subjectDb);
 		assertThat(subjectDb.size()).isEqualTo(2);
 	}

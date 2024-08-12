@@ -7,7 +7,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.dicom.DicomTreeNode;
 import org.shanoir.uploader.dicom.query.Media;
 import org.shanoir.uploader.dicom.query.PatientTreeNode;
@@ -23,7 +24,7 @@ import org.shanoir.uploader.dicom.query.StudyTreeNode;
  */
 public class DicomTreeCellRenderer extends DefaultTreeCellRenderer {
 	
-	private static Logger logger = Logger.getLogger(DicomTreeCellRenderer.class);
+	private static final Logger logger = LoggerFactory.getLogger(DicomTreeCellRenderer.class);
 	
 	private Icon mediaIcon;
     private Icon patientIcon;
