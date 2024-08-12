@@ -32,7 +32,7 @@ export class AuthAdminOrExpertGuard  {
         if (this.keycloakService.isUserAdminOrExpert()) {
             return true;
         } else {
-            this.consoleService.log('warn', 'No right to visit to this page.', ['route : ' + this.router.url]);
+            this.consoleService.log('warn', 'Sorry, you have no right to visit this page.', ['route : ' + this.router.url]);
             return false;
         }
     }
