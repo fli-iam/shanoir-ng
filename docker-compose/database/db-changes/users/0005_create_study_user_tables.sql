@@ -21,19 +21,31 @@ CREATE UNIQUE INDEX study_user_idx ON study_user
 );
 
 
-CREATE TABLE `study_user_center` (
-  `center_id` bigint(20) NOT NULL,
-  `study_user_id` bigint(20) NOT NULL,
-  KEY `FKbwq3j3rtbtndcifv9l6otdjtt` (`center_id`),
-  KEY `FK8jvoy3dqkninlrimnrb8endp3` (`study_user_id`),  
-  CONSTRAINT `FKbwq3j3rtbtndcifv9l6otdjtt` FOREIGN KEY (`center_id`) REFERENCES `center` (`id`),
-  CONSTRAINT `FK8jvoy3dqkninlrimnrb8endp3` FOREIGN KEY (`study_user_id`) REFERENCES `study_user` (`id`)
+CREATE TABLE study_user_center
+(
+  center_id bigint NOT NULL,
+  study_user_id bigint NOT NULL,
 );
 
+ALTER TABLE study_user_center
+ADD CONSTRAINT FKbwq3j3rtbtndcifv9l6otdjtt
+FOREIGN KEY (center_id)
+REFERENCES center(id);
 
-CREATE TABLE `study_user_study_user_rights` (
-  `study_user_rights` int(11) DEFAULT NULL,
-  `study_user_id` bigint(20) NOT NULL,
-  KEY `FK6ipbom6lji60h38bd3ok2r098` (`study_user_id`),
-  CONSTRAINT `FK6ipbom6lji60h38bd3ok2r098` FOREIGN KEY (`study_user_id`) REFERENCES `study_user` (`id`)
+ALTER TABLE study_user_center
+ADD CONSTRAINT FK8jvoy3dqkninlrimnrb8endp3
+FOREIGN KEY (study_user_id)
+REFERENCES study_user(id);
+
+
+
+CREATE TABLE study_user_study_user_rights
+(
+  study_user_rights int DEFAULT NOT NULL,
+  study_user_id bigint NOT NULL,
 );
+
+ALTER TABLE study_user_study_user_rights
+ADD CONSTRAINT FK6ipbom6lji60h38bd3ok2r098
+FOREIGN KEY (study_user_id)
+REFERENCES study_user(id);
