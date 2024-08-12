@@ -35,6 +35,7 @@ import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.IdList;
 import org.shanoir.uploader.model.rest.IdName;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
+import org.shanoir.uploader.model.rest.Manufacturer;
 import org.shanoir.uploader.model.rest.ManufacturerModel;
 import org.shanoir.uploader.model.rest.Sex;
 import org.shanoir.uploader.model.rest.Study;
@@ -554,6 +555,21 @@ public class ImportUtils {
 		return ShUpOnloadConfig.getShanoirUploaderServiceClient().createEquipment(equipment);
 	}
 
+	public static ManufacturerModel createManufacturerModel(String manufacturerModelName, Manufacturer manufacturer, String modality, Double magneticFieldStrength) {
+		ManufacturerModel manufacturerModel = new ManufacturerModel();
+		manufacturerModel.setName(manufacturerModelName);
+		manufacturerModel.setManufacturer(manufacturer);
+		manufacturerModel.setDatasetModalityType(modality);
+		manufacturerModel.setMagneticField(magneticFieldStrength);
+		return ShUpOnloadConfig.getShanoirUploaderServiceClient().createManufacturerModel(manufacturerModel);
+	}
+
+	public static Manufacturer createManufacturer(String manufacturerName) {
+		Manufacturer manufacturer = new Manufacturer();
+		manufacturer.setName(manufacturerName);
+		return ShUpOnloadConfig.getShanoirUploaderServiceClient().createManufacturer(manufacturer);
+	}
+
 	/**
 	 * Find matching equipment via manufacturer model name + device serial number
 	 * from entire database, no study restriction, equipment points to center for
@@ -578,6 +594,15 @@ public class ImportUtils {
 			if (acquisitionEquipment.getManufacturerModel().getManufacturer().getName().equalsIgnoreCase(manufacturer)
 				&& acquisitionEquipment.getManufacturerModel().getName().equalsIgnoreCase(manufacturerModelName)) {
 				return acquisitionEquipment.getManufacturerModel();
+			}
+		}
+		return null;
+	}
+
+	public static Manufacturer findManufacturerInAllEquipments(List<AcquisitionEquipment> acquisitionEquipments, String manufacturer) {
+		for (AcquisitionEquipment acquisitionEquipment : acquisitionEquipments) {
+			if (acquisitionEquipment.getManufacturerModel().getManufacturer().getName().equalsIgnoreCase(manufacturer)) {
+				return acquisitionEquipment.getManufacturerModel().getManufacturer();
 			}
 		}
 		return null;

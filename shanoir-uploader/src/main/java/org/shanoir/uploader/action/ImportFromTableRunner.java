@@ -30,6 +30,7 @@ import org.shanoir.ng.importer.model.PatientVerification;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.importer.model.Subject;
+import org.shanoir.ng.shared.dataset.DatasetModalityType;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
@@ -39,6 +40,7 @@ import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Center;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
+import org.shanoir.uploader.model.rest.Manufacturer;
 import org.shanoir.uploader.model.rest.ManufacturerModel;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.SubjectType;
@@ -277,17 +279,17 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			}
 		}
 		// 4.2 Find matching study card on study using info from DICOM
-		String manufacturer = uploadJob.getMriInformation().getManufacturer();
+		String manufacturerName = uploadJob.getMriInformation().getManufacturer();
 		String manufacturerModelName = uploadJob.getMriInformation().getManufacturersModelName();
 		String deviceSerialNumber = uploadJob.getMriInformation().getDeviceSerialNumber();
-		if (manufacturer == null || manufacturer.isBlank()
+		if (manufacturerName == null || manufacturerName.isBlank()
 			|| manufacturerModelName == null || manufacturerModelName.isBlank()
 			|| deviceSerialNumber == null || deviceSerialNumber.isBlank()) {
 			uploadJob.setUploadState(UploadState.ERROR);
 			importJob.setErrorMessage("Error: no manufacturer or model name or device serial number in DICOM.");
 			return false;
 		}
-		logger.info("Manufacturer used from DICOM: " + manufacturer);
+		logger.info("Manufacturer name used from DICOM: " + manufacturerName);
 		logger.info("Manufacturer model name used from DICOM: " + manufacturerModelName);
 		logger.info("Device serial number used from DICOM: " + deviceSerialNumber);
 		if (!studyCards.isEmpty()) {
@@ -327,8 +329,35 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				InstitutionDicom institutionDicom = new InstitutionDicom();
 				institutionDicom.setInstitutionName(institutionName);
 				institutionDicom.setInstitutionAddress(uploadJob.getMriInformation().getInstitutionAddress());
-				Center center = shanoirUploaderServiceClientNG.findCenterOrCreateByInstitutionDicom(institutionDicom, studyREST.getId());	
-				ManufacturerModel manufacturerModel = ImportUtils.findManufacturerModelInAllEquipments(acquisitionEquipments, manufacturer, manufacturerModelName);
+				Center center = shanoirUploaderServiceClientNG.findCenterOrCreateByInstitutionDicom(institutionDicom, studyREST.getId());
+				// 4.3.3 find or create manufacturer model and manufacturer
+				ManufacturerModel manufacturerModel = ImportUtils.findManufacturerModelInAllEquipments(acquisitionEquipments, manufacturerName, manufacturerModelName);
+				if (manufacturerModel == null) { // create one
+					Manufacturer manufacturer = ImportUtils.findManufacturerInAllEquipments(acquisitionEquipments, manufacturerName);
+					if (manufacturer == null) { // create one
+						manufacturer = ImportUtils.createManufacturer(manufacturerName);
+					}
+					if (manufacturer == null) {
+						uploadJob.setUploadState(UploadState.ERROR);
+						importJob.setErrorMessage("Error: could not create manufacturer.");
+						logger.error(importJob.getErrorMessage());
+						return false;
+					}
+					String modality = importJob.getDicomQuery().getModality();
+					Integer datasetModalityType = DatasetModalityType.getIdFromModalityName(modality);
+					String magneticFieldStrength = uploadJob.getMriInformation().getMagneticFieldStrength();
+					if (magneticFieldStrength == null || magneticFieldStrength.isBlank()) {
+						magneticFieldStrength = "0.0";
+					}
+					manufacturerModel = ImportUtils.createManufacturerModel(
+						manufacturerModelName, manufacturer, String.valueOf(datasetModalityType), Double.valueOf(magneticFieldStrength));
+				}
+				if (manufacturerModel == null) {
+					uploadJob.setUploadState(UploadState.ERROR);
+					importJob.setErrorMessage("Error: could not create manufacturerModel.");
+					logger.error(importJob.getErrorMessage());
+					return false;
+				}
 				equipment = ImportUtils.createEquipment(center, manufacturerModel, deviceSerialNumber);
 				if (equipment == null) {
 					uploadJob.setUploadState(UploadState.ERROR);
