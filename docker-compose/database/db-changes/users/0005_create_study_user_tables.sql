@@ -1,5 +1,6 @@
 CREATE TABLE `study_user` (
   `id` bigint(20) NOT NULL,
+  `confirmed` bit(1) NOT NULL,
   `receive_anonymization_report` bit(1) NOT NULL,
   `receive_new_import_report` bit(1) NOT NULL,
   `study_id` bigint(20) DEFAULT NULL,
