@@ -309,9 +309,10 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			}
 		}
 		// 4.3 No study card found: create one
+		AcquisitionEquipment equipment = null;
 		if (studyCard == null) {
 			// 4.3.1 try to find equipment via model name and serial number and use it for study card creation
-			AcquisitionEquipment equipment = ImportUtils.findEquipmentInAllEquipments(acquisitionEquipments, manufacturerModelName, deviceSerialNumber);
+			equipment = ImportUtils.findEquipmentInAllEquipments(acquisitionEquipments, manufacturerModelName, deviceSerialNumber);
 			if (equipment != null) {
 				// No need to create center, as already existing behind equipment
 				studyCard = ImportUtils.createStudyCard(studyREST, equipment, importJob);
@@ -379,6 +380,9 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			logger.error(importJob.getErrorMessage());
 			return false;
 		} else {
+			if (equipment != null) {
+				studyCard.setAcquisitionEquipment(equipment);
+			}
 			importJob.setStudyCardId(studyCard.getId());
 			importJob.setStudyCardName(studyCard.getName());
 		}
