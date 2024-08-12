@@ -68,7 +68,6 @@ public interface StudyMapper {
 
 	@Named("study.light.no.paths")
 	@Mappings({
-		@Mapping(target = "studyTags", ignore = true),
 		@Mapping(target = "protocolFilePaths", ignore = true),
 		@Mapping(target = "dataUserAgreementPaths", ignore = true)
 	})
