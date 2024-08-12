@@ -49,6 +49,7 @@ export class TreeService {
     public studyNode: StudyNode = null;
     private studyNodePromise: SuperPromise<void> = new SuperPromise();
     study: Study;
+    studyPromise: SuperPromise<Study> = new SuperPromise();
     public nodeInit: boolean = false; 
     private studyRights: StudyUserRight[]; 
     private _treeOpened: boolean = true;
@@ -385,7 +386,11 @@ export class TreeService {
         if (this.study?.id == id) {
             return Promise.resolve();
         } else {
-            let studyPromise: Promise<any> = this.studyService.get(id, null).then(study => this.study = study);
+            let studyPromise: Promise<void> = this.studyService.get(id, null).then(study => {
+                this.study = study;
+                this.studyPromise = new SuperPromise();
+                this.studyPromise.resolve(study);
+            });
 
             let rightsPromise: Promise<StudyUserRight[]> = (this.keycloakService.isUserAdmin
                 ? Promise.resolve(StudyUserRight.all())

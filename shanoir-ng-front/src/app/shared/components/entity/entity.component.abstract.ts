@@ -99,15 +99,15 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
         this.breadcrumbsService = ServiceLocator.injector.get(BreadcrumbsService);
         this.treeService = ServiceLocator.injector.get(TreeService);
         
-        this.treeService.activateTree(this.activatedRoute);
         this.mode = this.activatedRoute.snapshot.data['mode'];
+        if (this.mode != 'create') this.treeService.activateTree(this.activatedRoute);
         this.addBCStep();
 
         setTimeout(() => { // force it to be after child constructor, we need this.fetchEntity
             this.subscriptions.push(this.activatedRoute.params.subscribe(
                 params => {
-                    this.treeService.activateTree(this.activatedRoute); // at each routing event
                     this.mode = this.activatedRoute.snapshot.data['mode'];
+                    if (this.mode != 'create') this.treeService.activateTree(this.activatedRoute); // at each routing event
                     this.addBCStep();
                     this.isMainComponent = true;
                     const id = +params['id'];
@@ -150,9 +150,6 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     }
 
     init(): void {
-        this.entityPromise.then(() => {
-            if (this.getTreeSelection) this.treeService.selection = this.getTreeSelection();
-        });
         const choose = (): Promise<void> => {
             switch (this.mode) {
                 case 'create' :
@@ -165,6 +162,9 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
                     throw Error('mode has to be set!');
             }
         }
+        Promise.all([this.entityPromise, choose]).then(() => {
+            if (this.mode != 'create'&& this.getTreeSelection) this.treeService.selection = this.getTreeSelection();
+        });
         choose().then(() => {
             this.footerState = new FooterState(this.mode);
             this.footerState.backButton = this.isMainComponent;

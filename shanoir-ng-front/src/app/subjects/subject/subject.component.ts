@@ -114,9 +114,10 @@ export class SubjectComponent extends EntityComponent<Subject> {
             this.hasDownloadRight = true;
             return;
         } else {
-            // TODO make it dynamic
-            return this.studyRightsService.getMyRightsForStudy(this.treeService.study.id).then(rights => {
-                this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+            this.treeService.studyPromise.then(study => {
+                return this.studyRightsService.getMyRightsForStudy(study.id).then(rights => {
+                    this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+                });
             });
         }
         return Promise.resolve();
