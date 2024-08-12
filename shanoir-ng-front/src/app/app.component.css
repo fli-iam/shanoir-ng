@@ -2,7 +2,7 @@
 .main-content.open { margin-left: 300px; }
 .main-content.reduce-height { height: calc(100vh - 108px); }
 
-.lower-content { display: flex; max-height: calc(100% - 60px); overflow: hidden; }
+.lower-content { display: flex; height: calc(100% - 60px); overflow: hidden; }
 
 .content { display: inline-block; white-space: initial; max-height: 100%; overflow: auto; padding-right: 20px; flex-grow: 100; }
 side-menu, .side-menu { overflow-x: hidden; scrollbar-width: none; overflow: -moz-scrollbars-none; -ms-overflow-style: none; }
