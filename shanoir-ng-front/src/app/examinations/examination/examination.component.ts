@@ -160,7 +160,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
 
     openViewer() {
-	    window.open(environment.viewerUrl + '/viewer/1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
+	    window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
     }
 
     getCenters(): void {

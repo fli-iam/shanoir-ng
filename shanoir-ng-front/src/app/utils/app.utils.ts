@@ -55,6 +55,7 @@ export const BACKEND_API_CENTER_STUDY_URL: string = BACKEND_API_CENTER_URL + '/s
 
 // Studies http api
 export const BACKEND_API_STUDY_URL: string = BACKEND_API_STUDIES_MS_URL + '/studies';
+export const BACKEND_API_STUDY_STUDIES_LIGHT_URL: string = BACKEND_API_STUDIES_MS_URL + '/studies/light';
 export const BACKEND_API_STUDY_ALL_NAMES_URL: string = BACKEND_API_STUDY_URL + '/names';
 export const BACKEND_API_STUDY_DELETE_USER: string = BACKEND_API_STUDY_URL + '/studyUser';
 export const BACKEND_API_STUDY_ALL_NAMES_AND_CENTERS_URL: string = BACKEND_API_STUDY_URL + '/namesAndCenters';
@@ -221,7 +222,7 @@ export function downloadWithStatusGET(url: string, params?: HttpParams, state ?:
             responseType: 'blob',
             params: params
         }
-    );
+    ).shareReplay();
     obs.toPromise().then(response => browserDownloadFileFromResponse(response as HttpResponse<Blob>));
     return obs.mergeMap(event => {
         return extractState(event).then(s => {
@@ -241,7 +242,7 @@ export function downloadWithStatusPOST(url: string, formData: FormData, state ?:
             observe: 'events',
             responseType: 'blob'
         }
-    );
+    ).shareReplay();
     obs.toPromise().then(response => browserDownloadFileFromResponse(response as HttpResponse<Blob>));
     return obs.mergeMap(event => {
         return extractState(event).then(s => {

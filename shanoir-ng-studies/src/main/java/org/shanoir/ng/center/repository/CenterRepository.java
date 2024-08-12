@@ -15,9 +15,12 @@
 package org.shanoir.ng.center.repository;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -28,18 +31,26 @@ import org.springframework.data.repository.query.Param;
  * @author msimon
  */
 public interface CenterRepository extends CrudRepository<Center, Long> {
-
-
-	Center findByName(String name);
+	
+	@EntityGraph(attributePaths = "studyCenterList.study.name")
+	List<Center> findAll();
+	
+	@Query("SELECT DISTINCT c.acquisitionEquipments FROM Center c WHERE c.id = :centerId")
+    List<AcquisitionEquipment> findDistinctAcquisitionEquipmentsByCenterId(@Param("centerId") Long centerId);
+	
+	@EntityGraph(attributePaths = { "studyCenterList.study.name", "acquisitionEquipments.manufacturerModel.manufacturer" })
+	Optional<Center> findById(Long id);
+	
+	@EntityGraph(attributePaths = "studyCenterList.study.name")
+	Optional<Center> findByName(String name);
 	
 	@Query("select new org.shanoir.ng.shared.core.model.IdName(c.id, c.name) from Center c")
-	public List<IdName> findIdsAndNames();
+	List<IdName> findIdsAndNames();
 	
 	@Query("select new org.shanoir.ng.shared.core.model.IdName(c.id, c.name) from Center c, StudyCenter sc where sc.center = c and sc.study.id = :studyId")
-	public List<IdName> findIdsAndNames(@Param("studyId") Long studyId);
+	List<IdName> findIdsAndNames(@Param("studyId") Long studyId);
 
 	@Query("select c from Center c, StudyCenter sc where sc.center = c and sc.study.id = :studyId")
-	public List<Center> findByStudy(@Param("studyId") Long studyId);
-
+	List<Center> findByStudy(@Param("studyId") Long studyId);
 
 }

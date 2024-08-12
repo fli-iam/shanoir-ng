@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.shanoir.ng.coil.model.Coil;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.repository.CrudRepository;
 
 /**
@@ -26,7 +27,13 @@ import org.springframework.data.repository.CrudRepository;
  * @author msimon
  */
 public interface CoilRepository extends CrudRepository<Coil, Long> {
-
+	
+	@EntityGraph(attributePaths = { "manufacturerModel.manufacturer" })
+	List<Coil> findAll();
+	
+	@EntityGraph(attributePaths = { "center", "manufacturerModel.manufacturer" })
+	Optional<Coil> findById(Long id);
+	
 	/**
 	 * Find coil by name.
 	 *

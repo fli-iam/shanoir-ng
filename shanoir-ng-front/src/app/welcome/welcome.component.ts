@@ -12,7 +12,7 @@ import {
 import * as AppUtils from "../utils/app.utils";
 import {ImagesUrlUtil} from "../shared/utils/images-url.util";
 import {StudyService} from "../studies/shared/study.service";
-import {PublicStudyData} from "../studies/shared/study.dto";
+import {StudyLight} from "../studies/shared/study.dto";
 import {StudyType} from "../studies/shared/study-type.enum";
 import {isDarkColor} from "../utils/app.utils";
 import {DOCUMENT} from "@angular/common";
@@ -28,7 +28,7 @@ export class WelcomeComponent implements OnInit {
 	public githubLogoUrl: string = ImagesUrlUtil.GITHUB_WHITE_LOGO_PATH;
 	public shanoirLogoUrl: string = ImagesUrlUtil.SHANOIR_WHITE_LOGO_PATH;
 	public email: string = "mailto:developers_shanoir-request@inria.fr";
-	public studies: PublicStudyData[] = [];
+	public studies: StudyLight[] = [];
 	public StudyType = StudyType;
 	public show: number = 10;
 	@ViewChild('showMore', { static: false }) showMore: ElementRef<HTMLElement>;
