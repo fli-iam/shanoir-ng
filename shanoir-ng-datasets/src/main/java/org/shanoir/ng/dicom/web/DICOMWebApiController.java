@@ -111,16 +111,16 @@ public class DICOMWebApiController implements DICOMWebApi {
 	}
 
 	@Override
-	public ResponseEntity<String> findSeriesOfStudy(String examinationUID)
+	public ResponseEntity<String> findSeriesOfStudy(String examinationUID, String includeFields)
 			throws RestServiceException, JsonMappingException, JsonProcessingException {
 		LOG.error("findSeriesOfStudy examId : " + examinationUID);
-
+		LOG.error("findSeriesOfStudy includeFields : ", includeFields);
 
 		String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
 		LOG.error("studyInstanceUID : " + studyInstanceUID);
 
 		if (studyInstanceUID != null) {
-			String response = dicomWebService.findSeriesOfStudy(studyInstanceUID);
+			String response = dicomWebService.findSeriesOfStudy(studyInstanceUID, includeFields);
 			LOG.error("response : " + response);
 
 			JsonNode root = mapper.readTree(response);

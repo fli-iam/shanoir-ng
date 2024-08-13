@@ -124,9 +124,10 @@ public class DICOMWebService {
 		return null;
 	}
 
-	public String findSeriesOfStudy(String studyInstanceUID) {
+	public String findSeriesOfStudy(String studyInstanceUID, String includeFields) {
 		try {
-			String url = this.serverURL + "/" + studyInstanceUID + "/series";
+			LOG.error("dicomwebService.findSeriesOfStudy includeFields : ", includeFields);
+			String url = this.serverURL + "/" + studyInstanceUID + "/series?includefield=" + includeFields;
 			HttpGet httpGet = new HttpGet(url);
 			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
 				HttpEntity entity = response.getEntity();
