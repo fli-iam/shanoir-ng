@@ -1,7 +1,8 @@
 window.config = { 
 	routerBasename: '/', 
 	extensions: [], 
-	modes: [], 
+	modes: [],
+	experimentalStudyBrowserSort: true,
 	showStudyList: true,
 	dataSources: [ 
 		{ 
