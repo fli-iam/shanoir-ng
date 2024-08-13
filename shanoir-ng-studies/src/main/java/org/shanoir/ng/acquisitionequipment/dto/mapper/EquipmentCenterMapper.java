@@ -12,22 +12,32 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.acquisitionequipment.dto;
+package org.shanoir.ng.acquisitionequipment.dto.mapper;
 
 import java.util.List;
 
+import org.mapstruct.IterableMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
+import org.mapstruct.Named;
+import org.shanoir.ng.acquisitionequipment.dto.CenterDTO;
+import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.studycenter.StudyCenterDTO;
+import org.shanoir.ng.studycenter.StudyCenterMapper;
 
-public class CenterDTO extends IdName {
+/**
+ * Mapper for centers.
+ * 
+ * @author msimon
+ *
+ */
+@Mapper(componentModel = "spring", uses = { StudyCenterMapper.class })
+public interface EquipmentCenterMapper {
 
-	private List<StudyCenterDTO> studyCenterList;
+	List<CenterDTO> centersToCenterDTO(List<Center> centers);
+	
 
-	public List<StudyCenterDTO> getStudyCenterList() {
-		return studyCenterList;
-	}
-
-	public void setStudyCenterList(List<StudyCenterDTO> studyCenterList) {
-		this.studyCenterList = studyCenterList;
-	}
+	CenterDTO centerToCenterDTO(Center center);	
+	
 }
