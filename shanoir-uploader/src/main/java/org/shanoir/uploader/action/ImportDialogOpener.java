@@ -135,7 +135,8 @@ public class ImportDialogOpener {
 								}
 							}
 							compatibleStudyCard = ImportUtils.flagStudyCardCompatible(
-								studyCard, uploadJob.getMriInformation().getDeviceSerialNumber());
+								studyCard, uploadJob.getMriInformation().getManufacturersModelName(),
+								uploadJob.getMriInformation().getDeviceSerialNumber());
 						}
 					}
 					if (compatibleStudyCard) {
