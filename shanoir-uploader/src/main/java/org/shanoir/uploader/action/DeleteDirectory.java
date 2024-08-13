@@ -3,11 +3,12 @@ package org.shanoir.uploader.action;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DeleteDirectory {
 
-	private static Logger logger = Logger.getLogger(DeleteDirectory.class);
+	private static final Logger logger = LoggerFactory.getLogger(DeleteDirectory.class);
 
 	public void delete(String filePath) {
 

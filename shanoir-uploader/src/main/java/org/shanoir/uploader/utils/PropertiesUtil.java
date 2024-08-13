@@ -6,7 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A utility class introduced to perform
@@ -16,7 +17,7 @@ import org.apache.log4j.Logger;
  */
 public class PropertiesUtil {
 
-    private static Logger logger = Logger.getLogger(PropertiesUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(PropertiesUtil.class);
     
     public static void loadPropertiesFromFile(final Properties properties, final File propertiesFile) {
 		try {

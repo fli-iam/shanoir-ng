@@ -14,7 +14,11 @@
 
 package org.shanoir.ng.study.security;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -373,33 +377,6 @@ public class StudySecurityService {
 	 * @param rightStr
 	 * @return true or false
 	 */
-	public boolean filterStudyDTOsHasRight(List<StudyDTO> dtos, String rightStr) {
-		StudyUserRight right = StudyUserRight.valueOf(rightStr);
-		if (dtos == null) {
-			return true;
-		}
-		List<StudyDTO> newList = new ArrayList<>();
-		Map<Long, StudyDTO> map = new HashMap<>();
-		for (StudyDTO dto : dtos) {
-			map.put(dto.getId(), dto);
-		}
-		for (Study study : studyRepository.findAllById(new ArrayList<>(map.keySet()))) {
-			if (hasPrivilege(study, right)) {
-				newList.add(map.get(study.getId()));
-			}
-		}
-		dtos = newList;
-		return true;
-	}
-
-	/**
-	 * For every study of the list, check that the connected user has the given
-	 * right.
-	 *
-	 * @param dtos
-	 * @param rightStr
-	 * @return true or false
-	 */
 	public boolean filterStudyIdNameDTOsHasRight(List<IdName> dtos, String rightStr) {
 		StudyUserRight right = StudyUserRight.valueOf(rightStr);
 		if (dtos == null) {
@@ -463,6 +440,7 @@ public class StudySecurityService {
 		}
 		int nbStudies = 0;
 		for (Study study : studyRepository.findAllById(ids)) {
+			study.setStudyUserList(studyUserRepository.findByStudy_Id(study.getId()));
 			nbStudies++;
 			if (!hasPrivilege(study, right)) {
 				return false;

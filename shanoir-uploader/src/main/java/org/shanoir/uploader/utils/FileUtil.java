@@ -8,7 +8,8 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.text.DecimalFormat;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A utility class introduced to perform
@@ -18,7 +19,7 @@ import org.apache.log4j.Logger;
  */
 public class FileUtil {
 
-	private static Logger logger = Logger.getLogger(FileUtil.class);
+	private static final Logger logger = LoggerFactory.getLogger(FileUtil.class);
 	
 	/**
 	 * This method receives a directory name as a string

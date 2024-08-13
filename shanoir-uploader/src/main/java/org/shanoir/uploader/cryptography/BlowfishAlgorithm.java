@@ -7,7 +7,8 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is used for password en-/decryption.
@@ -18,7 +19,7 @@ import org.apache.log4j.Logger;
  */
 public class BlowfishAlgorithm {
 
-	private static Logger logger = Logger.getLogger(BlowfishAlgorithm.class);
+	private static final Logger logger = LoggerFactory.getLogger(BlowfishAlgorithm.class);
 
 	private static byte[] symmetricKey = new byte[1000];
 
