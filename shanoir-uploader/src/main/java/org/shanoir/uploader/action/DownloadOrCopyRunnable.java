@@ -6,7 +6,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+
+import javax.swing.JProgressBar;
 
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
@@ -48,9 +49,12 @@ public class DownloadOrCopyRunnable implements Runnable {
 	private String filePathDicomDir;
 
 	private Map<String, ImportJob> importJobs;
+
+	private JProgressBar progressBar;
 	
-	public DownloadOrCopyRunnable(boolean isFromPACS, final IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, final String filePathDicomDir, Map<String, ImportJob> importJobs) {
+	public DownloadOrCopyRunnable(boolean isFromPACS, JProgressBar progressBar, final IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, final String filePathDicomDir, Map<String, ImportJob> importJobs) {
 		this.isFromPACS = isFromPACS;
+		this.progressBar = progressBar;
 		this.dicomFileAnalyzer = dicomFileAnalyzer;
 		this.dicomServerClient = dicomServerClient; // used with PACS import
 		if(!isFromPACS && filePathDicomDir != null) {
@@ -72,7 +76,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 				 * 1. Download from PACS or copy from CD/DVD/local file system
 				 */
 				allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(
-					this.isFromPACS, studyInstanceUID, selectedSeries, uploadFolder, dicomFileAnalyzer, dicomServerClient, filePathDicomDir);
+					this.isFromPACS, this.progressBar, studyInstanceUID, selectedSeries, uploadFolder,  dicomFileAnalyzer, dicomServerClient, filePathDicomDir);
 				/**
 				 * 2. Fill MRI information into all series from first DICOM file of each serie
 				 */

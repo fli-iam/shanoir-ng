@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
+import javax.swing.JProgressBar;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingWorker;
 
@@ -249,7 +250,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		 */
 		HashMap<String, ImportJob> downloadImportJobs = new HashMap<String, ImportJob>();
 		downloadImportJobs.put(dicomStudy.getStudyInstanceUID(), importJob);
-		Runnable downloadRunnable = new DownloadOrCopyRunnable(true, dicomServerClient, dicomFileAnalyzer,  null, downloadImportJobs);
+		Runnable downloadRunnable = new DownloadOrCopyRunnable(true, importFromTableWindow.progressBar,  dicomServerClient, dicomFileAnalyzer,  null, downloadImportJobs);
 		Thread downloadThread = new Thread(downloadRunnable);
 		downloadThread.start();
 		while (downloadThread.isAlive()) {

@@ -25,6 +25,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.IntStream;
 
+import javax.swing.JProgressBar;
+
 import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.ElementDictionary;
@@ -178,9 +180,9 @@ public class QueryPACSService {
 	}
 	
 	public ImportJob queryCFIND(DicomQuery dicomQuery) throws Exception {
-		LOG.info("--------------------");
-		LOG.info("--- START C-FIND ---");
-		LOG.info("--------------------");
+		LOG.debug("--------------------");
+		LOG.debug("--- START C-FIND ---");
+		LOG.debug("--------------------");
 		long start = System.currentTimeMillis();
 		Association association = connectAssociation(calling, called, true);
 		ImportJob importJob = new ImportJob();
@@ -202,37 +204,45 @@ public class QueryPACSService {
 		releaseAssociation(association);
 		long finish = System.currentTimeMillis();
 		long timeElapsed = finish - start;
-		LOG.info("Duration of all calls of queryCFIND " + timeElapsed + "ms.");
-		LOG.info("--------------------");
-		LOG.info("--- END C-FIND -----");
-		LOG.info("--------------------");
+		LOG.debug("Duration of all calls of queryCFIND " + timeElapsed + "ms.");
+		LOG.debug("--------------------");
+		LOG.debug("--- END C-FIND -----");
+		LOG.debug("--------------------");
 		return importJob;
 	}
 
 	public void queryCFINDInstances(String studyInstanceUID, Serie serie) throws Exception {
-		LOG.info("------------------------------");
-		LOG.info("--- START C-FIND Instances ---");
-		LOG.info("------------------------------");
+		LOG.debug("------------------------------");
+		LOG.debug("--- START C-FIND Instances ---");
+		LOG.debug("------------------------------");
 		long start = System.currentTimeMillis();
 		Association association = connectAssociation(calling, called, true);
-		LOG.info("Query instances (before c-move) for serie: " + serie.getSeriesDescription());
+		LOG.info("Query instances/images (before c-move) for serie: " + serie.getSeriesDescription());
 		queryInstances(association, studyInstanceUID, serie);
 		releaseAssociation(association);
 		long finish = System.currentTimeMillis();
 		long timeElapsed = finish - start;
-		LOG.info("Duration of all calls of queryCFIND " + timeElapsed + "ms.");
-		LOG.info("------------------------------");
-		LOG.info("--- END C-FIND Instances -----");
-		LOG.info("------------------------------");
+		LOG.debug("Duration of all calls of queryCFIND " + timeElapsed + "ms.");
+		LOG.debug("------------------------------");
+		LOG.debug("--- END C-FIND Instances -----");
+		LOG.debug("------------------------------");
 	}
 
-	public void queryCMOVEs(String studyInstanceUID, List<Serie> selectedSeries) throws Exception {
+	public void queryCMOVEs(String studyInstanceUID, List<Serie> selectedSeries, JProgressBar progressBar) throws Exception {
 		LOG.info("--------------------");
 		LOG.info("--- START C-MOVES --");
 		LOG.info("--------------------");
 		long start = System.currentTimeMillis();
 		Association association = connectAssociation(calling, called, false);
-		selectedSeries.stream().forEach(serie -> queryCMOVEPerSerie(studyInstanceUID, serie, association));
+		int totalPercent = 0;
+		int serieNumber = 0;
+		int numberOfSeries = selectedSeries.size();
+		for (Serie serie : selectedSeries) {
+			serieNumber = serieNumber + 1;
+			queryCMOVEPerSerie(studyInstanceUID, serie, association);
+			totalPercent = Math.round(((float) serieNumber / numberOfSeries) * 100);
+			progressBar.setValue(totalPercent);
+		}
 		releaseAssociation(association);
 		long finish = System.currentTimeMillis();
 		long timeElapsed = finish - start;
@@ -263,7 +273,7 @@ public class QueryPACSService {
 			new DicomParam(Tag.QueryRetrieveLevel, "SERIES"),
 			new DicomParam(Tag.StudyInstanceUID, studyInstanceUID),
 			new DicomParam(Tag.SeriesInstanceUID, serie.getSeriesInstanceUID()) };
-		LOG.info("Calling PACS, C-MOVE for serie: {} of study: {}", serie.getSeriesDescription(), studyInstanceUID);
+		LOG.info("Calling DICOM server, C-MOVE for serie: {} of study: {}", serie.getSeriesDescription(), studyInstanceUID);
 		queryCMove(association, params);
 	}
 	
@@ -373,8 +383,8 @@ public class QueryPACSService {
 				maxPatientsFromPACSReached = true;
 				// we do not stop the method here in case other studies
 				// follow afterwards from patients, that exist already
-				// maybe no guarantee here, that the pacs returns studies
-				// grouped by patient
+				// maybe no guarantee here, that the DICOM server returns
+				// studies grouped by patient
 			}
 		}
 		if (!maxPatientsFromPACSReached) {
@@ -445,7 +455,7 @@ public class QueryPACSService {
 			studiesAttr.parallelStream().forEach(studyAttr -> {
 			    Study study = new Study(studyAttr);
 			    synchronized (studies) {
-					LOG.info("Study found in PACS: " + study.toString());
+					LOG.info("Study found in DICOM server: " + study.toString());
 			        studies.add(study);
 			    }
 			    String dicomResponseStudyDate = studyAttr.getString(Tag.StudyDate);
@@ -506,7 +516,7 @@ public class QueryPACSService {
 			serie.setSelected(false);
 		}
 		synchronized (series) {
-			LOG.info("Serie found in PACS: " + serie.toString());
+			LOG.info("Serie found in DICOM server: " + serie.toString());
 			series.add(serie);			
 		}
 	}
@@ -566,23 +576,23 @@ public class QueryPACSService {
 			for (DicomParam p : params) {
 				addAttributes(attributes, p);
 			}
-			LOG.info("Calling PACS, C-FIND with level: {}", level);
+			LOG.debug("Calling DICOM server, C-FIND with level: {}", level);
 			for (int i = 0; i < params.length; i++) {
-				LOG.info("Tag: {}, Value: {}", params[i].getTagName(), Arrays.toString(params[i].getValues()));
+				LOG.debug("Tag: {}, Value: {}", params[i].getTagName(), Arrays.toString(params[i].getValues()));
 			}
 			association.cfind(cuid, Priority.NORMAL, attributes, null, rspHandler);
 	        if (association.isReadyForDataTransfer()) {
 	            association.waitForOutstandingRSP();
 	        }
 		} catch (IOException | InterruptedException e) {
-			LOG.error("Error in c-find query: ", e);
+			LOG.error("Error in c-find query:", e);
 		}
 		List<Attributes> response = state.getDicomRSP();
 		LOG.info("C-FIND-RESPONSE NB. ELEMENTS: " + response.size());
 		LOG.debug("C-FIND-RESPONSE CONTENT:\n" + response);
 		long finish = System.currentTimeMillis();
 		long timeElapsed = finish - start;
-		LOG.info("Duration of C-FIND: " + timeElapsed + "ms.");
+		LOG.debug("Duration of C-FIND: " + timeElapsed + "ms.");
 		return response;
 	}
 
