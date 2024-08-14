@@ -180,7 +180,13 @@ public class UploadServiceJob {
 			// Clean all DICOM files after successful import to server
 			for (Iterator<File> iterator = allFiles.iterator(); iterator.hasNext();) {
 				File file = (File) iterator.next();
-				FileUtils.deleteQuietly(file);
+				// from-disk: delete files directly
+				if (file.getParentFile().equals(folder)) {
+					FileUtils.deleteQuietly(file);
+				// from-pacs: delete serieUID folder as well
+				} else {
+					FileUtils.deleteQuietly(file.getParentFile());
+				}
 			}
 			logger.info("All DICOM files deleted after successful upload to server.");
 
