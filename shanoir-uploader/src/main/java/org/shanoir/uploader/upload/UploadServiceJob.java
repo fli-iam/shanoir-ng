@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.action.ImportFinishRunnable;
@@ -176,23 +177,20 @@ public class UploadServiceJob {
 			uploadJob.setUploadDate(Util.formatTimePattern(new Date()));
 			uploadJobManager.writeUploadJob(uploadJob);
 			
-			// If we are coming from CSV import, delete the data from the work folder (but not the upload files in itself)
-			// @todo clean up fromCSV
-//			if (importJob.isFromCsv()) {
-//				for (Iterator<File> iterator = allFiles.iterator(); iterator.hasNext();) {
-//					File file = (File) iterator.next();
-//					FileUtils.deleteQuietly(file);
-//				}
-//			}
+			// Clean all DICOM files after successful import to server
+			for (Iterator<File> iterator = allFiles.iterator(); iterator.hasNext();) {
+				File file = (File) iterator.next();
+				FileUtils.deleteQuietly(file);
+			}
+			logger.info("All DICOM files deleted after successful upload to server.");
 
 			uploading = false;
-
 		} catch (Exception e) {
 			currentNominativeDataController.updateNominativeDataPercentage(folder, UploadState.ERROR.toString());
 			uploadJob.setUploadState(UploadState.ERROR);
 			uploadJob.setUploadDate(Util.formatTimePattern(new Date()));
 			uploadJobManager.writeUploadJob(uploadJob);
-			logger.error("An error occured during upload : " + e.getMessage());
+			logger.error("An error occurred during upload to server: " + e.getMessage());
 		}
 	}
 
