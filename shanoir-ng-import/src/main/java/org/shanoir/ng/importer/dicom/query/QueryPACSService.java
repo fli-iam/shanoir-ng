@@ -238,7 +238,7 @@ public class QueryPACSService {
 		int serieNumber = 0;
 		int numberOfSeries = selectedSeries.size();
 		for (Serie serie : selectedSeries) {
-			serieNumber = serieNumber + 1;
+			serieNumber++;
 			queryCMOVEPerSerie(studyInstanceUID, serie, association);
 			totalPercent = Math.round(((float) serieNumber / numberOfSeries) * 100);
 			progressBar.setValue(totalPercent);
