@@ -353,7 +353,7 @@ public class ImportUtils {
 				return null;
 			}
 		} else {
-			allFileNames = copyFilesToUploadFolder(dicomFileAnalyzer, selectedSeries, uploadFolder, filePathDicomDir);
+			allFileNames = copyFilesToUploadFolder(progressBar, dicomFileAnalyzer, selectedSeries, uploadFolder, filePathDicomDir);
 			if(allFileNames != null) {
 				logger.info(uploadFolder.getName() + ": " + allFileNames.size() + " DICOM files copied from CD/DVD/local file system.");
 			} else {
@@ -363,9 +363,13 @@ public class ImportUtils {
 		return allFileNames;
 	}
 
-	public static List<String> copyFilesToUploadFolder(ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, List<Serie> selectedSeries, final File uploadFolder, String filePathDicomDir) throws FileNotFoundException {
+	public static List<String> copyFilesToUploadFolder(JProgressBar progressBar, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, List<Serie> selectedSeries, final File uploadFolder, String filePathDicomDir) throws FileNotFoundException {
 		List<String> allFileNames = new ArrayList<String>();
+		int totalPercent = 0;
+		int serieNumber = 0;
+		int numberOfSeries = selectedSeries.size();
 		for (Serie serie : selectedSeries) {
+			serieNumber++;
 			List<String> newFileNamesOfSerie = new ArrayList<String>();
 			if (serie.getInstances() == null) {
 				continue;
@@ -390,6 +394,8 @@ public class ImportUtils {
 				instance.setReferencedFileID(new String[]{dicomFileName});
 			}
 			allFileNames.addAll(newFileNamesOfSerie);
+			totalPercent = Math.round(((float) serieNumber / numberOfSeries) * 100);
+			progressBar.setValue(totalPercent);
 		}
 		return allFileNames;
 	}
