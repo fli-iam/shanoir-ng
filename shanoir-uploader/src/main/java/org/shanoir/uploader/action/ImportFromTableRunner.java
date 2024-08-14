@@ -250,7 +250,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		 */
 		HashMap<String, ImportJob> downloadImportJobs = new HashMap<String, ImportJob>();
 		downloadImportJobs.put(dicomStudy.getStudyInstanceUID(), importJob);
-		Runnable downloadRunnable = new DownloadOrCopyRunnable(true, importFromTableWindow.progressBar,  dicomServerClient, dicomFileAnalyzer,  null, downloadImportJobs);
+		Runnable downloadRunnable = new DownloadOrCopyRunnable(true, importFromTableWindow.downloadProgressBar,  dicomServerClient, dicomFileAnalyzer,  null, downloadImportJobs);
 		Thread downloadThread = new Thread(downloadRunnable);
 		downloadThread.start();
 		while (downloadThread.isAlive()) {
