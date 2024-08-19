@@ -55,33 +55,40 @@ public class DICOMWebApiController implements DICOMWebApi {
 		Page<Examination> examinations = null;
 		int offset = Integer.valueOf(allParams.get("offset"));
 		int limit = Integer.valueOf(allParams.get("limit"));
+		String includeField = allParams.get("includefield");
 		Pageable pageable = PageRequest.of(offset, limit);
-		// 1. Search for studies with patient name
+		// 1. Search for studies==examinations with patient name
 		// (DICOM patientID does not make sense in case of Shanoir)
-		String patientName = allParams.get("PatientName");
+		String patientName = allParams.get("00100020");
 		if (patientName != null) {
+			// Remove leading and trailing asterix here
+			patientName = patientName.replaceAll("^\\*+", "").replaceAll("\\*+$", "");
 			examinations = examinationService.findPage(pageable, patientName);
 		} else {
-			// 2. Try StudyInstanceUIDs, in case no patient name
-			// Manage already multiple study instance UIDs
-			String studyInstanceUIDs = allParams.get("StudyInstanceUIDs");
-			if (studyInstanceUIDs != null) {
-				List<Examination> examinationList = new ArrayList<>();
-				String[] studyInstanceUIDArray = studyInstanceUIDs.split(",");
-				for(String studyInstanceUID : studyInstanceUIDArray) {
-					String examinationIdString = studyInstanceUID.substring(studyInstanceUID.lastIndexOf(".") + 1, studyInstanceUID.length());
-					Examination examination = examinationService.findById(Long.valueOf(examinationIdString));
-					examinationList.add(examination);
-				}
-				examinations = new PageImpl<>(examinationList);
-			// 3. No param, return page of examinations in db
-			} else {
+			List<Examination> examinationList = new ArrayList<>();
+			// 2. Manage still existing case with single study instance UID
+			String studyInstanceUID = allParams.get("StudyInstanceUID");
+			if (studyInstanceUID != null) {
+				String examinationIdString = studyInstanceUID.substring(studyInstanceUID.lastIndexOf(".") + 1, studyInstanceUID.length());
+				Examination examination = examinationService.findById(Long.valueOf(examinationIdString));
+				examinationList.add(examination);
+			}
+			// 3. Manage case, that nothing specific was found and return depending on pageable
+			if (examinationList.isEmpty()) {
 				examinations = examinationService.findPage(pageable, null);
+			} else {
+				examinations = new PageImpl<>(examinationList);
 			}
 		}
 		if (examinations == null || examinations.getContent().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
+		String studiesJson = queryDicomServerForDicomWeb(examinations, includeField);
+		return new ResponseEntity<String>(studiesJson, HttpStatus.OK);
+	}
+
+	private String queryDicomServerForDicomWeb(Page<Examination> examinations, String includeField)
+			throws JsonProcessingException, JsonMappingException {
 		StringBuffer studies = new StringBuffer();
 		studies.append("[");
 		Iterator<Examination> iterator = examinations.iterator();
@@ -89,20 +96,27 @@ public class DICOMWebApiController implements DICOMWebApi {
 			Examination examination = iterator.next();
 			String examinationUID = StudyInstanceUIDHandler.PREFIX + examination.getId();
 			String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
-			if (studyInstanceUID != null) {
-				String studyJson = dicomWebService.findStudy(studyInstanceUID);
-				JsonNode root = mapper.readTree(studyJson);
-				studyInstanceUIDHandler.replaceStudyInstanceUIDsWithExaminationUIDs(root, examinationUID, true);
-				studyJson = mapper.writeValueAsString(root);
-				studyJson = studyJson.substring(1, studyJson.length() - 1);
-				studies.append(studyJson);
-				if (iterator.hasNext()) {
-					studies.append(",");
-				}
+			if (studyInstanceUID == null) {
+				// continue: e.g. empty examination without dataset acquisition
+				continue;
+			}
+			String studyJson = dicomWebService.findStudy(studyInstanceUID, includeField);
+			if (studyJson == null) {
+				// continue: avoid viewer loading error in case an examination exists in database,
+				// but no images remain in DICOM server anymore
+				continue;
+			}
+			JsonNode root = mapper.readTree(studyJson);
+			studyInstanceUIDHandler.replaceStudyInstanceUIDsWithExaminationUIDs(root, examinationUID, true);
+			studyJson = mapper.writeValueAsString(root);
+			studyJson = studyJson.substring(1, studyJson.length() - 1);
+			studies.append(studyJson);
+			if (iterator.hasNext()) {
+				studies.append(",");
 			}
 		}
 		studies.append("]");
-		return new ResponseEntity<String>(studies.toString(), HttpStatus.OK);
+		return studies.toString();
 	}
 
 	@Override
