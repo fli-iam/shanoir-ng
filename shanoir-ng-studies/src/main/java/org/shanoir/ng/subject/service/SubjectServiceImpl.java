@@ -344,7 +344,7 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	public Subject findByIdentifierInStudiesWithRights(String identifier, List<Study> studies) {
 		Iterable<Long> studyIds = studies.stream().map(AbstractEntity::getId).collect(Collectors.toList());
-		Subject subject = subjectRepository.findDistinctByIdentifierAndSubjectStudyListStudyIdIn(identifier, studyIds);
+		Subject subject = subjectRepository.findFirstByIdentifierAndSubjectStudyListStudyIdIn(identifier, studyIds);
 		loadSubjectStudyTags(subject);
 		return subject;
 	}
