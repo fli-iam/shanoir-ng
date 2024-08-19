@@ -1,6 +1,7 @@
 package org.shanoir.ng.dicom.web;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -43,7 +45,11 @@ public class DICOMWebApiController implements DICOMWebApi {
 
 	private static final String PATIENT_NAME = "PatientName";
 
+	private static final String SERIES_NUMBER = "00200011";
+
 	private static final String STUDY_INSTANCE_UID = "StudyInstanceUID";
+
+	private static final String VALUE = "Value";
 
 	@Autowired
 	private ExaminationService examinationService;
@@ -150,11 +156,28 @@ public class DICOMWebApiController implements DICOMWebApi {
 		if (studyInstanceUID != null) {
 			String response = dicomWebService.findSeriesOfStudy(studyInstanceUID);
 			JsonNode root = mapper.readTree(response);
+			root = sortSeriesBySeriesNumber(root);
 			studyInstanceUIDHandler.replaceStudyInstanceUIDsWithExaminationUIDs(root, examinationUID, false);
 			return new ResponseEntity<String>(mapper.writeValueAsString(root), HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
+	}
+
+	private JsonNode sortSeriesBySeriesNumber(JsonNode root) {
+		if (root.isArray()) {
+            ArrayNode arrayNode = (ArrayNode) root;
+            List<JsonNode> jsonNodes = new ArrayList<>();
+            arrayNode.forEach(jsonNodes::add);
+            jsonNodes.sort(Comparator.comparingInt(node -> {
+                JsonNode seriesNumberNode = node.path(SERIES_NUMBER).path(VALUE).get(0);
+                return seriesNumberNode.asInt();
+            }));
+            ArrayNode sortedArrayNode = mapper.createArrayNode();
+            jsonNodes.forEach(sortedArrayNode::add);
+			return (JsonNode) sortedArrayNode;
+        }
+		return root;
 	}
 	
 	@Override

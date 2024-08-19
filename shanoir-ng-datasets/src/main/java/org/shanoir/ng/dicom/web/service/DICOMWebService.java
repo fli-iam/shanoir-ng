@@ -133,7 +133,7 @@ public class DICOMWebService {
 				if (entity != null) {
 					return EntityUtils.toString(entity);
 				} else {
-					LOG.error("DICOMWeb: findSeriesOfStudy: empty response entity.");				
+					LOG.error("DICOMWeb: findSeriesOfStudy: empty response entity for studyInstanceUID: " + studyInstanceUID);		
 				}
 			}
 		} catch (Exception e) {
