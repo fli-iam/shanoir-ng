@@ -334,7 +334,9 @@ export class TreeService {
                 ).then(acqEq => {
                     let centerNode: CenterNode = (this.studyNode.centersNode.centers as CenterNode[]).find(cn => acqEq.center.id == cn.id);
                     return centerNode?.open().then(() => {
-                        return (centerNode.acquisitionEquipments as AcquisitionEquipmentNode[]).find(aen => aen.id == acqEq.id);
+                        if (centerNode.acquisitionEquipments != UNLOADED) {
+                            return (centerNode.acquisitionEquipments as AcquisitionEquipmentNode[])?.find(aen => aen.id == acqEq.id);
+                        } else return null;
                     });
                 });
             });

@@ -20,6 +20,7 @@ import { AcquisitionEquipmentNode, CenterNode, CoilNode } from '../../tree/tree.
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
 import { CoilService } from 'src/app/coils/shared/coil.service';
+import { AcquisitionEquipmentService } from 'src/app/acquisition-equipments/shared/acquisition-equipment.service';
 
 
 @Component({
@@ -41,6 +42,7 @@ export class CenterNodeComponent implements OnChanges {
 
     constructor(
         private centerService: CenterService,
+        private acquisitionEquipmentService: AcquisitionEquipmentService,
         private acquisitionEquipmentPipe: AcquisitionEquipmentPipe,
         private coilService: CoilService,
         private keycloakService: KeycloakService,
@@ -67,13 +69,19 @@ export class CenterNodeComponent implements OnChanges {
         this.loading = true;
         this.centerService.get(this.node.id).then(
             center =>  {
-                if (center) {
+                if (center.acquisitionEquipments) {
                     this.node.acquisitionEquipments = center.acquisitionEquipments.map(
                             acqEq => new AcquisitionEquipmentNode(this.node, acqEq.id, this.acquisitionEquipmentPipe.transform(acqEq), 'UNLOADED', this.keycloakService.isUserAdminOrExpert()));
+                    this.loading = false;
+                    this.node.open();
+                } else {
+                    this.acquisitionEquipmentService.getAllByCenter(this.node.id).then(eqs => {
+                        this.node.acquisitionEquipments = eqs.map(acqEq => new AcquisitionEquipmentNode(this.node, acqEq.id, this.acquisitionEquipmentPipe.transform(acqEq), 'UNLOADED', this.keycloakService.isUserAdminOrExpert()));
+                        this.loading = false;
+                        this.node.open();
+                    });
                 }
-                this.loading = false;
-                this.node.open();
-            }).catch(() => {
+            }).catch((e) => {
                 this.loading = false;
             });
     }
