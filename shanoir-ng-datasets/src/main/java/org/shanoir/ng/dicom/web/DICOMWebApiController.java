@@ -33,6 +33,18 @@ public class DICOMWebApiController implements DICOMWebApi {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(DICOMWebApiController.class);
 	
+	private static final String INCLUDEFIELD = "includefield";
+
+	private static final String LIMIT = "limit";
+
+	private static final String OFFSET = "offset";
+
+	private static final String PATIENT_ID = "00100020";
+
+	private static final String PATIENT_NAME = "PatientName";
+
+	private static final String STUDY_INSTANCE_UID = "StudyInstanceUID";
+
 	@Autowired
 	private ExaminationService examinationService;
 	
@@ -53,21 +65,28 @@ public class DICOMWebApiController implements DICOMWebApi {
 	@Override
 	public ResponseEntity<String> findStudies(Map<String, String> allParams) throws RestServiceException, JsonMappingException, JsonProcessingException {
 		Page<Examination> examinations = null;
-		int offset = Integer.valueOf(allParams.get("offset"));
-		int limit = Integer.valueOf(allParams.get("limit"));
-		String includeField = allParams.get("includefield");
+		int offset = Integer.valueOf(allParams.get(OFFSET));
+		int limit = Integer.valueOf(allParams.get(LIMIT));
 		Pageable pageable = PageRequest.of(offset, limit);
+		String includeField = allParams.get(INCLUDEFIELD);
 		// 1. Search for studies==examinations with patient name
 		// (DICOM patientID does not make sense in case of Shanoir)
-		String patientName = allParams.get("00100020");
-		if (patientName != null) {
-			// Remove leading and trailing asterix here
-			patientName = patientName.replaceAll("^\\*+", "").replaceAll("\\*+$", "");
-			examinations = examinationService.findPage(pageable, patientName);
+		String patientIDTagParam = allParams.get(PATIENT_ID);
+		String patientNameParam = allParams.get(PATIENT_NAME);
+		if (patientIDTagParam != null || patientNameParam != null) {
+			String subjectName;
+			if (patientIDTagParam != null) {
+				subjectName = patientIDTagParam;
+			} else {
+				subjectName = patientNameParam;
+			}
+			// Remove leading and trailing asterix here to search with subject name
+			subjectName = subjectName.replaceAll("^\\*+", "").replaceAll("\\*+$", "");
+			examinations = examinationService.findPage(pageable, subjectName);
 		} else {
-			List<Examination> examinationList = new ArrayList<>();
 			// 2. Manage still existing case with single study instance UID
-			String studyInstanceUID = allParams.get("StudyInstanceUID");
+			List<Examination> examinationList = new ArrayList<>();
+			String studyInstanceUID = allParams.get(STUDY_INSTANCE_UID);
 			if (studyInstanceUID != null) {
 				String examinationIdString = studyInstanceUID.substring(studyInstanceUID.lastIndexOf(".") + 1, studyInstanceUID.length());
 				Examination examination = examinationService.findById(Long.valueOf(examinationIdString));
