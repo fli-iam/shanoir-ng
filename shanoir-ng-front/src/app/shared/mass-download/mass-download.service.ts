@@ -57,6 +57,11 @@ export type Report = {
     converter?: number;
     nbQueues?: number;
     unzip?: boolean;
+    folderStructureOptions?: {
+        subjectFolders?: boolean,
+        examinationFolders?: boolean,
+        datasetFolders?: boolean
+    }
 };
 
 export type DownloadInputIds = StrictUnion<
@@ -368,41 +373,46 @@ export class MassDownloadService {
     }
 
     private buildExtractedFilePath(dataset: Dataset, zipName: string, fileName: string, setup: DownloadSetup): string {
-        return this.buildFoldersPath(dataset, setup) + zipName.replace('.zip', '') + '/' + fileName;
+        return this.buildFoldersPath(dataset, setup) 
+            + (setup.datasetFolders ? zipName.replace('.zip', '') + '/' : '')
+            + fileName;
     }
 
     private buildShortExtractedFilePath(dataset: Dataset, fileIndex: number, fileName: string, setup: DownloadSetup): string {
             let fileNameSplit: string[] = fileName.split('.');
             let extension: string =  fileNameSplit.pop();
-            return this.buildShortFoldersPath(dataset, setup) + 'ds' + dataset.id + '/' + fileIndex + '.' + extension;
+            return this.buildShortFoldersPath(dataset, setup) 
+                + (setup.datasetFolders ? 'ds' + dataset.id + '/' : '') 
+                + fileIndex + '.' + extension;
     }
 
     private buildFoldersPath(dataset: Dataset, setup: DownloadSetup): string {
-        if (dataset.datasetProcessing) {
-            return 'Subject-' + dataset.subject?.id
-                + '/'
-                + dataset.name
-                + '/';
-        } else {
-            let str: string = '/';
-            if (setup.subjectFolders) {
-                str += 'Subject-' + dataset.datasetAcquisition?.examination?.subject?.id + '/';
-            }
-            if (setup.examinationFolders) {
-                str +=   + dataset.datasetAcquisition?.examination?.comment
-                    + '_' + dataset.datasetAcquisition?.examination?.id
-                    + '/';
-            }
-            return str;
+        let str: string = '/';
+        if (setup.subjectFolders) {
+            str += 'Subject-' + (
+                dataset.datasetProcessing
+                    ? dataset.subject?.id
+                    : dataset.datasetAcquisition?.examination?.subject?.id
+            ) + '/';
         }
+        if (setup.examinationFolders && !dataset.datasetProcessing) { // for processed datasets, skip the exam folder
+            str += dataset.datasetAcquisition?.examination?.comment
+                + '_' + dataset.datasetAcquisition?.examination?.id
+                + '/';
+        }
+        return str;
     }
 
     private buildShortFoldersPath(dataset: Dataset, setup: DownloadSetup): string {
         let str: string = '/';
         if (setup.subjectFolders) {
-            str += 'subj' + dataset.datasetAcquisition?.examination?.subject?.id + '/';
+            str += 'subj'+ (
+                dataset.datasetProcessing
+                    ? dataset.subject?.id
+                    : dataset.datasetAcquisition?.examination?.subject?.id
+            ) + '/';
         }
-        if (setup.examinationFolders) {
+        if (setup.examinationFolders && !dataset.datasetProcessing) {
             str += 'exam' + dataset.datasetAcquisition?.examination?.id + '/';
         }
         return str;
@@ -496,7 +506,12 @@ export class MassDownloadService {
             format : setup.format,
             nbQueues: setup.nbQueues,
             unzip: setup.unzip,
-            converter: setup.converter
+            converter: setup.converter,
+            folderStructureOptions: {
+                subjectFolders: setup.subjectFolders,
+                examinationFolders: setup.examinationFolders,
+                datasetFolders: setup.datasetFolders
+            }
         };
         datasetIds.forEach(id => report.list[id] = { status: 'QUEUED' });
         return report;
@@ -569,8 +584,7 @@ export class MassDownloadService {
                         return parentFolderHandle.getFileHandle(this.REPORT_FILENAME).then(fileHandle => {
                             return fileHandle.getFile().then(file => {
                                 return file.text().then(text => {
-                                    let reportFromFile: Report = JSON.parse(text);
-                                    reportFromFile.nbError = 0;
+                                    report.nbError = 0;
                                     let noSuccessIds: number[] = Object.keys(report.list).filter(key => report.list[key].status != 'SUCCESS').map(key => parseInt(key));
                                     task.status = 2;
                                     task.sessionId = this.sessionService.sessionId;
@@ -582,6 +596,17 @@ export class MassDownloadService {
                                         setup.converter = report.converter;
                                         setup.unzip = report.unzip;
                                         setup.datasets = datasets;
+                                        if (report.folderStructureOptions) { // keep default values if absent, don't set to false
+                                            if (report.folderStructureOptions.subjectFolders != undefined) {
+                                                setup.subjectFolders = report.folderStructureOptions.subjectFolders;
+                                            }
+                                            if (report.folderStructureOptions.examinationFolders != undefined) {
+                                                setup.examinationFolders = report.folderStructureOptions.examinationFolders;
+                                            }
+                                            if (report.folderStructureOptions.datasetFolders != undefined) {
+                                                setup.datasetFolders = report.folderStructureOptions.datasetFolders;
+                                            }
+                                        }
                                         this._downloadDatasets(setup, null, task, report, parentFolderHandle)
                                     });
                                 });
