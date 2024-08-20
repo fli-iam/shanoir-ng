@@ -28,6 +28,7 @@ import { Tag } from '../tags/tag.model';
 import { SuperPromise } from "../utils/super-promise";
 
 export abstract class ShanoirNode {
+
     abstract title: string;
     private _opened: boolean = false;
     private openPromise: Promise<void>;

@@ -114,6 +114,13 @@ export class TreeService {
         });
     }
 
+    updateTree() {
+        // update everything
+        let studyId: number = this.study?.id;
+        this.study = null;
+        this.initStudy(studyId);
+    }
+
     removeCurrentNode() {
         const route: string = this.selectedNode.route;
         Object.entries(this.selectedNode.parent).forEach((entry, index) => {

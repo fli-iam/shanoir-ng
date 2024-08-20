@@ -337,6 +337,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
         return this.modeSpecificSave(afterSave)
             .then(study => {
                 this.footerState.loading = false;
+                this.treeService.updateTree();
                 return study;
             })
             /* manages "after submit" errors like a unique constraint */
