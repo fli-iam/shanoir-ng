@@ -157,7 +157,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 			JOptionPane.showMessageDialog(
 				frame,
 				scrollPane,
-				"Download Report",
+				"Download or copy report",
 				JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
