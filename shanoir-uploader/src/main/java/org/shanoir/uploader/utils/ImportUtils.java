@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import javax.swing.JProgressBar;
@@ -226,7 +227,7 @@ public class ImportUtils {
 		newStudyForJob.setStudyInstanceUID(study.getStudyInstanceUID());
 		newStudyForJob.setStudyDescription(study.getStudyDescription());
 		importJob.setStudy(newStudyForJob);
-		importJob.setSelectedSeries(new HashSet<Serie>());
+		importJob.setSelectedSeries(new LinkedHashSet<Serie>());
 		return importJob;
 	}
 
@@ -342,10 +343,10 @@ public class ImportUtils {
 	 * @return
 	 * @throws FileNotFoundException 
 	 */
-	public static List<String> downloadOrCopyFilesIntoUploadFolder(boolean isFromPACS, JProgressBar progressBar, String studyInstanceUID, List<Serie> selectedSeries, File uploadFolder, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, IDicomServerClient dicomServerClient, String filePathDicomDir) throws FileNotFoundException {
+	public static List<String> downloadOrCopyFilesIntoUploadFolder(boolean isFromPACS, JProgressBar progressBar, StringBuilder downloadOrCopyReport, String studyInstanceUID, List<Serie> selectedSeries, File uploadFolder, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, IDicomServerClient dicomServerClient, String filePathDicomDir) throws FileNotFoundException {
 		List<String> allFileNames = null;
 		if (isFromPACS) {
-			allFileNames = dicomServerClient.retrieveDicomFiles(progressBar, studyInstanceUID, selectedSeries, uploadFolder);
+			allFileNames = dicomServerClient.retrieveDicomFiles(progressBar, downloadOrCopyReport, studyInstanceUID, selectedSeries, uploadFolder);
 			if(allFileNames != null && !allFileNames.isEmpty()) {
 				logger.info(uploadFolder.getName() + ": " + allFileNames.size() + " DICOM files downloaded from PACS.");
 			} else {
@@ -353,7 +354,7 @@ public class ImportUtils {
 				return null;
 			}
 		} else {
-			allFileNames = copyFilesToUploadFolder(progressBar, dicomFileAnalyzer, selectedSeries, uploadFolder, filePathDicomDir);
+			allFileNames = copyFilesToUploadFolder(progressBar, downloadOrCopyReport, dicomFileAnalyzer, selectedSeries, uploadFolder, filePathDicomDir);
 			if(allFileNames != null) {
 				logger.info(uploadFolder.getName() + ": " + allFileNames.size() + " DICOM files copied from CD/DVD/local file system.");
 			} else {
@@ -363,7 +364,7 @@ public class ImportUtils {
 		return allFileNames;
 	}
 
-	public static List<String> copyFilesToUploadFolder(JProgressBar progressBar, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, List<Serie> selectedSeries, final File uploadFolder, String filePathDicomDir) throws FileNotFoundException {
+	public static List<String> copyFilesToUploadFolder(JProgressBar progressBar, StringBuilder downloadOrCopyReport, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, List<Serie> selectedSeries, final File uploadFolder, String filePathDicomDir) throws FileNotFoundException {
 		List<String> allFileNames = new ArrayList<String>();
 		int totalPercent = 0;
 		int serieNumber = 0;
@@ -372,6 +373,7 @@ public class ImportUtils {
 			serieNumber++;
 			List<String> newFileNamesOfSerie = new ArrayList<String>();
 			if (serie.getInstances() == null) {
+				downloadOrCopyReport.append("Copy: serie (" + serie.getSeriesNumber() + ") " + serie.getSeriesDescription() + " has no images (ignored).\n");
 				continue;
 			}
 			for (Instance instance : serie.getInstances()) {
@@ -393,6 +395,7 @@ public class ImportUtils {
 				newFileNamesOfSerie.add(dicomFileName);
 				instance.setReferencedFileID(new String[]{dicomFileName});
 			}
+			downloadOrCopyReport.append("Copy: serie (" + serie.getSeriesNumber() + ") " + serie.getSeriesDescription() + " copied with " + newFileNamesOfSerie.size() + " images.\n");
 			allFileNames.addAll(newFileNamesOfSerie);
 			totalPercent = Math.round(((float) serieNumber / numberOfSeries) * 100);
 			progressBar.setValue(totalPercent);

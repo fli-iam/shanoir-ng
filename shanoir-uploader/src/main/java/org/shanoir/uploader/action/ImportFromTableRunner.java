@@ -11,14 +11,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-import javax.swing.JProgressBar;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingWorker;
 
@@ -228,7 +227,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			return false;
 		}
 		importJob.setStudy(selectedStudy);
-		importJob.setSelectedSeries(new HashSet<Serie>());
+		importJob.setSelectedSeries(new LinkedHashSet<Serie>());
 		selectedSeries.stream().forEach(s -> importJob.getSelectedSeries().add(s));
 		
 		PatientVerification patientVerification = importJob.getPatientVerification();
@@ -250,7 +249,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		 */
 		HashMap<String, ImportJob> downloadImportJobs = new HashMap<String, ImportJob>();
 		downloadImportJobs.put(dicomStudy.getStudyInstanceUID(), importJob);
-		Runnable downloadRunnable = new DownloadOrCopyRunnable(true, importFromTableWindow.downloadProgressBar,  dicomServerClient, dicomFileAnalyzer,  null, downloadImportJobs);
+		Runnable downloadRunnable = new DownloadOrCopyRunnable(true, importFromTableWindow.frame, importFromTableWindow.downloadProgressBar,  dicomServerClient, dicomFileAnalyzer,  null, downloadImportJobs);
 		Thread downloadThread = new Thread(downloadRunnable);
 		downloadThread.start();
 		while (downloadThread.isAlive()) {
