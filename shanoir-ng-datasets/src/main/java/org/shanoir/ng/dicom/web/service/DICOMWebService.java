@@ -107,15 +107,15 @@ public class DICOMWebService {
 		}
 	}
 
-	public String findStudy(String studyInstanceUID) {
+	public String findStudy(String studyInstanceUID, String includeField) {
 		try {
-			HttpGet httpGet = new HttpGet(this.serverURL + "?StudyInstanceUID=" + studyInstanceUID);
+			HttpGet httpGet = new HttpGet(this.serverURL + "?StudyInstanceUID=" + studyInstanceUID + "&includefield=" + includeField);
 			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
 				HttpEntity entity = response.getEntity();
 				if (entity != null) {
 					return EntityUtils.toString(entity);
 				} else {
-					LOG.error("DICOMWeb: findStudy: empty response entity.");					
+					LOG.error("DICOMWeb: findStudy: empty response entity for studyInstanceUID: " + studyInstanceUID);					
 				}
 			}
 		} catch (Exception e) {
@@ -133,7 +133,7 @@ public class DICOMWebService {
 				if (entity != null) {
 					return EntityUtils.toString(entity);
 				} else {
-					LOG.error("DICOMWeb: findSeriesOfStudy: empty response entity.");				
+					LOG.error("DICOMWeb: findSeriesOfStudy: empty response entity for studyInstanceUID: " + studyInstanceUID);		
 				}
 			}
 		} catch (Exception e) {
