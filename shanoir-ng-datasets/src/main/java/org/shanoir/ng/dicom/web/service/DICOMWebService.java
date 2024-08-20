@@ -129,7 +129,9 @@ public class DICOMWebService {
 			String url = this.serverURL + "/" + studyInstanceUID + "/series";
 			HttpGet httpGet = new HttpGet(url);
 			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
+				LOG.error("findSeriesOfStudy response : " + response);
 				HttpEntity entity = response.getEntity();
+				LOG.error("findSeriesOfStudy entity : " + entity);
 				if (entity != null) {
 					return EntityUtils.toString(entity);
 				} else {

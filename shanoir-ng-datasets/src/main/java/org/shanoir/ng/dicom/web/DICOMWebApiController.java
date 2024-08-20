@@ -70,6 +70,7 @@ public class DICOMWebApiController implements DICOMWebApi {
 
 	@Override
 	public ResponseEntity<String> findStudies(Map<String, String> allParams) throws RestServiceException, JsonMappingException, JsonProcessingException {
+		LOG.error("findStudies : " + allParams);
 		Page<Examination> examinations = null;
 		int offset = Integer.valueOf(allParams.get(OFFSET));
 		int limit = Integer.valueOf(allParams.get(LIMIT));
@@ -153,9 +154,12 @@ public class DICOMWebApiController implements DICOMWebApi {
 	public ResponseEntity<String> findSeriesOfStudy(String examinationUID)
 			throws RestServiceException, JsonMappingException, JsonProcessingException {
 		String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
+		LOG.error("findSeriesOfStudy studyInstanceUID : " + studyInstanceUID + " / examinationUID : " + examinationUID);
 		if (studyInstanceUID != null) {
 			String response = dicomWebService.findSeriesOfStudy(studyInstanceUID);
+			LOG.error("findSeriesOfStudy response : " + response);
 			JsonNode root = mapper.readTree(response);
+			LOG.error("findSeriesOfStudy root : " + root);
 			root = sortSeriesBySeriesNumber(root);
 			studyInstanceUIDHandler.replaceStudyInstanceUIDsWithExaminationUIDs(root, examinationUID, false);
 			return new ResponseEntity<String>(mapper.writeValueAsString(root), HttpStatus.OK);
