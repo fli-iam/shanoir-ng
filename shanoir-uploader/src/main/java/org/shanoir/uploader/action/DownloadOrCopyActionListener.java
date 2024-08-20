@@ -63,13 +63,23 @@ public class DownloadOrCopyActionListener implements ActionListener {
 		if (mainWindow.dicomTree == null) {
 			return;
 		}
+		final Map<String, ImportJob> importJobs = mainWindow.getSAL().getImportJobs();
+		for (ImportJob importJob : importJobs.values()) {
+			if (importJob.getSelectedSeries() == null || importJob.getSelectedSeries().isEmpty()) {
+				JOptionPane.showMessageDialog(mainWindow.frame,
+				"No serie selected.",
+				resourceBundle.getString("shanoir.uploader.select.error.title"),
+				JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+		}
+
 		/**
 		 * 1. Read values from GUI, entered by user
 		 */
 		Patient patient = null;
 		Patient firstPatient = null;
 		Subject firstSubject = null;
-		final Map<String, ImportJob> importJobs = mainWindow.getSAL().getImportJobs();
 		for (ImportJob importJob : importJobs.values()) {
 			// for the moment: one patient verification, extend later for n-patient verification
 			patient = adjustPatientWithPatientVerificationGUIValues(importJob.getPatient());
