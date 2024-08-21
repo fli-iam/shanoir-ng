@@ -22,6 +22,7 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +68,9 @@ public class DicomSRImporterService {
 
 	@Autowired
 	private ExaminationRepository examinationRepository;
+
+	@Autowired
+    private SolrService solrService;
 	
 	@Autowired
 	private DatasetService datasetService;
@@ -250,7 +254,8 @@ public class DicomSRImporterService {
 //		completeDatasetFromDicomSR(datasetAttributes, measurementDataset);
 		createMetadata(measurementDataset);
 		createDatasetExpression(datasetAttributes, measurementDataset);
-		datasetService.create(measurementDataset);
+		Dataset created = datasetService.create(measurementDataset);
+		solrService.indexDataset(created.getId());
 	}
 
 	/**
