@@ -1,5 +1,6 @@
 package org.shanoir.ng.dicom.web;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -110,6 +111,7 @@ public class DICOMWebApiController implements DICOMWebApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		String studiesJson = queryDicomServerForDicomWeb(examinations, includeField);
+		//LOG.error("findStudies studiesJson: " + studiesJson);
 		return new ResponseEntity<String>(studiesJson, HttpStatus.OK);
 	}
 
@@ -157,11 +159,11 @@ public class DICOMWebApiController implements DICOMWebApi {
 		LOG.error("findSeriesOfStudy studyInstanceUID : " + studyInstanceUID + " / examinationUID : " + examinationUID);
 		if (studyInstanceUID != null) {
 			String response = dicomWebService.findSeriesOfStudy(studyInstanceUID);
-			LOG.error("findSeriesOfStudy response : " + response);
+
 			JsonNode root = mapper.readTree(response);
-			LOG.error("findSeriesOfStudy root : " + root);
 			root = sortSeriesBySeriesNumber(root);
 			studyInstanceUIDHandler.replaceStudyInstanceUIDsWithExaminationUIDs(root, examinationUID, false);
+			LOG.error("API CONTROLLER root : " + root);
 			return new ResponseEntity<String>(mapper.writeValueAsString(root), HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);

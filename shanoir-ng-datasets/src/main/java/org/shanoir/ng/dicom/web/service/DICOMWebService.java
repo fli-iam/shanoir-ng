@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.hc.client5.http.classic.methods.HttpDelete;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -127,13 +128,15 @@ public class DICOMWebService {
 	public String findSeriesOfStudy(String studyInstanceUID) {
 		try {
 			String url = this.serverURL + "/" + studyInstanceUID + "/series";
+			LOG.error("findSeriesOfStudy url : " + url);
 			HttpGet httpGet = new HttpGet(url);
 			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
-				LOG.error("findSeriesOfStudy response : " + response);
+				LOG.error("service response : " + response);
 				HttpEntity entity = response.getEntity();
-				LOG.error("findSeriesOfStudy entity : " + entity);
+				LOG.error("service entity : " + entity);
 				if (entity != null) {
-					return EntityUtils.toString(entity);
+					String res = new String(EntityUtils.toString(entity).getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
+					return res;
 				} else {
 					LOG.error("DICOMWeb: findSeriesOfStudy: empty response entity for studyInstanceUID: " + studyInstanceUID);		
 				}
