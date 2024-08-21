@@ -128,13 +128,27 @@ export class CentersNode extends ShanoirNode {
 
 export abstract class CardsNode extends ShanoirNode {
 
+    load: SuperPromise<void> = new SuperPromise();
+
     constructor(
         public parent: ShanoirNode,
         public id: number,
         public label: string,
-        public cards: CardNode[] | UNLOADED
+        private _cards: CardNode[] | UNLOADED
     ) {
         super(parent, id, label);
+        this.registerOpenPromise(this.load);
+    }
+
+    set cards(cards: CardNode[] | UNLOADED) {
+        this._cards = cards;
+        if (cards && cards != UNLOADED) {
+            this.load.resolve();
+        }
+    }
+
+    get cards(): CardNode[] | UNLOADED {
+        return this._cards;
     }
 
     public abstract title;
