@@ -1,6 +1,5 @@
 package org.shanoir.ng.dicom.web;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -110,7 +109,6 @@ public class DICOMWebApiController implements DICOMWebApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		String studiesJson = queryDicomServerForDicomWeb(examinations, includeField);
-		//LOG.error("findStudies studiesJson: " + studiesJson);
 		return new ResponseEntity<String>(studiesJson, HttpStatus.OK);
 	}
 
