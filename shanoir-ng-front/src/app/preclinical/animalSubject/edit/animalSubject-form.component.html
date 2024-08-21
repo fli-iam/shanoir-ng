@@ -155,12 +155,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</fieldset>
 
 			<fieldset *ngIf="mode !== 'view'">
-					<subject-study-list [subject]="preclinicalSubject.subject" [displaySubjectType]="false" [selectableList]="studies" [(ngModel)]="preclinicalSubject.subject.subjectStudyList" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>
-			</fieldset>
-			<fieldset *ngIf="mode == 'view'">
-					<legend i18n="Subject data|Title@@subjectDetailDataTitle">Data</legend>
-					<reverse-subject-node [input]="breadcrumbsService.currentStep.data.subjectNode ? breadcrumbsService.currentStep.data.subjectNode : preclinicalSubject.subject"
-						(nodeInit)="onSubjectNodeInit($event)"></reverse-subject-node>
+				<subject-study-list [subject]="preclinicalSubject.subject" [displaySubjectType]="false" [selectableList]="studies" [(ngModel)]="preclinicalSubject.subject.subjectStudyList" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>
 			</fieldset>
 			<div *ngIf="displayPathologyTherapy">
 				<fieldset>

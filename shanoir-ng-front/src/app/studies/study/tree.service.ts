@@ -33,9 +33,9 @@ import { DatasetAcquisitionService } from 'src/app/dataset-acquisitions/shared/d
 import { DatasetProcessingService } from 'src/app/datasets/shared/dataset-processing.service';
 import { DatasetService } from 'src/app/datasets/shared/dataset.service';
 import { ExaminationService } from 'src/app/examinations/shared/examination.service';
+import { PreclinicalSubject } from "src/app/preclinical/animalSubject/shared/preclinicalSubject.model";
 import { Entity } from "src/app/shared/components/entity/entity.abstract";
 import { KeycloakService } from "src/app/shared/keycloak/keycloak.service";
-import { SubjectStudy } from "src/app/subjects/shared/subject-study.model";
 import { SuperPromise } from 'src/app/utils/super-promise';
 import { AcquisitionEquipmentNode, CenterNode, CentersNode, ClinicalSubjectNode, CoilNode, DatasetAcquisitionNode, DatasetNode, ExaminationNode, MemberNode, MembersNode, MetadataNode, PreclinicalSubjectNode, ProcessingNode, QualityCardNode, RightNode, ShanoirNode, StudyCardNode, StudyNode, SubjectNode, SubjectsNode, UNLOADED } from '../../tree/tree.model';
 import { StudyRightsService } from "../shared/study-rights.service";
@@ -487,6 +487,10 @@ export class Selection {
 
     static fromSubject(subject: Subject): Selection {
         return new Selection(subject.id, 'subject', subject.subjectStudyList.map(ss => ss.study.id), subject);
+    }
+
+    static fromPreclinicalSubject(preclinicalSubject: PreclinicalSubject): Selection {
+        return new Selection(preclinicalSubject.subject.id, 'subject', preclinicalSubject.subject.subjectStudyList.map(ss => ss.study.id), preclinicalSubject.subject);
     }
 
     static fromExamination(examination: Examination): Selection {

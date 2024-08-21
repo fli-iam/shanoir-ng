@@ -163,7 +163,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
             }
         }
         Promise.all([this.entityPromise, choose]).then(() => {
-            if (this.mode != 'create'&& this.getTreeSelection) this.treeService.selection = this.getTreeSelection();
+            if (this.mode != 'create' && this.getTreeSelection) this.treeService.selection = this.getTreeSelection();
         });
         choose().then(() => {
             this.footerState = new FooterState(this.mode);

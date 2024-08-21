@@ -43,6 +43,7 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 import { AnimalSubject } from '../shared/animalSubject.model';
 import { AnimalSubjectService } from '../shared/animalSubject.service';
 import { PreclinicalSubject } from '../shared/preclinicalSubject.model';
+import { Selection } from 'src/app/studies/study/tree.service';
 
 
 @Component({
@@ -114,6 +115,10 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         return this.animalSubjectService;
     }
 
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromPreclinicalSubject(this.entity);
+    }
+
     private addToCache(key: string, toBeCached: any) {
         if (!this.breadcrumbsService.currentStep.isPrefilled(key))	{
             this.breadcrumbsService.currentStep.addPrefilled(key, []);
@@ -128,64 +133,49 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         return this.breadcrumbsService.currentStep.getPrefilledValue(key);
     }
 
-    initView(): Promise<void> {
-        this.loadData();
-        this.preclinicalSubject = new PreclinicalSubject();
-        this.preclinicalSubject.animalSubject = new AnimalSubject();
-        this.preclinicalSubject.subject = new Subject();
-        this.preclinicalSubject.animalSubject.id = this.id;
-        this.preclinicalSubject.id = this.id;
-        return this.animalSubjectService.getAnimalSubject(this.preclinicalSubject.id).then(animalSubject => {
-            this.subjectService.get(this.preclinicalSubject.id).then(subject => {
-                this.preclinicalSubject.animalSubject = animalSubject;
-                this.preclinicalSubject.subject = subject;
-                // subjectStudy
-                if (this.preclinicalSubject.subject.subjectStudyList && this.preclinicalSubject.subject.subjectStudyList.length > 0){
-                    this.subjectStudyList = [];
-                    for (let study of this.preclinicalSubject.subject.subjectStudyList) {
-                        let newSubjectStudy: SubjectStudy = this.getSubjectStudy(study);
-                        this.subjectStudyList.push(newSubjectStudy);
+    protected fetchEntity: () => Promise<PreclinicalSubject> = () => {
+        return this.idPromise.then(id => {
+            return this.getService().get(id).then(ps => {
+                return Promise.all([
+                    this.animalSubjectService.getAnimalSubject(ps.id),
+                    this.subjectService.get(ps.id)
+                ]).then(([animalSubject, subject]) => {
+                    ps.animalSubject = animalSubject;
+                    ps.subject = subject;
+                    // subjectStudy
+                    if (ps.subject.subjectStudyList && ps.subject.subjectStudyList.length > 0){
+                        this.subjectStudyList = [];
+                        for (let ss of ps.subject.subjectStudyList) {
+                            let newSubjectStudy: SubjectStudy = this.copySubjectStudy(ss);
+                            this.subjectStudyList.push(newSubjectStudy);
+                        }
+                        ps.subject.subjectStudyList = this.subjectStudyList;
                     }
-                    this.preclinicalSubject.subject.subjectStudyList = this.subjectStudyList;
-                }
-                //
-                this.subjectTherapyService.getSubjectTherapies(this.preclinicalSubject).then(st => {
-                    this.preclinicalSubject.therapies = st;
-                });
-                this.subjectPathologyService.getSubjectPathologies(this.preclinicalSubject).then(sp => {
-                    this.preclinicalSubject.pathologies = sp;
+                    return ps;
                 });
             });
         });
     }
 
-    initEdit(): Promise<void> {
-        this.loadData();
-        this.preclinicalSubject = new PreclinicalSubject();
-        this.preclinicalSubject.id = this.id;
-        this.preclinicalSubject.animalSubject = new AnimalSubject();
-        this.preclinicalSubject.animalSubject.id = this.id;
-        this.preclinicalSubject.subject = new Subject();
-        this.preclinicalSubject.subject.id = this.id;
-        return this.animalSubjectService.getAnimalSubject(this.id).then(animalSubject => {
-            animalSubject.specie = this.getReferenceById(animalSubject.specie);
-            animalSubject.strain = this.getReferenceById(animalSubject.strain);
-            animalSubject.biotype = this.getReferenceById(animalSubject.biotype);
-            animalSubject.provider = this.getReferenceById(animalSubject.provider);
-            animalSubject.stabulation = this.getReferenceById(animalSubject.stabulation);
-            this.subjectService.get(this.preclinicalSubject.id).then((subject) => {
-                this.preclinicalSubject.animalSubject = animalSubject;
-                this.preclinicalSubject.subject = subject;
-                // subjectStudy
-                if (this.preclinicalSubject.subject.subjectStudyList && this.preclinicalSubject.subject.subjectStudyList.length > 0){
-                    this.subjectStudyList = [];
-                    for (let study of this.preclinicalSubject.subject.subjectStudyList) {
-                        let newSubjectStudy: SubjectStudy = this.getSubjectStudy(study);
-                        this.subjectStudyList.push(newSubjectStudy);
-                    }
-                    this.preclinicalSubject.subject.subjectStudyList = this.subjectStudyList;
-                }
+    initView(): Promise<void> {
+        return this.loadData().then(() => {
+            this.subjectTherapyService.getSubjectTherapies(this.preclinicalSubject).then(st => {
+                this.preclinicalSubject.therapies = st;
             });
+            this.subjectPathologyService.getSubjectPathologies(this.preclinicalSubject).then(sp => {
+                this.preclinicalSubject.pathologies = sp;
+            });
+        });
+
+    }
+
+    initEdit(): Promise<void> {
+        return this.loadData().then(() => {
+            this.preclinicalSubject.animalSubject.specie = this.getReferenceById(this.preclinicalSubject.animalSubject.specie);
+            this.preclinicalSubject.animalSubject.strain = this.getReferenceById(this.preclinicalSubject.animalSubject.strain);
+            this.preclinicalSubject.animalSubject.biotype = this.getReferenceById(this.preclinicalSubject.animalSubject.biotype);
+            this.preclinicalSubject.animalSubject.provider = this.getReferenceById(this.preclinicalSubject.animalSubject.provider);
+            this.preclinicalSubject.animalSubject.stabulation = this.getReferenceById(this.preclinicalSubject.animalSubject.stabulation);
         });
     }
 
@@ -200,12 +190,14 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         });
     }
 
-    loadData() {
-        this.referenceService.getReferencesByCategory(PreclinicalUtils.PRECLINICAL_CAT_SUBJECT).then(references => {
-            this.references = references;
-            this.sortReferences();
-        });
-        this.loadAllStudies();
+    loadData(): Promise<void> {
+        return Promise.all([
+            this.referenceService.getReferencesByCategory(PreclinicalUtils.PRECLINICAL_CAT_SUBJECT).then(references => {
+                this.references = references;
+                this.sortReferences();
+            }),
+            this.loadAllStudies()            
+        ]).then();
     }
 
     loadAllStudies(): void {
@@ -220,15 +212,15 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         });
     }
 
-    getSubjectStudy(subjectStudy: SubjectStudy): SubjectStudy{
+    copySubjectStudy(subjectStudy: SubjectStudy): SubjectStudy{
     	let fixedSubjectStudy = new SubjectStudy();
     	fixedSubjectStudy.id = subjectStudy.id;
     	fixedSubjectStudy.subjectStudyIdentifier = subjectStudy.subjectStudyIdentifier;
     	fixedSubjectStudy.subjectType = subjectStudy.subjectType;
     	fixedSubjectStudy.physicallyInvolved = subjectStudy.physicallyInvolved;
-    	fixedSubjectStudy.subject = this.getSubject();
+    	fixedSubjectStudy.subject = this.copySubject(subjectStudy.subject);
     	fixedSubjectStudy.study = subjectStudy.study;
-    	fixedSubjectStudy.subjectId = this.preclinicalSubject.id;
+    	fixedSubjectStudy.subjectId = subjectStudy.subject.id;
     	fixedSubjectStudy.studyId = subjectStudy.study.id;
         fixedSubjectStudy.tags = subjectStudy.tags;
     	return fixedSubjectStudy;
@@ -248,10 +240,10 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     	return null;
     }
 
-	getSubject(): Subject{
+	copySubject(s: Subject): Subject{
 		let subject = new Subject();
-		subject.id = this.preclinicalSubject.subject.id;
-		subject.name = this.preclinicalSubject.subject.name;
+		subject.id = s.id;
+		subject.name = s.name;
 		return subject;
 	}
 
