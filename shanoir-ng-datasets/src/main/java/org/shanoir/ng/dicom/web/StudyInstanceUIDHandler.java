@@ -105,13 +105,16 @@ public class StudyInstanceUIDHandler {
 			}
 			// find attribute: RetrieveURL
 			JsonNode retrieveURLNode = root.get(DICOM_TAG_RETRIEVE_URL);
+			LOG.error("StudyInstanceUIDHandler retrieveURLNode : " + retrieveURLNode);
 			if (retrieveURLNode != null) {
 				ArrayNode retrieveURLArray = (ArrayNode) retrieveURLNode.path(VALUE);
 				for (int i = 0; i < retrieveURLArray.size(); i++) {
 					JsonNode arrayElement = retrieveURLArray.get(i);
 					String retrieveURL = arrayElement.asText();
 					if (studyLevel) { // study level
+						LOG.error("StudyInstanceUIDHandler retrieveURL avant: " + retrieveURL);
 						retrieveURL = retrieveURL.replaceFirst(RETRIEVE_URL_STUDY_LEVEL, STUDIES + examinationUID);
+						LOG.error("StudyInstanceUIDHandler retrieveURL apres: " + retrieveURL);
 						retrieveURLArray.remove(i);
 						retrieveURLArray.insert(i, retrieveURL);
 					} else { // serie level
