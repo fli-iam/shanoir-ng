@@ -129,11 +129,11 @@ public class DICOMWebService {
 		try {
 			String url = this.serverURL + "/" + studyInstanceUID + "/series";
 			HttpGet httpGet = new HttpGet(url);
+			httpGet.setHeader("Accept-Charset", "UTF-8");
 			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
 				HttpEntity entity = response.getEntity();
 				if (entity != null) {
-					String res = new String(EntityUtils.toString(entity).getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
-					return res;
+					return  EntityUtils.toString(entity, "UTF-8");
 				} else {
 					LOG.error("DICOMWeb: findSeriesOfStudy: empty response entity for studyInstanceUID: " + studyInstanceUID);		
 				}
@@ -148,11 +148,11 @@ public class DICOMWebService {
 		try {
 			String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/metadata";
 			HttpGet httpGet = new HttpGet(url);
+			httpGet.setHeader("Accept-Charset", "UTF-8");
 			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
 				HttpEntity entity = response.getEntity();
 				if (entity != null) {
-					String res = new String(EntityUtils.toString(entity).getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
-					return res;
+					return EntityUtils.toString(entity, "UTF-8");
 				} else {
 					LOG.error("DICOMWeb: findSerieMetadataOfStudy: empty response entity.");				
 				}
