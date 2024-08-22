@@ -1,5 +1,18 @@
 package org.shanoir.ng.importer.service;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import org.apache.solr.client.solrj.SolrServerException;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Sequence;
@@ -8,7 +21,12 @@ import org.dcm4che3.data.VR;
 import org.dcm4che3.io.DicomInputStream;
 import org.dcm4che3.io.DicomOutputStream;
 import org.shanoir.ng.dataset.modality.MeasurementDataset;
-import org.shanoir.ng.dataset.model.*;
+import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetExpression;
+import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.model.DatasetMetadata;
+import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
@@ -31,19 +49,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
 /**
  * This class imports the measurements of the ohif-viewer, that are
  * send as DICOM SR Structured Report. It modifies the by the OHIF
@@ -62,9 +67,9 @@ public class DicomSRImporterService {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(DicomSRImporterService.class);
 
-	private static final String SR = "SR";
-
 	private static final String IMAGING_MEASUREMENT_REPORT = "Imaging Measurement Report";
+
+	private static final String SR = "SR";
 
 	@Autowired
 	private ExaminationRepository examinationRepository;
@@ -247,30 +252,17 @@ public class DicomSRImporterService {
 	 */
 	private void createDataset(Examination examination, Dataset dataset, Attributes datasetAttributes) throws MalformedURLException, IOException, SolrServerException {
 		MeasurementDataset measurementDataset = new MeasurementDataset();
-		measurementDataset.setReferencedDatasetForSuperimposition(dataset); // keep link to original dataset
+		// keep link to original dataset
+		measurementDataset.setReferencedDatasetForSuperimposition(dataset);
 		measurementDataset.setStudyId(examination.getStudyId());
 		measurementDataset.setSubjectId(examination.getSubject().getId());
 		measurementDataset.setCreationDate(LocalDate.now());
-//		completeDatasetFromDicomSR(datasetAttributes, measurementDataset);
-		createMetadata(measurementDataset);
+		// for rights check: keep link to original acquisition
+		measurementDataset.setDatasetAcquisition(dataset.getDatasetAcquisition());
+		createMetadata(datasetAttributes, dataset.getOriginMetadata().getDatasetModalityType(), measurementDataset);
 		createDatasetExpression(datasetAttributes, measurementDataset);
-		Dataset created = datasetService.create(measurementDataset);
-		solrService.indexDataset(created.getId());
-	}
-
-	/**
-	 * Create the dataset metadata.
-	 * 
-	 * @param measurementDataset
-	 */
-	private void createMetadata(MeasurementDataset measurementDataset) {
-		DatasetMetadata originMetadata = new DatasetMetadata();
-		originMetadata.setName(IMAGING_MEASUREMENT_REPORT);
-		originMetadata.setComment(IMAGING_MEASUREMENT_REPORT);
-		originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
-		originMetadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);		
-		measurementDataset.setOriginMetadata(originMetadata);
-		measurementDataset.setUpdatedMetadata(originMetadata);
+		Dataset createdDataset = datasetService.create(measurementDataset);
+		solrService.indexDataset(createdDataset.getId());
 	}
 
 	/**
@@ -283,7 +275,18 @@ public class DicomSRImporterService {
 	 * @param datasetAttributes
 	 * @param measurementDataset
 	 */
-	private void completeDatasetFromDicomSR(Attributes datasetAttributes, MeasurementDataset measurementDataset) {
+	private void createMetadata(Attributes datasetAttributes, DatasetModalityType modalityType, MeasurementDataset measurementDataset) {
+		DatasetMetadata originMetadata = new DatasetMetadata();
+		String reportName = datasetAttributes.getString(Tag.SeriesDescription);
+		if (reportName == null || reportName.isEmpty()) {
+			originMetadata.setName(IMAGING_MEASUREMENT_REPORT);
+		} else {
+			originMetadata.setName(reportName);
+		}
+		originMetadata.setDatasetModalityType(modalityType);
+		originMetadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);		
+		measurementDataset.setOriginMetadata(originMetadata);
+		measurementDataset.setUpdatedMetadata(originMetadata);
 		Sequence contentSequence = datasetAttributes.getSequence(Tag.ContentSequence);
 		if (contentSequence != null) {
 			Attributes contentSequenceAttributes = contentSequence.get(4);
@@ -297,30 +300,35 @@ public class DicomSRImporterService {
 						Sequence measurementGroupSequence = imagingMeasurementsAttributes.getSequence(Tag.ContentSequence);
 						if (measurementGroupSequence != null) {
 							// get tracking identifier
-							Attributes measurementGroupAttributes1 = measurementGroupSequence.get(0);
-							if (measurementGroupAttributes1 != null) {
-								String trackingIdentifier = measurementGroupAttributes1.getString(Tag.TextValue);
-								String trackingIdentifierType = trackingIdentifier.substring(trackingIdentifier.indexOf(":") + 1);
+							Attributes measurementGroupAttributes = measurementGroupSequence.get(0);
+							if (measurementGroupAttributes != null) {
+								String trackingIdentifier = measurementGroupAttributes.getString(Tag.TextValue);
+								if (trackingIdentifier != null && !trackingIdentifier.isEmpty()) {
+									String trackingIdentifierType = trackingIdentifier.substring(trackingIdentifier.indexOf(":") + 1);
+									originMetadata.setComment(trackingIdentifierType);
+								}
 							}
+							// as it was complicated to acquire the below code and as in the future
+							// we might access dedicated values from DICOM SR, I keep it as comment
 							// level measured values
-							Attributes measurementGroupAttributes2 = measurementGroupSequence.get(2);
-							if (measurementGroupAttributes2 != null) {
-								Sequence measuredValueSequence = measurementGroupAttributes2.getSequence(Tag.MeasuredValueSequence);
-								if (measuredValueSequence != null) {
-									Attributes measuredValueAttributes = measuredValueSequence.get(0);
-									if (measuredValueAttributes != null) {
-										// get numeric value and graphic data
-										String numericValue = measuredValueAttributes.getString(Tag.NumericValue);
-									}
-								}
-								Sequence graphicDataSequence = measurementGroupAttributes2.getSequence(Tag.ContentSequence);
-								if (graphicDataSequence != null) {
-									Attributes graphicDataAttributes = graphicDataSequence.get(0);
-									if (graphicDataAttributes != null) {
-										String graphicData = graphicDataAttributes.getString(Tag.GraphicData);
-									}
-								}
-							}
+							// Attributes measurementGroupAttributes2 = measurementGroupSequence.get(2);
+							// if (measurementGroupAttributes2 != null) {
+							// 	Sequence measuredValueSequence = measurementGroupAttributes2.getSequence(Tag.MeasuredValueSequence);
+							// 	if (measuredValueSequence != null) {
+							// 		Attributes measuredValueAttributes = measuredValueSequence.get(0);
+							// 		if (measuredValueAttributes != null) {
+							// 			// get numeric value and graphic data
+							// 			String numericValue = measuredValueAttributes.getString(Tag.NumericValue);
+							// 		}
+							// 	}
+							// 	Sequence graphicDataSequence = measurementGroupAttributes2.getSequence(Tag.ContentSequence);
+							// 	if (graphicDataSequence != null) {
+							// 		Attributes graphicDataAttributes = graphicDataSequence.get(0);
+							// 		if (graphicDataAttributes != null) {
+							// 			String graphicData = graphicDataAttributes.getString(Tag.GraphicData);
+							// 		}
+							// 	}
+							// }
 						}
 					}
 				}
