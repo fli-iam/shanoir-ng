@@ -3,6 +3,8 @@ package org.shanoir.uploader.dicom;
 import java.io.File;
 import java.util.List;
 
+import javax.swing.JProgressBar;
+
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
@@ -36,7 +38,7 @@ public interface IDicomServerClient {
 	 * begin to send all files to a local server implemented in DcmRcvHelper.
 	 * @param selectedSeries
 	 */
-	public List<String> retrieveDicomFiles(String studyInstanceUID, List<Serie> selectedSeries, final File tempFolderForUpload);
+	public List<String> retrieveDicomFiles(final JProgressBar progressBar, StringBuilder downloadOrCopyReport, String studyInstanceUID, List<Serie> selectedSeries, final File tempFolderForUpload);
 	
 	/**
 	 * This method returns the work folder.
