@@ -115,7 +115,7 @@ public class DICOMWebService {
 			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
 				HttpEntity entity = response.getEntity();
 				if (entity != null) {
-					LOG.error("findStudy response : " + response);
+					LOG.error("findStudy response : " + entity);
 					return EntityUtils.toString(entity);
 				} else {
 					LOG.error("DICOMWeb: findStudy: empty response entity for studyInstanceUID: " + studyInstanceUID);					
