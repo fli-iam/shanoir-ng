@@ -8,7 +8,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
-import org.shanoir.ng.importer.service.DicomSRImporterService;
+import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +60,7 @@ public class StowRSMultipartRelatedRequestFilter extends GenericFilterBean {
 	private static final String DICOMWEB_STUDIES = "/dicomweb/studies";
 
 	@Autowired
-	private DicomSRImporterService dicomSRImporterService;
+	private DicomSEGAndSRImporterService dicomSRImporterService;
 	
     @Override
     public void doFilter(
@@ -78,8 +78,8 @@ public class StowRSMultipartRelatedRequestFilter extends GenericFilterBean {
     			for (int i = 0; i < count; i++) {
     				BodyPart bodyPart = multipart.getBodyPart(i);
     				if (bodyPart.isMimeType(CONTENT_TYPE_DICOM)) {
-    					if(!dicomSRImporterService.importDicomSR(bodyPart.getInputStream())) {
-    						throw new ServletException("Error in importDicomSR.");
+    					if(!dicomSRImporterService.importDicomSEGAndSR(bodyPart.getInputStream())) {
+    						throw new ServletException("Error in importDicomSEGAndSR.");
     					}
     				} else {
     					throw new IOException("StowRSMultipartRelatedRequestFilter: exception sending dicom file to pacs (stow-sr).");

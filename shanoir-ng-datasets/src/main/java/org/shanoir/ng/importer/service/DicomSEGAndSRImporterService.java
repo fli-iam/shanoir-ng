@@ -63,11 +63,13 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 @Service
-public class DicomSRImporterService {
+public class DicomSEGAndSRImporterService {
 	
-	private static final Logger LOG = LoggerFactory.getLogger(DicomSRImporterService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DicomSEGAndSRImporterService.class);
 
 	private static final String IMAGING_MEASUREMENT_REPORT = "Imaging Measurement Report";
+
+	private static final String SEG = "SEG";
 
 	private static final String SR = "SR";
 
@@ -102,20 +104,25 @@ public class DicomSRImporterService {
 	private String dicomWebRS;
 	
 	@Transactional
-	public boolean importDicomSR(InputStream inputStream) {
+	public boolean importDicomSEGAndSR(InputStream inputStream) {
 		// DicomInputStream consumes the input stream to read the data
 		try (DicomInputStream dIS = new DicomInputStream(inputStream)) {
 			Attributes metaInformationAttributes = dIS.readFileMetaInformation();
 			Attributes datasetAttributes = dIS.readDataset();
-			// check for modality: DICOM SR
-			if (SR.equals(datasetAttributes.getString(Tag.Modality))) {
+			String modality = datasetAttributes.getString(Tag.Modality);
+			// check for modality: DICOM SEG or SR
+			if (SEG.equals(modality) || SR.equals(modality)) {
 				// IMPORTANT: do this before to use correct StudyInstanceUID afterwards
-				Examination examination = modifyDicomSR(datasetAttributes);
+				Examination examination = modifyDicom(datasetAttributes);
 				Dataset dataset = findDataset(examination, datasetAttributes);
+				if (dataset == null) {
+					LOG.error("Error: importDicomSEGAndSR: source dataset could not be found.");
+					return false;	
+				}
 				createDataset(examination, dataset, datasetAttributes);
 				sendToPacs(metaInformationAttributes, datasetAttributes);
 			} else {
-				LOG.error("Error: importDicomSR: other modality sent then SR.");
+				LOG.error("Error: importDicomSEGAndSR: other modality sent then SEG or SR.");
 				return false;
 			}
 		} catch (Exception e) {
@@ -140,7 +147,7 @@ public class DicomSRImporterService {
 	 * 
 	 * @param datasetAttributes
 	 */
-	private Examination modifyDicomSR(Attributes datasetAttributes) {
+	private Examination modifyDicom(Attributes datasetAttributes) {
 		String examinationUID = datasetAttributes.getString(Tag.StudyInstanceUID);
 		Long examinationID = Long.valueOf(examinationUID.substring(StudyInstanceUIDHandler.PREFIX.length()));
 		Examination examination = examinationRepository.findById(examinationID).get();
@@ -177,29 +184,56 @@ public class DicomSRImporterService {
 	 */
 	private Dataset findDataset(Examination examination, Attributes datasetAttributes) {
 		String studyInstanceUID = datasetAttributes.getString(Tag.StudyInstanceUID);
-		String seriesInstanceUID;
-		String sOPInstanceUID;
+		String seriesInstanceUID = null;
+		String sOPInstanceUID = null;
+		// DICOM SR: use CurrentRequestedProcedureEvidenceSequence
 		Sequence evidenceSequence = datasetAttributes.getSequence(Tag.CurrentRequestedProcedureEvidenceSequence);
 		if (evidenceSequence != null) {
 			Attributes itemEvidenceSequence = evidenceSequence.get(0);
-			if (itemEvidenceSequence != null) {
-				Sequence seriesSequence = itemEvidenceSequence.getSequence(Tag.ReferencedSeriesSequence);
-				if (seriesSequence != null) {
-					Attributes itemSeriesSequence = seriesSequence.get(0);
-					if (itemEvidenceSequence != null) {
-						Sequence sOPSequence = itemSeriesSequence.getSequence(Tag.ReferencedSOPSequence);
-						if (sOPSequence != null) {
-							Attributes itemSOPSequence = sOPSequence.get(0);
-							seriesInstanceUID = itemSeriesSequence.getString(Tag.SeriesInstanceUID);
-							sOPInstanceUID = itemSOPSequence.getString(Tag.ReferencedSOPInstanceUID);
-							return findDatasetByUIDs(examination, studyInstanceUID, seriesInstanceUID, sOPInstanceUID);
-						}
+			if (itemEvidenceSequence == null) {
+				LOG.error("Error: missing sequences/attributes CurrentRequestedProcedureEvidenceSequence in DICOM SR.");
+				return null;
+			}
+			Sequence seriesSequence = itemEvidenceSequence.getSequence(Tag.ReferencedSeriesSequence);
+			if (seriesSequence != null) {
+				Attributes itemSeriesSequence = seriesSequence.get(0);
+				if (itemEvidenceSequence != null) {
+					Sequence sOPSequence = itemSeriesSequence.getSequence(Tag.ReferencedSOPSequence);
+					if (sOPSequence != null) {
+						Attributes itemSOPSequence = sOPSequence.get(0);
+						seriesInstanceUID = itemSeriesSequence.getString(Tag.SeriesInstanceUID);
+						sOPInstanceUID = itemSOPSequence.getString(Tag.ReferencedSOPInstanceUID);
 					}
 				}
 			}
+		// DICOM SEG: use ReferencedSeriesSequence
+		} else {
+			// Get SeriesInstanceUID at first
+			Sequence referencedSeriesSequence = datasetAttributes.getSequence(Tag.ReferencedSeriesSequence);
+			if (referencedSeriesSequence == null) {
+				LOG.error("Error: missing sequences/attributes ReferencedSeriesSequence in DICOM SEG.");
+				return null;
+			}
+			Attributes itemReferencedSeriesSequence = referencedSeriesSequence.get(0);
+			if (itemReferencedSeriesSequence == null) {
+				LOG.error("Error: missing sequences/attributes itemReferencedSeriesSequence in DICOM SEG.");
+				return null;
+			}
+			seriesInstanceUID = itemReferencedSeriesSequence.getString(Tag.SeriesInstanceUID);
+			// Get SOPInstanceUID second
+			Sequence referencedInstanceSequence = itemReferencedSeriesSequence.getSequence(Tag.ReferencedInstanceSequence);
+			if (referencedInstanceSequence == null) {
+				LOG.error("Error: missing sequences/attributes ReferencedInstanceSequence in DICOM SEG.");
+				return null;
+			}
+			Attributes itemReferencedInstanceSequence = referencedInstanceSequence.get(0);
+			if (itemReferencedInstanceSequence == null) {
+				LOG.error("Error: missing sequences/attributes itemReferencedInstanceSequence in DICOM SEG.");
+				return null;
+			}
+			sOPInstanceUID = itemReferencedInstanceSequence.getString(Tag.ReferencedSOPInstanceUID);
 		}
-		LOG.error("Error: missing sequences/attributes in DICOM SR.");
-		return null;
+		return findDatasetByUIDs(examination, studyInstanceUID, seriesInstanceUID, sOPInstanceUID);
 	}
 	
 	/**
@@ -238,7 +272,7 @@ public class DicomSRImporterService {
 				}
 			}
 		}
-		LOG.error("Error: dataset could not be found with UIDs from DICOM SR.");	
+		LOG.error("Error: dataset could not be found with UIDs from DICOM SEG or SR.");	
 		return null;
 	}
 	
