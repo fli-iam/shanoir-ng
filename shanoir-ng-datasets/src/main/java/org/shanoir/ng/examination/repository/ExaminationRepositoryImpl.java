@@ -91,7 +91,7 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
 		if (subjectName != null) {
 			nbPreParams++;
 			subjectNameIndex = nbPreParams;
-			queryEndStr +=  "and ex.subject.name is ?" + subjectNameIndex + " ";
+			queryEndStr +=  "and ex.subject.name LIKE ?" + subjectNameIndex + " ";
 		}
 		if (!StringUtils.isEmpty(searchStr)) {
 			nbPreParams++;
