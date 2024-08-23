@@ -46,6 +46,7 @@ public class ExaminationData {
         if (examination.getStudy().getSubjectStudyList() == null) throw new IllegalArgumentException("subjectStudyList can't be null");
         // Keep only MR acquisitions
         // List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions().stream().filter(a -> a instanceof MrDatasetAcquisition).collect(Collectors.toList());
+        setStudyId(examination.getStudy().getId());
         setDatasetAcquisitions(examination.getDatasetAcquisitions());
         setExaminationComment(examination.getComment());
         setExaminationDate(examination.getExaminationDate());

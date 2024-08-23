@@ -156,6 +156,7 @@ public class DatasetApiController implements DatasetApi {
 				studyId = ds.getDatasetAcquisition().getExamination().getStudyId();
 			}
 
+
 			datasetService.deleteById(datasetId);
 			solrService.deleteFromIndex(datasetId);
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));

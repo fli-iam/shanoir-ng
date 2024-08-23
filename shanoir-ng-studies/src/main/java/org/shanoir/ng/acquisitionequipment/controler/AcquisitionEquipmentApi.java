@@ -81,11 +81,12 @@ public interface AcquisitionEquipmentApi {
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@RequestMapping(value = "/byDicom", produces = { "application/json" }, consumes = {"application/json" }, method = RequestMethod.POST)
+	@RequestMapping(value = "/byDicom/{centerId}", produces = { "application/json" }, consumes = {"application/json" }, method = RequestMethod.POST)
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
 	ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsOrCreateOneByEquipmentDicom(
-			@Parameter(description = "equipment dicom to find or create an equipment", required = true) @RequestBody EquipmentDicom equipmentDicom,
-			BindingResult result);
+		@Parameter(description = "id of the center", required = true) @PathVariable("centerId") Long centerId,
+		@Parameter(description = "equipment dicom to find or create an equipment", required = true) @RequestBody EquipmentDicom equipmentDicom,
+		BindingResult result);
 
 	@Operation(summary = "", description = "Returns all the acquisition equipments for a center")
 	@ApiResponses(value = {

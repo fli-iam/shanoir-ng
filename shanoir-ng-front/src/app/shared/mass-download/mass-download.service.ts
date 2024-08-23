@@ -57,6 +57,11 @@ export type Report = {
     converter?: number;
     nbQueues?: number;
     unzip?: boolean;
+    folderStructureOptions?: {
+        subjectFolders?: boolean,
+        examinationFolders?: boolean,
+        datasetFolders?: boolean
+    }
 };
 
 export type DownloadInputIds = StrictUnion<
@@ -321,9 +326,9 @@ export class MassDownloadService {
                                     this.notificationService.pushLocalTask(task);
                                     let path: string;
                                     if (setup.shortPath) {
-                                        path = this.buildShortFilePath(dataset, index, name);
+                                        path = this.buildShortExtractedFilePath(dataset, index, name, setup);
                                     } else {
-                                        path = this.buildFilePath(dataset, filename, name);
+                                        path = this.buildExtractedFilePath(dataset, filename, name, setup);
                                     }
                                     return this.writeMyFile(path, blob, userFolderHandle);
                                 });
@@ -335,9 +340,9 @@ export class MassDownloadService {
             } else {
                 let path: string;
                 if (setup.shortPath) {
-                    path = this.buildShortAcquisitionPath(dataset) + dataset.id + '.' + filename.split('.').pop();
+                    path = this.buildShortFoldersPath(dataset, setup) + dataset.id + '.' + filename.split('.').pop();
                 } else {
-                    path = this.buildAcquisitionPath(dataset) + filename;
+                    path = this.buildFoldersPath(dataset, setup) + filename;
                 }
                 task.message = 'saving dataset n°' + id;
                 this.notificationService.pushLocalTask(task);
@@ -367,38 +372,50 @@ export class MassDownloadService {
         });
     }
 
-    private buildFilePath(dataset: Dataset, zipName: string, fileName: string): string {
-        return this.buildAcquisitionPath(dataset) + zipName.replace('.zip', '') + '/' + fileName;
+    private buildExtractedFilePath(dataset: Dataset, zipName: string, fileName: string, setup: DownloadSetup): string {
+        return this.buildFoldersPath(dataset, setup) 
+            + (setup.datasetFolders ? zipName.replace('.zip', '') + '/' : '')
+            + fileName;
     }
 
-    private buildShortFilePath(dataset: Dataset, fileIndex: number, fileName: string): string {
+    private buildShortExtractedFilePath(dataset: Dataset, fileIndex: number, fileName: string, setup: DownloadSetup): string {
             let fileNameSplit: string[] = fileName.split('.');
             let extension: string =  fileNameSplit.pop();
-            return this.buildShortAcquisitionPath(dataset) + 'ds' + dataset.id + '/' + fileIndex + '.' + extension;
+            return this.buildShortFoldersPath(dataset, setup) 
+                + (setup.datasetFolders ? 'ds' + dataset.id + '/' : '') 
+                + fileIndex + '.' + extension;
     }
 
-    private buildAcquisitionPath(dataset: Dataset): string {
-        if (dataset.datasetProcessing) {
-            return dataset.datasetProcessing.inputDatasets[0].subject?.name
-                + '_' + dataset.datasetProcessing.inputDatasets[0].subject?.id
-                + '/'
-                + dataset.datasetProcessing.inputDatasets[0].name
-                + "_"
-                + dataset.name;
+    private buildFoldersPath(dataset: Dataset, setup: DownloadSetup): string {
+        let str: string = '/';
+        if (setup.subjectFolders) {
+            str += 'Subject-' + (
+                dataset.datasetProcessing
+                    ? dataset.subject?.id
+                    : dataset.datasetAcquisition?.examination?.subject?.id
+            ) + '/';
         }
-        return dataset.datasetAcquisition?.examination?.subject?.name
-                + '_' + dataset.datasetAcquisition?.examination?.subject?.id
-                + '/'
-                + dataset.datasetAcquisition?.examination?.comment
+        if (setup.examinationFolders && !dataset.datasetProcessing) { // for processed datasets, skip the exam folder
+            str += dataset.datasetAcquisition?.examination?.comment
                 + '_' + dataset.datasetAcquisition?.examination?.id
                 + '/';
+        }
+        return str;
     }
 
-    private buildShortAcquisitionPath(dataset: Dataset): string {
-        return 'subj' + dataset.datasetAcquisition?.examination?.subject?.id
-            + '/'
-            + 'exam' + dataset.datasetAcquisition?.examination?.id
-            + '/';
+    private buildShortFoldersPath(dataset: Dataset, setup: DownloadSetup): string {
+        let str: string = '/';
+        if (setup.subjectFolders) {
+            str += 'subj'+ (
+                dataset.datasetProcessing
+                    ? dataset.subject?.id
+                    : dataset.datasetAcquisition?.examination?.subject?.id
+            ) + '/';
+        }
+        if (setup.examinationFolders && !dataset.datasetProcessing) {
+            str += 'exam' + dataset.datasetAcquisition?.examination?.id + '/';
+        }
+        return str;
     }
 
     private writeMyFile(path: string, content: any, userFolderHandle: FileSystemDirectoryHandle): Promise<void> {
@@ -422,6 +439,7 @@ export class MassDownloadService {
                 if (error instanceof ShanoirError) {
                     throw error;
                 } else {
+                    console.error(filename);
                     throw new ShanoirError({error: {code: ShanoirError.FILE_PATH_TOO_LONG, message: 'Probable reason: directory path too long for Windows, max 260 characters (<your chosen directory>/' + path + ')', details: error + ''}});
                 }
             });
@@ -488,7 +506,12 @@ export class MassDownloadService {
             format : setup.format,
             nbQueues: setup.nbQueues,
             unzip: setup.unzip,
-            converter: setup.converter
+            converter: setup.converter,
+            folderStructureOptions: {
+                subjectFolders: setup.subjectFolders,
+                examinationFolders: setup.examinationFolders,
+                datasetFolders: setup.datasetFolders
+            }
         };
         datasetIds.forEach(id => report.list[id] = { status: 'QUEUED' });
         return report;
@@ -561,8 +584,7 @@ export class MassDownloadService {
                         return parentFolderHandle.getFileHandle(this.REPORT_FILENAME).then(fileHandle => {
                             return fileHandle.getFile().then(file => {
                                 return file.text().then(text => {
-                                    let reportFromFile: Report = JSON.parse(text);
-                                    reportFromFile.nbError = 0;
+                                    report.nbError = 0;
                                     let noSuccessIds: number[] = Object.keys(report.list).filter(key => report.list[key].status != 'SUCCESS').map(key => parseInt(key));
                                     task.status = 2;
                                     task.sessionId = this.sessionService.sessionId;
@@ -574,6 +596,17 @@ export class MassDownloadService {
                                         setup.converter = report.converter;
                                         setup.unzip = report.unzip;
                                         setup.datasets = datasets;
+                                        if (report.folderStructureOptions) { // keep default values if absent, don't set to false
+                                            if (report.folderStructureOptions.subjectFolders != undefined) {
+                                                setup.subjectFolders = report.folderStructureOptions.subjectFolders;
+                                            }
+                                            if (report.folderStructureOptions.examinationFolders != undefined) {
+                                                setup.examinationFolders = report.folderStructureOptions.examinationFolders;
+                                            }
+                                            if (report.folderStructureOptions.datasetFolders != undefined) {
+                                                setup.datasetFolders = report.folderStructureOptions.datasetFolders;
+                                            }
+                                        }
                                         this._downloadDatasets(setup, null, task, report, parentFolderHandle)
                                     });
                                 });
@@ -601,6 +634,9 @@ export class DownloadSetup {
     nbQueues: number = 4;
     unzip?: boolean = false;
     shortPath?: boolean = false;
+    subjectFolders: boolean = true;
+    examinationFolders: boolean = true;
+    datasetFolders: boolean = true;
     converter: number;
     datasets: Dataset[] = [];
 }
