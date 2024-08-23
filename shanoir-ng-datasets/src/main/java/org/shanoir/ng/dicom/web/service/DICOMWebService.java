@@ -110,6 +110,7 @@ public class DICOMWebService {
 	public String findStudy(String studyInstanceUID, String includeField) {
 		try {
 			HttpGet httpGet = new HttpGet(this.serverURL + "?StudyInstanceUID=" + studyInstanceUID + "&includefield=" + includeField);
+			httpGet.setHeader("Accept-Charset", "UTF-8");
 			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
 				HttpEntity entity = response.getEntity();
 				if (entity != null) {

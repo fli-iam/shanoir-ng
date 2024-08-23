@@ -109,7 +109,6 @@ public class DICOMWebApiController implements DICOMWebApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		String studiesJson = queryDicomServerForDicomWeb(examinations, includeField);
-		LOG.error("findStudies studiesJson 1: " + studiesJson);
 		return new ResponseEntity<String>(studiesJson, HttpStatus.OK);
 	}
 
@@ -134,9 +133,7 @@ public class DICOMWebApiController implements DICOMWebApi {
 			}
 			JsonNode root = mapper.readTree(studyJson);
 			studyInstanceUIDHandler.replaceStudyInstanceUIDsWithExaminationUIDs(root, examinationUID, true);
-			LOG.error("queryDicomServerForDicomWeb root: " + root);
 			studyJson = mapper.writeValueAsString(root);
-			LOG.error("queryDicomServerForDicomWeb studyJson : " + studyJson);
 			studyJson = studyJson.substring(1, studyJson.length() - 1);
 			studies.append(studyJson);
 			if (iterator.hasNext()) {
