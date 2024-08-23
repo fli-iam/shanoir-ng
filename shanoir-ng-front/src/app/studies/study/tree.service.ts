@@ -41,6 +41,7 @@ import { AcquisitionEquipmentNode, CenterNode, CentersNode, ClinicalSubjectNode,
 import { StudyRightsService } from "../shared/study-rights.service";
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyService } from '../shared/study.service';
+import { WaitBurstEnd } from "src/app/utils/wait-burst-end";
 
 @Injectable()
 export class TreeService {
@@ -53,7 +54,7 @@ export class TreeService {
     public nodeInit: boolean = false; 
     private studyRights: StudyUserRight[]; 
     private _treeOpened: boolean = true;
-    public treeAvailable: boolean = false;
+    private _treeAvailable: boolean = false;
     selectedNode: ShanoirNode;
 
     isSelected(id: number, type: NodeType): boolean {
@@ -89,6 +90,22 @@ export class TreeService {
 
     get canDownloadStudy(): boolean {
         return this.studyRights.includes(StudyUserRight.CAN_DOWNLOAD);
+    }
+    
+    private openCloseBurst: WaitBurstEnd = new WaitBurstEnd(this.setTreeAvailable.bind(this), 300);
+    private _lastTreeAvailable: boolean;
+ 
+    get treeAvailable(): boolean {
+        return this._treeAvailable;
+    }
+
+    set treeAvailable(treeAvailable: boolean) {
+        this._lastTreeAvailable = treeAvailable;
+        this.openCloseBurst.fire();
+    }
+
+    setTreeAvailable() {
+        this._treeAvailable = this._lastTreeAvailable; 
     }
 
     constructor(
@@ -150,10 +167,13 @@ export class TreeService {
                 studyLoaded = Promise.resolve();
             } else if (this.selection.studyId?.[0]) {
                 studyLoaded = this.initStudy(this.selection.studyId[0]);
+            } else {
+                this.treeAvailable = false;
             }
 
             studyLoaded?.then(() => this.selectNode(this.selection)).then(node => {
                 this.selectedNode = node;
+                this.treeAvailable = !!this.selectedNode;
             });
         }
     }

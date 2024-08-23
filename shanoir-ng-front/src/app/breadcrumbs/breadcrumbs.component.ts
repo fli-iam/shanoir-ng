@@ -16,7 +16,7 @@ import { AfterViewChecked, AfterViewInit, Component, ElementRef, HostListener, I
 import { Router } from '@angular/router';
 import { BreadcrumbsService, Step } from './breadcrumbs.service';
 import { Subject, Subscription } from 'rxjs';
-import { WaitBurstEnd } from '../utils/waitBurstEnd';
+import { WaitBurstEnd } from '../utils/wait-burst-end';
 import { take } from 'rxjs/operators';
 
 @Component({

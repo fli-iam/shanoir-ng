@@ -19,7 +19,7 @@ import { Subject } from "rxjs";
  */
 export class WaitBurstEnd {
     
-    private ts: number = Date.now();
+    private ts: number = 0;
 
     constructor(private onEnd: () => any, private delayMs: number = 300) {}
 
@@ -32,7 +32,6 @@ export class WaitBurstEnd {
                     this.onEnd();
                 }
             }, this.delayMs);
-
         }
     }
 
