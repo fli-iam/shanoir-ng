@@ -109,11 +109,13 @@ public class DICOMWebService {
 
 	public String findStudy(String studyInstanceUID, String includeField) {
 		try {
-			HttpGet httpGet = new HttpGet(this.serverURL + "?StudyInstanceUID=" + studyInstanceUID + "&includefield=" + includeField);
+			String url = this.serverURL + "?StudyInstanceUID=" + studyInstanceUID + "&includefield=" + includeField;
+			HttpGet httpGet = new HttpGet(url);
 			httpGet.setHeader("Accept-Charset", "UTF-8");
 			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
 				HttpEntity entity = response.getEntity();
 				if (entity != null) {
+					LOG.error("findStudy response : " + response);
 					return EntityUtils.toString(entity);
 				} else {
 					LOG.error("DICOMWeb: findStudy: empty response entity for studyInstanceUID: " + studyInstanceUID);					
