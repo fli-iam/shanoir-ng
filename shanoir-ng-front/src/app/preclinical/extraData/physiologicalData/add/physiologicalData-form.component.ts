@@ -63,19 +63,17 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
         return this.extradatasService;
     }
 
-    initView(): Promise<void> {
-        this.entity = new PhysiologicalData();
-        this.extradatasService.getExtraDatas(this.examination_id).then(extradatas => {
-            this.loadExaminationExtraDatas(extradatas);
+    protected fetchEntity: () => Promise<PhysiologicalData> = () => {
+        return  this.extradatasService.getExtraDatas(this.examination_id).then(extradatas => {
+            return this.getExaminationExtraDatas(extradatas);
         });
+    }
+
+    initView(): Promise<void> {
         return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
-        this.entity = new PhysiologicalData();
-        this.extradatasService.getExtraDatas(this.examination_id).then(extradatas => {
-            this.loadExaminationExtraDatas(extradatas);
-        });
         return Promise.resolve();
     }
 
@@ -84,13 +82,14 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
         return Promise.resolve();
     }
 
-    loadExaminationExtraDatas(extradatas: ExtraData[]){
+    getExaminationExtraDatas(extradatas: ExtraData[]): PhysiologicalData {
     	for (let ex of extradatas) {
     		// instanceof does not work??
     		if (ex.extradatatype == "Physiological data"){
-    			this.physioData = <PhysiologicalData>ex;
+    			return this.physioData;
     		}
     	}
+        return new PhysiologicalData();
     }
 
     buildForm(): UntypedFormGroup {

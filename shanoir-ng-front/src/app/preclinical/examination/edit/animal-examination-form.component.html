@@ -24,7 +24,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			></form-footer>
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
-					<h2 class="header command-zone"i18n="View examination|Title@@examinationDetailViewTitle">Details on examination</h2>
+					<h2 class="header command-zone"i18n="View examination|Title@@examinationDetailViewTitle">Details on examination !</h2>
 				</ng-template>
 				<ng-template [ngSwitchCase]="'edit'">
 					<h2 class="header command-zone"i18n="Edit examination|Title@@examinationDetailEditTitle">Edit examination</h2>
@@ -199,7 +199,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</fieldset>
 
 		<examination-anesthetic-form
-			[examination_id]="examination.id"
+			[id]="examination.id"
 			[mode]="mode"
 			(examAnestheticChange)="onExamAnestheticChange($event)">
 		</examination-anesthetic-form>

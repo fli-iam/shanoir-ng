@@ -51,6 +51,7 @@ export class ExaminationNodeComponent implements OnChanges {
     detailsPath: string = '/examination/details/';
     @Input() withMenu: boolean = true;
     private contentLoaded: SuperPromise<void> = new SuperPromise();
+    preclinical: boolean;
 
     constructor(
         private examinationService: ExaminationService,
@@ -77,7 +78,8 @@ export class ExaminationNodeComponent implements OnChanges {
                     'UNLOADED',
                     this.input.examination.extraDataFilePathList,
                     this.input.hasDeleteRights,
-                    this.input.hasDownloadRights);
+                    this.input.hasDownloadRights,
+                    this.input.examination.preclinical);
             }
             //this.node.registerOpenPromise(this.contentLoaded);
             this.nodeInit.emit(this.node);

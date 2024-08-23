@@ -212,7 +212,6 @@ export abstract class SubjectNode extends ShanoirNode {
     }
 
     public awesome: string;
-    protected readonly routeBase = '/subject/details/';
 }
 
 export class ClinicalSubjectNode extends SubjectNode {
@@ -231,6 +230,8 @@ export class ClinicalSubjectNode extends SubjectNode {
             canDeleteChildren,
             canDownload);
     }
+
+    protected readonly routeBase = '/subject/details/';
 }
 
 export class PreclinicalSubjectNode extends SubjectNode {
@@ -248,6 +249,8 @@ export class PreclinicalSubjectNode extends SubjectNode {
             canDeleteChildren,
             canDownload);
     }
+
+    protected readonly routeBase = '/preclinical-subject/details/';
 }
 
 
@@ -260,14 +263,15 @@ export class ExaminationNode extends ShanoirNode {
         public datasetAcquisitions: DatasetAcquisitionNode[] | UNLOADED,
         public extraDataFilePathList: string[] | UNLOADED,
         public canDelete: boolean,
-        public canDownload
+        public canDownload,
+        public preclinical: boolean
     ) {
         super(parent, id, label);
     }
 
     public extraDataOpen: boolean = false;
-    public title: string = "examination";
-    protected readonly routeBase = '/examination/details/';
+    public title: string = this.preclinical ? 'preclinical examination' : 'examination';
+    protected readonly routeBase = this.preclinical ? '/preclinical-examination/details/' : '/examination/details/';
 
     public static fromExam(exam: SubjectExamination, parent: ShanoirNode, canDelete: boolean, canDownload: boolean): ExaminationNode {
         let node: ExaminationNode = new ExaminationNode(
@@ -277,7 +281,8 @@ export class ExaminationNode extends ShanoirNode {
             null,
             exam.extraDataFilePathList,
             canDelete,
-            canDownload
+            canDownload,
+            exam.preclinical
         );
         node.datasetAcquisitions = exam.datasetAcquisitions ? exam.datasetAcquisitions.map(dsAcq => DatasetAcquisitionNode.fromAcquisition(dsAcq, node, canDelete, canDownload)) : [];
         return node;

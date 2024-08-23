@@ -18,7 +18,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         awesome="fa-regular fa-folder-open"
         [(opened)]="node.opened"
         (labelClick)="menuOpened = withMenu && !menuOpened"
-        [route]="'/study/details/' + node.id"
+        [route]="node.route"
         [hasChildren]="true"
         [clickable]="showDetails">
 

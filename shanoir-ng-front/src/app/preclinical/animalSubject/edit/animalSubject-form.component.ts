@@ -44,6 +44,10 @@ import { AnimalSubject } from '../shared/animalSubject.model';
 import { AnimalSubjectService } from '../shared/animalSubject.service';
 import { PreclinicalSubject } from '../shared/preclinicalSubject.model';
 import { Selection } from 'src/app/studies/study/tree.service';
+import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
+import { StudyRightsService } from 'src/app/studies/shared/study-rights.service';
+import { TaskState } from 'src/app/async-tasks/task.model';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 
 
 @Component({
@@ -69,6 +73,8 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     providers: Reference[] = [];
     stabulations: Reference[] = [];
     references: Reference[] = [];
+    hasDownloadRight: boolean = false;
+    downloadState: TaskState = new TaskState();
 
     @Input() preFillData: Subject;
     @Input() displayPathologyTherapy: boolean = true;
@@ -99,7 +105,9 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
             private referenceService: ReferenceService,
             private subjectPathologyService: SubjectPathologyService,
             private subjectTherapyService: SubjectTherapyService,
-            private differs: KeyValueDiffers) {
+            private differs: KeyValueDiffers,
+            private studyRightsService: StudyRightsService,
+            private downloadService: MassDownloadService) {
 
         super(route, 'preclinical-subject');
         this.differ = this.differs.find({}).create();
@@ -158,6 +166,19 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     }
 
     initView(): Promise<void> {
+        this.loadAllStudies();
+        if (this.keycloakService.isUserAdmin()) {
+            this.hasDownloadRight = true;
+            return;
+        } else {
+            this.treeService.studyPromise.then(study => {
+                return this.studyRightsService.getMyRightsForStudy(study.id).then(rights => {
+                    this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+                });
+            });
+        }
+
+
         return this.loadData().then(() => {
             this.subjectTherapyService.getSubjectTherapies(this.preclinicalSubject).then(st => {
                 this.preclinicalSubject.therapies = st;
@@ -536,5 +557,10 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                 this.goToList();
             }
         });
+    }
+
+    download() {
+        // TODO : select study
+        this.downloadService.downloadAllByStudyIdAndSubjectId(this.treeService.study.id, this.preclinicalSubject.subject.id, this.downloadState);
     }
 }

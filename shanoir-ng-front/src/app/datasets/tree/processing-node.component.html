@@ -19,7 +19,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         awesome="fas fa-gears"
         [(opened)]="node.opened"
         (labelClick)="toggleMenu()"
-        [route]="'/dataset-processing/details/' + node.id"
+        [route]="node.route"
         [hasChildren]="hasChildren()"
         [title]="node.title + ' n°' + node.id">
 

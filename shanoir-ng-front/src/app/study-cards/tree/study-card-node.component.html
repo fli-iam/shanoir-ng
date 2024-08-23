@@ -19,7 +19,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         awesome="fa-solid fa-shuffle"
         [(opened)]="node.opened"
         (labelClick)="menuOpened = withMenu && !menuOpened"
-        [route]="(node.type == 'studycard' ? '/study-card/details/' : '/quality-card/details/') + node.id"
+        [route]="node.route"
         [hasChildren]="false"
         [title]="node.title + ' n°' + node.id">
 

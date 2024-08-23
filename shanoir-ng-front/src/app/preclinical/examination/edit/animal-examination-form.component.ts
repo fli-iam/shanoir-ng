@@ -43,12 +43,12 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 import { ExaminationService } from '../../../examinations/shared/examination.service';
 import { AnimalExaminationService } from '../shared/animal-examination.service';
 import { ExaminationNode } from '../../../tree/tree.model';
-import {UnitOfMeasure} from "../../../enum/unitofmeasure.enum";
+import { UnitOfMeasure } from "../../../enum/unitofmeasure.enum";
+import { Selection } from 'src/app/studies/study/tree.service';
 
 @Component({
     selector: 'examination-preclinical-form',
     templateUrl: 'animal-examination-form.component.html',
-    providers: [ExtraDataService, ContrastAgentService, ExaminationAnestheticService, ExaminationService],
     styleUrls: ['animal-examination.component.css']
 })
 @ModesAware
@@ -98,7 +98,11 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     set examination(examination: Examination) { this.entity = examination; }
 
     getService(): EntityService<Examination> {
-        return this.animalExaminationService;
+        return this.examinationService;
+    }
+
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromExamination(this.examination);
     }
 
     initView(): Promise<void> {
