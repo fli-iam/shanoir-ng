@@ -39,7 +39,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
                     <!-- default display -->
                     <a class="cell-new-tab" [routerLink]="vars.rowRoute" *ngIf="!(editMode && vars.editable) && !vars.route && !vars.boolean && col.type != 'progress' && !col.multi && col.type != 'button'">
-                        <span class="default-data-parent"
+                        <span class="default-data-parent" title="{{vars.render.text ? vars.render.text : vars.render}}"
                             [style.color]="vars.cellGraphics?.color"
                             [style.border-color]="vars.cellGraphics?.tag ? vars.cellGraphics?.color : null"
                             [style.background-color]="vars.cellGraphics?.tag ? vars.cellGraphics?.backgroundColor : null"
@@ -51,10 +51,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </a>
 
                     <!-- link -->
-                    <a [routerLink]="vars.rowRoute" *ngIf="!(editMode && vars.editable) && vars.route && !col.multi" class="cell-new-tab">
+                    <a [routerLink]="vars.rowRoute" *ngIf="!(editMode && vars.editable) && vars.route && !col.multi" class="cell-new-tab" title="{{vars.render.text ? vars.render.text : vars.render}}">
                         <a class="link" [routerLink]="vars.route" routerLinkActive="active">{{vars.render.text ? vars.render.text : vars.render}}
                             <i *ngIf="!col.awesome" class="fas fa-external-link-alt"></i>
-                            <span *ngIf="col.awesome" class="awesome"><i *ngIf="col.awesome" [class]="col.awesome"></i></span>
+                            <span *ngIf="col.awesome" class="awesome">
+                                <i *ngIf="col.awesome" [class]="col.awesome"></i>
+                            </span>
                         </a>
                     </a>
 

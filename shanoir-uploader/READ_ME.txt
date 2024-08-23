@@ -10,6 +10,9 @@ the correct folder.
 
 Attention: do the above to not forget the logback.xml hard coded file path for logs.
 
+Attention: to deliver for Java 17 in the hospitals: switch back to Java 17 in two pom.xml:
+1) shanoir-uploader/pom.xml and 2) shanoir-ng-back/pom.xml
+
 ####### Maven: build a new Executable Jar version #############
 Build latest version for delivery using the below mvn command:
 Use "mvn package", to create one big zip containing everything.
