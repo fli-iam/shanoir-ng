@@ -110,7 +110,10 @@ public class SelectionActionListener implements TreeSelectionListener {
 						PatientTreeNode patientTreeNode = (PatientTreeNode) tp.getParentPath().getParentPath().getLastPathComponent();
 						handleStudyTreeNode(patientTreeNode, studyTreeNode, false);
 						ImportJob importJob = importJobs.get(studyTreeNode.getStudy().getStudyInstanceUID());
-						importJob.getSelectedSeries().add((Serie)serieTreeNode.getSerie().clone());
+						Serie serie = (Serie)serieTreeNode.getSerie();
+						if (!serie.isIgnored() && !serie.isErroneous()) {
+							importJob.getSelectedSeries().add((Serie)serie.clone());
+						}
 					}
 				}
 			}
@@ -185,7 +188,9 @@ public class SelectionActionListener implements TreeSelectionListener {
 					if (studyOfAllStudies.getStudyInstanceUID().equals(studyInstanceUID)) {
 						List<Serie> series = study.getSeries();
 						for (Serie serie : series) {
-							importJob.getSelectedSeries().add((Serie)serie.clone());
+							if (!serie.isIgnored() && !serie.isErroneous()) {
+								importJob.getSelectedSeries().add((Serie)serie.clone());
+							}
 						}
 					}
 				}

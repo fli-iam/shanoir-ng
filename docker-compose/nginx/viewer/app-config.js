@@ -1,8 +1,9 @@
 window.config = { 
 	routerBasename: '/', 
 	extensions: [], 
-	modes: [], 
-	showStudyList: true, 
+	modes: [],
+	experimentalStudyBrowserSort: true,
+	showStudyList: true,
 	dataSources: [ 
 		{ 
 			namespace: '@ohif/extension-default.dataSourcesModule.dicomweb', 
