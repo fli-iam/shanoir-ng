@@ -92,7 +92,7 @@ export class TreeService {
         return this.studyRights.includes(StudyUserRight.CAN_DOWNLOAD);
     }
     
-    private openCloseBurst: WaitBurstEnd = new WaitBurstEnd(this.setTreeAvailable.bind(this), 300);
+    private openCloseBurst: WaitBurstEnd = new WaitBurstEnd(this.setTreeAvailable.bind(this), 100);
     private _lastTreeAvailable: boolean;
  
     get treeAvailable(): boolean {

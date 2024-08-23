@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 
 import { Injectable, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
@@ -174,5 +174,12 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
             + ('0' + (date.getMonth() + 1)).slice(-2)
             + '-'
             + ('0' + date.getDate()).slice(-2);
+    }
+
+    public arrayFrom404(error: HttpErrorResponse) {
+        e => {
+            if (e.status == 404) return [];
+            else throw e;
+        }
     }
 }
