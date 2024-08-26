@@ -270,6 +270,9 @@ import { SessionService } from './shared/services/session.service';
 import { PipelineService } from "./vip/pipelines/pipeline/pipeline.service";
 import {ShanoirEventService} from "./users/shanoir-event/shanoir-event.service";
 import {StudyHistoryComponent} from "./studies/study-history/study-history.component";
+import { StudyTreeComponent } from './studies/study/study-tree.component';
+import { TreeService } from './studies/study/tree.service';
+import { CoilNodeComponent } from './coils/coil/tree/coil-node.component';
 
 @NgModule({
     imports: [
@@ -458,7 +461,9 @@ import {StudyHistoryComponent} from "./studies/study-history/study-history.compo
         TaskStatusComponent,
         DownloadSetupComponent,
         DownloadSetupAltComponent,
-        TestQualityCardOptionsComponent
+        TestQualityCardOptionsComponent,
+        StudyTreeComponent,
+        CoilNodeComponent
     ],
     providers: [
         AcquisitionEquipmentService,
@@ -546,6 +551,8 @@ import {StudyHistoryComponent} from "./studies/study-history/study-history.compo
         SessionService,
         ShanoirEventService,
         {provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true}
+        TreeService,
+        { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],
     bootstrap: [AppComponent]
 })

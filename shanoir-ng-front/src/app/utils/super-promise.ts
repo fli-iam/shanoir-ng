@@ -37,4 +37,12 @@ export class SuperPromise<T> implements Promise<T> {
         return this.promise[Symbol.toStringTag];
     }
 
+    public static timeoutPromise(milliseconds?: number): Promise<void> {
+        let superPromise: SuperPromise<void> = new SuperPromise();
+        setTimeout(() => {
+            superPromise.resolve();
+        }, milliseconds);
+        return superPromise;
+    }
+
 }

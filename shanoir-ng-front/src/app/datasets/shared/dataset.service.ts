@@ -11,20 +11,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient, HttpEvent, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { ErrorHandler, Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
-import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
+import { TaskState } from 'src/app/async-tasks/task.model';
+import { BidsElement } from "../../bids/model/bidsElement.model";
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
-import { Dataset } from './dataset.model';
 import { MrDataset } from '../dataset/mr/dataset.mr.model';
+import { DatasetDTO, DatasetDTOService, MrDatasetDTO } from "./dataset.dto";
+import { Dataset } from './dataset.model';
 import { DatasetUtils } from './dataset.utils';
-import {DatasetDTO, MrDatasetDTO, DatasetDTOService} from "./dataset.dto";
-import {BidsElement} from "../../bids/model/bidsElement.model";
 
 export type Format = 'nii' | 'dcm';
 
@@ -164,9 +164,8 @@ export class DatasetService extends EntityService<Dataset> {
     }
 
     protected mapEntity = (dto: DatasetDTO, quickResult?: Dataset, mode: 'eager' | 'lazy' = 'eager'): Promise<Dataset> => {
-        let result: Dataset = DatasetUtils.getDatasetInstance(dto.type);
-        this.datasetDTOService.toEntity(dto, result, mode);
-        return Promise.resolve(result);
+        quickResult = DatasetUtils.getDatasetInstance(dto.type);
+        return this.datasetDTOService.toEntity(dto, quickResult, mode);
     }
 
     protected mapEntityList = (dtos: DatasetDTO[]): Promise<Dataset[]> => {
