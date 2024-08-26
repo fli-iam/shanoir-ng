@@ -6,7 +6,8 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.dicom.DicomTreeNode;
 import org.shanoir.uploader.dicom.query.Media;
 
@@ -19,7 +20,7 @@ import org.shanoir.uploader.dicom.query.Media;
  */
 public class DicomTreeModel implements TreeModel {
 	
-	private static Logger logger = Logger.getLogger(DicomTreeModel.class);
+	private static final Logger logger = LoggerFactory.getLogger(DicomTreeModel.class);
 
     private Vector<TreeModelListener> treeModelListeners =
         new Vector<TreeModelListener>();

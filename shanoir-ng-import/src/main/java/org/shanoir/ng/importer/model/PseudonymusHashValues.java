@@ -1,4 +1,4 @@
-package org.shanoir.uploader.model.rest;
+package org.shanoir.ng.importer.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

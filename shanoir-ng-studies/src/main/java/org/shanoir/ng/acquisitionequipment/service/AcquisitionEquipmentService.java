@@ -83,6 +83,6 @@ public interface AcquisitionEquipmentService {
 	
 	List<AcquisitionEquipment> findAllBySerialNumber(String serialNumber);
 	
-	List<AcquisitionEquipment> findAcquisitionEquipmentsOrCreateOneByEquipmentDicom(EquipmentDicom equipmentDicom);
+	List<AcquisitionEquipment> findAcquisitionEquipmentsOrCreateOneByEquipmentDicom(Long centerId, EquipmentDicom equipmentDicom);
 	
 }

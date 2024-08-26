@@ -28,9 +28,11 @@ import org.shanoir.ng.tag.model.StudyTagDTO;
  * @author msimon
  *
  */
-public class PublicStudyDTO {
+public class StudyLightDTO {
 
 	private boolean downloadableByDefault;
+	
+	private boolean challenge;
 
 	@LocalDateAnnotations
 	private LocalDate endDate;
@@ -56,11 +58,23 @@ public class PublicStudyDTO {
 
 	private List<StudyTagDTO> studyTags;
 
+	private List<String> protocolFilePaths;
+	
+	private List<String> dataUserAgreementPaths;
+
 	/**
 	 * Default constructor.
 	 */
-	public PublicStudyDTO() {
+	public StudyLightDTO() {
 		// empty constructor
+	}
+
+	public boolean isChallenge() {
+		return challenge;
+	}
+
+	public void setChallenge(boolean challenge) {
+		this.challenge = challenge;
 	}
 
 	/**
@@ -221,4 +235,21 @@ public class PublicStudyDTO {
 	public void setStudyTags(List<StudyTagDTO> studyTags) {
 		this.studyTags = studyTags;
 	}
+
+	public List<String> getProtocolFilePaths() {
+		return protocolFilePaths;
+	}
+
+	public void setProtocolFilePaths(List<String> protocolFilePaths) {
+		this.protocolFilePaths = protocolFilePaths;
+	}
+
+	public List<String> getDataUserAgreementPaths() {
+		return dataUserAgreementPaths;
+	}
+
+	public void setDataUserAgreementPaths(List<String> dataUserAgreementPaths) {
+		this.dataUserAgreementPaths = dataUserAgreementPaths;
+	}
+
 }

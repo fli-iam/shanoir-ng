@@ -137,7 +137,7 @@ public class DicomSerieAndInstanceAnalyzer {
 				serie.setIsEnhanced(false);
 			}
 		} else {
-			LOG.warn("SOPClassUID not found to detect Enhanced DICOM.");
+			LOG.debug("SOPClassUID not found to detect Enhanced DICOM.");
 		}
 	}
 	

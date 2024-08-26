@@ -14,11 +14,23 @@
 
 package org.shanoir.ng.download;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.mail.BodyPart;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMultipart;
-import jakarta.mail.util.ByteArrayDataSource;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.StringReader;
+import java.net.URL;
+import java.nio.file.Files;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.json.JSONReader;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -38,15 +50,13 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import javax.json.Json;
-import javax.json.stream.JsonParser;
-import java.io.*;
-import java.net.URL;
-import java.nio.file.Files;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import jakarta.annotation.PostConstruct;
+import jakarta.json.Json;
+import jakarta.json.stream.JsonParser;
+import jakarta.mail.BodyPart;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMultipart;
+import jakarta.mail.util.ByteArrayDataSource;
 
 /**
  * This class is used to download files on using WADO URLs:
