@@ -67,18 +67,14 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
 
     initView(): Promise<void> {
         this.loadUnits();
-        this.loadNames();   
-        return this.ingredientsService.get(this.id).then(ingredient => {
-            this.ingredient = ingredient;
-        });
+        this.loadNames();
+        return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
         this.loadUnits();
         this.loadNames(); 
-        return this.ingredientsService.get(this.id).then(ingredient => {
-            this.ingredient = ingredient;
-        });
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {

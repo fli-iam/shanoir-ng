@@ -77,6 +77,16 @@ public class CoilApiController implements CoilApi {
 	}
 
 	@Override
+	public ResponseEntity<List<CoilDTO>> findCoilsByCenterId(
+			@Parameter(name = "id of the center", required = true) @PathVariable("centerId") Long centerId) {
+		final List<Coil> coils = coilService.findByCenterId(centerId);
+		if (coils.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(coilMapper.coilsToCoilDTOs(coils), HttpStatus.OK);
+	}
+
+	@Override
 	public ResponseEntity<List<CoilDTO>> findCoils() {
 		final List<Coil> coils = coilService.findAll();
 		if (coils.isEmpty()) {
