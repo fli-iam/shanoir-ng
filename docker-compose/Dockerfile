@@ -103,8 +103,8 @@ COPY --link --from=datasets-download /target/. /
 COPY --link datasets/entrypoint /usr/bin/
 COPY --link datasets/shanoir-ng-datasets.jar shanoir-ng-datasets.jar
 
-# Use the below line for remote debugging and to active dev profile
-#CMD ["-jar", "/shanoir-ng-datasets.jar", "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,address=0.0.0.0:9914,suspend=y"]
+# Use the below line for remote debugging
+#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9914", "-jar", "/shanoir-ng-datasets.jar"]
 CMD ["-jar", "/shanoir-ng-datasets.jar"]
 
 
@@ -116,8 +116,8 @@ FROM base-microservice as import
 COPY --link import/entrypoint /usr/bin/
 COPY --link import/shanoir-ng-import.jar shanoir-ng-import.jar
 
-# Use the below line for remote debugging and to active dev profile
-#CMD ["-jar", "/shanoir-ng-import.jar", "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,address=0.0.0.0:9913,suspend=y"]
+# Use the below line for remote debugging
+#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9913", "-jar", "/shanoir-ng-import.jar"]
 CMD ["-jar", "/shanoir-ng-import.jar"]
 
 
@@ -180,7 +180,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     locales-all \
     jq \
     libgtk2.0-0 \
-    openjdk-17-jre \
+    temurin-21-jre \
     pigz \
     xvfb
 
@@ -224,7 +224,7 @@ COPY --link preclinical/shanoir-ng-preclinical.jar shanoir-ng-preclinical.jar
 COPY --link preclinical/entrypoint /usr/bin/
 
 # Use the below line for remote debugging
-#CMD ["-jar", "/shanoir-ng-preclinical.jar", "-Xmx6g", "-Xms1g", "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,address=0.0.0.0:9915,suspend=y", "-Dspring.profiles.active=dev"]
+#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9915", "-jar", "/shanoir-ng-preclinical.jar", "-Xmx6g", "-Xms1g"]
 CMD ["-jar", "/shanoir-ng-preclinical.jar", "-Xmx6g", "-Xms1g"]
 
 
@@ -236,8 +236,8 @@ FROM base-microservice as studies
 COPY --link studies/shanoir-ng-studies.jar shanoir-ng-studies.jar
 COPY --link studies/entrypoint /usr/bin/
 
-# Use the below line for remote debugging and to active dev profile
-#CMD ["-jar", "/shanoir-ng-studies.jar", "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,address=0.0.0.0:9912,suspend=y"]
+# Use the below line for remote debugging
+#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9912", "-jar", "/shanoir-ng-studies.jar"]
 CMD ["-jar", "/shanoir-ng-studies.jar"]
 
 
@@ -257,8 +257,8 @@ ENV	\
 	kc.admin.client.client.id="admin-cli"	\
 	kc.admin.client.realm="master"
 
-# Use the below line for remote debugging and development profile purpose
-#CMD ["-jar", "/shanoir-ng-users.jar", "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,address=0.0.0.0:9911,suspend=y", "-Dspring.profiles.active=dev", "--syncAllUsersToKeycloak=true"]
+# Use the below line for remote debugging
+#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9911", "-jar", "/shanoir-ng-users.jar", "--syncAllUsersToKeycloak=true"]
 CMD ["-jar", "/shanoir-ng-users.jar"]
 
 
@@ -311,7 +311,7 @@ CMD []
 
 ################ nginx #####################################################
 
-FROM ohif/viewer:v4.12.32.19362 AS nginx-viewer
+FROM ohif/app:v3.9.0-beta.76 AS nginx-viewer
 
 FROM nginx as nginx
 

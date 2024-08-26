@@ -34,7 +34,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -65,8 +72,17 @@ public interface StudyApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterStudyDTOsHasRight(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<StudyDTO>> findStudies();
+	
+	@Operation(summary = "", description = "If exists, returns the studies that the user is allowed to see")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found studies"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "no study found"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@RequestMapping(value = "/light", produces = { "application/json" }, method = RequestMethod.GET)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	ResponseEntity<List<StudyLightDTO>> findStudiesLight();
 
 	@Operation(summary = "", description = "If exists, returns the studies that are publicly available")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found studies"),
@@ -75,7 +91,7 @@ public interface StudyApi {
 			@ApiResponse(responseCode = "404", description = "no study found"),
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/public/data", produces = { "application/json" }, method = RequestMethod.GET)
-	ResponseEntity<List<PublicStudyDTO>> findPublicStudiesData();
+	ResponseEntity<List<StudyLightDTO>> findPublicStudiesData();
 
 	@Operation(summary = "", description = "Returns id and name for all the studies")
 	@ApiResponses(value = {
@@ -86,7 +102,6 @@ public interface StudyApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/names", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterStudyIdNameDTOsHasRight(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<IdName>> findStudiesNames() throws RestServiceException;
 
 	@Operation(summary = "", description = "Returns id, name and centers for all the studies")
@@ -98,7 +113,6 @@ public interface StudyApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/namesAndCenters", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterStudyIdNameDTOsHasRight(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<IdNameCenterStudyDTO>> findStudiesNamesAndCenters() throws RestServiceException;
 
 	@Operation(summary = "", description = "If exists, returns the study corresponding to the given id")

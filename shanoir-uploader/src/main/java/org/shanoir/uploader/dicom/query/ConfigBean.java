@@ -2,8 +2,9 @@ package org.shanoir.uploader.dicom.query;
 
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
 import org.shanoir.uploader.utils.IShanoirConfigBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -12,7 +13,7 @@ import org.shanoir.uploader.utils.IShanoirConfigBean;
  */
 public class ConfigBean {
 
-	static Logger logger = Logger.getLogger(ConfigBean.class);
+	private static final Logger logger = LoggerFactory.getLogger(ConfigBean.class);
 
 	/** The AET of the Q/R SCP. */
 	private String dicomServerAETCalled;

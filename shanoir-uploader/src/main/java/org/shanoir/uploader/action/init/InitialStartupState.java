@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.nio.file.Files;
@@ -17,14 +16,16 @@ import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.TimeZone;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.gui.ShUpStartupDialog;
 import org.shanoir.uploader.utils.Encryption;
-import org.shanoir.uploader.utils.Util;
 import org.shanoir.uploader.utils.PropertiesUtil;
+import org.shanoir.uploader.utils.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * This concrete state class is the initial state (entry point) of the state machine.
@@ -42,21 +43,26 @@ import org.shanoir.uploader.utils.PropertiesUtil;
  *  @author mkain
  * 
  */
+@Component
 public class InitialStartupState implements State {
 
-	private static Logger logger = Logger.getLogger(InitialStartupState.class);
+	private static final Logger logger = LoggerFactory.getLogger(InitialStartupState.class);
 	
-	private static final String LOG4J_PROPERTIES = "/log4j.properties";
-
 	private static final String SU_V6_0_3 = ".su_v6.0.3";
 
 	private static final String SU_V6_0_4 = ".su_v6.0.4";
 
 	private static final String SU_V7_0_1 = ".su_v7.0.1";
 
+	private static final String SU_V8_0_0 = ".su_v8.0.0";
+
+	@Autowired
+	private ProxyConfigurationState proxyConfigurationState;
+
+	@Autowired
+	private ShUpStartupDialog shUpStartupDialog;
+
 	public void load(StartupStateContext context) throws Exception {
-		initShanoirUploaderFolder();
-		initLogging();
 		logger.info("Start running of ShanoirUploader...");
 		logger.info("Version: " + ShUpConfig.SHANOIR_UPLOADER_VERSION);
 		logger.info("Release Date: " + ShUpConfig.RELEASE_DATE);
@@ -76,8 +82,9 @@ public class InitialStartupState implements State {
 		copyPseudonymus();
 		initProfiles();
 		initProfile();
+		initCredentials();
 		initStartupDialog(context);
-		context.setState(new ProxyConfigurationState());
+		context.setState(proxyConfigurationState);
 		context.nextState();
 	}
 
@@ -85,6 +92,7 @@ public class InitialStartupState implements State {
 		// as properties, that exist already are not replaced/changed, start with the last version before,
 		// as considered as more important
 		// overwrite with properties from ShanoirUploader v7.0.1, v6.0.4 or v6.0.3, if existing
+		migrateFromVersion(SU_V8_0_0);
 		migrateFromVersion(SU_V7_0_1);
 		migrateFromVersion(SU_V6_0_4);
 		migrateFromVersion(SU_V6_0_3);
@@ -184,27 +192,9 @@ public class InitialStartupState implements State {
 	}
 
 	private void initStartupDialog(StartupStateContext context) {
-		ShUpStartupDialog shUpStartupDialog = new ShUpStartupDialog(context);
+		shUpStartupDialog.configure(context);
 		shUpStartupDialog.setVisible(true);
 		context.setShUpStartupDialog(shUpStartupDialog);
-	}
-	
-	/**
-	 * Initialize the logging.
-	 */
-	private void initLogging() {
-		try {
-			Properties log4jProperties = new Properties();
-			InputStream propsFile = InitialStartupState.class.getResourceAsStream(LOG4J_PROPERTIES);
-			log4jProperties.load(propsFile);
-			log4jProperties.put("log4j.appender.file.File",
-					ShUpConfig.shanoirUploaderFolder.getAbsolutePath() + File.separator + "su.log");
-			PropertyConfigurator.configure(log4jProperties);
-			logger.info("Logging successfully initialized.");
-		} catch (IOException e) {
-			// System.out here, as error in logging init, only exception
-			System.out.println("Init logging error: " + e.getMessage());
-		}
 	}
 	
 	private void initPropertiesFiles() throws FileNotFoundException, IOException {
@@ -254,23 +244,6 @@ public class InitialStartupState implements State {
 	}
 	
 	/**
-	 * Initialize personal properties folder of ShanoirUploader.
-	 */
-	private void initShanoirUploaderFolder() {
-		final String userHomeFolderPath = System.getProperty(ShUpConfig.USER_HOME);
-		final String shanoirUploaderFolderPath = userHomeFolderPath
-				+ File.separator + ShUpConfig.SU + "_" + ShUpConfig.SHANOIR_UPLOADER_VERSION;
-		final File shanoirUploaderFolder = new File(shanoirUploaderFolderPath);
-		boolean shanoirUploaderFolderExists = shanoirUploaderFolder.exists();
-		if (shanoirUploaderFolderExists) {
-			// do nothing
-		} else {
-			shanoirUploaderFolder.mkdirs();
-		}
-		ShUpConfig.shanoirUploaderFolder = shanoirUploaderFolder;
-	}
-	
-	/**
 	 * Reads properties from .su folder into memory, or copies property file if not existing.
 	 */
 	private void initProperties(final String fileName, final Properties properties) {
@@ -299,4 +272,15 @@ public class InitialStartupState implements State {
 			ShUpConfig.profileSelected = profile;
 		}
 	}
+	
+	private void initCredentials() throws FileNotFoundException, IOException {
+		String username = ShUpConfig.basicProperties.getProperty(ShUpConfig.USERNAME);
+		String password = ShUpConfig.basicProperties.getProperty(ShUpConfig.PASSWORD);
+		if (username != null && !username.isBlank() && password != null && !password.isBlank()) {
+			ShUpConfig.username = username;
+			ShUpConfig.password = password;
+			logger.info("Pre-configured credentials found.");
+		}
+	}
+
 }

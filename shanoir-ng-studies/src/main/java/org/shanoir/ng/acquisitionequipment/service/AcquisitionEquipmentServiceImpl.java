@@ -22,6 +22,7 @@ import java.util.Optional;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.center.model.Center;
+import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.manufacturermodel.model.Manufacturer;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
@@ -53,6 +54,9 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 	
 	@Autowired
 	private AcquisitionEquipmentRepository repository;
+
+	@Autowired
+	private CenterRepository centerRepository;
 
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
@@ -134,7 +138,8 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 
 	@Override
 	public List<AcquisitionEquipment> findAcquisitionEquipmentsOrCreateOneByEquipmentDicom(
-			EquipmentDicom equipmentDicom) {
+		Long centerId,
+		EquipmentDicom equipmentDicom) {
 		// trace all info from DICOM to get an overview of the possibilities in the hospitals and learn from it
 		LOG.info("findAcquisitionEquipmentsOrCreateOneByEquipmentDicom called with: " + equipmentDicom.toString());
 		if (equipmentDicom.isComplete()) { // we consider finding/creating the correct equipment is impossible without all 3 values
@@ -147,17 +152,17 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 				// nothing found with device serial number from DICOM
 				if (equipments == null || equipments.isEmpty()) {
 					equipments = new ArrayList<AcquisitionEquipment>();
-					autoCreateNewAcquisitionEquipment(equipmentDicom, equipments);
+					autoCreateNewAcquisitionEquipment(centerId, equipmentDicom, equipments);
 				} else {
 					matchOrRemoveEquipments(equipmentDicom, equipments);
 					if (equipments.isEmpty()) {
-						autoCreateNewAcquisitionEquipment(equipmentDicom, equipments);
+						autoCreateNewAcquisitionEquipment(centerId, equipmentDicom, equipments);
 					}
 				}
 			} else {
 				matchOrRemoveEquipments(equipmentDicom, equipments);
 				if (equipments.isEmpty()) {
-					autoCreateNewAcquisitionEquipment(equipmentDicom, equipments);
+					autoCreateNewAcquisitionEquipment(centerId, equipmentDicom, equipments);
 				}
 			}
 			return equipments;
@@ -165,7 +170,7 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 		return null;
 	}
 
-	private void autoCreateNewAcquisitionEquipment(EquipmentDicom equipmentDicom, List<AcquisitionEquipment> equipments) {
+	private void autoCreateNewAcquisitionEquipment(Long centerId, EquipmentDicom equipmentDicom, List<AcquisitionEquipment> equipments) {
 		AcquisitionEquipment equipment = new AcquisitionEquipment();
 		Manufacturer manufacturer = new Manufacturer();
 		manufacturer.setName(equipmentDicom.getManufacturer());
@@ -173,9 +178,8 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 		manufacturerModel.setName(equipmentDicom.getManufacturerModelName());
 		manufacturerModel.setManufacturer(manufacturer);
 		equipment.setManufacturerModel(manufacturerModel);
-		Center center = new Center();
-		center.setId(1L); // change later to correct center
-		equipment.setCenter(center);
+		Optional<Center> center = centerRepository.findById(centerId);
+		equipment.setCenter(center.orElseThrow());
 		AcquisitionEquipment newDbAcEq = repository.save(equipment);
 		equipments.add(newDbAcEq);
 	}

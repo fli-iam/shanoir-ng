@@ -20,8 +20,10 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.action.DicomServerConfigurationListener;
+import org.shanoir.uploader.dicom.IDicomServerClient;
 
 /**
  * The DICOM Server Configuration window of the ShanoirUploader.
@@ -46,15 +48,14 @@ public class DicomServerConfigurationWindow extends JFrame {
 	public JButton configureButton;
 	public boolean isDicomServerEnableTLS3DES = false;
 
-	private static Logger logger = Logger.getLogger(DicomServerConfigurationWindow.class);
+	private static final Logger logger = LoggerFactory.getLogger(DicomServerConfigurationWindow.class);
 
-	// private static final String JFRAME_TITLE = "DICOM Server Configuration";
 	DicomServerConfigurationListener dSCL;
 
 	public File shanoirUploaderFolder;
 	public ResourceBundle resourceBundle;
 
-	public DicomServerConfigurationWindow(File shanoirUploaderFolder, ResourceBundle resourceBundle) {
+	public DicomServerConfigurationWindow(final IDicomServerClient dicomServerClient, File shanoirUploaderFolder, ResourceBundle resourceBundle) {
 		this.shanoirUploaderFolder = shanoirUploaderFolder;
 		this.resourceBundle = resourceBundle;
 
@@ -159,7 +160,7 @@ public class DicomServerConfigurationWindow extends JFrame {
 		addItem(configurationPanel, configureButton, 2, 11, 1, GridBagConstraints.WEST);
 
 		// listener
-		dSCL = new DicomServerConfigurationListener(this);
+		dSCL = new DicomServerConfigurationListener(this, dicomServerClient);
 		echoButton.addActionListener(dSCL);
 		configureButton.addActionListener(dSCL);
 
