@@ -400,16 +400,13 @@ public class DatasetServiceImpl implements DatasetService {
 					// Delete file from disc
 					url = new URL(file.getPath().replaceAll("%20", " "));
 					File srcFile = new File(UriUtils.decode(url.getPath(), StandardCharsets.UTF_8.name()));
-					FileUtils.deleteQuietly(srcFile);
+					FileUtils.delete(srcFile);
 				} catch (Exception e) {
 					LOG.error("Could not delete nifti file: {}", file.getPath(), e);
 				}
 			}
-			LOG.error("We add " + expression.getId());
 			datasetExpressionToDelete.add(expression);
 		}
-
-		LOG.error("We delete " + datasetExpressionToDelete.size());
 		this.datasetExpressionRepository.deleteAll(datasetExpressionToDelete);
 	}
 
