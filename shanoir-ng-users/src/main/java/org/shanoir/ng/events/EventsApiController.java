@@ -1,5 +1,6 @@
 package org.shanoir.ng.events;
 
+import org.shanoir.ng.ShanoirUsersManagement;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
@@ -18,8 +19,10 @@ public class EventsApiController implements EventsApi {
     @Autowired
     private ShanoirEventsService shanoirEventsService;
 
+    private static final Logger LOG = LoggerFactory.getLogger(EventsApiController.class);
     @Override
     public ResponseEntity<Page<ShanoirEvent>> findEventsByStudyId(final Pageable pageable, Long studyId, String searchStr, String searchField) throws RestServiceException {
+        LOG.error("findEventsByStudyId : studyId=" + studyId + " / searchStr = " + searchStr + " / searchField = " + searchField);
         try {
             Page<ShanoirEvent> events = shanoirEventsService.findByStudyId(pageable, studyId, searchStr, searchField);
 

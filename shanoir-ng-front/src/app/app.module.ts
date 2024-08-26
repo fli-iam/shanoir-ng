@@ -550,7 +550,6 @@ import { CoilNodeComponent } from './coils/coil/tree/coil-node.component';
         MassDownloadService,
         SessionService,
         ShanoirEventService,
-        {provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true}
         TreeService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],
