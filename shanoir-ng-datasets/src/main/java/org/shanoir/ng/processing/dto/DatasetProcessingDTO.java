@@ -40,6 +40,8 @@ public class DatasetProcessingDTO {
 
 	private List<DatasetDTO> inputDatasets;
 
+	private List<DatasetDTO> outputDatasets;
+
 	private LocalDate processingDate;
 	
 	private Long studyId;
@@ -68,6 +70,14 @@ public class DatasetProcessingDTO {
 
 	public void setDatasetProcessingType(DatasetProcessingType datasetProcessingType) {
 		this.datasetProcessingType = datasetProcessingType;
+	}
+	
+	public List<DatasetDTO> getInputDatasets() {
+		return inputDatasets;
+	}
+
+	public void setInputDatasets(List<DatasetDTO> inputDatasets) {
+		this.inputDatasets = inputDatasets;
 	}
 
 	public List<DatasetWithProcessingsDTO> getOutputDatasets() {
@@ -100,13 +110,5 @@ public class DatasetProcessingDTO {
 
 	public void setParentId(Long parentId) {
 		this.parentId = parentId;
-	}
-
-	public List<DatasetDTO> getInputDatasets() {
-		return inputDatasets;
-	}
-
-	public void setInputDatasets(List<DatasetDTO> inputDatasets) {
-		this.inputDatasets = inputDatasets;
 	}
 }

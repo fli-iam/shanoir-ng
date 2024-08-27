@@ -3,8 +3,10 @@
 .cell { display: table-cell; vertical-align: middle; text-align: center; }
 .window { display: inline-block; background-color: var(--very-light-grey); border-radius: 2px; vertical-align: middle; padding: 15px 20px; }
 
-.body { width: 100%; text-align: left; margin-top: 20px; }
+.body { width: 100%; text-align: left; margin-top: 20px; position: relative; }
 .footer { margin-top: 20px; }
 input[type="number"] { width: 52px; }
 .warning { margin-left: 10px; color: var(--color-error); vertical-align: inherit; }
 .warning i { margin-right: 2px; }
+
+.format-preview { position: absolute; top: 0; right: 0; width: 220px; }

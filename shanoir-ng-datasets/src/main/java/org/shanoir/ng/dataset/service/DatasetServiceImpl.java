@@ -45,6 +45,7 @@ import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
+import org.shanoir.ng.vip.resource.ProcessingResourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -103,6 +104,9 @@ public class DatasetServiceImpl implements DatasetService {
 	@Autowired
 	private DatasetProcessingService processingService;
 
+	@Autowired
+	private ProcessingResourceService processingResourceService;
+
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
 	@Override
@@ -121,7 +125,10 @@ public class DatasetServiceImpl implements DatasetService {
 					));
 
 		}
+		// Remove parent processing to avoid errors
+		dataset.setDatasetProcessing(null);
 		processingService.removeDatasetFromAllProcessingInput(id);
+		processingResourceService.deleteByDatasetId(id);
 		propertyService.deleteByDatasetId(id);
 		repository.deleteById(id);
 

@@ -56,7 +56,6 @@ public class CoilApiController implements CoilApi {
 	public ResponseEntity<Void> deleteCoil(
 			@Parameter(description = "id of the coil", required = true) @PathVariable("coilId") Long coilId)
 			throws RestServiceException {
-
 		try {
 			coilService.deleteById(coilId);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_COIL_EVENT, coilId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
@@ -75,6 +74,16 @@ public class CoilApiController implements CoilApi {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<>(coilMapper.coilToCoilDTO(coil), HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<List<CoilDTO>> findCoilsByCenterId(
+			@Parameter(name = "id of the center", required = true) @PathVariable("centerId") Long centerId) {
+		final List<Coil> coils = coilService.findByCenterId(centerId);
+		if (coils.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(coilMapper.coilsToCoilDTOs(coils), HttpStatus.OK);
 	}
 
 	@Override

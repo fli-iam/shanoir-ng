@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -96,9 +95,7 @@ public class SubjectApiController implements SubjectApi {
 
 	@Override
 	public ResponseEntity<List<SubjectDTO>> findSubjects(boolean preclinical, boolean clinical) {
-
 		List<Subject> subjects = new ArrayList<>();
-
 		if(preclinical && clinical){
 			subjects = subjectService.findAll();
 		} else if (preclinical) {
@@ -106,11 +103,9 @@ public class SubjectApiController implements SubjectApi {
 		} else if (clinical) {
 			subjects = subjectService.findByPreclinical(false);
 		}
-
 		if (subjects.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-
 		return new ResponseEntity<>(subjectMapper.subjectsToSubjectDTOs(subjects), HttpStatus.OK);
 	}
 
@@ -146,7 +141,6 @@ public class SubjectApiController implements SubjectApi {
 			createdSubject = subjectService.createAutoIncrement(subject, centerId);
 		}
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_SUBJECT_EVENT, createdSubject.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-
 		final SubjectDTO subjectDTO = subjectMapper.subjectToSubjectDTO(createdSubject);
 		return new ResponseEntity<SubjectDTO>(subjectDTO, HttpStatus.OK);
 	}
@@ -160,7 +154,6 @@ public class SubjectApiController implements SubjectApi {
 		validate(subject, result);
 		try {
 			subjectService.update(subject);
-
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_SUBJECT_EVENT, subject.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
@@ -176,7 +169,7 @@ public class SubjectApiController implements SubjectApi {
 			@Parameter(description="preclinical", required = false) @RequestParam(value="preclinical", required = false) String preclinical) {
 		final List<SimpleSubjectDTO> simpleSubjectDTOList;
 		if ("null".equals(preclinical)) {
-			simpleSubjectDTOList = subjectService.findAllSubjectsOfStudy(studyId);
+			simpleSubjectDTOList = subjectService.findAllSubjectsOfStudyId(studyId);
 		} else {
 			simpleSubjectDTOList = subjectService.findAllSubjectsOfStudyAndPreclinical(studyId, Boolean.parseBoolean(preclinical));
 		}
@@ -197,7 +190,10 @@ public class SubjectApiController implements SubjectApi {
 	@Override
 	public ResponseEntity<SubjectDTO> findSubjectByIdentifier(
 			@Parameter(description = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier) {
-		final Subject subject = subjectService.findByIdentifier(subjectIdentifier);
+		// Get all allowed studies
+		List<Study> studies = studyService.findAll();
+		// As only studies are used to find a subject, in which the user has rights, no need for further rights checks
+		final Subject subject = subjectService.findByIdentifierInStudiesWithRights(subjectIdentifier, studies);
 		if (subject == null) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
@@ -217,12 +213,11 @@ public class SubjectApiController implements SubjectApi {
 	public ResponseEntity<Page<SubjectDTO>> findClinicalSubjectsPageByName(Pageable page, String name) {
 		// Get all allowed studies
 		List<Study> studies = this.studyService.findAll();
-		
 		Page<Subject> subjects = this.subjectService.getClinicalFilteredPageByStudies(page, name, studies);
-		
 		if (subjects.getContent().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<>(subjectMapper.subjectsToSubjectDTOs(subjects), HttpStatus.OK);
 	}
+
 }

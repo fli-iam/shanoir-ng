@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.acquisitionequipment.model;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
@@ -22,6 +24,7 @@ import org.shanoir.ng.shared.hateoas.HalEntity;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -51,7 +54,8 @@ public class AcquisitionEquipment extends HalEntity {
 	@JoinColumn(name = "center_id")
 	private Center center;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.EAGER)
+	@Fetch(FetchMode.JOIN)
 	@NotNull
 	@JoinColumn(name = "manufacturer_model_id")
 	private ManufacturerModel manufacturerModel;

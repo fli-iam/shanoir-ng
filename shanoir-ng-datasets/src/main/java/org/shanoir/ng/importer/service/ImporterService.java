@@ -314,7 +314,7 @@ public class ImporterService {
 
     private boolean hasQualityChecksAtImport(List<QualityCard> qualityCards) {
         if (qualityCards == null || qualityCards.isEmpty()) {
-            LOG.warn("No qualitycard given for this import");
+            LOG.warn("No qualitycard given for this import.");
             return false;
         }
         for (QualityCard qualityCard : qualityCards) {
@@ -330,7 +330,7 @@ public class ImporterService {
             StudyCard studyCard = getStudyCard(importJob.getStudyCardId());
             return studyCard;
         } else {
-            LOG.warn("No studycard given for this import");
+            LOG.warn("No studycard given for this import.");
             return null;
         }
     }

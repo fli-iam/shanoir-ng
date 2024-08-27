@@ -23,6 +23,7 @@ import { GlobalService } from './shared/services/global.service';
 import { WindowService } from './shared/services/window.service';
 import { KeycloakSessionService } from './shared/session/keycloak-session.service';
 import { StudyService } from './studies/shared/study.service';
+import { TreeService } from './studies/study/tree.service';
 import { UserService } from './users/shared/user.service';
 import { ServiceLocator } from './utils/locator.service';
 
@@ -48,7 +49,8 @@ export class AppComponent {
             private confirmService: ConfirmDialogService,
             protected router: Router,
             private studyService: StudyService,
-            private userService: UserService) {
+            private userService: UserService,
+            public treeService: TreeService) {
         
         ServiceLocator.rootViewContainerRef = this.viewContainerRef;
     }
@@ -69,6 +71,10 @@ export class AppComponent {
 
     toggleMenu(open: boolean) {
         this.menuOpen = open;
+    }
+
+    toggleTree(open: boolean) {
+        this.treeService.treeOpened = open;    
     }
 
     isAuthenticated(): boolean {

@@ -19,7 +19,7 @@ import java.util.List;
 
 import org.shanoir.ng.groupofsubjects.ExperimentalGroupOfSubjectsMapper;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
-import org.shanoir.ng.study.dto.PublicStudyDTO;
+import org.shanoir.ng.study.dto.StudyLightDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.studycenter.StudyCenterMapper;
@@ -60,10 +60,10 @@ public abstract class StudyDecorator implements StudyMapper {
 		for (Study study : studies) {
 			final StudyDTO studyDTO = convertStudyToStudyDTO(study, false);
 			if (study.getSubjectStudyList() != null) {
-				studyDTO.setNbSujects(study.getSubjectStudyList().size());
+				studyDTO.setNbSubjects(study.getNbSubjects());
 			}
 			if (study.getExaminations() != null) {
-				studyDTO.setNbExaminations(study.getExaminations().size());
+				studyDTO.setNbExaminations(study.getNbExaminations());
 			}
 			studyDTOs.add(studyDTO);
 		}
@@ -119,22 +119,18 @@ public abstract class StudyDecorator implements StudyMapper {
 	}
 
 	@Override
-	public PublicStudyDTO studyToPublicStudyDTO (final Study study) {
-		final PublicStudyDTO publicStudyDTO = delegate.studyToPublicStudyDTO(study);
-
-		if (study.getSubjectStudyList() != null) {
-			publicStudyDTO.setNbSubjects(study.getSubjectStudyList().size());
-		}
-		if (study.getExaminations() != null) {
-			publicStudyDTO.setNbExaminations(study.getExaminations().size());
-		}
+	public StudyLightDTO studyToStudyLightDTO(final Study study) {
+		final StudyLightDTO studyLightDTO = delegate.studyToStudyLightDTO(study);
+		studyLightDTO.setNbSubjects(study.getNbSubjects());
+		studyLightDTO.setNbExaminations(study.getNbExaminations());
 		if (study.getStudyTags() != null) {
-			publicStudyDTO.setStudyTags(studyTagMapper.studyTagListToStudyTagDTOList(study.getStudyTags()));
+			studyLightDTO.setStudyTags(studyTagMapper.studyTagListToStudyTagDTOList(study.getStudyTags()));
 		}
 		if (study.getLicense() != null) {
-			publicStudyDTO.setLicense(study.getLicense());
+			studyLightDTO.setLicense(study.getLicense());
 		}
-		return publicStudyDTO;
+		return studyLightDTO;
 	}
+
 }
 

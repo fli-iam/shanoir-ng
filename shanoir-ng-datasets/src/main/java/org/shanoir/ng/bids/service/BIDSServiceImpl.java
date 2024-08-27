@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -166,7 +167,9 @@ public class BIDSServiceImpl implements BIDSService {
 	public void deleteBidsFolder(Long studyId, String studyName) {
 		try {
 			if (studyName == null) {
-				studyName = this.studyRepo.findById(studyId).get().getName();
+				Optional<Study> study = studyRepo.findById(studyId);
+				if (!study.isEmpty())
+					studyName = study.get().getName();
 			}
 			// Try to delete the BIDS folder recursively if possible
 			File bidsDir = new File(bidsStorageDir + File.separator + STUDY_PREFIX + studyId + studyName);
