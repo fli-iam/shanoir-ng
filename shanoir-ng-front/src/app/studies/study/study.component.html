@@ -64,7 +64,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li [class.active]="activeTab == 'bids'" class="disabled" replaceUrl="true">BIDS</li>
 				</ng-container>
                 <li class="tags" *ngIf="isStudyAdmin" [class.active]="activeTab == 'history'" [routerLink]="'.'" [fragment]="'history'" replaceUrl="true" (click)="loadHistory()">
-                    <span class="tags">History</span>
+                    <span class="history">History</span>
                 </li>
 			</ul>
 
