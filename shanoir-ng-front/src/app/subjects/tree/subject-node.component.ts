@@ -75,12 +75,10 @@ export class SubjectNodeComponent implements OnChanges {
             private subjectService: SubjectService) {
     }
 
-    prout;
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {
             if (this.input instanceof SubjectNode) {
                 this.node = this.input;
-                this.prout = '???'
             } else if (this.input.subject.preclinical) {
                 this.node = new PreclinicalSubjectNode(
                     this.node,
@@ -92,7 +90,6 @@ export class SubjectNodeComponent implements OnChanges {
                     this.rights.includes(StudyUserRight.CAN_ADMINISTRATE),
                     this.rights.includes(StudyUserRight.CAN_DOWNLOAD),
                 );
-                this.prout = 'pre'
             } else {
                 this.node = new ClinicalSubjectNode(
                     this.node,
@@ -104,7 +101,6 @@ export class SubjectNodeComponent implements OnChanges {
                     this.rights.includes(StudyUserRight.CAN_ADMINISTRATE),
                     this.rights.includes(StudyUserRight.CAN_DOWNLOAD)
                 );
-                this.prout = 'cli'
             }
             this.node.registerOpenPromise(this.contentLoaded);
             this.nodeInit.emit(this.node);
