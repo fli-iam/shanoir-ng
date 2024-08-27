@@ -40,8 +40,6 @@ public class DatasetProcessingDTO {
 
 	private List<DatasetDTO> inputDatasets;
 
-	private List<DatasetDTO> outputDatasets;
-
 	private LocalDate processingDate;
 	
 	private Long studyId;
