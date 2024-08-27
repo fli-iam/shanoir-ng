@@ -123,7 +123,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 		
 		/* Validation */
 		validate(result);
-		validateProcessingInput(datasetProcessing);
+		datasetProcessingService.validateDatasetProcessing(datasetProcessing);
 
 		/* Save dataset processing in db. */
 		final DatasetProcessing createdDatasetProcessing = datasetProcessingService.create(datasetProcessing);
@@ -137,7 +137,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 			final BindingResult result) throws RestServiceException {
 
 		validate(result);
-		validateProcessingInput(datasetProcessing);
+		datasetProcessingService.validateDatasetProcessing(datasetProcessing);
 
 		try {
 			datasetProcessingService.update(datasetProcessing);
@@ -145,24 +145,6 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 		
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-	}
-
-
-	private void validateProcessingInput(DatasetProcessing processing) throws RestServiceException {
-		if(processing.getStudyId() == null){
-			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Processing must be linked to a study.", null);
-			throw new RestServiceException(error);
-		}
-		if(processing.getInputDatasets() == null || processing.getInputDatasets().isEmpty()){
-			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "There must be at least one input dataset.", null);
-			throw new RestServiceException(error);
-		}
-		for(Dataset dataset : processing.getInputDatasets()){
-			if (processing.getStudyId().equals(datasetService.getStudyId(dataset))){
-				ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Input dataset [" + dataset.getId() + "] is not linked to the processing study.", null);
-				throw new RestServiceException(error);
-			}
 		}
 	}
 	

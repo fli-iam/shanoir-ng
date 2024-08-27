@@ -4,6 +4,8 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.processing.service.DatasetProcessingService;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.vip.dto.DatasetParameterDTO;
 import org.shanoir.ng.vip.monitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.monitoring.model.ExecutionStatus;
@@ -35,6 +37,9 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
 
     @Autowired
     private ExecutionMonitoringSecurityService executionMonitoringSecurityService;
+
+    @Autowired
+    private DatasetProcessingService datasetProcessingService;
 
     private final String RIGHT_STR = "CAN_SEE_ALL";
 
@@ -176,6 +181,11 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
         return resources;
 
 
+    }
+
+    @Override
+    public void validateExecutionMonitoring(ExecutionMonitoring executionMonitoring) throws RestServiceException {
+        datasetProcessingService.validateDatasetProcessing(executionMonitoring);
     }
 
 }

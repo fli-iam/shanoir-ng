@@ -91,7 +91,6 @@ public class ExecutionApiController implements ExecutionApi {
 
         // 1: Get dataset and check rights
         List<Dataset> inputDatasets = this.getDatasetsFromParams(candidate.getDatasetParameters());
-
         this.checkRightsForExecution(inputDatasets);
 
         ExecutionMonitoring executionMonitoring = this.createExecutionMonitoring(candidate, inputDatasets);
@@ -215,7 +214,7 @@ public class ExecutionApiController implements ExecutionApi {
      * @param inputDatasets
      * @return
      */
-    private ExecutionMonitoring createExecutionMonitoring(ExecutionCandidateDTO execution, List<Dataset> inputDatasets) {
+    private ExecutionMonitoring createExecutionMonitoring(ExecutionCandidateDTO execution, List<Dataset> inputDatasets) throws RestServiceException {
         ExecutionMonitoring executionMonitoring = new ExecutionMonitoring();
         executionMonitoring.setName(execution.getName());
         executionMonitoring.setPipelineIdentifier(execution.getPipelineIdentifier());
@@ -228,6 +227,7 @@ public class ExecutionApiController implements ExecutionApi {
         executionMonitoring.setOutputProcessing(execution.getOutputProcessing());
         executionMonitoring.setInputDatasets(inputDatasets);
         executionMonitoring.setUsername(KeycloakUtil.getTokenUserName());
+        executionMonitoringService.validateExecutionMonitoring(executionMonitoring);
         return this.executionMonitoringService.create(executionMonitoring);
     }
 
