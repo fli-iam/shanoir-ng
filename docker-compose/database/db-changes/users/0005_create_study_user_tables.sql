@@ -25,3 +25,16 @@ CREATE TABLE `study_user_study_user_rights` (
   KEY `FK6ipbom6lji60h38bd3ok2r098` (`study_user_id`),
   CONSTRAINT `FK6ipbom6lji60h38bd3ok2r098` FOREIGN KEY (`study_user_id`) REFERENCES `study_user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+
+INSERT INTO users.study_user
+SELECT id, confirmed, receive_new_import_report, receive_study_user_report, study_id, user_id, COALESCE(user_name, '') 
+FROM studies.study_user;
+
+INSERT INTO users.study_user_center
+SELECT study_user_id, center_id 
+FROM studies.study_user_center;
+
+INSERT INTO users.study_user_study_user_rights
+SELECT study_user_id, study_user_rights 
+FROM studies.study_user_study_user_rights;
