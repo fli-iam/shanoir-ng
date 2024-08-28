@@ -221,12 +221,12 @@ export class ClinicalSubjectNode extends SubjectNode {
 
     public static fromSubjectStudy(subjectStudy: SubjectStudy, parent: ShanoirNode, canDeleteChildren: boolean, canDownload: boolean): ClinicalSubjectNode {
         return new ClinicalSubjectNode(
-            parent, 
-            subjectStudy.subject.id, 
-            new SubjectStudyPipe().transform(subjectStudy), 
-            subjectStudy.tags, 
-            UNLOADED, 
-            subjectStudy.qualityTag, 
+            parent,
+            subjectStudy.subject.id,
+            new SubjectStudyPipe().transform(subjectStudy),
+            subjectStudy.tags,
+            UNLOADED,
+            subjectStudy.qualityTag,
             canDeleteChildren,
             canDownload);
     }
@@ -240,12 +240,12 @@ export class PreclinicalSubjectNode extends SubjectNode {
 
     public static fromSubjectStudy(subjectStudy: SubjectStudy, parent: ShanoirNode, canDeleteChildren: boolean, canDownload: boolean): PreclinicalSubjectNode {
         return new PreclinicalSubjectNode(
-            parent, 
-            subjectStudy.subject.id, 
-            new SubjectStudyPipe().transform(subjectStudy), 
-            subjectStudy.tags, 
-            UNLOADED, 
-            subjectStudy.qualityTag, 
+            parent,
+            subjectStudy.subject.id,
+            new SubjectStudyPipe().transform(subjectStudy),
+            subjectStudy.tags,
+            UNLOADED,
+            subjectStudy.qualityTag,
             canDeleteChildren,
             canDownload);
     }
@@ -269,6 +269,7 @@ export class ExaminationNode extends ShanoirNode {
         super(parent, id, label);
     }
 
+    public selected: boolean = false;
     public extraDataOpen: boolean = false;
     public title: string = this.preclinical ? 'preclinical examination' : 'examination';
     protected readonly routeBase = this.preclinical ? '/preclinical-examination/details/' : '/examination/details/';

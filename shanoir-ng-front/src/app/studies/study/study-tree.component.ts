@@ -18,9 +18,11 @@ import { TaskState } from 'src/app/async-tasks/task.model';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { ExecutionDataService } from 'src/app/vip/execution.data-service';
 import { TreeService } from './tree.service';
-import { DatasetNode, StudyNode } from 'src/app/tree/tree.model';
+import {DatasetNode, ExaminationNode, StudyNode} from 'src/app/tree/tree.model';
 import { MsgBoxService } from 'src/app/shared/msg-box/msg-box.service';
 import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/confirm-dialog.service';
+import {Examination} from "../../examinations/shared/examination.model";
+import {environment} from "../../../environments/environment";
 
 
 @Component({
@@ -31,8 +33,9 @@ import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/c
 
 export class StudyTreeComponent {
 
-    _selectedDatasetNodes: DatasetNode[] = []; 
-    protected downloadState: TaskState; 
+    _selectedDatasetNodes: DatasetNode[] = [];
+    selectedExaminationNodes: number[] = [];
+    protected downloadState: TaskState;
 
     constructor(
             protected treeService: TreeService,
@@ -61,15 +64,24 @@ export class StudyTreeComponent {
         } else {
             this.downloadService.downloadByIds(this.selectedDatasetNodes?.map(n => n.id), this.downloadState);
         }
-        
+
+    }
+
+    openInViewer() {
+        console.log("selected exam nodes : " + this.selectedExaminationNodes);
+        let res = this.selectedExaminationNodes.map(id => `1.4.9.12.34.1.8527.${id}`).join(',');
+        window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=' + res, '_blank');
     }
 
     onSelectedChange(study: StudyNode) {
         let dsNodes: DatasetNode[] = [];
+        let examIds: number[] = [];
         if (study.subjectsNode.subjects && study.subjectsNode.subjects != 'UNLOADED') {
             study.subjectsNode.subjects.forEach(subj => {
                 if (subj.examinations && subj.examinations != 'UNLOADED') {
                     subj.examinations.forEach(exam => {
+                        if (exam.selected) examIds = examIds.concat(exam.id);
+
                         if (exam.datasetAcquisitions && exam.datasetAcquisitions != 'UNLOADED') {
                             exam.datasetAcquisitions.forEach(dsAcq => {
                                 dsNodes = dsNodes.concat(this.searchSelectedInDatasetNodes(dsAcq.datasets));
@@ -79,6 +91,7 @@ export class StudyTreeComponent {
                 }
             });
         }
+        this.selectedExaminationNodes = examIds;
         this.selectedDatasetNodes = dsNodes;
     }
 
@@ -100,7 +113,7 @@ export class StudyTreeComponent {
             }, []);
         } else return [];
     }
-        
+
 }
 
 
