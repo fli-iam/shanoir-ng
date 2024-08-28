@@ -229,7 +229,6 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as examinationId, " +
 			"null as examinationComment, " +
 			"null as examinationDate, " +
-			"ae.name as acquisitionEquipmentName, " +
 			"su.name as subjectName, " +
 			"sust.subject_type as subjectType, " +
 			"su.id as subjectId, " +
