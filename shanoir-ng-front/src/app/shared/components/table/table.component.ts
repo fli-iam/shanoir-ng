@@ -23,7 +23,7 @@ import { KeycloakService } from '../../keycloak/keycloak.service';
 import { ColumnDefinition } from './column.definition.type';
 import {isDarkColor} from "../../../utils/app.utils";
 import {Router} from "@angular/router";
-import {formatDate} from "@angular/common";
+import * as AppUtils from '../../../utils/app.utils';
 
 @Component({
     selector: 'shanoir-table',
@@ -630,6 +630,37 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             col.hidden = this.colSave[this.columnDefs.length + i].hidden;
         });
         this.saveSettings();
+    }
+
+    exportTable() {
+        let csvStr: string = '';
+        csvStr += this.columnDefs.map(col => col.headerName).join(','); // headers
+        let completion: Promise<void> = Promise.resolve();
+        for (let i = 0; i < this.page.totalPages; i++) { // here we could use a fixed page size
+            let pageable: Pageable = this.getPageable();
+            pageable.pageNumber = i + 1;
+            let getPage: Page<any> | Promise<Page<any>> = this.getPage(pageable, true)
+            completion = completion.then(() => { // load pages sequentially
+                if (getPage instanceof Promise) {
+                    return getPage.then(page => {
+                        for (let entry of page.content) {
+                            csvStr += '\n' + this.columnDefs.map(col => '"' + (TableComponent.getCellValue(entry, col) || '') + '"').join(',');
+                        }
+                    });
+                } else if (getPage instanceof Page) {
+                    for (let entry of getPage.content) {
+                        csvStr += '\n' + this.columnDefs.map(col => '"' + (TableComponent.getCellValue(entry, col) || '') + '"').join(',');
+                    }
+                    return Promise.resolve();
+                }
+            });
+        }
+        completion.then(() => {
+            const csvBlob = new Blob([csvStr], {
+                type: 'text/csv'
+            });
+            AppUtils.browserDownloadFile(csvBlob, 'tableExport_' + Date.now().toLocaleString('fr-FR'));
+        });
     }
 
     deploy(i: number) {
