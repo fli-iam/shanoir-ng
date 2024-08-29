@@ -71,19 +71,25 @@ public class StudyInstanceUIDHandler {
 	private ExaminationService examinationService;
 
 	private ConcurrentHashMap<String, String> examinationUIDToStudyInstanceUIDCache;
-	private ConcurrentHashMap<String, String> acquisitionUIDToStudyInstanceUIDCache;
+	private ConcurrentHashMap<String, String> acquisitionUIDToSeriesInstanceUIDCache;
 	
 	@PostConstruct
 	public void init() {
 		examinationUIDToStudyInstanceUIDCache = new ConcurrentHashMap<String, String>(1000);
-		acquisitionUIDToStudyInstanceUIDCache = new ConcurrentHashMap<String, String>(1000);
+		acquisitionUIDToSeriesInstanceUIDCache = new ConcurrentHashMap<String, String>(1000);
 		LOG.info("DICOMWeb cache created: examinationUIDToStudyInstanceUIDCache");
+		LOG.info("DICOMWeb cache created: acquisitionUIDToSeriesInstanceUIDCache");
 	}
-	
+
 	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
 	public void clearExaminationIdToStudyInstanceUIDCache() {
 		examinationUIDToStudyInstanceUIDCache.clear();
 		LOG.info("DICOMWeb cache cleared: examinationUIDToStudyInstanceUIDCache");
+	}
+	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
+	public void clearAcquisitionIdToSeriesInstanceUIDCache() {
+		acquisitionUIDToSeriesInstanceUIDCache.clear();
+		LOG.info("DICOMWeb cache cleared: acquisitionUIDToSeriesInstanceUIDCache");
 	}
 	
 	/**
@@ -156,6 +162,25 @@ public class StudyInstanceUIDHandler {
 		}
 		return studyInstanceUID;
 	}
+
+	public String findSeriesInstanceUIDFromCacheOrDatabase(String examinationUID) {
+		String studyInstanceUID = examinationUIDToStudyInstanceUIDCache.get(examinationUID);
+		if (studyInstanceUID == null) {
+			Long examinationId = extractExaminationId(examinationUID);
+			Examination examination = examinationService.findById(examinationId);
+			if (examination != null) {
+				studyInstanceUID = findStudyInstanceUID(examination);
+				if (studyInstanceUID != null) {
+					examinationUIDToStudyInstanceUIDCache.put(examinationUID, studyInstanceUID);
+					LOG.info("DICOMWeb cache adding: " + examinationUID + ", " + studyInstanceUID);
+					LOG.info("DICOMWeb cache, size: " + examinationUIDToStudyInstanceUIDCache.size());
+				}
+			}
+		}
+		return studyInstanceUID;
+	}
+
+
 	
 	/**
 	 * This method walks down the information model in Shanoir to read the StudyInstanceUID

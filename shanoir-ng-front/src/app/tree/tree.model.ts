@@ -304,6 +304,7 @@ export class DatasetAcquisitionNode extends ShanoirNode {
         super(parent, id, label);
     }
 
+    public selected: boolean = false;
     public title: string = "dataset-acquisition";
     protected readonly routeBase = '/dataset-acquisition/details/';
 
@@ -456,7 +457,7 @@ export abstract class CardNode extends ShanoirNode {
     ) {
         super(parent, id, label);
     }
-    
+
     public abstract type: 'studycard' | 'qualitycard';
     public abstract title: string;
 }

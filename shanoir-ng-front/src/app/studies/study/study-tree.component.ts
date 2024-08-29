@@ -70,7 +70,6 @@ export class StudyTreeComponent {
     }
 
     openInViewer() {
-        console.log("selected exam nodes : " + this.selectedExaminationNodes);
         let res = this.selectedExaminationNodes.map(id => `1.4.9.12.34.1.8527.${id}`).join(',');
         window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=' + res, '_blank');
     }
