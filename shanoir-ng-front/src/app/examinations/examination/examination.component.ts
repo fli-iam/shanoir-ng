@@ -165,7 +165,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
 
     openSegmentationViewer() {
-        window.open(environment.viewerUrl + '/Segmentation?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
+        window.open(environment.viewerUrl + '/segmentation?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
     }
     getCenters(): void {
         this.centerService
