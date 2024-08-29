@@ -23,6 +23,7 @@ import { MsgBoxService } from 'src/app/shared/msg-box/msg-box.service';
 import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/confirm-dialog.service';
 import {Examination} from "../../examinations/shared/examination.model";
 import {environment} from "../../../environments/environment";
+import {ConsoleService} from "../../shared/console/console.service";
 
 
 @Component({
@@ -42,7 +43,8 @@ export class StudyTreeComponent {
             private processingService: ExecutionDataService,
             private router: Router,
             private downloadService: MassDownloadService,
-            private dialogService: ConfirmDialogService) {
+            private dialogService: ConfirmDialogService,
+            private consoleService: ConsoleService) {
     }
 
     protected set selectedDatasetNodes(selectedDatasetNodes: DatasetNode[]) {
@@ -74,13 +76,15 @@ export class StudyTreeComponent {
     }
 
     onSelectedChange(study: StudyNode) {
+        console.log("this.selectedExaminationNodes.length 1: ", this.selectedExaminationNodes.length);
         let dsNodes: DatasetNode[] = [];
-        let examIds: number[] = [];
         if (study.subjectsNode.subjects && study.subjectsNode.subjects != 'UNLOADED') {
             study.subjectsNode.subjects.forEach(subj => {
                 if (subj.examinations && subj.examinations != 'UNLOADED') {
                     subj.examinations.forEach(exam => {
-                        if (exam.selected) examIds = examIds.concat(exam.id);
+                        if (exam.selected && this.selectedExaminationNodes.length <= 10 && !this.selectedExaminationNodes.includes(exam.id)) this.selectedExaminationNodes.push(exam.id);
+                        if (!exam.selected && this.selectedExaminationNodes.includes(exam.id)) this.selectedExaminationNodes.
+                        if (this.selectedExaminationNodes.length > 10) this.consoleService.log('warn', 'For performance reasons, you cannot open more than 10 examinations in the viewer at the same time.')
 
                         if (exam.datasetAcquisitions && exam.datasetAcquisitions != 'UNLOADED') {
                             exam.datasetAcquisitions.forEach(dsAcq => {
@@ -91,8 +95,8 @@ export class StudyTreeComponent {
                 }
             });
         }
-        this.selectedExaminationNodes = examIds;
         this.selectedDatasetNodes = dsNodes;
+        console.log("this.selectedExaminationNodes.length 2: ", this.selectedExaminationNodes.length);
     }
 
     private searchSelectedInDatasetNodes(dsNodes: DatasetNode[] | 'UNLOADED'): DatasetNode[] {

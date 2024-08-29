@@ -126,9 +126,12 @@ public class DICOMWebService {
 		return null;
 	}
 
-	public String findSeriesOfStudy(String studyInstanceUID) {
+	public String findSeriesOfStudy(String studyInstanceUID, String includefield, String seriesInstanceUID) {
 		try {
 			String url = this.serverURL + "/" + studyInstanceUID + "/series";
+			if (!includefield.isEmpty()) url += "?includefield=" + includefield;
+			if (!seriesInstanceUID.isEmpty()) url += "&SeriesInstanceUID=" + seriesInstanceUID;
+
 			HttpGet httpGet = new HttpGet(url);
 			httpGet.setHeader("Accept-Charset", "UTF-8");
 			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {

@@ -69,12 +69,14 @@ public class StudyInstanceUIDHandler {
 
 	@Autowired
 	private ExaminationService examinationService;
-	
+
 	private ConcurrentHashMap<String, String> examinationUIDToStudyInstanceUIDCache;
+	private ConcurrentHashMap<String, String> acquisitionUIDToStudyInstanceUIDCache;
 	
 	@PostConstruct
 	public void init() {
 		examinationUIDToStudyInstanceUIDCache = new ConcurrentHashMap<String, String>(1000);
+		acquisitionUIDToStudyInstanceUIDCache = new ConcurrentHashMap<String, String>(1000);
 		LOG.info("DICOMWeb cache created: examinationUIDToStudyInstanceUIDCache");
 	}
 	
