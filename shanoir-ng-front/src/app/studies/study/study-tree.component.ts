@@ -76,14 +76,13 @@ export class StudyTreeComponent {
     }
 
     onSelectedChange(study: StudyNode) {
-        console.log("this.selectedExaminationNodes.length 1: ", this.selectedExaminationNodes.length);
         let dsNodes: DatasetNode[] = [];
         if (study.subjectsNode.subjects && study.subjectsNode.subjects != 'UNLOADED') {
             study.subjectsNode.subjects.forEach(subj => {
                 if (subj.examinations && subj.examinations != 'UNLOADED') {
                     subj.examinations.forEach(exam => {
                         if (exam.selected && this.selectedExaminationNodes.length <= 10 && !this.selectedExaminationNodes.includes(exam.id)) this.selectedExaminationNodes.push(exam.id);
-                        if (!exam.selected && this.selectedExaminationNodes.includes(exam.id)) this.selectedExaminationNodes.
+                        if (!exam.selected && this.selectedExaminationNodes.includes(exam.id)) this.selectedExaminationNodes.splice(this.selectedExaminationNodes.indexOf(exam.id), 1);
                         if (this.selectedExaminationNodes.length > 10) this.consoleService.log('warn', 'For performance reasons, you cannot open more than 10 examinations in the viewer at the same time.')
 
                         if (exam.datasetAcquisitions && exam.datasetAcquisitions != 'UNLOADED') {
@@ -96,7 +95,6 @@ export class StudyTreeComponent {
             });
         }
         this.selectedDatasetNodes = dsNodes;
-        console.log("this.selectedExaminationNodes.length 2: ", this.selectedExaminationNodes.length);
     }
 
     private searchSelectedInDatasetNodes(dsNodes: DatasetNode[] | 'UNLOADED'): DatasetNode[] {
