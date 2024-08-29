@@ -11,6 +11,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -71,14 +72,11 @@ public class StudyInstanceUIDHandler {
 	private ExaminationService examinationService;
 
 	private ConcurrentHashMap<String, String> examinationUIDToStudyInstanceUIDCache;
-	private ConcurrentHashMap<String, String> acquisitionUIDToSeriesInstanceUIDCache;
 	
 	@PostConstruct
 	public void init() {
 		examinationUIDToStudyInstanceUIDCache = new ConcurrentHashMap<String, String>(1000);
-		acquisitionUIDToSeriesInstanceUIDCache = new ConcurrentHashMap<String, String>(1000);
 		LOG.info("DICOMWeb cache created: examinationUIDToStudyInstanceUIDCache");
-		LOG.info("DICOMWeb cache created: acquisitionUIDToSeriesInstanceUIDCache");
 	}
 
 	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
@@ -86,12 +84,7 @@ public class StudyInstanceUIDHandler {
 		examinationUIDToStudyInstanceUIDCache.clear();
 		LOG.info("DICOMWeb cache cleared: examinationUIDToStudyInstanceUIDCache");
 	}
-	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
-	public void clearAcquisitionIdToSeriesInstanceUIDCache() {
-		acquisitionUIDToSeriesInstanceUIDCache.clear();
-		LOG.info("DICOMWeb cache cleared: acquisitionUIDToSeriesInstanceUIDCache");
-	}
-	
+
 	/**
 	 * This method replaces StudyInstanceUIDs returned from the PACS with IDs
 	 * of examinations in Shanoir, in the Json returned.
@@ -162,25 +155,6 @@ public class StudyInstanceUIDHandler {
 		}
 		return studyInstanceUID;
 	}
-
-	public String findSeriesInstanceUIDFromCacheOrDatabase(String examinationUID) {
-		String studyInstanceUID = examinationUIDToStudyInstanceUIDCache.get(examinationUID);
-		if (studyInstanceUID == null) {
-			Long examinationId = extractExaminationId(examinationUID);
-			Examination examination = examinationService.findById(examinationId);
-			if (examination != null) {
-				studyInstanceUID = findStudyInstanceUID(examination);
-				if (studyInstanceUID != null) {
-					examinationUIDToStudyInstanceUIDCache.put(examinationUID, studyInstanceUID);
-					LOG.info("DICOMWeb cache adding: " + examinationUID + ", " + studyInstanceUID);
-					LOG.info("DICOMWeb cache, size: " + examinationUIDToStudyInstanceUIDCache.size());
-				}
-			}
-		}
-		return studyInstanceUID;
-	}
-
-
 	
 	/**
 	 * This method walks down the information model in Shanoir to read the StudyInstanceUID
@@ -194,8 +168,8 @@ public class StudyInstanceUIDHandler {
 		List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
 		for (DatasetAcquisition acquisition : acquisitions) {
 			if (acquisition instanceof MrDatasetAcquisition
-				|| acquisition instanceof CtDatasetAcquisition
-				|| acquisition instanceof PetDatasetAcquisition) {
+					|| acquisition instanceof CtDatasetAcquisition
+					|| acquisition instanceof PetDatasetAcquisition) {
 				List<Dataset> datasets = acquisition.getDatasets();
 				if (!datasets.isEmpty()) {
 					Dataset dataset = datasets.get(0);
@@ -215,7 +189,7 @@ public class StudyInstanceUIDHandler {
 							}
 						}
 					}
-				}				
+				}
 			}
 		}
 		return null;
@@ -229,6 +203,7 @@ public class StudyInstanceUIDHandler {
 	 * @param path
 	 */
 	private String findStudyInstanceUID(String path) {
+		LOG.error("findStudyInstanceUID : ", path);
 		Pattern p = Pattern.compile(WADO_URI_STUDY_UID_SERIES_UID);
 		Matcher m = p.matcher(path);
 		while (m.find()) {
@@ -241,11 +216,10 @@ public class StudyInstanceUIDHandler {
 		}
 		return null;
 	}
-	
+
 	public Long extractExaminationId(String examinationUID) {
 		String examinationUIDWithoutPrefix = examinationUID.substring(PREFIX.length());
 		Long id = Long.parseLong(examinationUIDWithoutPrefix);
 		return id;
 	}
-	
 }

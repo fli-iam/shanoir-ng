@@ -61,7 +61,10 @@ public class DICOMWebApiController implements DICOMWebApi {
 
 	@Autowired
 	private StudyInstanceUIDHandler studyInstanceUIDHandler;
-	
+
+	@Autowired
+	private SeriesInstanceUIDHandler seriesInstanceUIDHandler;
+
 	@Autowired
 	private ObjectMapper mapper;
 	
@@ -154,19 +157,24 @@ public class DICOMWebApiController implements DICOMWebApi {
 	@Override
 	public ResponseEntity<String> findSeriesOfStudy(String examinationUID, Map<String, String> allParams)
 			throws RestServiceException, JsonMappingException, JsonProcessingException {
-		String seriesInstanceUID = "";
+		String acquisitionUID = "";
 		String includefield = "";
+		String seriesInstanceUID = "";
 		String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
 		if (allParams.containsKey("SeriesInstanceUID") || allParams.containsKey("includefield")) {
-			seriesInstanceUID = allParams.get(SERIES_INSTANCE_UID);
+			acquisitionUID = allParams.get(SERIES_INSTANCE_UID);
 			includefield = allParams.get(INCLUDEFIELD);
-			seriesInstanceUID = studyInstanceUIDHandler.findSeriesInstanceUIDFromCacheOrDatabase(seriesInstanceUID);
+			seriesInstanceUID = seriesInstanceUIDHandler.findSeriesInstanceUIDFromCacheOrDatabase(acquisitionUID);
 		}
+		LOG.error("studyInstanceUID : " + studyInstanceUID);
+		LOG.error("includefield : " + includefield);
+		LOG.error("seriesInstanceUID : " + seriesInstanceUID);
 		if (studyInstanceUID != null) {
 			String response = dicomWebService.findSeriesOfStudy(studyInstanceUID, includefield, seriesInstanceUID);
 			JsonNode root = mapper.readTree(response);
 			root = sortSeriesBySeriesNumber(root);
 			studyInstanceUIDHandler.replaceStudyInstanceUIDsWithExaminationUIDs(root, examinationUID, false);
+			seriesInstanceUIDHandler.replaceSeriesInstanceUIDsWithAcquisitionUIDs(root, acquisitionUID, false);
 			return new ResponseEntity<String>(mapper.writeValueAsString(root), HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
