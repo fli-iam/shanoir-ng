@@ -48,15 +48,11 @@ export class PathologyFormComponent extends EntityComponent<Pathology>{
     }
 
     initView(): Promise<void> {
-        return this.pathologyService.get(this.id).then(pathology => {
-            this.pathology = pathology;
-        });
+        return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
-        return this.pathologyService.get(this.id).then(pathology => {
-            this.pathology = pathology;
-        });
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {

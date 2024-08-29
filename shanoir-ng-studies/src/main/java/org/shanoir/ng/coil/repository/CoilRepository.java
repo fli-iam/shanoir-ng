@@ -42,4 +42,6 @@ public interface CoilRepository extends CrudRepository<Coil, Long> {
 	 */
 	Optional<Coil> findByName(String name);
 
+	List<Coil> findByCenterId(Long centerId);
+
 }

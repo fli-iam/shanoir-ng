@@ -13,20 +13,28 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div #formContainer class="content-component detail" [@preventInitialChildAnimations]>
-	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
+	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
 		<div class="layout" [ngClass]="{'left': mode=='view'}">
-			<span class="right-col" [ngSwitch]="mode">
+			<form-footer
+					[state]="footerState"
+					(save)="save()"
+					(edit)="goToEdit()"
+					(delete) = "deleteBySubject(this.entity.subject)"
+					(cancel)="goToView(this.entity.animalSubject.id)"
+					(back)="goBack()">
+			<button  *ngIf="mode == 'view' && hasDownloadRight" class="right-icon dl-button" type="button" (click)="download()" [disabled]="downloadState.isActive()">Download<i class="fas fa-download"></i></button>
+			</form-footer>
+			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
-					<div class="header command-zone" i18n="View subject|Title">View subject</div>
+					<h2 class="header command-zone"i18n="View subject|Title@@subjectDetailViewTitle">Details on subject</h2>
 				</ng-template>
 				<ng-template [ngSwitchCase]="'edit'">
-					<div class="header command-zone" i18n="Edit subject|Title">Edit subject</div>
+					<h2 class="header command-zone"i18n="Edit subject|Title@@subjectDetailEditTitle">Edit subject</h2>
 				</ng-template>
 				<ng-template [ngSwitchCase]="'create'">
-					<div class="header command-zone" i18n="Create subject|Title">Create subject</div>
+					<h2 class="header command-zone"i18n="Create subject|Title@@subjectDetailCreateTitle">Create subject</h2>
 				</ng-template>
 			</span>
-
 			<fieldset>
 				<legend *ngIf="mode !== 'view'" i18n="Subject detail|Name label@@subjectDetailGeneral">General</legend>
 				<ol>
@@ -147,12 +155,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</fieldset>
 
 			<fieldset *ngIf="mode !== 'view'">
-					<subject-study-list [subject]="preclinicalSubject.subject" [displaySubjectType]="false" [selectableList]="studies" [(ngModel)]="preclinicalSubject.subject.subjectStudyList" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>
-			</fieldset>
-			<fieldset *ngIf="mode == 'view'">
-					<legend i18n="Subject data|Title@@subjectDetailDataTitle">Data</legend>
-					<reverse-subject-node [input]="breadcrumbsService.currentStep.data.subjectNode ? breadcrumbsService.currentStep.data.subjectNode : preclinicalSubject.subject"
-						(nodeInit)="onSubjectNodeInit($event)"></reverse-subject-node>
+				<subject-study-list [subject]="preclinicalSubject.subject" [displaySubjectType]="false" [selectableList]="studies" [(ngModel)]="preclinicalSubject.subject.subjectStudyList" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>
 			</fieldset>
 			<div *ngIf="displayPathologyTherapy">
 				<fieldset>
@@ -164,14 +167,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     			</fieldset>
                 <subject-therapy-list #therapiesComponent [mode]="mode" (onEvent)="validateForm($event)" [preclinicalSubject]="preclinicalSubject"></subject-therapy-list>
             </div>
-			<form-footer
-				[state]="footerState"
-				(save)="save()"
-				(edit)="goToEdit()"
-                (delete) = "deleteBySubject(this.entity.subject)"
-				(cancel)="goToView(this.entity.animalSubject.id)"
-				(back)="goBack()">
-			</form-footer>
 		</div>
     </form>
 </div>

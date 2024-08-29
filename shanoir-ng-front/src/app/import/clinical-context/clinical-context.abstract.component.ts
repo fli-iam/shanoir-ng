@@ -563,8 +563,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         });
     }
 
-
-
     private examToSubjectExam(examination: Examination): SubjectExamination {
         if (!examination) return;
         // Add the new created exam to the select box and select it
@@ -572,6 +570,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         subjectExam.id = examination.id;
         subjectExam.examinationDate = examination.examinationDate;
         subjectExam.comment = examination.comment;
+        subjectExam.preclinical = examination.preclinical;
         return subjectExam;
     }
 

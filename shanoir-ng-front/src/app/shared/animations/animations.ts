@@ -57,6 +57,21 @@ export const slideRight = trigger('slideRight', [
     )
 ]);
 
+export const slideRightWithMargins = trigger('slideRightWithMargins', [
+    transition(
+        ':enter', [
+            style({width: '*', 'margin-left': 0, 'margin-right': 0}),
+            animate('2000ms ease-in-out', style({width: '*',  'margin-left': '*', 'margin-right': '*'})),
+        ]
+    ),
+    transition(
+        ':leave', [
+            style({width: '*', 'margin-left': '*', 'margin-right': '*'}),
+            animate('500ms ease-in-out', style({width: 0, 'margin-left': 0, 'margin-right': 0}))
+        ]
+    )
+]);
+
 export const slideLeft = trigger('slideLeft', [
     transition(
         ':enter', [

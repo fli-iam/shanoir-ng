@@ -64,6 +64,17 @@ public interface CoilApi {
 	ResponseEntity<CoilDTO> findCoilById(
 			@Parameter(description = "id of the coil", required = true) @PathVariable("coilId") Long coilId);
 
+	@Operation(summary = "", description = "If exists, returns all the coil corresponding to the given center id")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found coil"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "204", description = "no coil found"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@GetMapping(value = "/byCenter/{centerId}", produces = { "application/json" })
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	ResponseEntity<List<CoilDTO>> findCoilsByCenterId(
+			@Parameter(name = "id of the center", required = true) @PathVariable("centerId") Long centerId);
+
 	@Operation(summary = "", description = "Returns all the coils")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found coils"),
