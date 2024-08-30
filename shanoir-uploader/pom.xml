@@ -41,6 +41,17 @@
 		</dependency>
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
+			<artifactId>shanoir-ng-datasets</artifactId>
+			<version>3.2.2</version>
+			<exclusions>
+			    <exclusion>
+			        <groupId>*</groupId>
+			        <artifactId>*</artifactId>
+			    </exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-import</artifactId>
 			<version>3.2.2</version>
 			<exclusions>

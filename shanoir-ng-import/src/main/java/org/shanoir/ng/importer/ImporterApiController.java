@@ -308,7 +308,7 @@ public class ImporterApiController implements ImporterApi {
 			// Import dicomfile
 			return uploadDicomZipFile(multiPartFile);
 		} catch (IOException e) {
-			LOG.error("ERROR while loading zip fiole, please contact an administrator");
+			LOG.error("ERROR while loading zip file, please contact an administrator");
 			LOG.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 		} finally {

@@ -138,7 +138,7 @@
 					</classpathDependencyExcludes>
 				</configuration>
 			</plugin>
-			<!-- Used here for ShanoirUploader: creae an additional single jar to be used by ShUp -->
+			<!-- Used here for ShanoirUploader: create an additional single jar to be used by ShUp -->
 	        <plugin>
 	            <groupId>org.springframework.boot</groupId>
 	            <artifactId>spring-boot-maven-plugin</artifactId>
