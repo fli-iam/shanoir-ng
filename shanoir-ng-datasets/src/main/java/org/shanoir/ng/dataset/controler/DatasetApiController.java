@@ -21,7 +21,7 @@ import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
+import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.modality.EegDataset;
@@ -149,12 +149,7 @@ public class DatasetApiController implements DatasetApi {
 			if (ds == null) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
-			Long studyId;
-			if (ds.getDatasetProcessing() != null) {
-				studyId = ds.getDatasetProcessing().getStudyId();
-			} else {
-				studyId = ds.getDatasetAcquisition().getExamination().getStudyId();
-			}
+			Long studyId = datasetService.getStudyId(ds);
 
 
 			datasetService.deleteById(datasetId);
@@ -188,7 +183,7 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<DatasetAndProcessingsDTOInterface> findDatasetById(
+	public ResponseEntity<DatasetWithDependenciesDTOInterface> findDatasetById(
 			final Long datasetId) {
 
 		final Dataset dataset = datasetService.findById(datasetId);
@@ -203,7 +198,7 @@ public class DatasetApiController implements DatasetApi {
 		else if (dataset instanceof EegDataset) {
 			return new ResponseEntity<>(eegDatasetMapper.datasetToDatasetAndProcessingsDTO((EegDataset) dataset), HttpStatus.OK);
 		} else {
-			return new ResponseEntity<>(datasetMapper.datasetToDatasetAndProcessingsDTO(dataset), HttpStatus.OK);
+			return new ResponseEntity<>(datasetMapper.datasetToDatasetWithParentsAndProcessingsDTO(dataset), HttpStatus.OK);
 		}
 	}
 
@@ -234,21 +229,21 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<List<DatasetAndProcessingsDTOInterface>> findDatasetsByIds(
+	public ResponseEntity<List<DatasetWithDependenciesDTOInterface>> findDatasetsByIds(
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds) {
 		List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
 		if (datasets.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 
-		List<DatasetAndProcessingsDTOInterface> dtos = new ArrayList<>();
+		List<DatasetWithDependenciesDTOInterface> dtos = new ArrayList<>();
 		for(Dataset dataset : datasets){
 			if (dataset instanceof MrDataset) {
 				dtos.add(mrDatasetMapper.datasetToDatasetAndProcessingsDTO((MrDataset) dataset));
 			} else if (dataset instanceof EegDataset) {
 				dtos.add(eegDatasetMapper.datasetToDatasetAndProcessingsDTO((EegDataset) dataset));
 			} else {
-				dtos.add(datasetMapper.datasetToDatasetAndProcessingsDTO(dataset));
+				dtos.add(datasetMapper.datasetToDatasetWithParentsAndProcessingsDTO(dataset));
 			}
 		}
 

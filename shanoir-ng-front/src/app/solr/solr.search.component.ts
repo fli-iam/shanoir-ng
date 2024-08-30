@@ -462,16 +462,24 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {headerName: "Nature", field: "datasetNature"},
             {headerName: "Series date", field: "datasetCreationDate", type: "date", hidden: true, cellRenderer: (params: any) => dateRenderer(params.data.datasetCreationDate)},
             {headerName: "Study", field: "studyName",
-                route: item => '/study/details/' + item.studyId
+                route: function(item) {
+                    return item.studyId ? '/study/details/' + item.studyId : null;
+                }
             },
             {headerName: "Subject", field: "subjectName",
-                route: item => '/subject/details/' + item.subjectId
+                route: function(item) {
+                    return item.subjectId ? '/subject/details/' + item.subjectId : null;
+                }
             },
             {headerName: "Acquisition Center", field: "centerName",
-                route: item => '/center/details/' + item.centerId
+                route: function(item) {
+                    return item.centerId ? '/center/details/' + item.centerId : null;
+                }
             },
             {headerName: "Exam", field: "examinationComment",
-                route: item => '/examination/details/' + item.examinationId
+                route: function(item) {
+                    return item.examinationId ? '/examination/details/' + item.examinationId : null;
+                }
             },
             {headerName: "Exam Date", field:"examinationDate", type: "date", cellRenderer: (params: any) => {
                     return dateRenderer(params.data.examinationDate);
@@ -485,8 +493,9 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {headerName: "Slice", field: "sliceThickness"},
             {headerName: "Pixel", field: "pixelBandwidth"},
             {headerName: "Mag. strength", field: "magneticFieldStrength"},
+
             {headerName: "View DICOM", type: "button", awesome: "fa-solid fa-up-right-from-square",
-              condition: item => (item.datasetType.includes("MR") || item.datasetType.includes("Pet") || item.datasetType.includes("Ct")),
+              condition: item => (!item.processed && (item.datasetType.includes("MR") || item.datasetType.includes("Pet") || item.datasetType.includes("Ct"))),
               action: item => {
                 window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + item.examinationId, '_blank');
               }
@@ -616,20 +625,21 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     initExecutionMode() {
-        let noAdminStudies: Set<string> = new Set();
-        this.datasetAcquisitionService.getAllForDatasets([...this.selectedDatasetIds]).then(acquisitions => {
-            acquisitions.forEach(acq => {
-                if (!this.hasAdminRight(acq.examination?.study?.id)) {
-                    noAdminStudies.add(acq.examination?.study?.name);
-                }
-            });
-            if(noAdminStudies.size > 0){
-                this.confirmDialogService.error('Invalid selection', 'You don\'t have the right to run pipelines on studies you don\'t administrate. '
-                    + 'Remove datasets that belongs to the following study(ies) from your selection : ' + [...noAdminStudies].join(', '));
-            }else{
-                this.processingService.setDatasets(this.selectedDatasetIds);
-                this.router.navigate(['pipelines']);
+        this.datasetService.getByIds(this.selectedDatasetIds).then(datasets => {
+            let studyId = datasets[0]?.study?.id;
+
+            if (!this.hasAdminRight(studyId)) {
+                this.confirmDialogService.error('Invalid selection', 'You don\'t have the right to run pipelines on study [' + studyId + '] that you don\'t administrate.');
+                return;
             }
+            for (const ds of datasets) {
+                if(ds.study?.id != studyId){
+                    this.confirmDialogService.error('Invalid selection', 'All selected datasets must be of the same study.');
+                    return;
+                }
+            }
+            this.processingService.setDatasets(this.selectedDatasetIds);
+            this.router.navigate(['pipelines']);
         });
     }
 
