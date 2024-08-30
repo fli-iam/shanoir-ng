@@ -31,23 +31,9 @@ public class SeriesInstanceUIDHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(SeriesInstanceUIDHandler.class);
 
-    private static final String WADO_URI_STUDY_UID_SERIES_UID = "studyUID=(.*?)\\&seriesUID";
+    private static final String WADO_URI_SERIES_UID_OBJECT_UID = "seriesUID=(.*?)\\&objectUID";
 
-    private static final String WADO_RS_STUDY_UID_SERIES_UID = "/studies/(.*?)/series/";
-
-    private static final String DICOM_TAG_SERIES_INSTANCE_UID = "0020000E";
-
-    private static final String DICOM_TAG_RETRIEVE_URL = "00081190";
-
-    private static final String VALUE = "Value";
-
-    private static final String RETRIEVE_URL_SERIE_LEVEL = "/studies/(.*)/series/";
-
-    private static final String RETRIEVE_URL_STUDY_LEVEL = "/studies/(.*)";
-
-    private static final String STUDIES = "/studies/";
-
-    private static final String SERIES = "/series/";
+    private static final String WADO_RS_SERIES_UID_INSTANCES_UID = "/series/(.*?)/instances/";
 
     public static final String PREFIX = UIDGeneration.ROOT + ".";
 
@@ -68,42 +54,7 @@ public class SeriesInstanceUIDHandler {
         LOG.info("DICOMWeb cache cleared: acquisitionUIDToSeriesInstanceUIDCache");
     }
 
-    public void replaceSeriesInstanceUIDsWithAcquisitionUIDs(JsonNode root, String acquisitionUID, boolean studyLevel) {
-        if (root.isObject()) {
-            // find attribute: SeriesInstanceUID
-            JsonNode seriesInstanceUIDNode = root.get(DICOM_TAG_SERIES_INSTANCE_UID);
-            if (seriesInstanceUIDNode != null) {
-                ArrayNode studyInstanceUIDArray = (ArrayNode) seriesInstanceUIDNode.path(VALUE);
-                for (int i = 0; i < studyInstanceUIDArray.size(); i++) {
-                    studyInstanceUIDArray.remove(i);
-                    studyInstanceUIDArray.insert(i,  acquisitionUID);
-                }
-            }
-            // find attribute: RetrieveURL
-            JsonNode retrieveURLNode = root.get(DICOM_TAG_RETRIEVE_URL);
-            if (retrieveURLNode != null) {
-                ArrayNode retrieveURLArray = (ArrayNode) retrieveURLNode.path(VALUE);
-                for (int i = 0; i < retrieveURLArray.size(); i++) {
-                    JsonNode arrayElement = retrieveURLArray.get(i);
-                    String retrieveURL = arrayElement.asText();
-                    if (studyLevel) { // serie level
-                        retrieveURL = retrieveURL.replaceFirst(RETRIEVE_URL_SERIE_LEVEL, STUDIES + acquisitionUID + SERIES);
-                        retrieveURLArray.remove(i);
-                        retrieveURLArray.insert(i, retrieveURL);
-                    }
-                }
-            }
-        } else if (root.isArray()) {
-            ArrayNode arrayNode = (ArrayNode) root;
-            for (int i = 0; i < arrayNode.size(); i++) {
-                JsonNode arrayElement = arrayNode.get(i);
-                replaceSeriesInstanceUIDsWithAcquisitionUIDs(arrayElement, acquisitionUID, studyLevel);
-            }
-        }
-    }
-
     public String findSeriesInstanceUIDFromCacheOrDatabase(String acquisitionUID) {
-        LOG.error("findSeries uid : " + acquisitionUID);
         String seriesInstanceUID = acquisitionUIDToSeriesInstanceUIDCache.get(acquisitionUID);
         if (seriesInstanceUID == null) {
             Long acquisitionId = extractAcquisitionId(acquisitionUID);
@@ -117,7 +68,6 @@ public class SeriesInstanceUIDHandler {
                 }
             }
         }
-        LOG.error("findSeries return seriesInstanceUID : " + seriesInstanceUID);
         return seriesInstanceUID;
     }
 
@@ -149,21 +99,13 @@ public class SeriesInstanceUIDHandler {
         return null;
     }
 
-    /**
-     * This method extracts the StudyInstanceUID from a WADO string.
-     * It tries first WADO-URI, and then WADO-RS, in case of nothing
-     * could be found for WADO-URI.
-     *
-     * @param path
-     */
     private String findSeriesInstanceUID(String path) {
-        LOG.error("findSeriesInstanceUID : ", path);
-        Pattern p = Pattern.compile(WADO_URI_STUDY_UID_SERIES_UID);
+        Pattern p = Pattern.compile(WADO_URI_SERIES_UID_OBJECT_UID);
         Matcher m = p.matcher(path);
         while (m.find()) {
             return m.group(1);
         }
-        p = Pattern.compile(WADO_RS_STUDY_UID_SERIES_UID);
+        p = Pattern.compile(WADO_RS_SERIES_UID_INSTANCES_UID);
         m = p.matcher(path);
         while (m.find()) {
             return m.group(1);

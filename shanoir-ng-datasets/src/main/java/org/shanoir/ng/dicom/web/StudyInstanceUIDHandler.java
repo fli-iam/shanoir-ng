@@ -90,7 +90,7 @@ public class StudyInstanceUIDHandler {
 	 * of examinations in Shanoir, in the Json returned.
 	 * 
 	 * @param root
-	 * @param examinationId
+	 * @param examinationUID
 	 * @param studyLevel
 	 */
 	public void replaceStudyInstanceUIDsWithExaminationUIDs(JsonNode root, String examinationUID, boolean studyLevel) {
@@ -136,7 +136,7 @@ public class StudyInstanceUIDHandler {
 	 * with the pseudonymization module and present in the PACS, either from a local cache to accelerate the
 	 * request response time or from the database, in table dataset_file.
 	 * 
-	 * @param examinationId
+	 * @param examinationUID
 	 * @return
 	 */
 	public String findStudyInstanceUIDFromCacheOrDatabase(String examinationUID) {
@@ -203,7 +203,6 @@ public class StudyInstanceUIDHandler {
 	 * @param path
 	 */
 	private String findStudyInstanceUID(String path) {
-		LOG.error("findStudyInstanceUID : ", path);
 		Pattern p = Pattern.compile(WADO_URI_STUDY_UID_SERIES_UID);
 		Matcher m = p.matcher(path);
 		while (m.find()) {
