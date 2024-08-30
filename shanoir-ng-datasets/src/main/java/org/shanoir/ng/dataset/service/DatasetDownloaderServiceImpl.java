@@ -306,13 +306,7 @@ public class DatasetDownloaderServiceImpl {
 	}
 
 	private String getDatasetFilepath(Dataset dataset, String studyName, String subjectName) {
-		Examination exam;
-		if (dataset.getDatasetAcquisition() == null && dataset.getDatasetProcessing() != null) {
-			exam = dataset.getDatasetProcessing().getInputDatasets().get(0).getDatasetAcquisition()
-					.getExamination();
-		} else {
-			exam = dataset.getDatasetAcquisition().getExamination();
-		}
+		Examination exam = datasetService.getExamination(dataset);
 
 		String datasetFilePath = studyName + "_" + subjectName + "_Exam-" + exam.getId();
 		if (exam.getComment() != null) {
