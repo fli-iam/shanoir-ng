@@ -129,9 +129,18 @@ public class DICOMWebService {
 	public String findSeriesOfStudy(String studyInstanceUID, String includefield, String seriesInstanceUID) {
 		try {
 			String url = this.serverURL + "/" + studyInstanceUID + "/series";
-			if (includefield != null && !includefield.isEmpty()) url += "?includefield=" + includefield;
-			if (seriesInstanceUID != null && !seriesInstanceUID.isEmpty()) url += "&SeriesInstanceUID=" + seriesInstanceUID;
-
+			boolean isFirstQueryParam = true;
+			if (includefield != null && !includefield.isEmpty()) {
+				url += "?includefield=" + includefield;
+				isFirstQueryParam = false;
+			}
+			if (seriesInstanceUID != null && !seriesInstanceUID.isEmpty()) {
+				if (isFirstQueryParam) {
+					url += "?SeriesInstanceUID=" + seriesInstanceUID;
+				} else {
+					url += "&SeriesInstanceUID=" + seriesInstanceUID;
+				}
+			}
 			HttpGet httpGet = new HttpGet(url);
 			httpGet.setHeader("Accept-Charset", "UTF-8");
 			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
