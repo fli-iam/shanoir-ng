@@ -24,11 +24,11 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.dataset.repository.DatasetExpressionRepository;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
-import org.shanoir.ng.datasetfile.DatasetFileRepository;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
+import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.property.service.DatasetPropertyService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
@@ -110,12 +110,6 @@ public class DatasetServiceImpl implements DatasetService {
 	private DatasetProcessingService processingService;
 
 	@Autowired
-	private DatasetFileRepository datasetFileRepository;
-
-	@Autowired
-	private DatasetExpressionRepository datasetExpressionRepository;
-
-  @Autowired
 	private ProcessingResourceService processingResourceService;
 
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
@@ -388,8 +382,6 @@ public class DatasetServiceImpl implements DatasetService {
 	 * @param dataset
 	 */
 	private void deleteNifti(Dataset dataset) {
-		List<DatasetExpression> datasetExpressionToDelete = new ArrayList<>();
-
 		for (DatasetExpression expression : dataset.getDatasetExpressions()) {
 			if (!DatasetExpressionFormat.NIFTI_SINGLE_FILE.equals(expression.getDatasetExpressionFormat())) {
 				continue;
@@ -397,17 +389,61 @@ public class DatasetServiceImpl implements DatasetService {
 			for (DatasetFile file : expression.getDatasetFiles()) {
 				URL url = null;
 				try {
-					// Delete file from disc
 					url = new URL(file.getPath().replaceAll("%20", " "));
 					File srcFile = new File(UriUtils.decode(url.getPath(), StandardCharsets.UTF_8.name()));
-					FileUtils.delete(srcFile);
-				} catch (Exception e) {
-					LOG.error("Could not delete nifti file: {}", file.getPath(), e);
+					FileUtils.deleteQuietly(srcFile);
+				} catch (MalformedURLException e) {
+					LOG.error("Could not delete nifti file: {}", file.getPath());
 				}
 			}
-			datasetExpressionToDelete.add(expression);
 		}
-		this.datasetExpressionRepository.deleteAll(datasetExpressionToDelete);
 	}
 
+	/**
+	 * Get study Id from dataset. If processed, recursively get it through processing inputs
+	 *
+	 * @param dataset
+	 * @return
+	 */
+	@Override
+	public Long getStudyId(Dataset dataset){
+		if (dataset.getDatasetProcessing() != null) {
+			return dataset.getDatasetProcessing().getStudyId();
+		}
+		if(dataset.getDatasetAcquisition() != null && dataset.getDatasetAcquisition().getExamination() != null){
+			return dataset.getDatasetAcquisition().getExamination().getStudyId();
+		}
+		return null;
+	}
+
+	/**
+	 * Get examination from dataset. If processed, recursively get it through processing inputs
+	 *
+	 * @param dataset
+	 * @return
+	 */
+	@Override
+	public Examination getExamination(Dataset dataset){
+		DatasetAcquisition acquisition = this.getAcquisition(dataset);
+		if(acquisition != null){
+			return acquisition.getExamination();
+		}
+		return null;
+	}
+
+	@Override
+	public DatasetAcquisition getAcquisition(Dataset dataset) {
+		if(dataset.getDatasetAcquisition() != null){
+			return dataset.getDatasetAcquisition();
+		}
+		if(dataset.getDatasetProcessing().getInputDatasets() != null){
+			for(Dataset ds : dataset.getDatasetProcessing().getInputDatasets()){
+				DatasetAcquisition acq = this.getAcquisition(ds);
+				if(acq != null){
+					return acq;
+				}
+			}
+		}
+		return null;
+	}
 }
