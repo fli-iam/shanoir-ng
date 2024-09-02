@@ -14,14 +14,16 @@
 
 package org.shanoir.ng.subject.repository;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.shanoir.ng.subject.model.Subject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-
-import java.util.List;
 
 /**
  * Repository for Subject.
@@ -39,6 +41,12 @@ import java.util.List;
  */
 public interface SubjectRepository extends CrudRepository<Subject, Long>, SubjectRepositoryCustom {
 
+	@EntityGraph(attributePaths = { "subjectStudyList.study.name", "subjectStudyList.study.tags", "subjectStudyList.subjectStudyTags", "subjectStudyList.study.studyUserList", "pseudonymusHashValues" })
+	Optional<Subject> findById(Long id);
+
+	@EntityGraph(attributePaths = { "subjectStudyList.study.name" , "subjectStudyList.study.studyUserList"})
+	Iterable<Subject> findAllById(Iterable<Long> ids);
+	
 	/**
 	 * Find subject by name.
 	 *
@@ -47,15 +55,9 @@ public interface SubjectRepository extends CrudRepository<Subject, Long>, Subjec
 	 * @return a Subject.
 	 */
 	Subject findByName(String name);
-	
-	/**
-	 * Find subject by identifier.
-	 *
-	 * @param identifier
-	 *            
-	 * @return a Subject.
-	 */
-	Subject findByIdentifier(String identifier);
+
+	@EntityGraph(attributePaths = { "subjectStudyList.study.name" , "subjectStudyList.study.tags"})
+	Subject findFirstByIdentifierAndSubjectStudyListStudyIdIn(String identifier, Iterable<Long> studyIds);
 	
 	@Query(value = "SELECT * FROM subject WHERE name LIKE :centerCode AND name REGEXP '^[0-9]+$' ORDER BY name DESC LIMIT 1", nativeQuery = true)
 	Subject findSubjectFromCenterCode(@Param("centerCode") String centerCode);
@@ -73,8 +75,9 @@ public interface SubjectRepository extends CrudRepository<Subject, Long>, Subjec
 
 	Iterable<Subject> findBySubjectStudyListStudyIdInAndIdIn(Iterable<Long> studyIds, Iterable<Long> ids);
 
+	@EntityGraph(attributePaths = { "subjectStudyList.study.name" , "subjectStudyList.study.tags", "subjectStudyList.study.studyUserList"})
     List<Subject> findByPreclinical(boolean preclinical);
 
-
 	boolean existsByName(String name);
+
 }

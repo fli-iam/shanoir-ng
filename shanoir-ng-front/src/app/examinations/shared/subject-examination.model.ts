@@ -20,4 +20,5 @@ export class SubjectExamination {
     examinationDate: Date;
     datasetAcquisitions: DatasetAcquisition[];
     extraDataFilePathList: string[] = [];
+    preclinical: boolean;
 }

@@ -76,6 +76,9 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 	private static final String PIXEL_BANDWIDTH_FACET = "pixelBandwidth";
 	private static final String MAGNETIC_FIELD_STRENGHT_FACET = "magneticFieldStrength";
 	private static final String TAGS_FACET = "tags";
+	private static final String PROCESSED_FACET = "processed";
+	private static final String IMPORT_DATE_FACET = "importDate";
+	private static final String USERNAME_IMPORT_FACET = "username";
 
 	private static final String[] DOCUMENT_FACET_LIST = {
 			DOCUMENT_ID_FACET,
@@ -98,7 +101,10 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 			SLICE_THICKNESS_FACET,
 			PIXEL_BANDWIDTH_FACET,
 			MAGNETIC_FIELD_STRENGHT_FACET,
-			TAGS_FACET,	
+			TAGS_FACET,
+			PROCESSED_FACET,
+			IMPORT_DATE_FACET,
+			USERNAME_IMPORT_FACET
 	};
 
 	private static final String[] TEXTUAL_FACET_LIST = {
@@ -111,7 +117,8 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 			SUBJECT_TYPE_FACET,
 			STUDY_NAME_FACET,
 			CENTER_NAME_FACET,
-			TAGS_FACET,	
+			TAGS_FACET,
+			PROCESSED_FACET
 	};
 
 	@Autowired
@@ -231,6 +238,16 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 					"{!tag=" + fieldName + "}" 
 					+ fieldName + ":(\"" + String.join("\" OR \"", values) + "\")");
 		} 
+	}
+
+
+	private void addFilterQueryFromBoolean(SolrQuery query, String fieldName, Collection<Boolean> values) {
+		if (values != null && !values.isEmpty()) {
+			query.addFilterQuery(
+					"{!tag=" + fieldName + "}"
+							+ fieldName + ":(" + values.stream().map(String::valueOf).collect(Collectors.joining(" OR "))
+							+ ")");
+		}
 	}
 
 	/**
@@ -353,10 +370,12 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 		addFilterQuery(query, DATASET_NATURE_FACET, shanoirQuery.getDatasetNature());
 		addFilterQuery(query, CENTER_NAME_FACET, shanoirQuery.getCenterName());
 		addFilterQuery(query, TAGS_FACET, shanoirQuery.getTags());
+		addFilterQueryFromBoolean(query, PROCESSED_FACET, shanoirQuery.getProcessed());
 		addFilterQueryFromRange(query, SLICE_THICKNESS_FACET, shanoirQuery.getSliceThickness());
 		addFilterQueryFromRange(query, PIXEL_BANDWIDTH_FACET, shanoirQuery.getPixelBandwidth());
 		addFilterQueryFromRange(query, MAGNETIC_FIELD_STRENGHT_FACET, shanoirQuery.getMagneticFieldStrength());
 		addFilterQueryFromDateRange(query, DATASET_CREATION_DATE_FACET, shanoirQuery.getDatasetDateRange());
+		addFilterQueryFromDateRange(query, IMPORT_DATE_FACET, shanoirQuery.getImportDateRange());
 
 		if (shanoirQuery.getSearchText() != null && !shanoirQuery.getSearchText().trim().isEmpty()) {
 			if (shanoirQuery.isExpertMode()) {
@@ -386,6 +405,11 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 			solrDoc.setAcquisitionEquipmentName((String) document.getFirstValue("acquisitionEquipmentName"));
 			solrDoc.setSubjectName((String) document.getFirstValue("subjectName"));
 			solrDoc.setSubjectId((Long) document.getFirstValue("subjectId"));
+			if (document.getFieldValues("tags") != null) {
+				solrDoc.setTags(document.getFieldValues("tags").stream()
+						.map(object -> Objects.toString(object, null))
+						.toList());
+			}
 			solrDoc.setStudyName((String) document.getFirstValue("studyName"));
 			solrDoc.setSubjectType((String) document.getFirstValue("subjectType"));
 			solrDoc.setStudyId((Long) document.getFirstValue("studyId"));
@@ -394,6 +418,9 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 			solrDoc.setSliceThickness((Double) document.getFirstValue("sliceThickness")); 
 			solrDoc.setPixelBandwidth((Double) document.getFirstValue("pixelBandwidth"));
 			solrDoc.setMagneticFieldStrength((Double) document.getFirstValue("magneticFieldStrength"));
+			solrDoc.setProcessed((Boolean) document.getFirstValue("processed"));
+			solrDoc.setImportDate((Date) document.getFirstValue("importDate"));
+			solrDoc.setUsername((String) document.getFirstValue("username"));
 			solrDocuments.add(solrDoc);
 		}
 		SolrResultPage<ShanoirSolrDocument> page = new SolrResultPage<>(solrDocuments, pageable, documents.getNumFound(), null);

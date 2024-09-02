@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -27,15 +27,15 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
     styleUrls: ['coil-list.component.css'],
 })
 export class CoilListComponent extends BrowserPaginEntityListComponent<Coil> {
-    
+
     @ViewChild('table', { static: false }) table: TableComponent;
 
     constructor(
             private coilService: CoilService) {
-                
+
         super('coil');
     }
-    
+
     getService(): EntityService<Coil> {
         return this.coilService;
     }
@@ -43,8 +43,8 @@ export class CoilListComponent extends BrowserPaginEntityListComponent<Coil> {
     getOptions() {
         return {
             new: true,
-            view: true, 
-            edit: this.keycloakService.isUserAdminOrExpert(), 
+            view: true,
+            edit: this.keycloakService.isUserAdminOrExpert(),
             delete: this.keycloakService.isUserAdminOrExpert()
         };
     }
@@ -56,12 +56,12 @@ export class CoilListComponent extends BrowserPaginEntityListComponent<Coil> {
     getColumnDefs(): ColumnDefinition[] {
         let colDef: ColumnDefinition[] = [
             { headerName: "Name", field: "name" },
-            
-            { headerName: "Acquisition Equipment Model", field: "manufacturerModel.name",
+
+            { headerName: "Center Equipment Model", field: "manufacturerModel.name",
             route: (coil: Coil) => '/manufacturer-model/details/' + coil.manufacturerModel.id
             },
-           
-            { headerName: "Center", field: "center.name",
+
+            { headerName: "Acquisition Center", field: "center.name",
             route: (coil: Coil) => '/center/details/' + coil.center.id
             },
 
@@ -69,7 +69,7 @@ export class CoilListComponent extends BrowserPaginEntityListComponent<Coil> {
             { headerName: "Number of channels", field: "numberOfChannels" },
             { headerName: "Serial number", field: "serialNumber" }
         ];
-        return colDef;       
+        return colDef;
     }
 
     getCustomActionsDefs(): any[] {

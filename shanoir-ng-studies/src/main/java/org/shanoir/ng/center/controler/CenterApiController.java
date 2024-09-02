@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.center.controler;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -25,6 +26,7 @@ import org.shanoir.ng.center.security.CenterFieldEditionSecurityManager;
 import org.shanoir.ng.center.service.CenterService;
 import org.shanoir.ng.center.service.CenterUniqueConstraintManager;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -34,6 +36,8 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.UndeletableDependenciesException;
+import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +61,9 @@ public class CenterApiController implements CenterApi {
 	private CenterService centerService;
 
 	@Autowired
+	private StudyService studyService;
+
+	@Autowired
 	private CenterFieldEditionSecurityManager fieldEditionSecurityManager;
 
 	@Autowired
@@ -67,7 +74,7 @@ public class CenterApiController implements CenterApi {
 
 	@Override
 	public ResponseEntity<Void> deleteCenter(
-			@Parameter(name = "id of the center", required = true) @PathVariable("centerId") final Long centerId)
+			@Parameter(description = "id of the center", required = true) @PathVariable("centerId") final Long centerId)
 					throws RestServiceException {
 		try {
 			if (centerId.equals(0L)) {
@@ -86,12 +93,61 @@ public class CenterApiController implements CenterApi {
 
 	@Override
 	public ResponseEntity<CenterDTO> findCenterById(
-			@Parameter(name = "id of the center", required = true) @PathVariable("centerId") final Long centerId) {
+			@Parameter(description = "id of the center", required = true) @PathVariable("centerId") final Long centerId) {
 		final Optional<Center> center = centerService.findById(centerId);
 		if (center.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<>(centerMapper.centerToCenterDTO(center.orElseThrow()), HttpStatus.OK);
+		return new ResponseEntity<>(centerMapper.centerToCenterDTOStudyCenters(center.orElseThrow()), HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<CenterDTO> findCenterOrCreateByInstitutionDicom(
+		@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+		@Parameter(description = "institution dicom to find or create a center", required = true)
+		@RequestBody InstitutionDicom institutionDicom, BindingResult result) throws RestServiceException {
+		if (institutionDicom.getInstitutionName() == null || institutionDicom.getInstitutionName().isBlank()) {
+			return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+		}
+		Optional<Center> centerOpt = centerService.findByName(institutionDicom.getInstitutionName());
+		if (centerOpt.isEmpty()) {
+			Center center = new Center();
+			center.setName(institutionDicom.getInstitutionName());
+			center.setStreet(institutionDicom.getInstitutionAddress());
+			StudyCenter studyCenter = new StudyCenter();
+			Study study = studyService.findById(studyId);
+			studyCenter.setStudy(study);
+			studyCenter.setCenter(center);
+			List<StudyCenter> studyCenterList = new ArrayList<>();
+			studyCenterList.add(studyCenter);
+			center.setStudyCenterList(studyCenterList);
+			return saveNewCenter(center, result);
+		} else {
+			Center center = centerOpt.orElseThrow();
+			boolean centerInStudy = false;
+			List<StudyCenter> studyCenterList = center.getStudyCenterList();
+			for (StudyCenter studyCenter : studyCenterList) {
+				if (studyCenter.getStudy().getId().equals(studyId)) {
+					centerInStudy = true;
+					break;
+				}
+			}
+			if(!centerInStudy) {
+				StudyCenter studyCenter = new StudyCenter();
+				Study study = studyService.findById(studyId);
+				studyCenter.setStudy(study);
+				studyCenter.setCenter(center);
+				center.getStudyCenterList().add(studyCenter);
+				try {
+					/* Update center in db. */
+					centerService.update(center);
+					eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_CENTER_EVENT, center.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+				} catch (EntityNotFoundException e) {
+					return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+				}	
+			}
+		}
+		return new ResponseEntity<>(centerMapper.centerToCenterDTOFlat(centerOpt.orElseThrow()), HttpStatus.OK);			
 	}
 
 	@Override
@@ -102,17 +158,17 @@ public class CenterApiController implements CenterApi {
 		if (centers.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<>(centerMapper.centersToCenterDTOs(centers), HttpStatus.OK);
+		return new ResponseEntity<>(centerMapper.centersToCenterDTOsFull(centers), HttpStatus.OK);
 	}
 
 	@Override
 	public ResponseEntity<List<CenterDTO>> findCentersByStudy (
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
 		final List<Center> centers = centerService.findByStudy(studyId);
 		if (centers.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<>(centerMapper.centersToCenterDTOs(centers), HttpStatus.OK);
+		return new ResponseEntity<>(centerMapper.centersToCenterDTOsEquipments(centers), HttpStatus.OK);
 	}
 
 	@Override
@@ -126,10 +182,9 @@ public class CenterApiController implements CenterApi {
 		return new ResponseEntity<>(centers, HttpStatus.OK);
 	}
 
-
 	@Override
 	public ResponseEntity<List<IdName>> findCentersNames(
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
 		final List<IdName> centers = centerService.findIdsAndNames(studyId);
 		if (centers.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -139,22 +194,20 @@ public class CenterApiController implements CenterApi {
 
 	@Override
 	public ResponseEntity<CenterDTO> saveNewCenter(
-			@Parameter(name = "the center to create", required = true) @RequestBody @Valid final Center center,
+			@Parameter(description = "the center to create", required = true) @RequestBody @Valid final Center center,
 			final BindingResult result) throws RestServiceException {
-
 		forceCentersOfStudyCenterList(center);
 		validate(center, result);
-
 		/* Save center in db. */
 		final Center createdCenter = centerService.create(center);
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_CENTER_EVENT, createdCenter.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-		return new ResponseEntity<>(centerMapper.centerToCenterDTO(createdCenter), HttpStatus.OK);
+		return new ResponseEntity<>(centerMapper.centerToCenterDTOFlat(createdCenter), HttpStatus.OK);
 	}
 
 	@Override
 	public ResponseEntity<Void> updateCenter(
-			@Parameter(name = "id of the center", required = true) @PathVariable("centerId") final Long centerId,
-			@Parameter(name = "the center to update", required = true) @RequestBody @Valid final Center center,
+			@Parameter(description = "id of the center", required = true) @PathVariable("centerId") final Long centerId,
+			@Parameter(description = "the center to update", required = true) @RequestBody @Valid final Center center,
 			final BindingResult result) throws RestServiceException {
 		try {
 			if (centerId.equals(0L)) {
@@ -191,4 +244,5 @@ public class CenterApiController implements CenterApi {
 			}
 		}
 	}
+
 }

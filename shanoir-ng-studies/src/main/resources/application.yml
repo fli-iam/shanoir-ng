@@ -33,6 +33,7 @@ spring:
       ddl-auto: validate
       id:
         db_structure_naming_strategy: legacy
+    open-in-view: false
     properties:
       hibernate:
         connection:
@@ -86,6 +87,8 @@ springdoc:
     config-url: /shanoir-ng/studies/api-docs/swagger-config
     enabled: true
     disable-swagger-default-url: true
+    oauth:
+      client-id: shanoir-swagger
 
 front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/

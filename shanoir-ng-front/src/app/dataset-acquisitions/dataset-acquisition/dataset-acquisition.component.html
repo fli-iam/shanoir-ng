@@ -15,9 +15,19 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div #formContainer class="content-component">
 	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
 		<div class="layout">
+			<form-footer
+				[state]="footerState"
+				(save)="save()"
+				(edit)="goToEdit()"
+                (delete) = "delete()"
+				(cancel)="goToView()"
+				(back)="goBack()"
+			>
+				<button *ngIf="mode == 'view' && hasDownloadRight && !noDatasets" class="right-icon dl-button" type="button" (click)="downloadAll()" [disabled]="downloadState?.isActive()">Download<i class="fas fa-download"></i></button>
+            </form-footer>
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
-					<h2 class="header command-zone">Dataset acquisition details</h2>
+					<h2 class="header command-zone">Details on dataset acquisition</h2>
 				</ng-template>
 				<ng-template [ngSwitchCase]="'edit'">
 					<h2 class="header command-zone">Edit dataset acquisition</h2>
@@ -61,7 +71,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <span class="right-col" [ngSwitch]="mode">
                             <ng-template [ngSwitchCase]="'view'">
                                 <a [routerLink]="['/examination/details/', datasetAcquisition.examination?.id]">
-                                    {{datasetAcquisition?.examination?.comment ? datasetAcquisition?.examination?.comment : datasetAcquisition?.examination?.examinationDate  | date: 'dd/MM/yyyy'}}
+									{{datasetAcquisition?.examination?.comment ? datasetAcquisition?.examination?.comment : datasetAcquisition?.examination?.examinationDate  | date: 'dd/MM/yyyy'}}
                                 </a>
                             </ng-template>
                         </span>
@@ -83,11 +93,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <li>
                         <label>Import date</label>
                         <span class="right-col" *ngIf="mode == 'view'">
-                                {{datasetAcquisition.creationDate}}
+                                {{datasetAcquisition.importDate}}
+                        </span>
+                    </li>
+                    <li>
+                        <label>Imported by user</label>
+                        <span class="right-col" *ngIf="mode == 'view'">
+                                {{datasetAcquisition.username}}
                         </span>
                     </li>
 					<li>
-						<label>Acquisition equipment</label>
+						<label>Center equipment</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<a *ngIf="datasetAcquisition.acquisitionEquipment?.id" [routerLink]="['/acquisition-equipment/details/', datasetAcquisition.acquisitionEquipment.id]">
@@ -141,24 +157,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<pet-protocol *ngIf="datasetAcquisition.type == 'Pet'" [(ngModel)]="datasetAcquisition.protocol" formControlName="protocol"></pet-protocol>
 			</ng-container>
 
-			<fieldset *ngIf="mode=='view'">
-				<legend i18n="Examination data|Title@@examinationDetailDataTitle">Data</legend>
-				<dataset-acquisition-node
-						[input]="acquisitionNode"
-						(nodeInit)="onNodeInit($event)"></dataset-acquisition-node >
-			</fieldset>
-
 			<progress-bar *ngIf="downloadState.status > 1" [progress]="downloadState?.progress" [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
-			<form-footer
-				[state]="footerState"
-				(save)="save()"
-				(edit)="goToEdit()"
-                (delete) = "delete()"
-				(cancel)="goToView()"
-				(back)="goBack()"
-			>
-			<button  *ngIf="mode == 'view' && hasDownloadRight && !noDatasets" class="right-icon dl-button" type="button" (click)="downloadAll()" [disabled]="downloadState?.isActive()">Download<i class="fas fa-download"></i></button>
-            </form-footer>
 		</div>
 	</form>
 </div>

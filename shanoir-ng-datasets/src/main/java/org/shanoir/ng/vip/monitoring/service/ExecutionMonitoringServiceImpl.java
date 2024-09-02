@@ -2,6 +2,10 @@ package org.shanoir.ng.vip.monitoring.service;
 
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.processing.service.DatasetProcessingService;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.vip.dto.DatasetParameterDTO;
 import org.shanoir.ng.vip.monitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.monitoring.model.ExecutionStatus;
@@ -33,6 +37,9 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
 
     @Autowired
     private ExecutionMonitoringSecurityService executionMonitoringSecurityService;
+
+    @Autowired
+    private DatasetProcessingService datasetProcessingService;
 
     private final String RIGHT_STR = "CAN_SEE_ALL";
 
@@ -107,7 +114,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
     }
 
     @Override
-    public List<ParameterResourceDTO> createProcessingResources(ExecutionMonitoring processing, List<DatasetParameterDTO> datasetParameters) {
+    public List<ParameterResourceDTO> createProcessingResources(ExecutionMonitoring processing, List<DatasetParameterDTO> datasetParameters) throws EntityNotFoundException {
 
         if(datasetParameters ==  null || datasetParameters.isEmpty()){
             return new ArrayList<>();
@@ -131,22 +138,19 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
                 Long entityId = null;
                 switch (dto.getGroupBy()) {
                     case ACQUISITION:
-                        if (ds.getDatasetAcquisition() != null) {
-                            entityId = ds.getDatasetAcquisition().getId();
+                        DatasetAcquisition acquisition = datasetService.getAcquisition(ds);
+                        if (acquisition != null) {
+                            entityId = acquisition.getId();
                         }
                         break;
                     case EXAMINATION:
-                        if (ds.getDatasetAcquisition() != null
-                                && ds.getDatasetAcquisition().getExamination() != null) {
-                            entityId = ds.getDatasetAcquisition().getExamination().getId();
+                        Examination exam = datasetService.getExamination(ds);
+                        if (exam != null) {
+                            entityId = exam.getId();
                         }
                         break;
                     case STUDY:
-                        if (ds.getDatasetAcquisition() != null
-                                && ds.getDatasetAcquisition().getExamination() != null
-                                && ds.getDatasetAcquisition().getExamination().getStudy() != null) {
-                            entityId = ds.getDatasetAcquisition().getExamination().getStudy().getId();
-                        }
+                        entityId = datasetService.getStudyId(ds);
                         break;
                     case SUBJECT:
                         if (ds.getSubjectId() != null) {
@@ -158,10 +162,12 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
                         break;
                 }
 
-                if(entityId != null) {
-                    datasetsByEntityId.putIfAbsent(entityId, new ArrayList<>());
-                    datasetsByEntityId.get(entityId).add(ds);
+                if (entityId == null) {
+                    throw new EntityNotFoundException("Cannot find [" + dto.getGroupBy() + "] entity for dataset [" + ds.getId() + "]");
                 }
+
+                datasetsByEntityId.putIfAbsent(entityId, new ArrayList<>());
+                datasetsByEntityId.get(entityId).add(ds);
 
             }
 
@@ -175,6 +181,11 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
         return resources;
 
 
+    }
+
+    @Override
+    public void validateExecutionMonitoring(ExecutionMonitoring executionMonitoring) throws RestServiceException {
+        datasetProcessingService.validateDatasetProcessing(executionMonitoring);
     }
 
 }

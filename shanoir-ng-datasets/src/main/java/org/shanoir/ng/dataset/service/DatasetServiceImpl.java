@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.dataset.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -23,10 +25,13 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
+import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.property.service.DatasetPropertyService;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -36,11 +41,14 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
-import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
+import org.shanoir.ng.vip.resource.ProcessingResourceService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -54,7 +62,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -76,44 +87,54 @@ public class DatasetServiceImpl implements DatasetService {
 	private ShanoirEventService shanoirEventService;
 
 	@Autowired
-	private SolrService solrService;
-
-	@Autowired
 	private DICOMWebService dicomWebService;
 
 	@Autowired
 	private DatasetPropertyService propertyService;
 
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
+
+	@Autowired
+	private ObjectMapper objectMapper;
+
 	@Value("${dcm4chee-arc.dicom.web}")
 	private boolean dicomWeb;
+
 	@Autowired
 	private DatasetProcessingService processingService;
+
+	@Autowired
+	private ProcessingResourceService processingResourceService;
+
+	private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
 	@Override
 	@Transactional
 	public void deleteById(final Long id) throws ShanoirException, SolrServerException, IOException, RestServiceException {
+		final Dataset dataset = repository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
 
-		List<Dataset> childDatasets = repository.findBySourceId(id);
-
-		if (!CollectionUtils.isEmpty(childDatasets)) {
+		// Do not delete entity if it is the source. If getSourceId() is not null, it means it's a copy
+		List<Dataset> childDs = repository.findBySourceId(id);
+		if (!CollectionUtils.isEmpty(childDs)) {
 			throw new RestServiceException(
 					new ErrorModel(
 							HttpStatus.UNPROCESSABLE_ENTITY.value(),
 							"This dataset is linked to another dataset that was copied."
 					));
+
 		}
-
-		final Dataset dataset = repository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
-
+		// Remove parent processing to avoid errors
+		dataset.setDatasetProcessing(null);
 		processingService.removeDatasetFromAllProcessingInput(id);
+		processingResourceService.deleteByDatasetId(id);
 		propertyService.deleteByDatasetId(id);
 		repository.deleteById(id);
 
 		if (dataset.getSourceId() == null) {
 			this.deleteDatasetFromPacs(dataset);
 		}
-		solrService.deleteFromIndex(id);
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, dataset.getStudyId()));
 	}
 
@@ -122,13 +143,14 @@ public class DatasetServiceImpl implements DatasetService {
         if (!dicomWeb) {
             return;
         }
-        for (DatasetExpression expression : dataset.getDatasetExpressions()) {
 
+        for (DatasetExpression expression : dataset.getDatasetExpressions()) {
 			boolean isDicom = DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat());
 
 			for (DatasetFile file : expression.getDatasetFiles()) {
-				if(isDicom && file.isPacs()){
-					dicomWebService.deleteDicomFilesFromPacs(file.getPath());
+				if (isDicom && file.isPacs()) {
+					dicomWebService.rejectDatasetFromPacs(file.getPath());
+					break;
 				} else if (!file.isPacs()) {
 					try {
 						URL url = new URL(file.getPath().replaceAll("%20", " "));
@@ -138,10 +160,15 @@ public class DatasetServiceImpl implements DatasetService {
 						throw new ShanoirException("Error while deleting dataset file", e);
 					}
 				}
-
 			}
+			break;
         }
     }
+
+	@Override
+	public boolean existsById(Long id) {
+		return repository.existsById(id);
+	}
 
 	@Override
 	@Transactional
@@ -169,7 +196,10 @@ public class DatasetServiceImpl implements DatasetService {
 	@Override
 	public Dataset create(final Dataset dataset) throws SolrServerException, IOException {
 		Dataset ds = repository.save(dataset);
+		Long studyId = this.getStudyId(dataset);
+
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, ds.getStudyId()));
+		rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
 		return ds;
 	}
 
@@ -181,7 +211,13 @@ public class DatasetServiceImpl implements DatasetService {
 		}
 		this.updateDatasetValues(datasetDb, dataset);
 		Dataset ds = repository.save(datasetDb);
-		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, datasetDb.getStudyId()));
+		try {
+			Long studyId = getStudyId(ds);
+			shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, studyId));
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException("Error while updating a dataset", e);
+		}
 		return ds;
 	}
 
@@ -321,5 +357,53 @@ public class DatasetServiceImpl implements DatasetService {
 	public List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception {
 		return repository.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
 	}
+
+	/**
+	 * Get study Id from dataset. If processed, recursively get it through processing inputs
+	 *
+	 * @param dataset
+	 * @return
+	 */
+	@Override
+	public Long getStudyId(Dataset dataset){
+		if (dataset.getDatasetProcessing() != null) {
+			return dataset.getDatasetProcessing().getStudyId();
+		}
+		if(dataset.getDatasetAcquisition() != null && dataset.getDatasetAcquisition().getExamination() != null){
+			return dataset.getDatasetAcquisition().getExamination().getStudyId();
+		}
+		return null;
+	}
+
+	/**
+	 * Get examination from dataset. If processed, recursively get it through processing inputs
+	 *
+	 * @param dataset
+	 * @return
+	 */
+	@Override
+	public Examination getExamination(Dataset dataset){
+		DatasetAcquisition acquisition = this.getAcquisition(dataset);
+		if(acquisition != null){
+			return acquisition.getExamination();
+		}
+		return null;
+	}
+
+    @Override
+    public DatasetAcquisition getAcquisition(Dataset dataset) {
+		if(dataset.getDatasetAcquisition() != null){
+			return dataset.getDatasetAcquisition();
+		}
+		if(dataset.getDatasetProcessing().getInputDatasets() != null){
+			for(Dataset ds : dataset.getDatasetProcessing().getInputDatasets()){
+				DatasetAcquisition acq = this.getAcquisition(ds);
+				if(acq != null){
+					return acq;
+				}
+			}
+		}
+		return null;
+    }
 
 }

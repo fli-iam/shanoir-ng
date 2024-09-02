@@ -58,6 +58,17 @@ export class ExecutionComponent implements OnInit {
     isLoading = true;
     isSubmitted = true;
     datasetsPromise: Promise<void>;
+    converterId: number;
+
+    niftiConverters: Option<number>[] = [
+        new Option<number>(1, 'DCM2NII_2008_03_31', null, null, null, false),
+        new Option<number>(2, 'MCVERTER_2_0_7', null, null, null, false),
+        new Option<number>(4, 'DCM2NII_2014_08_04', null, null, null, false),
+        new Option<number>(5, 'MCVERTER_2_1_0', null, null, null, false),
+        new Option<number>(6, 'DCM2NIIX', null, null, null, false),
+        new Option<number>(7, 'DICOMIFIER', null, null, null, false),
+        new Option<number>(8, 'MRICONVERTER', null, null, null, false),
+    ];
 
     constructor(
         private breadcrumbsService: BreadcrumbsService,
@@ -113,7 +124,8 @@ export class ExecutionComponent implements OnInit {
         this.executionForm = new UntypedFormGroup({
             "execution_name": new UntypedFormControl('', Validators.required),
             "export_format": new UntypedFormControl('', Validators.required),
-            "group_by": new UntypedFormControl('', Validators.required)
+            "group_by": new UntypedFormControl('', Validators.required),
+            "converter": new UntypedFormControl('')
         });
 
         this.pipeline.parameters.forEach(
@@ -152,7 +164,6 @@ export class ExecutionComponent implements OnInit {
         this.datasetsPromise.then(() => {
 
             let availableDatasets: Dataset[] = Array.from(this.selectedDatasets);
-            let excludedDatasetsCount = 0;
 
             this.datasetsOptions = [];
             availableDatasets.forEach(dataset => {
@@ -176,11 +187,7 @@ export class ExecutionComponent implements OnInit {
                         let paramDatasets: Dataset[] = [];
 
                         availableDatasets.forEach(dataset => {
-                            if(dataset.datasetProcessing){
-                                excludedDatasetsCount++;
-                            } else if (nameFilter.test(dataset.name)) {
-                                paramDatasets.push(dataset);
-                            }
+                            paramDatasets.push(dataset);
                         });
 
                         paramDatasets.forEach(dataset => {
@@ -192,9 +199,6 @@ export class ExecutionComponent implements OnInit {
                     }
                 }
             )
-            if(excludedDatasetsCount > 0){
-                this.consoleService.log('warn', "[" + excludedDatasetsCount + "] processed datasets has been excluded from the selection.");
-            }
         });
     }
 
@@ -223,6 +227,7 @@ export class ExecutionComponent implements OnInit {
         candidate.outputProcessing = this.pipeline.outputProcessing;
         candidate.client = KeycloakService.clientId;
         candidate.refreshToken = this.refreshToken;
+        candidate.converterId = this.converterId;
         candidate.datasetParameters = [];
         candidate.inputParameters = {};
         this.pipeline.parameters.forEach(

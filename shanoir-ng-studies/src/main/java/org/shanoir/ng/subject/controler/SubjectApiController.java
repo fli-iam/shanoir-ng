@@ -71,11 +71,12 @@ public class SubjectApiController implements SubjectApi {
 
 	@Override
 	public ResponseEntity<Void> deleteSubject(
-			@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
+			@Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
 		try {
 			// Delete all associated bids folders
 			subjectService.deleteById(subjectId);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_SUBJECT_EVENT, subjectId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -84,7 +85,7 @@ public class SubjectApiController implements SubjectApi {
 
 	@Override
 	public ResponseEntity<SubjectDTO> findSubjectById(
-			@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
+			@Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
 		final Subject subject = subjectService.findById(subjectId);
 		if (subject == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -94,9 +95,7 @@ public class SubjectApiController implements SubjectApi {
 
 	@Override
 	public ResponseEntity<List<SubjectDTO>> findSubjects(boolean preclinical, boolean clinical) {
-
 		List<Subject> subjects = new ArrayList<>();
-
 		if(preclinical && clinical){
 			subjects = subjectService.findAll();
 		} else if (preclinical) {
@@ -104,11 +103,9 @@ public class SubjectApiController implements SubjectApi {
 		} else if (clinical) {
 			subjects = subjectService.findByPreclinical(false);
 		}
-
 		if (subjects.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-
 		return new ResponseEntity<>(subjectMapper.subjectsToSubjectDTOs(subjects), HttpStatus.OK);
 	}
 
@@ -144,7 +141,6 @@ public class SubjectApiController implements SubjectApi {
 			createdSubject = subjectService.createAutoIncrement(subject, centerId);
 		}
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_SUBJECT_EVENT, createdSubject.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-
 		final SubjectDTO subjectDTO = subjectMapper.subjectToSubjectDTO(createdSubject);
 		return new ResponseEntity<SubjectDTO>(subjectDTO, HttpStatus.OK);
 	}
@@ -152,13 +148,12 @@ public class SubjectApiController implements SubjectApi {
 	// Attention: this method is used by ShanoirUploader!!!
 	@Override
 	public ResponseEntity<Void> updateSubject(
-			@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
-			@Parameter(name = "subject to update", required = true) @RequestBody Subject subject,
+			@Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
+			@Parameter(description = "subject to update", required = true) @RequestBody Subject subject,
 			final BindingResult result) throws RestServiceException, MicroServiceCommunicationException {
 		validate(subject, result);
 		try {
 			subjectService.update(subject);
-
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_SUBJECT_EVENT, subject.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
@@ -170,11 +165,11 @@ public class SubjectApiController implements SubjectApi {
 
 	@Override
 	public ResponseEntity<List<SimpleSubjectDTO>> findSubjectsByStudyId(
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@Parameter(name="preclinical", required = false) @RequestParam(value="preclinical", required = false) String preclinical) {
+			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(description="preclinical", required = false) @RequestParam(value="preclinical", required = false) String preclinical) {
 		final List<SimpleSubjectDTO> simpleSubjectDTOList;
 		if ("null".equals(preclinical)) {
-			simpleSubjectDTOList = subjectService.findAllSubjectsOfStudy(studyId);
+			simpleSubjectDTOList = subjectService.findAllSubjectsOfStudyId(studyId);
 		} else {
 			simpleSubjectDTOList = subjectService.findAllSubjectsOfStudyAndPreclinical(studyId, Boolean.parseBoolean(preclinical));
 		}
@@ -194,8 +189,11 @@ public class SubjectApiController implements SubjectApi {
 
 	@Override
 	public ResponseEntity<SubjectDTO> findSubjectByIdentifier(
-			@Parameter(name = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier) {
-		final Subject subject = subjectService.findByIdentifier(subjectIdentifier);
+			@Parameter(description = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier) {
+		// Get all allowed studies
+		List<Study> studies = studyService.findAll();
+		// As only studies are used to find a subject, in which the user has rights, no need for further rights checks
+		final Subject subject = subjectService.findByIdentifierInStudiesWithRights(subjectIdentifier, studies);
 		if (subject == null) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
@@ -215,12 +213,11 @@ public class SubjectApiController implements SubjectApi {
 	public ResponseEntity<Page<SubjectDTO>> findClinicalSubjectsPageByName(Pageable page, String name) {
 		// Get all allowed studies
 		List<Study> studies = this.studyService.findAll();
-		
 		Page<Subject> subjects = this.subjectService.getClinicalFilteredPageByStudies(page, name, studies);
-		
 		if (subjects.getContent().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<>(subjectMapper.subjectsToSubjectDTOs(subjects), HttpStatus.OK);
 	}
+
 }

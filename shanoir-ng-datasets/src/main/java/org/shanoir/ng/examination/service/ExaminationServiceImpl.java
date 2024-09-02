@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.examination.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -23,9 +24,9 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
-import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.processing.model.DatasetProcessing;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -37,6 +38,7 @@ import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -87,20 +89,23 @@ public class ExaminationServiceImpl implements ExaminationService {
 	private DatasetService datasetService;
 	@Autowired
 	private DatasetAcquisitionService datasetAcquisitionService;
-	
+
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
+
+	@Autowired
+	private ObjectMapper objectMapper;
 	@Value("${datasets-data}")
 	private String dataDir;
 	
 	@Override
-	public void deleteById(final Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException {
+	public void deleteById(final Long id) throws ShanoirException, SolrServerException, IOException, RestServiceException {
 		Optional<Examination> examinationOpt = examinationRepository.findById(id);
 		if (!examinationOpt.isPresent()) {
 			throw new EntityNotFoundException(Examination.class, id);
 		}
-		Long tokenUserId = KeycloakUtil.getTokenUserId();
 		Examination examination = examinationOpt.get();
-		String studyIdAsString = examination.getStudyId().toString();
-
+		
 		List<Examination> childExam = examinationRepository.findBySourceId(id);
 		if (!CollectionUtils.isEmpty(childExam)) {
 			throw new RestServiceException(
@@ -109,30 +114,15 @@ public class ExaminationServiceImpl implements ExaminationService {
 							"This examination is linked to another examination that was copied."
 					));
 		} else {
-			if (examination.getDatasetAcquisitions() != null) {
-				for (DatasetAcquisition dsAcq : examination.getDatasetAcquisitions()) {
+			List<DatasetAcquisition> dsAcqs = examination.getDatasetAcquisitions();
+			if (dsAcqs != null) {
+				for (DatasetAcquisition dsAcq : dsAcqs) {
 					this.datasetAcquisitionService.deleteById(dsAcq.getId());
 				}
 			}
 			examinationRepository.deleteById(id);
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, id.toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS, examination.getStudyId()));
-
 		}
-	}
-
-	@Override
-	public void deleteFromRabbit(Examination exam) throws ShanoirException, SolrServerException, IOException, RestServiceException {
-		Long tokenUserId = KeycloakUtil.getTokenUserId();
-		String studyIdAsString = exam.getStudyId().toString();
-		// Iterate over datasets acquisitions and datasets to send events and remove them from solr
-		for (DatasetAcquisition dsAcq : exam.getDatasetAcquisitions()) {
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, dsAcq.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
-			for (Dataset ds : dsAcq.getDatasets())  {
-				datasetService.deleteById(ds.getId());
-			}
-		}
-		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, exam.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS, exam.getStudyId()));
-		examinationRepository.deleteById(exam.getId());
+		rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(examination.getStudyId()));
 	}
 
 	@Override
@@ -148,9 +138,12 @@ public class ExaminationServiceImpl implements ExaminationService {
 	}
 	
 	@Override
-	public Page<Examination> findPage(final Pageable pageable, boolean preclinical) {
-		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			return examinationRepository.findAllByPreclinical(pageable, preclinical);
+	public Page<Examination> findPage(final Pageable pageable, boolean preclinical, String searchStr, String searchField) {
+		if (searchStr != null && searchStr.length() >= 1) {
+			List<Pair<Long, Long>> studyCenters = new ArrayList<>();
+			Set<Long> unrestrictedStudies = new HashSet<Long>();
+			securityService.getStudyCentersAndUnrestrictedStudies(studyCenters, unrestrictedStudies);
+			return examinationRepository.findPageByStudyCenterOrStudyIdInAndSearch(studyCenters, unrestrictedStudies, pageable, preclinical, searchStr, searchField);
 		} else {
 			List<Pair<Long, Long>> studyCenters = new ArrayList<>();
 			Set<Long> unrestrictedStudies = new HashSet<Long>();
@@ -161,8 +154,8 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 	@Override
 	public Page<Examination> findPage(final Pageable pageable, String patientName) {
-		if (patientName.length() > 64) {
-			throw new IllegalArgumentException("A patient name cannot be longer than 64 chars, it exceed the data representation limit");
+		if (patientName != null && patientName.length() > 64) {
+			throw new IllegalArgumentException("A patient name cannot be longer than 64 chars, it exceed the data representation limit.");
 		}
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			if (StringUtils.isNotEmpty(patientName)) {
@@ -250,7 +243,22 @@ public class ExaminationServiceImpl implements ExaminationService {
 				}
 			}
 		}
-		examinationDb.setSubject(examination.getSubject());
+		// If we updated the subject, we need to update datasets and processed datasets too
+		if (!examination.getSubject().getId().equals(examinationDb.getSubject().getId())) {
+			examinationDb.setSubject(examination.getSubject());
+			for (DatasetAcquisition acquisition : examinationDb.getDatasetAcquisitions()) {
+				for (Dataset ds : acquisition.getDatasets()) {
+					ds.setSubjectId(examination.getSubject().getId());
+					// Processed datasets
+					for (DatasetProcessing processing : ds.getProcessings()) {
+						for (Dataset procDs : processing.getOutputDatasets()) {
+							procDs.setSubjectId(examination.getSubject().getId());
+						}
+					}
+				}
+			}
+		}
+
 		examinationDb.setCenterId(examination.getCenterId());
 		examinationDb.setComment(examination.getComment());
 		examinationDb.setExaminationDate(examination.getExaminationDate());

@@ -5,7 +5,7 @@ import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.shanoir.ng.dataset.modality.MeshDataset;
+import org.shanoir.ng.dataset.modality.GenericDataset;
 import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
@@ -176,11 +176,6 @@ public class DefaultHandler extends ResultHandler {
 		// Create dataset processing
 		DatasetProcessing processing = this.createProcessing(execution, inputDatasets);
 
-		Long studyId = inputDatasets.get(0).getStudyId();
-
-		Study study = studyRepository.findById(studyId)
-				.orElseThrow(() -> new NotFoundException("Study [" + studyId + "] not found."));
-
 		for (File file : processedFiles) {
 
 			LOG.info("Processing [{}]...", file.getAbsolutePath());
@@ -189,13 +184,22 @@ public class DefaultHandler extends ResultHandler {
 			processedDataset.setDatasetProcessing(processing);
 			processedDataset.setProcessedDatasetFilePath(file.getAbsolutePath());
 			processedDataset.setProcessedDatasetType(ProcessedDatasetType.EXECUTION_RESULT);
-			processedDataset.setStudyId(studyId);
-			processedDataset.setStudyName(study.getName());
-			processedDataset.setProcessedDatasetName(execution.getName());
+			String datasetName = file.getName();
+			if (datasetName.contains("resource_id")) {
+				datasetName = datasetName.substring(datasetName.lastIndexOf("+") + 1);
+			}
+			processedDataset.setProcessedDatasetName(datasetName);
 
 			if(!inputDatasets.isEmpty()) {
 
-				List<Long> subjectIds = inputDatasets.stream().map(Dataset::getSubjectId).collect(Collectors.toList());
+				Long studyId = datasetService.getStudyId(inputDatasets.get(0));
+				Study study = studyRepository.findById(studyId)
+						.orElseThrow(() -> new NotFoundException("Study [" + studyId + "] not found."));
+
+				processedDataset.setStudyId(studyId);
+				processedDataset.setStudyName(study.getName());
+
+				List<Long> subjectIds = inputDatasets.stream().map(Dataset::getSubjectId).toList();
 
 				Predicate<Long> predicate = obj -> Objects.equals(inputDatasets.get(0).getSubjectId(), obj);
 
@@ -205,14 +209,9 @@ public class DefaultHandler extends ResultHandler {
 
 					processedDataset.setSubjectId(subject.getId());
 					processedDataset.setSubjectName(subject.getName());
-					processedDataset.setDatasetType(inputDatasets.get(0).getType());
-				} else {
-					processedDataset.setDatasetType(MeshDataset.datasetType);
 				}
-			} else {
-				// default ?
-				processedDataset.setDatasetType(MeshDataset.datasetType);
 			}
+			processedDataset.setDatasetType(GenericDataset.datasetType);
 
 			importerService.createProcessedDataset(processedDataset);
 
@@ -228,6 +227,7 @@ public class DefaultHandler extends ResultHandler {
 		DatasetProcessing processing = new DatasetProcessing();
 		processing.setParent(execution);
 		processing.setComment(execution.getPipelineIdentifier());
+		processing.setUsername(execution.getUsername());
 		processing.setInputDatasets(inputDatasets);
 		processing.setProcessingDate(execution.getProcessingDate());
 		processing.setStudyId(execution.getStudyId());

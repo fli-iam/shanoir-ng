@@ -15,6 +15,7 @@
 package org.shanoir.ng.dataset.repository;
 
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.tag.model.StudyTag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -44,7 +45,17 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 	Iterable<Dataset> findByDatasetAcquisition_Examination_Study_Id(Long studyId);
 
 	int countByDatasetAcquisition_Examination_Study_Id(Long studyId);
-	
+
+	@Query(value = "SELECT ds.id FROM dataset ds " +
+			"INNER JOIN dataset_acquisition acq ON ds.dataset_acquisition_id = acq.id " +
+			"INNER JOIN examination ex ON acq.examination_id = ex.id " +
+			"WHERE ex.study_id = ?1", nativeQuery = true)
+	List<Long> findIdsByStudyId(Long studyId);
+
+	@Query(value = "SELECT ds.id FROM dataset ds " +
+			"WHERE ds.subject_id IN (?1)", nativeQuery = true)
+	List<Long> findIdsBySubjectIdIn(List<Long> subjectIds);
+
 	Iterable<Dataset> findByDatasetAcquisitionId(Long acquisitionId);
 	
 	Iterable<Dataset> findBydatasetAcquisitionStudyCardId(Long studycardId);
@@ -66,4 +77,6 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 	List<Object[]> findExpressionSizesTotalByStudyIdGroupByFormat(List<Long> studyIds);
 
     List<Dataset> deleteByDatasetProcessingId(Long id);
+
+	boolean existsByTagsContains(StudyTag tag);
 }

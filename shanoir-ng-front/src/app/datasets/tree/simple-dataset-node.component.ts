@@ -14,7 +14,10 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
-import {DatasetNode, ProcessingNode, UNLOADED} from '../../tree/tree.model';
+import { Selection, TreeService } from 'src/app/studies/study/tree.service';
+import { TaskState } from "../../async-tasks/task.model";
+import { MassDownloadService } from "../../shared/mass-download/mass-download.service";
+import { DatasetNode, ProcessingNode } from '../../tree/tree.model';
 import { Dataset } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
 
@@ -34,11 +37,15 @@ export class SimpleDatasetNodeComponent implements OnChanges {
     @Input() hasBox: boolean = false;
     @Input() related: boolean = false;
     detailsPath: string = '/dataset/details/';
+    public downloadState: TaskState = new TaskState();
     @Output() onSimpleDatasetDelete: EventEmitter<void> = new EventEmitter();
+    @Input() withMenu: boolean = true;
 
     constructor(
         private router: Router,
-        private datasetService: DatasetService) {
+        private datasetService: DatasetService,
+        private downloadService: MassDownloadService,
+        protected treeService: TreeService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -49,15 +56,19 @@ export class SimpleDatasetNodeComponent implements OnChanges {
                 throw new Error('not implemented yet');
             }
         }
-    }
+    } 
 
     toggleMenu() {
-        this.menuOpened = !this.menuOpened;
+        this.menuOpened = this.withMenu && !this.menuOpened;
     }
 
-    download(format: string) {
+    download() {
+        if (this.loading) {
+            return;
+        }
         this.loading = true;
-        this.datasetService.downloadFromId(this.node.id, format).then(() => this.loading = false);
+        this.downloadService.downloadByIds([this.node.id], this.downloadState)
+            .then(() => this.loading = false);
     }
 
     showDatasetDetails() {

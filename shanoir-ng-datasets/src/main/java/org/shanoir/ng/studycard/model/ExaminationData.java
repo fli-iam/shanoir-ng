@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.model.SubjectStudy;
 
@@ -33,6 +34,28 @@ public class ExaminationData {
     private List<DatasetAcquisition> datasetAcquisitions;
     
     private SubjectStudy subjectStudy;
+
+    private Long studyId;
+
+    public ExaminationData() {}
+
+    public ExaminationData(Examination examination) {
+        if (examination == null) throw new IllegalArgumentException("examination can't be null");
+        if (examination.getDatasetAcquisitions() == null) throw new IllegalArgumentException("examination acquisitions can't be null");
+        if (examination.getStudy() == null) throw new IllegalArgumentException("study can't be null");
+        if (examination.getStudy().getSubjectStudyList() == null) throw new IllegalArgumentException("subjectStudyList can't be null");
+        // Keep only MR acquisitions
+        // List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions().stream().filter(a -> a instanceof MrDatasetAcquisition).collect(Collectors.toList());
+        setStudyId(examination.getStudy().getId());
+        setDatasetAcquisitions(examination.getDatasetAcquisitions());
+        setExaminationComment(examination.getComment());
+        setExaminationDate(examination.getExaminationDate());
+        setSubjectName(examination.getSubject().getName());
+        setSubjectStudy(
+            examination.getSubject().getSubjectStudyList().stream()
+                .filter(ss -> ss.getStudy().getId().equals(examination.getStudy().getId()))
+                .findFirst().orElse(null));
+    }
 
     public String getSubjectName() {
         return subjectName;
@@ -72,5 +95,13 @@ public class ExaminationData {
 
     public void setSubjectStudy(SubjectStudy subjectStudy) {
         this.subjectStudy = subjectStudy;
+    }
+
+    public Long getStudyId() {
+        return studyId;
+    }
+
+    public void setStudyId(Long studyId) {
+        this.studyId = studyId;
     }
 }

@@ -42,6 +42,12 @@
         <input id="dcm" type="radio" formControlName="export_format" name="export_format" [(ngModel)]="exportFormat" value="dcm" />DICOM
     </span>
     </div>
+    <div *ngIf="exportFormat=='nii'">
+        <label>Nifti converter <tool-tip>Nifti converter used to convert dicom to nifti.</tool-tip></label>
+        <span class="right-col">
+            <select-box formControlName="converter" [(ngModel)]="converterId" [options]="niftiConverters"></select-box>
+        </span>
+    </div>
 </form>
 <button type='button' (click)="onApplyParameters()" [disabled]="!executionForm.valid">Apply</button>
 

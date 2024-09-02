@@ -15,25 +15,28 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <node
         *ngIf="node"
         [label]="node.label"
-        awesome="fas fa-cog"
-        [(opened)]="node.open"
+        [class.selected]="treeService.isSelected(node.id, 'processing')"
+        awesome="fas fa-gears"
+        [(opened)]="node.opened"
         (labelClick)="toggleMenu()"
+        [route]="node.route"
         [hasChildren]="hasChildren()"
         [title]="node.title + ' n°' + node.id">
 
-    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
+    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu">
         <menu-item label="Details..." awesome="fa-regular fa-eye" (click)="showProcessingDetails()"></menu-item>
         <menu-item *ngIf="node.canDelete"  label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteProcessing()"></menu-item>
     </dropdown-menu>
 
     <ng-container *ngIf="node.open && node.datasets && node.datasets != $any('UNLOADED')">
-            <simple-dataset-node
-                    node
-                    *ngFor="let dataset of node.datasets; let i = index"
-                    [input]="dataset"
-                    (onSimpleDatasetDelete)="onSimpleDatasetDelete(i)"
-            >
-            </simple-dataset-node>
+        <simple-dataset-node
+                node
+                *ngFor="let dataset of node.datasets; let i = index"
+                [input]="dataset"
+                (onSimpleDatasetDelete)="onSimpleDatasetDelete(i)"
+                [withMenu]="withMenu"
+        >
+        </simple-dataset-node>
 
     </ng-container>
 </node>

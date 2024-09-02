@@ -26,6 +26,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+import org.shanoir.ng.tag.model.StudyTag;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -81,7 +82,7 @@ public abstract class Dataset extends AbstractEntity {
 
 	/** Dataset Processing. */
 	@JsonIgnore
-	@ManyToOne(cascade = CascadeType.REMOVE)
+	@ManyToOne
 	@JoinColumn(name = "dataset_processing_id")
 	private DatasetProcessing datasetProcessing;
 
@@ -131,6 +132,10 @@ public abstract class Dataset extends AbstractEntity {
 	@OneToOne(cascade = CascadeType.ALL)
 	private DatasetMetadata updatedMetadata;
 
+	@ManyToMany(fetch = FetchType.LAZY)
+	@JoinTable(name = "DATASET_TAG", joinColumns = @JoinColumn(name = "DATASET_ID"), inverseJoinColumns = @JoinColumn(name = "STUDY_TAG_ID"))
+	private List<StudyTag> tags;
+
 	private Long sourceId;
 
 	@JsonIgnore
@@ -165,7 +170,6 @@ public abstract class Dataset extends AbstractEntity {
 		}
 
 		this.importedStudyId = d.getImportedStudyId();
-		this.studyId = d.getStudyId();
 		this.subjectId = d.getSubjectId();
 		this.downloadable = d.downloadable;
 		this.updatedMetadata = new DatasetMetadata(d.getUpdatedMetadata());
@@ -448,5 +452,17 @@ public abstract class Dataset extends AbstractEntity {
 
 	public void setSOPInstanceUID(String sOPInstanceUID) {
 		SOPInstanceUID = sOPInstanceUID;
+	}
+
+	public boolean getInPacs() {
+		return getDatasetExpressions() != null && getDatasetExpressions().size() > 0;
+	}
+
+	public List<StudyTag> getTags() {
+		return tags;
+	}
+
+	public void setTags(List<StudyTag> tags) {
+		this.tags = tags;
 	}
 }

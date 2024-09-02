@@ -117,7 +117,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<tr><td colspan="2"><div class="footer command-zone">
 				<button type="button" i18n="Edit pathology|CancelButton label" class="Button" (click)="cancelPathology()">Cancel</button>
 				<button type="button" *ngIf="canUpdatePathology()" (click)="updatePathology()" i18n="Edit pathology|SaveButton label" class="Button" [disabled]="!form.valid">Update</button>
-				<button type="button" *ngIf="canAddPathology()" i18n="Edit pathology|CreateButton label" (click)="addPathology()" class="Button" [disabled]="!form.valid">Create</button>
+				<button type="button" *ngIf="canAddPathology()" i18n="Edit pathology|CreateButton label" (click)="addPathology()" class="Button" [disabled]="!form.valid">Save</button>
 			</div></td></tr>
 		</table>
     </form>

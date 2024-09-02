@@ -26,10 +26,6 @@
 	<name>shanoir-ng-import</name>
 	<description>Shanoir-NG Import Microservice</description>
 
-	<properties>
-		<weasis.version>5.14.1</weasis.version>
-	</properties>
-
 	<dependencies>
 		<!-- Shanoir-NG dependencies -->
 		<dependency>
@@ -62,7 +58,7 @@
 		<dependency>
 			<groupId>org.weasis</groupId>
 			<artifactId>weasis-dicom-tools</artifactId>
-			<version>${weasis.version}</version>
+			<version>${dcm4che.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -161,12 +157,6 @@
 							<target>
 								<copy file="target/${project.build.finalName}-exec.jar"
 									tofile="${basedir}/../docker-compose/import/${project.artifactId}.jar" />
-								<copy file="../utils/entrypoint_common"
-									tofile="${basedir}/../docker-compose/import/entrypoint_common" />
-								<copy file="../utils/oneshot"
-									tofile="${basedir}/../docker-compose/import/oneshot" />
-								<chmod perm="+x"
-									file="${basedir}/../docker-compose/import/oneshot" />
 							</target>
 						</configuration>
 						<goals>

@@ -27,7 +27,6 @@ export class ImportJob {
     studyId: number;
     studyCardId: number;
     acquisitionEquipmentId: number;
-    converterId: number;
     archive: string;
     subjectName: String;
     studyName: String;

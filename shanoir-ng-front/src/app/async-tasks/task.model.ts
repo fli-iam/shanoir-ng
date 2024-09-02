@@ -51,7 +51,8 @@ export class Task extends Entity {
     objectId: number;
     route: string;
     hasReport: boolean;
-    private readonly FIELDS: string[] = ['id', 'creationDate', 'lastUpdate','_status','_message', '_progress', '_eventType', 'eventLabel', 'objectId', 'route', 'report'];
+    sessionId: string;
+    private readonly FIELDS: string[] = ['id', 'creationDate', 'lastUpdate','_status','_message', '_progress', '_eventType', 'eventLabel', 'objectId', 'route', 'report', 'sessionId'];
 
     set eventType(eventType: string) {
         this._eventType = eventType;
@@ -100,6 +101,8 @@ export class Task extends Entity {
             }
         } else if (this.eventType === 'executionMonitoring.event' && this.status != -1) {
             return '/dataset-processing/details/' + this.objectId
+        } else if (this.eventType === 'solrIndexAll.event' && this.status != -1) {
+            return '/solr-search';
         } else if (this.eventType === 'copyDataset.event' && this.status != -1 && this.message.lastIndexOf('study [') != -1) {
             return '/study/details/' + this.message.slice(this.message.lastIndexOf("[") + 1, this.message.lastIndexOf("]"));
         }
@@ -121,6 +124,15 @@ export class Task extends Entity {
             if (task[fieldName] != this[fieldName]) return false;
         }
         return true;
+    }
+
+    updateWith(task: Task) {
+        if (task.status != undefined) this.status = task.status;
+        if (task.progress != undefined) this.progress = task.progress;
+        if (task.lastUpdate) this.lastUpdate = task.lastUpdate;
+        if (!this.creationDate && task.creationDate) this.creationDate = task.creationDate;
+        if (task.report) this.report = task.report;
+        if (task.message) this.message = task.message;
     }
 }
 
