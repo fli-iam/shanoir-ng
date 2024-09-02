@@ -155,9 +155,13 @@ public class ImportFinishActionListener implements ActionListener {
 		}
 				
 		/**
-		 * 3. Fill importJob, start pseudo and prepare upload
+		 * 3. Fill importJob, check quality if needed, start pseudo and prepare upload
 		 */
 		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examinationId, (Study) mainWindow.importDialog.studyCB.getSelectedItem(), (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem());
+		
+		//TODO : call Quality check Utils method to do QC on importJob.selectedSeries 
+		// 		 after creation of ExaminationAttributes and acquisitionAttributes.
+		
 		Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, importJob, subjectREST.getName());
 		Thread thread = new Thread(runnable);
 		thread.start();

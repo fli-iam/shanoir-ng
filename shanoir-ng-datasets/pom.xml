@@ -158,6 +158,14 @@
 					</execution>
 				</executions>
 			</plugin>
+			<!-- Used here for ShanoirUploader: create an additional single jar to be used by ShUp -->
+	        <plugin>
+	            <groupId>org.springframework.boot</groupId>
+	            <artifactId>spring-boot-maven-plugin</artifactId>
+	            <configuration>
+	                <classifier>exec</classifier>
+	            </configuration>
+	        </plugin>
 			<!-- Copy shanoir-ng-datasets.jar for docker-compose up running -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

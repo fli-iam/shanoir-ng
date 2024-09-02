@@ -163,7 +163,6 @@ public class QualityExaminationRule extends AbstractEntity {
             pilotedByDicomAttributes = true;
         } else {
             pilotedByDicomAttributes = false;
-            examinationAttributesCache = new ExaminationAttributes<Long>(downloader.getWadoURLHandler());
         }
         for (StudyCardCondition condition : getConditions()) {
             StringBuffer msg = new StringBuffer();

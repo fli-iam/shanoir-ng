@@ -65,6 +65,8 @@ public class ShanoirUploaderServiceClient {
 	private static final String SERVICE_STUDYCARDS_FIND_BY_STUDY_IDS = "service.studycards.find.by.study.ids";
 
 	private static final String SERVICE_STUDYCARDS_APPLY_ON_STUDY = "service.studycards.apply.on.study";
+
+	private static final String SERVICE_QUALITYCARDS_FIND_BY_STUDY_ID = "service.qualitycards.find.by.study.id";
 	
 	private static final String SERVICE_CENTERS_CREATE = "service.centers.create";
 
@@ -113,6 +115,8 @@ public class ShanoirUploaderServiceClient {
 	private String serviceURLStudyCardsByStudyIds;
 
 	private String serviceURLStudyCardsApplyOnStudy;
+
+	private String serviceURLQualityCardsByStudyId;
 	
 	private String serviceURLCentersCreate;
 
@@ -171,6 +175,8 @@ public class ShanoirUploaderServiceClient {
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_STUDYCARDS_FIND_BY_STUDY_IDS);
 		this.serviceURLStudyCardsApplyOnStudy = this.serverURL
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_STUDYCARDS_APPLY_ON_STUDY);
+		this.serviceURLQualityCardsByStudyId = this.serverURL
+				+ ShUpConfig.endpointProperties.getProperty(SERVICE_QUALITYCARDS_FIND_BY_STUDY_ID);
 		this.serviceURLCentersCreate = this.serverURL
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_CENTERS_CREATE);
 		this.serviceURLCentersFindOrCreateByInstitutionDicom = this.serverURL
@@ -865,6 +871,28 @@ public class ShanoirUploaderServiceClient {
 			}
 		}
 	}
+
+	// public List<QualityCard> findQualityCardsByStudyId(Long studyId) throws Exception {
+	// 	try {
+	// 		String studyIdentifier = URLEncoder.encode(Long.toString(studyId), "UTF-8");
+	// 		long startTime = System.currentTimeMillis();
+	// 		try (CloseableHttpResponse response = httpService.get(this.serviceURLQualityCardsByStudyId + studyIdentifier)) {
+	// 			long stopTime = System.currentTimeMillis();
+	// 			long elapsedTime = stopTime - startTime;
+	// 			logger.info("findQualityCardsByStudyId: " + elapsedTime + "ms");
+	// 			int code = response.getCode();
+	// 			if (code == HttpStatus.SC_OK) {
+	// 				List<QualityCard> qualityCards = Util.getMappedList(response, QualityCard.class);
+	// 				return qualityCards;
+	// 			} else {
+	// 				logger.error("Could not get quality cards for studyId : " +  studyIdentifier + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+	// 			}
+	// 		}
+	// 	} catch (JsonProcessingException e) {
+	// 		logger.error(e.getMessage(), e);
+	// 	}
+	// 	return null;
+	// }
 
 	public void postDicomSR(File file) throws Exception {
 		try (CloseableHttpResponse response = httpService.postFileMultipartRelated(this.serviceURLDatasetsDicomWebStudies, file)) {
