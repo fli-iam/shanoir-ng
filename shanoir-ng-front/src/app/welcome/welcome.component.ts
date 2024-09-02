@@ -50,7 +50,7 @@ export class WelcomeComponent implements OnInit {
         let datasetStr: string = "";
         let shanoirUrl: string = window.location.protocol + "//" + window.location.hostname;
 
-        this.studies.forEach( study => {
+        this.studies?.forEach( study => {
 
             // keywords handling
             let keywords: string = "";
@@ -139,7 +139,7 @@ export class WelcomeComponent implements OnInit {
 	private fetchStudies() {
 		this.studyService.getPublicStudiesData().then(studies => {
 			// sort by nbExaminations
-			this.studies = studies.sort((a, b) => {
+			this.studies = studies?.sort((a, b) => {
 				// To order by dates :
 				// return new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
 				return (b.nbExaminations) - (a.nbExaminations);

@@ -12,8 +12,11 @@ import java.util.List;
 import java.util.Properties;
 import java.util.stream.Stream;
 
+import javax.swing.JProgressBar;
+
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
+import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.uploader.dicom.query.ConfigBean;
@@ -56,10 +59,8 @@ public class DicomServerClient implements IDicomServerClient {
 				config.getLocalDicomServerPort());
 		DicomNode called = new DicomNode(config.getDicomServerAETCalled(), config.getDicomServerHost(),
 				config.getDicomServerPort());
-		// attention: we use calling here (== ShUp) to inform the DICOM server to send
-		// to ShUp,
-		// who becomes the "called" afterwards from the point of view of the DICOM
-		// server (switch)
+		// attention: we use calling here (== ShUp) to inform the DICOM server to send to ShUp,
+		// who becomes the "called" afterwards from the point of view of the DICOM server (switch)
 		queryPACSService.setDicomNodes(calling, called, config.getLocalDicomServerAETCalling());
 		dcmRcvManager.configureAndStartSCPServer(config, workFolder.getAbsolutePath());
 	}
@@ -134,12 +135,12 @@ public class DicomServerClient implements IDicomServerClient {
 	 * Collection)
 	 */
 	@Override
-	public List<String> retrieveDicomFiles(String studyInstanceUID, List<Serie> selectedSeries, final File uploadFolder) {
+	public List<String> retrieveDicomFiles(final JProgressBar progressBar, StringBuilder downloadOrCopyReport, String studyInstanceUID, List<Serie> selectedSeries, final File uploadFolder) {
 		final List<String> retrievedDicomFiles = new ArrayList<String>();
 		if (selectedSeries != null && !selectedSeries.isEmpty()) {
 			try {
-				downloadFromDicomServer(studyInstanceUID, selectedSeries);
-				readAndCopyDicomFilesToUploadFolder(studyInstanceUID, selectedSeries, uploadFolder, retrievedDicomFiles);
+				downloadFromDicomServer(studyInstanceUID, selectedSeries, progressBar, downloadOrCopyReport);
+				readAndCopyDicomFilesToUploadFolder(studyInstanceUID, selectedSeries, uploadFolder, retrievedDicomFiles, downloadOrCopyReport);
 				deleteFolderDownloadFromDicomServer(studyInstanceUID, selectedSeries);
 			} catch (Exception e) {
 				logger.error(":\n\n Download of "
@@ -162,7 +163,7 @@ public class DicomServerClient implements IDicomServerClient {
 	}
 
 	private void readAndCopyDicomFilesToUploadFolder(String studyInstanceUID, List<Serie> selectedSeries, final File uploadFolder,
-			final List<String> retrievedDicomFiles) throws IOException {
+			final List<String> retrievedDicomFiles, StringBuilder downloadOrCopyReport) throws IOException {
 		for (Serie serie : selectedSeries) {
 			List<String> fileNamesForSerie = new ArrayList<String>();
 			final String seriesInstanceUID = serie.getSeriesInstanceUID();
@@ -182,11 +183,19 @@ public class DicomServerClient implements IDicomServerClient {
 					File destDicomFile = new File(destSerieFolder, dicomFileName);
 					Files.move(sourceFileFromPacs.toPath(), destDicomFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 				}
+				downloadOrCopyReport.append("Download: serie (" + serie.getSeriesNumber() + ") " + serie.getSeriesDescription()
+					+ " downloaded with " + fileNamesForSerie.size() + " images.\n");
+				if (serie.getInstances().size() != fileNamesForSerie.size()) {
+					downloadOrCopyReport.append("Error: Download: serie (" + serie.getSeriesNumber() + ") " + serie.getSeriesDescription()
+						+ " downloaded with " + fileNamesForSerie.size()
+						+ " images not equal to instances in the DICOM server: " + serie.getInstances().size() + ".\n");
+				}
 				retrievedDicomFiles.addAll(fileNamesForSerie);
 				logger.info(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
 						+ " DICOM files for serie " + seriesInstanceUID + ": " + serie.getSeriesDescription()
 						+ " was successful.\n\n");
 			} else {
+				downloadOrCopyReport.append("Error: Download: serie (" + serie.getSeriesNumber() + ") " + serie.getSeriesDescription() + " downloaded with not existing serie folder.\n");
 				logger.error(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
 						+ " DICOM files for serie " + seriesInstanceUID + ": " + serie.getSeriesDescription()
 						+ " has failed.\n\n");
@@ -194,11 +203,24 @@ public class DicomServerClient implements IDicomServerClient {
 		}
 	}
 
-	private void downloadFromDicomServer(String studyInstanceUID, List<Serie> selectedSeries) throws Exception {
+	private void downloadFromDicomServer(String studyInstanceUID, List<Serie> selectedSeries, final JProgressBar progressBar, StringBuilder downloadOrCopyReport) throws Exception {
+		// 1. query instances/images for selected series to get DICOM file names
 		for (Serie serie : selectedSeries) {
-			queryPACSService.queryCFINDInstances(studyInstanceUID, serie);	
+			queryPACSService.queryCFINDInstances(studyInstanceUID, serie);
+			List<Instance> instances = serie.getInstances();
+			if (instances == null || instances.isEmpty()) {
+				downloadOrCopyReport.append("Error: Download: serie " + serie.getSeriesDescription() + " has no images (ignored).\n");
+				logger.error("Selected serie found with zero images, therefore removed from download: " + serie.getSeriesDescription());
+				selectedSeries.remove(serie);
+			} else {
+				logger.info("Download: serie " + serie.getSeriesDescription() + " has " + instances.size() + " images in DICOM server.");	
+			}
 		}
-		queryPACSService.queryCMOVEs(studyInstanceUID, selectedSeries);
+		// 2. c-move: download images from DICOM server for all series
+		// we have to call here for all series as the connection set up
+		// and release is very time consuming and error prone, so we do
+		// it only once in QueryPACSService.
+		queryPACSService.queryCMOVEs(studyInstanceUID, selectedSeries, progressBar);
 	}
 
 	/*

@@ -108,4 +108,6 @@ public interface DatasetProcessingService {
      * @throws IOException
      */
     void deleteByParentId(Long id) throws RestServiceException, ShanoirException, SolrServerException, IOException;
+
+    void validateDatasetProcessing(DatasetProcessing processing) throws RestServiceException;
 }

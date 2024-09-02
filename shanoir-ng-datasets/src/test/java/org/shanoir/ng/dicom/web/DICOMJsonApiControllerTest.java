@@ -23,7 +23,7 @@ import org.mockito.Mockito;
 import org.shanoir.ng.dicom.web.dto.mapper.ExaminationToStudyDTOMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.importer.service.DicomSRImporterService;
+import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
@@ -70,7 +70,7 @@ public class DICOMJsonApiControllerTest {
 	private ExaminationService examinationServiceMock;
 	
 	@MockBean
-	private DicomSRImporterService dicomSRImporterService;
+	private DicomSEGAndSRImporterService dicomSRImporterService;
 
 	@BeforeEach
 	public void setup() throws ShanoirException, SolrServerException, IOException, RestServiceException {

@@ -342,7 +342,7 @@ public class Serie implements Cloneable {
 	
 	public String toString() {
 		StringBuffer sB = new StringBuffer();
-		sB.append("[ ");
+		sB.append("[");
 		sB.append(this.seriesDescription);
 		sB.append(", ");
 		sB.append(this.sequenceName);

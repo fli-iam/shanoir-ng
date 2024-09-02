@@ -127,11 +127,16 @@ public class MainWindow extends JFrame {
 	public String studyDate = "";
 	JScrollPane scrollPaneUpload;
 
+	public JLabel startedDownloadsLB;
+	public JProgressBar downloadProgressBar;
+	public JLabel errorDownloadsLB;
+	public JLabel downloadErrorAlert;
+
 	public JLabel startedUploadsLB;
+	public JProgressBar uploadProgressBar;
 	public JLabel finishedUploadsLB;
 	public JLabel errorUploadsLB;
-	public JLabel errorAlert;
-	public JProgressBar uploadProgressBar;
+	public JLabel uploadErrorAlert;
 	
 	public IDicomServerClient dicomServerClient;
 	public File shanoirUploaderFolder;
@@ -936,17 +941,70 @@ public class MainWindow extends JFrame {
 		mainSplitPane.setRightComponent(editCurrentUploadsPanel);
 		notificationPanel.setLayout(gBLPanel);
 
-		// Content of Notification Panel
+		/**
+		 * Notification panel: copy or download
+		 */
+		GridBagConstraints gbc_notificationDownloadsOrCopies = new GridBagConstraints();
+		gbc_notificationDownloadsOrCopies.insets = new Insets(10, 10, 10, 10);
+		gbc_notificationDownloadsOrCopies.fill = GridBagConstraints.WEST;
+		gbc_notificationDownloadsOrCopies.gridx = 0;
+		gbc_notificationDownloadsOrCopies.gridy = 0;
+		JLabel notificationDownloadsOrCopies = new JLabel();
+		notificationDownloadsOrCopies.setText(resourceBundle.getString("shanoir.uploader.currentCopyOrDownloadSummary"));
+		Font font = new Font("Courier", Font.BOLD, 12);
+		notificationDownloadsOrCopies.setFont(font);
+		notificationPanel.add(notificationDownloadsOrCopies, gbc_notificationDownloadsOrCopies);
+
+		GridBagConstraints gbc_startedDownloadsLB = new GridBagConstraints();
+		gbc_startedDownloadsLB.insets = new Insets(10, 10, 10, 10);
+		gbc_startedDownloadsLB.fill = GridBagConstraints.EAST;
+		gbc_startedDownloadsLB.gridx = 0;
+		gbc_startedDownloadsLB.gridy = 1;
+		startedDownloadsLB = new JLabel();
+		startedDownloadsLB.setText(resourceBundle.getString("shanoir.uploader.currentCopyOrDownloadStarted"));
+		notificationPanel.add(startedDownloadsLB, gbc_startedDownloadsLB);
+
+		downloadProgressBar = new JProgressBar(0, 100);
+		downloadProgressBar.setValue(0);
+		downloadProgressBar.setStringPainted(true);
+		downloadProgressBar.setVisible(true);
+
+		GridBagConstraints gbc_downloadProgressBar = new GridBagConstraints();
+		gbc_downloadProgressBar.insets = new Insets(10, 10, 10, 10);
+		gbc_downloadProgressBar.fill = GridBagConstraints.HORIZONTAL;
+		gbc_downloadProgressBar.gridx = 1;
+		gbc_downloadProgressBar.gridy = 1;
+		notificationPanel.add(downloadProgressBar, gbc_downloadProgressBar);
+
+		errorDownloadsLB = new JLabel();
+		GridBagConstraints gbc_errorDownloadsLB = new GridBagConstraints();
+		gbc_errorDownloadsLB.insets = new Insets(10, 10, 10, 10);
+		gbc_errorDownloadsLB.fill = GridBagConstraints.EAST;
+		gbc_errorDownloadsLB.gridx = 0;
+		gbc_errorDownloadsLB.gridy = 2;
+		notificationPanel.add(errorDownloadsLB, gbc_errorDownloadsLB);
+
+		downloadErrorAlert = new JLabel();
+		GridBagConstraints gbc_downloadErrorAlert = new GridBagConstraints();
+		gbc_downloadErrorAlert.insets = new Insets(10, 10, 10, 10);
+		gbc_downloadErrorAlert.fill = GridBagConstraints.EAST;
+		gbc_downloadErrorAlert.gridx = 1;
+		gbc_downloadErrorAlert.gridy = 2;
+		gbc_downloadErrorAlert.gridheight = 2;
+		notificationPanel.add(downloadErrorAlert, gbc_downloadErrorAlert);
+
+		/**
+		 * Notification panel: imports
+		 */
 		JLabel notificationCurrentUploads = new JLabel();
 		GridBagConstraints gbc_notificationCurrentUploads = new GridBagConstraints();
 		gbc_notificationCurrentUploads.insets = new Insets(10, 10, 10, 10);
 		gbc_notificationCurrentUploads.fill = GridBagConstraints.WEST;
 		gbc_notificationCurrentUploads.gridx = 0;
-		gbc_notificationCurrentUploads.gridy = 0;
+		gbc_notificationCurrentUploads.gridy = 3;
 		notificationCurrentUploads.setText(resourceBundle.getString("shanoir.uploader.currentUploadsSummary"));
 		notificationPanel.add(notificationCurrentUploads,
 				gbc_notificationCurrentUploads);
-		Font font = new Font("Courier", Font.BOLD, 12);
 		notificationCurrentUploads.setFont(font);
 
 		startedUploadsLB = new JLabel();
@@ -954,7 +1012,7 @@ public class MainWindow extends JFrame {
 		gbc_startedUploadsLB.insets = new Insets(10, 10, 10, 10);
 		gbc_startedUploadsLB.fill = GridBagConstraints.EAST;
 		gbc_startedUploadsLB.gridx = 0;
-		gbc_startedUploadsLB.gridy = 1;
+		gbc_startedUploadsLB.gridy = 4;
 		notificationPanel.add(startedUploadsLB, gbc_startedUploadsLB);
 
 		uploadProgressBar = new JProgressBar(0, 100);
@@ -966,7 +1024,7 @@ public class MainWindow extends JFrame {
 		gbc_progressBar.insets = new Insets(10, 10, 10, 10);
 		gbc_progressBar.fill = GridBagConstraints.HORIZONTAL;
 		gbc_progressBar.gridx = 1;
-		gbc_progressBar.gridy = 1;
+		gbc_progressBar.gridy = 4;
 		notificationPanel.add(uploadProgressBar, gbc_progressBar);
 
 		finishedUploadsLB = new JLabel();
@@ -974,7 +1032,7 @@ public class MainWindow extends JFrame {
 		gbc_finishedUploadsLB.insets = new Insets(10, 10, 10, 10);
 		gbc_finishedUploadsLB.fill = GridBagConstraints.EAST;
 		gbc_finishedUploadsLB.gridx = 0;
-		gbc_finishedUploadsLB.gridy = 2;
+		gbc_finishedUploadsLB.gridy = 5;
 		notificationPanel.add(finishedUploadsLB, gbc_finishedUploadsLB);
 
 		errorUploadsLB = new JLabel();
@@ -982,17 +1040,17 @@ public class MainWindow extends JFrame {
 		gbc_errorUploadsLB.insets = new Insets(10, 10, 10, 10);
 		gbc_errorUploadsLB.fill = GridBagConstraints.EAST;
 		gbc_errorUploadsLB.gridx = 0;
-		gbc_errorUploadsLB.gridy = 3;
+		gbc_errorUploadsLB.gridy = 6;
 		notificationPanel.add(errorUploadsLB, gbc_errorUploadsLB);
 
-		errorAlert = new JLabel();
+		uploadErrorAlert = new JLabel();
 		GridBagConstraints gbc_errorAlert = new GridBagConstraints();
 		gbc_errorAlert.insets = new Insets(10, 10, 10, 10);
 		gbc_errorAlert.fill = GridBagConstraints.EAST;
 		gbc_errorAlert.gridx = 1;
-		gbc_errorAlert.gridy = 3;
+		gbc_errorAlert.gridy = 6;
 		gbc_errorAlert.gridheight = 2;
-		notificationPanel.add(errorAlert, gbc_errorAlert);
+		notificationPanel.add(uploadErrorAlert, gbc_errorAlert);
 		
 		menuBar.add(Box.createRigidArea(new Dimension(8, 0)));
 		

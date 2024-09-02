@@ -15,6 +15,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div #formContainer class="content-component">
     <form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
 		<div class="layout">
+			<form-footer
+				[state]="footerState"
+				(save)="save()"
+                (delete)="delete()"
+				(edit)="goToEdit()"
+				(cancel)="goToView()"
+				(back)="goBack()"
+			></form-footer>
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
 					<h2 class="header command-zone"i18n="View manufModel|Title@@manufModelDetailViewTitle">Details on manufacturer model</h2>
@@ -85,14 +93,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 				</ol>
 			</fieldset>
-			<form-footer
-				[state]="footerState"
-				(save)="save()"
-                (delete)="delete()"
-				(edit)="goToEdit()"
-				(cancel)="goToView()"
-				(back)="goBack()"
-			></form-footer>
         </div>
     </form>
 </div>

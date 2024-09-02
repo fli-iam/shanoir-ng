@@ -16,14 +16,12 @@ package org.shanoir.ng.dataset.modality;
 
 import java.util.List;
 
-import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
+import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTOInterface;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 
 
-public class EegDatasetAndProcessingsDTO extends EegDatasetDTO implements DatasetAndProcessingsDTOInterface {
-
-	private List<DatasetProcessingDTO> processings;
+public class EegDatasetWithDependenciesDTO extends EegDatasetWithProcessingsDTO implements DatasetWithDependenciesDTOInterface {
 	
 	private DatasetAcquisitionDTO datasetAcquisition;
 
@@ -38,17 +36,6 @@ public class EegDatasetAndProcessingsDTO extends EegDatasetDTO implements Datase
 	public void setDatasetAcquisition(DatasetAcquisitionDTO datasetAcquisition) {
 		this.datasetAcquisition = datasetAcquisition;
 	}
-
-	@Override
-	public List<DatasetProcessingDTO> getProcessings() {
-		return processings;
-	}
-
-	@Override
-	public void setProcessings(List<DatasetProcessingDTO> datasetProcessings) {
-		this.processings = datasetProcessings;
-	}
-
 
 	@Override
 	public DatasetProcessingDTO getDatasetProcessing() {

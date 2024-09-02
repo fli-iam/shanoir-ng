@@ -23,11 +23,7 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.joda.time.DateTime;
 import org.shanoir.ng.dataset.modality.*;
@@ -318,7 +314,7 @@ public class ImporterService {
 
     private boolean hasQualityChecksAtImport(List<QualityCard> qualityCards) {
         if (qualityCards == null || qualityCards.isEmpty()) {
-            LOG.warn("No qualitycard given for this import");
+            LOG.warn("No qualitycard given for this import.");
             return false;
         }
         for (QualityCard qualityCard : qualityCards) {
@@ -334,7 +330,7 @@ public class ImporterService {
             StudyCard studyCard = getStudyCard(importJob.getStudyCardId());
             return studyCard;
         } else {
-            LOG.warn("No studycard given for this import");
+            LOG.warn("No studycard given for this import.");
             return null;
         }
     }
@@ -441,15 +437,45 @@ public class ImporterService {
      */
     public Dataset createProcessedDataset(final ProcessedDatasetImportJob importJob) throws Exception {
 
-        ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getProcessedDatasetFilePath(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS, 0f);
+        ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getProcessedDatasetFilePath(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS, 0f, importJob.getStudyId());
         eventService.publishEvent(event);
 
-        if (importJob == null || importJob.getDatasetProcessing() == null) {
+        DatasetProcessing datasetProcessing = importJob.getDatasetProcessing();
+
+        if (datasetProcessing == null) {
             event.setStatus(ShanoirEvent.ERROR);
             event.setMessage("Dataset processing missing.");
             event.setProgress(-1f);
             eventService.publishEvent(event);
             return null;
+        }
+
+        if (importJob.getDatasetProcessing().getInputDatasets() == null ||
+                importJob.getDatasetProcessing().getInputDatasets().isEmpty()) {
+            event.setStatus(ShanoirEvent.ERROR);
+            event.setMessage("Processing input dataset(s) missing.");
+            event.setProgress(-1f);
+            eventService.publishEvent(event);
+            return null;
+        }
+
+        if (importJob.getStudyId() == null) {
+            event.setStatus(ShanoirEvent.ERROR);
+            event.setMessage("Study missing.");
+            event.setProgress(-1f);
+            eventService.publishEvent(event);
+            return null;
+        }
+
+        for(Dataset input : datasetProcessing.getInputDatasets()){
+            Long studyId = datasetService.getStudyId(input);
+            if (studyId != null && !studyId.equals(importJob.getStudyId())) {
+                event.setStatus(ShanoirEvent.ERROR);
+                event.setMessage("Study from input dataset [" + input.getId() + "] not the same as [" + studyId + "]");
+                event.setProgress(-1f);
+                eventService.publishEvent(event);
+                return null;
+            }
         }
         
         // Metadata
@@ -458,9 +484,8 @@ public class ImporterService {
         originMetadata.setName(importJob.getProcessedDatasetName());
 
         try {
-            DatasetProcessing datasetProcessing = importJob.getDatasetProcessing();
-            Dataset dataset = null;
-            
+
+            Dataset dataset;
             switch(importJob.getDatasetType()) {
                 case CalibrationDataset.datasetType:
                     dataset = new CalibrationDataset();

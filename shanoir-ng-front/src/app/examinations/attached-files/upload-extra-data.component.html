@@ -57,7 +57,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<button type="submit" i18n="uploadExtraData detail|Update button label@@updateButton" (click)="update()" class="Button" [disabled]="!uploadExtraDataForm.valid">Update<i class="far fa-save"></i></button>
 					</ng-template>
 					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify"> 
-						<button type="submit" i18n="uploadExtraData detail|Create button label@@createButton" (click)="create()" class="Button" [disabled]="!uploadExtraDataForm.valid">Create<i class="far fa-save"></i></button>
+						<button type="submit" i18n="uploadExtraData detail|Create button label@@createButton" (click)="create()" class="Button" [disabled]="!uploadExtraDataForm.valid">Save<i class="far fa-save"></i></button>
 					</ng-template>
 				</span>
 			</div>

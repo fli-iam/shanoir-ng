@@ -221,40 +221,35 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			+ " LEFT JOIN center c ON c.id = e.center_id"
 			+ " LEFT JOIN subject su ON su.id = d.subject_id, bids_dataset ed, dataset_metadata dm"
 			+ " WHERE d.updated_metadata_id = dm.id AND ed.id = d.id";
-	public static final String PROCESSED_QUERY = "SELECT d.id as datasetId"
-			+ ", dm.name as datasetName"
-			+ ", dm.dataset_modality_type as datasetType"
-			+ ", null as datasetNature"
-			+ ", d.creation_date as datasetCreationDate"
-			+ ", e.id as examinationId"
-			+ ", e.comment as examinationComment"
-			+ ", e.examination_date as examinationDate"
-			+ ", ae.name as acquisitionEquipmentName"
-			+ ", su.name as subjectName"
-			+ ", sust.subject_type as subjectType"
-			+ ", su.id as subjectId"
-			+ ", st.name as studyName"
-			+ ", e.study_id as studyId"
-			+ ", c.name as centerName"
-			+ ", c.id as centerId"
-			+ ", null as sliceThickness"
-			+ ", null as pixelBandwidth"
-			+ ", null as magneticFieldStrength"
-			+ ", da.import_date as importDate"
-			+ ", da.username as username"
-			+ ", 1 as processed"
+	public static final String PROCESSED_QUERY = "SELECT d.id as datasetId, " +
+			"dm.name as datasetName, " +
+			"dm.dataset_modality_type as datasetType, " +
+			"null as datasetNature, " +
+			"d.creation_date as datasetCreationDate, " +
+			"null as examinationId, " +
+			"null as examinationComment, " +
+			"null as examinationDate, " +
+			"null as acquisitionEquipmentName, " +
+			"su.name as subjectName, " +
+			"sust.subject_type as subjectType, " +
+			"su.id as subjectId, " +
+			"st.name as studyName, " +
+			"proc.study_id as studyId, " +
+			"null as centerName, " +
+			"null as centerId, " +
+			"null as sliceThickness, " +
+			"null as pixelBandwidth, " +
+			"null as magneticFieldStrength, " +
+			"proc.processing_date as importDate, " +
+			"proc.username as username, " +
+			"1 as processed"
 			+ " FROM dataset d"
-			+ " LEFT JOIN dataset dp ON dp.id ="
-			+ " (SELECT dataset_id from input_of_dataset_processing WHERE processing_id = d.dataset_processing_id LIMIT 1)"
-			+ " LEFT JOIN dataset_acquisition da on da.id = dp.dataset_acquisition_id"
-			+ " LEFT JOIN examination e ON e.id = da.examination_id"
-			+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
-			+ " LEFT JOIN study st ON st.id = e.study_id"
-			+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
-			+ " LEFT JOIN center c ON c.id = e.center_id"
+			+ " LEFT JOIN dataset_processing proc ON proc.id = d.dataset_processing_id"
+			+ " LEFT JOIN study st ON st.id = proc.study_id"
+			+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = proc.study_id"
 			+ " LEFT JOIN subject su ON su.id = d.subject_id, dataset_metadata dm"
 			+ " WHERE d.origin_metadata_id = dm.id"
-			+ " AND d.dataset_processing_id is not null";
+			+ " AND d.dataset_processing_id IS NOT NULL";
 	public static final String MEASUREMENT_QUERY = "SELECT d.id as datasetId, " +
 			"dm.name as datasetName, " +
 			"dm.dataset_modality_type as datasetType, " +
@@ -287,6 +282,38 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			+ " LEFT JOIN center c ON c.id = e.center_id"
 			+ " LEFT JOIN subject su ON su.id = d.subject_id, measurement_dataset md, dataset_metadata dm"
 			+ " WHERE d.updated_metadata_id = dm.id AND md.id = d.id";
+	public static final String SEGMENTATION_QUERY = "SELECT d.id as datasetId, " +
+			"dm.name as datasetName, " +
+			"dm.dataset_modality_type as datasetType, " +
+			"null as datasetNature, "
+			+ "d.creation_date as datasetCreationDate, " +
+			"e.id as examinationId, " +
+			"e.comment as examinationComment, " +
+			"e.examination_date as examinationDate, " +
+			"ae.name as acquisitionEquipmentName,"
+			+ "su.name as subjectName, " +
+			"sust.subject_type as subjectType, " +
+			"su.id as subjectId, " +
+			"st.name as studyName, " +
+			"e.study_id as studyId, " +
+			"c.name as centerName, " +
+			"c.id as centerId, "
+			+ "null as sliceThickness, " +
+			"null as pixelBandwidth, " +
+			"null as magneticFieldStrength, " +
+			"da.import_date as importDate, " +
+			"da.username as username, " +
+			"0 as processed"
+			+ " FROM dataset d"
+			+ " LEFT JOIN dataset refd ON refd.id = d.referenced_dataset_for_superimposition_id"
+			+ " LEFT JOIN dataset_acquisition da on da.id = refd.dataset_acquisition_id"
+			+ " LEFT JOIN examination e ON e.id = da.examination_id"
+			+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
+			+ " LEFT JOIN study st ON st.id = e.study_id"
+			+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
+			+ " LEFT JOIN center c ON c.id = e.center_id"
+			+ " LEFT JOIN subject su ON su.id = d.subject_id, segmentation_dataset sd, dataset_metadata dm"
+			+ " WHERE d.updated_metadata_id = dm.id AND sd.id = d.id";
 	public static final String XA_QUERY = "SELECT d.id as datasetId, " +
 			"dm.name as datasetName, " +
 			"dm.dataset_modality_type as datasetType, " +
@@ -405,6 +432,9 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 
 		Query measurementQuery = em.createNativeQuery(MEASUREMENT_QUERY + clause, RESULTSET_MAPPING);
 		result.addAll(measurementQuery.getResultList());
+
+		Query segmentationQuery = em.createNativeQuery(SEGMENTATION_QUERY + clause, RESULTSET_MAPPING);
+		result.addAll(segmentationQuery.getResultList());
 
 		return result;
 	}
