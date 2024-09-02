@@ -437,7 +437,7 @@ public class ImporterService {
      */
     public Dataset createProcessedDataset(final ProcessedDatasetImportJob importJob) throws Exception {
 
-        ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getProcessedDatasetFilePath(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS, 0f);
+        ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getProcessedDatasetFilePath(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS, 0f, importJob.getStudyId());
         eventService.publishEvent(event);
 
         DatasetProcessing datasetProcessing = importJob.getDatasetProcessing();
