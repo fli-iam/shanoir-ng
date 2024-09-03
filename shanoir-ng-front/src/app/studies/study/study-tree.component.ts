@@ -82,8 +82,7 @@ export class StudyTreeComponent {
         if (this.selectedAcquisitionNodes?.length > 0) {
             series = this.selectedAcquisitionNodes.map(acq => '1.4.9.12.34.1.8527.' + acq.id).join(',');
         }
-        console.log("studies : " + studies);
-        console.log("series : " + series);
+        
         if (series.length == 0)
             window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=' + studies, '_blank');
         if (series.length > 0 && studies.length > 0) {
