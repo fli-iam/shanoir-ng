@@ -18,12 +18,13 @@ import { TaskState } from 'src/app/async-tasks/task.model';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { ExecutionDataService } from 'src/app/vip/execution.data-service';
 import { TreeService } from './tree.service';
-import {DatasetAcquisitionNode, DatasetNode, ExaminationNode, StudyNode} from 'src/app/tree/tree.model';
+import {DatasetAcquisitionNode, DatasetNode, ExaminationNode, ShanoirNode, StudyNode} from 'src/app/tree/tree.model';
 import { MsgBoxService } from 'src/app/shared/msg-box/msg-box.service';
 import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/confirm-dialog.service';
 import {Examination} from "../../examinations/shared/examination.model";
 import {environment} from "../../../environments/environment";
 import {ConsoleService} from "../../shared/console/console.service";
+import {Dataset} from "../../datasets/shared/dataset.model";
 
 
 @Component({
@@ -35,9 +36,10 @@ import {ConsoleService} from "../../shared/console/console.service";
 export class StudyTreeComponent {
 
     _selectedDatasetNodes: DatasetNode[] = [];
-    selectedExaminationNodes: number[] = [];
-    selectedAcquisitionNodes: number[] = [];
+    selectedExaminationNodes: ShanoirNode[] = [];
+    selectedAcquisitionNodes: ShanoirNode[] = [];
     protected downloadState: TaskState;
+    canOpenDicom: boolean = false;
 
     constructor(
             protected treeService: TreeService,
@@ -74,18 +76,16 @@ export class StudyTreeComponent {
         let studies = "";
         let series = "";
         if (this.selectedExaminationNodes?.length > 0) {
-            studies = this.selectedExaminationNodes.map(id => `1.4.9.12.34.1.8527.${id}`).join(',');
+            studies = this.selectedExaminationNodes.map(exam => '1.4.9.12.34.1.8527.' + exam.id).join(',');
 
         }
         if (this.selectedAcquisitionNodes?.length > 0) {
-            series = this.selectedAcquisitionNodes.map(id => `1.4.9.12.34.1.8527.${id}`).join(',');
+            series = this.selectedAcquisitionNodes.map(acq => '1.4.9.12.34.1.8527.' + acq.id).join(',');
         }
         console.log("studies : " + studies);
         console.log("series : " + series);
         if (series.length == 0)
             window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=' + studies, '_blank');
-        if (studies.length == 0)
-            window.open(environment.viewerUrl + '/viewer?SeriesInstanceUIDs=' + series, '_blank');
         if (series.length > 0 && studies.length > 0) {
             window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=' + studies + '&SeriesInstanceUIDs=' + series, '_blank');
         }
@@ -113,26 +113,56 @@ export class StudyTreeComponent {
 
     checkSelectedExams(exam : ExaminationNode) {
         // Exam selected
-        if (exam.selected && this.selectedExaminationNodes.length <= 10 && !this.selectedExaminationNodes.includes(exam.id))
-            this.selectedExaminationNodes.push(exam.id);
+        if (exam.selected && this.selectedExaminationNodes.length <= 10 && !this.selectedExaminationNodes.includes(exam)) {
+            this.selectedExaminationNodes.push(exam);
+            this.canOpenDicom = true;
+        }
         // Exam unselected
-        if (!exam.selected && this.selectedExaminationNodes.includes(exam.id))
-            this.selectedExaminationNodes.splice(this.selectedExaminationNodes.indexOf(exam.id), 1);
+        if (!exam.selected && this.selectedExaminationNodes.includes(exam)) {
+            this.selectedExaminationNodes.splice(this.selectedExaminationNodes.indexOf(exam), 1);
+            if (this.selectedExaminationNodes.length == 0) {
+                this.canOpenDicom = false;
+            }
+            if (this.selectedExaminationNodes.length > 0 && this.selectedExaminationNodes.length <= 10) {
+                this.canOpenDicom = true;
+            }
+        }
+
         // More than 10 exam selected
-        if (this.selectedExaminationNodes.length > 10)
+        if (this.selectedExaminationNodes.length > 10) {
+            this.canOpenDicom = false;
             this.consoleService.log('warn', 'For performance reasons, you cannot open more than 10 examinations in the viewer at the same time.')
+        }
     }
 
     checkSelectedAcquisition(acq: DatasetAcquisitionNode) {
-        // Exam selected
-        if (acq.selected && this.selectedAcquisitionNodes.length <= 10 && !this.selectedAcquisitionNodes.includes(acq.id))
-            this.selectedAcquisitionNodes.push(acq.id);
-        // Exam unselected
-        if (!acq.selected && this.selectedAcquisitionNodes.includes(acq.id))
-            this.selectedAcquisitionNodes.splice(this.selectedAcquisitionNodes.indexOf(acq.id), 1);
-        // More than 10 exam selected
-        if (this.selectedAcquisitionNodes.length > 10)
-            this.consoleService.log('warn', 'For performance reasons, you cannot open more than 10 acquisition in the viewer at the same time.')
+        // Acquisition selected
+        if (acq.selected && this.selectedAcquisitionNodes.length <= 10 && !this.selectedAcquisitionNodes.includes(acq)) {
+            this.selectedAcquisitionNodes.push(acq);
+            if (!this.selectedExaminationNodes.includes(acq.parent))
+                this.selectedExaminationNodes.push(acq.parent);
+            acq.parent.selected = true;
+        }
+        // Acquisition unselected
+        if (!acq.selected && this.selectedAcquisitionNodes.includes(acq))
+            this.selectedAcquisitionNodes.splice(this.selectedAcquisitionNodes.indexOf(acq), 1);
+
+        // If multiple exam are selected, can't open viewer if any acquisition is also selected
+        if (this.selectedExaminationNodes.length > 1) {
+            if (this.selectedAcquisitionNodes.length > 0)
+                this.canOpenDicom = false;
+            if (this.selectedAcquisitionNodes.length == 0)
+                this.canOpenDicom = true;
+        }
+        // Can only open viewer if all selected acquisition belong to the same exam
+        if (this.selectedExaminationNodes.length == 1) {
+            if (this.selectedAcquisitionNodes.every(val => val.parent == this.selectedExaminationNodes[0])) {
+                this.canOpenDicom = true;
+            } else {
+                this.canOpenDicom = false;
+            }
+        }
+
     }
 
     private searchSelectedInDatasetNodes(dsNodes: DatasetNode[] | 'UNLOADED'): DatasetNode[] {
