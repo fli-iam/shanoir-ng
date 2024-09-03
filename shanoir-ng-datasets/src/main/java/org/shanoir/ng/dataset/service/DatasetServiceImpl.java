@@ -391,9 +391,10 @@ public class DatasetServiceImpl implements DatasetService {
 				try {
 					url = new URL(file.getPath().replaceAll("%20", " "));
 					File srcFile = new File(UriUtils.decode(url.getPath(), StandardCharsets.UTF_8.name()));
+					LOG.error("Deleting: " + srcFile.getAbsolutePath());
 					FileUtils.delete(srcFile);
 				} catch (Exception e) {
-					LOG.error("Could not delete nifti file: {}", file.getPath());
+					LOG.error("Could not delete nifti file: {}", file.getPath(), e);
 				}
 			}
 		}
