@@ -12,21 +12,11 @@
                         <select-box formControlName="format" [options]="formatOptions"></select-box>
                     </span>
                 </li>
-                <li *ngIf="hasDicom && form.get('format').value == 'nii'">
+                <li *ngIf="hasDicom && form.get('format')?.value == 'nii'">
                 <label>Nifti converter</label>
                 <span class="right-col">
                     <select-box formControlName="converter" [options]="niftiConverters" [(ngModel)]="converter"></select-box>
                 </span>
-                </li>
-                <li>
-                    <label>Unzip datasets (slower)</label>
-                    <span class="right-col">
-                        <checkbox formControlName="unzip"></checkbox>
-                        <span class="warning" *ngIf="form.get('unzip').value">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            The unzipping will run on your computer
-                        </span>
-                    </span>
                 </li>
                 <li *ngIf="winOs">
                     <label>
@@ -35,6 +25,99 @@
                     </label>
                     <span class="right-col">
                         <checkbox formControlName="shortPath"></checkbox>
+                    </span>
+                </li>
+                <li>
+                    <label>
+                        Unzip datasets (slower)
+                    </label>
+                    <span class="right-col">
+                        <checkbox formControlName="unzip"></checkbox>
+                        <span class="warning" *ngIf="form.get('unzip')?.value">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            The unzipping will run on your computer
+                        </span>
+                    </span>
+                </li>
+            </ol>
+        </fieldset>
+        <fieldset class="body" disabled="loading">
+            <div class="format-preview">
+                <node 
+                        label="download_folder" 
+                        awesome="fas fa-folder"
+                        [deploy]="true"
+                        [clickable]="false">
+                    <ng-template #datasetFileNode>
+                        <node *ngIf="!form.get('unzip')?.value" 
+                                label="dataset" 
+                                awesome="fas fa-file-zipper"
+                                [deploy]="true"
+                                [clickable]="false">
+                        </node>
+                        <node *ngIf="form.get('unzip')?.value" 
+                                label="ds123.dcm" 
+                                awesome="fas fa-file"
+                                [deploy]="true"
+                                [clickable]="false">
+                        </node>
+                    </ng-template>
+                    <ng-template #datasetNode>
+                        <node *ngIf="form.get('datasetFolders')?.value" 
+                                label="dataset" 
+                                awesome="fas fa-folder"
+                                [deploy]="true"
+                                [clickable]="false">
+                            <ng-template [ngTemplateOutlet]="datasetFileNode"></ng-template>
+                        </node>
+                        <ng-container *ngIf="!form.get('datasetFolders')?.value">
+                            <ng-template [ngTemplateOutlet]="datasetFileNode"></ng-template>
+                        </ng-container>
+                        
+                    </ng-template>
+                    <ng-template #examinationNode>
+                        <node *ngIf="form.get('examinationFolders')?.value" 
+                                label="examination" 
+                                awesome="fas fa-folder"
+                                [deploy]="true"
+                                [clickable]="false">
+                            <ng-template [ngTemplateOutlet]="datasetNode"></ng-template>
+                        </node>
+                        <ng-template *ngIf="!form.get('examinationFolders')?.value" [ngTemplateOutlet]="datasetNode"></ng-template>
+                    </ng-template>
+                    <ng-template #subjectNode>
+                        <node *ngIf="form.get('subjectFolders')?.value" 
+                                label="subject" 
+                                awesome="fas fa-folder"
+                                [deploy]="true"
+                                [clickable]="false">
+                            <ng-template [ngTemplateOutlet]="examinationNode"></ng-template>
+                        </node>
+                        <ng-template *ngIf="!form.get('subjectFolders')?.value" [ngTemplateOutlet]="examinationNode"></ng-template>
+                    </ng-template>
+                    
+                    <ng-template [ngTemplateOutlet]="subjectNode"></ng-template>
+                </node>
+                             
+            </div>
+            <legend>Folders structure</legend>
+            <ol>
+                <li>
+                    <label>Subject folders</label>
+                    <span class="right-col">
+                        <checkbox formControlName="subjectFolders"></checkbox>
+                    </span>
+                </li>
+                <li>
+                    <label>Examination folders</label>
+                    <span class="right-col">
+                        <checkbox formControlName="examinationFolders"></checkbox>
+                    </span>
+                </li>
+                <li *ngIf="form.get('unzip')?.value">
+                    <label>Dataset folders</label>
+                    <span class="right-col">
+                        <checkbox formControlName="datasetFolders"></checkbox>
                     </span>
                 </li>
             </ol>

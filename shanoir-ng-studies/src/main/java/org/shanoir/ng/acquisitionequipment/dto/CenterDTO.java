@@ -12,25 +12,22 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.dataset.dto;
+package org.shanoir.ng.acquisitionequipment.dto;
 
 import java.util.List;
 
-import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
-import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
+import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.studycenter.StudyCenterDTO;
 
+public class CenterDTO extends IdName {
 
-public interface DatasetAndProcessingsDTOInterface {
+	private List<StudyCenterDTO> studyCenterList;
 
-	public List<DatasetProcessingDTO> getProcessings();
+	public List<StudyCenterDTO> getStudyCenterList() {
+		return studyCenterList;
+	}
 
-	public void setProcessings(List<DatasetProcessingDTO> datasetProcessings);
-
-	public DatasetProcessingDTO getDatasetProcessing();
-
-	public void setDatasetProcessing(DatasetProcessingDTO datasetProcessing);
-
-	public DatasetAcquisitionDTO getDatasetAcquisition();
-
-	public void setDatasetAcquisition(DatasetAcquisitionDTO datasetAcquisition);
+	public void setStudyCenterList(List<StudyCenterDTO> studyCenterList) {
+		this.studyCenterList = studyCenterList;
+	}
 }

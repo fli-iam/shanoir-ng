@@ -43,12 +43,12 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 import { ExaminationService } from '../../../examinations/shared/examination.service';
 import { AnimalExaminationService } from '../shared/animal-examination.service';
 import { ExaminationNode } from '../../../tree/tree.model';
-import {UnitOfMeasure} from "../../../enum/unitofmeasure.enum";
+import { UnitOfMeasure } from "../../../enum/unitofmeasure.enum";
+import { Selection } from 'src/app/studies/study/tree.service';
 
 @Component({
     selector: 'examination-preclinical-form',
     templateUrl: 'animal-examination-form.component.html',
-    providers: [ExtraDataService, ContrastAgentService, ExaminationAnestheticService, ExaminationService],
     styleUrls: ['animal-examination.component.css']
 })
 @ModesAware
@@ -98,47 +98,45 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     set examination(examination: Examination) { this.entity = examination; }
 
     getService(): EntityService<Examination> {
-        return this.animalExaminationService;
+        return this.examinationService;
+    }
+
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromExamination(this.examination);
     }
 
     initView(): Promise<void> {
-        return this.examinationService.get(this.id).then(examination => {
-            this.examination = examination;
-            if(!this.examination.weightUnitOfMeasure){
-                this.examination.weightUnitOfMeasure = this.defaultUnit;
-            }
-            this.updateExam();
-            //this.loadExaminationAnesthetic();
-            if(this.examination && this.examination.subject && this.examination.subject.id ){
-                this.animalSubjectService
-        			.getAnimalSubject(this.examination.subject.id)
-        			.then(animalSubject => this.animalSubjectId = animalSubject.id)
-                    .catch((error) => {});
-
-        	}
-        });
+        if(!this.examination.weightUnitOfMeasure){
+            this.examination.weightUnitOfMeasure = this.defaultUnit;
+        }
+        this.updateExam();
+        //this.loadExaminationAnesthetic();
+        if(this.examination && this.examination.subject && this.examination.subject.id ){
+            this.animalSubjectService
+                .getAnimalSubject(this.examination.subject.id)
+                .then(animalSubject => this.animalSubjectId = animalSubject.id)
+                .catch((error) => {});
+        }
+        return Promise.resolve();
     }
 
 
     initEdit(): Promise<void> {
         this.getCenters();
         this.getStudies();
-        return this.examinationService.get(this.id).then(examination => {
-            this.examination = examination;
-            if(!this.examination.weightUnitOfMeasure){
-                this.examination.weightUnitOfMeasure = this.defaultUnit;
-            }
-            this.updateExam();
-            //this.loadExaminationAnesthetic(this.id);
-            if(this.examination && this.examination.subject && this.examination.subject.id){
-                this.animalSubjectService
-        			.getAnimalSubject(this.examination.subject.id)
-        			.then(animalSubject => this.animalSubjectId = animalSubject.id)
-                    .catch((error) => {});
+        if(!this.examination.weightUnitOfMeasure){
+            this.examination.weightUnitOfMeasure = this.defaultUnit;
+        }
+        this.updateExam();
+        //this.loadExaminationAnesthetic(this.id);
+        if(this.examination && this.examination.subject && this.examination.subject.id){
+            this.animalSubjectService
+                .getAnimalSubject(this.examination.subject.id)
+                .then(animalSubject => this.animalSubjectId = animalSubject.id)
+                .catch((error) => {});
 
-        	}
-        });
-
+        }
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {
@@ -385,7 +383,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
 
     onExaminationNodeInit(node: ExaminationNode) {
-        node.open = true;
+        node.open();
         this.breadcrumbsService.currentStep.data.examinationNode = node;
     }
 

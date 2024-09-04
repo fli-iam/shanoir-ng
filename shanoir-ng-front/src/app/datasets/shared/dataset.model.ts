@@ -40,6 +40,7 @@ export abstract class Dataset extends Entity {
     originMetadata: DatasetMetadata;
     updatedMetadata : DatasetMetadata = new DatasetMetadata();
     processings: DatasetProcessing[] = [];
+    inPacs: boolean;
     tags: Tag[];
 }
 

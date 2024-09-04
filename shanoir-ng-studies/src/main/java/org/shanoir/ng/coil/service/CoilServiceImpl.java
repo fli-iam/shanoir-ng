@@ -20,6 +20,7 @@ import java.util.Optional;
 import org.shanoir.ng.coil.model.Coil;
 import org.shanoir.ng.coil.repository.CoilRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -61,6 +62,10 @@ public class CoilServiceImpl implements CoilService {
 		// load study center list from database, as findAll does not allow multiple bags in entity graph
 		coils.stream().forEach(s -> s.getCenter().getStudyCenterList().size());
 		return coils;
+	}
+
+	public List<Coil> findByCenterId(Long centerId) {
+		return Utils.toList(repository.findByCenterId(centerId));
 	}
 	
 	public Coil create(final Coil entity) {
