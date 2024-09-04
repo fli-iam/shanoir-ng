@@ -110,7 +110,7 @@ public class SelectionActionListener implements TreeSelectionListener {
 						PatientTreeNode patientTreeNode = (PatientTreeNode) tp.getParentPath().getParentPath().getLastPathComponent();
 						handleStudyTreeNode(patientTreeNode, studyTreeNode, false);
 						ImportJob importJob = importJobs.get(studyTreeNode.getStudy().getStudyInstanceUID());
-						Serie serie = (Serie)serieTreeNode.getSerie();
+						Serie serie = (Serie) serieTreeNode.getSerie();
 						if (!serie.isIgnored() && !serie.isErroneous()) {
 							importJob.getSelectedSeries().add((Serie)serie.clone());
 						}
