@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -77,7 +78,7 @@ public class SelectionActionListener implements TreeSelectionListener {
 		mainWindow.birthDateTF.setText("");
 
 		mainWindow.isDicomObjectSelected = true;
-		importJobs = new HashMap<String, ImportJob>();
+		importJobs = new LinkedHashMap<String, ImportJob>();
 
 		try {
 			// returns all selected paths, which can be patients, studies and/or series
@@ -194,8 +195,13 @@ public class SelectionActionListener implements TreeSelectionListener {
 						}
 					}
 				}
+				// ignore empty, no series DICOM studies
+				if(!importJob.getSelectedSeries().isEmpty()) {
+					importJobs.put(studyInstanceUID, importJob);
+				}
+			} else {
+				importJobs.put(studyInstanceUID, importJob);
 			}
-			importJobs.put(studyInstanceUID, importJob);
 		}
 	}
 	
