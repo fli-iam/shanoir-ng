@@ -24,6 +24,7 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.repository.DatasetExpressionRepository;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
@@ -111,6 +112,9 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Autowired
 	private ProcessingResourceService processingResourceService;
+
+	@Autowired
+	DatasetExpressionRepository datasetExpressionRepository;
 
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
@@ -382,6 +386,7 @@ public class DatasetServiceImpl implements DatasetService {
 	 * @param dataset
 	 */
 	private void deleteNifti(Dataset dataset) {
+		List<DatasetExpression> expressionsToDelete = new ArrayList<>();
 		for (DatasetExpression expression : dataset.getDatasetExpressions()) {
 			if (!DatasetExpressionFormat.NIFTI_SINGLE_FILE.equals(expression.getDatasetExpressionFormat())) {
 				continue;
@@ -398,6 +403,8 @@ public class DatasetServiceImpl implements DatasetService {
 				}
 			}
 		}
+		this.datasetExpressionRepository.deleteAll(expressionsToDelete);
+
 	}
 
 	/**
