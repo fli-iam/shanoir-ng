@@ -40,6 +40,8 @@ export abstract class ShanoirNode {
         public label: string
     ) {}
 
+    public selected: boolean = false;
+
     open(): Promise<void> {
         if (this.parent) {
             this.parent.open();
