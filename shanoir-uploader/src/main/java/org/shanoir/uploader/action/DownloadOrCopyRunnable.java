@@ -149,7 +149,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 			} catch (IOException e) {
 				logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
 			}
-			downloadOrCopyReportSummary.append(downloadOrCopyReportPerStudy.toString() + "\n\n\n");
+			downloadOrCopyReportSummary.append(downloadOrCopyReportPerStudy.toString() + "\n\n");
 		}
 		/**
 		 * Display downloadOrCopy summary to user.
