@@ -195,7 +195,8 @@ public class SelectionActionListener implements TreeSelectionListener {
 						}
 					}
 				}
-				// ignore empty, no series DICOM studies
+				// ignore empty DICOM studies without series
+				// happens when DICOM study with different modality exists in DICOM server
 				if(!importJob.getSelectedSeries().isEmpty()) {
 					importJobs.put(studyInstanceUID, importJob);
 				}
