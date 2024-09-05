@@ -52,10 +52,15 @@ export class SelectSeriesComponent {
             return;
         }
         breadcrumbsService.nameStep('2. Series');
+
         this.patients = this.importDataService.patientList.patients;
+        this.patients = this.patients.filter(patient =>
+            patient.studies.some(study =>
+                study.series.some(serie => serie.modality === this.importService.dicomQuery.modality)
+            )
+        );
         this.workFolder = this.importDataService.patientList.workFolder;
     }
-
 
     showSerieDetails(serie: SerieDicom): void {
         this.detailedPatient = null;
