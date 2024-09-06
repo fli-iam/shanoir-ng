@@ -666,7 +666,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                 const csvBlob = new Blob([csvStr], {
                     type: 'text/csv'
                 });
-                AppUtils.browserDownloadFile(csvBlob, 'tableExport_' + Date.now().toLocaleString('fr-FR'));
+                AppUtils.browserDownloadFile(csvBlob, 'tableExport_' + new Date().toLocaleString('fr-FR'));
             });
         }
     }
