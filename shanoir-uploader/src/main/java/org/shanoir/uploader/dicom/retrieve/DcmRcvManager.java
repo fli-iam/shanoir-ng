@@ -3,10 +3,14 @@ package org.shanoir.uploader.dicom.retrieve;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 
+import org.dcm4che3.net.TransferCapability;
+import org.dcm4che3.net.TransferCapability.Role;
+import org.dcm4che3.tool.storescp.StoreSCP;
+import org.shanoir.uploader.dicom.query.ConfigBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.shanoir.uploader.dicom.query.ConfigBean;
 import org.weasis.dicom.param.AdvancedParams;
 import org.weasis.dicom.param.ConnectOptions;
 import org.weasis.dicom.param.DicomNode;
@@ -27,6 +31,8 @@ public class DcmRcvManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DcmRcvManager.class);
 	
+	private static final String PRIVATE_SIEMENS_CSA_NON_IMAGE_STORAGE = "1.3.12.2.1107.5.9.1";
+
 	private static final String SOP_CLASSES_PROPERTIES = "/sop-classes.properties";
 
 	/**
@@ -71,7 +77,11 @@ public class DcmRcvManager {
 			File storageDir = new File(workFolderPath);
 			DicomListener listener = new DicomListener(storageDir);
 		    listener.start(scpNode, lParams);
+			StoreSCP storeSCP = listener.getStoreSCP();
 	        logger.info("DICOM SCP server (mini-pacs) successfully initialized: " + scpNode.toString() + ", " + workFolderPath);
+			TransferCapability tc = storeSCP.getApplicationEntity().getTransferCapabilityFor(PRIVATE_SIEMENS_CSA_NON_IMAGE_STORAGE, Role.SCP);
+			String[] ts = tc.getTransferSyntaxes();
+			logger.info("Transfer syntaxes for PrivateSiemensCSANonImageStorage (OT): {}", Arrays.toString(ts));
 		} catch (Exception e) {
 			logger.error("DICOM SCP server (mini-pacs): error (not started): " + e.getMessage(), e);
 		}		
