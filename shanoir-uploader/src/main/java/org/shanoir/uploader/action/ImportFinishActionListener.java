@@ -23,6 +23,7 @@ import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.upload.UploadJob;
 import org.shanoir.uploader.utils.ImportUtils;
+import org.shanoir.uploader.utils.QualityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -133,6 +134,7 @@ public class ImportFinishActionListener implements ActionListener {
 		}
 		
 		Long examinationId = null;
+		// If the user wants to create a new examination
 		if (mainWindow.importDialog.mrExaminationNewExamCB.isSelected()) {
 			IdName center = (IdName) mainWindow.importDialog.mrExaminationCenterCB.getSelectedItem();
 			Date examinationDate = (Date) mainWindow.importDialog.mrExaminationDateDP.getModel().getValue();
@@ -148,6 +150,7 @@ public class ImportFinishActionListener implements ActionListener {
 			} else {
 				logger.info("Examination created on server with ID: " + examinationId);
 			}
+		// If the user wants to use an existing examination
 		} else {
 			Examination examinationDTO = (Examination) mainWindow.importDialog.mrExaminationExistingExamCB.getSelectedItem();
 			examinationId = examinationDTO.getId();
@@ -158,9 +161,16 @@ public class ImportFinishActionListener implements ActionListener {
 		 * 3. Fill importJob, check quality if needed, start pseudo and prepare upload
 		 */
 		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examinationId, (Study) mainWindow.importDialog.studyCB.getSelectedItem(), (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem());
+
+		// Quality Check if the Study selected has Quality Cards to be checked at import
+        try {
+            QualityUtils.checkQualityAtImport(importJob);
+        } catch (Exception ex) {
+        }
 		
 		//TODO : call Quality check Utils method to do QC on importJob.selectedSeries 
-		// 		 after creation of ExaminationAttributes and acquisitionAttributes.
+		// 		 after creation of ExaminationAttributes and acquisitionAttributes based on importJob.selectedSeries
+		// 		 and send with the importJob a new parameter that indicates that the qualityCheck was made and that the new qualityTag is in the SubjectStudy.
 		
 		Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, importJob, subjectREST.getName());
 		Thread thread = new Thread(runnable);

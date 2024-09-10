@@ -29,8 +29,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.joda.time.DateTime;
-import org.shanoir.ng.dataset.modality.*;
+import org.shanoir.ng.dataset.modality.CalibrationDataset;
+import org.shanoir.ng.dataset.modality.CtDataset;
+import org.shanoir.ng.dataset.modality.EegDataset;
+import org.shanoir.ng.dataset.modality.GenericDataset;
+import org.shanoir.ng.dataset.modality.MegDataset;
+import org.shanoir.ng.dataset.modality.MeshDataset;
+import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.dataset.modality.ParameterQuantificationDataset;
+import org.shanoir.ng.dataset.modality.PetDataset;
+import org.shanoir.ng.dataset.modality.RegistrationDataset;
+import org.shanoir.ng.dataset.modality.SegmentationDataset;
+import org.shanoir.ng.dataset.modality.SpectDataset;
+import org.shanoir.ng.dataset.modality.StatisticalDataset;
+import org.shanoir.ng.dataset.modality.TemplateDataset;
+import org.shanoir.ng.dataset.modality.XaDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -171,7 +184,8 @@ public class ImporterService {
                 QualityTag tagSave = subjectStudy != null ? subjectStudy.getQualityTag() : null;
                 ExaminationData examData = new ExaminationData(examination);
                 examData.setDatasetAcquisitions(Utils.toList(generatedAcquisitions));
-                QualityCardResult qualityResult = checkQuality(examData, importJob);                				
+                //TODO : checkQuality only if not already checked by SHUP and externalize all quality methods
+                QualityCardResult qualityResult = checkQuality(examData, importJob, null);                				
                 // Has quality check passed ?
                 if (qualityResult.hasError()) {
                     throw new QualityException(examination, qualityResult);
@@ -297,8 +311,21 @@ public class ImporterService {
         return generatedAcquisitions;
     }
 
-    private QualityCardResult checkQuality(ExaminationData examination, ImportJob importJob) throws ShanoirException {
-        List<QualityCard> qualityCards = qualityCardService.findByStudy(examination.getStudyId());   
+    public QualityCardResult checkQuality(ExaminationData examination, ImportJob importJob, List<QualityCard> qualityCards) throws ShanoirException {
+
+        // If the import comes from ShanoirUploader then examination is null
+        Long studyId;
+        if (importJob.isFromShanoirUploader()) {
+            studyId = importJob.getStudyId();
+        } else {
+            studyId = examination.getStudyId();
+        }
+
+        // If import comes from ShUp QualityCards are loaded, otherwise we query the database to get them
+        if (qualityCards == null) {
+            qualityCards = qualityCardService.findByStudy(studyId);
+        }
+        
         if (!hasQualityChecksAtImport(qualityCards)) {
             return new QualityCardResult();
         }     
