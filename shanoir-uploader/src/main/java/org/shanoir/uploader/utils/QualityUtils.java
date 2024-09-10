@@ -9,9 +9,11 @@ import org.shanoir.ng.importer.dto.Study;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
+import org.shanoir.ng.studycard.model.ExaminationData;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.uploader.model.mapper.StudyMapper;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
+import org.shanoir.ng.shared.model.SubjectStudy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +37,8 @@ public class QualityUtils {
 
 	public static QualityCardResult checkQualityAtImport(ImportJob importJob) throws Exception {
 
+		ExaminationData examinationData = new ExaminationData();
+		SubjectStudy subjectStudy = new SubjectStudy();
 		QualityCardResult qualityCardResult = new QualityCardResult();
 		
 		// Call Shanoir server to get all quality cards for the selected study
@@ -43,10 +47,10 @@ public class QualityUtils {
 		// Convert Import ms ImportJob into Datasets ms ImportJob
 		org.shanoir.ng.importer.dto.ImportJob importJobDto = convertImportJob(importJob);
 
-		qualityCardResult = importerService.checkQuality(null, importJobDto, qualityCards);
+		examinationData.setStudyId(importJob.getStudyId());
+		examinationData.setSubjectStudy(subjectStudy);
 
-
-		// use ImporterService.checkQuality() directly, convert SHUP Examination into ExaminationData (or let ExamData = null for now and check only with DicomMetadata) and Import ImportJob into Datasets ImportJob (mapstruct in shup)
+		qualityCardResult = importerService.checkQuality(examinationData, importJobDto, qualityCards);
 
 		// update SubjectStudy quality tag in ImporterService on server side using quality tag stored in ImportJob and SubjectStudy found with examination already created.
 
@@ -54,18 +58,6 @@ public class QualityUtils {
 		// Get dicomAttributes
 		// Check quality (w/ datasets method or directly w/ isfulfilled() method)
 		// QualityCardResult contains the list of all updated subjectStudies that contain their new qualityTag
-
-			// for (QualityCard qualityCard : qualityCards) {
-			// 	//If the qualitycard is to be checked at import, then execute quality control
-			// 	if (qualityCard.isToCheckAtImport()) {
-			// 		logger.info("Quality card " + qualityCard.getId() + " is to be checked at import for the study " + importJob.getStudyId());
-			// 		org.shanoir.ng.importer.dto.ImportJob importJobDtst = new org.shanoir.ng.importer.dto.ImportJob();
-
-			// 		ExaminationAttributes<String> dicomAttributes = dicomProcessing.getDicomExaminationAttributes(importJob.getFirstStudy());
-					
-			// 	} else {
-			// 	}
-			// }
 		
 
 		return qualityCardResult;
@@ -81,9 +73,11 @@ public class QualityUtils {
 		List<Patient> patients = new ArrayList<>();
 		Patient patient = new Patient();
 		List<Study> studies = new ArrayList<>();
-		studies.add(studyMapper.toDto(importJob.getStudy()));
+		// Until modifications of ImportUtils.java are done (get rid of Patients List), we browse the DICOM tree
+		studies.add(studyMapper.toDto(importJob.getPatients().get(0).getStudies().get(0)));
 		patient.setStudies(studies);
 		patients.add(patient);
+		importJobDto.setExaminationId(importJob.getExaminationId());
 		importJobDto.setTimestamp(importJob.getTimestamp());
 		importJobDto.setFromDicomZip(importJob.isFromDicomZip());
 		importJobDto.setFromShanoirUploader(Boolean.TRUE);

@@ -185,6 +185,7 @@ public class ImporterService {
                 ExaminationData examData = new ExaminationData(examination);
                 examData.setDatasetAcquisitions(Utils.toList(generatedAcquisitions));
                 //TODO : checkQuality only if not already checked by SHUP and externalize all quality methods
+            
                 QualityCardResult qualityResult = checkQuality(examData, importJob, null);                				
                 // Has quality check passed ?
                 if (qualityResult.hasError()) {
@@ -313,17 +314,9 @@ public class ImporterService {
 
     public QualityCardResult checkQuality(ExaminationData examination, ImportJob importJob, List<QualityCard> qualityCards) throws ShanoirException {
 
-        // If the import comes from ShanoirUploader then examination is null
-        Long studyId;
-        if (importJob.isFromShanoirUploader()) {
-            studyId = importJob.getStudyId();
-        } else {
-            studyId = examination.getStudyId();
-        }
-
         // If import comes from ShUp QualityCards are loaded, otherwise we query the database to get them
         if (qualityCards == null) {
-            qualityCards = qualityCardService.findByStudy(studyId);
+            qualityCards = qualityCardService.findByStudy(examination.getStudyId());
         }
         
         if (!hasQualityChecksAtImport(qualityCards)) {

@@ -300,6 +300,7 @@ public class ImportUtils {
 		}
 		studyImportJob.setSeries(series);
 		studiesImportJob.add(studyImportJob);
+		//importJob.setStudy(studyImportJob);
 		patient.setStudies(studiesImportJob);
 		importJob.setPatients(patients);
 		return importJob;
