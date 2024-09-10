@@ -164,7 +164,7 @@ public class StudyInstanceUIDHandler {
 	 * @param examination
 	 * @return
 	 */
-	private String findStudyInstanceUID(Examination examination) {
+	public String findStudyInstanceUID(Examination examination) {
 		List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
 		for (DatasetAcquisition acquisition : acquisitions) {
 			if (acquisition instanceof MrDatasetAcquisition

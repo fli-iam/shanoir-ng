@@ -8,17 +8,25 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import org.hibernate.Hibernate;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.examination.repository.ExaminationRepository;
+import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
+import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * The StowRSMultipartRelatedRequestFilter handles a POST request of
@@ -67,9 +75,11 @@ public class StowRSMultipartRelatedRequestFilter extends GenericFilterBean {
       ServletRequest request, 
       ServletResponse response,
       FilterChain chain) throws IOException, ServletException {
+
     	HttpServletRequest httpRequest = (HttpServletRequest) request;
     	if (httpRequest.getMethod().equals(HttpMethod.POST.toString())
     			&& httpRequest.getRequestURI().contains(DICOMWEB_STUDIES)
+				&& httpRequest.getContentType() != null
     			&& httpRequest.getContentType().contains(MediaType.MULTIPART_RELATED_VALUE)) {
     		try(ByteArrayInputStream bIS = new ByteArrayInputStream(httpRequest.getInputStream().readAllBytes())) {
     			ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, MediaType.MULTIPART_RELATED_VALUE);
@@ -92,5 +102,4 @@ public class StowRSMultipartRelatedRequestFilter extends GenericFilterBean {
     	}
         chain.doFilter(request, response);
     }
-
 }

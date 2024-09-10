@@ -20,6 +20,7 @@ import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.VR;
 import org.dcm4che3.io.DicomInputStream;
 import org.dcm4che3.io.DicomOutputStream;
+import org.hibernate.Hibernate;
 import org.shanoir.ng.dataset.modality.MeasurementDataset;
 import org.shanoir.ng.dataset.modality.SegmentationDataset;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
@@ -35,6 +36,7 @@ import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
+import org.shanoir.ng.dicom.web.SeriesInstanceUIDHandler;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
@@ -88,10 +90,12 @@ public class DicomSEGAndSRImporterService {
 	
 	@Autowired
 	private DICOMWebService dicomWebService;
-	
+
 	@Autowired
 	private StudyInstanceUIDHandler studyInstanceUIDHandler;
-	
+
+	@Autowired
+	private SeriesInstanceUIDHandler seriesInstanceUIDHandler;
 	@Value("${dcm4chee-arc.protocol}")
 	private String dcm4cheeProtocol;
 	
@@ -103,7 +107,8 @@ public class DicomSEGAndSRImporterService {
 	
 	@Value("${dcm4chee-arc.dicom.web.rs}")
 	private String dicomWebRS;
-	
+
+
 	@Transactional
 	public boolean importDicomSEGAndSR(InputStream inputStream) {
 		// DicomInputStream consumes the input stream to read the data
@@ -131,6 +136,27 @@ public class DicomSEGAndSRImporterService {
 			return false;
 		}
 		return true;
+	}
+
+	@Transactional
+	public void deleteSR(String examId, String seriesUid) {
+		try {
+			Examination exam = examinationRepository.findById(Long.valueOf(examId)).orElse(null);
+			if (exam != null) {
+				for (DatasetAcquisition acq : exam.getDatasetAcquisitions()) {
+					for (Dataset ds : acq.getDatasets()) {
+						String dsSeriesInstanceUid = seriesInstanceUIDHandler.findSeriesInstanceUID(ds);
+						if (dsSeriesInstanceUid.equals(seriesUid)) {
+							datasetService.deleteById(ds.getId());
+							solrService.deleteFromIndex(ds.getId());
+							return;
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
+		}
 	}
 
 	/**
