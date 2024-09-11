@@ -68,20 +68,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<span class="icon"><i class="fas fa-info-circle"></i></span>A subject global identifier will be automatically generated using the first name, the last name and the birth date of the subject.
 							This can help you to identify a subject that has already been inserted into the database.
 							<br/>To ensure anonymity, the first name and the last name will not be saved.
-							<br/>Notice that the birth Date will be set to the 1st of January of the birth Year for the same reason.
+							<br/>Note that the birth date will be set to January 1st of the birth year for the same reason.
 						</li>
 						<li *ngIf="!isAlreadyAnonymized && mode == 'create'">
-							<label i18n="Subject detail|First Name label@@SubjectDetailSubjectFirstName" [class.required-label]="subject.imagedObjectCategory=='LIVING_HUMAN_BEING'">First Name</label>
+							<label i18n="Subject detail|First Name label@@SubjectDetailSubjectFirstName" [class.required-label]="subject.imagedObjectCategory=='LIVING_HUMAN_BEING'">First name</label>
 							<span class="right-col">
-								<input type="text" id="firstName" [(ngModel)]="firstName" formControlName="firstName" />
+                                {{ firstName }}
 								<label *ngIf="hasError('firstName', ['required'])" class="form-validation-alert" i18n="Subject detail|FirstName required error@@subjectDetailFirstNameRequiredError">First name is required!</label>
 								<label *ngIf="hasError('firstName', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64!</label>
 							</span>
 						</li>
 						<li *ngIf="!isAlreadyAnonymized && mode == 'create'">
-							<label i18n="Subject detail|Last Name label@@SubjectDetailSubjectLastName" [class.required-label]="subject.imagedObjectCategory=='LIVING_HUMAN_BEING'">Last Name</label>
+							<label i18n="Subject detail|Last Name label@@SubjectDetailSubjectLastName" [class.required-label]="subject.imagedObjectCategory=='LIVING_HUMAN_BEING'">Last name</label>
 							<span class="right-col">
-								<input type="text" id="lastName" [(ngModel)]="lastName" formControlName="lastName" />
+                                {{ lastName }}
 								<label *ngIf="hasError('lastName', ['required'])" class="form-validation-alert" i18n="Subject detail|LastName required error@@subjectDetailLastNameRequiredError">Last name is required!</label>
 								<label *ngIf="hasError('lastName', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64!</label>
 							</span>
