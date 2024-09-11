@@ -271,8 +271,8 @@ public class DICOMWebApiController implements DICOMWebApi {
 	}
 
 	@Override
-	public ResponseEntity<Void> deleteStructuredReport(String examinationId, String seriesInstanceUid, String reject) {
-		examinationId = examinationId.substring(examinationId.lastIndexOf(".") + 1, examinationId.length());
+	public ResponseEntity<Void> deleteSEGAndSR(String examinationIdStr, String seriesInstanceUid, String reject) {
+		Long examinationId = studyInstanceUIDHandler.extractExaminationId(examinationIdStr);
 		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 		if (examinationId != null && seriesInstanceUid != null) {
 			dicomSRImporterService.deleteSR(examinationId, seriesInstanceUid);

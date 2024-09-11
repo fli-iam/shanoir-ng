@@ -139,9 +139,9 @@ public class DicomSEGAndSRImporterService {
 	}
 
 	@Transactional
-	public void deleteSR(String examId, String seriesUid) {
+	public void deleteSR(Long examId, String seriesUid) {
 		try {
-			Examination exam = examinationRepository.findById(Long.valueOf(examId)).orElse(null);
+			Examination exam = examinationRepository.findById(examId).orElse(null);
 			if (exam != null) {
 				for (DatasetAcquisition acq : exam.getDatasetAcquisitions()) {
 					for (Dataset ds : acq.getDatasets()) {

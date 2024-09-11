@@ -182,7 +182,7 @@ public interface DICOMWebApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/studies/{examinationUID}/series/{seriesInstanceUID}/reject/{reject}", method=RequestMethod.POST)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<Void> deleteStructuredReport(
+	ResponseEntity<Void> deleteSEGAndSR(
 			@Parameter(description = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
 			@Parameter(description = "seriesInstanceUID", required = true) @PathVariable("seriesInstanceUID") String seriesInstanceUID,
 			@Parameter(description = "reject", required = true) @PathVariable("reject") String reject
