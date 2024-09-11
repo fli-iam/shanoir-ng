@@ -268,6 +268,8 @@ import { DownloadSetupAltComponent } from './shared/mass-download/download-setup
 import { TestQualityCardOptionsComponent } from './study-cards/test-quality-card-options/test-quality-card-options.component';
 import { SessionService } from './shared/services/session.service';
 import { PipelineService } from "./vip/pipelines/pipeline/pipeline.service";
+import {ShanoirEventService} from "./users/shanoir-event/shanoir-event.service";
+import {StudyHistoryComponent} from "./studies/study-history/study-history.component";
 import { StudyTreeComponent } from './studies/study/study-tree.component';
 import { TreeService } from './studies/study/tree.service';
 import { CoilNodeComponent } from './coils/coil/tree/coil-node.component';
@@ -298,6 +300,7 @@ import { CoilNodeComponent } from './coils/coil/tree/coil-node.component';
         CenterListComponent,
         ConfirmDialogComponent,
         DatasetCopyDialogComponent,
+        StudyHistoryComponent,
         DropdownMenuComponent,
         UserComponent,
         ExaminationListComponent,
@@ -508,7 +511,7 @@ import { CoilNodeComponent } from './coils/coil/tree/coil-node.component';
         AnestheticService,
         ImportBrukerService,
         EnumUtils,
-        { provide: HTTP_INTERCEPTORS, useClass: KeycloakHttpInterceptor, multi: true },
+        {provide: HTTP_INTERCEPTORS, useClass: KeycloakHttpInterceptor, multi: true},
         BreadcrumbsService,
         GlobalService,
         ImportDataService,
@@ -546,6 +549,7 @@ import { CoilNodeComponent } from './coils/coil/tree/coil-node.component';
         QualityCardDTOService,
         MassDownloadService,
         SessionService,
+        ShanoirEventService,
         TreeService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],

@@ -23,6 +23,7 @@ import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.email.StudyInvitationEmail;
+import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,17 @@ public class RabbitMQUserService {
 	
 	@Autowired
 	private ObjectMapper mapper;
+
+	@Autowired
+	private RabbitMqStudyUserService listener;
+	@RabbitListener(bindings = @QueueBinding(
+			value = @Queue(value = RabbitMQConfiguration.STUDY_USER_QUEUE_DATASET, durable = "true"),
+			exchange = @Exchange(value = RabbitMQConfiguration.STUDY_USER_EXCHANGE, ignoreDeclarationExceptions = "true",
+					autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT)), containerFactory = "multipleConsumersFactory"
+	)
+	public void receiveMessage(String commandArrStr) {
+		listener.receiveStudyUsers(commandArrStr);
+	}
 
 	/**
 	 * Receives a shanoirEvent as a json object, thus create a event in the queue

@@ -40,6 +40,8 @@ export abstract class ShanoirNode {
         public label: string
     ) {}
 
+    public selected: boolean = false;
+
     open(): Promise<void> {
         if (this.parent) {
             this.parent.open();
@@ -221,12 +223,12 @@ export class ClinicalSubjectNode extends SubjectNode {
 
     public static fromSubjectStudy(subjectStudy: SubjectStudy, parent: ShanoirNode, canDeleteChildren: boolean, canDownload: boolean): ClinicalSubjectNode {
         return new ClinicalSubjectNode(
-            parent, 
-            subjectStudy.subject.id, 
-            new SubjectStudyPipe().transform(subjectStudy), 
-            subjectStudy.tags, 
-            UNLOADED, 
-            subjectStudy.qualityTag, 
+            parent,
+            subjectStudy.subject.id,
+            new SubjectStudyPipe().transform(subjectStudy),
+            subjectStudy.tags,
+            UNLOADED,
+            subjectStudy.qualityTag,
             canDeleteChildren,
             canDownload);
     }
@@ -240,12 +242,12 @@ export class PreclinicalSubjectNode extends SubjectNode {
 
     public static fromSubjectStudy(subjectStudy: SubjectStudy, parent: ShanoirNode, canDeleteChildren: boolean, canDownload: boolean): PreclinicalSubjectNode {
         return new PreclinicalSubjectNode(
-            parent, 
-            subjectStudy.subject.id, 
-            new SubjectStudyPipe().transform(subjectStudy), 
-            subjectStudy.tags, 
-            UNLOADED, 
-            subjectStudy.qualityTag, 
+            parent,
+            subjectStudy.subject.id,
+            new SubjectStudyPipe().transform(subjectStudy),
+            subjectStudy.tags,
+            UNLOADED,
+            subjectStudy.qualityTag,
             canDeleteChildren,
             canDownload);
     }
@@ -269,6 +271,7 @@ export class ExaminationNode extends ShanoirNode {
         super(parent, id, label);
     }
 
+    public selected: boolean = false;
     public extraDataOpen: boolean = false;
     public title: string = this.preclinical ? 'preclinical examination' : 'examination';
     protected readonly routeBase = this.preclinical ? '/preclinical-examination/details/' : '/examination/details/';
@@ -303,6 +306,7 @@ export class DatasetAcquisitionNode extends ShanoirNode {
         super(parent, id, label);
     }
 
+    public selected: boolean = false;
     public title: string = "dataset-acquisition";
     protected readonly routeBase = '/dataset-acquisition/details/';
 
@@ -455,7 +459,7 @@ export abstract class CardNode extends ShanoirNode {
     ) {
         super(parent, id, label);
     }
-    
+
     public abstract type: 'studycard' | 'qualitycard';
     public abstract title: string;
 }
