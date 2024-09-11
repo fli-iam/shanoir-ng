@@ -11,6 +11,7 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.model.rest.Examination;
@@ -161,16 +162,21 @@ public class ImportFinishActionListener implements ActionListener {
 		 * 3. Fill importJob, check quality if needed, start pseudo and prepare upload
 		 */
 		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examinationId, (Study) mainWindow.importDialog.studyCB.getSelectedItem(), (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem());
+		
+		QualityCardResult qualityControlResult = new QualityCardResult();
 
 		// Quality Check if the Study selected has Quality Cards to be checked at import
         try {
-            QualityUtils.checkQualityAtImport(importJob);
+            qualityControlResult = QualityUtils.checkQualityAtImport(importJob);
         } catch (Exception ex) {
+			logger.error(ex.getMessage(), ex);
         }
 		
-		//TODO : call Quality check Utils method to do QC on importJob.selectedSeries 
-		// 		 after creation of ExaminationAttributes and acquisitionAttributes based on importJob.selectedSeries
-		// 		 and send with the importJob a new parameter that indicates that the qualityCheck was made and that the new qualityTag is in the SubjectStudy.
+		if (!qualityControlResult.isEmpty() && qualityControlResult.hasError()) {
+			JOptionPane.showMessageDialog(mainWindow.frame,
+					ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.failed.message") + QualityUtils.getQualityControlreport(qualityControlResult),
+					ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.failed.title"), JOptionPane.INFORMATION_MESSAGE);
+		}
 		
 		Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, importJob, subjectREST.getName());
 		Thread thread = new Thread(runnable);

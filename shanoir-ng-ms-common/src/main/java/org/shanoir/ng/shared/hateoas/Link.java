@@ -14,7 +14,9 @@
 
 package org.shanoir.ng.shared.hateoas;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Hateoas link.
@@ -32,7 +34,8 @@ public class Link {
 	 * @param rel
 	 * @param href
 	 */
-	public Link(String rel, String href) {
+	@JsonCreator
+	public Link(@JsonProperty("rel") String rel, @JsonProperty("href") String href) {
 		this.rel = rel;
 		this.href = href;
 	}

@@ -3,17 +3,17 @@ package org.shanoir.uploader.utils;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.importer.dto.Patient;
 import org.shanoir.ng.importer.dto.Study;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
+import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
+import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
 import org.shanoir.ng.studycard.model.ExaminationData;
 import org.shanoir.ng.studycard.model.QualityCard;
+import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.model.mapper.StudyMapper;
-import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
-import org.shanoir.ng.shared.model.SubjectStudy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,14 +26,7 @@ public class QualityUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(QualityUtils.class);
 
-	private static ShanoirUploaderServiceClient shanoirUploaderServiceClient;
-
-	private static DicomProcessing dicomProcessing;
-
 	private static ImporterService importerService;
-
-	private static StudyMapper studyMapper;
-    
 
 	public static QualityCardResult checkQualityAtImport(ImportJob importJob) throws Exception {
 
@@ -42,7 +35,7 @@ public class QualityUtils {
 		QualityCardResult qualityCardResult = new QualityCardResult();
 		
 		// Call Shanoir server to get all quality cards for the selected study
-		List<QualityCard> qualityCards = shanoirUploaderServiceClient.findQualityCardsByStudyId(importJob.getStudyId());
+		List<QualityCard> qualityCards = ShUpOnloadConfig.getShanoirUploaderServiceClient().findQualityCardsByStudyId(importJob.getStudyId());
 
 		// Convert Import ms ImportJob into Datasets ms ImportJob
 		org.shanoir.ng.importer.dto.ImportJob importJobDto = convertImportJob(importJob);
@@ -57,7 +50,7 @@ public class QualityUtils {
 		// Apply quality card rules on the dicom attributes of importJob.getSelectedSeries()
 		// Get dicomAttributes
 		// Check quality (w/ datasets method or directly w/ isfulfilled() method)
-		// QualityCardResult contains the list of all updated subjectStudies that contain their new qualityTag
+		// QualityCardResult contains the list of all updated subjectStudies that contains their new qualityTag
 		
 
 		return qualityCardResult;
@@ -74,7 +67,7 @@ public class QualityUtils {
 		Patient patient = new Patient();
 		List<Study> studies = new ArrayList<>();
 		// Until modifications of ImportUtils.java are done (get rid of Patients List), we browse the DICOM tree
-		studies.add(studyMapper.toDto(importJob.getPatients().get(0).getStudies().get(0)));
+		studies.add(StudyMapper.INSTANCE.toDto(importJob.getPatients().get(0).getStudies().get(0)));
 		patient.setStudies(studies);
 		patients.add(patient);
 		importJobDto.setExaminationId(importJob.getExaminationId());
@@ -87,5 +80,17 @@ public class QualityUtils {
 		importJobDto.setUserId(importJob.getUserId());
 		importJobDto.setUsername(importJob.getUsername());
 		return importJobDto;
+	}
+
+	public static String getQualityControlreport(QualityCardResult qualityCardResult) {
+		String qualityCardReport = "";
+
+		if (!qualityCardResult.isEmpty()) {
+			for (QualityCardResultEntry entry : qualityCardResult) {
+				qualityCardReport = qualityCardReport + entry.getMessage() + "\n";
+			}
+		}
+
+		return qualityCardReport;
 	}
 }

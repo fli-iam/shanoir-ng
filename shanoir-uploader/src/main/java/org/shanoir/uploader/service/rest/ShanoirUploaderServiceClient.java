@@ -874,9 +874,10 @@ public class ShanoirUploaderServiceClient {
 	}
 
 	public List<QualityCard> findQualityCardsByStudyId(Long studyId) throws Exception {
+		logger.info("Retrieving qualitycards for the study : " + studyId);
 		try {
 			String studyIdentifier = URLEncoder.encode(Long.toString(studyId), "UTF-8");
-			long startTime = System.currentTimeMillis();
+			long startTime = System.currentTimeMillis(); 
 			try (CloseableHttpResponse response = httpService.get(this.serviceURLQualityCardsByStudyId + studyIdentifier)) {
 				long stopTime = System.currentTimeMillis();
 				long elapsedTime = stopTime - startTime;
