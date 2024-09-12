@@ -45,7 +45,7 @@ export class SubjectComponent extends EntityComponent<Subject> {
     readonly ImagedObjectCategory = ImagedObjectCategory;
     private readonly HASH_LENGTH: number = 14;
     studies: IdName[] = [];
-    isAlreadyAnonymized: boolean;
+    isAlreadyAnonymized: boolean = false;
     firstName: string = "";
     lastName: string = "";
     subjectNamePrefix: string = "";
