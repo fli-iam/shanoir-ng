@@ -45,7 +45,7 @@ export class SubjectComponent extends EntityComponent<Subject> {
     readonly ImagedObjectCategory = ImagedObjectCategory;
     private readonly HASH_LENGTH: number = 14;
     studies: IdName[] = [];
-    isAlreadyAnonymized: boolean;
+    isAlreadyAnonymized: boolean = false;
     firstName: string = "";
     lastName: string = "";
     subjectNamePrefix: string = "";
@@ -55,6 +55,8 @@ export class SubjectComponent extends EntityComponent<Subject> {
     dicomPatientName: string;
     downloadState: TaskState = new TaskState();
     hasDownloadRight: boolean = false;
+    importMode: string = "";
+    isImporting: boolean = false;
 
     catOptions: Option<ImagedObjectCategory>[] = [
         new Option<ImagedObjectCategory>(ImagedObjectCategory.PHANTOM, 'Phantom'),
@@ -105,6 +107,9 @@ export class SubjectComponent extends EntityComponent<Subject> {
             if (this.subjectNamePrefix) {
                 this.subject.name = this.subjectNamePrefix;
 	        }
+            this.isImporting = this.breadcrumbsService.isImporting();
+            if (this.isImporting)
+                this.importMode = this.breadcrumbsService.findImportMode();
         }
     }
 
@@ -178,8 +183,10 @@ export class SubjectComponent extends EntityComponent<Subject> {
 
     private updateFormControl(formGroup: UntypedFormGroup) {
         if (formGroup.get('imagedObjectCategory').value == ImagedObjectCategory.LIVING_HUMAN_BEING && !this.isAlreadyAnonymized && this.mode == 'create') {
-            formGroup.get('firstName').setValidators(this.nameValidators);
-            formGroup.get('lastName').setValidators(this.nameValidators);
+            if (this.importMode != 'EEG') {
+                formGroup.get('firstName').setValidators(this.nameValidators);
+                formGroup.get('lastName').setValidators(this.nameValidators);
+            }
             formGroup.get('birthDate').setValidators([Validators.required, DatepickerComponent.validator])
         } else {
             formGroup.get('firstName').setValidators([]);

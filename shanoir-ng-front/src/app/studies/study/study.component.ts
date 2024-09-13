@@ -626,10 +626,6 @@ export class StudyComponent extends EntityComponent<Study> {
         }, 1000);
     }
 
-    downloadAll() {
-        this.downloadService.downloadAllByStudyId(this.study.id,  this.studyDownloadState);
-    }
-
     storageVolumePrettyPrint(size: number) {
         return this.studyService.storageVolumePrettyPrint(size);
     }
