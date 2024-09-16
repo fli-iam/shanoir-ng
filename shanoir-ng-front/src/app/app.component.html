@@ -21,23 +21,22 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <ng-container *ngIf="isAuthenticated()">
     <div class="side-menu" *ngIf="menuOpen" @slideRight>
         <side-menu [class.reduce-height]="consoleComponenent && consoleComponenent.open ? true : false">
-            <div *ngIf="!treeService.treeOpened && treeService.treeAvailable" class="tree-open-button" (click)="toggleTree(true)">
-                <i class="fa-solid fa-folder-tree"></i>
-                <!-- <i *ngIf="!treeOpened" class="fas fa-chevron-right"></i> -->
-            </div>
         </side-menu>
     </div>
     <div class="main-content"
             [class.reduce-height]="consoleComponenent && consoleComponenent.open && consoleComponenent.deployed ? true : false"
             [class.open]="menuOpen" [@slideMarginLeft]="menuOpen ? 'margin' : 'nomargin'">
+        <div *ngIf="treeService.treeOpened && treeService.treeAvailable" class="tree-close-button" (click)="toggleTree(false)" title="open tree">
+            <i class="fas fa-chevron-left"></i>
+        </div>
+        <div *ngIf="!treeService.treeOpened && treeService.treeAvailable" class="tree-close-button" (click)="toggleTree(true)" title="close tree">
+            <i class="fas fa-chevron-right"></i>
+        </div>
         <div *ngIf="menuOpen" class="close-button" (click)="toggleMenu(false)"><i class="fas fa-chevron-left"></i></div>
         <div *ngIf="!menuOpen" class="open-button" (click)="toggleMenu(true)"><i class="fas fa-chevron-right"></i></div>
         <breadcrumbs *ngIf="isAuthenticated()"></breadcrumbs>
         <div class="lower-content">
             <div class="tree-frame" *ngIf="treeService.treeOpened && treeService.studyNode && treeService.treeAvailable">
-                <div class="tree-close-button" (click)="toggleTree(false)">
-                    <i class="fas fa-chevron-left"></i>
-                </div>
                 <study-tree>
                 </study-tree>
             </div>

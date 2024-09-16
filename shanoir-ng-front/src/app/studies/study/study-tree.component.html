@@ -17,12 +17,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <button class="right-icon dl-button" type="button" (click)="openInViewer()" [disabled]="!canOpenDicom" [title]="'Select examinations or acquisition from one exam to compare DICOM files in viewer'">View DICOM<i class="fas fa-eye"></i></button>
 </div>
 
-<study-node *ngIf="treeService.studyNode"
-		[input]="treeService.studyNode"
-		[hasBox]="true"
-		[withMenu]="false"
-		(nodeInit)="treeService.nodeInit = true"
-		(selectedChange)="onSelectedChange($event)">
-</study-node>
+<div class="tree">
+	<study-node *ngIf="treeService.studyNode"
+			[input]="treeService.studyNode"
+			[hasBox]="true"
+			[withMenu]="false"
+			(nodeInit)="treeService.nodeInit = true"
+			(selectedChange)="onSelectedChange($event)">
+	</study-node>
+</div>
 
 <ng-content></ng-content>

@@ -1,4 +1,4 @@
-:host { position: relative; padding-right: 10px; }
+:host { position: relative; }
 
 study-node {
     display: inline-block;
@@ -15,7 +15,7 @@ study-node {
     right: 0px;
 }
 
-.commands { margin-bottom: 10px; }
+.commands { margin-bottom: 10px; position: absolute; padding-right: 10px; }
 .commands button {     
     color: var(--color-a);
     background-color: transparent;
@@ -30,3 +30,6 @@ study-node {
     color: var(--very-light-grey);
     background-color: var(--color-b-light2);
 }
+
+.tree { overflow-y: auto; overflow-x: auto; height: calc(100% - 50px); margin-top: 40px; padding-right: 10px; }
+/* study-node { direction: ltr; } */
