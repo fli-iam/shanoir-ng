@@ -172,15 +172,24 @@ public class ImportFinishActionListener implements ActionListener {
 			logger.error(ex.getMessage(), ex);
         }
 		
-		if (!qualityControlResult.isEmpty() && qualityControlResult.hasError()) {
+		// If quality check resulted in errors or failed validations, show a message and do not start the import
+		if (!qualityControlResult.isEmpty() && (qualityControlResult.hasError() || qualityControlResult.hasFailedValid())) {
 			JOptionPane.showMessageDialog(mainWindow.frame,
 					ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.failed.message") + QualityUtils.getQualityControlreport(qualityControlResult),
 					ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.failed.title"), JOptionPane.INFORMATION_MESSAGE);
+
+			// set status FAILED
+		} else {
+			Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, importJob, subjectREST.getName());
+			Thread thread = new Thread(runnable);
+			thread.start();
+
+			JOptionPane.showMessageDialog(mainWindow.frame,
+				ShUpConfig.resourceBundle.getString("shanoir.uploader.import.start.auto.import.message"),
+				"Import", JOptionPane.INFORMATION_MESSAGE);
 		}
 		
-		Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, importJob, subjectREST.getName());
-		Thread thread = new Thread(runnable);
-		thread.start();
+		
 		
 		mainWindow.importDialog.setVisible(false);
 		mainWindow.importDialog.mrExaminationExamExecutiveLabel.setVisible(true);
@@ -188,9 +197,7 @@ public class ImportFinishActionListener implements ActionListener {
 		mainWindow.setCursor(null); // turn off the wait cursor
 		((JButton) event.getSource()).setEnabled(true);
 		
-		JOptionPane.showMessageDialog(mainWindow.frame,
-				ShUpConfig.resourceBundle.getString("shanoir.uploader.import.start.auto.import.message"),
-				"Import", JOptionPane.INFORMATION_MESSAGE);
+		
 	}
 
 }

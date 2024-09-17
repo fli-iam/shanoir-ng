@@ -3,7 +3,7 @@ package org.shanoir.uploader.model.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(componentModel = "spring", uses = {SerieMapper.class, DatasetMapper.class, ExpressionFormatMapper.class, DatasetFileMapper.class, DiffusionGradientMapper.class, ImageMapper.class})
+@Mapper(uses = {SerieMapper.class, DatasetMapper.class, ExpressionFormatMapper.class, DatasetFileMapper.class, DiffusionGradientMapper.class, ImageMapper.class})
 public interface StudyMapper {
 
     StudyMapper INSTANCE = Mappers.getMapper(StudyMapper.class);

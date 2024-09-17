@@ -55,7 +55,6 @@ import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.download.AcquisitionAttributes;
-import org.shanoir.ng.download.ExaminationAttributes;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
@@ -77,7 +76,6 @@ import org.shanoir.ng.shared.service.SubjectStudyService;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.ExaminationData;
-import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.QualityException;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
@@ -139,13 +137,13 @@ public class ImporterService {
 	private SubjectStudyService subjectStudyService;
 
     @Autowired
-    private DicomProcessing dicomProcessing;
-
-    @Autowired
     private WADODownloaderService downloader;
 
     @Autowired
     private SolrService solrService;
+
+    @Autowired
+    private QualityService qualityService;
 
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
 
@@ -184,9 +182,9 @@ public class ImporterService {
                 QualityTag tagSave = subjectStudy != null ? subjectStudy.getQualityTag() : null;
                 ExaminationData examData = new ExaminationData(examination);
                 examData.setDatasetAcquisitions(Utils.toList(generatedAcquisitions));
-                //TODO : checkQuality only if not already checked by SHUP and externalize all quality methods
-            
-                QualityCardResult qualityResult = checkQuality(examData, importJob, null);                				
+                
+                //TODO : checkQuality only if not already checked by SHUP
+                QualityCardResult qualityResult = qualityService.checkQuality(examData, importJob, null);                				
                 // Has quality check passed ?
                 if (qualityResult.hasError()) {
                     throw new QualityException(examination, qualityResult);
@@ -283,7 +281,7 @@ public class ImporterService {
                     // get dicomAttributes
                     AcquisitionAttributes<String> dicomAttributes = null;
                     try {
-                        dicomAttributes = dicomProcessing.getDicomAcquisitionAttributes(serie, serie.getIsEnhanced());
+                        dicomAttributes = DicomProcessing.getDicomAcquisitionAttributes(serie, serie.getIsEnhanced());
                     } catch (PacsException e) {
                         throw new ShanoirException("Unable to retrieve dicom attributes in file " + serie.getFirstDatasetFileForCurrentSerie().getPath(), e);
                     }
@@ -312,42 +310,45 @@ public class ImporterService {
         return generatedAcquisitions;
     }
 
-    public QualityCardResult checkQuality(ExaminationData examination, ImportJob importJob, List<QualityCard> qualityCards) throws ShanoirException {
+    // public QualityCardResult checkQuality(ExaminationData examination, ImportJob importJob, List<QualityCard> qualityCards) throws ShanoirException {
 
-        // If import comes from ShUp QualityCards are loaded, otherwise we query the database to get them
-        if (qualityCards == null) {
-            qualityCards = qualityCardService.findByStudy(examination.getStudyId());
-        }
+    //     // If import comes from ShUp QualityCards are loaded, otherwise we query the database to get them
+    //     if (qualityCards == null) {
+    //         qualityCards = qualityCardService.findByStudy(examination.getStudyId());
+    //     } else {
+    //         LOG.info("Quality cards loaded from ShUp");
+    //         downloader = null;
+    //     }
         
-        if (!hasQualityChecksAtImport(qualityCards)) {
-            return new QualityCardResult();
-        }     
-        Study firstStudy = importJob.getFirstStudy();
-        if (firstStudy == null) {
-            throw new ShanoirException("The given import job does not provide any serie. Examination : " + importJob.getExaminationId());
-        }
-        ExaminationAttributes<String> dicomAttributes = dicomProcessing.getDicomExaminationAttributes(firstStudy);
-        QualityCardResult qualityResult = new QualityCardResult();
-        for (QualityCard qualityCard : qualityCards) {
-            if (qualityCard.isToCheckAtImport()) {
-                qualityResult.merge(qualityCard.apply(examination, dicomAttributes, downloader));                       
-            }
-        }
-        return qualityResult;
-    }
+    //     if (!hasQualityChecksAtImport(qualityCards)) {
+    //         return new QualityCardResult();
+    //     }     
+    //     Study firstStudy = importJob.getFirstStudy();
+    //     if (firstStudy == null) {
+    //         throw new ShanoirException("The given import job does not provide any serie. Examination : " + importJob.getExaminationId());
+    //     }
+    //     ExaminationAttributes<String> dicomAttributes = DicomProcessing.getDicomExaminationAttributes(firstStudy);
+    //     QualityCardResult qualityResult = new QualityCardResult();
+    //     for (QualityCard qualityCard : qualityCards) {
+    //         if (qualityCard.isToCheckAtImport()) {
+    //             qualityResult.merge(qualityCard.apply(examination, dicomAttributes, downloader));                       
+    //         }
+    //     }
+    //     return qualityResult;
+    // }
 
-    private boolean hasQualityChecksAtImport(List<QualityCard> qualityCards) {
-        if (qualityCards == null || qualityCards.isEmpty()) {
-            LOG.warn("No qualitycard given for this import.");
-            return false;
-        }
-        for (QualityCard qualityCard : qualityCards) {
-            if (qualityCard.isToCheckAtImport()) {
-                return true;
-            }
-        }
-        return false;
-    }
+    // private boolean hasQualityChecksAtImport(List<QualityCard> qualityCards) {
+    //     if (qualityCards == null || qualityCards.isEmpty()) {
+    //         LOG.warn("No qualitycard given for this import.");
+    //         return false;
+    //     }
+    //     for (QualityCard qualityCard : qualityCards) {
+    //         if (qualityCard.isToCheckAtImport()) {
+    //             return true;
+    //         }
+    //     }
+    //     return false;
+    // }
 
     StudyCard getStudyCard(ImportJob importJob) {
         if (importJob.getStudyCardId() != null) { // makes sense: imports without studycard exist

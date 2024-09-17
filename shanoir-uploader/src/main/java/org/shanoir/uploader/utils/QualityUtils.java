@@ -6,7 +6,7 @@ import java.util.List;
 import org.shanoir.ng.importer.dto.Patient;
 import org.shanoir.ng.importer.dto.Study;
 import org.shanoir.ng.importer.model.ImportJob;
-import org.shanoir.ng.importer.service.ImporterService;
+import org.shanoir.ng.importer.service.QualityService;
 import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
@@ -26,7 +26,7 @@ public class QualityUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(QualityUtils.class);
 
-	private static ImporterService importerService;
+	private static QualityService qualityService = new QualityService();
 
 	public static QualityCardResult checkQualityAtImport(ImportJob importJob) throws Exception {
 
@@ -43,16 +43,10 @@ public class QualityUtils {
 		examinationData.setStudyId(importJob.getStudyId());
 		examinationData.setSubjectStudy(subjectStudy);
 
-		qualityCardResult = importerService.checkQuality(examinationData, importJobDto, qualityCards);
+		qualityCardResult = qualityService.checkQuality(examinationData, importJobDto, qualityCards);
 
 		// update SubjectStudy quality tag in ImporterService on server side using quality tag stored in ImportJob and SubjectStudy found with examination already created.
-
-		// Apply quality card rules on the dicom attributes of importJob.getSelectedSeries()
-		// Get dicomAttributes
-		// Check quality (w/ datasets method or directly w/ isfulfilled() method)
-		// QualityCardResult contains the list of all updated subjectStudies that contains their new qualityTag
-		
-
+	
 		return qualityCardResult;
 	}
 
