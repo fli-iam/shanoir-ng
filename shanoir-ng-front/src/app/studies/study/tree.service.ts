@@ -226,9 +226,10 @@ export class TreeService {
                                             if (dsNode) {
                                                 return dsNode.open().then(() => {
                                                     if (ret.topParent.id != (typeof dataset == 'number' ? dataset : dataset.id)) { // if sub processing/datasets 
-                                                        let procNode: ProcessingNode = dsNode.processings[0] as ProcessingNode;
+                                                        let procNode: ProcessingNode = (dsNode.processings as ProcessingNode[])
+                                                            .find(proc => (proc.datasets as DatasetNode[]).find(outDs => outDs.id == (typeof dataset == 'number' ? dataset : dataset.id)));
                                                         if (procNode) {
-                                                            return (dsNode.processings[0] as ProcessingNode).open().then(() => {
+                                                            return procNode.open().then(() => {
                                                                 return (procNode.datasets as DatasetNode[]).find(dsNd => dsNd.id == (typeof dataset == 'number' ? dataset : dataset.id));
                                                             });
                                                         }
@@ -481,6 +482,7 @@ export class TreeService {
         studyNode.subjectsNode = new SubjectsNode(studyNode, null, 'Subjects', subjects);
         studyNode.centersNode = new CentersNode(studyNode, null, 'Centers', centers);
         studyNode.membersNode = new MembersNode(studyNode, null, 'Members', members);
+        studyNode.membersNode.open();
         return studyNode;
     }
 }
@@ -522,7 +524,7 @@ export class Selection {
     }
 
     static fromDataset(dataset: Dataset): Selection {
-        return new Selection(dataset.id, 'dataset', [dataset.datasetProcessing ? dataset.datasetProcessing.outputDatasets?.[0]?.study.id : dataset.datasetAcquisition.examination.study.id], dataset);
+        return new Selection(dataset.id, 'dataset', dataset.datasetProcessing ? dataset.datasetProcessing.outputDatasets?.map(ods => ods.study.id) : [dataset.datasetAcquisition.examination.study.id], dataset);
     }
 
     static fromProcessing(processing: DatasetProcessing): Selection {
