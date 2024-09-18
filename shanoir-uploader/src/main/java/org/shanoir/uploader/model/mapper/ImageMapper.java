@@ -6,8 +6,6 @@ import org.mapstruct.Mapping;
 @Mapper()
 public interface ImageMapper {
 
-    //ImageMapper INSTANCE = Mappers.getMapper(ImageMapper.class);
-
 	@Mapping(target = "acquisitionNumber", source = "acquisitionNumber")
     @Mapping(target = "echoTimes", source = "echoTimes")
     org.shanoir.ng.importer.dto.Image toDto(org.shanoir.ng.importer.model.Image modelImage);

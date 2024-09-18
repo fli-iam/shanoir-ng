@@ -6,8 +6,6 @@ import org.mapstruct.Mapping;
 @Mapper(uses = {SerieMapper.class, ExpressionFormatMapper.class, DatasetFileMapper.class, DiffusionGradientMapper.class})
 public interface DatasetMapper {
 
-    //DatasetMapper INSTANCE = Mappers.getMapper(DatasetMapper.class);
-
     @Mapping(target = "bValues", ignore = true)
     @Mapping(target = "bVectors", ignore = true)
     org.shanoir.ng.importer.dto.Dataset toDto(org.shanoir.ng.importer.model.Dataset modelDataset);

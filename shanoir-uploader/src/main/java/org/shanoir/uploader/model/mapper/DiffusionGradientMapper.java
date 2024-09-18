@@ -7,8 +7,6 @@ import org.mapstruct.Mapping;
 @Mapper()
 public interface DiffusionGradientMapper {
 
-    //DiffusionGradientMapper INSTANCE = Mappers.getMapper(DiffusionGradientMapper.class);
-
     @Mapping(target = "mrProtocol", ignore = true)
     @Mapping(target = "mrDataset", ignore = true)
     @Mapping(target = "id", ignore = true)

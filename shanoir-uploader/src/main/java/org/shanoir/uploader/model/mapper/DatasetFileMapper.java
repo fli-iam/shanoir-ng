@@ -6,8 +6,6 @@ import org.mapstruct.Mapping;
 @Mapper()
 public interface DatasetFileMapper {
 
-    //DatasetFileMapper INSTANCE = Mappers.getMapper(DatasetFileMapper.class);
-
     @Mapping(target = "echoNumbers", ignore = true)
     org.shanoir.ng.importer.dto.DatasetFile toDto(org.shanoir.ng.importer.model.DatasetFile modelDatasetFile);
 

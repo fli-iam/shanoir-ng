@@ -5,8 +5,6 @@ import org.mapstruct.Mapper;
 @Mapper(uses = DatasetFileMapper.class)
 public interface ExpressionFormatMapper {
 
-    //ExpressionFormatMapper INSTANCE = Mappers.getMapper(ExpressionFormatMapper.class);
-
     org.shanoir.ng.importer.dto.ExpressionFormat toDto(org.shanoir.ng.importer.model.ExpressionFormat modelExpressionFormat);
 
     org.shanoir.ng.importer.model.ExpressionFormat toModel(org.shanoir.ng.importer.dto.ExpressionFormat dtoExpressionFormat);
