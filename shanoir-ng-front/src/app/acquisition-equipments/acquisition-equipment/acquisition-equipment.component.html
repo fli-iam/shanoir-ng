@@ -15,15 +15,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div #formContainer class="content-component">
 	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
 		<div class="layout">
+			<form-footer
+				[state]="footerState"
+				(save)="save()"
+                (delete) = "delete()"
+				(edit)="goToEdit()"
+				(cancel)="goToView()"
+				(back)="goBack()"
+			></form-footer>
 			<span [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'"> 
-					<h2 class="header command-zone"i18n="View acqEquip|Title@@acqEqptDetailViewTitle">Details on acquisition equipment</h2>
+				<ng-template [ngSwitchCase]="'view'">
+					<h2 class="header command-zone"i18n="View acqEquip|Title@@acqEqptDetailViewTitle">Details on center equipment</h2>
 				</ng-template>
-				<ng-template [ngSwitchCase]="'edit'"> 
-					<h2 class="header command-zone"i18n="Edit acqEquip|Title@@acqEqptDetailEditTitle">Edit acquisition equipment</h2>
+				<ng-template [ngSwitchCase]="'edit'">
+					<h2 class="header command-zone"i18n="Edit acqEquip|Title@@acqEqptDetailEditTitle">Edit center equipment</h2>
 				</ng-template>
-				<ng-template [ngSwitchCase]="'create'"> 
-					<h2 class="header command-zone"i18n="Create acqEquip|Title@@acqEqptDetailCreateTitle">Create acquisition equipment</h2>
+				<ng-template [ngSwitchCase]="'create'">
+					<h2 class="header command-zone"i18n="Create acqEquip|Title@@acqEqptDetailCreateTitle">Create center equipment</h2>
 				</ng-template>
 			</span>
 			<help-message [help]="'equipment'"></help-message>
@@ -40,12 +48,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li>
 						<label i18n="AcqEquip detail|Manufacturer model label@@acqEqptDetailManufModel">Manufacturer model</label>
 						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'"> 
+							<ng-template [ngSwitchCase]="'view'">
 								<a [routerLink]="['/manufacturer-model/details/', acqEquip.manufacturerModel?.id]">
 									{{acqEquip.manufacturerModel | manufModelLabel}}
 								</a>
 							</ng-template>
-							<ng-template ngSwitchDefault> 
+							<ng-template ngSwitchDefault>
 								<select-box formControlName="manufacturerModel" [(ngModel)]="acqEquip.manufacturerModel" (onNewClick)="openNewManufModel()" [optionArr]="manufModels" [pipe]="manufacturerModelPipe">
 								</select-box>
 								<label *ngIf="hasError('manufacturerModel', ['required'])" class="form-validation-alert" i18n="AcqEquip detail|Manufacturer model required error@@acqEqptDetailManufModelRequiredError">Manufacturer model is required!</label>
@@ -59,14 +67,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li>
-						<label i18n="AcqEquip detail|Center label@@acqEqptDetailCenter">Center</label>
+						<label i18n="AcqEquip detail|Center label@@acqEqptDetailCenter">Acquisition Center</label>
 						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'"> 
+							<ng-template [ngSwitchCase]="'view'">
 								<a [routerLink]="['/center/details/', acqEquip.center?.id]">
 									{{acqEquip.center?.name}}
 								</a>
 							</ng-template>
-							<ng-template ngSwitchDefault> 
+							<ng-template ngSwitchDefault>
 								<select-box formControlName="center" [(ngModel)]="acqEquip.center" [viewRoute]="'/center/details/' + acqEquip?.center?.id" [viewDisabled]="!acqEquip.center" [optionArr]="centers">
 								</select-box>
 								<label *ngIf="hasError('center', ['required'])" class="form-validation-alert" i18n="AcqEquip detail|Center required error@@acqEqptDetailCenterRequiredError">Center is required!</label>
@@ -79,10 +87,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<tool-tip>Value of DICOM Device Serial Number tag (0018,1000). Used to verify data imported from this equipment."</tool-tip>
 						</label>
 						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'"> 
+							<ng-template [ngSwitchCase]="'view'">
 								{{acqEquip.serialNumber}}
 							</ng-template>
-							<ng-template ngSwitchDefault> 
+							<ng-template ngSwitchDefault>
 								<input type="text" id="serialNumber" formControlName="serialNumber" [(ngModel)]="acqEquip.serialNumber"/>
 								<label *ngIf="hasError('serialNumber', ['unique'])" class="form-validation-alert" i18n="Edit acqEquip|Model number unique error@@acqEqptDetailModelNumberUniqueError">This equipment (same manufacturer model and same serial number) already exists!</label>
 								<label *ngIf="hasError('serialNumber', ['spaces'])" class="form-validation-alert">There can't be spaces at the beginning neither at the end of the serial number !</label>
@@ -91,14 +99,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 				</ol>
 			</fieldset>
-			<form-footer
-				[state]="footerState"
-				(save)="save()"
-                (delete) = "delete()"
-				(edit)="goToEdit()"
-				(cancel)="goToView()"
-				(back)="goBack()"
-			></form-footer>
 		</div>
 	</form>
 </div>

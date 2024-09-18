@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -166,7 +167,9 @@ public class BIDSServiceImpl implements BIDSService {
 	public void deleteBidsFolder(Long studyId, String studyName) {
 		try {
 			if (studyName == null) {
-				studyName = this.studyRepo.findById(studyId).get().getName();
+				Optional<Study> study = studyRepo.findById(studyId);
+				if (!study.isEmpty())
+					studyName = study.get().getName();
 			}
 			// Try to delete the BIDS folder recursively if possible
 			File bidsDir = new File(bidsStorageDir + File.separator + STUDY_PREFIX + studyId + studyName);
@@ -406,7 +409,8 @@ public class BIDSServiceImpl implements BIDSService {
 	private void createDatasetBidsFiles(final Dataset dataset, final File workDir, final String studyName, final String subjectName) throws IOException {
 		File dataFolder = null;
 
-		if (dataset.getDatasetAcquisition() == null && dataset.getDatasetProcessing() != null) {
+		if (dataset.getDatasetProcessing() != null) {
+			LOG.warn("Submitted dataset is a processed dataset.");
 			return;
 		}
 		String subjectNameUpdated = this.formatLabel(subjectName);
@@ -530,6 +534,9 @@ public class BIDSServiceImpl implements BIDSService {
 	}
 
 	private File createSpecificDataFolder(Dataset dataset, File workDir, File dataFolder, String subjectName, String studyName) throws IOException {
+
+
+
 		// Create specific files (EEG, MS, MEG, etc..)
 		if (dataset instanceof EegDataset) {
 			dataFolder = createDataFolder("eeg", workDir);

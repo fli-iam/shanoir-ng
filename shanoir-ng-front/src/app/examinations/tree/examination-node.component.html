@@ -16,21 +16,25 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </div>
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened"
+        [class.selected]="this.menuOpened || treeService.isSelected(node.id, 'examination')"
         [clickable] = "this.node.id != null"
         [label]="node.label"
         awesome="fas fa-stethoscope"
-        [(opened)]="node.open"
-        (labelClick)="menuOpened = !menuOpened"
+        [(opened)]="node.opened"
+        (labelClick)="menuOpened = withMenu && !menuOpened"
+        [route]="node.route"
+        [hasBox]="hasBox"
+        [(ngModel)]="node.selected"
+        (chkbxChange)="selectedChange.emit()"
         (firstOpen)="firstOpen()"
         [hasChildren]="hasChildren()"
         [title]="node.title + ' n°' + node.id">
 
-    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && this.node.id != null">
+    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu && this.node.id != null">
         <a [routerLink]="this.detailsPath + this.node.id" class="open-new-tab">
           <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
         </a>
-        <menu-item label="View in OHIF..." awesome="fa-regular fa-eye" (click)="viewExaminationDicoms()"></menu-item>
+        <menu-item label="View DICOM" awesome="fa-regular fa-eye" (click)="viewExaminationDicoms()"></menu-item>
         <menu-item [disabled]="(datasetIds && datasetIds.length == 0) || downloading" label="Download" awesome="fas fa-download" (click)="download()"></menu-item>
         <menu-item *ngIf="node.canDelete"  label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteExamination()"></menu-item>
     </dropdown-menu>
@@ -38,11 +42,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <ng-container *ngIf="node.open && node.datasetAcquisitions && node.datasetAcquisitions != $any('UNLOADED')">
         <dataset-acquisition-node
                 node
-                *ngFor="let datasetAcq of node.datasetAcquisitions; let i = index"
-                [input]="datasetAcq"
+                *ngFor="let datasetAcqNode of node.datasetAcquisitions; let i = index"
+                [input]="datasetAcqNode"
                 (selectedChange)="selectedChange.emit()"
                 [hasBox]="hasBox"
                 (onAcquisitionDelete)="onAcquisitionDelete(i)"
+                [withMenu]="withMenu"
         >
         </dataset-acquisition-node>
     </ng-container>

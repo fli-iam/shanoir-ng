@@ -11,22 +11,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import {Component, ElementRef, EventEmitter, Output, ViewChild} from '@angular/core';
 import { AbstractControl, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 
+import { KeyValue } from "@angular/common";
+import { TaskState } from 'src/app/async-tasks/task.model';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { AccessRequest } from 'src/app/users/access-request/access-request.model';
+import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
+import { ExecutionDataService } from 'src/app/vip/execution.data-service';
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
+import { DatasetExpressionFormat } from "../../enum/dataset-expression-format.enum";
 import { slideDown } from '../../shared/animations/animations';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
+import { Profile } from "../../shared/models/profile.model";
 import { Option } from '../../shared/select/select.component';
-import { SubjectService } from '../../subjects/shared/subject.service';
+import { StudyRightsService } from '../../studies/shared/study-rights.service';
+import { StudyCardService } from '../../study-cards/shared/study-card.service';
+import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Subject } from '../../subjects/shared/subject.model';
-import { DatasetNode, StudyNode } from '../../tree/tree.model';
+import { SubjectService } from '../../subjects/shared/subject.service';
 import { User } from '../../users/shared/user.model';
 import { UserService } from '../../users/shared/user.service';
 import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
@@ -35,20 +46,8 @@ import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
-import { SubjectStudy } from '../../subjects/shared/subject-study.model';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { StudyRightsService } from '../../studies/shared/study-rights.service';
-import { StudyCardService } from '../../study-cards/shared/study-card.service';
-import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
-import { Profile } from "../../shared/models/profile.model";
-import { AccessRequest } from 'src/app/users/access-request/access-request.model';
-import { ExecutionDataService } from 'src/app/vip/execution.data-service';
-import { DatasetService } from "../../datasets/shared/dataset.service";
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { DatasetExpressionFormat } from "../../enum/dataset-expression-format.enum";
-import { KeyValue } from "@angular/common";
-import { TaskState } from 'src/app/async-tasks/task.model';
-import {ShanoirError} from "../../shared/models/error.model";
+import {SuperPromise} from "../../utils/super-promise";
+import { Selection } from './tree.service';
 
 @Component({
     selector: 'study-detail',
@@ -58,11 +57,9 @@ import {ShanoirError} from "../../shared/models/error.model";
 })
 
 export class StudyComponent extends EntityComponent<Study> {
-
     @ViewChild('memberTable', { static: false }) table: TableComponent;
     @ViewChild('input', { static: false }) private fileInput: ElementRef;
     @ViewChild('duaInput', { static: false }) private duaFileInput: ElementRef;
-
     protected pdfDownloadState: TaskState = new TaskState();
     protected duaDownloadState: TaskState = new TaskState();
     protected studyDownloadState: TaskState = new TaskState();
@@ -70,12 +67,10 @@ export class StudyComponent extends EntityComponent<Study> {
     subjects: IdName[];
     selectedCenter: IdName;
     users: User[] = [];
-    studyNode: Study | StudyNode;
     uploading: boolean = false;
-
     protected protocolFiles: File[];
     protected dataUserAgreement: File;
-
+    openHistory: SuperPromise<void> = new SuperPromise<void>();
     public selectedDatasetIds: number[];
     protected hasDownloadRight: boolean;
     accessRequests: AccessRequest[];
@@ -94,113 +89,127 @@ export class StudyComponent extends EntityComponent<Study> {
         return b.value - a.value;
     };
 
+    public keycloakService: KeycloakService;
+
     constructor(
             private route: ActivatedRoute,
             private centerService: CenterService,
             private studyService: StudyService,
-            private datasetService: DatasetService,
             private subjectService: SubjectService,
             private userService: UserService,
             private studyRightsService: StudyRightsService,
             private studyCardService: StudyCardService,
             private accessRequestService: AccessRequestService,
             private processingService: ExecutionDataService,
-            private downloadService: MassDownloadService) {
-
+            private downloadService: MassDownloadService
+            ) {
         super(route, 'study');
         this.activeTab = 'general';
+    }
+
+    public set activeTab(param : string) {
+        super.activeTab = param;
+        if(this.activeTab == "history") {
+            this.openHistory.resolve();
+        }
+    }
+
+    public get activeTab():string {
+        return super.activeTab;
     }
 
     public get study(): Study { return this.entity; }
 
     public set study(study: Study) {
-        this.studyNode = this.breadcrumbsService.currentStep.data.studyNode ? this.breadcrumbsService.currentStep.data.studyNode : study;
         this.entity = study;
+    }
+
+    public set entity(study: Study) {
+        super.entity = study;
+    }
+
+    public get entity(): Study {
+        return super.entity;
     }
 
     getService(): EntityService<Study> {
         return this.studyService;
     }
 
-    initView(): Promise<void> {
+    loadHistory() {
+        this.openHistory.resolve();
+    }
 
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromStudy(this.study);
+    }
+
+    fetchEntity: () => Promise<Study> = () => {
+        return this.idPromise.then(() => this.studyService.get(this.id, null));
+    }
+
+    initView(): Promise<void> {
         this.studyRightsService.getMyRightsForStudy(this.id).then(rights => {
             this.hasDownloadRight = this.keycloakService.isUserAdmin() || rights.includes(StudyUserRight.CAN_DOWNLOAD);
         })
-        let studyPromise: Promise<Study> = this.studyService.get(this.id, null).then(study => {
 
-          this.study = study;
-          this.setLabeledSizes(this.study);
+        this.setLabeledSizes(this.study);
 
-          if (study.profile == null) {
-                let pro = new Profile();
-                pro.profileName = "Profile Neurinfo";
-                study.profile = pro;
-            }
-            study.subjectStudyList = study.subjectStudyList.sort(
-                function(a: SubjectStudy, b:SubjectStudy) {
-                    let aname = a.subjectStudyIdentifier ? a.subjectStudyIdentifier : a.subject.name;
-                    let bname = b.subjectStudyIdentifier ? b.subjectStudyIdentifier : b.subject.name;
-                    return aname.localeCompare(bname);
-                });
+        if (this.study.profile == null) {
+            let pro = new Profile();
+            pro.profileName = "Profile Neurinfo";
+            this.study.profile = pro;
+        }
+        this.study.subjectStudyList = this.study.subjectStudyList.sort(
+            function(a: SubjectStudy, b:SubjectStudy) {
+                let aname = a.subjectStudyIdentifier ? a.subjectStudyIdentifier : a.subject.name;
+                let bname = b.subjectStudyIdentifier ? b.subjectStudyIdentifier : b.subject.name;
+                return aname.localeCompare(bname);
+            });
 
-            this.hasStudyAdminRight().then(val => this.isStudyAdmin = val);
+        this.hasStudyAdminRight().then(val => this.isStudyAdmin = val);
 
-            return Promise.resolve(study)
-        });
         if (this.keycloakService.isUserAdmin()) {
             this.accessRequestService.findByStudy(this.id).then(accessReqs => {
                 this.accessRequests = accessReqs;
             });
         }
         if (this.keycloakService.isUserAdminOrExpert()) {
-            return Promise.all([
-                studyPromise,
-                this.fetchUsers()
-            ]).then(([study, users]) => {
-                Study.completeMembers(study, users);
+            return this.fetchUsers().then(users => {
+                Study.completeMembers(this.study, users);
             });
         } else {
-            return studyPromise.then();
+            return Promise.resolve();
         }
+
     }
 
     initEdit(): Promise<void> {
-        let studyPromise: Promise<Study> = this.studyService.get(this.id, null).then(study => {
-            this.study = study;
 
-            if (this.study.profile == null) {
-              let profile = new Profile();
-              profile.profileName = "Profile Neurinfo";
-              this.study.profile = profile;
-            }
+        if (this.study.profile == null) {
+            let profile = new Profile();
+            profile.profileName = "Profile Neurinfo";
+            this.study.profile = profile;
+        }
 
-            this.hasStudyAdminRight().then(val => this.isStudyAdmin = val);
+        this.hasStudyAdminRight().then(val => this.isStudyAdmin = val);
 
-            return study;
-        });
         this.getAllSubjects();
 
         this.protocolFiles = [];
 
-        Promise.all([
-            studyPromise,
-            this.fetchUsers(),
-        ]).then(([study, users]) => {
-            Study.completeMembers(study, users);
+        this.fetchUsers().then(users => {
+            Study.completeMembers(this.study, users);
         });
         if (this.keycloakService.isUserAdmin()) {
             this.accessRequestService.findByStudy(this.id).then(accessReqs => {
                 this.accessRequests = accessReqs;
             });
         }
-        Promise.all([
-            studyPromise,
-            this.getCenters()
-        ]).then(([study, centers]) => {
+        this.getCenters().then(centers => {
             this.onMonoMultiChange();
         });
-        return studyPromise.then(() => null);
+        return Promise.resolve();
     }
 
     async initCreate(): Promise<void> {
@@ -260,7 +269,6 @@ export class StudyComponent extends EntityComponent<Study> {
         }));
         return formGroup;
     }
-
     private setLabeledSizes(study: Study): Promise<void> {
         let waitUploads: Promise<void> = this.studyService.fileUploads.has(study.id)
             ? this.studyService.fileUploads.get(study.id)
@@ -580,48 +588,6 @@ export class StudyComponent extends EntityComponent<Study> {
         return element.split('\\').pop().split('/').pop();
     }
 
-    onTreeSelectedChange(study: StudyNode) {
-        let dsIds: number [] = [];
-        if (study.subjects && study.subjects != 'UNLOADED') {
-            study.subjects.forEach(subj => {
-                if (subj.examinations && subj.examinations != 'UNLOADED') {
-                    subj.examinations.forEach(exam => {
-                        if (exam.datasetAcquisitions && exam.datasetAcquisitions != 'UNLOADED') {
-                            exam.datasetAcquisitions.forEach(dsAcq => {
-                                dsIds = dsIds.concat(this.searchSelectedInDatasetNodes(dsAcq.datasets));
-                            });
-                        }
-                    });
-                }
-            });
-        }
-        this.selectedDatasetIds = dsIds;
-    }
-
-    private searchSelectedInDatasetNodes(dsNodes: DatasetNode[] | 'UNLOADED'): number[] {
-        if (dsNodes && dsNodes != 'UNLOADED') {
-            return dsNodes.map(ds => {
-                // get selected dataset from this nodes
-                let idsFound: number[] = ds.selected ? [ds.id] : [];
-                // get selected datasets from this node's processings datasets
-                if (ds.processings && ds.processings != 'UNLOADED') {
-                    let foundInProc: number[] = ds.processings
-                            .map(proc => this.searchSelectedInDatasetNodes(proc.datasets))
-                            .reduce((allFromProc, oneProc) => allFromProc.concat(oneProc), []);
-                        idsFound = idsFound.concat(foundInProc);
-                }
-                return idsFound;
-            }).reduce((allFromDs, thisDs) => {
-                return allFromDs.concat(thisDs);
-            }, []);
-        } else return [];
-    }
-
-    onStudyNodeInit(studyNode: StudyNode) {
-        studyNode.open = true;
-        this.breadcrumbsService.currentStep.data.studyNode = studyNode;
-    }
-
     public hasDownloadRights(): boolean {
         return this.keycloakService.isUserAdmin() || this.hasDownloadRight;
     }
@@ -652,25 +618,12 @@ export class StudyComponent extends EntityComponent<Study> {
         this.router.navigate(["/access-request/details/" + accessRequest.id]);
     }
 
-    goToProcessing() {
-        this.processingService.setDatasets(new Set(this.selectedDatasetIds));
-        this.router.navigate(['pipelines']);
-    }
-
     reloadSubjectStudies() {
         setTimeout(() => {
             this.studyService.get(this.id).then(study => {
                 this.study.subjectStudyList = study.subjectStudyList;
             });
         }, 1000);
-    }
-
-    downloadAll() {
-        this.downloadService.downloadAllByStudyId(this.study.id,  this.studyDownloadState);
-    }
-
-    downloadSelected() {
-        this.downloadService.downloadByIds(this.selectedDatasetIds, this.studyDownloadState);
     }
 
     storageVolumePrettyPrint(size: number) {

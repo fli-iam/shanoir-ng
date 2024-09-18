@@ -11,23 +11,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, OnInit } from '@angular/core';
-import { UntypedFormGroup, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
+import { Component } from '@angular/core';
+import { AbstractControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import * as shajs from 'sha.js';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { Selection } from 'src/app/studies/study/tree.service';
 import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 import { IdName } from '../../shared/models/id-name.model';
 import { Option } from '../../shared/select/select.component';
+import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
-import { ReverseSubjectNode, ClinicalSubjectNode } from '../../tree/tree.model';
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { Study } from '../../studies/shared/study.model';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { TaskState } from 'src/app/async-tasks/task.model';
+import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
+import { StudyRightsService } from 'src/app/studies/shared/study-rights.service';
 
 @Component({
     selector: 'subject-detail',
@@ -36,12 +40,12 @@ import { Study } from '../../studies/shared/study.model';
     animations: [slideDown, preventInitialChildAnimations]
 })
 
-export class SubjectComponent extends EntityComponent<Subject> implements OnInit {
+export class SubjectComponent extends EntityComponent<Subject> {
 
     readonly ImagedObjectCategory = ImagedObjectCategory;
     private readonly HASH_LENGTH: number = 14;
     studies: IdName[] = [];
-    isAlreadyAnonymized: boolean;
+    isAlreadyAnonymized: boolean = false;
     firstName: string = "";
     lastName: string = "";
     subjectNamePrefix: string = "";
@@ -49,7 +53,10 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
     private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64), Validators.pattern(this.pattern)];
     forceStudy: Study = null;
     dicomPatientName: string;
-    subjectNode: Subject | ClinicalSubjectNode;
+    downloadState: TaskState = new TaskState();
+    hasDownloadRight: boolean = false;
+    importMode: string = "";
+    isImporting: boolean = false;
 
     catOptions: Option<ImagedObjectCategory>[] = [
         new Option<ImagedObjectCategory>(ImagedObjectCategory.PHANTOM, 'Phantom'),
@@ -66,7 +73,9 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
 
     constructor(private route: ActivatedRoute,
             private subjectService: SubjectService,
-            private studyService: StudyService) {
+            private studyService: StudyService,
+            private downloadService: MassDownloadService,
+            private studyRightsService: StudyRightsService) {
 
         super(route, 'subject');
     }
@@ -74,15 +83,18 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
     public get subject(): Subject { return this.entity; }
     public set subject(subject: Subject) {
         this.entity = subject;
-        this.subjectNode = this.breadcrumbsService.currentStep.data.subjectNode ? this.breadcrumbsService.currentStep.data.subjectNode : subject;
     }
 
     getService(): EntityService<Subject> {
         return this.subjectService;
     }
 
-    ngOnInit() {
-        super.ngOnInit();
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromSubject(this.subject);
+    }
+
+    init() {
+        super.init();
         if (this.mode == 'create') {
             this.firstName = this.breadcrumbsService.currentStep.data.firstName;
             this.lastName = this.breadcrumbsService.currentStep.data.lastName;
@@ -95,17 +107,30 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
             if (this.subjectNamePrefix) {
                 this.subject.name = this.subjectNamePrefix;
 	        }
+            this.isImporting = this.breadcrumbsService.isImporting();
+            if (this.isImporting)
+                this.importMode = this.breadcrumbsService.findImportMode();
         }
     }
 
     initView(): Promise<void> {
         this.loadAllStudies();
-        return this.subjectService.get(this.id).then(subject => { this.subject = subject; });
+        if (this.keycloakService.isUserAdmin()) {
+            this.hasDownloadRight = true;
+            return;
+        } else {
+            this.treeService.studyPromise.then(study => {
+                return this.studyRightsService.getMyRightsForStudy(study.id).then(rights => {
+                    this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+                });
+            });
+        }
+        return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
         this.loadAllStudies();
-        return this.subjectService.get(this.id).then(subject => { this.subject = subject; });
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {
@@ -158,8 +183,10 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
 
     private updateFormControl(formGroup: UntypedFormGroup) {
         if (formGroup.get('imagedObjectCategory').value == ImagedObjectCategory.LIVING_HUMAN_BEING && !this.isAlreadyAnonymized && this.mode == 'create') {
-            formGroup.get('firstName').setValidators(this.nameValidators);
-            formGroup.get('lastName').setValidators(this.nameValidators);
+            if (this.importMode != 'EEG') {
+                formGroup.get('firstName').setValidators(this.nameValidators);
+                formGroup.get('lastName').setValidators(this.nameValidators);
+            }
             formGroup.get('birthDate').setValidators([Validators.required, DatepickerComponent.validator])
         } else {
             formGroup.get('firstName').setValidators([]);
@@ -223,15 +250,16 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
         return this.keycloakService.isUserAdminOrExpert();
     }
 
-    onSubjectNodeInit(node: ReverseSubjectNode) {
-        this.breadcrumbsService.currentStep.data.subjectNode = node;
-    }
-
     public toggleAnonymised() {
         if (this.isAlreadyAnonymized && this.subjectNamePrefix) {
             this.subject.name = this.subjectNamePrefix + this.dicomPatientName;
         } else if (!this.isAlreadyAnonymized && this.subjectNamePrefix && this.dicomPatientName) {
             this.subject.name = this.subjectNamePrefix;
         }
+    }
+
+    download() {
+        // TODO : select study
+        this.downloadService.downloadAllByStudyIdAndSubjectId(this.treeService.study.id, this.subject.id, this.downloadState);
     }
 }

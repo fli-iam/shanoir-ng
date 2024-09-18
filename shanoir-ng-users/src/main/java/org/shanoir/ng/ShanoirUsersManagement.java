@@ -14,20 +14,24 @@
 
 package org.shanoir.ng;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RoleResource;
 import org.keycloak.admin.client.resource.UserResource;
-import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.shanoir.ng.email.EmailService;
+import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.utils.KeycloakShanoirUtil;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.PasswordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,6 +121,9 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 	@Autowired
 	private EmailService emailService;
 
+	@Autowired
+	StudyRightsService commService;
+	private static final String ROLE_ADMIN = "ROLE_ADMIN";
 	
 	@Override
 	public void run(final ApplicationArguments args) throws Exception {
@@ -243,5 +250,20 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 		userResource.update(user);
 	}
 
-
+	/**
+	 * Check that the connected user has the given right for the given study.
+	 *
+	 * @param studyId the study id
+	 * @param rightStr the right
+	 * @return true or false
+	 */
+	public boolean hasRightOnStudy(Long studyId, String rightStr) {
+		if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+			return true;
+		}
+		if (studyId == null) {
+			return false;
+		}
+		return commService.hasRightOnStudy(studyId, rightStr);
+	}
 }

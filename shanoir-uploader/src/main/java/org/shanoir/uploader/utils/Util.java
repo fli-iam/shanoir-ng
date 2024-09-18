@@ -21,6 +21,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
@@ -40,7 +42,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.HttpResponse;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShanoirUploader;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
@@ -66,7 +69,7 @@ public final class Util {
 
 	private static final String DATE_PATTERN = "dd/MM/yyyy";
 
-	private static Logger logger = Logger.getLogger(Util.class);
+	private static final Logger logger = LoggerFactory.getLogger(Util.class);
 
 	/** Time pattern. */
 	public static String TIME_PATTERN = "HH'h'mm'm'ss's'";
@@ -465,12 +468,17 @@ public final class Util {
 			result = new ArrayList<File>();
 			final File[] listFiles = serieFolder.listFiles();
 			for (final File file : listFiles) {
-				if (file.isDirectory()) {
+				if (file.isDirectory() && !file.getName().equals("tmp")) {
 					result.add(file);
 				}
 			}
-
 		}
+		Collections.sort(result, new Comparator<File>() {
+			@Override
+			public int compare(File f1, File f2) {
+				return Long.compare(f1.lastModified(), f2.lastModified());
+			}
+		});
 		return result;
 	}
 

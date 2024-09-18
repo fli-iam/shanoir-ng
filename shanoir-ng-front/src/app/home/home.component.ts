@@ -21,7 +21,7 @@ import { DataUserAgreement } from '../dua/shared/dua.model';
 import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
 import { KeycloakService } from '../shared/keycloak/keycloak.service';
 import { ImagesUrlUtil } from '../shared/utils/images-url.util';
-import { Study } from '../studies/shared/study.model';
+import { StudyLight } from '../studies/shared/study.dto';
 import { StudyService } from '../studies/shared/study.service';
 import { AccessRequest } from '../users/access-request/access-request.model';
 import { User } from '../users/shared/user.model';
@@ -38,9 +38,9 @@ export class HomeComponent {
     shanoirBigLogoUrl: string = ImagesUrlUtil.SHANOIR_BLACK_LOGO_PATH;
 
     challengeDua: DataUserAgreement;
-    challengeStudies: Study[];
-    studies: Study[];
-    allStudies: Study[];
+    challengeStudies: StudyLight[];
+    studies: StudyLight[];
+    allStudies: StudyLight[];
     accountRequests: User[];
     jobs: Task[];
     solrInput: string;
@@ -58,7 +58,7 @@ export class HomeComponent {
             private keycloakService: KeycloakService,
             private userService: UserService,
             private taskService: TaskService) {
-        //this.breadcrumbsService.nameStep('Home');
+        this.breadcrumbsService.nameStep('Home');
         this.breadcrumbsService.markMilestone();
         this.load();
     }
@@ -99,7 +99,7 @@ export class HomeComponent {
     }
 
     private fetchChallengeStudies() {
-        this.studyService.getAll().then(studies => {
+        this.studyService.getStudiesLight().then(studies => {
             this.challengeStudies = [];
             if (studies) {
                 this.allStudies = studies;

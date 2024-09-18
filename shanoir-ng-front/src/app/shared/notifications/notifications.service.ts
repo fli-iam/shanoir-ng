@@ -161,10 +161,17 @@ export class NotificationsService {
             this.source.addEventListener('message', message => {
                 if (message.data !== "{}") {
                     let task: Task = this.taskService.toRealObject(JSON.parse(message.data));
-                    this.tasks = this.tasks.filter(t => t.completeId != task.completeId);
-                    this.tasks.push(task);
+                    let existingTask = this.tasks.find(t => t.completeId == task.completeId);
+                    if (existingTask) {
+                        existingTask.updateWith(task);
+                    } else {
+                        task.creationDate = new Date();
+                        task.lastUpdate = new Date();
+                        this.tasks.push(task);
+                    }
                     this.updateStatusVars();
                     this.emitTasks();
+                    //this.refresh();
                 }
             });
             this.refresh();

@@ -1,11 +1,8 @@
 package org.shanoir.uploader.model.rest;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.shanoir.uploader.ShUpConfig;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Study implements Comparable<Study> {
 

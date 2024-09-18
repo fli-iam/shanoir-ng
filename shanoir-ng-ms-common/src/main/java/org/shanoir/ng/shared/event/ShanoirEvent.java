@@ -58,6 +58,11 @@ public class ShanoirEvent {
 		this.progress = Float.valueOf(progress);
 	}
 
+	public ShanoirEvent(String eventType, String objectId, Long userId, String message,	int status, float progress, Long studyId) {
+		this(eventType, objectId, userId, message, status, studyId);
+		this.progress = Float.valueOf(progress);
+	}
+
 	/**
 	 * @return the id
 	 */

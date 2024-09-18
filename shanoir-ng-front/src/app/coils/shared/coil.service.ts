@@ -30,6 +30,12 @@ export class CoilService extends EntityService<Coil> {
 
     getEntityInstance() { return new Coil(); }
 
+    findByCenter(centerId: number): Promise<Coil[]> {
+        return this.http.get<any>(this.API_URL + '/byCenter/' + centerId)
+            .toPromise()
+            .then(list => this.mapEntityList(list, null));
+    }
+
     public stringify(entity: Coil) {
         let dto = new CoilDTO(entity);
         return JSON.stringify(dto, (key, value) => {

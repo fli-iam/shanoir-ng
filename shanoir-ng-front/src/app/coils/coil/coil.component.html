@@ -15,6 +15,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div #formContainer class="content-component">
 	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
 		<div class="layout">
+			<form-footer
+				[state]="footerState"
+				(save)="save()"
+				(edit)="goToEdit()"
+                (delete) = "delete()"
+				(cancel)="goToView()"
+				(back)="goBack()"
+			></form-footer>
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
 					<h2 class="header command-zone"i18n="View coil|Title@@coilDetailViewTitle">Details on coil</h2>
@@ -31,7 +39,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li>
 						<label i18n="Coil detail|Coil name label@@examinationDetailName">Name</label>
 						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">	
+							<ng-template [ngSwitchCase]="'view'">
 								{{coil.name}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
@@ -55,7 +63,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								{{coil.coilType}}
-							</ng-template> 
+							</ng-template>
 								<ng-template ngSwitchDefault>
 								<select-box formControlName="coilType" [(ngModel)]="coil.coilType" [optionArr]="coilTypes">
 								</select-box>
@@ -66,7 +74,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label i18n="Coil detail|Coil date label@@CoilDetailNbChannels">Number of channels</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{coil.numberOfChannels}} 
+								{{coil.numberOfChannels}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<input type="text" id="nbChannel" formControlName="nbChannel" [(ngModel)]="coil.numberOfChannels" />
@@ -74,19 +82,19 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li>
-						<label i18n="Coil detail|Center label@@coilDetailCenter">Center</label>
+						<label i18n="Coil detail|Center label@@coilDetailCenter">Acquisition Center</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<a [routerLink]="['/center/details/', coil.center?.id]">
 									{{coil.center?.name}}
-								</a> 
+								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select-box
-										(onNewClick)="openNewCenter()" 
+										(onNewClick)="openNewCenter()"
 										[newDisabled]="prefilledCenter"
-										formControlName="center" 
-										[(ngModel)]="coil.center"  
+										formControlName="center"
+										[(ngModel)]="coil.center"
 										(ngModelChange)="updateManufList($event?.id)"
 										[optionArr]="centers">
 								</select-box>
@@ -95,7 +103,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li>
-						<label i18n="Coil detail|Coil acquisition Equipment Model label@@examinationDetailCoilAcquisitionEquipmentModel">Acquisition Equipment Model</label>
+						<label i18n="Coil detail|Coil acquisition Equipment Model label@@examinationDetailCoilAcquisitionEquipmentModel">Center Equipment Model</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<a [routerLink]="['/manufacturer-model/details/', coil.manufacturerModel?.id]">
@@ -103,28 +111,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box 
-										formControlName="acquiEquipModel" 
-										[(ngModel)]="coil.manufacturerModel" 
-										(onNewClick)="openNewManufModel()" 
-										[newDisabled]="!coil.center || prefilledManuf" 
-										[optionArr]="manufModels" 
+								<select-box
+										formControlName="acquiEquipModel"
+										[(ngModel)]="coil.manufacturerModel"
+										(onNewClick)="openNewManufModel()"
+										[newDisabled]="!coil.center || prefilledManuf"
+										[optionArr]="manufModels"
 										[pipe]="manufModelPipe">
 								</select-box>
-								<label *ngIf="hasError('manufacturerModel', ['required'])" class="form-validation-alert" i18n="Coil detail|Manufacturer model required error@@coilDetailManufModelRequiredError">Acquisition Equipment model is required!</label>
+								<label *ngIf="hasError('manufacturerModel', ['required'])" class="form-validation-alert" i18n="Coil detail|Manufacturer model required error@@coilDetailManufModelRequiredError">Center Equipment model is required!</label>
 							</ng-template>
 						</span>
-					</li> 
+					</li>
 				</ol>
 			</fieldset>
-			<form-footer
-				[state]="footerState"
-				(save)="save()"
-				(edit)="goToEdit()"
-                (delete) = "delete()"
-				(cancel)="goToView()"
-				(back)="goBack()"
-			></form-footer>
 		</div>
 	</form>
 </div>

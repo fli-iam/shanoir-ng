@@ -213,4 +213,5 @@ public class ShanoirEventLight {
 	public String getIdAsString() {
 		return id == null ? null : id.toString();
 	}
+
 }

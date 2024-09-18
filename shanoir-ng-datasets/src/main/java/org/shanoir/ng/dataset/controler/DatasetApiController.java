@@ -15,27 +15,13 @@
 
 package org.shanoir.ng.dataset.controler;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
+import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.modality.EegDataset;
@@ -57,7 +43,10 @@ import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.exception.*;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ErrorDetails;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.service.StudyTagService;
@@ -76,9 +65,17 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 
 @Controller
@@ -148,7 +145,12 @@ public class DatasetApiController implements DatasetApi {
 	public ResponseEntity<Void> deleteDataset(
 			final Long datasetId) throws EntityNotFoundException, RestServiceException {
 		try {
-			Long studyId = datasetService.findById(datasetId).getDatasetAcquisition().getExamination().getStudyId();
+			Dataset ds = datasetService.findById(datasetId);
+			if (ds == null) {
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			}
+			Long studyId = datasetService.getStudyId(ds);
+
 
 			datasetService.deleteById(datasetId);
 			solrService.deleteFromIndex(datasetId);
@@ -181,7 +183,7 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<DatasetAndProcessingsDTOInterface> findDatasetById(
+	public ResponseEntity<DatasetWithDependenciesDTOInterface> findDatasetById(
 			final Long datasetId) {
 
 		final Dataset dataset = datasetService.findById(datasetId);
@@ -196,7 +198,7 @@ public class DatasetApiController implements DatasetApi {
 		else if (dataset instanceof EegDataset) {
 			return new ResponseEntity<>(eegDatasetMapper.datasetToDatasetAndProcessingsDTO((EegDataset) dataset), HttpStatus.OK);
 		} else {
-			return new ResponseEntity<>(datasetMapper.datasetToDatasetAndProcessingsDTO(dataset), HttpStatus.OK);
+			return new ResponseEntity<>(datasetMapper.datasetToDatasetWithParentsAndProcessingsDTO(dataset), HttpStatus.OK);
 		}
 	}
 
@@ -227,21 +229,21 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<List<DatasetAndProcessingsDTOInterface>> findDatasetsByIds(
+	public ResponseEntity<List<DatasetWithDependenciesDTOInterface>> findDatasetsByIds(
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds) {
 		List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
 		if (datasets.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 
-		List<DatasetAndProcessingsDTOInterface> dtos = new ArrayList<>();
+		List<DatasetWithDependenciesDTOInterface> dtos = new ArrayList<>();
 		for(Dataset dataset : datasets){
 			if (dataset instanceof MrDataset) {
 				dtos.add(mrDatasetMapper.datasetToDatasetAndProcessingsDTO((MrDataset) dataset));
 			} else if (dataset instanceof EegDataset) {
 				dtos.add(eegDatasetMapper.datasetToDatasetAndProcessingsDTO((EegDataset) dataset));
 			} else {
-				dtos.add(datasetMapper.datasetToDatasetAndProcessingsDTO(dataset));
+				dtos.add(datasetMapper.datasetToDatasetWithParentsAndProcessingsDTO(dataset));
 			}
 		}
 
