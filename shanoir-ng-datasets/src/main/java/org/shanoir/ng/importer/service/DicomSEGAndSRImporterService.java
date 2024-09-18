@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.persistence.EntityManager;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Sequence;
@@ -45,6 +46,7 @@ import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,6 +110,8 @@ public class DicomSEGAndSRImporterService {
 	@Value("${dcm4chee-arc.dicom.web.rs}")
 	private String dicomWebRS;
 
+	@Autowired
+	EntityManager entityManager;
 
 	@Transactional
 	public boolean importDicomSEGAndSR(InputStream inputStream) {
@@ -147,7 +151,10 @@ public class DicomSEGAndSRImporterService {
 					for (Dataset ds : acq.getDatasets()) {
 						String dsSeriesInstanceUid = seriesInstanceUIDHandler.findSeriesInstanceUID(ds);
 						if (dsSeriesInstanceUid.equals(seriesUid)) {
+							entityManager.clear();
+							SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 							datasetService.deleteById(ds.getId());
+							dicomWebService.deleteDicomFilesFromPacs();
 							solrService.deleteFromIndex(ds.getId());
 							return;
 						}

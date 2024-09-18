@@ -176,7 +176,7 @@ public interface DICOMWebApi {
 	@Operation(summary = "", description = "Delete the structured report")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found series/acquisitions"),
-			@ApiResponse(responseCode = "204", description = "no serie/acquisition found"),
+			@ApiResponse(responseCode = "204", description = "serie/acquisition deleted"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
 			@ApiResponse(responseCode = "500", description = "unexpected error") })

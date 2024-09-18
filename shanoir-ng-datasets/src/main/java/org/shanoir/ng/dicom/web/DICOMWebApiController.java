@@ -273,11 +273,10 @@ public class DICOMWebApiController implements DICOMWebApi {
 	@Override
 	public ResponseEntity<Void> deleteSEGAndSR(String examinationIdStr, String seriesInstanceUid, String reject) {
 		Long examinationId = studyInstanceUIDHandler.extractExaminationId(examinationIdStr);
-		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 		if (examinationId != null && seriesInstanceUid != null) {
 			dicomSRImporterService.deleteSR(examinationId, seriesInstanceUid);
 		}
 
-		return null;
+		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 	}
 }
