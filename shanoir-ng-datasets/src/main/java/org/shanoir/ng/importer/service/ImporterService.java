@@ -126,18 +126,12 @@ public class ImporterService {
 
     @Autowired
     private StudyCardRepository studyCardRepository;
-
-    @Autowired
-    private QualityCardService qualityCardService;
    
     @Autowired
     private DatasetAcquisitionService datasetAcquisitionService;
 
     @Autowired
 	private SubjectStudyService subjectStudyService;
-
-    @Autowired
-    private WADODownloaderService downloader;
 
     @Autowired
     private SolrService solrService;
@@ -310,46 +304,6 @@ public class ImporterService {
         return generatedAcquisitions;
     }
 
-    // public QualityCardResult checkQuality(ExaminationData examination, ImportJob importJob, List<QualityCard> qualityCards) throws ShanoirException {
-
-    //     // If import comes from ShUp QualityCards are loaded, otherwise we query the database to get them
-    //     if (qualityCards == null) {
-    //         qualityCards = qualityCardService.findByStudy(examination.getStudyId());
-    //     } else {
-    //         LOG.info("Quality cards loaded from ShUp");
-    //         downloader = null;
-    //     }
-        
-    //     if (!hasQualityChecksAtImport(qualityCards)) {
-    //         return new QualityCardResult();
-    //     }     
-    //     Study firstStudy = importJob.getFirstStudy();
-    //     if (firstStudy == null) {
-    //         throw new ShanoirException("The given import job does not provide any serie. Examination : " + importJob.getExaminationId());
-    //     }
-    //     ExaminationAttributes<String> dicomAttributes = DicomProcessing.getDicomExaminationAttributes(firstStudy);
-    //     QualityCardResult qualityResult = new QualityCardResult();
-    //     for (QualityCard qualityCard : qualityCards) {
-    //         if (qualityCard.isToCheckAtImport()) {
-    //             qualityResult.merge(qualityCard.apply(examination, dicomAttributes, downloader));                       
-    //         }
-    //     }
-    //     return qualityResult;
-    // }
-
-    // private boolean hasQualityChecksAtImport(List<QualityCard> qualityCards) {
-    //     if (qualityCards == null || qualityCards.isEmpty()) {
-    //         LOG.warn("No qualitycard given for this import.");
-    //         return false;
-    //     }
-    //     for (QualityCard qualityCard : qualityCards) {
-    //         if (qualityCard.isToCheckAtImport()) {
-    //             return true;
-    //         }
-    //     }
-    //     return false;
-    // }
-
     StudyCard getStudyCard(ImportJob importJob) {
         if (importJob.getStudyCardId() != null) { // makes sense: imports without studycard exist
             StudyCard studyCard = getStudyCard(importJob.getStudyCardId());
@@ -427,7 +381,7 @@ public class ImporterService {
      * @param serie
      * @return
      */
-    private boolean checkSerieForDicomImages(Serie serie) {
+    private static boolean checkSerieForDicomImages(Serie serie) {
         return serie.getModality() != null
                 && serie.getDatasets() != null
                 && !serie.getDatasets().isEmpty()

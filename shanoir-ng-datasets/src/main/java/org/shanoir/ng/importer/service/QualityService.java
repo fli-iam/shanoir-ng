@@ -38,7 +38,7 @@ public class QualityService {
         } else {
             LOG.info("Quality cards loaded from ShUp");
             // In this case of Quality control from ShUp, no need for WADO downloader
-            downloader = null;
+            //downloader = null;
         }
         
         if (!hasQualityChecksAtImport(qualityCards)) {

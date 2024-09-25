@@ -106,7 +106,7 @@ public class DatasetsCreatorService {
 	 * @param serie
 	 * @param serieIdentifiedForNotSeparating
 	 */
-	private void constructDicom(final File serieIDFolderFile, final Serie serie, final boolean serieIdentifiedForNotSeparating) {
+	public void constructDicom(final File serieIDFolderFile, final Serie serie, final boolean serieIdentifiedForNotSeparating) {
 		if (!serieIdentifiedForNotSeparating) {
 			final HashMap<SerieToDatasetsSeparator, Dataset> datasetMap = new HashMap<>();
 			for (Image image : serie.getImages()) {

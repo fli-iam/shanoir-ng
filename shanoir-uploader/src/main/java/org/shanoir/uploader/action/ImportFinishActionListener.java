@@ -23,6 +23,7 @@ import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.upload.UploadJob;
+import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.QualityUtils;
 import org.slf4j.Logger;
@@ -179,6 +180,8 @@ public class ImportFinishActionListener implements ActionListener {
 					ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.failed.title"), JOptionPane.INFORMATION_MESSAGE);
 
 			// set status FAILED
+			uploadJob.setUploadState(UploadState.ERROR);
+			
 		} else {
 			Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, importJob, subjectREST.getName());
 			Thread thread = new Thread(runnable);
