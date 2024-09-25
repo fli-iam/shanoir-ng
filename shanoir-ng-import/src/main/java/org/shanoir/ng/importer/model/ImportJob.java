@@ -111,6 +111,8 @@ public class ImportJob implements Serializable {
 
 	private String errorMessage;
 
+	private String qualityTag;
+
 	public long getTimestamp() {
         return timestamp;
     }
@@ -369,6 +371,14 @@ public class ImportJob implements Serializable {
 
 	public void setPatientVerification(PatientVerification patientVerification) {
 		this.patientVerification = patientVerification;
+	}
+
+	public String getQualityTag() {
+		return qualityTag;
+	}
+
+	public void setQualityTag(String qualityTag) {
+		this.qualityTag = qualityTag;
 	}
 
 }

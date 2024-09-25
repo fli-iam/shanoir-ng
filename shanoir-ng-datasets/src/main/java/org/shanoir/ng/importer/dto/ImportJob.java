@@ -72,6 +72,8 @@ public class ImportJob implements Serializable {
     private Long userId;
 
     private String username;
+
+    private String qualityTag;
     
     public long getTimestamp() {
         return timestamp;
@@ -232,6 +234,14 @@ public class ImportJob implements Serializable {
 
     public void setProperties(Map<String, String> properties) {
         this.properties = properties;
+    }
+
+    public String getQualityTag() {
+        return qualityTag;
+    }
+
+    public void setQualityTag(String qualityTag) {
+        this.qualityTag = qualityTag;
     }
 
     public Serie getFirstSerie() {

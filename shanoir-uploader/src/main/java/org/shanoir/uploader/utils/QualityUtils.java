@@ -21,6 +21,7 @@ import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
 import org.shanoir.ng.studycard.model.ExaminationData;
 import org.shanoir.ng.studycard.model.QualityCard;
+import org.shanoir.ng.utils.Utils;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.model.mapper.StudyMapper;
 import org.slf4j.Logger;
@@ -54,7 +55,7 @@ public class QualityUtils {
 		List<QualityCard> qualityCards = ShUpOnloadConfig.getShanoirUploaderServiceClient().findQualityCardsByStudyId(importJob.getStudyId());
 		
 		// Convert instances to images
-		imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob.getPatients(), importJobDir.getAbsolutePath(), false, null);
+		imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob.getPatients(), importJobDir.getAbsolutePath(), false, null, importJob.isFromShanoirUploader());
 
 		// Construct Dicom datasets from images
 		for (org.shanoir.ng.importer.model.Patient patient : importJob.getPatients()) {
