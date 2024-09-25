@@ -43,7 +43,7 @@ export class NotificationsService {
     readonly readInterval: number = 1000;
     readonly persistenceTime: number = 1800000;
     private freshTimeouts: SuperTimeout[] = [];
-    
+
 
     constructor(private taskService: TaskService, private keycloakService: KeycloakService, private sessionService: SessionService) {
         this.connectToServer();
@@ -223,12 +223,12 @@ export class NotificationsService {
         let tmpTasks: Task[] = this.localTasks.filter(lt => !this.newLocalTasksQueue.find(nlt => lt.id == nlt.id));
         tmpTasks = tmpTasks.concat(this.newLocalTasksQueue);
         tmpTasks.sort((a, b) => (a.lastUpdate?.getTime() || a.creationDate?.getDate()) - (b.lastUpdate?.getTime() || b.creationDate?.getDate()));
-        let tmpTasksStr: string = this.serializeTasks(tmpTasks); 
+        let tmpTasksStr: string = this.serializeTasks(tmpTasks);
         // check the size limit
         while (tmpTasksStr.length > 4000000) {
             tmpTasks.pop();
             tmpTasksStr = this.serializeTasks(tmpTasks);
-        } 
+        }
         localStorage.setItem(this.storageKey, tmpTasksStr);
         this.newLocalTasksQueue = [];
         this.localTasks = tmpTasks;

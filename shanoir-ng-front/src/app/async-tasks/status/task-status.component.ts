@@ -19,8 +19,12 @@ import { FilterablePageable, Page } from 'src/app/shared/components/table/pageab
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { QualityCardComponent } from 'src/app/study-cards/quality-card/quality-card.component';
 import { NotificationsService } from '../../shared/notifications/notifications.service';
-import {Task, TaskStatus} from '../task.model';
+import {Task} from '../task.model';
 import {TaskService} from "../task.service";
+import {HttpClient, HttpHeaders, HttpResponse} from "@angular/common/http";
+import * as AppUtils from "../../utils/app.utils";
+import {KeycloakService} from "../../shared/keycloak/keycloak.service";
+import {ConsoleService} from "../../shared/console/console.service";
 
 
 @Component({
@@ -50,7 +54,10 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
     constructor(
         private notificationsService: NotificationsService,
         private taskService: TaskService,
-        private downloadService: MassDownloadService
+        private downloadService: MassDownloadService,
+        private http: HttpClient,
+        private keycloakService: KeycloakService,
+        private consoleService: ConsoleService
     ) { }
 
     ngOnInit() {
@@ -101,4 +108,17 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
         this.downloadService.retry(this.task).finally(() => this.loading = false);
     }
 
+    downloadStats(event: MouseEvent) {
+        event.preventDefault();
+        let endpoint = AppUtils.BACKEND_API_DATASET_MS_URL + this.task.route;
+        this.http.get(endpoint, { observe: 'response', responseType: 'blob' })
+            .toPromise()
+            .then((response: HttpResponse<Blob>) => {
+                if (response.status == 200) {
+                    AppUtils.browserDownloadFileFromResponse(response);
+                } else {
+                    this.consoleService.log('error', 'Statistics file not found or deleted (after 6 hours).');
+                }
+             });
+    }
 }

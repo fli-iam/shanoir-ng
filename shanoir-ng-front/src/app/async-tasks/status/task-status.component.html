@@ -18,7 +18,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <ol>
             <li>
                 <label>Id</label>
-                <span class="right-col">{{task.id}}</span>
+                <span class="right-col">{{task.idAsString}}</span>
             </li>
             <li>
                 <label>Label</label>
@@ -45,7 +45,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <li *ngIf="task.route">
                 <label>Link</label>
                 <span class="right-col left-icon">
-                    <a [routerLink]="task.route">
+                    <a *ngIf="task._eventType != 'downloadStatistics.event'" [routerLink]="task.route">
+                        <i class="fa-solid fa-link"></i>
+                        {{task.route}}
+                    </a>
+                    <a *ngIf="task._eventType == 'downloadStatistics.event'" (click)="downloadStats($event)" href="#">
                         <i class="fa-solid fa-link"></i>
                         {{task.route}}
                     </a>

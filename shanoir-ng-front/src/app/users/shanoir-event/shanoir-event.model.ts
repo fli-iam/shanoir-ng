@@ -8,4 +8,5 @@ export class ShanoirEvent {
     studyId: number;
     username: string;
     userId: number;
+    idAsString: string;
 }
