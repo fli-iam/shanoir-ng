@@ -12,6 +12,8 @@ Attention: do the above to not forget the logback.xml hard coded file path for l
 
 Attention: to deliver for Java 17 in the hospitals: switch back to Java 17 in two pom.xml:
 1) shanoir-uploader/pom.xml and 2) shanoir-ng-back/pom.xml
+2) run a full Maven clean install on shanoir-ng-parent to avoid,
+that e.g. shanoir-ng-import remains still compiled with Java 21
 
 ####### Maven: build a new Executable Jar version #############
 Build latest version for delivery using the below mvn command:
