@@ -10,6 +10,7 @@ import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Study;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
+import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
 import org.shanoir.ng.studycard.model.ExaminationData;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.service.QualityCardService;
@@ -31,6 +32,7 @@ public class QualityService {
     
 
     public QualityCardResult checkQuality(ExaminationData examination, ImportJob importJob, List<QualityCard> qualityCards) throws ShanoirException {
+        LOG.info("Checking quality at import for examination : " + importJob.getExaminationId());
 
         // If import comes from ShUp QualityCards are loaded, otherwise we query the database to get them
         if (qualityCards == null) {
@@ -70,5 +72,14 @@ public class QualityService {
             }
         }
         return false;
+    }
+
+    public QualityCardResult retrieveQualityCardResult(ImportJob importJob) {
+        QualityCardResult qualityCardResult = new QualityCardResult();
+        QualityCardResultEntry qualityCardResultEntry = new QualityCardResultEntry();
+        qualityCardResultEntry.setTagSet(importJob.getQualityTag());
+        qualityCardResultEntry.setMessage("Tag "+ importJob.getQualityTag() + " was applied to examination " + importJob.getExaminationId() + " during quality check at import from Shanoir Uploader.");
+        qualityCardResult.add(qualityCardResultEntry);
+        return qualityCardResult;
     }
 }

@@ -77,7 +77,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	@Autowired
 	private ShanoirEventService eventService;
 
-	public void createImagesAndAnalyzeDicomFiles(List<Patient> patients, String folderFileAbsolutePath, boolean isImportFromPACS, ShanoirEvent event, boolean isFromShanoirUploader)
+	public void createImagesAndAnalyzeDicomFiles(List<Patient> patients, String folderFileAbsolutePath, boolean isImportFromPACS, ShanoirEvent event, boolean isFromShUpQualityControl)
 			throws FileNotFoundException {
 		// patient level
 		for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
@@ -98,7 +98,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 							eventService.publishEvent(event);
 						}
 						try {
-							filterAndCreateImages(folderFileAbsolutePath, serie, isImportFromPACS, isFromShanoirUploader);
+							filterAndCreateImages(folderFileAbsolutePath, serie, isImportFromPACS, isFromShUpQualityControl);
 						} catch (Exception e) { // one serie/file could cause problems, log and mark as erroneous, but continue with next serie
 							handleError(event, nbSeries, cpt, serie, e);
 						}
@@ -151,14 +151,14 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param serie
 	 * @throws FileNotFoundException
 	 */
-	private void filterAndCreateImages(String folderFileAbsolutePath, Serie serie, boolean isImportFromPACS, boolean isFromShanoirUploader) throws Exception {
+	private void filterAndCreateImages(String folderFileAbsolutePath, Serie serie, boolean isImportFromPACS, boolean isFromShUpQualityControl) throws Exception {
 		List<Image> images = new ArrayList<Image>();
 		List<Instance> instances = serie.getInstances();
 		if (instances != null) {
 			for (Iterator<Instance> instancesIt = instances.iterator(); instancesIt.hasNext();) {
 				Instance instance = instancesIt.next();
 				File instanceFile = getFileFromInstance(instance, serie, folderFileAbsolutePath, isImportFromPACS);
-				processDicomFilePerInstanceAndCreateImage(instanceFile, images, folderFileAbsolutePath, isFromShanoirUploader);
+				processDicomFilePerInstanceAndCreateImage(instanceFile, images, folderFileAbsolutePath, isFromShUpQualityControl);
 			}
 			/**
 			 * Old versions of ShUp v7.0.1, still installed and running, send "ignored" series.
@@ -230,7 +230,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param nonImages
 	 * @param images
 	 */
-	private void processDicomFilePerInstanceAndCreateImage(File dicomFile, List<Image> images, String folderFileAbsolutePath, boolean isFromShanoirUploader) throws Exception {
+	private void processDicomFilePerInstanceAndCreateImage(File dicomFile, List<Image> images, String folderFileAbsolutePath, boolean isFromShUpQualityControl) throws Exception {
 		try (DicomInputStream dIS = new DicomInputStream(dicomFile)) { // keep try to finally close input stream
 			Attributes attributes = dIS.readDataset();
 			// Some DICOM files with a particular SOPClassUID are ignored: such as Raw Data Storage etc.
@@ -244,7 +244,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				 * with dicom zip import during the upload or with the DicomStoreSCPServer folder for PACS import.
 				 * If the import is from ShanoirUploader, the path stays absolute to allow the execution of quality control.
 				 */
-				if (!isFromShanoirUploader) {
+				if (!isFromShUpQualityControl) {
 					relativeFilePath = dicomFile.getAbsolutePath().replace(folderFileAbsolutePath + SLASH, "");
 				} else {
 					relativeFilePath = dicomFile.getAbsolutePath();

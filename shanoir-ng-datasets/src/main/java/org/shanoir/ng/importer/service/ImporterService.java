@@ -55,7 +55,6 @@ import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.download.AcquisitionAttributes;
-import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -79,7 +78,6 @@ import org.shanoir.ng.studycard.model.ExaminationData;
 import org.shanoir.ng.studycard.model.QualityException;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
-import org.shanoir.ng.studycard.service.QualityCardService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.utils.Utils;
@@ -176,9 +174,17 @@ public class ImporterService {
                 QualityTag tagSave = subjectStudy != null ? subjectStudy.getQualityTag() : null;
                 ExaminationData examData = new ExaminationData(examination);
                 examData.setDatasetAcquisitions(Utils.toList(generatedAcquisitions));
+                QualityCardResult qualityResult;
                 
-                //TODO : checkQuality only if not already checked by SHUP
-                QualityCardResult qualityResult = qualityService.checkQuality(examData, importJob, null);                				
+                // If import comes from ShanoirUploader, the check quality at import has already been done
+                if (!importJob.isFromShanoirUploader()) {
+                    qualityResult = qualityService.checkQuality(examData, importJob, null);
+                } else {
+                    // We retrieve quality card result from ShUp import job
+                    qualityResult = qualityService.retrieveQualityCardResult(importJob);
+                    qualityResult.addUpdatedSubjectStudy(subjectStudy);
+                }
+                                				
                 // Has quality check passed ?
                 if (qualityResult.hasError()) {
                     throw new QualityException(examination, qualityResult);

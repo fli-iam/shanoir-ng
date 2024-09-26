@@ -2,12 +2,9 @@ package org.shanoir.uploader.utils;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
-import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.importer.DatasetsCreatorService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dto.Patient;
@@ -21,7 +18,6 @@ import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
 import org.shanoir.ng.studycard.model.ExaminationData;
 import org.shanoir.ng.studycard.model.QualityCard;
-import org.shanoir.ng.utils.Utils;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.model.mapper.StudyMapper;
 import org.slf4j.Logger;
@@ -47,15 +43,13 @@ public class QualityUtils {
 		ExaminationData examinationData = new ExaminationData();
 		SubjectStudy subjectStudy = new SubjectStudy();
 		QualityCardResult qualityCardResult = new QualityCardResult();
-		Set<DatasetAcquisition> generatedAcquisitions = new HashSet<>();
 		final File importJobDir = new File(importJob.getWorkFolder());
-		int rank = 0;
 		
 		// Call Shanoir server to get all quality cards for the selected study
 		List<QualityCard> qualityCards = ShUpOnloadConfig.getShanoirUploaderServiceClient().findQualityCardsByStudyId(importJob.getStudyId());
 		
-		// Convert instances to images
-		imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob.getPatients(), importJobDir.getAbsolutePath(), false, null, importJob.isFromShanoirUploader());
+		// Convert instances to images with parameter isFromShUpQualityControl set to true to keep absolute filepath for the images
+		imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob.getPatients(), importJobDir.getAbsolutePath(), false, null, true);
 
 		// Construct Dicom datasets from images
 		for (org.shanoir.ng.importer.model.Patient patient : importJob.getPatients()) {
@@ -75,40 +69,13 @@ public class QualityUtils {
 			}
 		}
 
-		// datasetsCreatorService.createDatasets(patient, importJobDir, importJob);
-
 		// Convert Import ms ImportJob into Datasets ms ImportJob
 		org.shanoir.ng.importer.dto.ImportJob importJobDto = convertImportJob(importJob);
 
-		// for (Patient patient : importJobDto.getPatients()) {
-        //     for (Study study : patient.getStudies()) {
-        //         for (Serie serie : study.getSelectedSeries() ) {
-		// 			AcquisitionAttributes<String> dicomAttributes = null;
-        //             try {
-        //                 dicomAttributes = DicomProcessing.getDicomAcquisitionAttributes(serie, serie.getIsEnhanced());
-        //             } catch (PacsException e) {
-        //                 throw new ShanoirException("Unable to retrieve dicom attributes in file " + serie.getFirstDatasetFileForCurrentSerie().getPath(), e);
-        //             }
-                    
-                    // Generate acquisition object with all sub objects : datasets, protocols, expressions, ...
-                    //DatasetAcquisition acquisition = ImporterService.createDatasetAcquisitionForSerie(serie, rank, null, importJobDto, dicomAttributes);
-					
-					// add acq to collection
-                    // if (acquisition != null) {
-                    //     generatedAcquisitions.add(acquisition);
-                    // }
-		// 			rank++;
-		// 		}
-		// 	}
-		// }
-
 		examinationData.setStudyId(importJob.getStudyId());
 		examinationData.setSubjectStudy(subjectStudy);
-		//examinationData.setDatasetAcquisitions(Utils.toList(generatedAcquisitions));
 
 		qualityCardResult = qualityService.checkQuality(examinationData, importJobDto, qualityCards);
-
-		// update SubjectStudy quality tag in ImporterService on server side using quality tag stored in ImportJob and SubjectStudy found with examination already created.
 	
 		return qualityCardResult;
 	}
@@ -144,7 +111,8 @@ public class QualityUtils {
 
 		if (!qualityCardResult.isEmpty()) {
 			for (QualityCardResultEntry entry : qualityCardResult) {
-				qualityCardReport = qualityCardReport + entry.getMessage() + "\n";
+				//We set two return lines to separate the different quality card entries
+				qualityCardReport = qualityCardReport + entry.getMessage() + "\n" + "\n";
 			}
 		}
 

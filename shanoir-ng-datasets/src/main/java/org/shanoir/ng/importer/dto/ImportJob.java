@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.quality.QualityTag;
 
 /**
  * @author atouboul
@@ -73,7 +74,7 @@ public class ImportJob implements Serializable {
 
     private String username;
 
-    private String qualityTag;
+    private QualityTag qualityTag;
     
     public long getTimestamp() {
         return timestamp;
@@ -236,11 +237,11 @@ public class ImportJob implements Serializable {
         this.properties = properties;
     }
 
-    public String getQualityTag() {
+    public QualityTag getQualityTag() {
         return qualityTag;
     }
 
-    public void setQualityTag(String qualityTag) {
+    public void setQualityTag(QualityTag qualityTag) {
         this.qualityTag = qualityTag;
     }
 

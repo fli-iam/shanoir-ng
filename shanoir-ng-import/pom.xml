@@ -127,8 +127,6 @@
 
 	<build>
 		<plugins>
-			<!-- Package shanoir-ng-import.jar as Spring Boot executable: Avoid error: 
-				no main manifest attribute, in /shanoir-ng-import.jar -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
@@ -138,6 +136,8 @@
 					</classpathDependencyExcludes>
 				</configuration>
 			</plugin>
+			<!-- Package shanoir-ng-import.jar as Spring Boot executable: Avoid error: 
+				no main manifest attribute, in /shanoir-ng-import.jar -->
 			<!-- Used here for ShanoirUploader: create an additional single jar to be used by ShUp -->
 	        <plugin>
 	            <groupId>org.springframework.boot</groupId>

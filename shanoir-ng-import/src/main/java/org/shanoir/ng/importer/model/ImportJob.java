@@ -22,6 +22,7 @@ import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.quality.QualityTag;
 
 /**
  * One ImportJob is related to the import of ONE DICOM STUDY,
@@ -111,7 +112,7 @@ public class ImportJob implements Serializable {
 
 	private String errorMessage;
 
-	private String qualityTag;
+	private QualityTag qualityTag;
 
 	public long getTimestamp() {
         return timestamp;
@@ -373,11 +374,11 @@ public class ImportJob implements Serializable {
 		this.patientVerification = patientVerification;
 	}
 
-	public String getQualityTag() {
+	public QualityTag getQualityTag() {
 		return qualityTag;
 	}
 
-	public void setQualityTag(String qualityTag) {
+	public void setQualityTag(QualityTag qualityTag) {
 		this.qualityTag = qualityTag;
 	}
 

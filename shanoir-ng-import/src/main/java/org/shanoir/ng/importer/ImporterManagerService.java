@@ -135,11 +135,11 @@ public class ImporterManagerService {
 				// at first all dicom files arrive normally in /tmp/shanoir-dcmrcv (see config DicomStoreSCPServer)
 				downloadAndMoveDicomFilesToImportJobDir(importJobDir, patients, event);
 				// convert instances to images, as already done after zip file upload
-				imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), true, event);
+				imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), true, event, false);
 			} else if (importJob.isFromShanoirUploader()) {
 				importJobDir = new File(importJob.getWorkFolder());
 				// convert instances to images, as already done after zip file upload
-				imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), false, event);
+				imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), false, event, false);
 			} else if (importJob.isFromDicomZip()) {
 				// images creation and analyze of dicom files has been done after upload already
 				importJobDir = new File(importJob.getWorkFolder());
