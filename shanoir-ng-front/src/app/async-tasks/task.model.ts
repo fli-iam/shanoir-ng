@@ -115,7 +115,7 @@ export class Task extends Entity {
             return '/solr-search';
         } else if (this.eventType === 'copyDataset.event' && this.status != -1 && this.message.lastIndexOf('study [') != -1) {
             return '/study/details/' + this.message.slice(this.message.lastIndexOf("[") + 1, this.message.lastIndexOf("]"));
-        } else if (this.eventType === 'downloadStatistics.event' && this.status != -1) {
+        } else if (this.eventType === 'downloadStatistics.event' && this.status != -1 && this.status != 2) {
             return '/datasets/download/event/' + this.idAsString;
         }
         return null;
