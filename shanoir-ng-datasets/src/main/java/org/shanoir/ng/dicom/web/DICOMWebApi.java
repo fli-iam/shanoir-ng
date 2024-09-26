@@ -72,7 +72,7 @@ public interface DICOMWebApi {
 	@GetMapping(value = "/studies/{examinationUID}/series", produces = { "application/dicom+json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_SEE_ALL'))")
 	ResponseEntity<String> findSeriesOfStudy(
-			@Parameter(description = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID
+			@Parameter(description = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID, @RequestParam Map<String, String> allParams
 		) throws RestServiceException, JsonMappingException, JsonProcessingException;
 	
 	@Operation(summary = "", description = "Returns the metadata of a DICOM serie/acquisition of an examination")

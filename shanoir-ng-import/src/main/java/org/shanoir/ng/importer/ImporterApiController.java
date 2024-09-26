@@ -14,26 +14,9 @@
 
 package org.shanoir.ng.importer;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.file.Files;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
@@ -46,16 +29,7 @@ import org.shanoir.ng.importer.eeg.brainvision.BrainVisionReader;
 import org.shanoir.ng.importer.eeg.edf.EDFAnnotation;
 import org.shanoir.ng.importer.eeg.edf.EDFParser;
 import org.shanoir.ng.importer.eeg.edf.EDFParserResult;
-import org.shanoir.ng.importer.model.Channel;
-import org.shanoir.ng.importer.model.EegDataset;
-import org.shanoir.ng.importer.model.EegImportJob;
-import org.shanoir.ng.importer.model.Event;
-import org.shanoir.ng.importer.model.ImportJob;
-import org.shanoir.ng.importer.model.Patient;
-import org.shanoir.ng.importer.model.Serie;
-import org.shanoir.ng.importer.model.Study;
-import org.shanoir.ng.importer.model.Subject;
-import org.shanoir.ng.importer.model.SubjectStudy;
+import org.shanoir.ng.importer.model.*;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -86,10 +60,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.validation.Valid;
+import java.io.*;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.file.Files;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This is the main component of the import of Shanoir-NG. The front-end in
@@ -177,6 +155,7 @@ public class ImporterApiController implements ImporterApi {
 			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 					"Wrong content type of file upload, .zip required.", null));
 		}
+		File tempFile = null;
 		try {
 			/**
 			 * 1. STEP: Handle file management. Always create a userId specific folder in
@@ -185,7 +164,7 @@ public class ImporterApiController implements ImporterApi {
 			 */
 			File userImportDir = ImportUtils.getUserImportDir(importDir);
 			boolean createDicomDir = false;
-			File tempFile = ImportUtils.saveTempFile(userImportDir, dicomZipFile);
+			tempFile = ImportUtils.saveTempFile(userImportDir, dicomZipFile);
 			if (!ImportUtils.checkZipContainsFile(DICOMDIR, tempFile)) {
 				createDicomDir = true;
 			}
@@ -223,7 +202,11 @@ public class ImporterApiController implements ImporterApi {
 			importJob.setWorkFolder(importJobDir.getName());
 			importJob.setPatients(patients);
 			return new ResponseEntity<>(importJob, HttpStatus.OK);
-		} catch (IOException e) {
+		} catch (Exception e) {
+			// If there is an exception, we should delete the temporary folder
+			if (tempFile != null) {
+				FileUtils.deleteQuietly(tempFile);
+			}
 			LOG.error(e.getMessage(), e);
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), ERROR_WHILE_SAVING_UPLOADED_FILE, null));

@@ -22,9 +22,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					(delete) = "delete()"
 					(cancel)="goToView()"
 					(back)="goBack()">
-				<button class="right-icon dl-button" type="button" (click)="viewExaminationDicoms()">View in OHIF...<i class="fa-regular fa-eye"></i></button>
 				<button *ngIf="mode == 'view' && hasDownloadRight" class="right-icon dl-button" type="button" (click)="downloadAll()" [disabled]="downloadState.isActive() || noDatasets">Download<i class="fas fa-download"></i></button>
-                <button *ngIf="mode == 'view' && hasDownloadRight && hasDicom" [disabled]="noDatasets" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="openViewer()">View DICOM<i class="fa fa-eye"></i></button>
+                <button *ngIf="mode == 'view'" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="openViewer()">View DICOM<i class="fa fa-eye"></i></button>
+                <button *ngIf="mode == 'view'" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="openSegmentationViewer()">View for segmentation<i class="fa fa-eye"></i></button>
 			</form-footer>
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">

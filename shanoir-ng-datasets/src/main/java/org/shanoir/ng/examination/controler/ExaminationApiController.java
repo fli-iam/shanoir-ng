@@ -110,8 +110,7 @@ public class ExaminationApiController implements ExaminationApi {
 			}
 	
 			examinationService.deleteById(examinationId);
-
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, examinationId.toString(), KeycloakUtil.getTokenUserId(), "" + studyId, ShanoirEvent.SUCCESS, studyId));
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, examinationId.toString(), KeycloakUtil.getTokenUserId(), "Examination " + examinationId + " deleted from study " + studyId, ShanoirEvent.SUCCESS, studyId));
 
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
 

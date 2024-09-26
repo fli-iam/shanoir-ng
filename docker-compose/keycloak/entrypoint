@@ -34,7 +34,8 @@ sed -i -E "s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g" /opt/keycloak/themes/shanoir-
 # NOTE: options that must also be set at build-time (eg: KC_DB,
 #       KC_HTTP_RELATIVE_PATH) are set in the Dockerfile.
 #
-export KC_PROXY="${KC_PROXY:-edge}"
+export KC_PROXY_HEADERS="${KC_PROXY_HEADERS:-xforwarded}"
+export KC_HTTP_ENABLED="${KC_HTTP_ENABLED:-true}"
 export KC_SPI_THEME_WELCOME_THEME="shanoir-theme"
 
 # we disable strict hostname checking by default because:

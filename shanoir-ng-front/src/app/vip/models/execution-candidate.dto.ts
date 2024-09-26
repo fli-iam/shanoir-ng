@@ -11,6 +11,6 @@ export class ExecutionCandidateDto {
     processingType: string;
     refreshToken: string;
     client: string;
-    converter: number;
+    converterId: number;
 
 }

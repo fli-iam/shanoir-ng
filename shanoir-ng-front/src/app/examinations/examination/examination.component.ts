@@ -163,6 +163,9 @@ export class ExaminationComponent extends EntityComponent<Examination> {
 	    window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
     }
 
+    openSegmentationViewer() {
+        window.open(environment.viewerUrl + '/segmentation?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
+    }
     getCenters(): void {
         this.centerService
             .getCentersNames()
@@ -253,7 +256,4 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         return UnitOfMeasure.getLabelByKey(key);
     }
 
-    viewExaminationDicoms() {
-        window.open(environment.viewerUrl + '/viewer/1.4.9.12.34.1.8527.' + this.examination.id, '_blank');
-    }
 }
