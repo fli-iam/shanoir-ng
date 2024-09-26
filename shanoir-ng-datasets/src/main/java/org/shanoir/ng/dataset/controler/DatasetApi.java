@@ -303,7 +303,7 @@ public interface DatasetApi {
 		@ApiResponse(responseCode = "403", description = "forbidden"),
 		@ApiResponse(responseCode = "404", description = "no dataset found"),
 		@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@GetMapping(value = "/downloadStatistics", produces = { "application/zip" })
+	@GetMapping(value = "/downloadStatistics")
 	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<String> downloadStatistics(
 			@Parameter(description = "Study name including regular expression", required=false) @Valid

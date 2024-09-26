@@ -139,7 +139,7 @@ export class DatasetService extends EntityService<Dataset> {
             AppUtils.BACKEND_API_DATASET_URL + '/downloadStatistics', { observe: 'response', responseType: 'blob', params: params})
             .toPromise().then(
             response => {
-                if (response.status != 200) {
+                if (response.status != 204) {
                     this.consoleService.log('error', 'Error during creation of statistics.');
                 }
             }

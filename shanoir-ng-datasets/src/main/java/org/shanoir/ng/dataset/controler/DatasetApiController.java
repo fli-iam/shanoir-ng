@@ -66,6 +66,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -623,7 +624,6 @@ public class DatasetApiController implements DatasetApi {
 			) throws RestServiceException, IOException {
 
 		ShanoirEvent event = null;
-		float progress = 0;
 		event = new ShanoirEvent(
 				ShanoirEventType.DOWNLOAD_STATISTICS_EVENT,
 				null,
@@ -634,15 +634,22 @@ public class DatasetApiController implements DatasetApi {
 
 		eventService.publishEvent(event);
 
+		createStats(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp, event);
+
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
+
+	@Async
+	public void createStats(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp, ShanoirEvent event) throws RestServiceException, IOException {
+		float progress = 0;
 		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
 		File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
 		File statisticsFile = recreateFile(userDir + File.separator + "shanoirExportStatistics.tsv");
 		File zipFile = recreateFile(userDir + File.separator + "shanoirExportStatistics_" + event.getId() + ZIP);
 
 		// Get the data
-		try (	FileOutputStream fos = new FileOutputStream(statisticsFile);
-				BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));	){
-
+		try (FileOutputStream fos = new FileOutputStream(statisticsFile);
+			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos))){
 
 			List<Object[]> results = datasetService.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
 
@@ -663,16 +670,13 @@ public class DatasetApiController implements DatasetApi {
 		}
 
 		zipSingleFile(statisticsFile, zipFile);
-
-
 		statisticsFile.delete();
+
 		event.setObjectId(String.valueOf(event.getId()));
 		event.setProgress(1f);
 		event.setMessage("Statistics fetched. Download available for 6 hours");
 		event.setStatus(ShanoirEvent.SUCCESS);
 		eventService.publishEvent(event);
-
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	@Override
@@ -724,5 +728,4 @@ public class DatasetApiController implements DatasetApi {
 			e.printStackTrace();
 		}
 	}
-
 }
