@@ -165,7 +165,8 @@ public class ImportFinishActionListener implements ActionListener {
 		/**
 		 * 3. Fill importJob, check quality if needed, start pseudo and prepare upload
 		 */
-		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examinationId, (Study) mainWindow.importDialog.studyCB.getSelectedItem(), (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem());
+		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examinationId, 
+		(Study) mainWindow.importDialog.studyCB.getSelectedItem(), (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem());
 		
 		QualityCardResult qualityControlResult = new QualityCardResult();
 
@@ -178,16 +179,8 @@ public class ImportFinishActionListener implements ActionListener {
 		
 		// If quality check resulted in errors or failed validations, show a message and do not start the import
 		if (!qualityControlResult.isEmpty() && (qualityControlResult.hasError() || qualityControlResult.hasFailedValid())) {
-			JTextArea textArea = new JTextArea(QualityUtils.getQualityControlreport(qualityControlResult));
-        	textArea.setLineWrap(true);
-        	textArea.setWrapStyleWord(true);
-        	textArea.setEditable(false);
-			textArea.setPreferredSize(new Dimension(800, 300));
-			JScrollPane scrollPane = new JScrollPane(textArea);
-			JOptionPane.showMessageDialog(null, scrollPane, ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"), JOptionPane.ERROR_MESSAGE);
-			// JOptionPane.showMessageDialog(mainWindow.frame,
-			// 		ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.failed.message") + QualityUtils.getQualityControlreport(qualityControlResult),
-			// 		ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult), 
+			ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"), JOptionPane.ERROR_MESSAGE);
 
 			// set status FAILED
 			uploadJob.setUploadState(UploadState.ERROR);
@@ -195,9 +188,8 @@ public class ImportFinishActionListener implements ActionListener {
 		} else {
 			// If quality control has one warning condition fulfilled we inform the user and allow import to continue
 			if (qualityControlResult.hasWarning()) {
-				JOptionPane.showMessageDialog(mainWindow.frame,
-					ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.warning.message") + QualityUtils.getQualityControlreport(qualityControlResult),
-					ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"), JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(null,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult), 
+				ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"), JOptionPane.ERROR_MESSAGE);
 			}
 			//Set qualityTag to the importJob in order to update subjectStudy qualityTag on server side
 			importJob.setQualityTag(qualityControlResult.getUpdatedSubjectStudies().get(0).getQualityTag());

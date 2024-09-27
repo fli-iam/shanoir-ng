@@ -1,9 +1,13 @@
 package org.shanoir.uploader.utils;
 
+import java.awt.Dimension;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 import org.shanoir.ng.importer.DatasetsCreatorService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
@@ -18,6 +22,7 @@ import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
 import org.shanoir.ng.studycard.model.ExaminationData;
 import org.shanoir.ng.studycard.model.QualityCard;
+import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.model.mapper.StudyMapper;
 import org.slf4j.Logger;
@@ -117,5 +122,22 @@ public class QualityUtils {
 		}
 
 		return qualityCardReport;
+	}
+
+	public static JScrollPane getQualityControlreportScrollPane(QualityCardResult qualityControlResult) {
+		String message = new String();
+		if (qualityControlResult.hasError() || qualityControlResult.hasFailedValid()) {
+			message = ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.failed.message");
+		} else if (qualityControlResult.hasWarning()) {
+			message = ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.warning.message");
+		}
+		JTextArea textArea = new JTextArea(message + getQualityControlreport(qualityControlResult));
+        textArea.setLineWrap(true);
+        textArea.setWrapStyleWord(true);
+        textArea.setEditable(false);
+		textArea.setPreferredSize(new Dimension(800, 300));
+		JScrollPane scrollPane = new JScrollPane(textArea);
+
+		return scrollPane;
 	}
 }
