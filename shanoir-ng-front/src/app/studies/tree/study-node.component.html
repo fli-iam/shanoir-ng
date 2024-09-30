@@ -34,11 +34,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             label="Subjects"
             awesome="fas fa-user-injured"
             [(opened)]="node.subjectsNode.opened"
+            (labelClick)="subjectsMenuOpened = !subjectsMenuOpened"
             [hasChildren]="hasDependency(this.node.subjectsNode.subjects)">
+
+        <div class="overmenu">
+            <span *ngIf="!filterOn" class="filter" (click)="clickFilter()" title="filter">
+                <i class="fa-solid fa-filter"></i>
+            </span>
+            <span *ngIf="filterOn">
+                filter : 
+                <input type="text" [(ngModel)]="filter" (ngModelChange)="onFilterChange()"/>
+                <span (click)="resetFilter()">&nbsp;x&nbsp;</span>
+            </span>
+        </div>
 
         <ng-container *ngIf="node.subjectsNode.opened && node.subjectsNode.subjects && node.subjectsNode.subjects != $any('UNLOADED')">
             <subject-node
-                    *ngFor="let subject of node.subjectsNode.subjects"
+                    *ngFor="let subject of filteredNodes || node.subjectsNode.subjects"
                     [input]="subject"
                     [studyId]="node.id"
                     (selectedChange)="selectedChange.emit(node)"

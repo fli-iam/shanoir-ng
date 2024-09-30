@@ -18,3 +18,5 @@ tool-tip { color: var(--greyer); vertical-align: initial; }
 .tag i { margin-right: 3px; }
 .dark { color:white }
 a { text-decoration: none; color: inherit; }
+.overmenu { visibility: hidden; display: inline-block; }
+.label:hover .overmenu { visibility: visible; }

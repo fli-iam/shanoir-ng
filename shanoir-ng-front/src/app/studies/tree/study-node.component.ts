@@ -22,6 +22,7 @@ import {
     QualityCardNode,
     StudyCardNode,
     StudyNode,
+    SubjectNode,
     UNLOADED
 } from '../../tree/tree.model';
 import { StudyRightsService } from "../shared/study-rights.service";
@@ -31,7 +32,8 @@ import { TreeService } from '../study/tree.service';
 
 @Component({
     selector: 'study-node',
-    templateUrl: 'study-node.component.html'
+    templateUrl: 'study-node.component.html',
+    styleUrls: ['study-node.component.css']
 })
 
 export class StudyNodeComponent implements OnChanges {
@@ -42,6 +44,7 @@ export class StudyNodeComponent implements OnChanges {
     node: StudyNode;
     loading: boolean = false;
     menuOpened: boolean = false;
+    subjectsMenuOpened: boolean = false;
     studyCardsLoading: boolean = false;
     qualityCardsLoading: boolean = false;
     showDetails: boolean;
@@ -50,6 +53,9 @@ export class StudyNodeComponent implements OnChanges {
     @Input() withMenu: boolean = true;
     idPromise: SuperPromise<number> = new SuperPromise();
     protected rights: StudyUserRight[];
+    filterOn: boolean = false;
+    filter: string;
+    filteredNodes: SubjectNode[];
 
     constructor(
             private router: Router,
@@ -127,5 +133,23 @@ export class StudyNodeComponent implements OnChanges {
 
     onQualityCardDelete(index: number) {
         (this.node.qualityCardsNode.cards as StudyCardNode[]).splice(index, 1) ;
+    }
+
+    clickFilter() {
+        this.filterOn = true;
+    }
+
+    onFilterChange() {
+        if (this.node.subjectsNode.subjects != 'UNLOADED' && this.filter) {
+            this.filteredNodes = (this.node.subjectsNode.subjects as SubjectNode[]).filter(node => {
+                return node.label.toLowerCase().includes(this.filter.toLowerCase());
+            });
+        }
+    }
+
+    resetFilter() {
+        this.filter = null;
+        this.filteredNodes = null;
+        this.filterOn = false;
     }
 }
