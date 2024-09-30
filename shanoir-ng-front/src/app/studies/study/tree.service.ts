@@ -209,7 +209,6 @@ export class TreeService {
         }
     }
 
-
     private selectDataset(dataset: number | Dataset): Promise<DatasetNode> {
         return this.studyNodePromise.then(() => {
             return this.studyNode.subjectsNode.open().then(() => {
@@ -487,6 +486,25 @@ export class TreeService {
         studyNode.membersNode = new MembersNode(studyNode, null, 'Members', members);
         studyNode.membersNode.open();
         return studyNode;
+    }
+
+    unSelectAll() {
+        this.unSelectNode(this.studyNode);
+    }
+
+    /**
+     * Unselect a ShanoirNode and it's children
+     * @param node 
+     */
+    unSelectNode(node: ShanoirNode) {
+        node.selected = false;
+        Object.entries(node).forEach(attr => {
+            if (attr[0] != 'parent' && attr[1] instanceof ShanoirNode) {
+                this.unSelectNode(attr[1]);
+            } else if (Array.isArray(attr[1]) && attr[1][0] instanceof ShanoirNode) {
+                attr[1].forEach(sn => this.unSelectNode(sn));
+            }
+        });
     }
 }
 

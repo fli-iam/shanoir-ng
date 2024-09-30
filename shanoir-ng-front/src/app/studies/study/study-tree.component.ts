@@ -183,6 +183,10 @@ export class StudyTreeComponent {
         } else return [];
     }
 
+    resetSelection() {
+        this.treeService.unSelectAll();
+    }
+
 }
 
 
