@@ -52,6 +52,13 @@ public class QualityUtils {
 		
 		// Call Shanoir server to get all quality cards for the selected study
 		List<QualityCard> qualityCards = ShUpOnloadConfig.getShanoirUploaderServiceClient().findQualityCardsByStudyId(importJob.getStudyId());
+
+		// If no quality cards are found for the study we skip the quality control
+		if (qualityCards.isEmpty()) {
+			logger.info("Quality Control At Import - No quality cards found for study " + importJob.getStudyId());
+
+			return qualityCardResult;
+		}
 		
 		// Convert instances to images with parameter isFromShUpQualityControl set to true to keep absolute filepath for the images
 		imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob.getPatients(), importJobDir.getAbsolutePath(), false, null, true);
@@ -78,6 +85,8 @@ public class QualityUtils {
 		org.shanoir.ng.importer.dto.ImportJob importJobDto = convertImportJob(importJob);
 
 		examinationData.setStudyId(importJob.getStudyId());
+		// Set an Id to the subjectStudy to retrieve the qualityTag
+		subjectStudy.setId(importJob.getSubject().getId());
 		examinationData.setSubjectStudy(subjectStudy);
 
 		qualityCardResult = qualityService.checkQuality(examinationData, importJobDto, qualityCards);

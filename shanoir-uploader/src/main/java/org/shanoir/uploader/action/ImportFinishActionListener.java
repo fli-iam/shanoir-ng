@@ -1,7 +1,6 @@
 package org.shanoir.uploader.action;
 
 import java.awt.Cursor;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -10,8 +9,6 @@ import java.util.Date;
 
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
@@ -186,30 +183,31 @@ public class ImportFinishActionListener implements ActionListener {
 			uploadJob.setUploadState(UploadState.ERROR);
 			
 		} else {
-			// If quality control has one warning condition fulfilled we inform the user and allow import to continue
-			if (qualityControlResult.hasWarning()) {
-				JOptionPane.showMessageDialog(null,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult), 
-				ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"), JOptionPane.ERROR_MESSAGE);
+			// If quality control condition is VALID we do not set a quality card result entry but we update the subjectStudy qualityTag
+			if (!qualityControlResult.isEmpty() || !qualityControlResult.getUpdatedSubjectStudies().isEmpty()) {
+				// If quality control has one warning condition fulfilled we inform the user and allow import to continue
+				if (qualityControlResult.hasWarning()) {
+					JOptionPane.showMessageDialog(null,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult), 
+					ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"), JOptionPane.ERROR_MESSAGE);
+				}
+				//Set qualityTag to the importJob in order to update subjectStudy qualityTag on server side
+				importJob.setQualityTag(qualityControlResult.getUpdatedSubjectStudies().get(0).getQualityTag());
 			}
-			//Set qualityTag to the importJob in order to update subjectStudy qualityTag on server side
-			importJob.setQualityTag(qualityControlResult.getUpdatedSubjectStudies().get(0).getQualityTag());
+				
 			Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, importJob, subjectREST.getName());
 			Thread thread = new Thread(runnable);
 			thread.start();
-
+	
 			JOptionPane.showMessageDialog(mainWindow.frame,
-				ShUpConfig.resourceBundle.getString("shanoir.uploader.import.start.auto.import.message"),
-				"Import", JOptionPane.INFORMATION_MESSAGE);
+			ShUpConfig.resourceBundle.getString("shanoir.uploader.import.start.auto.import.message"),
+			"Import", JOptionPane.INFORMATION_MESSAGE);
 		}
-		
-		
 		
 		mainWindow.importDialog.setVisible(false);
 		mainWindow.importDialog.mrExaminationExamExecutiveLabel.setVisible(true);
 		mainWindow.importDialog.mrExaminationExamExecutiveCB.setVisible(true);
 		mainWindow.setCursor(null); // turn off the wait cursor
-		((JButton) event.getSource()).setEnabled(true);
-		
+		((JButton) event.getSource()).setEnabled(true);	
 		
 	}
 
