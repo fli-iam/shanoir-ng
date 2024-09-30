@@ -121,6 +121,9 @@ export class TreeService {
             private studyRightsService: StudyRightsService,
             private router: Router) {
 
+        if (localStorage.getItem('treeOpened') == undefined) {
+            localStorage.setItem('treeOpened', 'true');
+        }
         this.treeOpened = localStorage.getItem('treeOpened') == 'true';
         router.events.subscribe(event => {
             if (event instanceof ActivationStart) {
