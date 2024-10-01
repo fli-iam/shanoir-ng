@@ -13,6 +13,7 @@ import javax.swing.JOptionPane;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.uploader.ShUpConfig;
+import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.IdName;
@@ -22,12 +23,16 @@ import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
+import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
 import org.shanoir.uploader.upload.UploadJob;
+import org.shanoir.uploader.upload.UploadJobManager;
 import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.QualityUtils;
+import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * This class implements the logic when the start import button is clicked.
@@ -48,6 +53,9 @@ public class ImportFinishActionListener implements ActionListener {
 	private Subject subjectREST;
 	
 	private ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBILNG;
+
+	// @Autowired
+	// private CurrentNominativeDataController currentNominativeDataController;
 
 	public ImportFinishActionListener(final MainWindow mainWindow, UploadJob uploadJob, File uploadFolder, Subject subjectREST,
 			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBILNG) {
@@ -180,7 +188,9 @@ public class ImportFinishActionListener implements ActionListener {
 			ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"), JOptionPane.ERROR_MESSAGE);
 
 			// set status FAILED
-			uploadJob.setUploadState(UploadState.ERROR);
+			ShUpOnloadConfig.getCurrentNominativeDataController().updateNominativeDataPercentage(uploadFolder, UploadState.ERROR.toString());
+			logger.error("The upload for the patient {} failed due to quality control errors.", importJob.getSubject().getName());
+
 			
 		} else {
 			// If quality control condition is VALID we do not set a quality card result entry but we update the subjectStudy qualityTag
@@ -188,7 +198,7 @@ public class ImportFinishActionListener implements ActionListener {
 				// If quality control has one warning condition fulfilled we inform the user and allow import to continue
 				if (qualityControlResult.hasWarning()) {
 					JOptionPane.showMessageDialog(null,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult), 
-					ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"), JOptionPane.ERROR_MESSAGE);
+					ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"), JOptionPane.WARNING_MESSAGE);
 				}
 				//Set qualityTag to the importJob in order to update subjectStudy qualityTag on server side
 				importJob.setQualityTag(qualityControlResult.getUpdatedSubjectStudies().get(0).getQualityTag());
