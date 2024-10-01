@@ -126,7 +126,7 @@ export class SubjectNodeComponent implements OnChanges {
                         }
                     }
                     this.loading = false;
-                    return this.node.open();
+                    this.node.open();
                 }).catch(error => {
                     this.loading = false;
                     this.consoleService.log('error', error.toString());
