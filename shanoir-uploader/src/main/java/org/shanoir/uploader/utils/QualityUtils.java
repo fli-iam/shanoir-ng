@@ -135,9 +135,9 @@ public class QualityUtils {
 
 	public static JScrollPane getQualityControlreportScrollPane(QualityCardResult qualityControlResult) {
 		String message = new String();
-		if (qualityControlResult.hasError() || qualityControlResult.hasFailedValid()) {
+		if (qualityControlResult.hasError()) {
 			message = ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.failed.message");
-		} else if (qualityControlResult.hasWarning()) {
+		} else if (qualityControlResult.hasWarning() || qualityControlResult.hasFailedValid()) {
 			message = ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.warning.message");
 		}
 		JTextArea textArea = new JTextArea(message + getQualityControlreport(qualityControlResult));

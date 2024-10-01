@@ -73,6 +73,9 @@ public class QualityService {
     }
 
     public QualityCardResult retrieveQualityCardResult(ImportJob importJob) {
+        if(importJob.getQualityTag() == null) {
+            return new QualityCardResult();
+        }
         QualityCardResult qualityCardResult = new QualityCardResult();
         QualityCardResultEntry qualityCardResultEntry = new QualityCardResultEntry();
         qualityCardResultEntry.setTagSet(importJob.getQualityTag());

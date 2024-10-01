@@ -180,9 +180,14 @@ public class ImporterService {
                 if (!importJob.isFromShanoirUploader()) {
                     qualityResult = qualityService.checkQuality(examData, importJob, null);
                 } else {
+                    LOG.info("Importing Data from ShanoirUploader.");
                     // We retrieve quality card result from ShUp import job
                     qualityResult = qualityService.retrieveQualityCardResult(importJob);
-                    qualityResult.addUpdatedSubjectStudy(subjectStudy);
+                    if (!qualityResult.isEmpty()) {
+                        LOG.info("Retrieving Quality Control result from ShanoirUploader.");
+                        subjectStudy.setQualityTag(qualityResult.get(0).getTagSet());
+                        qualityResult.addUpdatedSubjectStudy(subjectStudy);
+                    }
                 }
                                 				
                 // Has quality check passed ?
