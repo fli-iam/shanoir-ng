@@ -51,7 +51,7 @@ export class TreeService {
     private studyNodePromise: SuperPromise<void> = new SuperPromise();
     study: Study;
     studyPromise: SuperPromise<Study> = new SuperPromise();
-    public nodeInit: boolean = false; 
+    public nodeInit: SuperPromise<void> = new SuperPromise(); 
     private studyRights: StudyUserRight[]; 
     private _treeOpened: boolean = true;
     private _treeAvailable: boolean = false;
@@ -173,11 +173,14 @@ export class TreeService {
             } else {
                 this.treeAvailable = false;
             }
-
-            studyLoaded?.then(() => this.selectNode(this.selection)).then(node => {
+            
+            Promise.all([studyLoaded, this.nodeInit]).then(() => {
+                return this.selectNode(this.selection)
+            }).then(node => {
                 this.selectedNode = node;
                 this.treeAvailable = !!this.selectedNode;
             });
+            
         }
     }
 
@@ -305,7 +308,7 @@ export class TreeService {
                     let subjectNode: SubjectNode = (this.studyNode.subjectsNode.subjects as SubjectNode[]).find(sn => sn.id == dsa.examination?.subject?.id);
                     if (subjectNode) {
                         return subjectNode.open().then(() => {
-                            let examNode: ExaminationNode = (subjectNode.examinations as ExaminationNode[])?.find(exam => exam.id == dsa.examination?.id);
+                            let examNode: ExaminationNode = (subjectNode.examinations as ExaminationNode[]).find(exam => exam.id == dsa.examination?.id);
                             if (examNode) {
                                 return examNode.open().then(() => {
                                     return (examNode.datasetAcquisitions as DatasetAcquisitionNode[]).find(dsan => dsan.id == dsa.id);
@@ -433,8 +436,9 @@ export class TreeService {
             });
             return Promise.all([studyPromise, rightsPromise]).then(() => {
                 this.studyNode = this.buildStudyNode(this.study, this.studyRights);
-                this.studyNodePromise.resolve();
-                this.studyNode.open();
+                this.studyNode.open().then(() => {
+                    this.studyNodePromise.resolve();
+                });
             });
         }
     }

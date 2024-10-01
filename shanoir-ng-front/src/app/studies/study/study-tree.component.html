@@ -23,7 +23,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			[input]="treeService.studyNode"
 			[hasBox]="true"
 			[withMenu]="false"
-			(nodeInit)="treeService.nodeInit = true"
+			(nodeInit)="treeService.nodeInit.resolve()"
 			(selectedChange)="onSelectedChange($event)">
 	</study-node>
 </div>
