@@ -22,7 +22,7 @@ import { ServiceLocator } from './locator.service';
 
 // Base urls
 let url = window.location;
-const BACKEND_API_URL = url.protocol + "//" + url.hostname + "/shanoir-ng";
+export const BACKEND_API_URL = url.protocol + "//" + url.hostname + "/shanoir-ng";
 export const KEYCLOAK_BASE_URL = url.protocol + "//" + url.hostname + "/auth";
 export const LOGOUT_REDIRECT_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/welcome";
 export const LOGIN_REDIRECT_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/index.html";

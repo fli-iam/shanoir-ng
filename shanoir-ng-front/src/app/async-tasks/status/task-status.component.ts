@@ -110,15 +110,6 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
 
     downloadStats(event: MouseEvent) {
         event.preventDefault();
-        let endpoint = AppUtils.BACKEND_API_DATASET_MS_URL + this.task.route;
-        this.http.get(endpoint, { observe: 'response', responseType: 'blob' })
-            .toPromise()
-            .then((response: HttpResponse<Blob>) => {
-                if (response.status == 200) {
-                    AppUtils.browserDownloadFileFromResponse(response);
-                } else {
-                    this.consoleService.log('error', 'Statistics file not found or deleted (after 6 hours).');
-                }
-             });
+        this.taskService.downloadStats(this.task);
     }
 }

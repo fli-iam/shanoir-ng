@@ -25,6 +25,8 @@ import { GlobalService } from '../../services/global.service';
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { ColumnDefinition } from './column.definition.type';
 import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pageable.model';
+import {TaskService} from "../../../async-tasks/task.service";
+import {Task} from "../../../async-tasks/task.model";
 
 @Component({
     selector: 'shanoir-table',
@@ -81,7 +83,8 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             private breadcrumbsService: BreadcrumbsService,
             private globalClickService: GlobalService,
             protected router: Router,
-            private dialogService: ConfirmDialogService) {
+            private dialogService: ConfirmDialogService,
+            private taskService: TaskService) {
         this.maxResultsField = this.maxResults;
     }
 
@@ -185,6 +188,11 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         else if (this.selectionAllowed) this.onSelectChange(item, !this.isSelected(item));
     }
 
+    downloadStats(item: any) {
+        if (item instanceof Task && item.eventType == "downloadStatistics.event" && item.progress == 1) {
+            this.taskService.downloadStats(item);
+        }
+    }
 
     public static getCellValue(item: Object, col: ColumnDefinition): any {
         if (col.hasOwnProperty("cellRenderer")) {
@@ -637,7 +645,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     exportTable() {
         const MAX_ROWS: number = 10000;
         if (this.page.totalElements > MAX_ROWS) {
-            this.dialogService.error('Too Many Rows', 'You are trying to export ' + this.page.totalElements 
+            this.dialogService.error('Too Many Rows', 'You are trying to export ' + this.page.totalElements
                 + ' rows, the current max is at ' + MAX_ROWS + ', sorry.');
         } else {
             let csvStr: string = '';

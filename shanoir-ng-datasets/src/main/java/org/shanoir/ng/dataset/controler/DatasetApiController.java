@@ -657,14 +657,23 @@ public class DatasetApiController implements DatasetApi {
 
 				progress += 1f / results.size();
 				event.setProgress(progress);
+				eventService.publishEvent(event);
 				List<String> strings = Arrays.stream(or).map(object -> Objects.toString(object, null)).collect(Collectors.toList());
 				bw.write(String.join("\t", strings));
 				bw.newLine();
 			}
 
 		} catch (jakarta.persistence.NoResultException e) {
+			event.setStatus(ShanoirEvent.ERROR);
+			event.setMessage("No statistics found.");
+			event.setProgress(-1f);
+			eventService.publishEvent(event);
 			throw new RestServiceException(new ErrorModel(HttpStatus.NOT_FOUND.value(), "No result found.", e));
 		} catch (Exception e) {
+			event.setStatus(ShanoirEvent.ERROR);
+			event.setMessage("Error during fetching of statistics.");
+			event.setProgress(-1f);
+			eventService.publishEvent(event);
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while querying the database.", e));
 		}
@@ -713,7 +722,7 @@ public class DatasetApiController implements DatasetApi {
 			DirectoryStream<Path> directoryStream = Files.newDirectoryStream(directoryPath);
 
 			for (Path filePath : directoryStream) {
-				if (filePath.getFileName().toString().endsWith(".zip")) {
+				if (filePath.getFileName().toString().startsWith("shanoirExportStatistics_")) {
 					BasicFileAttributes attrs = Files.readAttributes(filePath, BasicFileAttributes.class);
 					FileTime creationTime = attrs.creationTime();
 					long creationTimeMillis = creationTime.toMillis();
