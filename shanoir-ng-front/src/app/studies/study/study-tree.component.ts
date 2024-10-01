@@ -119,12 +119,7 @@ export class StudyTreeComponent {
         // Exam unselected
         if (!exam.selected && this.selectedExaminationNodes.includes(exam)) {
             this.selectedExaminationNodes.splice(this.selectedExaminationNodes.indexOf(exam), 1);
-            if (this.selectedExaminationNodes.length == 0) {
-                this.canOpenDicom = false;
-            }
-            if (this.selectedExaminationNodes.length > 0 && this.selectedExaminationNodes.length <= 10) {
-                this.canOpenDicom = true;
-            }
+            this.computeCanOpenDicom();
         }
 
         // More than 10 exam selected
@@ -132,6 +127,25 @@ export class StudyTreeComponent {
             this.canOpenDicom = false;
             this.consoleService.log('warn', 'For performance reasons, you cannot open more than 10 examinations in the viewer at the same time.')
         }
+    }
+
+    computeCanOpenDicom() {
+        // If multiple exam are selected, can't open viewer if any acquisition is also selected
+        if (this.selectedExaminationNodes.length > 1) {
+            if (this.selectedAcquisitionNodes.length > 0)
+                this.canOpenDicom = false;
+            if (this.selectedAcquisitionNodes.length == 0)
+                this.canOpenDicom = true;
+        }
+        // Can only open viewer if all selected acquisition belong to the same exam
+        else if (this.selectedExaminationNodes.length == 1) {
+            if (this.selectedAcquisitionNodes.every(val => val.parent == this.selectedExaminationNodes[0])) {
+                this.canOpenDicom = true;
+            } else {
+                this.canOpenDicom = false;
+            }
+        }
+        else this.canOpenDicom = false;
     }
 
     checkSelectedAcquisition(acq: DatasetAcquisitionNode) {
@@ -146,22 +160,7 @@ export class StudyTreeComponent {
         if (!acq.selected && this.selectedAcquisitionNodes.includes(acq))
             this.selectedAcquisitionNodes.splice(this.selectedAcquisitionNodes.indexOf(acq), 1);
 
-        // If multiple exam are selected, can't open viewer if any acquisition is also selected
-        if (this.selectedExaminationNodes.length > 1) {
-            if (this.selectedAcquisitionNodes.length > 0)
-                this.canOpenDicom = false;
-            if (this.selectedAcquisitionNodes.length == 0)
-                this.canOpenDicom = true;
-        }
-        // Can only open viewer if all selected acquisition belong to the same exam
-        if (this.selectedExaminationNodes.length == 1) {
-            if (this.selectedAcquisitionNodes.every(val => val.parent == this.selectedExaminationNodes[0])) {
-                this.canOpenDicom = true;
-            } else {
-                this.canOpenDicom = false;
-            }
-        }
-
+        this.computeCanOpenDicom();
     }
 
     private searchSelectedInDatasetNodes(dsNodes: DatasetNode[] | 'UNLOADED'): DatasetNode[] {
@@ -185,6 +184,7 @@ export class StudyTreeComponent {
 
     resetSelection() {
         this.treeService.unSelectAll();
+        this.computeCanOpenDicom();
     }
 
 }
