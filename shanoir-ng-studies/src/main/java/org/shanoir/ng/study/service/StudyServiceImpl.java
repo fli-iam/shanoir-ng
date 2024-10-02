@@ -117,10 +117,10 @@ public class StudyServiceImpl implements StudyService {
 
 	@Autowired
 	private SubjectStudyRepository subjectStudyRepository;
-	
+
 	@Autowired
 	private StudyExaminationRepository studyExaminationRepository;
-	
+
 	@Autowired
 	private StudyCenterRepository studyCenterRepository;
 
@@ -384,27 +384,27 @@ public class StudyServiceImpl implements StudyService {
 	 * @return updated study
 	 */
 	private void updateTags(List<SubjectStudy> subjectStudyList, List<Tag> dbStudyTags) {
-        if (subjectStudyList == null || dbStudyTags == null) {
-            return;
-        }
-        for (SubjectStudy subjectStudy : subjectStudyList) {
-            if (subjectStudy.getTags() == null) {
-                continue;
-            }
-            for (Tag tag : subjectStudy.getTags()) {
-                if (tag.getId() == null) {
-                    Tag dbTag = dbStudyTags.stream().filter(
+		if (subjectStudyList == null || dbStudyTags == null) {
+			return;
+		}
+		for (SubjectStudy subjectStudy : subjectStudyList) {
+			if (subjectStudy.getTags() == null) {
+				continue;
+			}
+			for (Tag tag : subjectStudy.getTags()) {
+				if (tag.getId() == null) {
+					Tag dbTag = dbStudyTags.stream().filter(
 							upTag -> upTag.getColor().equals(tag.getColor())
 									&& upTag.getName().equals(tag.getName())
-                            ).findFirst().orElse(null);
-                    if (dbTag == null) {
-                        throw new IllegalStateException("Cannot link a new tag to a subject-study, this tag does not exist in the study");
-                    }
+					).findFirst().orElse(null);
+					if (dbTag == null) {
+						throw new IllegalStateException("Cannot link a new tag to a subject-study, this tag does not exist in the study");
+					}
 					tag.setId(dbTag.getId());
-                }
-            }
-        }
-    }
+				}
+			}
+		}
+	}
 
 	private List<Long> getTagsToDelete(Study study, Study studyDb) {
 		List<Long> tagsToDelete = new ArrayList<>();
@@ -459,8 +459,8 @@ public class StudyServiceImpl implements StudyService {
 			studies = studyRepository.findAll();
 		} else {
 			studies = studyRepository
-				.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(
-					KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId(), true);
+					.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(
+							KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId(), true);
 		}
 		// the below is necessary for the StudySecurityService, it is not possible for the above methods (findAll+findByXXX)
 		// to have an EntityQuery with two bags contained, that is why I have to get back to the database separately:
@@ -475,7 +475,7 @@ public class StudyServiceImpl implements StudyService {
 		// Utils.copyList is used to prevent a bug with @PostFilter
 		return Utils.copyList(studies);
 	}
-	
+
 	@Override
 	public List<Study> findAllWithCenters() {
 		List<Study> studies;
@@ -483,8 +483,8 @@ public class StudyServiceImpl implements StudyService {
 			studies = studyRepository.findAll();
 		} else {
 			studies = studyRepository
-				.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(
-					KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId(), true);
+					.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(
+							KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId(), true);
 		}
 		// the below is necessary for the StudySecurityService, it is not possible for the above method
 		// to have an EntityQuery with two bags contained, that is why I get back to the database:
@@ -502,31 +502,31 @@ public class StudyServiceImpl implements StudyService {
 	private void setNumberOfSubjectsAndExaminations(List<Study> studies) {
 		List<Object[]> subjectsCount = subjectStudyRepository.countByStudyIdGroupBy();
 		HashMap<Long, Long> studyIdSubjectsCountMap = new HashMap<>();
-        for (Object[] row : subjectsCount) {
-            Long studyId = (Long) row[0];
-            Long count = (Long) row[1];
-            studyIdSubjectsCountMap.put(studyId, count);
-        }
+		for (Object[] row : subjectsCount) {
+			Long studyId = (Long) row[0];
+			Long count = (Long) row[1];
+			studyIdSubjectsCountMap.put(studyId, count);
+		}
 		List<Object[]> examinationsCount = studyExaminationRepository.countByStudyIdGroupBy();
 		HashMap<Long, Long> studyIdExaminationsCountMap = new HashMap<>();
-        for (Object[] row : examinationsCount) {
-            Long studyId = (Long) row[0];
-            Long count = (Long) row[1];
-            studyIdExaminationsCountMap.put(studyId, count);
-        }
-        studies.stream().forEach(s -> {
-        	Long nbSubjects = studyIdSubjectsCountMap.get(s.getId());
-        	if (nbSubjects != null) {
-        		s.setNbSubjects(nbSubjects.intValue());
-        	} else {
-        		s.setNbSubjects(0);
-        	}
-        	Long nbExaminations = studyIdExaminationsCountMap.get(s.getId());
-        	if (nbExaminations != null) {
-        		s.setNbExaminations(nbExaminations.intValue());
-        	} else {
-        		s.setNbExaminations(0);
-        	}
+		for (Object[] row : examinationsCount) {
+			Long studyId = (Long) row[0];
+			Long count = (Long) row[1];
+			studyIdExaminationsCountMap.put(studyId, count);
+		}
+		studies.stream().forEach(s -> {
+			Long nbSubjects = studyIdSubjectsCountMap.get(s.getId());
+			if (nbSubjects != null) {
+				s.setNbSubjects(nbSubjects.intValue());
+			} else {
+				s.setNbSubjects(0);
+			}
+			Long nbExaminations = studyIdExaminationsCountMap.get(s.getId());
+			if (nbExaminations != null) {
+				s.setNbExaminations(nbExaminations.intValue());
+			} else {
+				s.setNbExaminations(0);
+			}
 		});
 	}
 
@@ -733,7 +733,7 @@ public class StudyServiceImpl implements StudyService {
 
 	public String updateStudyName(StudyDTO study) throws MicroServiceCommunicationException {
 		try {
-            return (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_NAME_UPDATE_QUEUE,
+			return (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_NAME_UPDATE_QUEUE,
 					objectMapper.writeValueAsString(study));
 		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException(
