@@ -34,7 +34,6 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.*;
-import org.shanoir.ng.shared.model.Center;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
@@ -61,7 +60,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 public class ExaminationApiController implements ExaminationApi {
@@ -109,7 +107,7 @@ public class ExaminationApiController implements ExaminationApi {
 				FileUtils.deleteDirectory(fileToDelete);
 			}
 			examinationService.deleteById(examinationId);
-			ShanoirEvent event= new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, examinationId.toString(), KeycloakUtil.getTokenUserId(), "Examination " + examinationId + " deleted from study " + studyId, ShanoirEvent.SUCCESS, studyId)
+			ShanoirEvent event= new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, examinationId.toString(), KeycloakUtil.getTokenUserId(), "Examination " + examinationId + " deleted from study " + studyId, ShanoirEvent.SUCCESS, studyId);
 			eventService.publishEvent(event);
 			event.setMessage("" + studyId);
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.EXAMINATION_STUDY_DELETE_QUEUE, event);
