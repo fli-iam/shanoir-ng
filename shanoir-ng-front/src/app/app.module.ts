@@ -273,6 +273,8 @@ import {StudyHistoryComponent} from "./studies/study-history/study-history.compo
 import { StudyTreeComponent } from './studies/study/study-tree.component';
 import { TreeService } from './studies/study/tree.service';
 import { CoilNodeComponent } from './coils/coil/tree/coil-node.component';
+import {ExecutionPlanningList} from "./vip/execution-planning/execution-planning-list.component";
+import {ExecutionPlanning} from "./vip/execution-planning/execution-planning.component";
 
 @NgModule({
     imports: [
@@ -463,7 +465,9 @@ import { CoilNodeComponent } from './coils/coil/tree/coil-node.component';
         DownloadSetupAltComponent,
         TestQualityCardOptionsComponent,
         StudyTreeComponent,
-        CoilNodeComponent
+        CoilNodeComponent,
+        ExecutionPlanningList,
+        ExecutionPlanning
     ],
     providers: [
         AcquisitionEquipmentService,

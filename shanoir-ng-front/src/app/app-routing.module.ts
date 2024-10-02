@@ -86,6 +86,8 @@ import { AccessRequestComponent } from './users/access-request/access-request.co
 import { PipelinesComponent } from './vip/pipelines/pipelines.component';
 import { ExecutionComponent } from './vip/execution/execution.component';
 import { ExecutionMonitoringsComponent } from './vip/execution-monitorings/execution-monitorings.component';
+import { ExecutionPlanningList } from "./vip/execution-planning/execution-planning-list.component"
+import { ExecutionPlanning } from "./vip/execution-planning/execution-planning.component";
 import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
 import { ApplyStudyCardOnComponent } from './study-cards/apply-study-card-on/apply-study-card-on.component';
 import { PreClinicalContextComponent } from './import/pre-clinical-context/pre-clinical-context.component';
@@ -127,6 +129,12 @@ let routes: Routes = [
     }, {
         path: 'execution-monitoring',
         component: ExecutionMonitoringsComponent
+    }, {
+        path: 'execution-planning',
+        component: ExecutionPlanning
+    }, {
+        path: 'execution-monitoring-list',
+        component: ExecutionPlanningList
     }, {
         path: 'pipelines',
         component: PipelinesComponent

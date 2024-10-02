@@ -1,0 +1,7 @@
+<form *ngIf="executionPlanning" (ngSubmit)="onSubmitExecutionForm()" xmlns="http://www.w3.org/1999/html">
+    <div>
+        <label>Execution Name</label>
+        <input type="text" id="name" formControlName="name" required [(ngModel)]="executionPlanning.name">
+    </div>
+</form>
+

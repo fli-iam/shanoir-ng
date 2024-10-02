@@ -24,16 +24,15 @@ import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.SecurityException;
+import org.shanoir.ng.vip.AutomaticExecution;
 import org.shanoir.ng.vip.dto.ExecutionCandidateDTO;
 import org.shanoir.ng.vip.dto.VipExecutionDTO;
 import org.shanoir.ng.vip.monitoring.model.ExecutionStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * @author Alae Es-saki
@@ -65,6 +64,17 @@ public interface ExecutionApi {
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
     ResponseEntity<VipExecutionDTO> getExecution(@Parameter(description = "The execution identifier", required=true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
+
+    @Operation(summary = "Get list of existing automatic executions for the given study_id", description = "Returns the list of existing automatic executions for the given study id", tags={  })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "successful response, returns the list of automatic executions"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "500", description = "unexpected error"),
+            @ApiResponse(responseCode = "503", description = "Internal error")})
+    @GetMapping(value = "/automatic/{studyId}",
+            produces = { "application/json", "application/octet-stream" })
+    ResponseEntity<List<AutomaticExecution>> getAutomaticExecutions(@Parameter(description = "The study Id", required=true) @PathVariable("studyId") Long studyId) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
+
 
     @Operation(summary = "Get stderr logs for the given VIP execution identifier", description = "Returns the stderr logs of the VIP execution that has the given identifier in parameter.", tags={  })
     @ApiResponses(value = {

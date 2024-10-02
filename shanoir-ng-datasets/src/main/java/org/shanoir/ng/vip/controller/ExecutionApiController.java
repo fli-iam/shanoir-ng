@@ -15,21 +15,19 @@
 
 package org.shanoir.ng.vip.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.processing.dto.ParameterResourceDTO;
 import org.shanoir.ng.processing.model.DatasetProcessingType;
-import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.vip.AutomaticExecution;
 import org.shanoir.ng.vip.dto.DatasetParameterDTO;
 import org.shanoir.ng.vip.dto.ExecutionCandidateDTO;
 import org.shanoir.ng.vip.dto.VipExecutionDTO;
@@ -45,14 +43,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 public class ExecutionApiController implements ExecutionApi {
@@ -252,4 +246,12 @@ public class ExecutionApiController implements ExecutionApi {
     public ResponseEntity<String> getExecutionStdout(String identifier) {
         return ResponseEntity.ok(vipClient.getExecutionStdout(identifier).block());
     }
+
+    @Override
+    public ResponseEntity<List<AutomaticExecution>> getAutomaticExecutions(@Parameter(description = "The study Id", required=true) @PathVariable("studyId") Long studyId) {
+        AutomaticExecution autoExec = new AutomaticExecution();
+        autoExec.setName("superbname");
+        return new ResponseEntity<>(Collections.singletonList(autoExec), HttpStatus.OK);
+    }
+
 }
