@@ -102,9 +102,11 @@ export class BrowserPaging<T> {
                 // Real value for date
                 cell1 = TableComponent.getFieldRawValue(n1, col.field)
                 cell2 = TableComponent.getFieldRawValue(n2, col.field)
-            } else if ((col.type == "date" || col.type == "dateTime") && !col.cellRenderer) {
-                cell1 = TableComponent.harmonizeToDate(cell1)?.getTime();
-                cell2 = TableComponent.harmonizeToDate(cell2)?.getTime();
+            } else if ((col.type == "date" || col.type == "dateTime")) {
+                let date1 : Date = this.dateAsStringToDate(cell1);
+                let date2 : Date = this.dateAsStringToDate(cell2);
+                cell1 = TableComponent.harmonizeToDate(date1)?.getTime();
+                cell2 = TableComponent.harmonizeToDate(date2)?.getTime();
             }
             // If equality, test the id so the order is always the same
             if (cell1 == cell2) {
@@ -139,6 +141,17 @@ export class BrowserPaging<T> {
         return items;
     }
 
+    private dateAsStringToDate(dateAsString: string): Date {
+        let dateSplit = dateAsString?.split("/")
+        if (dateSplit != null) {
+            const day1 = parseInt(dateSplit[0], 10);
+            const month1 = parseInt(dateSplit[1], 10) - 1;
+            const year1 = parseInt(dateSplit[2], 10);
+            return new Date(year1, month1, day1)
+        } else {
+            return null;
+        }
+    }
 
     /**
      * Filter items by a search string
