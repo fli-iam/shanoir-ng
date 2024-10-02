@@ -144,10 +144,10 @@ export class BrowserPaging<T> {
     private dateAsStringToDate(dateAsString: string): Date {
         let dateSplit = dateAsString?.split("/")
         if (dateSplit != null) {
-            const day1 = parseInt(dateSplit[0], 10);
-            const month1 = parseInt(dateSplit[1], 10) - 1;
-            const year1 = parseInt(dateSplit[2], 10);
-            return new Date(year1, month1, day1)
+            const day = parseInt(dateSplit[0], 10);
+            const month = parseInt(dateSplit[1], 10) - 1;
+            const year = parseInt(dateSplit[2], 10);
+            return new Date(year, month, day)
         } else {
             return null;
         }
