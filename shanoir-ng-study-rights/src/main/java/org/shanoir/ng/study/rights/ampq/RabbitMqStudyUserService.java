@@ -54,7 +54,7 @@ public class RabbitMqStudyUserService {
     public void receiveStudyUsers(String commandArrStr) throws AmqpRejectAndDontRequeueException {
     	StudyUserCommand[] commands;
     	try {
-    		LOG.error("Received study-user commands : {}", commandArrStr);
+    		LOG.debug("Received study-user commands : {}", commandArrStr);
 			
 			SimpleModule module = new SimpleModule();
 			module.addAbstractTypeMapping(StudyUserInterface.class, StudyUser.class);

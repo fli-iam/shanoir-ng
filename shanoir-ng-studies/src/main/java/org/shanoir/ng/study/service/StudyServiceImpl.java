@@ -643,15 +643,12 @@ public class StudyServiceImpl implements StudyService {
 		try {
 			List<StudyUserCommand> commands = new ArrayList<>();
 			for (Long id : idsToBeDeleted) {
-				LOG.error("We delete one" + id);
 				commands.add(new StudyUserCommand(CommandType.DELETE, id));
 			}
 			for (StudyUser su : created) {
-				LOG.error("We create one" + su.toString());
 				commands.add(new StudyUserCommand(CommandType.CREATE, su));
 			}
 			for (StudyUser su : toBeUpdated) {
-				LOG.error("We update one" + su.toString());
 				commands.add(new StudyUserCommand(CommandType.UPDATE, su));
 			}
 			studyUserCom.broadcast(commands);

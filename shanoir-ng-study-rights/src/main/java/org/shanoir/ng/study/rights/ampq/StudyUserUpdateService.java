@@ -46,13 +46,10 @@ public class StudyUserUpdateService {
     				 command.getStudyUserId() != null ? command.getStudyUserId().toString() : "null",
     				 command.getType());
         	if (CommandType.CREATE.equals(command.getType())) {
-				LOG.error("we create");
 				toBeCreated.add((StudyUser) command.getStudyUser());
 			} else if (CommandType.UPDATE.equals(command.getType())) {
-				LOG.error("we update");
 				toBeUpdated.put(command.getStudyUser().getId(), (StudyUser) command.getStudyUser());
 			} else if (CommandType.DELETE.equals(command.getType())) {
-				LOG.error("we delete");
 				toBeDeleted.add(command.getStudyUserId());
 			}
         }
@@ -85,11 +82,11 @@ public class StudyUserUpdateService {
         }
         int updateSize = IterableConverter.toList(toBeUpdatedDb).size();
         if (updateSize > 0) {
-        	LOG.error("Updating {} study-user(s)", updateSize);
+        	LOG.debug("Updating {} study-user(s)", updateSize);
         	studyUserRepository.saveAll(toBeUpdatedDb);
         }
         if (!toBeDeleted.isEmpty()) {
-        	LOG.error("Deleting {} study-user(s)", toBeDeleted.size());
+        	LOG.debug("Deleting {} study-user(s)", toBeDeleted.size());
         	studyUserRepository.deleteByIdIn(toBeDeleted);
         }
     }
