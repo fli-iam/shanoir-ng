@@ -108,10 +108,11 @@ public class ExaminationApiController implements ExaminationApi {
 			if (fileToDelete.exists()) {
 				FileUtils.deleteDirectory(fileToDelete);
 			}
-	
 			examinationService.deleteById(examinationId);
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, examinationId.toString(), KeycloakUtil.getTokenUserId(), "Examination " + examinationId + " deleted from study " + studyId, ShanoirEvent.SUCCESS, studyId));
-
+			ShanoirEvent event= new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, examinationId.toString(), KeycloakUtil.getTokenUserId(), "Examination " + examinationId + " deleted from study " + studyId, ShanoirEvent.SUCCESS, studyId)
+			eventService.publishEvent(event);
+			event.setMessage("" + studyId);
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.EXAMINATION_STUDY_DELETE_QUEUE, event);
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
 
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -329,5 +330,4 @@ public class ExaminationApiController implements ExaminationApi {
 			}
 		});
 	}
-
 }

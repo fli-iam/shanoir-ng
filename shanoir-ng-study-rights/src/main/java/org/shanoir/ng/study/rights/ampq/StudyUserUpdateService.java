@@ -14,24 +14,18 @@
 
 package org.shanoir.ng.study.rights.ampq;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.study.rights.command.CommandType;
 import org.shanoir.ng.study.rights.command.StudyUserCommand;
-import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.keyvalue.core.IterableConverter;
 import org.springframework.stereotype.Service;
+
+import java.util.*;
 
 @Service
 public class StudyUserUpdateService {
@@ -52,10 +46,13 @@ public class StudyUserUpdateService {
     				 command.getStudyUserId() != null ? command.getStudyUserId().toString() : "null",
     				 command.getType());
         	if (CommandType.CREATE.equals(command.getType())) {
+				LOG.error("we create");
 				toBeCreated.add((StudyUser) command.getStudyUser());
 			} else if (CommandType.UPDATE.equals(command.getType())) {
+				LOG.error("we update");
 				toBeUpdated.put(command.getStudyUser().getId(), (StudyUser) command.getStudyUser());
 			} else if (CommandType.DELETE.equals(command.getType())) {
+				LOG.error("we delete");
 				toBeDeleted.add(command.getStudyUserId());
 			}
         }
@@ -71,7 +68,7 @@ public class StudyUserUpdateService {
         }
         
         if (!toBeCreated.isEmpty()) {
-        	LOG.debug("Saving {} new study-user(s)", toBeCreated.size());
+        	LOG.error("Saving {} new study-user(s)", toBeCreated.size());
         	for (StudyUser su : toBeCreated) {
         		LOG.debug("getId : {}", su.getId());
         		LOG.debug("getUserName : {}", su.getUserName());
@@ -88,11 +85,11 @@ public class StudyUserUpdateService {
         }
         int updateSize = IterableConverter.toList(toBeUpdatedDb).size();
         if (updateSize > 0) {
-        	LOG.debug("Updating {} study-user(s)", updateSize);
+        	LOG.error("Updating {} study-user(s)", updateSize);
         	studyUserRepository.saveAll(toBeUpdatedDb);
         }
         if (!toBeDeleted.isEmpty()) {
-        	LOG.debug("Deleting {} study-user(s)", toBeDeleted.size());
+        	LOG.error("Deleting {} study-user(s)", toBeDeleted.size());
         	studyUserRepository.deleteByIdIn(toBeDeleted);
         }
     }

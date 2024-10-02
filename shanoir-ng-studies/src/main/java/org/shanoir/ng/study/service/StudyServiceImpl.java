@@ -14,20 +14,10 @@
 
 package org.shanoir.ng.study.service;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
@@ -74,11 +64,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import jakarta.transaction.Transactional;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Implementation of study service.
@@ -653,12 +643,15 @@ public class StudyServiceImpl implements StudyService {
 		try {
 			List<StudyUserCommand> commands = new ArrayList<>();
 			for (Long id : idsToBeDeleted) {
+				LOG.error("We delete one" + id);
 				commands.add(new StudyUserCommand(CommandType.DELETE, id));
 			}
 			for (StudyUser su : created) {
+				LOG.error("We create one" + su.toString());
 				commands.add(new StudyUserCommand(CommandType.CREATE, su));
 			}
 			for (StudyUser su : toBeUpdated) {
+				LOG.error("We update one" su.toString());
 				commands.add(new StudyUserCommand(CommandType.UPDATE, su));
 			}
 			studyUserCom.broadcast(commands);
