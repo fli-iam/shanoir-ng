@@ -651,7 +651,7 @@ public class StudyServiceImpl implements StudyService {
 				commands.add(new StudyUserCommand(CommandType.CREATE, su));
 			}
 			for (StudyUser su : toBeUpdated) {
-				LOG.error("We update one" su.toString());
+				LOG.error("We update one" + su.toString());
 				commands.add(new StudyUserCommand(CommandType.UPDATE, su));
 			}
 			studyUserCom.broadcast(commands);
