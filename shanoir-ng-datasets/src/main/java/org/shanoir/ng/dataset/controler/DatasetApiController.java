@@ -629,6 +629,8 @@ public class DatasetApiController implements DatasetApi {
 		if (studyNameOutRegExp != null && !StringUtils.isEmpty(studyNameOutRegExp)) params += "\nStudy to exclude : " + studyNameOutRegExp;
 		if (subjectNameInRegExp != null && !StringUtils.isEmpty(subjectNameInRegExp)) params += "\nSubject to include : " + subjectNameInRegExp;
 		if (subjectNameOutRegExp != null && !StringUtils.isEmpty(subjectNameOutRegExp)) params += "\nSubject to exclude : " + subjectNameOutRegExp;
+
+		LOG.error("downloadStatistics with params : " + params);
 		ShanoirEvent event = null;
 		event = new ShanoirEvent(
 				ShanoirEventType.DOWNLOAD_STATISTICS_EVENT,
@@ -647,12 +649,15 @@ public class DatasetApiController implements DatasetApi {
 
 	@Async
 	public void createStats(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp, ShanoirEvent event, String params) throws RestServiceException, IOException {
+
+		LOG.error("createStats");
 		float progress = 0;
 		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
 		File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
 		File statisticsFile = recreateFile(userDir + File.separator + "shanoirExportStatistics.tsv");
 		File zipFile = recreateFile(userDir + File.separator + "shanoirExportStatistics_" + event.getId() + ZIP);
 
+		LOG.error("createStats zipFile.path : " + zipFile.getPath());
 		// Get the data
 		try (FileOutputStream fos = new FileOutputStream(statisticsFile);
 			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos))){
@@ -696,6 +701,7 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public ResponseEntity<ByteArrayResource> downloadStatisticsByEventId(String eventId) throws IOException {
+		LOG.error("downloadStatisticsByEventId eventId : " + eventId);
 		try {
 			String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
 			File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
