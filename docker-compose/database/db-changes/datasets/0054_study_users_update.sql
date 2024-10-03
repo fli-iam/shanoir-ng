@@ -1,5 +1,5 @@
-delete from datasets.study_user;
 delete from datasets.study_user_study_user_rights;
+delete from datasets.study_user;
 
 INSERT INTO datasets.study_user
        (id, receive_study_user_report, receive_new_import_report, study_id, user_id, user_name, confirmed)
