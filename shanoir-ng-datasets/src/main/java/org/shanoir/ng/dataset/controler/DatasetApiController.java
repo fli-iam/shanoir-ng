@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
@@ -623,24 +624,29 @@ public class DatasetApiController implements DatasetApi {
 			@RequestParam(value = "subjectNameOutRegExp", required = false) String subjectNameOutRegExp
 			) throws RestServiceException, IOException {
 
+		String params = "";
+		if (studyNameInRegExp != null && !StringUtils.isEmpty(studyNameInRegExp)) params += "\nStudy to include : " + studyNameInRegExp;
+		if (studyNameOutRegExp != null && !StringUtils.isEmpty(studyNameOutRegExp)) params += "\nStudy to exclude : " + studyNameOutRegExp;
+		if (subjectNameInRegExp != null && !StringUtils.isEmpty(subjectNameInRegExp)) params += "\nSubject to include : " + subjectNameInRegExp;
+		if (subjectNameOutRegExp != null && !StringUtils.isEmpty(subjectNameOutRegExp)) params += "\nSubject to exclude : " + subjectNameOutRegExp;
 		ShanoirEvent event = null;
 		event = new ShanoirEvent(
 				ShanoirEventType.DOWNLOAD_STATISTICS_EVENT,
 				null,
 				KeycloakUtil.getTokenUserId(),
-				"Fetching statistics...",
+				"Fetching statistics with parameters :" + params,
 				ShanoirEvent.IN_PROGRESS,
 				null);
 
 		eventService.publishEvent(event);
 
-		createStats(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp, event);
+		createStats(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp, event, params);
 
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	@Async
-	public void createStats(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp, ShanoirEvent event) throws RestServiceException, IOException {
+	public void createStats(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp, ShanoirEvent event, String params) throws RestServiceException, IOException {
 		float progress = 0;
 		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
 		File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
@@ -683,7 +689,7 @@ public class DatasetApiController implements DatasetApi {
 
 		event.setObjectId(String.valueOf(event.getId()));
 		event.setProgress(1f);
-		event.setMessage("Statistics fetched. Download available for 6 hours");
+		event.setMessage("Statistics fetched with params : " + params + "\nDownload available for 6 hours");
 		event.setStatus(ShanoirEvent.SUCCESS);
 		eventService.publishEvent(event);
 	}
