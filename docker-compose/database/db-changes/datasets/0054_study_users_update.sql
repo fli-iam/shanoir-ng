@@ -1,3 +1,5 @@
+SET FOREIGN_KEY_CHECKS=0;
+
 delete from datasets.study_user_study_user_rights;
 delete from datasets.study_user;
 
@@ -10,3 +12,5 @@ INSERT INTO datasets.study_user_study_user_rights
 (study_user_id, study_user_rights)
 SELECT study_user_id, study_user_rights
 FROM studies.study_user_study_user_rights;
+
+SET FOREIGN_KEY_CHECKS=1;
