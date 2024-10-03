@@ -12,11 +12,38 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 <div class="commands">
-    <button class="dl-button" type="button" (click)="downloadSelected()" [disabled]="!(selectedDatasetNodes?.length > 0)" title="Download selection"><i class="fas fa-download"></i></button>
-    <button class="dl-button" type="button" (click)="goToProcessing()" [disabled]="!(selectedDatasetNodes?.length > 0)" title="Process selection"><i class="fas fa-rocket"></i></button>
-    <button class="dl-button" type="button" (click)="openInViewer()" [disabled]="!canOpenDicom" title="View DICOM images (select examinations or acquisition from one exam)"><i class="fas fa-eye"></i></button>
-	<button class="dl-button" type="button" (click)="resetSelection()" [disabled]="!(canOpenDicom || selectedDatasetNodes?.length > 0) " title="Unselect all"><i class="fas fa-broom"></i></button>
+    <button class="dl-button" 
+			type="button" 
+			(click)="downloadSelected()" 
+			[disabled]="!(selectedDatasetNodes?.length > 0) && !(selectedAcquisitionNodes?.length > 0) && !(selectedExaminationNodes?.length > 0)" 
+			title="Download selection">
+		<i class="fas fa-download"></i>
+	</button>
+    <button class="dl-button" 
+			type="button" 
+			(click)="goToProcessing()" 
+			[disabled]="!(selectedDatasetNodes?.length > 0) && !(selectedAcquisitionNodes?.length > 0) && !(selectedExaminationNodes?.length > 0)" 
+			title="Process selection">
+		<i class="fas fa-rocket"></i>
+	</button>
+    <button class="dl-button" 
+			type="button" 
+			(click)="openInViewer()" 
+			[disabled]="!canOpenDicomSingleExam && !canOpenDicomMultiExam" 
+			[title]="canOpenDicomMultiExam ? 
+					'View DICOM images for the selected acquisitions/examinations' 
+					: 'View selected DICOM images for the one examination selected'">
+		<double-awesome main="fas fa-eye" [sub]="canOpenDicomMultiExam? 'far fa-copy' : 'far fa-file'"></double-awesome>
+	</button>
+	<button class="dl-button" 
+			type="button" 
+			(click)="resetSelection()" 
+			[disabled]="!(selectedDatasetNodes?.length > 0) && !(selectedAcquisitionNodes?.length > 0) && !(selectedExaminationNodes?.length > 0)" 
+			title="Unselect all">
+		<i class="fas fa-broom"></i>
+	</button>
 </div>
+
 
 <div class="tree">
 	<study-node *ngIf="treeService.studyNode"
