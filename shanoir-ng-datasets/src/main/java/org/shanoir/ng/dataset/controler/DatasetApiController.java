@@ -602,6 +602,7 @@ public class DatasetApiController implements DatasetApi {
 				KeycloakUtil.getTokenUserId(),
 				"Fetching statistics with parameters :" + params,
 				ShanoirEvent.IN_PROGRESS,
+				0f,
 				null);
 
 		eventService.publishEvent(event);
