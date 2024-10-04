@@ -32,6 +32,7 @@ import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.dataset.service.CreateStatisticsService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -67,7 +68,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -86,8 +86,6 @@ import java.nio.file.attribute.FileTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 
 @Controller
@@ -119,6 +117,9 @@ public class DatasetApiController implements DatasetApi {
 
 	@Autowired
 	private DatasetService datasetService;
+
+	@Autowired
+	private CreateStatisticsService createStatisticsService;
 
 	@Autowired
 	private ExaminationService examinationService;
@@ -508,42 +509,6 @@ public class DatasetApiController implements DatasetApi {
 		datasetDownloaderService.massiveDownload(format, datasets, response, true, null);
     }
 
-    /**
-	 * Zip a single file
-	 * 
-	 * @param sourceFile
-	 * @param zipFile
-	 * @throws IOException
-	 */
-	private void zipSingleFile(final File sourceFile, final File zipFile) throws IOException {
-
-		byte[] buffer = new byte[1024];
-
-
-		try (	FileOutputStream fos = new FileOutputStream(zipFile);
-				ZipOutputStream zos = new ZipOutputStream(fos);
-				FileInputStream fis = new FileInputStream(sourceFile);
-				) {
-			// begin writing a new ZIP entry, positions the stream to the start of the entry data
-			zos.putNextEntry(new ZipEntry(sourceFile.getName()));
-
-			int length;
-
-			while ((length = fis.read(buffer)) > 0) {
-				zos.write(buffer, 0, length);
-			}
-			zos.closeEntry();
-		}
-	}
-
-	private File recreateFile(final String fileName) throws IOException {
-		File file = new File(fileName);
-		if(file.exists()) {
-			file.delete();
-		}
-		file.createNewFile();
-		return file;
-	}
 
 	/**
 	 * This method receives a list of URLs containing file:/// urls and copies the files to a folder named workFolder.
@@ -630,7 +595,6 @@ public class DatasetApiController implements DatasetApi {
 		if (subjectNameInRegExp != null && !StringUtils.isEmpty(subjectNameInRegExp)) params += "\nSubject to include : " + subjectNameInRegExp;
 		if (subjectNameOutRegExp != null && !StringUtils.isEmpty(subjectNameOutRegExp)) params += "\nSubject to exclude : " + subjectNameOutRegExp;
 
-		LOG.error("downloadStatistics with params : " + params);
 		ShanoirEvent event = null;
 		event = new ShanoirEvent(
 				ShanoirEventType.DOWNLOAD_STATISTICS_EVENT,
@@ -642,66 +606,15 @@ public class DatasetApiController implements DatasetApi {
 
 		eventService.publishEvent(event);
 
-		createStats(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp, event, params);
+		createStatisticsService.createStats(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp, event, params);
 
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
-	@Async
-	public void createStats(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp, ShanoirEvent event, String params) throws RestServiceException, IOException {
 
-		LOG.error("createStats");
-		float progress = 0;
-		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
-		File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
-		File statisticsFile = recreateFile(userDir + File.separator + "shanoirExportStatistics.tsv");
-		File zipFile = recreateFile(userDir + File.separator + "shanoirExportStatistics_" + event.getId() + ZIP);
-
-		LOG.error("createStats zipFile.path : " + zipFile.getPath());
-		// Get the data
-		try (FileOutputStream fos = new FileOutputStream(statisticsFile);
-			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos))){
-
-			List<Object[]> results = datasetService.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
-
-			for (Object[] or : results) {
-
-				progress += 1f / results.size();
-				event.setProgress(progress);
-				eventService.publishEvent(event);
-				List<String> strings = Arrays.stream(or).map(object -> Objects.toString(object, null)).collect(Collectors.toList());
-				bw.write(String.join("\t", strings));
-				bw.newLine();
-			}
-
-		} catch (jakarta.persistence.NoResultException e) {
-			event.setStatus(ShanoirEvent.ERROR);
-			event.setMessage("No statistics found.");
-			event.setProgress(-1f);
-			eventService.publishEvent(event);
-			throw new RestServiceException(new ErrorModel(HttpStatus.NOT_FOUND.value(), "No result found.", e));
-		} catch (Exception e) {
-			event.setStatus(ShanoirEvent.ERROR);
-			event.setMessage("Error during fetching of statistics.");
-			event.setProgress(-1f);
-			eventService.publishEvent(event);
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while querying the database.", e));
-		}
-
-		zipSingleFile(statisticsFile, zipFile);
-		statisticsFile.delete();
-
-		event.setObjectId(String.valueOf(event.getId()));
-		event.setProgress(1f);
-		event.setMessage("Statistics fetched with params : " + params + "\nDownload available for 6 hours");
-		event.setStatus(ShanoirEvent.SUCCESS);
-		eventService.publishEvent(event);
-	}
 
 	@Override
 	public ResponseEntity<ByteArrayResource> downloadStatisticsByEventId(String eventId) throws IOException {
-		LOG.error("downloadStatisticsByEventId eventId : " + eventId);
 		try {
 			String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
 			File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
