@@ -56,12 +56,6 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
     }
 
     getColumnDefs(): ColumnDefinition[] {
-        function dateRenderer(date: number) {
-            if (date) {
-                return new Date(date).toLocaleDateString();
-            }
-            return null;
-        };
         let colDef: ColumnDefinition[] = [
             { headerName: "Id", field: "id" },
             {
@@ -69,9 +63,7 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
                 route: (examination: Examination) => examination.subject ? '/preclinical-subject/details/' + examination.subject.id : null
             },
             {
-                headerName: "Examination date", field: "examinationDate", type: "date", cellRenderer: function (params: any) {
-                    return dateRenderer(params.data.examinationDate);
-                }, width: "100px"
+                headerName: "Examination date", field: "examinationDate", type: "date", width: "100px"
             },
             {
                 headerName: "Study", field: "study.name",
