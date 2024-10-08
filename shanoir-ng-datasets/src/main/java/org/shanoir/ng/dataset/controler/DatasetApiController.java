@@ -623,7 +623,6 @@ public class DatasetApiController implements DatasetApi {
 
 			byte[] data = Files.readAllBytes(zipFile.toPath());
 			ByteArrayResource resource = new ByteArrayResource(data);
-			deleteStats();
 
 			return ResponseEntity.ok()
 					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + zipFile.getName())
