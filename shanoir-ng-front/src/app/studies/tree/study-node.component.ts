@@ -30,6 +30,8 @@ import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
 import { TreeService } from '../study/tree.service';
 
+export type Sort = {field: 'name' | 'id', way : 'asc' | 'desc'}
+
 @Component({
     selector: 'study-node',
     templateUrl: 'study-node.component.html',
@@ -56,6 +58,7 @@ export class StudyNodeComponent implements OnChanges {
     filterOn: boolean = false;
     filter: string;
     filteredNodes: SubjectNode[];
+    subjectsOrder: Sort;
 
     constructor(
             private router: Router,
@@ -90,6 +93,7 @@ export class StudyNodeComponent implements OnChanges {
             } else {
                 throw new Error('Illegal argument type');
             }
+            this.sortSubjects({field: 'name', way : 'asc'});
             this.nodeInit.emit(this.node);
             this.showDetails = this.router.url != this.detailsPath  + this.node.id;
         }
@@ -151,5 +155,20 @@ export class StudyNodeComponent implements OnChanges {
         this.filter = null;
         this.filteredNodes = null;
         this.filterOn = false;
+    }
+
+    sortSubjects(sort: Sort) {
+        this.subjectsOrder = sort;
+        if (!(this.node.subjectsNode.subjects == 'UNLOADED')) {
+            if (this.subjectsOrder.field == 'name') {
+                this.node.subjectsNode.subjects.sort((a, b) => a.label?.localeCompare(b.label));
+            } else if (this.subjectsOrder.field == 'id') {
+                this.node.subjectsNode.subjects.sort((a, b) => b.id - a.id);
+            }
+            if (this.subjectsOrder.way == 'desc') {
+                this.node.subjectsNode.subjects.reverse();
+            }
+            this.onFilterChange();
+        }
     }
 }
