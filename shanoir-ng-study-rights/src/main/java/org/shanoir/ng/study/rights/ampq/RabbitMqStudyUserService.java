@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -33,7 +33,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -41,7 +40,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class RabbitMqStudyUserService {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(RabbitMqStudyUserService.class);
 
 	private static final String ROLE_ADMIN = "ROLE_ADMIN";
@@ -54,26 +53,26 @@ public class RabbitMqStudyUserService {
 
 	@Autowired
 	private ObjectMapper mapper;
-	
-    public void receiveStudyUsers(String commandArrStr) throws AmqpRejectAndDontRequeueException {
-    	StudyUserCommand[] commands;
-    	try {
-    		LOG.debug("Received study-user commands : {}", commandArrStr);
-			
+
+	public void receiveStudyUsers(String commandArrStr) throws AmqpRejectAndDontRequeueException {
+		StudyUserCommand[] commands;
+		try {
+			LOG.debug("Received study-user commands : {}", commandArrStr);
+
 			SimpleModule module = new SimpleModule();
 			module.addAbstractTypeMapping(StudyUserInterface.class, StudyUser.class);
 			mapper.registerModule(module);
-			
+
 			commands = mapper.readValue(commandArrStr, StudyUserCommand[].class);
 			service.processCommands(Arrays.asList(commands));
 		} catch (Exception e) {
 			throw new AmqpRejectAndDontRequeueException("Study User Update rejected !!!", e);
 		}
-    }
+	}
 
 	@RabbitListener(queues = RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
-	@Transactional    
+	@Transactional
 	public List<Long> getStudiesICanAdmin(Long userId) {
 		List<Long> studiesId = new ArrayList<>();
 		List<StudyUser> sus;

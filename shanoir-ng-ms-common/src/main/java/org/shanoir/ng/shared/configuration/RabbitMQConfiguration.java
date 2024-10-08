@@ -18,10 +18,6 @@ import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.rabbit.listener.MessageListenerContainer;
-import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
-import org.springframework.amqp.rabbit.listener.RabbitListenerEndpoint;
-import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -85,6 +81,9 @@ public class RabbitMQConfiguration {
 
 	/** Queue to notify when a user / study is updated / deleted. */
 	public static final String STUDY_USER_QUEUE = "study-user";
+
+	/** Update / create a study user to users MS. */
+	public static final String STUDY_USER_QUEUE_USERS = "study-user-queue-users";
 
 	/** Queue to notify when a subject / study is updated / deleted. */
 	public static final String SUBJECT_STUDY_QUEUE = "subject-study";
@@ -246,7 +245,12 @@ public class RabbitMQConfiguration {
 	public static Queue studyUserQueueImport() {
 		return new Queue(STUDY_USER_QUEUE_IMPORT, true);
 	}
-	
+
+	@Bean
+	public static Queue studyUserQueueUsers() {
+		return new Queue(STUDY_USER_QUEUE_USERS, true);
+	}
+
 	@Bean
 	public static Queue studyUserDatasetQueue() {
 		return new Queue(STUDY_USER_QUEUE_DATASET, true);
