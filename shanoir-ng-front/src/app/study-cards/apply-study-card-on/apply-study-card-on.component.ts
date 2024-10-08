@@ -188,9 +188,7 @@ export class ApplyStudyCardOnComponent implements OnInit {
             },
             { headerName: "Study", field: "examination.study.name", defaultField: 'examination.study.id', orderBy: ['examination.studyId'],
 				route: (dsAcq: DatasetAcquisition) => '/study/details/' + dsAcq?.examination?.study?.id},
-            { headerName: "Examination date", type: 'date', field: 'examination.examinationDate', cellRenderer: (params: any) => {
-                return this.dateRenderer(params.data.examination?.examinationDate);
-            }},
+            { headerName: "Examination date", type: 'date', field: 'examination.examinationDate' },
             { headerName: "Acquisition Center", field: "acquisitionEquipment.center.name", disableSorting: true,
 				route: (dsAcq: DatasetAcquisition) => dsAcq?.acquisitionEquipment?.center? '/center/details/' + dsAcq?.acquisitionEquipment?.center?.id : null
 			},
@@ -227,13 +225,6 @@ export class ApplyStudyCardOnComponent implements OnInit {
                 + " (" + DatasetModalityType.getLabel(manufModel.datasetModalityType) + ") " + acqEqpt.serialNumber
         }
     }
-
-    private dateRenderer(date: number): string {
-        if (date) {
-            return new Date(date).toLocaleDateString();
-        }
-        return null;
-    };
 
     onSelectionChange() {
         this.nbSelectedDatasets = 0;
