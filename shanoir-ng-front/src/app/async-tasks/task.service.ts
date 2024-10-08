@@ -56,7 +56,7 @@ export class TaskService extends EntityService<Task> {
         this.http.get(endpoint, { observe: 'response', responseType: 'blob' })
             .toPromise()
             .then((response: HttpResponse<Blob>) => {
-                if (response.status == 200) {
+                if (response.status == 200 || response.status == 204) {
                     AppUtils.browserDownloadFileFromResponse(response);
                 } else {
                     this.consoleService.log('error', 'Statistics file not found or deleted (after 6 hours).');

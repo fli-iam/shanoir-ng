@@ -46,7 +46,7 @@ public class CreateStatisticsService {
         float progress = 0;
         String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
         File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
-        File statisticsFile = recreateFile(userDir + File.separator + "shanoirExportStatistics.tsv");
+        File statisticsFile = recreateFile(userDir + File.separator + "shanoirExportStatistics_" + event.getId() + ".tsv");
         File zipFile = recreateFile(userDir + File.separator + "shanoirExportStatistics_" + event.getId() + ZIP);
 
         // Get the data
@@ -65,29 +65,21 @@ public class CreateStatisticsService {
                 bw.newLine();
             }
 
-        } catch (jakarta.persistence.NoResultException e) {
-            event.setStatus(ShanoirEvent.ERROR);
-            event.setMessage("No statistics found.");
-            event.setProgress(-1f);
-            eventService.publishEvent(event);
-            throw new RestServiceException(new ErrorModel(HttpStatus.NOT_FOUND.value(), "No result found.", e));
         } catch (Exception e) {
             event.setStatus(ShanoirEvent.ERROR);
             event.setMessage("Error during fetching of statistics.");
             event.setProgress(-1f);
             eventService.publishEvent(event);
-            throw new RestServiceException(
-                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while querying the database.", e));
+            LOG.error("Error during fetching of statistics with id : " + event.getId());
+        } finally {
+            zipSingleFile(statisticsFile, zipFile);
+            statisticsFile.delete();
+            event.setObjectId(String.valueOf(event.getId()));
+            event.setProgress(1f);
+            event.setMessage("Statistics fetched with params : " + params + "\nDownload available for 6 hours");
+            event.setStatus(ShanoirEvent.SUCCESS);
+            eventService.publishEvent(event);
         }
-
-        zipSingleFile(statisticsFile, zipFile);
-        statisticsFile.delete();
-
-        event.setObjectId(String.valueOf(event.getId()));
-        event.setProgress(1f);
-        event.setMessage("Statistics fetched with params : " + params + "\nDownload available for 6 hours");
-        event.setStatus(ShanoirEvent.SUCCESS);
-        eventService.publishEvent(event);
     }
 
     /**

@@ -56,6 +56,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Input() maxResults: number = 20;
     @Input() subRowsKey: string;
     @Output() registerRefresh: EventEmitter<(number?) => void> = new EventEmitter();
+    @Output() downloadStatsEvent: EventEmitter<any> = new EventEmitter();
     page: Page<Object>;
     isLoading: boolean = false;
     maxResultsField: number;
@@ -188,10 +189,8 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         else if (this.selectionAllowed) this.onSelectChange(item, !this.isSelected(item));
     }
 
-    downloadStats(item: any) {
-        if (item instanceof Task && item.eventType == "downloadStatistics.event" && item.progress == 1) {
-            this.taskService.downloadStats(item);
-        }
+    downloadStats(item) {
+        this.downloadStatsEvent.emit(item);
     }
 
     public static getCellValue(item: Object, col: ColumnDefinition): any {

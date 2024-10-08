@@ -141,6 +141,8 @@ export class DatasetService extends EntityService<Dataset> {
             response => {
                 if (response.status != 204) {
                     this.consoleService.log('error', 'Error during creation of statistics.');
+                } else {
+                    this.consoleService.log('info', 'Statistics are being prepared, check the Jobs page to see its progress.');
                 }
             }
         )

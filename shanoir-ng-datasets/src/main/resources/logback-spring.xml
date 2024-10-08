@@ -60,7 +60,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </logger>
 	
     <logger name="org.shanoir.ng.dataset.service.CreateStatisticsService" level="INFO" additivity="false">
-        <appender-ref ref="CREATE_STATS_LOG" />
+        <appender-ref ref="FILE" />
     </logger>
 	
     <logger name="org.shanoir.ng.dicom.DIMSEService" level="INFO" additivity="false">
