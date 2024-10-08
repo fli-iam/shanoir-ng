@@ -48,7 +48,7 @@ export class TreeService {
 
     _selection: Selection = null;
     public studyNode: StudyNode = null;
-    private studyNodePromise: SuperPromise<void> = new SuperPromise();
+    studyNodePromise: SuperPromise<void> = new SuperPromise();
     study: Study;
     studyPromise: SuperPromise<Study> = new SuperPromise();
     public nodeInit: SuperPromise<void> = new SuperPromise(); 

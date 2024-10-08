@@ -15,21 +15,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <button class="dl-button" 
 			type="button" 
 			(click)="downloadSelected()" 
-			[disabled]="!(selectedDatasetNodes?.length > 0) && !(selectedAcquisitionNodes?.length > 0) && !(selectedExaminationNodes?.length > 0)" 
+			[disabled]="selectionEmpty" 
 			title="Download selection">
 		<i class="fas fa-download"></i>
 	</button>
     <button class="dl-button" 
 			type="button" 
 			(click)="goToProcessing()" 
-			[disabled]="!(selectedDatasetNodes?.length > 0) && !(selectedAcquisitionNodes?.length > 0) && !(selectedExaminationNodes?.length > 0)" 
+			[disabled]="selectionEmpty" 
 			title="Process selection">
 		<i class="fas fa-rocket"></i>
 	</button>
     <button class="dl-button" 
 			type="button" 
 			(click)="openInViewer()" 
-			[disabled]="!canOpenDicomSingleExam && !canOpenDicomMultiExam" 
+			[disabled]="!loaded || (!canOpenDicomSingleExam && !canOpenDicomMultiExam)" 
 			[title]="canOpenDicomMultiExam ? 
 					'View DICOM images for the selected acquisitions/examinations' 
 					: 'View selected DICOM images for the one examination selected'">
@@ -38,7 +38,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<button class="dl-button" 
 			type="button" 
 			(click)="resetSelection()" 
-			[disabled]="!(selectedDatasetNodes?.length > 0) && !(selectedAcquisitionNodes?.length > 0) && !(selectedExaminationNodes?.length > 0)" 
+			[disabled]="selectionEmpty" 
 			title="Unselect all">
 		<i class="fas fa-broom"></i>
 	</button>

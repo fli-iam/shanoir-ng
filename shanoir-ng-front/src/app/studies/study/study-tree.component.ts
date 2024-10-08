@@ -15,16 +15,12 @@ import { Component } from '@angular/core';
 
 import { Router } from '@angular/router';
 import { TaskState } from 'src/app/async-tasks/task.model';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { ExecutionDataService } from 'src/app/vip/execution.data-service';
-import { TreeService } from './tree.service';
-import {DatasetAcquisitionNode, DatasetNode, ExaminationNode, ShanoirNode, StudyNode} from 'src/app/tree/tree.model';
-import { MsgBoxService } from 'src/app/shared/msg-box/msg-box.service';
 import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/confirm-dialog.service';
-import {Examination} from "../../examinations/shared/examination.model";
-import {environment} from "../../../environments/environment";
-import {ConsoleService} from "../../shared/console/console.service";
-import {Dataset} from "../../datasets/shared/dataset.model";
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, StudyNode } from 'src/app/tree/tree.model';
+import { ExecutionDataService } from 'src/app/vip/execution.data-service';
+import { environment } from "../../../environments/environment";
+import { TreeService } from './tree.service';
 
 
 @Component({
@@ -41,14 +37,16 @@ export class StudyTreeComponent {
     protected downloadState: TaskState;
     canOpenDicomSingleExam: boolean = false;
     canOpenDicomMultiExam: boolean = false;
+    protected loaded: boolean = false;
 
     constructor(
             protected treeService: TreeService,
             private processingService: ExecutionDataService,
             private router: Router,
             private downloadService: MassDownloadService,
-            private dialogService: ConfirmDialogService,
-            private consoleService: ConsoleService) {
+            private dialogService: ConfirmDialogService) {
+
+        treeService.studyNodePromise.then(() => this.loaded = true)
     }
 
     protected set selectedDatasetNodes(selectedDatasetNodes: DatasetNode[]) {
@@ -57,6 +55,15 @@ export class StudyTreeComponent {
 
     get selectedDatasetNodes(): DatasetNode[] {
         return this._selectedDatasetNodes;
+    }
+
+
+    get selectionEmpty(): boolean {
+        return !this.loaded || (
+            !(this.selectedDatasetNodes?.length > 0) 
+            && !(this.selectedAcquisitionNodes?.length > 0) 
+            && !(this.selectedExaminationNodes?.length > 0)
+        );
     }
 
     goToProcessing() {
