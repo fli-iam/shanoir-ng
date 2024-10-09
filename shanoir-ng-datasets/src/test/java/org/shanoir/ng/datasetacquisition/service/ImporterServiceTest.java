@@ -108,8 +108,6 @@ public class ImporterServiceTest {
 
 	private Examination exam;
 
-	private static final Logger LOG = LoggerFactory.getLogger(ImporterServiceTest.class);
-
 	@BeforeEach
 	public void setUp() throws IOException {
 		exam = new Examination();
@@ -136,7 +134,7 @@ public class ImporterServiceTest {
 		ExpressionFormat expressionFormat = new ExpressionFormat();
 		List<DatasetFile> datasetFiles = new ArrayList<DatasetFile>();
 		DatasetFile datasetFile = new DatasetFile();
-		datasetFile.setPath("");
+
 		datasetFiles.add(datasetFile);
 		expressionFormat.setDatasetFiles(datasetFiles);
 		expressionFormats.add(expressionFormat);
@@ -176,15 +174,9 @@ public class ImporterServiceTest {
 
 		//DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob, dicomAttributes);
 
-		DatasetFile datasetFile1 = serie.getFirstDatasetFileForCurrentSerie();
-		LOG.debug("getFirstDatasetFileForCurrentSerie: " + datasetFile1);
-
-		dicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced());
-
-
 		when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(Mockito.eq(serie), Mockito.eq(0), Mockito.eq(importJob), Mockito.any())).thenReturn(datasetAcq);
 		when(studyUserRightRepo.findByStudyId(importJob.getStudyId())).thenReturn(Collections.emptyList());
-		when(dicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced())).thenReturn(new Attributes());
+		when(dicomProcessing.getDicomObjectAttributes(Mockito.eq(serie.getFirstDatasetFileForCurrentSerie()), Mockito.eq(serie.getIsEnhanced()))).thenReturn(new Attributes());
 		when(qualityCardService.findByStudy(examination.getStudyId())).thenReturn(Utils.toList(new QualityCard())); // TODO perform quality card tests
 		when(qualityService.retrieveQualityCardResult(importJob)).thenReturn(new QualityCardResult());
 
