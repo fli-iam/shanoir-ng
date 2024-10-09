@@ -52,6 +52,8 @@ import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.service.QualityCardService;
 import org.shanoir.ng.utils.Utils;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
@@ -106,6 +108,8 @@ public class ImporterServiceTest {
 
 	private Examination exam;
 
+	private static final Logger LOG = LoggerFactory.getLogger(ImporterServiceTest.class);
+
 	@BeforeEach
 	public void setUp() throws IOException {
 		exam = new Examination();
@@ -133,7 +137,6 @@ public class ImporterServiceTest {
 		List<DatasetFile> datasetFiles = new ArrayList<DatasetFile>();
 		DatasetFile datasetFile = new DatasetFile();
 		datasetFile.setPath("");
-		
 		datasetFiles.add(datasetFile);
 		expressionFormat.setDatasetFiles(datasetFiles);
 		expressionFormats.add(expressionFormat);
@@ -172,6 +175,12 @@ public class ImporterServiceTest {
 		DatasetAcquisition datasetAcq = new MrDatasetAcquisition();
 
 		//DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob, dicomAttributes);
+
+		DatasetFile datasetFile1 = serie.getFirstDatasetFileForCurrentSerie();
+		LOG.debug("getFirstDatasetFileForCurrentSerie: " + datasetFile1);
+
+		dicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced());
+
 
 		when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(Mockito.eq(serie), Mockito.eq(0), Mockito.eq(importJob), Mockito.any())).thenReturn(datasetAcq);
 		when(studyUserRightRepo.findByStudyId(importJob.getStudyId())).thenReturn(Collections.emptyList());
