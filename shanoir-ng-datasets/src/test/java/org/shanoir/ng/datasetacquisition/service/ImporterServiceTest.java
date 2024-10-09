@@ -110,7 +110,6 @@ public class ImporterServiceTest {
 
 	@BeforeEach
 	public void setUp() throws IOException {
-		MockitoAnnotations.openMocks(this);
 		exam = new Examination();
 		exam.setExaminationDate(LocalDate.now());
 		exam.setId(1l);
