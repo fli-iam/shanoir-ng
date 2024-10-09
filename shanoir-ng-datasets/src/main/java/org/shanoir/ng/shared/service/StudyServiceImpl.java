@@ -20,10 +20,6 @@ import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.model.Tag;
-import org.shanoir.ng.tag.repository.StudyTagRepository;
-import org.shanoir.ng.vip.resulthandler.ResultHandlerService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -112,6 +108,10 @@ public class StudyServiceImpl implements StudyService {
 	public List<String> validate(Study updated, Study current){
 
 		List<String> errors = new ArrayList<>();
+
+		if (current.getStudyTags() == null) {
+			return errors;
+		}
 
 		for(StudyTag tag : current.getStudyTags()){
             if (!updated.getStudyTags().contains(tag)
