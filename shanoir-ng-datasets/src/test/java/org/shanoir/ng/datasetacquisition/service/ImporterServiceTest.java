@@ -23,7 +23,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
@@ -177,7 +176,6 @@ public class ImporterServiceTest {
 
 		when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(Mockito.eq(serie), Mockito.eq(0), Mockito.eq(importJob), Mockito.any())).thenReturn(datasetAcq);
 		when(studyUserRightRepo.findByStudyId(importJob.getStudyId())).thenReturn(Collections.emptyList());
-		when(serie.getFirstDatasetFileForCurrentSerie()).thenReturn(datasetFile);
 		when(dicomProcessing.getDicomObjectAttributes(any(DatasetFile.class), anyBoolean())).thenReturn(new Attributes());
 		when(qualityCardService.findByStudy(examination.getStudyId())).thenReturn(Utils.toList(new QualityCard())); // TODO perform quality card tests
 		when(qualityService.retrieveQualityCardResult(importJob)).thenReturn(new QualityCardResult());
