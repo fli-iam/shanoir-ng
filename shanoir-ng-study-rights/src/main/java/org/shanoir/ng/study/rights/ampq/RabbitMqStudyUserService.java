@@ -22,7 +22,6 @@ import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserInterface;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.study.rights.command.StudyUserCommand;
-import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +33,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,8 +41,6 @@ import java.util.stream.Collectors;
 public class RabbitMqStudyUserService {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(RabbitMqStudyUserService.class);
-
-	private static final String ROLE_ADMIN = "ROLE_ADMIN";
 
 	@Autowired
 	private StudyUserUpdateService service;
@@ -73,20 +69,13 @@ public class RabbitMqStudyUserService {
 
 	@RabbitListener(queues = RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
-	@Transactional    
+	@Transactional
 	public List<Long> getStudiesICanAdmin(Long userId) {
-		List<Long> studiesId = new ArrayList<>();
-		List<StudyUser> sus;
-		if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
-			sus = Utils.toList(this.studyUserRightsRepository.findAll());
-		} else {
-			sus = Utils.toList(this.studyUserRightsRepository.findByUserIdAndRight(userId, StudyUserRight.CAN_ADMINISTRATE.getId()));
-		}
+		List<StudyUser> sus = Utils.toList(this.studyUserRightsRepository.findByUserIdAndRight(userId, StudyUserRight.CAN_ADMINISTRATE.getId()));
     	if (CollectionUtils.isEmpty(sus)) {
     		return null;
     	}
-    	return sus.stream().map(studyUser ->
-    		studyUser.getStudyId()
+    	return sus.stream().map(StudyUser::getStudyId
     	).collect(Collectors.toList());
     }
 
