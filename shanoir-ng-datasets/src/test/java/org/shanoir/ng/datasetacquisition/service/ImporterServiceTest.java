@@ -16,12 +16,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.BDDMockito.given;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
@@ -52,8 +54,6 @@ import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.service.QualityCardService;
 import org.shanoir.ng.utils.Utils;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
@@ -110,6 +110,7 @@ public class ImporterServiceTest {
 
 	@BeforeEach
 	public void setUp() throws IOException {
+		MockitoAnnotations.openMocks(this);
 		exam = new Examination();
 		exam.setExaminationDate(LocalDate.now());
 		exam.setId(1l);
@@ -134,17 +135,18 @@ public class ImporterServiceTest {
 		ExpressionFormat expressionFormat = new ExpressionFormat();
 		List<DatasetFile> datasetFiles = new ArrayList<DatasetFile>();
 		DatasetFile datasetFile = new DatasetFile();
+		datasetFile.setPath("/fakePath");
 
 		datasetFiles.add(datasetFile);
 		expressionFormat.setDatasetFiles(datasetFiles);
 		expressionFormats.add(expressionFormat);
 		dataset.setExpressionFormats(expressionFormats);
-		datasets.add(dataset );
-		serie.setDatasets(datasets );
+		datasets.add(dataset);
+		serie.setDatasets(datasets);
 		series.add(serie);
 		study.setSeries(series);
-		studies.add(study );
-		patient.setStudies(studies );
+		studies.add(study);
+		patient.setStudies(studies);
 		patients.add(patient);
 		
 		ImportJob importJob = new ImportJob();
@@ -176,7 +178,8 @@ public class ImporterServiceTest {
 
 		when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(Mockito.eq(serie), Mockito.eq(0), Mockito.eq(importJob), Mockito.any())).thenReturn(datasetAcq);
 		when(studyUserRightRepo.findByStudyId(importJob.getStudyId())).thenReturn(Collections.emptyList());
-		when(dicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced())).thenReturn(new Attributes());
+		when(serie.getFirstDatasetFileForCurrentSerie()).thenReturn(datasetFile);
+		when(dicomProcessing.getDicomObjectAttributes(any(DatasetFile.class), anyBoolean())).thenReturn(new Attributes());
 		when(qualityCardService.findByStudy(examination.getStudyId())).thenReturn(Utils.toList(new QualityCard())); // TODO perform quality card tests
 		when(qualityService.retrieveQualityCardResult(importJob)).thenReturn(new QualityCardResult());
 
