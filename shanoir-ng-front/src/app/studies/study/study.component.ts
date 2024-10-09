@@ -11,9 +11,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import {Component, ElementRef, EventEmitter, Output, ViewChild} from '@angular/core';
 import { AbstractControl, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 
 import { KeyValue } from "@angular/common";
 import { TaskState } from 'src/app/async-tasks/task.model';
@@ -46,6 +46,7 @@ import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
+import {SuperPromise} from "../../utils/super-promise";
 import { Selection } from './tree.service';
 
 @Component({
@@ -59,7 +60,6 @@ export class StudyComponent extends EntityComponent<Study> {
     @ViewChild('memberTable', { static: false }) table: TableComponent;
     @ViewChild('input', { static: false }) private fileInput: ElementRef;
     @ViewChild('duaInput', { static: false }) private duaFileInput: ElementRef;
-
     protected pdfDownloadState: TaskState = new TaskState();
     protected duaDownloadState: TaskState = new TaskState();
     protected studyDownloadState: TaskState = new TaskState();
@@ -68,10 +68,10 @@ export class StudyComponent extends EntityComponent<Study> {
     selectedCenter: IdName;
     users: User[] = [];
     uploading: boolean = false;
-
     protected protocolFiles: File[];
     protected dataUserAgreement: File;
-
+    openHistory: SuperPromise<void> = new SuperPromise<void>();
+    public selectedDatasetIds: number[];
     protected hasDownloadRight: boolean;
     accessRequests: AccessRequest[];
     isStudyAdmin: boolean;
@@ -89,6 +89,8 @@ export class StudyComponent extends EntityComponent<Study> {
         return b.value - a.value;
     };
 
+    public keycloakService: KeycloakService;
+
     constructor(
             private route: ActivatedRoute,
             private centerService: CenterService,
@@ -98,10 +100,22 @@ export class StudyComponent extends EntityComponent<Study> {
             private studyRightsService: StudyRightsService,
             private studyCardService: StudyCardService,
             private accessRequestService: AccessRequestService,
-            private downloadService: MassDownloadService) {
-
+            private processingService: ExecutionDataService,
+            private downloadService: MassDownloadService
+            ) {
         super(route, 'study');
         this.activeTab = 'general';
+    }
+
+    public set activeTab(param : string) {
+        super.activeTab = param;
+        if(this.activeTab == "history") {
+            this.openHistory.resolve();
+        }
+    }
+
+    public get activeTab():string {
+        return super.activeTab;
     }
 
     public get study(): Study { return this.entity; }
@@ -120,6 +134,10 @@ export class StudyComponent extends EntityComponent<Study> {
 
     getService(): EntityService<Study> {
         return this.studyService;
+    }
+
+    loadHistory() {
+        this.openHistory.resolve();
     }
 
     protected getTreeSelection: () => Selection = () => {
@@ -163,6 +181,7 @@ export class StudyComponent extends EntityComponent<Study> {
         } else {
             return Promise.resolve();
         }
+
     }
 
     initEdit(): Promise<void> {
@@ -250,7 +269,6 @@ export class StudyComponent extends EntityComponent<Study> {
         }));
         return formGroup;
     }
-
     private setLabeledSizes(study: Study): Promise<void> {
         let waitUploads: Promise<void> = this.studyService.fileUploads.has(study.id)
             ? this.studyService.fileUploads.get(study.id)
@@ -606,10 +624,6 @@ export class StudyComponent extends EntityComponent<Study> {
                 this.study.subjectStudyList = study.subjectStudyList;
             });
         }, 1000);
-    }
-
-    downloadAll() {
-        this.downloadService.downloadAllByStudyId(this.study.id,  this.studyDownloadState);
     }
 
     storageVolumePrettyPrint(size: number) {

@@ -97,7 +97,13 @@ public class AccessRequestApiController implements AccessRequestApi {
 		createdRequest.setUser(user);
 
 		// Send event
-		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.ACCESS_REQUEST_EVENT, "" + createdRequest.getId(), KeycloakUtil.getTokenUserId(), "", 1, createdRequest.getStudyId()));
+		eventService.publishEvent(new ShanoirEvent(
+				ShanoirEventType.ACCESS_REQUEST_EVENT,
+				"",
+				KeycloakUtil.getTokenUserId(),
+				"New access request from " + user.getUsername(),
+				1,
+				createdRequest.getStudyId()));
 
 		// Send notification to study admin
 		emailService.notifyStudyManagerAccessRequest(createdRequest);
@@ -157,13 +163,15 @@ public class AccessRequestApiController implements AccessRequestApi {
 			if (resolvedRequest.getUser().isAccountRequestDemand() != null && resolvedRequest.getUser().isAccountRequestDemand()) {
 				this.userService.confirmAccountRequest(resolvedRequest.getUser());
 			}
+
 			// Update study to add a new user
 			ShanoirEvent subscription = new ShanoirEvent(
 					ShanoirEventType.USER_ADD_TO_STUDY_EVENT,
 					resolvedRequest.getStudyId().toString(),
 					resolvedRequest.getUser().getId(),
 					resolvedRequest.getUser().getUsername(),
-					ShanoirEvent.SUCCESS);
+					ShanoirEvent.SUCCESS,
+					resolvedRequest.getStudyId());
 
 			this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE, mapper.writeValueAsString(subscription));
 		} else {
@@ -192,20 +200,31 @@ public class AccessRequestApiController implements AccessRequestApi {
 
 		boolean isEmail = emailOrLogin.contains("@");
 
-		Optional<User> user;
+		User user;
 
 		if (isEmail) {
 			// Check if user with such email/username exists
-			user = this.userService.findByEmail(emailOrLogin);
+			user = this.userService.findByEmail(emailOrLogin).orElse(null);
 		} else {
-			user = this.userService.findByUsernameForInvitation(emailOrLogin);
+			user = this.userService.findByUsernameForInvitation(emailOrLogin).orElse(null);
 		}
 
-		// User exists => return an access request to be added
-		if (user.isPresent()) {
+		if (user != null) {
+			// Update study to add a new user
+			ShanoirEvent subscription = new ShanoirEvent(
+					ShanoirEventType.USER_ADD_TO_STUDY_EVENT,
+					String.valueOf(studyId),
+					KeycloakUtil.getTokenUserId(),
+					"Invite and add user " + user.getUsername(),
+					ShanoirEvent.SUCCESS,
+					studyId);
+			eventService.publishEvent(subscription);
+
+
+			// User exists => return an access request to be added
 			// create a new access request to return
 			AccessRequest request = new AccessRequest();
-			request.setUser(user.get());
+			request.setUser(user);
 			request.setStudyId(studyId);
 			request.setStudyName(studyName);
 			request.setMotivation("From study manager");

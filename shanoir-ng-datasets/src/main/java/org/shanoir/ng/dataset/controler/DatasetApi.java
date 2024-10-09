@@ -23,7 +23,7 @@ import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
+import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
@@ -79,7 +79,7 @@ public interface DatasetApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/{datasetId}", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_SEE_ALL'))")
-	ResponseEntity<DatasetAndProcessingsDTOInterface> findDatasetById(
+	ResponseEntity<DatasetWithDependenciesDTOInterface> findDatasetById(
 			@Parameter(description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId);
 
 	@Operation(summary = "", description = "Updates a dataset")
@@ -323,7 +323,7 @@ public interface DatasetApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PostMapping(value = "/allById", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_SEE_ALL'))")
-	ResponseEntity<List<DatasetAndProcessingsDTOInterface>> findDatasetsByIds(
+	ResponseEntity<List<DatasetWithDependenciesDTOInterface>> findDatasetsByIds(
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds);
 
 	@Operation(summary = "", description = "Updates the study tags of a dataset")

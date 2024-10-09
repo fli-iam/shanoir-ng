@@ -91,7 +91,6 @@ public class ExecutionApiController implements ExecutionApi {
 
         // 1: Get dataset and check rights
         List<Dataset> inputDatasets = this.getDatasetsFromParams(candidate.getDatasetParameters());
-
         this.checkRightsForExecution(inputDatasets);
 
         ExecutionMonitoring executionMonitoring = this.createExecutionMonitoring(candidate, inputDatasets);
@@ -143,7 +142,7 @@ public class ExecutionApiController implements ExecutionApi {
      * @param executionMonitoring
      * @return
      */
-    private VipExecutionDTO createVipExecution(ExecutionCandidateDTO candidate, ExecutionMonitoring executionMonitoring) {
+    private VipExecutionDTO createVipExecution(ExecutionCandidateDTO candidate, ExecutionMonitoring executionMonitoring) throws EntityNotFoundException {
         VipExecutionDTO dto = new VipExecutionDTO();
         dto.setName(candidate.getName());
         dto.setPipelineIdentifier(candidate.getPipelineIdentifier());
@@ -163,7 +162,7 @@ public class ExecutionApiController implements ExecutionApi {
      * @param candidate
      * @return
      */
-    private Map<String, java.lang.Object> getInputValues(ExecutionMonitoring createdMonitoring, ExecutionCandidateDTO candidate) {
+    private Map<String, java.lang.Object> getInputValues(ExecutionMonitoring createdMonitoring, ExecutionCandidateDTO candidate) throws EntityNotFoundException {
 
         Map<String, Object> inputValues = new HashMap<>(candidate.getInputParameters());
 
@@ -202,7 +201,7 @@ public class ExecutionApiController implements ExecutionApi {
                 + "?format=" + exportFormat
                 + "&resourceId=" + resourceId
                 + "&token=" + authenticationToken
-                + (candidate.getConverterId()  != null? ("&converter=" + candidate.getConverterId()) : "")
+                + (candidate.getConverterId()  != null ? ("&converterId=" + candidate.getConverterId()) : "")
                 + "&refreshToken=" + candidate.getRefreshToken()
                 + "&clientId=" + candidate.getClient()
                 + "&md5=none&type=File";
@@ -215,7 +214,7 @@ public class ExecutionApiController implements ExecutionApi {
      * @param inputDatasets
      * @return
      */
-    private ExecutionMonitoring createExecutionMonitoring(ExecutionCandidateDTO execution, List<Dataset> inputDatasets) {
+    private ExecutionMonitoring createExecutionMonitoring(ExecutionCandidateDTO execution, List<Dataset> inputDatasets) throws RestServiceException {
         ExecutionMonitoring executionMonitoring = new ExecutionMonitoring();
         executionMonitoring.setName(execution.getName());
         executionMonitoring.setPipelineIdentifier(execution.getPipelineIdentifier());
@@ -227,6 +226,8 @@ public class ExecutionApiController implements ExecutionApi {
         executionMonitoring.setDatasetProcessingType(DatasetProcessingType.valueOf(execution.getProcessingType()));
         executionMonitoring.setOutputProcessing(execution.getOutputProcessing());
         executionMonitoring.setInputDatasets(inputDatasets);
+        executionMonitoring.setUsername(KeycloakUtil.getTokenUserName());
+        executionMonitoringService.validateExecutionMonitoring(executionMonitoring);
         return this.executionMonitoringService.create(executionMonitoring);
     }
 

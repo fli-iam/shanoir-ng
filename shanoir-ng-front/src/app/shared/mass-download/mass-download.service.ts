@@ -90,10 +90,6 @@ export class MassDownloadService {
         this.winOs = deviceInformationService.getDeviceInfo()?.os?.toLocaleLowerCase().includes('windows');
     }
 
-    downloadAllByStudyId(studyId: number, downloadState?: TaskState): Promise<void> {
-        return this.downloadByDatasets({studyId: studyId}, downloadState);
-    }
-
     downloadAllByExaminationId(examinationId: number, downloadState?: TaskState): Promise<void> {
         return this.downloadByDatasets({examinationId: examinationId}, downloadState);
     }
@@ -116,20 +112,20 @@ export class MassDownloadService {
     private downloadByDatasets(inputIds: DownloadInputIds, downloadState?: TaskState): Promise<void> {
         return this.openModal(inputIds).then(ret => {
             if (ret != 'cancel') {
-                return this._downloadDatasets(ret, downloadState).catch(error => {
-                    if (ret.datasets.length > this.datasetService.MAX_DATASETS_IN_ZIP_DL) {
-                        this.dialogService.error('Too many datasets', 'You are trying to download '
-                            + ret.datasets.length + ' datasets while Shanoir sets a limit to ' + this.datasetService.MAX_DATASETS_IN_ZIP_DL
-                            + ' in a single zip. Please confider using a browser compatible with the Shanoir unlimited download functionality. See link below.',
-                            "https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker#browser_compatibility" );
-                    }
-                });
+                return this._downloadDatasets(ret, downloadState);
             } else return Promise.resolve();
         }).catch(error => {
             if (error == this.BROWSER_COMPAT_ERROR_MSG) {
                     return this.openAltModal(inputIds).then(ret => {
                         if (ret != 'cancel') {
-                            return this._downloadAlt(ret.datasets.map(ds => ds.id), ret.format, ret.converter, downloadState);
+                            return this._downloadAlt(ret.datasets.map(ds => ds.id), ret.format, ret.converter, downloadState).catch(error => {
+                                if (ret.datasets.length > this.datasetService.MAX_DATASETS_IN_ZIP_DL) {
+                                    this.dialogService.error('Too many datasets', 'You are trying to download '
+                                        + ret.datasets.length + ' datasets while Shanoir sets a limit to ' + this.datasetService.MAX_DATASETS_IN_ZIP_DL
+                                        + ' in a single zip. Please confider using a browser compatible with the Shanoir unlimited download functionality. See link below.',
+                                        "https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker#browser_compatibility" );
+                                }
+                            });
                         } else return Promise.resolve();
                     });
             } else throw error;
@@ -142,7 +138,7 @@ export class MassDownloadService {
     }
 
     // This method is used to download in
-    private _downloadAlt(datasetIds: number[], format: Format, converter? : number, downloadState?: TaskState): any {
+    private _downloadAlt(datasetIds: number[], format: Format, converter? : number, downloadState?: TaskState): Promise<void> {
         let task: Task = this.createTask(datasetIds.length);
 
         downloadState = new TaskState();
@@ -373,7 +369,7 @@ export class MassDownloadService {
     }
 
     private buildExtractedFilePath(dataset: Dataset, zipName: string, fileName: string, setup: DownloadSetup): string {
-        return this.buildFoldersPath(dataset, setup) 
+        return this.buildFoldersPath(dataset, setup)
             + (setup.datasetFolders ? zipName.replace('.zip', '') + '/' : '')
             + fileName;
     }
@@ -381,8 +377,8 @@ export class MassDownloadService {
     private buildShortExtractedFilePath(dataset: Dataset, fileIndex: number, fileName: string, setup: DownloadSetup): string {
             let fileNameSplit: string[] = fileName.split('.');
             let extension: string =  fileNameSplit.pop();
-            return this.buildShortFoldersPath(dataset, setup) 
-                + (setup.datasetFolders ? 'ds' + dataset.id + '/' : '') 
+            return this.buildShortFoldersPath(dataset, setup)
+                + (setup.datasetFolders ? 'ds' + dataset.id + '/' : '')
                 + fileIndex + '.' + extension;
     }
 
@@ -439,7 +435,6 @@ export class MassDownloadService {
                 if (error instanceof ShanoirError) {
                     throw error;
                 } else {
-                    console.error(filename);
                     throw new ShanoirError({error: {code: ShanoirError.FILE_PATH_TOO_LONG, message: 'Probable reason: directory path too long for Windows, max 260 characters (<your chosen directory>/' + path + ')', details: error + ''}});
                 }
             });

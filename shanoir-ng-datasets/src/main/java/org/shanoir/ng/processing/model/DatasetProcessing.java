@@ -69,6 +69,9 @@ public class DatasetProcessing extends AbstractEntity {
 	@JoinColumn(name = "parent_id")
 	private DatasetProcessing parent;
 
+	/** Authenticated user that created the processing */
+	private String username;
+
 	public DatasetProcessing() {
 
 	}
@@ -85,6 +88,7 @@ public class DatasetProcessing extends AbstractEntity {
 		this.processingDate = dproc.getProcessingDate();
 		this.studyId = dproc.getStudyId();
 		this.parent = dproc.getParent();
+		this.username = dproc.getUsername();
 	}
 
 	/**
@@ -191,5 +195,13 @@ public class DatasetProcessing extends AbstractEntity {
 
 	public void setParent(DatasetProcessing parent) {
 		this.parent = parent;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
 	}
 }

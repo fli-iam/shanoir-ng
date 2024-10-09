@@ -240,14 +240,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span *ngIf="page && browserSearch">Found : {{page?.numberOfElements}}</span>
                 <span *ngIf="page">Total : {{page?.totalElements}}</span>
                 <span>Page size : <input class="max-results" [(ngModel)]="maxResultsField" (change)="updateMaxResults()" type="text"/></span>
-                <span>Go to page : <input class="max-results" [(ngModel)]="pageNumber" (keyup.enter)="jumpToPage(pageNumber)" type="number" [min]="0" [max]="page?.totalPages"/></span>
-                <span (click)="settingsOpened = true" class="clickable" [class.left-icon]="!compactMode" title="Columns settings">
+                <span>Go to : <input class="max-results" [(ngModel)]="pageNumber" (keyup.enter)="jumpToPage(pageNumber)" type="number" [min]="0" [max]="page?.totalPages"/></span>
+                <span (click)="settingsOpened = true" class="clickable" title="Columns settings">
                     <i class="fas fa-cog"></i>
                     <span *ngIf="!compactMode">Columns settings</span>
                 </span>
-                <span (click)="resetColumns()" class="clickable" [class.left-icon]="!compactMode" title="Reset columns">
+                <span (click)="resetColumns()" class="clickable" title="Reset columns">
                     <i class="fas fa-undo-alt"></i>
                     <span *ngIf="!compactMode">Reset columns</span>
+                </span>
+                <span (click)="exportTable()" class="clickable" title="Export as CSV">
+                    <i class="fas fa-file-export"></i>
+                    <span *ngIf="!compactMode">Export CSV</span>
                 </span>
             </ng-container>
         </span>

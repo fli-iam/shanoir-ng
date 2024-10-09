@@ -61,7 +61,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     protected saveError: ShanoirError;
     protected onSubmitValidatedFields: string[] = [];
     @ViewChild('formContainer', {static: false}) formContainerElement: ElementRef;
-    activeTab: string;
+    _activeTab: string;
     protected isMainComponent: boolean;
     idPromise: SuperPromise<number> = new SuperPromise();
     entityPromise: SuperPromise<T> = new SuperPromise();
@@ -130,6 +130,14 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
         if (entity) this.entityPromise.resolve(entity);
     }
 
+    public get activeTab(): string {
+        return this._activeTab;
+    }
+
+    public set activeTab(param: string) {
+        this._activeTab = param;
+    }
+
     private loadEntity(): Promise<T> { 
         let promise: Promise<T>;
         if (this.entityInput) {
@@ -181,7 +189,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
         this.subscriptions.push(
             this.activatedRoute.fragment.subscribe(fragment => {
                 if (fragment) {
-                    this.activeTab = fragment;
+                    this._activeTab = fragment;
                     this.reloadRequiredStyles();
                 }
             })
