@@ -185,8 +185,10 @@ public class ImporterService {
                     qualityResult = qualityService.retrieveQualityCardResult(importJob);
                     if (!qualityResult.isEmpty()) {
                         LOG.info("Retrieving Quality Control result from ShanoirUploader.");
-                        subjectStudy.setQualityTag(qualityResult.get(0).getTagSet());
-                        qualityResult.addUpdatedSubjectStudy(subjectStudy);
+                        if(subjectStudy != null) {
+                            subjectStudy.setQualityTag(qualityResult.get(0).getTagSet());
+                            qualityResult.addUpdatedSubjectStudy(subjectStudy);
+                        }
                     }
                 }
                                 				
@@ -209,8 +211,10 @@ public class ImporterService {
                             datasetAcquisitionService.deleteById(acquisition.getId());
                         }
                         // revert quality tag
-                        subjectStudy.setQualityTag(tagSave);
-                        subjectStudyService.update(qualityResult.getUpdatedSubjectStudies());
+                        if(subjectStudy != null) {
+                            subjectStudy.setQualityTag(tagSave);
+                            subjectStudyService.update(qualityResult.getUpdatedSubjectStudies());
+                        }
                         throw new ShanoirException("Error while saving data in pacs, the import is canceled and acquisitions were not saved", e);
                     }
                 }
