@@ -132,6 +132,7 @@ public class ImporterServiceTest {
 		ExpressionFormat expressionFormat = new ExpressionFormat();
 		List<DatasetFile> datasetFiles = new ArrayList<DatasetFile>();
 		DatasetFile datasetFile = new DatasetFile();
+		datasetFile.setPath("/tmp/bruker/convert/brucker/blabla.zip");
 		
 		datasetFiles.add(datasetFile);
 		expressionFormat.setDatasetFiles(datasetFiles);
