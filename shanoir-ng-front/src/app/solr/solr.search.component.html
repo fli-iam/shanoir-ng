@@ -205,11 +205,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 (onType)="syntaxError = false"
                 (onChange)="refreshTable()"
                 [syntaxError]="syntaxError"
+                (expertModeChange)="setExpertMode($event)"
                 [expertMode]="solrRequest.expertMode">
         </solr-text-search>
 
         <solr-text-search-mode
                 [(ngModel)]="solrRequest.expertMode"
+                [expertMode]="expertMode"
                 [ngModelOptions]="{standalone: true}"
                 (onChange)="refreshTable()">
         </solr-text-search-mode>

@@ -88,6 +88,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     selectedStudies: string[]=[];
     hasCopyRight: boolean = false;
     selectedLines: SolrDocument[]=[];
+    expertMode: boolean = false;
 
     constructor(
             private breadcrumbsService: BreadcrumbsService, private formBuilder: UntypedFormBuilder,
@@ -272,6 +273,10 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         this.facetPageable = this.buildFacetPageable(updatedFacetName);
         if (this.tab != 'results') this.openResultTab();
         this.table.refresh(1);
+    }
+
+    setExpertMode(value: boolean): void {
+        this.expertMode = value;
     }
 
     openResultTab() {
