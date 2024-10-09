@@ -1,18 +1,7 @@
 package org.shanoir.ng.accessrequest;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +17,7 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.jackson.JacksonUtils;
+import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.user.service.UserService;
@@ -44,8 +34,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AccessRequestApiController.class)
 @ActiveProfiles("test")
@@ -80,6 +75,9 @@ public class AccessRequestApiControllerTest {
 	
 	@Autowired
 	private ObjectMapper mapper;
+
+	@Autowired
+	StudyUserRightsRepository studyUserRightsRepository;
 
 	private User user = new User();
 
