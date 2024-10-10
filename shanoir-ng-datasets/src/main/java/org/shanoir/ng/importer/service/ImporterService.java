@@ -197,13 +197,14 @@ public class ImporterService {
                     // TODO : Delete newly created Examination ?
                     throw new QualityException(examination, qualityResult);
                 } else { // Then do the import
-                    if (qualityResult.hasWarning() || qualityResult.hasFailedValid()) {
-                        event.setReport(qualityResult.toString());
+                    if (qualityResult != null && !qualityResult.isEmpty()) {
+                        if (qualityResult.hasWarning() || qualityResult.hasFailedValid()) {
+                            event.setReport(qualityResult.toString());
+                        }
+                        // add tag to subject-study
+                        subjectStudyService.update(qualityResult.getUpdatedSubjectStudies());
                     }
-                    // add tag to subject-study
-                    subjectStudyService.update(qualityResult.getUpdatedSubjectStudies());
-
-                	generatedAcquisitions = new HashSet<DatasetAcquisition>(datasetAcquisitionService.createAll(generatedAcquisitions));
+                	generatedAcquisitions = new HashSet<>(datasetAcquisitionService.createAll(generatedAcquisitions));
                     try {
                         persistPatientInPacs(importJob.getPatients(), event);
                     } catch (Exception e) { // if error in pacs
