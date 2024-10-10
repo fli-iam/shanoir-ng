@@ -198,6 +198,7 @@ public class ImporterServiceTest {
 				.thenReturn(new Attributes());
 
 			// WHEN we treat this importjob
+			assertNotNull(qualityResult);
 			service.createAllDatasetAcquisition(importJob, 1L);
 		
 			ArgumentCaptor<ShanoirEvent> argument = ArgumentCaptor.forClass(ShanoirEvent.class);
