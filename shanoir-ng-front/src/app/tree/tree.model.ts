@@ -43,11 +43,15 @@ export abstract class ShanoirNode {
     public selected: boolean = false;
 
     open(): Promise<void> {
-        if (this.parent) {
-            this.parent.open();
+        if (!this._opened) {
+            if (this.parent) {
+                this.parent.open();
+            }
+            this._opened = true;
+            return (this.openPromise || Promise.resolve()).then(() => SuperPromise.timeoutPromise());
+        } else {
+            return Promise.resolve();
         }
-        this._opened = true;
-        return (this.openPromise || Promise.resolve()).then(() => SuperPromise.timeoutPromise());
     }
 
     close() {

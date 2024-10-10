@@ -55,7 +55,7 @@ export class DropdownMenuComponent implements OnChanges, OnDestroy {
     }
     
     ngOnDestroy(): void {
-        this.globalClickSubscription.unsubscribe();
+        this.globalClickSubscription?.unsubscribe();
     }
 
     ngOnChanges(changes: SimpleChanges): void {

@@ -387,8 +387,8 @@ export class MassDownloadService {
         if (setup.subjectFolders) {
             str += 'Subject-' + (
                 dataset.datasetProcessing
-                    ? dataset.subject?.id
-                    : dataset.datasetAcquisition?.examination?.subject?.id
+                    ? dataset.subject?.name + '_' + dataset.subject?.id
+                    : dataset.datasetAcquisition?.examination?.subject?.name + '_' + dataset.datasetAcquisition?.examination?.subject?.id
             ) + '/';
         }
         if (setup.examinationFolders && !dataset.datasetProcessing) { // for processed datasets, skip the exam folder

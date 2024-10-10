@@ -1,0 +1,3 @@
+.overmenu input { height: 16px; }
+.overmenu .filter { margin-left: 10px; }
+.overmenu:has(input:focus) { visibility: visible; }

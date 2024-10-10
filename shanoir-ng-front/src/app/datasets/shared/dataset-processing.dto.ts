@@ -13,20 +13,10 @@
  */
 import { Injectable } from '@angular/core';
 
-import { Study } from '../../studies/shared/study.model';
-import { StudyService } from '../../studies/shared/study.service';
-import { Subject } from '../../subjects/shared/subject.model';
-import { SubjectService } from '../../subjects/shared/subject.service';
-import { DatasetType } from './dataset-type.model';
-import { Dataset, DatasetMetadata } from './dataset.model';
-import { DatasetUtils } from './dataset.utils';
-import { MrDataset, EchoTime, FlipAngle, InversionTime, MrDatasetMetadata, RepetitionTime, MrQualityProcedureType, MrDatasetNature } from '../dataset/mr/dataset.mr.model';
-import { DiffusionGradient } from '../../dataset-acquisitions/modality/mr/mr-protocol.model';
-import { Channel, Event, EegDataset } from '../dataset/eeg/dataset.eeg.model';
-import { DatasetProcessing } from './dataset-processing.model';
 import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
+import { MrDataset } from '../dataset/mr/dataset.mr.model';
+import { DatasetProcessing } from './dataset-processing.model';
 import { DatasetProcessingService } from './dataset-processing.service';
-import { IdName } from '../../shared/models/id-name.model';
 import { DatasetDTO } from './dataset.dto';
 
 @Injectable()
@@ -99,7 +89,7 @@ export class DatasetProcessingDTOService {
                 return dataset;
             })
         }
-        entity.processingDate = dto.processingDate;
+        entity.processingDate = new Date(dto.processingDate);
         entity.studyId = dto.studyId;
         entity.parentId = dto.parentId;
         return entity;

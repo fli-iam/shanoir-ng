@@ -11,7 +11,7 @@ import {Examination} from "../../examinations/shared/examination.model";
 @Component({
   selector: 'study-history',
   templateUrl: './study-history.component.html',
-  styleUrl: './study-history.component.css'
+  styleUrls: ['./study-history.component.css']
 })
 export class StudyHistoryComponent {
 
