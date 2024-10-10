@@ -40,6 +40,7 @@ export class SolrTextSearchComponent implements ControlValueAccessor {
     @Output() onType: EventEmitter<void> = new EventEmitter();
     @Output() expertModeChange: EventEmitter<boolean> = new EventEmitter();
     @Input() syntaxError: boolean = false;
+    @Input() syntaxErrorMsg: string;
     @Input() expertMode: boolean = false;
     protected propagateChange = (_: any) => {};
     protected propagateTouched = () => {};
