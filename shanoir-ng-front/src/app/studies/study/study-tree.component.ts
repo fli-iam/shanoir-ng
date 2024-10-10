@@ -99,6 +99,7 @@ export class StudyTreeComponent {
     }
 
     openInViewer() {
+        console.log('?')
         let studies = "";
         let series = "";
         if (this.selectedExaminationNodes?.length > 0) {
@@ -106,13 +107,15 @@ export class StudyTreeComponent {
 
         }
         if (this.selectedAcquisitionNodes?.length > 0) {
+            studies += this.selectedAcquisitionNodes.map(acq => '1.4.9.12.34.1.8527.' + acq.parent.id).join(',');
             series = this.selectedAcquisitionNodes.map(acq => '1.4.9.12.34.1.8527.' + acq.id).join(',');
         }
-        
-        if (series.length == 0)
+        if (series.length == 0) {
             window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=' + studies, '_blank');
-        if (series.length > 0 && studies.length > 0) {
+            console.log('###', environment.viewerUrl + '/viewer?StudyInstanceUIDs=' + studies, '_blank');
+        } else if (series.length > 0 && studies.length > 0) {
             window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=' + studies + '&SeriesInstanceUIDs=' + series, '_blank');
+            console.log('###', environment.viewerUrl + '/viewer?StudyInstanceUIDs=' + studies + '&SeriesInstanceUIDs=' + series, '_blank');
         }
     }
 
