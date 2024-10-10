@@ -173,10 +173,10 @@ public class ImporterServiceTest {
 		DatasetAcquisition datasetAcq = new MrDatasetAcquisition();
 
 		//DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob, dicomAttributes);
-
+		
 		when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(Mockito.eq(serie), Mockito.eq(0), Mockito.eq(importJob), Mockito.any())).thenReturn(datasetAcq);
 		when(studyUserRightRepo.findByStudyId(importJob.getStudyId())).thenReturn(Collections.emptyList());
-		when(dicomProcessing.getDicomObjectAttributes(any(DatasetFile.class), anyBoolean())).thenReturn(new Attributes());
+		when(DicomProcessing.getDicomObjectAttributes(any(DatasetFile.class), anyBoolean())).thenReturn(new Attributes());
 		when(qualityCardService.findByStudy(examination.getStudyId())).thenReturn(Utils.toList(new QualityCard())); // TODO perform quality card tests
 		when(qualityService.retrieveQualityCardResult(importJob)).thenReturn(new QualityCardResult());
 
