@@ -46,9 +46,11 @@ import org.shanoir.ng.importer.service.QualityService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.model.SubjectStudy;
+import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.shared.service.SubjectStudyService;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
+import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.service.QualityCardService;
 import org.shanoir.ng.utils.Utils;
@@ -172,6 +174,13 @@ public class ImporterServiceTest {
 		examination.getStudy().setSubjectStudyList(new ArrayList<>());
 		when(examinationRepository.findById(importJob.getExaminationId())).thenReturn(Optional.of(examination));
 		DatasetAcquisition datasetAcq = new MrDatasetAcquisition();
+
+		QualityCardResult qualityResult = new QualityCardResult();
+		QualityCardResultEntry entry = new QualityCardResultEntry();
+		entry.setTagSet(QualityTag.VALID);
+		qualityResult.add(entry);
+
+		when(qualityService.retrieveQualityCardResult(importJob)).thenReturn(qualityResult);
 
 		//DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob, dicomAttributes);
 		

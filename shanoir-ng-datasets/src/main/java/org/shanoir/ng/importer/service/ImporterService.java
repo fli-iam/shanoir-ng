@@ -23,7 +23,11 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.shanoir.ng.dataset.modality.CalibrationDataset;
 import org.shanoir.ng.dataset.modality.CtDataset;
@@ -189,7 +193,8 @@ public class ImporterService {
                 }
                                 				
                 // Has quality check passed ?
-                if (qualityResult.hasError()) {
+                if (!qualityResult.isEmpty() && qualityResult.hasError()) {
+                    // TODO : Delete newly created Examination ?
                     throw new QualityException(examination, qualityResult);
                 } else { // Then do the import
                     if (qualityResult.hasWarning() || qualityResult.hasFailedValid()) {
