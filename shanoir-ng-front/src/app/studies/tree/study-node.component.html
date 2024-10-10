@@ -20,7 +20,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         (labelClick)="menuOpened = withMenu && !menuOpened"
         [route]="node.route"
         [hasChildren]="true"
-        [clickable]="showDetails">
+        [clickable]="showDetails"
+        >
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="showDetails && menuOpened && withMenu">
         <a [routerLink]="this.detailsPath + this.node.id" class="open-new-tab">
@@ -69,6 +70,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [hasBox]="hasBox"
                     [withMenu]="withMenu"
                     [rights]="rights"
+                    (nodeInit)="onSubjectNodeInit()" 
             >
             </subject-node>
         </ng-container>

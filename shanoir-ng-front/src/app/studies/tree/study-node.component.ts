@@ -59,6 +59,8 @@ export class StudyNodeComponent implements OnChanges {
     filter: string;
     filteredNodes: SubjectNode[];
     subjectsOrder: Sort;
+    protected nbSubjectsInit: number = 0;
+    private subjectsInited: SuperPromise<void>;
 
     constructor(
             private router: Router,
@@ -87,13 +89,16 @@ export class StudyNodeComponent implements OnChanges {
             let id: number = this.input instanceof StudyNode ? this.input.id : this.input.study.id;
             this.idPromise.resolve(id);
             if (this.input instanceof StudyNode) {
+                this.subjectsInited = new SuperPromise();
                 this.node = this.input;
             } else if (this.input.study && this.input.rights) {
+                this.subjectsInited = new SuperPromise();
                 this.node = this.treeService.buildStudyNode(this.input.study, this.input.rights);
             } else {
                 throw new Error('Illegal argument type');
             }
             this.sortSubjects({field: 'name', way : 'asc'});
+            this.node.subjectsNode.registerOpenPromise(this.subjectsInited);
             this.nodeInit.emit(this.node);
             this.showDetails = this.router.url != this.detailsPath  + this.node.id;
         }
@@ -169,6 +174,13 @@ export class StudyNodeComponent implements OnChanges {
                 this.node.subjectsNode.subjects.reverse();
             }
             this.onFilterChange();
+        }
+    }
+
+    onSubjectNodeInit() {
+        this.nbSubjectsInit++;
+        if (this.nbSubjectsInit == this.node.subjectsNode?.subjects?.length) {
+            this.subjectsInited.resolve();
         }
     }
 }
