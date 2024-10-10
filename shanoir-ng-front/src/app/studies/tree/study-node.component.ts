@@ -55,7 +55,6 @@ export class StudyNodeComponent implements OnChanges {
     @Input() withMenu: boolean = true;
     idPromise: SuperPromise<number> = new SuperPromise();
     protected rights: StudyUserRight[];
-    filterOn: boolean = false;
     filter: string;
     filteredNodes: SubjectNode[];
     subjectsOrder: Sort;
@@ -144,22 +143,19 @@ export class StudyNodeComponent implements OnChanges {
         (this.node.qualityCardsNode.cards as StudyCardNode[]).splice(index, 1) ;
     }
 
-    clickFilter() {
-        this.filterOn = true;
-    }
-
     onFilterChange() {
-        if (this.node.subjectsNode.subjects != 'UNLOADED' && this.filter) {
+        if (this.node.subjectsNode.subjects != 'UNLOADED' && this.filter?.trim().length > 0) {
             this.filteredNodes = (this.node.subjectsNode.subjects as SubjectNode[]).filter(node => {
                 return node.label.toLowerCase().includes(this.filter.toLowerCase());
             });
+        } else {
+            this.filteredNodes = null;
         }
     }
 
     resetFilter() {
         this.filter = null;
         this.filteredNodes = null;
-        this.filterOn = false;
     }
 
     sortSubjects(sort: Sort) {

@@ -51,10 +51,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <span *ngIf="subjectsOrder.field == 'id' && subjectsOrder.way == 'desc'" class="filter" (click)="sortSubjects({field: 'id', way : 'asc'})" title="sort by id descending">
                 <i class="fa-solid fa-arrow-down-9-1"></i>
             </span>
-            <span *ngIf="!filterOn" class="filter" (click)="clickFilter()" title="filter">
-                <i class="fa-solid fa-filter"></i>
-            </span>
-            <span *ngIf="filterOn" class="filter">
+            <span class="filter">
                 filter : 
                 <input type="text" [(ngModel)]="filter" (ngModelChange)="onFilterChange()"/>
                 <span (click)="resetFilter()">&nbsp;x&nbsp;</span>
