@@ -76,7 +76,7 @@ public class AccessRequestApiControllerTest {
 	@Autowired
 	private ObjectMapper mapper;
 
-	@Autowired
+	@MockBean
 	StudyUserRightsRepository studyUserRightsRepository;
 
 	private User user = new User();
