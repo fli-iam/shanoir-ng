@@ -141,6 +141,7 @@ public class ImporterServiceTest {
 		dataset.setExpressionFormats(expressionFormats);
 		datasets.add(dataset);
 		serie.setDatasets(datasets);
+		serie.setIsEnhanced(Boolean.FALSE);
 		series.add(serie);
 		study.setSeries(series);
 		studies.add(study);
@@ -174,38 +175,42 @@ public class ImporterServiceTest {
 
 		//DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob, dicomAttributes);
 		
-		when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(Mockito.eq(serie), Mockito.eq(0), Mockito.eq(importJob), Mockito.any())).thenReturn(datasetAcq);
-		when(studyUserRightRepo.findByStudyId(importJob.getStudyId())).thenReturn(Collections.emptyList());
+		
 		try (MockedStatic<DicomProcessing> dicomProcessingMock = Mockito.mockStatic(DicomProcessing.class)) {
-			dicomProcessingMock.when(() -> DicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced())).thenReturn(new Attributes());
+			dicomProcessingMock
+				.when(() -> DicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced()))
+				.thenReturn(new Attributes());
+
+			when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(Mockito.eq(serie), Mockito.eq(0), Mockito.eq(importJob), Mockito.any())).thenReturn(datasetAcq);
+			when(studyUserRightRepo.findByStudyId(importJob.getStudyId())).thenReturn(Collections.emptyList());
+			// when(DicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced())).thenReturn(new Attributes());
+			when(qualityCardService.findByStudy(examination.getStudyId())).thenReturn(Utils.toList(new QualityCard())); // TODO perform quality card tests
+			when(qualityService.retrieveQualityCardResult(importJob)).thenReturn(new QualityCardResult());
+
+			// WHEN we treat this importjob
+			service.createAllDatasetAcquisition(importJob, 1L);
+		
+			ArgumentCaptor<ShanoirEvent> argument = ArgumentCaptor.forClass(ShanoirEvent.class);
+			Mockito.verify(taskService, Mockito.times(4)).publishEvent(argument.capture());
+		
+			List<ShanoirEvent> values = argument.getAllValues();
+			ShanoirEvent task = values.get(0);
+			assertTrue(task.getStatus() == 1);
+			// NOTE: This test is important as we use the message to send an mail to study admin further.
+			// PLEASE do not change sucess message OR change it accordingly in emailServiceImpl.
+			assertEquals("[studyName (n°1)] Successfully created datasets for subject [subjectName] in examination [2]", task.getMessage());
+		
+			// THEN datasets are created
+			// Check what we save at the end
+			verify(datasetAcquisitionService).createAll(any());
+			//verify(datasetAcquisitionService).create(datasetAcq);
+			verify(dicomPersisterService).persistAllForSerie(any());
+
+			assertNotNull(datasetAcq);
+		
+			// AN archive is not referenced in the examination (file not existing)
+			List<String> extradata = datasetAcq.getExamination().getExtraDataFilePathList();
+			assertNull(extradata);
 		}
-		// when(DicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced())).thenReturn(new Attributes());
-		when(qualityCardService.findByStudy(examination.getStudyId())).thenReturn(Utils.toList(new QualityCard())); // TODO perform quality card tests
-		when(qualityService.retrieveQualityCardResult(importJob)).thenReturn(new QualityCardResult());
-
-		// WHEN we treat this importjob
-		service.createAllDatasetAcquisition(importJob, 1L);
-		
-		ArgumentCaptor<ShanoirEvent> argument = ArgumentCaptor.forClass(ShanoirEvent.class);
-		Mockito.verify(taskService, Mockito.times(4)).publishEvent(argument.capture());
-		
-		List<ShanoirEvent> values = argument.getAllValues();
-		ShanoirEvent task = values.get(0);
-		assertTrue(task.getStatus() == 1);
-		// NOTE: This test is important as we use the message to send an mail to study admin further.
-		// PLEASE do not change sucess message OR change it accordingly in emailServiceImpl.
-		assertEquals("[studyName (n°1)] Successfully created datasets for subject [subjectName] in examination [2]", task.getMessage());
-		
-		// THEN datasets are created
-		// Check what we save at the end
-		verify(datasetAcquisitionService).createAll(any());
-		//verify(datasetAcquisitionService).create(datasetAcq);
-		verify(dicomPersisterService).persistAllForSerie(any());
-
-		assertNotNull(datasetAcq);
-		
-		// AN archive is not referenced in the examination (file not existing)
-		List<String> extradata = datasetAcq.getExamination().getExtraDataFilePathList();
-		assertNull(extradata);
 	}
 }
