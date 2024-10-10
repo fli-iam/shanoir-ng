@@ -84,6 +84,12 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
         return [];
     }
 
+    downloadStats(item: any) {
+        if (item instanceof Task && item.eventType == "downloadStatistics.event" && item.progress == 1) {
+            this.taskService.downloadStats(item);
+        }
+    }
+
     select(lightTask: Task) {
         this.notificationsService.nbNew = 0;
         this.notificationsService.nbNewError = 0;
