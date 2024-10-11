@@ -99,23 +99,19 @@ export class StudyTreeComponent {
     }
 
     openInViewer() {
-        console.log('?')
-        let studies = "";
-        let series = "";
+        let studies: Set<string> = new Set();
+        let series: Set<string> = new Set();
         if (this.selectedExaminationNodes?.length > 0) {
-            studies = this.selectedExaminationNodes.map(exam => '1.4.9.12.34.1.8527.' + exam.id).join(',');
-
+            this.selectedExaminationNodes.forEach(exam => studies.add('1.4.9.12.34.1.8527.' + exam.id));
         }
         if (this.selectedAcquisitionNodes?.length > 0) {
-            studies += this.selectedAcquisitionNodes.map(acq => '1.4.9.12.34.1.8527.' + acq.parent.id).join(',');
-            series = this.selectedAcquisitionNodes.map(acq => '1.4.9.12.34.1.8527.' + acq.id).join(',');
+            this.selectedAcquisitionNodes.forEach(acq => series.add('1.4.9.12.34.1.8527.' + acq.id));
+            this.selectedAcquisitionNodes.forEach(acq => studies.add('1.4.9.12.34.1.8527.' + acq.parent.id));
         }
-        if (series.length == 0) {
-            window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=' + studies, '_blank');
-            console.log('###', environment.viewerUrl + '/viewer?StudyInstanceUIDs=' + studies, '_blank');
-        } else if (series.length > 0 && studies.length > 0) {
-            window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=' + studies + '&SeriesInstanceUIDs=' + series, '_blank');
-            console.log('###', environment.viewerUrl + '/viewer?StudyInstanceUIDs=' + studies + '&SeriesInstanceUIDs=' + series, '_blank');
+        if ((series.size == 0 && studies.size > 0) || studies.size > 1) {
+            window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=' + Array.from(studies).join(','), '_blank');
+        } else if (series.size > 0 && studies.size == 1) {
+            window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=' + Array.from(studies).join(',') + '&SeriesInstanceUIDs=' + Array.from(series).join(','), '_blank');
         }
     }
 
