@@ -1,7 +1,13 @@
-<form *ngIf="executionPlanning" (ngSubmit)="onSubmitExecutionForm()" xmlns="http://www.w3.org/1999/html">
+<div *ngIf="state == 'edit' || state == 'create'">
+    We are creating / editing
+</div>
+<div *ngIf="state == 'view'">
     <div>
         <label>Execution Name</label>
-        <input type="text" id="name" formControlName="name" required [(ngModel)]="executionPlanning.name">
+        {{executionPlanning.name}}
     </div>
-</form>
-
+</div>
+<div *ngIf="mode=='edit'">
+    <button *ngIf="state =='view' " (click)="editExec()"> Edit </button>
+    <button *ngIf="state=='edit' || state=='create'" (click)="saveExec()"> Save </button>
+</div>
