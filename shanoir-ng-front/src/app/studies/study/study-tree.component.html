@@ -30,10 +30,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			type="button" 
 			(click)="openInViewer()" 
 			[disabled]="!loaded || (!canOpenDicomSingleExam && !canOpenDicomMultiExam)" 
-			[title]="canOpenDicomMultiExam ? 
+			[title]="loaded && canOpenDicomMultiExam ? 
 					'View DICOM images for the selected acquisitions/examinations' 
 					: 'View selected DICOM images for the one examination selected'">
-		<double-awesome main="fas fa-eye" [sub]="canOpenDicomMultiExam? 'far fa-copy' : 'far fa-file'"></double-awesome>
+		<double-awesome main="fas fa-eye" [sub]="loaded && canOpenDicomMultiExam? 'far fa-copy' : 'far fa-file'"></double-awesome>
 	</button>
 	<button class="dl-button" 
 			type="button" 

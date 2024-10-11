@@ -46,7 +46,7 @@ export class StudyTreeComponent {
             private downloadService: MassDownloadService,
             private dialogService: ConfirmDialogService) {
 
-        treeService.studyNodeOpenPromise.then(() => this.loaded = true)
+        treeService.studyNodeOpenPromise.then(() => this.loaded = true);
     }
 
     protected set selectedDatasetNodes(selectedDatasetNodes: DatasetNode[]) {
