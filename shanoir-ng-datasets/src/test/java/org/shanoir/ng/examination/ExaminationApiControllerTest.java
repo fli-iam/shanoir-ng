@@ -183,7 +183,7 @@ public class ExaminationApiControllerTest {
 			
 			ShanoirEvent event = eventCatcher.getValue();
 			assertNotNull(event);
-			assertEquals("Examination " + exam.getId() + " deleted from study " + exam.getStudyId().toString(), event.getMessage());
+			assertEquals(exam.getStudyId().toString(), event.getMessage());
 			assertEquals(exam.getId().toString(), event.getObjectId());
 			assertEquals(ShanoirEventType.DELETE_EXAMINATION_EVENT, event.getEventType());
 

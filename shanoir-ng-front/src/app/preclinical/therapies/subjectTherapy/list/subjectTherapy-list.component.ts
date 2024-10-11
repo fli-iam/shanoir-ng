@@ -89,15 +89,6 @@ export class SubjectTherapiesListComponent extends SubjectAbstractListInput<Subj
     }
 
     getColumnDefs(): ColumnDefinition[] {
-        function dateRenderer(date) {
-            if (date) {
-                return new Date(date).toLocaleDateString();
-            }
-            return null;
-        };
-        function castToString(id: number) {
-            return String(id);
-        };
         let colDef: ColumnDefinition[] = [
             { headerName: "Therapy", field: "therapy.name" },
             {
@@ -113,16 +104,8 @@ export class SubjectTherapiesListComponent extends SubjectAbstractListInput<Subj
                     return Frequency[params.data.frequency];
                 }
             },
-            {
-                headerName: "Start Date", field: "startDate", type: "date", cellRenderer: function(params: any) {
-                    return dateRenderer(params.data.startDate);
-                }
-            },
-            {
-                headerName: "End Date", field: "endDate", type: "date", cellRenderer: function(params: any) {
-                    return dateRenderer(params.data.endDate);
-                }
-            }
+            { headerName: "Start Date", field: "startDate", type: "date" },
+            { headerName: "End Date", field: "endDate", type: "date" }
         ];
         setTimeout(() => {
             if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
