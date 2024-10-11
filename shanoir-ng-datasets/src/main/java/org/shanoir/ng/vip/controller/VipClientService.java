@@ -1,5 +1,7 @@
 package org.shanoir.ng.vip.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.keycloak.representations.AccessTokenResponse;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -41,6 +43,9 @@ public class VipClientService {
     public void init() {
         this.webClient = WebClient.create(vipUrl);
     }
+
+    @Autowired
+    ObjectMapper mapper;
 
     /**
      *
@@ -104,7 +109,11 @@ public class VipClientService {
      * @return ExecutionDTO
      */
     public Mono<VipExecutionDTO> createExecution(VipExecutionDTO execution) {
-
+        try {
+            LOG.error("Created execution: " + mapper.writeValueAsString(execution));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         return webClient.post()
             .uri(vipExecutionUri)
             .headers(headers -> headers.addAll(this.getUserHttpHeaders()))
