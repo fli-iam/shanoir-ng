@@ -70,6 +70,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     @ViewChild('selectionTable', { static: false }) selectionTable: TableComponent;
     selectedDatasetIds: Set<number> = new Set();
     syntaxError: boolean = false;
+    syntaxErrorMsg : string = "";
     dateOpen: boolean = false;
     importDateOpen: boolean = false;
     public downloadState: TaskState = new TaskState();
@@ -88,6 +89,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     selectedStudies: string[]=[];
     hasCopyRight: boolean = false;
     selectedLines: SolrDocument[]=[];
+    expertMode: boolean = false;
 
     constructor(
             private breadcrumbsService: BreadcrumbsService, private formBuilder: UntypedFormBuilder,
@@ -274,6 +276,10 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         this.table.refresh(1);
     }
 
+    setExpertMode(value: boolean): void {
+        this.expertMode = value;
+    }
+
     openResultTab() {
         this.tab = 'results';
     }
@@ -321,11 +327,13 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                 }
                 this.firstPageLoaded = true;
                 this.contentPage.push(solrResultPage);
+                this.syntaxErrorMsg = "";
 
                 return solrResultPage;
             }).catch(reason => {
-                if (reason?.error?.code == 422 && reason.error.message == 'solr query failed') {
-                    this.syntaxError = true;
+                if (reason?.error?.code == 422) {
+					this.syntaxError = true;
+                    this.syntaxErrorMsg = reason?.error?.message;
                     return new SolrResultPage();
                 } else throw reason;
             });
