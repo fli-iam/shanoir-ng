@@ -190,7 +190,7 @@ public class ImporterApiController implements ImporterApi {
 			 * 3. STEP: split instances into non-images and images and get additional meta-data
 			 * from first dicom file of each serie, meta-data missing in dicomdir.
 			 */
-			imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), false, null);
+			imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), false, null, false);
 
 			/**
 			 * . STEP: create ImportJob
@@ -291,7 +291,7 @@ public class ImporterApiController implements ImporterApi {
 			// Import dicomfile
 			return uploadDicomZipFile(multiPartFile);
 		} catch (IOException e) {
-			LOG.error("ERROR while loading zip fiole, please contact an administrator");
+			LOG.error("ERROR while loading zip file, please contact an administrator");
 			LOG.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 		} finally {
