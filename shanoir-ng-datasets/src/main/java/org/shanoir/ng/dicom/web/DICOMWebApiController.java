@@ -49,6 +49,8 @@ public class DICOMWebApiController implements DICOMWebApi {
 
 	private static final String STUDY_INSTANCE_UID = "StudyInstanceUID";
 
+	private static final String SERIES_INSTANCE_UID = "SeriesInstanceUID";
+
 	private static final String VALUE = "Value";
 
 	@Autowired
@@ -59,7 +61,10 @@ public class DICOMWebApiController implements DICOMWebApi {
 
 	@Autowired
 	private StudyInstanceUIDHandler studyInstanceUIDHandler;
-	
+
+	@Autowired
+	private SeriesInstanceUIDHandler seriesInstanceUIDHandler;
+
 	@Autowired
 	private ObjectMapper mapper;
 	
@@ -150,17 +155,30 @@ public class DICOMWebApiController implements DICOMWebApi {
 	}
 
 	@Override
-	public ResponseEntity<String> findSeriesOfStudy(String examinationUID)
-			throws RestServiceException, JsonMappingException, JsonProcessingException {
+	public ResponseEntity<String> findSeriesOfStudy(String examinationUID, Map<String, String> allParams)
+			throws JsonProcessingException {
+		String acquisitionUID = "";
+		String includefield = "";
+		String seriesInstanceUID = "";
 		String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
+		if (allParams.containsKey("includefield")) {
+			includefield = allParams.get(INCLUDEFIELD);
+		}
+		if (allParams.containsKey("SeriesInstanceUID")) {
+			acquisitionUID = allParams.get(SERIES_INSTANCE_UID);
+			seriesInstanceUID = seriesInstanceUIDHandler.findSeriesInstanceUIDFromCacheOrDatabase(acquisitionUID);
+		}
+
 		if (studyInstanceUID != null) {
-			String response = dicomWebService.findSeriesOfStudy(studyInstanceUID);
+			String response = dicomWebService.findSeriesOfStudy(studyInstanceUID, includefield, seriesInstanceUID);
 			JsonNode root = mapper.readTree(response);
 			root = sortSeriesBySeriesNumber(root);
 			studyInstanceUIDHandler.replaceStudyInstanceUIDsWithExaminationUIDs(root, examinationUID, false);
+
 			return new ResponseEntity<String>(mapper.writeValueAsString(root), HttpStatus.OK);
-		} else {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+		else {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 	}
 

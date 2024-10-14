@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
@@ -31,6 +32,7 @@ import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.dataset.service.CreateStatisticsService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -42,7 +44,9 @@ import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -51,6 +55,7 @@ import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.service.StudyTagService;
 import org.shanoir.ng.utils.DatasetFileUtils;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -63,6 +68,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -71,11 +77,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 
 @Controller
@@ -109,6 +119,9 @@ public class DatasetApiController implements DatasetApi {
 	private DatasetService datasetService;
 
 	@Autowired
+	private CreateStatisticsService createStatisticsService;
+
+	@Autowired
 	private ExaminationService examinationService;
 
 	@Autowired
@@ -137,6 +150,7 @@ public class DatasetApiController implements DatasetApi {
 
 	@Autowired
 	private DatasetRepository datasetRepository;
+
 
 	/** Number of downloadable datasets. */
 	private static final int DATASET_LIMIT = 500;
@@ -501,42 +515,6 @@ public class DatasetApiController implements DatasetApi {
 		datasetDownloaderService.massiveDownload(format, datasets, response, true, null);
     }
 
-    /**
-	 * Zip a single file
-	 * 
-	 * @param sourceFile
-	 * @param zipFile
-	 * @throws IOException
-	 */
-	private void zipSingleFile(final File sourceFile, final File zipFile) throws IOException {
-
-		byte[] buffer = new byte[1024];
-
-
-		try (	FileOutputStream fos = new FileOutputStream(zipFile);
-				ZipOutputStream zos = new ZipOutputStream(fos);
-				FileInputStream fis = new FileInputStream(sourceFile);
-				) {
-			// begin writing a new ZIP entry, positions the stream to the start of the entry data
-			zos.putNextEntry(new ZipEntry(sourceFile.getName()));
-
-			int length;
-
-			while ((length = fis.read(buffer)) > 0) {
-				zos.write(buffer, 0, length);
-			}
-			zos.closeEntry();
-		}
-	}
-
-	private File recreateFile(final String fileName) throws IOException {
-		File file = new File(fileName);
-		if(file.exists()) {
-			file.delete();
-		}
-		file.createNewFile();
-		return file;
-	}
 
 	/**
 	 * This method receives a list of URLs containing file:/// urls and copies the files to a folder named workFolder.
@@ -606,7 +584,7 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<ByteArrayResource> downloadStatistics(
+	public ResponseEntity<String> downloadStatistics(
 			@Parameter(description = "Study name including regular expression", required=false) @Valid
 			@RequestParam(value = "studyNameInRegExp", required = false) String studyNameInRegExp,
 			@Parameter(description = "Study name excluding regular expression", required=false) @Valid
@@ -616,43 +594,78 @@ public class DatasetApiController implements DatasetApi {
 			@Parameter(description = "Subject name excluding regular expression", required=false) @Valid
 			@RequestParam(value = "subjectNameOutRegExp", required = false) String subjectNameOutRegExp
 			) throws RestServiceException, IOException {
-		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
-		File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
-		File statisticsFile = recreateFile(userDir + File.separator + "shanoirExportStatistics.tsv");
-		File zipFile = recreateFile(userDir + File.separator + "shanoirExportStatistics" + ZIP);
 
-		// Get the data
-		try (	FileOutputStream fos = new FileOutputStream(statisticsFile);
-				BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));	){
+		String params = "";
+		if (studyNameInRegExp != null && !StringUtils.isEmpty(studyNameInRegExp)) params += "\nStudy to include : " + studyNameInRegExp;
+		if (studyNameOutRegExp != null && !StringUtils.isEmpty(studyNameOutRegExp)) params += "\nStudy to exclude : " + studyNameOutRegExp;
+		if (subjectNameInRegExp != null && !StringUtils.isEmpty(subjectNameInRegExp)) params += "\nSubject to include : " + subjectNameInRegExp;
+		if (subjectNameOutRegExp != null && !StringUtils.isEmpty(subjectNameOutRegExp)) params += "\nSubject to exclude : " + subjectNameOutRegExp;
 
+		ShanoirEvent event = null;
+		event = new ShanoirEvent(
+				ShanoirEventType.DOWNLOAD_STATISTICS_EVENT,
+				null,
+				KeycloakUtil.getTokenUserId(),
+				"Fetching statistics with parameters :" + params,
+				ShanoirEvent.IN_PROGRESS,
+				0f,
+				null);
 
-			List<Object[]> results = datasetService.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
+		eventService.publishEvent(event);
 
-			for (Object[] or : results) {
-				List<String> strings = Arrays.stream(or).map(object -> Objects.toString(object, null)).collect(Collectors.toList());
-				bw.write(String.join("\t", strings));
-				bw.newLine();
-			}
+		createStatisticsService.createStats(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp, event, params);
 
-		} catch (jakarta.persistence.NoResultException e) {
-			throw new RestServiceException(new ErrorModel(HttpStatus.NOT_FOUND.value(), "No result found.", e));
-		} catch (Exception e) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while querying the database.", e));
-		}
-
-		zipSingleFile(statisticsFile, zipFile);
-
-		byte[] data = Files.readAllBytes(zipFile.toPath());
-		ByteArrayResource resource = new ByteArrayResource(data);
-
-		statisticsFile.delete();
-
-		return ResponseEntity.ok()
-				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + zipFile.getName())
-				.contentType(MediaType.MULTIPART_FORM_DATA)
-				.contentLength(data.length)
-				.body(resource);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
+
+
+	@Override
+	public ResponseEntity<ByteArrayResource> downloadStatisticsByEventId(String eventId) throws IOException {
+		try {
+			String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
+			File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
+			File zipFile = new File(userDir + File.separator + "shanoirExportStatistics_" + eventId + ZIP);
+
+			byte[] data = Files.readAllBytes(zipFile.toPath());
+			ByteArrayResource resource = new ByteArrayResource(data);
+
+			return ResponseEntity.ok()
+					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + zipFile.getName())
+					.contentType(MediaType.MULTIPART_FORM_DATA)
+					.contentLength(data.length)
+					.body(resource);
+		} catch (Exception e) {
+			LOG.error("Error during download of statistics for event with id = " + eventId + ".");
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+	}
+
+	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
+	public void deleteStats() {
+		try {
+			String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
+			File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
+			Path directoryPath = Paths.get(userDir.getPath());
+
+			long currentTime = System.currentTimeMillis();
+			long sixHoursInMillis = TimeUnit.HOURS.toMillis(6);
+			DirectoryStream<Path> directoryStream = Files.newDirectoryStream(directoryPath);
+
+			for (Path filePath : directoryStream) {
+				if (filePath.getFileName().toString().startsWith("shanoirExportStatistics_")) {
+					BasicFileAttributes attrs = Files.readAttributes(filePath, BasicFileAttributes.class);
+					FileTime creationTime = attrs.creationTime();
+					long creationTimeMillis = creationTime.toMillis();
+
+					if ((currentTime - creationTimeMillis) > sixHoursInMillis) {
+						Files.delete(filePath);
+						LOG.error("Statistics file delete after 6 hours : " + filePath.getFileName());
+					}
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }
