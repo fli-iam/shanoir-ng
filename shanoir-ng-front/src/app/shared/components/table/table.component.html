@@ -52,7 +52,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
                     <!-- link -->
                     <a [routerLink]="vars.rowRoute" *ngIf="!(editMode && vars.editable) && vars.route && !col.multi" class="cell-new-tab" title="{{vars.render.text ? vars.render.text : vars.render}}">
-                        <a class="link" [routerLink]="vars.route" routerLinkActive="active">{{vars.render.text ? vars.render.text : vars.render}}
+                        <a class="link" [routerLink]="(item.eventType != 'downloadStatistics.event') ? vars.route : null" routerLinkActive="active" (click)="downloadStats(item)">{{vars.render.text ? vars.render.text : vars.render}}
                             <i *ngIf="!col.awesome" class="fas fa-external-link-alt"></i>
                             <span *ngIf="col.awesome" class="awesome">
                                 <i *ngIf="col.awesome" [class]="col.awesome"></i>

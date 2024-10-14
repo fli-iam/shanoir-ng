@@ -110,7 +110,7 @@ public class ExaminationApiController implements ExaminationApi {
 			ShanoirEvent event= new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, examinationId.toString(), KeycloakUtil.getTokenUserId(), "Examination " + examinationId + " deleted from study " + studyId, ShanoirEvent.SUCCESS, studyId);
 			eventService.publishEvent(event);
 			event.setMessage("" + studyId);
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.EXAMINATION_STUDY_DELETE_QUEUE, event);
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.EXAMINATION_STUDY_DELETE_QUEUE, objectMapper.writeValueAsString(event));
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
 
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);

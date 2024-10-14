@@ -26,7 +26,7 @@ a:hover, a:active { color: inherit; }
 .menu-list li > i, .menu-list li > a i { margin-left: 6px; width: 30px; }
 .menu-list a { text-decoration: none; }
 .menu-list .sub-menu { background-color: var(--color-a-light); overflow: hidden; }
-.menu-list .sub-menu li { font-size: 12px; background-color: var(--color-a-light); padding-left: 30px; }
+.menu-list .sub-menu li { font-size: 12px; background-color: var(--color-a-light); padding-left: 25px; }
 .menu-list .single-task { color: var(--color-b-light); font-size: 10px !important; }
 
 .chevron { float: right; font-size: 10px; margin-right: 10px; }
