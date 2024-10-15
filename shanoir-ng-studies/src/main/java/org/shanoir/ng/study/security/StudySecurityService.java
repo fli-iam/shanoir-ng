@@ -40,6 +40,7 @@ import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.repository.StudyTagRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -187,6 +188,7 @@ public class StudySecurityService {
 	 * @throws EntityNotFoundException
 	 */
 	public boolean hasRightOnSubjectForOneStudy(Long subjectId, String rightStr) throws EntityNotFoundException {
+		System.out.println("###################################### check rights !!!!!!!!!!");
 		Subject subject = subjectRepository.findById(subjectId).orElse(null);
 		if (subject == null) {
 			throw new EntityNotFoundException("Cannot find subject with id " + subjectId);
@@ -201,6 +203,42 @@ public class StudySecurityService {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Check that the connected user has the given right for every subject
+	 * 
+	 * @param subjectId
+	 *            the subject id
+	 * @param rightStr
+	 *            the right
+	 * @return true or false
+	 * @throws EntityNotFoundException
+	 */
+	public boolean hasRightOnSubjectsForOneStudy(List<SimpleSubjectDTO> subjectDTOs, String rightStr) throws EntityNotFoundException {
+		if (subjectDTOs == null) return true;
+		List<Long> subjectIds = new ArrayList<>();
+		for (SimpleSubjectDTO dto : subjectDTOs) {
+			subjectIds.add(dto.getId());	
+		}
+		List<Subject> subjects = Utils.toList(subjectRepository.findAllById(subjectIds));
+		if (subjects == null || subjects.isEmpty()) {
+			throw new EntityNotFoundException("Cannot find any subject with id in " + subjectIds);
+		}
+		for (Subject subject : subjects) {
+			if (subject.getSubjectStudyList() == null) {
+				return false;
+			}
+			StudyUserRight right = StudyUserRight.valueOf(rightStr);
+			boolean hasRight = false;
+			for (SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
+				if (hasPrivilege(subjectStudy.getStudy(), right)) {
+					hasRight = true;
+				} 
+			}
+			if (!hasRight) return false;
+		}
+		return true;
 	}
 
 	/**
