@@ -66,7 +66,7 @@ public interface SubjectService {
 	 * @return list of subjects
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnSubjectForOneStudy(filterObject.getId(), 'CAN_SEE_ALL')")
+	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnSubjectsForOneStudy(returnObject, 'CAN_SEE_ALL')")
 	public List<SimpleSubjectDTO> findAllSubjectsOfStudyId(final Long studyId);
 	
 	/**
@@ -77,8 +77,8 @@ public interface SubjectService {
 	 * @return list of subjects
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnSubjectForOneStudy(filterObject.getId(), 'CAN_SEE_ALL')")
-	List<SimpleSubjectDTO> findAllSubjectsOfStudyAndPreclinical(Long studyId, boolean preclinical);
+	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnSubjectsForOneStudy(returnObject, 'CAN_SEE_ALL')")
+	List<SimpleSubjectDTO> findAllSubjectsOfStudyAndPreclinical(Long studyId, Boolean preclinical);
 	
 	/**
 	 * Find subject by data.

@@ -19,7 +19,6 @@ import java.util.List;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.model.SubjectStudyTag;
-import org.shanoir.ng.tag.model.Tag;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -38,6 +37,8 @@ public interface SubjectStudyRepository extends CrudRepository<SubjectStudy, Lon
            "LEFT JOIN FETCH sst.tag t " +
            "WHERE ss.study.id = :studyId")
     List<SubjectStudy> findByStudyId(@Param("studyId") Long studyId);
+
+    List<SubjectStudy> findByStudyIdAndStudy_StudyUserList_UserId(Long studyId, Long userId);
 
 	SubjectStudy findByStudyIdAndSubjectId(Long studyId, Long subjectId);
 
