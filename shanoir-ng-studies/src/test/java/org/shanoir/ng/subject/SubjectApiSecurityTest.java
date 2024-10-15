@@ -191,6 +191,7 @@ public class SubjectApiSecurityTest {
 		subjectStudyMock.setStudy(buildStudyMock(1L));
 		subjectStudyMock.setSubject(subjectMockNoRights);
 		given(subjectStudyRepository.findByStudyId(subjectStudyMock.getStudy().getId())).willReturn(Arrays.asList(subjectStudyMock));
+		given(subjectStudyRepository.findByStudyIdAndStudy_StudyUserList_UserId(subjectStudyMock.getStudy().getId(), LOGGED_USER_ID)).willReturn(Arrays.asList(subjectStudyMock));
 		given(studyRepository.findStudyWithTagsById(1L)).willReturn(buildStudyMock(1L));
 		assertAccessAuthorized(api::findSubjectsByStudyId, 1L, "null");
 		assertEquals(null, api.findSubjectsByStudyId(1L, "null").getBody());
@@ -216,6 +217,7 @@ public class SubjectApiSecurityTest {
 		subjectStudyMock.setStudy(buildStudyMock(1L));
 		subjectStudyMock.setSubject(subjectMockWrongRights);
 		given(subjectStudyRepository.findByStudyId(subjectStudyMock.getStudy().getId())).willReturn(Arrays.asList(subjectStudyMock));
+		given(subjectStudyRepository.findByStudyIdAndStudy_StudyUserList_UserId(subjectStudyMock.getStudy().getId(), LOGGED_USER_ID)).willReturn(Arrays.asList(subjectStudyMock));
 		assertAccessAuthorized(api::findSubjectsByStudyId, 1L, null);
 		assertEquals(null, api.findSubjectsByStudyId(1L, null).getBody());
 		
@@ -241,6 +243,7 @@ public class SubjectApiSecurityTest {
 		subjectStudyMock.setStudy(buildStudyMock(1L));
 		subjectStudyMock.setSubject(subjectMockRightRights);
 		given(subjectStudyRepository.findByStudyId(subjectStudyMock.getStudy().getId())).willReturn(Arrays.asList(subjectStudyMock));
+		given(subjectStudyRepository.findByStudyIdAndStudy_StudyUserList_UserId(subjectStudyMock.getStudy().getId(), LOGGED_USER_ID)).willReturn(Arrays.asList(subjectStudyMock));
 		given(studyRepository.findById(1L)).willReturn(Optional.of(subjectStudyMock.getStudy()));
 		assertAccessAuthorized(api::findSubjectsByStudyId, 1L, null);
 		assertNotNull(api.findSubjectsByStudyId(1L,null).getBody());
