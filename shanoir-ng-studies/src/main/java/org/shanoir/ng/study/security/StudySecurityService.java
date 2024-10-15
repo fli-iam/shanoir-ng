@@ -188,7 +188,6 @@ public class StudySecurityService {
 	 * @throws EntityNotFoundException
 	 */
 	public boolean hasRightOnSubjectForOneStudy(Long subjectId, String rightStr) throws EntityNotFoundException {
-		System.out.println("###################################### check rights !!!!!!!!!!");
 		Subject subject = subjectRepository.findById(subjectId).orElse(null);
 		if (subject == null) {
 			throw new EntityNotFoundException("Cannot find subject with id " + subjectId);
