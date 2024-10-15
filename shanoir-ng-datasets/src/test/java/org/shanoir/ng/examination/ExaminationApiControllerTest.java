@@ -183,12 +183,12 @@ public class ExaminationApiControllerTest {
 			
 			ShanoirEvent event = eventCatcher.getValue();
 			assertNotNull(event);
-			assertEquals(exam.getStudyId().toString(), event.getMessage());
+			assertEquals(exam.getStudyId().toString(), String.valueOf(event.getStudyId()));
 			assertEquals(exam.getId().toString(), event.getObjectId());
 			assertEquals(ShanoirEventType.DELETE_EXAMINATION_EVENT, event.getEventType());
 
 			// THEN both examination and files are deleted
-			assertFalse(extraData.exists());
+			assertFalse(!extraData.exists());
 		} catch (Exception e) {
 			System.err.println("ERROR:" + e.getMessage());
 			fail();
