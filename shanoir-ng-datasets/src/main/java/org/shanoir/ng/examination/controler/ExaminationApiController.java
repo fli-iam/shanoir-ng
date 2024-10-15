@@ -96,32 +96,25 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Override
 	public ResponseEntity<Void> deleteExamination(
-			@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId)
-					throws RestServiceException {
-		try {
-			// Delete extra data
-			Long studyId = examinationService.findById(examinationId).getStudyId();
-			String dataPath = examinationService.getExtraDataFilePath(examinationId, "");
-			File fileToDelete = new File(dataPath);
-			if (fileToDelete.exists()) {
-				FileUtils.deleteDirectory(fileToDelete);
-			}
-			examinationService.deleteById(examinationId);
-			ShanoirEvent event= new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, examinationId.toString(), KeycloakUtil.getTokenUserId(), "Examination " + examinationId + " deleted from study " + studyId, ShanoirEvent.SUCCESS, studyId);
-			eventService.publishEvent(event);
-			event.setMessage("" + studyId);
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.EXAMINATION_STUDY_DELETE_QUEUE, objectMapper.writeValueAsString(event));
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
+			@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId) {
+		LOG.error("delete examination id : " + examinationId);
+		Long studyId = examinationService.findById(examinationId).getStudyId();
 
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		} catch (SolrServerException | ShanoirException e) {
-			throw new RestServiceException(e, new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while deleting examination."));
-		} catch (IOException e) {
-			LOG.error("Something went wrong while deleting extra-data file: {}" , e);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
+		ShanoirEvent event = null;
+		event = new ShanoirEvent(
+				ShanoirEventType.DELETE_EXAMINATION_EVENT,
+				String.valueOf(examinationId),
+				KeycloakUtil.getTokenUserId(),
+				"Starting delete of examination with id : " + examinationId,
+				ShanoirEvent.IN_PROGRESS,
+				0f,
+				studyId);
+
+		eventService.publishEvent(event);
+
+		examinationService.deleteExaminationAsync(examinationId, studyId, event);
+
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	@Override

@@ -17,9 +17,11 @@ package org.shanoir.ng.examination.controler;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -57,7 +59,7 @@ public interface ExaminationApi {
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> deleteExamination(
 			@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId)
-			throws RestServiceException;
+			throws RestServiceException, ShanoirException, SolrServerException, IOException;
 
 	@Operation(summary = "", description = "If exists, returns the examination corresponding to the given id")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found examination"),

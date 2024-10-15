@@ -26,7 +26,9 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -45,8 +47,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -123,6 +128,38 @@ public class ExaminationServiceImpl implements ExaminationService {
 			examinationRepository.deleteById(id);
 		}
 		rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(examination.getStudyId()));
+	}
+
+	@Async
+	@Transactional
+	public void deleteExaminationAsync(Long examinationId, Long studyId, ShanoirEvent event) {
+		try {
+			event.setProgress(1f);
+			event.setMessage("Examination delete ongoing...");
+			eventService.publishEvent(event);
+
+			String dataPath = getExtraDataFilePath(examinationId, "");
+			File fileToDelete = new File(dataPath);
+			if (fileToDelete.exists()) {
+				FileUtils.deleteDirectory(fileToDelete);
+			}
+			deleteById(examinationId);
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.EXAMINATION_STUDY_DELETE_QUEUE, objectMapper.writeValueAsString(event));
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
+
+		} catch (Exception e) {
+			event.setStatus(ShanoirEvent.ERROR);
+			event.setMessage("Error during delete of examination with id : " + examinationId);
+			event.setProgress(-1f);
+			eventService.publishEvent(event);
+			LOG.error("Error during delete of examination with id : " + examinationId);
+		} finally {
+			event.setObjectId(String.valueOf(event.getId()));
+			event.setProgress(1f);
+			event.setMessage("Examination with id " + examinationId + " deleted succesfully.");
+			event.setStatus(ShanoirEvent.SUCCESS);
+			eventService.publishEvent(event);
+		}
 	}
 
 	@Override
