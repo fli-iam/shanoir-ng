@@ -24,6 +24,7 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.repository.DatasetExpressionRepository;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
@@ -41,6 +42,7 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -62,6 +64,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -87,6 +90,9 @@ public class DatasetServiceImpl implements DatasetService {
 	private ShanoirEventService shanoirEventService;
 
 	@Autowired
+	private SolrService solrService;
+
+	@Autowired
 	private DICOMWebService dicomWebService;
 
 	@Autowired
@@ -106,6 +112,9 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Autowired
 	private ProcessingResourceService processingResourceService;
+
+	@Autowired
+	DatasetExpressionRepository datasetExpressionRepository;
 
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
@@ -196,7 +205,13 @@ public class DatasetServiceImpl implements DatasetService {
 	@Override
 	public Dataset create(final Dataset dataset) throws SolrServerException, IOException {
 		Dataset ds = repository.save(dataset);
-		Long studyId = this.getStudyId(dataset);
+		Long studyId;
+		if (ds.getDatasetAcquisition() != null) {
+			studyId = ds.getDatasetAcquisition().getExamination().getStudyId();
+		} else {
+			// We have a processed dataset -> acquisition is null but study id is set.
+			studyId = ds.getStudyId();
+		}
 
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, ds.getStudyId()));
 		rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
@@ -212,7 +227,7 @@ public class DatasetServiceImpl implements DatasetService {
 		this.updateDatasetValues(datasetDb, dataset);
 		Dataset ds = repository.save(datasetDb);
 		try {
-			Long studyId = getStudyId(ds);
+			Long studyId = ds.getDatasetAcquisition().getExamination().getStudyId();
 			shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, studyId));
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
 		} catch (JsonProcessingException e) {
@@ -358,6 +373,41 @@ public class DatasetServiceImpl implements DatasetService {
 		return repository.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
 	}
 
+	@Override
+	public void deleteNiftis(Long studyId) {
+		List<Dataset> datasets = this.findByStudyId(studyId);
+		for (Dataset dataset : datasets) {
+			deleteNifti(dataset);
+		}
+	}
+
+	/**
+	 * Deletes nifti on file server
+	 * @param dataset
+	 */
+	private void deleteNifti(Dataset dataset) {
+		List<DatasetExpression> expressionsToDelete = new ArrayList<>();
+		for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+			if (!DatasetExpressionFormat.NIFTI_SINGLE_FILE.equals(expression.getDatasetExpressionFormat())) {
+				continue;
+			}
+			for (DatasetFile file : expression.getDatasetFiles()) {
+				URL url = null;
+				try {
+					url = new URL(file.getPath().replaceAll("%20", " "));
+					File srcFile = new File(UriUtils.decode(url.getPath(), StandardCharsets.UTF_8.name()));
+					LOG.error("Deleting: " + srcFile.getAbsolutePath());
+					FileUtils.delete(srcFile);
+				} catch (Exception e) {
+					LOG.error("Could not delete nifti file: {}", file.getPath(), e);
+				}
+			}
+			expressionsToDelete.add(expression);
+		}
+		this.datasetExpressionRepository.deleteAll(expressionsToDelete);
+
+	}
+
 	/**
 	 * Get study Id from dataset. If processed, recursively get it through processing inputs
 	 *
@@ -390,8 +440,8 @@ public class DatasetServiceImpl implements DatasetService {
 		return null;
 	}
 
-    @Override
-    public DatasetAcquisition getAcquisition(Dataset dataset) {
+	@Override
+	public DatasetAcquisition getAcquisition(Dataset dataset) {
 		if(dataset.getDatasetAcquisition() != null){
 			return dataset.getDatasetAcquisition();
 		}
@@ -404,6 +454,5 @@ public class DatasetServiceImpl implements DatasetService {
 			}
 		}
 		return null;
-    }
-
+	}
 }
