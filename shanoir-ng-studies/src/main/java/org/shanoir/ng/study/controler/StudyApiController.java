@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -180,19 +181,6 @@ public class StudyApiController implements StudyApi {
 		}
 		for (Study study : studies) {
 			studiesDTO.add(studyMapper.studyToIdNameDTO(study));
-		}
-		return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
-	}
-
-	@Override
-	public ResponseEntity<List<IdNameCenterStudyDTO>> findStudiesNamesAndCenters() throws RestServiceException {
-		List<IdNameCenterStudyDTO> studiesDTO = new ArrayList<>();
-		final List<Study> studies = studyService.findAllWithCenters();
-		if (studies.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		for (Study study : studies) {
-			studiesDTO.add(studyMapper.studyToExtendedIdNameDTO(study));
 		}
 		return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
 	}
