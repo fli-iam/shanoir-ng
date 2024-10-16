@@ -30,7 +30,6 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.vip.dto.DatasetParameterDTO;
 import org.shanoir.ng.vip.dto.ExecutionCandidateDTO;
 import org.shanoir.ng.vip.dto.VipExecutionDTO;
-import org.shanoir.ng.vip.model.AutomaticExecution;
 import org.shanoir.ng.vip.monitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.monitoring.model.ExecutionStatus;
 import org.shanoir.ng.vip.monitoring.schedule.ExecutionStatusMonitorService;
@@ -46,7 +45,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 public class ExecutionApiController implements ExecutionApi {
@@ -96,7 +98,7 @@ public class ExecutionApiController implements ExecutionApi {
         return new ResponseEntity<>(createdMonitoring, HttpStatus.OK);
     }
 
-    private List<Dataset> getDatasetsFromParams(List<DatasetParameterDTO> parameters){
+    private List<Dataset> getDatasetsFromParams(List<DatasetParameterDTO> parameters) {
         List<Long> datasetsIds = new ArrayList<>();
         for (DatasetParameterDTO param : parameters) {
             datasetsIds.addAll(param.getDatasetIds());
@@ -189,13 +191,13 @@ public class ExecutionApiController implements ExecutionApi {
                 + "&md5=none&type=File";
     }
 
-    private String getInputValueUri(ExecutionCandidateDTO candidate, String groupBy, String exportFormat, String resourceId, String authenticationToken){
+    private String getInputValueUri(ExecutionCandidateDTO candidate, String groupBy, String exportFormat, String resourceId, String authenticationToken) {
         String entityName = "resource_id+" + resourceId + "+" + groupBy + ("dcm".equals(exportFormat) ? ".zip" : ".nii.gz");
         return SHANOIR_URI_SCHEME + entityName
                 + "?format=" + exportFormat
                 + "&resourceId=" + resourceId
                 + "&token=" + authenticationToken
-                + (candidate.getConverterId()  != null ? ("&converterId=" + candidate.getConverterId()) : "")
+                + (candidate.getConverterId() != null ? ("&converterId=" + candidate.getConverterId()) : "")
                 + "&refreshToken=" + candidate.getRefreshToken()
                 + "&clientId=" + candidate.getClient()
                 + "&md5=none&type=File";
@@ -226,13 +228,13 @@ public class ExecutionApiController implements ExecutionApi {
     }
 
     @Override
-    public ResponseEntity<VipExecutionDTO> getExecution(@Parameter(description = "The execution identifier", required=true) @PathVariable("identifier") String identifier) {
+    public ResponseEntity<VipExecutionDTO> getExecution(@Parameter(description = "The execution identifier", required = true) @PathVariable("identifier") String identifier) {
         return ResponseEntity.ok(vipClient.getExecution(identifier).block());
     }
 
 
     @Override
-    public ResponseEntity<ExecutionStatus> getExecutionStatus(@Parameter(description = "The execution identifier", required=true) @PathVariable("identifier") String identifier) {
+    public ResponseEntity<ExecutionStatus> getExecutionStatus(@Parameter(description = "The execution identifier", required = true) @PathVariable("identifier") String identifier) {
         return ResponseEntity.ok(vipClient.getExecution(identifier).map(VipExecutionDTO::getStatus).block());
     }
 
@@ -246,12 +248,5 @@ public class ExecutionApiController implements ExecutionApi {
     public ResponseEntity<String> getExecutionStdout(String identifier) {
         return ResponseEntity.ok(vipClient.getExecutionStdout(identifier).block());
     }
-
-    @Override
-    public ResponseEntity<List<AutomaticExecution>> getAutomaticExecutions(@Parameter(description = "The study Id", required=true) @PathVariable("studyId") Long studyId) {
-        AutomaticExecution autoExec = new AutomaticExecution();
-        autoExec.setName("superbname");
-        return new ResponseEntity<>(Collections.singletonList(autoExec), HttpStatus.OK);
-    }
-
 }
+

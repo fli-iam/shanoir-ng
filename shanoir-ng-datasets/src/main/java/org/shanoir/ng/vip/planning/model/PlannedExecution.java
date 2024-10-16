@@ -1,18 +1,18 @@
-package org.shanoir.ng.vip.model;
+package org.shanoir.ng.vip.planning.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.vip.monitoring.model.PipelineParameter;
+
+import java.util.List;
 
 /**
  * This class represents the associated criterias for an automatic execution realized after an import in shanoir.
  */
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AutomaticExecution {
+public class PlannedExecution {
 
     @Id
     private Long id;
@@ -23,11 +23,11 @@ public class AutomaticExecution {
     @JoinColumn(name = "study_id")
     private Study study;
 
-    /*
+    private String execution;
+
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable(name = "pipeline_parameter")
+    @JoinTable(name = "execution_pipeline_parameters")
     private List<PipelineParameter> parameters;
-     */
 
     public String getName() {
         return name;
@@ -51,5 +51,21 @@ public class AutomaticExecution {
 
     public void setStudy(Study study) {
         this.study = study;
+    }
+
+    public String getExecution() {
+        return execution;
+    }
+
+    public void setExecution(String execution) {
+        this.execution = execution;
+    }
+
+    public List<PipelineParameter> getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(List<PipelineParameter> parameters) {
+        this.parameters = parameters;
     }
 }

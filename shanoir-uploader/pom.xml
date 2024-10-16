@@ -17,7 +17,6 @@
 		<!-- current version of Spring Boot 3.2.2 uses Spring Framework 6.1.3 -->
 		<spring.version>6.1.3</spring.version>
 		<logback.version>1.5.3</logback.version>
-		<lombok.version>1.18.26</lombok.version>
 		<dcm4che.version>5.31.1</dcm4che.version>
 		<keycloak.version>25.0.4</keycloak.version>
 		<jackson.version>2.13.4</jackson.version>
@@ -212,12 +211,6 @@
 		    <artifactId>jaxb-impl</artifactId>
 		    <version>4.0.0</version>
 		    <scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<version>${lombok.version}</version>
-			<scope>provided</scope>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.json/json -->
 		<dependency>
