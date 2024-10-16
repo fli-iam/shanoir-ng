@@ -402,6 +402,7 @@ public class DatasetServiceImpl implements DatasetService {
 					LOG.error("Could not delete nifti file: {}", file.getPath(), e);
 				}
 			}
+			expressionsToDelete.add(expression);
 		}
 		this.datasetExpressionRepository.deleteAll(expressionsToDelete);
 
