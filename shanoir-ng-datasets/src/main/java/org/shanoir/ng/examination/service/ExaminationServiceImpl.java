@@ -104,7 +104,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 	private String dataDir;
 	
 	@Override
-	public void deleteById(final Long id) throws ShanoirException, SolrServerException, IOException, RestServiceException {
+	public void deleteById(final Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
 		Optional<Examination> examinationOpt = examinationRepository.findById(id);
 		if (!examinationOpt.isPresent()) {
 			throw new EntityNotFoundException(Examination.class, id);
@@ -122,7 +122,14 @@ public class ExaminationServiceImpl implements ExaminationService {
 			List<DatasetAcquisition> dsAcqs = examination.getDatasetAcquisitions();
 			if (dsAcqs != null) {
 				for (DatasetAcquisition dsAcq : dsAcqs) {
-					this.datasetAcquisitionService.deleteById(dsAcq.getId());
+					if (event != null) {
+						float progress = event.getProgress();
+						progress += 1f / dsAcqs.size();
+						event.setMessage("Delete examination - acquisition with id : " + dsAcq.getId());
+						event.setProgress(progress);
+						eventService.publishEvent(event);
+					}
+					this.datasetAcquisitionService.deleteById(dsAcq.getId(), event);
 				}
 			}
 			examinationRepository.deleteById(id);
@@ -134,7 +141,6 @@ public class ExaminationServiceImpl implements ExaminationService {
 	@Transactional
 	public void deleteExaminationAsync(Long examinationId, Long studyId, ShanoirEvent event) {
 		try {
-			event.setProgress(1f);
 			event.setMessage("Examination delete ongoing...");
 			eventService.publishEvent(event);
 
@@ -143,7 +149,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 			if (fileToDelete.exists()) {
 				FileUtils.deleteDirectory(fileToDelete);
 			}
-			deleteById(examinationId);
+			deleteById(examinationId, event);
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.EXAMINATION_STUDY_DELETE_QUEUE, objectMapper.writeValueAsString(event));
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
 

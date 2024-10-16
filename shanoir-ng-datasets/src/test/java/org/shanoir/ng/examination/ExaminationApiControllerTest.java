@@ -138,7 +138,7 @@ public class ExaminationApiControllerTest {
 
 	@BeforeEach
 	public void setup() throws ShanoirException, SolrServerException, IOException, RestServiceException {
-		doNothing().when(examinationServiceMock).deleteById(1L);
+		doNothing().when(examinationServiceMock).deleteById(1L, null);
 		given(examinationServiceMock.findPage(Mockito.any(Pageable.class), Mockito.eq(false), Mockito.eq(null), Mockito.eq(null))).willReturn(new PageImpl<Examination>(Arrays.asList(new Examination())));
 		Examination exam = new Examination();
 		exam.setId(Long.valueOf(123));
