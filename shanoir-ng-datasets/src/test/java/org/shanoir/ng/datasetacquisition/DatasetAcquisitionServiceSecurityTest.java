@@ -107,7 +107,7 @@ public class DatasetAcquisitionServiceSecurityTest {
 		
 		assertAccessDenied(service::create, mockDsAcq());
 		assertAccessDenied(service::update, mockDsAcq(1L));
-		assertAccessDenied(service::deleteById, 1L, null);
+		assertAccessDenied(service::deleteById, 1L, null, 0f);
 	}
 
 	@Test
@@ -136,7 +136,7 @@ public class DatasetAcquisitionServiceSecurityTest {
 		assertEquals(4, page.getTotalElements());
 		assertAccessAuthorized(service::create, mockDsAcq());
 		assertAccessAuthorized(service::update, mockDsAcq(1L));
-		assertAccessAuthorized(service::deleteById, 1L, null);
+		assertAccessAuthorized(service::deleteById, 1L, null, 0f);
 	}
 
 	
@@ -199,19 +199,19 @@ public class DatasetAcquisitionServiceSecurityTest {
 		// deleteById(Long)
 		given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
 		if ("ROLE_USER".equals(role)) {
-			assertAccessDenied(service::deleteById, 1L, null);
+			assertAccessDenied(service::deleteById, 1L, null, 0f);
 		} else if ("ROLE_EXPERT".equals(role)) {
 			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
-			assertAccessDenied(service::deleteById, 1L, null);
+			assertAccessDenied(service::deleteById, 1L, null, 0f);
 			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
-			assertAccessAuthorized(service::deleteById, 1L, null);
+			assertAccessAuthorized(service::deleteById, 1L, null, 0f);
 		}
 		given(rightsService.hasRightOnStudy(2L, "CAN_ADMINISTRATE")).willReturn(true);
-		assertAccessDenied(service::deleteById, 2L, null);
+		assertAccessDenied(service::deleteById, 2L, null, 0f);
 		given(rightsService.hasRightOnStudy(3L, "CAN_ADMINISTRATE")).willReturn(true);
-		assertAccessDenied(service::deleteById, 3L, null);
+		assertAccessDenied(service::deleteById, 3L, null, 0f);
 		given(rightsService.hasRightOnStudy(4L, "CAN_ADMINISTRATE")).willReturn(true);
-		assertAccessDenied(service::deleteById, 4L, null);
+		assertAccessDenied(service::deleteById, 4L, null, 0f);
 		given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
 		given(rightsService.hasRightOnStudy(2L, "CAN_ADMINISTRATE")).willReturn(false);
 		given(rightsService.hasRightOnStudy(3L, "CAN_ADMINISTRATE")).willReturn(false);

@@ -121,15 +121,16 @@ public class ExaminationServiceImpl implements ExaminationService {
 		} else {
 			List<DatasetAcquisition> dsAcqs = examination.getDatasetAcquisitions();
 			if (dsAcqs != null) {
+				float progressMax = 0f;
 				for (DatasetAcquisition dsAcq : dsAcqs) {
 					if (event != null) {
-						float progress = event.getProgress();
-						progress += 1f / dsAcqs.size();
-						event.setMessage("Delete examination - acquisition with id : " + dsAcq.getId());
-						event.setProgress(progress);
-						eventService.publishEvent(event);
+						progressMax += dsAcq.getDatasets().size();
 					}
-					this.datasetAcquisitionService.deleteById(dsAcq.getId(), event);
+				}
+				for (DatasetAcquisition dsAcq : dsAcqs) {
+					event.setMessage("Delete examination - acquisition with id : " + dsAcq.getId());
+					eventService.publishEvent(event);
+					this.datasetAcquisitionService.deleteById(dsAcq.getId(), event, progressMax);
 				}
 			}
 			examinationRepository.deleteById(id);
@@ -141,9 +142,6 @@ public class ExaminationServiceImpl implements ExaminationService {
 	@Transactional
 	public void deleteExaminationAsync(Long examinationId, Long studyId, ShanoirEvent event) {
 		try {
-			event.setMessage("Examination delete ongoing...");
-			eventService.publishEvent(event);
-
 			String dataPath = getExtraDataFilePath(examinationId, "");
 			File fileToDelete = new File(dataPath);
 			if (fileToDelete.exists()) {

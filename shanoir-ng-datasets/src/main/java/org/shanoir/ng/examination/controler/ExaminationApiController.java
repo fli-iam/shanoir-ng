@@ -107,7 +107,7 @@ public class ExaminationApiController implements ExaminationApi {
 				KeycloakUtil.getTokenUserId(),
 				"Starting delete of examination with id : " + examinationId,
 				ShanoirEvent.IN_PROGRESS,
-				0f,
+				0,
 				studyId);
 
 		eventService.publishEvent(event);
