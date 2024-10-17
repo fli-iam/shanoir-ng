@@ -182,7 +182,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
     @Override
     @Transactional
-    public void deleteById(Long id, ShanoirEvent event, float progressMax) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException {
+    public void deleteById(Long id, ShanoirEvent event) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException {
         final DatasetAcquisition entity = repository.findById(id).orElse(null);
         if (entity == null) {
             throw new EntityNotFoundException("Cannot find entity with id = " + id);
@@ -203,6 +203,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
                 for (Dataset ds : datasets) {
                     if (event != null) {
                         event.setMessage("Delete examination - dataset with id : " + ds.getId());
+                        float progressMax = Float.valueOf(event.getEventProperties().get("progressMax"));
                         event.setProgress(event.getProgress() + (1f / progressMax));
                         shanoirEventService.publishEvent(event);
                     }

@@ -121,16 +121,19 @@ public class ExaminationServiceImpl implements ExaminationService {
 		} else {
 			List<DatasetAcquisition> dsAcqs = examination.getDatasetAcquisitions();
 			if (dsAcqs != null) {
+				Map<String, String> eventProperties = new HashMap<>();
 				float progressMax = 0f;
 				for (DatasetAcquisition dsAcq : dsAcqs) {
 					if (event != null) {
 						progressMax += dsAcq.getDatasets().size();
+						eventProperties.put("progressMax", String.valueOf(progressMax));
+						event.setEventProperties(eventProperties);
 					}
 				}
 				for (DatasetAcquisition dsAcq : dsAcqs) {
 					event.setMessage("Delete examination - acquisition with id : " + dsAcq.getId());
 					eventService.publishEvent(event);
-					this.datasetAcquisitionService.deleteById(dsAcq.getId(), event, progressMax);
+					this.datasetAcquisitionService.deleteById(dsAcq.getId(), event);
 				}
 			}
 			examinationRepository.deleteById(id);
