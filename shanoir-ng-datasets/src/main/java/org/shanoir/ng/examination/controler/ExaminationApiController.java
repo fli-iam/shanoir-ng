@@ -119,8 +119,7 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Override
 	public ResponseEntity<ExaminationDTO> findExaminationById(
-			@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId)
-					throws RestServiceException {
+			@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId) {
 		Examination examination = examinationService.findById(examinationId);
 		orderDatasetAcquisitions(examination);
 		if (examination == null) {
