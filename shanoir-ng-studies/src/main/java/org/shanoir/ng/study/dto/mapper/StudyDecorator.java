@@ -26,8 +26,6 @@ import org.shanoir.ng.studycenter.StudyCenterMapper;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyMapper;
 import org.shanoir.ng.tag.model.StudyTagMapper;
 import org.shanoir.ng.tag.model.TagMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -106,9 +104,6 @@ public abstract class StudyDecorator implements StudyMapper {
 	 * @return study DTO.
 	 */
 	private StudyDTO convertStudyToStudyDTO(final Study study, final boolean withData) {
-
-		LOG.error("############################################################## convert study " + study.getId());
-
 		final StudyDTO studyDTO = delegate.studyToStudyDTO(study);
 		studyDTO.setStudyCenterList(
 				studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
@@ -122,8 +117,6 @@ public abstract class StudyDecorator implements StudyMapper {
 		}
 		return studyDTO;
 	}
-	private static final Logger LOG = LoggerFactory.getLogger(StudyDecorator.class);
-
 
 	@Override
 	public StudyLightDTO studyToStudyLightDTO(final Study study) {
