@@ -112,7 +112,6 @@ public class CenterServiceImpl implements CenterService {
 	
 	public List<Center> findAll() {
 		List<Center> centers = centerRepository.findAll();
-		centers.stream().forEach(c -> c.setAcquisitionEquipments(new ArrayList<>()));
 		return centers;
 	}
 	
@@ -138,7 +137,7 @@ public class CenterServiceImpl implements CenterService {
 			centers = centers.stream().filter(center -> studyUser.getCenterIds().contains(center.getId())).collect(Collectors.toList());
 		}
 		// do this here: because of two bags exception, when annotating this additionally to the query in the repository
-		centers.stream().forEach(c -> c.setAcquisitionEquipments(centerRepository.findDistinctAcquisitionEquipmentsByCenterId(c.getId())));
+		//centers.stream().forEach(c -> c.setAcquisitionEquipments(centerRepository.findDistinctAcquisitionEquipmentsByCenterId(c.getId())));
 		return centers;
 	}
 
