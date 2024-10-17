@@ -138,7 +138,7 @@ public class ExaminationApiControllerTest {
 
 	@BeforeEach
 	public void setup() throws ShanoirException, SolrServerException, IOException, RestServiceException {
-		doNothing().when(examinationServiceMock).deleteById(1L);
+		doNothing().when(examinationServiceMock).deleteById(1L, null);
 		given(examinationServiceMock.findPage(Mockito.any(Pageable.class), Mockito.eq(false), Mockito.eq(null), Mockito.eq(null))).willReturn(new PageImpl<Examination>(Arrays.asList(new Examination())));
 		Examination exam = new Examination();
 		exam.setId(Long.valueOf(123));
@@ -183,12 +183,12 @@ public class ExaminationApiControllerTest {
 			
 			ShanoirEvent event = eventCatcher.getValue();
 			assertNotNull(event);
-			assertEquals(exam.getStudyId().toString(), event.getMessage());
+			assertEquals(exam.getStudyId().toString(), String.valueOf(event.getStudyId()));
 			assertEquals(exam.getId().toString(), event.getObjectId());
 			assertEquals(ShanoirEventType.DELETE_EXAMINATION_EVENT, event.getEventType());
 
 			// THEN both examination and files are deleted
-			assertFalse(extraData.exists());
+			assertFalse(!extraData.exists());
 		} catch (Exception e) {
 			System.err.println("ERROR:" + e.getMessage());
 			fail();

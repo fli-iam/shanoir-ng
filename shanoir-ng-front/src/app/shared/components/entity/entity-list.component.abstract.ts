@@ -125,7 +125,11 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
                     this.getService().delete(entity.id).then(() => {
                         this.onDelete.next({entity: entity});
                         this.table.refresh().then(() => {
-                            this.consoleService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + entity.id + ' sucessfully deleted');
+                            if (this.ROUTING_NAME == 'examination') {
+                                this.consoleService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + entity.id + ' has sucessfully started to delete. Check the job page to see its progress.');
+                            } else {
+                                this.consoleService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + entity.id + ' sucessfully deleted');
+                            }
                         });
                         this.treeService.updateTree();
                     }).catch(reason => {

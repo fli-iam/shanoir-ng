@@ -16,6 +16,7 @@ package org.shanoir.ng.examination.service;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -45,7 +46,10 @@ public interface ExaminationService {
 	 * @throws ShanoirException 
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnExamination(#id, 'CAN_ADMINISTRATE'))")
-	void deleteById(Long id) throws ShanoirException, SolrServerException, IOException, RestServiceException;
+	void deleteById(Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException;
+
+	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnExamination(#id, 'CAN_ADMINISTRATE'))")
+	void deleteExaminationAsync(Long examinationId, Long studyId, ShanoirEvent event);
 
 	/**
 	 * Get all examinations for a specific user to support DICOMweb.
