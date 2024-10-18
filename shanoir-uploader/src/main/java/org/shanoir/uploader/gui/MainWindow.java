@@ -31,7 +31,6 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
@@ -353,7 +352,7 @@ public class MainWindow extends JFrame {
 
 		patientNameTF = new JTextField();
 		GridBagConstraints gbc_patientNameTF = new GridBagConstraints();
-		gbc_patientNameTF.insets = new Insets(5, 5, 0, 0);
+		gbc_patientNameTF.insets = new Insets(5, 5, 0, 10);
 		gbc_patientNameTF.fill = GridBagConstraints.HORIZONTAL;
 		gbc_patientNameTF.gridwidth = 6;
 		gbc_patientNameTF.gridx = 1;
@@ -361,72 +360,8 @@ public class MainWindow extends JFrame {
 		queryPanel.add(patientNameTF, gbc_patientNameTF);
 		patientNameTF.setColumns(15);
 		patientNameTF.setText("");
+		patientNameTF.setToolTipText(resourceBundle.getString("shanoir.uploader.patientNameLabel.tooltip"));
 
-		/**
-		 * Help Button
-		 */
-		JButton helpButton;
-		helpButton = new JButton(resourceBundle.getString("shanoir.uploader.helpButton"));
-		GridBagConstraints gbc_HelpButton = new GridBagConstraints();
-		gbc_HelpButton.insets = new Insets(5, 2, 0, 2);
-		gbc_HelpButton.gridx = 7;
-		gbc_HelpButton.gridy = 2;
-		queryPanel.add(helpButton, gbc_HelpButton);
-
-		helpButton.addActionListener(new java.awt.event.ActionListener() {
-			@Override
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				String message = "<html><b> - </b>The patient name should be in this form:</html> "
-						+ "\n"
-						+ "\n"
-						+ "<html>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-						+ "<b>"
-						+ "LastName"
-						+ "<b>"
-						+ "</html>"
-						+ "\n"
-						+ "or"
-						+ "\n"
-						+ "<html>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-						+ "<b>"
-						+ "LastName, FirstName"
-						+ "<b>"
-						+ "</html>"
-						+ "\n"
-						+ "or"
-						+ "\n"
-						+ "<html>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-						+ "<b>"
-						+ "LastName, FirstName1, FirstName2"
-						+ "<b>"
-						+ "</html>"
-						+ "\n"
-						+ "\n"
-						+
-
-						"<html><b> - </b>The wildcard character &nbsp;&nbsp; \"*\" &nbsp;&nbsp;can be used :</html>"
-						+ "\n"
-						+ "\n"
-						+
-
-						"<html>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-						+ "<b>"
-						+ "with the patient FirstName"
-						+ "<b>"
-						+ "</html>"
-						+ "\n"
-						+ "or"
-						+ "\n"
-						+ "<html>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-						+ "<b>"
-						+ "with the patient LastName only if the LastName introduced contains at least 4 characters"
-						+ "<b>" + "</html>" + "\n";
-
-				
-				JOptionPane.showMessageDialog(queryPanel, message, "Help",
-						JOptionPane.INFORMATION_MESSAGE);
-			}
-		});
 
 		// If fields Patient name, Patient ID and Study description are empty
 		// Query DICOM server button is grey
@@ -457,7 +392,7 @@ public class MainWindow extends JFrame {
 
 		patientIDTF = new JTextField();
 		GridBagConstraints gbc_patientIDTF = new GridBagConstraints();
-		gbc_patientIDTF.insets = new Insets(5, 5, 0, 0);
+		gbc_patientIDTF.insets = new Insets(5, 5, 0, 10);
 		gbc_patientIDTF.fill = GridBagConstraints.HORIZONTAL;
 		gbc_patientIDTF.gridwidth = 6;
 		gbc_patientIDTF.gridx = 1;
@@ -488,7 +423,7 @@ public class MainWindow extends JFrame {
 		birthDatePicker.setTextEditable(true);
 
 		GridBagConstraints gbc_birthDateResearchTF = new GridBagConstraints();
-		gbc_birthDateResearchTF.insets = new Insets(5, 5, 0, 0);
+		gbc_birthDateResearchTF.insets = new Insets(5, 5, 0, 10);
 		gbc_birthDateResearchTF.fill = GridBagConstraints.HORIZONTAL;
 		gbc_birthDateResearchTF.gridwidth = 6;
 		gbc_birthDateResearchTF.gridx = 1;
@@ -558,7 +493,7 @@ public class MainWindow extends JFrame {
 
 		studyDescriptionTF = new JTextField();
 		GridBagConstraints gbc_studyDescriptionTF = new GridBagConstraints();
-		gbc_studyDescriptionTF.insets = new Insets(5, 5, 0, 0);
+		gbc_studyDescriptionTF.insets = new Insets(5, 5, 0, 10);
 		gbc_studyDescriptionTF.fill = GridBagConstraints.HORIZONTAL;
 		gbc_studyDescriptionTF.gridwidth = 6;
 		gbc_studyDescriptionTF.gridx = 1;
@@ -591,7 +526,7 @@ public class MainWindow extends JFrame {
 		studyDatePicker.setTextEditable(true);
 
 		GridBagConstraints gbc_studyDatePicker = new GridBagConstraints();
-		gbc_studyDatePicker.insets = new Insets(5, 5, 0, 0);
+		gbc_studyDatePicker.insets = new Insets(5, 5, 0, 10);
 		gbc_studyDatePicker.fill = GridBagConstraints.HORIZONTAL;
 		gbc_studyDatePicker.gridwidth = 6;
 		gbc_studyDatePicker.gridx = 1;
@@ -701,7 +636,7 @@ public class MainWindow extends JFrame {
 		noRB = new JRadioButton("None");
 		modalityRG.add(noRB);
 		GridBagConstraints gBC_noRB = new GridBagConstraints();
-		gBC_noRB.insets = new Insets(2, 2, 0, 2);
+		gBC_noRB.insets = new Insets(2, 2, 0, 10);
 		gBC_noRB.fill = GridBagConstraints.HORIZONTAL;
 		gBC_noRB.gridx = 5;
 		gBC_noRB.gridy = 7;
