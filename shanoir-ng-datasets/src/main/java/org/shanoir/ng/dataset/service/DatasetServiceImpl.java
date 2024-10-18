@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -65,15 +65,12 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * Dataset service implementation.
- * 
+ *
  * @author msimon
  *
  */
@@ -153,7 +150,7 @@ public class DatasetServiceImpl implements DatasetService {
             return;
         }
 
-        for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+		for (DatasetExpression expression : dataset.getDatasetExpressions()) {
 			boolean isDicom = DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat());
 
 			for (DatasetFile file : expression.getDatasetFiles()) {
@@ -171,8 +168,8 @@ public class DatasetServiceImpl implements DatasetService {
 				}
 			}
 			break;
-        }
-    }
+		}
+	}
 
 	@Override
 	public boolean existsById(Long id) {
@@ -185,7 +182,7 @@ public class DatasetServiceImpl implements DatasetService {
 		for(Long id : ids){
 			this.deleteById(id);
 		}
-    }
+	}
 
 	@Override
 	public Dataset findById(final Long id) {
@@ -239,7 +236,7 @@ public class DatasetServiceImpl implements DatasetService {
 
 	/**
 	 * Update some values of dataset to save them in database.
-	 * 
+	 *
 	 * @param datasetDb dataset found in database.
 	 * @param dataset dataset with new values.
 	 * @return database dataset with new values.
@@ -299,8 +296,8 @@ public class DatasetServiceImpl implements DatasetService {
 		}
 
 		datasets = datasets.stream().filter(ds ->
-				studyUserCenters.get(ds.getStudyId()) != null &&
-				studyUserCenters.get(ds.getStudyId()).contains(ds.getDatasetAcquisition().getExamination().getCenterId()))
+						studyUserCenters.get(ds.getStudyId()) != null &&
+								studyUserCenters.get(ds.getStudyId()).contains(ds.getDatasetAcquisition().getExamination().getCenterId()))
 				.collect(Collectors.toList());
 		int size = datasets.size();
 
@@ -350,7 +347,7 @@ public class DatasetServiceImpl implements DatasetService {
 	public List<Dataset> findByAcquisition(Long acquisitionId) {
 		return Utils.toList(repository.findByDatasetAcquisitionId(acquisitionId));
 	}
-	
+
 	@Override
 	public List<Dataset> findByStudycard(Long studycardId) {
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
@@ -358,7 +355,7 @@ public class DatasetServiceImpl implements DatasetService {
 		} else {
 			Long userId = KeycloakUtil.getTokenUserId();
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
-			
+
 			return Utils.toList(repository.findByDatasetAcquisitionStudyCardIdAndDatasetAcquisitionExaminationStudy_IdIn(studycardId, studyIds));
 		}
 	}
@@ -387,25 +384,37 @@ public class DatasetServiceImpl implements DatasetService {
 	 */
 	private void deleteNifti(Dataset dataset) {
 		List<DatasetExpression> expressionsToDelete = new ArrayList<>();
-		for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+
+		for (Iterator<DatasetExpression> iterex = dataset.getDatasetExpressions().iterator(); iterex.hasNext(); ) {
+			DatasetExpression expression = iterex.next();
 			if (!DatasetExpressionFormat.NIFTI_SINGLE_FILE.equals(expression.getDatasetExpressionFormat())) {
 				continue;
 			}
-			for (DatasetFile file : expression.getDatasetFiles()) {
+			for (Iterator<DatasetFile> iter = expression.getDatasetFiles().iterator(); iter.hasNext(); ) {
+				DatasetFile file = iter.next();
 				URL url = null;
 				try {
 					url = new URL(file.getPath().replaceAll("%20", " "));
 					File srcFile = new File(UriUtils.decode(url.getPath(), StandardCharsets.UTF_8.name()));
-					LOG.error("Deleting: " + srcFile.getAbsolutePath());
-					FileUtils.delete(srcFile);
+					if (srcFile.exists()) {
+						LOG.error("Deleting: " + srcFile.getAbsolutePath());
+						FileUtils.delete(srcFile);
+					}
+					// We are forced to detach elements here to be able to delete them from DB
+					file.setDatasetExpression(null);
+					iter.remove();
 				} catch (Exception e) {
 					LOG.error("Could not delete nifti file: {}", file.getPath(), e);
 				}
 			}
+			expression.setDataset(null);
+			iterex.remove();
 			expressionsToDelete.add(expression);
 		}
+		if (expressionsToDelete.isEmpty()) {
+			return;
+		}
 		this.datasetExpressionRepository.deleteAll(expressionsToDelete);
-
 	}
 
 	/**
