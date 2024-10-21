@@ -14,15 +14,25 @@
 
 package org.shanoir.ng.processing.service;
 
+import org.apache.solr.client.solrj.SolrServerException;
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.dataset.service.ProcessedDatasetService;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.Utils;
+import org.shanoir.ng.vip.resource.ProcessingResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -42,7 +52,16 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     @Autowired
     private ProcessedDatasetService processedDatasetService;
 
-	protected DatasetProcessing updateValues(final DatasetProcessing from, final DatasetProcessing to) {
+    @Autowired
+    ProcessingResourceService processingResourceService;
+
+    @Autowired
+    private DatasetService datasetService;
+
+    @Autowired
+    private SolrService solrService;
+
+    protected DatasetProcessing updateValues(final DatasetProcessing from, final DatasetProcessing to) {
 		to.setDatasetProcessingType(from.getDatasetProcessingType());
 		to.setComment(from.getComment());
 		to.setInputDatasets(from.getInputDatasets());
@@ -82,10 +101,19 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     }
 
     @Override
-    public void deleteById(final Long id) throws EntityNotFoundException {
+    @Transactional
+    public void deleteById(final Long id) throws ShanoirException, RestServiceException, SolrServerException, IOException {
         final Optional<DatasetProcessing> entity = repository.findById(id);
         entity.orElseThrow(() -> new EntityNotFoundException("Cannot find dataset processing [" + id + "]"));
-        processedDatasetService.deleteByProcessingId(id);
+
+        // delete associated ressources
+        processingResourceService.deleteByProcessingId(id);
+
+        for (Dataset ds : entity.get().getOutputDatasets()) {
+            datasetService.deleteById(ds.getId());
+            solrService.deleteFromIndex(ds.getId());
+        }
+
         this.deleteByParentId(id);
         repository.deleteById(id);
     }
@@ -96,7 +124,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
      * @param datasetId
      */
     @Override
-    public void removeDatasetFromAllProcessingInput(Long datasetId) throws ShanoirException {
+    public void removeDatasetFromAllProcessingInput(Long datasetId) throws ShanoirException, RestServiceException, SolrServerException, IOException {
         List<DatasetProcessing> processings = repository.findAllByInputDatasets_Id(datasetId);
         List<DatasetProcessing> toUpdate = new ArrayList<>();
         List<DatasetProcessing> toDelete = new ArrayList<>();
@@ -117,10 +145,28 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     }
 
     @Override
-    public void deleteByParentId(Long id) throws EntityNotFoundException {
+    public void deleteByParentId(Long id) throws ShanoirException, RestServiceException, SolrServerException, IOException {
         List<DatasetProcessing> processings = repository.findAllByParentId(id);
         for(DatasetProcessing child : processings){
             this.deleteById(child.getId());
+        }
+    }
+
+    @Override
+    public void validateDatasetProcessing(DatasetProcessing processing) throws RestServiceException {
+        if(processing.getStudyId() == null){
+            ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Processing must be linked to a study.", null);
+            throw new RestServiceException(error);
+        }
+        if(processing.getInputDatasets() == null || processing.getInputDatasets().isEmpty()){
+            ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "There must be at least one input dataset.", null);
+            throw new RestServiceException(error);
+        }
+        for(Dataset dataset : processing.getInputDatasets()){
+            if (!processing.getStudyId().equals(datasetService.getStudyId(dataset))){
+                ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Input dataset [" + dataset.getId() + "] is not linked to the processing study.", null);
+                throw new RestServiceException(error);
+            }
         }
     }
 }

@@ -56,9 +56,11 @@ Then the shanoir-downloader project can be simply managed as a normal git repo (
     - Run Docker in admin mode
     - Delete, if needed, %appData%/Docker/settings.json (Docker will create another one, see https://forums.docker.com/t/solved-docker-failed-to-start-docker-desktop-for-windows/106976/6)
     
-* Install Java 17
-    - Download and install : https://www.oracle.com/fr/java/technologies/javase/jdk11-archive-downloads.html
-    - Add enviromnent variable : JAVA_HOME = C:\Program Files\Java\jdk-11.0.16
+* Install Java 21
+    - Download and install : https://www.oracle.com/java/technologies/javase/jdk21-archive-downloads.html
+    - Add enviromnent variable :
+      		On Windows (as environment variable): JAVA_HOME = C:\Program Files\Java\jdk-21.0.1
+      		On Mac (in your .bashrc or .zshrc file): export JAVA_HOME=$(/usr/libexec/java_home)
 
 * Install Maven
     - Download : https://maven.apache.org/download.cgi
@@ -136,7 +138,7 @@ Please note, that the MS Users does for security reasons not publicly expose his
 # Requirements
 
 To build and deploy Shanoir, you will need:
-* Java 17 (since migration to Spring Boot 3.1.2)
+* Java 21 (since migration to Spring Boot 3.1.2)
 * docker (https://docs.docker.com/install/)
 * docker-compose 3 (https://docs.docker.com/compose/install/)
 * maven 3
@@ -311,6 +313,7 @@ server directly:
    interface and receive the new password is by e-mail. In development, if you
    do hot have a configured SMTP relay, then you may choose to overide the
    password manually and set `Temporary password: No` to make it persistent.
+   Go to the "Attributes" tab of your User page and create a new attribute "userId" and set the value with a random number not taken by another user.
 
 
 ### PACS dcm4chee

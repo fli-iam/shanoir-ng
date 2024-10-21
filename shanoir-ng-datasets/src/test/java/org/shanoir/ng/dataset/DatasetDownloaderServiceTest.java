@@ -26,7 +26,7 @@ import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.importer.service.DicomSRImporterService;
+import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -108,7 +108,7 @@ public class DatasetDownloaderServiceTest {
 	private ImporterService importerService;
 	
 	@MockBean
-	private DicomSRImporterService dicomSRImporterService;
+	private DicomSEGAndSRImporterService dicomSRImporterService;
 
 	private Subject subject = new Subject(3L, "name");
 	private Study study = new Study(1L, "studyName");

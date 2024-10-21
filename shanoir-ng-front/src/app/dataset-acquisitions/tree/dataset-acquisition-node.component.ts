@@ -12,7 +12,6 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
-import { Router } from '@angular/router';
 import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
 import { Dataset } from '../../datasets/shared/dataset.model';
 import { DatasetService } from '../../datasets/shared/dataset.service';
@@ -20,14 +19,13 @@ import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
 
 import { Subscription } from 'rxjs';
 import { TaskState } from 'src/app/async-tasks/task.model';
+import { Selection, TreeService } from 'src/app/studies/study/tree.service';
 import { ConsoleService } from "../../shared/console/console.service";
-import { DatasetAcquisitionNode, DatasetNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
+import { MassDownloadService } from "../../shared/mass-download/mass-download.service";
+import { DatasetAcquisitionNode, DatasetNode, ProcessingNode, ShanoirNode, UNLOADED } from '../../tree/tree.model';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from "../shared/dataset-acquisition.service";
-import {MassDownloadService} from "../../shared/mass-download/mass-download.service";
-
-
-
+import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
 
 @Component({
     selector: 'dataset-acquisition-node',
@@ -37,7 +35,7 @@ import {MassDownloadService} from "../../shared/mass-download/mass-download.serv
 export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
 
     progressStatus: TaskState;
-    @Input() input: DatasetAcquisitionNode | DatasetAcquisition;
+    @Input() input: DatasetAcquisitionNode | {datasetAcquisition: DatasetAcquisition, parentNode: ShanoirNode, studyRights: StudyUserRight[]} ;
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
     node: DatasetAcquisitionNode;
     loading: boolean = false;
@@ -51,14 +49,15 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
     downloading = false;
     hasBids: boolean = false;
     protected subscriptions: Subscription[] = [];
+    @Input() withMenu: boolean = true;
     protected downloadState: TaskState = new TaskState();
 
     constructor(
-        private router: Router,
         private datasetService: DatasetService,
         private datasetAcquisitionService: DatasetAcquisitionService,
         private consoleService: ConsoleService,
-        private massDownloadService: MassDownloadService) {
+        private massDownloadService: MassDownloadService,
+        protected treeService: TreeService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -68,10 +67,16 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
                 if(this.node.datasets != "UNLOADED"){
                     this.setDatasetIds(this.node.datasets);
                 }
-
             } else {
-                let label: string = 'Dataset Acquisition n°' + this.input.id;
-                this.node = new DatasetAcquisitionNode(this.input.id, label, UNLOADED,false);
+                let label: string = 'Dataset Acquisition n°' + this.input.datasetAcquisition.id;
+                this.node = new DatasetAcquisitionNode(
+                    this.input.parentNode,
+                    this.input.datasetAcquisition.id,
+                    label,
+                    UNLOADED,
+                    this.input.studyRights.includes(StudyUserRight.CAN_ADMINISTRATE),
+                    this.input.studyRights.includes(StudyUserRight.CAN_DOWNLOAD)
+                );
                 this.loadDatasets();
             }
         }
@@ -85,7 +90,7 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
     loadDatasets() {
         if (this.node.datasets == UNLOADED) {
             this.datasetService.getByAcquisitionId(this.node.id).then(datasets => {
-                this.node.datasets = datasets.map(ds => this.mapDatasetNode(ds, false)).sort();
+                this.node.datasets = datasets.map(ds => DatasetNode.fromDataset(ds, false, this.node, this.node.canDelete, this.node.canDownload)).sort();
                 this.setDatasetIds(this.node.datasets);
             });
         }
@@ -105,26 +110,6 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
                 this.hasDicom = true;
             }
         });
-    }
-
-    private mapDatasetNode(dataset: Dataset, processed: boolean): DatasetNode {
-        return new DatasetNode(
-            dataset.id,
-            dataset.name,
-            dataset.type,
-            dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : [],
-            processed,
-            this.node.canDelete
-        );
-    }
-
-    private mapProcessingNode(processing: DatasetProcessing): ProcessingNode {
-        return new ProcessingNode(
-            processing.id,
-            DatasetProcessingType.getLabel(processing.datasetProcessingType),
-            processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],
-            this.node.canDelete
-        );
     }
 
     deleteAcquisition() {

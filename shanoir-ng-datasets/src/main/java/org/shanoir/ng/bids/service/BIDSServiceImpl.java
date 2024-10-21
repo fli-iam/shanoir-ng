@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -156,67 +157,19 @@ public class BIDSServiceImpl implements BIDSService {
 
 	DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
-	@Override
-	/**
-	 * Receives a shanoirEvent as a json object, concerning a study update => Update BIDS folder too
-	 * @param commandArrStr the task as a json string.
-	 */
-	@RabbitListener(bindings = {
-			@QueueBinding(
-					key = ShanoirEventType.DELETE_EXAMINATION_EVENT,
-					value = @Queue(value = RabbitMQConfiguration.BIDS_EVENT_QUEUE, durable = "true"),
-					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
-			@QueueBinding(
-					key = ShanoirEventType.DELETE_DATASET_EVENT,
-					value = @Queue(value = RabbitMQConfiguration.BIDS_EVENT_QUEUE, durable = "true"),
-					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
-			@QueueBinding(
-					key = ShanoirEventType.UPDATE_DATASET_EVENT,
-					value = @Queue(value = RabbitMQConfiguration.BIDS_EVENT_QUEUE, durable = "true"),
-					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
-			@QueueBinding(
-					key = ShanoirEventType.UPDATE_EXAMINATION_EVENT,
-					value = @Queue(value = RabbitMQConfiguration.BIDS_EVENT_QUEUE, durable = "true"),
-					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
-			@QueueBinding(
-					key = ShanoirEventType.CREATE_EXAMINATION_EVENT,
-					value = @Queue(value = RabbitMQConfiguration.BIDS_EVENT_QUEUE, durable = "true"),
-					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
-			@QueueBinding(
-					key = ShanoirEventType.CREATE_DATASET_EVENT,
-					value = @Queue(value = RabbitMQConfiguration.BIDS_EVENT_QUEUE, durable = "true"),
-					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
-	}, containerFactory = "multipleConsumersFactory"
-			)
-	public void deleteBids(String eventAsString) {
-		ShanoirEvent event;
-		try {
-			event = objectMapper.readValue(eventAsString, ShanoirEvent.class);
-			if (event.getStudyId() == null) {
-				LOG.error("This event did not triggered a BIDs folder deletion {}", eventAsString);
-				return;
-			}
-			Study studyDeleted = studyRepo.findById(event.getStudyId()).orElse(null);
-			if (studyDeleted == null) {
-				return;
-			}
-			this.deleteBidsFolder(studyDeleted.getId(), studyDeleted.getName());
-		} catch (Exception e) {
-			LOG.error("ERROR when deleting BIDS folder: please delete it manually: {}", eventAsString, e);
-		}
+	@RabbitListener(queues = RabbitMQConfiguration.RELOAD_BIDS)
+	public void deleteBidsForStudy(String studyId) {
+		Study studyDeleted = studyRepo.findById(Long.valueOf(studyId)).orElse(null);
+		this.deleteBidsFolder(studyDeleted.getId(), studyDeleted.getName());
 	}
 
 	@Override
 	public void deleteBidsFolder(Long studyId, String studyName) {
 		try {
 			if (studyName == null) {
-				studyName = this.studyRepo.findById(studyId).get().getName();
+				Optional<Study> study = studyRepo.findById(studyId);
+				if (!study.isEmpty())
+					studyName = study.get().getName();
 			}
 			// Try to delete the BIDS folder recursively if possible
 			File bidsDir = new File(bidsStorageDir + File.separator + STUDY_PREFIX + studyId + studyName);
@@ -456,7 +409,8 @@ public class BIDSServiceImpl implements BIDSService {
 	private void createDatasetBidsFiles(final Dataset dataset, final File workDir, final String studyName, final String subjectName) throws IOException {
 		File dataFolder = null;
 
-		if (dataset.getDatasetAcquisition() == null && dataset.getDatasetProcessing() != null) {
+		if (dataset.getDatasetProcessing() != null) {
+			LOG.warn("Submitted dataset is a processed dataset.");
 			return;
 		}
 		String subjectNameUpdated = this.formatLabel(subjectName);
@@ -580,6 +534,9 @@ public class BIDSServiceImpl implements BIDSService {
 	}
 
 	private File createSpecificDataFolder(Dataset dataset, File workDir, File dataFolder, String subjectName, String studyName) throws IOException {
+
+
+
 		// Create specific files (EEG, MS, MEG, etc..)
 		if (dataset instanceof EegDataset) {
 			dataFolder = createDataFolder("eeg", workDir);

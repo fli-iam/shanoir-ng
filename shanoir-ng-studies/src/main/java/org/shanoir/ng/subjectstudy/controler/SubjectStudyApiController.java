@@ -53,8 +53,8 @@ public class SubjectStudyApiController implements SubjectStudyApi {
 
 	@Override
 	public ResponseEntity<Void> updateSubjectStudy(
-			@Parameter(name = "id of the subject study", required = true) @PathVariable("subjectStudyId") Long subjectStudyId,
-			@Parameter(name = "subject study to update", required = true) @RequestBody SubjectStudy subjectStudy,
+			@Parameter(description = "id of the subject study", required = true) @PathVariable("subjectStudyId") Long subjectStudyId,
+			@Parameter(description = "subject study to update", required = true) @RequestBody SubjectStudy subjectStudy,
 			final BindingResult result) throws RestServiceException {
 
 		final FieldErrorMap errors = new FieldErrorMap(result);

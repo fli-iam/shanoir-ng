@@ -50,7 +50,12 @@ public enum CoilType {
 	/**
 	 * VOLUME.
 	 */
-	VOLUME(6);
+	VOLUME(6),
+
+	/**
+	 * SYNERGY.
+	 */
+	SYNERGY(7);
 
 	private int id;
 

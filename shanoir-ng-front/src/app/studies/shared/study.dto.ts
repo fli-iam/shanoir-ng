@@ -89,7 +89,7 @@ export class StudyDTOService {
         entity.monoCenter = dto.monoCenter;
         entity.name = dto.name;
         entity.nbExaminations = dto.nbExaminations;
-        entity.nbSujects = dto.nbSujects;
+        entity.nbSubjects = dto.nbSubjects;
         entity.protocolFilePaths = dto.protocolFilePaths;
         entity.profile = dto.profile;
         entity.description = dto.description;
@@ -138,6 +138,7 @@ export class StudyDTOService {
         //entity.timepoints = dto.timepoints;
         entity.visibleByDefault = dto.visibleByDefault;
         entity.withExamination = dto.withExamination;
+        entity.studyCardPolicy = dto.studyCardPolicy;
         if (dto.studyUserList) {
             entity.nbMembers = dto.studyUserList.length;
         }
@@ -273,7 +274,7 @@ export class StudyDTO {
     challenge: boolean;
     name: string;
     nbExaminations: number;
-    nbSujects: number;
+    nbSubjects: number;
     nbMembers: number;
     protocolFilePaths: string[];
     dataUserAgreementPaths: string[];
@@ -287,6 +288,7 @@ export class StudyDTO {
     //timepoints: Timepoint[];
     visibleByDefault: boolean;
     withExamination: boolean;
+    studyCardPolicy: string;
     tags: Tag[];
     studyTags: Tag[];
     studyCards: StudyCardDTO[];
@@ -325,6 +327,7 @@ export class StudyDTO {
             return dto;
         }) : null;
         this.visibleByDefault = study.visibleByDefault;
+        this.studyCardPolicy = study.studyCardPolicy;
         this.withExamination = study.withExamination;
         this.tags = study.tags;
         this.studyTags = study.studyTags;
@@ -360,8 +363,9 @@ export class CenterStudyDTO {
     tags: Tag[];
 }
 
-export class PublicStudyData {
+export class StudyLight {
   downloadableByDefault: boolean;
+  challenge: boolean;
   endDate: Date;
   id: number;
   name: string;

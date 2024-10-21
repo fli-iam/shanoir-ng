@@ -84,11 +84,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <ng-template [ngSwitchCase]="'executionMonitoring.event'">
                     <i class="fa-solid fa-gears"></i>
                 </ng-template>
+                <ng-template [ngSwitchCase]="'solrIndexAll.event'">
+                    <i class="fa-solid fa-sun"></i>
+                </ng-template>
                 <ng-template [ngSwitchCase]="'copyDataset.event'">
                     <i class="fa-solid fa-copy"></i>
                 </ng-template>
                 <ng-template [ngSwitchCase]="'checkQuality.event'">
                     <i class="fa-solid fa-star"></i>
+                </ng-template>
+                <ng-template [ngSwitchCase]="'downloadStatistics.event'">
+                    <i class="fa-solid fa-download"></i>
                 </ng-template>
                 <ng-template ngSwitchDefault>
                     <i class="fa-regular fa-clock"></i>
@@ -109,8 +115,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
     <li (click)="state.eqOpened = !state.eqOpened; saveState();"><i class="fas fa-vial"></i>Medical configuration<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
     <div *ngIf="state.eqOpened" class="sub-menu" [@slideDown]="state.eqOpened">
-        <li routerLink="/center/list" routerLinkActive="active"><i class="fa-regular fa-hospital"></i>Centers</li>
-        <li routerLink="/acquisition-equipment/list" routerLinkActive="active"><i class="fas fa-microscope"></i>Acquisition equipments</li>
+        <li routerLink="/center/list" routerLinkActive="active"><i class="fa-regular fa-hospital"></i>Acquisition centers</li>
+        <li routerLink="/acquisition-equipment/list" routerLinkActive="active"><i class="fas fa-microscope"></i>Center equipments</li>
         <li routerLink="/coil/list" routerLinkActive="active"><i class="fas fa-magnet"></i>Coils</li>
         <li routerLink="/study-card/list" routerLinkActive="active"><i class="fa-solid fa-shuffle"></i>Study Cards</li>
         <li routerLink="/quality-card/list" routerLinkActive="active"><i class="fa-solid fa-shuffle"></i>Quality Cards</li>
@@ -150,3 +156,5 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <div>Copyright (C) 2009-2023 Inria</div>
     <div><a href="https://www.inria.fr/" target="_blank">https://www.inria.fr/</a></div>
 </div>
+
+<ng-content></ng-content>

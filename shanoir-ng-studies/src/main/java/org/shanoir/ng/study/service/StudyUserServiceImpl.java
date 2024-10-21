@@ -95,7 +95,10 @@ public class StudyUserServiceImpl implements StudyUserService {
 
 	@Override
 	public List<StudyUser> findStudyUsersByStudyId(Long studyId) {
-		return studyUserRepository.findByStudy_Id(studyId);
+		List<StudyUser> studyUsers = studyUserRepository.findByStudy_Id(studyId);
+		// two bags contraint on EntityGraph expression in findByStudy_Id: load centers manually
+		studyUsers.stream().forEach(su -> su.setCenters(studyUserRepository.findDistinctCentersByStudyId(studyId)));
+		return studyUsers;
 	}
 
 	@RabbitListener(queues = RabbitMQConfiguration.DELETE_USER_QUEUE, containerFactory = "singleConsumerFactory")

@@ -11,20 +11,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {Component, EventEmitter, ViewChild, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
-import {DatasetAcquisitionService} from '../../dataset-acquisitions/shared/dataset-acquisition.service';
-import {DatasetProcessing} from '../../datasets/shared/dataset-processing.model';
-import {Dataset} from '../../datasets/shared/dataset.model';
-import {DatasetProcessingType} from '../../enum/dataset-processing-type.enum';
-import {ConsoleService} from '../../shared/console/console.service';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { DatasetAcquisitionService } from '../../dataset-acquisitions/shared/dataset-acquisition.service';
+import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
+import { Dataset } from '../../datasets/shared/dataset.model';
+import { ConsoleService } from '../../shared/console/console.service';
 
-import {DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode} from '../../tree/tree.model';
-import {Examination} from '../shared/examination.model';
-import {ExaminationPipe} from '../shared/examination.pipe';
-import {ExaminationService} from '../shared/examination.service';
-import {environment} from '../../../environments/environment';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+
 import { TaskState } from 'src/app/async-tasks/task.model';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { Selection, TreeService } from 'src/app/studies/study/tree.service';
+import { SuperPromise } from 'src/app/utils/super-promise';
+import { environment } from '../../../environments/environment';
+import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode, ShanoirNode } from '../../tree/tree.model';
+import { Examination } from '../shared/examination.model';
+import { ExaminationPipe } from '../shared/examination.pipe';
+import { ExaminationService } from '../shared/examination.service';
 
 @Component({
     selector: 'examination-node',
@@ -33,7 +35,7 @@ import { TaskState } from 'src/app/async-tasks/task.model';
 
 export class ExaminationNodeComponent implements OnChanges {
 
-    @Input() input: ExaminationNode | Examination;
+    @Input() input: ExaminationNode | {examination: Examination, parentNode: ShanoirNode, hasDeleteRights: boolean, hasDownloadRights: boolean};
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
     @Output() nodeInit: EventEmitter<ExaminationNode> = new EventEmitter();
     @Output() onExaminationDelete: EventEmitter<void> = new EventEmitter();
@@ -42,18 +44,23 @@ export class ExaminationNodeComponent implements OnChanges {
     node: ExaminationNode;
     loading: boolean = false;
     menuOpened: boolean = false;
-    @Input() hasBox: boolean = false;
+    @Input() hasBox: boolean = true;
     datasetIds: number[];
     hasDicom: boolean = false;
     downloading = false;
     detailsPath: string = '/examination/details/';
+    @Input() withMenu: boolean = true;
+    private contentLoaded: SuperPromise<void> = new SuperPromise();
+    preclinical: boolean;
 
     constructor(
         private examinationService: ExaminationService,
         private datasetAcquisitionService: DatasetAcquisitionService,
         private examPipe: ExaminationPipe,
+        private downloadService: MassDownloadService,
         private massDownloadService : MassDownloadService,
-        private consoleService: ConsoleService) {
+        private consoleService: ConsoleService,
+        protected treeService: TreeService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -65,12 +72,16 @@ export class ExaminationNodeComponent implements OnChanges {
                 }
             } else {
                 this.node = new ExaminationNode(
-                    this.input.id,
-                    this.examPipe.transform(this.input),
+                    this.input.parentNode,
+                    this.input.examination?.id,
+                    this.examPipe.transform(this.input.examination),
                     'UNLOADED',
-                    this.input.extraDataFilePathList,
-                    false);
+                    this.input.examination.extraDataFilePathList,
+                    this.input.hasDeleteRights,
+                    this.input.hasDownloadRights,
+                    this.input.examination.preclinical);
             }
+            //this.node.registerOpenPromise(this.contentLoaded);
             this.nodeInit.emit(this.node);
         }
     }
@@ -81,8 +92,9 @@ export class ExaminationNodeComponent implements OnChanges {
         else return (this.node.datasetAcquisitions && this.node.datasetAcquisitions.length > 0)
                 || (this.node.extraDataFilePathList && this.node.extraDataFilePathList.length > 0);
     }
+
     viewExaminationDicoms() {
-        window.open(environment.viewerUrl + '/viewer/1.4.9.12.34.1.8527.' + this.node.id, '_blank');
+        window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.node.id, '_blank');
     }
 
     downloadFile(file) {
@@ -90,16 +102,19 @@ export class ExaminationNodeComponent implements OnChanges {
     }
 
     firstOpen() {
-        if (this.node.datasetAcquisitions == 'UNLOADED') this.loadDatasetAcquisitions().then(() => this.node.open = true);
+        if (this.node.datasetAcquisitions == 'UNLOADED') {
+            this.loadDatasetAcquisitions().then(() => this.contentLoaded.resolve());
+        } else {
+            this.contentLoaded.resolve();
+        }
     }
 
     loadDatasetAcquisitions(): Promise<void> {
         this.loading = true;
-
         return this.datasetAcquisitionService.getAllForExamination(this.node.id).then(dsAcqs => {
             if (!dsAcqs) dsAcqs = [];
             dsAcqs = dsAcqs.filter(acq => acq.type !== 'Processed');
-            this.node.datasetAcquisitions = dsAcqs.map(dsAcq => this.mapAcquisitionNode(dsAcq));
+            this.node.datasetAcquisitions = dsAcqs.map(dsAcq => DatasetAcquisitionNode.fromAcquisition(dsAcq, this.node, this.node.canDelete, this.node.canDownload));
             this.fetchDatasetIds(this.node.datasetAcquisitions);
             this.nodeInit.emit(this.node);
             this.loading = false;
@@ -137,35 +152,6 @@ export class ExaminationNodeComponent implements OnChanges {
         this.massDownloadService.downloadAllByExaminationId(this.node.id, this.downloadState)
             .then(() => this.downloading = false);
 
-    }
-
-    mapAcquisitionNode(dsAcq: any): DatasetAcquisitionNode {
-        return new DatasetAcquisitionNode(
-            dsAcq.id,
-            dsAcq.name,
-            dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds, false)) : [],
-            this.node.canDelete
-        );
-    }
-
-    mapDatasetNode(dataset: Dataset, processed: boolean): DatasetNode {
-        return new DatasetNode(
-            dataset.id,
-            dataset.name,
-            dataset.type,
-            dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : [],
-            processed,
-            this.node.canDelete
-        );
-    }
-
-    mapProcessingNode(processing: DatasetProcessing): ProcessingNode {
-        return new ProcessingNode(
-            processing.id,
-            DatasetProcessingType.getLabel(processing.datasetProcessingType),
-            processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],
-            this.node.canDelete
-        );
     }
 
     deleteExamination() {

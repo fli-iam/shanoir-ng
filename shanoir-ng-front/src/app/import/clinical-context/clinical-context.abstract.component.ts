@@ -225,6 +225,44 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         }
     }
 
+    private getStudyCardOptions(study: Study): Promise<Option<StudyCard>[]> {
+        let studyEquipments: AcquisitionEquipment[] = [];
+        if (!study) return Promise.resolve([]);
+        /* find equipments for this study - needed for checking studycards compatibilities */
+        study.studyCenterList.forEach(studyCenter => {
+            studyCenter.center.acquisitionEquipments.forEach(eq => {
+                if (studyEquipments.findIndex(se => se.id == eq.id) == -1) studyEquipments.push(eq);
+            });
+        });
+        /* build the studycards options and set their compatibilies */
+        return this.centerService.getCentersByStudyId(study.id).then(centers => {
+            let accessibleCenterIds = centers.map(center => center.id);
+            return this.studycardService.getAllForStudy(study.id).then(studyCards => {
+                if (!studyCards) studyCards = [];
+
+                return studyCards.filter(studyCard => {
+                    return accessibleCenterIds.includes(studyCard.acquisitionEquipment.center.id);
+                }).map(studyCard => {
+                    let opt = new Option(studyCard, studyCard.name);
+                    let scEq = studyCard.acquisitionEquipment ? studyEquipments.find(se => se.id == studyCard.acquisitionEquipment.id) : null;
+                    opt.compatible = this.acqEqCompatible(scEq);
+                    return opt;
+                });
+            });
+        });
+    }
+
+    private selectDefaultStudyCard(options: Option<StudyCard>[]): Promise<void> {
+        let founded = options?.find(option => option.compatible)?.value;
+        if (founded) {
+            this.studycard = founded;
+            return this.onSelectStudyCard();
+        } else if (options?.length > 0) {
+            this.studycard = options[0].value;
+            return this.onSelectStudyCard();
+        }
+    }
+
     private getCenterOptions(study: Study): Promise<Option<Center>[]> {
         if (study && study.id && study.studyCenterList) {
             return this.centerService.getCentersByStudyId(study.id).then(centers => {
@@ -452,8 +490,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         });
     }
 
-
-
     private examToSubjectExam(examination: Examination): SubjectExamination {
         if (!examination) return;
         // Add the new created exam to the select box and select it
@@ -461,6 +497,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         subjectExam.id = examination.id;
         subjectExam.examinationDate = examination.examinationDate;
         subjectExam.comment = examination.comment;
+        subjectExam.preclinical = examination.preclinical;
         return subjectExam;
     }
 

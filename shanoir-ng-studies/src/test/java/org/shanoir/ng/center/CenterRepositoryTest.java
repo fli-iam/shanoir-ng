@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.shanoir.ng.center.model.Center;
@@ -61,9 +62,9 @@ public class CenterRepositoryTest {
 	
 	@Test
 	public void findByNameTest() throws Exception {
-		Center centerDb = repository.findByName(CENTER_TEST_1_NAME);
-		assertNotNull(centerDb);
-		assertThat(centerDb.getId()).isEqualTo(CENTER_TEST_1_ID);
+		Optional<Center> centerDb = repository.findByName(CENTER_TEST_1_NAME);
+		assertNotNull(centerDb.get());
+		assertThat(centerDb.get().getId()).isEqualTo(CENTER_TEST_1_ID);
 	}
 	
 	@Test

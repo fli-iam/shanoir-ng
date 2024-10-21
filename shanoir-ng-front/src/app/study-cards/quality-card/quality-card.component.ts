@@ -42,6 +42,7 @@ import { TestQualityCardOptionsComponent } from '../test-quality-card-options/te
 import { SuperPromise } from 'src/app/utils/super-promise';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { Selection } from 'src/app/studies/study/tree.service';
 
 @Component({
     selector: 'quality-card',
@@ -104,24 +105,22 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
         return this.qualityCardService;
     }
 
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromQualitycard(this.qualityCard);
+    }
+
     get qualityCard(): QualityCard { return this.entity; }
     set qualityCard(qc: QualityCard) { this.entity = qc; }
 
     initView(): Promise<void> {
-        let scFetchPromise: Promise<void> = this.qualityCardService.get(this.id).then(sc => {
-            this.qualityCard = sc;
-        });
-        this.hasAdministrateRightPromise = scFetchPromise.then(() => this.hasAdminRightsOnStudy().then(res => this.isStudyAdmin = res));
-        return scFetchPromise;
+        this.hasAdministrateRightPromise = this.hasAdminRightsOnStudy().then(res => this.isStudyAdmin = res);
+        return Promise.resolve();  
     }
 
     initEdit(): Promise<void> {
-        let scFetchPromise: Promise<void> = this.qualityCardService.get(this.id).then(sc => {
-            this.qualityCard = sc;
-        });
-        this.hasAdministrateRightPromise = scFetchPromise.then(() => this.hasAdminRightsOnStudy().then(res => this.isStudyAdmin = res));
+        this.hasAdministrateRightPromise = this.hasAdminRightsOnStudy().then(res => this.isStudyAdmin = res);
         this.fetchStudies();
-        return scFetchPromise;
+        return Promise.resolve();  
     }
 
     initCreate(): Promise<void> {
@@ -273,7 +272,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
         return Promise.resolve(this.report.getPage(pageable));
     }
 
-    static downloadReport(report: any, name?: string) {
+    static downloadReport(report: {columnDefs: any[], items: any[]}, name?: string) {
         if (!report) return;
         let csvStr: string = '';
         csvStr += report.columnDefs.map(col => col.headerName).join(',');

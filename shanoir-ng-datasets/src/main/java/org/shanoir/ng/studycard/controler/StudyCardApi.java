@@ -51,7 +51,7 @@ public interface StudyCardApi {
 	@RequestMapping(value = "/{studyCardId}", produces = { "application/json" }, method = RequestMethod.DELETE)
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudyCard(#studyCardId, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> deleteStudyCard(
-			@Parameter(name = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) throws RestServiceException;
+			@Parameter(description = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) throws RestServiceException;
 
 	@Operation(summary = "", description = "If exists, returns the study card corresponding to the given id")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found study card"),
@@ -63,7 +63,7 @@ public interface StudyCardApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.hasRightOnStudy(returnObject.getBody().getStudyId(), 'CAN_SEE_ALL')")
 	ResponseEntity<StudyCard> findStudyCardById(
-			@Parameter(name = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId);
+			@Parameter(description = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId);
 	
 	@Operation(summary = "", description = "If exists, returns the study cards corresponding to the given study id")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found study cards"),
@@ -75,7 +75,7 @@ public interface StudyCardApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<StudyCard>> findStudyCardByStudyId(
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId);
+			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 		
 	@Operation(summary = "", description = "If exists, returns the study cards corresponding to the given equipment id")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found study cards"),
@@ -87,7 +87,7 @@ public interface StudyCardApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<StudyCard>> findStudyCardByAcqEqId(
-			@Parameter(name = "id of the acquisition equipment", required = true) @PathVariable("acqEqId") Long acqEqId);
+			@Parameter(description = "id of the acquisition equipment", required = true) @PathVariable("acqEqId") Long acqEqId);
 	
 	@Operation(summary = "", description = "Returns all the study Cards")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found study cards"),
@@ -110,7 +110,7 @@ public interface StudyCardApi {
 			"application/json" }, method = RequestMethod.POST)
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(#studyCard.getStudyId(), 'CAN_ADMINISTRATE'))")
 	ResponseEntity<StudyCard> saveNewStudyCard(
-			@Parameter(name = "study Card to create", required = true) @RequestBody StudyCard studyCard,
+			@Parameter(description = "study Card to create", required = true) @RequestBody StudyCard studyCard,
 			final BindingResult result) throws RestServiceException;
 		
 	// Attention: used by ShanoirUploader!
@@ -125,7 +125,7 @@ public interface StudyCardApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or ( hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.filterCardList(returnObject.getBody(), 'CAN_SEE_ALL') )")
 	ResponseEntity<List<StudyCard>> searchStudyCards(
-			@Parameter(name = "study ids", required = true) @RequestBody IdList studyIds);	
+			@Parameter(description = "study ids", required = true) @RequestBody IdList studyIds);	
 	
 	@Operation(summary = "", description = "Updates a study card")
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "study card updated"),
@@ -137,8 +137,8 @@ public interface StudyCardApi {
 			"application/json" }, method = RequestMethod.PUT)
 	@PreAuthorize("hasRole('ADMIN') or ( hasRole('EXPERT') and #studyCardId == #studyCard.getId() and @datasetSecurityService.hasUpdateRightOnStudyCard(#studyCard, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> updateStudyCard(
-			@Parameter(name = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId,
-			@Parameter(name = "study card to update", required = true) @RequestBody StudyCard studyCard,
+			@Parameter(description = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId,
+			@Parameter(description = "study card to update", required = true) @RequestBody StudyCard studyCard,
 			final BindingResult result) throws RestServiceException;
 
 	@Operation(summary = "", description = "Returns all the dicom tags")
@@ -158,6 +158,6 @@ public interface StudyCardApi {
 			"application/json" }, method = RequestMethod.POST)
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnEveryDatasetAcquisition(#studyCardApplyObject.datasetAcquisitionIds, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> applyStudyCard(
-			@Parameter(name = "study card id and acquisition ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws RestServiceException, PacsException, SolrServerException, IOException;
+			@Parameter(description = "study card id and acquisition ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws RestServiceException, PacsException, SolrServerException, IOException;
 
 }

@@ -13,9 +13,7 @@
  */
 
 package org.shanoir.ng.acquisitionequipment.dto;
-
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
-import org.shanoir.ng.shared.core.model.IdName;
 
 /**
  * DTO for acquisition equipments.
@@ -25,7 +23,7 @@ import org.shanoir.ng.shared.core.model.IdName;
  */
 public class AcquisitionEquipmentDTO {
 
-	private IdName center;
+	private CenterDTO center;
 
 	private Long id;
 
@@ -38,7 +36,7 @@ public class AcquisitionEquipmentDTO {
 	/**
 	 * @return the center
 	 */
-	public IdName getCenter() {
+	public CenterDTO getCenter() {
 		return center;
 	}
 
@@ -46,7 +44,7 @@ public class AcquisitionEquipmentDTO {
 	 * @param center
 	 *            the center to set
 	 */
-	public void setCenter(IdName center) {
+	public void setCenter(CenterDTO center) {
 		this.center = center;
 	}
 

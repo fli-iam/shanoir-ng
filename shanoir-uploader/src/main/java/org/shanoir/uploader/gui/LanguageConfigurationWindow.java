@@ -18,12 +18,13 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.action.LanguageConfigurationListener;
 
 public class LanguageConfigurationWindow extends JFrame {
 
-	private static Logger logger = Logger.getLogger(LanguageConfigurationWindow.class);
+	private static final Logger logger = LoggerFactory.getLogger(LanguageConfigurationWindow.class);
 	public File shanoirUploaderFolder;
 	public ResourceBundle resourceBundle;
 	public JRadioButton rbEnglish;

@@ -39,7 +39,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 export class ExaminationAnestheticFormComponent extends EntityComponent<ExaminationAnesthetic> {
 
     @Input() isStandalone: boolean = false;
-    @Input() examination_id: number;
     @Input() form: UntypedFormGroup;
     @Output() examAnestheticChange = new EventEmitter();
     //examinationAnesthetic : ExaminationAnesthetic;
@@ -67,48 +66,41 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
 
     getService(): EntityService<ExaminationAnesthetic> {
         return this.examAnestheticService;
-    }    
+    }
+
+    protected fetchEntity: () => Promise<ExaminationAnesthetic> = () => {
+        return this.examAnestheticService.getExaminationAnesthetics(this.id).then(examAnesthetics => {
+            if (examAnesthetics && examAnesthetics.length > 0) {
+                //Should be only one
+                let examAnesthetic: ExaminationAnesthetic = examAnesthetics[0];
+                examAnesthetic.internal_id = examAnesthetic.id;
+                return examAnesthetic;
+            }
+        });
+    }
 
     initView(): Promise<void> {
         this.getEnums();
         this.examinationAnesthetic = new ExaminationAnesthetic();
-        return this.loadData().then(() => {
-            this.examAnestheticService.getExaminationAnesthetics(this.examination_id).then(examAnesthetics => {
-                if (examAnesthetics && examAnesthetics.length > 0) {
-                    //Should be only one
-                    let examAnesthetic: ExaminationAnesthetic = examAnesthetics[0];
-                    this.examinationAnesthetic = examAnesthetic;
-                    this.examinationAnesthetic.internal_id = examAnesthetic.id;
-                }
-            });
-        });
+        return this.loadData();
     }
 
     
     initEdit(): Promise<void> {
         this.getEnums();
-        this.examinationAnesthetic = new ExaminationAnesthetic();
         return this.loadData().then(() => {
-            this.examAnestheticService.getExaminationAnesthetics(this.examination_id).then(examAnesthetics => {
-                if (examAnesthetics && examAnesthetics.length > 0) {
-                    //Should be only one
-                    let examAnesthetic: ExaminationAnesthetic = examAnesthetics[0];
-                    this.examinationAnesthetic = examAnesthetic;
-                    this.examinationAnesthetic.dose_unit = this.getReferenceById(examAnesthetic.dose_unit);
-                    this.examinationAnesthetic.anesthetic = this.getAnestheticById(examAnesthetic.anesthetic);
-                    this.examinationAnesthetic.internal_id = examAnesthetic.id;
-                }
-            });
+            //Should be only one
+            this.examinationAnesthetic.dose_unit = this.getReferenceById(this.examinationAnesthetic.dose_unit);
+            this.examinationAnesthetic.anesthetic = this.getAnestheticById(this.examinationAnesthetic.anesthetic);
+
         });
-
-
     }
 
     initCreate(): Promise<void> {
         this.getEnums();
         this.loadData();
         this.examinationAnesthetic = new ExaminationAnesthetic();
-        this.examinationAnesthetic.examination_id = this.examination_id;
+        this.examinationAnesthetic.examination_id = this.id;
         return Promise.resolve();
     }
 

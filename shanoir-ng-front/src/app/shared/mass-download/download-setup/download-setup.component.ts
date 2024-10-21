@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { AngularDeviceInformationService } from 'angular-device-information';
 import { DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
@@ -21,6 +21,7 @@ import { Dataset } from "../../../datasets/shared/dataset.model";
 import { Option } from '../../select/select.component';
 import { GlobalService } from '../../services/global.service';
 import { DownloadInputIds, DownloadSetup } from '../mass-download.service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'download-setup',
@@ -28,7 +29,7 @@ import { DownloadInputIds, DownloadSetup } from '../mass-download.service';
     styleUrls: ['download-setup.component.css']
 })
 
-export class DownloadSetupComponent implements OnInit {
+export class DownloadSetupComponent implements OnInit, OnDestroy {
 
     @Output() go: EventEmitter<DownloadSetup> = new EventEmitter();
     @Output() close: EventEmitter<void> = new EventEmitter();
@@ -55,6 +56,7 @@ export class DownloadSetupComponent implements OnInit {
     ];
     winOs: boolean;
     @ViewChild('window') window: ElementRef;
+    protected subscriptions: Subscription[] = [];
 
     constructor(
             private formBuilder: UntypedFormBuilder,
@@ -106,11 +108,17 @@ export class DownloadSetupComponent implements OnInit {
             'format': [{value: this.format || 'dcm', disabled: this.format}, [Validators.required]],
             'converter': [{value: this.converter}],
             'nbQueues': [4, [Validators.required, Validators.min(1), Validators.max(1024)]],
-            'unzip': [false, []],
+            'unzip': [false],
+            'subjectFolders': [true],
+            'examinationFolders': [true],
+            'datasetFolders': [false]
         });
         if (this.winOs) {
             formGroup.addControl('shortPath', new UntypedFormControl(false));
         }
+        this.subscriptions.push(formGroup.get('unzip').valueChanges.subscribe(val => {
+            formGroup.get('datasetFolders').setValue(val); 
+        }));
         return formGroup;
     }
 
@@ -118,6 +126,9 @@ export class DownloadSetupComponent implements OnInit {
         let setup: DownloadSetup = new DownloadSetup(this.form.get('format').value);
         setup.nbQueues = this.form.get('nbQueues').value;
         setup.unzip = this.form.get('unzip').value;
+        setup.subjectFolders = this.form.get('subjectFolders').value;
+        setup.examinationFolders = this.form.get('examinationFolders').value;
+        setup.datasetFolders = this.form.get('datasetFolders').value;
         setup.converter = (this.form.get('format').value == 'nii') ? this.form.get('converter')?.value : null;
         if (this.form.get('shortPath')) setup.shortPath = this.form.get('shortPath').value;
         setup.datasets = this.datasets;
@@ -142,6 +153,12 @@ export class DownloadSetupComponent implements OnInit {
             }
         }
         return false;
+    }
+
+    ngOnDestroy() {
+        for(let subscribtion of this.subscriptions) {
+            subscribtion.unsubscribe();
+        }
     }
 
 }

@@ -55,7 +55,7 @@ public interface SubjectStudyApi {
 			+ " or @studySecurityService.hasRightOnStudy(#subjectStudy.getStudy(), 'CAN_ADMINISTRATE') )"
 			+ "  )) and @controlerSecurityService.idMatches(#subjectStudyId, #subjectStudy)")
 	ResponseEntity<Void> updateSubjectStudy(
-			@Parameter(name = "id of the subject study", required = true) @PathVariable("subjectStudyId") Long subjectStudyId,
-			@Parameter(name = "subject study to update", required = true) @RequestBody SubjectStudy subjectStudy,
+			@Parameter(description = "id of the subject study", required = true) @PathVariable("subjectStudyId") Long subjectStudyId,
+			@Parameter(description = "subject study to update", required = true) @RequestBody SubjectStudy subjectStudy,
 			final BindingResult result) throws RestServiceException;
 }

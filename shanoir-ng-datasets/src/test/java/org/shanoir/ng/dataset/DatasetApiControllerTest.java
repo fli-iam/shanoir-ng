@@ -29,7 +29,9 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
+import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
+import org.shanoir.ng.dataset.service.CreateStatisticsService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -37,7 +39,7 @@ import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.importer.service.DicomSRImporterService;
+import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -47,6 +49,9 @@ import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.security.ControlerSecurityService;
+import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.tag.mapper.StudyTagMapper;
+import org.shanoir.ng.tag.service.StudyTagService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -90,9 +95,21 @@ public class DatasetApiControllerTest {
 
 	@MockBean
 	private DatasetService datasetServiceMock;
+	
+	@MockBean
+	private CreateStatisticsService createStatisticsService;
+
+	@MockBean
+	private DatasetRepository datasetRepositoryMock;
+
+	@MockBean
+	private StudyTagService studyTagServiceMock;
 
 	@MockBean
 	private DatasetMapper datasetMapperMock;
+
+	@MockBean
+	private StudyTagMapper studyTagMapperMock;
 
 	@MockBean
 	private MrDatasetMapper mrDatasetMapperMock;
@@ -134,11 +151,14 @@ public class DatasetApiControllerTest {
 	private ImporterService importerService;
 	
 	@MockBean
-	private DicomSRImporterService dicomSRImporterService;
+	private DicomSEGAndSRImporterService dicomSRImporterService;
 	
 	@MockBean
 	private DatasetDownloaderServiceImpl datasetDownloaderService;
-	
+
+	@MockBean
+	private SolrService solrService;
+
 	@Autowired
 	private ObjectMapper mapper;
 
@@ -151,8 +171,13 @@ public class DatasetApiControllerTest {
 
 	@BeforeEach
 	public void setup() throws ShanoirException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException, SolrServerException, RestServiceException {
+		MrDataset datasetToReturn = new MrDataset();
+		datasetToReturn.setDatasetAcquisition(dsAcq);
+		datasetToReturn.getDatasetAcquisition().setExamination(exam);
+		datasetToReturn.getDatasetAcquisition().getExamination().setStudy(study);
+
+		given(datasetServiceMock.findById(1L)).willReturn(datasetToReturn);
 		doNothing().when(datasetServiceMock).deleteById(1L);
-		given(datasetServiceMock.findById(1L)).willReturn(new MrDataset());
 		given(datasetServiceMock.create(Mockito.mock(MrDataset.class))).willReturn(new MrDataset());
 		given(studyRepo.findById(Mockito.anyLong())).willReturn(Optional.of(study));
 		given(controlerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(Dataset.class))).willReturn(true);

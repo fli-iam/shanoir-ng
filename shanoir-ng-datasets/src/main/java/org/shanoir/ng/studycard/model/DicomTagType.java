@@ -24,7 +24,7 @@ public enum DicomTagType {
 	 */
 	String, Long, Float, Double, Integer, Binary, Date, FloatArray, IntArray;
 	
-	public static DicomTagType valueOf(VR vr) {
+	public static DicomTagType valueOf(VR vr, VM vm) {
 		if (	   vr.equals(VR.AE)
 				|| vr.equals(VR.AS) // Age special format
 				|| vr.equals(VR.CS)
@@ -53,7 +53,8 @@ public enum DicomTagType {
 			return DicomTagType.Date;
 			
 		} else if (vr.equals(VR.FL)
-				|| vr.equals(VR.OF)) {
+				|| vr.equals(VR.OF)
+				|| (vr.equals(VR.DS) && Cardinality.ONE.equals(vm.getMax()))) {
 			return DicomTagType.Float;
 			
 		} else if (vr.equals(VR.FD)
@@ -61,7 +62,8 @@ public enum DicomTagType {
 			return DicomTagType.Double;
 			
 		} else if (vr.equals(VR.SS)
-				|| vr.equals(VR.US)) {
+				|| vr.equals(VR.US)
+				|| (vr.equals(VR.IS) && Cardinality.ONE.equals(vm.getMax()))) {
 			return DicomTagType.Integer;
 		
 		} else if (vr.equals(VR.OL)

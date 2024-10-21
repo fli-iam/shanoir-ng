@@ -52,16 +52,10 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
     }
 
     getPage(pageable: Pageable): Promise<Page<Examination>> {
-        return this.examinationService.getPage(pageable, true);
+        return this.examinationService.getPage(pageable, true, "", "");
     }
 
     getColumnDefs(): ColumnDefinition[] {
-        function dateRenderer(date: number) {
-            if (date) {
-                return new Date(date).toLocaleDateString();
-            }
-            return null;
-        };
         let colDef: ColumnDefinition[] = [
             { headerName: "Id", field: "id" },
             {
@@ -69,16 +63,14 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
                 route: (examination: Examination) => examination.subject ? '/preclinical-subject/details/' + examination.subject.id : null
             },
             {
-                headerName: "Examination date", field: "examinationDate", type: "date", cellRenderer: function (params: any) {
-                    return dateRenderer(params.data.examinationDate);
-                }, width: "100px"
+                headerName: "Examination date", field: "examinationDate", type: "date", width: "100px"
             },
             {
                 headerName: "Study", field: "study.name",
                 route: (examination: Examination) => examination.study ? '/study/details/' + examination.study.id : null
             },
             {
-                headerName: "Center", field: "center.name",
+                headerName: "Acquisition Center", field: "center.name",
                 route: (examination: Examination) => examination.center ? '/center/details/' + examination.center.id : null
             }
         ];

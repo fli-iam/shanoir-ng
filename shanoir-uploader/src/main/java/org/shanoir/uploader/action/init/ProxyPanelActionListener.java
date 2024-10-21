@@ -6,14 +6,16 @@ import java.awt.event.ActionListener;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.gui.ProxyConfigurationPanel;
 import org.shanoir.uploader.utils.Util;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ProxyPanelActionListener implements ActionListener {
 
 	private ProxyConfigurationPanel proxyPanel;
 
 	private StartupStateContext sSC;
 
-	public ProxyPanelActionListener(ProxyConfigurationPanel proxyPanel, StartupStateContext sSC) {
+	public void configure(ProxyConfigurationPanel proxyPanel, StartupStateContext sSC) {
 		this.proxyPanel = proxyPanel;
 		this.sSC = sSC;
 	}

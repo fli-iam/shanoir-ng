@@ -80,6 +80,8 @@ public class ShanoirEventType {
 
 	/** Download dataset. */
 	public static final String DOWNLOAD_DATASET_EVENT = "downloadDataset.event";
+	/** Download statistics. */
+	public static final String DOWNLOAD_STATISTICS_EVENT = "downloadStatistics.event";
 
 	/** User subscribed to a challenge. */
 	public static final String CHALLENGE_SUBSCRIPTION_EVENT = "challengeSubscription.event";
@@ -91,4 +93,9 @@ public class ShanoirEventType {
 	public static final String USER_ADD_TO_STUDY_EVENT = "userAddToStudy.event";
 
 	public static final String CHECK_QUALITY_EVENT = "checkQuality.event";
+
+	/**
+	 * Index all datasets in solr
+	 */
+	public static final String SOLR_INDEX_ALL_EVENT = "solrIndexAll.event";
 }

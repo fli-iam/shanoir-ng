@@ -116,8 +116,8 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 
 				subjectStudyList.add(ssToAdd);
 				studyTarget.setSubjectStudyList(subjectStudyList);
-				studyRepository.save(studyTarget);
 
+				studyRepository.save(studyTarget);
 				// then send it to dataset ms which has a duplicated table
 				try {
 					subjectStudyUpdateBroadcastService.send(subjectStudyList);

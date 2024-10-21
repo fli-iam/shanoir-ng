@@ -16,9 +16,12 @@ package org.shanoir.ng.studycard.service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.dcm4che3.data.Attributes;
+import org.hibernate.Hibernate;
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.AcquisitionAttributes;
@@ -31,6 +34,7 @@ import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.PacsException;
+import org.shanoir.ng.shared.exception.StreamExceptionWrapper;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.service.StudyService;
@@ -38,18 +42,14 @@ import org.shanoir.ng.shared.service.SubjectStudyService;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.StudyCard;
+import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
 import org.shanoir.ng.studycard.model.rule.QualityExaminationRule;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.AmqpException;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class CardsProcessingService {
@@ -117,7 +117,7 @@ public class CardsProcessingService {
                 } catch (EntityNotFoundException e) {} // too bad
             }
             List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
-            if (CollectionUtils.isNotEmpty(acquisitions)) {
+            if (acquisitions != null && !acquisitions.isEmpty()) {
                 LOG.debug(acquisitions.size() + " acquisitions found for examination with id: " + examination.getId());
                 LOG.debug(qualityCard.getRules().size() + " rules found for study card with id: " + qualityCard.getId() + " and name: " + qualityCard.getName());
                 long rulesStartTs = new Date().getTime();
@@ -149,7 +149,7 @@ public class CardsProcessingService {
 	public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags, Integer start, Integer stop) throws MicroServiceCommunicationException {
         long startTs = new Date().getTime();
         if (qualityCard == null) throw new IllegalArgumentException("qualityCard can't be null");
-        ShanoirEvent event = new ShanoirEvent(ShanoirEventType.CHECK_QUALITY_EVENT, null, KeycloakUtil.getTokenUserId(), "Quality check started on study " + qualityCard.getStudyId() , 4);
+        ShanoirEvent event = new ShanoirEvent(ShanoirEventType.CHECK_QUALITY_EVENT, null, KeycloakUtil.getTokenUserId(), "Quality check started on study " + qualityCard.getStudyId() , 4, qualityCard.getStudyId());
         eventService.publishEvent(event);
         Study study = studyService.findById(qualityCard.getStudyId());
         if (study == null ) throw new IllegalArgumentException("study can't be null");
@@ -164,22 +164,34 @@ public class CardsProcessingService {
                 } catch (EntityNotFoundException e) {} // too bad
             }
             QualityCardResult result = new QualityCardResult();
-            int i = 0;
+            AtomicInteger i = new AtomicInteger(0);
             List<Examination> examinations;
             if (start != null && stop != null) {
                 examinations = study.getExaminations().subList(start, stop < study.getExaminations().size() ? stop : study.getExaminations().size());
             } else {
                 examinations = study.getExaminations();
             }
-            for (Examination examination : examinations) {
-                event.setStatus(2);
-                event.setProgress((float)i / examinations.size());
-                event.setMessage("checking quality for examination " + examination.getComment());
-                //event.setReport(result.toString()); // too heavy
-                eventService.publishEvent(event);
-                result.merge(applyQualityCardOnExamination(qualityCard, examination, false));
-                i++;
-            };
+            // Load lazy data before go parallel
+            loadExaminationsLazyCollections(study.getExaminations(), event);
+            loadRulesLazyCollections(qualityCard.getRules(), event);
+            // main loop
+            try {
+                examinations.parallelStream().forEach(examination -> {
+                    event.setStatus(2);
+                    event.setProgress(0.5f + (i.floatValue() * 0.5f / examinations.size()));
+                    event.setMessage("checking quality for examination " + examination.getComment());
+                    //event.setReport(result.toString()); // too heavy, too slow
+                    eventService.publishEvent(event);
+                    try {
+                        result.merge(applyQualityCardOnExamination(qualityCard, examination, false));
+                    } catch (MicroServiceCommunicationException e) {
+                        throw new StreamExceptionWrapper(e);
+                    }
+                    i.incrementAndGet();
+                });
+            } catch (StreamExceptionWrapper e) {
+                throw (MicroServiceCommunicationException)(e.getCause());
+            }
             if (updateTags) { // update subject studies
 			    try {
                     event.setMessage("setting quality subject tags");
@@ -203,6 +215,49 @@ public class CardsProcessingService {
             throw new RestClientException("Quality card used with emtpy rules.");
         }
 	}
+
+    private void loadExaminationsLazyCollections(List<Examination> examinations, ShanoirEvent event) {
+        if (examinations != null) {
+            int i = 0;
+            for (Examination examination : examinations) {
+                event.setMessage("Loading examination " + examination.getComment() + " data from Shanoir database");
+                event.setProgress(i * 0.4f / examinations.size());
+                eventService.publishEvent(event);
+                if (examination.getSubject() != null) {
+                    Hibernate.initialize(examination.getSubject().getSubjectStudyList());
+                }
+                if (examination.getDatasetAcquisitions() != null) {
+                    for(DatasetAcquisition acquisition : examination.getDatasetAcquisitions()) {
+                        if (acquisition.getDatasets() != null) {
+                            for (Dataset dataset : acquisition.getDatasets()) {
+                                if (dataset.getDatasetExpressions() != null) {
+                                    for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+                                        Hibernate.initialize(expression.getDatasetFiles());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                i++;
+            }
+        }
+    }
+
+    private void loadRulesLazyCollections(List<QualityExaminationRule> rules, ShanoirEvent event) {
+        event.setMessage("Loading rules");
+        event.setProgress(0.5f);
+        eventService.publishEvent(event);
+        if (rules != null) {
+            for (QualityExaminationRule rule : rules) {
+                if (rule.getConditions() != null) {
+                    for (StudyCardCondition condition : rule.getConditions()) {
+                        Hibernate.initialize(condition.getValues());
+                    }
+                }
+            }
+        }
+    }
 
     /**
 	 * Study cards for quality control: apply on entire study.

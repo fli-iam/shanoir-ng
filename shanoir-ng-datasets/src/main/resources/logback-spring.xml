@@ -58,11 +58,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <logger name="org.shanoir.ng.shared.event" level="INFO" additivity="false">
         <appender-ref ref="EVENT_FILE_LOG" />
     </logger>
-    
+	
+    <logger name="org.shanoir.ng.dataset.service.CreateStatisticsService" level="INFO" additivity="false">
+        <appender-ref ref="FILE" />
+    </logger>
+	
     <logger name="org.shanoir.ng.dicom.DIMSEService" level="INFO" additivity="false">
         <appender-ref ref="DIMSE_FILE_LOG" />
     </logger>
-    
+
     <root level="INFO">
         <appender-ref ref="FILE" />
         <appender-ref ref="CONSOLE" />

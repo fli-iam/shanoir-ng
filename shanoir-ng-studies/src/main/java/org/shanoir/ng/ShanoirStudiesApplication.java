@@ -14,6 +14,9 @@
 
 package org.shanoir.ng;
 
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.servers.Server;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -23,7 +26,11 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
  * Shanoir-NG microservice studies application.
  */
 @SpringBootApplication
-@OpenAPIDefinition
+@OpenAPIDefinition(
+		info = @Info(title = "Shanoir studies API", version = "1.0"),
+		servers = @Server(url = "/shanoir-ng/studies", description = "Studies"),
+		security = { @SecurityRequirement(name = "BearerAuth"), @SecurityRequirement(name = "OAuth2Auth") }
+)
 public class ShanoirStudiesApplication {
 
 	public static void main(String[] args) {

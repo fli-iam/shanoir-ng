@@ -45,7 +45,7 @@
     <div *ngIf="exportFormat=='nii'">
         <label>Nifti converter <tool-tip>Nifti converter used to convert dicom to nifti.</tool-tip></label>
         <span class="right-col">
-            <select-box formControlName="converter" [(ngModel)]="converter" [options]="niftiConverters"></select-box>
+            <select-box formControlName="converter" [(ngModel)]="converterId" [options]="niftiConverters"></select-box>
         </span>
     </div>
 </form>

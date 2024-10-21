@@ -4,12 +4,13 @@ import java.awt.Container;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.gui.ImportDialog;
 
 public class ImportCreateNewExamCBItemListener implements ItemListener {
 	
-	private static Logger logger = Logger.getLogger(ImportCreateNewExamCBItemListener.class);
+	private static final Logger logger = LoggerFactory.getLogger(ImportCreateNewExamCBItemListener.class);
 
 	private ImportDialog importDialog;
 

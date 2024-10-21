@@ -1,19 +1,20 @@
 package org.shanoir.ng.vip.monitoring.schedule;
 
-import org.shanoir.ng.vip.controller.VipClientService;
-import org.shanoir.ng.vip.monitoring.model.ExecutionMonitoring;
-import org.shanoir.ng.vip.dto.VipExecutionDTO;
-import org.shanoir.ng.vip.monitoring.model.ExecutionStatus;
-import org.shanoir.ng.vip.resulthandler.ResultHandlerException;
-import org.shanoir.ng.vip.resulthandler.ResultHandlerService;
-import org.shanoir.ng.vip.monitoring.service.ExecutionMonitoringService;
+import java.time.LocalDate;
+
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.SecurityException;
-import org.shanoir.ng.shared.security.KeycloakServiceAccountUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.vip.controller.VipClientService;
+import org.shanoir.ng.vip.dto.VipExecutionDTO;
+import org.shanoir.ng.vip.monitoring.model.ExecutionMonitoring;
+import org.shanoir.ng.vip.monitoring.model.ExecutionStatus;
+import org.shanoir.ng.vip.monitoring.service.ExecutionMonitoringService;
+import org.shanoir.ng.vip.resulthandler.ResultHandlerException;
+import org.shanoir.ng.vip.resulthandler.ResultHandlerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import reactor.core.publisher.Mono;
+import reactor.core.Exceptions;
 
 import java.time.LocalDate;
 
@@ -46,9 +47,6 @@ public class ExecutionStatusMonitorService {
 
 	@Autowired
 	private ExecutionMonitoringService executionMonitoringService;
-
-	@Autowired
-	private KeycloakServiceAccountUtils keycloakServiceAccountUtils;
 
 	@Autowired
 	private ShanoirEventService eventService;
@@ -119,9 +117,11 @@ public class ExecutionStatusMonitorService {
 						stop.set(true);
 						break;
 				}
-			}catch (ResultHandlerException e){
-				LOG.error(e.getMessage(), e.getCause());
-				this.setJobInError(event, execLabel + " : " + e.getMessage());
+			} catch (Exception e){
+				// Unwrap ReactiveException thrown from async method
+				Throwable ex = Exceptions.unwrap(e);
+				LOG.error(ex.getMessage(), ex.getCause());
+				this.setJobInError(event, execLabel + " : " + ex.getMessage());
 				LOG.warn("Stopping thread...");
 				stop.set(true);
 			}

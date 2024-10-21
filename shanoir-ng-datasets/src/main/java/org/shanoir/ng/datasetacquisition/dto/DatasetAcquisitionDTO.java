@@ -41,7 +41,9 @@ public class DatasetAcquisitionDTO {
 
 	private Object protocol;
 
-	private LocalDate creationDate;
+	private LocalDate importDate;
+
+	private String username;
 
 	
 	public Long getId() {
@@ -124,12 +126,19 @@ public class DatasetAcquisitionDTO {
 		this.protocol = protocol;
 	}
 
-	public LocalDate getCreationDate() {
-		return creationDate;
+	public LocalDate getImportDate() {
+		return importDate;
 	}
 
-	public void setCreationDate(LocalDate creationDate) {
-		this.creationDate = creationDate;
+	public void setImportDate(LocalDate importDate) {
+		this.importDate = importDate;
 	}
-	
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
 }

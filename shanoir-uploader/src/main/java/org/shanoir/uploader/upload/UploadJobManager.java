@@ -7,7 +7,8 @@ import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
 import jakarta.xml.bind.Unmarshaller;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class manages UploadJobs.
@@ -16,7 +17,7 @@ import org.apache.log4j.Logger;
  */
 public class UploadJobManager {
 	
-	private static Logger logger = Logger.getLogger(UploadJobManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(UploadJobManager.class);
 
 	public static final String UPLOAD_JOB_XML = "upload-job.xml";
 	
@@ -63,7 +64,7 @@ public class UploadJobManager {
 			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 			jaxbMarshaller.marshal(uploadJob, uploadJobFile);
 		} catch (JAXBException e) {
-			logger.error(e);
+			logger.error(e.getMessage());
 		}
 	}
 
@@ -77,7 +78,7 @@ public class UploadJobManager {
 			final UploadJob uploadJob = (UploadJob) jaxbUnmarshaller.unmarshal(uploadJobFile);
 			return uploadJob;
 		} catch (JAXBException e) {
-			logger.error(e);
+			logger.error(e.getMessage());
 		}
 		return null;
 	}

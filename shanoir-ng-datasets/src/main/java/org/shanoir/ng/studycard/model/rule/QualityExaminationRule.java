@@ -87,9 +87,13 @@ public class QualityExaminationRule extends AbstractEntity {
     public void apply(Examination examination, QualityCardResult result, WADODownloaderService downloader) {
         apply(examination, null, result, downloader);	        
     }
+
+    public void apply(ExaminationData examination, QualityCardResult result, WADODownloaderService downloader) {
+        apply(examination, null, result, downloader);
+    }
 	
 	public void apply(Examination examination, ExaminationAttributes<?> examinationDicomAttributes, QualityCardResult result, WADODownloaderService downloader) {
-	    ExaminationData examData = convert(examination);
+	    ExaminationData examData = new ExaminationData(examination);
 	    if (examData.getSubjectStudy() == null) {
 	        Logger log = LoggerFactory.getLogger(QualityExaminationRule.class);
 	        log.warn("No subject study in exam " + examination.getId());
@@ -200,25 +204,6 @@ public class QualityExaminationRule extends AbstractEntity {
         result.setExaminationDate(examination.getExaminationDate());
         result.setExaminationComment(examination.getExaminationComment());
         return result;
-    }
-    
-    private ExaminationData convert(Examination examination) {
-        if (examination == null) throw new IllegalArgumentException("examination can't be null");
-        if (examination.getDatasetAcquisitions() == null) throw new IllegalArgumentException("examination acquisitions can't be null");
-        if (examination.getStudy() == null) throw new IllegalArgumentException("study can't be null");
-        if (examination.getStudy().getSubjectStudyList() == null) throw new IllegalArgumentException("subjectStudyList can't be null");
-        // Keep only MR acquisitions
-        // List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions().stream().filter(a -> a instanceof MrDatasetAcquisition).collect(Collectors.toList());
-        ExaminationData examData = new ExaminationData();
-        examData.setDatasetAcquisitions(examination.getDatasetAcquisitions());
-        examData.setExaminationComment(examination.getComment());
-        examData.setExaminationDate(examination.getExaminationDate());
-        examData.setSubjectName(examination.getSubject().getName());
-        examData.setSubjectStudy(
-                examination.getSubject().getSubjectStudyList().stream()
-                    .filter(ss -> ss.getStudy().getId().equals(examination.getStudy().getId()))
-                    .findFirst().orElse(null));
-        return examData;
     }
     
     public class ConditionComparator implements Comparator<StudyCardCondition> {

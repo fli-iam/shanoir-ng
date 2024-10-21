@@ -15,50 +15,42 @@
 package org.shanoir.ng.study.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.shanoir.ng.study.model.Study;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepositoryCustom {
 	
-	/**
-	 * Get all studies
-	 * 
-	 * @return list of studies.
-	 */
-	@Override
-	List<Study> findAll();
+	@EntityGraph("Study.All")
+	Optional<Study> findById(Long id);
 
-	/**
-	 * Get all studies with isChallenge flag to true
-	 * @return the liost of challenges
-	 */
+	@EntityGraph(attributePaths = { "studyTags" })
+	List<Study> findByVisibleByDefaultTrue();
+
+	@EntityGraph(attributePaths = { "profile", "tags" })
+	List<Study> findAll();
+	
+	@EntityGraph(attributePaths = { "profile", "tags" })
+	List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(Long userId, Integer studyUserRightId, boolean confirmed);
+
 	List<Study> findByChallengeTrue();
 
-	/**
-	 * Get studies linked to an user.
-	 * 
-	 * @param userId
-	 *            user id.
-	 * @return list of studies.
-	 */
-	List<Study> findByStudyUserList_UserIdOrderByNameAsc(Long userId);
-		
-	/**
-	 * Get studies linked to an user.
-	 * 
-	 * @param userId
-	 *            user id.
-	 * @return list of studies.
-	 */
-	List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(Long userId, Integer studyUseRightId, boolean confirmed);
+	List<Study> findByStudyUserList_UserIdOrderByNameAsc(Long userId);	
 
-	/**
-	 * Lists all the publicly available studies.
-	 * @return all the publicly available studies.
-	 */
-	List<Study> findByVisibleByDefaultTrue();
+	@EntityGraph(attributePaths = "tags")
+    @Query("SELECT s FROM Study s WHERE s.id = :studyId")
+    Study findStudyWithTagsById(@Param("studyId") Long studyId);
+
+	@Query("SELECT s.protocolFilePaths FROM Study s WHERE s.id = :studyId")
+    List<String> findProtocolFilePathsByStudyId(Long studyId);
+
+	@Query("SELECT s.dataUserAgreementPaths FROM Study s WHERE s.id = :studyId")
+    List<String> findDataUserAgreementPathsByStudyId(Long studyId);
 
 }

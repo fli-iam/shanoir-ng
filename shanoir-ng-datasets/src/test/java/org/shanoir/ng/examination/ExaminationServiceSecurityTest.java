@@ -95,7 +95,7 @@ public class ExaminationServiceSecurityTest {
 		Set<Long> ids = Mockito.anySet();
 		given(rightsService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
 		assertAccessDenied(service::findById, ENTITY_ID);
-		assertAccessDenied(service::findPage, PageRequest.of(0, 10), false);
+		assertAccessDenied(service::findPage, PageRequest.of(0, 10), false, "", "");
 		assertAccessDenied(service::findBySubjectId, 1L);
 		assertAccessDenied(service::findBySubjectIdStudyId, 1L, 1L);
 		assertAccessDenied(service::save, mockExam(null));
@@ -135,7 +135,7 @@ public class ExaminationServiceSecurityTest {
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
 	public void testAsAdmin() throws ShanoirException {
 		assertAccessAuthorized(service::findById, ENTITY_ID);
-		assertAccessAuthorized(service::findPage, PageRequest.of(0, 10), false);
+		assertAccessAuthorized(service::findPage, PageRequest.of(0, 10), false, "", "");
 		assertAccessAuthorized(service::findBySubjectId, 1L);
 		assertAccessAuthorized(service::findBySubjectIdStudyId, 1L, 1L);
 		assertAccessAuthorized(service::save, mockExam(null));
@@ -153,8 +153,8 @@ public class ExaminationServiceSecurityTest {
 	
 	
 	private void testFindPage() throws ShanoirException {
-		assertAccessAuthorized(service::findPage, PageRequest.of(0, 10), false);
-		assertThat(service.findPage(PageRequest.of(0, 10), false)).hasSize(1);
+		assertAccessAuthorized(service::findPage, PageRequest.of(0, 10), false, "", "");
+		assertThat(service.findPage(PageRequest.of(0, 10), false, "", "")).hasSize(1);
 	}
 	
 	private void testFindBySubjectId() throws ShanoirException {

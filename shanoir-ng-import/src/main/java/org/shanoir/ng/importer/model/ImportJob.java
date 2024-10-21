@@ -17,12 +17,31 @@ package org.shanoir.ng.importer.model;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 
 /**
- * @author atouboul
+ * One ImportJob is related to the import of ONE DICOM STUDY,
+ * which equals ONE EXAM in Shanoir. We are doing this, as one
+ * DICOM study can have a size of up to 10Gb nowadays. This means
+ * we process already a huge amount of data for one import, that
+ * can take up to 30-45 minutes. There is no sense in extending this
+ * further for the future to anything like multi-exam in one import,
+ * so the model has to be kept:
+ * 1 ImportJob (1 DICOM study/exam) - 1 subject relation
+ *                                  - 1 exam relation
+ * IF in an ImportJob contains a subject object, it means to create one
+ * in ms studies during the import.
+ * If it contains a subjectName, an existing subject is to use.
+ * Same logic for the exams.
+ * 
+ * @todo: later we will remove the patients list from here, that is a
+ * legacy error, that has to be corrected, e.g. move the subject out into
+ * import job as written above.
+ * 
  * @author mkain
  */
 public class ImportJob implements Serializable {
@@ -31,7 +50,10 @@ public class ImportJob implements Serializable {
 	
 	private long timestamp;
 
-    private boolean fromDicomZip;
+	/* DicomQuery, that has been used to extract the DICOM study = ImportJob */
+	private DicomQuery dicomQuery;
+
+	private boolean fromDicomZip;
 
     private boolean fromShanoirUploader;
 
@@ -39,32 +61,55 @@ public class ImportJob implements Serializable {
     
 	private String workFolder;
 
+	// @todo: remove this list here later
     private List<Patient> patients;
+
+	// DICOM patient for this import job
+	private Patient patient;
+
+	private PatientVerification patientVerification;
     
-    private Long examinationId;
-    
-    private Long studyCardId;
-    
+	// DICOM study for this import job
+	private Study study;
+
+	// series to import with this import job
+	private Set<Serie> selectedSeries;
+
+	// Shanoir study
     private Long studyId;
+    
+	private String studyName;
+
+    private Long studyCardId;
     
 	private String studyCardName;
 	
-	// todo: remove this later, when front end uses StudyCards
     private Long acquisitionEquipmentId;
 	
+	// subject: use already existing
+	private String subjectName;
+
+	// subject: create new subject in ms studies based on these values
+	private Subject subject;
+
+	// examination: use already existing
+    private Long examinationId;
+
+	private String examinationComment;
+
 	private String anonymisationProfileToUse;
 
     private String archive;
-
-	private String subjectName;
-
-	private String studyName;
-
+    
 	private ShanoirEvent shanoirEvent;
 
 	private Long userId;
 
+	private String username;
+
 	private Long centerId;
+
+	private String errorMessage;
 
 	public long getTimestamp() {
         return timestamp;
@@ -152,7 +197,6 @@ public class ImportJob implements Serializable {
 
 	public void setAcquisitionEquipmentId(final Long acquisitionEquipmentId) {
 		this.acquisitionEquipmentId = acquisitionEquipmentId;
-
 	}
 
 	public Long getStudyCardId() {
@@ -201,6 +245,14 @@ public class ImportJob implements Serializable {
 
 	public void setUserId(Long userId) {
 		this.userId = userId;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
 	@Override
@@ -254,6 +306,70 @@ public class ImportJob implements Serializable {
 	public void setCenterId(Long centerId) {
 		this.centerId = centerId;
 	}
-	
+
+	public Subject getSubject() {
+		return subject;
+	}
+
+	public void setSubject(Subject subject) {
+		this.subject = subject;
+	}
+
+	public Study getStudy() {
+		return study;
+	}
+
+	public void setStudy(Study study) {
+		this.study = study;
+	}
+
+	public Patient getPatient() {
+		return patient;
+	}
+
+	public void setPatient(Patient patient) {
+		this.patient = patient;
+	}
+
+	public Set<Serie> getSelectedSeries() {
+		return selectedSeries;
+	}
+
+	public void setSelectedSeries(Set<Serie> selectedSeries) {
+		this.selectedSeries = selectedSeries;
+	}
+
+    public DicomQuery getDicomQuery() {
+		return dicomQuery;
+	}
+
+	public void setDicomQuery(DicomQuery dicomQuery) {
+		this.dicomQuery = dicomQuery;
+	}
+
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
+
+	public String getExaminationComment() {
+		return examinationComment;
+	}
+
+	public void setExaminationComment(String examinationComment) {
+		this.examinationComment = examinationComment;
+	}
+
+	public PatientVerification getPatientVerification() {
+		return patientVerification;
+	}
+
+	public void setPatientVerification(PatientVerification patientVerification) {
+		this.patientVerification = patientVerification;
+	}
+
 }
 

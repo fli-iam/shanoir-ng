@@ -37,6 +37,6 @@ public interface CommonApi {
 	@PostMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" })
 	ResponseEntity<CommonIdNamesDTO> findStudySubjectCenterNamesByIds(
-			@Parameter(name = "study to update", required = true) @RequestBody CommonIdsDTO commonIdDTO);
+			@Parameter(description = "study to update", required = true) @RequestBody CommonIdsDTO commonIdDTO);
 
 }

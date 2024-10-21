@@ -109,10 +109,11 @@ public class ImporterManagerService {
 	
 	@Async
 	public void manageImportJob(final ImportJob importJob) {
-	    ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), importJob.getUserId(), "Starting import configuration", ShanoirEvent.IN_PROGRESS, 0f);
+	    ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), importJob.getUserId(), "Starting import configuration", ShanoirEvent.IN_PROGRESS, 0f, importJob.getStudyId());
 	    event.setTimestamp(importJob.getTimestamp());
 		eventService.publishEvent(event);
 		importJob.setShanoirEvent(event);
+		importJob.setUsername(KeycloakUtil.getTokenUserName());
 		try {
 			// Always create a userId specific folder in the import work folder (the root of everything):
 			// split imports to clearly separate them into separate folders for each user
@@ -300,7 +301,7 @@ public class ImporterManagerService {
 	 * @param patients
 	 * @throws ShanoirException
 	 */
-	private void downloadAndMoveDicomFilesToImportJobDir(final File importJobDir, List<Patient> patients, ShanoirEvent event) throws ShanoirException {
+	private void downloadAndMoveDicomFilesToImportJobDir(final File importJobDir, List<Patient> patients, ShanoirEvent event) throws Exception {
 		for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
 			Patient patient = patientsIt.next();
 			List<Study> studies = patient.getStudies();
@@ -316,7 +317,8 @@ public class ImporterManagerService {
 
 					String studyInstanceUID = study.getStudyInstanceUID();
 					String seriesInstanceUID = serie.getSeriesInstanceUID();
-					queryPACSService.queryCMOVE(studyInstanceUID, seriesInstanceUID);
+					queryPACSService.queryCFINDInstances(studyInstanceUID, serie);
+					queryPACSService.queryCMOVE(studyInstanceUID, serie);
 					File serieIDFolderDir = new File(importJobDir + File.separator + seriesInstanceUID);
 
 					if(!serieIDFolderDir.exists()) {

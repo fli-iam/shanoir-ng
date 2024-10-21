@@ -62,7 +62,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </ng-container>
         </li>
         <li>
-            <label [class.required-label]="!useStudyCard">Select an acquisition equipment</label>
+            <label [class.required-label]="!useStudyCard">Select a center equipment</label>
             <span class="right-col">
                 <select-box *ngIf="!useStudyCard || acquisitionEquipment"
                         [disabled]="(!useStudyCard && (!center || !acquisitionEquipmentOptions)) || loading"
@@ -77,13 +77,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </li>
         <li class="info" *ngIf="acquisitionEquipment && !acqEqCompatible(acquisitionEquipment)">
             <i class="fas fa-exclamation-triangle"></i>
-            <strong>The acquisition equipment may not be not compatible with the imported data !</strong>
-            <strong> Selected : {{acquisitionEquipment.serialNumber}}</strong>
+            <strong>The center equipment may not be not compatible with the imported data !</strong>
+            <strong> selected : {{acquisitionEquipment.serialNumber}}</strong>
             <ng-container *ngIf="importedEquipmentDataStr">
                 <br/>Your archive contains this data :
                 <code>{{importedEquipmentDataStr}}</code>
             </ng-container>
-            <br/>If the acquisition equipment you need is not in the above list, you can create a new acquisition equipment from this data by clicking on the 'add' button.
+            <br/>If the center equipment you need is not in the above list, you can create a new center equipment from this data by clicking on the 'add' button.
         </li>
     </ol>
 

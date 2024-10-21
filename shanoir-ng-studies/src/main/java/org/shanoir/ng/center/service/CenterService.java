@@ -66,7 +66,7 @@ public interface CenterService {
 	 * @return a center.
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	Center findByName(String name);
+	Optional<Center> findByName(String name);
 
 	/**
 	 * Find id and name for all centers.

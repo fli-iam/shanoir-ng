@@ -11,11 +11,10 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
-
 <button type="button" (click)="resetSearch()" title="clear search"><i class="fas fa-broom"></i></button>
-<input class="search-txt" [(ngModel)]="filter.searchStr" (change)="search()" type="text" placeholder="search..."/> 
+<input class="search-txt" [(ngModel)]="filter.searchStr" (change)="search()" type="text" placeholder="search..."/>
 to filter
-<select class="search-field" [(ngModel)]="filter.searchField" (change)="search()"> 
+<select class="search-field" [(ngModel)]="filter.searchField" (change)="search()">
     <option *ngIf="searchableColumns?.length > 1" value="">*</option>
     <option *ngFor="let col of searchableColumns" value="{{col.field}}">
         {{col.headerName}}

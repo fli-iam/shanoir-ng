@@ -33,6 +33,7 @@ import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.studycard.model.DicomTagType;
 import org.shanoir.ng.studycard.model.Operation;
+import org.shanoir.ng.studycard.model.VM;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -171,7 +172,8 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
             throw new IllegalArgumentException("dicomAttributes can't be null");
         }
         VR tagVr = StandardElementDictionary.INSTANCE.vrOf(dicomTag);
-        DicomTagType tagType = DicomTagType.valueOf(tagVr);
+        VM tagVm = VM.of(dicomTag);
+        DicomTagType tagType = DicomTagType.valueOf(tagVr, tagVm);
         if (!this.getOperation().compatibleWith(tagType)) {
             if (errorMsg != null) errorMsg.append("\ncondition [" + toString() 
                     + "] failed on dataset " + datasetId + " because the operation " + this.getOperation() + " is not compatible with dicom tag " 

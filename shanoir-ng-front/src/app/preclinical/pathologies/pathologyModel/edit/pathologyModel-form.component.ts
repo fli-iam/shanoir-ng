@@ -60,24 +60,20 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
     }
 
     initView(): Promise<void> {
-        return this.modelService.get(this.id).then(model => {
-            this.model = model;
-        });
+        return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
         this.loadData();
-        return this.modelService.get(this.id).then(model => {
-            this.model = model;
-            if(this.pathologies){
-                for(let patho of this.pathologies){
-                    if(patho.id == model.pathology.id)
-                        this.model.pathology = patho;
-                }
+        if(this.pathologies){
+            for(let patho of this.pathologies){
+                if(patho.id == this.model.pathology.id)
+                    this.model.pathology = patho;
             }
-            //Generate url for upload
-            this.uploadUrl = this.modelService.getUploadUrl(this.model.id);
-        });
+        }
+        //Generate url for upload
+        this.uploadUrl = this.modelService.getUploadUrl(this.model.id);
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {

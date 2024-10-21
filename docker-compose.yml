@@ -17,7 +17,9 @@ services:
   #
   keycloak-database:
     container_name: "${SHANOIR_PREFIX}keycloak-database"
-    build: ./docker-compose/keycloak-database
+    build:
+      context: docker-compose
+      target: keycloak-database
     environment:
       - MYSQL_DATABASE=keycloak
     ulimits:
@@ -43,7 +45,9 @@ services:
       - SHANOIR_KEYCLOAK_USER
       - SHANOIR_KEYCLOAK_PASSWORD
       - SHANOIR_ALLOWED_ADMIN_IPS
-    build: ./docker-compose/keycloak
+    build:
+      context: docker-compose
+      target: keycloak
     volumes:
       - "keycloak-logs:/opt/keycloak/data/log"
     networks:
@@ -70,7 +74,9 @@ services:
   #
   database:
     container_name: "${SHANOIR_PREFIX}database"
-    build: ./docker-compose/database
+    build:
+      context: docker-compose
+      target: database
     command: --max_allowed_packet 20000000
     env_file:
       - ./docker-compose/database/variables.env
@@ -91,7 +97,9 @@ services:
   #
   users:
     container_name: "${SHANOIR_PREFIX}users"
-    build: ./docker-compose/users
+    build:
+      context: docker-compose
+      target: users
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -121,7 +129,9 @@ services:
   #
   studies:
     container_name: "${SHANOIR_PREFIX}studies"
-    build: ./docker-compose/studies
+    build:
+      context: docker-compose
+      target: studies
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -146,7 +156,9 @@ services:
   #
   import:
     container_name: "${SHANOIR_PREFIX}import"
-    build: ./docker-compose/import
+    build:
+      context: docker-compose
+      target: import
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -161,6 +173,10 @@ services:
     ports:
      - "9903:9903"
      - "9913:9913"
+     # uncomment below for local testing of import-from-pacs, enable:
+     # pacs-to-ms-import: c-move from dcm4chee arc light to ms import
+     # do not add by default, as it blocks local ShUp from using 44105
+     # - "44105:44105"
     depends_on:
       - "database"
       - "rabbitmq"
@@ -170,7 +186,9 @@ services:
   #
   datasets:
     container_name: "${SHANOIR_PREFIX}datasets"
-    build: ./docker-compose/datasets
+    build:
+      context: docker-compose
+      target: datasets
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -198,7 +216,9 @@ services:
 
   preclinical:
     container_name: "${SHANOIR_PREFIX}preclinical"
-    build: ./docker-compose/preclinical
+    build:
+      context: docker-compose
+      target: preclinical
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -223,7 +243,9 @@ services:
   #
   nifti-conversion:
     container_name: "${SHANOIR_PREFIX}nifti-conversion"
-    build: ./docker-compose/nifti-conversion
+    build:
+      context: docker-compose
+      target: nifti-conversion
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -244,7 +266,9 @@ services:
   #
   solr:
     container_name: "${SHANOIR_PREFIX}solr"
-    build: ./docker-compose/solr
+    build:
+      context: docker-compose
+      target: solr
     environment:
       - SOLR_LOG_LEVEL=SEVERE
     volumes:
@@ -317,7 +341,9 @@ services:
   #
   nginx:
     container_name: shanoir-ng-nginx
-    build: ./docker-compose/nginx
+    build:
+      context: docker-compose
+      target: nginx
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME

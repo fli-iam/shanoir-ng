@@ -27,9 +27,9 @@ export class SolrService {
 
     }
 
-    public indexAll(): Promise<void> {
+    public indexAll() {
         if (this.keycloakService.isUserAdmin()) {
-            return this.http.post<void>(AppUtils.BACKEND_API_SOLR_INDEX_URL, {}).toPromise();
+            return this.http.post<void>(AppUtils.BACKEND_API_SOLR_INDEX_URL, {}, {reportProgress: true, observe: 'events'}).toPromise();
         }
     }
 

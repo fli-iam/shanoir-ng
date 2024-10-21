@@ -90,12 +90,8 @@ if [ -n "$build" ] ; then
 
 	# 1. build a docker image with the java toolchain
 	DEV_IMG=shanoir-ng-dev
-	docker build -t "$DEV_IMG" - <<EOF
-FROM debian:bookworm
-# NOTE: using bookworm-proposed-updates because of https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1039472
-RUN echo "deb http://deb.debian.org/debian bookworm-proposed-updates main" >> /etc/apt/sources.list \
-    && apt-get update -qq && apt-get install -qqy --no-install-recommends openjdk-17-jdk-headless maven bzip2 git
-EOF
+	docker build -t "$DEV_IMG" --target=jdk docker-compose
+
 	# 2. run the maven build
 	mkdir -p /tmp/home
 	docker run --rm -t -i -v "$PWD:/src" -u "`id -u`:`id -g`" -e HOME="/src/tmp/home" \
@@ -148,7 +144,7 @@ if [ -n "$deploy" ] ; then
 
 		step "start: keycloak"
 		docker compose up -d keycloak
-		utils/oneshot --pgrp '\| *'				\
+		docker-compose/common/oneshot --pgrp '\| *'				\
 				' INFO  \[io.quarkus\] .* Keycloak .* started in [0-9]*'	\
 				-- docker compose logs --no-color --follow keycloak >/dev/null
 

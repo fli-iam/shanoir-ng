@@ -17,6 +17,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <h2 *ngIf="mode == 'view'" class="header command-zone">Access Request</h2>
 <div #formContainer class="content-component">
     <form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
+        <form-footer
+            [state]="footerState"
+            (save)="save()"
+            (back)="goBack()"
+        ></form-footer>
 	    <ul>
 	        <li *ngIf="mode == 'create' && !fromStudy">
 	            <label i18n="access request|study label@@study" class="required-label">Study</label>
@@ -79,10 +84,5 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             Refuse
             <i class="fa-solid fa-thumbs-down"></i>
         </button>
-    <form-footer
-    [state]="footerState"
-    (save)="save()"
-    (back)="goBack()"
-    ></form-footer>
     </form>
 </div>

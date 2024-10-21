@@ -59,7 +59,7 @@ public class SubjectStudyUpdateBroadcastService {
 				subjectStudy.getId(),
 				subjectStudy.getStudy().getId(), 
 				subjectStudy.getSubject().getId(),
-				subjectStudy.getSubjectType().getId());
+				(subjectStudy.getSubjectType() != null ? subjectStudy.getSubjectType().getId() : null));
 			dtos.add(dto);
 		}
 		return dtos;

@@ -155,18 +155,10 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                     return capitalsAndUnderscoresToDisplayable(params.data.studyStatus);
                 }
             },
+            { headerName: "Start date", field: "startDate", type: "date" },
+            { headerName: "End date", field: "endDate", type: "date" },
             {
-                headerName: "Start date", field: "startDate", type: "date", cellRenderer: (params: any) => {
-                    return this.dateRenderer(params.data.startDate);
-                }
-            },
-            {
-                headerName: "End date", field: "endDate", type: "date", cellRenderer: (params: any) => {
-                    return this.dateRenderer(params.data.endDate);
-                }
-            },
-            {
-                headerName: "Subjects", field: "nbSujects", type: "number", width: '30px'
+                headerName: "Subjects", field: "nbSubjects", type: "number", width: '30px'
             },
             {
                 headerName: "Examinations", field: "nbExaminations", type: "number", width: '30px'

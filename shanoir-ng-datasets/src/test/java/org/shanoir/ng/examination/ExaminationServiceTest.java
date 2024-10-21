@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.examination;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +34,7 @@ import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -75,6 +77,11 @@ public class ExaminationServiceTest {
 	@Mock
 	private SubjectRepository subjectService;
 
+	@Mock
+	private RabbitTemplate rabbitTemplate;
+
+	@Mock
+	private ObjectMapper mapper;
 
 	@BeforeEach
 	public void setup() throws ShanoirException {
@@ -123,7 +130,7 @@ public class ExaminationServiceTest {
 	public void updateAsAdminTest() throws ShanoirException {
 		// We update the subject -> admin -> SUCCESS
 		Examination updatedExam = createExamination();
-		updatedExam.setSubject(null);
+		updatedExam.setSubject(new Subject(5L, "new name"));
 		final Examination updatedExamination = examinationService.update(updatedExam);
 
 		Assertions.assertNotNull(updatedExamination);

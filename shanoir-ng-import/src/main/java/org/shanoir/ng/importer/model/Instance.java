@@ -24,28 +24,37 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * 
  * @author mkain
  */
-public class Instance {
+public class Instance implements Cloneable {
 
-    @JsonProperty("sopInstanceUID")
-    private String sopInstanceUID;
-	
+	@JsonProperty("sopInstanceUID")
+	private String sopInstanceUID;
+
 	@JsonProperty("instanceNumber")
-    private String instanceNumber;
-    
-    @JsonProperty("referencedSOPClassUIDInFile")
-    private String referencedSOPClassUIDInFile;
+	private String instanceNumber;
 
-    @JsonProperty("referencedFileID")
-    private String[] referencedFileID;
-    
-    public Instance() {}
-    
-    public Instance(Attributes attributes) {
-    		this.sopInstanceUID = attributes.getString(Tag.SOPInstanceUID);
-    		this.instanceNumber = attributes.getString(Tag.InstanceNumber);
-    		this.referencedSOPClassUIDInFile = attributes.getString(Tag.ReferencedSOPClassUIDInFile);
-    		this.referencedFileID = attributes.getStrings(Tag.ReferencedFileID);
-    }
+	@JsonProperty("referencedSOPClassUIDInFile")
+	private String referencedSOPClassUIDInFile;
+
+	@JsonProperty("referencedFileID")
+	private String[] referencedFileID;
+
+	public Instance() {
+	}
+
+	public Instance(Attributes attributes) {
+		sopInstanceUID = attributes.getString(Tag.SOPInstanceUID);
+		// try to remove confusing spaces, in case DICOM server sends them wrongly
+		if (sopInstanceUID != null)
+			sopInstanceUID = sopInstanceUID.trim();
+		instanceNumber = attributes.getString(Tag.InstanceNumber);
+		referencedSOPClassUIDInFile = attributes.getString(Tag.ReferencedSOPClassUIDInFile);
+		referencedFileID = attributes.getStrings(Tag.ReferencedFileID);
+	}
+
+	@Override
+	protected Object clone() throws CloneNotSupportedException {
+		return super.clone();
+	}
 
 	public String getInstanceNumber() {
 		return instanceNumber;
@@ -78,5 +87,5 @@ public class Instance {
 	public void setSopInstanceUID(String sopInstanceUID) {
 		this.sopInstanceUID = sopInstanceUID;
 	}
-	
+
 }

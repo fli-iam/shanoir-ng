@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -61,8 +61,11 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
     @Input() title: string;
     @Input() tags: Tag[];
     @Input() qualityTag: QualityTag;
+    @Input() route: string;
+    @Input() downloadable: boolean = true;
     public isOpen: boolean = false;
     @Input() opened: boolean = false;
+    private neverOpened: boolean = true;
     @Output() openedChange: EventEmitter<boolean> = new EventEmitter();
     public checked: boolean | 'indeterminate';
     @ViewChild('box') boxElt: CheckboxComponent;
@@ -80,9 +83,13 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.opened) {
             if (!this.opened && this.isOpen) {
-                this.close();
+                setTimeout(() => {
+                    this.close();
+                });
             } else if (this.opened && !this.isOpen) {
-                this.open();
+                setTimeout(() => {
+                    this.open();
+                });
             }
         }
     }
@@ -110,7 +117,10 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
         this.dataLoading = false;
         this.isOpen = true;
         this.openedChange.emit(this.isOpen);
-        if (this.hasChildren == 'unknown') this.firstOpen.emit(this);
+        if (this.hasChildren == 'unknown' || this.neverOpened) {
+            this.neverOpened = false;
+            this.firstOpen.emit(this);
+        }
     }
 
     public close() {
@@ -120,7 +130,7 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
 
     public toggle() {
         if (this.isOpen) this.close();
-        else {     
+        else {
             this.open();
         }
     }
@@ -135,7 +145,7 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
             this.onChangeCallback(value);
         }
     }
-    
+
     getFontColor(colorInp: string): boolean {
         return isDarkColor(colorInp);
     }
@@ -144,6 +154,7 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
     writeValue(value: any) {
         if (value !== this.checked) {
             this.checked = value;
+            //this.chkbxChange.emit(value);
         }
     }
 
@@ -156,4 +167,4 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
     registerOnTouched(fn: any) {
         this.onTouchedCallback = fn;
     }
-} 
+}

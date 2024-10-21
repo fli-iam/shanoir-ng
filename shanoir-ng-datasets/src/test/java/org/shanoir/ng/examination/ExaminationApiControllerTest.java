@@ -28,7 +28,7 @@ import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.importer.service.DicomSRImporterService;
+import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -41,6 +41,7 @@ import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -87,7 +88,7 @@ public class ExaminationApiControllerTest {
 	public String tempFolderPath;
 
 	@MockBean
-	private DicomSRImporterService dicomSRImporterService;
+	private DicomSEGAndSRImporterService dicomSRImporterService;
 
 	@BeforeEach
 	public void beforeClass() {
@@ -127,6 +128,9 @@ public class ExaminationApiControllerTest {
 	private StudyRepository studyRepository;
 
 	@MockBean
+	private RabbitTemplate rabbitTemplate;
+	
+	@MockBean
 	ExaminationRepository examRepo;
 	
 	@Autowired
@@ -135,7 +139,7 @@ public class ExaminationApiControllerTest {
 	@BeforeEach
 	public void setup() throws ShanoirException, SolrServerException, IOException, RestServiceException {
 		doNothing().when(examinationServiceMock).deleteById(1L);
-		given(examinationServiceMock.findPage(Mockito.any(Pageable.class), Mockito.eq(false))).willReturn(new PageImpl<Examination>(Arrays.asList(new Examination())));
+		given(examinationServiceMock.findPage(Mockito.any(Pageable.class), Mockito.eq(false), Mockito.eq(null), Mockito.eq(null))).willReturn(new PageImpl<Examination>(Arrays.asList(new Examination())));
 		Examination exam = new Examination();
 		exam.setId(Long.valueOf(123));
 		given(examinationServiceMock.save(Mockito.any(Examination.class))).willReturn(exam);

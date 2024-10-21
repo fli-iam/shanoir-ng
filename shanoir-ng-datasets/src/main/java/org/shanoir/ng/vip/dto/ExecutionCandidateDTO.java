@@ -37,6 +37,7 @@ public class ExecutionCandidateDTO {
     private String refreshToken;
     @NotNull(message = "Client must be provided")
     private String client;
+    private Long converterId;
 
     public String getName() {
         return name;
@@ -109,5 +110,14 @@ public class ExecutionCandidateDTO {
 
     public void setInputParameters(Map<String, List<String>> inputParameters) {
         this.inputParameters = inputParameters;
+    }
+
+
+    public Long getConverterId() {
+        return converterId;
+    }
+
+    public void setConverterId(Long converterId) {
+        this.converterId = converterId;
     }
 }

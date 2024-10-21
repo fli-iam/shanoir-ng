@@ -1,5 +1,8 @@
 package org.shanoir.uploader.action.init;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 /**
  * This concrete state class defines the state when the shanoir uploader tests
  * the connection to the PACS after having failed with previous configuration.
@@ -17,10 +20,14 @@ package org.shanoir.uploader.action.init;
  * @author atouboul
  *
  */
+@Component
 public class PacsManualConfigurationState implements State {
 
+	@Autowired
+	private ReadyState readyState;
+
 	public void load(StartupStateContext context) {
-		context.setState(new ReadyState());
+		context.setState(readyState);
 		context.nextState();
 	}
 

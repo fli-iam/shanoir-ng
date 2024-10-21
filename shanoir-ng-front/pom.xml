@@ -158,25 +158,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.7</version>
-				<executions>
-					<execution>
-						<id>copy-entrypoint_common-nginx</id>
-						<phase>package</phase>
-						<configuration>
-							<target>
-								<copy file="../utils/entrypoint_common" tofile="${nginx.directory.docker.compose}/entrypoint_common" />
-							</target>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 

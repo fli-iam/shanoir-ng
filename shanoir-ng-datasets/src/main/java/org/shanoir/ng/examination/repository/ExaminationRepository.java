@@ -57,6 +57,7 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	 */
 	List<Examination> findBySubjectIdAndStudy_Id(Long subjectId, Long studyId);
 
+	List<Examination> findByIdGreaterThan(Long id);
 	
 	/**
 	 * Get a paginated list of examinations
@@ -117,4 +118,5 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	 */
 	Examination findBySourceIdAndStudy_Id(Long sourceId, Long studyId);
 
+	Page<Examination> findPageByComment(String comment, Pageable pageable);
 }

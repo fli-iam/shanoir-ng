@@ -50,4 +50,5 @@ public class ParameterResourceDTO {
     public void setExportFormat(String exportFormat) {
         this.exportFormat = exportFormat;
     }
+
 }

@@ -52,10 +52,13 @@ export class ExaminationService extends EntityService<Examination> {
             .toPromise();
     }
 
-    getPage(pageable: Pageable, preclinical: boolean = false): Promise<Page<Examination>> {
+    getPage(pageable: Pageable, preclinical: boolean = false, searchStr : string, searchField : string): Promise<Page<Examination>> {
+        let params = { 'params': pageable.toParams() };
+        params['params']['searchStr'] = searchStr;
+        params['params']['searchField'] = searchField;
         return this.http.get<Page<Examination>>(
             (!preclinical) ? AppUtils.BACKEND_API_EXAMINATION_URL : (AppUtils.BACKEND_API_EXAMINATION_PRECLINICAL_URL+'/1'),
-            { 'params': pageable.toParams() }
+            params
         )
         .toPromise()
         .then(this.mapPage);

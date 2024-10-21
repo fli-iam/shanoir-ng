@@ -14,17 +14,18 @@
 
 package org.shanoir.ng.datasetacquisition.dto.mapper;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.shanoir.ng.dataset.modality.BidsDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.bids.BidsDatasetAcquisition;
+import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Decorator for dataset acquisitions mapper.
@@ -45,6 +46,14 @@ public abstract class ExaminationDatasetAcquisitionDecorator implements Examinat
 		}
 		final List<ExaminationDatasetAcquisitionDTO> datasetAcquisitionDTOs = new ArrayList<>();
 		for (DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
+			// Remove dataset processing input childs here #2121
+			for (Dataset datasetToBe : datasetAcquisition.getDatasets()) {
+				if (datasetToBe.getProcessings() != null) {
+					for (DatasetProcessing processing : datasetToBe.getProcessings()) {
+						processing.setInputDatasets(null);
+					}
+				}
+			}
 			datasetAcquisitionDTOs.add(datasetAcquisitionToExaminationDatasetAcquisitionDTO(datasetAcquisition));
 		}
 		return datasetAcquisitionDTOs;

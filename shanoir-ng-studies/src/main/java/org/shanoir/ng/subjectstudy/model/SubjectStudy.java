@@ -100,14 +100,7 @@ public class SubjectStudy extends AbstractEntity {
     }
 
 	public void setSubjectStudyTags(List<SubjectStudyTag> subjectStudyTags) {
-		if (this.subjectStudyTags != null) {
-			this.subjectStudyTags.clear();
-			if (subjectStudyTags != null) {
-				this.subjectStudyTags.addAll(subjectStudyTags);
-			}			
-		} else {
-			this.subjectStudyTags = subjectStudyTags;
-		}
+		this.subjectStudyTags = subjectStudyTags;
 	}
 	
 	/**

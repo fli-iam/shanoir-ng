@@ -9,8 +9,12 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.io.File;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
@@ -21,6 +25,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -41,7 +46,6 @@ import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.CaretListener;
 
-import org.apache.log4j.Logger;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
@@ -57,6 +61,8 @@ import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.service.rest.UrlConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -68,7 +74,7 @@ import org.shanoir.uploader.service.rest.UrlConfig;
 @SuppressWarnings("serial")
 public class MainWindow extends JFrame {
 
-	private static Logger logger = Logger.getLogger(MainWindow.class);
+	private static final Logger logger = LoggerFactory.getLogger(MainWindow.class);
 
 	public JFrame frame = this;
 
@@ -79,7 +85,11 @@ public class MainWindow extends JFrame {
 	public JTextField patientIDTF;
 	public JTextField studyDescriptionTF;
 	public JTextField seriesDescriptionTF;
-	
+	public ButtonGroup modalityRG;
+	public JRadioButton mrRB, ctRB, ptRB, nmRB, noRB;
+	public ButtonGroup queryLevelRG;
+	public JRadioButton pRB, sRB;
+
 	public JPanel editPanel;
 	public ButtonGroup anonymisedBG;
 	public JLabel lastNameLabel;
@@ -91,7 +101,7 @@ public class MainWindow extends JFrame {
 	public JTextField birthNameTF;
 	public JTextField birthDateTF;
 	public ButtonGroup sexRG;
-	public JRadioButton mSexR, fSexR;
+	public JRadioButton fSexR, mSexR, oSexR;
 	public JButton downloadOrCopyButton;
 	
 	public JButton queryButton;
@@ -113,15 +123,20 @@ public class MainWindow extends JFrame {
 
 	public UtilDateModel birthDateModel;
 	public UtilDateModel studyDateModel;
-	public String dateRS = "";
+	public String birthDate = "";
 	public String studyDate = "";
 	JScrollPane scrollPaneUpload;
 
+	public JLabel startedDownloadsLB;
+	public JProgressBar downloadProgressBar;
+	public JLabel errorDownloadsLB;
+	public JLabel downloadErrorAlert;
+
 	public JLabel startedUploadsLB;
+	public JProgressBar uploadProgressBar;
 	public JLabel finishedUploadsLB;
 	public JLabel errorUploadsLB;
-	public JLabel errorAlert;
-	public JProgressBar uploadProgressBar;
+	public JLabel uploadErrorAlert;
 	
 	public IDicomServerClient dicomServerClient;
 	public File shanoirUploaderFolder;
@@ -136,14 +151,12 @@ public class MainWindow extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public MainWindow(final IDicomServerClient dicomServerClient,
-			final File shanoirUploaderFolder,
-			final UrlConfig urlConfig,
-			final ResourceBundle resourceBundle) {
-		this.dicomServerClient=dicomServerClient;
+	public MainWindow(final IDicomServerClient dicomServerClient, final File shanoirUploaderFolder,
+			final UrlConfig urlConfig, final ResourceBundle resourceBundle) {
+		this.dicomServerClient = dicomServerClient;
 		this.dicomFileAnalyzer = new ImagesCreatorAndDicomFileAnalyzerService();
-		this.shanoirUploaderFolder=shanoirUploaderFolder;
-		this.resourceBundle=resourceBundle;
+		this.shanoirUploaderFolder = shanoirUploaderFolder;
+		this.resourceBundle = resourceBundle;
 		String JFRAME_TITLE = "ShanoirUploader " + ShUpConfig.SHANOIR_UPLOADER_VERSION + " " + ShUpConfig.RELEASE_DATE;
 		try {
 			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
@@ -154,8 +167,7 @@ public class MainWindow extends JFrame {
 			}
 		} catch (Exception e) {
 			try {
-				UIManager.setLookAndFeel(UIManager
-						.getSystemLookAndFeelClassName());
+				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 			} catch (Exception ex) {
 				logger.error(ex.getMessage());
 			}
@@ -172,7 +184,6 @@ public class MainWindow extends JFrame {
 		/**
 		 * Handle menu bar here:
 		 */
-		
 		JMenuBar menuBar = new JMenuBar();
 		contentPane.add(menuBar, BorderLayout.NORTH);
 
@@ -194,13 +205,23 @@ public class MainWindow extends JFrame {
 		JMenu mnImport = new JMenu(resourceBundle.getString("shanoir.uploader.importMenu"));
 		menuBar.add(mnImport);
 		
-		JMenuItem mnImportExcell = new JMenuItem(resourceBundle.getString("shanoir.uploader.importMenu.csv"));
+		JMenuItem mnImportExcell = new JMenuItem(resourceBundle.getString("shanoir.uploader.importMenu.table"));
 		mnImport.add(mnImportExcell);
-		
+
 		mnImportExcell.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				ImportFromCSVWindow importcsv = new ImportFromCSVWindow(shanoirUploaderFolder, resourceBundle, scrollPaneUpload, dicomServerClient, dicomFileAnalyzer, ShUpOnloadConfig.getShanoirUploaderServiceClient());
+				ImportFromTableWindow importTable = new ImportFromTableWindow(shanoirUploaderFolder, resourceBundle, scrollPaneUpload, dicomServerClient, dicomFileAnalyzer, ShUpOnloadConfig.getShanoirUploaderServiceClient(), dOCAL);
+			}
+		});
+
+		JMenuItem mnImportFolder = new JMenuItem(resourceBundle.getString("shanoir.uploader.importMenu.folder"));
+		mnImport.add(mnImportFolder);
+
+		mnImportFolder.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ImportFromFolderWindow importFolder = new ImportFromFolderWindow(shanoirUploaderFolder, resourceBundle, scrollPaneUpload, dicomServerClient, dicomFileAnalyzer, ShUpOnloadConfig.getShanoirUploaderServiceClient());
 			}
 		});
 
@@ -211,8 +232,8 @@ public class MainWindow extends JFrame {
 		mntmDicomServerConfiguration.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				DicomServerConfigurationWindow dscw = new DicomServerConfigurationWindow(
-						shanoirUploaderFolder, resourceBundle );
+				DicomServerConfigurationWindow dscw = new DicomServerConfigurationWindow(dicomServerClient,
+						shanoirUploaderFolder, resourceBundle);
 				dscw.hostNameTF.setText(ShUpConfig.dicomServerProperties.getProperty("dicom.server.host"));
 				dscw.portTF.setText(ShUpConfig.dicomServerProperties.getProperty("dicom.server.port"));
 				dscw.aetTF.setText(ShUpConfig.dicomServerProperties.getProperty("dicom.server.aet.called"));
@@ -245,8 +266,11 @@ public class MainWindow extends JFrame {
 			}
 		});
 
-		JMenu profileSelected = new JMenu("<html><b>" + resourceBundle.getString("shanoir.uploader.profileMenu") + ShUpConfig.profileSelected + "</b></html>");
-		menuBar.add(Box.createRigidArea(new Dimension(400,5)));
+		JMenu profileSelected = new JMenu("<html>"
+			+ "[ " + resourceBundle.getString("shanoir.uploader.profileMenu") + ShUpConfig.profileSelected + " ]"
+			+ " "
+			+ "[ " + resourceBundle.getString("shanoir.uploader.accountMenu") + ShUpConfig.username + " ]</html>");
+		menuBar.add(Box.createRigidArea(new Dimension(200,5)));
 		menuBar.add(profileSelected);
 
 		/**
@@ -284,11 +308,39 @@ public class MainWindow extends JFrame {
 		GridBagConstraints gbc_queryPanelLabel = new GridBagConstraints();
 		gbc_queryPanelLabel.anchor = GridBagConstraints.WEST;
 		gbc_queryPanelLabel.fill = GridBagConstraints.HORIZONTAL;
-		gbc_queryPanelLabel.insets = new Insets(5, 5, 0, 0);
+		gbc_queryPanelLabel.insets = new Insets(10, 10, 10, 10);
 		gbc_queryPanelLabel.gridwidth = 3;
 		gbc_queryPanelLabel.gridx = 0;
 		gbc_queryPanelLabel.gridy = 0;
 		queryPanel.add(queryPanelLabel, gbc_queryPanelLabel);
+
+		JLabel queryLevelLabel = new JLabel(resourceBundle.getString("shanoir.uploader.queryLevelLabel"));
+		GridBagConstraints gbc_queryLevelLabel = new GridBagConstraints();
+		gbc_queryLevelLabel.anchor = GridBagConstraints.EAST;
+		gbc_queryLevelLabel.insets = new Insets(5, 5, 2, 0);
+		gbc_queryLevelLabel.gridx = 0;
+		gbc_queryLevelLabel.gridy = 1;
+		queryPanel.add(queryLevelLabel, gbc_queryLevelLabel);
+		
+		queryLevelRG = new ButtonGroup();
+		pRB = new JRadioButton("Patient");
+		pRB.setSelected(true);
+		queryLevelRG.add(pRB);
+		GridBagConstraints gBC_pRB = new GridBagConstraints();
+		gBC_pRB.insets = new Insets(2, 5, 0, 2);
+		gBC_pRB.fill = GridBagConstraints.HORIZONTAL;
+		gBC_pRB.gridx = 1;
+		gBC_pRB.gridy = 1;
+		queryPanel.add(pRB, gBC_pRB);
+
+		sRB = new JRadioButton("Study");
+		queryLevelRG.add(sRB);
+		GridBagConstraints gBC_sRB = new GridBagConstraints();
+		gBC_sRB.insets = new Insets(2, 2, 0, 2);
+		gBC_sRB.fill = GridBagConstraints.HORIZONTAL;
+		gBC_sRB.gridx = 2;
+		gBC_sRB.gridy = 1;
+		queryPanel.add(sRB, gBC_sRB);
 
 		JLabel patientNameLabel = new JLabel(resourceBundle.getString("shanoir.uploader.patientNameLabel"));
 		patientNameLabel.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -296,15 +348,16 @@ public class MainWindow extends JFrame {
 		gbc_patientNameLabel.anchor = GridBagConstraints.EAST;
 		gbc_patientNameLabel.insets = new Insets(5, 5, 0, 0);
 		gbc_patientNameLabel.gridx = 0;
-		gbc_patientNameLabel.gridy = 1;
+		gbc_patientNameLabel.gridy = 2;
 		queryPanel.add(patientNameLabel, gbc_patientNameLabel);
 
 		patientNameTF = new JTextField();
 		GridBagConstraints gbc_patientNameTF = new GridBagConstraints();
 		gbc_patientNameTF.insets = new Insets(5, 5, 0, 0);
 		gbc_patientNameTF.fill = GridBagConstraints.HORIZONTAL;
+		gbc_patientNameTF.gridwidth = 6;
 		gbc_patientNameTF.gridx = 1;
-		gbc_patientNameTF.gridy = 1;
+		gbc_patientNameTF.gridy = 2;
 		queryPanel.add(patientNameTF, gbc_patientNameTF);
 		patientNameTF.setColumns(15);
 		patientNameTF.setText("");
@@ -316,8 +369,8 @@ public class MainWindow extends JFrame {
 		helpButton = new JButton(resourceBundle.getString("shanoir.uploader.helpButton"));
 		GridBagConstraints gbc_HelpButton = new GridBagConstraints();
 		gbc_HelpButton.insets = new Insets(5, 2, 0, 2);
-		gbc_HelpButton.gridx = 2;
-		gbc_HelpButton.gridy = 1;
+		gbc_HelpButton.gridx = 7;
+		gbc_HelpButton.gridy = 2;
 		queryPanel.add(helpButton, gbc_HelpButton);
 
 		helpButton.addActionListener(new java.awt.event.ActionListener() {
@@ -383,7 +436,7 @@ public class MainWindow extends JFrame {
 				if (patientNameTF.getText().length() != 0
 						|| patientIDTF.getText().length() != 0
 						|| studyDescriptionTF.getText().length() != 0
-						|| dateRS.length() != 0 || studyDate.length() != 0) {
+						|| birthDate.length() != 0 || studyDate.length() != 0) {
 					queryButton.setEnabled(true);
 				} else {
 					queryButton.setEnabled(false);
@@ -399,54 +452,21 @@ public class MainWindow extends JFrame {
 		gbc_PatientIDLabel.anchor = GridBagConstraints.EAST;
 		gbc_PatientIDLabel.insets = new Insets(5, 5, 0, 0);
 		gbc_PatientIDLabel.gridx = 0;
-		gbc_PatientIDLabel.gridy = 2;
+		gbc_PatientIDLabel.gridy = 3;
 		queryPanel.add(PatientIDLabel, gbc_PatientIDLabel);
 
 		patientIDTF = new JTextField();
 		GridBagConstraints gbc_patientIDTF = new GridBagConstraints();
 		gbc_patientIDTF.insets = new Insets(5, 5, 0, 0);
 		gbc_patientIDTF.fill = GridBagConstraints.HORIZONTAL;
+		gbc_patientIDTF.gridwidth = 6;
 		gbc_patientIDTF.gridx = 1;
-		gbc_patientIDTF.gridy = 2;
+		gbc_patientIDTF.gridy = 3;
 		queryPanel.add(patientIDTF, gbc_patientIDTF);
 		patientIDTF.setColumns(15);
 		patientIDTF.setText("");
 		patientIDTF.addCaretListener(caretQueryPACSfields);
-
-		JLabel studyDescriptionLabel = new JLabel(resourceBundle.getString("shanoir.uploader.studyDescriptionLabel"));
-		GridBagConstraints gbc_studyDescriptionLabel = new GridBagConstraints();
-		gbc_studyDescriptionLabel.anchor = GridBagConstraints.EAST;
-		gbc_studyDescriptionLabel.insets = new Insets(5, 5, 0, 0);
-		gbc_studyDescriptionLabel.gridx = 0;
-		gbc_studyDescriptionLabel.gridy = 3;
-		queryPanel.add(studyDescriptionLabel, gbc_studyDescriptionLabel);
-
-		studyDescriptionTF = new JTextField();
-		GridBagConstraints gbc_studyDescriptionTF = new GridBagConstraints();
-		gbc_studyDescriptionTF.insets = new Insets(5, 5, 0, 0);
-		gbc_studyDescriptionTF.fill = GridBagConstraints.HORIZONTAL;
-		gbc_studyDescriptionTF.gridx = 1;
-		gbc_studyDescriptionTF.gridy = 3;
-		queryPanel.add(studyDescriptionTF, gbc_studyDescriptionTF);
-		studyDescriptionTF.setColumns(15);
-		studyDescriptionTF.setText("");
-		studyDescriptionTF.addCaretListener(caretQueryPACSfields);
-
-		JLabel seriesDescriptionLabel = new JLabel("Series description:");
-		GridBagConstraints gbc_seriesDescriptionLabel = new GridBagConstraints();
-		gbc_seriesDescriptionLabel.anchor = GridBagConstraints.EAST;
-		gbc_seriesDescriptionLabel.insets = new Insets(10, 10, 10, 10);
-		gbc_seriesDescriptionLabel.gridx = 0;
-		gbc_seriesDescriptionLabel.gridy = 4;
-
-		seriesDescriptionTF = new JTextField();
-		GridBagConstraints gbc_seriesDescriptionTF = new GridBagConstraints();
-		gbc_seriesDescriptionTF.insets = new Insets(10, 10, 10, 10);
-		gbc_seriesDescriptionTF.fill = GridBagConstraints.HORIZONTAL;
-		gbc_seriesDescriptionTF.gridx = 1;
-		gbc_seriesDescriptionTF.gridy = 4;
-		seriesDescriptionTF.setColumns(15);
-
+		
 		// Add Birth Date field
 		JLabel birthDateReasearchLabel = new JLabel(resourceBundle.getString("shanoir.uploader.patientBirthDateLabel"));
 		GridBagConstraints gbc_birthDateReasearchLabel = new GridBagConstraints();
@@ -462,27 +482,62 @@ public class MainWindow extends JFrame {
 		p.put("text.today", "Today");
 		p.put("text.month", "Month");
 		p.put("text.year", "Year");
-		JDatePanelImpl datePanel = new JDatePanelImpl(birthDateModel, p);
+		JDatePanelImpl birthDatePanel = new JDatePanelImpl(birthDateModel, p);
 		DateLabelFormatter dLP = new DateLabelFormatter();
-		birthDateModel.getValue();
+		final JDatePickerImpl birthDatePicker = new JDatePickerImpl(birthDatePanel, dLP);
+		birthDatePicker.setTextEditable(true);
 
-		final JDatePickerImpl datePicker = new JDatePickerImpl(datePanel, dLP);
-		GridBagConstraints gbc_birthDateReasearchTF = new GridBagConstraints();
-		gbc_birthDateReasearchTF.insets = new Insets(5, 5, 0, 0);
-		gbc_birthDateReasearchTF.fill = GridBagConstraints.HORIZONTAL;
-		gbc_birthDateReasearchTF.gridx = 1;
-		gbc_birthDateReasearchTF.gridy = 4;
-		queryPanel.add(datePicker, gbc_birthDateReasearchTF);
+		GridBagConstraints gbc_birthDateResearchTF = new GridBagConstraints();
+		gbc_birthDateResearchTF.insets = new Insets(5, 5, 0, 0);
+		gbc_birthDateResearchTF.fill = GridBagConstraints.HORIZONTAL;
+		gbc_birthDateResearchTF.gridwidth = 6;
+		gbc_birthDateResearchTF.gridx = 1;
+		gbc_birthDateResearchTF.gridy = 4;
+		queryPanel.add(birthDatePicker, gbc_birthDateResearchTF);
 
-		datePicker.addActionListener(new ActionListener() {
+		final SimpleDateFormat manualFormatter = new SimpleDateFormat("dd/MM/yyyy");
+		final SimpleDateFormat dicomFormatter = new SimpleDateFormat("yyyyMMdd");
+		JFormattedTextField birthDateTextField = birthDatePicker.getJFormattedTextField();
+        birthDateTextField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                try {
+					String birthDateText = birthDateTextField.getText();
+					if (birthDateText != null && !"".equals(birthDateText)) {
+						Date birthDateDate = manualFormatter.parse(birthDateText);
+						birthDateModel.setValue(birthDateDate);
+						birthDate = dicomFormatter.format(birthDateDate);
+						queryButton.setEnabled(true);
+					} else {
+						birthDate = "";
+						if (patientNameTF.getText().length() == 0
+								&& patientIDTF.getText().length() == 0
+								&& studyDescriptionTF.getText().length() == 0
+								&& studyDate.length() == 0) {
+							queryButton.setEnabled(false);
+						}
+					}
+                } catch (ParseException ex) {
+                    logger.error(ex.getMessage(), e);
+					birthDate = "";
+					if (patientNameTF.getText().length() == 0
+							&& patientIDTF.getText().length() == 0
+							&& studyDescriptionTF.getText().length() == 0
+							&& studyDate.length() == 0) {
+						queryButton.setEnabled(false);
+					}
+                }
+            }
+        });
+
+		birthDatePicker.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				final SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
 				if (birthDateModel.getValue() != null) {
-					dateRS = formatter.format(birthDateModel.getValue());
+					birthDate = dicomFormatter.format(birthDateModel.getValue());
 					queryButton.setEnabled(true);
 				} else {
-					dateRS = "";
+					birthDate = "";
 					if (patientNameTF.getText().length() == 0
 							&& patientIDTF.getText().length() == 0
 							&& studyDescriptionTF.getText().length() == 0
@@ -492,6 +547,26 @@ public class MainWindow extends JFrame {
 				}
 			}
 		});
+		
+		JLabel studyDescriptionLabel = new JLabel(resourceBundle.getString("shanoir.uploader.studyDescriptionLabel"));
+		GridBagConstraints gbc_studyDescriptionLabel = new GridBagConstraints();
+		gbc_studyDescriptionLabel.anchor = GridBagConstraints.EAST;
+		gbc_studyDescriptionLabel.insets = new Insets(5, 5, 0, 0);
+		gbc_studyDescriptionLabel.gridx = 0;
+		gbc_studyDescriptionLabel.gridy = 5;
+		queryPanel.add(studyDescriptionLabel, gbc_studyDescriptionLabel);
+
+		studyDescriptionTF = new JTextField();
+		GridBagConstraints gbc_studyDescriptionTF = new GridBagConstraints();
+		gbc_studyDescriptionTF.insets = new Insets(5, 5, 0, 0);
+		gbc_studyDescriptionTF.fill = GridBagConstraints.HORIZONTAL;
+		gbc_studyDescriptionTF.gridwidth = 6;
+		gbc_studyDescriptionTF.gridx = 1;
+		gbc_studyDescriptionTF.gridy = 5;
+		queryPanel.add(studyDescriptionTF, gbc_studyDescriptionTF);
+		studyDescriptionTF.setColumns(15);
+		studyDescriptionTF.setText("");
+		studyDescriptionTF.addCaretListener(caretQueryPACSfields);
 
 		// Add Examination date field
 		// 0008,0020 StudyDate
@@ -500,7 +575,7 @@ public class MainWindow extends JFrame {
 		gbc_studyDateLabel.anchor = GridBagConstraints.EAST;
 		gbc_studyDateLabel.insets = new Insets(5, 5, 0, 0);
 		gbc_studyDateLabel.gridx = 0;
-		gbc_studyDateLabel.gridy = 5;
+		gbc_studyDateLabel.gridy = 6;
 		queryPanel.add(studyDateLabel, gbc_studyDateLabel);
 
 		studyDateModel = new UtilDateModel();
@@ -513,40 +588,134 @@ public class MainWindow extends JFrame {
 		DateLabelFormatter studyDLP = new DateLabelFormatter();
 		final JDatePickerImpl studyDatePicker = new JDatePickerImpl(
 				studyDatePanel, studyDLP);
+		studyDatePicker.setTextEditable(true);
 
 		GridBagConstraints gbc_studyDatePicker = new GridBagConstraints();
 		gbc_studyDatePicker.insets = new Insets(5, 5, 0, 0);
 		gbc_studyDatePicker.fill = GridBagConstraints.HORIZONTAL;
+		gbc_studyDatePicker.gridwidth = 6;
 		gbc_studyDatePicker.gridx = 1;
-		gbc_studyDatePicker.gridy = 5;
+		gbc_studyDatePicker.gridy = 6;
 		queryPanel.add(studyDatePicker, gbc_studyDatePicker);
 
+		JFormattedTextField studyDateTextField = studyDatePicker.getJFormattedTextField();
+		studyDateTextField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                try {
+					String studyDateText = studyDateTextField.getText();
+					if (studyDateText != null && !"".equals(studyDateText)) {
+						Date studyDateDate = manualFormatter.parse(studyDateText);
+						studyDateModel.setValue(studyDateDate);
+						studyDate = dicomFormatter.format(studyDateDate);
+						queryButton.setEnabled(true);
+					} else {
+						studyDate = "";
+						if (patientNameTF.getText().length() == 0
+								&& patientIDTF.getText().length() == 0
+								&& studyDescriptionTF.getText().length() == 0
+								&& birthDate.length() == 0) {
+							queryButton.setEnabled(false);
+						}
+					}
+				} catch (ParseException ex) {
+                    logger.error(ex.getMessage(), e);
+					studyDate = "";
+					if (patientNameTF.getText().length() == 0
+							&& patientIDTF.getText().length() == 0
+							&& studyDescriptionTF.getText().length() == 0
+							&& birthDate.length() == 0) {
+						queryButton.setEnabled(false);
+					}
+                }
+            }
+        });
 		studyDatePicker.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				queryButton.setEnabled(true);
-				final SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
 				if (studyDateModel.getValue() != null) {
-					studyDate = formatter.format(studyDateModel.getValue());
+					studyDate = dicomFormatter.format(studyDateModel.getValue());
 					queryButton.setEnabled(true);
 				} else {
 					studyDate = "";
 					if (patientNameTF.getText().length() == 0
 							&& patientIDTF.getText().length() == 0
 							&& studyDescriptionTF.getText().length() == 0
-							&& dateRS.length() == 0) {
+							&& birthDate.length() == 0) {
 						queryButton.setEnabled(false);
 					}
 				}
 			}
 		});
 
+		JLabel modalityLabel = new JLabel(resourceBundle.getString("shanoir.uploader.modalityLabel"));
+		GridBagConstraints gbc_modalityLabel = new GridBagConstraints();
+		gbc_modalityLabel.anchor = GridBagConstraints.EAST;
+		gbc_modalityLabel.insets = new Insets(5, 5, 0, 0);
+		gbc_modalityLabel.gridx = 0;
+		gbc_modalityLabel.gridy = 7;
+		queryPanel.add(modalityLabel, gbc_modalityLabel);
+		
+		modalityRG = new ButtonGroup();
+		mrRB = new JRadioButton("MR");
+		mrRB.setSelected(true);
+		modalityRG.add(mrRB);
+		GridBagConstraints gBC_mrRB = new GridBagConstraints();
+		gBC_mrRB.insets = new Insets(2, 5, 0, 2);
+		gBC_mrRB.fill = GridBagConstraints.HORIZONTAL;
+		gBC_mrRB.gridx = 1;
+		gBC_mrRB.gridy = 7;
+		gBC_mrRB.weightx = 1.0;
+		queryPanel.add(mrRB, gBC_mrRB);
+
+		ctRB = new JRadioButton("CT");
+		modalityRG.add(ctRB);
+		GridBagConstraints gBC_ctRB = new GridBagConstraints();
+		gBC_ctRB.insets = new Insets(2, 2, 0, 2);
+		gBC_ctRB.fill = GridBagConstraints.HORIZONTAL;
+		gBC_ctRB.gridx = 2;
+		gBC_ctRB.gridy = 7;
+		gBC_ctRB.weightx = 1.0;
+		queryPanel.add(ctRB, gBC_ctRB);
+
+		ptRB = new JRadioButton("PT");
+		modalityRG.add(ptRB);
+		GridBagConstraints gBC_ptRB = new GridBagConstraints();
+		gBC_ptRB.insets = new Insets(2, 2, 0, 2);
+		gBC_ptRB.fill = GridBagConstraints.HORIZONTAL;
+		gBC_ptRB.gridx = 3;
+		gBC_ptRB.gridy = 7;
+		gBC_ptRB.weightx = 1.0;
+		queryPanel.add(ptRB, gBC_ptRB);
+
+		nmRB = new JRadioButton("NM");
+		modalityRG.add(nmRB);
+		GridBagConstraints gBC_nmRB = new GridBagConstraints();
+		gBC_nmRB.insets = new Insets(2, 2, 0, 2);
+		gBC_nmRB.fill = GridBagConstraints.HORIZONTAL;
+		gBC_nmRB.gridx = 4;
+		gBC_nmRB.gridy = 7;
+		gBC_nmRB.weightx = 1.0;
+		queryPanel.add(nmRB, gBC_nmRB);
+
+		noRB = new JRadioButton("None");
+		modalityRG.add(noRB);
+		GridBagConstraints gBC_noRB = new GridBagConstraints();
+		gBC_noRB.insets = new Insets(2, 2, 0, 2);
+		gBC_noRB.fill = GridBagConstraints.HORIZONTAL;
+		gBC_noRB.gridx = 5;
+		gBC_noRB.gridy = 7;
+		gBC_noRB.weightx = 1.0;
+		queryPanel.add(noRB, gBC_noRB);
+		
 		queryButton = new JButton(resourceBundle.getString("shanoir.uploader.queryButton"), searchIcon);
 		GridBagConstraints gbc_queryButton = new GridBagConstraints();
-		gbc_queryButton.insets = new Insets(5, 5, 5, 0);
-		gbc_queryButton.gridwidth = 3;
+		gbc_queryButton.anchor = GridBagConstraints.CENTER;
+		gbc_queryButton.insets = new Insets(5, 5, 5, 5);
+		gbc_queryButton.weightx = 1.0;
+		gbc_queryButton.gridwidth = 8;
 		gbc_queryButton.gridx = 0;
-		gbc_queryButton.gridy = 6;
+		gbc_queryButton.gridy = 8;
 		queryPanel.add(queryButton, gbc_queryButton);
 		queryButton.setEnabled(false);
 		frame.getRootPane().setDefaultButton(queryButton);
@@ -556,7 +725,7 @@ public class MainWindow extends JFrame {
 		GridBagConstraints gbc_separator = new GridBagConstraints();
 		gbc_separator.insets = new Insets(10, 10, 10, 10);
 		gbc_separator.gridx = 1;
-		gbc_separator.gridy = 6;
+		gbc_separator.gridy = 7;
 		queryPanel.add(separator, gbc_separator);
 
 		/**
@@ -681,7 +850,7 @@ public class MainWindow extends JFrame {
 				new RSDocumentListener(this));
 
 		/**
-		 * Radio buttons for sex: M or F
+		 * Radio buttons for sex: F, M or O
 		 */
 		JLabel sexLabel = new JLabel(resourceBundle.getString("shanoir.uploader.sexLabel"));
 		sexLabel.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -692,26 +861,39 @@ public class MainWindow extends JFrame {
 		gBCSexLabel.gridy = 5;
 		editPanel.add(sexLabel, gBCSexLabel);
 		sexRG = new ButtonGroup();
-		mSexR = new JRadioButton("M");
-		mSexR.setEnabled(false);
-		sexRG.add(mSexR);
-		editPanel.add(mSexR);
 		fSexR = new JRadioButton("F");
 		fSexR.setEnabled(false);
 		sexRG.add(fSexR);
 		editPanel.add(fSexR);
+		mSexR = new JRadioButton("M");
+		mSexR.setEnabled(false);
+		sexRG.add(mSexR);
+		editPanel.add(mSexR);
+		oSexR = new JRadioButton("O");
+		oSexR.setEnabled(false);
+		sexRG.add(oSexR);
+		editPanel.add(oSexR);
+		GridBagConstraints gBCFSexR = new GridBagConstraints();
+		gBCFSexR.insets = new Insets(10, 10, 10, 10);
+		gBCFSexR.fill = GridBagConstraints.HORIZONTAL;
+		gBCFSexR.gridx = 1;
+		gBCFSexR.gridy = 5;
+		gBCFSexR.weightx = 1.0;
+		editPanel.add(fSexR, gBCFSexR);
 		GridBagConstraints gBCMSexR = new GridBagConstraints();
 		gBCMSexR.insets = new Insets(10, 10, 10, 10);
 		gBCMSexR.fill = GridBagConstraints.HORIZONTAL;
-		gBCMSexR.gridx = 1;
+		gBCMSexR.gridx = 2;
 		gBCMSexR.gridy = 5;
+		gBCMSexR.weightx = 1.0;
 		editPanel.add(mSexR, gBCMSexR);
-		GridBagConstraints gBCFSexR = new GridBagConstraints();
-		gBCFSexR.insets = new Insets(10, 10, 10, 10);
-		gBCMSexR.fill = GridBagConstraints.HORIZONTAL;
-		gBCFSexR.gridx = 2;
-		gBCFSexR.gridy = 5;
-		editPanel.add(fSexR, gBCFSexR);
+		GridBagConstraints gBCOSexR = new GridBagConstraints();
+		gBCOSexR.insets = new Insets(10, 10, 10, 10);
+		gBCOSexR.fill = GridBagConstraints.HORIZONTAL;
+		gBCOSexR.gridx = 3;
+		gBCOSexR.gridy = 5;
+		gBCOSexR.weightx = 1.0;
+		editPanel.add(oSexR, gBCOSexR);
 
 		/**
 		 * Last button for download or copy action:
@@ -759,17 +941,70 @@ public class MainWindow extends JFrame {
 		mainSplitPane.setRightComponent(editCurrentUploadsPanel);
 		notificationPanel.setLayout(gBLPanel);
 
-		// Content of Notification Panel
+		/**
+		 * Notification panel: copy or download
+		 */
+		GridBagConstraints gbc_notificationDownloadsOrCopies = new GridBagConstraints();
+		gbc_notificationDownloadsOrCopies.insets = new Insets(10, 10, 10, 10);
+		gbc_notificationDownloadsOrCopies.fill = GridBagConstraints.WEST;
+		gbc_notificationDownloadsOrCopies.gridx = 0;
+		gbc_notificationDownloadsOrCopies.gridy = 0;
+		JLabel notificationDownloadsOrCopies = new JLabel();
+		notificationDownloadsOrCopies.setText(resourceBundle.getString("shanoir.uploader.currentCopyOrDownloadSummary"));
+		Font font = new Font("Courier", Font.BOLD, 12);
+		notificationDownloadsOrCopies.setFont(font);
+		notificationPanel.add(notificationDownloadsOrCopies, gbc_notificationDownloadsOrCopies);
+
+		GridBagConstraints gbc_startedDownloadsLB = new GridBagConstraints();
+		gbc_startedDownloadsLB.insets = new Insets(10, 10, 10, 10);
+		gbc_startedDownloadsLB.fill = GridBagConstraints.EAST;
+		gbc_startedDownloadsLB.gridx = 0;
+		gbc_startedDownloadsLB.gridy = 1;
+		startedDownloadsLB = new JLabel();
+		startedDownloadsLB.setText(resourceBundle.getString("shanoir.uploader.currentCopyOrDownloadStarted"));
+		notificationPanel.add(startedDownloadsLB, gbc_startedDownloadsLB);
+
+		downloadProgressBar = new JProgressBar(0, 100);
+		downloadProgressBar.setValue(0);
+		downloadProgressBar.setStringPainted(true);
+		downloadProgressBar.setVisible(true);
+
+		GridBagConstraints gbc_downloadProgressBar = new GridBagConstraints();
+		gbc_downloadProgressBar.insets = new Insets(10, 10, 10, 10);
+		gbc_downloadProgressBar.fill = GridBagConstraints.HORIZONTAL;
+		gbc_downloadProgressBar.gridx = 1;
+		gbc_downloadProgressBar.gridy = 1;
+		notificationPanel.add(downloadProgressBar, gbc_downloadProgressBar);
+
+		errorDownloadsLB = new JLabel();
+		GridBagConstraints gbc_errorDownloadsLB = new GridBagConstraints();
+		gbc_errorDownloadsLB.insets = new Insets(10, 10, 10, 10);
+		gbc_errorDownloadsLB.fill = GridBagConstraints.EAST;
+		gbc_errorDownloadsLB.gridx = 0;
+		gbc_errorDownloadsLB.gridy = 2;
+		notificationPanel.add(errorDownloadsLB, gbc_errorDownloadsLB);
+
+		downloadErrorAlert = new JLabel();
+		GridBagConstraints gbc_downloadErrorAlert = new GridBagConstraints();
+		gbc_downloadErrorAlert.insets = new Insets(10, 10, 10, 10);
+		gbc_downloadErrorAlert.fill = GridBagConstraints.EAST;
+		gbc_downloadErrorAlert.gridx = 1;
+		gbc_downloadErrorAlert.gridy = 2;
+		gbc_downloadErrorAlert.gridheight = 2;
+		notificationPanel.add(downloadErrorAlert, gbc_downloadErrorAlert);
+
+		/**
+		 * Notification panel: imports
+		 */
 		JLabel notificationCurrentUploads = new JLabel();
 		GridBagConstraints gbc_notificationCurrentUploads = new GridBagConstraints();
 		gbc_notificationCurrentUploads.insets = new Insets(10, 10, 10, 10);
 		gbc_notificationCurrentUploads.fill = GridBagConstraints.WEST;
 		gbc_notificationCurrentUploads.gridx = 0;
-		gbc_notificationCurrentUploads.gridy = 0;
+		gbc_notificationCurrentUploads.gridy = 3;
 		notificationCurrentUploads.setText(resourceBundle.getString("shanoir.uploader.currentUploadsSummary"));
 		notificationPanel.add(notificationCurrentUploads,
 				gbc_notificationCurrentUploads);
-		Font font = new Font("Courier", Font.BOLD, 12);
 		notificationCurrentUploads.setFont(font);
 
 		startedUploadsLB = new JLabel();
@@ -777,7 +1012,7 @@ public class MainWindow extends JFrame {
 		gbc_startedUploadsLB.insets = new Insets(10, 10, 10, 10);
 		gbc_startedUploadsLB.fill = GridBagConstraints.EAST;
 		gbc_startedUploadsLB.gridx = 0;
-		gbc_startedUploadsLB.gridy = 1;
+		gbc_startedUploadsLB.gridy = 4;
 		notificationPanel.add(startedUploadsLB, gbc_startedUploadsLB);
 
 		uploadProgressBar = new JProgressBar(0, 100);
@@ -789,7 +1024,7 @@ public class MainWindow extends JFrame {
 		gbc_progressBar.insets = new Insets(10, 10, 10, 10);
 		gbc_progressBar.fill = GridBagConstraints.HORIZONTAL;
 		gbc_progressBar.gridx = 1;
-		gbc_progressBar.gridy = 1;
+		gbc_progressBar.gridy = 4;
 		notificationPanel.add(uploadProgressBar, gbc_progressBar);
 
 		finishedUploadsLB = new JLabel();
@@ -797,7 +1032,7 @@ public class MainWindow extends JFrame {
 		gbc_finishedUploadsLB.insets = new Insets(10, 10, 10, 10);
 		gbc_finishedUploadsLB.fill = GridBagConstraints.EAST;
 		gbc_finishedUploadsLB.gridx = 0;
-		gbc_finishedUploadsLB.gridy = 2;
+		gbc_finishedUploadsLB.gridy = 5;
 		notificationPanel.add(finishedUploadsLB, gbc_finishedUploadsLB);
 
 		errorUploadsLB = new JLabel();
@@ -805,17 +1040,17 @@ public class MainWindow extends JFrame {
 		gbc_errorUploadsLB.insets = new Insets(10, 10, 10, 10);
 		gbc_errorUploadsLB.fill = GridBagConstraints.EAST;
 		gbc_errorUploadsLB.gridx = 0;
-		gbc_errorUploadsLB.gridy = 3;
+		gbc_errorUploadsLB.gridy = 6;
 		notificationPanel.add(errorUploadsLB, gbc_errorUploadsLB);
 
-		errorAlert = new JLabel();
+		uploadErrorAlert = new JLabel();
 		GridBagConstraints gbc_errorAlert = new GridBagConstraints();
 		gbc_errorAlert.insets = new Insets(10, 10, 10, 10);
 		gbc_errorAlert.fill = GridBagConstraints.EAST;
 		gbc_errorAlert.gridx = 1;
-		gbc_errorAlert.gridy = 3;
+		gbc_errorAlert.gridy = 6;
 		gbc_errorAlert.gridheight = 2;
-		notificationPanel.add(errorAlert, gbc_errorAlert);
+		notificationPanel.add(uploadErrorAlert, gbc_errorAlert);
 		
 		menuBar.add(Box.createRigidArea(new Dimension(8, 0)));
 		

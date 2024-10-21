@@ -1,21 +1,31 @@
 package org.shanoir.ng.events;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.tasks.AsyncTaskApiController;
 import org.shanoir.ng.tasks.UserSseEmitter;
+import org.shanoir.ng.user.model.User;
+import org.shanoir.ng.user.model.dto.UserDTO;
+import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.util.Pair;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -29,9 +39,13 @@ public class ShanoirEventsService {
 
 	@Autowired
 	ShanoirEventRepository repository;
+	@Autowired
+	ShanoirEventRepositoryCustom repositoryCustom;
+
+	@Autowired
+	UserRepository userRepository;
 
 	private static final Logger LOG = LoggerFactory.getLogger(ShanoirEventsService.class);
-
 
 	public void addEvent(ShanoirEvent event) {
 		// Call repository
@@ -41,8 +55,10 @@ public class ShanoirEventsService {
 		// Push notification to UI
 		if (ShanoirEventType.IMPORT_DATASET_EVENT.equals(event.getEventType())
 			  || ShanoirEventType.EXECUTION_MONITORING_EVENT.equals(event.getEventType())
+				|| ShanoirEventType.SOLR_INDEX_ALL_EVENT.equals(event.getEventType())
 				|| ShanoirEventType.COPY_DATASET_EVENT.equals(event.getEventType())
-				|| ShanoirEventType.CHECK_QUALITY_EVENT.equals(event.getEventType())) { 
+				|| ShanoirEventType.CHECK_QUALITY_EVENT.equals(event.getEventType())
+				|| ShanoirEventType.DOWNLOAD_STATISTICS_EVENT.equals(event.getEventType())) {
 			sendSseEventsToUI(saved);
 		}
 	}
@@ -124,5 +140,10 @@ public class ShanoirEventsService {
 	public ShanoirEvent findById(Long taskId) {
 		Long userId = KeycloakUtil.getTokenUserId();
 		return repository.findByIdAndUserId(taskId, userId);
+	}
+
+	public Page<ShanoirEvent> findByStudyId(final Pageable pageable,Long studyId, String searchStr, String searchField) {
+		Page<ShanoirEvent> events = repositoryCustom.findByStudyIdOrderByCreationDateDescAndSearch(pageable, studyId, searchStr, searchField);
+		return events;
 	}
 }

@@ -15,6 +15,7 @@
 package org.shanoir.ng.importer.model;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.dcm4che3.data.Attributes;
@@ -22,6 +23,7 @@ import org.dcm4che3.data.Tag;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
+import org.shanoir.ng.shared.dicom.InstitutionDicom;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -31,7 +33,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author atouboul
  * @author mkain
  */
-public class Serie {
+public class Serie implements Cloneable {
 	
 	@JsonProperty("selected")
 	private boolean selected;
@@ -111,18 +113,21 @@ public class Serie {
 	public Serie() {}
 
 	public Serie(Attributes attributes) {
-		this.seriesInstanceUID = attributes.getString(Tag.SeriesInstanceUID);
-		this.sopClassUID = attributes.getString(Tag.SOPClassUID);
-		this.seriesDescription = attributes.getString(Tag.SeriesDescription);
-		this.seriesDate = DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.SeriesDate));
-		this.seriesNumber = attributes.getString(Tag.SeriesNumber);
-		this.numberOfSeriesRelatedInstances = attributes.getInt(Tag.NumberOfSeriesRelatedInstances, 0);
-		this.modality = attributes.getString(Tag.Modality);
-		this.protocolName = attributes.getString(Tag.ProtocolName);
-		this.isEnhanced = Boolean.FALSE;
-		this.isMultiFrame = Boolean.FALSE;
-		this.isSpectroscopy = Boolean.FALSE;
-		this.isCompressed = Boolean.FALSE;
+		seriesInstanceUID = attributes.getString(Tag.SeriesInstanceUID);
+		// try to remove confusing spaces, in case DICOM server sends them wrongly
+		if (seriesInstanceUID != null)
+			seriesInstanceUID = seriesInstanceUID.trim();
+		sopClassUID = attributes.getString(Tag.SOPClassUID);
+		seriesDescription = attributes.getString(Tag.SeriesDescription);
+		seriesDate = DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.SeriesDate));
+		seriesNumber = attributes.getString(Tag.SeriesNumber);
+		numberOfSeriesRelatedInstances = attributes.getInt(Tag.NumberOfSeriesRelatedInstances, 0);
+		modality = attributes.getString(Tag.Modality);
+		protocolName = attributes.getString(Tag.ProtocolName);
+		isEnhanced = Boolean.FALSE;
+		isMultiFrame = Boolean.FALSE;
+		isSpectroscopy = Boolean.FALSE;
+		isCompressed = Boolean.FALSE;
 		final EquipmentDicom equipmentDicom = new EquipmentDicom(
 				attributes.getString(Tag.Manufacturer),
 				attributes.getString(Tag.ManufacturerModelName),
@@ -130,6 +135,17 @@ public class Serie {
 				attributes.getString(Tag.StationName),
 				attributes.getString(Tag.MagneticFieldStrength));
 		setEquipment(equipmentDicom);
+	}
+
+	public Object clone() throws CloneNotSupportedException {
+		Serie cloned = (Serie) super.clone();
+		if (this.instances != null) {
+			cloned.instances = new ArrayList<Instance>();
+			for (Instance instance : this.instances) {
+				cloned.instances.add((Instance) instance.clone());
+			}
+		}
+		return cloned;
 	}
 
 	public boolean getSelected() {
@@ -326,6 +342,7 @@ public class Serie {
 	
 	public String toString() {
 		StringBuffer sB = new StringBuffer();
+		sB.append("[");
 		sB.append(this.seriesDescription);
 		sB.append(", ");
 		sB.append(this.sequenceName);
@@ -334,7 +351,10 @@ public class Serie {
 		sB.append(", ");
 		sB.append(this.seriesNumber);
 		sB.append(", ");
+		sB.append(this.numberOfSeriesRelatedInstances);
+		sB.append(", ");
 		sB.append(this.seriesInstanceUID);
+		sB.append(" ]");
 		return sB.toString();
 	}
 

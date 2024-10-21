@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -69,7 +69,7 @@ export class ApplyStudyCardOnComponent implements OnInit {
             private keycloakService: KeycloakService,
             private activatedRoute: ActivatedRoute,
             private location: Location) {
-                
+
         breadcrumbsService.nameStep('Reapply Study Card');
 
     }
@@ -98,7 +98,7 @@ export class ApplyStudyCardOnComponent implements OnInit {
             this.location.back();
             return;
         }
-        
+
         let rightsPromise: Promise<Map<number, StudyUserRight[]>> = this.studyRightsService.getMyRights().then(rights => this.studyRights = rights);
 
         this.status = this.breadcrumbsService.currentStep.data.status ? this.breadcrumbsService.currentStep.data.status : 'default';
@@ -107,7 +107,7 @@ export class ApplyStudyCardOnComponent implements OnInit {
         }
 
         let filteredAcquisitionsPromise: Promise<DatasetAcquisition[]> = Promise.all([acquisitionPromise, rightsPromise]).then(([acquisitions, rights]) => {
-            let nonAdminAcquisitions: DatasetAcquisition[] = this.keycloakService.isUserAdmin() ? [] : acquisitions?.filter(acq => 
+            let nonAdminAcquisitions: DatasetAcquisition[] = this.keycloakService.isUserAdmin() ? [] : acquisitions?.filter(acq =>
                 !rights.get(acq.examination?.study?.id)?.includes(StudyUserRight.CAN_ADMINISTRATE)
             );
             this.nonAdminStudies = new Set();
@@ -115,7 +115,7 @@ export class ApplyStudyCardOnComponent implements OnInit {
                 this.nonAdminStudies.add(acq.examination?.study?.name);
             });
             this.nbNonAdminAcquisitions = nonAdminAcquisitions?.length;
-            this.datasetAcquisitions = this.keycloakService.isUserAdmin() ? acquisitions : acquisitions?.filter(acq => 
+            this.datasetAcquisitions = this.keycloakService.isUserAdmin() ? acquisitions : acquisitions?.filter(acq =>
                 rights.get(acq.examination?.study?.id)?.includes(StudyUserRight.CAN_ADMINISTRATE)
             );
             this.browserPaging = new BrowserPaging(this.datasetAcquisitions, this.columnsDefs);
@@ -157,7 +157,7 @@ export class ApplyStudyCardOnComponent implements OnInit {
 
     private reapplyOn(datasetAcquisitionIds: number[]) {
         this.confirmService.confirm('Apply Study Card ?',
-                'Would you like to apply the study card "' 
+                'Would you like to apply the study card "'
                 + this.studycard.name
                 + '" to ' + datasetAcquisitionIds.length
                 + ' datasets? Note that any previous study card application will be permanentely overwriten by new values.'
@@ -182,22 +182,20 @@ export class ApplyStudyCardOnComponent implements OnInit {
             { headerName: "Compatible", type: "boolean", cellRenderer: row => this.isCompatible(row.data.acquisitionEquipment?.id), awesome: "fa-solid fa-circle", awesomeFalse: "fa-solid fa-triangle-exclamation", color: "green", colorFalse: "orangered", disableSorting: true },
             { headerName: 'Id', field: 'id', type: 'number', width: '30px', defaultSortCol: true, defaultAsc: false},
             { headerName: 'Type', field: 'type', width: '22px'},
-            { headerName: "Acquisition Equipment", field: "acquisitionEquipment", orderBy: ['acquisitionEquipmentId'],
+            { headerName: "Center Equipment", field: "acquisitionEquipment", orderBy: ['acquisitionEquipmentId'],
                 cellRenderer: (params: any) => this.transformAcqEq(params.data?.acquisitionEquipment),
                 route: (dsAcq: DatasetAcquisition) => '/acquisition-equipment/details/' + dsAcq?.acquisitionEquipment?.id
             },
             { headerName: "Study", field: "examination.study.name", defaultField: 'examination.study.id', orderBy: ['examination.studyId'],
 				route: (dsAcq: DatasetAcquisition) => '/study/details/' + dsAcq?.examination?.study?.id},
-            { headerName: "Examination date", type: 'date', field: 'examination.examinationDate', cellRenderer: (params: any) => {
-                return this.dateRenderer(params.data.examination?.examinationDate);
-            }},    
-            { headerName: "Center", field: "acquisitionEquipment.center.name", disableSorting: true,
+            { headerName: "Examination date", type: 'date', field: 'examination.examinationDate' },
+            { headerName: "Acquisition Center", field: "acquisitionEquipment.center.name", disableSorting: true,
 				route: (dsAcq: DatasetAcquisition) => dsAcq?.acquisitionEquipment?.center? '/center/details/' + dsAcq?.acquisitionEquipment?.center?.id : null
 			},
             { headerName: "Last StudyCard", field: "studyCard.name"},
             { headerName: "", type: "button", awesome: "fa-regular fa-eye", action: item => this.router.navigate(['/dataset-acquisition/details/' + item.id]) }
         ];
-        return colDef;       
+        return colDef;
     }
 
     getSubRowDefs() {
@@ -228,13 +226,6 @@ export class ApplyStudyCardOnComponent implements OnInit {
         }
     }
 
-    private dateRenderer(date: number): string {
-        if (date) {
-            return new Date(date).toLocaleDateString();
-        }
-        return null;
-    };
-
     onSelectionChange() {
         this.nbSelectedDatasets = 0;
         this.datasetAcquisitions.forEach(acq => {
@@ -259,7 +250,7 @@ export class ApplyStudyCardOnComponent implements OnInit {
             this.datasetAcquisitions.forEach(acq => {
                 if (this.selectedAcquisitionIds.has(acq.id) && acq.acquisitionEquipment?.id != this.studycard.acquisitionEquipment?.id) {
                     this.nbIncompatible++;
-                } 
+                }
             });
         }
     }

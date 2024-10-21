@@ -22,7 +22,7 @@ import { ServiceLocator } from './locator.service';
 
 // Base urls
 let url = window.location;
-const BACKEND_API_URL = url.protocol + "//" + url.hostname + "/shanoir-ng";
+export const BACKEND_API_URL = url.protocol + "//" + url.hostname + "/shanoir-ng";
 export const KEYCLOAK_BASE_URL = url.protocol + "//" + url.hostname + "/auth";
 export const LOGOUT_REDIRECT_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/welcome";
 export const LOGIN_REDIRECT_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/index.html";
@@ -32,6 +32,7 @@ export const SILENT_CHECK_SSO_URL = url.protocol + "//" + url.hostname + "/shano
 // Users http api
 export const BACKEND_API_USERS_MS_URL: string = BACKEND_API_URL + "/users";
 export const BACKEND_API_USER_URL: string = BACKEND_API_USERS_MS_URL + '/users';
+export const BACKEND_API_USER_EVENTS: string = BACKEND_API_USERS_MS_URL + '/events';
 export const BACKEND_API_USER_ACCOUNT_REQUEST_URL: string = BACKEND_API_USERS_MS_URL + '/accountrequest';
 export const BACKEND_API_USER_CONFIRM_ACCOUNT_REQUEST_URL: string = '/confirmaccountrequest';
 export const BACKEND_API_USER_DENY_ACCOUNT_REQUEST_URL: string = '/denyaccountrequest';
@@ -55,6 +56,7 @@ export const BACKEND_API_CENTER_STUDY_URL: string = BACKEND_API_CENTER_URL + '/s
 
 // Studies http api
 export const BACKEND_API_STUDY_URL: string = BACKEND_API_STUDIES_MS_URL + '/studies';
+export const BACKEND_API_STUDY_STUDIES_LIGHT_URL: string = BACKEND_API_STUDIES_MS_URL + '/studies/light';
 export const BACKEND_API_STUDY_ALL_NAMES_URL: string = BACKEND_API_STUDY_URL + '/names';
 export const BACKEND_API_STUDY_DELETE_USER: string = BACKEND_API_STUDY_URL + '/studyUser';
 export const BACKEND_API_STUDY_ALL_NAMES_AND_CENTERS_URL: string = BACKEND_API_STUDY_URL + '/namesAndCenters';
@@ -87,7 +89,7 @@ export const BACKEND_API_SUBJECT_STUDY_URL: string = BACKEND_API_STUDIES_MS_URL 
 export const BACKEND_API_COIL_URL: string = BACKEND_API_STUDIES_MS_URL + '/coils';
 
 // Datasets http api
-const BACKEND_API_DATASET_MS_URL: string = BACKEND_API_URL + '/datasets';
+export const BACKEND_API_DATASET_MS_URL: string = BACKEND_API_URL + '/datasets';
 export const BACKEND_API_DATASET_URL: string = BACKEND_API_DATASET_MS_URL + '/datasets';
 export const BACKEND_API_PROCESSED_DATASET_URL: string = BACKEND_API_DATASET_URL + '/processedDataset';
 
@@ -221,7 +223,7 @@ export function downloadWithStatusGET(url: string, params?: HttpParams, state ?:
             responseType: 'blob',
             params: params
         }
-    );
+    ).shareReplay();
     obs.toPromise().then(response => browserDownloadFileFromResponse(response as HttpResponse<Blob>));
     return obs.mergeMap(event => {
         return extractState(event).then(s => {
@@ -241,7 +243,7 @@ export function downloadWithStatusPOST(url: string, formData: FormData, state ?:
             observe: 'events',
             responseType: 'blob'
         }
-    );
+    ).shareReplay();
     obs.toPromise().then(response => browserDownloadFileFromResponse(response as HttpResponse<Blob>));
     return obs.mergeMap(event => {
         return extractState(event).then(s => {

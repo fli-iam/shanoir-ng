@@ -19,6 +19,7 @@ import java.util.Set;
 
 import jakarta.transaction.Transactional;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
@@ -30,10 +31,13 @@ public interface StudyUserRightsRepository extends CrudRepository<StudyUser, Lon
 	@Transactional
 	void deleteByIdIn(Set<Long> ids);
 
+	@EntityGraph(attributePaths = "studyUserRights")
 	StudyUser findByUserIdAndStudyId(Long userId, Long studyId);
 
+	@EntityGraph(attributePaths = "studyUserRights")
 	Iterable<StudyUser> findByUserIdAndStudyIdIn(Long userId, Set<Long> studyIds);
 
+	@EntityGraph(attributePaths = "studyUserRights")
 	Iterable<StudyUser> findByUserId(Long userId);
 	
 	Iterable<StudyUser> findByStudyId(Long studyId);

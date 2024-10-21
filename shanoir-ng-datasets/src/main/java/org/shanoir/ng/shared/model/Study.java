@@ -18,8 +18,11 @@ import jakarta.persistence.*;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.tag.model.StudyTag;
+import org.shanoir.ng.tag.model.Tag;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author yyao
@@ -52,6 +55,9 @@ public class Study extends IdName {
 	/** Relations between the subjects and the studies. */
     @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Examination> examinations;
+
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
+	private Set<StudyTag> studyTags;
 	
 
 	/**
@@ -134,5 +140,12 @@ public class Study extends IdName {
     public void setExaminations(List<Examination> examinations) {
         this.examinations = examinations;
     }
-	
+
+	public Set<StudyTag> getStudyTags() {
+		return studyTags;
+	}
+
+	public void setStudyTags(Set<StudyTag> studyTags) {
+		this.studyTags = studyTags;
+	}
 }

@@ -72,7 +72,7 @@ public interface DICOMWebApi {
 	@GetMapping(value = "/studies/{examinationUID}/series", produces = { "application/dicom+json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_SEE_ALL'))")
 	ResponseEntity<String> findSeriesOfStudy(
-			@Parameter(name = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID
+			@Parameter(description = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID, @RequestParam Map<String, String> allParams
 		) throws RestServiceException, JsonMappingException, JsonProcessingException;
 	
 	@Operation(summary = "", description = "Returns the metadata of a DICOM serie/acquisition of an examination")
@@ -85,8 +85,8 @@ public interface DICOMWebApi {
 	@GetMapping(value = "/studies/{examinationUID}/series/{serieInstanceUID}/metadata", produces = { "application/dicom+json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_SEE_ALL'))")
 	ResponseEntity<String> findSerieMetadataOfStudy(
-			@Parameter(name = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
-			@Parameter(name = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID
+			@Parameter(description = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
+			@Parameter(description = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID
 		) throws RestServiceException, JsonMappingException, JsonProcessingException;
 
 	@Operation(summary = "", description = "Returns all DICOM instances/datasets of a study and serie")
@@ -99,8 +99,8 @@ public interface DICOMWebApi {
 	@GetMapping(value = "/studies/{examinationUID}/series/{serieInstanceUID}/instances", produces = { "application/dicom+json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_SEE_ALL'))")
 	ResponseEntity<String> findInstancesOfStudyOfSerie(
-			@Parameter(name = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
-			@Parameter(name = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID
+			@Parameter(description = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
+			@Parameter(description = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID
 		) throws RestServiceException;
 	
 	@Operation(summary = "", description = "Returns a DICOM instance")
@@ -113,9 +113,9 @@ public interface DICOMWebApi {
 	@GetMapping(value = "/studies/{examinationUID}/series/{serieInstanceUID}/instances/{sopInstanceUID}")
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_SEE_ALL'))")
 	ResponseEntity findInstance(
-			@Parameter(name = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
-			@Parameter(name = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID,
-			@Parameter(name = "sopInstanceUID", required = true) @PathVariable("sopInstanceUID") String sopInstanceUID
+			@Parameter(description = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
+			@Parameter(description = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID,
+			@Parameter(description = "sopInstanceUID", required = true) @PathVariable("sopInstanceUID") String sopInstanceUID
 		) throws RestServiceException;
 	
 	@Operation(summary = "", description = "Returns a frame of a DICOM instance/dataset, of a study and serie")
@@ -128,10 +128,10 @@ public interface DICOMWebApi {
 	@GetMapping(value = "/studies/{examinationUID}/series/{serieInstanceUID}/instances/{sopInstanceUID}/frames/{frame}")
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_SEE_ALL'))")
 	ResponseEntity findFrameOfStudyOfSerieOfInstance(
-			@Parameter(name = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
-			@Parameter(name = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID,
-			@Parameter(name = "sopInstanceUID", required = true) @PathVariable("sopInstanceUID") String sopInstanceUID,
-			@Parameter(name = "frame", required = true) @PathVariable("frame") String frame
+			@Parameter(description = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
+			@Parameter(description = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID,
+			@Parameter(description = "sopInstanceUID", required = true) @PathVariable("sopInstanceUID") String sopInstanceUID,
+			@Parameter(description = "frame", required = true) @PathVariable("frame") String frame
 		) throws RestServiceException;
 	
 	@Operation(summary = "", description = "Returns all DICOM instances/datasets")
@@ -155,7 +155,7 @@ public interface DICOMWebApi {
 	@GetMapping(value = "/studies/{studyInstanceUID}/instances", produces = { "application/dicom+json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<String> findInstancesOfStudy(
-			@Parameter(name = "studyInstanceUID", required = true) @PathVariable("studyInstanceUID") String studyInstanceUID
+			@Parameter(description = "studyInstanceUID", required = true) @PathVariable("studyInstanceUID") String studyInstanceUID
 		) throws RestServiceException;
 	
 	@Operation(summary = "", description = "STOW-RS")

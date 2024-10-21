@@ -225,10 +225,10 @@ public class CurrentUploadsWindowTable implements Observer {
 		frame.errorUploadsLB
 				.setText(frame.resourceBundle.getString("shanoir.uploader.failedUploadsSummary") + nbErrorUpload);
 		if (nbErrorUpload != 0) {
-			frame.errorAlert.setText(frame.resourceBundle.getString("shanoir.uploader.failedUploadsMessagePart1")
+			frame.uploadErrorAlert.setText(frame.resourceBundle.getString("shanoir.uploader.failedUploadsMessagePart1")
 					+ frame.resourceBundle.getString("shanoir.uploader.failedUploadsMessagePart2"));
 		} else {
-			frame.errorAlert.setText("");
+			frame.uploadErrorAlert.setText("");
 		}
 	}
 

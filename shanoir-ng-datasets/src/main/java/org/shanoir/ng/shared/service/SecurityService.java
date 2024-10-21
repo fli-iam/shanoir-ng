@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.shared.service;
 
+import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
@@ -32,6 +34,9 @@ public class SecurityService {
 
 	@Autowired
 	StudyUserRightsRepository rightsRepository;
+
+	@Autowired
+	StudyRepository studyRepository;
 	
 	/**
 	 * Get study center rights for the current user as two separate variable.
@@ -42,15 +47,19 @@ public class SecurityService {
 	public void getStudyCentersAndUnrestrictedStudies(List<Pair<Long, Long>> studyCenters, Set<Long> unrestrictedStudies) {
 		Long userId = KeycloakUtil.getTokenUserId();
 		// Check if user has restrictions.
-		List<StudyUser> studyUsers = Utils.toList(rightsRepository.findByUserIdAndRight(userId, StudyUserRight.CAN_SEE_ALL.getId()));
-//		List<Pair<Long, Long>> studyCenters = new ArrayList<>();
-//		Set<Long> unrestrictedStudies = new HashSet<Long>();
-		for (StudyUser studyUser : studyUsers) {
-			if (CollectionUtils.isEmpty(studyUser.getCenterIds()) && studyUser.isConfirmed()) {
-				unrestrictedStudies.add(studyUser.getStudyId());
-			} else {
-				for (Long centerId : studyUser.getCenterIds()) {
-					studyCenters.add(Pair.of(studyUser.getStudyId(), centerId));						
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			for (Study stud : studyRepository.findAll()) {
+				unrestrictedStudies.add(stud.getId());
+			}
+		} else {
+			List<StudyUser> studyUsers = Utils.toList(rightsRepository.findByUserIdAndRight(userId, StudyUserRight.CAN_SEE_ALL.getId()));
+			for (StudyUser studyUser : studyUsers) {
+				if (CollectionUtils.isEmpty(studyUser.getCenterIds()) && studyUser.isConfirmed()) {
+					unrestrictedStudies.add(studyUser.getStudyId());
+				} else {
+					for (Long centerId : studyUser.getCenterIds()) {
+						studyCenters.add(Pair.of(studyUser.getStudyId(), centerId));
+					}
 				}
 			}
 		}

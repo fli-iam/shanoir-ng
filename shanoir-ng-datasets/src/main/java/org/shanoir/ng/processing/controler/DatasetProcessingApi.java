@@ -47,7 +47,7 @@ public interface DatasetProcessingApi {
 	@DeleteMapping(value = "/{datasetProcessingId}", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<Void> deleteDatasetProcessing(
-			@Parameter(name = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId)
+			@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId)
             throws RestServiceException, ShanoirException, SolrServerException, IOException;
 
 	@Operation(summary = "", description = "If exists, returns the dataset processing corresponding to the given id")
@@ -59,20 +59,7 @@ public interface DatasetProcessingApi {
 	@GetMapping(value = "/{datasetProcessingId}", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<DatasetProcessingDTO> findDatasetProcessingById(
-			@Parameter(name = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId);
-
-	@Operation(summary = "", description = "Returns all the dataset processings")
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "found dataset processings"),
-			@ApiResponse(responseCode = "204", description = "no dataset processing found"),
-			@ApiResponse(responseCode = "401", description = "unauthorized"),
-			@ApiResponse(responseCode = "403", description = "forbidden"),
-			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@GetMapping(value = "/study/{studyId}/subject/{subjectId}", produces = { "application/json" })
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
-	ResponseEntity<List<DatasetProcessingDTO>> findDatasetProcessingsByStudyIdAndSubjectId(
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
+			@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId);
 
 	@Operation(summary = "", description = "Returns the dataset processings with given study and subject")
 	@ApiResponses(value = {
@@ -94,7 +81,7 @@ public interface DatasetProcessingApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/{datasetProcessingId}/inputDatasets/", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<List<DatasetDTO>> getInputDatasets(@Parameter(name = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId);
+	ResponseEntity<List<DatasetDTO>> getInputDatasets(@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId);
 
 	@Operation(summary = "", description = "Returns the output datasets of a processing")
 	@ApiResponses(value = {
@@ -105,7 +92,7 @@ public interface DatasetProcessingApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/{datasetProcessingId}/outputDatasets/", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<List<DatasetDTO>> getOutputDatasets(@Parameter(name = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId);
+	ResponseEntity<List<DatasetDTO>> getOutputDatasets(@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId);
 
 	@Operation(summary = "", description = "Saves a new dataset processing")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "created dataset processing"),
@@ -116,7 +103,7 @@ public interface DatasetProcessingApi {
 	@PostMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<DatasetProcessingDTO> saveNewDatasetProcessing(@Parameter(name = "dataset processing to create", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
+	ResponseEntity<DatasetProcessingDTO> saveNewDatasetProcessing(@Parameter(description = "dataset processing to create", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
 			BindingResult result) throws RestServiceException;
 
 	@Operation(summary = "", description = "Updates a dataset processing")
@@ -129,8 +116,8 @@ public interface DatasetProcessingApi {
 			"application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and @controlerSecurityService.idMatches(#datasetProcessingId, #datasetProcessing)")
 	ResponseEntity<Void> updateDatasetProcessing(
-			@Parameter(name = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId,
-			@Parameter(name = "dataset processing to update", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing, BindingResult result)
+			@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId,
+			@Parameter(description = "dataset processing to update", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing, BindingResult result)
 			throws RestServiceException;
 
 }

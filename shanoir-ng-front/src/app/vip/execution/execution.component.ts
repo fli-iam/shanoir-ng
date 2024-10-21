@@ -58,7 +58,7 @@ export class ExecutionComponent implements OnInit {
     isLoading = true;
     isSubmitted = true;
     datasetsPromise: Promise<void>;
-    converter: number;
+    converterId: number;
 
     niftiConverters: Option<number>[] = [
         new Option<number>(1, 'DCM2NII_2008_03_31', null, null, null, false),
@@ -164,7 +164,6 @@ export class ExecutionComponent implements OnInit {
         this.datasetsPromise.then(() => {
 
             let availableDatasets: Dataset[] = Array.from(this.selectedDatasets);
-            let excludedDatasetsCount = 0;
 
             this.datasetsOptions = [];
             availableDatasets.forEach(dataset => {
@@ -188,11 +187,7 @@ export class ExecutionComponent implements OnInit {
                         let paramDatasets: Dataset[] = [];
 
                         availableDatasets.forEach(dataset => {
-                            if(dataset.datasetProcessing){
-                                excludedDatasetsCount++;
-                            } else if (nameFilter.test(dataset.name)) {
-                                paramDatasets.push(dataset);
-                            }
+                            paramDatasets.push(dataset);
                         });
 
                         paramDatasets.forEach(dataset => {
@@ -204,9 +199,6 @@ export class ExecutionComponent implements OnInit {
                     }
                 }
             )
-            if(excludedDatasetsCount > 0){
-                this.consoleService.log('warn', "[" + excludedDatasetsCount + "] processed datasets has been excluded from the selection.");
-            }
         });
     }
 
@@ -235,6 +227,7 @@ export class ExecutionComponent implements OnInit {
         candidate.outputProcessing = this.pipeline.outputProcessing;
         candidate.client = KeycloakService.clientId;
         candidate.refreshToken = this.refreshToken;
+        candidate.converterId = this.converterId;
         candidate.datasetParameters = [];
         candidate.inputParameters = {};
         this.pipeline.parameters.forEach(

@@ -84,7 +84,7 @@ export class AccountRequestComponent {
                  this.requestSent = true;
             }, (err) => {
                 if (err?.error?.details?.fieldErrors?.email != null) {
-                    this.consoleService.log("error", "An user with this email already exists, please connect with it or use another one.")
+                    this.consoleService.log("error", "An account already exists for this email address. Please connect with your credentials or pass by the reset password process (link named 'Forgot password?').")
                 } else {
                     throw err;
                 }

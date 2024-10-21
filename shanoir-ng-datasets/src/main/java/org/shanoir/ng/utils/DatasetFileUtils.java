@@ -186,7 +186,7 @@ public class DatasetFileUtils {
 		return name.toString();
 	}
 
-	private static void compressGzipFile(String source, String gzipDestination) throws IOException {
+	public static void compressGzipFile(String source, String gzipDestination) throws IOException {
 		try (FileInputStream fis = new FileInputStream(source);
 		FileOutputStream fos = new FileOutputStream(gzipDestination);
 		GZIPOutputStream gzipOS = new GZIPOutputStream(fos)) {

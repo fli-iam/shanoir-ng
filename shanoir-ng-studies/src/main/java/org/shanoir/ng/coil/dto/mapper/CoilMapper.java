@@ -17,6 +17,8 @@ package org.shanoir.ng.coil.dto.mapper;
 import java.util.List;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 import org.shanoir.ng.center.dto.mapper.CenterMapper;
 import org.shanoir.ng.coil.dto.CoilDTO;
 import org.shanoir.ng.coil.model.Coil;
@@ -27,7 +29,7 @@ import org.shanoir.ng.coil.model.Coil;
  * @author msimon
  *
  */
-@Mapper(componentModel = "spring", uses = { CenterMapper.class/*, ManufacturerModelMapper.class*/ })
+@Mapper(componentModel = "spring", uses = { CenterMapper.class })
 public interface CoilMapper {
 
 	/**
@@ -46,6 +48,10 @@ public interface CoilMapper {
 	 *            coil to map.
 	 * @return coil DTO.
 	 */
+	@Mappings({
+		@Mapping(target = "center.acquisitionEquipments", ignore = true),
+		@Mapping(target = "center.studyCenterList", ignore = true)
+	})
 	CoilDTO coilToCoilDTO(Coil coil);
 
 }

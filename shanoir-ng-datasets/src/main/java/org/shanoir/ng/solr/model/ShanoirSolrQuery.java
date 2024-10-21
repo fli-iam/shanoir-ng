@@ -54,8 +54,12 @@ public class ShanoirSolrQuery {
 	private	Collection<String> tags;
 
 	private LocalDate datasetStartDate;
-	
+
 	private LocalDate datasetEndDate;
+
+	private LocalDate importStartDate;
+
+	private LocalDate importEndDate;
 	
 	private	Collection<String> datasetType;
 	
@@ -72,6 +76,8 @@ public class ShanoirSolrQuery {
 	private Range<Float> magneticFieldStrength;
 
 	private Collection<Boolean> processed;
+
+	private Collection<String> username;
 	
 	private Map<String, FacetPageable> facetPaging;
 	
@@ -205,6 +211,22 @@ public class ShanoirSolrQuery {
 		this.datasetEndDate = datasetEndDate;
 	}
 
+	public LocalDate getImportStartDate() {
+		return importStartDate;
+	}
+
+	public void setImportStartDate(LocalDate importStartDate) {
+		this.importStartDate = importStartDate;
+	}
+
+	public LocalDate getImportEndDate() {
+		return importEndDate;
+	}
+
+	public void setImportEndDate(LocalDate importEndDate) {
+		this.importEndDate = importEndDate;
+	}
+
 	/**
 	 * @return the datasetType
 	 */
@@ -298,9 +320,12 @@ public class ShanoirSolrQuery {
 	public void setFacetPaging(Map<String, FacetPageable> facetPaging) {
 		this.facetPaging = facetPaging;
 	}
-	
+
 	public Range<LocalDate> getDatasetDateRange() {
 		return new Range<LocalDate>(getDatasetStartDate(), getDatasetEndDate());
+	}
+	public Range<LocalDate> getImportDateRange() {
+		return new Range<LocalDate>(getImportStartDate(), getImportEndDate());
 	}
 
 	public Collection<Long> getSubjectId() {
@@ -325,5 +350,13 @@ public class ShanoirSolrQuery {
 
 	public void setProcessed(Collection<Boolean> processed) {
 		this.processed = processed;
+	}
+
+	public Collection<String> getUsername() {
+		return username;
+	}
+
+	public void setUsername(Collection<String> username) {
+		this.username = username;
 	}
 }

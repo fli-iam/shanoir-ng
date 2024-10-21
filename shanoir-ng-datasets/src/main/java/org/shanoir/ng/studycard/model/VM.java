@@ -57,6 +57,11 @@ public class VM {
 	public void setMax(Cardinality max) {
 		this.max = max;
 	}
+
+	@Override
+	public String toString() {
+		return getMin() + "-" + getMax().toString();
+	}
 	
 	public static VM of(int tag) {
 		if (Tag.OffendingElement == tag) return new VM("1-n");

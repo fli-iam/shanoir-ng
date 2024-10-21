@@ -34,6 +34,7 @@ import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
+import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -66,6 +67,9 @@ public class StudyServiceSecurityTest {
 	
 	@MockBean
 	private StudyRepository repository;
+
+	@MockBean
+	private StudyUserRepository studyUserRepository;
 	
 	@BeforeEach
 	public void setup() {
@@ -113,10 +117,14 @@ public class StudyServiceSecurityTest {
 		
 		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(new Study[] 
 				{ buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL), buildStudyMock(2L, StudyUserRight.CAN_SEE_ALL) } ));
+		given(studyUserRepository.findByStudy_Id(1L)).willReturn(buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL).getStudyUserList());
+		given(studyUserRepository.findByStudy_Id(2L)).willReturn(buildStudyMock(2L, StudyUserRight.CAN_SEE_ALL).getStudyUserList());
 		assertEquals(2, service.findAll().size());
 		
 		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(new Study[] 
 				{ buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL), buildStudyMock(2L, StudyUserRight.CAN_DOWNLOAD) } ));
+		given(studyUserRepository.findByStudy_Id(1L)).willReturn(buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL).getStudyUserList());
+		given(studyUserRepository.findByStudy_Id(2L)).willReturn(buildStudyMock(2L, StudyUserRight.CAN_DOWNLOAD).getStudyUserList());
 		assertEquals(1, service.findAll().size());
 	}
 
@@ -185,6 +193,7 @@ public class StudyServiceSecurityTest {
 		studyMock.setStudyUserList(Arrays.asList(studyUser));
 		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true))
 			.willReturn(Arrays.asList(studyMock));
+		given(studyUserRepository.findByStudy_Id(studyMock.getId())).willReturn(Arrays.asList(studyUser));
 		List<Study> repoAll = repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true);
 		List<Study> all = service.findAll();
 		Assertions.assertNotNull(all);

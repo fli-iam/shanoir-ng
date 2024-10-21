@@ -1,0 +1,79 @@
+<configuration>
+
+    <!-- Root logger option -->
+    <root level="INFO">
+        <appender-ref ref="stdout" />
+        <appender-ref ref="file" />
+    </root>
+
+    <!-- Logger for org.apache.http -->
+    <logger name="org.apache.http" level="OFF" additivity="false"/>
+
+    <!-- Logger for org.shanoir.uploader.upload.UploadStatusServiceJob -->
+    <logger name="org.shanoir.uploader.upload.UploadStatusServiceJob" level="ERROR" additivity="false">
+        <appender-ref ref="file" />
+    </logger>
+
+    <!-- Logger for org.shanoir.uploader.upload.UploadServiceJob -->
+    <logger name="org.shanoir.uploader.upload.UploadServiceJob" level="INFO" additivity="false">
+        <appender-ref ref="file" />
+    </logger>
+
+    <!-- Logger for org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager -->
+    <logger name="org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager" level="ERROR" additivity="false">
+        <appender-ref ref="file" />
+    </logger>
+
+    <!-- Logger for org.shanoir.dicom.importer.UploadJobManager -->
+    <logger name="org.shanoir.dicom.importer.UploadJobManager" level="ERROR" additivity="false">
+        <appender-ref ref="file" />
+    </logger>
+    
+    <logger name="org.dcm4che3" level="ERROR" additivity="false">
+        <appender-ref ref="stdout" />
+        <appender-ref ref="file" />
+    </logger>
+
+    <!-- Logger for org.dcm4che3.net -->
+    <logger name="org.dcm4che3.net" level="INFO" additivity="false">
+        <appender-ref ref="stdout" />
+        <appender-ref ref="file" />
+    </logger>
+
+    <!-- Logger for org.dcm4che3.net.Dimse -->
+    <logger name="org.dcm4che3.net.Dimse" level="ERROR" additivity="false">
+        <appender-ref ref="stdout" />
+        <appender-ref ref="file" />
+    </logger>
+
+    <!-- Logger for org.dcm4che3.tool.storescp.StoreSCP -->
+    <logger name="org.dcm4che3.tool.storescp.StoreSCP" level="ERROR" additivity="false">
+        <appender-ref ref="stdout" />
+        <appender-ref ref="file" />
+    </logger>
+
+    <!-- Define stdout appender -->
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd_HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Define file appender -->
+	<appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${user.home}/.su_v9.0.0/su.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${user.home}/.su_v9.0.0/archived_logs/su.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <!-- each archived file, size max 10MB -->
+            <maxFileSize>10MB</maxFileSize>
+            <!-- total size of all archive files, if total size > 20GB, it will delete old archived file -->
+            <totalSizeCap>1GB</totalSizeCap>
+            <!-- 60 days to keep -->
+            <maxHistory>60</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd_HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+</configuration>
