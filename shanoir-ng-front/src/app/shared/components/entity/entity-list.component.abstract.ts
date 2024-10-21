@@ -29,6 +29,8 @@ import { ColumnDefinition } from '..//table/column.definition.type';
 import { Entity, EntityRoutes } from './entity.abstract';
 import { EntityService } from './entity.abstract.service';
 import { TreeService } from 'src/app/studies/study/tree.service';
+import {SubjectComponent} from "../../../subjects/subject/subject.component";
+import {SubjectService} from "../../../subjects/shared/subject.service";
 
 @Directive()
 export abstract class EntityListComponent<T extends Entity> implements OnDestroy {
@@ -56,6 +58,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     private showId: boolean = true;
 
     abstract getService(): EntityService<T>;
+    getOnDeleteConfirmMessage?(entity: T): Promise<string>;
 
     constructor(
             protected readonly ROUTING_NAME: string) {
@@ -115,12 +118,22 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     }
 
     protected openDeleteConfirmDialog = (entity: T) => {
-        this.confirmDialogService
-            .confirm(
-                'Delete ' + this.ROUTING_NAME,
-                'Are you sure you want to delete the ' + this.ROUTING_NAME
-                + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?'
-            ).then(res => {
+        let dialogTitle : string = 'Delete ' + this.ROUTING_NAME;
+        let dialogMsg : string = 'Are you sure you want to delete the ' + this.ROUTING_NAME
+            + (entity['name'] ? ' \"' + entity['name'] + '\"' : ' with id n° ' + entity.id) + ' ?';
+
+        let promise: Promise<string>;
+        if (this.getOnDeleteConfirmMessage) {
+            promise = this.getOnDeleteConfirmMessage(entity);
+        } else {
+            promise = Promise.resolve('');
+        }
+        promise.then(studyListStr => {
+            this.confirmDialogService
+                .confirm(
+                    dialogTitle,
+                    dialogMsg + studyListStr
+                ).then(res => {
                 if (res) {
                     this.getService().delete(entity.id).then(() => {
                         this.onDelete.next({entity: entity});
@@ -143,6 +156,8 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
                     });
                 }
             })
+        });
+
     }
 
     private dealWithDeleteError(error: ShanoirError, entity: any) {
