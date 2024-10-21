@@ -16,7 +16,6 @@ package org.shanoir.ng.dataset.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.processing.model.DatasetProcessingType;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
@@ -59,8 +58,7 @@ public class DatasetExpression extends AbstractEntity {
 	private Long size;
 
 	/** Set of files. */
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "datasetExpression", cascade = { CascadeType.MERGE,
-			CascadeType.PERSIST, CascadeType.REMOVE })
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "datasetExpression", cascade = { CascadeType.ALL })
 	private List<DatasetFile> datasetFiles;
 
 	/** Dataset processing type. */
