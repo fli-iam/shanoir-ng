@@ -850,6 +850,7 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
+	@Transactional
 	public List<StudyStatisticsDTO> queryStudyStatistics(Long studyId) throws Exception {
 		return studyRepository.queryStudyStatistics(studyId);
 	}

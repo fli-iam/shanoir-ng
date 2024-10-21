@@ -30,7 +30,7 @@ export type Format = 'nii' | 'dcm';
 
 @Injectable()
 export class DatasetService extends EntityService<Dataset> {
-    
+
     readonly API_URL = AppUtils.BACKEND_API_DATASET_URL;
     readonly MAX_DATASETS_IN_ZIP_DL: number = 500;
 
@@ -117,7 +117,7 @@ export class DatasetService extends EntityService<Dataset> {
         return this.http.get<number>(AppUtils.BACKEND_API_DATASET_URL + '/study/nb-datasets/' + studyId)
         .toPromise();
     }
-    
+
     public downloadDatasets(ids: number[], format: string, converter ? : number, state?: TaskState): Observable<TaskState> {
         const formData: FormData = new FormData();
         formData.set('datasetIds', ids.join(","));
@@ -139,7 +139,11 @@ export class DatasetService extends EntityService<Dataset> {
             AppUtils.BACKEND_API_DATASET_URL + '/downloadStatistics', { observe: 'response', responseType: 'blob', params: params})
             .toPromise().then(
             response => {
-                this.downloadIntoBrowser(response);
+                if (response.status != 204) {
+                    this.consoleService.log('error', 'Error during creation of statistics.');
+                } else {
+                    this.consoleService.log('info', 'Statistics are being prepared, check the Jobs page to see its progress.');
+                }
             }
         )
     }

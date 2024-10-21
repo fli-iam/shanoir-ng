@@ -22,7 +22,7 @@ import { ServiceLocator } from './locator.service';
 
 // Base urls
 let url = window.location;
-const BACKEND_API_URL = url.protocol + "//" + url.hostname + "/shanoir-ng";
+export const BACKEND_API_URL = url.protocol + "//" + url.hostname + "/shanoir-ng";
 export const KEYCLOAK_BASE_URL = url.protocol + "//" + url.hostname + "/auth";
 export const LOGOUT_REDIRECT_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/welcome";
 export const LOGIN_REDIRECT_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/index.html";
@@ -88,7 +88,7 @@ export const BACKEND_API_SUBJECT_STUDY_URL: string = BACKEND_API_STUDIES_MS_URL 
 export const BACKEND_API_COIL_URL: string = BACKEND_API_STUDIES_MS_URL + '/coils';
 
 // Datasets http api
-const BACKEND_API_DATASET_MS_URL: string = BACKEND_API_URL + '/datasets';
+export const BACKEND_API_DATASET_MS_URL: string = BACKEND_API_URL + '/datasets';
 export const BACKEND_API_DATASET_URL: string = BACKEND_API_DATASET_MS_URL + '/datasets';
 export const BACKEND_API_PROCESSED_DATASET_URL: string = BACKEND_API_DATASET_URL + '/processedDataset';
 

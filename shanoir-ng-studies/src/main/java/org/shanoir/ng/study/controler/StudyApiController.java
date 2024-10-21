@@ -23,7 +23,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -40,7 +39,6 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
-import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyLightDTO;
 import org.shanoir.ng.study.dto.StudyStatisticsDTO;
@@ -75,6 +73,7 @@ import org.springframework.web.multipart.MultipartFile;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 
 @Controller
@@ -473,6 +472,7 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
+	@Transactional
 	public ResponseEntity<List<IdName>> findPublicStudiesConnected() {
 		List<IdName> studiesDTO = new ArrayList<>();
 		

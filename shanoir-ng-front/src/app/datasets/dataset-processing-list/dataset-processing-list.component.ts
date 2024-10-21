@@ -51,18 +51,11 @@ export class DatasetProcessingListComponent extends BrowserPaginEntityListCompon
     }
 
     getColumnDefs(): ColumnDefinition[] {
-        function dateRenderer(date: number) {
-            if (date) {
-                return new Date(date).toLocaleDateString();
-            }
-            return null;
-        };
-
         let columnDefs: ColumnDefinition[] = [
             { headerName: 'Id', field: 'id', type: 'number', width: '30px', defaultSortCol: true},
             { headerName: "Processing", field: "datasetProcessingType" },
             { headerName: "Comment", field: "comment" },
-            { headerName: "Date", field: "processingDate", type: "date", cellRenderer: (params: any) => dateRenderer(params.data.processingDate) }
+            { headerName: "Date", field: "processingDate", type: "date" }
         ];
         return columnDefs;
     }
