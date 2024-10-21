@@ -97,7 +97,6 @@ public class ExaminationApiController implements ExaminationApi {
 	@Override
 	public ResponseEntity<Void> deleteExamination(
 			@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId) {
-		LOG.error("delete examination id : " + examinationId);
 		Long studyId = examinationService.findById(examinationId).getStudyId();
 
 		ShanoirEvent event = null;
