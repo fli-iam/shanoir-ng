@@ -39,6 +39,7 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyLightDTO;
 import org.shanoir.ng.study.dto.StudyStatisticsDTO;
@@ -180,6 +181,19 @@ public class StudyApiController implements StudyApi {
 		}
 		for (Study study : studies) {
 			studiesDTO.add(studyMapper.studyToIdNameDTO(study));
+		}
+		return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<List<IdNameCenterStudyDTO>> findStudiesNamesAndCenters() throws RestServiceException {
+		List<IdNameCenterStudyDTO> studiesDTO = new ArrayList<>();
+		final List<Study> studies = studyService.findAll();
+		if (studies.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		for (Study study : studies) {
+			studiesDTO.add(studyMapper.studyToExtendedIdNameDTO(study));
 		}
 		return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
 	}

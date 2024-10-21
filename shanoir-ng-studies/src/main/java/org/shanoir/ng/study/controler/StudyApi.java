@@ -23,6 +23,7 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyLightDTO;
 import org.shanoir.ng.study.dto.StudyStatisticsDTO;
@@ -107,6 +108,17 @@ public interface StudyApi {
 	@RequestMapping(value = "/names", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<List<IdName>> findStudiesNames() throws RestServiceException;
+
+	@Operation(summary = "", description = "Returns id, name and centers for all the studies")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "found studies"),
+			@ApiResponse(responseCode = "204", description = "no study found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@RequestMapping(value = "/namesAndCenters", produces = { "application/json" }, method = RequestMethod.GET)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	ResponseEntity<List<IdNameCenterStudyDTO>> findStudiesNamesAndCenters() throws RestServiceException;
 
 	@Operation(summary = "", description = "If exists, returns the study corresponding to the given id")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found study"),
