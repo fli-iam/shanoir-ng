@@ -264,7 +264,7 @@ export class SubjectComponent extends EntityComponent<Subject> {
     }
 
     getOnDeleteConfirmMessage(entity: Subject): Promise<string> {
-        let studyListStr : string = "\n\nThis subject belong in studies: \n- ";
+        let studyListStr : string = "\n\nThis subject belongs to the studies: \n- ";
         const studiesNames = entity.subjectStudyList.map(study => study.study.name).join('\n- ');
         studyListStr += studiesNames;
         return Promise.resolve(studyListStr);
