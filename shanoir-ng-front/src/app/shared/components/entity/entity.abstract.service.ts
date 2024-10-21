@@ -21,17 +21,16 @@ import { ShanoirError } from "../../models/error.model";
 import { ConfirmDialogService } from "../confirm-dialog/confirm-dialog.service";
 import { Page } from '../table/pageable.model';
 import { Entity } from './entity.abstract';
+import {EntityComponent} from "./entity.component.abstract";
 
 @Injectable()
 export abstract class EntityService<T extends Entity> implements OnDestroy {
 
     abstract API_URL: string;
-
     abstract getEntityInstance(entity?: T): T;
-
+    getOnDeleteConfirmMessage?(entity: Entity): Promise<string>;
     protected confirmDialogService = ServiceLocator.injector.get(ConfirmDialogService);
     protected consoleService = ServiceLocator.injector.get(ConsoleService);
-
     protected subscriptions: Subscription[] = [];
 
     // protected http: HttpClient = ServiceLocator.injector.get(HttpClient);
@@ -71,40 +70,43 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
             .toPromise();
     }
 
-    deleteWithConfirmDialog(name: string, entity: Entity): Promise<boolean> {
+    deleteWithConfirmDialog(name: string, entity: Entity, studyListStr?: string): Promise<boolean> {
+        let dialogTitle : string = 'Delete ' + name;
+        let dialogMsg : string = 'Are you sure you want to delete the ' + name
+            + (entity['name'] ? ' \"' + entity['name'] + '\"' : ' with id n° ' + entity.id) + ' ?';
+
         return this.confirmDialogService
             .confirm(
-                'Delete ' + name,
-                'Are you sure you want to delete the ' + name
-                + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?'
+                dialogTitle,
+                dialogMsg + studyListStr
             ).then(res => {
-                if (res) {
-                    return this.delete(entity.id).then(() => {
-                        this.consoleService.log('info', 'The ' + name + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' was sucessfully deleted');
-                        return true;
-                    }).catch(reason => {
-                        if(!reason){
-                            return;
+            if (res) {
+                return this.delete(entity.id).then(() => {
+                    this.consoleService.log('info', 'The ' + name + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' was sucessfully deleted');
+                    return true;
+                }).catch(reason => {
+                    if (!reason) {
+                        return;
+                    }
+                    let warn = 'The ' + name + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' is linked to other entities, it was not deleted.';
+                    if ((reason.error && reason.error.code == 422)
+                        || reason.status == 422) {
+                        this.consoleService.log('warn', warn);
+                        return false;
+                    }
+                    if (reason instanceof ShanoirError && reason.code == 422) {
+                        if (reason.message) {
+                            warn = warn + ' ' + reason.message;
                         }
-                        let warn = 'The ' + name + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' is linked to other entities, it was not deleted.';
-                        if((reason.error && reason.error.code == 422)
-                            || reason.status == 422){
-                            this.consoleService.log('warn', warn);
-                            return false;
-                        }
-                        if(reason instanceof ShanoirError && reason.code == 422){
-                            if(reason.message){
-                                warn = warn + ' ' + reason.message;
-                            }
-                            this.consoleService.log('warn', warn);
-                            return false;
-                        }
+                        this.consoleService.log('warn', warn);
+                        return false;
+                    }
 
-                        throw Error(reason);
-                    });
-                }
-                return false;
-            })
+                    throw Error(reason);
+                });
+            }
+            return false;
+        })
     }
 
     get(id: number | BigInt, mode: 'eager' | 'lazy' = 'eager'): Promise<T> {
@@ -182,4 +184,5 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
             else throw e;
         }
     }
+
 }

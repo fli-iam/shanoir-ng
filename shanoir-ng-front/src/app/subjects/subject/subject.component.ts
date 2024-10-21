@@ -262,4 +262,11 @@ export class SubjectComponent extends EntityComponent<Subject> {
         // TODO : select study
         this.downloadService.downloadAllByStudyIdAndSubjectId(this.treeService.study.id, this.subject.id, this.downloadState);
     }
+
+    getOnDeleteConfirmMessage(entity: Subject): Promise<string> {
+        let studyListStr : string = "\n\nThis subject belong in studies: \n- ";
+        const studiesNames = entity.subjectStudyList.map(study => study.study.name).join('\n- ');
+        studyListStr += studiesNames;
+        return Promise.resolve(studyListStr);
+    }
 }
