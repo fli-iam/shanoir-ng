@@ -12,16 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<h2 class="header command-zone">My jobs</h2>
-
-<shanoir-table #table
-	[getPage]="getPage.bind(this)"
-	[columnDefs]="columnDefs"
-	[customActionDefs]="customActionDefs"
-	[browserSearch]="false"
-	(rowClick)="select($event)"
-    (downloadStatsEvent)="downloadStats($event)"
-	[selectedId]="selected?.id">
-</shanoir-table>
-
-<task-status *ngIf="selected" [task]="selected"></task-status>
+<i [class]="main"></i>
+<i class="sub" [class]="sub">
+    <i class="sub-background" [class]="sub"></i>
+</i>
