@@ -28,6 +28,7 @@ import { TableComponent } from '../table/table.component';
 import { ColumnDefinition } from '..//table/column.definition.type';
 import { Entity, EntityRoutes } from './entity.abstract';
 import { EntityService } from './entity.abstract.service';
+import { TreeService } from 'src/app/studies/study/tree.service';
 
 @Directive()
 export abstract class EntityListComponent<T extends Entity> implements OnDestroy {
@@ -42,6 +43,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     protected consoleService: ConsoleService;
     protected breadcrumbsService: BreadcrumbsService;
     public windowService: WindowService;
+    private treeService: TreeService;
     public onDelete: Subject<{entity: Entity, error?: ShanoirError}> =  new Subject();
     public onAdd: Subject<any> =  new Subject<any>();
     protected subscriptions: Subscription[] = [];
@@ -125,6 +127,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
                         this.table.refresh().then(() => {
                             this.consoleService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + entity.id + ' sucessfully deleted');
                         });
+                        this.treeService.updateTree();
                     }).catch(reason => {
                         if (!reason){
                             return;

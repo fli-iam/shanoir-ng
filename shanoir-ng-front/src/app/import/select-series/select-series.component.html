@@ -52,7 +52,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             awesome="fa fa-brain"
                             hasBox="true"
                             [(ngModel)]="serie.selected"
-                            (chkbxChange)="onSerieCheckChange($event, study, patient)"
+                            (chkbxChange)="onSerieCheckChange(study, patient)"
                             (labelClick)="showSerieDetails(serie)"
                             [class.selected]="detailedSerie == serie"
                             [ngModelOptions]="{standalone: true}"
