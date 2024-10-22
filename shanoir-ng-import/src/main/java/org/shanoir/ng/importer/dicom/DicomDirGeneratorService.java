@@ -116,6 +116,7 @@ public class DicomDirGeneratorService {
 			Attributes patRec = in.findPatientRecord(pid);
 			if (patRec == null) {
 				patRec = recFact.createRecord(RecordType.PATIENT, null, dataset, null, null);
+				patRec.setSpecificCharacterSet("ISO_IR 192"); // set to UTF-8
 				patRec.setString(Tag.PatientBirthDate, VR.DA, pBirthDate);
 				patRec.setString(Tag.PatientSex, VR.CS, pSex);
 				out.addRootDirectoryRecord(patRec);
@@ -124,6 +125,7 @@ public class DicomDirGeneratorService {
 			Attributes studyRec = in.findStudyRecord(patRec, styuid);
 			if (studyRec == null) {
 				studyRec = recFact.createRecord(RecordType.STUDY, null, dataset, null, null);
+				studyRec.setSpecificCharacterSet("ISO_IR 192"); // set to UTF-8
 				out.addLowerDirectoryRecord(patRec, studyRec);
 				num++;
 			}
@@ -132,6 +134,7 @@ public class DicomDirGeneratorService {
 				Attributes seriesRec = in.findSeriesRecord(studyRec, seruid);
 				if (seriesRec == null) {
 					seriesRec = recFact.createRecord(RecordType.SERIES, null, dataset, null, null);
+					seriesRec.setSpecificCharacterSet("ISO_IR 192"); // set to UTF-8
 					seriesRec.setString(Tag.SeriesDescription, VR.LO, seriesDescription);
 					out.addLowerDirectoryRecord(studyRec, seriesRec);
 					num++;
