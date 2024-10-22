@@ -70,6 +70,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
         this.breadcrumbsService = ServiceLocator.injector.get(BreadcrumbsService);
         this.keycloakService = ServiceLocator.injector.get(KeycloakService);
         this.windowService = ServiceLocator.injector.get(WindowService);
+        this.treeService = ServiceLocator.injector.get(TreeService);
 
         this.computeOptions();
         this.columnDefs = this.getColumnDefs();
