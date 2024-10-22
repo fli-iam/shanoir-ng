@@ -39,8 +39,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </li>
         <li>
             <label class="required-label">Select a center</label>
-            <label *ngIf="modality == 'MR'" [class.required-label]="!useStudyCard">Acquisition Center</label>
-            <label *ngIf="modality != 'MR'" [class.required-label]="!useStudyCard">Select an acquisition center</label>
             <span class="right-col">
                 <select-box
                         [disabled]="!study || !centerOptions || loading"
@@ -67,8 +65,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </li>
         <li>
             <label class="required-label">Select an acquisition equipment</label>
-            <label *ngIf="modality == 'MR'" [class.required-label]="!useStudyCard">Center equipment</label>
-            <label *ngIf="modality != 'MR'" [class.required-label]="!useStudyCard">Select an center equipment</label>
             <span class="right-col">
                 <select-box
                         [disabled]="!center || !acquisitionEquipmentOptions || loading"

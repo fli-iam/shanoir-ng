@@ -40,6 +40,7 @@ import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subj
 import { ContextData, ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 import {PreclinicalSubject} from "../../preclinical/animalSubject/shared/preclinicalSubject.model";
+import {StudyCard} from "../../study-cards/shared/study-card.model";
 
 @Directive()
 export abstract class AbstractClinicalContextComponent implements OnDestroy, OnInit {
@@ -222,44 +223,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             } else {
                 this.hasAdminRightOn(this.study).then((result) => this.isAdminOfStudy[studyId] = result);
             }
-        }
-    }
-
-    private getStudyCardOptions(study: Study): Promise<Option<StudyCard>[]> {
-        let studyEquipments: AcquisitionEquipment[] = [];
-        if (!study) return Promise.resolve([]);
-        /* find equipments for this study - needed for checking studycards compatibilities */
-        study.studyCenterList.forEach(studyCenter => {
-            studyCenter.center.acquisitionEquipments.forEach(eq => {
-                if (studyEquipments.findIndex(se => se.id == eq.id) == -1) studyEquipments.push(eq);
-            });
-        });
-        /* build the studycards options and set their compatibilies */
-        return this.centerService.getCentersByStudyId(study.id).then(centers => {
-            let accessibleCenterIds = centers.map(center => center.id);
-            return this.studycardService.getAllForStudy(study.id).then(studyCards => {
-                if (!studyCards) studyCards = [];
-
-                return studyCards.filter(studyCard => {
-                    return accessibleCenterIds.includes(studyCard.acquisitionEquipment.center.id);
-                }).map(studyCard => {
-                    let opt = new Option(studyCard, studyCard.name);
-                    let scEq = studyCard.acquisitionEquipment ? studyEquipments.find(se => se.id == studyCard.acquisitionEquipment.id) : null;
-                    opt.compatible = this.acqEqCompatible(scEq);
-                    return opt;
-                });
-            });
-        });
-    }
-
-    private selectDefaultStudyCard(options: Option<StudyCard>[]): Promise<void> {
-        let founded = options?.find(option => option.compatible)?.value;
-        if (founded) {
-            this.studycard = founded;
-            return this.onSelectStudyCard();
-        } else if (options?.length > 0) {
-            this.studycard = options[0].value;
-            return this.onSelectStudyCard();
         }
     }
 
