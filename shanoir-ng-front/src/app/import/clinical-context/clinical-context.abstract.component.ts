@@ -110,11 +110,18 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         if (this.reloading) {
             this.fetchStudies(false).then(() => {
                 this.reloadSavedData().finally(() => this.reloading = false);
+                this.getStudyCardPolicy(this.study).then(policy => {
+                    this.study.studyCardPolicy = policy;
+                })
             }).catch(error => {
                 throw new ShanoirError({error: {message: 'the study list failed loading', details: error}});
             });
         } else {
-            this.fetchStudies(true);
+            this.fetchStudies(true).then( () => {
+                this.getStudyCardPolicy(this.study).then(policy => {
+                    this.study.studyCardPolicy = policy;
+                })
+            });
         }
     }
 
@@ -297,6 +304,21 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         }
     }
 
+    private getStudyCardPolicy(study: Study): Promise<string> {
+        if (study && study.id) {
+            return this.studyService.get(study.id).then(study => {
+                if (study.studyCardPolicy == 'MANDATORY' || study.studyCardPolicy == 'OPTIONAL') {
+                    this.useStudyCard = true;
+                } else {
+                    this.useStudyCard = false;
+                }
+                return study.studyCardPolicy;
+            })
+        } else {
+            return Promise.resolve('MANDATORY');
+        }
+    }
+
     private selectDefaultCenter(options: Option<Center>[]): Promise<void> {
         let founded = options?.find(option => option.compatible)?.value;
         if (founded) {
@@ -355,24 +377,28 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         this.computeIsAdminOfStudy(this.study?.id);
         this.studycard = this.center = this.acquisitionEquipment = this.subject = this.examination = null;
 
-        let studycardsOrCentersPromise: Promise<void>;
-        if (this.useStudyCard) {
-            studycardsOrCentersPromise = this.getStudyCardOptions(this.study).then(options => {
-                this.studycardOptions = options;
-                return this.selectDefaultStudyCard(options);
-            });
-        } else {
-            studycardsOrCentersPromise = this.getCenterOptions(this.study).then(options => {
-                this.centerOptions = options;
-                return this.selectDefaultCenter(options);
-            });
-        }
+        return this.getStudyCardPolicy(this.study).then(policy => {
+            this.study.studyCardPolicy = policy;
 
-        let subjectsPromise: Promise<void> = this.getSubjectList(this.study?.id).then(subjects => {
-            this.subjects = subjects ? subjects : [];
+            let studycardsOrCentersPromise: Promise<void>;
+            if (this.useStudyCard) {
+                studycardsOrCentersPromise = this.getStudyCardOptions(this.study).then(options => {
+                    this.studycardOptions = options;
+                    return this.selectDefaultStudyCard(options);
+                });
+            } else {
+                studycardsOrCentersPromise = this.getCenterOptions(this.study).then(options => {
+                    this.centerOptions = options;
+                    return this.selectDefaultCenter(options);
+                });
+            }
+
+            let subjectsPromise: Promise<void> = this.getSubjectList(this.study?.id).then(subjects => {
+                this.subjects = subjects ? subjects : [];
+            });
+            return Promise.all([studycardsOrCentersPromise, subjectsPromise]).finally(() => this.loading--)
+                .then(() => this.onContextChange());
         });
-        return Promise.all([studycardsOrCentersPromise, subjectsPromise]).finally(() => this.loading--)
-            .then(() => this.onContextChange());
     }
 
     public onSelectStudyCard(): Promise<any> {
