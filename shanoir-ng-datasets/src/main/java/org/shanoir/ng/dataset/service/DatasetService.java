@@ -149,6 +149,7 @@ public interface DatasetService {
 	@PreAuthorize("hasRole('ADMIN')")
 	List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception;
 	
+	
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#dataset.getId(), 'CAN_ADMINISTRATE'))")
 	void deleteDatasetFromPacs(Dataset dataset) throws ShanoirException;
 
@@ -161,5 +162,7 @@ public interface DatasetService {
 	Examination getExamination(Dataset dataset);
 
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT','USER') and @datasetSecurityService.hasRightOnDataset(#dataset.id, 'CAN_SEE_ALL'))")
-    DatasetAcquisition getAcquisition(Dataset dataset);
+	DatasetAcquisition getAcquisition(Dataset dataset);
+
+	void deleteNiftis(Long studyId);
 }
