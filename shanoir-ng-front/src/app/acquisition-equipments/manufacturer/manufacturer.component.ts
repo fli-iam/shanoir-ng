@@ -45,11 +45,11 @@ export class ManufacturerComponent extends EntityComponent<Manufacturer> {
     }
 
     initView(): Promise<void> {
-        return this.getManufacturer();
+        return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
-        return this.getManufacturer();
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {

@@ -36,6 +36,7 @@ import { StudyCard, StudyCardRule } from '../shared/study-card.model';
 import { StudyCardService } from '../shared/study-card.service';
 import { StudyCardRuleComponent } from '../study-card-rules/study-card-rule.component';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
+import { Selection } from 'src/app/studies/study/tree.service';
 
 @Component({
     selector: 'study-card',
@@ -79,23 +80,22 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
         return this.studyCardService;
     }
 
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromStudycard(this.studyCard);
+    }
+
     get studyCard(): StudyCard { return this.entity; }
     set studyCard(coil: StudyCard) { this.entity = coil; }
 
     initView(): Promise<void> {
-        let scFetchPromise: Promise<void> = this.studyCardService.get(this.id).then(sc => {
-            this.studyCard = sc;
-        });
-        this.hasAdministrateRightPromise = scFetchPromise.then(() => this.hasAdminRightsOnStudy());
-        return scFetchPromise;
+        this.hasAdministrateRightPromise = this.hasAdminRightsOnStudy();
+        return Promise.resolve();  
     }
 
     initEdit(): Promise<void> {
         this.hasAdministrateRightPromise = Promise.resolve(false);
         this.fetchStudies();
-        return this.studyCardService.get(this.id).then(sc => {
-            this.studyCard = sc;
-        });
+        return Promise.resolve();  
     }
 
     initCreate(): Promise<void> {

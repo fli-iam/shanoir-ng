@@ -109,7 +109,7 @@ public class ImporterManagerService {
 	
 	@Async
 	public void manageImportJob(final ImportJob importJob) {
-	    ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), importJob.getUserId(), "Starting import configuration", ShanoirEvent.IN_PROGRESS, 0f);
+	    ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), importJob.getUserId(), "Starting import configuration", ShanoirEvent.IN_PROGRESS, 0f, importJob.getStudyId());
 	    event.setTimestamp(importJob.getTimestamp());
 		eventService.publishEvent(event);
 		importJob.setShanoirEvent(event);

@@ -93,6 +93,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <ng-template [ngSwitchCase]="'checkQuality.event'">
                     <i class="fa-solid fa-star"></i>
                 </ng-template>
+                <ng-template [ngSwitchCase]="'downloadStatistics.event'">
+                    <i class="fa-solid fa-download"></i>
+                </ng-template>
                 <ng-template ngSwitchDefault>
                     <i class="fa-regular fa-clock"></i>
                 </ng-template>
@@ -153,3 +156,5 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <div>Copyright (C) 2009-2023 Inria</div>
     <div><a href="https://www.inria.fr/" target="_blank">https://www.inria.fr/</a></div>
 </div>
+
+<ng-content></ng-content>

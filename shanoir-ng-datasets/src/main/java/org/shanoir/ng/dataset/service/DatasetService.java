@@ -17,6 +17,8 @@ package org.shanoir.ng.dataset.service;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -152,4 +154,15 @@ public interface DatasetService {
 	void deleteDatasetFromPacs(Dataset dataset) throws ShanoirException;
 
 	boolean existsById(Long id);
+
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT','USER') and @datasetSecurityService.hasRightOnDataset(#dataset.id, 'CAN_SEE_ALL'))")
+	Long getStudyId(Dataset dataset);
+
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT','USER') and @datasetSecurityService.hasRightOnDataset(#dataset.id, 'CAN_SEE_ALL'))")
+	Examination getExamination(Dataset dataset);
+
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT','USER') and @datasetSecurityService.hasRightOnDataset(#dataset.id, 'CAN_SEE_ALL'))")
+	DatasetAcquisition getAcquisition(Dataset dataset);
+
+	void deleteNiftis(Long studyId);
 }

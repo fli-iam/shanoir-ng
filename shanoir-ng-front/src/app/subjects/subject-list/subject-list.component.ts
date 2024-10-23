@@ -56,21 +56,10 @@ export class SubjectListComponent extends EntityListComponent<Subject> {
 
     // Grid columns definition
     getColumnDefs(): ColumnDefinition[] {
-        function dateRenderer(date: number) {
-            if (date) {
-                return new Date(date).toLocaleDateString();
-            }
-            return null;
-        };
         return [
             { headerName: "Common Name", field: "name", defaultSortCol: true, defaultAsc: true },
             { headerName: "Sex", field: "sex", disableSearch: true },
-
-            {
-                headerName: "Birth Date", field: "birthDate", type: "date", disableSearch: true, cellRenderer: function (params: any) {
-                    return dateRenderer(params.data.birthDate);
-                }
-            },
+            { headerName: "Birth Date", field: "birthDate", type: "date", disableSearch: true },
             { headerName: "Manual HD", field: "manualHemisphericDominance", disableSearch: true},
             { headerName: "Language HD", field: "languageHemisphericDominance", disableSearch: true},
             { headerName: "Imaged object category", field: "imagedObjectCategory", disableSearch: true}

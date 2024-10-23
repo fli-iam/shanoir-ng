@@ -15,6 +15,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div #formContainer class="content-component">
     <form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
 		<div class="layout" [ngClass]="{'left': mode=='view'}">
+			<form-footer
+				[state]="footerState"
+				(save)="save()"
+				(edit)="goToEdit()"
+				(back)="goBack()"
+				(cancel)="goToView()"
+			></form-footer>
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
 					<h2 class="header command-zone"i18n="View examination|Title@@examinationDetailViewTitle">Details on examination</h2>
@@ -192,7 +199,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</fieldset>
 
 		<examination-anesthetic-form
-			[examination_id]="examination.id"
+			[id]="examination.id"
 			[mode]="mode"
 			(examAnestheticChange)="onExamAnestheticChange($event)">
 		</examination-anesthetic-form>
@@ -225,16 +232,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<fieldset *ngIf="examination && mode=='view'">
 			<legend i18n="Examination data|Title@@examinationDetailDataTitle">Data</legend>
 			<examination-node
-					[input]="breadcrumbsService.currentStep.data.examinationNode ? breadcrumbsService.currentStep.data.examinationNode : examination"
+					[input]="breadcrumbsService.currentStep.data.examinationNode ? breadcrumbsService.currentStep.data.examinationNode : {examination: examination, parentNode: null}"
 					(nodeInit)="onExaminationNodeInit($event)"></examination-node>
 		</fieldset>
-		<form-footer
-			[state]="footerState"
-			(save)="save()"
-			(edit)="goToEdit()"
-			(back)="goBack()"
-			(cancel)="goToView()"
-		></form-footer>
 	</div>
-	</form>
+</form>
 

@@ -71,12 +71,6 @@ export class UserListComponent extends BrowserPaginEntityListComponent<User>{
 
     // Grid columns definition
     getColumnDefs(): ColumnDefinition[] {
-        function dateRenderer(date: number) {
-            if (date) {
-                return new Date(date).toLocaleDateString();
-            }
-            return null;
-        };
         let columnDefs: ColumnDefinition[] = [
             {headerName: "Username", field: "username" },
             {headerName: "First Name", field: "firstName" },
@@ -94,18 +88,12 @@ export class UserListComponent extends BrowserPaginEntityListComponent<User>{
             }},
             {headerName: "Challenge", field: "accountRequestInfo.challenge", type: "boolean", defaultSortCol: true},
             {headerName: "Role", field: "role.displayName", width: "63px"},
-            {headerName: "Creation", field: "creationDate", type: "date", cellRenderer: function (params: any) {
-                return dateRenderer(params.data.creationDate);
-            }},
-            {headerName: "Expiration", field: "expirationDate", type: "date", cellRenderer: function (params: any) {
-                return dateRenderer(params.data.expirationDate);
-            }},
+            {headerName: "Creation", field: "creationDate", type: "date"},
+            {headerName: "Expiration", field: "expirationDate", type: "date"},
             {headerName: "Active", field: "valid", type: "boolean", cellRenderer: function (params: any) {
                 return !params.data.expirationDate || params.data.expirationDate >= new Date();
             }},
-            {headerName: "Last Login", field: "lastLogin", type: "date", cellRenderer: function (params: any) {
-                return dateRenderer(params.data.lastLogin);
-            }}
+            {headerName: "Last Login", field: "lastLogin", type: "date"}
         ];
 
         return columnDefs;

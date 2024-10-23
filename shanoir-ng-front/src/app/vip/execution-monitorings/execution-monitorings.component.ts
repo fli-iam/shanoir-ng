@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ViewChild } from '@angular/core';
 import { BreadcrumbsService } from 'src/app/breadcrumbs/breadcrumbs.service';
 import { EntityListComponent } from 'src/app/shared/components/entity/entity-list.component.abstract';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -10,76 +10,65 @@ import { ExecutionMonitoring } from '../models/execution-monitoring.model';
 import { ExecutionMonitoringService } from './execution-monitoring.service';
 
 @Component({
-  selector: 'app-execution-monitorings',
-  templateUrl: './execution-monitorings.component.html',
-  styleUrls: ['./execution-monitorings.component.css']
+    selector: 'app-execution-monitorings',
+    templateUrl: './execution-monitorings.component.html',
+    styleUrls: ['./execution-monitorings.component.css']
 })
 export class ExecutionMonitoringsComponent extends EntityListComponent<ExecutionMonitoring> implements AfterViewInit {
+    
+    @ViewChild('table', { static: false }) table: TableComponent;
+    private executionMonitorings: ExecutionMonitoring[] = [];
 
-  @ViewChild('table', { static: false }) table: TableComponent;
-  private executionMonitorings: ExecutionMonitoring[] = [];
+    constructor(protected breadcrumbsService: BreadcrumbsService, private executionMonitoringService: ExecutionMonitoringService) {
+        super('execution-monitoring');
+        this.breadcrumbsService.markMilestone();
+        this.breadcrumbsService.nameStep('VIP dataset processings');
+    }
 
-  constructor(protected breadcrumbsService: BreadcrumbsService, private executionMonitoringService: ExecutionMonitoringService) {
-    super('execution-monitoring');
-    this.breadcrumbsService.markMilestone();
-    this.breadcrumbsService.nameStep('VIP dataset processings');
-  }
+    ngAfterViewInit(): void {
+        this.subscriptions.push(
+            this.executionMonitoringService.getAllExecutionMonitorings().subscribe(executionMonitorings => {
+                if (executionMonitorings == null) {
+                    this.executionMonitorings = [];
+                } else {
+                    this.executionMonitorings = executionMonitorings;
+                }
+                this.table.refresh();
+            })
+        );
+    }
 
-  ngAfterViewInit(): void {
-    this.subscriptions.push(
-      this.executionMonitoringService.getAllExecutionMonitorings().subscribe(executionMonitorings => {
-        if (executionMonitorings == null) {
-          this.executionMonitorings = [];
-        } else {
-          this.executionMonitorings = executionMonitorings;
-        }
-        this.table.refresh();
-      })
-    );
-  }
+    getService(): EntityService<ExecutionMonitoring> {
+        return this.executionMonitoringService;
+    }
 
-  getService(): EntityService<ExecutionMonitoring> {
-    return this.executionMonitoringService;
-  }
+    getOptions() {
+        return { 'new': false, 'edit': false, 'view': false, 'delete': false, 'reload': true, id: false };
+    }
 
-  getOptions() {
-    return { 'new': false, 'edit': false, 'view': false, 'delete': false, 'reload': true, id: false };
-  }
+    getPage(pageable: Pageable): Promise<Page<ExecutionMonitoring>> {
+        return Promise.resolve(new BrowserPaging(this.executionMonitorings, this.columnDefs).getPage(pageable));
+    }
 
-  getPage(pageable: Pageable): Promise<Page<ExecutionMonitoring>> {
-    return Promise.resolve(new BrowserPaging(this.executionMonitorings, this.columnDefs).getPage(pageable));
-  }
+    getColumnDefs(): ColumnDefinition[] {
+        return [
+            { headerName: "ID", field: "id", width: '130px', defaultSortCol: true, defaultAsc: false },
+            {
+                headerName: 'Name', field: 'name', width: '100%', type: 'link',
+                route: (executionMonitoring: ExecutionMonitoring) => {
+                    // return the link of the execution monitoring + id
+                    return `/dataset-processing/details/${executionMonitoring.id}`;
+                }
+            },
+            { headerName: 'Status', field: 'status', width: '70px' },
+            { headerName: "Creation", field: "startDate", width: '130px' },
+            {
+                headerName: "Workflow ID", field: "comment", width: '130px'
+            },
+        ];
+    }
 
-  getColumnDefs(): ColumnDefinition[] {
-    function dateRenderer(date: number) {
-      if (date) {
-        return new Date(date).toLocaleString();
-      }
-      return null;
-    };
-    return [
-      {headerName: "ID", field: "id", width: '130px', defaultSortCol: true, defaultAsc: false},
-      {
-        headerName: 'Name', field: 'name', width: '100%', type: 'link',
-        route: (executionMonitoring: ExecutionMonitoring) => {
-          // return the link of the execution monitoring + id
-          return `/dataset-processing/details/${executionMonitoring.id}`;
-        }
-      },
-      { headerName: 'Status', field: 'status', width: '70px' },
-      {
-        headerName: "Creation", field: "startDate", width: '130px', cellRenderer: function (params: any) {
-          return dateRenderer(params.data.startDate);
-        }
-      },
-      {
-        headerName: "Workflow ID", field: "comment", width: '130px'
-      },
-    ];
-  }
-
-  getCustomActionsDefs(): any[] {
-    return [];
-  }
-
+    getCustomActionsDefs(): any[] {
+        return [];
+    }
 }

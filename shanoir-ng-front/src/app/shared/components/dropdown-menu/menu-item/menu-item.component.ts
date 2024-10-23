@@ -31,7 +31,7 @@ export class MenuItemComponent {
     @Input() disabled: boolean;
     @ContentChildren(forwardRef(() => MenuItemComponent)) itemMenus: QueryList<MenuItemComponent>;
 
-    public opened: boolean = false;
+    public opened: boolean = true;
     public siblings: QueryList<MenuItemComponent>;
     public parent: any;
     public hasChildren: boolean = true;

@@ -20,12 +20,14 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 import org.shanoir.ng.processing.dto.mapper.DatasetProcessingMapper;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.*;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +58,9 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
 	@Autowired
 	private DatasetProcessingService datasetProcessingService;
+
+	@Autowired
+	private DatasetService datasetService;
 
 	@Override
 	public ResponseEntity<Void> deleteDatasetProcessing(
@@ -112,9 +117,13 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 	public ResponseEntity<DatasetProcessingDTO> saveNewDatasetProcessing(
 			@Parameter(description = "dataset processing to create", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
 			final BindingResult result) throws RestServiceException {
+
+		/* set authenticated username */
+		datasetProcessing.setUsername(KeycloakUtil.getTokenUserName());
 		
 		/* Validation */
 		validate(result);
+		datasetProcessingService.validateDatasetProcessing(datasetProcessing);
 
 		/* Save dataset processing in db. */
 		final DatasetProcessing createdDatasetProcessing = datasetProcessingService.create(datasetProcessing);
@@ -128,6 +137,8 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 			final BindingResult result) throws RestServiceException {
 
 		validate(result);
+		datasetProcessingService.validateDatasetProcessing(datasetProcessing);
+
 		try {
 			datasetProcessingService.update(datasetProcessing);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -136,7 +147,6 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
-	
 	
 	private void validate(BindingResult result) throws RestServiceException {
 		final FieldErrorMap errors = new FieldErrorMap(result);

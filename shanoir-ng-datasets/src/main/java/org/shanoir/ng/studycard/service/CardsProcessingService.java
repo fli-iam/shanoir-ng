@@ -149,7 +149,7 @@ public class CardsProcessingService {
 	public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags, Integer start, Integer stop) throws MicroServiceCommunicationException {
         long startTs = new Date().getTime();
         if (qualityCard == null) throw new IllegalArgumentException("qualityCard can't be null");
-        ShanoirEvent event = new ShanoirEvent(ShanoirEventType.CHECK_QUALITY_EVENT, null, KeycloakUtil.getTokenUserId(), "Quality check started on study " + qualityCard.getStudyId() , 4);
+        ShanoirEvent event = new ShanoirEvent(ShanoirEventType.CHECK_QUALITY_EVENT, null, KeycloakUtil.getTokenUserId(), "Quality check started on study " + qualityCard.getStudyId() , 4, qualityCard.getStudyId());
         eventService.publishEvent(event);
         Study study = studyService.findById(qualityCard.getStudyId());
         if (study == null ) throw new IllegalArgumentException("study can't be null");
