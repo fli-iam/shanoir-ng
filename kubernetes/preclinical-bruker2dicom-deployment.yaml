@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.17.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: preclinical-bruker2dicom
+  name: preclinical-bruker2dicom
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: preclinical-bruker2dicom
+    spec:
+      containers:
+      - args:
+        - python3
+        - /opt/dicomifier.ws/run.py
+        image: jcomedouteau/dicomifier.ws:1.3
+        name: preclinical-bruker2dicom
+        ports:
+        - containerPort: 5000
+        resources: {}
+        volumeMounts:
+        - mountPath: /var/log/shanoir-ng-logs
+          name: logs
+        - mountPath: /tmp
+          name: tmp
+      restartPolicy: Always
+      volumes:
+      - name: logs
+        persistentVolumeClaim:
+          claimName: logs
+      - name: tmp
+        persistentVolumeClaim:
+          claimName: tmp
+status: {}

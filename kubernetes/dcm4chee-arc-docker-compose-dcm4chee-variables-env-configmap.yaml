@@ -1,0 +1,13 @@
+apiVersion: v1
+data:
+  HTTP_PORT: "8081"
+  POSTGRES_DB: pacsdb
+  POSTGRES_PASSWORD: pacs
+  POSTGRES_USER: pacs
+  STORAGE_DIR: /storage/fs1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: dcm4chee-arc-docker-compose-dcm4chee-variables-env
+  name: dcm4chee-arc-docker-compose-dcm4chee-variables-env

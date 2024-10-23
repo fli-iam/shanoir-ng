@@ -1,0 +1,9 @@
+apiVersion: v1
+data:
+  MYSQL_ROOT_PASSWORD: password
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: database-docker-compose-database-variables-env
+  name: database-docker-compose-database-variables-env
