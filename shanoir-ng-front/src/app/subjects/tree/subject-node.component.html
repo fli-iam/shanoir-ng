@@ -11,22 +11,22 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
-
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened"
+        [class.selected]="this.menuOpened || treeService.isSelected(node.id, 'subject')"
         [label]="node.label"
         [tags]="node.tags"
         [qualityTag]="node.qualityTag"
         [awesome]="node.awesome"
-        (firstOpen)="loadExaminations()"
-        [(opened)]="node.open"
+        (firstOpen)="onFirstOpen()"
+        [(opened)]="node.opened"
         [hasChildren]="hasChildren()"
-        (labelClick)="menuOpened = !menuOpened"
+        (labelClick)="menuOpened = withMenu && !menuOpened"
+        [route]="node.route"
         [dataLoading]="loading"
         [title]="node.title + ' n°' + node.id">
 
-    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
+    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu">
         <a [routerLink]="this.detailsPath" class="open-new-tab">
             <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
         </a>
@@ -42,6 +42,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 (selectedChange)="selectedChange.emit()"
                 [hasBox]="hasBox"
                 (onExaminationDelete)="onExaminationDelete(i)"
+                [withMenu]="withMenu"
         >
         </examination-node>
     </ng-container>

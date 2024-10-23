@@ -20,9 +20,7 @@ import org.mapstruct.DecoratedWith;
 import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Named;
-import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMetadataMapper;
-import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.paging.PageImpl;
@@ -66,7 +64,7 @@ public interface MrDatasetMapper {
 	 * @return dataset DTO.
 	 */
 	@Named(value = "withProcessings")
-	MrDatasetAndProcessingsDTO datasetToDatasetAndProcessingsDTO(MrDataset dataset);	
+	MrDatasetWithDependenciesDTO datasetToDatasetAndProcessingsDTO(MrDataset dataset);
 	
 	/**
 	 * Map a @Dataset to a @DatasetDTO.

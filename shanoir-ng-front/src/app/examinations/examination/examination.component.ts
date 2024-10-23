@@ -15,7 +15,10 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
+import { TaskState } from 'src/app/async-tasks/task.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { Selection } from 'src/app/studies/study/tree.service';
 import { environment } from '../../../environments/environment';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
@@ -28,14 +31,11 @@ import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { StudyService } from '../../studies/shared/study.service';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
-import { ExaminationNode } from '../../tree/tree.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
-import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 
 @Component({
-    selector: 'examination',
+    selector: 'examination-detail',
     templateUrl: 'examination.component.html'
 })
 
@@ -54,7 +54,6 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     hasImportRight: boolean = false;
     hasDownloadRight: boolean = false;
     pattern: string = '[^:|<>&\/]+';
-    examNode: Examination | ExaminationNode;
     downloadState: TaskState = new TaskState();
 
     datasetIds: Promise<number[]> = new Promise((resolve, reject) => {});
@@ -86,12 +85,15 @@ export class ExaminationComponent extends EntityComponent<Examination> {
 
     set examination(examination: Examination) {
         this.entity = examination;
-        this.examNode = this.breadcrumbsService.currentStep.data.examinationNode ? this.breadcrumbsService.currentStep.data.examinationNode : examination;
     }
     get examination(): Examination { return this.entity; }
 
     getService(): EntityService<Examination> {
         return this.examinationService;
+    }
+
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromExamination(this.examination);
     }
 
     set entity(exam: Examination) {
@@ -104,35 +106,32 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
 
     initView(): Promise<void> {
-        return this.examinationService.get(this.id).then((examination: Examination) => {
-            this.examination = examination;
-            if(!this.examination.weightUnitOfMeasure){
-                this.examination.weightUnitOfMeasure = this.defaultUnit;
-            }
-            if (this.keycloakService.isUserAdmin()) {
-                this.hasAdministrateRight = true;
-                this.hasDownloadRight = true;
-                this.hasImportRight = true;
-                return;
-            } else {
-                return this.studyRightsService.getMyRightsForStudy(examination.study.id).then(rights => {
-                    this.hasImportRight = rights.includes(StudyUserRight.CAN_IMPORT);
-                    this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
-                    this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
-                });
-            }
-        });
+        if(!this.examination.weightUnitOfMeasure){
+            this.examination.weightUnitOfMeasure = this.defaultUnit;
+        }
+        if (this.keycloakService.isUserAdmin()) {
+            this.hasAdministrateRight = true;
+            this.hasDownloadRight = true;
+            this.hasImportRight = true;
+            return Promise.resolve();
+        } else {
+            return this.studyRightsService.getMyRightsForStudy(this.examination.study.id).then(rights => {
+                this.hasImportRight = rights.includes(StudyUserRight.CAN_IMPORT);
+                this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
+                this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+            });
+        }
     }
 
     initEdit(): Promise<void> {
         this.getCenters();
         this.getStudies();
-        return this.examinationService.get(this.id).then((examination: Examination) => {
-            this.examination = examination
-            if(!this.examination.weightUnitOfMeasure){
-                this.examination.weightUnitOfMeasure = this.defaultUnit;
-            }
-        }).then(exam => this.getSubjects());
+
+        if(!this.examination.weightUnitOfMeasure){
+            this.examination.weightUnitOfMeasure = this.defaultUnit;
+        }
+        this.getSubjects();
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {
@@ -164,6 +163,9 @@ export class ExaminationComponent extends EntityComponent<Examination> {
 	    window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
     }
 
+    openSegmentationViewer() {
+        window.open(environment.viewerUrl + '/segmentation?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
+    }
     getCenters(): void {
         this.centerService
             .getCentersNames()
@@ -250,47 +252,8 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         return element.split('\\').pop().split('/').pop();
     }
 
-    onExaminationNodeInit(node: ExaminationNode) {
-        node.open = true;
-        this.breadcrumbsService.currentStep.data.examinationNode = node;
-        this.fetchDatasetIdsFromTree();
-    }
-
-    fetchDatasetIdsFromTree() {
-        if (!this.datasetIdsLoaded) {
-            let node: ExaminationNode = this.breadcrumbsService.currentStep.data.examinationNode;
-            let found: boolean = false;
-            // first look into the tree
-            let datasetIds: number[] = [];
-            if (node && node.datasetAcquisitions != 'UNLOADED') {
-                found = true;
-                node.datasetAcquisitions.forEach(dsAcq => {
-                    if (dsAcq.datasets != 'UNLOADED') {
-                        dsAcq.datasets.forEach(ds => {
-                            datasetIds.push(ds.id);
-							if (ds.type == 'Eeg') {
-								this.hasEEG = true;
-							} else if (ds.type == 'BIDS') {
-                                this.hasBids = true;
-                            } else {
-								this.hasDicom = true;
-							}
-                        });
-                    } else {
-                        found = false;
-                        return;
-                    }
-                });
-            }
-            if (found) {
-                this.datasetIdsLoaded = true;
-                this.datasetIds = Promise.resolve(datasetIds);
-                this.noDatasets = datasetIds.length == 0;
-            }
-        }
-    }
-
     getUnit(key: string) {
         return UnitOfMeasure.getLabelByKey(key);
     }
+
 }

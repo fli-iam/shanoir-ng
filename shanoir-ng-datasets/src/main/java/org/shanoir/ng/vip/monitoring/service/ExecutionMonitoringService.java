@@ -1,5 +1,6 @@
 package org.shanoir.ng.vip.monitoring.service;
 
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.vip.dto.DatasetParameterDTO;
 import org.shanoir.ng.vip.monitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.processing.dto.ParameterResourceDTO;
@@ -66,5 +67,7 @@ public interface ExecutionMonitoringService {
 
     List<ExecutionMonitoring> findAllRunning();
 
-    List<ParameterResourceDTO> createProcessingResources(ExecutionMonitoring createdProcessing, List<DatasetParameterDTO> parameterDatasets);
+    List<ParameterResourceDTO> createProcessingResources(ExecutionMonitoring createdProcessing, List<DatasetParameterDTO> parameterDatasets) throws EntityNotFoundException;
+
+	void validateExecutionMonitoring(ExecutionMonitoring executionMonitoring) throws RestServiceException;
 }

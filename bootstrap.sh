@@ -144,7 +144,7 @@ if [ -n "$deploy" ] ; then
 
 		step "start: keycloak"
 		docker compose up -d keycloak
-		utils/oneshot --pgrp '\| *'				\
+		docker-compose/common/oneshot --pgrp '\| *'				\
 				' INFO  \[io.quarkus\] .* Keycloak .* started in [0-9]*'	\
 				-- docker compose logs --no-color --follow keycloak >/dev/null
 

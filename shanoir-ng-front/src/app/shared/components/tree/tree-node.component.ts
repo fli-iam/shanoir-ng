@@ -61,8 +61,11 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
     @Input() title: string;
     @Input() tags: Tag[];
     @Input() qualityTag: QualityTag;
+    @Input() route: string;
+    @Input() downloadable: boolean = true;
     public isOpen: boolean = false;
     @Input() opened: boolean = false;
+    private neverOpened: boolean = true;
     @Output() openedChange: EventEmitter<boolean> = new EventEmitter();
     public checked: boolean | 'indeterminate';
     @ViewChild('box') boxElt: CheckboxComponent;
@@ -80,9 +83,13 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.opened) {
             if (!this.opened && this.isOpen) {
-                this.close();
+                setTimeout(() => {
+                    this.close();
+                });
             } else if (this.opened && !this.isOpen) {
-                this.open();
+                setTimeout(() => {
+                    this.open();
+                });
             }
         }
     }
@@ -110,7 +117,10 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
         this.dataLoading = false;
         this.isOpen = true;
         this.openedChange.emit(this.isOpen);
-        if (this.hasChildren == 'unknown') this.firstOpen.emit(this);
+        if (this.hasChildren == 'unknown' || this.neverOpened) {
+            this.neverOpened = false;
+            this.firstOpen.emit(this);
+        }
     }
 
     public close() {
@@ -144,6 +154,7 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
     writeValue(value: any) {
         if (value !== this.checked) {
             this.checked = value;
+            //this.chkbxChange.emit(value);
         }
     }
 

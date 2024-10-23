@@ -22,7 +22,7 @@ import org.mockito.Mockito;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.WADODownloaderService;
-import org.shanoir.ng.importer.service.DicomSRImporterService;
+import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.validation.FindByRepository;
@@ -93,7 +93,7 @@ public class StudyCardApiControllerTest {
 	private DatasetSecurityService datasetSecurityService;
 
 	@MockBean
-	private DicomSRImporterService dicomSRImporterService;
+	private DicomSEGAndSRImporterService dicomSRImporterService;
 	
 	@MockBean
 	private SolrService solrService;

@@ -126,7 +126,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     public Collection<DatasetAcquisition> createAll(Collection<DatasetAcquisition> acquisitions) {
     	Iterable<DatasetAcquisition> result = this.repository.saveAll(acquisitions);
     	for (DatasetAcquisition acquisition: result) {
-            shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, acquisition.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+            shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, acquisition.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, acquisition.getExamination().getStudyId()));
     	}
     	return StreamSupport.stream(result.spliterator(), false).collect(Collectors.toList());
     }
@@ -134,7 +134,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     @Override
     public DatasetAcquisition create(DatasetAcquisition entity) {
         DatasetAcquisition savedEntity = repository.save(entity);
-        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, entity.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, entity.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
         return savedEntity;
     }
 
@@ -147,7 +147,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         updateValues(entity, entityDb);
         DatasetAcquisition acq = repository.save(entityDb);
 
-        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_ACQUISITION_EVENT, entity.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_ACQUISITION_EVENT, entity.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
 
         return acq;
     }
@@ -207,7 +207,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
                 if (!datasetIds.isEmpty()) solrService.deleteFromIndex(datasetIds);
             }
             repository.deleteById(id);
-            shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+            shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
         }
     }
     

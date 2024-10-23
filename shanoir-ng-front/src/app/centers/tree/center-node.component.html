@@ -14,27 +14,37 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened"
+        [class.selected]="this.menuOpened || treeService.isSelected(node.id, 'center')"
         [label]="node.label"
         awesome="fa-regular fa-hospital"
-        (firstOpen)="loadEquipments()"
-        [(opened)]="node.open"
-        (labelClick)="menuOpened = !menuOpened"
+        (firstOpen)="loadEquipments(); loadCoils()"
+        [(opened)]="node.opened"
+        (labelClick)="menuOpened = withMenu && !menuOpened"
+        [route]="node.route"
         [hasChildren]="hasChildren()"
         [title]="node.title + ' n°' + node.id">
 
-    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
+    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu && withMenu">
         <a [routerLink]="this.detailsPath + this.node.id" class="open-new-tab">
             <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
         </a>
     </dropdown-menu>
 
     <ng-container *ngIf="node.open && node.acquisitionEquipments && node.acquisitionEquipments != $any('UNLOADED')">
-            <equipment-node
-                    node
-                    *ngFor="let acquisitionEquipment of node.acquisitionEquipments; let i = index"
-                    [input]="acquisitionEquipment"
-                    (onEquipmentDelete)="onEquipmentDelete(i)">
-            </equipment-node>
+        <equipment-node
+                node
+                *ngFor="let acquisitionEquipment of node.acquisitionEquipments; let i = index"
+                [input]="acquisitionEquipment"
+                (onEquipmentDelete)="onEquipmentDelete(i)"
+                (onNodeSelect)="onEquipementNodeSelect.emit($event)"
+                [withMenu]="withMenu">
+        </equipment-node>
+    </ng-container>
+    <ng-container *ngIf="node.open && node.coils && node.coils != $any('UNLOADED')">
+        <coil-node
+                node
+                *ngFor="let coil of node.coils; let i = index"
+                [input]="coil">
+        </coil-node>
     </ng-container>
 </node>

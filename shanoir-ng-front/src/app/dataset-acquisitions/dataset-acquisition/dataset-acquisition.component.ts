@@ -11,29 +11,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {Component, ViewChild} from '@angular/core';
+import { Component } from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
+import { TaskState } from 'src/app/async-tasks/task.model';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { Selection } from 'src/app/studies/study/tree.service';
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
+import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 import { AcquisitionEquipmentService } from '../../acquisition-equipments/shared/acquisition-equipment.service';
+import { DatasetService } from "../../datasets/shared/dataset.service";
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
+import { StudyRightsService } from "../../studies/shared/study-rights.service";
+import { StudyUserRight } from "../../studies/shared/study-user-right.enum";
 import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
+import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.model';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../shared/dataset-acquisition.service';
-import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.model';
-import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import {DatasetAcquisitionNode} from '../../tree/tree.model';
-import {DatasetService} from "../../datasets/shared/dataset.service";
-import {StudyUserRight} from "../../studies/shared/study-user-right.enum";
-import {StudyRightsService} from "../../studies/shared/study-rights.service";
-import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+
 
 @Component({
-    selector: 'dataset-acquisition',
+    selector: 'dataset-acquisition-detail',
     templateUrl: 'dataset-acquisition.component.html',
     styleUrls: ['dataset-acquisition.component.css']
 })
@@ -41,7 +42,6 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
 
     public studyCards: StudyCard[];
     public acquisitionEquipments: AcquisitionEquipment[];
-    acquisitionNode: DatasetAcquisition | DatasetAcquisitionNode;
     hasDownloadRight: boolean = false;
     noDatasets: boolean = false;
     hasDicom: boolean = false;
@@ -63,43 +63,39 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
         return this.datasetAcquisitionService;
     }
 
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromAcquisition(this.datasetAcquisition);
+    }
+
     get datasetAcquisition(): DatasetAcquisition { return this.entity; }
     set datasetAcquisition(datasetAcquisition: DatasetAcquisition) {
-        this.acquisitionNode = this.breadcrumbsService.currentStep.data.datasetAcquisitionNode ? this.breadcrumbsService.currentStep.data.datasetAcquisitionNode : datasetAcquisition;
         this.entity = datasetAcquisition;
     }
 
     initView(): Promise<void> {
-        return this.datasetAcquisitionService.get(this.id).then(dsAcq => {
-            this.datasetAcquisition = dsAcq;
-            this.datasetService.getByAcquisitionId(dsAcq.id).then(datasets => {
-                dsAcq.datasets = datasets;
-                this.datasetAcquisition.datasets.forEach(ds => {
-                    this.noDatasets = false;
-                    if (ds.type != 'Eeg' && ds.type != 'BIDS') {
-                        this.hasDicom = true;
-                    }
-                });
-            })
-
-            if (this.keycloakService.isUserAdmin()) {
-                this.hasDownloadRight = true;
-                return;
-            } else {
-                return this.studyRightsService.getMyRightsForStudy(dsAcq.examination.study.id).then(rights => {
-                    this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
-                });
-            }
-
-        });
+        this.datasetService.getByAcquisitionId(this.datasetAcquisition.id).then(datasets => {
+            this.datasetAcquisition.datasets = datasets;
+            this.datasetAcquisition.datasets?.forEach(ds => {
+                this.noDatasets = false;
+                if (ds.type != 'Eeg' && ds.type != 'BIDS') {
+                    this.hasDicom = true;
+                }
+            });
+        })
+        if (this.keycloakService.isUserAdmin()) {
+            this.hasDownloadRight = true;
+            return Promise.resolve();
+        } else {
+            return this.studyRightsService.getMyRightsForStudy(this.datasetAcquisition.examination.study.id).then(rights => {
+                this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+            });
+        }
     }
 
     initEdit(): Promise<void> {
         this.studyCardService.getAll().then(scs => this.studyCards = scs);
         this.acqEqService.getAll().then(aes => this.acquisitionEquipments = aes);
-        return this.datasetAcquisitionService.get(this.id).then(dsAcq => {
-            this.datasetAcquisition = dsAcq;
-        });
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {
@@ -124,11 +120,6 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
 
     public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert(); // TODO
-    }
-
-    onNodeInit(node: DatasetAcquisitionNode) {
-        node.open = true;
-        this.breadcrumbsService.currentStep.data.datasetAcquisitionNode = node;
     }
 
     downloadAll() {

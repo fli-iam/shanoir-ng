@@ -16,10 +16,10 @@
 		</div>
 	</div>
     <div class="stats">
-        {{ studies.length }} public studies
+        {{ studies?.length }} shared studies
     </div>
     <div class="study-tab-parent">
-        <div *ngIf="studies.length > 0" class="study-tab">
+        <div *ngIf="studies?.length > 0" class="study-tab">
             <div class="studyItem" *ngFor="let study of studies | slice:0:show; let index = index;">
                 <div class="title link" (click)="accessRequest(study)">
                     <span class="studyTitle"><b>{{study.name}}</b></span>

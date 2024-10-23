@@ -68,9 +68,7 @@ export class DatasetAcquisitionListComponent extends EntityListComponent<Dataset
                 route: (dsAcq: DatasetAcquisition) => '/study/details/' + dsAcq.examination.study.id},
             { headerName: "Subject", field: "examination.subject.name", defaultField: 'examination.subject.id', orderBy: ['examination.subject.name'],
                 route: (dsAcq: DatasetAcquisition) => '/subject/details/' + dsAcq.examination.subject.id},
-            { headerName: "Examination date", type: 'date', field: 'examination.examinationDate', cellRenderer: (params: any) => {
-                return this.dateRenderer(params.data.examination.examinationDate);
-            }},
+            { headerName: "Examination date", type: 'date', field: 'examination.examinationDate' },
             { headerName: "Acquisition Center", field: "acquisitionEquipment.center.name", orderBy: ['examination.centerId'],
 				route: (dsAcq: DatasetAcquisition) => (dsAcq.acquisitionEquipment && dsAcq.acquisitionEquipment.center) ? '/center/details/' + dsAcq.acquisitionEquipment?.center.id : null
 			},

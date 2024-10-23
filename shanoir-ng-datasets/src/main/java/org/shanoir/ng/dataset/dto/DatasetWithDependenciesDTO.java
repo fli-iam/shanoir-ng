@@ -12,22 +12,19 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.dataset.modality;
+package org.shanoir.ng.dataset.dto;
 
 import java.util.List;
 
-import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 
 
-public class MrDatasetAndProcessingsDTO extends MrDatasetDTO implements DatasetAndProcessingsDTOInterface {
-
-	private List<DatasetProcessingDTO> processings;
+public class DatasetWithDependenciesDTO extends DatasetWithProcessingsDTO implements DatasetWithDependenciesDTOInterface {
 	
-	private DatasetProcessingDTO datasetProcessing;
-
 	private DatasetAcquisitionDTO datasetAcquisition;
+
+	private DatasetProcessingDTO datasetProcessing;
 
 	@Override
 	public DatasetAcquisitionDTO getDatasetAcquisition() {
@@ -38,25 +35,12 @@ public class MrDatasetAndProcessingsDTO extends MrDatasetDTO implements DatasetA
 	public void setDatasetAcquisition(DatasetAcquisitionDTO datasetAcquisition) {
 		this.datasetAcquisition = datasetAcquisition;
 	}
-	
-	@Override
-	public List<DatasetProcessingDTO> getProcessings() {
-		return processings;
-	}
 
-	@Override
-	public void setProcessings(List<DatasetProcessingDTO> datasetProcessings) {
-		this.processings = datasetProcessings;
-	}
-
-	@Override
 	public DatasetProcessingDTO getDatasetProcessing() {
 		return datasetProcessing;
 	}
 
-	@Override
 	public void setDatasetProcessing(DatasetProcessingDTO datasetProcessing) {
 		this.datasetProcessing = datasetProcessing;
 	}
-
 }

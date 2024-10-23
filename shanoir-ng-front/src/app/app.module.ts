@@ -268,6 +268,12 @@ import { DownloadSetupAltComponent } from './shared/mass-download/download-setup
 import { TestQualityCardOptionsComponent } from './study-cards/test-quality-card-options/test-quality-card-options.component';
 import { SessionService } from './shared/services/session.service';
 import { PipelineService } from "./vip/pipelines/pipeline/pipeline.service";
+import {ShanoirEventService} from "./users/shanoir-event/shanoir-event.service";
+import {StudyHistoryComponent} from "./studies/study-history/study-history.component";
+import { StudyTreeComponent } from './studies/study/study-tree.component';
+import { TreeService } from './studies/study/tree.service';
+import { CoilNodeComponent } from './coils/coil/tree/coil-node.component';
+import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.component';
 
 @NgModule({
     imports: [
@@ -295,6 +301,7 @@ import { PipelineService } from "./vip/pipelines/pipeline/pipeline.service";
         CenterListComponent,
         ConfirmDialogComponent,
         DatasetCopyDialogComponent,
+        StudyHistoryComponent,
         DropdownMenuComponent,
         UserComponent,
         ExaminationListComponent,
@@ -455,7 +462,10 @@ import { PipelineService } from "./vip/pipelines/pipeline/pipeline.service";
         TaskStatusComponent,
         DownloadSetupComponent,
         DownloadSetupAltComponent,
-        TestQualityCardOptionsComponent
+        TestQualityCardOptionsComponent,
+        StudyTreeComponent,
+        CoilNodeComponent,
+        DoubleAwesomeComponent
     ],
     providers: [
         AcquisitionEquipmentService,
@@ -503,7 +513,7 @@ import { PipelineService } from "./vip/pipelines/pipeline/pipeline.service";
         AnestheticService,
         ImportBrukerService,
         EnumUtils,
-        { provide: HTTP_INTERCEPTORS, useClass: KeycloakHttpInterceptor, multi: true },
+        {provide: HTTP_INTERCEPTORS, useClass: KeycloakHttpInterceptor, multi: true},
         BreadcrumbsService,
         GlobalService,
         ImportDataService,
@@ -541,6 +551,8 @@ import { PipelineService } from "./vip/pipelines/pipeline/pipeline.service";
         QualityCardDTOService,
         MassDownloadService,
         SessionService,
+        ShanoirEventService,
+        TreeService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],
     bootstrap: [AppComponent]

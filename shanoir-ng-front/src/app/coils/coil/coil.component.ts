@@ -16,8 +16,11 @@ import { Component, Input } from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { Selection } from 'src/app/studies/study/tree.service';
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { ManufacturerModel } from '../../acquisition-equipments/shared/manufacturer-model.model';
+import { ManufacturerModelPipe } from '../../acquisition-equipments/shared/manufacturer-model.pipe';
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
@@ -25,8 +28,6 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { CoilType } from '../shared/coil-type.enum';
 import { Coil } from '../shared/coil.model';
 import { CoilService } from '../shared/coil.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { ManufacturerModelPipe } from '../../acquisition-equipments/shared/manufacturer-model.pipe';
 
 @Component({
     selector: 'coil',
@@ -57,22 +58,20 @@ export class CoilComponent extends EntityComponent<Coil> {
         return this.coilService;
     }
 
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromCoil(this.coil);
+    }
+    
     initView(): Promise<void> {
-        return this.coilService.get(this.id).then(coil => {
-            this.coil = coil;
-        });
+        return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
-        return Promise.all([
-            this.centerService.getAll(),
-            this.coilService.get(this.id)
-        ]).then(([centers, coil]) => {
+        return this.centerService.getAll().then(centers => {
             this.centers = centers;
-            this.coil = coil;
             if (this.acqEquip) {
-                coil.center = this.acqEquip.center;
-                coil.manufacturerModel = this.acqEquip.manufacturerModel;
+                this.coil.center = this.acqEquip.center;
+                this.coil.manufacturerModel = this.acqEquip.manufacturerModel;
             } else {
                 this.coil.center = this.centers.filter(center => center.id == this.coil.center.id)[0];
                 this.updateManufList(this.coil.center?.id);

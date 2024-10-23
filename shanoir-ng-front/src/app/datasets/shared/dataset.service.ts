@@ -11,26 +11,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient, HttpEvent, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { ErrorHandler, Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
-import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
+import { TaskState } from 'src/app/async-tasks/task.model';
+import { BidsElement } from "../../bids/model/bidsElement.model";
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
-import { Dataset } from './dataset.model';
 import { MrDataset } from '../dataset/mr/dataset.mr.model';
+import { DatasetDTO, DatasetDTOService, MrDatasetDTO } from "./dataset.dto";
+import { Dataset } from './dataset.model';
 import { DatasetUtils } from './dataset.utils';
-import {DatasetDTO, MrDatasetDTO, DatasetDTOService} from "./dataset.dto";
-import {BidsElement} from "../../bids/model/bidsElement.model";
 
 export type Format = 'nii' | 'dcm';
 
 @Injectable()
 export class DatasetService extends EntityService<Dataset> {
-    
+
     readonly API_URL = AppUtils.BACKEND_API_DATASET_URL;
     readonly MAX_DATASETS_IN_ZIP_DL: number = 500;
 
@@ -117,7 +117,7 @@ export class DatasetService extends EntityService<Dataset> {
         return this.http.get<number>(AppUtils.BACKEND_API_DATASET_URL + '/study/nb-datasets/' + studyId)
         .toPromise();
     }
-    
+
     public downloadDatasets(ids: number[], format: string, converter ? : number, state?: TaskState): Observable<TaskState> {
         const formData: FormData = new FormData();
         formData.set('datasetIds', ids.join(","));
@@ -139,7 +139,11 @@ export class DatasetService extends EntityService<Dataset> {
             AppUtils.BACKEND_API_DATASET_URL + '/downloadStatistics', { observe: 'response', responseType: 'blob', params: params})
             .toPromise().then(
             response => {
-                this.downloadIntoBrowser(response);
+                if (response.status != 204) {
+                    this.consoleService.log('error', 'Error during creation of statistics.');
+                } else {
+                    this.consoleService.log('info', 'Statistics are being prepared, check the Jobs page to see its progress.');
+                }
             }
         )
     }
@@ -164,9 +168,8 @@ export class DatasetService extends EntityService<Dataset> {
     }
 
     protected mapEntity = (dto: DatasetDTO, quickResult?: Dataset, mode: 'eager' | 'lazy' = 'eager'): Promise<Dataset> => {
-        let result: Dataset = DatasetUtils.getDatasetInstance(dto.type);
-        this.datasetDTOService.toEntity(dto, result, mode);
-        return Promise.resolve(result);
+        quickResult = DatasetUtils.getDatasetInstance(dto.type);
+        return this.datasetDTOService.toEntity(dto, quickResult, mode);
     }
 
     protected mapEntityList = (dtos: DatasetDTO[]): Promise<Dataset[]> => {

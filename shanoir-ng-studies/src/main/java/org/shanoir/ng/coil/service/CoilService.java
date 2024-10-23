@@ -85,4 +85,7 @@ public interface CoilService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	Optional<Coil> findByName(String name);
 
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	List<Coil> findByCenterId(Long centerId);
+
 }

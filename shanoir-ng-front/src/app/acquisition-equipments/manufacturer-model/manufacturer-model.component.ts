@@ -55,18 +55,12 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
     }
 
     initView(): Promise<void> {
-        return this.getManufacturerModel();
+        return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
-        let manufModelPromise: Promise<void> = this.getManufacturerModel();
-        Promise.all([
-            manufModelPromise,
-            this.getManufs()
-        ]).then(([, ]) => {
-            this.manufModel.manufacturer = this.getManufById(this.manufModel.manufacturer.id);
-        });
-        return manufModelPromise;
+        this.manufModel.manufacturer = this.getManufById(this.manufModel.manufacturer.id);
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {
