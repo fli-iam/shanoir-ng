@@ -96,6 +96,7 @@ export class SubjectListComponent extends EntityListComponent<Subject> {
         return this.subjectService.get(entity.id).then(res => {
             const studiesNames = res.subjectStudyList.map(study => study.study.name).join('\n- ');
             studyListStr += studiesNames;
+            studyListStr += '\n\nAttention: this action deletes all datasets from ALL studies listed above.';
             return studyListStr;
         });
     }
