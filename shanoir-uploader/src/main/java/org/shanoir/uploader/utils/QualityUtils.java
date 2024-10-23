@@ -18,7 +18,6 @@ import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.service.QualityService;
 import org.shanoir.ng.shared.model.SubjectStudy;
-import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
 import org.shanoir.ng.studycard.model.ExaminationData;
@@ -50,9 +49,16 @@ public class QualityUtils {
 		SubjectStudy subjectStudy = new SubjectStudy();
 		QualityCardResult qualityCardResult = new QualityCardResult();
 		final File importJobDir = new File(importJob.getWorkFolder());
+		List<QualityCard> qualityCards;
 		
 		// Call Shanoir server to get all quality cards for the selected study
-		List<QualityCard> qualityCards = ShUpOnloadConfig.getShanoirUploaderServiceClient().findQualityCardsByStudyId(importJob.getStudyId());
+		try {
+			qualityCards = ShUpOnloadConfig.getShanoirUploaderServiceClient().findQualityCardsByStudyId(importJob.getStudyId());
+		} catch (Exception e) {
+			logger.error("Error while retrieving quality cards from server for study " + importJob.getStudyId() + " : " + e.getMessage());
+			throw e;
+		}
+		
 
 		// If no quality cards are found for the study we skip the quality control
 		if (qualityCards.isEmpty()) {
@@ -90,7 +96,13 @@ public class QualityUtils {
 		subjectStudy.setId(importJob.getSubject().getId());
 		examinationData.setSubjectStudy(subjectStudy);
 
-		qualityCardResult = qualityService.checkQuality(examinationData, importJobDto, qualityCards);
+		try {
+			qualityCardResult = qualityService.checkQuality(examinationData, importJobDto, qualityCards);
+		} catch (Exception e) {
+			logger.error("Error while checking quality at import for examination " + importJob.getExaminationId() + " : " + e.getMessage());
+			throw e;
+		}
+		
 	
 		return qualityCardResult;
 	}
