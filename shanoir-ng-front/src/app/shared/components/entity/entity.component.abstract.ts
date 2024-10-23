@@ -85,6 +85,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     abstract buildForm(): UntypedFormGroup;
     protected getTreeSelection: () => Selection; //optional
     protected fetchEntity: () => Promise<any>; // optional
+    getOnDeleteConfirmMessage?(entity: Entity): Promise<string>;
 
     constructor(
         protected activatedRoute: ActivatedRoute,
@@ -98,7 +99,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
         this.consoleService = ServiceLocator.injector.get(ConsoleService);
         this.breadcrumbsService = ServiceLocator.injector.get(BreadcrumbsService);
         this.treeService = ServiceLocator.injector.get(TreeService);
-        
+
         this.mode = this.activatedRoute.snapshot.data['mode'];
         if (this.mode != 'create') this.treeService.activateTree(this.activatedRoute);
         this.addBCStep();
@@ -138,7 +139,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
         this._activeTab = param;
     }
 
-    private loadEntity(): Promise<T> { 
+    private loadEntity(): Promise<T> {
         let promise: Promise<T>;
         if (this.entityInput) {
             promise = Promise.resolve(this.entityInput);
@@ -407,14 +408,22 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     }
 
     protected openDeleteConfirmDialog = (entity: T) => {
-        this.getService().deleteWithConfirmDialog(this.ROUTING_NAME, entity).then(deleted => {
-            if (deleted) {
-                if (this.treeService.treeOpened && this.treeService.treeAvailable) {
-                    this.goToParent();
-                } else {
-                    this.goBack();
+        let promise: Promise<string>;
+        if (this.getOnDeleteConfirmMessage) {
+            promise = this.getOnDeleteConfirmMessage(entity);
+        } else {
+            promise = Promise.resolve('');
+        }
+        promise.then(studyListStr => {
+            this.getService().deleteWithConfirmDialog(this.ROUTING_NAME, entity, studyListStr).then(deleted => {
+                if (deleted) {
+                    if (this.treeService.treeOpened && this.treeService.treeAvailable) {
+                        this.goToParent();
+                    } else {
+                        this.goBack();
+                    }
                 }
-            }
+            });
         });
     }
 
@@ -499,4 +508,5 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     }
 
     abstract getService(): EntityService<T>;
+
 }

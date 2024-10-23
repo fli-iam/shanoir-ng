@@ -23,9 +23,6 @@ import { HttpClient } from '@angular/common/http';
 import { SubjectDTO, SubjectDTOService } from './subject.dto';
 import { SubjectStudyDTO } from './subject-study.dto';
 import { Page, Pageable } from 'src/app/shared/components/table/pageable.model';
-import {BACKEND_API_SUBJECT_URL} from "../../utils/app.utils";
-import {Dataset} from "../../datasets/shared/dataset.model";
-import {DatasetDTO} from "../../datasets/shared/dataset.dto";
 
 @Injectable()
 export class SubjectService extends EntityService<Subject> {
