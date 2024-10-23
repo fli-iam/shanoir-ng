@@ -14,6 +14,12 @@
 
 package org.shanoir.ng.importer.strategies.datasetexpression;
 
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.model.DatasetExpression;
@@ -26,24 +32,14 @@ import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
 
 @Component
 public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy {
 
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(DicomDatasetExpressionStrategy.class);
-
-	@Autowired
-	DicomProcessing dicomProcessing;
 
 	@Value("${dcm4chee-arc.protocol}")
 	private String dcm4cheeProtocol;
@@ -86,7 +82,7 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 			Attributes dicomAttributes;
 
 			try {
-				dicomAttributes = dicomProcessing.getDicomObjectAttributes(datasetFile, serie.getIsEnhanced());
+				dicomAttributes = DicomProcessing.getDicomObjectAttributes(datasetFile, serie.getIsEnhanced());
 			} catch (IOException e) {
 				LOG.error("Error while reading DICOM attributes from file.", e);
 				throw e;

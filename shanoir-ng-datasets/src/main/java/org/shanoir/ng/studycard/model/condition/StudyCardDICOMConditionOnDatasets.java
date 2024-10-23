@@ -239,16 +239,6 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
                         float[] valueArr = extractFloatArray(value);
                         return arrayCompare(getOperation(), floatValues, valueArr);
                     }
-                } else if (DicomTagType.FloatArray.equals(tagType)) {
-                    float[] floatValues = dicomAttributes.getFloats(this.getDicomTag());
-                    if (floatValues == null) {
-                        if (errorMsg != null) errorMsg.append("\ncondition [" + toString() 
-                            + "] failed on dataset " + datasetId + " because could not find/extract a value in the dicom for the tag " + getDicomTagCodeAndLabel(this.getDicomTag()));
-                        return false;
-                    } else {
-                        float[] valueArr = extractFloatArray(value);
-                        return arrayCompare(getOperation(), floatValues, valueArr);
-                    }
                 } else { // numerical simple comparisons
                     BigDecimal scValue = new BigDecimal(value);
                     Integer comparison = null;

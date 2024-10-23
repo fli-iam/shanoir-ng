@@ -103,7 +103,12 @@ public class QualityExaminationRule extends AbstractEntity {
     }
 
     public void apply(ExaminationData examination, ExaminationAttributes<?> examinationDicomAttributes, QualityCardResult result, WADODownloaderService downloader) {
+        // In case a rule was added without condition (= set as Always in gui)
         if (this.getConditions() == null || this.getConditions().isEmpty()) {
+            QualityCardResultEntry resultEntry = initResult(examination);
+            resultEntry.setTagSet(getQualityTag());
+            resultEntry.setMessage("Tag " + getQualityTag().name() + " was set by the quality card rule without any condition.");
+            result.add(resultEntry);
             result.addUpdatedSubjectStudy( 
                     setTagToSubjectStudy(examination.getSubjectStudy()));
         } else {
@@ -111,7 +116,7 @@ public class QualityExaminationRule extends AbstractEntity {
             if (conditionResult.isFulfilled()) {
                 result.addUpdatedSubjectStudy( 
                         setTagToSubjectStudy(examination.getSubjectStudy()));
-            }            
+            }          
             // if conditions not fulfilled for a VALID tag
             // or if conditions fulfilled for a ERROR or WARNING tag
             // then add an entry to the report
@@ -128,7 +133,7 @@ public class QualityExaminationRule extends AbstractEntity {
                 result.add(resultEntry);
             }
         }
-    }            
+    }
           
     
     /**
@@ -158,12 +163,12 @@ public class QualityExaminationRule extends AbstractEntity {
         ConditionResult condResult = new ConditionResult();
         Collections.sort(conditions, new ConditionComparator()); // sort by level
         boolean pilotedByDicomAttributes;
-        ExaminationAttributes<Long> examinationAttributesCache = new ExaminationAttributes<Long>(downloader.getWadoURLHandler());
+        ExaminationAttributes<Long> examinationAttributesCache = null;
         if (dicomAttributes != null) {
             pilotedByDicomAttributes = true;
         } else {
             pilotedByDicomAttributes = false;
-            examinationAttributesCache = new ExaminationAttributes<Long>(downloader.getWadoURLHandler());
+            examinationAttributesCache = new ExaminationAttributes<>(downloader.getWadoURLHandler());
         }
         for (StudyCardCondition condition : getConditions()) {
             StringBuffer msg = new StringBuffer();

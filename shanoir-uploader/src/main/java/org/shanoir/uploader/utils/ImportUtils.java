@@ -284,7 +284,7 @@ public class ImportUtils {
 				continue;
 			}
 			/**
-			 * Attention: the below switch is important, as all import jobs from ShUp
+			 * Warning: the below switch is important, as all import jobs from ShUp
 			 * are considered as "from-disk" on the server, nevertheless if within ShUp
 			 * they come from a pacs or a local disk, so the below setReferencedFileID
 			 * is necessary, that import-from-pacs with ShUp run on the server.
@@ -300,6 +300,7 @@ public class ImportUtils {
 		}
 		studyImportJob.setSeries(series);
 		studiesImportJob.add(studyImportJob);
+		//importJob.setStudy(studyImportJob);
 		patient.setStudies(studiesImportJob);
 		importJob.setPatients(patients);
 		return importJob;
