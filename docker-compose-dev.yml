@@ -18,7 +18,7 @@ services:
   keycloak-database:
     container_name: "${SHANOIR_PREFIX}keycloak-database"
     build:
-      context: docker-compose-dev
+      context: docker-compose
       target: keycloak-database
     environment:
       - MYSQL_DATABASE=keycloak
@@ -46,7 +46,7 @@ services:
       - SHANOIR_KEYCLOAK_PASSWORD
       - SHANOIR_ALLOWED_ADMIN_IPS
     build:
-      context: docker-compose-dev
+      context: docker-compose
       target: keycloak
     volumes:
       - "keycloak-logs:/opt/keycloak/data/log"
@@ -75,7 +75,7 @@ services:
   database:
     container_name: "${SHANOIR_PREFIX}database"
     build:
-      context: docker-compose-dev
+      context: docker-compose
       target: database
     command: --max_allowed_packet 20000000
     env_file:
@@ -98,7 +98,7 @@ services:
   users:
     container_name: "${SHANOIR_PREFIX}users"
     build:
-      context: docker-compose-dev
+      context: docker-compose
       target: users
     environment:
       - SHANOIR_PREFIX
@@ -130,7 +130,7 @@ services:
   studies:
     container_name: "${SHANOIR_PREFIX}studies"
     build:
-      context: docker-compose-dev
+      context: docker-compose
       target: studies
     environment:
       - SHANOIR_PREFIX
@@ -157,7 +157,7 @@ services:
   import:
     container_name: "${SHANOIR_PREFIX}import"
     build:
-      context: docker-compose-dev
+      context: docker-compose
       target: import
     environment:
       - SHANOIR_PREFIX
@@ -187,7 +187,7 @@ services:
   datasets:
     container_name: "${SHANOIR_PREFIX}datasets"
     build:
-      context: docker-compose-dev
+      context: docker-compose
       target: datasets
     environment:
       - SHANOIR_PREFIX
@@ -217,7 +217,7 @@ services:
   preclinical:
     container_name: "${SHANOIR_PREFIX}preclinical"
     build:
-      context: docker-compose-dev
+      context: docker-compose
       target: preclinical
     environment:
       - SHANOIR_PREFIX
@@ -244,7 +244,7 @@ services:
   nifti-conversion:
     container_name: "${SHANOIR_PREFIX}nifti-conversion"
     build:
-      context: docker-compose-dev
+      context: docker-compose
       target: nifti-conversion
     environment:
       - SHANOIR_PREFIX
@@ -267,7 +267,7 @@ services:
   solr:
     container_name: "${SHANOIR_PREFIX}solr"
     build:
-      context: docker-compose-dev
+      context: docker-compose
       target: solr
     environment:
       - SOLR_LOG_LEVEL=SEVERE
@@ -342,7 +342,7 @@ services:
   nginx:
     container_name: shanoir-ng-nginx
     build:
-      context: docker-compose-dev
+      context: docker-compose
       target: nginx
     environment:
       - SHANOIR_PREFIX

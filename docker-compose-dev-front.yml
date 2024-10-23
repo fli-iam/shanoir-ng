@@ -22,7 +22,7 @@ services:
   front-dev:
     container_name: front-dev
     build:
-      context: docker-compose-dev
+      context: docker-compose
       target: front-dev
     volumes:
       - "./shanoir-ng-front:/app/"
