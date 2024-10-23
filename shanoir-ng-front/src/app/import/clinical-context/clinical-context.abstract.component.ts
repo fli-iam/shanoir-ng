@@ -307,7 +307,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     private getStudyCardPolicy(study: Study): Promise<string> {
         if (study && study.id) {
             return this.studyService.get(study.id).then(study => {
-                if (study.studyCardPolicy == 'MANDATORY' || study.studyCardPolicy == 'OPTIONAL') {
+                if (study.studyCardPolicy == 'MANDATORY') {
                     this.useStudyCard = true;
                 } else {
                     this.useStudyCard = false;
