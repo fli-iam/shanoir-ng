@@ -11,6 +11,7 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
@@ -182,7 +183,7 @@ public class ImportFinishActionListener implements ActionListener {
 			logger.error(ex.getMessage(), ex);
         }
 		
-		// If quality check resulted in errors or failed validations, show a message and do not start the import
+		// If quality check resulted in errors, show a message and do not start the import
 		if (!qualityControlResult.isEmpty() && (qualityControlResult.hasError())) {
 			JOptionPane.showMessageDialog(null,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult), 
 			ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"), JOptionPane.ERROR_MESSAGE);
@@ -195,7 +196,7 @@ public class ImportFinishActionListener implements ActionListener {
 		} else {
 			// If quality control condition is VALID we do not set a quality card result entry but we update the subjectStudy qualityTag
 			if (!qualityControlResult.isEmpty() || !qualityControlResult.getUpdatedSubjectStudies().isEmpty()) {
-				// If quality control has one warning condition fulfilled we inform the user and allow import to continue
+				// If quality control has one warning or failed valid condition fulfilled we inform the user and allow import to continue
 				if (qualityControlResult.hasWarning() || qualityControlResult.hasFailedValid()) {
 					JOptionPane.showMessageDialog(null,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult), 
 					ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"), JOptionPane.WARNING_MESSAGE);

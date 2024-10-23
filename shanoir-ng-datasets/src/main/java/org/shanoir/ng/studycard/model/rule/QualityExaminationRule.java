@@ -105,6 +105,10 @@ public class QualityExaminationRule extends AbstractEntity {
     public void apply(ExaminationData examination, ExaminationAttributes<?> examinationDicomAttributes, QualityCardResult result, WADODownloaderService downloader) {
         // In case a rule was added without condition (= set as Always in gui)
         if (this.getConditions() == null || this.getConditions().isEmpty()) {
+            QualityCardResultEntry resultEntry = initResult(examination);
+            resultEntry.setTagSet(getQualityTag());
+            resultEntry.setMessage("Tag " + getQualityTag().name() + " was set by the quality card rule without any condition.");
+            result.add(resultEntry);
             result.addUpdatedSubjectStudy( 
                     setTagToSubjectStudy(examination.getSubjectStudy()));
         } else {
