@@ -31,6 +31,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
+import org.shanoir.ng.dataset.service.CreateStatisticsService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -38,7 +39,7 @@ import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.importer.service.DicomSRImporterService;
+import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -94,6 +95,9 @@ public class DatasetApiControllerTest {
 
 	@MockBean
 	private DatasetService datasetServiceMock;
+	
+	@MockBean
+	private CreateStatisticsService createStatisticsService;
 
 	@MockBean
 	private DatasetRepository datasetRepositoryMock;
@@ -147,7 +151,7 @@ public class DatasetApiControllerTest {
 	private ImporterService importerService;
 	
 	@MockBean
-	private DicomSRImporterService dicomSRImporterService;
+	private DicomSEGAndSRImporterService dicomSRImporterService;
 	
 	@MockBean
 	private DatasetDownloaderServiceImpl datasetDownloaderService;

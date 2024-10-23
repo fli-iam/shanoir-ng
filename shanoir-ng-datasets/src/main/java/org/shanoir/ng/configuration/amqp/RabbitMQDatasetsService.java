@@ -462,7 +462,8 @@ public class RabbitMQDatasetsService {
 					userId,
 					"Copy of dataset " + countProgress++ + "/" + countTotal + " to study [" + studyId + "].",
 					ShanoirEvent.IN_PROGRESS,
-					Float.valueOf(countProgress/countTotal)
+					Float.valueOf(countProgress/countTotal),
+					studyId
 			);
 			event.setReport("");
 

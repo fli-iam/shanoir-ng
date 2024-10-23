@@ -11,38 +11,63 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
-
 <node
         *ngIf="node"
-        [class.selected]="showDetails && this.menuOpened"
+        [class.selected]="(showDetails && this.menuOpened) || treeService.isSelected(node.id, 'study')"
         [label]="node.label"
         awesome="fa-regular fa-folder-open"
-        [(opened)]="node.open"
-        (labelClick)="menuOpened = !menuOpened"
+        [(opened)]="node.opened"
+        (labelClick)="menuOpened = withMenu && !menuOpened"
+        [route]="node.route"
         [hasChildren]="true"
-        [clickable]="showDetails">
+        [clickable]="showDetails"
+        >
 
-        <dropdown-menu [(openInput)]="menuOpened" *ngIf="showDetails && menuOpened">
-          <a [routerLink]="this.detailsPath + this.node.id" class="open-new-tab">
+    <dropdown-menu [(openInput)]="menuOpened" *ngIf="showDetails && menuOpened && withMenu">
+        <a [routerLink]="this.detailsPath + this.node.id" class="open-new-tab">
             <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
-          </a>
-        </dropdown-menu>
+        </a>
+    </dropdown-menu>
 
     <node
             *ngIf="node.open"
             class="subjects"
             label="Subjects"
             awesome="fas fa-user-injured"
-            [(opened)]="node.subjectsOpen"
-            [hasChildren]="hasDependency(this.node.subjects)">
+            [(opened)]="node.subjectsNode.opened"
+            (labelClick)="subjectsMenuOpened = !subjectsMenuOpened"
+            [hasChildren]="hasDependency(this.node.subjectsNode.subjects)">
 
-        <ng-container *ngIf="node.subjectsOpen && node.subjects && node.subjects != $any('UNLOADED')">
+        <div class="overmenu">
+            <span *ngIf="!(subjectsOrder.field == 'name' && subjectsOrder.way == 'asc')" class="filter" (click)="sortSubjects({field: 'name', way : 'asc'})" title="sort by name ascending">
+                <i class="fa-solid fa-arrow-down-a-z"></i>
+            </span>
+            <span *ngIf="subjectsOrder.field == 'name' && subjectsOrder.way == 'asc'" class="filter" (click)="sortSubjects({field: 'name', way : 'desc'})" title="sort by name descending">
+                <i class="fa-solid fa-arrow-down-z-a"></i>
+            </span>
+            <span *ngIf="!(subjectsOrder.field == 'id' && subjectsOrder.way == 'desc')" class="filter" (click)="sortSubjects({field: 'id', way : 'desc'})" title="sort by id ascending">
+                <i class="fa-solid fa-arrow-down-1-9"></i>
+            </span>
+            <span *ngIf="subjectsOrder.field == 'id' && subjectsOrder.way == 'desc'" class="filter" (click)="sortSubjects({field: 'id', way : 'asc'})" title="sort by id descending">
+                <i class="fa-solid fa-arrow-down-9-1"></i>
+            </span>
+            <span class="filter">
+                filter : 
+                <input type="text" [(ngModel)]="filter" (ngModelChange)="onFilterChange()"/>
+                <span (click)="resetFilter()">&nbsp;x&nbsp;</span>
+            </span>
+        </div>
+
+        <ng-container *ngIf="node.subjectsNode.opened && node.subjectsNode.subjects && node.subjectsNode.subjects != $any('UNLOADED')">
             <subject-node
-                    *ngFor="let subject of node.subjects"
+                    *ngFor="let subject of filteredNodes || node.subjectsNode.subjects"
                     [input]="subject"
                     [studyId]="node.id"
                     (selectedChange)="selectedChange.emit(node)"
                     [hasBox]="hasBox"
+                    [withMenu]="withMenu"
+                    [rights]="rights"
+                    (nodeInit)="onSubjectNodeInit()" 
             >
             </subject-node>
         </ng-container>
@@ -54,13 +79,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             class="centers"
             label="Centers"
             awesome="fa-regular fa-hospital"
-            [(opened)]="node.centersOpen"
-            [hasChildren]="hasDependency(this.node.centers)">
+            [(opened)]="node.centersNode.opened"
+            [hasChildren]="hasDependency(this.node.centersNode.centers)">
 
-        <ng-container *ngIf="node.centersOpen && node.centers && node.centers != $any('UNLOADED')">
+        <ng-container *ngIf="node.centersNode.opened && node.centersNode.centers && node.centersNode.centers != $any('UNLOADED')">
             <center-node
-                    *ngFor="let center of node.centers"
-                    [input]="center">
+                    *ngFor="let center of node.centersNode.centers"
+                    [input]="center"
+                    [withMenu]="withMenu">
             </center-node>
         </ng-container>
 
@@ -72,17 +98,42 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             label="Study Cards"
             awesome="fa-solid fa-shuffle"
             (firstOpen)="loadStudyCards()"
-            [(opened)]="node.studycardsOpen"
-            [hasChildren]="hasDependency(this.node.studyCards)"
+            [(opened)]="node.studyCardsNode.opened"
+            [hasChildren]="hasDependency(node.studyCardsNode.cards)"
             [dataLoading]="studyCardsLoading">
 
-        <ng-container *ngIf="node.studycardsOpen && node.studyCards && node.studyCards != $any('UNLOADED')">
-            <studycard-node
-                    *ngFor="let studycard of node.studyCards;let i = index"
+        <ng-container *ngIf="node.studyCardsNode.opened && node.studyCardsNode.cards && node.studyCardsNode.cards != $any('UNLOADED')">
+            <card-node
+                    *ngFor="let studycard of node.studyCardsNode.cards; let i = index"
                     [input]="studycard"
-                    (onCardDelete)="onCardDelete(i)"
+                    (onCardDelete)="onStudyCardDelete(i)"
+                    [withMenu]="withMenu"
+                    detailsPath="study-card/details"
             >
-            </studycard-node>
+            </card-node>
+        </ng-container>
+
+    </node>
+
+    <node
+            *ngIf="node.open"
+            class="studycards"
+            label="Quality Cards"
+            awesome="fa-solid fa-shuffle"
+            (firstOpen)="loadQualityCards()"
+            [(opened)]="node.qualityCardsNode.opened"
+            [hasChildren]="hasDependency(node.qualityCardsNode.cards)"
+            [dataLoading]="qualityCardsLoading">
+
+        <ng-container *ngIf="node.qualityCardsNode.opened && node.qualityCardsNode.cards && node.qualityCardsNode.cards != $any('UNLOADED')">
+            <card-node
+                    *ngFor="let qualitycard of node.qualityCardsNode.cards; let i = index"
+                    [input]="qualitycard"
+                    (onCardDelete)="onQualityCardDelete(i)"
+                    [withMenu]="withMenu"
+                    detailsPath="quality-card/details"
+            >
+            </card-node>
         </ng-container>
 
     </node>
@@ -92,13 +143,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             class="members"
             label="Members"
             awesome="far fa-user"
-            [(opened)]="node.membersOpen"
-            [hasChildren]="hasDependency(this.node.members)">
+            [(opened)]="node.membersNode.opened"
+            [hasChildren]="hasDependency(this.node.membersNode.members)">
 
-        <ng-container *ngIf="node.membersOpen && node.members && node.members != $any('UNLOADED')">
+        <ng-container *ngIf="node.membersNode.opened && node.membersNode.members && node.membersNode.members != $any('UNLOADED')">
             <member-node
-                    *ngFor="let member of node.members"
-                    [input]="member">
+                    *ngFor="let member of node.membersNode.members"
+                    [input]="member"
+                    [withMenu]="withMenu">
             </member-node>
         </ng-container>
 

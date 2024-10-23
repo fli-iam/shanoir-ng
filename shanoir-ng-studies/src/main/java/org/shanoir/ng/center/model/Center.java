@@ -81,7 +81,7 @@ public class Center extends HalEntity {
 	private String street;
 
 	/** Relations between the investigators, the centers and the studies. */
-	@OneToMany(mappedBy = "center", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "center", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	private List<StudyCenter> studyCenterList;
 
 	private String website;

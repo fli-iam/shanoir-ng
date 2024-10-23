@@ -1,9 +1,19 @@
-.main-content { padding: 0 20px 0 20px; position: relative; margin-left: 0; height: 100vh;overflow: auto; }
+.main-content { padding: 0 0 0 20px; position: relative; margin-left: 0; height: 100vh; white-space: nowrap; overflow-y: hidden; z-index: 100;}
 .main-content.open { margin-left: 300px; }
 .main-content.reduce-height { height: calc(100vh - 108px); }
-side-menu, .side-menu { overflow-x: hidden; scrollbar-width: none; overflow: -moz-scrollbars-none; -ms-overflow-style: none; }
-.side-menu { width: 300px; position: fixed; top: 0; z-index: 1; }
 
+.lower-content { display: flex; height: calc(100% - 60px); overflow: hidden; }
+
+.content { display: inline-block; white-space: initial; max-height: 100%; overflow: auto; padding-right: 20px; flex-grow: 100; }
+side-menu, .side-menu { overflow-x: hidden; scrollbar-width: none; overflow: -moz-scrollbars-none; -ms-overflow-style: none; }
+.side-menu { width: 300px; position: fixed; top: 0; z-index: 0; }
+
+study-tree { z-index: 1; 
+    height: 100%; display: inline-block; overflow: hidden; position: relative; min-width: fit-content; margin-top: 10px; }
+
+.tree-frame { border-right: 1px solid var(--grey); margin-right: 20px; }
+
+.tree, .content { vertical-align: top; }
 .close-button, 
 .open-button { width: 14px; height: 27px; position: fixed; top: 0; left: 0; cursor: pointer; color: var(--very-light-grey); z-index: 2; }
 
@@ -15,5 +25,8 @@ side-menu, .side-menu { overflow-x: hidden; scrollbar-width: none; overflow: -mo
 .close-button:hover i, 
 .open-button:hover i { color: var(--color-b); }
 
-side-menu, .main-content { transition: 1s ease; }
 shanoir-console { position: absolute; bottom: 0; z-index: 1; }
+
+.tree-close-button { position: absolute; top: 45%; left: 0; z-index: 100; color: var(--color-a); cursor: pointer;
+    border: 1px solid var(--grey); border-left: none; border-radius: 0 5px 5px 0; padding: 2px 1px; }
+.tree-frame { position: relative; }

@@ -1,5 +1,18 @@
 package org.shanoir.ng.importer.service;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import org.apache.solr.client.solrj.SolrServerException;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Sequence;
@@ -8,7 +21,13 @@ import org.dcm4che3.data.VR;
 import org.dcm4che3.io.DicomInputStream;
 import org.dcm4che3.io.DicomOutputStream;
 import org.shanoir.ng.dataset.modality.MeasurementDataset;
-import org.shanoir.ng.dataset.model.*;
+import org.shanoir.ng.dataset.modality.SegmentationDataset;
+import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetExpression;
+import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.model.DatasetMetadata;
+import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
@@ -22,6 +41,7 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,19 +49,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * This class imports the measurements of the ohif-viewer, that are
@@ -57,16 +64,21 @@ import java.util.Optional;
  *
  */
 @Service
-public class DicomSRImporterService {
+public class DicomSEGAndSRImporterService {
 	
-	private static final Logger LOG = LoggerFactory.getLogger(DicomSRImporterService.class);
-
-	private static final String SR = "SR";
+	private static final Logger LOG = LoggerFactory.getLogger(DicomSEGAndSRImporterService.class);
 
 	private static final String IMAGING_MEASUREMENT_REPORT = "Imaging Measurement Report";
 
+	private static final String SEG = "SEG";
+
+	private static final String SR = "SR";
+
 	@Autowired
 	private ExaminationRepository examinationRepository;
+
+	@Autowired
+    private SolrService solrService;
 	
 	@Autowired
 	private DatasetService datasetService;
@@ -93,20 +105,25 @@ public class DicomSRImporterService {
 	private String dicomWebRS;
 	
 	@Transactional
-	public boolean importDicomSR(InputStream inputStream) {
+	public boolean importDicomSEGAndSR(InputStream inputStream) {
 		// DicomInputStream consumes the input stream to read the data
 		try (DicomInputStream dIS = new DicomInputStream(inputStream)) {
 			Attributes metaInformationAttributes = dIS.readFileMetaInformation();
 			Attributes datasetAttributes = dIS.readDataset();
-			// check for modality: DICOM SR
-			if (SR.equals(datasetAttributes.getString(Tag.Modality))) {
+			String modality = datasetAttributes.getString(Tag.Modality);
+			// check for modality: DICOM SEG or SR
+			if (SEG.equals(modality) || SR.equals(modality)) {
 				// IMPORTANT: do this before to use correct StudyInstanceUID afterwards
-				Examination examination = modifyDicomSR(datasetAttributes);
+				Examination examination = modifyDicom(datasetAttributes);
 				Dataset dataset = findDataset(examination, datasetAttributes);
-				createDataset(examination, dataset, datasetAttributes);
+				if (dataset == null) {
+					LOG.error("Error: importDicomSEGAndSR: source dataset could not be found.");
+					return false;	
+				}
+				createDataset(modality, examination, dataset, datasetAttributes);
 				sendToPacs(metaInformationAttributes, datasetAttributes);
 			} else {
-				LOG.error("Error: importDicomSR: other modality sent then SR.");
+				LOG.error("Error: importDicomSEGAndSR: other modality sent then SEG or SR.");
 				return false;
 			}
 		} catch (Exception e) {
@@ -131,7 +148,7 @@ public class DicomSRImporterService {
 	 * 
 	 * @param datasetAttributes
 	 */
-	private Examination modifyDicomSR(Attributes datasetAttributes) {
+	private Examination modifyDicom(Attributes datasetAttributes) {
 		String examinationUID = datasetAttributes.getString(Tag.StudyInstanceUID);
 		Long examinationID = Long.valueOf(examinationUID.substring(StudyInstanceUIDHandler.PREFIX.length()));
 		Examination examination = examinationRepository.findById(examinationID).get();
@@ -168,29 +185,56 @@ public class DicomSRImporterService {
 	 */
 	private Dataset findDataset(Examination examination, Attributes datasetAttributes) {
 		String studyInstanceUID = datasetAttributes.getString(Tag.StudyInstanceUID);
-		String seriesInstanceUID;
-		String sOPInstanceUID;
+		String seriesInstanceUID = null;
+		String sOPInstanceUID = null;
+		// DICOM SR: use CurrentRequestedProcedureEvidenceSequence
 		Sequence evidenceSequence = datasetAttributes.getSequence(Tag.CurrentRequestedProcedureEvidenceSequence);
 		if (evidenceSequence != null) {
 			Attributes itemEvidenceSequence = evidenceSequence.get(0);
-			if (itemEvidenceSequence != null) {
-				Sequence seriesSequence = itemEvidenceSequence.getSequence(Tag.ReferencedSeriesSequence);
-				if (seriesSequence != null) {
-					Attributes itemSeriesSequence = seriesSequence.get(0);
-					if (itemEvidenceSequence != null) {
-						Sequence sOPSequence = itemSeriesSequence.getSequence(Tag.ReferencedSOPSequence);
-						if (sOPSequence != null) {
-							Attributes itemSOPSequence = sOPSequence.get(0);
-							seriesInstanceUID = itemSeriesSequence.getString(Tag.SeriesInstanceUID);
-							sOPInstanceUID = itemSOPSequence.getString(Tag.ReferencedSOPInstanceUID);
-							return findDatasetByUIDs(examination, studyInstanceUID, seriesInstanceUID, sOPInstanceUID);
-						}
+			if (itemEvidenceSequence == null) {
+				LOG.error("Error: missing sequences/attributes CurrentRequestedProcedureEvidenceSequence in DICOM SR.");
+				return null;
+			}
+			Sequence seriesSequence = itemEvidenceSequence.getSequence(Tag.ReferencedSeriesSequence);
+			if (seriesSequence != null) {
+				Attributes itemSeriesSequence = seriesSequence.get(0);
+				if (itemEvidenceSequence != null) {
+					Sequence sOPSequence = itemSeriesSequence.getSequence(Tag.ReferencedSOPSequence);
+					if (sOPSequence != null) {
+						Attributes itemSOPSequence = sOPSequence.get(0);
+						seriesInstanceUID = itemSeriesSequence.getString(Tag.SeriesInstanceUID);
+						sOPInstanceUID = itemSOPSequence.getString(Tag.ReferencedSOPInstanceUID);
 					}
 				}
 			}
+		// DICOM SEG: use ReferencedSeriesSequence
+		} else {
+			// Get SeriesInstanceUID at first
+			Sequence referencedSeriesSequence = datasetAttributes.getSequence(Tag.ReferencedSeriesSequence);
+			if (referencedSeriesSequence == null) {
+				LOG.error("Error: missing sequences/attributes ReferencedSeriesSequence in DICOM SEG.");
+				return null;
+			}
+			Attributes itemReferencedSeriesSequence = referencedSeriesSequence.get(0);
+			if (itemReferencedSeriesSequence == null) {
+				LOG.error("Error: missing sequences/attributes itemReferencedSeriesSequence in DICOM SEG.");
+				return null;
+			}
+			seriesInstanceUID = itemReferencedSeriesSequence.getString(Tag.SeriesInstanceUID);
+			// Get SOPInstanceUID second
+			Sequence referencedInstanceSequence = itemReferencedSeriesSequence.getSequence(Tag.ReferencedInstanceSequence);
+			if (referencedInstanceSequence == null) {
+				LOG.error("Error: missing sequences/attributes ReferencedInstanceSequence in DICOM SEG.");
+				return null;
+			}
+			Attributes itemReferencedInstanceSequence = referencedInstanceSequence.get(0);
+			if (itemReferencedInstanceSequence == null) {
+				LOG.error("Error: missing sequences/attributes itemReferencedInstanceSequence in DICOM SEG.");
+				return null;
+			}
+			sOPInstanceUID = itemReferencedInstanceSequence.getString(Tag.ReferencedSOPInstanceUID);
 		}
-		LOG.error("Error: missing sequences/attributes in DICOM SR.");
-		return null;
+		return findDatasetByUIDs(examination, studyInstanceUID, seriesInstanceUID, sOPInstanceUID);
 	}
 	
 	/**
@@ -229,7 +273,7 @@ public class DicomSRImporterService {
 				}
 			}
 		}
-		LOG.error("Error: dataset could not be found with UIDs from DICOM SR.");	
+		LOG.error("Error: dataset could not be found with UIDs from DICOM SEG or SR.");	
 		return null;
 	}
 	
@@ -241,31 +285,24 @@ public class DicomSRImporterService {
 	 * @param datasetAttributes
 	 * @throws MalformedURLException
 	 */
-	private void createDataset(Examination examination, Dataset dataset, Attributes datasetAttributes) throws MalformedURLException, IOException, SolrServerException {
-		MeasurementDataset measurementDataset = new MeasurementDataset();
-		measurementDataset.setReferencedDatasetForSuperimposition(dataset); // keep link to original dataset
-		measurementDataset.setStudyId(examination.getStudyId());
-		measurementDataset.setSubjectId(examination.getSubject().getId());
-		measurementDataset.setCreationDate(LocalDate.now());
-//		completeDatasetFromDicomSR(datasetAttributes, measurementDataset);
-		createMetadata(measurementDataset);
-		createDatasetExpression(datasetAttributes, measurementDataset);
-		datasetService.create(measurementDataset);
-	}
-
-	/**
-	 * Create the dataset metadata.
-	 * 
-	 * @param measurementDataset
-	 */
-	private void createMetadata(MeasurementDataset measurementDataset) {
-		DatasetMetadata originMetadata = new DatasetMetadata();
-		originMetadata.setName(IMAGING_MEASUREMENT_REPORT);
-		originMetadata.setComment(IMAGING_MEASUREMENT_REPORT);
-		originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
-		originMetadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);		
-		measurementDataset.setOriginMetadata(originMetadata);
-		measurementDataset.setUpdatedMetadata(originMetadata);
+	private void createDataset(String modality, Examination examination, Dataset dataset, Attributes datasetAttributes) throws MalformedURLException, IOException, SolrServerException {
+		Dataset newMsOrSegDataset = null;
+		if (SEG.equals(modality)) {
+			newMsOrSegDataset = new SegmentationDataset();
+		} else {
+			newMsOrSegDataset = new MeasurementDataset();
+		}
+		// keep link to original dataset
+		newMsOrSegDataset.setReferencedDatasetForSuperimposition(dataset);
+		newMsOrSegDataset.setStudyId(examination.getStudyId());
+		newMsOrSegDataset.setSubjectId(examination.getSubject().getId());
+		newMsOrSegDataset.setCreationDate(LocalDate.now());
+		// for rights check: keep link to original acquisition
+		newMsOrSegDataset.setDatasetAcquisition(dataset.getDatasetAcquisition());
+		createMetadata(datasetAttributes, dataset.getOriginMetadata().getDatasetModalityType(), newMsOrSegDataset);
+		createDatasetExpression(datasetAttributes, newMsOrSegDataset);
+		Dataset createdDataset = datasetService.create(newMsOrSegDataset);
+		solrService.indexDataset(createdDataset.getId());
 	}
 
 	/**
@@ -276,9 +313,20 @@ public class DicomSRImporterService {
 	 * not used, we keep it for a very high later usage.
 	 * 
 	 * @param datasetAttributes
-	 * @param measurementDataset
+	 * @param dataset
 	 */
-	private void completeDatasetFromDicomSR(Attributes datasetAttributes, MeasurementDataset measurementDataset) {
+	private void createMetadata(Attributes datasetAttributes, DatasetModalityType modalityType, Dataset dataset) {
+		DatasetMetadata originMetadata = new DatasetMetadata();
+		String reportName = datasetAttributes.getString(Tag.SeriesDescription);
+		if (reportName == null || reportName.isEmpty()) {
+			originMetadata.setName(IMAGING_MEASUREMENT_REPORT);
+		} else {
+			originMetadata.setName(reportName);
+		}
+		originMetadata.setDatasetModalityType(modalityType);
+		originMetadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);		
+		dataset.setOriginMetadata(originMetadata);
+		dataset.setUpdatedMetadata(originMetadata);
 		Sequence contentSequence = datasetAttributes.getSequence(Tag.ContentSequence);
 		if (contentSequence != null) {
 			Attributes contentSequenceAttributes = contentSequence.get(4);
@@ -292,30 +340,35 @@ public class DicomSRImporterService {
 						Sequence measurementGroupSequence = imagingMeasurementsAttributes.getSequence(Tag.ContentSequence);
 						if (measurementGroupSequence != null) {
 							// get tracking identifier
-							Attributes measurementGroupAttributes1 = measurementGroupSequence.get(0);
-							if (measurementGroupAttributes1 != null) {
-								String trackingIdentifier = measurementGroupAttributes1.getString(Tag.TextValue);
-								String trackingIdentifierType = trackingIdentifier.substring(trackingIdentifier.indexOf(":") + 1);
+							Attributes measurementGroupAttributes = measurementGroupSequence.get(0);
+							if (measurementGroupAttributes != null) {
+								String trackingIdentifier = measurementGroupAttributes.getString(Tag.TextValue);
+								if (trackingIdentifier != null && !trackingIdentifier.isEmpty()) {
+									String trackingIdentifierType = trackingIdentifier.substring(trackingIdentifier.indexOf(":") + 1);
+									originMetadata.setComment(trackingIdentifierType);
+								}
 							}
+							// as it was complicated to acquire the below code and as in the future
+							// we might access dedicated values from DICOM SR, I keep it as comment
 							// level measured values
-							Attributes measurementGroupAttributes2 = measurementGroupSequence.get(2);
-							if (measurementGroupAttributes2 != null) {
-								Sequence measuredValueSequence = measurementGroupAttributes2.getSequence(Tag.MeasuredValueSequence);
-								if (measuredValueSequence != null) {
-									Attributes measuredValueAttributes = measuredValueSequence.get(0);
-									if (measuredValueAttributes != null) {
-										// get numeric value and graphic data
-										String numericValue = measuredValueAttributes.getString(Tag.NumericValue);
-									}
-								}
-								Sequence graphicDataSequence = measurementGroupAttributes2.getSequence(Tag.ContentSequence);
-								if (graphicDataSequence != null) {
-									Attributes graphicDataAttributes = graphicDataSequence.get(0);
-									if (graphicDataAttributes != null) {
-										String graphicData = graphicDataAttributes.getString(Tag.GraphicData);
-									}
-								}
-							}
+							// Attributes measurementGroupAttributes2 = measurementGroupSequence.get(2);
+							// if (measurementGroupAttributes2 != null) {
+							// 	Sequence measuredValueSequence = measurementGroupAttributes2.getSequence(Tag.MeasuredValueSequence);
+							// 	if (measuredValueSequence != null) {
+							// 		Attributes measuredValueAttributes = measuredValueSequence.get(0);
+							// 		if (measuredValueAttributes != null) {
+							// 			// get numeric value and graphic data
+							// 			String numericValue = measuredValueAttributes.getString(Tag.NumericValue);
+							// 		}
+							// 	}
+							// 	Sequence graphicDataSequence = measurementGroupAttributes2.getSequence(Tag.ContentSequence);
+							// 	if (graphicDataSequence != null) {
+							// 		Attributes graphicDataAttributes = graphicDataSequence.get(0);
+							// 		if (graphicDataAttributes != null) {
+							// 			String graphicData = graphicDataAttributes.getString(Tag.GraphicData);
+							// 		}
+							// 	}
+							// }
 						}
 					}
 				}
@@ -330,13 +383,13 @@ public class DicomSRImporterService {
 	 * @param measurementDataset
 	 * @throws MalformedURLException
 	 */
-	private void createDatasetExpression(Attributes datasetAttributes, MeasurementDataset measurementDataset)
+	private void createDatasetExpression(Attributes datasetAttributes, Dataset dataset)
 			throws MalformedURLException {
 		DatasetExpression expression = new DatasetExpression();
 		expression.setCreationDate(LocalDateTime.now());
 		expression.setDatasetExpressionFormat(DatasetExpressionFormat.DICOM);
-		expression.setDataset(measurementDataset);
-		measurementDataset.setDatasetExpressions(Collections.singletonList(expression));		
+		expression.setDataset(dataset);
+		dataset.setDatasetExpressions(Collections.singletonList(expression));		
 		List<DatasetFile> files = createDatasetFiles(datasetAttributes, expression);
 		expression.setDatasetFiles(files);
 	}

@@ -15,41 +15,9 @@
 
 package org.shanoir.ng.vip.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.v3.oas.annotations.Parameter;
-import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.security.DatasetSecurityService;
-import org.shanoir.ng.dataset.service.DatasetService;
-import org.shanoir.ng.processing.dto.ParameterResourceDTO;
-import org.shanoir.ng.processing.model.DatasetProcessingType;
-import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.SecurityException;
-import org.shanoir.ng.utils.KeycloakUtil;
-import org.shanoir.ng.vip.dto.DatasetParameterDTO;
-import org.shanoir.ng.vip.dto.ExecutionCandidateDTO;
-import org.shanoir.ng.vip.dto.VipExecutionDTO;
-import org.shanoir.ng.vip.monitoring.model.ExecutionMonitoring;
-import org.shanoir.ng.vip.monitoring.model.ExecutionStatus;
-import org.shanoir.ng.vip.monitoring.schedule.ExecutionStatusMonitorService;
-import org.shanoir.ng.vip.monitoring.service.ExecutionMonitoringService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import reactor.core.publisher.Mono;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Controller
 public class PipelineApiController implements PipelineApi {

@@ -11,19 +11,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { fromEvent, Subscription } from 'rxjs';
 
-import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
-import { GlobalService } from '../../services/global.service';
-import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pageable.model';
+import { Router } from "@angular/router";
 import * as shajs from 'sha.js';
+import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
+import * as AppUtils from '../../../utils/app.utils';
+import { isDarkColor } from "../../../utils/app.utils";
 import { slideDown } from '../../animations/animations';
 import { KeycloakService } from '../../keycloak/keycloak.service';
+import { GlobalService } from '../../services/global.service';
+import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { ColumnDefinition } from './column.definition.type';
-import {isDarkColor} from "../../../utils/app.utils";
-import {Router} from "@angular/router";
-import {formatDate} from "@angular/common";
+import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pageable.model';
+import {TaskService} from "../../../async-tasks/task.service";
+import {Task} from "../../../async-tasks/task.model";
 
 @Component({
     selector: 'shanoir-table',
@@ -53,6 +56,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Input() maxResults: number = 20;
     @Input() subRowsKey: string;
     @Output() registerRefresh: EventEmitter<(number?) => void> = new EventEmitter();
+    @Output() downloadStatsEvent: EventEmitter<any> = new EventEmitter();
     page: Page<Object>;
     isLoading: boolean = false;
     maxResultsField: number;
@@ -79,7 +83,9 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             private elementRef: ElementRef,
             private breadcrumbsService: BreadcrumbsService,
             private globalClickService: GlobalService,
-            protected router: Router ) {
+            protected router: Router,
+            private dialogService: ConfirmDialogService,
+            private taskService: TaskService) {
         this.maxResultsField = this.maxResults;
     }
 
@@ -183,6 +189,9 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         else if (this.selectionAllowed) this.onSelectChange(item, !this.isSelected(item));
     }
 
+    downloadStats(item) {
+        this.downloadStatsEvent.emit(item);
+    }
 
     public static getCellValue(item: Object, col: ColumnDefinition): any {
         if (col.hasOwnProperty("cellRenderer")) {
@@ -630,6 +639,43 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             col.hidden = this.colSave[this.columnDefs.length + i].hidden;
         });
         this.saveSettings();
+    }
+
+    exportTable() {
+        const MAX_ROWS: number = 10000;
+        if (this.page.totalElements > MAX_ROWS) {
+            this.dialogService.error('Too Many Rows', 'You are trying to export ' + this.page.totalElements
+                + ' rows, the current max is at ' + MAX_ROWS + ', sorry.');
+        } else {
+            let csvStr: string = '';
+            csvStr += this.columnDefs.map(col => col.headerName).join(','); // headers
+            let completion: Promise<void> = Promise.resolve();
+            for (let i = 0; i < this.page.totalPages; i++) { // here we could use a fixed page size
+                let pageable: Pageable = this.getPageable();
+                pageable.pageNumber = i + 1;
+                let getPage: Page<any> | Promise<Page<any>> = this.getPage(pageable, true)
+                completion = completion.then(() => { // load pages sequentially
+                    if (getPage instanceof Promise) {
+                        return getPage.then(page => {
+                            for (let entry of page.content) {
+                                csvStr += '\n' + this.columnDefs.map(col => '"' + (TableComponent.getCellValue(entry, col) || '') + '"').join(',');
+                            }
+                        });
+                    } else if (getPage instanceof Page) {
+                        for (let entry of getPage.content) {
+                            csvStr += '\n' + this.columnDefs.map(col => '"' + (TableComponent.getCellValue(entry, col) || '') + '"').join(',');
+                        }
+                        return Promise.resolve();
+                    }
+                });
+            }
+            completion.then(() => {
+                const csvBlob = new Blob([csvStr], {
+                    type: 'text/csv'
+                });
+                AppUtils.browserDownloadFile(csvBlob, 'tableExport_' + new Date().toLocaleString('fr-FR'));
+            });
+        }
     }
 
     deploy(i: number) {

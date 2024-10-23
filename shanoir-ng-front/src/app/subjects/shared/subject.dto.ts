@@ -109,7 +109,7 @@ export class SubjectDTO {
         if (subject.examinations) this.examinations = Id.toIdList(subject.examinations);
         this.name = subject.name;
         this.identifier = subject.identifier;
-        this.birthDate = formatDate(subject.birthDate, 'yyyy-MM-dd', 'en');
+        if (subject.birthDate) this.birthDate = formatDate(subject.birthDate, 'yyyy-MM-dd', 'en');
         this.languageHemisphericDominance = subject.languageHemisphericDominance;
         this.manualHemisphericDominance = subject.manualHemisphericDominance;
         this.imagedObjectCategory = subject.imagedObjectCategory;

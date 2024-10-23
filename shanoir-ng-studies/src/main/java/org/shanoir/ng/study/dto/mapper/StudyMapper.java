@@ -26,7 +26,9 @@ import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.StudyLightDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
+import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.timepoint.TimepointMapper;
 
 /**
@@ -82,5 +84,10 @@ public interface StudyMapper {
 	IdNameCenterStudyDTO studyToExtendedIdNameDTO(Study study);
 
 	IdName studyToIdNameDTO(Study study);
+
+	@Mappings({
+		@Mapping(target = "subjectPreclinical", source = "subject.preclinical")
+	})
+	SubjectStudyDTO subjectStudyToSubjectStudyDTO(SubjectStudy subjectStudy);
 
 }

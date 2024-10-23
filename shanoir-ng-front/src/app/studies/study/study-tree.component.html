@@ -1,0 +1,58 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+<div class="commands">
+    <button class="dl-button" 
+			type="button" 
+			(click)="downloadSelected()" 
+			[disabled]="selectionEmpty" 
+			title="Download selection">
+		<i class="fas fa-download"></i>
+	</button>
+    <button class="dl-button" 
+			type="button" 
+			(click)="goToProcessing()" 
+			[disabled]="selectionEmpty" 
+			title="Process selection">
+		<i class="fas fa-rocket"></i>
+	</button>
+    <button class="dl-button" 
+			type="button" 
+			(click)="openInViewer()" 
+			[disabled]="!loaded || (!canOpenDicomSingleExam && !canOpenDicomMultiExam)" 
+			[title]="loaded && canOpenDicomMultiExam ? 
+					'View DICOM images for the selected acquisitions/examinations' 
+					: 'View selected DICOM images for the one examination selected'">
+		<double-awesome main="fas fa-eye" [sub]="loaded && canOpenDicomMultiExam? 'far fa-copy' : 'far fa-file'"></double-awesome>
+	</button>
+	<button class="dl-button" 
+			type="button" 
+			(click)="resetSelection()" 
+			[disabled]="selectionEmpty" 
+			title="Unselect all">
+		<i class="fas fa-broom"></i>
+	</button>
+</div>
+
+
+<div class="tree">
+	<study-node *ngIf="treeService.studyNode"
+			[input]="treeService.studyNode"
+			[hasBox]="true"
+			[withMenu]="false"
+			(nodeInit)="treeService.studyNodeInit.resolve()"
+			(selectedChange)="onSelectedChange($event)">
+	</study-node>
+</div>
+
+<ng-content></ng-content>

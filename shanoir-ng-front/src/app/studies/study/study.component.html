@@ -15,6 +15,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div #formContainer class="content-component detail max-content">
 	<div class="layout" [ngClass]="{'left': mode=='view'}">
 		<form *ngIf="form" [formGroup]="form" novalidate [class.disabled]="footerState.loading">
+			<form-footer
+					[state]="footerState"
+					(save)="save()"
+					(edit)="goToEdit()"
+					(delete) = "delete()"
+					(cancel)="goToView()"
+					(back)="goBack()">
+			</form-footer>
+
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
 					<h2 class="header command-zone" i18n="View study|Title@@studyDetailViewTitle">Details on study</h2>
@@ -26,7 +35,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<h2 class="header command-zone" i18n="Create study|Title@@studyDetailCreateTitle">Create study</h2>
 				</ng-template>
 			</span>
-
 			<ul class="tabs">
 				<li [class.active]="activeTab == 'general'" [routerLink]="'.'" [fragment]="'general'" replaceUrl="true">
 					<span class="general">General</span>
@@ -48,14 +56,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </li>
 				<ng-container *ngIf="mode == 'view'">
                     <li *ngIf="isStudyAdmin" [class.active]="activeTab == 'quality'" [routerLink]="'.'" [fragment]="'quality'" replaceUrl="true">Quality</li>
-					<li [class.active]="activeTab == 'tree'" [routerLink]="'.'" [fragment]="'tree'" replaceUrl="true">Tree</li>
 					<li [class.active]="activeTab == 'bids'" [routerLink]="'.'" [fragment]="'bids'" replaceUrl="true">BIDS</li>
 				</ng-container>
 				<ng-container *ngIf="mode != 'view'">
                     <li [class.active]="activeTab == 'quality'" class="disabled" replaceUrl="true">Quality</li>
-                    <li [class.active]="activeTab == 'tree'" class="disabled" replaceUrl="true">Tree</li>
 					<li [class.active]="activeTab == 'bids'" class="disabled" replaceUrl="true">BIDS</li>
 				</ng-container>
+                <li class="tags" *ngIf="isStudyAdmin" [class.active]="activeTab == 'history'" [routerLink]="'.'" [fragment]="'history'" replaceUrl="true" (click)="loadHistory()">
+                    <span class="history">History</span>
+                </li>
 			</ul>
 
 			<fieldset [class.hidden-tab]="activeTab != 'general'" tab="general">
@@ -397,14 +406,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<legend>Quality control</legend>
 				<quality-control [studyId]="study.id" (tagUpdate)="reloadSubjectStudies()"></quality-control>
 			</fieldset>
-			<fieldset [class.hidden-tab]="activeTab != 'tree'" *ngIf="mode != 'create'" tab="tree">
-				<legend>Tree</legend>
-				<study-node [input]="studyNode"
-						(selectedChange)="onTreeSelectedChange($event)"
-						(nodeInit)="onStudyNodeInit($event)"
-						[hasBox]="true">
-				</study-node>
-			</fieldset>
             <fieldset [class.hidden-tab]="activeTab != 'tags'" class="tags">
                 <legend>Public Study tags</legend>
                 <tag-creator ngDefaultControl [mode]="mode" [study]="study" [(ngModel)]="study.studyTags" (onChange)="onStudyTagListChange()" formControlName="studyTags"></tag-creator>
@@ -413,17 +414,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				        <legend>BIDS tree</legend>
                 <bids-tree [studyId]="id" [studyName]="study.name"></bids-tree>
             </fieldset>
-			<form-footer
-					[state]="footerState"
-					(save)="save()"
-					(edit)="goToEdit()"
-					(delete) = "delete()"
-					(cancel)="goToView()"
-					(back)="goBack()">
-				<button  *ngIf="mode == 'view' && hasDownloadRights()" class="right-icon dl-button" type="button" (click)="downloadAll()">Download study<i class="fas fa-download"></i></button>
-				<button  *ngIf="mode == 'view' && hasDownloadRights()" class="right-icon dl-button" type="button" (click)="downloadSelected()" [disabled]="!selectedDatasetIds">Download selected<i class="fas fa-download"></i></button>
-				<button class="right-icon dl-button" type="button" (click)="goToProcessing()" [disabled]="mode != 'view' || !selectedDatasetIds || selectedDatasetIds.length <= 0">Apply processing on selection<i class="fas fa-rocket"></i></button>
-			</form-footer>
+            <fieldset *ngIf="mode == 'view'" [class.hidden-tab]="activeTab != 'history'" tab="history">
+                <legend>History</legend>
+                <study-history #studyHistory
+                   [eventHistory]="openHistory"
+                   [study]="study">
+                </study-history>
+            </fieldset>
 		</form>
 	</div>
 </div>

@@ -16,6 +16,7 @@ export class FooterState {
 
     constructor(
         public mode: "view" | "edit" | "create",
+        public backButton: boolean = true,
         public canEdit: boolean = true,
         public canDelete: boolean = true,
         public valid: boolean = false,

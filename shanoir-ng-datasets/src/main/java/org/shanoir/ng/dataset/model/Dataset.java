@@ -454,6 +454,10 @@ public abstract class Dataset extends AbstractEntity {
 		SOPInstanceUID = sOPInstanceUID;
 	}
 
+	public boolean getInPacs() {
+		return getDatasetExpressions() != null && getDatasetExpressions().size() > 0;
+	}
+
 	public List<StudyTag> getTags() {
 		return tags;
 	}

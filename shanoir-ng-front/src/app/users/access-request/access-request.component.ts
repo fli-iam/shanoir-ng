@@ -90,12 +90,8 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     }
 
     initView(): Promise<void> {
-        let studies = this.studyService.getPublicStudiesConnected();
-        let access = this.accessRequestService.get(this.id);
-        
-        return Promise.all([studies, access]).then(([studiesRes, accessRequestRes]) => {
+        return this.studyService.getPublicStudiesConnected().then(studiesRes => {
             this.studies = studiesRes;
-            this.accessRequest = accessRequestRes;
         });
     }
 

@@ -20,7 +20,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<name>ShanoirChallengeScoresMS</name>
 
 	<properties>
-        <springfox-version>2.5.0</springfox-version>
+        <springfox-version>2.10.0</springfox-version>
     </properties>
 
 	<parent>
