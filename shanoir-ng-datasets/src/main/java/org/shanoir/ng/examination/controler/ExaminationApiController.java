@@ -104,7 +104,7 @@ public class ExaminationApiController implements ExaminationApi {
 				ShanoirEventType.DELETE_EXAMINATION_EVENT,
 				String.valueOf(examinationId),
 				KeycloakUtil.getTokenUserId(),
-				"Starting delete of examination with id : " + examinationId,
+				"Starting deletion of examination with id : " + examinationId,
 				ShanoirEvent.IN_PROGRESS,
 				0,
 				studyId);

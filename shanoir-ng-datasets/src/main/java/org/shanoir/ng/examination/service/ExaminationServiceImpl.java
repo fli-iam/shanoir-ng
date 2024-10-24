@@ -135,6 +135,11 @@ public class ExaminationServiceImpl implements ExaminationService {
 					eventService.publishEvent(event);
 					this.datasetAcquisitionService.deleteById(dsAcq.getId(), event);
 				}
+				event.setObjectId(String.valueOf(event.getId()));
+				event.setProgress(1f);
+				event.setMessage("Examination with id " + id + " deleted succesfully.");
+				event.setStatus(ShanoirEvent.SUCCESS);
+				eventService.publishEvent(event);
 			}
 			examinationRepository.deleteById(id);
 		}
@@ -160,12 +165,6 @@ public class ExaminationServiceImpl implements ExaminationService {
 			event.setProgress(-1f);
 			eventService.publishEvent(event);
 			LOG.error("Error during delete of examination with id : " + examinationId);
-		} finally {
-			event.setObjectId(String.valueOf(event.getId()));
-			event.setProgress(1f);
-			event.setMessage("Examination with id " + examinationId + " deleted succesfully.");
-			event.setStatus(ShanoirEvent.SUCCESS);
-			eventService.publishEvent(event);
 		}
 	}
 
