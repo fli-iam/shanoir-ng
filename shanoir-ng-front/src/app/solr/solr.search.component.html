@@ -205,7 +205,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 (onType)="syntaxError = false"
                 (onChange)="refreshTable()"
                 [syntaxError]="syntaxError"
-                [expertMode]="solrRequest.expertMode">
+                [syntaxErrorMsg]="syntaxErrorMsg"
+                (expertModeChange)="setExpertMode($event)">
         </solr-text-search>
 
         <solr-text-search-mode
