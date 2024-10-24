@@ -67,9 +67,11 @@ public class StowRSMultipartRelatedRequestFilter extends GenericFilterBean {
       ServletRequest request, 
       ServletResponse response,
       FilterChain chain) throws IOException, ServletException {
+
     	HttpServletRequest httpRequest = (HttpServletRequest) request;
     	if (httpRequest.getMethod().equals(HttpMethod.POST.toString())
     			&& httpRequest.getRequestURI().contains(DICOMWEB_STUDIES)
+				&& httpRequest.getContentType() != null
     			&& httpRequest.getContentType().contains(MediaType.MULTIPART_RELATED_VALUE)) {
     		try(ByteArrayInputStream bIS = new ByteArrayInputStream(httpRequest.getInputStream().readAllBytes())) {
     			ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, MediaType.MULTIPART_RELATED_VALUE);
@@ -92,5 +94,4 @@ public class StowRSMultipartRelatedRequestFilter extends GenericFilterBean {
     	}
         chain.doFilter(request, response);
     }
-
 }
