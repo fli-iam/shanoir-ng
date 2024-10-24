@@ -33,10 +33,11 @@ public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepos
 	@EntityGraph(attributePaths = { "studyTags" })
 	List<Study> findByVisibleByDefaultTrue();
 
-	@EntityGraph(attributePaths = { "profile", "tags" })
+	//@EntityGraph(attributePaths = { "profile", "tags" })
 	List<Study> findAll();
 	
-	@EntityGraph(attributePaths = { "profile", "tags" })
+	//@EntityGraph(attributePaths = { "profile", "tags" })
+	@Query("SELECT s FROM Study s JOIN FETCH s.studyUserList su WHERE su.study.id = s.id AND su.userId = :userId and :studyUserRightId in elements(su.studyUserRights) AND su.confirmed = :confirmed")
 	List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(Long userId, Integer studyUserRightId, boolean confirmed);
 
 	List<Study> findByChallengeTrue();

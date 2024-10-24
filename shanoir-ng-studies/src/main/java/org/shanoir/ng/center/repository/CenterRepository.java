@@ -32,7 +32,8 @@ import org.springframework.data.repository.query.Param;
  */
 public interface CenterRepository extends CrudRepository<Center, Long> {
 	
-	@EntityGraph(attributePaths = "studyCenterList.study.name")
+	//@EntityGraph(attributePaths = "studyCenterList.study.name")
+	@Query("SELECT c FROM Center c LEFT JOIN FETCH c.acquisitionEquipments")
 	List<Center> findAll();
 	
 	@Query("SELECT DISTINCT c.acquisitionEquipments FROM Center c WHERE c.id = :centerId")

@@ -60,7 +60,7 @@ public class Center extends HalEntity {
 	private static final long serialVersionUID = -1965594174611746591L;
 
 	/** List of the acquisition equipments related to this center. */
-	@OneToMany(mappedBy = "center", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+	@OneToMany(mappedBy = "center", fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
 	private List<AcquisitionEquipment> acquisitionEquipments;
 
 	private String city;
