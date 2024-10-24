@@ -71,6 +71,18 @@ public interface DatasetApi {
     		@RequestBody(required = true) List<Long> datasetIds)
 			throws RestServiceException;
 
+	@Operation(summary = "", description = "Deletes nifti files from a study")
+	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "Niftis deleted"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "no dataset found"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@PreAuthorize("hasRole('ADMIN')")
+	@DeleteMapping(value = "/deleteNiftis", produces = { "application/json" })
+	ResponseEntity<Void> deleteNiftisFromStudy(
+			@Parameter(description = "Id of the study from which we want to delete the niftis", required=true) @Valid
+			@RequestBody(required = true) long studyId);
+
 	@Operation(summary = "", description = "If exists, returns the dataset corresponding to the given id")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found dataset"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -303,9 +315,9 @@ public interface DatasetApi {
 		@ApiResponse(responseCode = "403", description = "forbidden"),
 		@ApiResponse(responseCode = "404", description = "no dataset found"),
 		@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@GetMapping(value = "/downloadStatistics", produces = { "application/zip" })
+	@GetMapping(value = "/downloadStatistics")
 	@PreAuthorize("hasRole('ADMIN')")
-	ResponseEntity<ByteArrayResource> downloadStatistics(
+	ResponseEntity<String> downloadStatistics(
 			@Parameter(description = "Study name including regular expression", required=false) @Valid
 			@RequestParam(value = "studyNameInRegExp", required = false) String studyNameInRegExp,
 			@Parameter(description = "Study name excluding regular expression", required=false) @Valid
@@ -314,6 +326,20 @@ public interface DatasetApi {
 			@RequestParam(value = "subjectNameInRegExp", required = false) String subjectNameInRegExp,
 			@Parameter(description = "Subject name excluding regular expression", required=false) @Valid
 			@RequestParam(value = "subjectNameOutRegExp", required = false) String subjectNameOutRegExp) throws RestServiceException, IOException;
+
+	@Operation(summary = "downloadStatistics", description = "Download statistics for event")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "download ok"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "event not found"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@GetMapping(value = "/download/event/{eventId}", produces = { "application/zip" })
+	@PreAuthorize("hasRole('ADMIN')")
+	ResponseEntity<ByteArrayResource> downloadStatisticsByEventId(
+			@Parameter(description = "id of the event", required = true) @PathVariable("eventId") String eventId)
+			throws RestServiceException, IOException;
+
 
 	@Operation(summary = "", description = "If exists, returns the datasets corresponding to the given ids")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found dataset"),
