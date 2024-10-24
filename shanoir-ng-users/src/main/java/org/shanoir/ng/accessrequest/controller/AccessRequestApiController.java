@@ -1,9 +1,8 @@
 package org.shanoir.ng.accessrequest.controller;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.email.EmailService;
@@ -16,9 +15,12 @@ import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.study.rights.StudyUser;
+import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.service.UserService;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
@@ -33,10 +35,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.swagger.v3.oas.annotations.Parameter;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Api for access request, to make a demand on 
@@ -45,6 +46,8 @@ import io.swagger.v3.oas.annotations.Parameter;
  */
 @Controller
 public class AccessRequestApiController implements AccessRequestApi {
+
+	private static final String ROLE_ADMIN = "ROLE_ADMIN";
 
 	@Autowired
 	ShanoirEventService eventService;
@@ -63,6 +66,9 @@ public class AccessRequestApiController implements AccessRequestApi {
 
 	@Autowired
 	ObjectMapper mapper;
+
+	@Autowired
+	StudyUserRightsRepository studyUserRightsRepository;
 
 	private static final Logger LOG = LoggerFactory.getLogger(AccessRequestApiController.class);
 
@@ -126,7 +132,14 @@ public class AccessRequestApiController implements AccessRequestApi {
 	@Override
     public ResponseEntity<List<AccessRequest>> findAllByAdminId() throws RestServiceException {
         // Get all studies I administrate
-        List<Long> studiesId = (List<Long>) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE, KeycloakUtil.getTokenUserId());
+
+        List<Long> studiesId;
+		if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+			studiesId = Utils.toList(this.studyUserRightsRepository.findAll()).stream().map(StudyUser::getStudyId
+			).collect(Collectors.toList());
+		} else {
+			studiesId = (List<Long>) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE, KeycloakUtil.getTokenUserId());
+		}
 
         if (CollectionUtils.isEmpty(studiesId)) {
             return new ResponseEntity<List<AccessRequest>>(HttpStatus.NO_CONTENT);

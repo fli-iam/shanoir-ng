@@ -276,6 +276,7 @@ import { CoilNodeComponent } from './coils/coil/tree/coil-node.component';
 import { PlannedExecutionListComponent } from "./vip/planned-execution/planned-execution-list.component";
 import { PlannedExecutionComponent } from "./vip/planned-execution/planned-execution.component";
 import { PlannedExecutionService } from "./vip/planned-execution/planned-execution.service";
+import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.component';
 
 @NgModule({
     imports: [
@@ -466,6 +467,8 @@ import { PlannedExecutionService } from "./vip/planned-execution/planned-executi
         DownloadSetupAltComponent,
         TestQualityCardOptionsComponent,
         StudyTreeComponent,
+        CoilNodeComponent,
+        DoubleAwesomeComponent,
         CoilNodeComponent,
         PlannedExecutionListComponent,
         PlannedExecutionComponent
