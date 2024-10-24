@@ -52,10 +52,20 @@ export class SelectSeriesComponent {
             return;
         }
         breadcrumbsService.nameStep('2. Series');
+
         this.patients = this.importDataService.patientList.patients;
+
+        if (this.importService.dicomQuery != null) {
+            this.patients = this.patients.map(patient => {
+                patient.studies = patient.studies.filter(study =>
+                    study.series.length > 0 &&
+                    study.series.every(serie => serie.modality === this.importService.dicomQuery.modality)
+                );
+                return patient;
+            }).filter(patient => patient.studies.length > 0);
+        }
         this.workFolder = this.importDataService.patientList.workFolder;
     }
-
 
     showSerieDetails(serie: SerieDicom): void {
         this.detailedPatient = null;
