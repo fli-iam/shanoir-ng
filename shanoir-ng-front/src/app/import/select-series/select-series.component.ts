@@ -62,7 +62,7 @@ export class SelectSeriesComponent {
                     study.series.every(serie => serie.modality === this.importService.dicomQuery.modality)
                 );
                 return patient;
-            });
+            }).filter(patient => patient.studies.length > 0);
         }
         this.workFolder = this.importDataService.patientList.workFolder;
     }
