@@ -154,6 +154,7 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
     writeValue(value: any) {
         if (value !== this.checked) {
             this.checked = value;
+            //this.chkbxChange.emit(value);
         }
     }
 
