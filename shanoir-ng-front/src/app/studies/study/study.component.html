@@ -426,7 +426,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </fieldset>
             <fieldset [class.hidden-tab]="activeTab != 'executions'" tab="executions">
                 <legend>Execution planning</legend>
-                <execution-planning-list [studyId]="study.id" [mode]="mode"/>
+                <planned-execution-list [studyId]="study.id" />
             </fieldset>
 		</form>
 	</div>

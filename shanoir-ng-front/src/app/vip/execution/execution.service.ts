@@ -20,7 +20,7 @@ import {Execution} from "../models/execution";
 import {ExecutionCandidateDto} from "../models/execution-candidate.dto";
 import {IdName} from "../../shared/models/id-name.model";
 import {Id} from "../../shared/models/id.model";
-import {AutomaticExecution} from "../models/automatic-execution";
+import {PlannedExecution} from "../models/planned-execution";
 
 @Injectable()
 export class ExecutionService {
@@ -47,8 +47,8 @@ export class ExecutionService {
    * Get all automatic executions linked to a study
    * @param study_id the study id we want the automatic executions from
    */
-  public getAutomaticExecutions(study_id: number): Promise<AutomaticExecution[]> {
-    return this.httpClient.get<AutomaticExecution[]>(`${this.executionUrl}/automatic/` + study_id).toPromise();
+  public getAutomaticExecutions(study_id: number): Promise<PlannedExecution[]> {
+    return this.httpClient.get<PlannedExecution[]>(`${this.executionUrl}/automatic/` + study_id).toPromise();
   }
 
 

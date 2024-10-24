@@ -86,8 +86,8 @@ import { AccessRequestComponent } from './users/access-request/access-request.co
 import { PipelinesComponent } from './vip/pipelines/pipelines.component';
 import { ExecutionComponent } from './vip/execution/execution.component';
 import { ExecutionMonitoringsComponent } from './vip/execution-monitorings/execution-monitorings.component';
-import { ExecutionPlanningList } from "./vip/execution-planning/execution-planning-list.component"
-import { ExecutionPlanning } from "./vip/execution-planning/execution-planning.component";
+import { PlannedExecutionListComponent } from "./vip/planned-execution/planned-execution-list.component"
+import { PlannedExecutionComponent } from "./vip/planned-execution/planned-execution.component";
 import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
 import { ApplyStudyCardOnComponent } from './study-cards/apply-study-card-on/apply-study-card-on.component';
 import { PreClinicalContextComponent } from './import/pre-clinical-context/pre-clinical-context.component';
@@ -130,11 +130,11 @@ let routes: Routes = [
         path: 'execution-monitoring',
         component: ExecutionMonitoringsComponent
     }, {
-        path: 'execution-planning',
-        component: ExecutionPlanning
+        path: 'planned-execution',
+        component: PlannedExecutionComponent
     }, {
-        path: 'execution-monitoring-list',
-        component: ExecutionPlanningList
+        path: 'planned-execution-list',
+        component: PlannedExecutionListComponent
     }, {
         path: 'pipelines',
         component: PipelinesComponent
@@ -174,7 +174,8 @@ let routes: Routes = [
                 component: ImportProcessedDatasetComponent,
                 data: {importMode: 'Processed Dataset'}
             }, {
-                path: 'series',
+                path: 'ser' +
+                    'ies',
                 component: SelectSeriesComponent
             }, {
                 path: 'eegseries',

@@ -38,7 +38,7 @@ public interface PlannedExecutionApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "Internal error")})
-    @PostMapping(value = "/create", consumes = "application/json", produces = "application/json")
+    @PostMapping(value = "", consumes = "application/json", produces = "application/json")
     ResponseEntity<PlannedExecution> createPlannedExecution(@RequestBody PlannedExecution plannedExecution) throws IOException, RestServiceException, SecurityException;
 
     @Operation(summary = "Delete a PlannedExecution entity", description = "Deletes the planned execution by its ID", tags={  })
@@ -68,7 +68,7 @@ public interface PlannedExecutionApi {
             @ApiResponse(responseCode = "404", description = "not found"),
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "Internal error")})
-    @PostMapping(value = "/update/{executionId}", consumes = "application/json", produces = "application/json")
+    @PostMapping(value = "/{executionId}", consumes = "application/json", produces = "application/json")
     ResponseEntity<PlannedExecution> updatePlannedExecution(@RequestBody PlannedExecution plannedExecution) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
 
 }

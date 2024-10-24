@@ -1,0 +1,10 @@
+<label i18n="Execution planning">Executions's planification</label>
+
+<h2 i18n="Manage examinations|Title@@examinationListTitle">Manage examinations</h2>
+
+<shanoir-table #table
+               [getPage]="getPage.bind(this)"
+               [columnDefs]="columnDefs"
+               [customActionDefs]="customActionDefs"
+               [rowRoute]="getRowRoute.bind(this)">
+</shanoir-table>

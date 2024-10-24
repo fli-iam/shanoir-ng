@@ -273,8 +273,9 @@ import {StudyHistoryComponent} from "./studies/study-history/study-history.compo
 import { StudyTreeComponent } from './studies/study/study-tree.component';
 import { TreeService } from './studies/study/tree.service';
 import { CoilNodeComponent } from './coils/coil/tree/coil-node.component';
-import {ExecutionPlanningList} from "./vip/execution-planning/execution-planning-list.component";
-import {ExecutionPlanning} from "./vip/execution-planning/execution-planning.component";
+import { PlannedExecutionListComponent } from "./vip/planned-execution/planned-execution-list.component";
+import { PlannedExecutionComponent } from "./vip/planned-execution/planned-execution.component";
+import { PlannedExecutionService } from "./vip/planned-execution/planned-execution.service";
 
 @NgModule({
     imports: [
@@ -466,8 +467,8 @@ import {ExecutionPlanning} from "./vip/execution-planning/execution-planning.com
         TestQualityCardOptionsComponent,
         StudyTreeComponent,
         CoilNodeComponent,
-        ExecutionPlanningList,
-        ExecutionPlanning
+        PlannedExecutionListComponent,
+        PlannedExecutionComponent
     ],
     providers: [
         AcquisitionEquipmentService,
@@ -555,6 +556,7 @@ import {ExecutionPlanning} from "./vip/execution-planning/execution-planning.com
         SessionService,
         ShanoirEventService,
         TreeService,
+        PlannedExecutionService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],
     bootstrap: [AppComponent]

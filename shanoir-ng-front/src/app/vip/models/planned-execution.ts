@@ -11,8 +11,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {DatasetProcessingType} from "../../enum/dataset-processing-type.enum";
+import {Entity} from "../../shared/components/entity/entity.abstract";
 
-export class AutomaticExecution {
+export class PlannedExecution extends Entity {
+    id: number
     name: string
 }
