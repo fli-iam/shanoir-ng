@@ -41,15 +41,13 @@ export class SolrTextSearchComponent implements ControlValueAccessor {
     @Output() expertModeChange: EventEmitter<boolean> = new EventEmitter();
     @Input() syntaxError: boolean = false;
     @Input() syntaxErrorMsg: string;
-    @Input() expertMode: boolean = false;
+    expertMode: boolean = false;
     protected propagateChange = (_: any) => {};
     protected propagateTouched = () => {};
 
     inputTextChange() {
         if (this.searchKeyWords.some(word => this.searchText.includes(word))) {
             this.expertModeChange.emit(true);
-        } else {
-            this.expertModeChange.emit(false);
         }
     }
 

@@ -33,7 +33,7 @@ export class SolrTextSearchModeComponent implements ControlValueAccessor {
 
     showInfo: boolean = false;
     @Output() onChange: EventEmitter<boolean> = new EventEmitter();
-    @Input() expertMode: boolean = false;
+    expertMode: boolean = false;
     protected propagateChange = (_: any) => {};
     protected propagateTouched = () => {};
 
