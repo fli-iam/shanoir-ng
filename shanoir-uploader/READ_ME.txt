@@ -13,6 +13,10 @@ Attention: do the above to not forget the logback.xml hard coded file path for l
 Attention: to deliver for Java 17 in the hospitals: switch back to Java 17 in two pom.xml:
 1) shanoir-uploader/pom.xml and 2) shanoir-ng-back/pom.xml
 
+Attention: when you made changes in ms-import, e.g. how to query the PACS, as the code is
+unified, you have to compile both projects 1) shanoir-ng-import 2) shanoir-uploader, that
+the change, e.g. in PACSQueryService is part of the new version of ShUp.
+
 ####### Maven: build a new Executable Jar version #############
 Build latest version for delivery using the below mvn command:
 Use "mvn package", to create one big zip containing everything.

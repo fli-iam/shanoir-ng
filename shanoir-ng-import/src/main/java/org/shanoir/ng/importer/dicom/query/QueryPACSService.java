@@ -47,7 +47,7 @@ import org.dcm4che3.net.service.QueryRetrieveLevel;
 import org.shanoir.ng.importer.dicom.DicomSerieAndInstanceAnalyzer;
 import org.shanoir.ng.importer.dicom.InstanceNumberSorter;
 import org.shanoir.ng.importer.dicom.PatientNameSorter;
-import org.shanoir.ng.importer.dicom.SeriesNumberSorter;
+import org.shanoir.ng.importer.dicom.SeriesNumberOrDescriptionSorter;
 import org.shanoir.ng.importer.dicom.StudyDateSorter;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
@@ -494,7 +494,7 @@ public class QueryPACSService {
 		if (seriesAttr != null) {
 			List<Serie> series = new ArrayList<Serie>();
 			seriesAttr.parallelStream().forEach(s -> processDICOMSerie(s, association, study, modality, series));
-			series.sort(new SeriesNumberSorter());
+			series.sort(new SeriesNumberOrDescriptionSorter());
 			study.setSeries(series);
 		}
 	}
