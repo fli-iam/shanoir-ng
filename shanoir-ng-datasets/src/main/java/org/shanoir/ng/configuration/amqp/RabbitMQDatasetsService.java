@@ -502,7 +502,8 @@ public class RabbitMQDatasetsService {
 			event.setStatus(ShanoirEvent.SUCCESS);
 			event.setProgress(1.0f);
 			eventService.publishEvent(event);
-			solrService.indexDatasets(newDatasets);
+			if (newDatasets.size() > 0)
+				solrService.indexDatasets(newDatasets);
 
 		} catch (Exception e) {
 			if (event != null) {
