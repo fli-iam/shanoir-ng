@@ -40,6 +40,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <span *ngIf="buttonPicto" class="button-picto clickable" (click)="buttonClick.emit()">
             <i class="{{buttonPicto}}"></i>
         </span>
+        <span class="button-picto clickable overmenu">
+            <ng-content select=".overmenu"></ng-content>
+        </span>
     </span>
     <span>
         <ng-content select="dropdown-menu"></ng-content>

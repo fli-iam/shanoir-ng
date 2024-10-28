@@ -32,7 +32,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <file>/var/log/shanoir-ng-logs/shanoir-events.log</file>
         <append>true</append>
         <encoder>
-            <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd_HH:mm:ss.SSS} %-5level [%mdc{username}] %logger{35} - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -40,7 +40,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <file>/var/log/shanoir-ng-logs/shanoir-equipments.log</file>
         <append>true</append>
         <encoder>
-            <pattern>%d{yyyy-MM-dd_HH:mm:ss.SSS} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd_HH:mm:ss.SSS} %-5level [%mdc{username}] %logger{35} - %msg%n</pattern>
         </encoder>
     </appender>
 
