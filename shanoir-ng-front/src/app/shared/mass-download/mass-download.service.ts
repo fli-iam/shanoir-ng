@@ -90,10 +90,6 @@ export class MassDownloadService {
         this.winOs = deviceInformationService.getDeviceInfo()?.os?.toLocaleLowerCase().includes('windows');
     }
 
-    downloadAllByStudyId(studyId: number, downloadState?: TaskState): Promise<void> {
-        return this.downloadByDatasets({studyId: studyId}, downloadState);
-    }
-
     downloadAllByExaminationId(examinationId: number, downloadState?: TaskState): Promise<void> {
         return this.downloadByDatasets({examinationId: examinationId}, downloadState);
     }
@@ -144,11 +140,11 @@ export class MassDownloadService {
     // This method is used to download in
     private _downloadAlt(datasetIds: number[], format: Format, converter? : number, downloadState?: TaskState): Promise<void> {
         let task: Task = this.createTask(datasetIds.length);
-        
+
         downloadState = new TaskState();
         downloadState.status = task.status;
         downloadState.progress = 0;
-        
+
         return this.downloadQueue.waitForTurn().then(releaseQueue => {
             try {
                 task.status = 2;
@@ -373,7 +369,7 @@ export class MassDownloadService {
     }
 
     private buildExtractedFilePath(dataset: Dataset, zipName: string, fileName: string, setup: DownloadSetup): string {
-        return this.buildFoldersPath(dataset, setup) 
+        return this.buildFoldersPath(dataset, setup)
             + (setup.datasetFolders ? zipName.replace('.zip', '') + '/' : '')
             + fileName;
     }
@@ -381,8 +377,8 @@ export class MassDownloadService {
     private buildShortExtractedFilePath(dataset: Dataset, fileIndex: number, fileName: string, setup: DownloadSetup): string {
             let fileNameSplit: string[] = fileName.split('.');
             let extension: string =  fileNameSplit.pop();
-            return this.buildShortFoldersPath(dataset, setup) 
-                + (setup.datasetFolders ? 'ds' + dataset.id + '/' : '') 
+            return this.buildShortFoldersPath(dataset, setup)
+                + (setup.datasetFolders ? 'ds' + dataset.id + '/' : '')
                 + fileIndex + '.' + extension;
     }
 
@@ -391,8 +387,8 @@ export class MassDownloadService {
         if (setup.subjectFolders) {
             str += 'Subject-' + (
                 dataset.datasetProcessing
-                    ? dataset.subject?.id
-                    : dataset.datasetAcquisition?.examination?.subject?.id
+                    ? dataset.subject?.name + '_' + dataset.subject?.id
+                    : dataset.datasetAcquisition?.examination?.subject?.name + '_' + dataset.datasetAcquisition?.examination?.subject?.id
             ) + '/';
         }
         if (setup.examinationFolders && !dataset.datasetProcessing) { // for processed datasets, skip the exam folder

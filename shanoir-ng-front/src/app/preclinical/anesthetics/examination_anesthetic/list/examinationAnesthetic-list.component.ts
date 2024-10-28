@@ -44,12 +44,6 @@ export class ExaminationAnestheticsListComponent  extends BrowserPaginEntityList
     }
     
     getColumnDefs(): ColumnDefinition[] {
-        function dateRenderer(date) {
-            if (date) {
-                return new Date(date).toLocaleDateString();
-            }
-            return null;
-        };
         function castToString(id: number) {
             return String(id);
         };
@@ -60,12 +54,8 @@ export class ExaminationAnestheticsListComponent  extends BrowserPaginEntityList
             {headerName: "Injection interval", field: "injectionInterval"},
             {headerName: "Injection site", field: "injectionSite"},
             {headerName: "Injection type", field: "injectionType"},
-            {headerName: "Start Date", field: "startDate", type: "date", cellRenderer: function (params: any) {
-                return dateRenderer(params.data.startDate);
-            }},
-            {headerName: "End Date", field: "endDate", type: "date", cellRenderer: function (params: any) {
-                return dateRenderer(params.data.endDate);
-            }}      
+            {headerName: "Start Date", field: "startDate", type: "date"},
+            {headerName: "End Date", field: "endDate", type: "date"}      
         ];
         return colDef;       
     }

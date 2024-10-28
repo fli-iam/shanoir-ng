@@ -23,7 +23,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder><pattern>${CONSOLE_LOG_PATTERN}</pattern></encoder>
 
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter"> 
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>${SHANOIR_CONSOLE_LOG_LEVEL}</level>
         </filter>
     </appender>
@@ -32,7 +32,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <file>/var/log/shanoir-ng-logs/shanoir-events.log</file>
         <append>true</append>
         <encoder>
-            <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd_HH:mm:ss.SSS} %-5level [%mdc{username}] %logger{35} - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -47,7 +47,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <appender name="RESULTHANDLER_FILE" class="ch.qos.logback.core.FileAppender">
         <file>/var/log/shanoir-ng-logs/shanoir-vip-handler.log</file>
         <encoder>
-            <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd_HH:mm:ss.SSS} %-5level [%mdc{username}] %logger{35} - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -58,7 +58,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <logger name="org.shanoir.ng.shared.event" level="INFO" additivity="false">
         <appender-ref ref="EVENT_FILE_LOG" />
     </logger>
-    
+	
+    <logger name="org.shanoir.ng.dataset.service.CreateStatisticsService" level="INFO" additivity="false">
+        <appender-ref ref="FILE" />
+    </logger>
+	
     <logger name="org.shanoir.ng.dicom.DIMSEService" level="INFO" additivity="false">
         <appender-ref ref="DIMSE_FILE_LOG" />
     </logger>

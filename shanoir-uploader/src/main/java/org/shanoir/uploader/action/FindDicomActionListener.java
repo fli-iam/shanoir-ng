@@ -10,7 +10,6 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -154,24 +153,6 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 					lastName = patientName + "*";
 				}
 
-				// Users can't use the wildcard "*" on the lastName unless they
-				// introduce at least 3 characters
-				boolean exitFlag = false;
-				if (lastName.contains("*")) {
-					String lastNamePartIntroduced = lastName;
-					String regex = "\\*";
-					String replacement = "";
-					lastNamePartIntroduced = lastNamePartIntroduced.replaceAll(
-							regex, replacement);
-					if (lastNamePartIntroduced.length() < 3) {
-						String message = "\"The wildcard \"*\" can not be used on the last name unless introducing at least 3 characters\"\n";
-						JOptionPane.showMessageDialog(new JFrame(), message,
-								"ERROR", JOptionPane.ERROR_MESSAGE);
-						mainWindow.patientNameTF.setText("");
-						exitFlag = true;
-					}
-				}
-
 				// for Request, the Patient Name must be of the form:
 				// lastName^firstName1^firstName2
 
@@ -185,7 +166,6 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 				else
 					patientNameFinal = lastName.toUpperCase();
 
-				if (!exitFlag) {
 					String modality = null;
 					if (!mainWindow.noRB.isSelected()) {
 						if (mainWindow.mrRB.isSelected()) {
@@ -208,9 +188,7 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 							mainWindow.studyDescriptionTF.getText(),
 							mainWindow.birthDate, mainWindow.studyDate);
 					fillMediaWithPatients(media, patients);
-				} else {
-					media = null;
-				}
+
 				this.mainWindow.setCursor(Cursor.getDefaultCursor());
 			} catch (ConnectException cE) {
 				logger.error(cE.getMessage(), cE);

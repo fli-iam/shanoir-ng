@@ -272,7 +272,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
         return Promise.resolve(this.report.getPage(pageable));
     }
 
-    static downloadReport(report: any, name?: string) {
+    static downloadReport(report: {columnDefs: any[], items: any[]}, name?: string) {
         if (!report) return;
         let csvStr: string = '';
         csvStr += report.columnDefs.map(col => col.headerName).join(',');
