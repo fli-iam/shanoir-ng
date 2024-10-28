@@ -146,6 +146,7 @@ public class DicomServerClient implements IDicomServerClient {
 				logger.error(":\n\n Download of "
 						+ " DICOM files for DICOM study/exam " + studyInstanceUID + ": " + " has failed.\n\n"
 						+ e.getMessage(), e);
+				return null;
 			}				
 		}
 		return retrievedDicomFiles;
