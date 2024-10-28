@@ -118,7 +118,7 @@ jobs:
   
           # extract the list of images to be built from the docker-compose config
           images = json.loads(subprocess.check_output(
-                  ["docker", "buildx", "bake", "--print", "-f", "docker-compose.yml"])
+                  ["docker", "buildx", "bake", "--print", "-f", "docker-compose-dev.yml"])
               )["group"]["default"]["targets"]
 
           # override the bake config (add cache config + set tags & labels)
