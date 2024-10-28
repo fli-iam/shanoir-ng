@@ -25,7 +25,15 @@
         <fieldset>
             <ol>
                 <li>
-                    <label i18n="Center detail|Name label@@centerDetailName">Name</label>
+                    <label i18n="Planned execution detail|StudyId label@@centerDetailName">Study</label>
+                    <span class="right-col" [ngSwitch]="mode">
+						<ng-template [ngSwitchCase]="'view'">
+							{{plannedExecution.study}}
+						</ng-template>
+					</span>
+                </li>
+                <li>
+                    <label i18n="Planned execution detail|Name label@@centerDetailName">Name</label>
                     <span class="right-col" [ngSwitch]="mode">
 						<ng-template [ngSwitchCase]="'view'">
 							{{plannedExecution.name}}

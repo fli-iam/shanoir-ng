@@ -21,7 +21,12 @@ export class PlannedExecutionListComponent extends BrowserPaginEntityListCompone
 
     constructor(protected plannedExecutionService: PlannedExecutionService,
                 protected studyRightsService: StudyRightsService) {
-        super('plannedExecution')
+        super('planned-execution')
+    }
+
+    ngOnInit() {
+        super.ngOnInit()
+        this.breadcrumbsService.currentStep.addPrefilled("studyId", this.studyId)
     }
 
     getService(): EntityService<PlannedExecution> {

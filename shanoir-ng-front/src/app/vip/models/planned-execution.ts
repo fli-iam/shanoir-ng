@@ -15,5 +15,6 @@ import {Entity} from "../../shared/components/entity/entity.abstract";
 
 export class PlannedExecution extends Entity {
     id: number
+    study: number
     name: string
 }

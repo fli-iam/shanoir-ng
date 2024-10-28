@@ -2,6 +2,7 @@ package org.shanoir.ng.vip.planning.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.vip.monitoring.model.PipelineParameter;
 
@@ -12,10 +13,7 @@ import java.util.List;
  */
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PlannedExecution {
-
-    @Id
-    private Long id;
+public class PlannedExecution extends HalEntity {
 
     private String name;
 
@@ -35,14 +33,6 @@ public class PlannedExecution {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public Study getStudy() {

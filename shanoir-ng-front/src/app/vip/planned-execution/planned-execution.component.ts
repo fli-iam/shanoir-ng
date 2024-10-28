@@ -15,6 +15,7 @@ import {FormArray, FormGroup, Validators} from "@angular/forms";
 import {StudyCardRulesComponent} from "../../study-cards/study-card-rules/study-card-rules.component";
 import {QualityCard} from "../../study-cards/shared/quality-card.model";
 import {EntityService} from "../../shared/components/entity/entity.abstract.service";
+import {Center} from "../../centers/shared/center.model";
 
 
 @Component({
@@ -25,21 +26,24 @@ import {EntityService} from "../../shared/components/entity/entity.abstract.serv
 @ModesAware
 export class PlannedExecutionComponent extends EntityComponent<PlannedExecution> {
 
+    studyId: number;
+
     constructor(
         private route: ActivatedRoute,
         private studyRightsService: StudyRightsService,
         keycloakService: KeycloakService,
         protected plannedExecutionService: PlannedExecutionService) {
         super(route, 'planned-execution');
+        this.studyId = this.breadcrumbsService.currentStep.getPrefilledValue("studyId")
     }
 
     get plannedExecution(): PlannedExecution { return this.entity; }
     set plannedExecution(pe: PlannedExecution) { this.entity= pe; }
 
-
     buildForm(): FormGroup {
         return this.formBuilder.group({
             'name': [this.plannedExecution.name, [Validators.required, Validators.minLength(2), this.registerOnSubmitValidator('unique', 'name')]],
+            'studyId': [this.plannedExecution.study, [Validators.required]],
         });
     }
 
@@ -48,6 +52,8 @@ export class PlannedExecutionComponent extends EntityComponent<PlannedExecution>
     }
 
     initCreate(): Promise<void> {
+        this.entity = new PlannedExecution();
+        this.entity.study = this.studyId;
         return Promise.resolve();
     }
 

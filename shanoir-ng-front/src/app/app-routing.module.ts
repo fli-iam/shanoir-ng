@@ -130,9 +130,6 @@ let routes: Routes = [
         path: 'execution-monitoring',
         component: ExecutionMonitoringsComponent
     }, {
-        path: 'planned-execution',
-        component: PlannedExecutionComponent
-    }, {
         path: 'planned-execution-list',
         component: PlannedExecutionListComponent
     }, {
@@ -836,6 +833,21 @@ let routes: Routes = [
     {
         path: 'access-request/list',
         component: AccessRequestListComponent
+    },
+    {
+        path: 'planned-execution/create',
+        component: PlannedExecutionComponent,
+        data: { mode: 'create' },
+    },
+    {
+        path: 'planned-execution/edit/:id',
+        component: PlannedExecutionComponent,
+        data: { mode: 'edit' },
+    },
+    {
+        path: 'planned-execution/details/:id',
+        component: PlannedExecutionComponent,
+        data: { mode: 'view' },
     }
 ];
 

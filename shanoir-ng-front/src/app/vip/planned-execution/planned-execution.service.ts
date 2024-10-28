@@ -17,6 +17,7 @@ import {HttpClient} from "@angular/common/http";
 import * as AppUtils from "../../utils/app.utils";
 import {PlannedExecution} from "../models/planned-execution";
 import {EntityService} from "../../shared/components/entity/entity.abstract.service";
+import {BACKEND_API_VIP_PLANNED_EXEC_URL} from "../../utils/app.utils";
 
 @Injectable()
 export class PlannedExecutionService extends EntityService<PlannedExecution> {
@@ -32,6 +33,6 @@ export class PlannedExecutionService extends EntityService<PlannedExecution> {
    * @param study_id the study id we want the automatic executions from
    */
   public getPlannedExecutionsByStudy(study_id: number): Promise<PlannedExecution[]> {
-    return this.httpClient.get<PlannedExecution[]>(this.API_URL + study_id).toPromise();
+    return this.httpClient.get<PlannedExecution[]>(this.API_URL + "/byStudy/" + study_id).toPromise();
   }
 }
