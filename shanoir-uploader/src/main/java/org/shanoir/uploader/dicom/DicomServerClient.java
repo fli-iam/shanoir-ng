@@ -184,10 +184,14 @@ public class DicomServerClient implements IDicomServerClient {
 					File destDicomFile = new File(destSerieFolder, dicomFileName);
 					Files.move(sourceFileFromPacs.toPath(), destDicomFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 				}
-				downloadOrCopyReport.append("Download: serie (No. " + serie.getSeriesNumber() + ") " + serie.getSeriesDescription()
+				downloadOrCopyReport.append("Download: serie "
+					+ (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
+					+ serie.getSeriesDescription()
 					+ " downloaded with " + fileNamesForSerie.size() + " images.\n");
 				if (serie.getInstances().size() != fileNamesForSerie.size()) {
-					downloadOrCopyReport.append("Error: Download: serie (No. " + serie.getSeriesNumber() + ") " + serie.getSeriesDescription()
+					downloadOrCopyReport.append("Error: Download: serie "
+						+ (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
+						+ serie.getSeriesDescription()
 						+ " downloaded with " + fileNamesForSerie.size()
 						+ " images not equal to instances in the DICOM server: " + serie.getInstances().size() + ".\n");
 				}
@@ -196,7 +200,9 @@ public class DicomServerClient implements IDicomServerClient {
 						+ " DICOM files for serie " + seriesInstanceUID + ": " + serie.getSeriesDescription()
 						+ " was successful.\n\n");
 			} else {
-				downloadOrCopyReport.append("Error: Download: serie (No. " + serie.getSeriesNumber() + ") " + serie.getSeriesDescription() + " downloaded with not existing serie folder.\n");
+				downloadOrCopyReport.append("Error: Download: serie "
+					+ (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
+				 	+ serie.getSeriesDescription() + " downloaded with not existing serie folder.\n");
 				logger.error(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
 						+ " DICOM files for serie " + seriesInstanceUID + ": " + serie.getSeriesDescription()
 						+ " has failed.\n\n");

@@ -380,6 +380,13 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				serie.setSopClassUID(sopClassUIDDicomFile);
 			}
 		}
+		if (StringUtils.isEmpty(serie.getSeriesNumber())) {
+			// has not been sent by PACS (case for Telemis), get it from .dcm file:
+			String seriesNumberDicomFile = attributes.getString(Tag.SeriesNumber);
+			if (StringUtils.isNotEmpty(seriesNumberDicomFile)) {
+				serie.setSeriesNumber(seriesNumberDicomFile);
+			}
+		}
 		if (StringUtils.isEmpty(serie.getSeriesDescription())) {
 			// has not been found in dicomdir or before in other file, so we get it from .dcm file:
 			String seriesDescriptionDicomFile = attributes.getString(Tag.SeriesDescription);
