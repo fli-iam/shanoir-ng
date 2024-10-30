@@ -212,8 +212,8 @@ public class DicomServerClient implements IDicomServerClient {
 
 	private void downloadFromDicomServer(String studyInstanceUID, List<Serie> selectedSeries, final JProgressBar progressBar, StringBuilder downloadOrCopyReport) throws Exception {
 		// 1. query instances/images for selected series to get DICOM file names
+		queryPACSService.queryCFINDsInstances(studyInstanceUID, selectedSeries);
 		for (Serie serie : selectedSeries) {
-			queryPACSService.queryCFINDInstances(studyInstanceUID, serie);
 			List<Instance> instances = serie.getInstances();
 			if (instances == null || instances.isEmpty()) {
 				downloadOrCopyReport.append("Error: Download: serie " + serie.getSeriesDescription() + " has no images (ignored).\n");

@@ -228,6 +228,25 @@ public class QueryPACSService {
 		LOG.debug("------------------------------");
 	}
 
+	public void queryCFINDsInstances(String studyInstanceUID, List<Serie> selectedSeries) throws Exception {
+		LOG.debug("------------------------------");
+		LOG.debug("--- START C-FIND Instances ---");
+		LOG.debug("------------------------------");
+		long start = System.currentTimeMillis();
+		Association association = connectAssociation(calling, called, true);
+		for (Serie serie : selectedSeries) {
+			LOG.info("Query instances/images (before c-move) for serie: " + serie.getSeriesDescription());
+			queryInstances(association, studyInstanceUID, serie);
+		}
+		releaseAssociation(association);
+		long finish = System.currentTimeMillis();
+		long timeElapsed = finish - start;
+		LOG.debug("Duration of all calls of queryCFIND " + timeElapsed + "ms.");
+		LOG.debug("------------------------------");
+		LOG.debug("--- END C-FIND Instances -----");
+		LOG.debug("------------------------------");
+	}
+
 	public void queryCMOVEs(String studyInstanceUID, List<Serie> selectedSeries, JProgressBar progressBar) throws Exception {
 		LOG.info("--------------------");
 		LOG.info("--- START C-MOVES --");
