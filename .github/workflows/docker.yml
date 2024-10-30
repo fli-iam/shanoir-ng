@@ -143,4 +143,7 @@ jobs:
       - name: Build docker images
         uses: docker/bake-action@v4
         with:
+          files:
+            - docker-compose-dev.yml
+            - docker-bake.json
           push: true
