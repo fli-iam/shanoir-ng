@@ -94,7 +94,7 @@ Then the shanoir-downloader project can be simply managed as a normal git repo (
 
 * Using locally built docker images
 * Run "mvn clean install -DskipTests" in shanoir-ng/shanoir-ng-parent/ folder
-* Run docker-compose up -f docker-compose-dev.yml --build in shanoir-ng/
+* Run docker-compose -f docker-compose-dev.yml up --build in shanoir-ng/
 
 * Using github packages images
 * Run docker-compose up --build in shanoir-ng/
