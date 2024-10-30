@@ -131,6 +131,8 @@ public class Examination extends HalEntity {
 
     private Long sourceId;
 
+    private String copyMessage;
+
     public Examination() {
 
     }
@@ -425,5 +427,13 @@ public class Examination extends HalEntity {
 
     public void setSourceId(Long sourceId) {
         this.sourceId = sourceId;
+    }
+
+    public String getCopyMessage() {
+        return copyMessage;
+    }
+
+    public void setCopyMessage(String copyMessage) {
+        this.copyMessage = copyMessage;
     }
 }

@@ -142,6 +142,8 @@ public abstract class Dataset extends AbstractEntity {
 	@Transient
 	public String SOPInstanceUID;
 
+	private String copyMessage;
+
 	public Dataset() {
 	}
 
@@ -464,5 +466,13 @@ public abstract class Dataset extends AbstractEntity {
 
 	public void setTags(List<StudyTag> tags) {
 		this.tags = tags;
+	}
+
+	public String getCopyMessage() {
+		return copyMessage;
+	}
+
+	public void setCopyMessage(String copyMessage) {
+		this.copyMessage = copyMessage;
 	}
 }

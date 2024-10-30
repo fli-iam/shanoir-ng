@@ -57,6 +57,7 @@ public class ExaminationDTO {
 	private List<InstrumentBasedAssessment> instrumentBasedAssessmentList;
 
 	private List<String> extraDataFilePathList;
+	private String copyMessage;
 
 	/**
 	 * @return the id
@@ -191,5 +192,13 @@ public class ExaminationDTO {
 
 	public void setWeightUnitOfMeasure(UnitOfMeasure weightUnitOfMeasure) {
 		this.weightUnitOfMeasure = weightUnitOfMeasure;
+	}
+
+	public String getCopyMessage() {
+		return copyMessage;
+	}
+
+	public void setCopyMessage(String copyMessage) {
+		this.copyMessage = copyMessage;
 	}
 }

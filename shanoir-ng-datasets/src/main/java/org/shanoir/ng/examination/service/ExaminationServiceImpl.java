@@ -55,6 +55,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Examination service implementation.
@@ -192,7 +193,23 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 	@Override
 	public Examination findById(final Long id) {
-		return examinationRepository.findById(id).orElse(null);
+		Examination exam = examinationRepository.findById(id).orElse(null);
+		LOG.error("findById exam.id : " + id);
+		LOG.error("findById exam.sourceId : " + exam.getSourceId());
+		List<Examination> childExam = examinationRepository.findBySourceId(id);
+		if (!CollectionUtils.isEmpty(childExam)) {
+			String copyMsg = "This examination has been copied: ";
+			copyMsg += childExam.stream().map(Examination::getId).map(String::valueOf).collect(Collectors.joining(","));
+			LOG.error("CopyMsg : " + copyMsg);
+			exam.setCopyMessage(copyMsg);
+		}
+		if (exam.getSourceId() != null) {
+			String copyMsg = "This examination is the copy of : " + exam.getSourceId();
+			LOG.error("CopyMsg : " + copyMsg);
+			exam.setCopyMessage(copyMsg);
+		}
+
+		return exam;
 	}
 
 	@Override

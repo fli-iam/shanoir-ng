@@ -54,6 +54,8 @@ public class DatasetDTO {
 	
 	private List<StudyTagDTO> tags;
 
+	private String copyMessage;
+
 	/**
 	 * @return the creationDate
 	 */
@@ -197,5 +199,13 @@ public class DatasetDTO {
 
 	public void setTags(List<StudyTagDTO> tags) {
 		this.tags = tags;
+	}
+
+	public String getCopyMessage() {
+		return copyMessage;
+	}
+
+	public void setCopyMessage(String copyMessage) {
+		this.copyMessage = copyMessage;
 	}
 }

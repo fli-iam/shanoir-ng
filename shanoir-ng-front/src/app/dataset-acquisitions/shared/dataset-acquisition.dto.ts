@@ -102,7 +102,9 @@ export class DatasetAcquisitionDTOService {
         entity.rank = dto.rank;
         entity.softwareRelease = dto.softwareRelease;
         entity.sortingIndex = dto.sortingIndex;
+        entity.copyMessage = dto.copyMessage;
         entity.type = dto.type;
+        entity.copyMessage = dto.copyMessage;
         entity.importDate = dto.importDate;
         entity.username = dto.username;
         if (dto.acquisitionEquipmentId) {
@@ -157,6 +159,7 @@ export class DatasetAcquisitionDTO {
         this.type = dsAcq.type;
         this.importDate = dsAcq.importDate;
         this.username = dsAcq.username;
+        this.copyMessage = dsAcq.copyMessage;
     }
 
     id: number;
@@ -169,6 +172,7 @@ export class DatasetAcquisitionDTO {
     importDate: Date;
     type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Xa' | 'Generic' | 'Processed' | 'BIDS';
     username: string;
+    copyMessage: string;
 }
 
 export class MrDatasetAcquisitionDTO extends DatasetAcquisitionDTO {

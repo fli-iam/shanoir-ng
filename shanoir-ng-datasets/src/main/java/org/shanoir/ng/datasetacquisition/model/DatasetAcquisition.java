@@ -103,6 +103,8 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	/** Name of the user who did the import */
 	private String username;
 
+	private String copyMessage;
+
 	public DatasetAcquisition() {
 	}
 
@@ -118,6 +120,7 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 		this.importDate = other.importDate;
 		this.sourceId = other.sourceId;
 		this.username = other.username;
+		this.copyMessage = other.copyMessage;
 	}
 
 	/**
@@ -262,5 +265,13 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 
 	public void setUsername(String username) {
 		this.username = username;
+	}
+
+	public String getCopyMessage() {
+		return copyMessage;
+	}
+
+	public void setCopyMessage(String copyMessage) {
+		this.copyMessage = copyMessage;
 	}
 }

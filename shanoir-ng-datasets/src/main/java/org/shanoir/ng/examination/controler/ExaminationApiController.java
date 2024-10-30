@@ -129,6 +129,7 @@ public class ExaminationApiController implements ExaminationApi {
 			@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId)
 					throws RestServiceException {
 		Examination examination = examinationService.findById(examinationId);
+		LOG.error("APIController exam.copymsg : " + examination.getCopyMessage());
 		orderDatasetAcquisitions(examination);
 		if (examination == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);

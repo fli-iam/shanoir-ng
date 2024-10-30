@@ -46,6 +46,8 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     noDatasets: boolean = false;
     hasDicom: boolean = false;
     protected downloadState: TaskState = new TaskState();
+    copyRelation: string = "";
+    copyEntityIds: string[] = [];
 
     constructor(
             private route: ActivatedRoute,
@@ -73,6 +75,7 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     }
 
     initView(): Promise<void> {
+        this.getCopiedEntity(this.datasetAcquisition?.copyMessage);
         this.datasetService.getByAcquisitionId(this.datasetAcquisition.id).then(datasets => {
             this.datasetAcquisition.datasets = datasets;
             this.datasetAcquisition.datasets?.forEach(ds => {
@@ -124,5 +127,20 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
 
     downloadAll() {
         this.downloadService.downloadAllByAcquisitionId(this.datasetAcquisition?.id, this.downloadState);
+    }
+
+    getCopiedEntity(copyMsg: string) {
+        console.log("getCopiedEntity");
+        this.copyEntityIds = [];
+        if (copyMsg != null && copyMsg.includes('This acquisition has been copied')) {
+            this.copyEntityIds = copyMsg.substring(copyMsg.indexOf(":") + 1).split(",");
+            this.copyEntityIds = this.copyEntityIds.map(entityId => entityId.trim());
+            this.copyRelation = "copied";
+        } else if (copyMsg != null && copyMsg.includes('This acquisition is the copy of')) {
+            this.copyEntityIds[0] = copyMsg.substring(copyMsg.indexOf(':') + 1).trim();
+            this.copyRelation = "copy";
+        } else {
+            this.copyRelation = "";
+        }
     }
 }

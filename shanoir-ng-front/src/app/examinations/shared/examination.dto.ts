@@ -73,6 +73,7 @@ export class ExaminationDTOService {
         entity.id = dto.id;
         entity.examinationDate = new Date(dto.examinationDate);
         entity.comment = dto.comment;
+        entity.copyMessage = dto.copyMessage;
         entity.note = dto.note;
         entity.subjectWeight = dto.subjectWeight;
         entity.weightUnitOfMeasure = dto.weightUnitOfMeasure;
@@ -109,9 +110,11 @@ export class ExaminationDTO {
     preclinical: boolean;
     instrumentBasedAssessmentList: InstrumentBasedAssessment[];
     extraDataFilePathList: string[] = [];
+    copyMessage : string;
 
     constructor(examination?: Examination) {
         if (examination) {
+            console.log("examination : ", examination);
             this.id = examination.id;
             this.centerId = examination.center ? examination.center.id : null;
             this.comment = examination.comment;
@@ -124,6 +127,7 @@ export class ExaminationDTO {
             this.preclinical = examination.preclinical;
             this.extraDataFilePathList = examination.extraDataFilePathList;
             this.instrumentBasedAssessmentList = examination.instrumentBasedAssessmentList;
+            this.copyMessage = examination.copyMessage;
         }
     }
 }

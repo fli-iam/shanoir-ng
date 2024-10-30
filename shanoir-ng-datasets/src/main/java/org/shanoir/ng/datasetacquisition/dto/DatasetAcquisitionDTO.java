@@ -45,6 +45,8 @@ public class DatasetAcquisitionDTO {
 
 	private String username;
 
+	private String copyMessage;
+
 	
 	public Long getId() {
 		return id;
@@ -140,5 +142,13 @@ public class DatasetAcquisitionDTO {
 
 	public void setUsername(String username) {
 		this.username = username;
+	}
+
+	public String getCopyMessage() {
+		return copyMessage;
+	}
+
+	public void setCopyMessage(String copyMessage) {
+		this.copyMessage = copyMessage;
 	}
 }

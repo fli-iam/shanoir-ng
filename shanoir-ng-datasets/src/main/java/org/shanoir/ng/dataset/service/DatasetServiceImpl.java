@@ -186,7 +186,20 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Override
 	public Dataset findById(final Long id) {
-		return repository.findById(id).orElse(null);
+		Dataset ds = repository.findById(id).orElse(null);
+		List<Dataset> childDs = repository.findBySourceId(id);
+		if (!CollectionUtils.isEmpty(childDs)) {
+			String copyMsg = "This dataset has been copied: ";
+			copyMsg += childDs.stream().map(Dataset::getId).map(String::valueOf).collect(Collectors.joining(","));
+			LOG.error("CopyMsg : " + copyMsg);
+			ds.setCopyMessage(copyMsg);
+		}
+		if (ds.getSourceId() != null) {
+			String copyMsg = "This dataset is the copy of : " + ds.getSourceId();
+			LOG.error("CopyMsg : " + copyMsg);
+			ds.setCopyMessage(copyMsg);
+		}
+		return ds;
 	}
 
 	@Override

@@ -19,6 +19,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationServiceImpl;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -102,7 +103,20 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
     @Override
     public DatasetAcquisition findById(Long id) {
-        return repository.findById(id).orElse(null);
+        DatasetAcquisition dsAcq = repository.findById(id).orElse(null);
+        List<DatasetAcquisition> childAcq = repository.findBySourceId(id);
+        if (!CollectionUtils.isEmpty(childAcq)) {
+            String copyMsg = "This acquisition has been copied: ";
+            copyMsg += childAcq.stream().map(DatasetAcquisition::getId).map(String::valueOf).collect(Collectors.joining(","));
+            LOG.error("CopyMsg : " + copyMsg);
+            dsAcq.setCopyMessage(copyMsg);
+        }
+        if (dsAcq.getSourceId() != null) {
+            String copyMsg = "This acquisition is the copy of : " + dsAcq.getSourceId();
+            LOG.error("CopyMsg : " + copyMsg);
+            dsAcq.setCopyMessage(copyMsg);
+        }
+        return dsAcq;
     }
 
     @Override

@@ -42,6 +42,7 @@ export abstract class Dataset extends Entity {
     processings: DatasetProcessing[] = [];
     inPacs: boolean;
     tags: Tag[];
+    copyMessage: string;
 }
 
 export class DatasetMetadata {

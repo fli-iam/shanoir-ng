@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import {Component, ElementRef, EventEmitter, Output, ViewChild} from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
@@ -33,6 +33,7 @@ import { StudyService } from '../../studies/shared/study.service';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
+import {ExaminationNode} from "../../tree/tree.model";
 
 @Component({
     selector: 'examination-detail',
@@ -64,7 +65,12 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     hasBids: boolean = false;
     unit = UnitOfMeasure;
     defaultUnit = this.unit.KG;
+    copyRelation: string = "";
+    copyEntityIds: string[] = [];
 
+    @Output() firstOpen = new EventEmitter();
+
+    @Output() nodeInit = new EventEmitter();
 
     constructor(
             private route: ActivatedRoute,
@@ -106,6 +112,12 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
 
     initView(): Promise<void> {
+        console.log("init view exam.id : ", this.examination.id);
+        this.getCopiedEntity(this.examination?.copyMessage);
+        this.firstOpen.emit();
+        this.nodeInit.emit();
+        //this.treeService.selection = this.getTreeSelection();
+
         if(!this.examination.weightUnitOfMeasure){
             this.examination.weightUnitOfMeasure = this.defaultUnit;
         }
@@ -151,7 +163,8 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             'comment': [this.examination.comment, Validators.pattern(this.pattern)],
             'note': [this.examination.note],
             'subjectWeight': [this.examination.subjectWeight],
-            'weightUnitOfMeasure': [this.examination.weightUnitOfMeasure]
+            'weightUnitOfMeasure': [this.examination.weightUnitOfMeasure],
+            'copyMessage': [this.examination.copyMessage]
         });
     }
 
@@ -166,6 +179,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     openSegmentationViewer() {
         window.open(environment.viewerUrl + '/segmentation?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
     }
+
     getCenters(): void {
         this.centerService
             .getCentersNames()
@@ -201,13 +215,9 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         this.getSubjects();
     }
 
-    instAssessment() {
-    }
-
     public async hasEditRight(): Promise<boolean> {
 	   return this.keycloakService.isUserAdmin() || this.hasImportRight;
     }
-
 
     public async hasDeleteRight(): Promise<boolean> {
          return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
@@ -256,4 +266,18 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         return UnitOfMeasure.getLabelByKey(key);
     }
 
+    getCopiedEntity(copyMsg: string) {
+        console.log("getCopiedEntity");
+        this.copyEntityIds = [];
+        if (copyMsg != null && copyMsg.includes('This examination has been copied')) {
+            this.copyEntityIds = copyMsg.substring(copyMsg.indexOf(":") + 1).split(",");
+            this.copyEntityIds = this.copyEntityIds.map(entityId => entityId.trim());
+            this.copyRelation = "copied";
+        } else if (copyMsg != null && copyMsg.includes('This examination is the copy of')) {
+            this.copyEntityIds[0] = copyMsg.substring(copyMsg.indexOf(':') + 1).trim();
+            this.copyRelation = "copy";
+        } else {
+            this.copyRelation = "";
+        }
+    }
 }

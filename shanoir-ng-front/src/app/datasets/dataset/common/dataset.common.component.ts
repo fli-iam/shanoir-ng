@@ -45,7 +45,8 @@ export class CommonDatasetComponent implements OnChanges {
     CardinalityOfRelatedSubjects = CardinalityOfRelatedSubjects;
     ExploredEntity = ExploredEntity;
     ProcessedDatasetType = ProcessedDatasetType;
-
+    copyRelation: string = "";
+    copyEntityIds: string[] = [];
 
     constructor(
             private studyService: StudyService,
@@ -64,6 +65,7 @@ export class CommonDatasetComponent implements OnChanges {
     }
 
     ngOnChanges(changes: SimpleChanges) {
+        this.getCopiedEntity(this.dataset?.copyMessage);
         if (changes['parentFormGroup']) {
             this.completeForm();
         }
@@ -120,5 +122,20 @@ export class CommonDatasetComponent implements OnChanges {
         this.studyService.getAll().then(studies => {
             this.studies = studies;
         });
+    }
+
+    getCopiedEntity(copyMsg: string) {
+        console.log("getCopiedEntity");
+        this.copyEntityIds = [];
+        if (copyMsg != null && copyMsg.includes('This dataset has been copied')) {
+            this.copyEntityIds = copyMsg.substring(copyMsg.indexOf(":") + 1).split(",");
+            this.copyEntityIds = this.copyEntityIds.map(entityId => entityId.trim());
+            this.copyRelation = "copied";
+        } else if (copyMsg != null && copyMsg.includes('This dataset is the copy of')) {
+            this.copyEntityIds[0] = copyMsg.substring(copyMsg.indexOf(':') + 1).trim();
+            this.copyRelation = "copy";
+        } else {
+            this.copyRelation = "";
+        }
     }
 }
