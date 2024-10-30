@@ -21,7 +21,9 @@ public class PlannedExecution extends HalEntity {
     @JoinColumn(name = "study_id")
     private Study study;
 
-    private String execution;
+    private String vipPipeline;
+
+    private String examinationNameFilter;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "execution_pipeline_parameters")
@@ -43,12 +45,12 @@ public class PlannedExecution extends HalEntity {
         this.study = study;
     }
 
-    public String getExecution() {
-        return execution;
+    public String getVipPipeline() {
+        return vipPipeline;
     }
 
-    public void setExecution(String execution) {
-        this.execution = execution;
+    public void setVipPipeline(String execution) {
+        this.vipPipeline = execution;
     }
 
     public List<PipelineParameter> getParameters() {
@@ -58,4 +60,9 @@ public class PlannedExecution extends HalEntity {
     public void setParameters(List<PipelineParameter> parameters) {
         this.parameters = parameters;
     }
+
+    public String getExaminationNameFilter() { return examinationNameFilter; }
+
+    public void setExaminationNameFilter(String examinationNameFilter) { this.examinationNameFilter = examinationNameFilter; }
+
 }

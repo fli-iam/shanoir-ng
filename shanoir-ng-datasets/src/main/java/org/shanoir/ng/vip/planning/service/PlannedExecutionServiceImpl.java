@@ -1,6 +1,7 @@
 package org.shanoir.ng.vip.planning.service;
 
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.vip.planning.dto.PlannedExecutionDTO;
 import org.shanoir.ng.vip.planning.model.PlannedExecution;
 import org.shanoir.ng.vip.planning.repository.PlannedExecutionRepository;
 import org.slf4j.Logger;
@@ -26,8 +27,17 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
     }
 
     @Override
-    public PlannedExecution update(PlannedExecution plannedExecution) {
-        return this.plannedExecutionRepository.save(plannedExecution);
+    public PlannedExecution update(Long plannedExecutionId, PlannedExecutionDTO plannedExecution) {
+        PlannedExecution dbExecution = this.plannedExecutionRepository.findById(plannedExecutionId).orElse(null);
+
+        if (dbExecution == null) {
+            return null;
+        }
+
+        // Update updatable fields only
+        dbExecution.setName(plannedExecution.getName());
+
+        return this.plannedExecutionRepository.save(dbExecution);
     }
 
     @Override
@@ -36,13 +46,8 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
     }
 
     @Override
-    public void delete(Long executionId) {
-        PlannedExecution execution = this.findById(executionId);
-        if (execution == null) {
-            // Already deleted
-            return;
-        }
-        this.plannedExecutionRepository.delete(execution);
+    public void delete(PlannedExecution plannedExecution) {
+        this.plannedExecutionRepository.delete(plannedExecution);
     }
 
     @Override

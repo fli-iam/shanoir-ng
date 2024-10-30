@@ -16,6 +16,10 @@ import {StudyCardRulesComponent} from "../../study-cards/study-card-rules/study-
 import {QualityCard} from "../../study-cards/shared/quality-card.model";
 import {EntityService} from "../../shared/components/entity/entity.abstract.service";
 import {Center} from "../../centers/shared/center.model";
+import {PipelineService} from "../pipelines/pipeline/pipeline.service";
+import {Pipeline} from "../models/pipeline";
+import {PipelineParameter} from "../models/pipelineParameter";
+import {ParameterType} from "../models/parameterType";
 
 
 @Component({
@@ -27,11 +31,14 @@ import {Center} from "../../centers/shared/center.model";
 export class PlannedExecutionComponent extends EntityComponent<PlannedExecution> {
 
     studyId: number;
+    pipelines: Pipeline[]
+    selectedPipeline: Pipeline
 
     constructor(
         private route: ActivatedRoute,
         private studyRightsService: StudyRightsService,
         keycloakService: KeycloakService,
+        private pipelineService: PipelineService,
         protected plannedExecutionService: PlannedExecutionService) {
         super(route, 'planned-execution');
         this.studyId = this.breadcrumbsService.currentStep.getPrefilledValue("studyId")
@@ -54,10 +61,20 @@ export class PlannedExecutionComponent extends EntityComponent<PlannedExecution>
     initCreate(): Promise<void> {
         this.entity = new PlannedExecution();
         this.entity.study = this.studyId;
-        return Promise.resolve();
+        this.pipelineService.listPipelines().subscribe(
+            (pipelines :Pipeline[])=>{
+                this.pipelines = pipelines;
+            }
+        )
+        return Promise.resolve()
     }
 
     initEdit(): Promise<void> {
+        this.pipelineService.listPipelines().subscribe(
+            (pipelines :Pipeline[])=>{
+                this.pipelines = pipelines;
+            }
+        )
         return Promise.resolve();
     }
 
@@ -65,5 +82,8 @@ export class PlannedExecutionComponent extends EntityComponent<PlannedExecution>
         return Promise.resolve();
     }
 
+    isAFile(parameter: PipelineParameter): boolean {
+        return parameter.type == ParameterType.File;
+    }
 
 }

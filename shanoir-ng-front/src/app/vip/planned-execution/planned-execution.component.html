@@ -45,7 +45,36 @@
 						</ng-template>
 					</span>
                 </li>
+                <li>
+                    <label>Pipeline</label>
+                    <span class="right-col" [ngSwitch]="mode">
+						<ng-template [ngSwitchCase]="'view'">
+							{{plannedExecution.vipPipeline}}
+						</ng-template>
+						<ng-template ngSwitchDefault>
+                            <select-box formControlName="vipPipeline" [(ngModel)]="plannedExecution.vipPipeline" [optionArr]="pipelines">
+                            </select-box>
+						</ng-template>
+					</span>
+                </li>
+
             </ol>
+            <div *ngIf="selectedPipeline">
+                <div *ngFor="let parameter of selectedPipeline.parameters">
+                    <div *ngIf="parameter.name != 'executable'">
+                        <label>{{parameter.name}}{{!parameter.isOptional && parameter.type != 'Boolean' ? '*' : ''}}
+                            <tool-tip> {{isAFile(parameter) ? 'Regular expression to filter among the selected datasets. ' + parameter.description : parameter.description}} </tool-tip></label>
+                        <input *ngIf="!isAFile(parameter) && parameter.type != 'Boolean'" formControlName="{{parameter.name}}" name="{{parameter.name}}" id="{{parameter.name}}">
+                        <span *ngIf="parameter.type == 'Boolean'">
+                     <checkbox formControlName="{{parameter.name}}" id="{{parameter.name}}"></checkbox>
+                 </span>
+                        <span *ngIf="isAFile(parameter)">
+                            <input *ngIf="isAFile(parameter)"
+                                formControlName="{{parameter.name}}" name="{{parameter.name}}" id="{{parameter.name}}">
+                        </span>
+                    </div>
+                </div>
+            </div>
         </fieldset>
-        </form>
+    </form>
 </div>

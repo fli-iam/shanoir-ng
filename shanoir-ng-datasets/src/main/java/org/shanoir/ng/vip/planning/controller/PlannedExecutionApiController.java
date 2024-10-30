@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -43,7 +44,10 @@ public class PlannedExecutionApiController implements PlannedExecutionApi {
 
     @Override
     public ResponseEntity<Void> deletePlannedExecution(@Parameter(description = "The PlannedExecution Id", required=true) @PathVariable("executionId") Long executionId) throws IOException, RestServiceException, EntityNotFoundException, SecurityException{
-        this.plannedExecutionService.delete(executionId);
+        PlannedExecution plannedExecution = this.plannedExecutionService.findById(executionId);
+        if (plannedExecution != null) {
+            this.plannedExecutionService.delete(plannedExecution);
+        }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -53,8 +57,11 @@ public class PlannedExecutionApiController implements PlannedExecutionApi {
     }
 
     @Override
-    public ResponseEntity<PlannedExecutionDTO> updatePlannedExecution(@RequestBody PlannedExecution plannedExecution) throws IOException, RestServiceException, EntityNotFoundException, SecurityException {
-        return new ResponseEntity<>(peMapper.PlannedExecutionToDTO(this.plannedExecutionService.update(plannedExecution)), HttpStatus.OK);
+    public ResponseEntity<PlannedExecutionDTO> updatePlannedExecution(
+            @Parameter(description = "id of the planned execution", required = true) @PathVariable("executionId") Long executionId,
+            @Parameter(description = "center to update", required = true) @RequestBody PlannedExecutionDTO plannedExecution, BindingResult result)
+            throws IOException, RestServiceException, EntityNotFoundException, SecurityException {
+        return new ResponseEntity<>(peMapper.PlannedExecutionToDTO(this.plannedExecutionService.update(executionId, plannedExecution)), HttpStatus.OK);
     }
 
 }
