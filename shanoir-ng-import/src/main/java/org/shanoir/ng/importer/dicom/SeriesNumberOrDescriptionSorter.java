@@ -38,6 +38,9 @@ public class SeriesNumberOrDescriptionSorter implements Comparator<Serie> {
 		} catch(NumberFormatException e) {
 			String s1SeriesDescription = s1.getSeriesDescription();
 			String s2SeriesDescription = s2.getSeriesDescription();
+			if (s1SeriesDescription == null || s2SeriesDescription == null) {
+				return 0;
+			}
 			return s1SeriesDescription.compareToIgnoreCase(s2SeriesDescription);
 		}
 	}
