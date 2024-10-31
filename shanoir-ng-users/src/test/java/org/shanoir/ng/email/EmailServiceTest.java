@@ -90,7 +90,7 @@ public class EmailServiceTest {
 	}
 
 	@Test
-	@WithMockKeycloakUser(authorities = { "ROLE_ADMIN" })
+	@WithMockKeycloakUser(id = 4, username = "phdauvergne", authorities = { "ROLE_ADMIN" })
 	public void notifyAccountRequestAcceptedTest() throws Exception {
 		emailService.notifyAccountRequestAccepted(ModelsUtil.createUser());
 		assertReceivedMessageContains("Granted: Your Shanoir account has been activated", "Your account request has been granted");
@@ -103,7 +103,7 @@ public class EmailServiceTest {
 	}
 
 	@Test
-	@WithMockKeycloakUser(authorities = { "ROLE_ADMIN" })
+	@WithMockKeycloakUser(id = 4, username = "phdauvergne", authorities = { "ROLE_ADMIN" })
 	public void notifyExtensionRequestAcceptedTest() throws Exception {
 		emailService.notifyExtensionRequestAccepted(ModelsUtil.createUser());
 		assertReceivedMessageContains("Granted: Your Shanoir account extension has been extended", "Your account extension request has been granted");
