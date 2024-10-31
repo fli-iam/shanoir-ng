@@ -14,7 +14,7 @@ public class PlannedExecutionDTO extends HalEntity {
 
     private String name;
 
-    private long study;
+    private long studyId;
 
     private String vipPipeline;
 
@@ -22,9 +22,9 @@ public class PlannedExecutionDTO extends HalEntity {
 
     private List<PipelineParameter> parameters;
 
-    public long getStudy() { return study; }
+    public long getStudyId() { return studyId; }
 
-    public void setStudy(long study) { this.study = study; }
+    public void setStudyId(long studyId) { this.studyId = studyId; }
 
     public String getName() {
         return name;

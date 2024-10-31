@@ -3,7 +3,6 @@ package org.shanoir.ng.vip.planning.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import org.shanoir.ng.shared.hateoas.HalEntity;
-import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.vip.monitoring.model.PipelineParameter;
 
 import java.util.List;
@@ -17,9 +16,7 @@ public class PlannedExecution extends HalEntity {
 
     private String name;
 
-    @ManyToOne
-    @JoinColumn(name = "study_id")
-    private Study study;
+    private Long studyId;
 
     private String vipPipeline;
 
@@ -35,14 +32,6 @@ public class PlannedExecution extends HalEntity {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Study getStudy() {
-        return study;
-    }
-
-    public void setStudy(Study study) {
-        this.study = study;
     }
 
     public String getVipPipeline() {
@@ -65,4 +54,11 @@ public class PlannedExecution extends HalEntity {
 
     public void setExaminationNameFilter(String examinationNameFilter) { this.examinationNameFilter = examinationNameFilter; }
 
+    public Long getStudyId() {
+        return studyId;
+    }
+
+    public void setStudyId(Long studyId) {
+        this.studyId = studyId;
+    }
 }

@@ -16,7 +16,7 @@ import {PipelineParameter} from "./pipelineParameter";
 
 export class PlannedExecution extends Entity {
     id: number
-    study: number
+    studyId: number
     name: string
     vipPipeline: string
     examinationNameFilter: string

@@ -39,6 +39,7 @@ public class PlannedExecutionApiController implements PlannedExecutionApi {
 
     @Override
     public ResponseEntity<PlannedExecutionDTO> saveNewPlannedExecution(@Parameter(description = "planned execution to create", required = true) @RequestBody PlannedExecution plannedExecution) throws IOException, RestServiceException, SecurityException {
+
         return new ResponseEntity<PlannedExecutionDTO>(peMapper.PlannedExecutionToDTO(this.plannedExecutionService.save(plannedExecution)), HttpStatus.OK);
     }
 

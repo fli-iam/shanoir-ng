@@ -50,7 +50,8 @@ export class PlannedExecutionComponent extends EntityComponent<PlannedExecution>
     buildForm(): FormGroup {
         return this.formBuilder.group({
             'name': [this.plannedExecution.name, [Validators.required, Validators.minLength(2), this.registerOnSubmitValidator('unique', 'name')]],
-            'studyId': [this.plannedExecution.study, [Validators.required]],
+            'studyId': [this.plannedExecution.studyId, [Validators.required]],
+            'vipPipeline': [this.plannedExecution.vipPipeline, [Validators.required]]
         });
     }
 
@@ -60,7 +61,7 @@ export class PlannedExecutionComponent extends EntityComponent<PlannedExecution>
 
     initCreate(): Promise<void> {
         this.entity = new PlannedExecution();
-        this.entity.study = this.studyId;
+        this.entity.studyId = this.studyId;
         this.pipelineService.listPipelines().subscribe(
             (pipelines :Pipeline[])=>{
                 this.pipelines = pipelines;
