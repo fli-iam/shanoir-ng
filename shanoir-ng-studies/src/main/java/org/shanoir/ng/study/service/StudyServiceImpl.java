@@ -315,23 +315,24 @@ public class StudyServiceImpl implements StudyService {
 
 			for (SubjectStudy subjectStudyDb : studyDb.getSubjectStudyList()) {
 				if(!updatedIds.contains(subjectStudyDb.getId())) {
-					removed.add(subjectStudyDb.getSubject());
-				}
-			}
-
-			for (Subject subject : removed) {
-				if (this.subjectStudyRepository.countBySubject(subject) == 1L) {
-					toBeDeleted.add(subject);
+					Subject sub = subjectStudyDb.getSubject();
+					removed.add(sub);
 
 					eventService.publishEvent(
 							new ShanoirEvent(
-									ShanoirEventType.DELETE_SUBJECT_EVENT,
-									subject.getId().toString(),
+									ShanoirEventType.REMOVE_SUBJECT_FROM_STUDY_EVENT,
+									sub.getId().toString(),
 									KeycloakUtil.getTokenUserId(),
-									"Subject " + subject.getName() + " (id: " + subject.getId() + ") removed from study " + study.getName() + " (id: " + study.getId() + ")",
-									ShanoirEvent.SUCCESS)
+									"Subject " + sub.getName() + " (id: " + sub.getId() + ") removed from study " + study.getName() + " (id: " + study.getId() + ")",
+									ShanoirEvent.SUCCESS,
+									study.getId())
 					);
 
+				}
+			}
+			for (Subject subject : removed) {
+				if (this.subjectStudyRepository.countBySubject(subject) == 1L) {
+					toBeDeleted.add(subject);
 				}
 			}
 		}
