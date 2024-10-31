@@ -24,6 +24,9 @@ import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -123,6 +126,9 @@ public class StudyServiceImpl implements StudyService {
 
 	@Autowired
 	private StudyCenterRepository studyCenterRepository;
+
+	@Autowired
+	private ShanoirEventService eventService;
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
@@ -316,6 +322,16 @@ public class StudyServiceImpl implements StudyService {
 			for (Subject subject : removed) {
 				if (this.subjectStudyRepository.countBySubject(subject) == 1L) {
 					toBeDeleted.add(subject);
+
+					eventService.publishEvent(
+							new ShanoirEvent(
+									ShanoirEventType.DELETE_SUBJECT_EVENT,
+									subject.getId().toString(),
+									KeycloakUtil.getTokenUserId(),
+									"Subject " + subject.getName() + " (id: " + subject.getId() + ") removed from study " + study.getName() + " (id: " + study.getId() + ")",
+									ShanoirEvent.SUCCESS)
+					);
+
 				}
 			}
 		}
