@@ -17,16 +17,15 @@ The Shanoir-NG website is available at:  https://project.inria.fr/shanoir/
 
 
 ## Shanoir-NG User documentation
-Detailed documentation for Shanoir users is available here.
-The rest of this README contains information for Shanoir developers 
-and maintainers
+Documentation for Shanoir users is available at (https://github.com/fli-iam/shanoir-ng/wiki#users)
 
-## Shanoir-NG repository 
-
-###  Branches
+##  The Shanoir-NG repository
+### Structure
+Official source code repository: https://github.com/scikit-learn/scikit-learn
 
 * The latest _stable version_ of Shanoir-NG is on `master` 
-* The latest _dev version_ of Shanoir-NG is on `develop` (if mature -> merged into master)
+* The latest _development version_ of Shanoir-NG is on `develop` 
+* The default branch of the repository is `develop`
 
 ### Cloning the Shanoir-NG repository
 
@@ -53,6 +52,8 @@ To build and deploy Shanoir, you will need:
 * at least 10GB of available RAM
 
 ### Installation instructions
+Detailed installation instructions are available at https://github.com/fli-iam/shanoir-ng/wiki#users)
+
 
 
 ## Help and Support
@@ -67,6 +68,7 @@ main Wiki entries:
    + [Maintainer Documentation](https://github.com/fli-iam/shanoir-ng/wiki#operations-ops-installation-updates-and-maintenance-administration)
    + [Project Management documentation](https://github.com/fli-iam/shanoir-ng/wiki)
    + [Shanoir-NG website](https://project.inria.fr/shanoir/)  
+   + 
 ### Communication
 + [News](https://project.inria.fr/shanoir/news/)  
 + [Youtube](https://www.youtube.com/watch?v=_Lpb3Pvw6e8)
