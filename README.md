@@ -4,15 +4,16 @@ Shanoir-NG (Next Generation) is a software that helps neuroimaging
 analysis researchers, radiologists, and MRI operators to organize 
 and share neuroimaging datasets. 
 
-Shanoir-NG is copyrighted by [Inria](https://www.inria.fr/) and is now open source under 
-the GNU General Public License v3.0.  See the ([LICENSE file](LICENSE)) 
-for details.
+Shanoir-NG is copyrighted by [Inria](https://www.inria.fr/) and is open source under 
+the [GNU General Public License v3.0](LICENSE). 
+
+The Shanoir NG website is available at:  https://project.inria.fr/shanoir/
 
 >[!Important]
 > Shanoir NG is still in the development phase. 
 > While many functionalities work well, some are not developed yet 
 > and some might be unstable. 
-> Also It still misses production features like database backup.
+> Also it still misses production features like database backup.
 
 ## Shanoir-NG User documentation
 
@@ -48,4 +49,5 @@ To build and deploy Shanoir, you will need:
 * at least 10GB of available RAM
 
 
+## 
 
