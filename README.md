@@ -19,7 +19,7 @@ The Shanoir-NG website is available at:  https://project.inria.fr/shanoir/
 ## Shanoir-NG User documentation
 Documentation for Shanoir users is available at https://github.com/fli-iam/shanoir-ng/wiki#users
 
-##  The Shanoir-NG repository
+## Shanoir-NG repository
 ### Structure
 Official source code repository:https://github.com/fli-iam/shanoir-ng
 
