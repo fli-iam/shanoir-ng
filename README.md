@@ -21,7 +21,7 @@ Documentation for Shanoir users is available at https://github.com/fli-iam/shano
 
 ## Shanoir-NG repository
 ### Structure
-Official source code repository:https://github.com/fli-iam/shanoir-ng
+Official source code repository: https://github.com/fli-iam/shanoir-ng
 
 * The latest _stable version_ of Shanoir-NG is on `master` 
 * The latest _development version_ of Shanoir-NG is on `develop` 
