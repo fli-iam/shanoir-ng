@@ -20,6 +20,7 @@ import {PipelineService} from "../pipelines/pipeline/pipeline.service";
 import {Pipeline} from "../models/pipeline";
 import {PipelineParameter} from "../models/pipelineParameter";
 import {ParameterType} from "../models/parameterType";
+import {ReturnStatement} from "@angular/compiler";
 
 
 @Component({
@@ -32,6 +33,7 @@ export class PlannedExecutionComponent extends EntityComponent<PlannedExecution>
 
     studyId: number;
     pipelines: Pipeline[]
+    pipelineNames: string[]
     selectedPipeline: Pipeline
 
     constructor(
@@ -65,6 +67,7 @@ export class PlannedExecutionComponent extends EntityComponent<PlannedExecution>
         this.pipelineService.listPipelines().subscribe(
             (pipelines :Pipeline[])=>{
                 this.pipelines = pipelines;
+                this.pipelineNames = pipelines.map(pipeline => pipeline.name)
             }
         )
         return Promise.resolve()
