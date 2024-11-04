@@ -5,7 +5,8 @@ analysis researchers, radiologists, and MRI operators to organize
 and share neuroimaging datasets. 
 
 Shanoir-NG is copyrighted by [Inria](https://www.inria.fr/) and is now open source under 
-the GNU General Public License v3.0.  See the ([LICENSE file](LICENSE)) for details.
+the GNU General Public License v3.0.  See the ([LICENSE file](LICENSE)) 
+for details.
 
 >[!Important]
 > Shanoir NG is still in the development phase. 
