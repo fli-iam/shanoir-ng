@@ -7,10 +7,10 @@ and share neuroimaging datasets.
 Shanoir-NG is copyrighted by [Inria](https://www.inria.fr/) and is open source under 
 the [GNU General Public License v3.0](LICENSE). 
 
-The Shanoir NG website is available at:  https://project.inria.fr/shanoir/
+The Shanoir-NG website is available at:  https://project.inria.fr/shanoir/
 
 >[!Important]
-> Shanoir NG is still in the development phase. 
+> Shanoir-NG is still in the development phase. 
 > While many functionalities work well, some are not developed yet 
 > and some might be unstable. 
 > Also it still misses production features like database backup.
