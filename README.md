@@ -18,12 +18,12 @@ for details.
 
 ## Shanoir-NG repository 
 
-## Branches
+###  Branches
 
 * The latest _stable version_ of Shanoir-NG is on `master` 
 * The latest _dev version_ of Shanoir-NG is on `develop` (if mature -> merged into master)
 
-## Cloning the Shanoir-NG repository
+### Cloning the Shanoir-NG repository
 
 1. Clone the shanoir-ng repository
 2. Go into the shanoir-downloader subfolder (it should be empty)
