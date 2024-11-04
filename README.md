@@ -59,16 +59,20 @@ Detailed installation instructions are available at https://github.com/fli-iam/s
 ## Help and Support
 
 ### Documentation
-The [Shanoir-NG Wiki](https://github.com/fli-iam/shanoir-ng/wiki)is 
-the main documentation source. Hereunder are some direct links to 
-main Wiki entries:
+
+>[!Important]
+>The [Shanoir-NG Wiki](https://github.com/fli-iam/shanoir-ng/wiki) is 
+>the main documentation source. 
+
+Hereunder are some direct links to 
+main Shanoir-NG Wiki entries:
    + [User Documentation](https://github.com/fli-iam/shanoir-ng/wiki#users)
    + [Developer documentation](https://github.com/fli-iam/shanoir-ng/wiki#developers-dev)
    + [REST API](https://github.com/fli-iam/shanoir-ng/wiki#shanoir-ng-rest-api)
    + [Maintainer Documentation](https://github.com/fli-iam/shanoir-ng/wiki#operations-ops-installation-updates-and-maintenance-administration)
    + [Project Management documentation](https://github.com/fli-iam/shanoir-ng/wiki)
    + [Shanoir-NG website](https://project.inria.fr/shanoir/)  
-   + 
+     
 ### Communication
 + [News](https://project.inria.fr/shanoir/news/)  
 + [Youtube](https://www.youtube.com/watch?v=_Lpb3Pvw6e8)
