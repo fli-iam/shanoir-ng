@@ -52,12 +52,6 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
     }
 
     getColumnDefs(): ColumnDefinition[] {
-        function dateRenderer(date: number) {
-            if (date) {
-                return new Date(date).toLocaleDateString();
-            }
-            return null;
-        };
         let colDef: ColumnDefinition[] = [
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {
@@ -67,9 +61,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
             },{
                 headerName: "Comment", field: "comment"
             },{
-                headerName: "Examination date", field: "examinationDate", type: "date", cellRenderer: function (params: any) {
-                    return dateRenderer(params.data.examinationDate);
-                }, width: "100px"
+                headerName: "Examination date", field: "examinationDate", type: "date", width: "100px"
             },{
                 headerName: "Research study", field: "study.name", orderBy: ['study.name'],
                 route: (examination: Examination) => examination.study ? '/study/details/' + examination.study.id : null

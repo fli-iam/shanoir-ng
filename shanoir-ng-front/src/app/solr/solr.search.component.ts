@@ -443,13 +443,6 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     private getCommonColumnDefs() {
-
-        function dateRenderer(date: number) {
-            if (date) {
-                return formatDate(new Date(date),'dd/MM/yyyy', 'en-US', 'UTC');
-            }
-            return null;
-        };
         let columnDefs: ColumnDefinition[] = [
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {headerName: "Admin", type: "boolean", cellRenderer: row => this.hasAdminRight(row.data.studyId), awesome: "fa-solid fa-shield", color: "goldenrod", disableSorting: true},
@@ -460,7 +453,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                 }},
             {headerName: "Type", field: "datasetType"},
             {headerName: "Nature", field: "datasetNature"},
-            {headerName: "Series date", field: "datasetCreationDate", type: "date", hidden: true, cellRenderer: (params: any) => dateRenderer(params.data.datasetCreationDate)},
+            {headerName: "Series date", field: "datasetCreationDate", type: "date", hidden: true},
             {headerName: "Study", field: "studyName",
                 route: function(item) {
                     return item.studyId ? '/study/details/' + item.studyId : null;
@@ -481,19 +474,12 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                     return item.examinationId ? '/examination/details/' + item.examinationId : null;
                 }
             },
-            {headerName: "Exam Date", field:"examinationDate", type: "date", cellRenderer: (params: any) => {
-                    return dateRenderer(params.data.examinationDate);
-                }
-            },
-            {headerName: "Import Date", field:"importDate", type: "date", cellRenderer: (params: any) => {
-                    return dateRenderer(params.data.importDate);
-                }
-            },
+            {headerName: "Exam Date", field:"examinationDate", type: "date"},
+            {headerName: "Import Date", field:"importDate", type: "date"},
             {headerName: "Imported by", field:"username"},
             {headerName: "Slice", field: "sliceThickness"},
             {headerName: "Pixel", field: "pixelBandwidth"},
             {headerName: "Mag. strength", field: "magneticFieldStrength"},
-
             {headerName: "View DICOM", type: "button", awesome: "fa-solid fa-up-right-from-square",
               condition: item => (!item.processed && (item.datasetType.includes("MR") || item.datasetType.includes("Pet") || item.datasetType.includes("Ct"))),
               action: item => {

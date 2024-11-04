@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -24,6 +24,7 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.repository.DatasetExpressionRepository;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
@@ -41,6 +42,7 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -62,15 +64,13 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * Dataset service implementation.
- * 
+ *
  * @author msimon
  *
  */
@@ -85,6 +85,9 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Autowired
 	private ShanoirEventService shanoirEventService;
+
+	@Autowired
+	private SolrService solrService;
 
 	@Autowired
 	private DICOMWebService dicomWebService;
@@ -106,6 +109,9 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Autowired
 	private ProcessingResourceService processingResourceService;
+
+	@Autowired
+	DatasetExpressionRepository datasetExpressionRepository;
 
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
@@ -144,7 +150,7 @@ public class DatasetServiceImpl implements DatasetService {
             return;
         }
 
-        for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+		for (DatasetExpression expression : dataset.getDatasetExpressions()) {
 			boolean isDicom = DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat());
 
 			for (DatasetFile file : expression.getDatasetFiles()) {
@@ -162,8 +168,8 @@ public class DatasetServiceImpl implements DatasetService {
 				}
 			}
 			break;
-        }
-    }
+		}
+	}
 
 	@Override
 	public boolean existsById(Long id) {
@@ -176,7 +182,7 @@ public class DatasetServiceImpl implements DatasetService {
 		for(Long id : ids){
 			this.deleteById(id);
 		}
-    }
+	}
 
 	@Override
 	public Dataset findById(final Long id) {
@@ -196,7 +202,13 @@ public class DatasetServiceImpl implements DatasetService {
 	@Override
 	public Dataset create(final Dataset dataset) throws SolrServerException, IOException {
 		Dataset ds = repository.save(dataset);
-		Long studyId = this.getStudyId(dataset);
+		Long studyId;
+		if (ds.getDatasetAcquisition() != null) {
+			studyId = ds.getDatasetAcquisition().getExamination().getStudyId();
+		} else {
+			// We have a processed dataset -> acquisition is null but study id is set.
+			studyId = ds.getStudyId();
+		}
 
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, ds.getStudyId()));
 		rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
@@ -212,7 +224,7 @@ public class DatasetServiceImpl implements DatasetService {
 		this.updateDatasetValues(datasetDb, dataset);
 		Dataset ds = repository.save(datasetDb);
 		try {
-			Long studyId = getStudyId(ds);
+			Long studyId = ds.getDatasetAcquisition().getExamination().getStudyId();
 			shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, studyId));
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
 		} catch (JsonProcessingException e) {
@@ -224,7 +236,7 @@ public class DatasetServiceImpl implements DatasetService {
 
 	/**
 	 * Update some values of dataset to save them in database.
-	 * 
+	 *
 	 * @param datasetDb dataset found in database.
 	 * @param dataset dataset with new values.
 	 * @return database dataset with new values.
@@ -284,8 +296,8 @@ public class DatasetServiceImpl implements DatasetService {
 		}
 
 		datasets = datasets.stream().filter(ds ->
-				studyUserCenters.get(ds.getStudyId()) != null &&
-				studyUserCenters.get(ds.getStudyId()).contains(ds.getDatasetAcquisition().getExamination().getCenterId()))
+						studyUserCenters.get(ds.getStudyId()) != null &&
+								studyUserCenters.get(ds.getStudyId()).contains(ds.getDatasetAcquisition().getExamination().getCenterId()))
 				.collect(Collectors.toList());
 		int size = datasets.size();
 
@@ -335,7 +347,7 @@ public class DatasetServiceImpl implements DatasetService {
 	public List<Dataset> findByAcquisition(Long acquisitionId) {
 		return Utils.toList(repository.findByDatasetAcquisitionId(acquisitionId));
 	}
-	
+
 	@Override
 	public List<Dataset> findByStudycard(Long studycardId) {
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
@@ -343,7 +355,7 @@ public class DatasetServiceImpl implements DatasetService {
 		} else {
 			Long userId = KeycloakUtil.getTokenUserId();
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
-			
+
 			return Utils.toList(repository.findByDatasetAcquisitionStudyCardIdAndDatasetAcquisitionExaminationStudy_IdIn(studycardId, studyIds));
 		}
 	}
@@ -356,6 +368,53 @@ public class DatasetServiceImpl implements DatasetService {
 	@Override
 	public List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception {
 		return repository.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
+	}
+
+	@Override
+	public void deleteNiftis(Long studyId) {
+		List<Dataset> datasets = this.findByStudyId(studyId);
+		for (Dataset dataset : datasets) {
+			deleteNifti(dataset);
+		}
+	}
+
+	/**
+	 * Deletes nifti on file server
+	 * @param dataset
+	 */
+	private void deleteNifti(Dataset dataset) {
+		List<DatasetExpression> expressionsToDelete = new ArrayList<>();
+
+		for (Iterator<DatasetExpression> iterex = dataset.getDatasetExpressions().iterator(); iterex.hasNext(); ) {
+			DatasetExpression expression = iterex.next();
+			if (!DatasetExpressionFormat.NIFTI_SINGLE_FILE.equals(expression.getDatasetExpressionFormat())) {
+				continue;
+			}
+			for (Iterator<DatasetFile> iter = expression.getDatasetFiles().iterator(); iter.hasNext(); ) {
+				DatasetFile file = iter.next();
+				URL url = null;
+				try {
+					url = new URL(file.getPath().replaceAll("%20", " "));
+					File srcFile = new File(UriUtils.decode(url.getPath(), StandardCharsets.UTF_8.name()));
+					if (srcFile.exists()) {
+						LOG.error("Deleting: " + srcFile.getAbsolutePath());
+						FileUtils.delete(srcFile);
+					}
+					// We are forced to detach elements here to be able to delete them from DB
+					file.setDatasetExpression(null);
+					iter.remove();
+				} catch (Exception e) {
+					LOG.error("Could not delete nifti file: {}", file.getPath(), e);
+				}
+			}
+			expression.setDataset(null);
+			iterex.remove();
+			expressionsToDelete.add(expression);
+		}
+		if (expressionsToDelete.isEmpty()) {
+			return;
+		}
+		this.datasetExpressionRepository.deleteAll(expressionsToDelete);
 	}
 
 	/**
@@ -390,8 +449,8 @@ public class DatasetServiceImpl implements DatasetService {
 		return null;
 	}
 
-    @Override
-    public DatasetAcquisition getAcquisition(Dataset dataset) {
+	@Override
+	public DatasetAcquisition getAcquisition(Dataset dataset) {
 		if(dataset.getDatasetAcquisition() != null){
 			return dataset.getDatasetAcquisition();
 		}
@@ -404,6 +463,5 @@ public class DatasetServiceImpl implements DatasetService {
 			}
 		}
 		return null;
-    }
-
+	}
 }
