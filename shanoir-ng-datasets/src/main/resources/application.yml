@@ -103,6 +103,8 @@ datasets-data: /var/datasets-data
 bids-data-folder: /var/datasets-data/bids-data
 # logging configuration
 logging:
+  pattern:
+    file: '%d{yyyy-MM-dd_HH:mm:ss.SSS} %-5level [%mdc{username}] %logger{35} - %msg%n'
   file:
     name: /var/log/shanoir-ng-logs/shanoir-ng-datasets.log
   level:
