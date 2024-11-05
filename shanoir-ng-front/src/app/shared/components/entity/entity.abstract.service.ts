@@ -80,26 +80,31 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
                 dialogTitle,
                 dialogMsg + studyListStr
             ).then(res => {
-            if (res) {
-                return this.delete(entity.id).then(() => {
-                    this.consoleService.log('info', 'The ' + name + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' was sucessfully deleted');
-                    return true;
-                }).catch(reason => {
-                    if (!reason) {
-                        return;
-                    }
-                    let warn = 'The ' + name + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' is linked to other entities, it was not deleted.';
-                    if ((reason.error && reason.error.code == 422)
-                        || reason.status == 422) {
-                        this.consoleService.log('warn', warn);
-                        return false;
-                    }
-                    if (reason instanceof ShanoirError && reason.code == 422) {
-                        if (reason.message) {
-                            warn = warn + ' ' + reason.message;
+                if (res) {
+                    return this.delete(entity.id).then(() => {
+                        if (name == 'examination') {
+                            this.consoleService.log('info', 'The ' + name + ' n°' + entity.id + ' has sucessfully started to delete. Check the job page to see its progress.');
+                        } else {
+                            this.consoleService.log('info', 'The ' + name + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' was sucessfully deleted');
                         }
-                        this.consoleService.log('warn', warn);
-                        return false;
+                        return true;
+                    }).catch(reason => {
+                        if(!reason){
+                            return;
+                        }
+                        let warn = 'The ' + name + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' is linked to other entities, it was not deleted.';
+                        if((reason.error && reason.error.code == 422)
+                            || reason.status == 422){
+                            this.consoleService.log('warn', warn);
+                            return false;
+                        }
+                        if(reason instanceof ShanoirError && reason.code == 422){
+                            if(reason.message){
+                                warn = warn + ' ' + reason.message;
+                            }
+                            this.consoleService.log('warn', warn);
+                            return false;
+                        }
                     }
 
                     throw Error(reason);
