@@ -41,20 +41,6 @@ git repo (as if it were a separated project)  meaning that once
 you are in the shanoir-downloader/ folder, you can just `git pull` 
 to get the latest changes, and commit some changes.
 
-## Shanoir-NG Installation
-###  Requirements
-
-To build and deploy Shanoir, you will need:
-* Java 21 (since migration to Spring Boot 3.1.2)
-* docker (https://docs.docker.com/install/)
-* docker-compose 3 (https://docs.docker.com/compose/install/)
-* maven 3 (https://maven.apache.org/download.cgi)
-* at least 10GB of available RAM
-
-### Installation instructions
-Detailed installation instructions are available at https://github.com/fli-iam/shanoir-ng/wiki#users. 
-
-
 
 ## Help and Support
 
@@ -71,9 +57,10 @@ main Shanoir-NG Wiki entries:
    + [REST API](https://github.com/fli-iam/shanoir-ng/wiki#shanoir-ng-rest-api)
    + [Maintainer Documentation](https://github.com/fli-iam/shanoir-ng/wiki#operations-ops-installation-updates-and-maintenance-administration)
    + [Project Management documentation](https://github.com/fli-iam/shanoir-ng/wiki)
-   + [Shanoir-NG website](https://project.inria.fr/shanoir/)  
+   
      
 ### Communication
++ [Shanoir-NG website](https://project.inria.fr/shanoir/) 
 + [News](https://project.inria.fr/shanoir/news/)  
 + [Youtube](https://www.youtube.com/watch?v=_Lpb3Pvw6e8)
 
