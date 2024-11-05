@@ -162,7 +162,7 @@ export class StudyNodeComponent implements OnChanges {
         this.subjectsOrder = sort;
         if (!(this.node.subjectsNode.subjects == 'UNLOADED')) {
             if (this.subjectsOrder.field == 'name') {
-                this.node.subjectsNode.subjects.sort((a, b) => a.label?.localeCompare(b.label));
+                this.node.subjectsNode.subjects.sort((a, b) => a.label?.trim().localeCompare(b.label.trim()));
             } else if (this.subjectsOrder.field == 'id') {
                 this.node.subjectsNode.subjects.sort((a, b) => b.id - a.id);
             }
