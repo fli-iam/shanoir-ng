@@ -144,7 +144,7 @@ export class SubjectComponent extends EntityComponent<Subject> {
         let subjectForm = this.formBuilder.group({
             'imagedObjectCategory': [this.subject.imagedObjectCategory, [Validators.required]],
             'isAlreadyAnonymized': [],
-            'name': [this.subject.name, this.nameValidators.concat([this.registerOnSubmitValidator('unique', 'name')]).concat(this.forbiddenNameValidator([this.subjectNamePrefix]))],
+            'name': [this.subject.name, this.nameValidators.concat([this.registerOnSubmitValidator('unique', 'name')]).concat(this.forbiddenNameValidator([this.subjectNamePrefix])).concat([this.notEmptyValidator()])],
             'firstName': [this.firstName],
             'lastName': [this.lastName],
             'birthDate': [this.subject.birthDate],
@@ -179,6 +179,15 @@ export class SubjectComponent extends EntityComponent<Subject> {
         }
         return null;
       };
+    }
+
+    private notEmptyValidator(): ValidatorFn {
+        return (c: AbstractControl): { [key: string]: boolean } | null => {
+            if (!c.value || c.value.trim().length < 2) {
+                return { 'notEmptyValidator': true };
+            }
+            return null;
+        };
     }
 
     private updateFormControl(formGroup: UntypedFormGroup) {
