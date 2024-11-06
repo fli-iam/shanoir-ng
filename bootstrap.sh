@@ -96,7 +96,7 @@ if [ -n "$build" ] ; then
 	mkdir -p /tmp/home
 	docker run --rm -t -i -v "$PWD:/src" -u "`id -u`:`id -g`" -e HOME="/src/tmp/home" \
 		-e MAVEN_OPTS="-Dmaven.repo.local=/src/tmp/home/.m2/repository"	\
-		-w /src "$DEV_IMG" sh -c 'git config --global --add safe.directory /src && cd shanoir-ng-parent && mvn clean install -DskipTests'
+		-w /src "$DEV_IMG" sh -c 'cd shanoir-ng-parent && mvn clean install -DskipTests'
 
 	# 3. build the docker images
 	docker compose -f docker-compose-dev.yml build
