@@ -80,7 +80,11 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
             ).then(res => {
                 if (res) {
                     return this.delete(entity.id).then(() => {
-                        this.consoleService.log('info', 'The ' + name + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' was sucessfully deleted');
+                        if (name == 'examination') {
+                            this.consoleService.log('info', 'The ' + name + ' n°' + entity.id + ' has sucessfully started to delete. Check the job page to see its progress.');
+                        } else {
+                            this.consoleService.log('info', 'The ' + name + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' was sucessfully deleted');
+                        }
                         return true;
                     }).catch(reason => {
                         if(!reason){
