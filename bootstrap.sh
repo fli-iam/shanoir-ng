@@ -99,7 +99,7 @@ if [ -n "$build" ] ; then
 		-w /src "$DEV_IMG" sh -c 'git config --global --add safe.directory /src && cd shanoir-ng-parent && mvn clean install -DskipTests'
 
 	# 3. build the docker images
-	docker compose build
+	docker compose -f docker-compose-dev.yml build
 fi
 
 if [ -n "$deploy" ] ; then
