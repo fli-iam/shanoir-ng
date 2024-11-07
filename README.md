@@ -25,7 +25,6 @@ Official source code repository: https://github.com/fli-iam/shanoir-ng
 
 * The latest _stable version_ of Shanoir-NG is on `master` 
 * The latest _development version_ of Shanoir-NG is on `develop` 
-* The default branch of the repository is `develop`
 
 ### Cloning the Shanoir-NG repository
 
@@ -40,6 +39,10 @@ Then the shanoir-downloader project can be simply managed as a normal
 git repo (as if it were a separated project)  meaning that once
 you are in the shanoir-downloader/ folder, you can just `git pull` 
 to get the latest changes, and commit some changes.
+
+## Shanoir Developpers Quick Installation
+After cloning the Shanoir-NG repository follow these 
+[Quick Installation Instructions](https://github.com/alexpron/shanoir-ng/wiki/Quick-Installation)
 
 
 ## Help and Support
