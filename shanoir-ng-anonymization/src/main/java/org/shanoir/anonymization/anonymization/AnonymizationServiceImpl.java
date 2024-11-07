@@ -66,6 +66,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		tagsToDeleteForManufacturer = AnonymizationRulesSingleton.getInstance().getTagsToDeleteForManufacturer();
 		// init here for multi-threading reasons
 		Map<String, String> seriesInstanceUIDs = new HashMap<>();
+		Map<String, String> frameOfReferenceUIDs = new HashMap<>();
 		Map<String, String> studyInstanceUIDs = new HashMap<>();
 		Map<String, String> studyIds = new HashMap<>();
 		LOG.debug("anonymize : totalAmount={}", totalAmount);
@@ -73,7 +74,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		for (int i = 0; i < dicomFiles.size(); ++i) {
 			final File file = dicomFiles.get(i);
 			// Perform the anonymization
-			performAnonymization(file, anonymizationMap, false, "", "", seriesInstanceUIDs, studyInstanceUIDs, studyIds);
+			performAnonymization(file, anonymizationMap, false, "", "", seriesInstanceUIDs, frameOfReferenceUIDs, studyInstanceUIDs, studyIds);
 			current++;
 			final int currentPercent = current * 100 / totalAmount;
 			LOG.debug("anonymize : anonymization current percent= {} %", currentPercent);
@@ -99,6 +100,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
 		// init here for multi-threading reasons
 		Map<String, String> seriesInstanceUIDs = new HashMap<>();
+		Map<String, String> frameOfReferenceUIDs = new HashMap<>();
 		Map<String, String> studyInstanceUIDs = new HashMap<>();
 		Map<String, String> studyIds = new HashMap<>();
 		LOG.debug("anonymize : totalAmount={}", totalAmount);
@@ -106,7 +108,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		for (int i = 0; i < dicomFiles.size(); ++i) {
 			final File file = dicomFiles.get(i);
 			// Perform the anonymization
-			performAnonymization(file, anonymizationMap, true, patientName, patientID, seriesInstanceUIDs, studyInstanceUIDs, studyIds);
+			performAnonymization(file, anonymizationMap, true, patientName, patientID, seriesInstanceUIDs, frameOfReferenceUIDs, studyInstanceUIDs, studyIds);
 			current++;
 			final int currentPercent = current * 100 / totalAmount;
 			LOG.debug("anonymize : anonymization current percent= {} %", currentPercent);
@@ -156,7 +158,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	 * @throws Exception
 	 */
 	public void performAnonymization(final File dicomFile, Map<String, String> anonymizationMap, boolean isShanoirAnonymization,
-			String patientName, String patientID, Map<String, String> seriesInstanceUIDs,
+			String patientName, String patientID, Map<String, String> seriesInstanceUIDs, Map<String, String> frameOfReferenceUIDs,
 			Map<String, String> studyInstanceUIDs, Map<String, String> studyIds) throws Exception {
 		DicomInputStream din = null;
 		DicomOutputStream dos = null;
@@ -217,6 +219,8 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 						anonymizeSOPInstanceUID(tagInt, datasetAttributes, mediaStorageSOPInstanceUIDGenerated);
 					} else if (tagInt == Tag.SeriesInstanceUID) {
 						anonymizeSeriesInstanceUID(tagInt, datasetAttributes, seriesInstanceUIDs);
+					} else if (tagInt == Tag.FrameOfReferenceUID) {
+						anonymizeFrameOfReferenceUID(tagInt, datasetAttributes, frameOfReferenceUIDs);
 					} else if (tagInt == Tag.StudyInstanceUID) {
 						anonymizeStudyInstanceUID(tagInt, datasetAttributes, studyInstanceUIDs);
 					} else if (tagInt == Tag.StudyID) {
@@ -348,6 +352,25 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
 	private void anonymizeSOPInstanceUID(int tagInt, Attributes attributes, String mediaStorageSOPInstanceUID) {
 		anonymizeTagAccordingToVR(attributes, tagInt, mediaStorageSOPInstanceUID);
+	}
+
+	private void anonymizeFrameOfReferenceUID(int tagInt, Attributes attributes, Map<String, String> frameOfReferenceUIDs) {
+		String value;
+		if (frameOfReferenceUIDs != null && frameOfReferenceUIDs.size() != 0
+				&& frameOfReferenceUIDs.get(attributes.getString(tagInt)) != null) {
+			value = frameOfReferenceUIDs.get(attributes.getString(tagInt));
+		} else {
+			UIDGeneration generator = new UIDGeneration();
+			String newUID = null;
+			try {
+				newUID = generator.getNewUID();
+			} catch (Exception e) {
+				LOG.error(e.getMessage());
+			}
+			value = newUID;
+			frameOfReferenceUIDs.put(attributes.getString(tagInt), value);
+		}
+		anonymizeTagAccordingToVR(attributes, tagInt, value);
 	}
 
 	private void anonymizeSeriesInstanceUID(int tagInt, Attributes attributes, Map<String, String> seriesInstanceUIDs) {
