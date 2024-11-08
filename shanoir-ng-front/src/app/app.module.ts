@@ -15,7 +15,7 @@
 import { AppRoutingModule } from './app-routing.module';
 import { PreclinicalRoutingModule } from './preclinical/preclinical-routing.module'
 import { APP_BASE_HREF, CommonModule } from '@angular/common';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { ErrorHandler, Injector, NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 // import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -275,21 +275,7 @@ import { TreeService } from './studies/study/tree.service';
 import { CoilNodeComponent } from './coils/coil/tree/coil-node.component';
 import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.component';
 
-@NgModule({
-    imports: [
-        BrowserModule,
-        BrowserAnimationsModule,
-        CommonModule,
-        FormsModule,
-        HttpClientModule,
-        ReactiveFormsModule,
-        NgxJsonViewerModule,
-        AppRoutingModule,
-        PreclinicalRoutingModule,
-        RouterModule,
-        ClipboardModule
-    ],
-    declarations: [
+@NgModule({ declarations: [
         AccountRequestComponent,
         AccountRequestInfoComponent,
         AcquisitionEquipmentComponent,
@@ -467,7 +453,16 @@ import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.c
         CoilNodeComponent,
         DoubleAwesomeComponent
     ],
-    providers: [
+    bootstrap: [AppComponent], imports: [BrowserModule,
+        BrowserAnimationsModule,
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        NgxJsonViewerModule,
+        AppRoutingModule,
+        PreclinicalRoutingModule,
+        RouterModule,
+        ClipboardModule], providers: [
         AcquisitionEquipmentService,
         AuthAdminGuard,
         AuthAdminOrExpertGuard,
@@ -513,7 +508,7 @@ import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.c
         AnestheticService,
         ImportBrukerService,
         EnumUtils,
-        {provide: HTTP_INTERCEPTORS, useClass: KeycloakHttpInterceptor, multi: true},
+        { provide: HTTP_INTERCEPTORS, useClass: KeycloakHttpInterceptor, multi: true },
         BreadcrumbsService,
         GlobalService,
         ImportDataService,
@@ -553,10 +548,9 @@ import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.c
         SessionService,
         ShanoirEventService,
         TreeService,
-        { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
-    ],
-    bootstrap: [AppComponent]
-})
+        { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true },
+        provideHttpClient(withInterceptorsFromDi())
+    ] })
 export class AppModule {
 
     constructor(private injector: Injector) {
