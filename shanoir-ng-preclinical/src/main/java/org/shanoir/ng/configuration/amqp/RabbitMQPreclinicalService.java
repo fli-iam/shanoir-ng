@@ -51,21 +51,20 @@ public class RabbitMQPreclinicalService {
 
     /**
      * Receives a shanoirEvent as a json object, concerning a subject deletion
-     * @param eventAsString the task as a json string.
+     * @param subjectIdAsStr the subject's id to delete, as string
      */
     @RabbitListener(bindings = @QueueBinding(
             key = ShanoirEventType.DELETE_SUBJECT_EVENT,
-            value = @Queue(value = RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, durable = "true"),
-            exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-                    autoDelete = "false", durable = "true", type= ExchangeTypes.TOPIC))
+            value = @Queue(value = RabbitMQConfiguration.DELETE_ANIMAL_SUBJECT_QUEUE, durable = "true"),
+            exchange = @Exchange(value = RabbitMQConfiguration.SUBJECT_STUDY_EXCHANGE, ignoreDeclarationExceptions = "true",
+            autoDelete = "false", durable = "true", type= ExchangeTypes.FANOUT)), containerFactory = "multipleConsumersFactory"
     )
     @Transactional
-    public void deleteAnimalSubject(String eventAsString) throws AmqpRejectAndDontRequeueException {
+    public void deleteAnimalSubject(String subjectIdAsStr) throws AmqpRejectAndDontRequeueException {
         SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
         try {
-
-            ShanoirEvent event = objectMapper.readValue(eventAsString, ShanoirEvent.class);
-            Long subjectId = Long.valueOf(event.getObjectId());
+            LOG.error("subject Id : " + subjectIdAsStr);
+            Long subjectId = Long.valueOf(subjectIdAsStr);
 
             AnimalSubject animalSubject = subjectService.getBySubjectId(subjectId);
 

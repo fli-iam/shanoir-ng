@@ -340,7 +340,14 @@ public class StudyServiceImpl implements StudyService {
 
 		studyDb = studyRepository.save(studyDb);
 
+		//LOG.error("subject study size : " + study.getSubjectStudyList().size());
+		//LOG.error("subject studyDb size : " + studyDb.getSubjectStudyList().size());
+		//for (SubjectStudy ss : study.getSubjectStudyList()) {
+		//	LOG.error("subjectStudy in study " + study.getId() + " : "  + ss.getSubject().getId() + " - " + ss.getSubject().getName());
+		//}
+
 		if (study.getSubjectStudyList() != null) {
+			//LOG.error("sslist not null");
 			List<SubjectStudy> subjectStudyListDb = studyDb.getSubjectStudyList();
 			List<SubjectStudy> subjectStudyListNew = study.getSubjectStudyList();
 			subjectStudyListDb.clear();
@@ -349,11 +356,6 @@ public class StudyServiceImpl implements StudyService {
 				dbSubjectStudy.setStudy(studyDb);
 			}
 			studyDb = studyRepository.save(studyDb);
-		}
-
-		// Actually delete subjects
-		for (Subject subjectToDelete : toBeDeleted) {
-			subjectService.deleteById(subjectToDelete.getId());
 		}
 
 		if (studyDb.getTags() != null) {
@@ -365,9 +367,16 @@ public class StudyServiceImpl implements StudyService {
 			studyDb = studyRepository.save(studyDb);
 		}
 
-		String error = this.updateStudyName(studyMapper.studyToStudyDTODetailed(studyDb));
+		String error = this.updateStudyName(studyMapper.studyToStudyDTODetailed(studyDb)); // call datasets : update study (+ subjectstudy)
 
-		if(error != null && !error.isEmpty()){
+		// Actually delete subjects
+		//LOG.error("toBeDeleted size : " + toBeDeleted.size());
+		for (Subject subjectToDelete : toBeDeleted) {
+			LOG.error("subjectToDelete.id : " + subjectToDelete.getId());
+			subjectService.deleteById(subjectToDelete.getId()); // call datasets : delete subject (+ exam)
+		}
+
+		if (error != null && !error.isEmpty()) {
 			LOG.error("Study [" + studyDb.getId() + "] couldn't be sync with datasets microservice : {}", error);
 			throw new ShanoirException(error);
 		}

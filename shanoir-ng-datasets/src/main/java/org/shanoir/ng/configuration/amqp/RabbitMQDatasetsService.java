@@ -168,6 +168,7 @@ public class RabbitMQDatasetsService {
 	@RabbitListener(queues = RabbitMQConfiguration.STUDY_NAME_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
 	@RabbitHandler
 	public String receiveStudyUpdate(final String studyAsString) {
+		LOG.error("study update");
 		try {
 
 			Study updated = objectMapper.readValue(studyAsString, Study.class);
@@ -313,20 +314,20 @@ public class RabbitMQDatasetsService {
 
 	/**
          * Receives a shanoirEvent as a json object, concerning a subject deletion
-         * @param eventAsString the task as a json string.
+         * @param subjectIdAsString a string of the subject's id
          */
 	@RabbitListener(bindings = @QueueBinding(
 			key = ShanoirEventType.DELETE_SUBJECT_EVENT,
 			value = @Queue(value = RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, durable = "true"),
-			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)), containerFactory = "singleConsumerFactory"
+			exchange = @Exchange(value = RabbitMQConfiguration.SUBJECT_STUDY_EXCHANGE, ignoreDeclarationExceptions = "true",
+			autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT)), containerFactory = "multipleConsumersFactory"
 			)
 	@Transactional
-	public void deleteSubject(String eventAsString) throws AmqpRejectAndDontRequeueException {
+	public void deleteSubject(String subjectIdAsString) throws AmqpRejectAndDontRequeueException {
+		LOG.error("delete subject : " + subjectIdAsString);
 		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 		try {
-			ShanoirEvent event = objectMapper.readValue(eventAsString, ShanoirEvent.class);
-			Long subjectId = Long.valueOf(event.getObjectId());
+			Long subjectId = Long.valueOf(subjectIdAsString);
 			Set<Long> studyIds = new HashSet<>();
 
 			// Inverse order to remove copied examination before its source (if copied)
