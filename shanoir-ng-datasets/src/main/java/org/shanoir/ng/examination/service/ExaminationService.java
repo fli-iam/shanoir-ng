@@ -46,7 +46,7 @@ public interface ExaminationService {
 	 * @throws ShanoirException 
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_ADMINISTRATE'))")
-	void deleteById(Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException;
+	void deleteById(Long examinationId, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException;
 
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_ADMINISTRATE'))")
 	void deleteExaminationAsync(Long examinationId, Long studyId, ShanoirEvent event);
