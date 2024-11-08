@@ -21,7 +21,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 // import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { Autosize } from 'ng-autosize';
 import { NgxJsonViewerModule } from 'ngx-json-viewer';
 import { AcquisitionEquipmentListComponent } from './acquisition-equipments/acquisition-equipment-list/acquisition-equipment-list.component';
 import { AcquisitionEquipmentComponent } from './acquisition-equipments/acquisition-equipment/acquisition-equipment.component';
@@ -275,14 +274,14 @@ import { TreeService } from './studies/study/tree.service';
 import { CoilNodeComponent } from './coils/coil/tree/coil-node.component';
 import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.component';
 
-@NgModule({ declarations: [
+@NgModule({ 
+    declarations: [
         AccountRequestComponent,
         AccountRequestInfoComponent,
         AcquisitionEquipmentComponent,
         AcquisitionEquipmentListComponent,
         AcquisitionEquipmentPipe,
         AppComponent,
-        Autosize,
         CenterComponent,
         CenterListComponent,
         ConfirmDialogComponent,
@@ -453,7 +452,9 @@ import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.c
         CoilNodeComponent,
         DoubleAwesomeComponent
     ],
-    bootstrap: [AppComponent], imports: [BrowserModule,
+    bootstrap: [AppComponent], 
+    imports: [
+        BrowserModule,
         BrowserAnimationsModule,
         CommonModule,
         FormsModule,
@@ -462,7 +463,9 @@ import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.c
         AppRoutingModule,
         PreclinicalRoutingModule,
         RouterModule,
-        ClipboardModule], providers: [
+        ClipboardModule
+    ], 
+    providers: [
         AcquisitionEquipmentService,
         AuthAdminGuard,
         AuthAdminOrExpertGuard,
@@ -550,7 +553,8 @@ import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.c
         TreeService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true },
         provideHttpClient(withInterceptorsFromDi())
-    ] })
+    ] 
+})
 export class AppModule {
 
     constructor(private injector: Injector) {
