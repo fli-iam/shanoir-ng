@@ -22,6 +22,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 /**
  * Repository for relations between a study and an user.
@@ -33,6 +34,9 @@ public interface StudyUserRightsRepository extends CrudRepository<StudyUser, Lon
 
 	@EntityGraph(attributePaths = "studyUserRights")
 	StudyUser findByUserIdAndStudyId(Long userId, Long studyId);
+
+	@Query("SELECT su.centerIds FROM StudyUser su WHERE su.id = :id")
+    List<Long> findCenterIdsByStudyUserId(@Param("id") Long studyUserId);
 
 	@EntityGraph(attributePaths = "studyUserRights")
 	Iterable<StudyUser> findByUserIdAndStudyIdIn(Long userId, Set<Long> studyIds);
