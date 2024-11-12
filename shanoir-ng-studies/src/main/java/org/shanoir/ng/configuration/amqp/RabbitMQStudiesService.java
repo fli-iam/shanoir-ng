@@ -109,7 +109,7 @@ public class RabbitMQStudiesService {
 			ObjectMapper objectMapper = new ObjectMapper();
 			ShanoirEvent event =  objectMapper.readValue(eventStr, ShanoirEvent.class);
 			Long examinationId = Long.valueOf(event.getObjectId());
-			Long studyId = Long.valueOf(event.getMessage());
+			Long studyId = Long.valueOf(event.getStudyId());
 			this.studyService.deleteExamination(examinationId, studyId);
 		} catch (Exception e) {
 			LOG.error("Could not index examination on given study ", e);

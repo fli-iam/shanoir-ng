@@ -56,8 +56,7 @@ public interface ExaminationApi {
 	@DeleteMapping(value = "/{examinationId}", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> deleteExamination(
-			@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId)
-			throws RestServiceException;
+			@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId);
 
 	@Operation(summary = "", description = "If exists, returns the examination corresponding to the given id")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found examination"),
