@@ -22,6 +22,7 @@ import {
     QualityCardNode,
     StudyCardNode,
     StudyNode,
+    SubjectNode,
     UNLOADED
 } from '../../tree/tree.model';
 import { StudyRightsService } from "../shared/study-rights.service";
@@ -29,9 +30,12 @@ import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
 import { TreeService } from '../study/tree.service';
 
+export type Sort = {field: 'name' | 'id', way : 'asc' | 'desc'}
+
 @Component({
     selector: 'study-node',
-    templateUrl: 'study-node.component.html'
+    templateUrl: 'study-node.component.html',
+    styleUrls: ['study-node.component.css']
 })
 
 export class StudyNodeComponent implements OnChanges {
@@ -42,6 +46,7 @@ export class StudyNodeComponent implements OnChanges {
     node: StudyNode;
     loading: boolean = false;
     menuOpened: boolean = false;
+    subjectsMenuOpened: boolean = false;
     studyCardsLoading: boolean = false;
     qualityCardsLoading: boolean = false;
     showDetails: boolean;
@@ -50,6 +55,11 @@ export class StudyNodeComponent implements OnChanges {
     @Input() withMenu: boolean = true;
     idPromise: SuperPromise<number> = new SuperPromise();
     protected rights: StudyUserRight[];
+    filter: string;
+    filteredNodes: SubjectNode[];
+    subjectsOrder: Sort;
+    protected nbSubjectsInit: number = 0;
+    private subjectsInited: SuperPromise<void>;
 
     constructor(
             private router: Router,
@@ -78,12 +88,16 @@ export class StudyNodeComponent implements OnChanges {
             let id: number = this.input instanceof StudyNode ? this.input.id : this.input.study.id;
             this.idPromise.resolve(id);
             if (this.input instanceof StudyNode) {
+                this.subjectsInited = new SuperPromise();
                 this.node = this.input;
             } else if (this.input.study && this.input.rights) {
+                this.subjectsInited = new SuperPromise();
                 this.node = this.treeService.buildStudyNode(this.input.study, this.input.rights);
             } else {
                 throw new Error('Illegal argument type');
             }
+            this.sortSubjects({field: 'name', way : 'asc'});
+            this.node.subjectsNode.registerOpenPromise(this.subjectsInited);
             this.nodeInit.emit(this.node);
             this.showDetails = this.router.url != this.detailsPath  + this.node.id;
         }
@@ -127,5 +141,42 @@ export class StudyNodeComponent implements OnChanges {
 
     onQualityCardDelete(index: number) {
         (this.node.qualityCardsNode.cards as StudyCardNode[]).splice(index, 1) ;
+    }
+
+    onFilterChange() {
+        if (this.node.subjectsNode.subjects != 'UNLOADED' && this.filter?.trim().length > 0) {
+            this.filteredNodes = (this.node.subjectsNode.subjects as SubjectNode[]).filter(node => {
+                return node.label.toLowerCase().includes(this.filter.toLowerCase());
+            });
+        } else {
+            this.filteredNodes = null;
+        }
+    }
+
+    resetFilter() {
+        this.filter = null;
+        this.filteredNodes = null;
+    }
+
+    sortSubjects(sort: Sort) {
+        this.subjectsOrder = sort;
+        if (!(this.node.subjectsNode.subjects == 'UNLOADED')) {
+            if (this.subjectsOrder.field == 'name') {
+                this.node.subjectsNode.subjects.sort((a, b) => a.label?.trim().localeCompare(b.label.trim()));
+            } else if (this.subjectsOrder.field == 'id') {
+                this.node.subjectsNode.subjects.sort((a, b) => b.id - a.id);
+            }
+            if (this.subjectsOrder.way == 'desc') {
+                this.node.subjectsNode.subjects.reverse();
+            }
+            this.onFilterChange();
+        }
+    }
+
+    onSubjectNodeInit() {
+        this.nbSubjectsInit++;
+        if (this.nbSubjectsInit == this.node.subjectsNode?.subjects?.length) {
+            this.subjectsInited.resolve();
+        }
     }
 }

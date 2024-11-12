@@ -211,7 +211,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 		try {
 			Long studyId = datasetAcquisitionService.findById(datasetAcquisitionId).getExamination().getStudyId();
 			
-			datasetAcquisitionService.deleteById(datasetAcquisitionId);
+			datasetAcquisitionService.deleteById(datasetAcquisitionId, null);
 
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
 

@@ -20,7 +20,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         (labelClick)="menuOpened = withMenu && !menuOpened"
         [route]="node.route"
         [hasChildren]="true"
-        [clickable]="showDetails">
+        [clickable]="showDetails"
+        >
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="showDetails && menuOpened && withMenu">
         <a [routerLink]="this.detailsPath + this.node.id" class="open-new-tab">
@@ -34,17 +35,39 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             label="Subjects"
             awesome="fas fa-user-injured"
             [(opened)]="node.subjectsNode.opened"
+            (labelClick)="subjectsMenuOpened = !subjectsMenuOpened"
             [hasChildren]="hasDependency(this.node.subjectsNode.subjects)">
+
+        <div class="overmenu">
+            <span *ngIf="!(subjectsOrder.field == 'name' && subjectsOrder.way == 'asc')" class="filter" (click)="sortSubjects({field: 'name', way : 'asc'})" title="sort by name ascending">
+                <i class="fa-solid fa-arrow-down-a-z"></i>
+            </span>
+            <span *ngIf="subjectsOrder.field == 'name' && subjectsOrder.way == 'asc'" class="filter" (click)="sortSubjects({field: 'name', way : 'desc'})" title="sort by name descending">
+                <i class="fa-solid fa-arrow-down-z-a"></i>
+            </span>
+            <span *ngIf="!(subjectsOrder.field == 'id' && subjectsOrder.way == 'desc')" class="filter" (click)="sortSubjects({field: 'id', way : 'desc'})" title="sort by id ascending">
+                <i class="fa-solid fa-arrow-down-1-9"></i>
+            </span>
+            <span *ngIf="subjectsOrder.field == 'id' && subjectsOrder.way == 'desc'" class="filter" (click)="sortSubjects({field: 'id', way : 'asc'})" title="sort by id descending">
+                <i class="fa-solid fa-arrow-down-9-1"></i>
+            </span>
+            <span class="filter">
+                filter : 
+                <input type="text" [(ngModel)]="filter" (ngModelChange)="onFilterChange()"/>
+                <span (click)="resetFilter()">&nbsp;x&nbsp;</span>
+            </span>
+        </div>
 
         <ng-container *ngIf="node.subjectsNode.opened && node.subjectsNode.subjects && node.subjectsNode.subjects != $any('UNLOADED')">
             <subject-node
-                    *ngFor="let subject of node.subjectsNode.subjects"
+                    *ngFor="let subject of filteredNodes || node.subjectsNode.subjects"
                     [input]="subject"
                     [studyId]="node.id"
                     (selectedChange)="selectedChange.emit(node)"
                     [hasBox]="hasBox"
                     [withMenu]="withMenu"
                     [rights]="rights"
+                    (nodeInit)="onSubjectNodeInit()" 
             >
             </subject-node>
         </ng-container>

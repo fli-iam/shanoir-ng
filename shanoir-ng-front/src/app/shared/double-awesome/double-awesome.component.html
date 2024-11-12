@@ -12,8 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="input-frame">
-    <input type="text" placeholder="search in Shanoir ..." [(ngModel)]="searchText" (ngModelChange)="inputTextChange()" (change)="onChangeSearch()" (keyup)="onType.emit()" [class.error]="syntaxError" [class.expert]="expertMode"/>
-    <span class="left-icon clickable clear" (click)="clear(); this.onChangeSearch();"><i class="fas fa-times"></i>clear</span>
-</div>
-<div class="syntax-error" *ngIf="syntaxError || syntaxErrorMsg">{{syntaxErrorMsg}}</div>
+<i [class]="main"></i>
+<i class="sub" [class]="sub">
+    <i class="sub-background" [class]="sub"></i>
+</i>

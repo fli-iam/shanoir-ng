@@ -335,7 +335,7 @@ public class RabbitMQDatasetsService {
 
 			// Delete associated examinations and datasets from solr repository
 			for (Examination exam : listExam) {
-				examinationService.deleteById(exam.getId());
+				examinationService.deleteById(exam.getId(), null);
 				studyIds.add(exam.getStudyId());
 			}
 			
@@ -372,7 +372,7 @@ public class RabbitMQDatasetsService {
 
 			// Delete associated examinations and datasets from solr repository then from database
 			for (Examination exam : examinationRepository.findByStudy_Id(Long.valueOf(event.getObjectId()))) {
-				examinationService.deleteById(exam.getId());
+				examinationService.deleteById(exam.getId(), null);
 			}
 			// also delete associated study cards
 			for (StudyCard sc : studyCardRepository.findByStudyId(Long.valueOf(event.getObjectId()))) {
