@@ -40,7 +40,6 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
     postConstructor() {
         this.patient = this.getFirstSelectedPatient();
         this.modality = this.getFirstSelectedSerie().modality.toString();
-        this.useStudyCard = this.modality.toUpperCase() == "MR";
     }
 
     protected exitCondition(): boolean {
@@ -78,7 +77,6 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         importJob.fromDicomZip = true;
         importJob.examinationId = context.examination.id;
         importJob.studyId = context.study.id;
-        importJob.studyCardId = context.studyCard ? context.studyCard.id : null;
         importJob.acquisitionEquipmentId = context.acquisitionEquipment.id;
         importJob.subjectName = context.subject.name;
         importJob.studyName = context.study.name;
