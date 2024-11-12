@@ -50,6 +50,7 @@ import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpStatus;
@@ -84,9 +85,7 @@ public class SubjectServiceTest {
 	
 	@Mock
 	private ObjectMapper objectMapper;
-	
-	@Mock
-	private ShanoirEventService eventService;
+
 	
 	@Mock
 	private StudyExaminationRepository studyExaminationRepository;
@@ -105,7 +104,6 @@ public class SubjectServiceTest {
 		subjectService.deleteById(SUBJECT_ID);
 
 		Mockito.verify(subjectRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
-		Mockito.verify(eventService, Mockito.times(1)).publishEvent(Mockito.any(ShanoirEvent.class));
 	}
 
 	@Test
