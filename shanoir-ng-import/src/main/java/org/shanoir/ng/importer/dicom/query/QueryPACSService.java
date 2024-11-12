@@ -548,9 +548,11 @@ public class QueryPACSService {
 	 * @param serie
 	 */
 	private void queryInstances(Association association, String studyInstanceUID, Serie serie) {
+		DicomParam modality = initDicomParam(Tag.Modality, serie.getModality());
 		DicomParam studyInstanceUIDParam = initDicomParam(Tag.StudyInstanceUID, studyInstanceUID);
 		DicomParam seriesInstanceUIDParam = initDicomParam(Tag.SeriesInstanceUID, serie.getSeriesInstanceUID());
 		DicomParam[] params = {
+			modality,
 			studyInstanceUIDParam,
 			seriesInstanceUIDParam,
 			new DicomParam(Tag.SOPInstanceUID),
@@ -563,12 +565,14 @@ public class QueryPACSService {
 				Instance instance = new Instance(i);
 				if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(i)) {
 					synchronized (instances) {
+						LOG.debug("Adding instance: " + instance.toString());
 						instances.add(instance);						
 					}
 				}
 			});
 			instances.sort(new InstanceNumberSorter());
 			serie.setInstances(instances);
+			LOG.info(instances.size() + " instances found for serie " + serie.getSeriesDescription());
 		}
 	}
 
