@@ -340,14 +340,7 @@ public class StudyServiceImpl implements StudyService {
 
 		studyDb = studyRepository.save(studyDb);
 
-		//LOG.error("subject study size : " + study.getSubjectStudyList().size());
-		//LOG.error("subject studyDb size : " + studyDb.getSubjectStudyList().size());
-		//for (SubjectStudy ss : study.getSubjectStudyList()) {
-		//	LOG.error("subjectStudy in study " + study.getId() + " : "  + ss.getSubject().getId() + " - " + ss.getSubject().getName());
-		//}
-
 		if (study.getSubjectStudyList() != null) {
-			//LOG.error("sslist not null");
 			List<SubjectStudy> subjectStudyListDb = studyDb.getSubjectStudyList();
 			List<SubjectStudy> subjectStudyListNew = study.getSubjectStudyList();
 			subjectStudyListDb.clear();
@@ -367,13 +360,11 @@ public class StudyServiceImpl implements StudyService {
 			studyDb = studyRepository.save(studyDb);
 		}
 
-		String error = this.updateStudyName(studyMapper.studyToStudyDTODetailed(studyDb)); // call datasets : update study (+ subjectstudy)
+		String error = this.updateStudyName(studyMapper.studyToStudyDTODetailed(studyDb));
 
 		// Actually delete subjects
-		//LOG.error("toBeDeleted size : " + toBeDeleted.size());
 		for (Subject subjectToDelete : toBeDeleted) {
-			LOG.error("subjectToDelete.id : " + subjectToDelete.getId());
-			subjectService.deleteById(subjectToDelete.getId()); // call datasets : delete subject (+ exam)
+			subjectService.deleteById(subjectToDelete.getId());
 		}
 
 		if (error != null && !error.isEmpty()) {

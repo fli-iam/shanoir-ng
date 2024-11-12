@@ -91,10 +91,7 @@ public class StudyServiceImpl implements StudyService {
 			current.getSubjectStudyList().addAll(updated.getSubjectStudyList());
 		}
 
-		//LOG.error("current.getSubjectStudyList().size : " + current.getSubjectStudyList().size());
-
 		for (SubjectStudy sustu : current.getSubjectStudyList()) {
-			//LOG.error("sustu : " + sustu.getSubject().getId() + " - " + sustu.getSubject().getName());
 			sustu.setStudy(current);
 			for (Tag tag : sustu.getTags()) {
 				if (tag.getId() == null) {

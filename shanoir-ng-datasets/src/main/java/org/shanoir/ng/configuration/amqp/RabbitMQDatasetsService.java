@@ -324,7 +324,6 @@ public class RabbitMQDatasetsService {
 			)
 	@Transactional
 	public void deleteSubject(String subjectIdAsString) throws AmqpRejectAndDontRequeueException {
-		LOG.error("delete subject : " + subjectIdAsString);
 		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 		try {
 			Long subjectId = Long.valueOf(subjectIdAsString);

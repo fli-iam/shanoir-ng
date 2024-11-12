@@ -63,7 +63,6 @@ public class RabbitMQPreclinicalService {
     public void deleteAnimalSubject(String subjectIdAsStr) throws AmqpRejectAndDontRequeueException {
         SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
         try {
-            LOG.error("subject Id : " + subjectIdAsStr);
             Long subjectId = Long.valueOf(subjectIdAsStr);
 
             AnimalSubject animalSubject = subjectService.getBySubjectId(subjectId);
