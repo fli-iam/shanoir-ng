@@ -114,7 +114,11 @@ public class SubjectServiceImpl implements SubjectService {
 		// Delete all associated study_examination
 		studyExaminationRepository.deleteBySubjectId(id);
 		subjectRepository.deleteById(id);
-		rabbitTemplate.convertAndSend(RabbitMQConfiguration.SUBJECT_STUDY_EXCHANGE, "", id.toString());
+		if (subject.get().isPreclinical())
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_ANIMAL_SUBJECT_QUEUE, id.toString());
+
+		rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, id.toString());
+
 	}
 
 	@Override

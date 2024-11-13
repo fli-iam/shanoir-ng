@@ -131,7 +131,7 @@ public class RabbitMQDatasetsService {
 	@RabbitListener(bindings = @QueueBinding(
 			value = @Queue(value = RabbitMQConfiguration.STUDY_USER_QUEUE_DATASET, durable = "true"),
 			exchange = @Exchange(value = RabbitMQConfiguration.STUDY_USER_EXCHANGE, ignoreDeclarationExceptions = "true",
-			autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT)), containerFactory = "multipleConsumersFactory"
+			autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT)), containerFactory = "singleConsumerFactory"
 	)
 	public void receiveMessage(String commandArrStr) {
 		listener.receiveStudyUsers(commandArrStr);
@@ -319,8 +319,8 @@ public class RabbitMQDatasetsService {
 	@RabbitListener(bindings = @QueueBinding(
 			key = ShanoirEventType.DELETE_SUBJECT_EVENT,
 			value = @Queue(value = RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, durable = "true"),
-			exchange = @Exchange(value = RabbitMQConfiguration.SUBJECT_STUDY_EXCHANGE, ignoreDeclarationExceptions = "true",
-			autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT)), containerFactory = "multipleConsumersFactory"
+			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
+			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)), containerFactory = "singleConsumerFactory"
 			)
 	@Transactional
 	public void deleteSubject(String subjectIdAsString) throws AmqpRejectAndDontRequeueException {

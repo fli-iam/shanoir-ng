@@ -16,18 +16,4 @@ public class TestConfiguration {
 	@MockBean
 	private RabbitTemplate rabbitTemplate;
 
-	@Autowired
-	private ConnectionFactory connectionFactory;
-	@Bean(name = "multipleConsumersFactory")
-	public SimpleRabbitListenerContainerFactory multipleConsumersFactory() {
-		SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
-		factory.setConnectionFactory(connectionFactory);
-		factory.setMaxConcurrentConsumers(100);
-		factory.setConcurrentConsumers(10);
-		factory.setStartConsumerMinInterval(100L);
-		factory.setConsecutiveActiveTrigger(1);
-		factory.setAutoStartup(true);
-		factory.setPrefetchCount(1);
-		return factory;
-	}
 }
