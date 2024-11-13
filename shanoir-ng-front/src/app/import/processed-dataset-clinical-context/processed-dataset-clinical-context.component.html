@@ -91,9 +91,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </legend>
         <li>
             <label class="required-label">Dataset processing</label>
-            <span class="right-col">
+            <span>
                 <span *ngIf="datasetProcessing">{{datasetProcessing.comment ? datasetProcessing.comment : datasetProcessing.datasetProcessingType}} ({{(datasetProcessing.id)}})</span>
-                <span *ngIf="!datasetProcessing"><button (click)="openCreateDatasetProcessing()">Create processing</button></span>
+                <span *ngIf="!datasetProcessing" class="right-button"><button (click)="openCreateDatasetProcessing()">Create processing</button></span>
             </span>
         </li>
     </ol>
