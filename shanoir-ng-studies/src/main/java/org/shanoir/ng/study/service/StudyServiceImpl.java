@@ -62,6 +62,7 @@ import org.shanoir.ng.subjectstudy.model.SubjectStudyTag;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.model.Tag;
+import org.shanoir.ng.tag.repository.TagRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ListDependencyUpdate;
 import org.shanoir.ng.utils.Utils;
@@ -133,6 +134,10 @@ public class StudyServiceImpl implements StudyService {
 
 	@Autowired
 	private StudyCenterRepository studyCenterRepository;
+
+	@Autowired
+	private TagRepository tagRepository;
+
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
@@ -853,5 +858,10 @@ public class StudyServiceImpl implements StudyService {
 	@Transactional
 	public List<StudyStatisticsDTO> queryStudyStatistics(Long studyId) throws Exception {
 		return studyRepository.queryStudyStatistics(studyId);
+	}
+
+	@Override
+	public List<Tag> getTagsFromStudy(Long studyId) {
+		return tagRepository.findByStudyId(studyId);
 	}
 }

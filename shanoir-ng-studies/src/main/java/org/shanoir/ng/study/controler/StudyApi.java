@@ -218,6 +218,18 @@ public interface StudyApi {
 	ResponseEntity<List<StudyUserRight>> rights(
 			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId)
 			throws RestServiceException;
+
+	@Operation(summary = "", description = "Get tags from this study")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "here are your tags"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@RequestMapping(value = "/tags/{studyId}", produces = { "application/json" }, consumes = {
+			"application/json" }, method = RequestMethod.GET)
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasAnyRightOnStudy(#studyId, {'CAN_SEE_ALL', 'CAN_IMPORT', 'CAN_ADMINISTRATE'}))")
+	ResponseEntity<List<org.shanoir.ng.tag.model.Tag>> tags(
+			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId)
+			throws RestServiceException;
 	
 	@Operation(summary = "", description = "Get my rights")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "here are your rights"),

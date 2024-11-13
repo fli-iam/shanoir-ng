@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -83,6 +84,28 @@ public class StudySecurityService {
 			throw new EntityNotFoundException("Cannot find study with id " + studyId);
 		}
 		return hasPrivilege(study, right);
+	}
+
+	/**
+	 * Check that the connected user has any of the given rights for the given study.
+	 * 
+	 * @param studyId the study id
+	 * @param rightStr the right
+	 * @return true or false
+	 */
+    public boolean hasAnyRightOnStudy(Long studyId, List<String> rightStrs) throws EntityNotFoundException {
+    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")){
+			return true;
+		}
+    	if (studyId == null || rightStrs == null) {
+			return false;
+		}
+		Study study = studyRepository.findById(studyId).orElse(null);
+		if (study == null) {
+			throw new EntityNotFoundException("Cannot find study with id " + studyId);
+		}
+        List<StudyUserRight> rights = rightStrs.stream().map(str -> StudyUserRight.valueOf(str)).collect(Collectors.toList());
+		return hasAnyPrivilege(study, rights);
 	}
 
 	public boolean hasRightOnStudyTag(Long id, String rightStr) throws EntityNotFoundException {
@@ -537,6 +560,25 @@ public class StudySecurityService {
 	 */
 	private boolean hasPrivilege(Study study, StudyUserRight neededRight) {
 		return study != null && hasPrivilege(study.getStudyUserList(), neededRight);
+	}
+
+	/**
+	 * Check that the connected user has any of these rights on this study.
+	 * 
+	 * @param study
+	 * @param neededRight
+	 * @return true or false
+	 */
+	private boolean hasAnyPrivilege(Study study, List<StudyUserRight> neededRights) {
+		if (neededRights == null || study == null) return false;
+		else {
+			for (StudyUserRight right : neededRights) {
+				if (hasPrivilege(study.getStudyUserList(), right)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**

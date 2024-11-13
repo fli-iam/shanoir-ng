@@ -11,13 +11,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { Observable } from 'rxjs/Observable';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
-import { BidsElement } from '../../bids/model/bidsElement.model';
+import { Tag } from 'src/app/tags/tag.model';
 import { DataUserAgreement } from '../../dua/shared/dua.model';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
@@ -29,9 +29,9 @@ import { StudyUserRight } from './study-user-right.enum';
 import { StudyUser } from "./study-user.model";
 import {
     CenterStudyDTO,
-    StudyLight,
     StudyDTO,
     StudyDTOService,
+    StudyLight,
     StudyStorageVolumeDTO,
     SubjectWithSubjectStudyDTO
 } from './study.dto';
@@ -75,6 +75,11 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     getStudiesNames(): Promise<IdName[]> {
         return this.http.get<IdName[]>(AppUtils.BACKEND_API_STUDY_ALL_NAMES_URL)
             .toPromise();
+    }
+
+    getStudyNamesAndCenters(): Promise<Study[]> {
+        return this.http.get<CenterStudyDTO[]>(AppUtils.BACKEND_API_STUDY_URL + '/namesAndCenters')
+            .toPromise().then(dtos => dtos.map(dto => StudyDTOService.centerStudyDTOtoStudy(dto)));
     }
 
     getStudiesProfiles(): Promise<Profile[]> {
@@ -303,5 +308,11 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
 
     storageVolumePrettyPrint(size: number) {
         return AppUtils.getSizeStr(size);
+    }
+
+    getTagsFromStudyId(studyId: number): Promise<Tag[]> {
+        return this.http.get<any[]>(AppUtils.BACKEND_API_STUDY_URL + '/tags/' + studyId)
+            .toPromise()
+            .then(dtos => dtos.map(dto => StudyDTOService.tagDTOToTag(dto)));
     }
 }

@@ -25,6 +25,7 @@ import org.shanoir.ng.study.dto.StudyStatisticsDTO;
 import org.shanoir.ng.study.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
+import org.shanoir.ng.tag.model.Tag;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -158,5 +159,6 @@ public interface StudyService {
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	List<StudyStatisticsDTO> queryStudyStatistics(Long studyId) throws Exception;
-	
+
+	public List<Tag> getTagsFromStudy(Long studyId);
 }

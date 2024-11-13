@@ -55,6 +55,7 @@ import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.study.service.StudyUniqueConstraintManager;
 import org.shanoir.ng.study.service.StudyUserService;
 import org.shanoir.ng.tag.model.StudyTagMapper;
+import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -311,6 +312,17 @@ public class StudyApiController implements StudyApi {
 		List<StudyUserRight> rights = this.studyUserService.getRightsForStudy(studyId);
 		if (!rights.isEmpty()) {
 			return new ResponseEntity<>(rights, HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+	}
+
+	@Override
+	public ResponseEntity<List<Tag>> tags(@PathVariable("studyId") final Long studyId)
+			throws RestServiceException {
+		List<Tag> tags = this.studyService.getTagsFromStudy(studyId);
+		if (!tags.isEmpty()) {
+			return new ResponseEntity<>(tags, HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
