@@ -10,7 +10,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,8 +68,11 @@ public class DICOMWebApiController implements DICOMWebApi {
 	private SeriesInstanceUIDHandler seriesInstanceUIDHandler;
 
 	@Autowired
+	private DicomSEGAndSRImporterService dicomSRImporterService;
+
+	@Autowired
 	private ObjectMapper mapper;
-	
+
 	@Override
 	public ResponseEntity<String> findPatients() throws RestServiceException {
 		return null;
@@ -264,5 +269,14 @@ public class DICOMWebApiController implements DICOMWebApi {
 	public ResponseEntity<Void> stow(HttpServletRequest request) throws RestServiceException {
 		return null;
 	}
-	
+
+	@Override
+	public ResponseEntity<Void> deleteSEGAndSR(String examinationIdStr, String seriesInstanceUid, String reject) {
+		Long examinationId = studyInstanceUIDHandler.extractExaminationId(examinationIdStr);
+		if (examinationId != null && seriesInstanceUid != null) {
+			dicomSRImporterService.deleteSR(examinationId, seriesInstanceUid);
+		}
+
+		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+	}
 }
