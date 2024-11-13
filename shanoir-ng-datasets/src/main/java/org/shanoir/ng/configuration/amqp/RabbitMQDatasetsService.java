@@ -131,7 +131,7 @@ public class RabbitMQDatasetsService {
 	@RabbitListener(bindings = @QueueBinding(
 			value = @Queue(value = RabbitMQConfiguration.STUDY_USER_QUEUE_DATASET, durable = "true"),
 			exchange = @Exchange(value = RabbitMQConfiguration.STUDY_USER_EXCHANGE, ignoreDeclarationExceptions = "true",
-			autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT)), containerFactory = "singleConsumerFactory"
+			autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT)), containerFactory = "multipleConsumersFactory"
 	)
 	public void receiveMessage(String commandArrStr) {
 		listener.receiveStudyUsers(commandArrStr);
@@ -168,7 +168,6 @@ public class RabbitMQDatasetsService {
 	@RabbitListener(queues = RabbitMQConfiguration.STUDY_NAME_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
 	@RabbitHandler
 	public String receiveStudyUpdate(final String studyAsString) {
-		LOG.error("study update");
 		try {
 
 			Study updated = objectMapper.readValue(studyAsString, Study.class);

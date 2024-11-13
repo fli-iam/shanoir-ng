@@ -75,7 +75,6 @@ public class SubjectApiController implements SubjectApi {
 		try {
 			// Delete all associated bids folders
 			subjectService.deleteById(subjectId);
-			//eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_SUBJECT_EVENT, subjectId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, subjectId.toString());
 
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);

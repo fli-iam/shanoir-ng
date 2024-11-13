@@ -331,10 +331,6 @@ public class RabbitMQConfiguration {
 	public FanoutExchange fanoutSubjectExchange() {
 		return new FanoutExchange(STUDY_USER_EXCHANGE, true, false);
 	}
-	@Bean
-	public FanoutExchange fanoutSubjectStudyExchange() {
-		return new FanoutExchange(SUBJECT_STUDY_EXCHANGE, true, false);
-	}
 
 	@Bean
 	public static Queue studyNameUpdateQueue() {

@@ -15,14 +15,11 @@
 package org.shanoir.ng.shared.service;
 
 import org.shanoir.ng.dataset.repository.DatasetRepository;
-import org.shanoir.ng.dicom.web.StowRSMultipartRelatedRequestFilter;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.model.Tag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,8 +36,6 @@ public class StudyServiceImpl implements StudyService {
 
 	@Autowired
 	private DatasetRepository dsRepository;
-
-	private static final Logger LOG = LoggerFactory.getLogger(StudyServiceImpl.class);
 
 	@Override
 	public Study findById(final Long id) {
