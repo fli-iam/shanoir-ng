@@ -48,7 +48,7 @@ public class RabbitMQPreclinicalService {
      * Receives a shanoirEvent as a json object, concerning a subject deletion
      * @param subjectIdAsStr the subject's id to delete, as string
      */
-    @RabbitListener(queues = RabbitMQConfiguration.DELETE_ANIMAL_SUBJECT_QUEUE, containerFactory = "singleConsumerFactory")
+    @RabbitListener(queues = RabbitMQConfiguration.DELETE_ANIMAL_SUBJECT_QUEUE)
     @Transactional
     public void deleteAnimalSubject(String subjectIdAsStr) throws AmqpRejectAndDontRequeueException {
         SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
