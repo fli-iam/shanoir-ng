@@ -131,7 +131,9 @@ public class SubjectApiController implements SubjectApi {
 		Subject createdSubject;
 		if (centerId == null) {
 			// #2475 Trim subject common name, only when not coming from SHUP
-			subject.setName(subject.getName().trim());
+			if (subject.getName() != null) {
+				subject.setName(subject.getName().trim());
+			}
 			createdSubject = subjectService.create(subject);
 		} else {
 			createdSubject = subjectService.createAutoIncrement(subject, centerId);
