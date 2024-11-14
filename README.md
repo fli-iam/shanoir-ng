@@ -1,8 +1,8 @@
 # Shanoir-NG - Import, manage and share neuroimaging data
 
-Shanoir-NG (Next Generation) is a software that helps neuroimaging
-analysis researchers, radiologists, and MRI operators to organize 
-and share neuroimaging datasets. 
+Shanoir-NG (Next Generation) is a software that helps imaging
+analysis researchers, radiologists, and acquisition operators to organize 
+and share imaging datasets. 
 
 Shanoir-NG is copyrighted by [Inria](https://www.inria.fr/) and is open source under 
 the [GNU General Public License v3.0](LICENSE). 
