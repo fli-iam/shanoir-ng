@@ -15,7 +15,6 @@ The Shanoir-NG website is available at:  https://project.inria.fr/shanoir/
 > and some might be unstable. 
 > Also it still misses production features like database backup.
 
-
 ## Shanoir-NG User documentation
 Documentation for Shanoir users is available at https://github.com/fli-iam/shanoir-ng/wiki#users
 
@@ -40,12 +39,22 @@ git repo (as if it were a separated project)  meaning that once
 you are in the shanoir-downloader/ folder, you can just `git pull` 
 to get the latest changes, and commit some changes.
 
+## Contributing 
+
+There are  two main ways to contribute to Shanoir-NG 
+1. Contribute to the code
+2. Report Issues you are encountering 
+
+To learn how to contribute to the code of Shanoir report to the Shanoir-NG 
+[Contribution Workflow](https://github.com/fli-iam/shanoir-ng/wiki/Contribution-Workflow)
+
+To scroll existing issues and open a new open eventually report to [Github Issues](https://github.com/fli-iam/shanoir-ng/issues). 
+
 ## Shanoir Developpers Quick Installation
 After cloning the Shanoir-NG repository follow these 
 [Quick Installation Instructions](https://github.com/alexpron/shanoir-ng/wiki/Quick-Installation)
 
 For more detailled informations about Shanoir development installation please report to [Shanoir Installation Step by Step](https://github.com/alexpron/shanoir-ng/wiki/Installation-Step-by-Step)
-
 
 ## Help and Support
 
