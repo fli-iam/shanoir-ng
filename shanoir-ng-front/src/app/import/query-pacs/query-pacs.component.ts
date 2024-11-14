@@ -56,6 +56,21 @@ export class QueryPacsComponent{
 
     queryPACS(): void {
         this.importService.queryPACS(this.dicomQuery).then((importJob: ImportJob) => {
+            // filter series with wrong modality, studies with no series, patients with no studies
+            if (importJob) {
+                importJob.patients = importJob?.patients.map(patient => ({
+                        ...patient,
+                        studies: patient.studies.map(study => ({
+                                ...study,
+                                series: this.dicomQuery.modality == '' // if modality is 'none', do not filter
+                                    ? study.series
+                                    : study.series.filter(serie => serie.modality === this.dicomQuery.modality)
+                            }))
+                            .filter(study => study.series.length > 0)
+                    }))
+                    .filter(patient => patient.studies.length > 0);
+            }
+
             if (importJob && importJob.patients.length > 0) {
                 this.importDataService.patientList = importJob;
                 this.router.navigate(['imports/series']);
