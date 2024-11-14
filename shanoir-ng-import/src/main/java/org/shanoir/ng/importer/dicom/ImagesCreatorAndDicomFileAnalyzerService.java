@@ -72,6 +72,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 
 	private static final String SUFFIX_DCM = ".dcm";
 	
+	private static final String UNKNOWN = "unknown";
+
 	private static final String YES = "YES";
 
 	@Autowired
@@ -339,22 +341,18 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 */
 	private void addSeriesEquipment(Serie serie, Attributes attributes) {
 		if (serie.getEquipment() == null || !serie.getEquipment().isComplete()) {
-			String manufacturer = attributes.getString(Tag.Manufacturer);
-			if (manufacturer == null || manufacturer.isEmpty()) {
-				manufacturer = "unknown";
-			}
-			String manufacturerModelName = attributes.getString(Tag.ManufacturerModelName);
-			if (manufacturerModelName == null || manufacturerModelName.isEmpty()) {
-				manufacturerModelName = "unknown";
-			}
-			String deviceSerialNumber = attributes.getString(Tag.DeviceSerialNumber);
-			if (deviceSerialNumber == null || deviceSerialNumber.isEmpty()) {
-				deviceSerialNumber = "unknown";
-			}
-			String stationName = attributes.getString(Tag.StationName);
-			String magneticFieldStrength = attributes.getString(Tag.MagneticFieldStrength);
+			String manufacturer = getOrSetToUnknown(attributes, Tag.Manufacturer, UNKNOWN);
+			String manufacturerModelName = getOrSetToUnknown(attributes, Tag.ManufacturerModelName, UNKNOWN);
+			String deviceSerialNumber = getOrSetToUnknown(attributes, Tag.DeviceSerialNumber, UNKNOWN);
+			String stationName = getOrSetToUnknown(attributes, Tag.StationName, UNKNOWN);
+			String magneticFieldStrength = getOrSetToUnknown(attributes, Tag.MagneticFieldStrength, UNKNOWN);
 			serie.setEquipment(new EquipmentDicom(manufacturer, manufacturerModelName, deviceSerialNumber, stationName, magneticFieldStrength));
 		}
+	}
+	
+	private String getOrSetToUnknown(Attributes attributes, int tag, String defaultValue) {
+		String value = attributes.getString(tag);
+		return (value == null || value.isEmpty()) ? defaultValue : value;
 	}
 
 	/**
@@ -366,8 +364,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	private void addSeriesCenter(Serie serie, Attributes attributes) {
 		if (serie.getInstitution() == null) {
 			InstitutionDicom institution = new InstitutionDicom();
-			String institutionName = attributes.getString(Tag.InstitutionName);
-			String institutionAddress = attributes.getString(Tag.InstitutionAddress);
+			String institutionName = getOrSetToUnknown(attributes, Tag.InstitutionName, UNKNOWN);
+			String institutionAddress = getOrSetToUnknown(attributes, Tag.InstitutionAddress, UNKNOWN);
 			institution.setInstitutionName(institutionName);
 			institution.setInstitutionAddress(institutionAddress);
 			serie.setInstitution(institution);
