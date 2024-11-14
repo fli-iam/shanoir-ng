@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetType;
 import org.shanoir.ng.shared.model.DiffusionGradient;
 import org.shanoir.ng.shared.model.EchoTime;
 import org.shanoir.ng.shared.model.FlipAngle;
@@ -40,8 +41,6 @@ import jakarta.persistence.Transient;
  */
 @Entity
 public class MrDataset extends Dataset {
-
-	public static final String datasetType = "Mr";
 
 	/**
 	 * UID
@@ -246,8 +245,8 @@ public class MrDataset extends Dataset {
 	}
 
 	@Override
-	public String getType() {
-		return "Mr";
+	public DatasetType getType() {
+		return DatasetType.Mr;
 	}
 
 	/**

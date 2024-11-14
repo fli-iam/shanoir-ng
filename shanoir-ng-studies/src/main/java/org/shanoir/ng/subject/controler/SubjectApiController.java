@@ -135,10 +135,12 @@ public class SubjectApiController implements SubjectApi {
 			@RequestParam(required = false) Long centerId,
 			final BindingResult result) throws RestServiceException {
 		validate(subject, result);
-		// #2475 Trim subject common name
-		subject.setName(subject.getName().trim());
 		Subject createdSubject;
 		if (centerId == null) {
+			// #2475 Trim subject common name, only when not coming from SHUP
+			if (subject.getName() != null) {
+				subject.setName(subject.getName().trim());
+			}
 			createdSubject = subjectService.create(subject);
 		} else {
 			createdSubject = subjectService.createAutoIncrement(subject, centerId);
