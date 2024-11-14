@@ -1,5 +1,9 @@
 package org.shanoir.ng.shared.event;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Transient;
+
+import java.util.Map;
 import java.util.UUID;
 
 public class ShanoirEvent {
@@ -27,6 +31,10 @@ public class ShanoirEvent {
 	protected Long studyId;
 	
 	private Long timestamp;
+
+	@Transient
+	@JsonProperty("eventProperties")
+	private Map<String, String> eventProperties;
 
    
 	public ShanoirEvent() {
@@ -196,6 +204,11 @@ public class ShanoirEvent {
         this.timestamp = timestamp;
     }
 
-	
+	public Map<String, String> getEventProperties() {
+		return eventProperties;
+	}
 
+	public void setEventProperties(Map<String, String> eventProperties) {
+		this.eventProperties = eventProperties;
+	}
 }
