@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.tag.repository;
 
+import java.util.List;
+
 import org.shanoir.ng.tag.model.Tag;
 import org.springframework.data.repository.CrudRepository;
 
@@ -23,5 +25,7 @@ import org.springframework.data.repository.CrudRepository;
  * @author msimon
  */
 public interface TagRepository extends CrudRepository<Tag, Long> {
+
+    List<Tag> findByStudyId(Long studyId);
 	
 }

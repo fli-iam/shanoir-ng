@@ -17,6 +17,7 @@ package org.shanoir.ng.dataset.modality;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
+
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -27,6 +28,8 @@ import org.shanoir.ng.shared.model.InversionTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.shanoir.ng.dataset.model.DatasetType;
+
 /**
  * EEG dataset.
  * 
@@ -35,17 +38,15 @@ import java.util.List;
  */
 @Entity
 public class EegDataset extends Dataset {
-
-	public static final String datasetType = "Eeg";
-
+	
 	/**
 	 * UID
 	 */
 	private static final long serialVersionUID = -7618433089837302003L;
 
 	@Override
-	public String getType() {
-		return "Eeg";
+	public DatasetType getType() {
+		return DatasetType.Eeg;
 	}
 
 	private float samplingFrequency;
