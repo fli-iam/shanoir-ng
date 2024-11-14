@@ -15,7 +15,9 @@
 package org.shanoir.ng.dataset.modality;
 
 import jakarta.persistence.Entity;
+
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetType;
 
 /**
  * Segmentation dataset.
@@ -25,8 +27,6 @@ import org.shanoir.ng.dataset.model.Dataset;
  */
 @Entity
 public class SegmentationDataset extends Dataset {
-
-	public static final String datasetType = "Segmentation";
 
 	/**
 	 * UID
@@ -40,8 +40,8 @@ public class SegmentationDataset extends Dataset {
 	}
 
 	@Override
-	public String getType() {
-		return "Segmentation";
+	public DatasetType getType() {
+		return DatasetType.Segmentation;
 	}
 
 }

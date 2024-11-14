@@ -1,14 +1,12 @@
 package org.shanoir.ng.dataset.modality;
 
-import jakarta.persistence.Entity;
-import net.bytebuddy.description.type.TypeList;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetType;
+
+import jakarta.persistence.Entity;
 
 @Entity
 public class GenericDataset extends Dataset {
-
-	public static final String datasetType = "Generic";
-
 
 	/**
 	 * Serial version UUID
@@ -24,8 +22,8 @@ public class GenericDataset extends Dataset {
 	}
 
 	@Override
-	public String getType() {
-		return datasetType;
+	public DatasetType getType() {
+		return DatasetType.Generic;
 	}
 
 }
