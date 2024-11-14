@@ -19,6 +19,8 @@ import java.util.List;
 
 import org.shanoir.ng.dataset.modality.BidsDataset;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetModalityType;
+import org.shanoir.ng.dataset.model.DatasetType;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.bids.BidsDatasetAcquisition;
@@ -90,18 +92,20 @@ public abstract class ExaminationDatasetAcquisitionDecorator implements Examinat
 			}
 		} else if (datasetAcquisition.getDatasets() != null) {
 			for (final Dataset dataset : datasetAcquisition.getDatasets()) {
-				final String datasetName = dataset.getName();
-				if (!StringUtils.isEmpty(datasetName) && !datasetNameSet.contains(datasetName)) {
-					datasetNameSet.add(datasetName);
-				}
-				String datasetComment = null;
-				if (dataset.getUpdatedMetadata() != null && dataset.getUpdatedMetadata().getComment() != null) {
-					datasetComment = dataset.getUpdatedMetadata().getComment();
-				} else if (dataset.getOriginMetadata() != null && dataset.getOriginMetadata().getComment() != null) {
-					datasetComment = dataset.getOriginMetadata().getComment();
-				}
-				if (!StringUtils.isEmpty(datasetComment) && !datasetCommentSet.contains(datasetComment)) {
-					datasetCommentSet.add(datasetComment);
+				if (!DatasetType.Measurement.equals(dataset.getType())) {
+					final String datasetName = dataset.getName();
+					if (!StringUtils.isEmpty(datasetName) && !datasetNameSet.contains(datasetName)) {
+						datasetNameSet.add(datasetName);
+					}
+					String datasetComment = null;
+					if (dataset.getUpdatedMetadata() != null && dataset.getUpdatedMetadata().getComment() != null) {
+						datasetComment = dataset.getUpdatedMetadata().getComment();
+					} else if (dataset.getOriginMetadata() != null && dataset.getOriginMetadata().getComment() != null) {
+						datasetComment = dataset.getOriginMetadata().getComment();
+					}
+					if (!StringUtils.isEmpty(datasetComment) && !datasetCommentSet.contains(datasetComment)) {
+						datasetCommentSet.add(datasetComment);
+					}
 				}
 			}
 		}
@@ -110,11 +114,11 @@ public abstract class ExaminationDatasetAcquisitionDecorator implements Examinat
 			result.append(datasetNameSet.get(0));
 		} else if (datasetCommentSet.size() == 1) {
 			result.append(datasetCommentSet.get(0));
-		// } else if (datasetNameSet.size() > 1) {
-		// 	for (final String name : datasetNameSet) {
-		// 		result.append(name).append(" ");
-		// 	}
-		// 	result.deleteCharAt(result.length() - 1);
+		} else if (datasetNameSet.size() > 1) {
+			for (final String name : datasetNameSet) {
+				result.append(name).append(" ");
+			}
+			result.deleteCharAt(result.length() - 1);
 		} else {
 			result.append("id=").append(datasetAcquisition.getId());
 			if (datasetAcquisition.getRank() != null) {
