@@ -76,21 +76,27 @@ public class DownloadOrCopyRunnable implements Runnable {
 
 	@Override
 	public void run() {
+		logger.info(importJobs.size() + " DICOM study(ies) selected for download or copy.");
+		StringBuilder downloadOrCopyReportSummary = new StringBuilder();
 		for (String studyInstanceUID : importJobs.keySet()) {
-			StringBuilder downloadOrCopyReport = new StringBuilder();
+			StringBuilder downloadOrCopyReportPerStudy = new StringBuilder();
 			ImportJob importJob = importJobs.get(studyInstanceUID);
+			downloadOrCopyReportPerStudy.append("DICOM study: ["
+				+ importJob.getStudy().getStudyDate() + "], "
+				+ importJob.getStudy().getStudyDescription() + "\n");
 			File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(),
 					importJob.getSubject().getIdentifier());
 			importJob.setWorkFolder(uploadFolder.getAbsolutePath());
 			List<Serie> selectedSeries = new ArrayList<>(importJob.getSelectedSeries());
-			downloadOrCopyReport.append(selectedSeries.size() + " series selected for download or copy.\n");
+			downloadOrCopyReportPerStudy.append(selectedSeries.size() + " series selected for download or copy.\n\n");
 			List<String> allFileNames = null;
+			downloadProgressBar.setValue(0);
 			try {
 				/**
 				 * 1. Download from PACS or copy from CD/DVD/local file system
 				 */
 				allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(
-						this.isFromPACS, downloadProgressBar, downloadOrCopyReport, studyInstanceUID, selectedSeries,
+						this.isFromPACS, downloadProgressBar, downloadOrCopyReportPerStudy, studyInstanceUID, selectedSeries,
 						uploadFolder, dicomFileAnalyzer, dicomServerClient, filePathDicomDir);
 				/**
 				 * 2. Fill MRI information into all series from first DICOM file of each serie
@@ -143,23 +149,24 @@ public class DownloadOrCopyRunnable implements Runnable {
 			} catch (IOException e) {
 				logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
 			}
-
-			/**
-			 * Display downloadOrCopy summary to user.
-			 */
-			JTextArea textArea = new JTextArea(downloadOrCopyReport.toString());
-			textArea.setEditable(false);
-			textArea.setWrapStyleWord(true);
-			textArea.setLineWrap(true);
-			textArea.setCaretPosition(0);
-			JScrollPane scrollPane = new JScrollPane(textArea);
-			scrollPane.setPreferredSize(new java.awt.Dimension(650, 550));
-			JOptionPane.showMessageDialog(
-				frame,
-				scrollPane,
-				"Download or copy report",
-				JOptionPane.INFORMATION_MESSAGE);
+			downloadOrCopyReportSummary.append(downloadOrCopyReportPerStudy.toString() + "\n\n");
 		}
+		/**
+		 * Display downloadOrCopy summary to user.
+		 */
+		JTextArea textArea = new JTextArea(downloadOrCopyReportSummary.toString());
+		textArea.setEditable(false);
+		textArea.setWrapStyleWord(true);
+		textArea.setLineWrap(true);
+		textArea.setCaretPosition(0);
+		JScrollPane scrollPane = new JScrollPane(textArea);
+		scrollPane.setPreferredSize(new java.awt.Dimension(650, 550));
+		JOptionPane.showMessageDialog(
+			frame,
+			scrollPane,
+			"Download or copy report",
+			JOptionPane.INFORMATION_MESSAGE);
+
 	}
 
 }
