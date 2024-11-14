@@ -187,7 +187,8 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 		} catch (IOException e) {
 			throw new RestServiceException(e, new ErrorModel(500, "Error querying Solr"));
 		} catch (SolrException | SolrServerException e) {
-			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "solr query failed");
+			String errorMessage = e.getMessage().substring(e.getMessage().indexOf("shanoir") + 9);
+			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), errorMessage);
 			throw new RestServiceException(e, error);
 		}
 		return response;

@@ -14,21 +14,13 @@
 
 package org.shanoir.ng.subject.controler;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-
+import io.swagger.v3.oas.annotations.Parameter;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.ErrorDetails;
-import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
-import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
@@ -49,7 +41,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import io.swagger.v3.oas.annotations.Parameter;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 @Controller
 public class SubjectApiController implements SubjectApi {
@@ -136,6 +130,10 @@ public class SubjectApiController implements SubjectApi {
 		validate(subject, result);
 		Subject createdSubject;
 		if (centerId == null) {
+			// #2475 Trim subject common name, only when not coming from SHUP
+			if (subject.getName() != null) {
+				subject.setName(subject.getName().trim());
+			}
 			createdSubject = subjectService.create(subject);
 		} else {
 			createdSubject = subjectService.createAutoIncrement(subject, centerId);
