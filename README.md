@@ -91,8 +91,14 @@ Then the shanoir-downloader project can be simply managed as a normal git repo (
 * Fork GitHub project
 * Clone
 * Edit .env file and set SHANOIR_MIGRATION=init
+
+* Using locally built docker images
 * Run "mvn clean install -DskipTests" in shanoir-ng/shanoir-ng-parent/ folder
+* Run docker-compose -f docker-compose-dev.yml up --build in shanoir-ng/
+
+* Using github packages images
 * Run docker-compose up --build in shanoir-ng/
+
 * Load data manually from Docker Desktop :
     - Open terminal in database microservice
     - Run command : mysql -uroot -ppassword
@@ -131,7 +137,7 @@ Keycloak : http://localhost:8080/auth/admin/master/console/#/realms/shanoir-ng/r
 and will not be found if you run docker-compose elsewhere; results in errors after
 * Access to shanoir-ng: https://shanoir-ng-nginx
 
-If you want to login, please configure a user in Keycloak :
+If you want to login, please configure a user in Keycloak.
 
 Please note, that the MS Users does for security reasons not publicly expose his REST-interface.
 
@@ -159,6 +165,9 @@ The following sections give detailed informations about each step.
 The default docker-compose configuration is well-suited for a development
 environment. Each microservice is hosted in a separate container and the
 application data are stored in named volumes.
+
+Shanoir is now based on github packages for the microservices images.
+If you want to build your own 'local' images, you have to run shanoir with docker-compose-dev.yml file.
 
 Before deploying, some configuration is required:
 
@@ -215,6 +224,10 @@ Procedure:
   ```
   docker-compose build
   ```
+  
+* In order to use these built images, when running "docker compose" command,
+  you have to precise docker-compose-dev.yml file.
+  Otherwise, github packages are used by default.
 
 ## CONFIGURE
 
@@ -266,6 +279,9 @@ Name                  | Value             | Description                         
   
 
 ## DEPLOY
+
+For all the following commands, if you want to deploy locally built images,
+you have to add "-f docker-compose-dev.yml" argument to the "docker compose up" command.
 
 0. ensure all containers are stopped and all volumes are destroyed (**CAUTION:
    this destroys all external volumes defined in docker-compose.yml**) 
