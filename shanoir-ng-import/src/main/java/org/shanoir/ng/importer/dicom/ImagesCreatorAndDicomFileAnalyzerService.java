@@ -340,8 +340,17 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	private void addSeriesEquipment(Serie serie, Attributes attributes) {
 		if (serie.getEquipment() == null || !serie.getEquipment().isComplete()) {
 			String manufacturer = attributes.getString(Tag.Manufacturer);
+			if (manufacturer == null || manufacturer.isEmpty()) {
+				manufacturer = "unknown";
+			}
 			String manufacturerModelName = attributes.getString(Tag.ManufacturerModelName);
+			if (manufacturerModelName == null || manufacturerModelName.isEmpty()) {
+				manufacturerModelName = "unknown";
+			}
 			String deviceSerialNumber = attributes.getString(Tag.DeviceSerialNumber);
+			if (deviceSerialNumber == null || deviceSerialNumber.isEmpty()) {
+				deviceSerialNumber = "unknown";
+			}
 			String stationName = attributes.getString(Tag.StationName);
 			String magneticFieldStrength = attributes.getString(Tag.MagneticFieldStrength);
 			serie.setEquipment(new EquipmentDicom(manufacturer, manufacturerModelName, deviceSerialNumber, stationName, magneticFieldStrength));
