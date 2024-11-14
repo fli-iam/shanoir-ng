@@ -1,6 +1,7 @@
 package org.shanoir.ng.vip.resulthandler;
 
 import jakarta.ws.rs.NotFoundException;
+
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,6 +37,8 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import org.shanoir.ng.dataset.model.DatasetType;
 
 @Service
 public class DefaultHandler extends ResultHandler {
@@ -211,7 +214,7 @@ public class DefaultHandler extends ResultHandler {
 					processedDataset.setSubjectName(subject.getName());
 				}
 			}
-			processedDataset.setDatasetType(GenericDataset.datasetType);
+			processedDataset.setDatasetType(DatasetType.Generic.name());
 
 			importerService.createProcessedDataset(processedDataset);
 

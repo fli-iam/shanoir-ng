@@ -15,7 +15,9 @@
 package org.shanoir.ng.dataset.modality;
 
 import jakarta.persistence.Entity;
+
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetType;
 
 /**
  * XA dataset.
@@ -25,8 +27,6 @@ import org.shanoir.ng.dataset.model.Dataset;
  */
 @Entity
 public class XaDataset extends Dataset {
-
-	public static final String datasetType = "Xa";
 
 	public XaDataset() {
 	}
@@ -41,8 +41,8 @@ public class XaDataset extends Dataset {
 	private static final long serialVersionUID = -3926301273461759120L;
 
 	@Override
-	public String getType() {
-		return "Xa";
+	public DatasetType getType() {
+		return DatasetType.Xa;
 	}
 
 }
