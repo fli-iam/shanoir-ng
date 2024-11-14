@@ -54,7 +54,7 @@ To scroll existing issues and open a new open eventually report to [Github Issue
 After cloning the Shanoir-NG repository follow these 
 [Quick Installation Instructions](https://github.com/alexpron/shanoir-ng/wiki/Quick-Installation)
 
-For more detailled informations about Shanoir development installation please report to [Shanoir Installation Step by Step](https://github.com/alexpron/shanoir-ng/wiki/Installation-Step-by-Step)
+For more detailled informations about Shanoir development installation please report to [Shanoir Installation Step by Step](https://github.com/alexpron/shanoir-ng/wiki/Developper-Installation-Step-by-Step)
 
 ## Help and Support
 
