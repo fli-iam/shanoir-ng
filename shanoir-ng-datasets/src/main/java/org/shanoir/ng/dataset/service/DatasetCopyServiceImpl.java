@@ -1,6 +1,7 @@
 package org.shanoir.ng.dataset.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
@@ -20,9 +21,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import org.shanoir.ng.dataset.model.DatasetType;
 
 
 @Service
@@ -52,10 +56,10 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
             LOG.info("[CopyDatasets] moveDataset : " + oldDsId + " to study : " + studyId);
 
             // Creation of new dataset according to its type
-            String dsType = ds.getType();
+            DatasetType dsType = ds.getType();
             Dataset newDs = null;
             if (ds.getDatasetAcquisition() != null &&  ds.getDatasetAcquisition().getId() != null) {
-                if ("Mr".equals(dsType)) {
+                if (DatasetType.Mr.equals(dsType)) {
                     newDs = new MrDataset(ds);
                 } else {
                     newDs = DatasetUtils.copyDatasetFromDataset(ds);
