@@ -194,7 +194,6 @@ public class ImporterService {
                                 				
                 // Has quality check passed ?
                 if (qualityResult != null && !qualityResult.isEmpty() && qualityResult.hasError()) {
-                    // TODO : Delete newly created Examination ?
                     throw new QualityException(examination, qualityResult);
                 } else { // Then do the import
                     if (qualityResult != null && !qualityResult.isEmpty()) {
