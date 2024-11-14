@@ -312,15 +312,10 @@ public class RabbitMQDatasetsService {
 
 
 	/**
-         * Receives a shanoirEvent as a json object, concerning a subject deletion
-         * @param subjectIdAsString a string of the subject's id
-         */
-	@RabbitListener(bindings = @QueueBinding(
-			key = ShanoirEventType.DELETE_SUBJECT_EVENT,
-			value = @Queue(value = RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, durable = "true"),
-			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)), containerFactory = "singleConsumerFactory"
-			)
+	 * Receives a shanoirEvent as a json object, concerning a subject deletion
+	 * @param subjectIdAsString a string of the subject's id
+	 */
+	@RabbitListener(queues = RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, containerFactory = "singleConsumerFactory")
 	@Transactional
 	public void deleteSubject(String subjectIdAsString) throws AmqpRejectAndDontRequeueException {
 		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
