@@ -1,15 +1,15 @@
 package org.shanoir.ng.dataset.modality;
 
 import jakarta.persistence.Entity;
+
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetType;
 
 @Entity
 public class BidsDataset extends Dataset {
 
 	private static final long serialVersionUID = 7476089535424633518L;
-
-	public static final String datasetType = "BIDS";
-
+	
 	/** BIDS data type. */
 	private String bidsDataType;
 
@@ -23,8 +23,8 @@ public class BidsDataset extends Dataset {
 	}
 
 	@Override
-	public String getType() {
-		return datasetType;
+	public DatasetType getType() {
+		return DatasetType.BIDS;
 	}
 
 	public String getBidsDataType() {
