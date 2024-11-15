@@ -49,7 +49,7 @@ public class QualityUtils {
 		SubjectStudy subjectStudy = new SubjectStudy();
 		QualityCardResult qualityCardResult = new QualityCardResult();
 		final File importJobDir = new File(importJob.getWorkFolder());
-		List<QualityCard> qualityCards = new ArrayList<QualityCard>();
+		List<QualityCard> qualityCards = new ArrayList<>();
 		
 		// Call Shanoir server to get all quality cards for the selected study
 		try {
@@ -61,7 +61,7 @@ public class QualityUtils {
 		
 
 		// If no quality cards are found for the study we skip the quality control
-		if (qualityCards.isEmpty()) {
+		if (qualityCards == null || qualityCards.isEmpty()) {
 			logger.info("Quality Control At Import - No quality cards found for study " + importJob.getStudyId());
 
 			return qualityCardResult;
