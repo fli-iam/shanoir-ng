@@ -120,7 +120,6 @@ public class ExaminationApiController implements ExaminationApi {
 	public ResponseEntity<ExaminationDTO> findExaminationById(
 			@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId) {
 		Examination examination = examinationService.findById(examinationId);
-		LOG.error("APIController exam.copymsg : " + examination.getCopyMessage());
 		orderDatasetAcquisitions(examination);
 		if (examination == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);

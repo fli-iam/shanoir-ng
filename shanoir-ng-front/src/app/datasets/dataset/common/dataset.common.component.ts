@@ -125,7 +125,6 @@ export class CommonDatasetComponent implements OnChanges {
     }
 
     getCopiedEntity(copyMsg: string) {
-        console.log("getCopiedEntity");
         this.copyEntityIds = [];
         if (copyMsg != null && copyMsg.includes('This dataset has been copied')) {
             this.copyEntityIds = copyMsg.substring(copyMsg.indexOf(":") + 1).split(",");

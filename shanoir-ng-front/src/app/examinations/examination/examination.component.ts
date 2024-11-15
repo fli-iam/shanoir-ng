@@ -112,11 +112,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
 
     initView(): Promise<void> {
-        console.log("init view exam.id : ", this.examination.id);
         this.getCopiedEntity(this.examination?.copyMessage);
-        this.firstOpen.emit();
-        this.nodeInit.emit();
-        //this.treeService.selection = this.getTreeSelection();
 
         if(!this.examination.weightUnitOfMeasure){
             this.examination.weightUnitOfMeasure = this.defaultUnit;
@@ -267,7 +263,6 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
 
     getCopiedEntity(copyMsg: string) {
-        console.log("getCopiedEntity");
         this.copyEntityIds = [];
         if (copyMsg != null && copyMsg.includes('This examination has been copied')) {
             this.copyEntityIds = copyMsg.substring(copyMsg.indexOf(":") + 1).split(",");

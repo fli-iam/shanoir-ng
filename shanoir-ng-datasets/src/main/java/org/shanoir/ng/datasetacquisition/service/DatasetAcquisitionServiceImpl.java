@@ -108,12 +108,10 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         if (!CollectionUtils.isEmpty(childAcq)) {
             String copyMsg = "This acquisition has been copied: ";
             copyMsg += childAcq.stream().map(DatasetAcquisition::getId).map(String::valueOf).collect(Collectors.joining(","));
-            LOG.error("CopyMsg : " + copyMsg);
             dsAcq.setCopyMessage(copyMsg);
         }
         if (dsAcq.getSourceId() != null) {
             String copyMsg = "This acquisition is the copy of : " + dsAcq.getSourceId();
-            LOG.error("CopyMsg : " + copyMsg);
             dsAcq.setCopyMessage(copyMsg);
         }
         return dsAcq;
