@@ -114,7 +114,6 @@ export class ExaminationDTO {
 
     constructor(examination?: Examination) {
         if (examination) {
-            console.log("examination : ", examination);
             this.id = examination.id;
             this.centerId = examination.center ? examination.center.id : null;
             this.comment = examination.comment;

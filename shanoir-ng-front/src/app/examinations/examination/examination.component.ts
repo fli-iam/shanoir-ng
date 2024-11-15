@@ -68,10 +68,6 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     copyRelation: string = "";
     copyEntityIds: string[] = [];
 
-    @Output() firstOpen = new EventEmitter();
-
-    @Output() nodeInit = new EventEmitter();
-
     constructor(
             private route: ActivatedRoute,
             private examinationService: ExaminationService,
