@@ -15,7 +15,9 @@
 package org.shanoir.ng.dataset.modality;
 
 import jakarta.persistence.Entity;
+
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetType;
 
 /**
  * Spectroscopy dataset.
@@ -25,8 +27,6 @@ import org.shanoir.ng.dataset.model.Dataset;
  */
 @Entity
 public class SpectDataset extends Dataset {
-
-	public static final String datasetType = "Spect";
 
 	/**
 	 * UID 
@@ -69,8 +69,8 @@ public class SpectDataset extends Dataset {
 	}
 
 	@Override
-	public String getType() {
-		return "Spect";
+	public DatasetType getType() {
+		return DatasetType.Spect;
 	}
 
 }

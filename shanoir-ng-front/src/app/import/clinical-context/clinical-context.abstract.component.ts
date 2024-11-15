@@ -199,7 +199,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     private completeStudyCenters(): Promise<void> {
-        return Promise.all([this.studyService.getStudyNamesAndCenters(), this.centerService.getAll()])
+        return Promise.all([this.studyService.getAll(), this.centerService.getAll()])
             .then(([allStudies, allCenters]) => {
                 this.studyOptions = [];
                 this.allCenters = allCenters;
@@ -367,9 +367,11 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
                 return this.selectDefaultCenter(options);
             });
         }
-
         let subjectsPromise: Promise<void> = this.getSubjectList(this.study?.id).then(subjects => {
             this.subjects = subjects ? subjects : [];
+        });
+        let tagsPromise: Promise<void> = this.studyService.getTagsFromStudyId(this.study?.id).then(tags => {
+            this.study.tags = tags ? tags : [];
         });
         return Promise.all([studycardsOrCentersPromise, subjectsPromise]).finally(() => this.loading--)
             .then(() => this.onContextChange());

@@ -94,7 +94,7 @@ public class ExaminationServiceTest {
 	@Test
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void deleteByIdTest() throws ShanoirException, SolrServerException, IOException, RestServiceException {
-		examinationService.deleteById(EXAMINATION_ID);
+		examinationService.deleteById(EXAMINATION_ID, null);
 		Mockito.verify(examinationRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 

@@ -15,8 +15,9 @@
 package org.shanoir.ng.dataset.modality;
 
 import jakarta.persistence.Entity;
-import org.hibernate.sql.Template;
+
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetType;
 
 /**
  * Template dataset.
@@ -26,8 +27,6 @@ import org.shanoir.ng.dataset.model.Dataset;
  */
 @Entity
 public class TemplateDataset extends Dataset {
-
-	public static final String datasetType = "Template";
 
 	/**
 	 * UID
@@ -70,8 +69,8 @@ public class TemplateDataset extends Dataset {
 	}
 
 	@Override
-	public String getType() {
-		return "Template";
+	public DatasetType getType() {
+		return DatasetType.Template;
 	}
 
 }
