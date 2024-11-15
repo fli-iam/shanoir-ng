@@ -148,9 +148,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [(ngModel)]="subject"
                         (userChange)="onSelectSubject();"
                         [viewRoute]="'/subject/details/' + this.subject?.id" [viewDisabled]="!subject"
-                        (onNewClick)="openCreateSubject()" [newDisabled]="!study || !acquisitionEquipment"
                         [optionArr]="subjects">
                 </select-box>
+                <button class="new-subject left-icon" (click)="openCreateSubject()" [disabled]="!study || !acquisitionEquipment">
+                    <i class="fa-solid fa-user-plus"></i>
+                    New
+                </button>
             </span>
         </li>
         <li *ngIf="editSubjectStudy" class="required">
