@@ -36,6 +36,7 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
     @Input() inputIds: DownloadInputIds;
     form: UntypedFormGroup;
     loading: boolean;
+    loaded: boolean = false;
     format: Format;
     converter: number;
     datasets: Dataset[];
@@ -96,6 +97,7 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
                     }
                 ).finally(() => {
                     this.loading = false;
+                    this.loaded = true;
                 });
             }
         }
