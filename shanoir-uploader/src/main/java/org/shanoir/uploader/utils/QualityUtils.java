@@ -49,7 +49,7 @@ public class QualityUtils {
 		SubjectStudy subjectStudy = new SubjectStudy();
 		QualityCardResult qualityCardResult = new QualityCardResult();
 		final File importJobDir = new File(importJob.getWorkFolder());
-		List<QualityCard> qualityCards;
+		List<QualityCard> qualityCards = new ArrayList<QualityCard>();
 		
 		// Call Shanoir server to get all quality cards for the selected study
 		try {
