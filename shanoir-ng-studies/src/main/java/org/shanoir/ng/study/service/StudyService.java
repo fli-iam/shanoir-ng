@@ -17,11 +17,15 @@ package org.shanoir.ng.study.service;
 import java.util.List;
 import java.util.Map;
 
-import org.shanoir.ng.shared.exception.*;
+import org.shanoir.ng.shared.exception.AccessDeniedException;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.study.dto.StudyStatisticsDTO;
 import org.shanoir.ng.study.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
+import org.shanoir.ng.tag.model.Tag;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -66,9 +70,6 @@ public interface StudyService {
 	@PostFilter("@studySecurityService.hasRightOnTrustedStudy(filterObject, 'CAN_SEE_ALL')")
 	List<Study> findAll();
 	
-	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
-	@PostFilter("@studySecurityService.hasRightOnTrustedStudy(filterObject, 'CAN_SEE_ALL')")
-	List<Study> findAllWithCenters();
 
 	/**
 	 * Get all the challenges
@@ -158,5 +159,6 @@ public interface StudyService {
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	List<StudyStatisticsDTO> queryStudyStatistics(Long studyId) throws Exception;
-	
+
+	public List<Tag> getTagsFromStudy(Long studyId);
 }

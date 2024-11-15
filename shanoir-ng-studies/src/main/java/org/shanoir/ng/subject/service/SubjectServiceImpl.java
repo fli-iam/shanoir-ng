@@ -281,21 +281,32 @@ public class SubjectServiceImpl implements SubjectService {
 		}
 	}
 
+	/**
+	 * If preclinical is null, doesn't use it. Else it filters the subjects depending of the given value true/false.
+	 */
 	@Override
-	public List<SimpleSubjectDTO> findAllSubjectsOfStudyId(final Long studyId) {
+	public List<SimpleSubjectDTO> findAllSubjectsOfStudyAndPreclinical(final Long studyId, final Boolean preclinical) {
 		List<SimpleSubjectDTO> simpleSubjectDTOList = new ArrayList<>();
-		List<SubjectStudy> subjectStudyList = subjectStudyRepository.findByStudyId(studyId);
+		List<SubjectStudy> subjectStudyList;
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			subjectStudyList = subjectStudyRepository.findByStudyId(studyId);
+		} else {
+			Long userId = KeycloakUtil.getTokenUserId();
+			subjectStudyList = subjectStudyRepository.findByStudyIdAndStudy_StudyUserList_UserId(studyId, userId);
+		}
+		Study studyWithTags = studyRepository.findStudyWithTagsById(studyId);
 		if (subjectStudyList != null) {
 			subjectStudyList.stream().forEach(ss -> {
-				ss.setSubjectStudyTags(subjectStudyRepository.findSubjectStudyTagsByStudyIdAndSubjectId(studyId, ss.getSubject().getId()));
-				Study studyWithTags = studyRepository.findStudyWithTagsById(studyId);
+				// after testing this seems to be useless :
+				// ss.setSubjectStudyTags(subjectStudyRepository.findSubjectStudyTagsByStudyIdAndSubjectId(studyId, ss.getSubject().getId()));
 				if (studyWithTags != null) {
 					ss.getStudy().setTags(studyWithTags.getTags());
 				}
 			});
 			for (SubjectStudy rel : subjectStudyList) {
 				SimpleSubjectDTO simpleSubjectDTO = new SimpleSubjectDTO();
-				if (studyId.equals(rel.getStudy().getId())) {
+				if (studyId.equals(rel.getStudy().getId()) 
+						&& preclinical == null || (preclinical.equals(rel.getSubject().isPreclinical()))) {
 					Subject sub = rel.getSubject();
 					simpleSubjectDTO.setId(sub.getId());
 					simpleSubjectDTO.setName(sub.getName());
@@ -312,33 +323,8 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 	
 	@Override
-	public List<SimpleSubjectDTO> findAllSubjectsOfStudyAndPreclinical(final Long studyId, boolean preclinical) {
-		List<SimpleSubjectDTO> simpleSubjectDTOList = new ArrayList<>();
-		List<SubjectStudy> subjectStudyList = subjectStudyRepository.findByStudyId(studyId);
-		if (subjectStudyList != null) {
-			subjectStudyList.stream().forEach(ss -> {
-				ss.setSubjectStudyTags(subjectStudyRepository.findSubjectStudyTagsByStudyIdAndSubjectId(studyId, ss.getSubject().getId()));
-				Study studyWithTags = studyRepository.findStudyWithTagsById(studyId);
-				if (studyWithTags != null) {
-					ss.getStudy().setTags(studyWithTags.getTags());
-				}
-			});
-			for (SubjectStudy rel : subjectStudyList) {
-				SimpleSubjectDTO simpleSubjectDTO = new SimpleSubjectDTO();
-				if (studyId.equals(rel.getStudy().getId()) && preclinical == rel.getSubject().isPreclinical()) {
-					Subject sub = rel.getSubject();
-					simpleSubjectDTO.setId(sub.getId());
-					simpleSubjectDTO.setName(sub.getName());
-					simpleSubjectDTO.setIdentifier(sub.getIdentifier());
-					simpleSubjectDTO.setImagedObjectCategory(sub.getImagedObjectCategory());
-					simpleSubjectDTO.setLanguageHemisphericDominance(sub.getLanguageHemisphericDominance());
-					simpleSubjectDTO.setManualHemisphericDominance(sub.getManualHemisphericDominance());
-					simpleSubjectDTO.setSubjectStudy(subjectStudyMapper.subjectStudyToSubjectStudyDTO(rel));
-					simpleSubjectDTOList.add(simpleSubjectDTO);
-				}
-			}
-		}
-		return simpleSubjectDTOList;
+	public List<SimpleSubjectDTO> findAllSubjectsOfStudyId(final Long studyId) {
+		return findAllSubjectsOfStudyAndPreclinical(studyId, null);
 	}
 
 	@Override

@@ -15,7 +15,9 @@
 package org.shanoir.ng.dataset.modality;
 
 import jakarta.persistence.Entity;
+
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetType;
 
 /**
  * CT dataset.
@@ -25,8 +27,6 @@ import org.shanoir.ng.dataset.model.Dataset;
  */
 @Entity
 public class CtDataset extends Dataset {
-
-	public static final String datasetType = "Ct";
 
 //	private String pixelData;
 //	
@@ -49,8 +49,8 @@ public class CtDataset extends Dataset {
 	private static final long serialVersionUID = -1035190618348031062L;
 
 	@Override
-	public String getType() {
-		return "Ct";
+	public DatasetType getType() {
+		return DatasetType.Ct;
 	}
 
 }
