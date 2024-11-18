@@ -23,6 +23,7 @@ export enum DatasetType {
   Meg = 'Meg',
   Mesh = 'Mesh',
   Mr = 'Mr',
+  Generic = 'Generic',
   ParameterQuantification = 'ParameterQuantification',
   Pet = 'Pet',
   Registration = 'Registration',
