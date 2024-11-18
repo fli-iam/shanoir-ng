@@ -56,6 +56,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriUtils;
@@ -371,10 +372,31 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
+	@Async
 	public void deleteNiftis(Long studyId) {
 		List<Dataset> datasets = this.findByStudyId(studyId);
-		for (Dataset dataset : datasets) {
-			deleteNifti(dataset);
+		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DELETE_NIFTI_EVENT, studyId.toString(), KeycloakUtil.getTokenUserId(), "Preparing deletion of niftis", ShanoirEvent.IN_PROGRESS, 0, studyId);
+		shanoirEventService.publishEvent(event);
+		try {
+			int total = datasets.size();
+			int i = 1;
+			for (Dataset dataset : datasets) {
+				event.setProgress((float) (i / total));
+				event.setMessage("Deleting nifti for dataset: " + dataset.getName() + " of subject " + dataset.getSubjectId());
+				shanoirEventService.publishEvent(event);
+				deleteNifti(dataset);
+				i += 1;
+			}
+			event.setProgress(1f);
+			event.setStatus(ShanoirEvent.SUCCESS);
+			event.setMessage("Deleting nifti for study: " + studyId + ": Success.");
+			shanoirEventService.publishEvent(event);
+		} catch (Exception e) {
+			LOG.error("Could not properly delete niftis: ", e);
+			event.setProgress(1f);
+			event.setStatus(ShanoirEvent.ERROR);
+			event.setMessage("Deleting nifti for study: " + studyId + ": Error. " + e.getMessage());
+			shanoirEventService.publishEvent(event);
 		}
 	}
 
@@ -383,7 +405,7 @@ public class DatasetServiceImpl implements DatasetService {
 	 * @param dataset
 	 */
 	private void deleteNifti(Dataset dataset) {
-		List<DatasetExpression> expressionsToDelete = new ArrayList<>();
+		Set<DatasetExpression> expressionsToDelete = new HashSet<>();
 
 		for (Iterator<DatasetExpression> iterex = dataset.getDatasetExpressions().iterator(); iterex.hasNext(); ) {
 			DatasetExpression expression = iterex.next();
