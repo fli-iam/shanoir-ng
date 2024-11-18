@@ -66,11 +66,11 @@ For more detailled informations about Shanoir development installation please re
 
 Hereunder are some direct links to 
 main Shanoir-NG Wiki entries:
-   + [User Documentation](https://github.com/fli-iam/shanoir-ng/wiki#users)
-   + [Developer documentation](https://github.com/fli-iam/shanoir-ng/wiki#developers-dev)
-   + [REST API](https://github.com/fli-iam/shanoir-ng/wiki#shanoir-ng-rest-api)
-   + [Maintainer Documentation](https://github.com/fli-iam/shanoir-ng/wiki#operations-ops-installation-updates-and-maintenance-administration)
-   + [Project Management documentation](https://github.com/fli-iam/shanoir-ng/wiki)
+   + [User Documentation](https://github.com/alexpron/shanoir-ng/wiki/Shanoir-Users-Documentation)
+   + [Developer documentation](https://github.com/alexpron/shanoir-ng/wiki/Shanoir-Developers-Documentation)
+   + [REST API](https://github.com/alexpron/shanoir-ng/wiki/shanoir-REST-apis-doc)
+   + [Maintainer Documentation](https://github.com/alexpron/shanoir-ng/wiki/Shanoir-Maintainer-Documentation)
+   + [Project Management documentation](https://github.com/alexpron/shanoir-ng/wiki/Shanoir-Project-Management-Documentation)
    
      
 ### Communication
