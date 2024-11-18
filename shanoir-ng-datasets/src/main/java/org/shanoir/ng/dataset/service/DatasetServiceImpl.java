@@ -53,6 +53,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -102,6 +103,7 @@ public class DatasetServiceImpl implements DatasetService {
 	private ObjectMapper objectMapper;
 
 	@Autowired
+	@Lazy
 	private DatasetProcessingService processingService;
 
 	@Autowired
@@ -109,6 +111,8 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Autowired
 	private DatasetAsyncService datasetAsyncService;
+	@Lazy
+	private ProcessingResourceService processingResourceService;
 
 	@Autowired
 	private ProcessingResourceRepository processingResourceRepository;
@@ -387,6 +391,7 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Override
 	@Async
+	@Transactional
 	public void deleteNiftis(Long studyId) {
 		List<Dataset> datasets = this.findByStudyId(studyId);
 		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DELETE_NIFTI_EVENT, studyId.toString(), KeycloakUtil.getTokenUserId(), "Preparing deletion of niftis", ShanoirEvent.IN_PROGRESS, 0, studyId);
