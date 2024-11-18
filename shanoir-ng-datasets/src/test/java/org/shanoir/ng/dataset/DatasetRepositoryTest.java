@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.shanoir.ng.dataset.model.DatasetType;
 
 /**
  * Tests for repository 'dataset'.
@@ -127,7 +128,7 @@ public class DatasetRepositoryTest {
 		Dataset foundedPet1 = all.get(2);
 		assertEquals(pet1Id, foundedPet1.getId());
 		assertTrue(foundedPet1 instanceof PetDataset);
-		assertEquals("Pet", ((PetDataset)foundedPet1).getType());
+		assertEquals(DatasetType.Pet, ((PetDataset)foundedPet1).getType());
 	}
 	
 	@Test

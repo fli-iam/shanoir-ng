@@ -15,7 +15,9 @@
 package org.shanoir.ng.dataset.modality;
 
 import jakarta.persistence.Entity;
+
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetType;
 
 /**
  * PET dataset.
@@ -25,8 +27,6 @@ import org.shanoir.ng.dataset.model.Dataset;
  */
 @Entity
 public class PetDataset extends Dataset {
-
-	public static final String datasetType = "Pet";
 
 	/**
 	 * UID
@@ -42,8 +42,8 @@ public class PetDataset extends Dataset {
 	}
 
 	@Override
-	public String getType() {
-		return "Pet";
+	public DatasetType getType() {
+		return DatasetType.Pet;
 	}
 
 }

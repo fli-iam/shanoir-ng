@@ -28,7 +28,6 @@ import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Center } from '../../centers/shared/center.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ManufacturerModelPipe } from '../shared/manufacturer-model.pipe';
-import {StudyCardService} from "../../study-cards/shared/study-card.service";
 import { Selection } from 'src/app/studies/study/tree.service';
 
 @Component({
