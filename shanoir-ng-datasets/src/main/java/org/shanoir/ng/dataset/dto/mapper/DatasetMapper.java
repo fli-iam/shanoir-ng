@@ -28,6 +28,7 @@ import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Mapper for datasets.
@@ -98,4 +99,25 @@ public interface DatasetMapper {
 	 */
 	IdName datasetToIdNameDTO(Dataset dataset);
 
+	default List<Long> mapCopiesFromDataset(List<Dataset> copies) {
+		if (copies == null) {
+			return null;
+		}
+		return copies.stream()
+				.map(Dataset::getId)
+				.collect(Collectors.toList());
+	}
+
+	default Long mapSourceFromDataset(Dataset source) {
+		return source != null ? source.getId() : null;
+	}
+
+
+	default List<Dataset> mapCopiesFromLong(List<Long> copies) {
+		return null;
+	}
+
+	default Dataset mapSourceFromLong(Long source) {
+		return null;
+	}
 }

@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.dataset.dto;
 
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.EntityOrigin;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.tag.model.StudyTagDTO;
 
@@ -54,7 +56,12 @@ public class DatasetDTO {
 	
 	private List<StudyTagDTO> tags;
 
-	private String copyMessage;
+	private Long source;
+
+	private List<Long> copies;
+
+	private EntityOrigin origin;
+
 
 	/**
 	 * @return the creationDate
@@ -201,11 +208,27 @@ public class DatasetDTO {
 		this.tags = tags;
 	}
 
-	public String getCopyMessage() {
-		return copyMessage;
+	public Long getSource() {
+		return source;
 	}
 
-	public void setCopyMessage(String copyMessage) {
-		this.copyMessage = copyMessage;
+	public void setSource(Long source) {
+		this.source = source;
+	}
+
+	public List<Long> getCopies() {
+		return copies;
+	}
+
+	public void setCopies(List<Long> copies) {
+		this.copies = copies;
+	}
+
+	public EntityOrigin getOrigin() {
+		return origin;
+	}
+
+	public void setOrigin(EntityOrigin origin) {
+		this.origin = origin;
 	}
 }

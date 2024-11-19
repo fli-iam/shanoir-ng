@@ -65,8 +65,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     hasBids: boolean = false;
     unit = UnitOfMeasure;
     defaultUnit = this.unit.KG;
-    copyRelation: string = "";
-    copyEntityIds: string[] = [];
+    copyEntityIds: number[] = [];
 
     constructor(
             private route: ActivatedRoute,
@@ -108,7 +107,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
 
     initView(): Promise<void> {
-        this.getCopiedEntity(this.examination?.copyMessage);
+        this.getCopiedEntity(this.examination);
 
         if(!this.examination.weightUnitOfMeasure){
             this.examination.weightUnitOfMeasure = this.defaultUnit;
@@ -155,8 +154,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             'comment': [this.examination.comment, Validators.pattern(this.pattern)],
             'note': [this.examination.note],
             'subjectWeight': [this.examination.subjectWeight],
-            'weightUnitOfMeasure': [this.examination.weightUnitOfMeasure],
-            'copyMessage': [this.examination.copyMessage]
+            'weightUnitOfMeasure': [this.examination.weightUnitOfMeasure]
         });
     }
 
@@ -258,17 +256,14 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         return UnitOfMeasure.getLabelByKey(key);
     }
 
-    getCopiedEntity(copyMsg: string) {
+    getCopiedEntity(examination: Examination) {
         this.copyEntityIds = [];
-        if (copyMsg != null && copyMsg.includes('This examination has been copied')) {
-            this.copyEntityIds = copyMsg.substring(copyMsg.indexOf(":") + 1).split(",");
-            this.copyEntityIds = this.copyEntityIds.map(entityId => entityId.trim());
-            this.copyRelation = "copied";
-        } else if (copyMsg != null && copyMsg.includes('This examination is the copy of')) {
-            this.copyEntityIds[0] = copyMsg.substring(copyMsg.indexOf(':') + 1).trim();
-            this.copyRelation = "copy";
-        } else {
-            this.copyRelation = "";
+        if (examination != null) {
+            if (examination.origin == 1 || examination.source != null) {    // this examination is a copy
+                this.copyEntityIds.push(examination.source);
+            } else if (examination.origin == 2) {                           // this examination is a source
+                this.copyEntityIds = examination.copies;
+            }
         }
     }
 }

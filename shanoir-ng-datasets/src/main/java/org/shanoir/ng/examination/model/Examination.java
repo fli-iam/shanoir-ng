@@ -21,6 +21,7 @@ import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.dataset.model.EntityOrigin;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.hateoas.HalEntity;
@@ -129,9 +130,14 @@ public class Examination extends HalEntity {
     @ColumnDefault("false")
     private boolean preclinical;
 
-    private Long sourceId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "source_id")
+    private Examination source;
 
-    private String copyMessage;
+    @OneToMany(fetch = FetchType.LAZY)
+    private List<Examination> copies;
+
+    private EntityOrigin origin;
 
     public Examination() {
 
@@ -160,7 +166,9 @@ public class Examination extends HalEntity {
         this.timepointId = other.timepointId;
         this.weightUnitOfMeasure = other.weightUnitOfMeasure;
         this.preclinical = other.preclinical;
-        this.sourceId = other.sourceId;
+        this.source = other.source;
+        this.origin = other.origin;
+        this.copies = other.copies;
     }
 
     /**
@@ -209,7 +217,7 @@ public class Examination extends HalEntity {
     }
 
     /**
-     * @param datasetAcquisitionList
+     * @param datasetAcquisitions
      *            the datasetAcquisitionList to set
      */
     public void setDatasetAcquisitions(List<DatasetAcquisition> datasetAcquisitions) {
@@ -421,19 +429,27 @@ public class Examination extends HalEntity {
         this.preclinical = preclinical;
     }
 
-    public Long getSourceId() {
-        return sourceId;
+    public Examination getSource() {
+        return source;
     }
 
-    public void setSourceId(Long sourceId) {
-        this.sourceId = sourceId;
+    public void setSource(Examination source) {
+        this.source = source;
     }
 
-    public String getCopyMessage() {
-        return copyMessage;
+    public List<Examination> getCopies() {
+        return copies;
     }
 
-    public void setCopyMessage(String copyMessage) {
-        this.copyMessage = copyMessage;
+    public void setCopies(List<Examination> copies) {
+        this.copies = copies;
+    }
+
+    public EntityOrigin getOrigin() {
+        return origin;
+    }
+
+    public void setOrigin(EntityOrigin origin) {
+        this.origin = origin;
     }
 }

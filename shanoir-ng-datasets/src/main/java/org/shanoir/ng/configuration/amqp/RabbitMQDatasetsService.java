@@ -20,6 +20,7 @@ import jakarta.persistence.EntityManager;
 import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.dataset.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.EntityOrigin;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetCopyService;
 import org.shanoir.ng.dataset.service.DatasetService;
@@ -477,7 +478,7 @@ public class RabbitMQDatasetsService {
 				Long dsCount = datasetRepository.countDatasetsBySourceIdAndStudyId(datasetParentId, studyId);
 				Dataset datasetParent = datasetService.findById(datasetParentId);
 
-				if (datasetParent.getSourceId() != null) {
+				if (datasetParent.getSource() != null) {
 					LOG.info("[CopyDatasets] Selected dataset is a copy, please pick the original dataset.");
 					countCopy++;
 				} else if (dsCount != 0) {

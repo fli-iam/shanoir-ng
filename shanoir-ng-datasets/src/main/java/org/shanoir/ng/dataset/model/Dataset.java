@@ -165,13 +165,18 @@ public abstract class Dataset extends AbstractEntity {
 	@JoinTable(name = "DATASET_TAG", joinColumns = @JoinColumn(name = "DATASET_ID"), inverseJoinColumns = @JoinColumn(name = "STUDY_TAG_ID"))
 	private List<StudyTag> tags;
 
-	private Long sourceId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "source_id")
+	private Dataset source;
+
+	@OneToMany(fetch = FetchType.LAZY)
+	private List<Dataset> copies;
+
+    private EntityOrigin origin;
 
 	@JsonIgnore
 	@Transient
 	public String SOPInstanceUID;
-
-	private String copyMessage;
 
 	public Dataset() {
 	}
@@ -204,7 +209,9 @@ public abstract class Dataset extends AbstractEntity {
 		this.subjectId = d.getSubjectId();
 		this.downloadable = d.downloadable;
 		this.updatedMetadata = new DatasetMetadata(d.getUpdatedMetadata());
-		this.sourceId = d.getSourceId();
+		this.source = d.getSource();
+		this.origin = d.getOrigin();
+		this.copies = d.getCopies();
 	}
 
 	/**
@@ -479,12 +486,12 @@ public abstract class Dataset extends AbstractEntity {
 		this.downloadable = downloadable;
 	}
 
-	public Long getSourceId() {
-		return sourceId;
+	public Dataset getSource() {
+		return source;
 	}
 
-	public void setSourceId(Long sourceId) {
-		this.sourceId = sourceId;
+	public void setSource(Dataset source) {
+		this.source = source;
 	}
 
 	public String getSOPInstanceUID() {
@@ -507,11 +514,19 @@ public abstract class Dataset extends AbstractEntity {
 		this.tags = tags;
 	}
 
-	public String getCopyMessage() {
-		return copyMessage;
+	public List<Dataset> getCopies() {
+		return copies;
 	}
 
-	public void setCopyMessage(String copyMessage) {
-		this.copyMessage = copyMessage;
+	public void setCopies(List<Dataset> copies) {
+		this.copies = copies;
+	}
+
+	public EntityOrigin getOrigin() {
+		return origin;
+	}
+
+	public void setOrigin(EntityOrigin origin) {
+		this.origin = origin;
 	}
 }

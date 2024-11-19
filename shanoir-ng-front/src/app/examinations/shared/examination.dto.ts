@@ -73,7 +73,9 @@ export class ExaminationDTOService {
         entity.id = dto.id;
         entity.examinationDate = new Date(dto.examinationDate);
         entity.comment = dto.comment;
-        entity.copyMessage = dto.copyMessage;
+        entity.origin = dto.origin;
+        entity.source = dto.source;
+        entity.copies = dto.copies;
         entity.note = dto.note;
         entity.subjectWeight = dto.subjectWeight;
         entity.weightUnitOfMeasure = dto.weightUnitOfMeasure;
@@ -110,8 +112,10 @@ export class ExaminationDTO {
     preclinical: boolean;
     instrumentBasedAssessmentList: InstrumentBasedAssessment[];
     extraDataFilePathList: string[] = [];
-    copyMessage : string;
 
+    origin: number;
+    copies: number[];
+    source: number;
     constructor(examination?: Examination) {
         if (examination) {
             this.id = examination.id;
@@ -126,7 +130,9 @@ export class ExaminationDTO {
             this.preclinical = examination.preclinical;
             this.extraDataFilePathList = examination.extraDataFilePathList;
             this.instrumentBasedAssessmentList = examination.instrumentBasedAssessmentList;
-            this.copyMessage = examination.copyMessage;
+            this.origin = examination.origin;
+            this.source = examination.source;
+            this.copies = examination.copies;
         }
     }
 }

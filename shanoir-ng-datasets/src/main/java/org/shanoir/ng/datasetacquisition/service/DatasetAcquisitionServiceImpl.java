@@ -103,18 +103,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
     @Override
     public DatasetAcquisition findById(Long id) {
-        DatasetAcquisition dsAcq = repository.findById(id).orElse(null);
-        List<DatasetAcquisition> childAcq = repository.findBySourceId(id);
-        if (!CollectionUtils.isEmpty(childAcq)) {
-            String copyMsg = "This acquisition has been copied: ";
-            copyMsg += childAcq.stream().map(DatasetAcquisition::getId).map(String::valueOf).collect(Collectors.joining(","));
-            dsAcq.setCopyMessage(copyMsg);
-        }
-        if (dsAcq.getSourceId() != null) {
-            String copyMsg = "This acquisition is the copy of : " + dsAcq.getSourceId();
-            dsAcq.setCopyMessage(copyMsg);
-        }
-        return dsAcq;
+        return repository.findById(id).orElse(null);
     }
 
     @Override

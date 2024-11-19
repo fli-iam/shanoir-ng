@@ -15,7 +15,14 @@
 package org.shanoir.ng.datasetacquisition.dto;
 
 import java.time.LocalDate;
+import java.util.List;
 
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import org.shanoir.ng.dataset.model.EntityOrigin;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.studycard.model.StudyCard;
 
@@ -45,7 +52,11 @@ public class DatasetAcquisitionDTO {
 
 	private String username;
 
-	private String copyMessage;
+	private Long source;
+
+	private List<Long> copies;
+
+	private EntityOrigin origin;
 
 	
 	public Long getId() {
@@ -144,11 +155,27 @@ public class DatasetAcquisitionDTO {
 		this.username = username;
 	}
 
-	public String getCopyMessage() {
-		return copyMessage;
+	public Long getSource() {
+		return source;
 	}
 
-	public void setCopyMessage(String copyMessage) {
-		this.copyMessage = copyMessage;
+	public void setSource(Long source) {
+		this.source = source;
+	}
+
+	public List<Long> getCopies() {
+		return copies;
+	}
+
+	public void setCopies(List<Long> copies) {
+		this.copies = copies;
+	}
+
+	public EntityOrigin getOrigin() {
+		return origin;
+	}
+
+	public void setOrigin(EntityOrigin origin) {
+		this.origin = origin;
 	}
 }

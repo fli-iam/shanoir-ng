@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.EntityOrigin;
 import org.shanoir.ng.datasetacquisition.model.bids.BidsDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.eeg.EegDatasetAcquisition;
@@ -98,12 +99,17 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	@LocalDateAnnotations
 	private LocalDate importDate;
 
-	private Long sourceId;
-
 	/** Name of the user who did the import */
 	private String username;
 
-	private String copyMessage;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "source_id")
+	private DatasetAcquisition source;
+
+	@OneToMany(fetch = FetchType.LAZY)
+	private List<DatasetAcquisition> copies;
+
+	private EntityOrigin origin;
 
 	public DatasetAcquisition() {
 	}
@@ -118,9 +124,10 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 		this.softwareRelease = other.softwareRelease;
 		this.sortingIndex = other.sortingIndex;
 		this.importDate = other.importDate;
-		this.sourceId = other.sourceId;
 		this.username = other.username;
-		this.copyMessage = other.copyMessage;
+		this.origin = other.origin;
+		this.copies = other.copies;
+		this.source = other.source;
 	}
 
 	/**
@@ -251,14 +258,6 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	@Transient
 	public abstract String getType();
 
-	public Long getSourceId() {
-		return sourceId;
-	}
-
-	public void setSourceId(Long sourceId) {
-		this.sourceId = sourceId;
-	}
-
 	public String getUsername() {
 		return username;
 	}
@@ -267,11 +266,27 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 		this.username = username;
 	}
 
-	public String getCopyMessage() {
-		return copyMessage;
+	public DatasetAcquisition getSource() {
+		return source;
 	}
 
-	public void setCopyMessage(String copyMessage) {
-		this.copyMessage = copyMessage;
+	public void setSource(DatasetAcquisition source) {
+		this.source = source;
+	}
+
+	public List<DatasetAcquisition> getCopies() {
+		return copies;
+	}
+
+	public void setCopies(List<DatasetAcquisition> copies) {
+		this.copies = copies;
+	}
+
+	public EntityOrigin getOrigin() {
+		return origin;
+	}
+
+	public void setOrigin(EntityOrigin origin) {
+		this.origin = origin;
 	}
 }

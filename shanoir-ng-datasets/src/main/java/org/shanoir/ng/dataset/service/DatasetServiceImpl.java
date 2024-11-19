@@ -24,6 +24,7 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.model.EntityOrigin;
 import org.shanoir.ng.dataset.repository.DatasetExpressionRepository;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -138,7 +139,7 @@ public class DatasetServiceImpl implements DatasetService {
 		propertyService.deleteByDatasetId(id);
 		repository.deleteById(id);
 
-		if (dataset.getSourceId() == null) {
+		if (dataset.getOrigin() == EntityOrigin.COPY) {
 			this.deleteDatasetFromPacs(dataset);
 		}
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, dataset.getStudyId()));
@@ -186,18 +187,7 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Override
 	public Dataset findById(final Long id) {
-		Dataset ds = repository.findById(id).orElse(null);
-		List<Dataset> childDs = repository.findBySourceId(id);
-		if (!CollectionUtils.isEmpty(childDs)) {
-			String copyMsg = "This dataset has been copied: ";
-			copyMsg += childDs.stream().map(Dataset::getId).map(String::valueOf).collect(Collectors.joining(","));
-			ds.setCopyMessage(copyMsg);
-		}
-		if (ds.getSourceId() != null) {
-			String copyMsg = "This dataset is the copy of : " + ds.getSourceId();
-			ds.setCopyMessage(copyMsg);
-		}
-		return ds;
+		return repository.findById(id).orElse(null);
 	}
 
 	@Override

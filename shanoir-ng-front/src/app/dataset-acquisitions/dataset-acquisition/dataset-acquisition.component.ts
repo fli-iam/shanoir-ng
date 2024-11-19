@@ -46,8 +46,7 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     noDatasets: boolean = false;
     hasDicom: boolean = false;
     protected downloadState: TaskState = new TaskState();
-    copyRelation: string = "";
-    copyEntityIds: string[] = [];
+    copyEntityIds: number[] = [];
 
     constructor(
             private route: ActivatedRoute,
@@ -75,7 +74,7 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     }
 
     initView(): Promise<void> {
-        this.getCopiedEntity(this.datasetAcquisition?.copyMessage);
+        this.getCopiedEntity(this.datasetAcquisition);
         this.datasetService.getByAcquisitionId(this.datasetAcquisition.id).then(datasets => {
             this.datasetAcquisition.datasets = datasets;
             this.datasetAcquisition.datasets?.forEach(ds => {
@@ -113,7 +112,6 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
             'type': [this.datasetAcquisition.type],
             'study-card': [this.datasetAcquisition.studyCard],
             'acq-eq': [this.datasetAcquisition.acquisitionEquipment, [Validators.required]],
-            //'examination': [this.datasetAcquisition.examination, [Validators.required]],
             'rank': [this.datasetAcquisition.rank],
             'software-release': [this.datasetAcquisition.softwareRelease],
             'sorting-index': [this.datasetAcquisition.sortingIndex],
@@ -129,17 +127,14 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
         this.downloadService.downloadAllByAcquisitionId(this.datasetAcquisition?.id, this.downloadState);
     }
 
-    getCopiedEntity(copyMsg: string) {
+    getCopiedEntity(dsAcq: DatasetAcquisition) {
         this.copyEntityIds = [];
-        if (copyMsg != null && copyMsg.includes('This acquisition has been copied')) {
-            this.copyEntityIds = copyMsg.substring(copyMsg.indexOf(":") + 1).split(",");
-            this.copyEntityIds = this.copyEntityIds.map(entityId => entityId.trim());
-            this.copyRelation = "copied";
-        } else if (copyMsg != null && copyMsg.includes('This acquisition is the copy of')) {
-            this.copyEntityIds[0] = copyMsg.substring(copyMsg.indexOf(':') + 1).trim();
-            this.copyRelation = "copy";
-        } else {
-            this.copyRelation = "";
+        if (dsAcq != null) {
+            if (dsAcq.origin == 1 || dsAcq.source != null) {    // this datasetAcq is a copy
+                this.copyEntityIds.push(dsAcq.source);
+            } else if (dsAcq.origin == 2) {                     // this datasetAcq is a source
+                this.copyEntityIds = dsAcq.copies;
+            }
         }
     }
 }

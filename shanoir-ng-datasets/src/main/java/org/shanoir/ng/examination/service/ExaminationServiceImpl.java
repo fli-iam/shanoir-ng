@@ -238,19 +238,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 	@Override
 	public Examination findById(final Long id) {
-		Examination exam = examinationRepository.findById(id).orElse(null);
-		List<Examination> childExam = examinationRepository.findBySourceId(id);
-		if (!CollectionUtils.isEmpty(childExam)) {
-			String copyMsg = "This examination has been copied: ";
-			copyMsg += childExam.stream().map(Examination::getId).map(String::valueOf).collect(Collectors.joining(","));
-			exam.setCopyMessage(copyMsg);
-		}
-		if (exam.getSourceId() != null) {
-			String copyMsg = "This examination is the copy of : " + exam.getSourceId();
-			exam.setCopyMessage(copyMsg);
-		}
-
-		return exam;
+		return examinationRepository.findById(id).orElse(null);
 	}
 
 	@Override
