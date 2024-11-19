@@ -383,13 +383,13 @@ public class DatasetServiceImpl implements DatasetService {
 		shanoirEventService.publishEvent(event);
 		try {
 			int total = datasets.size();
-			int i = 1;
+			float progress = 0;
 			for (Dataset dataset : datasets) {
-				event.setProgress((float) (i / total));
+				progress = progress + 1f / total;
+				event.setProgress(progress);
 				event.setMessage("Deleting nifti for dataset: " + dataset.getName() + " of subject " + dataset.getSubjectId());
 				shanoirEventService.publishEvent(event);
 				deleteNifti(dataset);
-				i += 1;
 			}
 			event.setProgress(1f);
 			event.setStatus(ShanoirEvent.SUCCESS);
@@ -397,7 +397,7 @@ public class DatasetServiceImpl implements DatasetService {
 			shanoirEventService.publishEvent(event);
 		} catch (Exception e) {
 			LOG.error("Could not properly delete niftis: ", e);
-			event.setProgress(1f);
+			event.setProgress(-1f);
 			event.setStatus(ShanoirEvent.ERROR);
 			event.setMessage("Deleting nifti for study: " + studyId + ": Error. " + e.getMessage());
 			shanoirEventService.publishEvent(event);
