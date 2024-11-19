@@ -23,6 +23,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 /**
  * Service managing ShanoirEvents
  * @author fli
@@ -57,6 +62,8 @@ public class ShanoirEventsService {
 				|| ShanoirEventType.DOWNLOAD_STATISTICS_EVENT.equals(event.getEventType())
 				|| ShanoirEventType.DELETE_EXAMINATION_EVENT.equals(event.getEventType())
 				|| ShanoirEventType.DELETE_DATASET_EVENT.equals(event.getEventType())) {
+				|| ShanoirEventType.DELETE_EXAMINATION_EVENT.equals(event.getEventType())
+				|| ShanoirEventType.DELETE_NIFTI_EVENT.equals(event.getEventType())) {
 			sendSseEventsToUI(saved);
 		}
 	}
@@ -75,7 +82,7 @@ public class ShanoirEventsService {
 		}
 		List<ShanoirEvent> dbEvents = Utils.toList(repository.findByUserIdAndEventTypeInAndLastUpdateYoungerThan7Days(userId, list));
 		List<ShanoirEventLight> events = new ArrayList<>();
-		cleanEvents(dbEvents);		
+		cleanEvents(dbEvents);
 		for (ShanoirEvent event : dbEvents) {
 			events.add(event.toLightEvent());
 		}
