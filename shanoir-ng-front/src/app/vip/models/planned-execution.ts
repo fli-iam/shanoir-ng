@@ -21,4 +21,7 @@ export class PlannedExecution extends Entity {
     vipPipeline: string
     examinationNameFilter: string
     parameters: PipelineParameter[]
+    exportFormat: string
+    groupBy: string
+    niftiConverter: number
 }

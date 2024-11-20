@@ -3,24 +3,16 @@ import {PlannedExecution} from "../models/planned-execution";
 import {ModesAware} from "../../preclinical/shared/mode/mode.decorator";
 import {EntityComponent, Mode} from "../../shared/components/entity/entity.component.abstract";
 import {ActivatedRoute} from "@angular/router";
-import {QualityCardService} from "../../study-cards/shared/quality-card.service";
-import {StudyService} from "../../studies/shared/study.service";
-import {ExaminationService} from "../../examinations/shared/examination.service";
 import {StudyRightsService} from "../../studies/shared/study-rights.service";
 import {KeycloakService} from "../../shared/keycloak/keycloak.service";
-import {CoilService} from "../../coils/shared/coil.service";
-import {ConfirmDialogService} from "../../shared/components/confirm-dialog/confirm-dialog.service";
 import {PlannedExecutionService} from "./planned-execution.service";
-import {FormArray, FormGroup, Validators} from "@angular/forms";
-import {StudyCardRulesComponent} from "../../study-cards/study-card-rules/study-card-rules.component";
-import {QualityCard} from "../../study-cards/shared/quality-card.model";
+import {FormGroup, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators} from "@angular/forms";
 import {EntityService} from "../../shared/components/entity/entity.abstract.service";
-import {Center} from "../../centers/shared/center.model";
 import {PipelineService} from "../pipelines/pipeline/pipeline.service";
 import {Pipeline} from "../models/pipeline";
 import {PipelineParameter} from "../models/pipelineParameter";
 import {ParameterType} from "../models/parameterType";
-import {ReturnStatement} from "@angular/compiler";
+import {Option} from "../../shared/select/select.component";
 
 
 @Component({
@@ -31,10 +23,21 @@ import {ReturnStatement} from "@angular/compiler";
 @ModesAware
 export class PlannedExecutionComponent extends EntityComponent<PlannedExecution> {
 
+    niftiConverters: Option<number>[] = [
+        new Option<number>(1, 'DCM2NII_2008_03_31', null, null, null, false),
+        new Option<number>(2, 'MCVERTER_2_0_7', null, null, null, false),
+        new Option<number>(4, 'DCM2NII_2014_08_04', null, null, null, false),
+        new Option<number>(5, 'MCVERTER_2_1_0', null, null, null, false),
+        new Option<number>(6, 'DCM2NIIX', null, null, null, false),
+        new Option<number>(7, 'DICOMIFIER', null, null, null, false),
+        new Option<number>(8, 'MRICONVERTER', null, null, null, false),
+    ];
+
     studyId: number;
     pipelines: Pipeline[]
     pipelineNames: string[]
     selectedPipeline: Pipeline
+    executionForm: UntypedFormGroup
 
     constructor(
         private route: ActivatedRoute,
@@ -43,18 +46,22 @@ export class PlannedExecutionComponent extends EntityComponent<PlannedExecution>
         private pipelineService: PipelineService,
         protected plannedExecutionService: PlannedExecutionService) {
         super(route, 'planned-execution');
-        this.studyId = this.breadcrumbsService.currentStep.getPrefilledValue("studyId")
+        if ( this.breadcrumbsService.currentStep ) {
+            this.studyId = this.breadcrumbsService.currentStep.getPrefilledValue("studyId")
+        }
     }
 
     get plannedExecution(): PlannedExecution { return this.entity; }
     set plannedExecution(pe: PlannedExecution) { this.entity= pe; }
 
     buildForm(): FormGroup {
-        return this.formBuilder.group({
+        this.executionForm = this.formBuilder.group({
             'name': [this.plannedExecution.name, [Validators.required, Validators.minLength(2), this.registerOnSubmitValidator('unique', 'name')]],
+            'examinationNameFilter': [this.plannedExecution.examinationNameFilter],
             'studyId': [this.plannedExecution.studyId, [Validators.required]],
             'vipPipeline': [this.plannedExecution.vipPipeline, [Validators.required]]
         });
+        return this.executionForm;
     }
 
     getService(): EntityService<PlannedExecution> {
@@ -67,7 +74,7 @@ export class PlannedExecutionComponent extends EntityComponent<PlannedExecution>
         this.pipelineService.listPipelines().subscribe(
             (pipelines :Pipeline[])=>{
                 this.pipelines = pipelines;
-                this.pipelineNames = pipelines.map(pipeline => pipeline.name)
+                this.pipelineNames = pipelines.map(pipeline => pipeline.identifier)
             }
         )
         return Promise.resolve()
@@ -77,6 +84,7 @@ export class PlannedExecutionComponent extends EntityComponent<PlannedExecution>
         this.pipelineService.listPipelines().subscribe(
             (pipelines :Pipeline[])=>{
                 this.pipelines = pipelines;
+                this.pipelineNames = pipelines.map(pipeline => pipeline.identifier)
             }
         )
         return Promise.resolve();
@@ -88,6 +96,38 @@ export class PlannedExecutionComponent extends EntityComponent<PlannedExecution>
 
     isAFile(parameter: PipelineParameter): boolean {
         return parameter.type == ParameterType.File;
+    }
+
+    updatePipeline(selectedPipelineIdentifier): void {
+        if (selectedPipelineIdentifier) {
+            this.pipelineService.getPipeline(selectedPipelineIdentifier).subscribe(pipeline => {
+                this.selectedPipeline = pipeline;
+                this.selectedPipeline.parameters.forEach(
+                    parameter => {
+                        let validators: ValidatorFn[] = [];
+                        if (!parameter.isOptional && parameter.type != ParameterType.Boolean && parameter.type != ParameterType.File) {
+                            validators.push(Validators.required);
+                        }
+                        let control = new UntypedFormControl(parameter.defaultValue, validators);
+                        if (parameter.name != "executable") {
+                            this.executionForm.addControl(parameter.name, control);
+                        }
+                    }
+                )
+                let groupByControl = new UntypedFormControl("dataset", [Validators.required]);
+                this.executionForm.addControl("groupBy", groupByControl);
+
+                let exportControl = new UntypedFormControl("dcm", [Validators.required]);
+                this.executionForm.addControl("exportFormat", exportControl);
+
+                let niiConverterControl = new UntypedFormControl(6, []);
+                this.executionForm.addControl("niftiConverter", niiConverterControl);
+            });
+
+        } else {
+            this.selectedPipeline = null;
+            this.executionForm = this.buildForm();
+        }
     }
 
 }

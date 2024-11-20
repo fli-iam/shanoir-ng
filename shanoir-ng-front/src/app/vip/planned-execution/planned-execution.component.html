@@ -1,5 +1,5 @@
 <div #formContainer class="content-component detail">
-    <form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
+    <form *ngIf="form" [formGroup]="executionForm" class="max-content" novalidate [class.disabled]="footerState.loading">
         <form-footer
             [state]="footerState"
             (save)="save()"
@@ -27,9 +27,7 @@
                 <li>
                     <label i18n="Planned execution detail|StudyId label@@centerDetailName">Study</label>
                     <span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'">
-							{{plannedExecution.studyId}}
-						</ng-template>
+                        {{plannedExecution.studyId}}
 					</span>
                 </li>
                 <li>
@@ -46,35 +44,68 @@
 					</span>
                 </li>
                 <li>
+                    <label i18n="Planned execution detail|Execution comment filter">Execution name filter <tool-tip>This is the regular expression (see: https://regex101.com/) used to decide if the execution should be applied on newly imported exam or not.
+                        It is based on examination. An empty field means that all examinations import should trigger the execution.</tool-tip></label>
+
+                    <span class="right-col" [ngSwitch]="mode">
+						<ng-template [ngSwitchCase]="'view'">
+							{{plannedExecution.examinationNameFilter}}
+						</ng-template>
+						<ng-template ngSwitchDefault>
+							<input type="text" id="examinationNameFilter" formControlName="examinationNameFilter" [(ngModel)]="plannedExecution.examinationNameFilter" />
+							<label *ngIf="hasError('examinationNameFilter', ['required'])" class="form-validation-alert" i18n="Edit center|Name required error@@centerDetailNameRequiredError">Examination Name Filter is required!</label>
+						</ng-template>
+					</span>
+                </li>
+                <li>
                     <label>Pipeline</label>
                     <span class="right-col" [ngSwitch]="mode">
 						<ng-template [ngSwitchCase]="'view'">
 							{{plannedExecution.vipPipeline}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-                            <select-box formControlName="vipPipeline" [(ngModel)]="plannedExecution.vipPipeline" [optionArr]="pipelineNames">
+                            <select-box formControlName="vipPipeline" [(ngModel)]="plannedExecution.vipPipeline" [optionArr]="pipelineNames" (userChange)="updatePipeline($event)">
                             </select-box>
 						</ng-template>
 					</span>
                 </li>
-
             </ol>
-            <div *ngIf="selectedPipeline">
-                <div *ngFor="let parameter of selectedPipeline.parameters">
-                    <div *ngIf="parameter.name != 'executable'">
-                        <label>{{parameter.name}}{{!parameter.isOptional && parameter.type != 'Boolean' ? '*' : ''}}
-                            <tool-tip> {{isAFile(parameter) ? 'Regular expression to filter among the selected datasets. ' + parameter.description : parameter.description}} </tool-tip></label>
-                        <input *ngIf="!isAFile(parameter) && parameter.type != 'Boolean'" formControlName="{{parameter.name}}" name="{{parameter.name}}" id="{{parameter.name}}">
-                        <span *ngIf="parameter.type == 'Boolean'">
-                     <checkbox formControlName="{{parameter.name}}" id="{{parameter.name}}"></checkbox>
-                 </span>
-                        <span *ngIf="isAFile(parameter)">
+            <ol *ngIf="selectedPipeline">
+                <legend><br/>Pipeline parameters <tool-tip>Files parameters should be set as regular expression for dataset names. Example *T2* will select all dataset whose names contains "T2".</tool-tip><br/></legend>
+                    <li *ngFor="let parameter of selectedPipeline.parameters">
+                            <label>{{parameter.name}}{{!parameter.isOptional && parameter.type != 'Boolean' ? '*' : ''}}
+                                <tool-tip> {{isAFile(parameter) ? 'Regular expression to filter among the selected datasets. ' + parameter.description : parameter.description}} </tool-tip></label>
+                            <input  class="right-col" *ngIf="!isAFile(parameter) && parameter.type != 'Boolean'" formControlName="{{parameter.name}}" name="{{parameter.name}}" id="{{parameter.name}}">
+                            <span  class="right-col" *ngIf="parameter.type == 'Boolean'">
+                             <checkbox formControlName="{{parameter.name}}" id="{{parameter.name}}"></checkbox>
+                         </span>
+                            <span  class="right-col" *ngIf="isAFile(parameter)">
                             <input *ngIf="isAFile(parameter)"
-                                formControlName="{{parameter.name}}" name="{{parameter.name}}" id="{{parameter.name}}">
+                                   formControlName="{{parameter.name}}" name="{{parameter.name}}" id="{{parameter.name}}">
                         </span>
-                    </div>
-                </div>
-            </div>
+                    </li>
+                <li>
+                    <label>Group by <tool-tip>Selected datasets will be grouped by the chosen entity. Choose what the selected pipeline expect.</tool-tip></label>
+                    <span class="right-col">
+                    <input id="dataset" type="radio" formControlName="groupBy" name="groupBy" [(ngModel)]="plannedExecution.groupBy" value="dataset" />Dataset(s)
+                    <input id="acquisition" type="radio" formControlName="groupBy" name="groupBy" [(ngModel)]="plannedExecution.groupBy" value="acquisition" />Acquisition(s)
+                    <input id="examination" type="radio" formControlName="groupBy" name="groupBy" [(ngModel)]="plannedExecution.groupBy" value="examination" />Examination(s)
+                </span>
+                </li>
+                <li>
+                    <label>Dataset export format <tool-tip>Selected datasets can be exported as Dicom of NIfTI. Choose what the selected pipeline expect.</tool-tip></label>
+                    <span class="right-col">
+                    <input id="nii" type="radio" formControlName="exportFormat" name="exportFormat" [(ngModel)]="plannedExecution.exportFormat" value="nii" />NIfTI
+                    <input id="dcm" type="radio" formControlName="exportFormat" name="exportFormat" [(ngModel)]="plannedExecution.exportFormat" value="dcm" />DICOM
+                </span>
+                </li>
+                <li *ngIf="plannedExecution.exportFormat=='nii'">
+                    <label>Nifti converter <tool-tip>Nifti converter used to convert dicom to nifti.</tool-tip></label>
+                    <span class="right-col">
+                    <select-box formControlName="niftiConverter" [(ngModel)]="plannedExecution.niftiConverter" [options]="niftiConverters"></select-box>
+                </span>
+                </li>
+            </ol>
         </fieldset>
     </form>
 </div>

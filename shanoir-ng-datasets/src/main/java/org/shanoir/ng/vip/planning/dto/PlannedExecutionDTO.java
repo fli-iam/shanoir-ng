@@ -22,6 +22,12 @@ public class PlannedExecutionDTO extends HalEntity {
 
     private List<PipelineParameter> parameters;
 
+    private String exportFormat;
+
+    private String groupBy;
+
+    private long niftiConverter;
+
     public long getStudyId() { return studyId; }
 
     public void setStudyId(long studyId) { this.studyId = studyId; }
@@ -56,5 +62,29 @@ public class PlannedExecutionDTO extends HalEntity {
 
     public void setParameters(List<PipelineParameter> parameters) {
         this.parameters = parameters;
+    }
+
+    public String getExportFormat() {
+        return exportFormat;
+    }
+
+    public void setExportFormat(String exportFormat) {
+        this.exportFormat = exportFormat;
+    }
+
+    public String getGroupBy() {
+        return groupBy;
+    }
+
+    public void setGroupBy(String groupBy) {
+        this.groupBy = groupBy;
+    }
+
+    public long getNiftiConverter() {
+        return niftiConverter;
+    }
+
+    public void setNiftiConverter(long niftiConverter) {
+        this.niftiConverter = niftiConverter;
     }
 }
