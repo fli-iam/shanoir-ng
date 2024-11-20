@@ -241,7 +241,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             }
             return Promise.all(uploads).then(() => null);
         }).then(() => null).catch(reason => { if (reason.status == 403) {
-            this.consoleService.log('error', 'Examination ' + this.examination.id + ' Updating study / subject / center of an examination is forbiden.');
+            this.consoleService.log('error', 'Examination ' + this.examination.id + ' Updating study / subject / center of an examination is forbidden.');
             return null;
         } else {
             throw reason;
