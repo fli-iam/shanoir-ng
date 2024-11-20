@@ -172,6 +172,7 @@ public class SubjectApiController implements SubjectApi {
 	public ResponseEntity<List<SimpleSubjectDTO>> findSubjectsByStudyId(
 			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@Parameter(description="preclinical", required = false) @RequestParam(value="preclinical", required = false) String preclinical) {
+		
 		final List<SimpleSubjectDTO> simpleSubjectDTOList;
 		if ("null".equals(preclinical)) {
 			simpleSubjectDTOList = subjectService.findAllSubjectsOfStudyId(studyId);
