@@ -39,7 +39,7 @@ import jakarta.persistence.PostLoad;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * Study card.
+ * Quality card.
  *
  * @author msimon
  *
