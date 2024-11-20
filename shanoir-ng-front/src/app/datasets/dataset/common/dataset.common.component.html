@@ -82,7 +82,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</span>
 		</li>
 
-        <li *ngIf="mode != 'create' && dataset.origin == 2">
+        <li *ngIf="mode != 'create' && dataset.origin == 'SOURCE'">
             <label>This dataset has been copied :</label>
             <span class="right-col">
                 <div *ngFor="let entityId of copyEntityIds">
@@ -90,7 +90,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </div>
             </span>
         </li>
-        <li *ngIf="mode != 'create' && dataset.origin == 1 || dataset.source != null">
+        <li *ngIf="mode != 'create' && dataset.origin == 'COPY' || dataset.source != null">
             <label>This dataset is the copy of :</label>
             <span class="right-col">
                 <a [routerLink]="['/dataset/details/', copyEntityIds[0]]"> [ {{ copyEntityIds }} ] </a>

@@ -19,23 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.shanoir.ng.dataset.modality.BidsDataset;
-import org.shanoir.ng.dataset.modality.CalibrationDataset;
-import org.shanoir.ng.dataset.modality.CtDataset;
-import org.shanoir.ng.dataset.modality.EegDataset;
-import org.shanoir.ng.dataset.modality.GenericDataset;
-import org.shanoir.ng.dataset.modality.MeasurementDataset;
-import org.shanoir.ng.dataset.modality.MegDataset;
-import org.shanoir.ng.dataset.modality.MeshDataset;
-import org.shanoir.ng.dataset.modality.MrDataset;
-import org.shanoir.ng.dataset.modality.ParameterQuantificationDataset;
-import org.shanoir.ng.dataset.modality.PetDataset;
-import org.shanoir.ng.dataset.modality.RegistrationDataset;
-import org.shanoir.ng.dataset.modality.SegmentationDataset;
-import org.shanoir.ng.dataset.modality.SpectDataset;
-import org.shanoir.ng.dataset.modality.StatisticalDataset;
-import org.shanoir.ng.dataset.modality.TemplateDataset;
-import org.shanoir.ng.dataset.modality.XaDataset;
+import org.shanoir.ng.dataset.modality.*;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
@@ -172,7 +156,7 @@ public abstract class Dataset extends AbstractEntity {
 	@OneToMany(fetch = FetchType.LAZY)
 	private List<Dataset> copies;
 
-    private EntityOrigin origin;
+    private Integer origin;
 
 	@JsonIgnore
 	@Transient
@@ -210,7 +194,7 @@ public abstract class Dataset extends AbstractEntity {
 		this.downloadable = d.downloadable;
 		this.updatedMetadata = new DatasetMetadata(d.getUpdatedMetadata());
 		this.source = d.getSource();
-		this.origin = d.getOrigin();
+		this.origin = d.getOrigin().getId();
 		this.copies = d.getCopies();
 	}
 
@@ -523,10 +507,14 @@ public abstract class Dataset extends AbstractEntity {
 	}
 
 	public EntityOrigin getOrigin() {
-		return origin;
+		return EntityOrigin.getType(origin);
 	}
 
 	public void setOrigin(EntityOrigin origin) {
-		this.origin = origin;
+		if (origin == null) {
+			this.origin = null;
+		} else {
+			this.origin = origin.getId();
+		}
 	}
 }

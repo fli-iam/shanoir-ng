@@ -175,7 +175,7 @@ export class DatasetAcquisitionDTO {
     importDate: Date;
     type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Xa' | 'Generic' | 'Processed' | 'BIDS';
     username: string;
-    origin: number;
+    origin: string;
     copies: number[];
     source: number;
 }

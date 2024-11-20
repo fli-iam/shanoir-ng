@@ -37,7 +37,7 @@ export class Examination extends Entity {
     extraDataFilePathList: string[] = [];
     preclinical: boolean;
     hasStudyCenterData: boolean = false;
-    origin: number;
+    origin: string;
     copies: number[];
     source: number;
 }

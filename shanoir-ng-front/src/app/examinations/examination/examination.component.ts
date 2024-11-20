@@ -259,9 +259,9 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     getCopiedEntity(examination: Examination) {
         this.copyEntityIds = [];
         if (examination != null) {
-            if (examination.origin == 1 || examination.source != null) {    // this examination is a copy
+            if (examination.origin == 'COPY' || examination.source != null) {    // this examination is a copy
                 this.copyEntityIds.push(examination.source);
-            } else if (examination.origin == 2) {                           // this examination is a source
+            } else if (examination.origin == 'SOURCE') {                         // this examination is a source
                 this.copyEntityIds = examination.copies;
             }
         }

@@ -42,7 +42,7 @@ export abstract class Dataset extends Entity {
     processings: DatasetProcessing[] = [];
     inPacs: boolean;
     tags: Tag[];
-    origin: number;
+    origin: string;
     copies: number[];
     source: number;
 }

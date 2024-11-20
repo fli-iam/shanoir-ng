@@ -137,7 +137,7 @@ public class Examination extends HalEntity {
     @OneToMany(fetch = FetchType.LAZY)
     private List<Examination> copies;
 
-    private EntityOrigin origin;
+    private Integer origin;
 
     public Examination() {
 
@@ -445,11 +445,16 @@ public class Examination extends HalEntity {
         this.copies = copies;
     }
 
+
     public EntityOrigin getOrigin() {
-        return origin;
+        return EntityOrigin.getType(origin);
     }
 
     public void setOrigin(EntityOrigin origin) {
-        this.origin = origin;
+        if (origin == null) {
+            this.origin = null;
+        } else {
+            this.origin = origin.getId();
+        }
     }
 }

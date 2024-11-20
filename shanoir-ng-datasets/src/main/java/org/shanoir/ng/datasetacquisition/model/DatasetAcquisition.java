@@ -109,7 +109,7 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	@OneToMany(fetch = FetchType.LAZY)
 	private List<DatasetAcquisition> copies;
 
-	private EntityOrigin origin;
+	private Integer origin;
 
 	public DatasetAcquisition() {
 	}
@@ -282,11 +282,16 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 		this.copies = copies;
 	}
 
+
 	public EntityOrigin getOrigin() {
-		return origin;
+		return EntityOrigin.getType(origin);
 	}
 
 	public void setOrigin(EntityOrigin origin) {
-		this.origin = origin;
+		if (origin == null) {
+			this.origin = null;
+		} else {
+			this.origin = origin.getId();
+		}
 	}
 }

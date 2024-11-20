@@ -113,7 +113,7 @@ export class ExaminationDTO {
     instrumentBasedAssessmentList: InstrumentBasedAssessment[];
     extraDataFilePathList: string[] = [];
 
-    origin: number;
+    origin: string;
     copies: number[];
     source: number;
     constructor(examination?: Examination) {
