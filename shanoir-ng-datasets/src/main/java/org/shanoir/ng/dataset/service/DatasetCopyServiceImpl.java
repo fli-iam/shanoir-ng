@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.shanoir.ng.dataset.model.DatasetType;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
@@ -49,6 +50,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
     private static final Logger LOG = LoggerFactory.getLogger(DatasetCopyServiceImpl.class);
 
     @Override
+    @Transactional
     public Object[] moveDataset(Dataset ds, Long studyId, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap, Long userId) throws JsonProcessingException {
         try {
             int countProcessed = 0;

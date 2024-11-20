@@ -14,10 +14,7 @@
 
 package org.shanoir.ng.dataset.dto.mapper;
 
-import org.mapstruct.DecoratedWith;
-import org.mapstruct.IterableMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.Named;
+import org.mapstruct.*;
 import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTO;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -67,6 +64,8 @@ public interface DatasetMapper {
 	 * @return dataset DTO.
 	 */
 	@Named(value = "withProcessings")
+	@Mapping(target = "copies", expression = "java(mapCopiesFromDataset(dataset.getCopies()))")
+	@Mapping(target = "source", expression = "java(mapSourceFromDataset(dataset.getSource()))")
 	DatasetWithDependenciesDTO datasetToDatasetWithParentsAndProcessingsDTO(Dataset dataset);
 	
 	/**

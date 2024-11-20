@@ -15,7 +15,9 @@
 package org.shanoir.ng.examination.dto.mapper;
 
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import org.hibernate.Hibernate;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.model.Study;
@@ -47,6 +49,10 @@ public abstract class ExaminationDecorator implements ExaminationMapper {
 	@Override
 	public ExaminationDTO examinationToExaminationDTO(Examination examination) {
 		final ExaminationDTO examinationDTO = delegate.examinationToExaminationDTO(examination);
+		Hibernate.initialize(examination.getCopies());
+		examinationDTO.setCopies(examination.getCopies().stream()
+				.map(Examination::getId)
+				.collect(Collectors.toList()));
 		return examinationDTO;
 	}
 	

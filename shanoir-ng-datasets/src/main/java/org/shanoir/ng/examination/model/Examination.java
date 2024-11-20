@@ -167,7 +167,6 @@ public class Examination extends HalEntity {
         this.weightUnitOfMeasure = other.weightUnitOfMeasure;
         this.preclinical = other.preclinical;
         this.source = other.source;
-        this.origin = other.origin;
         this.copies = other.copies;
     }
 

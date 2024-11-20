@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -84,7 +85,12 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	 */
 	@Query("select e.id from Examination e where e.study.id = :studyId")
 	List<Long> findIdsByStudyId(Long studyId);
-	
+
+
+	@Query(value = "SELECT copies_id FROM examination_copies WHERE examination_id = :examinationId", nativeQuery = true)
+	List<Long> findCopyIdsByExaminationId(@Param("examinationId") Long examinationId);
+
+
 	/**
 	 * Get all examinations, clinical or preclinical.
 	 * 
