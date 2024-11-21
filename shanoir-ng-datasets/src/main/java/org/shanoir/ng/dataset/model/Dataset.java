@@ -153,7 +153,7 @@ public abstract class Dataset extends AbstractEntity {
 	@JoinColumn(name = "source_id")
 	private Dataset source;
 
-	@OneToMany(fetch = FetchType.LAZY)
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "source", cascade = CascadeType.ALL)
 	private List<Dataset> copies;
 
     private Integer origin;

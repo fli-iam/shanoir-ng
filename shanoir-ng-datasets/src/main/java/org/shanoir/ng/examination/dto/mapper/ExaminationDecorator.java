@@ -49,10 +49,6 @@ public abstract class ExaminationDecorator implements ExaminationMapper {
 	@Override
 	public ExaminationDTO examinationToExaminationDTO(Examination examination) {
 		final ExaminationDTO examinationDTO = delegate.examinationToExaminationDTO(examination);
-		Hibernate.initialize(examination.getCopies());
-		examinationDTO.setCopies(examination.getCopies().stream()
-				.map(Examination::getId)
-				.collect(Collectors.toList()));
 		return examinationDTO;
 	}
 	

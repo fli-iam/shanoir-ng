@@ -134,7 +134,7 @@ public class Examination extends HalEntity {
     @JoinColumn(name = "source_id")
     private Examination source;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "source", cascade = CascadeType.ALL)
     private List<Examination> copies;
 
     private Integer origin;

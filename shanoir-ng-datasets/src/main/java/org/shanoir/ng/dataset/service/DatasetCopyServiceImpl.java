@@ -50,7 +50,6 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
     private static final Logger LOG = LoggerFactory.getLogger(DatasetCopyServiceImpl.class);
 
     @Override
-    @Transactional
     public Object[] moveDataset(Dataset ds, Long studyId, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap, Long userId) throws JsonProcessingException {
         try {
             int countProcessed = 0;
@@ -71,6 +70,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                 ds.setOrigin(EntityOrigin.SOURCE);
                 newDs.setSource(ds);
                 newDs.setOrigin(EntityOrigin.COPY);
+                newDs.setCopies(new ArrayList<>());
                 newDs.setSubjectId(ds.getSubjectId());
 
                 // Handling of DatasetAcquisition and Examination
@@ -137,6 +137,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
         oldAcq.getCopies().add(newDsAcq);
         newDsAcq.setOrigin(EntityOrigin.COPY);
         newDsAcq.setExamination(newExam);
+        newDsAcq.setCopies(new ArrayList<>());
         newDsAcq.setSource(oldAcq);
 
         datasetAcquisitionRepository.save(newDsAcq);
@@ -155,6 +156,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
         oldExam.setOrigin(EntityOrigin.SOURCE);
         oldExam.getCopies().add(newExamination);
         newExamination.setSource(oldExam);
+        newExamination.setCopies(new ArrayList<>());
         newExamination.setOrigin(EntityOrigin.COPY);
 
         examinationRepository.save(newExamination);
