@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.shanoir.ng.dataset.model.DatasetType;
-import org.springframework.transaction.annotation.Transactional;
 
 
 @Service

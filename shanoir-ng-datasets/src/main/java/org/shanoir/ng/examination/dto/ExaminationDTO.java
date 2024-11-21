@@ -21,10 +21,7 @@ import org.shanoir.ng.dataset.model.EntityOrigin;
 import org.shanoir.ng.examination.model.InstrumentBasedAssessment;
 import org.shanoir.ng.examination.model.UnitOfMeasure;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
-import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.model.SubjectDTO;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Examination DTO with necessary information for front

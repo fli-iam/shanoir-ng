@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.dataset.dto;
 
-import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.EntityOrigin;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.tag.model.StudyTagDTO;

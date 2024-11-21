@@ -126,9 +126,9 @@ export class CommonDatasetComponent implements OnChanges {
     getCopiedEntity(dataset: Dataset) {
         this.copyEntityIds = [];
         if (dataset != null) {
-            if (dataset.origin == 'COPY' || dataset.source != null) {    // this dataset is a copy
+            if (dataset.origin == 'COPY' || dataset.source != null) {
                 this.copyEntityIds.push(dataset.source);
-            } else if (dataset.origin == 'SOURCE') {                       // this dataset is a source
+            } else if (dataset.origin == 'SOURCE' || dataset.copies.length > 0) {
                 this.copyEntityIds = dataset.copies;
             }
         }

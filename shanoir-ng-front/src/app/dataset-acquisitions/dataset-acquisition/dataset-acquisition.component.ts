@@ -130,9 +130,9 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     getCopiedEntity(dsAcq: DatasetAcquisition) {
         this.copyEntityIds = [];
         if (dsAcq != null) {
-            if (dsAcq.origin == 'COPY' || dsAcq.source != null) {    // this datasetAcq is a copy
+            if (dsAcq.origin == 'COPY' || dsAcq.source != null) {
                 this.copyEntityIds.push(dsAcq.source);
-            } else if (dsAcq.origin == 'SOURCE') {                     // this datasetAcq is a source
+            } else if (dsAcq.origin == 'SOURCE' || dsAcq.copies.length > 0) {
                 this.copyEntityIds = dsAcq.copies;
             }
         }

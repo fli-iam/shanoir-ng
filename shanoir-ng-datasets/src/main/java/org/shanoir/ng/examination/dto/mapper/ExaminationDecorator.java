@@ -15,9 +15,6 @@
 package org.shanoir.ng.examination.dto.mapper;
 
 import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import org.hibernate.Hibernate;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.model.Study;

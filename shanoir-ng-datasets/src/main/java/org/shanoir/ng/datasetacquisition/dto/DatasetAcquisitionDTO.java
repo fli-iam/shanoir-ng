@@ -17,12 +17,7 @@ package org.shanoir.ng.datasetacquisition.dto;
 import java.time.LocalDate;
 import java.util.List;
 
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import org.shanoir.ng.dataset.model.EntityOrigin;
-import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.studycard.model.StudyCard;
 
