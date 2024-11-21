@@ -117,7 +117,8 @@ public class CurrentUploadsWindowTable implements Observer {
 			case UploadState.ERROR -> model.addRow(new Object[] { key, nominativeDataUploadJob.getPatientPseudonymusHash(),
 					nominativeDataUploadJob.getPatientName(), nominativeDataUploadJob.getIPP(),
 					nominativeDataUploadJob.getStudyDate(), nominativeDataUploadJob.getMriSerialNumber(),
-					nominativeDataUploadJob.getUploadState().toString(), "",
+					nominativeDataUploadJob.getUploadState().toString(),
+					(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.reimport"),
 					(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete") });
 			default -> model.addRow(new Object[] { key, nominativeDataUploadJob.getPatientPseudonymusHash(),
 					nominativeDataUploadJob.getPatientName(), nominativeDataUploadJob.getIPP(),
@@ -195,10 +196,10 @@ public class CurrentUploadsWindowTable implements Observer {
 					|| "READY".compareTo(entry.getValue().getUploadPercentage()) == 0) {
 					// Do Nothing
 				} else {
-					if (entry.getValue().getUploadPercentage().equals("FINISHED")) {
+					if (entry.getValue().getUploadPercentage().equals(finishedUploadState)) {
 						totalUploadPercent += 100;
 						nbFinishUpload++;
-					} else if (entry.getValue().getUploadPercentage().equals("ERROR")) {
+					} else if (entry.getValue().getUploadPercentage().equals(errorUploadState)) {
 						nbErrorUpload++;
 					} else {
 						nbStartUpload++;
