@@ -156,8 +156,6 @@ public abstract class Dataset extends AbstractEntity {
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "source", cascade = CascadeType.ALL)
 	private List<Dataset> copies;
 
-    private Integer origin;
-
 	@JsonIgnore
 	@Transient
 	public String SOPInstanceUID;
@@ -505,15 +503,4 @@ public abstract class Dataset extends AbstractEntity {
 		this.copies = copies;
 	}
 
-	public EntityOrigin getOrigin() {
-		return EntityOrigin.getType(origin);
-	}
-
-	public void setOrigin(EntityOrigin origin) {
-		if (origin == null) {
-			this.origin = null;
-		} else {
-			this.origin = origin.getId();
-		}
-	}
 }

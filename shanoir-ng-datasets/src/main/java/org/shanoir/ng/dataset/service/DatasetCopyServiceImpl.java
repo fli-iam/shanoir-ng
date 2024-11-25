@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
-import org.shanoir.ng.dataset.model.EntityOrigin;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
@@ -66,9 +65,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                     newDs = DatasetUtils.copyDatasetFromDataset(ds);
                 }
                 ds.getCopies().add(newDs);
-                ds.setOrigin(EntityOrigin.SOURCE);
                 newDs.setSource(ds);
-                newDs.setOrigin(EntityOrigin.COPY);
                 newDs.setCopies(new ArrayList<>());
                 newDs.setSubjectId(ds.getSubjectId());
 
@@ -132,9 +129,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
             newDsAcq = DatasetAcquisitionUtils.copyDatasetAcquisitionFromDatasetAcquisition(oldAcq);
         }
 
-        oldAcq.setOrigin(EntityOrigin.SOURCE);
         oldAcq.getCopies().add(newDsAcq);
-        newDsAcq.setOrigin(EntityOrigin.COPY);
         newDsAcq.setExamination(newExam);
         newDsAcq.setCopies(new ArrayList<>());
         newDsAcq.setSource(oldAcq);
@@ -152,11 +147,9 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
 
         Examination newExamination = new Examination(oldExam, newStudy, subject);
 
-        oldExam.setOrigin(EntityOrigin.SOURCE);
         oldExam.getCopies().add(newExamination);
         newExamination.setSource(oldExam);
         newExamination.setCopies(new ArrayList<>());
-        newExamination.setOrigin(EntityOrigin.COPY);
 
         examinationRepository.save(newExamination);
         eventService.publishEvent(

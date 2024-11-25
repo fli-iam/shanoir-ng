@@ -65,7 +65,6 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     hasBids: boolean = false;
     unit = UnitOfMeasure;
     defaultUnit = this.unit.KG;
-    copyEntityIds: number[] = [];
 
     constructor(
             private route: ActivatedRoute,
@@ -107,8 +106,6 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
 
     initView(): Promise<void> {
-        this.getCopiedEntity(this.examination);
-
         if(!this.examination.weightUnitOfMeasure){
             this.examination.weightUnitOfMeasure = this.defaultUnit;
         }
@@ -254,16 +251,5 @@ export class ExaminationComponent extends EntityComponent<Examination> {
 
     getUnit(key: string) {
         return UnitOfMeasure.getLabelByKey(key);
-    }
-
-    getCopiedEntity(examination: Examination) {
-        this.copyEntityIds = [];
-        if (examination != null) {
-            if (examination.origin == 'COPY' || examination.source != null) {
-                this.copyEntityIds.push(examination.source);
-            } else if (examination.origin == 'SOURCE' || examination.copies.length > 0) {
-                this.copyEntityIds = examination.copies;
-            }
-        }
     }
 }

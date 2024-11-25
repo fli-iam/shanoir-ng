@@ -23,7 +23,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.EntityOrigin;
 import org.shanoir.ng.datasetacquisition.model.bids.BidsDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.eeg.EegDatasetAcquisition;
@@ -108,8 +107,6 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "source", cascade = CascadeType.ALL)
 	private List<DatasetAcquisition> copies;
-
-	private Integer origin;
 
 	public DatasetAcquisition() {
 	}
@@ -281,16 +278,4 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 		this.copies = copies;
 	}
 
-
-	public EntityOrigin getOrigin() {
-		return EntityOrigin.getType(origin);
-	}
-
-	public void setOrigin(EntityOrigin origin) {
-		if (origin == null) {
-			this.origin = null;
-		} else {
-			this.origin = origin.getId();
-		}
-	}
 }

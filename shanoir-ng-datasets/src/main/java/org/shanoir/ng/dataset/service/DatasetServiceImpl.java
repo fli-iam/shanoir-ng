@@ -24,7 +24,6 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.dataset.model.EntityOrigin;
 import org.shanoir.ng.dataset.repository.DatasetExpressionRepository;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -139,7 +138,7 @@ public class DatasetServiceImpl implements DatasetService {
 		propertyService.deleteByDatasetId(id);
 		repository.deleteById(id);
 
-		if (dataset.getOrigin() == EntityOrigin.COPY) {
+		if (dataset.getSource() != null) {
 			this.deleteDatasetFromPacs(dataset);
 		}
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, dataset.getStudyId()));

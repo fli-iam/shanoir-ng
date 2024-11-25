@@ -45,7 +45,6 @@ export class CommonDatasetComponent implements OnChanges {
     CardinalityOfRelatedSubjects = CardinalityOfRelatedSubjects;
     ExploredEntity = ExploredEntity;
     ProcessedDatasetType = ProcessedDatasetType;
-    copyEntityIds: number[] = [];
 
     constructor(
             private studyService: StudyService,
@@ -64,7 +63,6 @@ export class CommonDatasetComponent implements OnChanges {
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        this.getCopiedEntity(this.dataset);
         if (changes['parentFormGroup']) {
             this.completeForm();
         }
@@ -121,16 +119,5 @@ export class CommonDatasetComponent implements OnChanges {
         this.studyService.getAll().then(studies => {
             this.studies = studies;
         });
-    }
-
-    getCopiedEntity(dataset: Dataset) {
-        this.copyEntityIds = [];
-        if (dataset != null) {
-            if (dataset.origin == 'COPY' || dataset.source != null) {
-                this.copyEntityIds.push(dataset.source);
-            } else if (dataset.origin == 'SOURCE' || dataset.copies.length > 0) {
-                this.copyEntityIds = dataset.copies;
-            }
-        }
     }
 }

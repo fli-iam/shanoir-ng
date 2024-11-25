@@ -17,7 +17,6 @@ package org.shanoir.ng.examination.dto;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.shanoir.ng.dataset.model.EntityOrigin;
 import org.shanoir.ng.examination.model.InstrumentBasedAssessment;
 import org.shanoir.ng.examination.model.UnitOfMeasure;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
@@ -59,8 +58,6 @@ public class ExaminationDTO {
 	private Long source;
 
 	private List<Long> copies;
-
-	private EntityOrigin origin;
 
 	/**
 	 * @return the id
@@ -211,13 +208,5 @@ public class ExaminationDTO {
 
 	public void setCopies(List<Long> copies) {
 		this.copies = copies;
-	}
-
-	public EntityOrigin getOrigin() {
-		return origin;
-	}
-
-	public void setOrigin(EntityOrigin origin) {
-		this.origin = origin;
 	}
 }

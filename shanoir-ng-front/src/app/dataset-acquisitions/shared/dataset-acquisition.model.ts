@@ -33,7 +33,6 @@ export abstract class DatasetAcquisition extends Entity {
     name: string; // set in ExaminationDatasetAcquisitionDecorator.java
     importDate: Date;
     username: string;
-    origin: string;
     copies: number[];
     source: number;
 }

@@ -149,18 +149,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 						</span>
 					</li>
-                    <li *ngIf="mode != 'create' && datasetAcquisition.origin == 'SOURCE'">
+                    <li *ngIf="mode != 'create' && datasetAcquisition.copies != null">
                         <label>This acquisition has been copied :</label>
                         <span class="right-col">
-                            <div *ngFor="let entityId of copyEntityIds">
+                            <div *ngFor="let entityId of datasetAcquisition.copies">
                                 <a [routerLink]="['/dataset-acquisition/details/', entityId]"> [ {{ entityId }} ] </a>
                             </div>
                         </span>
                     </li>
-                    <li *ngIf="mode != 'create' && datasetAcquisition.origin == 'COPY' || datasetAcquisition.source != null">
+                    <li *ngIf="mode != 'create' && datasetAcquisition.source != null">
                         <label>This acquisition is the copy of :</label>
                         <span class="right-col">
-                            <a [routerLink]="['/dataset-acquisition/details/', copyEntityIds[0]]"> [ {{ copyEntityIds }} ] </a>
+                            <a [routerLink]="['/dataset-acquisition/details/', datasetAcquisition.source]"> [ {{ datasetAcquisition.source }} ] </a>
                         </span>
                     </li>
 				</ol>

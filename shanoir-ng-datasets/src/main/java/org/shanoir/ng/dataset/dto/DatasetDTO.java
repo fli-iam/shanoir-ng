@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.dataset.dto;
 
-import org.shanoir.ng.dataset.model.EntityOrigin;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.tag.model.StudyTagDTO;
 
@@ -58,8 +57,6 @@ public class DatasetDTO {
 	private Long source;
 
 	private List<Long> copies;
-
-	private EntityOrigin origin;
 
 
 	/**
@@ -221,13 +218,5 @@ public class DatasetDTO {
 
 	public void setCopies(List<Long> copies) {
 		this.copies = copies;
-	}
-
-	public EntityOrigin getOrigin() {
-		return origin;
-	}
-
-	public void setOrigin(EntityOrigin origin) {
-		this.origin = origin;
 	}
 }

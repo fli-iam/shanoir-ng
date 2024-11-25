@@ -46,7 +46,6 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     noDatasets: boolean = false;
     hasDicom: boolean = false;
     protected downloadState: TaskState = new TaskState();
-    copyEntityIds: number[] = [];
 
     constructor(
             private route: ActivatedRoute,
@@ -74,7 +73,6 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     }
 
     initView(): Promise<void> {
-        this.getCopiedEntity(this.datasetAcquisition);
         this.datasetService.getByAcquisitionId(this.datasetAcquisition.id).then(datasets => {
             this.datasetAcquisition.datasets = datasets;
             this.datasetAcquisition.datasets?.forEach(ds => {
@@ -125,16 +123,5 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
 
     downloadAll() {
         this.downloadService.downloadAllByAcquisitionId(this.datasetAcquisition?.id, this.downloadState);
-    }
-
-    getCopiedEntity(dsAcq: DatasetAcquisition) {
-        this.copyEntityIds = [];
-        if (dsAcq != null) {
-            if (dsAcq.origin == 'COPY' || dsAcq.source != null) {
-                this.copyEntityIds.push(dsAcq.source);
-            } else if (dsAcq.origin == 'SOURCE' || dsAcq.copies.length > 0) {
-                this.copyEntityIds = dsAcq.copies;
-            }
-        }
     }
 }

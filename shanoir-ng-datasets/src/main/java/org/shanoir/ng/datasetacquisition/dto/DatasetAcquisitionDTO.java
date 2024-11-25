@@ -17,7 +17,6 @@ package org.shanoir.ng.datasetacquisition.dto;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.shanoir.ng.dataset.model.EntityOrigin;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.studycard.model.StudyCard;
 
@@ -51,9 +50,6 @@ public class DatasetAcquisitionDTO {
 
 	private List<Long> copies;
 
-	private EntityOrigin origin;
-
-	
 	public Long getId() {
 		return id;
 	}
@@ -166,11 +162,4 @@ public class DatasetAcquisitionDTO {
 		this.copies = copies;
 	}
 
-	public EntityOrigin getOrigin() {
-		return origin;
-	}
-
-	public void setOrigin(EntityOrigin origin) {
-		this.origin = origin;
-	}
 }

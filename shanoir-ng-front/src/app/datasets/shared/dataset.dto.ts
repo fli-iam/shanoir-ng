@@ -126,7 +126,6 @@ export class DatasetDTOService {
         entity.creationDate = dto.creationDate;
         entity.name = dto.name;
         entity.type = dto.type;
-        entity.origin = dto.origin;
         entity.source = dto.source;
         entity.copies = dto.copies;
         entity.originMetadata = dto.originMetadata;
@@ -209,7 +208,6 @@ export class DatasetDTO {
     datasetAcquisition: DatasetAcquisitionDTO;
     inPacs: boolean;
     tags: Tag[];
-    origin: string;
     copies: number[];
     source: number;
 
@@ -221,7 +219,6 @@ export class DatasetDTO {
             this.studyId = dataset.study ? dataset.study.id : null;
             this.subjectId = dataset.subject ? dataset.subject.id : null;
             this.updatedMetadata = dataset.updatedMetadata;
-            this.origin = dataset.origin;
             this.source = dataset.source;
             this.copies = dataset.copies;
             this.name = dataset.name;

@@ -20,13 +20,10 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.shanoir.ng.dataset.modality.MrDataset;
-import org.shanoir.ng.dataset.model.EntityOrigin;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
-import org.shanoir.ng.shared.model.EchoTime;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 
@@ -136,8 +133,6 @@ public class Examination extends HalEntity {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "source", cascade = CascadeType.ALL)
     private List<Examination> copies;
-
-    private Integer origin;
 
     public Examination() {
 
@@ -444,16 +439,4 @@ public class Examination extends HalEntity {
         this.copies = copies;
     }
 
-
-    public EntityOrigin getOrigin() {
-        return EntityOrigin.getType(origin);
-    }
-
-    public void setOrigin(EntityOrigin origin) {
-        if (origin == null) {
-            this.origin = null;
-        } else {
-            this.origin = origin.getId();
-        }
-    }
 }
