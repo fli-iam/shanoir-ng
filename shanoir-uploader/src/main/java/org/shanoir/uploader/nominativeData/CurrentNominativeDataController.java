@@ -281,6 +281,7 @@ public class CurrentNominativeDataController {
 			tableCellRendererComponent.setBackground(Color.LIGHT_GRAY);
 			setHorizontalAlignment(SwingConstants.CENTER);
 			tableCellRendererComponent.setFont(tableCellRendererComponent.getFont().deriveFont(Font.BOLD));
+
 			if (value instanceof String) {
  				String string = (String) value;
  				if (row != cuw.rowsNb - 1) {
@@ -309,7 +310,7 @@ public class CurrentNominativeDataController {
 		private String getDeleteAllHTML(String string) {
 			StringBuilder sb = new StringBuilder();
 			sb.append("<html>");
-			sb.append("<span style=\"color: red;\"><b>");
+			sb.append("<span style=\"color: purple;\"><b>");
 			sb.append(string);
 			sb.append("</b></span>");
 			sb.append("</html>");
