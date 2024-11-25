@@ -25,20 +25,6 @@ Official source code repository: https://github.com/fli-iam/shanoir-ng
 * The latest _stable version_ of Shanoir-NG is on branch `master` 
 * The latest _development version_ of Shanoir-NG is on branch `develop` 
 
-### Cloning the Shanoir-NG repository
-
-1. Clone the shanoir-ng repository
-2. Go into the shanoir-downloader subfolder (it should be empty)
-3. Initialise the shanoir-downloader submodule:
-  - `git submodule init` to initialize your local configuration file
-  - `git submodule update` to fetch all the data from shanoir 
-and check out the appropriate commit listed in `shanoir_downloader`
-
-Then the shanoir-downloader project can be simply managed as a normal
-git repo (as if it were a separated project)  meaning that once
-you are in the shanoir-downloader/ folder, you can just `git pull` 
-to get the latest changes, and commit some changes.
-
 ## Contributing 
 
 There are  two main ways to contribute to Shanoir-NG 
@@ -51,10 +37,11 @@ To learn how to contribute to the code of Shanoir report to the Shanoir-NG
 To scroll existing issues and open a new open eventually report to [Github Issues](https://github.com/fli-iam/shanoir-ng/issues). 
 
 ## Shanoir Developpers Quick Installation
-After cloning the Shanoir-NG repository follow these 
+To quickly bootstrap a Shanoir development environment 
 [Quick Installation Instructions](https://github.com/alexpron/shanoir-ng/wiki/Quick-Installation)
 
-For more detailled informations about Shanoir development installation please report to [Shanoir Installation Step by Step](https://github.com/alexpron/shanoir-ng/wiki/Developper-Installation-Step-by-Step)
+For more detailed information about Shanoir development installation 
+please report to [Shanoir Installation Step by Step](https://github.com/alexpron/shanoir-ng/wiki/Developper-Installation-Step-by-Step)
 
 ## Help and Support
 
