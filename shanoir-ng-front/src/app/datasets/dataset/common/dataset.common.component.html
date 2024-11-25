@@ -82,7 +82,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</span>
 		</li>
 
-        <li *ngIf="mode != 'create' && dataset.copies != null">
+        <li *ngIf="mode != 'create' && dataset.copies?.length > 0">
             <label>This dataset has been copied :</label>
             <span class="right-col">
                 <div *ngFor="let entityId of dataset.copies">
