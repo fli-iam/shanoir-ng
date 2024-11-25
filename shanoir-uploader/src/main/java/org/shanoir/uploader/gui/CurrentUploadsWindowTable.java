@@ -18,6 +18,7 @@ import org.shanoir.uploader.nominativeData.CurrentNominativeDataModel;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
 import org.shanoir.uploader.upload.UploadState;
 
+@SuppressWarnings("deprecation")
 public class CurrentUploadsWindowTable implements Observer {
 
 	public MainWindow frame;

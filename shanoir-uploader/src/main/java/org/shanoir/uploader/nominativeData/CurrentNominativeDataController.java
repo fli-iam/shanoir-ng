@@ -44,6 +44,7 @@ public class CurrentNominativeDataController {
 
 	private CurrentUploadsWindowTable cuw;
 
+	@SuppressWarnings("deprecation")
 	public void configure(final File workFolderFilePath, final CurrentUploadsWindowTable cuw) {
 		this.currentNominativeDataModel = new CurrentNominativeDataModel();
 		currentNominativeDataModel.addObserver(cuw);
