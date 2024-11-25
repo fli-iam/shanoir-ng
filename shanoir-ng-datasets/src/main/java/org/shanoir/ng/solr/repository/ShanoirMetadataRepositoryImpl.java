@@ -52,7 +52,8 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"ae.name as acquisitionEquipmentName, " +
 			"su.name as subjectName, " +
 			"sust.subject_type as subjectType, " +
-			"su.id as subjectId, st.name as studyName, " +
+			"su.id as subjectId, " +
+			"st.name as studyName, " +
 			"e.study_id as studyId, " +
 			"c.name as centerName, " +
 			"c.id as centerId, mrp.slice_thickness as sliceThickness, " +
@@ -60,6 +61,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"mrp.magnetic_field_strength as magneticFieldStrength, " +
 			"da.import_date as importDate, " +
 			"da.username as username, " +
+			"da.sorting_index as sortingIndex, " +
 			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
@@ -91,6 +93,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as magneticFieldStrength, " +
 			"da.import_date as importDate, " +
 			"da.username as username, " +
+			"da.sorting_index as sortingIndex, " +
 			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
@@ -112,7 +115,8 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"ae.name as acquisitionEquipmentName, " +
 			"su.name as subjectName, " +
 			"sust.subject_type as subjectType, " +
-			"su.id as subjectId, st.name as studyName, " +
+			"su.id as subjectId, " +
+			"st.name as studyName, " +
 			"e.study_id as studyId, " +
 			"c.name as centerName, c.id as centerId, " +
 			"null as sliceThickness, " +
@@ -120,6 +124,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as magneticFieldStrength, " +
 			"da.import_date as importDate, " +
 			"da.username as username, " +
+			"da.sorting_index as sortingIndex, " +
 			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
@@ -151,6 +156,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as magneticFieldStrength, " +
 			"da.import_date as importDate, " +
 			"da.username as username, " +
+			"da.sorting_index as sortingIndex, " +
 			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
@@ -172,7 +178,8 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"ae.name as acquisitionEquipmentName, " +
 			"su.name as subjectName, " +
 			"sust.subject_type as subjectType, " +
-			"su.id as subjectId, st.name as studyName, " +
+			"su.id as subjectId, " +
+			"st.name as studyName, " +
 			"e.study_id as studyId, " +
 			"c.name as centerName, c.id as centerId, " +
 			"null as sliceThickness, " +
@@ -180,6 +187,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as magneticFieldStrength, " +
 			"da.import_date as importDate, " +
 			"da.username as username, " +
+			"da.sorting_index as sortingIndex, " +
 			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
@@ -211,6 +219,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as magneticFieldStrength, " +
 			"da.import_date as importDate, " +
 			"da.username as username, " +
+			"da.sorting_index as sortingIndex, " +
 			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
@@ -242,6 +251,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as magneticFieldStrength, " +
 			"proc.processing_date as importDate, " +
 			"proc.username as username, " +
+			"da.sorting_index as sortingIndex, " +
 			"1 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_processing proc ON proc.id = d.dataset_processing_id"
@@ -271,6 +281,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as magneticFieldStrength, " +
 			"da.import_date as importDate, " +
 			"da.username as username, " +
+			"da.sorting_index as sortingIndex, " +
 			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset refd ON refd.id = d.referenced_dataset_for_superimposition_id"
@@ -297,12 +308,13 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"st.name as studyName, " +
 			"e.study_id as studyId, " +
 			"c.name as centerName, " +
-			"c.id as centerId, "
-			+ "null as sliceThickness, " +
+			"c.id as centerId, " +
+			"null as sliceThickness, " +
 			"null as pixelBandwidth, " +
 			"null as magneticFieldStrength, " +
 			"da.import_date as importDate, " +
 			"da.username as username, " +
+			"da.sorting_index as sortingIndex, " +
 			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset refd ON refd.id = d.referenced_dataset_for_superimposition_id"
@@ -335,6 +347,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as magneticFieldStrength, " +
 			"da.import_date as importDate, " +
 			"da.username as username, " +
+			"da.sorting_index as sortingIndex, " +
 			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
