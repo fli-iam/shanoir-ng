@@ -1,0 +1,8 @@
+{
+  "auth-server-url": "https://shanoir-ofsep-qualif.irisa.fr/auth",
+  "realm": "shanoir-ng",
+  "resource": "shanoir-uploader",
+  "ssl-required": "external",
+  "public-client": true,
+  "use-resource-role-mappings": true
+}
