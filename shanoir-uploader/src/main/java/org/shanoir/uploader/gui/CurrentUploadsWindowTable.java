@@ -51,7 +51,15 @@ public class CurrentUploadsWindowTable implements Observer {
 			frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete")
 		};
 		this.columnNames = columnNames;
-		table = new JTable(new DefaultTableModel(columnNames, 0));
+		// Create the non editable table to display the current uploads
+		table = new JTable(new DefaultTableModel(columnNames, 0) {
+
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+		});
+
 		table.setPreferredScrollableViewportSize(new Dimension(800, 100));
 		table.setFillsViewportHeight(true);
 
