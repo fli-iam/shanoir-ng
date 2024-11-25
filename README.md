@@ -36,7 +36,7 @@ To learn how to contribute to the code of Shanoir report to the Shanoir-NG
 To scroll existing issues and open a new open eventually report to [Github Issues](https://github.com/fli-iam/shanoir-ng/issues). 
 
 ## Shanoir Developpers Quick Installation
-To quickly bootstrap a Shanoir development environment 
+To quickly bootstrap a Shanoir development environment follow the
 [Quick Installation Instructions](https://github.com/alexpron/shanoir-ng/wiki/Quick-Installation)
 
 For more detailed information about Shanoir development installation 
