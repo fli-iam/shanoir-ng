@@ -110,29 +110,31 @@ public class CurrentUploadsWindowTable implements Observer {
 	}
 
 	private void addRow(DefaultTableModel model, String key, NominativeDataUploadJob nominativeDataUploadJob) {
+		String actionImport = (String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.import");
+    	String actionDelete = (String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete");
+
 		switch (nominativeDataUploadJob.getUploadState()) {
-			case UploadState.READY -> model.addRow(new Object[] { key, nominativeDataUploadJob.getPatientPseudonymusHash(),
+			case UploadState.READY, UploadState.ERROR -> model.addRow(new Object[] { key, nominativeDataUploadJob.getPatientPseudonymusHash(),
 					nominativeDataUploadJob.getPatientName(), nominativeDataUploadJob.getIPP(),
 					nominativeDataUploadJob.getStudyDate(), nominativeDataUploadJob.getMriSerialNumber(),
 					nominativeDataUploadJob.getUploadState().toString(),
-					(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.import"),
-					(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete")
+					actionImport,
+					actionDelete
 				});
 			case UploadState.FINISHED_UPLOAD -> model.addRow(new Object[] { key, nominativeDataUploadJob.getPatientPseudonymusHash(),
 					nominativeDataUploadJob.getPatientName(), nominativeDataUploadJob.getIPP(),
 					nominativeDataUploadJob.getStudyDate(), nominativeDataUploadJob.getMriSerialNumber(),
-					nominativeDataUploadJob.getUploadPercentage(), "",
-					(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete") });
-			case UploadState.ERROR -> model.addRow(new Object[] { key, nominativeDataUploadJob.getPatientPseudonymusHash(),
-					nominativeDataUploadJob.getPatientName(), nominativeDataUploadJob.getIPP(),
-					nominativeDataUploadJob.getStudyDate(), nominativeDataUploadJob.getMriSerialNumber(),
-					nominativeDataUploadJob.getUploadState().toString(),
-					(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.reimport"),
-					(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete") });
+					nominativeDataUploadJob.getUploadPercentage(),
+					 "",
+					actionDelete 
+				});
 			default -> model.addRow(new Object[] { key, nominativeDataUploadJob.getPatientPseudonymusHash(),
 					nominativeDataUploadJob.getPatientName(), nominativeDataUploadJob.getIPP(),
 					nominativeDataUploadJob.getStudyDate(), nominativeDataUploadJob.getMriSerialNumber(),
-					nominativeDataUploadJob.getUploadPercentage(), "", "" });
+					nominativeDataUploadJob.getUploadPercentage(), 
+					"", 
+					"" 
+				});
 		}
 	}
 
