@@ -313,6 +313,20 @@
    	</repositories>
 
 	<build>
+		<resources>
+			<!-- Default resource configuration (without the key files) -->
+			<resource>
+				<directory>src/main/resources</directory>
+				<excludes>
+					<exclude>profile.OFSEP/key</exclude>
+					<exclude>profile.OFSEP-Qualif/key</exclude>
+					<exclude>profile.OFSEP-VHD/key</exclude>
+					<exclude>profile.OFSEP-VHD-Qualif/key</exclude>
+					<exclude>key</exclude>
+					<exclude>pseudonymus</exclude>
+				</excludes>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -340,8 +354,10 @@
 						<phase>package</phase>
 						<configuration>
 							<tasks>
-								<copy file="start-shup-windows-java.bat" tofile="target/start-shup-windows-java.bat" />
-								<copy file="start-shup-linux-mac-java.sh" tofile="target/start-shup-linux-mac-java.sh" />
+								<copy file="start-shup-windows-java.bat"
+									tofile="target/start-shup-windows-java.bat" />
+								<copy file="start-shup-linux-mac-java.sh"
+									tofile="target/start-shup-linux-mac-java.sh" />
 								<copy file="downloadDataset.sh" tofile="target/downloadDataset.sh" />
 								<copy file="downloadDataset.bat" tofile="target/downloadDataset.bat" />
 							</tasks>
@@ -396,5 +412,19 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>ofsep</id>
+			<build>
+				<resources>
+					<resource>
+						<directory>src/main/resources</directory>
+						<!-- No excludes, so all 'key' files are included -->
+					</resource>
+				</resources>
+			</build>
+		</profile>
+	</profiles>
 
 </project>
