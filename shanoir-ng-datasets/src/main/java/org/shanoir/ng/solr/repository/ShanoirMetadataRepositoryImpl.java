@@ -251,7 +251,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as magneticFieldStrength, " +
 			"proc.processing_date as importDate, " +
 			"proc.username as username, " +
-			"da.sorting_index as sortingIndex, " +
+			"null as sortingIndex, " +
 			"1 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_processing proc ON proc.id = d.dataset_processing_id"
