@@ -387,7 +387,7 @@ public class DatasetServiceImpl implements DatasetService {
 			for (Dataset dataset : datasets) {
 				progress = progress + 1f / total;
 				event.setProgress(progress);
-				event.setMessage("Deleting nifti for dataset: " + dataset.getName() + " of subject " + dataset.getSubjectId());
+				event.setMessage("Deleting nifti for dataset: " + dataset.getId());
 				shanoirEventService.publishEvent(event);
 				deleteNifti(dataset);
 			}
