@@ -116,7 +116,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 			throw new RestServiceException(
 					new ErrorModel(
 							HttpStatus.UNPROCESSABLE_ENTITY.value(),
-							"This examination is linked to another examination that was copied."
+							"This examination is linked to another examination, that was copied."
 					));
 		} else {
 			List<DatasetAcquisition> dsAcqs = examination.getDatasetAcquisitions();
@@ -138,7 +138,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 				if (event != null) {
 					event.setObjectId(String.valueOf(event.getId()));
 					event.setProgress(1f);
-					event.setMessage("Examination with id " + id + " deleted succesfully.");
+					event.setMessage("Examination with id " + id + " successfully deleted.");
 					event.setStatus(ShanoirEvent.SUCCESS);
 					eventService.publishEvent(event);
 				}
@@ -163,10 +163,10 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 		} catch (Exception e) {
 			event.setStatus(ShanoirEvent.ERROR);
-			event.setMessage("Error during delete of examination with id : " + examinationId);
+			event.setMessage("Error during deletion of examination with id : " + examinationId);
 			event.setProgress(-1f);
 			eventService.publishEvent(event);
-			LOG.error("Error during delete of examination with id : " + examinationId);
+			LOG.error("Error during deletion of examination with id : " + examinationId);
 		}
 	}
 

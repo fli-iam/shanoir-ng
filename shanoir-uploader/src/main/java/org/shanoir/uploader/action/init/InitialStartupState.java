@@ -248,7 +248,12 @@ public class InitialStartupState implements State {
 	 */
 	private void initProperties(final String fileName, final Properties properties) {
 		final File propertiesFile = new File(ShUpConfig.shanoirUploaderFolder + File.separator + fileName);
-		if (propertiesFile.exists()) {
+		// in case of profiles.properties and endpoint.properties we copy each time from the .jar,
+		// as we consider the new code has always right and these files are never edited manually
+		// by the installing user: advantage new added endpoints are always considered
+		if (propertiesFile.exists()
+			&& !fileName.equals(ShUpConfig.PROFILES_PROPERTIES)
+			&& !fileName.equals(ShUpConfig.ENDPOINT_PROPERTIES)) {
 			// do nothing
 		} else {
 			Util.copyFileFromJar(fileName, propertiesFile);
