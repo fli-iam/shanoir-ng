@@ -290,18 +290,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <legend i18n="Study detail|Name label@@studyDetailCentersAndPITitle">List of centers</legend>
                 <ol>
                     <li>
-                        <label i18n="Study detail|Multicenter label@@studyDetailMultiCenter">Multi / single center</label>
-                        <span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								<span *ngIf="study.monoCenter">Single center</span>
-								<span *ngIf="!study.monoCenter">Multicenter</span>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<span [class.disabled]="study.studyCenterList?.length > 1">Single center</span>
-								<toggle-switch formControlName="monoCenter" [(ngModel)]="study.monoCenter" (onChange)="onMonoMultiChange()" [reverse]="true"></toggle-switch>
-								<span>Multicenter</span>
-							</ng-template>
-						</span>
 						<span *ngIf="mode == 'view'" class="left-col">
 						    <p><b>Centers</b></p>
 						    <ol *ngFor="let studyCenter of study.studyCenterList; let i = index; let even = even; let odd = odd;" [class.even]="even" [class.odd]="odd">
@@ -317,13 +305,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<label *ngIf="hasError('studyCenterList', ['required'])" class="form-validation-alert right-col">At least one center is required !</label>
 						</span>
 					</li>
-					<li *ngIf="mode != 'view' && study.monoCenter">
-						<label>Subject prefix for this center</label>
-						<span class="right-col">
-							<span class="prefix">{{study.name}}-</span><input class="prefix-input" *ngIf="study.studyCenterList[0]" type="text" [(ngModel)]="study.studyCenterList[0].subjectNamePrefix" (input)="onPrefixChange()" [ngModelOptions]="{standalone: true}"/>
-						</span>
-					</li>
-					<li *ngIf="mode != 'view' && !study.monoCenter">
+					<li *ngIf="mode != 'view'">
 						<span class="study-center-list">
 							<input type="hidden" formControlName="studyCenterList" [(ngModel)]="study.studyCenterList"/>
 							<table>
