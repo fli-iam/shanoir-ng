@@ -290,10 +290,20 @@ public class StudyServiceImpl implements StudyService {
 		studyDb.setMonoCenter(study.isMonoCenter());
 
 		if (study.getStudyCenterList() != null) {
-			ListDependencyUpdate.updateWith(studyDb.getStudyCenterList(), study.getStudyCenterList());
-			for (StudyCenter studyCenter : studyDb.getStudyCenterList()) {
-				studyCenter.setStudy(studyDb);
+			List<StudyCenter> studyCenterListDb = studyDb.getStudyCenterList();
+			for (StudyCenter dbStudyCenter : studyCenterListDb) {
+				dbStudyCenter.setStudy(null);
 			}
+			studyCenterListDb.clear();
+
+			List<StudyCenter> studyCenterListNew = study.getStudyCenterList();
+
+			for (StudyCenter studyCenter : studyCenterListNew) {
+				studyCenter.setStudy(studyDb);
+				studyDb.getStudyCenterList().add(studyCenter);
+			}
+
+			studyDb = studyRepository.save(studyDb);
 		}
 
 		if (study.getTags() != null) {
