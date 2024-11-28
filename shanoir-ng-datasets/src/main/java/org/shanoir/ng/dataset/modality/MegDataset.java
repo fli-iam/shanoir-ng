@@ -14,8 +14,10 @@
 
 package org.shanoir.ng.dataset.modality;
 
-import jakarta.persistence.Entity;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetType;
+
+import jakarta.persistence.Entity;
 
 /**
  * MEG dataset.
@@ -25,8 +27,6 @@ import org.shanoir.ng.dataset.model.Dataset;
  */
 @Entity
 public class MegDataset extends Dataset {
-
-	public static final String datasetType = "Meg";
 
 	/**
 	 * UID
@@ -40,8 +40,8 @@ public class MegDataset extends Dataset {
 	}
 
 	@Override
-	public String getType() {
-		return "Meg";
+	public DatasetType getType() {
+		return DatasetType.Meg;
 	}
 
 }
