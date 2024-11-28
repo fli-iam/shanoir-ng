@@ -215,20 +215,17 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 					anonymizeTag(tagInt, action, datasetAttributes);
 				// even: public tags
 				} else if (anonymizationMap.containsKey(tagString)) {
-					if (tagInt == Tag.SOPInstanceUID) {
-						anonymizeSOPInstanceUID(tagInt, datasetAttributes, mediaStorageSOPInstanceUIDGenerated);
-					} else if (tagInt == Tag.SeriesInstanceUID) {
-						anonymizeSeriesInstanceUID(tagInt, datasetAttributes, seriesInstanceUIDs);
-					} else if (tagInt == Tag.FrameOfReferenceUID) {
-						anonymizeFrameOfReferenceUID(tagInt, datasetAttributes, frameOfReferenceUIDs);
-					} else if (tagInt == Tag.StudyInstanceUID) {
-						anonymizeStudyInstanceUID(tagInt, datasetAttributes, studyInstanceUIDs);
-					} else if (tagInt == Tag.StudyID) {
-						anonymizeStudyId(tagInt, datasetAttributes, studyIds);
-					} else {
-						final String action = anonymizationMap.get(tagString);
-						anonymizeTag(tagInt, action, datasetAttributes);
-					}
+                                    switch (tagInt) {
+                                        case Tag.SOPInstanceUID -> anonymizeSOPInstanceUID(tagInt, datasetAttributes, mediaStorageSOPInstanceUIDGenerated);
+                                        case Tag.SeriesInstanceUID -> anonymizeUID(tagInt, datasetAttributes, seriesInstanceUIDs);
+                                        case Tag.FrameOfReferenceUID -> anonymizeUID(tagInt, datasetAttributes, frameOfReferenceUIDs);
+                                        case Tag.StudyInstanceUID -> anonymizeUID(tagInt, datasetAttributes, studyInstanceUIDs);
+                                        case Tag.StudyID -> anonymizeStudyId(tagInt, datasetAttributes, studyIds);
+                                        default -> {
+                                            final String action = anonymizationMap.get(tagString);
+                                            anonymizeTag(tagInt, action, datasetAttributes);
+                                        }
+                                    }
 				} else {
 					if (0x50000000 <= tagInt && tagInt <= 0x50FFFFFF) {
 						final String action = anonymizationMap.get(CURVE_DATA_TAGS);
@@ -352,65 +349,6 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
 	private void anonymizeSOPInstanceUID(int tagInt, Attributes attributes, String mediaStorageSOPInstanceUID) {
 		anonymizeTagAccordingToVR(attributes, tagInt, mediaStorageSOPInstanceUID);
-	}
-
-	private void anonymizeFrameOfReferenceUID(int tagInt, Attributes attributes, Map<String, String> frameOfReferenceUIDs) {
-		String value;
-		if (frameOfReferenceUIDs != null && frameOfReferenceUIDs.size() != 0
-				&& frameOfReferenceUIDs.get(attributes.getString(tagInt)) != null) {
-			value = frameOfReferenceUIDs.get(attributes.getString(tagInt));
-		} else {
-			UIDGeneration generator = new UIDGeneration();
-			String newUID = null;
-			try {
-				newUID = generator.getNewUID();
-			} catch (Exception e) {
-				LOG.error(e.getMessage());
-			}
-			value = newUID;
-			frameOfReferenceUIDs.put(attributes.getString(tagInt), value);
-		}
-		anonymizeTagAccordingToVR(attributes, tagInt, value);
-	}
-
-	private void anonymizeSeriesInstanceUID(int tagInt, Attributes attributes, Map<String, String> seriesInstanceUIDs) {
-		String value;
-		if (seriesInstanceUIDs != null && seriesInstanceUIDs.size() != 0
-				&& seriesInstanceUIDs.get(attributes.getString(tagInt)) != null) {
-			value = seriesInstanceUIDs.get(attributes.getString(tagInt));
-		} else {
-			UIDGeneration generator = new UIDGeneration();
-			String newUID = null;
-			try {
-				newUID = generator.getNewUID();
-			} catch (Exception e) {
-				LOG.error(e.getMessage());
-			}
-			value = newUID;
-			seriesInstanceUIDs.put(attributes.getString(tagInt), value);
-		}
-		anonymizeTagAccordingToVR(attributes, tagInt, value);
-	}
-
-	private void anonymizeStudyInstanceUID(int tagInt, Attributes attributes, Map<String, String> studyInstanceUIDs) {
-		String value;
-		if (studyInstanceUIDs != null && studyInstanceUIDs.size() != 0
-				&& studyInstanceUIDs.get(attributes.getString(tagInt)) != null) {
-			value = studyInstanceUIDs.get(attributes.getString(tagInt));
-			LOG.debug("Existing StudyInstanceUID reused: {}", value);
-		} else {
-			UIDGeneration generator = new UIDGeneration();
-			String newUID = null;
-			try {
-				newUID = generator.getNewUID();
-			} catch (Exception e) {
-				LOG.error(e.getMessage());
-			}
-			value = newUID;
-			LOG.info("New StudyInstanceUID generated for DICOM study/exam: {}", newUID);
-			studyInstanceUIDs.put(attributes.getString(tagInt), value);
-		}
-		anonymizeTagAccordingToVR(attributes, tagInt, value);
 	}
 
 	private void anonymizeStudyId(int tagInt, Attributes attributes, Map<String, String> studyIds) {
@@ -544,6 +482,27 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		// VR.UR = Universal Resource Identifier or Universal
 		// Resource Locator (URI/URL)
 		// VR.OD = Other Double String
+	}
+
+	private void anonymizeUID(int tagInt, Attributes attributes, Map<String, String> UIDs) {
+		String value;
+		if (UIDs != null && UIDs.size() != 0
+				&& UIDs.get(attributes.getString(tagInt)) != null) {
+			value = UIDs.get(attributes.getString(tagInt));
+			LOG.debug("Existing DICOM metadata UID with tag {} reused: {}", tagInt, value);
+		} else {
+			UIDGeneration generator = new UIDGeneration();
+			String newUID = null;
+			try {
+				newUID = generator.getNewUID();
+			} catch (Exception e) {
+				LOG.error(e.getMessage());
+			}
+			value = newUID;
+			LOG.info("New DICOM metadata UID with tag {} generated for DICOM study/exam: {}", tagInt, newUID);
+			UIDs.put(attributes.getString(tagInt), value);
+		}
+		anonymizeTagAccordingToVR(attributes, tagInt, value);
 	}
 
 }
