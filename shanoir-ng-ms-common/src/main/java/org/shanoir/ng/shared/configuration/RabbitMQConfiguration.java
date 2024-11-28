@@ -314,6 +314,9 @@ public class RabbitMQConfiguration {
 	}
 	
 	@Bean
+	public static Queue deleteSubjectQueue() { return new Queue(DELETE_SUBJECT_QUEUE, true); }
+	
+	@Bean
 	public static Queue importerQueue() {
 		return new Queue(IMPORTER_QUEUE_DATASET, true);
 	}
