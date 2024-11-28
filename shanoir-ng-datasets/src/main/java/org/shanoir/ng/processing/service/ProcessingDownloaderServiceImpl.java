@@ -41,12 +41,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
     private WADODownloaderService downloader;
 
     public void massiveDownload(List<DatasetProcessing> processingList, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
-        List<Dataset> inputs = processingList.stream().flatMap(processing -> processing.getInputDatasets().stream()).collect(Collectors.toList());
-        if(resultOnly){
-            processingList.forEach(it -> {it.setOutputDatasets(it.getOutputDatasets().stream().filter(file -> Objects.equals(file.getName(), "result.yaml")).toList()); it.setInputDatasets(new ArrayList<>());});
-        }
-        List<Dataset> outputs = processingList.stream().flatMap(processing -> processing.getOutputDatasets().stream()).collect(Collectors.toList());
-        checkSize(inputs, outputs);
+        manageResultOnly(processingList, resultOnly);
 
         response.setContentType("application/zip");
         response.setHeader("Content-Disposition", "attachment;filename=Processings_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")));
@@ -124,7 +119,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
                 zipOutputStream.closeEntry();
             }
 
-            String ids = String.join(",", Stream.concat(inputs.stream(), outputs.stream()).map(dataset -> dataset.getId().toString()).collect(Collectors.toList()));
+            String ids = String.join(",", Stream.concat(processingList.stream().map(DatasetProcessing::getInputDatasets), processingList.stream().map(DatasetProcessing::getOutputDatasets)).map(dataset -> ((Dataset) dataset).getId().toString()).collect(Collectors.toList()));
             ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DOWNLOAD_DATASET_EVENT, ids,
                     KeycloakUtil.getTokenUserId(), ids + "." + format, ShanoirEvent.IN_PROGRESS);
             event.setStatus(ShanoirEvent.SUCCESS);
@@ -135,6 +130,12 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
                             "Unexpected error while downloading dataset files"));
+        }
+    }
+
+    private void manageResultOnly(List<DatasetProcessing> processingList, boolean resultOnly) {
+        if(resultOnly){
+            processingList.forEach(it -> {it.setOutputDatasets(it.getOutputDatasets().stream().filter(file -> Objects.equals(file.getName(), "result.yaml")).toList()); it.setInputDatasets(new ArrayList<>());});
         }
     }
 
