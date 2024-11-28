@@ -1103,5 +1103,33 @@ public class DatasetSecurityService {
 		Long id = studyInstanceUIDHandler.extractExaminationId(examinationUID);
 		return hasRightOnExamination(id, rightStr);
     }
-   
+
+	public boolean HasRightOnEveryDatasetOfProcessings(List<Long> processingIds, String rightStr) {
+		boolean hasRight = true;
+
+		for (Long processingId : processingIds) {
+			if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN") || processingId == null) {
+				continue;
+			}
+			Iterable<Dataset> datasets = datasetRepository.findDatasetsByProcessingId(processingId);
+
+			for (Dataset dataset : datasets) {
+				if (dataset.getDatasetAcquisition() == null
+						|| dataset.getDatasetAcquisition().getExamination() == null
+						|| dataset.getDatasetAcquisition().getExamination().getStudyId() == null) {
+
+					if (dataset.getDatasetProcessing() != null && dataset.getDatasetProcessing().getInputDatasets() != null) {
+						for (Dataset inputDs : dataset.getDatasetProcessing().getInputDatasets()) {
+							hasRight &= hasRightOnTrustedDataset(inputDs, rightStr);
+						}
+					} else {
+						throw new IllegalStateException("Cannot check dataset n°" + dataset.getId() + " rights, this dataset has neither examination nor processing parent !");
+					}
+				} else {
+					hasRight &= this.hasRightOnStudyCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), dataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr);
+				}
+			}
+		}
+		return hasRight;
+	}
 }

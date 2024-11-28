@@ -19,11 +19,13 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 import org.shanoir.ng.processing.model.DatasetProcessing;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.http.ResponseEntity;
@@ -119,5 +121,20 @@ public interface DatasetProcessingApi {
 			@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId,
 			@Parameter(description = "dataset processing to update", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing, BindingResult result)
 			throws RestServiceException;
+
+	@Operation(summary = "massiveDownloadDatasetsByProcessingIds", description = "If exists, returns a zip file of the inputs/outputs per processing corresponding to the given processing IDs")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "zip file"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "no dataset found"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@GetMapping(value = "/massiveDownloadByProcessing")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.HasRightOnEveryDatasetOfProcessings(#processingIds, 'CAN_DOWNLOAD'))")
+	void massiveDownloadByProcessingId(
+			@Parameter(description = "id of the processing", required=true) @Valid
+			@RequestParam(value = "processingIds") List<Long> processingIds,
+			@Parameter(description = "outputs to extract") @Valid
+			@RequestParam(value = "resultOnly") boolean resultOnly, HttpServletResponse response) throws RestServiceException;
 
 }

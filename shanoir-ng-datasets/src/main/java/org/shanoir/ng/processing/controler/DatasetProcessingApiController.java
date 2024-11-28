@@ -15,16 +15,21 @@
 package org.shanoir.ng.processing.controler;
 
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.apache.poi.ss.extractor.ExcelExtractor;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 import org.shanoir.ng.processing.dto.mapper.DatasetProcessingMapper;
 import org.shanoir.ng.processing.model.DatasetProcessing;
+import org.shanoir.ng.processing.model.DatasetProcessingType;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
+import org.shanoir.ng.processing.service.ProcessingDownloaderServiceImpl;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -38,9 +43,12 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -60,7 +68,14 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 	private DatasetProcessingService datasetProcessingService;
 
 	@Autowired
-	private DatasetService datasetService;
+	private ProcessingDownloaderServiceImpl processingDownloaderService;
+
+	/** Number of downloadable datasets. */
+	private static final int DATASET_LIMIT = 500;
+
+	public DatasetProcessingApiController(){
+
+	}
 
 	@Override
 	public ResponseEntity<Void> deleteDatasetProcessing(
@@ -147,12 +162,43 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
-	
+
 	private void validate(BindingResult result) throws RestServiceException {
 		final FieldErrorMap errors = new FieldErrorMap(result);
 		if (!errors.isEmpty()) {
 			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
 			throw new RestServiceException(error);
 		}
+	}
+
+	@Override
+	public void massiveDownloadByProcessingId(
+			@Parameter(description = "ids of processing", required=true) @Valid
+			@RequestParam(value = "processingIds") List<Long> processingIds,
+			@Parameter(description = "outputs to extract") @Valid
+			@RequestParam(value = "resultOnly") boolean resultOnly,
+			HttpServletResponse response) throws RestServiceException {
+
+		List<DatasetProcessing> processingList = new ArrayList<>();
+		for (Long processingId : processingIds) {
+			DatasetProcessing processing = null;
+			try {
+				if(processingId == null){
+					throw new Exception();
+				}
+				processing = datasetProcessingService.findById(processingId).get();
+				processingList.add(processing);
+			}catch (Exception e) {
+				throw new RestServiceException(
+						new ErrorModel(HttpStatus.FORBIDDEN.value(), processingId + " is not a valid processing id."));
+			}
+
+			if(!Objects.equals(processing.getDatasetProcessingType(), DatasetProcessingType.SEGMENTATION)){
+				throw new RestServiceException(
+						new ErrorModel(HttpStatus.FORBIDDEN.value(), "Processing " + processingId + " has not a valid processing type."));
+			}
+		}
+
+		processingDownloaderService.massiveDownload(processingList, resultOnly, "dcm" , response, false, null);
 	}
 }
