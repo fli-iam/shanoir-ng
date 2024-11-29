@@ -123,7 +123,7 @@
             </ol>
         </fieldset>
         <div class="footer">
-            <button type="button" type="button" (click)="downloadNow()" class="alt left-icon" [disabled]="form.dirty && !form.valid">
+            <button type="button" type="button" (click)="downloadNow()" class="alt left-icon" [disabled]="(form.dirty && !form.valid) || !loaded">
                 <i class="fas fa-download"></i>Download now
             </button>
             <button type="button" (click)="cancel()">Cancel</button>

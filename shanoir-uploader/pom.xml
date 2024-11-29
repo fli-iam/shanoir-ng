@@ -25,12 +25,24 @@
 		<junit.jupiter.version>5.8.2</junit.jupiter.version>
 		<junit.platform.version>1.8.2</junit.platform.version>
 		<poi.version>4.1.2</poi.version>
+		<mapstruct.version>1.5.3.Final</mapstruct.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-ms-common</artifactId>
+			<version>3.2.2</version>
+			<exclusions>
+			    <exclusion>
+			        <groupId>*</groupId>
+			        <artifactId>*</artifactId>
+			    </exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.shanoir-ng</groupId>
+			<artifactId>shanoir-ng-datasets</artifactId>
 			<version>3.2.2</version>
 			<exclusions>
 			    <exclusion>
@@ -269,6 +281,12 @@
             <version>${junit.platform.version}</version>
             <scope>test</scope>
         </dependency>
+		<!-- https://mvnrepository.com/artifact/org.mapstruct/mapstruct-processor -->
+		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct</artifactId>
+			<version>${mapstruct.version}</version>
+		</dependency>
 	</dependencies>
 
 	<repositories>
@@ -295,6 +313,20 @@
    	</repositories>
 
 	<build>
+		<resources>
+			<!-- Default resource configuration (without the key files) -->
+			<resource>
+				<directory>src/main/resources</directory>
+				<excludes>
+					<exclude>profile.OFSEP/key</exclude>
+					<exclude>profile.OFSEP-Qualif/key</exclude>
+					<exclude>profile.OFSEP-VHD/key</exclude>
+					<exclude>profile.OFSEP-VHD-Qualif/key</exclude>
+					<exclude>key</exclude>
+					<exclude>pseudonymus</exclude>
+				</excludes>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -303,6 +335,13 @@
 				<configuration>
 					<source>${java.version}</source>
 					<target>${java.version}</target>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.mapstruct</groupId>
+							<artifactId>mapstruct-processor</artifactId>
+							<version>${mapstruct.version}</version>
+						</path>
+					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
 			<!-- Place any Ant task here. You can add anything you can add between 
@@ -315,8 +354,10 @@
 						<phase>package</phase>
 						<configuration>
 							<tasks>
-								<copy file="start-shup-windows-java.bat" tofile="target/start-shup-windows-java.bat" />
-								<copy file="start-shup-linux-mac-java.sh" tofile="target/start-shup-linux-mac-java.sh" />
+								<copy file="start-shup-windows-java.bat"
+									tofile="target/start-shup-windows-java.bat" />
+								<copy file="start-shup-linux-mac-java.sh"
+									tofile="target/start-shup-linux-mac-java.sh" />
 								<copy file="downloadDataset.sh" tofile="target/downloadDataset.sh" />
 								<copy file="downloadDataset.bat" tofile="target/downloadDataset.bat" />
 							</tasks>
@@ -371,5 +412,19 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>ofsep</id>
+			<build>
+				<resources>
+					<resource>
+						<directory>src/main/resources</directory>
+						<!-- No excludes, so all 'key' files are included -->
+					</resource>
+				</resources>
+			</build>
+		</profile>
+	</profiles>
 
 </project>
