@@ -489,7 +489,10 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		if (UIDs != null && UIDs.size() != 0
 				&& UIDs.get(attributes.getString(tagInt)) != null) {
 			value = UIDs.get(attributes.getString(tagInt));
-			LOG.debug("Existing DICOM metadata UID with tag {} reused: {}", tagInt, value);
+			// We log only concerning the studyInstanceUID
+			if(Tag.StudyInstanceUID == tagInt) {
+				LOG.debug("Existing StudyInstanceUID reused: {}", value);
+			}
 		} else {
 			UIDGeneration generator = new UIDGeneration();
 			String newUID = null;
@@ -499,7 +502,9 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 				LOG.error(e.getMessage());
 			}
 			value = newUID;
-			LOG.info("New DICOM metadata UID with tag {} generated for DICOM study/exam: {}", tagInt, newUID);
+			if(Tag.StudyInstanceUID == tagInt) {
+				LOG.info("New StudyInstanceUID generated for DICOM study/exam: {}", newUID);
+			}
 			UIDs.put(attributes.getString(tagInt), value);
 		}
 		anonymizeTagAccordingToVR(attributes, tagInt, value);
