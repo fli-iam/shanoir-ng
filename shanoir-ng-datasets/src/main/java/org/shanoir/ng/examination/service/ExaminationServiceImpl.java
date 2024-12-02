@@ -131,8 +131,10 @@ public class ExaminationServiceImpl implements ExaminationService {
 					}
 				}
 				for (DatasetAcquisition dsAcq : dsAcqs) {
-					event.setMessage("Delete examination - acquisition with id : " + dsAcq.getId());
-					eventService.publishEvent(event);
+					if (event != null) {
+						event.setMessage("Delete examination - acquisition with id : " + dsAcq.getId());
+						eventService.publishEvent(event);
+					}
 					this.datasetAcquisitionService.deleteById(dsAcq.getId(), event);
 				}
 				if (event != null) {
