@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -33,7 +33,7 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     animations: [slideDown]
 })
 export class BidsUploadComponent {
-    
+
     public archiveStatus: Status = 'none';
     protected extensionError: boolean;
     public errorMessage: string;
@@ -48,7 +48,7 @@ export class BidsUploadComponent {
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
             private studyService: StudyService) {
-                
+
     Promise.all([this.studyService.getAll(), this.centerService.getAll()])
             .then(([allStudies, allCenters]) => {
                 this.studyOptions = [];
@@ -59,17 +59,17 @@ export class BidsUploadComponent {
                             let center: Center = allCenters.find(center => center.id === studyCenter.center.id);
                             if (center) {
                                 studyCenter.center = center;
-                            } 
+                            }
                         }
                         this.studyOptions.push(studyOption);
                         // update the selected study as well
                         if (this.study && this.study.id == study.id) {
-                            this.study.studyCenterList = study.studyCenterList; 
+                            this.study.studyCenterList = study.studyCenterList;
                         }
                     }
                 }
             });
-        
+
         setTimeout(() => {
             breadcrumbsService.currentStepAsMilestone();
             breadcrumbsService.currentStep.label = '1. Upload';
@@ -77,7 +77,7 @@ export class BidsUploadComponent {
             breadcrumbsService.currentStep.importMode = 'BIDS';
         });
     }
-    
+
     public onSelectStudy() {
         this.centerOptions = [];
         if (this.study && this.study.id && this.study.studyCenterList) {
@@ -86,7 +86,7 @@ export class BidsUploadComponent {
                 this.centerOptions.push(centerOption);
             }
         }
-        if (this.study.monoCenter || this.study.studyCenterList.length == 1) {
+        if (this.study.studyCenterList.length == 1) {
             this.center = this.study.studyCenterList[0].center;
         }
     }
@@ -125,4 +125,3 @@ export class BidsUploadComponent {
         return this.archiveStatus == 'uploaded';
     }
 }
-    

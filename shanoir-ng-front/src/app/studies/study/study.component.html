@@ -300,9 +300,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li *ngIf="mode != 'view'">
 						<label i18n="Study detail|List of centers label@@studyDetailCentersAndPI">Center</label>
 						<span class="right-col">
-							<select-box [ngModel]="selectedCenter" formControlName="selectedCenter" (userChange)="onCenterChange($event)" placeholder="Select a center ..." (onAddClick)="onCenterAdd()" [addDisabled]="!enableAddIcon()" [options]="centerOptions">
+							<select-box [(ngModel)]="selectedCenter" formControlName="selectedCenter" placeholder="Select a center ..." (onAddClick)="onCenterAdd()" [options]="centerOptions">
 							</select-box>
-							<label *ngIf="hasError('studyCenterList', ['required'])" class="form-validation-alert right-col">At least one center is required !</label>
+							<label *ngIf="hasError('studyCenterList', ['noCenter'])" class="form-validation-alert right-col">At least one center is required !</label>
 						</span>
 					</li>
 					<li *ngIf="mode != 'view'">
@@ -315,6 +315,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									<th>Subject Prefix (optional) <tool-tip>A default prefix for the new subjects created when importing datasets in this study</tool-tip></th>
 									<th></th>
 								</tr>
+                                <tr *ngIf="study.studyCenterList.length == 0">
+                                    <td>
+                                        List of center cannot be empty.
+                                    </td>
+                                </tr>
 								<tr *ngFor="let studyCenter of study.studyCenterList; let i = index; let even = even; let odd = odd;" [class.even]="even" [class.odd]="odd">
 									<td>{{studyCenter.center.name}}</td>
 									<td class="icon icon-clickable center-link" (click)="goToCenter(studyCenter.center.id)">
