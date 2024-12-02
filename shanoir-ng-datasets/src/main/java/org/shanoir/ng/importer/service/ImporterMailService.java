@@ -58,7 +58,7 @@ public class ImporterMailService {
         generatedMail.setUserId(userId);
         generatedMail.setStudyCard(importJob.getStudyCardName());
 
-        for (DatasetAcquisition acq : generatedAcquisitions) {
+        for (DatasetAcquisition acq : generatedAcquisitions.stream().sorted(Comparator.comparingInt(DatasetAcquisition::getSortingIndex)).toList()) {
             if (!CollectionUtils.isEmpty(acq.getDatasets())) {
                 for (Dataset dataset : acq.getDatasets()) {
                     datasets.put(dataset.getId(), dataset.getName());
