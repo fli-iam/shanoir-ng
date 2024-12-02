@@ -44,7 +44,6 @@ CREATE TABLE `study` (
   `coordinator_id` bigint(20) DEFAULT NULL,
   `downloadable_by_default` bit(1) NOT NULL,
   `end_date` date DEFAULT NULL,
-  `mono_center` bit(1) NOT NULL,
   `name` varchar(255) NOT NULL,
   `start_date` date DEFAULT NULL,
   `study_status` int(11) NOT NULL,
