@@ -89,9 +89,11 @@ export class StudyNodeComponent implements OnChanges {
             this.idPromise.resolve(id);
             if (this.input instanceof StudyNode) {
                 this.subjectsInited = new SuperPromise();
+                this.nbSubjectsInit = 0;
                 this.node = this.input;
             } else if (this.input.study && this.input.rights) {
                 this.subjectsInited = new SuperPromise();
+                this.nbSubjectsInit = 0;
                 this.node = this.treeService.buildStudyNode(this.input.study, this.input.rights);
             } else {
                 throw new Error('Illegal argument type');
@@ -177,6 +179,12 @@ export class StudyNodeComponent implements OnChanges {
         this.nbSubjectsInit++;
         if (this.nbSubjectsInit == this.node.subjectsNode?.subjects?.length) {
             this.subjectsInited.resolve();
+        }
+    }
+
+    onOpenedChange(state) {
+        if (!state) {
+            this.nbSubjectsInit = 0;
         }
     }
 }
