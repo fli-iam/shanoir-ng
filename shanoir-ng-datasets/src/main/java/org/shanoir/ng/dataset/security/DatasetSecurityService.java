@@ -1132,4 +1132,31 @@ public class DatasetSecurityService {
 		}
 		return hasRight;
 	}
+
+	/**
+	 * Check that the connected user has the given right for the given examination.
+	 *
+	 * @param examinationIds the examination ids
+	 * @param rightStr the right
+	 * @return true or false
+	 * @throws EntityNotFoundException
+	 */
+	public boolean hasRightOnExaminations(List<Long> examinationIds, String rightStr) throws EntityNotFoundException {
+		if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+			return true;
+		}
+		for (Long examinationId : examinationIds) {
+			Examination exam = examinationRepository.findById(examinationId).orElse(null);
+			if (exam == null) {
+				throw new EntityNotFoundException("Cannot find examination with id " + examinationId);
+			}
+			if (exam.getStudyId() == null) {
+				return false;
+			}
+			if(!this.hasRightOnStudyCenter(exam.getCenterId(), exam.getStudyId(), rightStr)){
+				return false;
+			}
+		}
+		return true;
+	}
 }

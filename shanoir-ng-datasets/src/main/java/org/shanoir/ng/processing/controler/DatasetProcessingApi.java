@@ -137,4 +137,19 @@ public interface DatasetProcessingApi {
 			@Parameter(description = "outputs to extract") @Valid
 			@RequestParam(value = "resultOnly") boolean resultOnly, HttpServletResponse response) throws RestServiceException;
 
+	@Operation(summary = "massiveDownloadProcessingDatasetsByExaminationIds", description = "If exists, returns a zip file of the inputs/outputs per processing corresponding to the given examination IDs")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "zip file"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "no dataset found"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@GetMapping(value = "/massiveDownloadProcessingByExamination")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExaminations(#examinationIds, 'CAN_DOWNLOAD'))")
+	void massiveDownloadProcessingByExaminationId(
+			@Parameter(description = "id of the examination", required=true) @Valid
+			@RequestParam(value = "examiantionIds") List<Long> examinationIds,
+			@Parameter(description = "outputs to extract") @Valid
+			@RequestParam(value = "resultOnly") boolean resultOnly, HttpServletResponse response) throws RestServiceException;
+
 }

@@ -24,6 +24,8 @@ import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.service.DatasetService;
+import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 import org.shanoir.ng.processing.dto.mapper.DatasetProcessingMapper;
 import org.shanoir.ng.processing.model.DatasetProcessing;
@@ -70,8 +72,8 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 	@Autowired
 	private ProcessingDownloaderServiceImpl processingDownloaderService;
 
-	/** Number of downloadable datasets. */
-	private static final int DATASET_LIMIT = 500;
+	@Autowired
+	private ExaminationService examinationService;
 
 	public DatasetProcessingApiController(){
 
@@ -200,5 +202,34 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 		}
 
 		processingDownloaderService.massiveDownload(processingList, resultOnly, "dcm" , response, false, null);
+	}
+
+	@Override
+	public void massiveDownloadProcessingByExaminationId(
+			@Parameter(description = "ids of examination", required=true) @Valid
+			@RequestParam(value = "examinationIds") List<Long> examinationIds,
+			@Parameter(description = "outputs to extract") @Valid
+			@RequestParam(value = "resultOnly") boolean resultOnly,
+			HttpServletResponse response) throws RestServiceException {
+
+		List<Examination> examinationList = new ArrayList<>();
+		for (Long examinationId : examinationIds) {
+			Examination examination = null;
+			try {
+				if(examinationId == null){
+					throw new Exception();
+				}
+				examination = examinationService.findById(examinationId);
+
+				if(Objects.isNull(examination)){
+					throw new Exception();
+				}
+				examinationList.add(examination);
+			}catch (Exception e) {
+				throw new RestServiceException(
+						new ErrorModel(HttpStatus.FORBIDDEN.value(), examinationId + " is not a valid examination id."));
+			}
+		}
+		processingDownloaderService.massiveDownloadByExamination(examinationList, resultOnly, "dcm" , response, false, null);
 	}
 }
