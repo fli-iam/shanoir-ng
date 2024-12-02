@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.17.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: solr
+  name: solr
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: solr
+    spec:
+      containers:
+      - env:
+        - name: SOLR_LOG_LEVEL
+          value: SEVERE
+        image: solr
+        name: solr
+        ports:
+        - containerPort: 8983
+        resources: {}
+        volumeMounts:
+        - mountPath: /var/solr
+          name: solr-data
+      restartPolicy: Always
+      volumes:
+      - name: solr-data
+        persistentVolumeClaim:
+          claimName: solr-data
+status: {}
