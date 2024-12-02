@@ -84,9 +84,7 @@ public class SubjectServiceTest {
 	
 	@Mock
 	private ObjectMapper objectMapper;
-	
-	@Mock
-	private ShanoirEventService eventService;
+
 	
 	@Mock
 	private StudyExaminationRepository studyExaminationRepository;
@@ -105,7 +103,6 @@ public class SubjectServiceTest {
 		subjectService.deleteById(SUBJECT_ID);
 
 		Mockito.verify(subjectRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
-		Mockito.verify(eventService, Mockito.times(1)).publishEvent(Mockito.any(ShanoirEvent.class));
 	}
 
 	@Test

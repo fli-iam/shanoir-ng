@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.importer.model;
 
+import java.util.Arrays;
+
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 
@@ -86,6 +88,13 @@ public class Instance implements Cloneable {
 
 	public void setSopInstanceUID(String sopInstanceUID) {
 		this.sopInstanceUID = sopInstanceUID;
+	}
+
+	@Override
+	public String toString() {
+		return "Instance [sopInstanceUID=" + sopInstanceUID + ", instanceNumber=" + instanceNumber
+				+ ", referencedSOPClassUIDInFile=" + referencedSOPClassUIDInFile + ", referencedFileID="
+				+ Arrays.toString(referencedFileID) + "]";
 	}
 
 }

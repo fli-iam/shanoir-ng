@@ -36,7 +36,7 @@ public class StudyServiceImpl implements StudyService {
 
 	@Autowired
 	private DatasetRepository dsRepository;
-	
+
 	@Override
 	public Study findById(final Long id) {
 		return repository.findById(id).orElse(null);
