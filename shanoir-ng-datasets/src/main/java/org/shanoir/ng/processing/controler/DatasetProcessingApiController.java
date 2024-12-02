@@ -195,7 +195,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 						new ErrorModel(HttpStatus.FORBIDDEN.value(), processingId + " is not a valid processing id."));
 			}
 
-			if(!Objects.equals(processing.getDatasetProcessingType(), DatasetProcessingType.SEGMENTATION)){
+			if(!Objects.equals(processing.getComment(), "comete_moelle/0.1")){
 				throw new RestServiceException(
 						new ErrorModel(HttpStatus.FORBIDDEN.value(), "Processing " + processingId + " has not a valid processing type."));
 			}
