@@ -33,7 +33,8 @@ import { Selection } from 'src/app/studies/study/tree.service';
 
 @Component({
     selector: 'acquisition-equipment-detail',
-    templateUrl: 'acquisition-equipment.component.html'
+    templateUrl: 'acquisition-equipment.component.html',
+    standalone: false
 })
 
 export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEquipment> {

@@ -32,16 +32,17 @@ import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 
 
 @Component({
-  selector: 'subject-study-list',
-  templateUrl: 'subject-study-list.component.html',
-  styleUrls: ['subject-study-list.component.css'],
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => SubjectStudyListComponent),
-      multi: true
-    }
-]
+    selector: 'subject-study-list',
+    templateUrl: 'subject-study-list.component.html',
+    styleUrls: ['subject-study-list.component.css'],
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => SubjectStudyListComponent),
+            multi: true
+        }
+    ],
+    standalone: false
 })
 
 export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> implements OnChanges, OnDestroy {

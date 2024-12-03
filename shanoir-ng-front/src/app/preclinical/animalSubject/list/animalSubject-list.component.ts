@@ -27,10 +27,11 @@ import {PreclinicalSubject} from '../shared/preclinicalSubject.model';
 
 
 @Component({
-  selector: 'animalSubject-list',
-  templateUrl:'animalSubject-list.component.html',
-  styleUrls: ['animalSubject-list.component.css'],
-  providers: [AnimalSubjectService]
+    selector: 'animalSubject-list',
+    templateUrl: 'animalSubject-list.component.html',
+    styleUrls: ['animalSubject-list.component.css'],
+    providers: [AnimalSubjectService],
+    standalone: false
 })
 export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponent<PreclinicalSubject>{
 

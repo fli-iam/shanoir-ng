@@ -27,7 +27,8 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 @Component({
     selector: 'center-list',
     templateUrl: 'center-list.component.html',
-    styleUrls: ['center-list.component.css']
+    styleUrls: ['center-list.component.css'],
+    standalone: false
 })
 
 export class CenterListComponent extends BrowserPaginEntityListComponent<Center> {

@@ -31,6 +31,7 @@ import {ConsoleService} from "../../shared/console/console.service";
     selector: 'task-status',
     templateUrl: 'task-status.component.html',
     styleUrls: ['task-status.component.css'],
+    standalone: false
 })
 export class TaskStatusComponent implements OnDestroy, OnChanges {
 

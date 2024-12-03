@@ -32,7 +32,8 @@ export const atLeastOneNotBlank = (validator: ValidatorFn) => ( group: UntypedFo
     selector: 'query-pacs',
     templateUrl: 'query-pacs.component.html',
     styleUrls: ['../shared/import.step.css'],
-    animations: [slideDown]
+    animations: [slideDown],
+    standalone: false
 })
 
 export class QueryPacsComponent{

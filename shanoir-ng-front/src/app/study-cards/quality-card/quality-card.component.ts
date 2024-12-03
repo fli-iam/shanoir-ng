@@ -48,7 +48,8 @@ import { Selection } from 'src/app/studies/study/tree.service';
     selector: 'quality-card',
     templateUrl: 'quality-card.component.html',
     styleUrls: ['quality-card.component.css'],
-    animations: [slideDown]
+    animations: [slideDown],
+    standalone: false
 })
 export class QualityCardComponent extends EntityComponent<QualityCard> {
 

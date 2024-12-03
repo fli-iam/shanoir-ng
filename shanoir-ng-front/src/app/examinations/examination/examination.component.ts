@@ -36,7 +36,8 @@ import { ExaminationService } from '../shared/examination.service';
 
 @Component({
     selector: 'examination-detail',
-    templateUrl: 'examination.component.html'
+    templateUrl: 'examination.component.html',
+    standalone: false
 })
 
 export class ExaminationComponent extends EntityComponent<Examination> {
