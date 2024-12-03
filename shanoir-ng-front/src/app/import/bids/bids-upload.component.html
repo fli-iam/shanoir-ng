@@ -61,7 +61,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label class="required-label">Select an associated center</label>
             <span class="right-col">
                 <select-box
-                        [disabled]="(!study || !centerOptions || study.monoCenter || this.study.studyCenterList.length == 1)"
+                        [disabled]="(!study || !centerOptions || this.study.studyCenterList.length == 1)"
                         [(ngModel)]="center"
                         [viewRoute]="'/center/details/' + this.center?.id"
                         [viewDisabled]="!center"
