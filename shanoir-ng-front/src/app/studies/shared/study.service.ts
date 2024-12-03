@@ -14,7 +14,7 @@
 import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { BidsElement } from '../../bids/model/bidsElement.model';
