@@ -314,15 +314,17 @@ public class RabbitMQConfiguration {
 	}
 	
 	@Bean
+	public static Queue deleteSubjectQueue() { return new Queue(DELETE_SUBJECT_QUEUE, true); }
+	
+	@Bean
 	public static Queue importerQueue() {
 		return new Queue(IMPORTER_QUEUE_DATASET, true);
 	}
 
 	@Bean
 	public FanoutExchange fanout() {
-	    return new FanoutExchange(STUDY_USER_EXCHANGE, true, false);
+		return new FanoutExchange(STUDY_USER_EXCHANGE, true, false);
 	}
-
 	@Bean
 	public TopicExchange topicExchange() {
 	    return new TopicExchange(EVENTS_EXCHANGE);
@@ -330,7 +332,7 @@ public class RabbitMQConfiguration {
 
 	@Bean
 	public FanoutExchange fanoutSubjectExchange() {
-	    return new FanoutExchange(STUDY_USER_EXCHANGE, true, false);
+		return new FanoutExchange(STUDY_USER_EXCHANGE, true, false);
 	}
 
 	@Bean

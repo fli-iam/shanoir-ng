@@ -45,7 +45,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class DatasetSecurityService {
@@ -511,7 +510,7 @@ public class DatasetSecurityService {
 		if (!studiesRelated.isEmpty()) {
 			studies.addAll(studiesRelated);
 		}
-		return hasRightOnStudiesCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), studies, rightStr);
+		return hasRightOnStudiesCenter(dataset.getCenterId(), studies, rightStr);
     }
 
 	private static Long getStudyIdFromDataset(Dataset dataset) {

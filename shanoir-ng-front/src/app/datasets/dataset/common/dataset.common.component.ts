@@ -47,7 +47,6 @@ export class CommonDatasetComponent implements OnChanges {
     ExploredEntity = ExploredEntity;
     ProcessedDatasetType = ProcessedDatasetType;
 
-
     constructor(
             private studyService: StudyService,
             private subjectService: SubjectService,

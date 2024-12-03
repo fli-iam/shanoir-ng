@@ -14,8 +14,10 @@
 
 package org.shanoir.ng.dataset.modality;
 
-import jakarta.persistence.Entity;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetType;
+
+import jakarta.persistence.Entity;
 
 /**
  * Registration dataset.
@@ -25,8 +27,6 @@ import org.shanoir.ng.dataset.model.Dataset;
  */
 @Entity
 public class RegistrationDataset extends Dataset {
-
-	public static final String datasetType = "Registration";
 
 	/**
 	 * UID
@@ -69,8 +69,8 @@ public class RegistrationDataset extends Dataset {
 	}
 
 	@Override
-	public String getType() {
-		return "Registration";
+	public DatasetType getType() {
+		return DatasetType.Registration;
 	}
 
 }

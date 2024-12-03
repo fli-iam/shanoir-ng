@@ -312,21 +312,15 @@ public class RabbitMQDatasetsService {
 
 
 	/**
-         * Receives a shanoirEvent as a json object, concerning a subject deletion
-         * @param eventAsString the task as a json string.
-         */
-	@RabbitListener(bindings = @QueueBinding(
-			key = ShanoirEventType.DELETE_SUBJECT_EVENT,
-			value = @Queue(value = RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, durable = "true"),
-			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)), containerFactory = "singleConsumerFactory"
-			)
+	 * Receives a shanoirEvent as a json object, concerning a subject deletion
+	 * @param subjectIdAsString a string of the subject's id
+	 */
+	@RabbitListener(queues = RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, containerFactory = "singleConsumerFactory")
 	@Transactional
-	public void deleteSubject(String eventAsString) throws AmqpRejectAndDontRequeueException {
+	public void deleteSubject(String subjectIdAsString) throws AmqpRejectAndDontRequeueException {
 		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 		try {
-			ShanoirEvent event = objectMapper.readValue(eventAsString, ShanoirEvent.class);
-			Long subjectId = Long.valueOf(event.getObjectId());
+			Long subjectId = Long.valueOf(subjectIdAsString);
 			Set<Long> studyIds = new HashSet<>();
 
 			// Inverse order to remove copied examination before its source (if copied)
@@ -477,7 +471,7 @@ public class RabbitMQDatasetsService {
 				Long dsCount = datasetRepository.countDatasetsBySourceIdAndStudyId(datasetParentId, studyId);
 				Dataset datasetParent = datasetService.findById(datasetParentId);
 
-				if (datasetParent.getSourceId() != null) {
+				if (datasetParent.getSource() != null) {
 					LOG.info("[CopyDatasets] Selected dataset is a copy, please pick the original dataset.");
 					countCopy++;
 				} else if (dsCount != 0) {
@@ -502,7 +496,8 @@ public class RabbitMQDatasetsService {
 			event.setStatus(ShanoirEvent.SUCCESS);
 			event.setProgress(1.0f);
 			eventService.publishEvent(event);
-			solrService.indexDatasets(newDatasets);
+			if (newDatasets.size() > 0)
+				solrService.indexDatasets(newDatasets);
 
 		} catch (Exception e) {
 			if (event != null) {

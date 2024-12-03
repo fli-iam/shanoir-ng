@@ -65,6 +65,8 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     }
 
     initView(): Promise<void> {
+        this.papayaLoaded = false;
+        this.dicomArchiveService.clearFileInMemory();
         if (!this.dataset.updatedMetadata) this.dataset.updatedMetadata = new DatasetMetadata();
         this.isMRS = this.isSpectro(this.dataset);
         if (this.keycloakService.isUserAdmin()) {

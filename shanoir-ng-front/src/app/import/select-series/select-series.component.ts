@@ -53,10 +53,11 @@ export class SelectSeriesComponent {
             return;
         }
         breadcrumbsService.nameStep('2. Series');
+
         this.patients = this.importDataService.patientList.patients;
+
         this.workFolder = this.importDataService.patientList.workFolder;
     }
-
 
     showSerieDetails(serie: SerieDicom): void {
         this.detailedPatient = null;

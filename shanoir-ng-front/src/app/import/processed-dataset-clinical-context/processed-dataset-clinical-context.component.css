@@ -1,0 +1,11 @@
+.right-button { margin-top: 10px;
+    margin-bottom: 10px;
+    background-color: var(--color-b);
+    border: 0px;
+    border-radius: 2px;
+    color: var(--very-light-grey);
+    padding: 5px 10px;
+    transition-property: transform, box-shadow;
+    transition-duration: 0.3s;
+    transition-timing-function: ease-in-out;
+}

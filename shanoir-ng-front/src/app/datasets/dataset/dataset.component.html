@@ -42,6 +42,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<mr-dataset-details *ngIf="dataset.type == 'Mr'" [mode]="mode" [dataset]="dataset" [parentFormGroup]="form"></mr-dataset-details>
             <eeg-dataset-details *ngIf="dataset.type == 'Eeg'" [mode]="mode" [dataset]="dataset"></eeg-dataset-details>
 
+
 			<!-- TODO : other types -->
 
 			<fieldset *ngIf="mode=='view' && !isMRS && hasDownloadRight && dataset.type != 'Eeg' && dataset.type != 'BIDS' && dataset.type != 'Measurement'">

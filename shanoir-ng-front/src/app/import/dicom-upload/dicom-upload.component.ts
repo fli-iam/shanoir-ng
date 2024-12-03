@@ -30,6 +30,7 @@ import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { Option } from '../../shared/select/select.component';
 import { ImportJob } from '../shared/dicom-data.model';
 import { TaskState } from 'src/app/async-tasks/task.model';
+import { StudyLight } from 'src/app/studies/shared/study.dto';
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 
@@ -52,7 +53,7 @@ export class DicomUploadComponent implements OnDestroy {
     studyCard: StudyCard;
     center: Center;
     modality: string;
-    studyOptions: Option<Study>[] = [];
+    studyOptions: Option<StudyLight>[] = [];
     studycardOptions: Option<StudyCard>[] = [];
     otherErrorMessage: string;
     uploadState: TaskState = new TaskState();
@@ -72,9 +73,9 @@ export class DicomUploadComponent implements OnDestroy {
             breadcrumbsService.currentStep.importMode = 'DICOM';
         });
 
-        this.studyService.getStudyNamesAndCenters().then(allStudies => {
+        this.studyService.getStudiesLight().then(allStudies => {
             for (let study of allStudies) {
-                    let studyOption: Option<Study> = new Option(study, study.name);
+                    let studyOption: Option<StudyLight> = new Option(study, study.name);
                     this.studyOptions.push(studyOption);
                 }
         });

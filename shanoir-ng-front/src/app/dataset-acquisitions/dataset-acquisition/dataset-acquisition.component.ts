@@ -111,7 +111,6 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
             'type': [this.datasetAcquisition.type],
             'study-card': [this.datasetAcquisition.studyCard],
             'acq-eq': [this.datasetAcquisition.acquisitionEquipment, [Validators.required]],
-            //'examination': [this.datasetAcquisition.examination, [Validators.required]],
             'rank': [this.datasetAcquisition.rank],
             'software-release': [this.datasetAcquisition.softwareRelease],
             'sorting-index': [this.datasetAcquisition.sortingIndex],
