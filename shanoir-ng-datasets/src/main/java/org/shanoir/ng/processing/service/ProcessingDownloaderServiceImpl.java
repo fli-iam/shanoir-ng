@@ -76,9 +76,11 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         for (DatasetProcessing processing : processingList) {
             String processingFilePath = getExecFilepath(processing.getId(), getExaminationDatas(processing.getInputDatasets()));
             String subjectName = getProcessingSubject(processing);
-            for (Dataset dataset : Stream.concat(processing.getInputDatasets().stream(), processing.getOutputDatasets().stream()).toList()) {
+            for (Dataset dataset : processing.getInputDatasets()) {
                 manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, processingFilePath  + "/" + shapeForPath(dataset.getName()), format, withManifest, filesByAcquisitionId, converterId);
-
+            }
+            for (Dataset dataset : processing.getOutputDatasets()) {
+                manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, processingFilePath  + "/output", format, withManifest, filesByAcquisitionId, converterId);
             }
         }
         if(!filesByAcquisitionId.isEmpty()){
