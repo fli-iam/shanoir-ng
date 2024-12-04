@@ -466,28 +466,32 @@ public class DatasetSecurityService {
 		}
     	
     	Iterable<Dataset> datasets = datasetRepository.findAllById(datasetIds);
-    	 
-    	boolean hasRight = true;
-    	for (Dataset dataset : datasets) {
-            if (dataset.getDatasetAcquisition() == null 
-                    || dataset.getDatasetAcquisition().getExamination() == null
-                    || dataset.getDatasetAcquisition().getExamination().getStudyId() == null) {
-                
-                if (dataset.getDatasetProcessing() != null && dataset.getDatasetProcessing().getInputDatasets() != null) {
-                    for (Dataset inputDs : dataset.getDatasetProcessing().getInputDatasets()) {
-                    	hasRight &= hasRightOnTrustedDataset(inputDs, rightStr);
-                    }
-                } else {
-                    throw new IllegalStateException("Cannot check dataset n°" + dataset.getId() + " rights, this dataset has neither examination nor processing parent !");                
-                }
-            } else {
-            	hasRight &= this.hasRightOnStudyCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), dataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr);
-            }
-    	}
-    	return hasRight;
-    }
 
-    /**
+		return hasRigthOnDatasets(datasets, rightStr);
+	}
+
+	private boolean hasRigthOnDatasets(Iterable<Dataset> datasets, String rightStr) {
+		boolean hasRight = true;
+		for (Dataset dataset : datasets) {
+			if (dataset.getDatasetAcquisition() == null
+					|| dataset.getDatasetAcquisition().getExamination() == null
+					|| dataset.getDatasetAcquisition().getExamination().getStudyId() == null) {
+
+				if (dataset.getDatasetProcessing() != null && dataset.getDatasetProcessing().getInputDatasets() != null) {
+					for (Dataset inputDs : dataset.getDatasetProcessing().getInputDatasets()) {
+						hasRight &= hasRightOnTrustedDataset(inputDs, rightStr);
+					}
+				} else {
+					throw new IllegalStateException("Cannot check dataset n°" + dataset.getId() + " rights, this dataset has neither examination nor processing parent !");
+				}
+			} else {
+				hasRight &= this.hasRightOnStudyCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), dataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr);
+			}
+		}
+		return hasRight;
+	}
+
+	/**
      * Check that the connected user has the given right for the given dataset.
      * 
      * @param dataset the dataset
@@ -1113,22 +1117,7 @@ public class DatasetSecurityService {
 			}
 			Iterable<Dataset> datasets = datasetRepository.findDatasetsByProcessingId(processingId);
 
-			for (Dataset dataset : datasets) {
-				if (dataset.getDatasetAcquisition() == null
-						|| dataset.getDatasetAcquisition().getExamination() == null
-						|| dataset.getDatasetAcquisition().getExamination().getStudyId() == null) {
-
-					if (dataset.getDatasetProcessing() != null && dataset.getDatasetProcessing().getInputDatasets() != null) {
-						for (Dataset inputDs : dataset.getDatasetProcessing().getInputDatasets()) {
-							hasRight &= hasRightOnTrustedDataset(inputDs, rightStr);
-						}
-					} else {
-						throw new IllegalStateException("Cannot check dataset n°" + dataset.getId() + " rights, this dataset has neither examination nor processing parent !");
-					}
-				} else {
-					hasRight &= this.hasRightOnStudyCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), dataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr);
-				}
-			}
+			hasRight &= hasRigthOnDatasets(datasets, rightStr);
 		}
 		return hasRight;
 	}
