@@ -203,7 +203,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 			@Parameter(description = "ids of examination", required=true) @Valid
 			@RequestBody List<Long> examinationIds,
 			@Parameter(description = "comment of the desired processings") @Valid
-			@RequestParam(value = "processingComment") String processingComment,
+			@RequestParam(value = "processingComment", required = false) String processingComment,
 			@Parameter(description = "outputs to extract") @Valid
 			@RequestParam(value = "resultOnly") boolean resultOnly,
 			HttpServletResponse response) throws RestServiceException {

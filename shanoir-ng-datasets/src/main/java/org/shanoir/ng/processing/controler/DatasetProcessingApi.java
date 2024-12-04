@@ -150,7 +150,7 @@ public interface DatasetProcessingApi {
             @Parameter(description = "id of the examination", required = true) @Valid
             @RequestBody List<Long> examinationIds,
             @Parameter(description = "comment of the desired processings") @Valid
-            @RequestParam(value = "processingComment") String processingComment,
+            @RequestParam(value = "processingComment", required = false) String processingComment,
             @Parameter(description = "outputs to extract") @Valid
             @RequestParam(value = "resultOnly", defaultValue = "false") boolean resultOnly, HttpServletResponse response) throws RestServiceException;
 
