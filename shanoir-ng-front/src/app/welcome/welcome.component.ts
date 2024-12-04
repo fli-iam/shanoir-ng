@@ -1,5 +1,5 @@
+import { DOCUMENT } from "@angular/common";
 import {
-    AfterViewInit,
     Component,
     ElementRef,
     HostListener,
@@ -9,13 +9,13 @@ import {
     ViewChild,
     ViewEncapsulation
 } from '@angular/core';
+import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
+import { ImagesUrlUtil } from "../shared/utils/images-url.util";
+import { StudyType } from "../studies/shared/study-type.enum";
+import { StudyLight } from "../studies/shared/study.dto";
+import { StudyService } from "../studies/shared/study.service";
 import * as AppUtils from "../utils/app.utils";
-import {ImagesUrlUtil} from "../shared/utils/images-url.util";
-import {StudyService} from "../studies/shared/study.service";
-import {StudyLight} from "../studies/shared/study.dto";
-import {StudyType} from "../studies/shared/study-type.enum";
-import {isDarkColor} from "../utils/app.utils";
-import {DOCUMENT} from "@angular/common";
+import { isDarkColor } from "../utils/app.utils";
 
 @Component({
     selector: 'app-welcome',
@@ -37,6 +37,7 @@ export class WelcomeComponent implements OnInit {
 	constructor(
 		private studyService: StudyService,
         private _renderer2: Renderer2,
+        private confirmDialogService: ConfirmDialogService,
         @Inject(DOCUMENT) private _document: Document
 	) { }
 
@@ -168,7 +169,14 @@ export class WelcomeComponent implements OnInit {
 	}
 
 	accessRequest(study: any): void {
-		window.location.href = window.location.protocol + "//" + window.location.hostname + "/shanoir-ng/account/study/" + study.id + "/account-request";
+        this.confirmDialogService.choose('Do you already have a Shanoir access ?', null, {yes: 'Yes, log in', no: 'No, request an account', cancel: 'Cancel'})
+        .then(choice => {
+            if (choice == 'yes') {
+                window.location.href = window.location.protocol + "//" + window.location.hostname + "/shanoir-ng/access-request/study/" + study.id;
+            } else if (choice == 'no') {
+                window.location.href = window.location.protocol + "//" + window.location.hostname + "/shanoir-ng/account/study/" + study.id + "/account-request";
+            }
+        });
 	}
 
 	getFontColor(colorInp: string): boolean {

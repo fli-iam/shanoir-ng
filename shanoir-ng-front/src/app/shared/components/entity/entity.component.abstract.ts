@@ -71,7 +71,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     protected confirmDialogService: ConfirmDialogService;
     private entityRoutes: EntityRoutes;
     protected router: Router;
-    private location: Location;
+    protected location: Location;
     protected formBuilder: UntypedFormBuilder;
     public keycloakService: KeycloakService;
     protected consoleService: ConsoleService;
