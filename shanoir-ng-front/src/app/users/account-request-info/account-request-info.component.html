@@ -16,7 +16,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     
     <ol>
     <li *ngIf="presetStudyId">
-        <span>You have been invited to join a study in Shanoir, you have to create an account before accessing the data.</span>
+        <span>Before accessing the data you have to create an account on Shanoir.</span>
     </li>
             <li *ngIf="!presetStudyId">
             <label *ngIf="editMode" i18n="Edit user|Study label@@editUserStudy" [class.required-label]="editMode">List of available studies</label> 
