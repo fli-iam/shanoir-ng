@@ -117,69 +117,21 @@ public class DatasetDownloaderServiceImpl {
 
 		try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
 			for (Dataset dataset : datasets) {
-				if (!dataset.isDownloadable()) {
-					downloadResults.put(dataset.getId(), new DatasetDownloadError("Dataset not downloadable", DatasetDownloadError.ERROR));
-					continue;
-				}
-				DatasetDownloadError downloadResult = new DatasetDownloadError();
-				downloadResults.put(dataset.getId(), downloadResult);
-
 				// Create a new folder organized by subject / examination
 				String subjectName = getSubjectName(dataset);
 				if (subjectName.contains(File.separator)) {
 					subjectName = subjectName.replaceAll(File.separator, "_");
 				}
+
 				String studyName = studyRepository.findById(dataset.getStudyId()).orElse(null).getName();
+
 
 				String datasetFilePath = null;
 				if (datasets.size() != 1) {
 					datasetFilePath = getDatasetFilepath(dataset, studyName, subjectName);
 				}
+				manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, datasetFilePath, format, withManifest, filesByAcquisitionId, converterId);
 
-				List<URL> pathURLs = new ArrayList<>();
-
-				if (dataset.getDatasetProcessing() != null) {
-					// DOWNLOAD PROCESSED DATASET
-					DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE, downloadResult);
-					DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath);
-				} else if (dataset instanceof EegDataset) {
-					// DOWNLOAD EEG
-					DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG, downloadResult);
-					DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, false, datasetFilePath);
-				} else if (dataset instanceof BidsDataset) {
-					// DOWNLOAD BIDS
-					DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.BIDS, downloadResult);
-					DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath);
-					// Manage errors here
-				} else if (DCM.equals(format)) {
-					// DOWNLOAD DICOM
-					DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, downloadResult);
-					List<String> files = downloader.downloadDicomFilesForURLsAsZip(pathURLs, zipOutputStream, subjectName, dataset, datasetFilePath, downloadResult);
-					if (withManifest) {
-						filesByAcquisitionId.putIfAbsent(dataset.getDatasetAcquisition().getId(), new ArrayList<>());
-						filesByAcquisitionId.get(dataset.getDatasetAcquisition().getId()).addAll(files);
-					}
-				} else if (NII.equals(format)) {
-					// Check if we have a specific converter -> nifti reconversion
-					if (converterId != null) {
-						reconvertToNifti(format, converterId, dataset, pathURLs, downloadResult, subjectName, zipOutputStream);
-					} else {
-						// Check that we have existing nifti, otherwise reconvert using dcm2niix by default.
-						DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE, downloadResult);
-						if (!pathURLs.isEmpty()) {
-							List<String> files = DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, false, datasetFilePath);
-						} else {
-							// Reconvert using dcm2niix by default.
-							reconvertToNifti(format, DEFAULT_NIFTI_CONVERTER_ID, dataset, pathURLs, downloadResult, subjectName, zipOutputStream);
-						}
-					}
-				} else {
-					downloadResult.update("Dataset format was not adapted to dataset download choosen", DatasetDownloadError.ERROR);
-				}
-
-				if (downloadResult.getStatus() == null) {
-					downloadResults.remove(dataset.getId());
-				}
 			}
 			if(!filesByAcquisitionId.isEmpty()){
 				DatasetFileUtils.writeManifestForExport(zipOutputStream, filesByAcquisitionId);
@@ -205,6 +157,60 @@ public class DatasetDownloaderServiceImpl {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 							"Unexpected error while downloading dataset files"));
+		}
+	}
+
+	protected void manageDatasetDownload(Dataset dataset, Map<Long, DatasetDownloadError> downloadResults, ZipOutputStream zipOutputStream, String subjectName, String datasetFilePath, String format, boolean withManifest, Map<Long, List<String>> filesByAcquisitionId, Long converterId) throws IOException, RestServiceException {
+		if (!dataset.isDownloadable()) {
+			downloadResults.put(dataset.getId(), new DatasetDownloadError("Dataset not downloadable", DatasetDownloadError.ERROR));
+			return;
+		}
+		DatasetDownloadError downloadResult = new DatasetDownloadError();
+		downloadResults.put(dataset.getId(), downloadResult);
+
+		List<URL> pathURLs = new ArrayList<>();
+
+		if (dataset.getDatasetProcessing() != null) {
+			// DOWNLOAD PROCESSED DATASET
+			DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE, downloadResult);
+			DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath);
+		} else if (dataset instanceof EegDataset) {
+			// DOWNLOAD EEG
+			DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG, downloadResult);
+			DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, false, datasetFilePath);
+		} else if (dataset instanceof BidsDataset) {
+			// DOWNLOAD BIDS
+			DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.BIDS, downloadResult);
+			DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath);
+			// Manage errors here
+		} else if (Objects.equals("dcm", format)) {
+			// DOWNLOAD DICOM
+			DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, downloadResult);
+			List<String> files = downloader.downloadDicomFilesForURLsAsZip(pathURLs, zipOutputStream, subjectName, dataset, datasetFilePath, downloadResult);
+			if (withManifest) {
+				filesByAcquisitionId.putIfAbsent(dataset.getDatasetAcquisition().getId(), new ArrayList<>());
+				filesByAcquisitionId.get(dataset.getDatasetAcquisition().getId()).addAll(files);
+			}
+		} else if (Objects.equals("nii", format)) {
+			// Check if we have a specific converter -> nifti reconversion
+			if (converterId != null) {
+				reconvertToNifti(format, converterId, dataset, pathURLs, downloadResult, subjectName, zipOutputStream);
+			} else {
+				// Check that we have existing nifti, otherwise reconvert using dcm2niix by default.
+				DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE, downloadResult);
+				if (!pathURLs.isEmpty()) {
+					List<String> files = DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, false,  datasetFilePath);
+				} else {
+					// Reconvert using dcm2niix by default.
+					reconvertToNifti(format, DEFAULT_NIFTI_CONVERTER_ID, dataset, pathURLs, downloadResult, subjectName, zipOutputStream);
+				}
+			}
+		} else {
+			downloadResult.update("Dataset format was not adapted to dataset download choosen", DatasetDownloadError.ERROR);
+		}
+
+		if (downloadResult.getStatus() == null) {
+			downloadResults.remove(dataset.getId());
 		}
 	}
 
