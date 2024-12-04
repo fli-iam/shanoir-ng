@@ -174,9 +174,9 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 	}
 
 	@Override
-	public void massiveDownloadByProcessingId(
+	public void massiveDownloadByProcessingIds(
 			@Parameter(description = "ids of processing", required=true) @Valid
-			@RequestParam(value = "processingIds") List<Long> processingIds,
+			@RequestBody List<Long> processingIds,
 			@Parameter(description = "outputs to extract") @Valid
 			@RequestParam(value = "resultOnly") boolean resultOnly,
 			HttpServletResponse response) throws RestServiceException {
@@ -194,20 +194,16 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 				throw new RestServiceException(
 						new ErrorModel(HttpStatus.FORBIDDEN.value(), processingId + " is not a valid processing id."));
 			}
-
-			if(!Objects.equals(processing.getComment(), "comete_moelle/0.1")){
-				throw new RestServiceException(
-						new ErrorModel(HttpStatus.FORBIDDEN.value(), "Processing " + processingId + " has not a valid processing type."));
-			}
 		}
-
 		processingDownloaderService.massiveDownload(processingList, resultOnly, "dcm" , response, false, null);
 	}
 
 	@Override
-	public void massiveDownloadProcessingByExaminationId(
+	public void massiveDownloadProcessingByExaminationIds(
 			@Parameter(description = "ids of examination", required=true) @Valid
-			@RequestParam(value = "examinationIds") List<Long> examinationIds,
+			@RequestBody List<Long> examinationIds,
+			@Parameter(description = "comment of the desired processings") @Valid
+			@RequestParam(value = "processingComment") String processingComment,
 			@Parameter(description = "outputs to extract") @Valid
 			@RequestParam(value = "resultOnly") boolean resultOnly,
 			HttpServletResponse response) throws RestServiceException {
@@ -230,6 +226,6 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 						new ErrorModel(HttpStatus.FORBIDDEN.value(), examinationId + " is not a valid examination id."));
 			}
 		}
-		processingDownloaderService.massiveDownloadByExamination(examinationList, resultOnly, "dcm" , response, false, null);
+		processingDownloaderService.massiveDownloadByExaminations(examinationList, processingComment, resultOnly, "dcm" , response, false, null);
 	}
 }

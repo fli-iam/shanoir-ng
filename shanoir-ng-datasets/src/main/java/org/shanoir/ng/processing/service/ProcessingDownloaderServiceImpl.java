@@ -149,9 +149,9 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         }
     }
 
-    public void massiveDownloadByExamination(List<Examination> examinationList, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
+    public void massiveDownloadByExaminations(List<Examination> examinationList, String processingComment, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
         List<Long> processingIdsList = datasetProcessingRepository.findAllIdsByExaminationIds(examinationList.stream().map(Examination::getId).toList());
-        List<DatasetProcessing> processingList = datasetProcessingService.findAllById(processingIdsList).stream().filter(it -> Objects.equals(it.getComment(), "comete_moelle/0.1")).toList();
+        List<DatasetProcessing> processingList = datasetProcessingService.findAllById(processingIdsList).stream().filter(it -> Objects.equals(it.getComment(), processingComment)).toList();
         massiveDownload(processingList, resultOnly, format, response, withManifest, converterId);
     }
 
