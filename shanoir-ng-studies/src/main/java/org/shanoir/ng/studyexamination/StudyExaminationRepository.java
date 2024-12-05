@@ -17,6 +17,7 @@ package org.shanoir.ng.studyexamination;
 import java.util.List;
 
 import org.shanoir.ng.subject.model.Subject;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -30,7 +31,11 @@ public interface StudyExaminationRepository extends CrudRepository<StudyExaminat
 	
 	public Iterable<StudyExamination> findByCenterId(Long centerId);
 
-	public void deleteBySubject(Subject subject);
+    public void deleteBySubject(Subject subject);
+
+    @Modifying
+    @Query("DELETE FROM StudyExamination se WHERE se.subject.id = :subjectId")
+    public void deleteBySubjectId(Long subjectId);
 	
     int countByStudyId(@Param("studyId") Long studyId);
 
