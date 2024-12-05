@@ -46,19 +46,19 @@ public class CurrentNominativeDataController {
 
 	@SuppressWarnings("deprecation")
 	public void configure(final File workFolderFilePath, final CurrentUploadsWindowTable cuw) {
+		this.cuw = cuw;
 		this.currentNominativeDataModel = new CurrentNominativeDataModel();
 		currentNominativeDataModel.addObserver(cuw);
-		this.cuw = cuw;
 		processWorkFolder(workFolderFilePath);
 
-		CurrentUploadsWindowTable.table.addMouseListener(new MouseAdapter() {
-			public DefaultTableModel model = (DefaultTableModel) CurrentUploadsWindowTable.table.getModel();
+		cuw.table.addMouseListener(new MouseAdapter() {
+			public DefaultTableModel model = (DefaultTableModel) cuw.table.getModel();
 
             @Override
 			public void mouseClicked(MouseEvent e) {
-				int row = CurrentUploadsWindowTable.table.getSelectedRow();
-				int col = CurrentUploadsWindowTable.table.getSelectedColumn();
-				int rows = CurrentUploadsWindowTable.table.getRowCount();
+				int row = cuw.table.getSelectedRow();
+				int col = cuw.table.getSelectedColumn();
+				int rows = cuw.table.getRowCount();
 				// Last row and last column: delete all imports whatever their status
 				if (col == cuw.deleteColumn && row == rows - 1) {
 					String message = cuw.frame.resourceBundle
@@ -76,7 +76,7 @@ public class CurrentNominativeDataController {
 							== JOptionPane.YES_OPTION) {
 						boolean uploadsToDelete = false;
 						for (int i = 0; i < rows; i++) {
-							String uploadState = (String) CurrentUploadsWindowTable.table.getModel().getValueAt(i, cuw.uploadStateColumn);
+							String uploadState = (String) cuw.table.getModel().getValueAt(i, cuw.uploadStateColumn);
 							if (uploadState.equals(cuw.finishedUploadState)
 									|| uploadState.equals(cuw.errorUploadState)) {
 								DeleteDirectory dt = new DeleteDirectory();
@@ -96,16 +96,16 @@ public class CurrentNominativeDataController {
 					}
 				// delete one import: ready (to gain disk space) or finished
 				} else if (col == cuw.deleteColumn && row != -1) {
-					String uploadState = (String) CurrentUploadsWindowTable.table.getModel().getValueAt(row, cuw.uploadStateColumn);
+					String uploadState = (String) cuw.table.getModel().getValueAt(row, cuw.uploadStateColumn);
 					if (uploadState.equals(cuw.finishedUploadState)
 							|| uploadState.equals(cuw.readyUploadState)) {
 						showDeleteConfirmationDialog(workFolderFilePath, cuw, row);					
 					}
 				// start the import or try reimporting an exam with status "ERROR"
 				} else if (col == cuw.importColumn && row != -1) {
-					String uploadState = (String) CurrentUploadsWindowTable.table.getModel().getValueAt(row, cuw.uploadStateColumn);
+					String uploadState = (String) cuw.table.getModel().getValueAt(row, cuw.uploadStateColumn);
 					if (uploadState.equals(cuw.readyUploadState) || uploadState.equals(cuw.errorUploadState)) {
-						String uploadJobFilePath = (String) CurrentUploadsWindowTable.table.getModel().getValueAt(row, 0) + File.separator + UploadJobManager.UPLOAD_JOB_XML;
+						String uploadJobFilePath = (String) cuw.table.getModel().getValueAt(row, 0) + File.separator + UploadJobManager.UPLOAD_JOB_XML;
 						File uploadJobFile = new File(uploadJobFilePath);
 						uploadJobManager = new UploadJobManager(uploadJobFile);
 						UploadJob uploadJob = uploadJobManager.readUploadJob();
@@ -123,7 +123,7 @@ public class CurrentNominativeDataController {
 					final CurrentUploadsWindowTable cuw, int row) {
 				String message = cuw.frame.resourceBundle
 						.getString("shanoir.uploader.currentUploads.Action.delete.confirmation.message")
-						+ (String) CurrentUploadsWindowTable.table.getModel().getValueAt(row, cuw.patientNameColumn) + "?";
+						+ (String) cuw.table.getModel().getValueAt(row, cuw.patientNameColumn) + "?";
 				UIManager.put("OptionPane.cancelButtonText", cuw.frame.resourceBundle
 						.getString("shanoir.uploader.currentUploads.Action.delete.confirmation.cancel"));
 				UIManager.put("OptionPane.noButtonText", cuw.frame.resourceBundle
@@ -135,7 +135,7 @@ public class CurrentNominativeDataController {
 				if (JOptionPane.showConfirmDialog(null, message,
 						cuw.frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete.confirmation.title"), 1)
 						== JOptionPane.YES_OPTION) {
-					String uploadState = (String) CurrentUploadsWindowTable.table.getModel().getValueAt(row, cuw.uploadStateColumn);
+					String uploadState = (String) cuw.table.getModel().getValueAt(row, cuw.uploadStateColumn);
 					if (!uploadState.startsWith(cuw.startUploadState)
 							&& !uploadState.startsWith(cuw.startAutoImportUploadState)) {
 						DeleteDirectory dt = new DeleteDirectory();

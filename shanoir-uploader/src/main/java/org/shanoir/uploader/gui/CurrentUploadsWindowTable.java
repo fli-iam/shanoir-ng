@@ -21,8 +21,9 @@ import org.shanoir.uploader.upload.UploadState;
 @SuppressWarnings("deprecation")
 public class CurrentUploadsWindowTable implements Observer {
 
-	public MainWindow frame;
-	public static JTable table;
+	private static CurrentUploadsWindowTable instance;
+	public final MainWindow frame;
+	public final JTable table;
 	Object[] columnNames;
 	Object[] paths;
 	public int importColumn = 7;
@@ -37,7 +38,7 @@ public class CurrentUploadsWindowTable implements Observer {
 	public int selectedRow;
 	public int rowsNb;
 
-	public CurrentUploadsWindowTable(final MainWindow frame) {
+	private CurrentUploadsWindowTable(MainWindow frame) {
 		this.frame = frame;
 		final Object[] columnNames = {
 			"id",
@@ -52,15 +53,28 @@ public class CurrentUploadsWindowTable implements Observer {
 		};
 		this.columnNames = columnNames;
 		// Create the non editable table to display the current uploads
-		table = new JTable(new DefaultTableModel(columnNames, 0) {
+		this.table = new JTable(new DefaultTableModel(columnNames, 0) {
 
 			@Override
 			public boolean isCellEditable(int row, int column) {
 				return false;
 			}
 		});
+		
+		initTable();
+		frame.scrollPaneUpload.getViewport().add(table);
+	}
 
-		table.setPreferredScrollableViewportSize(new Dimension(800, 100));
+	// Method to create the singleton instance of the class
+	public static synchronized CurrentUploadsWindowTable getInstance(MainWindow frame) {
+        if (instance == null) {
+            instance = new CurrentUploadsWindowTable(frame);
+        }
+        return instance;
+    }
+
+	private void initTable() {
+        table.setPreferredScrollableViewportSize(new Dimension(800, 100));
 		table.setFillsViewportHeight(true);
 
 		table.getColumnModel().getColumn(0).setPreferredWidth(0);
@@ -89,8 +103,7 @@ public class CurrentUploadsWindowTable implements Observer {
 		// Change Background color of action column
 		table.getColumnModel().getColumn(importColumn).setCellRenderer(new Background_Renderer());
 		table.getColumnModel().getColumn(deleteColumn).setCellRenderer(new Background_Renderer());
-		frame.scrollPaneUpload.getViewport().add(table);
-	}
+    }
 
 	public void fillTable(Map<String, NominativeDataUploadJob> initialUploads) {
 		DefaultTableModel model = (DefaultTableModel) table.getModel();
@@ -160,17 +173,17 @@ public class CurrentUploadsWindowTable implements Observer {
 	 * Create the GUI and show it. For thread safety, this method should be invoked
 	 * from the event-dispatching thread.
 	 */
-	private void showGUI(MainWindow frame, final Object[][] currentUploadsTable) {
+	private void showGUI(MainWindow frame) {
 		frame.scrollPaneUpload.getViewport().add(table);
 	}
 
-	public void showWindow(final MainWindow frame, final Object[][] currentUploadsTable, final Object[] paths) {
+	public void showWindow(final MainWindow frame, final Object[] paths) {
 		// Schedule a job for the event-dispatching thread:
 		// creating and showing this application's GUI.
 		this.paths = paths;
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				showGUI(frame, currentUploadsTable);
+				showGUI(frame);
 			}
 		});
 	}
@@ -214,7 +227,7 @@ public class CurrentUploadsWindowTable implements Observer {
 						nbErrorUpload++;
 					} else {
 						nbStartUpload++;
-						int percent = Integer.valueOf(entry.getValue().getUploadPercentage().substring(0,
+						int percent = Integer.parseInt(entry.getValue().getUploadPercentage().substring(0,
 								entry.getValue().getUploadPercentage().length() - 2));
 						totalUploadPercent += percent;
 					}
@@ -241,6 +254,7 @@ public class CurrentUploadsWindowTable implements Observer {
 		}
 	}
 
+    @Override
 	public void update(Observable o, Object arg) {
 		CurrentNominativeDataModel currentNominativeDataModel = (CurrentNominativeDataModel) o;
 		String[] msg = (String[]) arg;
