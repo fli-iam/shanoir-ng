@@ -31,10 +31,11 @@ import { ExtraData } from '../../extraData/shared/extradata.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
-  selector: 'physiological-data-upload-form',
-  templateUrl: 'physiologicalData-form.component.html',
-  providers: [ExtraDataService],
-  animations: [slideDown]
+    selector: 'physiological-data-upload-form',
+    templateUrl: 'physiologicalData-form.component.html',
+    providers: [ExtraDataService],
+    animations: [slideDown],
+    standalone: false
 })
 @ModesAware
 export class PhysiologicalDataFormComponent extends EntityComponent<PhysiologicalData> {

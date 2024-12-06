@@ -27,7 +27,8 @@ import { Router } from '@angular/router';
 @Component({
     selector: 'accountRequest',
     templateUrl: 'account-request.component.html',
-    styleUrls: ['account-request.component.css']
+    styleUrls: ['account-request.component.css'],
+    standalone: false
 })
 
 export class AccountRequestComponent {

@@ -13,7 +13,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 <node
         *ngIf="node"
-        [class.selected]="(showDetails && this.menuOpened) || treeService.isSelected(node.id, 'study')"
+        [class.selected]="(showDetails && menuOpened) || treeService.isSelected(node.id, 'study')"
         [label]="node.label"
         awesome="fa-regular fa-folder-open"
         [(opened)]="node.opened"
@@ -24,7 +24,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         >
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="showDetails && menuOpened && withMenu">
-        <a [routerLink]="this.detailsPath + this.node.id" class="open-new-tab">
+        <a [routerLink]="detailsPath + node.id" class="open-new-tab">
             <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
         </a>
     </dropdown-menu>
@@ -37,7 +37,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [(opened)]="node.subjectsNode.opened"
             (openedChange)="onOpenedChange($event)"
             (labelClick)="subjectsMenuOpened = !subjectsMenuOpened"
-            [hasChildren]="hasDependency(this.node.subjectsNode.subjects)">
+            [hasChildren]="hasDependency(node.subjectsNode.subjects)">
 
         <div class="overmenu">
             <span *ngIf="!(subjectsOrder.field == 'name' && subjectsOrder.way == 'asc')" class="filter" (click)="sortSubjects({field: 'name', way : 'asc'})" title="sort by name ascending">
@@ -81,7 +81,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             label="Centers"
             awesome="fa-regular fa-hospital"
             [(opened)]="node.centersNode.opened"
-            [hasChildren]="hasDependency(this.node.centersNode.centers)">
+            [hasChildren]="hasDependency(node.centersNode.centers)">
 
         <ng-container *ngIf="node.centersNode.opened && node.centersNode.centers && node.centersNode.centers != $any('UNLOADED')">
             <center-node
@@ -145,7 +145,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             label="Members"
             awesome="far fa-user"
             [(opened)]="node.membersNode.opened"
-            [hasChildren]="hasDependency(this.node.membersNode.members)">
+            [hasChildren]="hasDependency(node.membersNode.members)">
 
         <ng-container *ngIf="node.membersNode.opened && node.membersNode.members && node.membersNode.members != $any('UNLOADED')">
             <member-node

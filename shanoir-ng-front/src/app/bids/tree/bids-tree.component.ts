@@ -29,6 +29,7 @@ import {DatasetService} from "../../datasets/shared/dataset.service";
     selector: 'bids-tree',
     templateUrl: 'bids-tree.component.html',
     styleUrls: ['bids-tree.component.css'],
+    standalone: false
 })
 
 export class BidsTreeComponent implements OnDestroy, OnInit {

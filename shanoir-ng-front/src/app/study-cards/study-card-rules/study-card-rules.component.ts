@@ -52,12 +52,13 @@ import { QualityCardRuleComponent } from './quality-card-rule.component';
     templateUrl: 'study-card-rules.component.html',
     styleUrls: ['study-card-rules.component.css'],
     providers: [
-        { 
-          provide: NG_VALUE_ACCESSOR,
-          multi: true,
-          useExisting: forwardRef(() => StudyCardRulesComponent),
+        {
+            provide: NG_VALUE_ACCESSOR,
+            multi: true,
+            useExisting: forwardRef(() => StudyCardRulesComponent),
         }
-      ]
+    ],
+    standalone: false
 })
 export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor {
     

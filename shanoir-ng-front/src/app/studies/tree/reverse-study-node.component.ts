@@ -32,7 +32,8 @@ import { SuperPromise } from 'src/app/utils/super-promise';
 
 @Component({
     selector: 'reverse-study-node',
-    templateUrl: 'reverse-study-node.component.html'
+    templateUrl: 'reverse-study-node.component.html',
+    standalone: false
 })
 
 export class ReverseStudyNodeComponent implements OnChanges {

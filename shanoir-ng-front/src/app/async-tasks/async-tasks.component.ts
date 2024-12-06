@@ -27,7 +27,8 @@ import { BrowserPaging } from '../shared/components/table/browser-paging.model';
 @Component({
     selector: 'async-tasks',
     templateUrl: 'async-tasks.component.html',
-    styleUrls: ['async-tasks.component.css']
+    styleUrls: ['async-tasks.component.css'],
+    standalone: false
 })
 
 export class AsyncTasksComponent extends EntityListComponent<Task> implements AfterViewInit {

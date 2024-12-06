@@ -23,7 +23,8 @@ import { TreeService } from 'src/app/studies/study/tree.service';
 
 @Component({
     selector: 'card-node',
-    templateUrl: 'study-card-node.component.html'
+    templateUrl: 'study-card-node.component.html',
+    standalone: false
 })
 
 export class StudyCardNodeComponent implements OnChanges {

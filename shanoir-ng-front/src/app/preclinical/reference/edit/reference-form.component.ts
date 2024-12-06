@@ -29,7 +29,8 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
     templateUrl: 'reference-form.component.html',
     styleUrls: ['reference-form.component.css'],
     providers: [ReferenceService],
-    animations: [slideDown]
+    animations: [slideDown],
+    standalone: false
 })
 @ModesAware
 export class ReferenceFormComponent extends EntityComponent<Reference>{

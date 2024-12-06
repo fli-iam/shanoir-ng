@@ -12,8 +12,8 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<span class="subtitle" *ngIf="this.qualityCards?.length > 0">These are the compatible quality cards that you can apply all over your study.</span>
-<span class="subtitle" *ngIf="this.qualityCards?.length == 0 || !this.qualityCards">There are no existing quality card for this study.</span>
+<span class="subtitle" *ngIf="qualityCards?.length > 0">These are the compatible quality cards that you can apply all over your study.</span>
+<span class="subtitle" *ngIf="qualityCards?.length == 0 || !qualityCards">There are no existing quality card for this study.</span>
 
 <table>
     <ng-container *ngFor="let qualityCard of qualityCards">

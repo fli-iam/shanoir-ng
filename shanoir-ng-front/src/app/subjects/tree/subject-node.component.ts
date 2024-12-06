@@ -44,7 +44,8 @@ import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
 
 @Component({
     selector: 'subject-node',
-    templateUrl: 'subject-node.component.html'
+    templateUrl: 'subject-node.component.html',
+    standalone: false
 })
 
 export class SubjectNodeComponent implements OnChanges {

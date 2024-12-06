@@ -29,12 +29,13 @@ export type Mode =  "view" | "edit" | "create";
     templateUrl: 'tag.creator.component.html',
     styleUrls: ['tag.creator.component.css'],
     providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => TagCreatorComponent),
-      multi: true
-    }
-]
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => TagCreatorComponent),
+            multi: true
+        }
+    ],
+    standalone: false
 })
 
 export class TagCreatorComponent extends AbstractInput<Tag[]> {
