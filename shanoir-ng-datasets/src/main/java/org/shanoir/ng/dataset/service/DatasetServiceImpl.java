@@ -53,9 +53,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriUtils;
@@ -105,9 +107,11 @@ public class DatasetServiceImpl implements DatasetService {
 	private boolean dicomWeb;
 
 	@Autowired
+	@Lazy
 	private DatasetProcessingService processingService;
 
 	@Autowired
+	@Lazy
 	private ProcessingResourceService processingResourceService;
 
 	@Autowired
@@ -371,10 +375,32 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
+	@Async
+	@Transactional
 	public void deleteNiftis(Long studyId) {
 		List<Dataset> datasets = this.findByStudyId(studyId);
-		for (Dataset dataset : datasets) {
-			deleteNifti(dataset);
+		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DELETE_NIFTI_EVENT, studyId.toString(), KeycloakUtil.getTokenUserId(), "Preparing deletion of niftis", ShanoirEvent.IN_PROGRESS, 0, studyId);
+		shanoirEventService.publishEvent(event);
+		try {
+			int total = datasets.size();
+			float progress = 0;
+			for (Dataset dataset : datasets) {
+				progress = progress + 1f / total;
+				event.setProgress(progress);
+				event.setMessage("Deleting nifti for dataset: " + dataset.getId());
+				shanoirEventService.publishEvent(event);
+				deleteNifti(dataset);
+			}
+			event.setProgress(1f);
+			event.setStatus(ShanoirEvent.SUCCESS);
+			event.setMessage("Deleting nifti for study: " + studyId + ": Success.");
+			shanoirEventService.publishEvent(event);
+		} catch (Exception e) {
+			LOG.error("Could not properly delete niftis: ", e);
+			event.setProgress(-1f);
+			event.setStatus(ShanoirEvent.ERROR);
+			event.setMessage("Deleting nifti for study: " + studyId + ": Error. " + e.getMessage());
+			shanoirEventService.publishEvent(event);
 		}
 	}
 
@@ -383,7 +409,7 @@ public class DatasetServiceImpl implements DatasetService {
 	 * @param dataset
 	 */
 	private void deleteNifti(Dataset dataset) {
-		List<DatasetExpression> expressionsToDelete = new ArrayList<>();
+		Set<DatasetExpression> expressionsToDelete = new HashSet<>();
 
 		for (Iterator<DatasetExpression> iterex = dataset.getDatasetExpressions().iterator(); iterex.hasNext(); ) {
 			DatasetExpression expression = iterex.next();
