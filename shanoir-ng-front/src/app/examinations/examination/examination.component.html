@@ -167,6 +167,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             </ul>
 						</span>
                     </li>
+                    <li *ngIf="mode != 'create' && examination.copies?.length > 0">
+                        <label i18n="Examination detail|Copied entities label@@examinationCopiedEntitiesLabel">This examination has been copied :</label>
+                        <span class="right-col">
+                            <div *ngFor="let entityId of examination.copies">
+                                <a [routerLink]="['/examination/details/', entityId]"> [ {{ entityId }} ] </a>
+                            </div>
+                        </span>
+                    </li>
+                    <li *ngIf="mode != 'create' && examination.source != null">
+                        <label i18n="Examination detail|Copied entities label@@examinationCopiedEntitiesLabel">This examination is the copy of :</label>
+                        <span class="right-col">
+                            <a [routerLink]="['/examination/details/', examination.source]"> [ {{ examination.source }} ] </a>
+                        </span>
+                    </li>
 				</ol>
 			</fieldset>
 		</div>

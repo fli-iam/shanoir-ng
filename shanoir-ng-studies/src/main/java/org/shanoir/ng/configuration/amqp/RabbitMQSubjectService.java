@@ -190,41 +190,6 @@ public class RabbitMQSubjectService {
 		}
 	}
 
-	/**
-	 * Receives a shanoirEvent as a json object, concerning a preclinical subject deletion
-	 * @param eventAsString the task as a json string.
-	 */
-	@RabbitListener(bindings = @QueueBinding(
-			key = ShanoirEventType.DELETE_PRECLINICAL_SUBJECT_EVENT,
-			value = @Queue(value = RabbitMQConfiguration.DELETE_ANIMAL_SUBJECT_QUEUE, durable = "true"),
-			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-					autoDelete = "false", durable = "true", type= ExchangeTypes.TOPIC)), containerFactory = "multipleConsumersFactory"
-	)
-
-	@Transactional
-	public void deletePreclinicalSubject(String eventAsString) throws AmqpRejectAndDontRequeueException {
-		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
-		try {
-
-			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
-
-			Long id = Long.valueOf(event.getObjectId());
-
-			Optional<Subject> subject = subjectRepository.findById(id);
-
-			if(subject.isEmpty() || !subject.get().isPreclinical()){
-				return;
-			}
-
-			subjectService.deleteById(subject.get().getId());
-			LOG.info("Subject [{}] has been deleted following deletion of preclinical subject [{}]", subject.get().getId(), id);
-
-
-		} catch (Exception e) {
-			LOG.error("Something went wrong deserializing the event", e);
-			throw new AmqpRejectAndDontRequeueException(e);
-		}
-	}
 
 	private boolean studyListContains(List<SubjectStudy> subjectStudyList, Long studyId) {
 		for (SubjectStudy sustu : subjectStudyList) {

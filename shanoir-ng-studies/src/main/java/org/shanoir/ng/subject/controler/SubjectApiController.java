@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.subject.controler;
 
+
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
@@ -30,6 +32,7 @@ import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.subject.service.SubjectUniqueConstraintManager;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -63,6 +66,9 @@ public class SubjectApiController implements SubjectApi {
 	@Autowired
 	private StudyService studyService;
 
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
+
 	@Override
 	public ResponseEntity<Void> deleteSubject(
 			@Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
@@ -70,6 +76,7 @@ public class SubjectApiController implements SubjectApi {
 			// Delete all associated bids folders
 			subjectService.deleteById(subjectId);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_SUBJECT_EVENT, subjectId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, subjectId.toString());
 
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
