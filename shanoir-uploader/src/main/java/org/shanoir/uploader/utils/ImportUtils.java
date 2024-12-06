@@ -360,6 +360,7 @@ public class ImportUtils {
 				logger.info(uploadFolder.getName() + ": " + allFileNames.size() + " DICOM files copied from CD/DVD/local file system.");
 			} else {
 				logger.error("Error while copying file from CD/DVD/local file system.");
+				return null;
 			}
 		}
 		return allFileNames;

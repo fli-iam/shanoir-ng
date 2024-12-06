@@ -40,6 +40,7 @@ import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.security.ControlerSecurityService;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -61,10 +62,11 @@ import static org.mockito.Mockito.times;
 @SpringBootTest
 @ActiveProfiles("test")
 public class DatasetDownloaderServiceTest {
-	
-	@Autowired
+
+    @Qualifier("datasetDownloaderServiceImpl")
+    @Autowired
 	DatasetDownloaderServiceImpl datasetDownloaderService;
-	
+
 	@MockBean
 	private DatasetService datasetServiceMock;
 
