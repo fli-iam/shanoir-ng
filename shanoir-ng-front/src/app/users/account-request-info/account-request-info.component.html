@@ -56,7 +56,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </span>
         </li>
         <li>
-            <label i18n="Edit user|Function label@@editUserFunction" [class.required-label]="editMode">Expertise / Role in the study</label> 
+            <label i18n="Edit user|Function label@@editUserFunction" [class.required-label]="editMode">Expertise (radiologist, researcher, ...)</label> 
             <span class="right-col">
                 <ng-container *ngIf="editMode">
                     <input type="text" formControlName="function" [(ngModel)]="info.function" (change)="onInfoChange()"/>
@@ -64,17 +64,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <label *ngIf="hasError('function', ['length'])" class="form-validation-alert" i18n="Edit user|Function length error@@editUserFunctionLengthError">Function length must be less than 200!</label>
                 </ng-container>
                 <span *ngIf="!editMode">{{info.function}}</span>
-            </span>
-        </li>
-        <li>
-            <label i18n="Edit user|Contact label@@editUserContact">Shanoir study manager</label> 
-            <span class="right-col">
-                <ng-container *ngIf="editMode">
-                    <input type="text" formControlName="contact" [(ngModel)]="info.contact"  (change)="onInfoChange()"/>
-                    <label *ngIf="hasError('contact', ['required'])" class="form-validation-alert" i18n="Edit user|Contact required error@@editUserContactRequiredError">Contact is required!</label>
-                    <label *ngIf="hasError('contact', ['length'])" class="form-validation-alert" i18n="Edit user|Contact length error@@editUserContactLengthError">Contact length must be less than 200!</label>
-                </ng-container>
-                <span *ngIf="!editMode">{{info.contact}}</span>
             </span>
         </li>
     </ol>
