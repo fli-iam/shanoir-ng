@@ -13,7 +13,6 @@
  */
 import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { ErrorHandler, Injectable } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { BidsElement } from "../../bids/model/bidsElement.model";
@@ -25,6 +24,7 @@ import { MrDataset } from '../dataset/mr/dataset.mr.model';
 import { DatasetDTO, DatasetDTOService, MrDatasetDTO } from "./dataset.dto";
 import { Dataset } from './dataset.model';
 import { DatasetUtils } from './dataset.utils';
+import { Observable } from 'rxjs';
 
 export type Format = 'nii' | 'dcm';
 

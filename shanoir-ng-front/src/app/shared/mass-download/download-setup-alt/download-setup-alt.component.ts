@@ -24,7 +24,8 @@ import { DownloadInputIds } from '../mass-download.service';
 @Component({
     selector: 'download-setup-alt',
     templateUrl: 'download-setup-alt.component.html',
-    styleUrls: ['download-setup-alt.component.css']
+    styleUrls: ['download-setup-alt.component.css'],
+    standalone: false
 })
 
 export class DownloadSetupAltComponent implements OnInit {

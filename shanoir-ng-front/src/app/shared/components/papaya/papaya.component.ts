@@ -20,7 +20,8 @@ declare var papayaContainers: any[];
 @Component({
     selector: "papaya",
     templateUrl: "papaya.component.html",
-    styleUrls: ["papaya.component.css"]
+    styleUrls: ["papaya.component.css"],
+    standalone: false
 })
 export class PapayaComponent implements OnInit, OnDestroy {
     @Input() params: any[];

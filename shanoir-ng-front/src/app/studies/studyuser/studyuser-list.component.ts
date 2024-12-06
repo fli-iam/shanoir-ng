@@ -39,10 +39,12 @@ import { ServiceLocator } from 'src/app/utils/locator.service';
     styleUrls: ['studyuser-list.component.css'],
     providers: [
         {
-          provide: NG_VALUE_ACCESSOR,
-          useExisting: forwardRef(() => StudyUserListComponent),
-          multi: true,
-        }] 
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => StudyUserListComponent),
+            multi: true,
+        }
+    ],
+    standalone: false
 })
 
 export class StudyUserListComponent implements ControlValueAccessor, OnChanges {

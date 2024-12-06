@@ -24,7 +24,8 @@ import { Option } from '../../shared/select/select.component';
 
 @Component({
     selector: 'upload-extra-data',
-    templateUrl: 'upload-extra-data.component.html'
+    templateUrl: 'upload-extra-data.component.html',
+    standalone: false
 })
 
 export class UploadExtraDataComponent implements OnInit, OnChanges {

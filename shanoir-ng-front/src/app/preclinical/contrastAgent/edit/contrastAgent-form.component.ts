@@ -33,7 +33,8 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
     templateUrl: 'contrastAgent-form.component.html',
     styleUrls: ['contrastAgent-form.component.css'],
     providers: [ContrastAgentService, ReferenceService],
-    animations: [slideDown]
+    animations: [slideDown],
+    standalone: false
 })
 @ModesAware
 export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{

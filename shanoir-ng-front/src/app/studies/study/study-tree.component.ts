@@ -26,7 +26,8 @@ import { TreeService } from './tree.service';
 @Component({
     selector: 'study-tree',
     templateUrl: 'study-tree.component.html',
-    styleUrls: ['study-tree.component.css']
+    styleUrls: ['study-tree.component.css'],
+    standalone: false
 })
 
 export class StudyTreeComponent {

@@ -14,7 +14,7 @@
 
 import { Injectable } from '@angular/core';
 
-import {HttpClient, HttpResponse} from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { EntityService } from '../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../utils/app.utils';
 import { Task } from './task.model';

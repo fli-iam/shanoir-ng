@@ -27,7 +27,8 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     selector: 'processed-dataset',
     templateUrl: 'processed-dataset.component.html',
     styleUrls: ['processed-dataset.component.css', '../shared/import.step.css'],
-    animations: [slideDown]
+    animations: [slideDown],
+    standalone: false
 })
 export class ImportProcessedDatasetComponent {
     

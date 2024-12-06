@@ -20,6 +20,7 @@ import { Filter } from '../pageable.model';
     selector: 'shanoir-table-search',
     templateUrl: 'search.component.html',
     styleUrls: ['search.component.css'],
+    standalone: false
 })
 
 export class TableSearchComponent implements OnChanges {

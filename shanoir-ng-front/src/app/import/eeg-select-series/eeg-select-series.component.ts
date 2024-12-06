@@ -28,7 +28,8 @@ import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
     selector: 'eeg-select-series',
     templateUrl: 'eeg-select-series.component.html',
     styleUrls: ['eeg-select-series.component.css', '../shared/import.step.css'],
-    animations: [slideDown]
+    animations: [slideDown],
+    standalone: false
 })
 export class EegSelectSeriesComponent {
 

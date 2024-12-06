@@ -31,7 +31,8 @@ import { StudyService } from '../shared/study.service';
 @Component({
     selector: 'study-list',
     templateUrl: 'study-list.component.html',
-    styleUrls: ['study-list.component.css']
+    styleUrls: ['study-list.component.css'],
+    standalone: false
 })
 
 export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {

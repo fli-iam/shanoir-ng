@@ -24,7 +24,8 @@ import {TaskState} from "../../async-tasks/task.model";
 
 @Component({
     selector: 'dataset-node',
-    templateUrl: 'dataset-node.component.html'
+    templateUrl: 'dataset-node.component.html',
+    standalone: false
 })
 
 export class DatasetNodeComponent implements OnChanges {
