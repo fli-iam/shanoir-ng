@@ -17,6 +17,7 @@ package org.shanoir.ng.dataset.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
@@ -117,6 +118,10 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Autowired
 	private ProcessingResourceRepository processingResourceRepository;
+
+	@Autowired
+	@Lazy
+	private DatasetServiceImpl datasetServiceImpl;
 
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
@@ -413,39 +418,66 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Override
 	@Async
-	@Transactional
 	public void deleteNiftis(Long studyId) {
-		List<Dataset> datasets = this.findByStudyId(studyId);
+		List<Long> datasets = repository.findIdsByStudyId(studyId);
+
 		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DELETE_NIFTI_EVENT, studyId.toString(), KeycloakUtil.getTokenUserId(), "Preparing deletion of niftis", ShanoirEvent.IN_PROGRESS, 0, studyId);
 		shanoirEventService.publishEvent(event);
 		try {
 			int total = datasets.size();
-			float progress = 0;
-			for (Dataset dataset : datasets) {
-				progress = progress + 1f / total;
-				event.setProgress(progress);
-				event.setMessage("Deleting nifti for dataset: " + dataset.getId());
-				shanoirEventService.publishEvent(event);
-				deleteNifti(dataset);
+			datasetServiceImpl.updateEvent(0f, event, null);
+			for (List<Long> partition : ListUtils.partition(datasets, 1000)){
+				datasetServiceImpl.deletePartitionOfNiftis(partition, total, event);
 			}
+			datasetServiceImpl.updateEvent(1f, event, studyId);
+		} catch (Exception e) {
+			datasetServiceImpl.updateEvent(-1f, event, studyId, e);
+
+		}
+	}
+
+	@Transactional
+	protected void deletePartitionOfNiftis(List<Long> partition, float total, ShanoirEvent event) {
+
+		float progress = event.getProgress();
+		for (Dataset dataset : repository.findAllById(partition)) {
+			progress = progress + 1f / total;
+			updateEvent(progress, event, dataset.getId());
+			deleteNifti(dataset);
+		}
+	}
+
+    protected void updateEvent(float progress, ShanoirEvent event, Long id) {
+		datasetServiceImpl.updateEvent(progress, event, id, null);
+	}
+
+	@Transactional
+    protected void updateEvent(float progress, ShanoirEvent event, Long id, Exception e) {
+		event.setProgress(progress);
+		if (progress == 1f) {
 			event.setProgress(1f);
 			event.setStatus(ShanoirEvent.SUCCESS);
-			event.setMessage("Deleting nifti for study: " + studyId + ": Success.");
-			shanoirEventService.publishEvent(event);
-		} catch (Exception e) {
+			event.setMessage("Deleting nifti for study: " + id + ": Success.");
+		} else if (progress == -1f) {
 			LOG.error("Could not properly delete niftis: ", e);
 			event.setProgress(-1f);
 			event.setStatus(ShanoirEvent.ERROR);
-			event.setMessage("Deleting nifti for study: " + studyId + ": Error. " + e.getMessage());
-			shanoirEventService.publishEvent(event);
+			event.setMessage("Deleting nifti for study: " + id + ": Error. " + e.getMessage());
+		} else if (Objects.isNull(id)) {
+			event.setProgress(progress);
 		}
+		else if (Objects.isNull(id)) {
+			event.setProgress(progress);
+			event.setMessage("Deleting nifti for dataset: " + id);
+		}
+		shanoirEventService.publishEvent(event);
 	}
 
 	/**
 	 * Deletes nifti on file server
 	 * @param dataset
 	 */
-	private void deleteNifti(Dataset dataset) {
+	public void deleteNifti(Dataset dataset) {
 		Set<DatasetExpression> expressionsToDelete = new HashSet<>();
 
 		for (Iterator<DatasetExpression> iterex = dataset.getDatasetExpressions().iterator(); iterex.hasNext(); ) {
