@@ -86,6 +86,8 @@ import { AccessRequestComponent } from './users/access-request/access-request.co
 import { PipelinesComponent } from './vip/pipelines/pipelines.component';
 import { ExecutionComponent } from './vip/execution/execution.component';
 import { ExecutionMonitoringsComponent } from './vip/execution-monitorings/execution-monitorings.component';
+import { PlannedExecutionListComponent } from "./vip/planned-execution/planned-execution-list.component"
+import { PlannedExecutionComponent } from "./vip/planned-execution/planned-execution.component";
 import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
 import { ApplyStudyCardOnComponent } from './study-cards/apply-study-card-on/apply-study-card-on.component';
 import { PreClinicalContextComponent } from './import/pre-clinical-context/pre-clinical-context.component';
@@ -128,6 +130,9 @@ let routes: Routes = [
         path: 'execution-monitoring',
         component: ExecutionMonitoringsComponent
     }, {
+        path: 'planned-execution-list',
+        component: PlannedExecutionListComponent
+    }, {
         path: 'pipelines',
         component: PipelinesComponent
     }, {
@@ -166,7 +171,8 @@ let routes: Routes = [
                 component: ImportProcessedDatasetComponent,
                 data: {importMode: 'Processed Dataset'}
             }, {
-                path: 'series',
+                path: 'ser' +
+                    'ies',
                 component: SelectSeriesComponent
             }, {
                 path: 'eegseries',
@@ -827,6 +833,21 @@ let routes: Routes = [
     {
         path: 'access-request/list',
         component: AccessRequestListComponent
+    },
+    {
+        path: 'planned-execution/create',
+        component: PlannedExecutionComponent,
+        data: { mode: 'create' },
+    },
+    {
+        path: 'planned-execution/edit/:id',
+        component: PlannedExecutionComponent,
+        data: { mode: 'edit' },
+    },
+    {
+        path: 'planned-execution/details/:id',
+        component: PlannedExecutionComponent,
+        data: { mode: 'view' },
     }
 ];
 

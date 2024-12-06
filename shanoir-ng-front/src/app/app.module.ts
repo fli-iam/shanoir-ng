@@ -273,6 +273,9 @@ import {StudyHistoryComponent} from "./studies/study-history/study-history.compo
 import { StudyTreeComponent } from './studies/study/study-tree.component';
 import { TreeService } from './studies/study/tree.service';
 import { CoilNodeComponent } from './coils/coil/tree/coil-node.component';
+import { PlannedExecutionListComponent } from "./vip/planned-execution/planned-execution-list.component";
+import { PlannedExecutionComponent } from "./vip/planned-execution/planned-execution.component";
+import { PlannedExecutionService } from "./vip/planned-execution/planned-execution.service";
 import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.component';
 
 @NgModule({
@@ -465,7 +468,10 @@ import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.c
         TestQualityCardOptionsComponent,
         StudyTreeComponent,
         CoilNodeComponent,
-        DoubleAwesomeComponent
+        DoubleAwesomeComponent,
+        CoilNodeComponent,
+        PlannedExecutionListComponent,
+        PlannedExecutionComponent
     ],
     providers: [
         AcquisitionEquipmentService,
@@ -553,6 +559,7 @@ import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.c
         SessionService,
         ShanoirEventService,
         TreeService,
+        PlannedExecutionService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],
     bootstrap: [AppComponent]

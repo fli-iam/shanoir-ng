@@ -15,13 +15,17 @@
 
 package org.shanoir.ng.vip.monitoring.model;
 
-import java.util.List;
-import java.util.Map;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
 /**
  * This class represents the parameter of a VIP pipeline.
  */
+@Entity
 public class PipelineParameter {
+
+    @Id
+    private Long id;
 
     private String name;
     private String type;
@@ -76,5 +80,13 @@ public class PipelineParameter {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getId() {
+        return id;
     }
 }

@@ -265,7 +265,6 @@ export class ExecutionComponent implements OnInit {
 
     isAFile(parameter: PipelineParameter): boolean {
         return parameter.type == ParameterType.File;
-
     }
 
     getDefaultExecutionName(): string {

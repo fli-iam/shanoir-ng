@@ -38,7 +38,7 @@ import java.io.IOException;
 /**
  * @author Alae Es-saki
  */
-@Tag(name = "VIP execution", description="Proxy API for VIP /executions")
+@Tag(name = "VIP execution byIdentifier", description="Proxy API for VIP /executions")
 @RequestMapping("/vip/execution")
 public interface ExecutionApi {
 
@@ -55,13 +55,13 @@ public interface ExecutionApi {
     ResponseEntity<IdName> createExecution(
             @Parameter(description = "execution", required = true) @RequestBody final ExecutionCandidateDTO candidate) throws EntityNotFoundException, SecurityException, RestServiceException;
 
-    @Operation(summary = "Get VIP execution for the given identifier", description = "Returns the VIP execution that has the given identifier in parameter.", tags={  })
+    @Operation(summary = " byIdentifier Get VIP execution for the given identifier", description = "Returns the VIP execution that has the given identifier in parameter.", tags={  })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "successful response, returns the status"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "error from VIP API")})
-    @RequestMapping(value = "/{identifier}",
+    @RequestMapping(value = "byIdentifier/{identifier}",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
     ResponseEntity<VipExecutionDTO> getExecution(@Parameter(description = "The execution identifier", required=true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;

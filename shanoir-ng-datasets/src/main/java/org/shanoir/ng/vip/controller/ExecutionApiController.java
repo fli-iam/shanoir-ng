@@ -15,15 +15,12 @@
 
 package org.shanoir.ng.vip.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.processing.dto.ParameterResourceDTO;
 import org.shanoir.ng.processing.model.DatasetProcessingType;
-import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -45,7 +42,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -102,7 +98,7 @@ public class ExecutionApiController implements ExecutionApi {
         return new ResponseEntity<>(createdMonitoring, HttpStatus.OK);
     }
 
-    private List<Dataset> getDatasetsFromParams(List<DatasetParameterDTO> parameters){
+    private List<Dataset> getDatasetsFromParams(List<DatasetParameterDTO> parameters) {
         List<Long> datasetsIds = new ArrayList<>();
         for (DatasetParameterDTO param : parameters) {
             datasetsIds.addAll(param.getDatasetIds());
@@ -195,13 +191,13 @@ public class ExecutionApiController implements ExecutionApi {
                 + "&md5=none&type=File";
     }
 
-    private String getInputValueUri(ExecutionCandidateDTO candidate, String groupBy, String exportFormat, String resourceId, String authenticationToken){
+    private String getInputValueUri(ExecutionCandidateDTO candidate, String groupBy, String exportFormat, String resourceId, String authenticationToken) {
         String entityName = "resource_id+" + resourceId + "+" + groupBy + ("dcm".equals(exportFormat) ? ".zip" : ".nii.gz");
         return SHANOIR_URI_SCHEME + entityName
                 + "?format=" + exportFormat
                 + "&resourceId=" + resourceId
                 + "&token=" + authenticationToken
-                + (candidate.getConverterId()  != null ? ("&converterId=" + candidate.getConverterId()) : "")
+                + (candidate.getConverterId() != null ? ("&converterId=" + candidate.getConverterId()) : "")
                 + "&refreshToken=" + candidate.getRefreshToken()
                 + "&clientId=" + candidate.getClient()
                 + "&md5=none&type=File";
@@ -232,13 +228,13 @@ public class ExecutionApiController implements ExecutionApi {
     }
 
     @Override
-    public ResponseEntity<VipExecutionDTO> getExecution(@Parameter(description = "The execution identifier", required=true) @PathVariable("identifier") String identifier) {
+    public ResponseEntity<VipExecutionDTO> getExecution(@Parameter(description = "The execution identifier", required = true) @PathVariable("identifier") String identifier) {
         return ResponseEntity.ok(vipClient.getExecution(identifier).block());
     }
 
 
     @Override
-    public ResponseEntity<ExecutionStatus> getExecutionStatus(@Parameter(description = "The execution identifier", required=true) @PathVariable("identifier") String identifier) {
+    public ResponseEntity<ExecutionStatus> getExecutionStatus(@Parameter(description = "The execution identifier", required = true) @PathVariable("identifier") String identifier) {
         return ResponseEntity.ok(vipClient.getExecution(identifier).map(VipExecutionDTO::getStatus).block());
     }
 
@@ -253,3 +249,4 @@ public class ExecutionApiController implements ExecutionApi {
         return ResponseEntity.ok(vipClient.getExecutionStdout(identifier).block());
     }
 }
+
