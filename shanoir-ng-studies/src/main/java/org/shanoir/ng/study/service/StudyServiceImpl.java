@@ -140,6 +140,7 @@ public class StudyServiceImpl implements StudyService {
 
 
 	@Override
+	@Transactional
 	public void deleteById(final Long id) throws EntityNotFoundException {
 		final Study study = studyRepository.findById(id).orElse(null);
 		if (study == null) {
@@ -157,11 +158,11 @@ public class StudyServiceImpl implements StudyService {
 				LOG.error("Could not transmit study-user delete info through RabbitMQ", e);
 			}
 		}
-
-		studyRepository.deleteById(id);
+		studyRepository.delete(study);
 	}
 
 	@Override
+	@Transactional
 	public Study findById(final Long id) {
 		return studyRepository.findById(id).orElse(null);
 	}
@@ -467,6 +468,7 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
+	@Transactional
 	public List<Study> findAll() {
 		List<Study> studies;
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
