@@ -35,6 +35,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             label="Subjects"
             awesome="fas fa-user-injured"
             [(opened)]="node.subjectsNode.opened"
+            (openedChange)="onOpenedChange($event)"
             (labelClick)="subjectsMenuOpened = !subjectsMenuOpened"
             [hasChildren]="hasDependency(this.node.subjectsNode.subjects)">
 
@@ -52,7 +53,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <i class="fa-solid fa-arrow-down-9-1"></i>
             </span>
             <span class="filter">
-                filter : 
+                filter :
                 <input type="text" [(ngModel)]="filter" (ngModelChange)="onFilterChange()"/>
                 <span (click)="resetFilter()">&nbsp;x&nbsp;</span>
             </span>
@@ -67,7 +68,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [hasBox]="hasBox"
                     [withMenu]="withMenu"
                     [rights]="rights"
-                    (nodeInit)="onSubjectNodeInit()" 
+                    (nodeInit)="onSubjectNodeInit()"
             >
             </subject-node>
         </ng-container>

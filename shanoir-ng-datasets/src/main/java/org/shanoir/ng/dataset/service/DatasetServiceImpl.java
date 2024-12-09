@@ -138,7 +138,7 @@ public class DatasetServiceImpl implements DatasetService {
 		propertyService.deleteByDatasetId(id);
 		repository.deleteById(id);
 
-		if (dataset.getSourceId() == null) {
+		if (dataset.getSource() != null) {
 			this.deleteDatasetFromPacs(dataset);
 		}
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, dataset.getStudyId()));
