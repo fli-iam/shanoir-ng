@@ -74,7 +74,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
 
     private void manageProcessingsDownload(List<DatasetProcessing> processingList, Map<Long, DatasetDownloadError> downloadResults, ZipOutputStream zipOutputStream, String format, boolean withManifest, Map<Long, List<String>> filesByAcquisitionId, Long converterId) throws RestServiceException, IOException {
         for (DatasetProcessing processing : processingList) {
-            String processingFilePath = getExecFilepath(processing.getId(), getExaminationDatas(processing.getInputDatasets()));
+            String processingFilePath = getExecFilepath(processing, getExaminationDatas(processing.getInputDatasets()));
             String subjectName = getProcessingSubject(processing);
             for (Dataset dataset : processing.getInputDatasets()) {
                 manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, processingFilePath  + "/" + shapeForPath(dataset.getName()), format, withManifest, filesByAcquisitionId, converterId);
@@ -141,17 +141,16 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         return new Pair<>(0L, "");
     }
 
-    private String getExecFilepath(Long processingId, Pair<Long, String> examDatas) {
-
-        String execFilePath = "processing_" + processingId +  "_exam_" + examDatas.first();
-        if (!Objects.equals(examDatas.second(), "")) {
+    private String getExecFilepath(DatasetProcessing processing, Pair<Long, String> examDatas) {
+        String execFilePath = "processing_" + processing.getId() +  "_exam_" + examDatas.first();
+        if (Objects.nonNull(examDatas.second()) && !Objects.equals(examDatas.second(), "")) {
             execFilePath += "_" + examDatas.second();
         }
         return shapeForPath(execFilePath);
     }
 
     private String shapeForPath(String path){
-        path = path.replaceAll("[^a-zA-Z0-9_\\-]", "_");
+        path = path.replaceAll("[^a-zA-Z0-9_]", "_").replaceAll("_+$", "").replaceAll("_+", "_");
         if (path.length() > 255) {
             path = path.substring(0, 254);
         }
