@@ -108,7 +108,7 @@ CREATE TABLE `study` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO study
-	(id, Clinical, coordinator_id, downloadable_by_default, end_date, mono_center, name, start_date, study_status, study_type, visible_by_default, with_examination)
+	(id, Clinical, coordinator_id, downloadable_by_default, end_date, name, start_date, study_status, study_type, visible_by_default, with_examination)
 VALUES
 	(1, '\0', NULL, '\0', NULL, 'NATIVE Divers', '2009-11-02 00:00:00', 1, 3, '\0', 1),
 	(2, 1, 2, '\0', '2015-12-31 00:00:00', 'USPIO-6', '2009-07-01 00:00:00', 1, 1, '\0', 1),

@@ -206,7 +206,12 @@ export class StudyComponent extends EntityComponent<Study> {
                 this.accessRequests = accessReqs;
             });
         }
-
+        this.getCenters().then(centers => {
+            console.log("test");
+            let option = this.centerOptions.find(option => option.value.id == this.study.studyCenterList[0].center.id);
+            if (option) this.selectedCenter = option.value;
+            this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
+        });
         return Promise.resolve();
     }
 
@@ -380,14 +385,6 @@ export class StudyComponent extends EntityComponent<Study> {
         this.form.get('studyCenterList').updateValueAndValidity();
     }
 
-    // onCenterChange(center: IdName): void {
-    //   this.selectedCenter = center;
-    //   if (this.study.studyCenterList.length == 1) {
-    //     this.study.studyCenterList = []
-    //     this.onCenterAdd();
-    //   }
-    // }
-
     onPrefixChange() {
         this.form.get('studyCenterList').markAsDirty();
         this.form.get('studyCenterList').updateValueAndValidity();
@@ -401,27 +398,15 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     removeCenterFromStudy(centerId: number): void {
-        if (!this.study.studyCenterList || this.study.studyCenterList.length < 2) return;
+        if (!this.study.studyCenterList) return;
+        console.log("centerId : ", centerId);
+        console.log("studyCenterList 1: ", this.study.studyCenterList);
         this.study.studyCenterList = this.study.studyCenterList.filter(item => item.center.id !== centerId);
+        console.log("studyCenterList 2: ", this.study.studyCenterList);
         this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
         this.form.get('studyCenterList').markAsDirty();
         this.form.get('studyCenterList').updateValueAndValidity();
     }
-
-    // enableAddIcon(): boolean {
-    //     return this.selectedCenter && !this.isCenterAlreadyLinked(this.selectedCenter.id)
-    //         && (!this.study.studyCenterList || this.study.studyCenterList.length == 0);
-    // }
-
-    // isCenterAlreadyLinked(centerId: number): boolean {
-    //     if (!this.study.studyCenterList) return false;
-    //     for (let studyCenter of this.study.studyCenterList) {
-    //         if (centerId == studyCenter.center.id) {
-    //             return true;
-    //         }
-    //     }
-    //     return false;
-    // }
 
     isMe(user: User): boolean {
         return user.id == KeycloakService.auth.userId;
