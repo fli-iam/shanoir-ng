@@ -22,10 +22,12 @@ import { Mode } from '../components/entity/entity.component.abstract';
     styleUrls: ['checkbox.component.css'],
     providers: [
         {
-          provide: NG_VALUE_ACCESSOR,
-          useExisting: forwardRef(() => CheckboxComponent),
-          multi: true,
-        }]   
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => CheckboxComponent),
+            multi: true,
+        }
+    ],
+    standalone: false
 })
 export class CheckboxComponent implements ControlValueAccessor { 
     

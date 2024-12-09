@@ -31,7 +31,8 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
     selector: 'pathologyModel-form',
     templateUrl: 'pathologyModel-form.component.html',
     providers: [PathologyModelService, PathologyService],
-    animations: [slideDown]
+    animations: [slideDown],
+    standalone: false
 })
 @ModesAware
 export class PathologyModelFormComponent extends EntityComponent<PathologyModel>{

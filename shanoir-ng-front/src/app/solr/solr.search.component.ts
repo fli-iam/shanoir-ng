@@ -54,6 +54,7 @@ export type TextualFacet = typeof TextualFacetNames[number];
     templateUrl: 'solr.search.component.html',
     styleUrls: ['solr.search.component.css'],
     animations: [slideDown],
+    standalone: false
 })
 
 export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {

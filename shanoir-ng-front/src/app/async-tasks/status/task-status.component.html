@@ -72,7 +72,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </span>
             </li>
         </ol>
-        <ol *ngIf="this.report && (task._eventType == 'checkQuality.event' || task._eventType == 'importDataset.event')">
+        <ol *ngIf="report && (task._eventType == 'checkQuality.event' || task._eventType == 'importDataset.event')">
             <legend>Report</legend>
             <li>
                 <shanoir-table #table class="report"

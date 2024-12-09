@@ -18,7 +18,10 @@ import { AcquisitionEquipment } from "./acquisition-equipment.model";
 import { DatasetModalityType } from "../../enum/dataset-modality-type.enum";
 import { ManufacturerModel } from './manufacturer-model.model';
 
-@Pipe({ name: "acqEqptLabel" })
+@Pipe({
+    name: "acqEqptLabel",
+    standalone: false
+})
 export class AcquisitionEquipmentPipe implements PipeTransform {
 
     transform(acqEqpt: AcquisitionEquipment): string {

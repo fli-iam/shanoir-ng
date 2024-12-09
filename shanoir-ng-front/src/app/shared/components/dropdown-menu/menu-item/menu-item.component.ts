@@ -20,7 +20,8 @@ import { menuAnimDur, menuSlideRight } from '../../../../shared/animations/anima
     selector: 'menu-item',
     templateUrl: 'menu-item.component.html',
     styleUrls: ['menu-item.component.css'],
-    animations: [menuSlideRight]
+    animations: [menuSlideRight],
+    standalone: false
 })
 
 export class MenuItemComponent {

@@ -28,7 +28,8 @@ import {ToggleSwitchComponent} from "../../shared/switch/switch.component";
           provide: NG_VALUE_ACCESSOR,
           useExisting: forwardRef(() => SolrTextSearchComponent),
           multi: true,
-        }]
+        }],
+    standalone: false
 })
 
 export class SolrTextSearchComponent implements ControlValueAccessor {

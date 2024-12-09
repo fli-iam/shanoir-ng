@@ -13,7 +13,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened || treeService.isSelected(node.id, 'subject')"
+        [class.selected]="menuOpened || treeService.isSelected(node.id, 'subject')"
         [label]="node.label"
         [tags]="node.tags"
         [qualityTag]="node.qualityTag"
@@ -27,7 +27,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [title]="node.title + ' n°' + node.id">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu">
-        <a [routerLink]="this.detailsPath" class="open-new-tab">
+        <a [routerLink]="detailsPath" class="open-new-tab">
             <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
         </a>
       <menu-item [disabled]="loading" label="Download" awesome="fas fa-download" (click)="loading ? null : download()"></menu-item>
