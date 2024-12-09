@@ -27,7 +27,8 @@ import {SolrDocument} from "../../../solr/solr.document.model";
 @Component({
     selector: 'user-action-dialog',
     templateUrl: 'dataset-copy-dialog.component.html',
-    styleUrls: ['dataset-copy-dialog.component.css']
+    styleUrls: ['dataset-copy-dialog.component.css'],
+    standalone: false
 })
 export class DatasetCopyDialogComponent {
     title: string;

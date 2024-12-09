@@ -38,7 +38,8 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     selector: 'dicom-upload',
     templateUrl: 'dicom-upload.component.html',
     styleUrls: ['dicom-upload.component.css', '../shared/import.step.css'],
-    animations: [slideDown]
+    animations: [slideDown],
+    standalone: false
 })
 export class DicomUploadComponent implements OnDestroy {
 

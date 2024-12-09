@@ -22,10 +22,11 @@ import { BrowserPaginEntityListComponent } from '../../../shared/components/enti
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
-  selector: 'reference-list',
-  templateUrl:'reference-list.component.html',
-  styleUrls: ['reference-list.component.css'], 
-  providers: [ReferenceService]
+    selector: 'reference-list',
+    templateUrl: 'reference-list.component.html',
+    styleUrls: ['reference-list.component.css'],
+    providers: [ReferenceService],
+    standalone: false
 })
     
 export class ReferencesListComponent  extends BrowserPaginEntityListComponent<Reference>{

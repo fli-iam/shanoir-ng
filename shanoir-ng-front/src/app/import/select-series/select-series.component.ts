@@ -26,7 +26,8 @@ import { ImportService } from '../shared/import.service';
     selector: 'select-series',
     templateUrl: 'select-series.component.html',
     styleUrls: ['select-series.component.css', '../shared/import.step.css'],
-    animations: [slideDown]
+    animations: [slideDown],
+    standalone: false
 })
 export class SelectSeriesComponent {
 

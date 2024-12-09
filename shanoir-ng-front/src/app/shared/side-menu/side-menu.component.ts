@@ -30,7 +30,8 @@ import { UserService } from '../../users/shared/user.service';
     selector: 'side-menu',
     templateUrl: 'side-menu.component.html',
     styleUrls: ['side-menu.component.css', environment.production ? 'prod.css' : 'dev.css'],
-    animations: [ slideDown, disapearUp ]
+    animations: [slideDown, disapearUp],
+    standalone: false
 })
 
 export class SideMenuComponent {

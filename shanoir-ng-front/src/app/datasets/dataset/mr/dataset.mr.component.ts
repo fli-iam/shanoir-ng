@@ -21,7 +21,8 @@ import {UnitOfMeasure} from "../../../enum/unitofmeasure.enum";
 
 @Component({
     selector: 'mr-dataset-details',
-    templateUrl: 'dataset.mr.component.html'
+    templateUrl: 'dataset.mr.component.html',
+    standalone: false
 })
 
 export class MrDatasetComponent implements OnInit{
