@@ -123,6 +123,7 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
+	@Transactional
 	public ResponseEntity<Void> deleteStudy(@PathVariable("studyId") Long studyId) {
 		try {
 			Study study = studyService.findById(studyId);
@@ -157,6 +158,7 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
+	@Transactional
 	public ResponseEntity<List<StudyDTO>> findStudies() {
 		List<Study> studies = studyService.findAll();
 		if (studies.isEmpty()) {
@@ -200,6 +202,7 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
+	@Transactional
 	public ResponseEntity<StudyDTO> findStudyById(@PathVariable("studyId") final Long studyId, boolean withStorageVolume) {
 		Study study = studyService.findById(studyId);
 		if (study == null) {
@@ -213,6 +216,7 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
+	@Transactional
 	public ResponseEntity<StudyDTO> saveNewStudy(@RequestBody final Study study, final BindingResult result)
 			throws RestServiceException {
 
