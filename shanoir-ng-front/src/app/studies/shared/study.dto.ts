@@ -86,7 +86,6 @@ export class StudyDTOService {
         //entity.experimentalGroupsOfSubjects = dto.experimentalGroupsOfSubjects;
         entity.id = dto.id;
         entity.challenge = dto.challenge;
-        entity.monoCenter = dto.monoCenter;
         entity.name = dto.name;
         entity.nbExaminations = dto.nbExaminations;
         entity.nbSubjects = dto.nbSubjects;
@@ -270,7 +269,6 @@ export class StudyDTO {
     endDate: Date;
     //examinationIds: number[];
     experimentalGroupsOfSubjects: Id[];
-    monoCenter: boolean;
     challenge: boolean;
     name: string;
     nbExaminations: number;
@@ -302,7 +300,6 @@ export class StudyDTO {
         this.downloadableByDefault = study.downloadableByDefault;
         this.endDate = study.endDate;
         this.experimentalGroupsOfSubjects = study.experimentalGroupsOfSubjects ? study.experimentalGroupsOfSubjects.map(egos => new Id(egos.id)) : null;
-        this.monoCenter = study.monoCenter;
         this.name = study.name;
         this.profile = study.profile;
         this.challenge = study.challenge;

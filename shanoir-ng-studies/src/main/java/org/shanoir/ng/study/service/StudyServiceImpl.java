@@ -288,7 +288,6 @@ public class StudyServiceImpl implements StudyService {
 		studyDb.setVisibleByDefault(study.isVisibleByDefault());
 		studyDb.setStudyCardPolicy(study.getStudyCardPolicy());
 		studyDb.setWithExamination(study.isWithExamination());
-		studyDb.setMonoCenter(study.isMonoCenter());
 
 		if (study.getStudyCenterList() != null) {
 			ListDependencyUpdate.updateWith(studyDb.getStudyCenterList(), study.getStudyCenterList());
