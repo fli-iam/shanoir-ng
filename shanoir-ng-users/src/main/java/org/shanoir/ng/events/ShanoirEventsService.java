@@ -1,16 +1,9 @@
 package org.shanoir.ng.events;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.tasks.AsyncTaskApiController;
 import org.shanoir.ng.tasks.UserSseEmitter;
-import org.shanoir.ng.user.model.User;
-import org.shanoir.ng.user.model.dto.UserDTO;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
@@ -19,15 +12,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.util.Pair;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Service managing ShanoirEvents
@@ -59,7 +52,8 @@ public class ShanoirEventsService {
 				|| ShanoirEventType.COPY_DATASET_EVENT.equals(event.getEventType())
 				|| ShanoirEventType.CHECK_QUALITY_EVENT.equals(event.getEventType())
 				|| ShanoirEventType.DOWNLOAD_STATISTICS_EVENT.equals(event.getEventType())
-				|| ShanoirEventType.DELETE_EXAMINATION_EVENT.equals(event.getEventType())) {
+				|| ShanoirEventType.DELETE_EXAMINATION_EVENT.equals(event.getEventType())
+				|| ShanoirEventType.DELETE_NIFTI_EVENT.equals(event.getEventType())) {
 			sendSseEventsToUI(saved);
 		}
 	}
