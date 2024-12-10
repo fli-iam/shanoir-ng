@@ -94,8 +94,9 @@ public class ShanoirEventType {
 
 	public static final String CHECK_QUALITY_EVENT = "checkQuality.event";
 
-	/**
-	 * Index all datasets in solr
-	 */
+	/** Index all datasets in solr */
 	public static final String SOLR_INDEX_ALL_EVENT = "solrIndexAll.event";
+
+	/** TEMPORARY: Delete existing niftis in shanoir. */
+	public static final String DELETE_NIFTI_EVENT = "deleteNiftis.event";
 }
