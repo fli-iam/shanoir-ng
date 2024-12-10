@@ -138,21 +138,29 @@ export class TreeService {
         // update everything
         let studyId: number = this.study?.id;
         this.study = null;
-        this.initStudy(studyId);
-    }
-
-    removeCurrentNode() {
-        const route: string = this.selectedNode.route;
-        Object.entries(this.selectedNode.parent).forEach((entry, index) => {
-            if (Array.isArray(entry[1])) {
-                let i: number = entry[1].findIndex(node => node.route == route);
-                entry[1].splice(i, 1);
-            }
+        this.initStudy(studyId).then(() => {
+            this.changeSelection();
         });
     }
 
+    removeCurrentNode() {
+        if (this.selectedNode?.parent) {
+            const route: string = this.selectedNode.route;
+            Object.entries(this.selectedNode.parent).forEach((entry, index) => {
+                if (Array.isArray(entry[1])) {
+                    let i: number = entry[1].findIndex(node => node.route == route);
+                    entry[1].splice(i, 1);
+                }
+            });
+        }
+    }
+
     goToParent() {
-        this.router.navigate([this.selectedNode?.parent?.route]);
+        if (this.selectedNode instanceof StudyNode) {
+            this.router.navigate(['/study/list']);
+        } else {
+            this.router.navigate([this.selectedNode?.parent?.route]);
+        }
     }
 
     activateTree(activatedRoute: ActivatedRoute) {
@@ -163,6 +171,8 @@ export class TreeService {
         if (this.selection?.type == 'study') {
             this.initStudy(this.selection.id).then(() => {
                 this.studyNode.subjectsNode.open();
+                this.selectedNode = this.studyNode;
+                this.treeAvailable = !!this.selectedNode;
             });
         } else {
             let studyLoaded: Promise<void>;
