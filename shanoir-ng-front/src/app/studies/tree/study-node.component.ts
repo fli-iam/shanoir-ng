@@ -40,7 +40,7 @@ export type Sort = {field: 'name' | 'id', way : 'asc' | 'desc'}
 
 export class StudyNodeComponent implements OnChanges {
 
-    @Input() input: StudyNode | {study: Study, rights: StudyUserRight[]};
+    @Input() input: StudyNode | { study: Study, rights: StudyUserRight[] };
     @Output() nodeInit: EventEmitter<StudyNode> = new EventEmitter();
     @Output() selectedChange: EventEmitter<StudyNode> = new EventEmitter();
     node: StudyNode;
@@ -62,17 +62,17 @@ export class StudyNodeComponent implements OnChanges {
     private subjectsInited: SuperPromise<void>;
 
     constructor(
-            private router: Router,
-            private studyCardService: StudyCardService,
-            private qualityCardService: QualityCardService,
-            private keycloakService: KeycloakService,
-            private studyRightsService: StudyRightsService,
-            protected treeService: TreeService) {
+        private router: Router,
+        private studyCardService: StudyCardService,
+        private qualityCardService: QualityCardService,
+        private keycloakService: KeycloakService,
+        private studyRightsService: StudyRightsService,
+        protected treeService: TreeService) {
 
         this.idPromise.then(id => {
             (this.keycloakService.isUserAdmin
-                ? Promise.resolve(StudyUserRight.all())
-                : this.studyRightsService.getMyRightsForStudy(id)
+                    ? Promise.resolve(StudyUserRight.all())
+                    : this.studyRightsService.getMyRightsForStudy(id)
             ).then(rights => {
                 this.rights = rights;
             });
@@ -98,13 +98,13 @@ export class StudyNodeComponent implements OnChanges {
             } else {
                 throw new Error('Illegal argument type');
             }
-            this.sortSubjects({field: 'name', way : 'asc'});
+            this.sortSubjects({field: 'name', way: 'asc'});
             this.node.subjectsNode.registerOpenPromise(this.subjectsInited);
             this.nodeInit.emit(this.node);
-            this.showDetails = this.router.url != this.detailsPath  + this.node.id;
+            this.showDetails = this.router.url != this.detailsPath + this.node.id;
         }
     }
-    
+
     hasDependency(dependencyArr: any[] | UNLOADED): boolean | 'unknown' {
         if (!dependencyArr) return false;
         else if (dependencyArr == UNLOADED) return 'unknown';
@@ -116,7 +116,7 @@ export class StudyNodeComponent implements OnChanges {
             this.studyCardsLoading = true;
             this.studyCardService.getAllForStudy(this.node.id).then(studyCards => {
                 if (studyCards) {
-                   this.node.studyCardsNode.cards = studyCards.map(studyCard => new StudyCardNode(this.node, studyCard.id, studyCard.name, this.canAdmin));
+                    this.node.studyCardsNode.cards = studyCards.map(studyCard => new StudyCardNode(this.node, studyCard.id, studyCard.name, this.canAdmin));
                 } else this.node.studyCardsNode.cards = [];
                 this.studyCardsLoading = false;
                 this.node.studyCardsNode.open();
@@ -129,7 +129,7 @@ export class StudyNodeComponent implements OnChanges {
             this.qualityCardsLoading = true;
             this.qualityCardService.getAllForStudy(this.node.id).then(qualityCards => {
                 if (qualityCards) {
-                   this.node.qualityCardsNode.cards = qualityCards.map(studyCard => new QualityCardNode(this.node, studyCard.id, studyCard.name, this.canAdmin));
+                    this.node.qualityCardsNode.cards = qualityCards.map(studyCard => new QualityCardNode(this.node, studyCard.id, studyCard.name, this.canAdmin));
                 } else this.node.qualityCardsNode.cards = [];
                 this.qualityCardsLoading = false;
                 this.node.qualityCardsNode.open();
@@ -138,11 +138,11 @@ export class StudyNodeComponent implements OnChanges {
     }
 
     onStudyCardDelete(index: number) {
-        (this.node.studyCardsNode.cards as StudyCardNode[]).splice(index, 1) ;
+        (this.node.studyCardsNode.cards as StudyCardNode[]).splice(index, 1);
     }
 
     onQualityCardDelete(index: number) {
-        (this.node.qualityCardsNode.cards as StudyCardNode[]).splice(index, 1) ;
+        (this.node.qualityCardsNode.cards as StudyCardNode[]).splice(index, 1);
     }
 
     onFilterChange() {

@@ -60,6 +60,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Examination service implementation.
@@ -131,8 +132,10 @@ public class ExaminationServiceImpl implements ExaminationService {
 					}
 				}
 				for (DatasetAcquisition dsAcq : dsAcqs) {
-					event.setMessage("Delete examination - acquisition with id : " + dsAcq.getId());
-					eventService.publishEvent(event);
+					if (event != null) {
+						event.setMessage("Delete examination - acquisition with id : " + dsAcq.getId());
+						eventService.publishEvent(event);
+					}
 					this.datasetAcquisitionService.deleteById(dsAcq.getId(), event);
 				}
 				if (event != null) {

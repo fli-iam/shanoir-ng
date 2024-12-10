@@ -68,7 +68,7 @@ export class DatasetDTOService {
                 promises.push(this.datasetProcessingService.get(dto.datasetProcessing.id).then(
                     processing => {
                         result.datasetProcessing = processing;
-                    }    
+                    }
                 ));
             }
             if (dto.studyId) promises.push(this.studyService.get(dto.studyId).then(study => result.study = study));
@@ -126,6 +126,8 @@ export class DatasetDTOService {
         entity.creationDate = dto.creationDate;
         entity.name = dto.name;
         entity.type = dto.type;
+        entity.source = dto.source;
+        entity.copies = dto.copies;
         entity.originMetadata = dto.originMetadata;
         entity.updatedMetadata = dto.updatedMetadata;
         entity.inPacs = dto.inPacs;
@@ -206,6 +208,8 @@ export class DatasetDTO {
     datasetAcquisition: DatasetAcquisitionDTO;
     inPacs: boolean;
     tags: Tag[];
+    copies: number[];
+    source: number;
 
     constructor(dataset?: Dataset) {
         if (dataset) {
@@ -215,6 +219,8 @@ export class DatasetDTO {
             this.studyId = dataset.study ? dataset.study.id : null;
             this.subjectId = dataset.subject ? dataset.subject.id : null;
             this.updatedMetadata = dataset.updatedMetadata;
+            this.source = dataset.source;
+            this.copies = dataset.copies;
             this.name = dataset.name;
             this.datasetProcessing = dataset.datasetProcessing;
             this.type = dataset.type;

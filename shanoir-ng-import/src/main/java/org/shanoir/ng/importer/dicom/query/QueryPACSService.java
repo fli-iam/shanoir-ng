@@ -47,7 +47,7 @@ import org.dcm4che3.net.service.QueryRetrieveLevel;
 import org.shanoir.ng.importer.dicom.DicomSerieAndInstanceAnalyzer;
 import org.shanoir.ng.importer.dicom.InstanceNumberSorter;
 import org.shanoir.ng.importer.dicom.PatientNameSorter;
-import org.shanoir.ng.importer.dicom.SeriesNumberSorter;
+import org.shanoir.ng.importer.dicom.SeriesNumberOrDescriptionSorter;
 import org.shanoir.ng.importer.dicom.StudyDateSorter;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
@@ -219,6 +219,25 @@ public class QueryPACSService {
 		Association association = connectAssociation(calling, called, true);
 		LOG.info("Query instances/images (before c-move) for serie: " + serie.getSeriesDescription());
 		queryInstances(association, studyInstanceUID, serie);
+		releaseAssociation(association);
+		long finish = System.currentTimeMillis();
+		long timeElapsed = finish - start;
+		LOG.debug("Duration of all calls of queryCFIND " + timeElapsed + "ms.");
+		LOG.debug("------------------------------");
+		LOG.debug("--- END C-FIND Instances -----");
+		LOG.debug("------------------------------");
+	}
+
+	public void queryCFINDsInstances(String studyInstanceUID, List<Serie> selectedSeries) throws Exception {
+		LOG.debug("------------------------------");
+		LOG.debug("--- START C-FIND Instances ---");
+		LOG.debug("------------------------------");
+		long start = System.currentTimeMillis();
+		Association association = connectAssociation(calling, called, true);
+		for (Serie serie : selectedSeries) {
+			LOG.info("Query instances/images (before c-move) for serie: " + serie.getSeriesDescription());
+			queryInstances(association, studyInstanceUID, serie);
+		}
 		releaseAssociation(association);
 		long finish = System.currentTimeMillis();
 		long timeElapsed = finish - start;
@@ -494,7 +513,7 @@ public class QueryPACSService {
 		if (seriesAttr != null) {
 			List<Serie> series = new ArrayList<Serie>();
 			seriesAttr.parallelStream().forEach(s -> processDICOMSerie(s, association, study, modality, series));
-			series.sort(new SeriesNumberSorter());
+			series.sort(new SeriesNumberOrDescriptionSorter());
 			study.setSeries(series);
 		}
 	}
@@ -529,9 +548,11 @@ public class QueryPACSService {
 	 * @param serie
 	 */
 	private void queryInstances(Association association, String studyInstanceUID, Serie serie) {
+		DicomParam modality = initDicomParam(Tag.Modality, serie.getModality());
 		DicomParam studyInstanceUIDParam = initDicomParam(Tag.StudyInstanceUID, studyInstanceUID);
 		DicomParam seriesInstanceUIDParam = initDicomParam(Tag.SeriesInstanceUID, serie.getSeriesInstanceUID());
 		DicomParam[] params = {
+			modality,
 			studyInstanceUIDParam,
 			seriesInstanceUIDParam,
 			new DicomParam(Tag.SOPInstanceUID),
@@ -544,12 +565,14 @@ public class QueryPACSService {
 				Instance instance = new Instance(i);
 				if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(i)) {
 					synchronized (instances) {
+						LOG.debug("Adding instance: " + instance.toString());
 						instances.add(instance);						
 					}
 				}
 			});
 			instances.sort(new InstanceNumberSorter());
 			serie.setInstances(instances);
+			LOG.info(instances.size() + " instances found for serie " + serie.getSeriesDescription());
 		}
 	}
 
