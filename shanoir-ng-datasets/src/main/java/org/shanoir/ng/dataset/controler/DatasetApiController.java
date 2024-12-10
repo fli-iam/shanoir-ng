@@ -52,8 +52,6 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.solr.service.SolrService;
-import org.shanoir.ng.tag.model.StudyTag;
-import org.shanoir.ng.tag.service.StudyTagService;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
@@ -146,9 +144,6 @@ public class DatasetApiController implements DatasetApi {
 
 	@Autowired
 	private ObjectMapper objectMapper;
-
-	@Autowired
-	private StudyTagService studyTagService;
 
 	@Autowired
 	private DatasetRepository datasetRepository;
@@ -270,30 +265,6 @@ public class DatasetApiController implements DatasetApi {
 		}
 
 		return new ResponseEntity<>(dtos, HttpStatus.OK);
-	}
-
-	@Override
-	public ResponseEntity<Void> updateDatasetTags(Long datasetId, List<Long> studyTagIds, BindingResult result) throws EntityNotFoundException, SolrServerException, IOException {
-		Dataset ds = datasetService.findById(datasetId);
-		if (ds == null) {
-			throw new EntityNotFoundException(Dataset.class, datasetId);
-		}
-
-		List<StudyTag> tags = studyTagService.findByIds(studyTagIds);
-
-		ds.setTags(new ArrayList<>());
-
-		for(StudyTag tag : tags){
-			if(tag.getStudy().getId().equals(ds.getStudyId())){
-				ds.getTags().add(tag);
-			}
-		}
-
-		datasetRepository.save(ds);
-
-		solrService.indexDataset(datasetId);
-
-		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
   @Override
