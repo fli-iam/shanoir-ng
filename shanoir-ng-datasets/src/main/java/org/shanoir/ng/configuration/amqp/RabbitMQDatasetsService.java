@@ -471,7 +471,7 @@ public class RabbitMQDatasetsService {
 				Long dsCount = datasetRepository.countDatasetsBySourceIdAndStudyId(datasetParentId, studyId);
 				Dataset datasetParent = datasetService.findById(datasetParentId);
 
-				if (datasetParent.getSourceId() != null) {
+				if (datasetParent.getSource() != null) {
 					LOG.info("[CopyDatasets] Selected dataset is a copy, please pick the original dataset.");
 					countCopy++;
 				} else if (dsCount != 0) {
@@ -496,7 +496,8 @@ public class RabbitMQDatasetsService {
 			event.setStatus(ShanoirEvent.SUCCESS);
 			event.setProgress(1.0f);
 			eventService.publishEvent(event);
-			solrService.indexDatasets(newDatasets);
+			if (newDatasets.size() > 0)
+				solrService.indexDatasets(newDatasets);
 
 		} catch (Exception e) {
 			if (event != null) {

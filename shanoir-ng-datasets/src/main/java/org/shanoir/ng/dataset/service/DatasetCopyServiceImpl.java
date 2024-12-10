@@ -64,7 +64,9 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                 } else {
                     newDs = DatasetUtils.copyDatasetFromDataset(ds);
                 }
-                newDs.setSourceId(oldDsId);
+                ds.getCopies().add(newDs);
+                newDs.setSource(ds);
+                newDs.setCopies(new ArrayList<>());
                 newDs.setSubjectId(ds.getSubjectId());
 
                 // Handling of DatasetAcquisition and Examination
@@ -106,32 +108,34 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
         }
     }
 
-    public DatasetAcquisition moveAcquisition(DatasetAcquisition acq, Dataset newDs, Long studyId, Map<Long, Examination> examMap, Long userId) {
-        Long oldAcqId = acq.getId();
+    public DatasetAcquisition moveAcquisition(DatasetAcquisition oldAcq, Dataset newDs, Long studyId, Map<Long, Examination> examMap, Long userId) {
         Examination newExam = null;
         // Get existing examination...
-        if (acq.getExamination() != null &&  acq.getExamination().getId() != null) {
-            if (examMap.get(acq.getExamination().getId()) != null) {
-                newExam = examMap.get(acq.getExamination().getId());
+        if (oldAcq.getExamination() != null &&  oldAcq.getExamination().getId() != null) {
+            if (examMap.get(oldAcq.getExamination().getId()) != null) {
+                newExam = examMap.get(oldAcq.getExamination().getId());
             }  else {
-                newExam = examinationRepository.findBySourceIdAndStudy_Id(acq.getExamination().getId(), studyId);
+                newExam = examinationRepository.findBySourceIdAndStudy_Id(oldAcq.getExamination().getId(), studyId);
             }
             if (newExam == null) {
-                newExam = moveExamination(acq, studyId, userId);
+                newExam = moveExamination(oldAcq, studyId, userId);
             }
         }
         // Create new DatasetAcquisition according to its type
         DatasetAcquisition newDsAcq = null;
-        if ("Mr".equals(acq.getType())) {
-            newDsAcq = new MrDatasetAcquisition(acq, (MrDataset) newDs);
+        if ("Mr".equals(oldAcq.getType())) {
+            newDsAcq = new MrDatasetAcquisition(oldAcq, (MrDataset) newDs);
         } else {
-            newDsAcq = DatasetAcquisitionUtils.copyDatasetAcquisitionFromDatasetAcquisition(acq);
+            newDsAcq = DatasetAcquisitionUtils.copyDatasetAcquisitionFromDatasetAcquisition(oldAcq);
         }
+
+        oldAcq.getCopies().add(newDsAcq);
         newDsAcq.setExamination(newExam);
-        newDsAcq.setSourceId(oldAcqId);
+        newDsAcq.setCopies(new ArrayList<>());
+        newDsAcq.setSource(oldAcq);
 
         datasetAcquisitionRepository.save(newDsAcq);
-        examMap.put(acq.getExamination().getId(), newExam);
+        examMap.put(oldAcq.getExamination().getId(), newExam);
         LOG.info("[CopyDatasets] New dataset acquisition created with id = " + newDsAcq.getId());
         return newDsAcq;
     }
@@ -142,7 +146,10 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
         Subject subject = subjectRepository.findById(oldExam.getSubject().getId()).orElse(null);
 
         Examination newExamination = new Examination(oldExam, newStudy, subject);
-        newExamination.setSourceId(oldExam.getId());
+
+        oldExam.getCopies().add(newExamination);
+        newExamination.setSource(oldExam);
+        newExamination.setCopies(new ArrayList<>());
 
         examinationRepository.save(newExamination);
         eventService.publishEvent(

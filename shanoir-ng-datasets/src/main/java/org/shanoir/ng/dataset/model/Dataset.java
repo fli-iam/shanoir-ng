@@ -19,23 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.shanoir.ng.dataset.modality.BidsDataset;
-import org.shanoir.ng.dataset.modality.CalibrationDataset;
-import org.shanoir.ng.dataset.modality.CtDataset;
-import org.shanoir.ng.dataset.modality.EegDataset;
-import org.shanoir.ng.dataset.modality.GenericDataset;
-import org.shanoir.ng.dataset.modality.MeasurementDataset;
-import org.shanoir.ng.dataset.modality.MegDataset;
-import org.shanoir.ng.dataset.modality.MeshDataset;
-import org.shanoir.ng.dataset.modality.MrDataset;
-import org.shanoir.ng.dataset.modality.ParameterQuantificationDataset;
-import org.shanoir.ng.dataset.modality.PetDataset;
-import org.shanoir.ng.dataset.modality.RegistrationDataset;
-import org.shanoir.ng.dataset.modality.SegmentationDataset;
-import org.shanoir.ng.dataset.modality.SpectDataset;
-import org.shanoir.ng.dataset.modality.StatisticalDataset;
-import org.shanoir.ng.dataset.modality.TemplateDataset;
-import org.shanoir.ng.dataset.modality.XaDataset;
+import org.shanoir.ng.dataset.modality.*;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
@@ -165,7 +149,12 @@ public abstract class Dataset extends AbstractEntity {
 	@JoinTable(name = "DATASET_TAG", joinColumns = @JoinColumn(name = "DATASET_ID"), inverseJoinColumns = @JoinColumn(name = "STUDY_TAG_ID"))
 	private List<StudyTag> tags;
 
-	private Long sourceId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "source_id")
+	private Dataset source;
+
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "source", cascade = CascadeType.ALL)
+	private List<Dataset> copies;
 
 	@JsonIgnore
 	@Transient
@@ -202,7 +191,8 @@ public abstract class Dataset extends AbstractEntity {
 		this.subjectId = d.getSubjectId();
 		this.downloadable = d.downloadable;
 		this.updatedMetadata = new DatasetMetadata(d.getUpdatedMetadata());
-		this.sourceId = d.getSourceId();
+		this.source = d.getSource();
+		this.copies = d.getCopies();
 	}
 
 	/**
@@ -477,12 +467,12 @@ public abstract class Dataset extends AbstractEntity {
 		this.downloadable = downloadable;
 	}
 
-	public Long getSourceId() {
-		return sourceId;
+	public Dataset getSource() {
+		return source;
 	}
 
-	public void setSourceId(Long sourceId) {
-		this.sourceId = sourceId;
+	public void setSource(Dataset source) {
+		this.source = source;
 	}
 
 	public String getSOPInstanceUID() {
@@ -504,4 +494,13 @@ public abstract class Dataset extends AbstractEntity {
 	public void setTags(List<StudyTag> tags) {
 		this.tags = tags;
 	}
+
+	public List<Dataset> getCopies() {
+		return copies;
+	}
+
+	public void setCopies(List<Dataset> copies) {
+		this.copies = copies;
+	}
+
 }
