@@ -56,7 +56,7 @@ public class UploadFromTableActionListener implements ActionListener {
 	 * @param selectedFile the selected table file
 	 */
 	private void readImportJobsFromFile(File selectedFile) {
-		Map<String, ImportJob> importJobs = new HashMap<String, ImportJob>();;
+		Map<String, ImportJob> importJobs = new HashMap<String, ImportJob>(10000);
 		try (XSSFWorkbook myWorkBook = new XSSFWorkbook(selectedFile)) {
 			XSSFSheet mySheet = myWorkBook.getSheetAt(0);
 			Iterator<Row> rowIterator = mySheet.iterator();
@@ -75,6 +75,7 @@ public class UploadFromTableActionListener implements ActionListener {
 			this.importFromTableWindow.displayError(resourceBundle.getString("shanoir.uploader.import.table.error.csv"));
 			return;
 		}
+		logger.info(importJobs.entrySet().size() + " import jobs (== DICOM studies/examinations) read from table.");
 		this.importFromTableWindow.displayImportJobs(importJobs);
 	}
 
@@ -158,14 +159,20 @@ public class UploadFromTableActionListener implements ActionListener {
 		if (cell != null) {
 			switch (cell.getCellType()) {
 				case STRING:
-					return cell.getStringCellValue();
+                return cell.getStringCellValue().trim(); // Trim to clean up any whitespace
 				case NUMERIC:
 					if (DateUtil.isCellDateFormatted(cell)) {
 						return String.valueOf(cell.getDateCellValue());
+					} else {
+						double numericValue = cell.getNumericCellValue();
+						if (numericValue == Math.floor(numericValue)) {
+							return String.valueOf((long) numericValue);
+						} else {
+							return String.valueOf(numericValue);
+						}
 					}
-					break;
 				case BOOLEAN:
-					break;
+					return String.valueOf(cell.getBooleanCellValue());
 				case FORMULA:
 					break;
 				case BLANK:
