@@ -18,7 +18,8 @@ import { FooterState } from './footer-state.model';
 @Component({
     selector: 'form-footer',
     templateUrl: 'form-footer.component.html',
-    styleUrls: ['./form-footer.component.css']
+    styleUrls: ['./form-footer.component.css'],
+    standalone: false
 })
 
 export class FormFooterComponent {

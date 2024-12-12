@@ -19,7 +19,8 @@ import { getSizeStr } from 'src/app/utils/app.utils';
 @Component({
     selector: 'progress-bar',
     templateUrl: 'loading-bar.component.html',
-    styleUrls: ['loading-bar.component.css']
+    styleUrls: ['loading-bar.component.css'],
+    standalone: false
 })
 
 export class LoadingBarComponent {

@@ -33,10 +33,11 @@ export type Mode =  "view" | "edit" | "create";
 
 
 @Component({
-  selector: 'ingredients-list',
-  templateUrl:'anestheticIngredient-list.component.html',
-  styleUrls: ['anestheticIngredient-list.component.css'], 
-  providers: [AnestheticIngredientService]
+    selector: 'ingredients-list',
+    templateUrl: 'anestheticIngredient-list.component.html',
+    styleUrls: ['anestheticIngredient-list.component.css'],
+    providers: [AnestheticIngredientService],
+    standalone: false
 })
 
 @ModesAware

@@ -24,7 +24,8 @@ import { AccessRequestService } from './access-request.service';
     selector: 'accessRequestList',
     templateUrl: 'access-request-list.component.html',
     styleUrls: ['access-request-list.component.css'],
-    animations: [disapearUp]
+    animations: [disapearUp],
+    standalone: false
 })
 
 export class AccessRequestListComponent {

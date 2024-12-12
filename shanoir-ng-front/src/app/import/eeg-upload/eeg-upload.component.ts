@@ -29,7 +29,8 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     selector: 'eeg-upload',
     templateUrl: 'eeg-upload.component.html',
     styleUrls: ['eeg-upload.component.css', '../shared/import.step.css'],
-    animations: [slideDown]
+    animations: [slideDown],
+    standalone: false
 })
 export class EegUploadComponent {
     

@@ -21,7 +21,8 @@ import { TaskState } from 'src/app/async-tasks/task.model';
 @Component({
     selector: 'challenge-block',
     templateUrl: 'challenge-block.component.html',
-    styleUrls: ['challenge-block.component.css']
+    styleUrls: ['challenge-block.component.css'],
+    standalone: false
 })
 
 export class ChallengeBlockComponent {
