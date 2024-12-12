@@ -4,8 +4,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
+import java.math.BigDecimal;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -56,7 +57,7 @@ public class UploadFromTableActionListener implements ActionListener {
 	 * @param selectedFile the selected table file
 	 */
 	private void readImportJobsFromFile(File selectedFile) {
-		Map<String, ImportJob> importJobs = new HashMap<String, ImportJob>(10000);
+		Map<String, ImportJob> importJobs = new LinkedHashMap<String, ImportJob>(10000);
 		try (XSSFWorkbook myWorkBook = new XSSFWorkbook(selectedFile)) {
 			XSSFSheet mySheet = myWorkBook.getSheetAt(0);
 			Iterator<Row> rowIterator = mySheet.iterator();
@@ -168,7 +169,7 @@ public class UploadFromTableActionListener implements ActionListener {
 						if (numericValue == Math.floor(numericValue)) {
 							return String.valueOf((long) numericValue);
 						} else {
-							return String.valueOf(numericValue);
+							return BigDecimal.valueOf(cell.getNumericCellValue()).toPlainString();
 						}
 					}
 				case BOOLEAN:
