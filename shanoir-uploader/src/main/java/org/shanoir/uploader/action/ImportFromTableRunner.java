@@ -148,17 +148,21 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 	}
 
 	private boolean importData(ImportJob importJob, org.shanoir.uploader.model.rest.Study studyREST, List<AcquisitionEquipment> acquisitionEquipments) throws UnsupportedEncodingException, NoSuchAlgorithmException, PseudonymusException {
-		logger.info("1. Query PACS");
+		logger.info("1. Query PACS with DicomQuery: " + importJob.getDicomQuery().toString());
 		List<Patient> patients = null;
 		try {
 			patients = dicomServerClient.queryDicomServer(importJob.getDicomQuery());
 		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
 			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.missing.data"));
 			return false;
 		}
 		if (patients == null || patients.isEmpty()) {
+			logger.warn("No patients found for DicomQuery.");
 			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.missing.data"));
 			return false;
+		} else {
+			logger.info(patients.size() + " patients found for DicomQuery");
 		}
 
 		logger.info("2. Select series");
