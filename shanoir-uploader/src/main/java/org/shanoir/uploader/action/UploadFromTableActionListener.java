@@ -32,7 +32,7 @@ public class UploadFromTableActionListener implements ActionListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(UploadFromTableActionListener.class);
 
-	private static SimpleDateFormat dicomDateFormat = new SimpleDateFormat("ddMMyyyy");
+	private static SimpleDateFormat dicomDateFormat = new SimpleDateFormat("yyyymmdd");
 
 	private JFileChooser fileChooser;
 	private ImportFromTableWindow importFromTableWindow;
