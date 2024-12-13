@@ -161,6 +161,8 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		if (!selectPatientStudyAndSeries(importJob, minDate)) {
 			return false;
 		}
+		logger.info("DICOM Patient selected: " + importJob.getPatient().toString());
+		logger.info("DICOM Study selected: " + importJob.getStudy().toString());
 		PatientVerification patientVerification = importJob.getPatientVerification();
 		Patient newPatient = ImportUtils.adjustPatientWithPatientVerification(
 			importJob.getPatient(),
@@ -178,10 +180,13 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		 * so we only send one import job to the DownloadOrCopyRunnable, to download only
 		 * one DICOM study, as the code after directly finishes the import of this study.
 		 */
+		// DownloadOrCopyRunnable sets patient and study to NULL: reduce size of import-job.json
+		LocalDate studyDate = importJob.getStudy().getStudyDate();
+		String studyDescription = importJob.getStudy().getStudyDescription();
 		HashMap<String, ImportJob> downloadImportJobs = new HashMap<String, ImportJob>();
 		downloadImportJobs.put(importJob.getStudy().getStudyInstanceUID(), importJob);
-		Runnable downloadRunnable = new DownloadOrCopyRunnable(true, true, importFromTableWindow.frame, importFromTableWindow.downloadProgressBar,  dicomServerClient, dicomFileAnalyzer,  null, downloadImportJobs);
-		Thread downloadThread = new Thread(downloadRunnable);
+		Runnable downloadOrCopyRunnable = new DownloadOrCopyRunnable(true, true, importFromTableWindow.frame, importFromTableWindow.downloadProgressBar,  dicomServerClient, dicomFileAnalyzer,  null, downloadImportJobs);
+		Thread downloadThread = new Thread(downloadOrCopyRunnable);
 		downloadThread.start();
 		while (downloadThread.isAlive()) {
 			// wait for download thread to finish 
@@ -376,7 +381,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 					LocalDate examinationLocalDate = examinationDate.toInstant()
                         .atZone(ZoneId.systemDefault())
                         .toLocalDate();
-					if (examinationLocalDate.equals(importJob.getStudy().getStudyDate())) {
+					if (examinationLocalDate.equals(studyDate)) {
 						logger.info("Import job only downloaded, manual user decision needed: existing examination with the same date.");
 						return false;
 					}
@@ -387,10 +392,10 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			return false;
 		}
 		logger.info("6.2 Create examination.");
-		Instant studyDateInstant = importJob.getStudy().getStudyDate().atStartOfDay(ZoneId.systemDefault()).toInstant();
-        Date studyDate = Date.from(studyDateInstant);
+		Instant studyDateInstant = studyDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
+        Date studyDateDate = Date.from(studyDateInstant);
 		Long centerId = studyCard.getAcquisitionEquipment().getCenter().getId();
-		Long examinationId = ImportUtils.createExamination(studyREST, subjectREST, studyDate, importJob.getStudy().getStudyDescription(), centerId);
+		Long examinationId = ImportUtils.createExamination(studyREST, subjectREST, studyDateDate, studyDescription, centerId);
 		if (examinationId == null) {
 			uploadJob.setUploadState(UploadState.ERROR);
 			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.examination"));
