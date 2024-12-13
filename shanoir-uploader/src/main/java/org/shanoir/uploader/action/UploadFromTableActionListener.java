@@ -5,6 +5,8 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -29,6 +31,8 @@ import org.slf4j.LoggerFactory;
 public class UploadFromTableActionListener implements ActionListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(UploadFromTableActionListener.class);
+
+	private static SimpleDateFormat dicomDateFormat = new SimpleDateFormat("ddMMyyyy");
 
 	private JFileChooser fileChooser;
 	private ImportFromTableWindow importFromTableWindow;
@@ -160,10 +164,11 @@ public class UploadFromTableActionListener implements ActionListener {
 		if (cell != null) {
 			switch (cell.getCellType()) {
 				case STRING:
-                return cell.getStringCellValue().trim(); // Trim to clean up any whitespace
+                return cell.getStringCellValue().trim();
 				case NUMERIC:
 					if (DateUtil.isCellDateFormatted(cell)) {
-						return String.valueOf(cell.getDateCellValue());
+						Date date = cell.getDateCellValue();
+						return dicomDateFormat.format(date);
 					} else {
 						double numericValue = cell.getNumericCellValue();
 						if (numericValue == Math.floor(numericValue)) {
