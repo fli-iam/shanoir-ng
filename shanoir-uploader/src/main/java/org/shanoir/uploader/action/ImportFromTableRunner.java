@@ -333,15 +333,16 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		logger.info("5. Create subject or use existing one (add subject-study, if necessary)");
 		org.shanoir.uploader.model.rest.Subject subjectREST = null;
 		String subjectStudyIdentifier = null;
-		// Profile Neurinfo
+		// Profile Neurinfo/dev: SHANOIR_SUBJECT_NAME column is mandatory
 		if (ShUpConfig.isModeSubjectCommonNameManual()) {
+			// @todo: manage case here, subject with the same name in Excel exists already: re-use
 			if (importJob.getSubjectName() == null || importJob.getSubjectName().isBlank()) {
 				uploadJob.setUploadState(UploadState.ERROR);
 				importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.subject"));
 				logger.error(importJob.getErrorMessage());
 				return false;
 			}
-		// Profile OFSEP
+		// Profile OFSEP: SHANOIR_SUBJECT_NAME column is ignored
 		} else {
 			try {
 				subjectREST = shanoirUploaderServiceClientNG.findSubjectBySubjectIdentifier(subject.getIdentifier());
@@ -354,7 +355,6 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				return false;
 			}	
 		}
-
 		subjectREST = ImportUtils.manageSubject(subjectREST,
 			subject, importJob.getSubjectName(), ImagedObjectCategory.LIVING_HUMAN_BEING,
 			HemisphericDominance.Left.toString(), HemisphericDominance.Left.toString(),
