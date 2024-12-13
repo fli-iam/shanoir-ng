@@ -19,11 +19,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * Api for access request, to make a demand on 
@@ -117,10 +117,14 @@ public interface AccessRequestApi {
 	@PutMapping(value = "/invitation/")
 	ResponseEntity<AccessRequest> inviteUserToStudy(
 			@Parameter(name = "Study the user is invited in", required = true) 
-			@RequestParam(value = "studyId", required = true) Long studyId,
+				@RequestParam(value = "studyId", required = true) Long studyId,
 			@Parameter(name = "Study name the user is invited in", required = true) 
-			@RequestParam(value = "studyName", required = true) String studyName,
+				@RequestParam(value = "studyName", required = true) String studyName,
+			@Parameter(name = "Issuer of the invitation", required = true) 
+				@RequestParam(value = "issuer", required = true) String issuer,
+			@Parameter(name = "The future role of the user in the study he is invited in", required = true) 
+				@RequestParam(value = "studyName", required = true) String role,
 			@Parameter(name = "The email or login of the invited user.") 
-    		@RequestParam(value = "email", required = true) String emailOrLogin) throws RestServiceException, JsonProcessingException, AmqpException;
+				@RequestParam(value = "email", required = true) String emailOrLogin) throws RestServiceException, JsonProcessingException, AmqpException;
 
 }

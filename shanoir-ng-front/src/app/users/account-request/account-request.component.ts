@@ -15,14 +15,14 @@
 import { Location } from '@angular/common';
 import { Component } from '@angular/core';
 
-import * as AppUtils from '../../utils/app.utils';
-import { User } from '../shared/user.model';
-import { AccountRequestInfo } from '../account-request-info/account-request-info.model';
-import { UserService } from '../shared/user.service'
-import { UntypedFormGroup, Validators, UntypedFormBuilder, AbstractControl, ValidationErrors } from '@angular/forms';
+import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ConsoleService } from 'src/app/shared/console/console.service';
 import { ServiceLocator } from 'src/app/utils/locator.service';
-import { Router } from '@angular/router';
+import * as AppUtils from '../../utils/app.utils';
+import { AccountRequestInfo } from '../account-request-info/account-request-info.model';
+import { User } from '../shared/user.model';
+import { UserService } from '../shared/user.service';
 
 @Component({
     selector: 'accountRequest',
@@ -40,6 +40,9 @@ export class AccountRequestComponent {
     public errorOnRequest: boolean = false;
     infoValid: boolean = false;
     protected router: Router;
+    studyName: string; // optional : study display name
+    invitationIssuer: string; // optional : issuer of the invitation (from the study details)
+    role: string; // optional : operator/researcher
 
     language: 'english' | 'french' = 'english';
 
@@ -47,8 +50,12 @@ export class AccountRequestComponent {
             private fb: UntypedFormBuilder,
             public userService: UserService,
             private location: Location,
-            private consoleService: ConsoleService,) {
+            private route: ActivatedRoute,
+            private consoleService: ConsoleService) {
                 this.router = ServiceLocator.injector.get(Router)
+                this.studyName = this.route.snapshot.queryParams['study'];
+                this.invitationIssuer = this.route.snapshot.queryParams['from'];
+                this.role = this.route.snapshot.queryParams['role'];
             }
 
     ngOnInit(): void {
@@ -80,6 +87,9 @@ export class AccountRequestComponent {
     }
 
     accountRequest(): void {
+        if (this.studyName) this.user.accountRequestInfo.studyName = this.studyName;
+        if (this.invitationIssuer) this.user.accountRequestInfo.contact = this.invitationIssuer;
+        if (this.role) this.user.accountRequestInfo.function = this.role;
         this.userService.requestAccount(this.user)
             .then((res) => {
                  this.requestSent = true;

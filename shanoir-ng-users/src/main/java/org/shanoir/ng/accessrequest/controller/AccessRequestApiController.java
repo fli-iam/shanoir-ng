@@ -205,11 +205,15 @@ public class AccessRequestApiController implements AccessRequestApi {
 
 	public 	ResponseEntity<AccessRequest> inviteUserToStudy(
 			@Parameter(name = "Study the user is invited in", required = true) 
-			@RequestParam(value = "studyId", required = true) Long studyId,
+				@RequestParam(value = "studyId", required = true) Long studyId,
 			@Parameter(name = "Study name the user is invited in", required = true) 
-			@RequestParam(value = "studyName", required = true) String studyName,
+				@RequestParam(value = "studyName", required = true) String studyName,
+			@Parameter(name = "Issuer of the invitation", required = true) 
+				@RequestParam(value = "issuer", required = true) String issuer,
+			@Parameter(name = "The future role of the user in the study he is invited in", required = true) 
+				@RequestParam(value = "studyName", required = true) String role,
 			@Parameter(name = "The email or login of the invited user.") 
-			@RequestParam(value = "email", required = true) String emailOrLogin) throws RestServiceException, JsonProcessingException, AmqpException {
+				@RequestParam(value = "email", required = true) String emailOrLogin) throws RestServiceException, JsonProcessingException, AmqpException {
 
 		boolean isEmail = emailOrLogin.contains("@");
 
@@ -243,19 +247,23 @@ public class AccessRequestApiController implements AccessRequestApi {
 			request.setMotivation("From study manager");
 			request.setStatus(AccessRequest.APPROVED);
 			return new ResponseEntity<AccessRequest>(request, HttpStatus.OK);
+		} else {
+			// Otherwise, send a mail to the new user if we have a mail in entry
+			if (isEmail) {
+				StudyInvitationEmail mail = new StudyInvitationEmail();
+				mail.setInvitedMail(emailOrLogin);
+				mail.setStudyId(studyId.toString());
+				mail.setStudyName(studyName);
+				mail.setInvitationIssuer(issuer);
+				mail.setRole(role);
+				this.emailService.inviteToStudy(mail);
+				return new ResponseEntity<AccessRequest>(HttpStatus.NO_CONTENT);
+			} else {
+				return new ResponseEntity<AccessRequest>(HttpStatus.BAD_REQUEST);
+			}
+
 		}
 
-		// Otherwise, send a mail to the new user if we have a mail in entry
-		if (isEmail) {
-			StudyInvitationEmail mail = new StudyInvitationEmail();
-			mail.setInvitedMail(emailOrLogin);
-			mail.setStudyId(studyId.toString());
-			mail.setStudyName(studyName);
-			
-			this.emailService.inviteToStudy(mail);
-			return new ResponseEntity<AccessRequest>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<AccessRequest>(HttpStatus.BAD_REQUEST);
 	}
 
 	public ResponseEntity<List<AccessRequest>> findAllByStudyId(

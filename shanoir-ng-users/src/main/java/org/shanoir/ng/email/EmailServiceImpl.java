@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.email;
 
+import java.net.URLEncoder;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -576,13 +577,32 @@ public class EmailServiceImpl implements EmailService {
 			// access-request/study/1
 			variables.put(SERVER_ADDRESS, shanoirServerAddress + "access-request/study/" + email.getStudyId());
 			// account/study/1/account-request
-			variables.put(SERVER_ADDRESS_PUBLIC, shanoirServerAddress + "account/study/" + email.getStudyId() + "/account-request");
+			variables.put(SERVER_ADDRESS_PUBLIC, buildInvitationLink(email));
 			final String content = build("notifyAnonymousInvitation", variables);
 			messageHelper.setText(content, true);
 		};
 		// Send the message
 		LOG.error("User with mail {} invited in study {}", email.getInvitedMail(), email.getStudyId());
 		mailSender.send(messagePreparator);
+	}
+
+	private String buildInvitationLink(StudyInvitationEmail email) {
+		String link = shanoirServerAddress + "account/study/" + email.getStudyId() + "/account-request";
+		List<String> params = new ArrayList<>();
+		if (email.getRole() != null) {
+			params.add("role=" + URLEncoder.encode(email.getRole()));
+		}
+		if (email.getStudyName() != null) {
+			params.add("study=" + URLEncoder.encode(email.getStudyName()));
+		}
+		if (email.getInvitationIssuer() != null) {
+			params.add("from=" + URLEncoder.encode(email.getInvitationIssuer()));
+		}
+		if (!params.isEmpty()) {
+			link += "?";
+			link += String.join("&", params);
+		}
+		return link;
 	}
 
 	/**
