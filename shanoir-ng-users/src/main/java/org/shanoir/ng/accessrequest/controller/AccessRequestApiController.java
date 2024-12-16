@@ -211,7 +211,7 @@ public class AccessRequestApiController implements AccessRequestApi {
 			@Parameter(name = "Issuer of the invitation", required = true) 
 				@RequestParam(value = "issuer", required = false) String issuer,
 			@Parameter(name = "The future role of the user in the study he is invited in", required = true) 
-				@RequestParam(value = "studyName", required = false) String role,
+				@RequestParam(value = "role", required = false) String role,
 			@Parameter(name = "The email or login of the invited user.") 
 				@RequestParam(value = "email", required = true) String emailOrLogin) throws RestServiceException, JsonProcessingException, AmqpException {
 
