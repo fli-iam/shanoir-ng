@@ -36,13 +36,13 @@ export class AccessRequestService extends EntityService<AccessRequest> implement
         super(http);
     }
 
-    public inviteUser(mail: string, study: IdName): Promise<AccessRequest> {
+    public inviteUser(mail: string, role: string, study: IdName): Promise<AccessRequest> {
         const formData: FormData = new FormData();
         formData.set("email", mail);
         formData.set("studyId", "" + study.id);
         formData.set("studyName", study.name);
         formData.set("issuer", KeycloakService.auth.authz.tokenParsed.name);
-        formData.set("role", study.name);
+        formData.set("role", role);
         return this.http.put(this.API_URL + "/invitation/", formData).toPromise()
             .then(response =>
             {
