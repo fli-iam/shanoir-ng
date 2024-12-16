@@ -67,6 +67,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     StudyUserRight = StudyUserRight;
     isAdmin: boolean;
     invitationMail: string;
+    invitationRole: string;
 
     private onTouchedCallback = () => {};
     private onChangeCallback = (_: any) => {};
