@@ -193,6 +193,11 @@ public class Patient {
 			this.patientFirstName = parts.length > 0 ? parts[0].trim() : "";
 			this.patientLastName = parts.length > 1 ? parts[1].trim() : "";
 		}
+		// If birth name is missing in DICOM: use last name by default
+		// Users can adapt it in PatientVerification on using ShUp
+		if (patientBirthName == null || patientBirthName.isEmpty()) {
+			this.patientBirthName = this.patientLastName;
+		}
 	}
 
 }
