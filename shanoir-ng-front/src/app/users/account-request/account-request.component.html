@@ -18,7 +18,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         Request an account
     </h2>
     <div class="subtitle">
-        To access the study <span>{{studyName}}</span> you first have to create an account
+        To access <span>{{studyName}}</span> data you first have to create a Shanoir account
     </div>
     <div class="rgpd">
         <div class="language">
@@ -41,7 +41,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </div>
     </div>
     <form *ngIf="form && !requestSent" [formGroup]="form" class="max-content" novalidate>
-        <fieldset>
+        <fieldset class="main-fieldset">
             <ol>
                 <li>
                     <label i18n="Edit user|First name label@@editUserFirstName" class="required-label">First Name</label>
