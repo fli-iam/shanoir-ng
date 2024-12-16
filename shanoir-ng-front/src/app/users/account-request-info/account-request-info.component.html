@@ -51,19 +51,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span *ngIf="!editMode">{{info.institution}}</span>
             </span>
         </li>
-        <!-- <li>
-            <label i18n="Edit user|Function label@@editUserFunction" [class.required-label]="editMode">Role</label> 
+        <li>
+            <label i18n="Edit user|Function label@@editUserFunction" [class.required-label]="editMode">Role in the study</label> 
             <span class="right-col">
-                <ng-container *ngIf="editMode">
-                    <input type="radio" [(ngModel)]="info.function" value="radiologist" (change)="onInfoChange()" formControlName="function"/>
-                    <span>radiologist</span>
-                    <br/><input type="radio" [(ngModel)]="info.function" value="researcher" (change)="onInfoChange()" formControlName="function"/>
-                    <span>researcher</span>
-                    <br/><input type="radio" [(ngModel)]="info.function" value="other" (change)="onInfoChange()" formControlName="function"/>
-                    <span>other</span>
-                </ng-container>
                 <span *ngIf="!editMode">{{info.function}}</span>
             </span>
-        </li> -->
+        </li>
+        <li>
+            <label i18n="Edit user|Contact label@@editUserContact">Invitation issuer</label> 
+            <span class="right-col">
+                <span *ngIf="!editMode">{{info.contact}}</span>
+            </span>
+        </li>
     </ol>
 </fieldset>
