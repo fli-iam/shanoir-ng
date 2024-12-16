@@ -137,6 +137,7 @@ public class ImporterApiControllerTest {
 
 		EegImportJob importJob = new EegImportJob();
 		EegDataset dataset = new EegDataset();
+		importJob.setExaminationId(1L);
 		importJob.setDatasets(Collections.singletonList(dataset));
 		dataset.setName("Ceci est un nom bien particulier");
 
