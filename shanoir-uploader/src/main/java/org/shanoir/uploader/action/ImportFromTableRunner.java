@@ -335,6 +335,20 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		String subjectStudyIdentifier = null;
 		// Profile Neurinfo/dev: SHANOIR_SUBJECT_NAME column is mandatory
 		if (ShUpConfig.isModeSubjectCommonNameManual()) {
+			try {
+				List<org.shanoir.uploader.model.rest.Subject> existingSubjects = shanoirUploaderServiceClientNG.findSubjectsByStudy(studyREST.getId());
+				if (existingSubjects != null) {
+					subjectREST = existingSubjects.stream()
+						.filter(existingSubject -> importJob.getSubjectName().equals(existingSubject.getName()))
+						.findFirst()
+						.orElse(null);
+					if (subjectREST != null) {
+						subjectStudyIdentifier = subjectREST.getName();
+					}
+				}
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
 			// @todo: manage case here, subject with the same name in Excel exists already: re-use
 			if (importJob.getSubjectName() == null || importJob.getSubjectName().isBlank()) {
 				uploadJob.setUploadState(UploadState.ERROR);
