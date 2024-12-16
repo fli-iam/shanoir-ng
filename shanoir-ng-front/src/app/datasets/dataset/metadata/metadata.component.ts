@@ -29,7 +29,8 @@ import { Subscription } from 'rxjs';
 @Component({
     selector: 'dicom-metadata',
     templateUrl: 'metadata.component.html',
-    styleUrls: ['metadata.component.css']
+    styleUrls: ['metadata.component.css'],
+    standalone: false
 })
 
 export class MetadataComponent implements OnDestroy {

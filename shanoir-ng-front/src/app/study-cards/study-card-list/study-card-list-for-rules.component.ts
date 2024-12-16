@@ -27,6 +27,7 @@ import { ColumnDefinition } from '../../shared/components/table/column.definitio
     selector: 'study-card-list-for-rules',
     templateUrl: 'study-card-list-for-rules.component.html',
     styleUrls: ['study-card-list.component.css'],
+    standalone: false
 })
 export class StudyCardForRulesListComponent extends StudyCardListComponent implements OnInit {
 

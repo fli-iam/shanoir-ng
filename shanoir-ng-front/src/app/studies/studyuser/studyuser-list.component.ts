@@ -39,10 +39,12 @@ import { ServiceLocator } from 'src/app/utils/locator.service';
     styleUrls: ['studyuser-list.component.css'],
     providers: [
         {
-          provide: NG_VALUE_ACCESSOR,
-          useExisting: forwardRef(() => StudyUserListComponent),
-          multi: true,
-        }] 
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => StudyUserListComponent),
+            multi: true,
+        }
+    ],
+    standalone: false
 })
 
 export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
@@ -65,6 +67,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     StudyUserRight = StudyUserRight;
     isAdmin: boolean;
     invitationMail: string;
+    invitationRole: string;
 
     private onTouchedCallback = () => {};
     private onChangeCallback = (_: any) => {};
@@ -263,8 +266,8 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     }
 
     public inviteUser() {
-        let stud = new IdName(this.study.id, this.study.name);
-        this.accessRequestService.inviteUser(this.invitationMail, stud).then(request => {
+        let study = new IdName(this.study.id, this.study.name);
+        this.accessRequestService.inviteUser(this.invitationMail, this.invitationRole, study).then(request => {
             if (!request) {
                 this.consoleService.log('info', "No user found with such email, an invitation was sent.");
             } else {

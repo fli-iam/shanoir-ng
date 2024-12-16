@@ -32,7 +32,8 @@ import { ServiceLocator } from './utils/locator.service';
     selector: 'app-root',
     templateUrl: 'app.component.html',
     styleUrls: ['app.component.css'],
-    animations: [ slideRight, slideMarginLeft, parent ]
+    animations: [slideRight, slideMarginLeft, parent],
+    standalone: false
 })
 
 export class AppComponent {

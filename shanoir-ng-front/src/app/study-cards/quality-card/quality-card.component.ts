@@ -40,7 +40,7 @@ import { ExaminationService } from 'src/app/examinations/shared/examination.serv
 import { ServiceLocator } from 'src/app/utils/locator.service';
 import { TestQualityCardOptionsComponent } from '../test-quality-card-options/test-quality-card-options.component';
 import { SuperPromise } from 'src/app/utils/super-promise';
-import { Observable } from 'rxjs';
+import { Observable, race } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { Selection } from 'src/app/studies/study/tree.service';
 
@@ -48,7 +48,8 @@ import { Selection } from 'src/app/studies/study/tree.service';
     selector: 'quality-card',
     templateUrl: 'quality-card.component.html',
     styleUrls: ['quality-card.component.css'],
-    animations: [slideDown]
+    animations: [slideDown],
+    standalone: false
 })
 export class QualityCardComponent extends EntityComponent<QualityCard> {
 
@@ -247,7 +248,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
 
     private waitForEnd(modalRef: ComponentRef<any>): Promise<Interval | 'cancel'> {
         let resPromise: SuperPromise<any | 'cancel'> = new SuperPromise();
-        let result: Observable<any> = Observable.race([
+        let result: Observable<any> = race([
             modalRef.instance.test, 
             modalRef.instance.close.map(() => 'cancel')
         ]);

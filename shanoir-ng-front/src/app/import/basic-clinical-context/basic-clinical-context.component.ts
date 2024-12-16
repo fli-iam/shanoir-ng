@@ -31,7 +31,8 @@ import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
     selector: 'clinical-context',
     templateUrl: '../clinical-context/clinical-context.component.html',
     styleUrls: ['../clinical-context/clinical-context.component.css', '../shared/import.step.css'],
-    animations: [slideDown, preventInitialChildAnimations]
+    animations: [slideDown, preventInitialChildAnimations],
+    standalone: false
 })
 export class BasicClinicalContextComponent extends AbstractClinicalContextComponent implements OnDestroy {
 

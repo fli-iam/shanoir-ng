@@ -15,7 +15,10 @@
 import { Pipe, PipeTransform } from "@angular/core";
 import { DatasetProcessing } from "../shared/dataset-processing.model";
 
-@Pipe({ name: "datasetProcessingLabel" })
+@Pipe({
+    name: "datasetProcessingLabel",
+    standalone: false
+})
 export class DatasetProcessingPipe implements PipeTransform {
 
     transform(datasetProcessing: DatasetProcessing) {

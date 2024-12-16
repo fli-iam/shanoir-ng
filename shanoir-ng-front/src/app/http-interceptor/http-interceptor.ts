@@ -15,7 +15,7 @@ import { formatDate } from '@angular/common';
 import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { StatusCodes } from 'http-status-codes';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { catchError, finalize, tap } from 'rxjs/operators';
 
 import { ConsoleService } from '../shared/console/console.service';

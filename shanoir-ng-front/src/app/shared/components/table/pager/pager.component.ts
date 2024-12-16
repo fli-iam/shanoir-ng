@@ -18,6 +18,7 @@ import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges } from
     selector: 'shanoir-pager',
     templateUrl: 'pager.component.html',
     styleUrls: ['pager.component.css'],
+    standalone: false
 })
 
 export class PagerComponent implements OnChanges {

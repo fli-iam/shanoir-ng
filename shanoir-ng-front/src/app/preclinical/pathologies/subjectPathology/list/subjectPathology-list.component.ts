@@ -28,7 +28,8 @@ import { ColumnDefinition } from '../../../../shared/components/table/column.def
     templateUrl: 'subjectPathology-list.component.html',
     providers: [
         SubjectPathologyService
-    ]
+    ],
+    standalone: false
 })
 
 @ModesAware

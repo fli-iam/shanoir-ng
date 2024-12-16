@@ -32,7 +32,8 @@ import { StudyUser } from 'src/app/studies/shared/study-user.model';
 @Component({
     selector: 'user-detail',
     templateUrl: 'user.component.html',
-    styleUrls: ['user.component.css']
+    styleUrls: ['user.component.css'],
+    standalone: false
 })
 
 export class UserComponent extends EntityComponent<User> {

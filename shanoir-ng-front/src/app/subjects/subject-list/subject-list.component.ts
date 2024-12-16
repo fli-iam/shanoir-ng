@@ -27,7 +27,8 @@ import { Pageable, Page } from 'src/app/shared/components/table/pageable.model';
 @Component({
     selector: 'subject-list',
     templateUrl: 'subject-list.component.html',
-    styleUrls: ['subject-list.component.css']
+    styleUrls: ['subject-list.component.css'],
+    standalone: false
 })
 
 export class SubjectListComponent extends EntityListComponent<Subject> {

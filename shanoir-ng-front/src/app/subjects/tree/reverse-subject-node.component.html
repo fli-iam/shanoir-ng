@@ -14,7 +14,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened || treeService.isSelected(node.id, 'subject')"
+        [class.selected]="menuOpened || treeService.isSelected(node.id, 'subject')"
         [label]="node.label"
         [awesome]="awesome"
         [(opened)]="node.opened"

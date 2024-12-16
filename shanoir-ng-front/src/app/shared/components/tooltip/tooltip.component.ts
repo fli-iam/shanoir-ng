@@ -18,7 +18,8 @@ import { Component, HostBinding, Input } from '@angular/core';
 @Component({
     selector: 'tool-tip',
     templateUrl: 'tooltip.component.html',
-    styleUrls: ['tooltip.component.css']
+    styleUrls: ['tooltip.component.css'],
+    standalone: false
 })
 
 export class TooltipComponent {
