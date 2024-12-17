@@ -312,10 +312,14 @@ public class RabbitMQConfiguration {
 	public static Queue studiesSubjectStudyStudyCardTagQueue() {
 		return new Queue(STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG, true);
 	}
-	
+
 	@Bean
-	public static Queue deleteSubjectQueue() { return new Queue(DELETE_SUBJECT_QUEUE, true); }
-	
+	public static Queue deleteSubjectQueue() {
+		return new Queue(DELETE_SUBJECT_QUEUE, true); }
+	@Bean
+	public static Queue deleteAnimalSubjectQueue() {
+		return new Queue(DELETE_ANIMAL_SUBJECT_QUEUE, true); }
+
 	@Bean
 	public static Queue importerQueue() {
 		return new Queue(IMPORTER_QUEUE_DATASET, true);
