@@ -143,6 +143,7 @@ public class DicomServerClient implements IDicomServerClient {
 		final List<String> retrievedDicomFiles = new ArrayList<String>();
 		if (selectedSeries != null && !selectedSeries.isEmpty()) {
 			try {
+				cleanTempFolders(studyInstanceUID);
 				downloadFromDicomServer(studyInstanceUID, selectedSeries, progressBar, downloadOrCopyReport);
 				readAndCopyDicomFilesToUploadFolder(studyInstanceUID, selectedSeries, uploadFolder, retrievedDicomFiles, downloadOrCopyReport);
 				deleteFolderDownloadFromDicomServer(studyInstanceUID, selectedSeries);
@@ -154,6 +155,14 @@ public class DicomServerClient implements IDicomServerClient {
 			}				
 		}
 		return retrievedDicomFiles;
+	}
+
+	private void cleanTempFolders(String studyInstanceUID) {
+		File tempStudyInstanceUIDFolder = new File(workFolder, studyInstanceUID);
+		if (tempStudyInstanceUIDFolder.exists()) {
+			tempStudyInstanceUIDFolder.delete();
+			logger.info("Temp folder of last download found and cleaned: " + tempStudyInstanceUIDFolder.getAbsolutePath());
+		}
 	}
 
 	private void downloadFromDicomServer(String studyInstanceUID, List<Serie> selectedSeries, final JProgressBar progressBar, StringBuilder downloadOrCopyReport) throws Exception {
@@ -188,7 +197,8 @@ public class DicomServerClient implements IDicomServerClient {
 							if (!destSerieFolder.exists())
 								destSerieFolder.mkdirs();
 							File destDicomFile = new File(destSerieFolder, dicomFileName);
-							Files.move(sourceFileFromPacs.toPath(), destDicomFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+							Files.copy(sourceFileFromPacs.toPath(), destDicomFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+							sourceFileFromPacs.delete();
 						}
 					}
 				}

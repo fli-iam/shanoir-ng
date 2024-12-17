@@ -124,31 +124,43 @@ public class CurrentUploadsWindowTable implements Observer {
 
 	private void addRow(DefaultTableModel model, String key, NominativeDataUploadJob nominativeDataUploadJob) {
 		String actionImport = (String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.import");
-    	String actionDelete = (String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete");
-
-		switch (nominativeDataUploadJob.getUploadState()) {
-			case UploadState.READY, UploadState.ERROR -> model.addRow(new Object[] { key, nominativeDataUploadJob.getPatientPseudonymusHash(),
-					nominativeDataUploadJob.getPatientName(), nominativeDataUploadJob.getIPP(),
-					nominativeDataUploadJob.getStudyDate(), nominativeDataUploadJob.getMriSerialNumber(),
-					nominativeDataUploadJob.getUploadState().toString(),
-					actionImport,
-					actionDelete
-				});
-			case UploadState.FINISHED_UPLOAD -> model.addRow(new Object[] { key, nominativeDataUploadJob.getPatientPseudonymusHash(),
-					nominativeDataUploadJob.getPatientName(), nominativeDataUploadJob.getIPP(),
-					nominativeDataUploadJob.getStudyDate(), nominativeDataUploadJob.getMriSerialNumber(),
-					nominativeDataUploadJob.getUploadPercentage(),
-					 "",
-					actionDelete 
-				});
-			default -> model.addRow(new Object[] { key, nominativeDataUploadJob.getPatientPseudonymusHash(),
-					nominativeDataUploadJob.getPatientName(), nominativeDataUploadJob.getIPP(),
-					nominativeDataUploadJob.getStudyDate(), nominativeDataUploadJob.getMriSerialNumber(),
-					nominativeDataUploadJob.getUploadPercentage(), 
-					"", 
-					"" 
-				});
-		}
+		String actionDelete = (String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete");
+		Object[] row = switch (nominativeDataUploadJob.getUploadState()) {
+			case READY, ERROR -> new Object[] {
+				key,
+				nominativeDataUploadJob.getPatientPseudonymusHash(),
+				nominativeDataUploadJob.getPatientName(),
+				nominativeDataUploadJob.getIPP(),
+				nominativeDataUploadJob.getStudyDate(),
+				nominativeDataUploadJob.getMriSerialNumber(),
+				nominativeDataUploadJob.getUploadState().toString(),
+				actionImport,
+				actionDelete
+			};
+			case FINISHED_UPLOAD -> new Object[] {
+				key,
+				nominativeDataUploadJob.getPatientPseudonymusHash(),
+				nominativeDataUploadJob.getPatientName(),
+				nominativeDataUploadJob.getIPP(),
+				nominativeDataUploadJob.getStudyDate(),
+				nominativeDataUploadJob.getMriSerialNumber(),
+				nominativeDataUploadJob.getUploadPercentage(),
+				"",
+				actionDelete
+			};
+			default -> new Object[] {
+				key,
+				nominativeDataUploadJob.getPatientPseudonymusHash(),
+				nominativeDataUploadJob.getPatientName(),
+				nominativeDataUploadJob.getIPP(),
+				nominativeDataUploadJob.getStudyDate(),
+				nominativeDataUploadJob.getMriSerialNumber(),
+				nominativeDataUploadJob.getUploadPercentage(),
+				"",
+				""
+			};
+		};
+		model.addRow(row);
 	}
 
 	public void addLineToTable(String absolutePath, NominativeDataUploadJob nominativeDataUploadJob) {
