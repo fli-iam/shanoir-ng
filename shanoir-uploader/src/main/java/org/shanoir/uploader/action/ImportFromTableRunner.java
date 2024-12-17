@@ -349,7 +349,6 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 			}
-			// @todo: manage case here, subject with the same name in Excel exists already: re-use
 			if (importJob.getSubjectName() == null || importJob.getSubjectName().isBlank()) {
 				uploadJob.setUploadState(UploadState.ERROR);
 				importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.subject"));
