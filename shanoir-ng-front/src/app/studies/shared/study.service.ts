@@ -16,7 +16,7 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { Observable } from 'rxjs/Observable';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
+import { Task, TaskState } from 'src/app/async-tasks/task.model';
 import { Tag } from 'src/app/tags/tag.model';
 import { DataUserAgreement } from '../../dua/shared/dua.model';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
@@ -36,6 +36,7 @@ import {
     SubjectWithSubjectStudyDTO
 } from './study.dto';
 import { Study } from './study.model';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 
 @Injectable()
 export class StudyService extends EntityService<Study> implements OnDestroy {
@@ -46,7 +47,8 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     fileUploads: Map<number, Promise<void>> = new Map(); // current uploads
     private studyVolumesCache: Map<number, StudyStorageVolumeDTO> = new Map();
 
-    constructor(protected http: HttpClient, private keycloakService: KeycloakService, private studyDTOService: StudyDTOService) {
+    constructor(protected http: HttpClient, private keycloakService: KeycloakService, private studyDTOService: StudyDTOService, 
+            private downloadService: MassDownloadService) {
         super(http)
     }
 
@@ -172,12 +174,16 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
 
     downloadProtocolFile(fileName: string, studyId: number, state?: TaskState) {
         const endpoint = this.API_URL + '/protocol-file-download/' + studyId + "/" + fileName + "/";
-        return AppUtils.downloadWithStatusGET(endpoint, null, state);
+        return this.downloadService.downloadSingleFile(endpoint, null, state);
+    }
+
+    buildProtocolFileUrl(fileName: string, studyId: number): string {
+        return this.API_URL + '/protocol-file-download/' + studyId + "/" + fileName;
     }
 
     downloadDuaFile(fileName: string, studyId: number, state?: TaskState) {
         const endpoint = this.API_URL + '/dua-download/' + studyId + "/" + fileName + "/";
-        return AppUtils.downloadWithStatusGET(endpoint, null, state);
+        return this.downloadService.downloadSingleFile(endpoint, null, state);
     }
 
     downloadDuaBlob(fileName: string, studyId: number): Promise<Blob> {

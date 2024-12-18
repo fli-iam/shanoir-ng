@@ -13,20 +13,20 @@
  */
 
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
 
+import { HttpClient } from '@angular/common/http';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
-import { ExtraData } from './extradata.model';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-import * as AppUtils from '../../../../utils/app.utils';
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { ExtraData } from './extradata.model';
+import { Observable } from 'rxjs';
 
 @Injectable()
 export class ExtraDataService extends EntityService<ExtraData>{
         
     API_URL = PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL;
 
-    constructor(protected http: HttpClient) {
+    constructor(protected http: HttpClient, private downloadService: MassDownloadService) {
         super(http)
     }
     
@@ -48,16 +48,7 @@ export class ExtraDataService extends EntityService<ExtraData>{
 
     downloadFile(examId: number): Promise<void> {
         const endpoint = this.API_URL + '/extradata/download/' + examId;
-        return this.http.get(endpoint, { observe: 'response', responseType: 'blob' }
-        ).toPromise().then(
-            response => {
-                this.downloadIntoBrowser(response);
-            }
-        );
-    }
-
-    private downloadIntoBrowser(response: HttpResponse<Blob>){
-        AppUtils.browserDownloadFileFromResponse(response);
+        return this.downloadService.downloadSingleFile(endpoint).toPromise().then(() => null);
     }
     
     createExtraData(datatype:string,extradata: any): Promise<any> {

@@ -23,6 +23,7 @@ import { ServiceLocator } from '../../utils/locator.service';
 import { ExaminationDTO, ExaminationDTOService } from './examination.dto';
 import { Examination } from './examination.model';
 import { SubjectExamination } from './subject-examination.model';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 
 
 @Injectable()
@@ -30,7 +31,7 @@ export class ExaminationService extends EntityService<Examination> {
 
     API_URL = AppUtils.BACKEND_API_EXAMINATION_URL;
 
-    constructor(protected http: HttpClient) {
+    constructor(protected http: HttpClient, private downloadService: MassDownloadService) {
         super(http)
     }
     protected examinationDtoService: ExaminationDTOService = ServiceLocator.injector.get(ExaminationDTOService);
@@ -82,11 +83,7 @@ export class ExaminationService extends EntityService<Examination> {
 
     downloadFile(fileName: string, examId: number, state?: TaskState): Observable<TaskState>  {
         const endpoint: string = this.API_URL + '/extra-data-download/' + examId + "/" + fileName + "/";
-        return AppUtils.downloadWithStatusGET(endpoint, null, state);
-    }
-
-    private downloadIntoBrowser(response: HttpResponse<Blob>){
-        AppUtils.browserDownloadFileFromResponse(response);
+        return this.downloadService.downloadSingleFile(endpoint, null, state);
     }
 
     public stringify(entity: Examination) {

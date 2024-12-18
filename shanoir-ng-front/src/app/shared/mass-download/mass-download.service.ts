@@ -13,10 +13,9 @@
  */
 
 import { formatDate } from '@angular/common';
-import { HttpResponse } from '@angular/common/http';
+import { HttpParams, HttpResponse } from '@angular/common/http';
 import { ComponentRef, Injectable } from '@angular/core';
-import { Observable, Subscription } from 'rxjs-compat';
-import { take } from 'rxjs/operators';
+import { last, take } from 'rxjs/operators';
 import { Task, TaskState } from 'src/app/async-tasks/task.model';
 import { Dataset } from 'src/app/datasets/shared/dataset.model';
 import { DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
@@ -32,6 +31,8 @@ import { SessionService } from '../services/session.service';
 import { ShanoirError } from '../models/error.model';
 import { StrictUnion, getSizeStr } from 'src/app/utils/app.utils';
 import { AngularDeviceInformationService } from 'angular-device-information';
+import { Observable, race, Subscription } from 'rxjs';
+import * as AppUtils from '../../utils/app.utils';
 
 declare var JSZip: any;
 
@@ -173,7 +174,7 @@ export class MassDownloadService {
                     this.notificationService.pushLocalTask(task);
                 }, errorFunction);
 
-                const endSubscription: Subscription = downloadObs.last().subscribe(state => {
+                const endSubscription: Subscription = downloadObs.pipe(last()).subscribe(state => {
                     flowSubscription.unsubscribe();
                     let duration: number = Date.now() - start;
                     task.message = 'download completed in ' + duration + 'ms for ' + datasetIds.length + ' datasets';
@@ -549,7 +550,7 @@ export class MassDownloadService {
 
     private waitForEnd(modalRef: ComponentRef<any>): Promise<any | 'cancel'> {
         let resPromise: SuperPromise<any | 'cancel'> = new SuperPromise();
-        let result: Observable<any> = Observable.race([
+        let result: Observable<any> = race([
             modalRef.instance.go,
             modalRef.instance.close.map(() => 'cancel')
         ]);
@@ -619,6 +620,49 @@ export class MassDownloadService {
             this.consoleService.log('error', 'Can\'t parse the status from the recorded message', [e, task?.report]);
             return null;
         }
+    }
+
+    /**
+     * Handles large files. Download a single file, displaying a loading bar in the side menu if the dl takes more than 5s.
+     * 
+     * It is impossible to nicely use the browser dl for large files.
+     * It's because the browser need a dl through a <a href> to do so, and we can't as we have an auth token to put in a http header.
+     * But using js makes the browser dl the file silently, then copying the blob to the dl dir with the nice browser display.
+     * So with large files, the silent step is confusing for users. Here we will help her/him by displaying the progress.
+     * 
+     * @param url 
+     * @param params 
+     * @param state 
+     * @param totalSize total size of the file, if known
+     * @returns 
+     */
+    downloadSingleFile(url: string, params?: HttpParams, state?: TaskState): Observable<TaskState> {
+        let obs: Observable<TaskState> = AppUtils.downloadWithStatusGET(url, params, state);
+
+        let task: Task = new Task();
+        task.id = Date.now();
+        task.creationDate = new Date();
+        task.lastUpdate = task.creationDate;
+        task.message = 'Downloading ' + (url + '').split('/').pop();
+        task.progress = 0;
+        task.status = 2;
+        task.eventType = 'downloadFile.event';
+        task.sessionId = this.sessionService.sessionId;
+
+        let startTs: number = Date.now();
+        obs.subscribe(event => {
+            let ts: number = Date.now();
+            if (ts - startTs > 5000) {
+                if (event.progress) {
+                    task.progress = event.progress;
+                }
+                task.status = event.status;
+                if (task.status == 1) task.progress = 1;
+                this.notificationService.pushLocalTask(task);
+            }
+        });
+    
+        return obs;
     }
 }
 

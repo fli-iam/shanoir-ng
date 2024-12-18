@@ -507,6 +507,10 @@ export class StudyComponent extends EntityComponent<Study> {
         this.studyService.downloadProtocolFile(file, this.study.id, this.pdfDownloadState);
     }
 
+    public builFileUrl(file): string {
+        return this.studyService.buildProtocolFileUrl(file, this.study.id);
+    }
+
     public attachNewFile(event: any) {
         let fileToAdd = event.target.files[0];
         this.protocolFiles.push(fileToAdd);
