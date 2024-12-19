@@ -22,7 +22,8 @@ import { ImportJob } from '../shared/dicom-data.model';
     selector: 'pacs-clinical-context',
     templateUrl: '../clinical-context/clinical-context.component.html',
     styleUrls: ['../clinical-context/clinical-context.component.css', '../shared/import.step.css'],
-    animations: [slideDown, preventInitialChildAnimations]
+    animations: [slideDown, preventInitialChildAnimations],
+    standalone: false
 })
 export class PacsClinicalContextComponent extends BasicClinicalContextComponent {
     

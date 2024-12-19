@@ -16,8 +16,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </div>
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened || treeService.isSelected(node.id, 'examination')"
-        [clickable] = "this.node.id != null"
+        [class.selected]="menuOpened || treeService.isSelected(node.id, 'examination')"
+        [clickable] = "node.id != null"
         [label]="node.label"
         awesome="fas fa-stethoscope"
         [(opened)]="node.opened"
@@ -30,8 +30,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [hasChildren]="hasChildren()"
         [title]="node.title + ' n°' + node.id">
 
-    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu && this.node.id != null">
-        <a [routerLink]="this.detailsPath + this.node.id" class="open-new-tab">
+    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu && node.id != null">
+        <a [routerLink]="detailsPath + node.id" class="open-new-tab">
           <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
         </a>
         <menu-item label="View DICOM" awesome="fa-regular fa-eye" (click)="viewExaminationDicoms()"></menu-item>

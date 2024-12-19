@@ -22,10 +22,12 @@ import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
     styleUrls: ['switch.component.css'],
     providers: [
         {
-          provide: NG_VALUE_ACCESSOR,
-          useExisting: forwardRef(() => ToggleSwitchComponent),
-          multi: true,
-        }]   
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => ToggleSwitchComponent),
+            multi: true,
+        }
+    ],
+    standalone: false
 })
 
 export class ToggleSwitchComponent implements ControlValueAccessor { 

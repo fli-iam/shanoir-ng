@@ -20,7 +20,8 @@ import { MsgBoxService } from './msg-box.service';
     selector: 'msg-box',
     templateUrl: './msg-box.component.html',
     styleUrls: ['./msg-box.component.css'],
-    animations: [ slideLeft ]
+    animations: [slideLeft],
+    standalone: false
 })
 export class MsgBoxComponent {
 

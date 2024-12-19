@@ -27,10 +27,12 @@ import { Option } from '../select/select.component';
     styleUrls: ['multi-select-table.component.css'],
     providers: [
         {
-          provide: NG_VALUE_ACCESSOR,
-          useExisting: forwardRef(() => MultiSelectTableComponent),
-          multi: true,
-        }]
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => MultiSelectTableComponent),
+            multi: true,
+        }
+    ],
+    standalone: false
 })
 
 export class MultiSelectTableComponent implements ControlValueAccessor, OnChanges {

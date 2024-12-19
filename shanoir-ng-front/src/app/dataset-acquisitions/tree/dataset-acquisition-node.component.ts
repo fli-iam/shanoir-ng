@@ -29,7 +29,8 @@ import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
 
 @Component({
     selector: 'dataset-acquisition-node',
-    templateUrl: 'dataset-acquisition-node.component.html'
+    templateUrl: 'dataset-acquisition-node.component.html',
+    standalone: false
 })
 
 export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
