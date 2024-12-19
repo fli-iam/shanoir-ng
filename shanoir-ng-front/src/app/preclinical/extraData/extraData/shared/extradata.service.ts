@@ -12,20 +12,20 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { SingleDownloadService } from 'src/app/shared/mass-download/single-download.service';
 import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 import { ExtraData } from './extradata.model';
-import { Observable } from 'rxjs';
 
 @Injectable()
 export class ExtraDataService extends EntityService<ExtraData>{
         
     API_URL = PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL;
 
-    constructor(protected http: HttpClient, private downloadService: MassDownloadService) {
+    constructor(protected http: HttpClient, private downloadService: SingleDownloadService) {
         super(http)
     }
     
