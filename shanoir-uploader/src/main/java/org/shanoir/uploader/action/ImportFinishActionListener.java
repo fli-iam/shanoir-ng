@@ -197,8 +197,12 @@ public class ImportFinishActionListener implements ActionListener {
 						JOptionPane.showMessageDialog(mainWindow.frame,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult), 
 						ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"), JOptionPane.WARNING_MESSAGE);
 					}
-					//Set qualityTag to the importJob in order to update subjectStudy qualityTag on server side
-					importJob.setQualityTag(qualityControlResult.getUpdatedSubjectStudies().get(0).getQualityTag());
+					// If Failed Valid No updated subject studies exist in the qualityControlResult
+					// For Now if Failed Valid then the quality tag of the subject on server side is not updated with an empty value
+					if (!qualityControlResult.hasFailedValid()) {
+						//Set qualityTag to the importJob in order to update subjectStudy qualityTag on server side
+						importJob.setQualityTag(qualityControlResult.getUpdatedSubjectStudies().get(0).getQualityTag());
+					}
 				}
 				
 				Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, importJob, subjectREST.getName());
@@ -212,7 +216,7 @@ public class ImportFinishActionListener implements ActionListener {
         } catch (Exception ex) {
 			logger.error(ex.getMessage(), ex);
 			JOptionPane.showMessageDialog(mainWindow.frame,  ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.exception.message") + ex.getMessage(), 
-			ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"), JOptionPane.ERROR_MESSAGE);
+			ShUpConfig.resourceBundle.getString("shanoir.uploader.select.error.title"), JOptionPane.ERROR_MESSAGE);
 			// set status FAILED
 			ShUpOnloadConfig.getCurrentNominativeDataController().updateNominativeDataPercentage(uploadFolder, UploadState.ERROR.toString());
         }
