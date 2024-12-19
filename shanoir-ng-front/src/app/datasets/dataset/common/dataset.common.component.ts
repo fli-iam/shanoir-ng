@@ -29,7 +29,8 @@ import { Dataset } from '../../shared/dataset.model';
 
 @Component({
     selector: 'common-dataset-details',
-    templateUrl: 'dataset.common.component.html'
+    templateUrl: 'dataset.common.component.html',
+    standalone: false
 })
 export class CommonDatasetComponent implements OnChanges {
 

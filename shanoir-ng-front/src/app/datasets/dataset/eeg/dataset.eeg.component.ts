@@ -24,7 +24,8 @@ import {UnitOfMeasure} from "../../../enum/unitofmeasure.enum";
 
 @Component({
     selector: 'eeg-dataset-details',
-    templateUrl: 'dataset.eeg.component.html'
+    templateUrl: 'dataset.eeg.component.html',
+    standalone: false
 })
 
 export class EegDatasetComponent implements OnInit  {

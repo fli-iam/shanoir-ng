@@ -25,7 +25,8 @@ import { FormGroup } from '@angular/forms';
 @Component({
     selector: 'quality-card-rule',
     templateUrl: 'quality-card-rule.component.html',
-    styleUrls: ['study-card-rule.component.css']
+    styleUrls: ['study-card-rule.component.css'],
+    standalone: false
 })
 export class QualityCardRuleComponent implements OnChanges {
 

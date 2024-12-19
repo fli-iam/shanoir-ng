@@ -29,7 +29,8 @@ import { ColumnDefinition } from '../../../../shared/components/table/column.def
     templateUrl: './subjectTherapy-list.component.html',
     providers: [
         SubjectTherapyService
-    ]
+    ],
+    standalone: false
 })
 
 @ModesAware

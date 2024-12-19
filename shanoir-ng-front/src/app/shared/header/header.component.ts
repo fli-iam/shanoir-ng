@@ -19,7 +19,8 @@ import { ImagesUrlUtil } from '../utils/images-url.util';
 @Component({
     selector: 'header',
     templateUrl: 'header.component.html',
-    styleUrls: ['header.component.css']
+    styleUrls: ['header.component.css'],
+    standalone: false
 })
 
 export class HeaderComponent {

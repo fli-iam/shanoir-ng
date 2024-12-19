@@ -27,6 +27,7 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
     selector: 'examination-list',
     templateUrl: 'examination-list.component.html',
     styleUrls: ['examination-list.component.css'],
+    standalone: false
 })
 export class ExaminationListComponent extends EntityListComponent<Examination>{
 

@@ -19,7 +19,8 @@ import { CoilNode } from 'src/app/tree/tree.model';
 
 @Component({
     selector: 'coil-node',
-    templateUrl: 'coil-node.component.html'
+    templateUrl: 'coil-node.component.html',
+    standalone: false
 })
 
 export class CoilNodeComponent implements OnChanges {

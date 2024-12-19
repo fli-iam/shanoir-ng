@@ -37,7 +37,8 @@ import { StudyRightsService } from 'src/app/studies/shared/study-rights.service'
     selector: 'subject-detail',
     templateUrl: 'subject.component.html',
     styleUrls: ['subject.component.css'],
-    animations: [slideDown, preventInitialChildAnimations]
+    animations: [slideDown, preventInitialChildAnimations],
+    standalone: false
 })
 
 export class SubjectComponent extends EntityComponent<Subject> {

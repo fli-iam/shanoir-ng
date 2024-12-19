@@ -53,7 +53,8 @@ import { Selection } from './tree.service';
     selector: 'study-detail',
     templateUrl: 'study.component.html',
     styleUrls: ['study.component.css'],
-    animations: [slideDown]
+    animations: [slideDown],
+    standalone: false
 })
 
 export class StudyComponent extends EntityComponent<Study> {
@@ -505,6 +506,10 @@ export class StudyComponent extends EntityComponent<Study> {
 
     public downloadFile(file) {
         this.studyService.downloadProtocolFile(file, this.study.id, this.pdfDownloadState);
+    }
+
+    public builFileUrl(file): string {
+        return this.studyService.buildProtocolFileUrl(file, this.study.id);
     }
 
     public attachNewFile(event: any) {
