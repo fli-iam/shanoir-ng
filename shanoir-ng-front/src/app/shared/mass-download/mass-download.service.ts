@@ -15,7 +15,7 @@
 import { formatDate } from '@angular/common';
 import { HttpParams, HttpResponse } from '@angular/common/http';
 import { ComponentRef, Injectable } from '@angular/core';
-import { last, take } from 'rxjs/operators';
+import { last, map, take } from 'rxjs/operators';
 import { Task, TaskState } from 'src/app/async-tasks/task.model';
 import { Dataset } from 'src/app/datasets/shared/dataset.model';
 import { DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
@@ -552,7 +552,7 @@ export class MassDownloadService {
         let resPromise: SuperPromise<any | 'cancel'> = new SuperPromise();
         let result: Observable<any> = race([
             modalRef.instance.go,
-            modalRef.instance.close.map(() => 'cancel')
+            modalRef.instance.close.pipe(map(() => 'cancel'))
         ]);
         result.pipe(take(1)).subscribe(ret => {
             modalRef.destroy();

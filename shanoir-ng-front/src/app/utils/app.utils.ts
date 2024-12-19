@@ -331,7 +331,10 @@ export function findLastIndex<T>(array: Array<T>, predicate: (value: T, index: n
 }
 
 
-@Pipe({ name: 'times' })
+@Pipe({
+    name: 'times',
+    standalone: false
+})
 export class TimesPipe implements PipeTransform {
     transform(value: number): any {
         const iterable = {};
@@ -345,7 +348,10 @@ export class TimesPipe implements PipeTransform {
     }
 }
 
-@Pipe({ name: 'getValues' })
+@Pipe({
+    name: 'getValues',
+    standalone: false
+})
 export class GetValuesPipe implements PipeTransform {
     transform(map: Map<any, any>): any[] {
         let ret = [];

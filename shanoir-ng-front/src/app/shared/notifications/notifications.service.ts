@@ -204,6 +204,7 @@ export class NotificationsService {
     }
 
     private readLocalTasks() {
+        console.log(this.sessionService.sessionId);
         let storageTasksStr: string = localStorage.getItem(this.storageKey);
         this.lastLocalStorageRead = Date.now();
         let storageTasks: Task[] = [];

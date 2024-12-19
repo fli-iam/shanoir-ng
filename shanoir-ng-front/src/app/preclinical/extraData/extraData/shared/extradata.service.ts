@@ -13,7 +13,6 @@
  */
 
 import { Injectable } from '@angular/core';
-
 import { HttpClient } from '@angular/common/http';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
@@ -39,7 +38,8 @@ export class ExtraDataService extends EntityService<ExtraData>{
             .then(entities => entities?.map((entity) => this.toRealObject(entity)) || []);
     }
   
-    getExtraData(id:string): Promise<ExtraData>{
+    getExtraData(id:string): Promise<ExtraData> {
+        console.log('prout')
         return this.http.get<ExtraData>(PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL+"/"+id)
             .toPromise()
             .then((entity) => this.toRealObject(entity));
