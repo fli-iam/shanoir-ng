@@ -44,7 +44,7 @@ export class KeycloakService {
 
     static init(): Promise<any> {
 
-        if (window.location.href.endsWith('/account-request')) {
+        if (window.location.href.includes('/account-request')) {
             return Promise.resolve();
         }
 
