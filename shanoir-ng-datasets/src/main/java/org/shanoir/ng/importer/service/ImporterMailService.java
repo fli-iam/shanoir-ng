@@ -46,7 +46,7 @@ public class ImporterMailService {
     public void sendImportEmail(ImportJob importJob, Long userId, Examination examination, Set<DatasetAcquisition> generatedAcquisitions) {
         EmailDatasetsImported generatedMail = new EmailDatasetsImported();
 
-        Map<Long, String> datasets = new HashMap<>();
+        LinkedHashMap<Long, String> datasets = new LinkedHashMap<>();
         if (CollectionUtils.isEmpty(generatedAcquisitions)) {
             return;
         }
