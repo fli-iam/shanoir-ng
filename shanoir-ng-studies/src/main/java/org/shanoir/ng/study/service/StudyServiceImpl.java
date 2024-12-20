@@ -140,6 +140,7 @@ public class StudyServiceImpl implements StudyService {
 
 
 	@Override
+	@Transactional
 	public void deleteById(final Long id) throws EntityNotFoundException {
 		final Study study = studyRepository.findById(id).orElse(null);
 		if (study == null) {
@@ -157,11 +158,11 @@ public class StudyServiceImpl implements StudyService {
 				LOG.error("Could not transmit study-user delete info through RabbitMQ", e);
 			}
 		}
-
-		studyRepository.deleteById(id);
+		studyRepository.delete(study);
 	}
 
 	@Override
+	@Transactional
 	public Study findById(final Long id) {
 		return studyRepository.findById(id).orElse(null);
 	}
@@ -366,11 +367,6 @@ public class StudyServiceImpl implements StudyService {
 			studyDb = studyRepository.save(studyDb);
 		}
 
-		// Actually delete subjects
-		for (Subject subjectToDelete : toBeDeleted) {
-			subjectService.deleteById(subjectToDelete.getId());
-		}
-
 		if (studyDb.getTags() != null) {
 			studyDb.getTags().removeIf(tag -> tagsToDelete.contains(tag.getId()));
 			studyDb = studyRepository.save(studyDb);
@@ -382,7 +378,12 @@ public class StudyServiceImpl implements StudyService {
 
 		String error = this.updateStudyName(studyMapper.studyToStudyDTODetailed(studyDb));
 
-		if(error != null && !error.isEmpty()){
+		// Actually delete subjects
+		for (Subject subjectToDelete : toBeDeleted) {
+			subjectService.deleteById(subjectToDelete.getId());
+		}
+
+		if (error != null && !error.isEmpty()) {
 			LOG.error("Study [" + studyDb.getId() + "] couldn't be sync with datasets microservice : {}", error);
 			throw new ShanoirException(error);
 		}
@@ -468,6 +469,7 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
+	@Transactional
 	public List<Study> findAll() {
 		List<Study> studies;
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {

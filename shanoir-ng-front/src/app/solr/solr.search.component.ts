@@ -54,6 +54,7 @@ export type TextualFacet = typeof TextualFacetNames[number];
     templateUrl: 'solr.search.component.html',
     styleUrls: ['solr.search.component.css'],
     animations: [slideDown],
+    standalone: false
 })
 
 export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
@@ -461,6 +462,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {headerName: "Type", field: "datasetType"},
             {headerName: "Nature", field: "datasetNature"},
             {headerName: "Series date", field: "datasetCreationDate", type: "date", hidden: true},
+            {headerName: "Sorting index", field: "sortingIndex"},
             {headerName: "Study", field: "studyName",
                 route: function(item) {
                     return item.studyId ? '/study/details/' + item.studyId : null;

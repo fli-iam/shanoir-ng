@@ -13,7 +13,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened || treeService.isSelected(node.id, 'coil')"
+        [class.selected]="menuOpened || treeService.isSelected(node.id, 'coil')"
         [label]="node.label"
         awesome="fas fa-magnet"
         [(opened)]="node.opened"

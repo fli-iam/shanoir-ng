@@ -23,10 +23,12 @@ import {UnitOfMeasure} from "../../../enum/unitofmeasure.enum";
     templateUrl: 'mr-protocol.component.html',
     providers: [
         {
-          provide: NG_VALUE_ACCESSOR,
-          useExisting: forwardRef(() => MrProtocolComponent),
-          multi: true,
-        }]
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => MrProtocolComponent),
+            multi: true,
+        }
+    ],
+    standalone: false
 })
 export class MrProtocolComponent implements ControlValueAccessor {
 

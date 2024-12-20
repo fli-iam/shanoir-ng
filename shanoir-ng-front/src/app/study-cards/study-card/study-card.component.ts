@@ -42,7 +42,8 @@ import { Selection } from 'src/app/studies/study/tree.service';
     selector: 'study-card',
     templateUrl: 'study-card.component.html',
     styleUrls: ['study-card.component.css'],
-    animations: [slideDown]
+    animations: [slideDown],
+    standalone: false
 })
 export class StudyCardComponent extends EntityComponent<StudyCard> {
 
