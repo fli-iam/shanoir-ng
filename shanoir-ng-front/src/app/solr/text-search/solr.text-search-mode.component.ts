@@ -26,7 +26,8 @@ import { slideDown } from '../../shared/animations/animations';
           provide: NG_VALUE_ACCESSOR,
           useExisting: forwardRef(() => SolrTextSearchModeComponent),
           multi: true,
-        }]
+        }],
+    standalone: false
 })
 
 export class SolrTextSearchModeComponent implements ControlValueAccessor {

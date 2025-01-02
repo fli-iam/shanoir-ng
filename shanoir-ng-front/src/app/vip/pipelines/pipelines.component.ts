@@ -6,9 +6,10 @@ import {ExecutionDataService} from '../execution.data-service';
 import {PipelineService} from "./pipeline/pipeline.service";
 
 @Component({
-  selector: 'app-pipelines',
-  templateUrl: './pipelines.component.html',
-  styleUrls: ['./pipelines.component.css']
+    selector: 'app-pipelines',
+    templateUrl: './pipelines.component.html',
+    styleUrls: ['./pipelines.component.css'],
+    standalone: false
 })
 export class PipelinesComponent implements OnInit {
 
