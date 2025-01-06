@@ -23,7 +23,8 @@ import { DataUserAgreement } from './shared/dua.model';
 @Component({
     selector: 'dua',
     templateUrl: 'dua.component.html',
-    styleUrls: ['dua.component.css'] 
+    styleUrls: ['dua.component.css'],
+    standalone: false
 })
 
 export class DUAComponent {

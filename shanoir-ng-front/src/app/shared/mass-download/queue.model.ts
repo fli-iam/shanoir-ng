@@ -13,6 +13,7 @@
  */
 
 import { BehaviorSubject, Subject, Subscription } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 
 export class Queue {
 
@@ -27,7 +28,7 @@ export class Queue {
         const stop: Subject<any> = new Subject<any>();
         const ticket: number = this._nextTicket++;
         return new Promise((resolve, reject) => {
-            const sub: Subscription = this._queue.takeUntil(stop).subscribe(calledTicket => {
+            const sub: Subscription = this._queue.pipe(takeUntil(stop)).subscribe(calledTicket => {
                 if (calledTicket == ticket) {
                     stop.next();
                     stop.complete();

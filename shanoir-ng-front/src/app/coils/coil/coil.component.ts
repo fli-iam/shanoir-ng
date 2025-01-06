@@ -32,7 +32,8 @@ import { CoilService } from '../shared/coil.service';
 @Component({
     selector: 'coil',
     templateUrl: 'coil.component.html',
-    styleUrls: ['coil.component.css']
+    styleUrls: ['coil.component.css'],
+    standalone: false
 })
 export class CoilComponent extends EntityComponent<Coil> {
 

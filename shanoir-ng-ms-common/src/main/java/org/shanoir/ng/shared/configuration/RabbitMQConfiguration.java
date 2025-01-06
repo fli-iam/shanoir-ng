@@ -315,10 +315,13 @@ public class RabbitMQConfiguration {
 
 	@Bean
 	public static Queue deleteSubjectQueue() {
-		return new Queue(DELETE_SUBJECT_QUEUE, true); }
-	@Bean
+		return new Queue(DELETE_SUBJECT_QUEUE, true);
+  }
+	
+  @Bean
 	public static Queue deleteAnimalSubjectQueue() {
-		return new Queue(DELETE_ANIMAL_SUBJECT_QUEUE, true); }
+		return new Queue(DELETE_ANIMAL_SUBJECT_QUEUE, true);
+  }
 
 	@Bean
 	public static Queue importerQueue() {
