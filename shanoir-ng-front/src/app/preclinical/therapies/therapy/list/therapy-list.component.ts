@@ -29,10 +29,11 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 
 
 @Component({
-  selector: 'therapy-list',
-  templateUrl:'therapy-list.component.html',
-  styleUrls: ['therapy-list.component.css'], 
-  providers: [TherapyService]
+    selector: 'therapy-list',
+    templateUrl: 'therapy-list.component.html',
+    styleUrls: ['therapy-list.component.css'],
+    providers: [TherapyService],
+    standalone: false
 })
 export class TherapiesListComponent  extends BrowserPaginEntityListComponent<Therapy> {
   @ViewChild('therapiesTable') table: TableComponent;

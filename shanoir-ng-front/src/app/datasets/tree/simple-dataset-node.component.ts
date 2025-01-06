@@ -24,7 +24,8 @@ import { DatasetService } from '../shared/dataset.service';
 
 @Component({
     selector: 'simple-dataset-node',
-    templateUrl: 'dataset-node.component.html'
+    templateUrl: 'dataset-node.component.html',
+    standalone: false
 })
 
 export class SimpleDatasetNodeComponent implements OnChanges {

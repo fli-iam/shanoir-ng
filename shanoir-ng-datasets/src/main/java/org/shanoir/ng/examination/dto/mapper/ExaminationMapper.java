@@ -15,15 +15,18 @@
 package org.shanoir.ng.examination.dto.mapper;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.shanoir.ng.datasetacquisition.dto.mapper.ExaminationDatasetAcquisitionMapper;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.data.domain.Page;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Mapper for examinations.
@@ -66,6 +69,9 @@ public interface ExaminationMapper {
 	 * @param examination examination to map.
 	 * @return examination DTO.
 	 */
+	@Mapping(target = "copies", expression = "java(mapCopiesFromExamination(examination.getCopies()))")
+	@Mapping(target = "source", expression = "java(mapSourceFromExamination(examination.getSource()))")
+	@Transactional
 	ExaminationDTO examinationToExaminationDTO(Examination examination);
 
 	/**
@@ -84,4 +90,24 @@ public interface ExaminationMapper {
 	 */
 	SubjectExaminationDTO examinationToSubjectExaminationDTO(Examination examination);
 
+	default List<Long> mapCopiesFromExamination(List<Examination> copies) {
+		if (copies == null) {
+			return null;
+		}
+		return copies.stream()
+				.map(Examination::getId)
+				.collect(Collectors.toList());
+	}
+
+	default Long mapSourceFromExamination(Examination source) {
+		return source != null ? source.getId() : null;
+	}
+
+	default List<Examination> mapCopiesExaminationFromLong(List<Long> copies) {
+		return null;
+	}
+
+	default Examination mapSourceExaminationFromLong(Long source) {
+		return null;
+	}
 }

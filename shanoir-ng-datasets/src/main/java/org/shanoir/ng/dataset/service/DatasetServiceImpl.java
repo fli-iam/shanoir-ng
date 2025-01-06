@@ -147,7 +147,8 @@ public class DatasetServiceImpl implements DatasetService {
 		} catch (Exception e) {
 			LOG.error("ERREUR e : " + e.getMessage());
 		}
-		if (dataset.getSourceId() == null) {
+
+		if (dataset.getSource() != null) {
 			this.deleteDatasetFromPacs(dataset);
 		}
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, dataset.getStudyId()));
@@ -434,8 +435,16 @@ public class DatasetServiceImpl implements DatasetService {
 	 */
 	@Override
 	public Long getStudyId(Dataset dataset){
+		if (dataset.getStudyId() != null) {
+			return dataset.getStudyId();
+		}
 		if (dataset.getDatasetProcessing() != null) {
 			return dataset.getDatasetProcessing().getStudyId();
+		}
+		try {
+			LOG.error(objectMapper.writeValueAsString(dataset));
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
 		}
 		if(dataset.getDatasetAcquisition() != null && dataset.getDatasetAcquisition().getExamination() != null){
 			return dataset.getDatasetAcquisition().getExamination().getStudyId();

@@ -17,8 +17,11 @@ package org.shanoir.ng.dataset.dto.mapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import org.hibernate.Hibernate;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
+import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTO;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDataset;
@@ -79,4 +82,13 @@ public abstract class DatasetDecorator implements DatasetMapper {
 		return defaultMapper.datasetToIdNameDTO(dataset);
 	}
 
+	@Override
+	public DatasetWithDependenciesDTO datasetToDatasetWithParentsAndProcessingsDTO(Dataset dataset) {
+		final DatasetWithDependenciesDTO datasetDTO = defaultMapper.datasetToDatasetWithParentsAndProcessingsDTO(dataset);
+		Hibernate.initialize(dataset.getCopies());
+		datasetDTO.setCopies(dataset.getCopies().stream()
+				.map(Dataset::getId)
+				.collect(Collectors.toList()));
+		return datasetDTO;
+	}
 }

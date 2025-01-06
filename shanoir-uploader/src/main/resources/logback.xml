@@ -34,6 +34,11 @@
         <appender-ref ref="file" />
     </logger>
 
+    <logger name="org.shanoir.ng.importer.dicom.query.QueryPACSService" level="ERROR" additivity="false">
+        <appender-ref ref="stdout" />
+        <appender-ref ref="file" />
+    </logger>
+
     <!-- Logger for org.dcm4che3.net -->
     <logger name="org.dcm4che3.net" level="INFO" additivity="false">
         <appender-ref ref="stdout" />

@@ -84,6 +84,10 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     public List<DatasetProcessing> findAll() {
         return Utils.toList(repository.findAll());
     }
+
+    public List<DatasetProcessing> findAllById(List<Long> idList) {
+        return idList.stream().flatMap(it -> findById(it).stream()).toList();
+    }
     
     @Override
     public DatasetProcessing create(final DatasetProcessing entity) {

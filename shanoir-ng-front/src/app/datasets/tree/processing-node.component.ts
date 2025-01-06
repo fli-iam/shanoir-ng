@@ -22,7 +22,8 @@ import { Selection, TreeService } from 'src/app/studies/study/tree.service';
 
 @Component({
     selector: 'processing-node',
-    templateUrl: 'processing-node.component.html'
+    templateUrl: 'processing-node.component.html',
+    standalone: false
 })
 
 export class ProcessingNodeComponent implements OnChanges {
