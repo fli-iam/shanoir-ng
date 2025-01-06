@@ -38,7 +38,8 @@ import { Selection } from 'src/app/studies/study/tree.service';
 @Component({
     selector: 'dataset-processing-detail',
     templateUrl: 'dataset-processing.component.html',
-    styleUrls: ['dataset-processing.component.css']
+    styleUrls: ['dataset-processing.component.css'],
+    standalone: false
 })
 
 export class DatasetProcessingComponent extends EntityComponent<DatasetProcessing> {

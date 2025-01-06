@@ -25,12 +25,13 @@ export type Mode =  "view" | "edit" | "create";
     templateUrl: 'tag.input.component.html',
     styleUrls: ['tag.input.component.css'],
     providers: [
-    { 
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => TagInputComponent),
-      multi: true
-    }
-]
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => TagInputComponent),
+            multi: true
+        }
+    ],
+    standalone: false
 })
 
 export class TagInputComponent implements ControlValueAccessor, OnChanges {

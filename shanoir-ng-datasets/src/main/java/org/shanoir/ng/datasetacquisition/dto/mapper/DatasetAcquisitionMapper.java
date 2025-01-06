@@ -15,12 +15,9 @@
 package org.shanoir.ng.datasetacquisition.dto.mapper;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.mapstruct.DecoratedWith;
-import org.mapstruct.Mapper;
-import org.mapstruct.MapperConfig;
-import org.mapstruct.MappingInheritanceStrategy;
-import org.mapstruct.ObjectFactory;
+import org.mapstruct.*;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
@@ -45,7 +42,9 @@ public interface DatasetAcquisitionMapper {
 	
 	public PageImpl<DatasetAcquisitionDTO> datasetAcquisitionsToDatasetAcquisitionDTOs(Page<DatasetAcquisition> page);
 
-	
+
+	@Mapping(target = "copies", expression = "java(mapCopiesFromDatasetAcquisition(datasetAcquisition.getCopies()))")
+	@Mapping(target = "source", expression = "java(mapSourceFromDatasetAcquisition(datasetAcquisition.getSource()))")
 	DatasetAcquisitionDTO datasetAcquisitionToDatasetAcquisitionDTO(
 			DatasetAcquisition datasetAcquisition);
 	
@@ -63,4 +62,24 @@ public interface DatasetAcquisitionMapper {
         else throw new IllegalStateException("Cannot map from a dataset acquisition dto that don't provide a valid type. Given type = " + dto.getType());
     }
 
+	default List<Long> mapCopiesFromDatasetAcquisition(List<DatasetAcquisition> copies) {
+		if (copies == null) {
+			return null;
+		}
+		return copies.stream()
+				.map(DatasetAcquisition::getId)
+				.collect(Collectors.toList());
+	}
+
+	default Long mapSourceFromDatasetAcquisition(DatasetAcquisition source) {
+		return source != null ? source.getId() : null;
+	}
+
+	default List<DatasetAcquisition> mapCopiesDatasetAcquisitionFromLong(List<Long> copies) {
+		return null;
+	}
+
+	default DatasetAcquisition mapSourceDatasetAcquisitionFromLong(Long source) {
+		return null;
+	}
 }

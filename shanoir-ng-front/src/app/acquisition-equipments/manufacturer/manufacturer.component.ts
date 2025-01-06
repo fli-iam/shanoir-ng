@@ -23,7 +23,8 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 
 @Component({
     selector: 'manufacturer-detail',
-    templateUrl: 'manufacturer.component.html'
+    templateUrl: 'manufacturer.component.html',
+    standalone: false
 })
 
 export class ManufacturerComponent extends EntityComponent<Manufacturer> {

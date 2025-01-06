@@ -15,7 +15,9 @@
 package org.shanoir.ng.dataset.modality;
 
 import jakarta.persistence.Entity;
+
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetType;
 
 /**
  * Parameter quantification dataset.
@@ -25,8 +27,6 @@ import org.shanoir.ng.dataset.model.Dataset;
  */
 @Entity
 public class ParameterQuantificationDataset extends Dataset {
-
-	public static final String datasetType = "ParameterQuantification";
 
 	/**
 	 * UID
@@ -70,8 +70,8 @@ public class ParameterQuantificationDataset extends Dataset {
 	}
 
 	@Override
-	public String getType() {
-		return "ParameterQuantification";
+	public DatasetType getType() {
+		return DatasetType.ParameterQuantification;
 	}
 
 }

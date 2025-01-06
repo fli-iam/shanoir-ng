@@ -27,7 +27,8 @@ import { Pageable, Page } from 'src/app/shared/components/table/pageable.model';
 @Component({
     selector: 'subject-list',
     templateUrl: 'subject-list.component.html',
-    styleUrls: ['subject-list.component.css']
+    styleUrls: ['subject-list.component.css'],
+    standalone: false
 })
 
 export class SubjectListComponent extends EntityListComponent<Subject> {
@@ -89,5 +90,15 @@ export class SubjectListComponent extends EntityListComponent<Subject> {
             subject.subjectStudyList &&
             subject.subjectStudyList.filter(ss => this.studiesICanAdmin?.includes(ss.study.id)).length > 0
         );
+    }
+
+    getOnDeleteConfirmMessage(entity: Subject): Promise<string> {
+        let studyListStr : string = "\n\nThis subject belongs to the studies: \n- ";
+        return this.subjectService.get(entity.id).then(res => {
+            const studiesNames = res.subjectStudyList.map(study => study.study.name).join('\n- ');
+            studyListStr += studiesNames;
+            studyListStr += '\n\nAttention: this action deletes all datasets from ALL studies listed above.';
+            return studyListStr;
+        });
     }
 }

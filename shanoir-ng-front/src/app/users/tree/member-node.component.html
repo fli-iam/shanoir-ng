@@ -13,7 +13,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 <node
         *ngIf="node"
-        [class.selected]="isAdmin && (this.menuOpened || treeService.isSelected(node.id, 'user'))"
+        [class.selected]="isAdmin && (menuOpened || treeService.isSelected(node.id, 'user'))"
         [label]="node.label"
         awesome="far fa-user"
         [(opened)]="node.opened"
@@ -22,7 +22,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [hasChildren]="hasChildren()">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="isAdmin">
-        <a [routerLink]="this.detailsPath + this.node.id" class="open-new-tab">
+        <a [routerLink]="detailsPath + node.id" class="open-new-tab">
             <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
         </a>
     </dropdown-menu>

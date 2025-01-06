@@ -14,10 +14,20 @@
 
 package org.shanoir.ng.study.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.transaction.Transactional;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
@@ -52,6 +62,7 @@ import org.shanoir.ng.subjectstudy.model.SubjectStudyTag;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.model.Tag;
+import org.shanoir.ng.tag.repository.TagRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ListDependencyUpdate;
 import org.shanoir.ng.utils.Utils;
@@ -64,11 +75,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.transaction.Transactional;
 
 /**
  * Implementation of study service.
@@ -124,7 +135,12 @@ public class StudyServiceImpl implements StudyService {
 	@Autowired
 	private StudyCenterRepository studyCenterRepository;
 
+	@Autowired
+	private TagRepository tagRepository;
+
+
 	@Override
+	@Transactional
 	public void deleteById(final Long id) throws EntityNotFoundException {
 		final Study study = studyRepository.findById(id).orElse(null);
 		if (study == null) {
@@ -142,11 +158,11 @@ public class StudyServiceImpl implements StudyService {
 				LOG.error("Could not transmit study-user delete info through RabbitMQ", e);
 			}
 		}
-
-		studyRepository.deleteById(id);
+		studyRepository.delete(study);
 	}
 
 	@Override
+	@Transactional
 	public Study findById(final Long id) {
 		return studyRepository.findById(id).orElse(null);
 	}
@@ -351,11 +367,6 @@ public class StudyServiceImpl implements StudyService {
 			studyDb = studyRepository.save(studyDb);
 		}
 
-		// Actually delete subjects
-		for (Subject subjectToDelete : toBeDeleted) {
-			subjectService.deleteById(subjectToDelete.getId());
-		}
-
 		if (studyDb.getTags() != null) {
 			studyDb.getTags().removeIf(tag -> tagsToDelete.contains(tag.getId()));
 			studyDb = studyRepository.save(studyDb);
@@ -367,7 +378,12 @@ public class StudyServiceImpl implements StudyService {
 
 		String error = this.updateStudyName(studyMapper.studyToStudyDTODetailed(studyDb));
 
-		if(error != null && !error.isEmpty()){
+		// Actually delete subjects
+		for (Subject subjectToDelete : toBeDeleted) {
+			subjectService.deleteById(subjectToDelete.getId());
+		}
+
+		if (error != null && !error.isEmpty()) {
 			LOG.error("Study [" + studyDb.getId() + "] couldn't be sync with datasets microservice : {}", error);
 			throw new ShanoirException(error);
 		}
@@ -453,6 +469,7 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
+	@Transactional
 	public List<Study> findAll() {
 		List<Study> studies;
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
@@ -462,34 +479,8 @@ public class StudyServiceImpl implements StudyService {
 					.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(
 							KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId(), true);
 		}
-		// the below is necessary for the StudySecurityService, it is not possible for the above methods (findAll+findByXXX)
-		// to have an EntityQuery with two bags contained, that is why I have to get back to the database separately:
-		studies.stream().forEach(s -> {
-			s.setStudyUserList(studyUserRepository.findByStudy_Id(s.getId()));
-			// same for the below: two bags issue: findByStudy_Id is already annotated with "studyUserRights",
-			// so I call a second repository method to load the ss.centers from the database, as required by JSON
-			s.getStudyUserList().stream().forEach(ss -> ss.setCenters(studyUserRepository.findDistinctCentersByStudyId(ss.getStudyId())));
-		});
 		setNumberOfSubjectsAndExaminations(studies);
 		setFilePaths(studies);
-		// Utils.copyList is used to prevent a bug with @PostFilter
-		return Utils.copyList(studies);
-	}
-
-	@Override
-	public List<Study> findAllWithCenters() {
-		List<Study> studies;
-		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			studies = studyRepository.findAll();
-		} else {
-			studies = studyRepository
-					.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(
-							KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId(), true);
-		}
-		// the below is necessary for the StudySecurityService, it is not possible for the above method
-		// to have an EntityQuery with two bags contained, that is why I get back to the database:
-		studies.stream().forEach(s -> s.setStudyUserList(studyUserRepository.findByStudy_Id(s.getId())));
-		studies.stream().forEach(s -> s.setStudyCenterList(studyCenterRepository.findByStudy_Id(s.getId())));
 		// Utils.copyList is used to prevent a bug with @PostFilter
 		return Utils.copyList(studies);
 	}
@@ -869,5 +860,10 @@ public class StudyServiceImpl implements StudyService {
 	@Transactional
 	public List<StudyStatisticsDTO> queryStudyStatistics(Long studyId) throws Exception {
 		return studyRepository.queryStudyStatistics(studyId);
+	}
+
+	@Override
+	public List<Tag> getTagsFromStudy(Long studyId) {
+		return tagRepository.findByStudyId(studyId);
 	}
 }

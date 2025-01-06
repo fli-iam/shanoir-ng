@@ -21,10 +21,12 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
     styleUrls: ['auto-ajust-input.component.css'],
     providers: [
         {
-          provide: NG_VALUE_ACCESSOR,
-          useExisting: forwardRef(() => AutoAdjustInputComponent),
-          multi: true,
-        }]   
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => AutoAdjustInputComponent),
+            multi: true,
+        }
+    ],
+    standalone: false
 })
 
 export class AutoAdjustInputComponent implements ControlValueAccessor {

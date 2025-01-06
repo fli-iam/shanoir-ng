@@ -22,6 +22,7 @@ import { Observable } from 'rxjs';
 
 @Injectable()
 export class ImportService {
+    private _dicomQuery: DicomQuery;
 
     constructor(private http: HttpClient) { }
 
@@ -106,7 +107,12 @@ export class ImportService {
             .then(response => response.body);
     }
 
+    public get dicomQuery(): DicomQuery {
+        return this._dicomQuery;
+    }
+
     queryPACS(dicomQuery: DicomQuery): Promise<ImportJob> {
+        this._dicomQuery = dicomQuery;
         return this.http.post<ImportJob>(AppUtils.BACKEND_API_QUERY_PACS, dicomQuery)
             .toPromise();
     }

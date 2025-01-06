@@ -17,7 +17,10 @@ import { Pipe, PipeTransform } from "@angular/core";
 import { SubjectStudy } from "./subject-study.model";
 import { IdName } from "../../shared/models/id-name.model";
 
-@Pipe({ name: "studyNamePipe" })
+@Pipe({
+    name: "studyNamePipe",
+    standalone: false
+})
 export class StudyNamePipe implements PipeTransform {
 
     transform(subjectStudy: SubjectStudy, studies: IdName[]) {

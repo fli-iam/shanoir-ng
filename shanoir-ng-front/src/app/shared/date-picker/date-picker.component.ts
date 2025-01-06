@@ -33,10 +33,12 @@ import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErr
     ],
     providers: [
         {
-          provide: NG_VALUE_ACCESSOR,
-          useExisting: forwardRef(() => DatepickerComponent),
-          multi: true,
-        }]   
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => DatepickerComponent),
+            multi: true,
+        }
+    ],
+    standalone: false
 })
 export class DatepickerComponent implements ControlValueAccessor {
 
