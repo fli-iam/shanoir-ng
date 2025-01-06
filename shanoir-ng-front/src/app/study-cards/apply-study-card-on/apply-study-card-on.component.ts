@@ -37,7 +37,8 @@ export type Status = 'default' | 'loading' | 'done' | 'error';
     selector: 'apply-study-card-on',
     templateUrl: 'apply-study-card-on.component.html',
     styleUrls: ['apply-study-card-on.component.css'],
-    animations: [ slideRight ]
+    animations: [slideRight],
+    standalone: false
 })
 export class ApplyStudyCardOnComponent implements OnInit {
 

@@ -14,7 +14,7 @@
 
 import { Injectable } from '@angular/core';
 import { HttpResponse, HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 import { Examination } from '../../../examinations/shared/examination.model';
 import * as AppUtils from '../../../utils/app.utils';

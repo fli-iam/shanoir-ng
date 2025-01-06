@@ -23,7 +23,8 @@ import { Tag } from 'src/app/tags/tag.model';
 
 @Component({
     selector: 'reverse-subject-node',
-    templateUrl: 'reverse-subject-node.component.html'
+    templateUrl: 'reverse-subject-node.component.html',
+    standalone: false
 })
 
 export class ReverseSubjectNodeComponent implements OnChanges {
