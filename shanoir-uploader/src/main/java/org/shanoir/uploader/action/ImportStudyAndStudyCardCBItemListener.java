@@ -9,8 +9,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
@@ -24,6 +22,8 @@ import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 	
@@ -39,15 +39,12 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 	
 	private Date studyDate;
 	
-	private ImportStudyCardFilterDocumentListener importStudyCardDocumentListener;
-	
 	private ShanoirUploaderServiceClient serviceClient;
 
-	public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, Subject subject, Date studyDate, ImportStudyCardFilterDocumentListener importStudyCardDocumentListener, ShanoirUploaderServiceClient serviceClient) {
+	public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, Subject subject, Date studyDate, ShanoirUploaderServiceClient serviceClient) {
 		this.mainWindow = mainWindow;
 		this.subject = subject;
 		this.studyDate = studyDate;
-		this.importStudyCardDocumentListener = importStudyCardDocumentListener;
 		this.serviceClient = serviceClient;
 	}
 
@@ -183,11 +180,9 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 
 	private void updateStudyCards(Study study) {
 		mainWindow.importDialog.studyCardCB.removeAllItems();
-		this.importStudyCardDocumentListener.cleanDefaultStudyCards();
 		if (study.getStudyCards() != null) {
 			for (StudyCard studyCard : study.getStudyCards()) {
 				mainWindow.importDialog.studyCardCB.addItem(studyCard);
-				this.importStudyCardDocumentListener.addDefaultStudyCard(studyCard);
 			}
 		}
 		

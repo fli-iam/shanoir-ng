@@ -61,12 +61,11 @@ public class ImportDialogOpener {
 			} // else Profile Neurinfo: no search with identifier, user selects existing subject 
 			List<Study> studiesWithStudyCards = getStudiesWithStudyCards(uploadJob);
 			// init components of GUI and listeners
-			ImportStudyCardFilterDocumentListener importStudyCardFilterDocumentListener = new ImportStudyCardFilterDocumentListener(this.mainWindow);
-			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, subject, studyDate, importStudyCardFilterDocumentListener, shanoirUploaderServiceClient);
+			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, subject, studyDate, shanoirUploaderServiceClient);
 			ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, uploadJob, uploadFolder, subject, importStudyAndStudyCardCBIL);
 			importDialog = new ImportDialog(this.mainWindow,
 					ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
-					importStudyAndStudyCardCBIL, importFinishAL, importStudyCardFilterDocumentListener);
+					importStudyAndStudyCardCBIL, importFinishAL);
 			// update import dialog with items from server
 			updateImportDialogForSubject(subject); // this has to be done after init of the dialog
 			updateImportDialogForNewExamFields(studyDate, uploadJob.getStudyDescription());
@@ -241,6 +240,7 @@ public class ImportDialogOpener {
 				importDialog.subjectTextField.setBackground(Color.WHITE);
 				importDialog.subjectTextField.setEnabled(true);
 				importDialog.subjectTextField.setEditable(true);
+				importDialog.existingSubjectsCB.setEditable(true);
 			// Profile OFSEP: display, that subject will be created automatically
 			} else if (ShUpConfig.isModeSubjectCommonNameAutoIncrement()) {
 				importDialog.subjectTextField
