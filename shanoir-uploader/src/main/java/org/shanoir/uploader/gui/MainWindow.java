@@ -339,7 +339,7 @@ public class MainWindow extends JFrame {
 		queryRadioPanel.add(sRB);
 
 		GridBagConstraints gbc_radioPanel = new GridBagConstraints();
-		gbc_radioPanel.insets = new Insets(2, 0, 2, 0);
+		gbc_radioPanel.insets = new Insets(2, 0, 0, 0);
 		gbc_radioPanel.gridx = 1;
 		gbc_radioPanel.gridy = 1;
 		gbc_radioPanel.gridwidth = 2;
