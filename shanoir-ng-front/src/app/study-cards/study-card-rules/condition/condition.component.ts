@@ -27,7 +27,8 @@ import { Coil } from 'src/app/coils/shared/coil.model';
 @Component({
     selector: 'condition',
     templateUrl: 'condition.component.html',
-    styleUrls: ['condition.component.css']
+    styleUrls: ['condition.component.css'],
+    standalone: false
 })
 export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges {
     

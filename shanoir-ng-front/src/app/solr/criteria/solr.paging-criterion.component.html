@@ -37,7 +37,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             {{item.value}}
             <!-- <span class="facet-count" *ngIf="item.valueCount > 0">{{item.valueCount}}</span> -->
         </span>
-        <span *ngIf="this.selectedFacets.length > 0" title="Reset" (click)="clearSelection()" class="clear-selection left-icon clickable"><i class="fas fa-snowplow"></i></span>
+        <span *ngIf="selectedFacets.length > 0" title="Reset" (click)="clearSelection()" class="clear-selection left-icon clickable"><i class="fas fa-snowplow"></i></span>
     </ul>
     <div>
         <div class="filter-frame">

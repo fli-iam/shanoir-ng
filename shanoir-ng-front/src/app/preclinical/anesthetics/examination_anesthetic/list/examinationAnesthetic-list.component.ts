@@ -22,10 +22,11 @@ import { BrowserPaginEntityListComponent } from '../../../../shared/components/e
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
-  selector: 'examination-anesthetics-list',
-  templateUrl:'examinationAnesthetic-list.component.html',
-  styleUrls: ['examinationAnesthetic-list.component.css'], 
-  providers: [ExaminationAnestheticService]
+    selector: 'examination-anesthetics-list',
+    templateUrl: 'examinationAnesthetic-list.component.html',
+    styleUrls: ['examinationAnesthetic-list.component.css'],
+    providers: [ExaminationAnestheticService],
+    standalone: false
 })
 export class ExaminationAnestheticsListComponent  extends BrowserPaginEntityListComponent<ExaminationAnesthetic>{
   @ViewChild('examinationAnestheticTable') table: TableComponent; 
