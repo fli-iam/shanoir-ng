@@ -134,7 +134,12 @@ public class BidsImporterApiController implements BidsImporterApi {
 
 		// STEP 2: Subject level, analyze and create the new subject if necessary
 		Long subjectId = null;
-		for (File subjectFile : importJobDir.listFiles()) {
+		// Exclude MACOSX automatically added hidden files
+		for (File subjectFile : importJobDir.listFiles(new FilenameFilter() {
+			@Override
+			public boolean accept(File arg0, String name) {
+				return !name.startsWith(".DS_Store") && !name.startsWith("__");
+			}})) {
 			String fileName = subjectFile.getName();
 			String subjectName = null;
 			if (fileName.startsWith("sub-")) {
@@ -152,7 +157,6 @@ public class BidsImporterApiController implements BidsImporterApi {
 				if (subjectId == null) {
 					throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), SUBJECT_CREATION_ERROR, null));
 				}
-
 				importJob.setSubjectName(subjectName);
 
 			} else {
