@@ -18,6 +18,7 @@ import { HttpClient, HttpEvent, HttpEventType, HttpParams, HttpProgressEvent, Ht
 import { Observable } from 'rxjs';
 import { TaskState, TaskStatus } from '../async-tasks/task.model';
 import { ServiceLocator } from './locator.service';
+import { map, mergeMap, shareReplay } from 'rxjs/operators';
 
 
 // Base urls
@@ -206,9 +207,9 @@ export function downloadBlob(url: string, params?: HttpParams): Promise<Blob> {
             params: params
         }
     )
-    .map(response => {
+    .pipe(map(response => {
         return response;
-    })
+    }))
     .toPromise();
 }
 
@@ -222,14 +223,14 @@ export function downloadWithStatusGET(url: string, params?: HttpParams, state ?:
             responseType: 'blob',
             params: params
         }
-    ).shareReplay();
+    ).pipe(shareReplay());
     obs.toPromise().then(response => browserDownloadFileFromResponse(response as HttpResponse<Blob>));
-    return obs.mergeMap(event => {
+    return obs.pipe(mergeMap(event => {
         return extractState(event).then(s => {
             state = s
             return s;
         });
-    });
+    }));
 }
 
 export function downloadWithStatusPOST(url: string, formData: FormData, state ?: TaskState): Observable<TaskState> {
@@ -242,14 +243,14 @@ export function downloadWithStatusPOST(url: string, formData: FormData, state ?:
             observe: 'events',
             responseType: 'blob'
         }
-    ).shareReplay();
+    ).pipe(shareReplay());
     obs.toPromise().then(response => browserDownloadFileFromResponse(response as HttpResponse<Blob>));
-    return obs.mergeMap(event => {
+    return obs.pipe(mergeMap(event => {
         return extractState(event).then(s => {
             state = s
             return s;
         });
-    });
+    }));
 }
 
 export function extractState(event: HttpEvent<any>): Promise<TaskState> {
@@ -319,7 +320,10 @@ export function findLastIndex<T>(array: Array<T>, predicate: (value: T, index: n
 }
 
 
-@Pipe({ name: 'times' })
+@Pipe({
+    name: 'times',
+    standalone: false
+})
 export class TimesPipe implements PipeTransform {
     transform(value: number): any {
         const iterable = {};
@@ -333,7 +337,10 @@ export class TimesPipe implements PipeTransform {
     }
 }
 
-@Pipe({ name: 'getValues' })
+@Pipe({
+    name: 'getValues',
+    standalone: false
+})
 export class GetValuesPipe implements PipeTransform {
     transform(map: Map<any, any>): any[] {
         let ret = [];
