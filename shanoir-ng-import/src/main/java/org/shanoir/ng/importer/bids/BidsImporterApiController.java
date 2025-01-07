@@ -316,8 +316,6 @@ public class BidsImporterApiController implements BidsImporterApi {
 		}
 		File sessionFile = sessionFiles[0];
 
-
-
 		// session_id;acq_time;pathology
 		// analyze date for every session
 		CsvMapper mapper = new CsvMapper();
@@ -341,16 +339,16 @@ public class BidsImporterApiController implements BidsImporterApi {
 			return examDates;
 		}
 
-			// Legal format in BIDS (are we up to date ? I don't think so)
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-DDThh:mm:ss[.000000][Z]");
+		// Legal format in BIDS (are we up to date ? I don't think so)
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-DDThh:mm:ss[.000000][Z]");
 
-			while (it.hasNext()) {
-				String[] row = it.next()[0].split(CSV_SEPARATOR);
-				String sessionLabel = row[sessionIdIndex];
-				String dateAsString = row[dateIndex];
-				TemporalAccessor date = formatter.parseBest(dateAsString, LocalDate::from);
-				examDates.put(sessionLabel, LocalDate.from(date));
-			}
+        while (it.hasNext()) {
+            String[] row = it.next()[0].split(CSV_SEPARATOR);
+            String sessionLabel = row[sessionIdIndex];
+            String dateAsString = row[dateIndex];
+            TemporalAccessor date = formatter.parseBest(dateAsString, LocalDate::from);
+            examDates.put(sessionLabel, LocalDate.from(date));
+        }
 		} else {
 			LOG.error("We found an empty session.tsv file ");
 			return examDates;
