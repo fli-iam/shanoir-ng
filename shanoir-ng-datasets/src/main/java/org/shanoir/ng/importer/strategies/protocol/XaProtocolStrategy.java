@@ -14,16 +14,36 @@
 
 package org.shanoir.ng.importer.strategies.protocol;
 
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
 import org.shanoir.ng.datasetacquisition.model.xa.XaProtocol;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Serie;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class XaProtocolStrategy {
 
-	public XaProtocol generateProtocolForSerie(AcquisitionAttributes<String> attributes, Serie serie) {		
-		XaProtocol protocol = new XaProtocol();        
+	private static final Logger LOG = LoggerFactory.getLogger(XaProtocolStrategy.class);
+
+	public XaProtocol generateProtocolForSerie(AcquisitionAttributes<String> acquisitionAttributes, Serie serie) {		
+		XaProtocol protocol = new XaProtocol();
+		Attributes attributes = acquisitionAttributes.getFirstDatasetAttributes();
+
+		// Slice thickness
+		Double sliceThickness = attributes.getDouble(Tag.SliceThickness, -1);
+		sliceThickness = (sliceThickness != -1 ? sliceThickness : null);
+		LOG.debug("extractMetadata : sliceThickness=" + sliceThickness);
+		protocol.setSliceThickness(sliceThickness);
+
+		/** (0054, 0081) Number of Slices */
+		Integer numberOfSlices = attributes.getInt(Tag.NumberOfSlices, -1);
+		numberOfSlices = (numberOfSlices != -1) ? numberOfSlices : null;
+		LOG.debug("extractMetadata : numberOfSlices=" + numberOfSlices);
+		protocol.setNumberOfSlices(numberOfSlices);
+		
 		return protocol;
 	}
 

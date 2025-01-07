@@ -116,9 +116,16 @@ public class MrProtocolStrategy {
 		}
 
 		// Slice thickness
-		final Double sliceThickness = attributes.getDouble(Tag.SliceThickness, 0);
+		Double sliceThickness = attributes.getDouble(Tag.SliceThickness, -1);
+		sliceThickness = (sliceThickness != -1 ? sliceThickness : null);
 		LOG.debug("extractMetadata : sliceThickness=" + sliceThickness);
 		mrProtocol.setSliceThickness(sliceThickness);
+
+		/** (0054, 0081) Number of Slices */
+		Integer numberOfSlices = attributes.getInt(Tag.NumberOfSlices, -1);
+		numberOfSlices = (numberOfSlices != -1) ? numberOfSlices : null;
+		LOG.debug("extractMetadata : numberOfSlices=" + numberOfSlices);
+		mrProtocol.setNumberOfSlices(numberOfSlices);
 
 		// Spacing between slices
 		final Double sliceSpacing = attributes.getDouble(Tag.SpacingBetweenSlices, 0);

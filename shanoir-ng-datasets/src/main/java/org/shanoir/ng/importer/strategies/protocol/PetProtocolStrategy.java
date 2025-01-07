@@ -42,9 +42,16 @@ public class PetProtocolStrategy {
 		final Integer dimensionY = attributes.getInt(Tag.Columns, 0);
 		LOG.debug("extractMetadata : dimensionY=" + dimensionY);
 		petProtocol.setDimensionY(dimensionY);
+
+		// Slice thickness
+		Double sliceThickness = attributes.getDouble(Tag.SliceThickness, -1);
+		sliceThickness = (sliceThickness != -1 ? sliceThickness : null);
+		LOG.debug("extractMetadata : sliceThickness=" + sliceThickness);
+		petProtocol.setSliceThickness(sliceThickness);
 		
 		/** (0054, 0081) Number of Slices */
-		final Integer numberOfSlices = attributes.getInt(Tag.NumberOfSlices, 0);
+		Integer numberOfSlices = attributes.getInt(Tag.NumberOfSlices, -1);
+		numberOfSlices = (numberOfSlices != -1) ? numberOfSlices : null;
 		LOG.debug("extractMetadata : numberOfSlices=" + numberOfSlices);
 		petProtocol.setNumberOfSlices(numberOfSlices);
 		
