@@ -29,7 +29,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <select-box
                         [(ngModel)]="study"
                         (userChange)="onSelectStudy()"
-                        [viewRoute]="'/study/details/' + this.study?.id"
+                        [viewRoute]="'/study/details/' + study?.id"
                         [viewDisabled]="!study"
                         [options]="studyOptions"
                         [disabled]="loading">
@@ -44,7 +44,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [readOnly]="useStudyCard"
                         [(ngModel)]="center"
                         (userChange)="onSelectCenter()"
-                        [viewRoute]="'/center/details/' + this.center?.id" [viewDisabled]="!center"
+                        [viewRoute]="'/center/details/' + center?.id" [viewDisabled]="!center"
                         (onNewClick)="openCreateCenter()" [newHidden]="hasCompatibleCenters"
                         [options]="centerOptions">
                 </select-box>
@@ -69,7 +69,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [readOnly]="useStudyCard"
                         [(ngModel)]="acquisitionEquipment"
                         (userChange)="onContextChange();"
-                        [viewRoute]="'/acquisition-equipment/details/' + this.acquisitionEquipment?.id" [viewDisabled]="!acquisitionEquipment"
+                        [viewRoute]="'/acquisition-equipment/details/' + acquisitionEquipment?.id" [viewDisabled]="!acquisitionEquipment"
                         (onNewClick)="openCreateAcqEqt()" [newHidden]="hasCompatibleEquipments"
                         [options]="acquisitionEquipmentOptions" [pipe]="acqEqPipe">
                 </select-box>
@@ -99,7 +99,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [disabled]="loading || !study || !acquisitionEquipment"
                         [(ngModel)]="subject"
                         (userChange)="onSelectSubject();"
-                        [viewRoute]="'/subject/details/' + this.subject?.id" [viewDisabled]="!subject"
+                        [viewRoute]="'/subject/details/' + subject?.id" [viewDisabled]="!subject"
                         (onNewClick)="openCreateSubject()" [newDisabled]="!study || !acquisitionEquipment"
                         [optionArr]="subjects">
                 </select-box>
@@ -148,7 +148,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </li>
             <li>
                 <label>Tags</label>
-                <tag-list [(ngModel)]="subject.subjectStudy.tags" [availableTags]="this.study?.tags"></tag-list>
+                <tag-list [(ngModel)]="subject.subjectStudy.tags" [availableTags]="study?.tags"></tag-list>
             </li>
         </div>
     </ol>
@@ -162,7 +162,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label class="required-label">Select an examination</label>
             <span class="right-col">
                 <select-box [disabled]="!study || !subject || loading" [(ngModel)]="examination" (userChange)="onSelectExam()"
-                        [viewRoute]="'/examination/details/' + this.examination?.id" [viewDisabled]="!examination"
+                        [viewRoute]="'/examination/details/' + examination?.id" [viewDisabled]="!examination"
                         (onNewClick)="openCreateExam()" [newDisabled]="!study || !subject" [optionArr]="examinations" [pipe]="subjectExaminationLabelPipe">
                 </select-box>
             </span>

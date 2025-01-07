@@ -18,7 +18,8 @@ import { LoaderService } from './loader.service';
 @Component({
     selector: 'loader',
     templateUrl: './loader.component.html',
-    styleUrls: ['./loader.component.css']
+    styleUrls: ['./loader.component.css'],
+    standalone: false
 })
 export class LoaderComponent {
 

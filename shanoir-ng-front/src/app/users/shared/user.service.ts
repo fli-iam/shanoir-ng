@@ -13,7 +13,6 @@
  */
 
 import { Injectable, OnDestroy } from '@angular/core';
-import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
 import { ExtensionRequestInfo } from '../extension-request/extension-request-info.model';
@@ -65,7 +64,7 @@ export class UserService extends EntityService<User> implements OnDestroy {
         return this.http.post<User>(AppUtils.BACKEND_API_USER_ACCOUNT_REQUEST_URL, JSON.stringify(user)).toPromise();
     }
 
-    requestExtension(extensionRequestInfo: ExtensionRequestInfo): Promise<void | ErrorObservable<any>> {
+    requestExtension(extensionRequestInfo: ExtensionRequestInfo): Promise<void> {
         return this.http.post<void>(AppUtils.BACKEND_API_USER_EXTENSION_REQUEST_URL, JSON.stringify(extensionRequestInfo))
             .toPromise();
     }

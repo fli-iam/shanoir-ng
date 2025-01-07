@@ -26,7 +26,8 @@ import { Subscription } from 'rxjs';
 @Component({
     selector: 'download-setup',
     templateUrl: 'download-setup.component.html',
-    styleUrls: ['download-setup.component.css']
+    styleUrls: ['download-setup.component.css'],
+    standalone: false
 })
 
 export class DownloadSetupComponent implements OnInit, OnDestroy {
