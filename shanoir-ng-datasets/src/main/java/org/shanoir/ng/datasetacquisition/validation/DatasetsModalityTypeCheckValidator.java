@@ -66,25 +66,25 @@ public class DatasetsModalityTypeCheckValidator
 				}
 			} else if (datasetAcquisition instanceof GenericDatasetAcquisition) {
 				for (Dataset dataset : datasetAcquisition.getDatasets()) {
-					if (!(dataset instanceof GenericDataset)) {
+					if (!(dataset.getType().equals(DatasetType.Generic))) {
 						return false;
 					}
 				}
 			} else if (datasetAcquisition instanceof EegDatasetAcquisition) {
 				for (Dataset dataset : datasetAcquisition.getDatasets()) {
-					if (!(dataset instanceof EegDataset)) {
+					if (!(dataset.getType().equals(DatasetType.Eeg))) {
 						return false;
 					}
 				}
 			} else if (datasetAcquisition instanceof BidsDatasetAcquisition) {
 				for (Dataset dataset : datasetAcquisition.getDatasets()) {
-					if (!(dataset instanceof BidsDataset)) {
+					if (!(dataset.getType().equals(DatasetType.BIDS))) {
 						return false;
 					}
 				}
 			} else if (datasetAcquisition instanceof XaDatasetAcquisition) {
 				for (Dataset dataset : datasetAcquisition.getDatasets()) {
-					if (!(dataset instanceof XaDataset)) {
+					if (!(dataset.getType().equals(DatasetType.Xa))) {
 						return false;
 					}
 				}
