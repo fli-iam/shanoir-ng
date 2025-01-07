@@ -213,7 +213,7 @@ public class DicomServerClient implements IDicomServerClient {
 			} else {
 				downloadOrCopyReport.append("Error: Download: serie "
 					+ (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
-				 	+ serie.getSeriesDescription() + " downloaded with not existing serie folder.\n");
+				 	+ serie.getSeriesDescription() + " downloaded without an existing serie folder.\n");
 				logger.error(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
 						+ " DICOM files for serie " + seriesInstanceUID + ": " + serie.getSeriesDescription()
 						+ " has failed.\n\n");
