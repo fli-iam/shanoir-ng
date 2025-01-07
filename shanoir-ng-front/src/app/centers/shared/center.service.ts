@@ -34,7 +34,6 @@ export class CenterService extends EntityService<Center> {
     getEntityInstance() { return new Center(); }
 
     getCentersNames(): Promise<IdName[]> {
-        console.log("getCentersNames");
         return this.http.get<IdName[]>(AppUtils.BACKEND_API_CENTER_NAMES_URL)
             .toPromise();
     }

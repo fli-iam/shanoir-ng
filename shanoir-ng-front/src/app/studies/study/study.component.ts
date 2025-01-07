@@ -207,7 +207,6 @@ export class StudyComponent extends EntityComponent<Study> {
             });
         }
         this.getCenters().then(centers => {
-            console.log("test");
             let option = this.centerOptions.find(option => option.value.id == this.study.studyCenterList[0].center.id);
             if (option) this.selectedCenter = option.value;
             this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
@@ -399,10 +398,7 @@ export class StudyComponent extends EntityComponent<Study> {
 
     removeCenterFromStudy(centerId: number): void {
         if (!this.study.studyCenterList) return;
-        console.log("centerId : ", centerId);
-        console.log("studyCenterList 1: ", this.study.studyCenterList);
         this.study.studyCenterList = this.study.studyCenterList.filter(item => item.center.id !== centerId);
-        console.log("studyCenterList 2: ", this.study.studyCenterList);
         this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
         this.form.get('studyCenterList').markAsDirty();
         this.form.get('studyCenterList').updateValueAndValidity();
