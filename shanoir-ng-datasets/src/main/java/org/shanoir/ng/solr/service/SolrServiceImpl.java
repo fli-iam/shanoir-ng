@@ -94,6 +94,12 @@ public class SolrServiceImpl implements SolrService {
 	@Autowired
 	private ShanoirEventService eventService;
 
+	//This attribute is a bean of the class itself.
+	//Its goal is to avoid transactional self-invocation issue,
+	//which appears when a transactional method calls another transactional method,
+	//and both are defined in the same class.
+	//When the issue occurs, Spring might have difficulties to manage the transactions,
+	//which is not the case anymore when methods are called with various beans of the class.
 	@Lazy
 	@Autowired
 	private SolrServiceImpl solrServiceImpl;
