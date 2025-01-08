@@ -21,9 +21,6 @@ package org.shanoir.ng.solr.service;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.ListUtils;
@@ -148,7 +145,7 @@ public class SolrServiceImpl implements SolrService {
 			for (List<ShanoirMetadata> partition : ListUtils.partition(documents, 100000)) {
 				indexedData += partition.size();
 				event.setProgress((float) Math.floor(30F + ((indexedData / (float) totalData) * 70F)) / 100F);
-				solrServiceImpl.indexDataPartition(event, partition, tags, indexedData).get();
+				solrServiceImpl.indexDataPartition(event, partition, tags, indexedData);
 			}
 		} catch (Exception e) {
 			LOG.error("Error indexing datasets into Solr.", e);
@@ -157,14 +154,13 @@ public class SolrServiceImpl implements SolrService {
 	}
 
 	@Transactional
-	protected Future<Void> indexDataPartition(ShanoirEvent event, List<ShanoirMetadata> documents, Map<Long, List<String>> tags, int indexedSize) throws SolrServerException, IOException {
+	protected void indexDataPartition(ShanoirEvent event, List<ShanoirMetadata> documents, Map<Long, List<String>> tags, int indexedSize) throws SolrServerException, IOException {
 		indexDocumentsInSolr(documents, tags);
 		if(Objects.equals(1f, event.getProgress())){
 			eventService.publishSuccessEvent(event, "Indexed [" + indexedSize + "] datasets.");
 		} else {
 			eventService.publishEvent(event, "Indexing [" + indexedSize + "] datasets...", event.getProgress());
 		}
-		return CompletableFuture.completedFuture(null);
 	}
 
 	@Transactional
