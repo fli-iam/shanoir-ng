@@ -25,10 +25,12 @@ import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/c
     templateUrl: 'account-request-info.component.html',
     providers: [
         {
-          provide: NG_VALUE_ACCESSOR,
-          useExisting: forwardRef(() => AccountRequestInfoComponent),
-          multi: true,
-        }]
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => AccountRequestInfoComponent),
+            multi: true,
+        }
+    ],
+    standalone: false
 })
 export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit {
 

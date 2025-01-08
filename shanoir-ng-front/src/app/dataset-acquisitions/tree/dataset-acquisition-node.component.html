@@ -17,9 +17,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </div>
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened || treeService.isSelected(node.id, 'acquisition')"
+        [class.selected]="menuOpened || treeService.isSelected(node.id, 'acquisition')"
         [label]="node.label"
-        [clickable] = "this.node.id != null"
+        [clickable] = "node.id != null"
         awesome="fas fa-procedures"
         [(opened)]="node.opened"
         (labelClick)="menuOpened = withMenu && !menuOpened"
@@ -31,8 +31,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         (firstOpen)="loadDatasets()"
         [title]="node.title + ' n°' + node.id">
 
-    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu && withMenu && this.node.id != null">
-        <a [routerLink]="this.detailsPath + this.node.id" class="open-new-tab">
+    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu && withMenu && node.id != null">
+        <a [routerLink]="detailsPath + node.id" class="open-new-tab">
             <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
         </a>
             <menu-item [disabled]="(datasetIds && datasetIds.length == 0) || downloading" label="Download" awesome="fas fa-download" (click)="download()"></menu-item>

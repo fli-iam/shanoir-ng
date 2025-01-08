@@ -49,7 +49,8 @@ import { Selection } from 'src/app/studies/study/tree.service';
 @Component({
     selector: 'examination-preclinical-form',
     templateUrl: 'animal-examination-form.component.html',
-    styleUrls: ['animal-examination.component.css']
+    styleUrls: ['animal-examination.component.css'],
+    standalone: false
 })
 @ModesAware
 export class AnimalExaminationFormComponent extends EntityComponent<Examination>{

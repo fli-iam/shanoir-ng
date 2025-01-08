@@ -42,7 +42,8 @@ export const CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR: any = {
     selector: 'node',
     templateUrl: 'tree-node.component.html',
     styleUrls: ['tree-node.component.css'],
-    providers: [CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR]
+    providers: [CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR],
+    standalone: false
 })
 
 export class TreeNodeComponent implements ControlValueAccessor, OnChanges {

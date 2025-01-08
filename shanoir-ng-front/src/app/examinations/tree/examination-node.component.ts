@@ -30,7 +30,8 @@ import { ExaminationService } from '../shared/examination.service';
 
 @Component({
     selector: 'examination-node',
-    templateUrl: 'examination-node.component.html'
+    templateUrl: 'examination-node.component.html',
+    standalone: false
 })
 
 export class ExaminationNodeComponent implements OnChanges {

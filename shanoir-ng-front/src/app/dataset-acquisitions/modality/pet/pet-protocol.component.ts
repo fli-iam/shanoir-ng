@@ -23,10 +23,12 @@ import {UnitOfMeasure} from "../../../enum/unitofmeasure.enum";
     templateUrl: 'pet-protocol.component.html',
     providers: [
         {
-          provide: NG_VALUE_ACCESSOR,
-          useExisting: forwardRef(() => PetProtocolComponent),
-          multi: true,
-        }]
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => PetProtocolComponent),
+            multi: true,
+        }
+    ],
+    standalone: false
 })
 export class PetProtocolComponent implements ControlValueAccessor {
 

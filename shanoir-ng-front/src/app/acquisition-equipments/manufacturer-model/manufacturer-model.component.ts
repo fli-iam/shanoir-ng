@@ -30,7 +30,8 @@ import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
 
 @Component({
     selector: 'manufacturer-model-detail',
-    templateUrl: 'manufacturer-model.component.html'
+    templateUrl: 'manufacturer-model.component.html',
+    standalone: false
 })
 
 export class ManufacturerModelComponent extends EntityComponent<ManufacturerModel> {
