@@ -27,7 +27,8 @@ import { ImportService } from '../../../import/shared/import.service';
     selector: 'bruker-select-series',
     templateUrl: 'bruker-select-series.component.html',
     styleUrls: ['bruker-select-series.component.css', '../../../import/shared/import.step.css'],
-    animations: [slideDown]
+    animations: [slideDown],
+    standalone: false
 })
 export class BrukerSelectSeriesComponent {
 

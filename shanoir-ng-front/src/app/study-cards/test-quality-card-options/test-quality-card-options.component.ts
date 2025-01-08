@@ -20,7 +20,8 @@ import { GlobalService } from 'src/app/shared/services/global.service';
 @Component({
     selector: 'test-quality-card-options',
     templateUrl: 'test-quality-card-options.component.html',
-    styleUrls: ['test-quality-card-options.component.css']
+    styleUrls: ['test-quality-card-options.component.css'],
+    standalone: false
 })
 export class TestQualityCardOptionsComponent implements OnInit {
 
