@@ -32,7 +32,9 @@ public class UploadFromTableActionListener implements ActionListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(UploadFromTableActionListener.class);
 
-	private static SimpleDateFormat dicomDateFormat = new SimpleDateFormat("yyyymmdd");
+	private static SimpleDateFormat dicomStudyDateFormat = new SimpleDateFormat("yyyymmdd");
+
+	private static SimpleDateFormat birthDateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
 	private JFileChooser fileChooser;
 	private ImportFromTableWindow importFromTableWindow;
@@ -42,7 +44,7 @@ public class UploadFromTableActionListener implements ActionListener {
 		this.importFromTableWindow = importFromTableWindow;
 		this.fileChooser = new JFileChooser();
 		// Create a file filter for .xlsx files
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("Excel Files", "xlsx", "xls");
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Excel files", "xlsx", "xls");
         fileChooser.setFileFilter(filter);
 		this.resourceBundle = resourceBundle;
 	}
@@ -106,7 +108,7 @@ public class UploadFromTableActionListener implements ActionListener {
 		value = handleCell(birthName);
 		patientVerification.setBirthName(value);
 		Cell birthDate = row.getCell(13);
-		value = handleCell(birthDate);
+		value = handleCell(birthDate, true);
 		patientVerification.setBirthDate(value);
 		importJob.setPatientVerification(patientVerification);
 	}
@@ -161,14 +163,22 @@ public class UploadFromTableActionListener implements ActionListener {
 	}
 
 	private String handleCell(Cell cell) {
+		return handleCell(cell, false);
+	}
+
+	private String handleCell(Cell cell, boolean specialHandling) {
 		if (cell != null) {
 			switch (cell.getCellType()) {
 				case STRING:
-                return cell.getStringCellValue().trim();
+                	return cell.getStringCellValue().trim();
 				case NUMERIC:
 					if (DateUtil.isCellDateFormatted(cell)) {
 						Date date = cell.getDateCellValue();
-						return dicomDateFormat.format(date);
+						if (specialHandling) {
+							return birthDateFormat.format(date);
+						} else {
+							return dicomStudyDateFormat.format(date);
+						}
 					} else {
 						double numericValue = cell.getNumericCellValue();
 						if (numericValue == Math.floor(numericValue)) {
