@@ -23,7 +23,8 @@ export type ImportMode = 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS' | 'Process
 @Component({
     selector: 'imports',
     templateUrl: 'import.component.html',
-    styleUrls: ['import.component.css']
+    styleUrls: ['import.component.css'],
+    standalone: false
 })
 export class ImportComponent {
 

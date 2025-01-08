@@ -14,7 +14,7 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { ImportJob } from '../../import/shared/dicom-data.model';
 
 import * as PreclinicalUtils from '../utils/preclinical.utils';

@@ -25,6 +25,7 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
     selector: 'coil-list',
     templateUrl: 'coil-list.component.html',
     styleUrls: ['coil-list.component.css'],
+    standalone: false
 })
 export class CoilListComponent extends BrowserPaginEntityListComponent<Coil> {
 
