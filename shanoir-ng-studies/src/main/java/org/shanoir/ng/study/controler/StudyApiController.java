@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
+import org.hibernate.Hibernate;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -197,6 +198,7 @@ public class StudyApiController implements StudyApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		for (Study study : studies) {
+			Hibernate.initialize(study.getStudyCenterList());
 			studiesDTO.add(studyMapper.studyToExtendedIdNameDTO(study));
 		}
 		return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
