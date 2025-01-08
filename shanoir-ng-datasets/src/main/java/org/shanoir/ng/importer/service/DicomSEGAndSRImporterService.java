@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.persistence.EntityManager;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Sequence;
@@ -20,6 +21,7 @@ import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.VR;
 import org.dcm4che3.io.DicomInputStream;
 import org.dcm4che3.io.DicomOutputStream;
+import org.hibernate.Hibernate;
 import org.shanoir.ng.dataset.modality.MeasurementDataset;
 import org.shanoir.ng.dataset.modality.SegmentationDataset;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
@@ -35,6 +37,7 @@ import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
+import org.shanoir.ng.dicom.web.SeriesInstanceUIDHandler;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
@@ -43,6 +46,7 @@ import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,10 +92,12 @@ public class DicomSEGAndSRImporterService {
 	
 	@Autowired
 	private DICOMWebService dicomWebService;
-	
+
 	@Autowired
 	private StudyInstanceUIDHandler studyInstanceUIDHandler;
-	
+
+	@Autowired
+	private SeriesInstanceUIDHandler seriesInstanceUIDHandler;
 	@Value("${dcm4chee-arc.protocol}")
 	private String dcm4cheeProtocol;
 	
@@ -103,7 +109,10 @@ public class DicomSEGAndSRImporterService {
 	
 	@Value("${dcm4chee-arc.dicom.web.rs}")
 	private String dicomWebRS;
-	
+
+	@Autowired
+	EntityManager entityManager;
+
 	@Transactional
 	public boolean importDicomSEGAndSR(InputStream inputStream) {
 		// DicomInputStream consumes the input stream to read the data
@@ -131,6 +140,30 @@ public class DicomSEGAndSRImporterService {
 			return false;
 		}
 		return true;
+	}
+
+	@Transactional
+	public void deleteSR(Long examId, String seriesUid) {
+		try {
+			Examination exam = examinationRepository.findById(examId).orElse(null);
+			if (exam != null) {
+				for (DatasetAcquisition acq : exam.getDatasetAcquisitions()) {
+					for (Dataset ds : acq.getDatasets()) {
+						String dsSeriesInstanceUid = seriesInstanceUIDHandler.findSeriesInstanceUID(ds);
+						if (dsSeriesInstanceUid.equals(seriesUid)) {
+							entityManager.clear();
+							SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+							datasetService.deleteById(ds.getId());
+							dicomWebService.deleteDicomFilesFromPacs();
+							solrService.deleteFromIndex(ds.getId());
+							return;
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
+		}
 	}
 
 	/**

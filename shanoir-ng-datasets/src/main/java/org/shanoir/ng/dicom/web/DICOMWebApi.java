@@ -8,12 +8,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDatasetsDTO;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -170,6 +173,20 @@ public interface DICOMWebApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<Void> stow(HttpServletRequest request) throws RestServiceException;
 
+	@Operation(summary = "", description = "Delete the structured report")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "found series/acquisitions"),
+			@ApiResponse(responseCode = "204", description = "serie/acquisition deleted"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@RequestMapping(value = "/studies/{examinationUID}/series/{seriesInstanceUID}/reject/{reject}", method=RequestMethod.POST)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	ResponseEntity<Void> deleteSEGAndSR(
+			@Parameter(description = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
+			@Parameter(description = "seriesInstanceUID", required = true) @PathVariable("seriesInstanceUID") String seriesInstanceUID,
+			@Parameter(description = "reject", required = true) @PathVariable("reject") String reject
+	) throws RestServiceException;
 
 //    @GET
 //    @NoCache

@@ -16,12 +16,17 @@ package org.shanoir.ng.datasetacquisition.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import org.shanoir.ng.dataset.modality.*;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetType;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.bids.BidsDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.eeg.EegDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 
 /**
  * Validates if all datasets of an acquisition have same modality type than the
@@ -56,6 +61,30 @@ public class DatasetsModalityTypeCheckValidator
 			} else if (datasetAcquisition instanceof CtDatasetAcquisition) {
 				for (Dataset dataset : datasetAcquisition.getDatasets()) {
 					if (!(dataset.getType().equals(DatasetType.Ct))) {
+						return false;
+					}
+				}
+			} else if (datasetAcquisition instanceof GenericDatasetAcquisition) {
+				for (Dataset dataset : datasetAcquisition.getDatasets()) {
+					if (!(dataset.getType().equals(DatasetType.Generic))) {
+						return false;
+					}
+				}
+			} else if (datasetAcquisition instanceof EegDatasetAcquisition) {
+				for (Dataset dataset : datasetAcquisition.getDatasets()) {
+					if (!(dataset.getType().equals(DatasetType.Eeg))) {
+						return false;
+					}
+				}
+			} else if (datasetAcquisition instanceof BidsDatasetAcquisition) {
+				for (Dataset dataset : datasetAcquisition.getDatasets()) {
+					if (!(dataset.getType().equals(DatasetType.BIDS))) {
+						return false;
+					}
+				}
+			} else if (datasetAcquisition instanceof XaDatasetAcquisition) {
+				for (Dataset dataset : datasetAcquisition.getDatasets()) {
+					if (!(dataset.getType().equals(DatasetType.Xa))) {
 						return false;
 					}
 				}

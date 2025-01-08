@@ -16,6 +16,7 @@ package org.shanoir.ng.dataset.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -111,6 +112,9 @@ public class DatasetServiceImpl implements DatasetService {
 	private ProcessingResourceService processingResourceService;
 
 	@Autowired
+	EntityManager entityManager;
+  
+	@Autowired
 	DatasetExpressionRepository datasetExpressionRepository;
 
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
@@ -131,12 +135,18 @@ public class DatasetServiceImpl implements DatasetService {
 					));
 
 		}
-		// Remove parent processing to avoid errors
-		dataset.setDatasetProcessing(null);
-		processingService.removeDatasetFromAllProcessingInput(id);
-		processingResourceService.deleteByDatasetId(id);
-		propertyService.deleteByDatasetId(id);
-		repository.deleteById(id);
+		try {
+			// Remove parent processing to avoid errors
+			dataset.setDatasetProcessing(null);
+			processingService.removeDatasetFromAllProcessingInput(id);
+			processingResourceService.deleteByDatasetId(id);
+			propertyService.deleteByDatasetId(id);
+
+			repository.deleteById(id);
+			entityManager.flush();
+		} catch (Exception e) {
+			LOG.error("ERREUR e : " + e.getMessage());
+		}
 
 		if (dataset.getSource() != null) {
 			this.deleteDatasetFromPacs(dataset);

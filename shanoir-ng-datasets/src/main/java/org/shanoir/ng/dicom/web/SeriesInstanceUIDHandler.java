@@ -71,7 +71,7 @@ public class SeriesInstanceUIDHandler {
         return seriesInstanceUID;
     }
 
-    private String findSeriesInstanceUID(DatasetAcquisition acquisition) {
+    public String findSeriesInstanceUID(DatasetAcquisition acquisition) {
         if (acquisition instanceof MrDatasetAcquisition
                 || acquisition instanceof CtDatasetAcquisition
                 || acquisition instanceof PetDatasetAcquisition) {
@@ -91,6 +91,26 @@ public class SeriesInstanceUIDHandler {
                                     return findSeriesInstanceUID(path);
                                 }
                             }
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public String findSeriesInstanceUID(Dataset ds) {
+        List<DatasetExpression> expressions = ds.getDatasetExpressions();
+        if (!expressions.isEmpty()) {
+            for (DatasetExpression expression : expressions) {
+                // only DICOM is of interest here
+                if (expression.getDatasetExpressionFormat().equals(DatasetExpressionFormat.DICOM)) {
+                    List<DatasetFile> files = expression.getDatasetFiles();
+                    if (!files.isEmpty()) {
+                        DatasetFile file = files.get(0);
+                        if (file.isPacs()) {
+                            String path = file.getPath();
+                            return findSeriesInstanceUID(path);
                         }
                     }
                 }
