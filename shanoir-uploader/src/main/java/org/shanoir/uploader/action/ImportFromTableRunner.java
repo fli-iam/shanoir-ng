@@ -268,6 +268,12 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				institutionDicom.setInstitutionName(institutionName);
 				institutionDicom.setInstitutionAddress(uploadJob.getMriInformation().getInstitutionAddress());
 				Center center = shanoirUploaderServiceClientNG.findCenterOrCreateByInstitutionDicom(institutionDicom, studyREST.getId());
+				if (center == null) {
+					uploadJob.setUploadState(UploadState.ERROR);
+					importJob.setErrorMessage("Error: could not find or create center.");
+					logger.error(importJob.getErrorMessage());
+					return false;
+				}
 				// 4.3.3 find or create manufacturer model and manufacturer
 				ManufacturerModel manufacturerModel = ImportUtils.findManufacturerModelInAllEquipments(acquisitionEquipments, manufacturerName, manufacturerModelName);
 				if (manufacturerModel == null) { // create one
