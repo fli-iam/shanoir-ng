@@ -49,6 +49,8 @@ public class CreateStatisticsService {
         File statisticsFile = recreateFile(userDir + File.separator + "shanoirExportStatistics_" + event.getId() + ".tsv");
         File zipFile = recreateFile(userDir + File.separator + "shanoirExportStatistics_" + event.getId() + ZIP);
 
+        LOG.error("createStats : " + studyNameInRegExp);
+
         // Get the data
         try (FileOutputStream fos = new FileOutputStream(statisticsFile);
              BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos))){

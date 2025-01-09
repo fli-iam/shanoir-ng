@@ -4,6 +4,9 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.ParameterMode;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.StoredProcedureQuery;
+import org.shanoir.ng.dataset.service.CreateStatisticsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -14,6 +17,7 @@ public class DatasetRepositoryImpl implements DatasetRepositoryCustom {
     @PersistenceContext
     private EntityManager entityManager;
 
+	private static final Logger LOG = LoggerFactory.getLogger(DatasetRepositoryImpl.class);
     @SuppressWarnings("unchecked")
 	@Override
     public List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp,
@@ -38,6 +42,7 @@ public class DatasetRepositoryImpl implements DatasetRepositoryCustom {
 		query.execute();
 		
 		List<Object[]> results = query.getResultList();
+		LOG.error("query statistics results size : " + results.size());
 		return results;
     }
 

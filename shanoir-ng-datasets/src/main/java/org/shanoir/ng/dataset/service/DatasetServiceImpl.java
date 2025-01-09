@@ -367,6 +367,7 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Override
 	public List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception {
+		LOG.error("query statistics : " + studyNameInRegExp);
 		return repository.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
 	}
 

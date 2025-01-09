@@ -597,6 +597,8 @@ public class DatasetApiController implements DatasetApi {
 			@RequestParam(value = "subjectNameOutRegExp", required = false) String subjectNameOutRegExp
 			) throws RestServiceException, IOException {
 
+		LOG.error("downloadStatistics");
+
 		String params = "";
 		if (studyNameInRegExp != null && !StringUtils.isEmpty(studyNameInRegExp)) params += "\nStudy to include : " + studyNameInRegExp;
 		if (studyNameOutRegExp != null && !StringUtils.isEmpty(studyNameOutRegExp)) params += "\nStudy to exclude : " + studyNameOutRegExp;
