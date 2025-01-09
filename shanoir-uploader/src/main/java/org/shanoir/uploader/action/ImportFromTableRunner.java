@@ -110,7 +110,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			}
 		}
 
-		boolean success = true;
+		boolean resultAllJobs = true;
 		int i = 1;
 		logger.info("\r\n**********************************\r\n"
 			+ "Starting Excel mass import...\r\n"
@@ -126,9 +126,10 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				logger.info("\r\n------------------------------------------------------\r\n"
 					+ "Starting importJob " + importJobIdentifier + "\r\n"
 					+ "------------------------------------------------------");
-				success = importData(importJob, study, acquisitionEquipments) && success;
+				boolean resultOneJob = importData(importJob, study, acquisitionEquipments);
+				resultAllJobs = resultOneJob && resultAllJobs;
 				logger.info("\r\n------------------------------------------------------\r\n"
-					+ "Finished importJob " + importJobIdentifier + ", success?: " + success+ "\r\n"
+					+ "Finished importJob " + importJobIdentifier + ", success?: " + resultOneJob + "\r\n"
 					+ "------------------------------------------------------");
 			} catch(Exception exception) {
 				logger.error(exception.getMessage(), exception);
@@ -136,7 +137,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			i++;
 		}
 
-		if (success) {
+		if (resultAllJobs) {
 			importFromTableWindow.progressBar.setString("Success !");
 			importFromTableWindow.progressBar.setValue(100);
 			// Open current import tab and close table import panel
@@ -417,7 +418,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		}
 		importJob.setExaminationId(examinationId);
 
-		logger.info("7. Start import to server (upload files + start import job)");
+		logger.info("7. Prepare uploadJob in thread: pseudonymize DICOM files, write import-job.json and upload-job.xml.");
 		importJob.setDicomQuery(null); // clean up, as not necessary anymore
 		importJob.setPatientVerification(null); // avoid sending patient info to server
 		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examinationId, studyREST, studyCard);
