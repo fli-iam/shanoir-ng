@@ -208,13 +208,22 @@ public class DicomServerClient implements IDicomServerClient {
 					+ (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
 					+ serie.getSeriesDescription()
 					+ " downloaded with " + fileNamesForSerie.size() + " images.\n");
-				if (serie.getInstances().size() != fileNamesForSerie.size()
-					|| serie.getNumberOfSeriesRelatedInstances().intValue() != serie.getInstances().size()) {
+				if (serie.getInstances().size() != fileNamesForSerie.size()) {
 					downloadOrCopyReport.append("Error: Download: serie "
 						+ (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
 						+ serie.getSeriesDescription()
 						+ " downloaded with " + fileNamesForSerie.size()
 						+ " images not equal to instances in the DICOM server: " + serie.getInstances().size() + ".\n");
+				}
+				if (serie.getNumberOfSeriesRelatedInstances() != null
+					&& serie.getNumberOfSeriesRelatedInstances().intValue() != 0
+					&& serie.getNumberOfSeriesRelatedInstances().intValue() != serie.getInstances().size()) {
+					logger.warn("Download: serie "
+						+ (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
+						+ serie.getSeriesDescription()
+						+ " getNumberOfSeriesRelatedInstances (" + serie.getNumberOfSeriesRelatedInstances().intValue()
+						+ ") != " + serie.getInstances().size()
+					);
 				}
 				retrievedDicomFiles.addAll(fileNamesForSerie);
 				logger.info(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
