@@ -14,9 +14,12 @@
 
 package org.shanoir.ng.importer.strategies.protocol;
 
+import java.io.IOException;
+
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.datasetacquisition.model.ct.CtProtocol;
+import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Serie;
 import org.slf4j.Logger;
@@ -42,6 +45,12 @@ public class CtProtocolStrategy {
 		Integer numberOfSlices = attributes.getInt(Tag.NumberOfSlices, -1);
 		numberOfSlices = (numberOfSlices != -1) ? numberOfSlices : null;
 		LOG.debug("extractMetadata : numberOfSlices=" + numberOfSlices);
+		if (numberOfSlices == null) {
+			try {
+				numberOfSlices = DicomProcessing.countUniqueInstances(serie, false);
+				LOG.debug("count nb of slices within the serie : numberOfSlices=" + numberOfSlices);
+			} catch (IOException e) {}
+		}
 		protocol.setNumberOfSlices(numberOfSlices);
 
 		return protocol;

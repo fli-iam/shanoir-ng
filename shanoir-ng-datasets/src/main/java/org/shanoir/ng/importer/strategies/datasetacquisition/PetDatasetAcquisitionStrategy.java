@@ -69,7 +69,7 @@ public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy
 		datasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
 		datasetAcquisition.setAcquisitionStartTime(DateTimeUtils.dateToLocalDateTime(dicomAttributes.getFirstDatasetAttributes().getDate(Tag.AcquisitionTime)));
 
-		PetProtocol protocol = protocolStrategy.generateProtocolForSerie(dicomAttributes.getFirstDatasetAttributes());
+		PetProtocol protocol = protocolStrategy.generateProtocolForSerie(dicomAttributes.getFirstDatasetAttributes(), serie);
 		datasetAcquisition.setPetProtocol(protocol);
 	
 		// TODO ATO add Compatibility check between study card Equipment and dicomEquipment if not done at front level.
