@@ -134,11 +134,11 @@ public class BidsImporterApiController implements BidsImporterApi {
 
 		// STEP 2: Subject level, analyze and create the new subject if necessary
 		Long subjectId = null;
-		// Exclude MACOSX automatically added hidden files
+		// Exclude MACOS automatically added metadata files and directories (AppleDouble and Finder)
 		for (File subjectFile : importJobDir.listFiles(new FilenameFilter() {
 			@Override
 			public boolean accept(File arg0, String name) {
-				return !name.startsWith(".DS_Store") && !name.startsWith("__");
+				return !name.startsWith(".DS_Store") && !name.startsWith("__MAC") && !name.startsWith("._") && !name.startsWith(".AppleDouble") ;
 			}})) {
 			String fileName = subjectFile.getName();
 			String subjectName = null;
@@ -170,7 +170,7 @@ public class BidsImporterApiController implements BidsImporterApi {
 			File[] examFiles = subjectFile.listFiles(new FilenameFilter() {
 				@Override
 				public boolean accept(File arg0, String name) {
-					return !name.endsWith("_scans.tsv") && !name.endsWith("_sessions.tsv");
+					return !name.endsWith("_scans.tsv") && !name.endsWith("_sessions.tsv") && !name.startsWith(".DS_Store") && !name.startsWith("__MAC") && !name.startsWith("._") && !name.startsWith(".AppleDouble");
 				}
 			});
 
@@ -209,7 +209,13 @@ public class BidsImporterApiController implements BidsImporterApi {
 					importJob.setExaminationId(examId);
 
 					// STEP 4: Finish import from every bids data folder
-					for (File dataTypeFile : sessionFile.listFiles()) {
+					for (File dataTypeFile : sessionFile.listFiles(
+							new FilenameFilter() {
+								@Override
+								public boolean accept(File arg0, String name) {
+									return !name.startsWith(".DS_Store") && !name.startsWith("__MAC") && !name.startsWith("._") && !name.startsWith(".AppleDouble") ;
+								}}
+					)) {
 						importSession(dataTypeFile, importJob);
 					}
 				} else {
