@@ -301,7 +301,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 						magneticFieldStrength = "0.0";
 					}
 					manufacturerModel = ImportUtils.createManufacturerModel(
-						manufacturerModelName, manufacturer, String.valueOf(datasetModalityType), Double.valueOf(magneticFieldStrength));
+						manufacturerModelName, manufacturer, DatasetModalityType.getType(datasetModalityType).toString(), Double.valueOf(magneticFieldStrength));
 				}
 				if (manufacturerModel == null) {
 					uploadJob.setUploadState(UploadState.ERROR);
