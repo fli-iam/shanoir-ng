@@ -316,12 +316,21 @@ public class BidsImporterApiController implements BidsImporterApi {
 		}
 		File sessionFile = sessionFiles[0];
 
+
+
 		// session_id;acq_time;pathology
 		// analyze date for every session
 		CsvMapper mapper = new CsvMapper();
 		mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
 		MappingIterator<String[]> it = mapper.readerFor(String[].class).readValues(sessionFile);
 
+		// Check File is not empty
+		if (sessionFile.length() > 0) {
+			LOG.debug("We found a non empty session.tsv file ");
+		} else {
+			LOG.debug("We found an empty session.tsv file ");
+			return examDates;
+		})
 		// Check that the list of column is known
 		List<String> columns = Arrays.asList(it.next()[0].split(CSV_SEPARATOR));
 		int sessionIdIndex = columns.indexOf("session_id");
