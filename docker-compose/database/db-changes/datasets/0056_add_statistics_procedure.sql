@@ -86,7 +86,7 @@ FROM dataset
     LEFT JOIN studies.pseudonymus_hash_values AS pseudonymus_hash_values ON (pseudonymus_hash_values.id = subject.pseudonymus_hash_values_id)
 
 WHERE subject.name NOT rlike if(subjectNameOutRegExp IS NULL  OR subjectNameOutRegExp = '', '^\b\B$', subjectNameOutRegExp) AND study.name rlike if(studyNameInRegExp IS NULL  OR studyNameInRegExp = '', '.*', studyNameInRegExp)
-	LIMIT limitRows OFFSET offsetRows;
+	LIMIT rowCount OFFSET startRow;
 END //
 
 delimiter ;
