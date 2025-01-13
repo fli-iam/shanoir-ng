@@ -50,8 +50,12 @@ public class DatasetRepositoryImpl implements DatasetRepositoryCustom {
 		query.setParameter(3, subjectNameInRegExp);
 		query.setParameter(4, subjectNameOutRegExp);
 
-		List<Object[]> allResults = new ArrayList<>();
+		query.setParameter(5, startRow);
+		query.setParameter(6, rowCount);
 
+		query.execute();
+		List<Object[]> results = new ArrayList<>();
+		List<Object[]> resBloc = new ArrayList<>();
 		LOG.error("query 3");
 		while (true) {
 			query.setParameter(5, startRow);
@@ -59,17 +63,19 @@ public class DatasetRepositoryImpl implements DatasetRepositoryCustom {
 
 			query.execute();
 
-			@SuppressWarnings("unchecked")
-			List<Object[]> results = query.getResultList();
-
-			if (results.isEmpty()) {
+			resBloc.clear();
+			resBloc = query.getResultList();
+			LOG.error("query res isempty : " + query.getResultList().size());
+			LOG.error("resbloc size : " + resBloc.size());
+			LOG.error("resbloc isempty : " + resBloc.isEmpty());
+			if (resBloc.isEmpty()) {
 				break;
 			}
 
-			allResults.addAll(results);
+			results.addAll(resBloc);
 			startRow += rowCount;
 		}
 
-		return allResults;
+		return results;
     }
 }
