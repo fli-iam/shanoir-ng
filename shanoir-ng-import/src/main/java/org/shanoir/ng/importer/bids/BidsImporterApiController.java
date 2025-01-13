@@ -336,10 +336,10 @@ public class BidsImporterApiController implements BidsImporterApi {
 		int sessionIdIndex = columns.indexOf("session_id");
 		int dateIndex = columns.indexOf("acq_time");
 
-			// If there is no date, just give up
-			if (dateIndex == -1) {
-				return examDates;
-			}
+		// If there is no date, just give up
+		if (dateIndex == -1) {
+			return examDates;
+		}
 
 			// Legal format in BIDS (are we up to date ? I don't think so)
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-DDThh:mm:ss[.000000][Z]");
