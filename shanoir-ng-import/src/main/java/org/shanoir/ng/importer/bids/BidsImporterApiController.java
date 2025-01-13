@@ -316,6 +316,8 @@ public class BidsImporterApiController implements BidsImporterApi {
 		}
 		File sessionFile = sessionFiles[0];
 
+
+
 		// session_id;acq_time;pathology
 		// analyze date for every session
 		CsvMapper mapper = new CsvMapper();
