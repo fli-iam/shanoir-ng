@@ -68,7 +68,7 @@ SELECT
     WHERE property.dataset_id = dataset.id
     GROUP BY property.dataset_processing_id
     ORDER BY exe.start_date DESC
-    LIMIT startRow, rowCount) AS execution
+    LIMIT 1) AS execution
 
 FROM dataset
     LEFT JOIN dataset_acquisition ON (dataset_acquisition.id = dataset.dataset_acquisition_id)
@@ -88,7 +88,8 @@ FROM dataset
 WHERE subject.name rlike if(subjectNameInRegExp IS NULL  OR subjectNameInRegExp = '', '.*', subjectNameInRegExp)
   AND subject.name NOT rlike if(subjectNameOutRegExp IS NULL  OR subjectNameOutRegExp = '', '^\b\B$', subjectNameOutRegExp)
   AND study.name rlike if(studyNameInRegExp IS NULL  OR studyNameInRegExp = '', '.*', studyNameInRegExp)
-  AND study.name NOT rlike if(studyNameOutRegExp IS NULL  OR studyNameOutRegExp = '', '^\b\B$', studyNameOutRegExp);
+  AND study.name NOT rlike if(studyNameOutRegExp IS NULL  OR studyNameOutRegExp = '', '^\b\B$', studyNameOutRegExp)
+LIMIT rowCount OFFSET startRow;
 END //
 
 delimiter ;

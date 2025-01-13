@@ -68,7 +68,7 @@ SELECT
     WHERE property.dataset_id = dataset.id
     GROUP BY property.dataset_processing_id
     ORDER BY exe.start_date DESC
-    LIMIT startRow, rowCount) AS execution
+    LIMIT 1) AS execution
 
 FROM dataset
     LEFT JOIN dataset_acquisition ON (dataset_acquisition.id = dataset.dataset_acquisition_id)
@@ -85,7 +85,8 @@ FROM dataset
     LEFT JOIN studies.center AS center ON (center.id = examination.center_id)
     LEFT JOIN studies.pseudonymus_hash_values AS pseudonymus_hash_values ON (pseudonymus_hash_values.id = subject.pseudonymus_hash_values_id)
 
-WHERE subject.name NOT rlike if(subjectNameOutRegExp IS NULL  OR subjectNameOutRegExp = '', '^\b\B$', subjectNameOutRegExp) AND study.name rlike if(studyNameInRegExp IS NULL  OR studyNameInRegExp = '', '.*', studyNameInRegExp);
+WHERE subject.name NOT rlike if(subjectNameOutRegExp IS NULL  OR subjectNameOutRegExp = '', '^\b\B$', subjectNameOutRegExp) AND study.name rlike if(studyNameInRegExp IS NULL  OR studyNameInRegExp = '', '.*', studyNameInRegExp)
+	LIMIT limitRows OFFSET offsetRows;
 END //
 
 delimiter ;
