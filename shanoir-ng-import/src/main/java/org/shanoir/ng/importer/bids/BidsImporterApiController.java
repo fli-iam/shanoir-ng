@@ -317,7 +317,6 @@ public class BidsImporterApiController implements BidsImporterApi {
 		File sessionFile = sessionFiles[0];
 
 
-
 		// session_id;acq_time;pathology
 		// analyze date for every session
 		CsvMapper mapper = new CsvMapper();
@@ -326,31 +325,32 @@ public class BidsImporterApiController implements BidsImporterApi {
 
 		// Check File is not empty
 		if (sessionFile.length() > 0) {
-			LOG.debug("We found a non empty session.tsv file ");
+			LOG.error("We found a non empty session.tsv file ");
+			// Check that the list of column is known
+			List<String> columns = Arrays.asList(it.next()[0].split(CSV_SEPARATOR));
+			int sessionIdIndex = columns.indexOf("session_id");
+			int dateIndex = columns.indexOf("acq_time");
+
+			// If there is no date, just give up
+			if (dateIndex == -1) {
+				return examDates;
+			}
+
+			// Legal format in BIDS (are we up to date ? I don't think so)
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-DDThh:mm:ss[.000000][Z]");
+
+			while (it.hasNext()) {
+				String[] row = it.next()[0].split(CSV_SEPARATOR);
+				String sessionLabel = row[sessionIdIndex];
+				String dateAsString = row[dateIndex];
+				TemporalAccessor date = formatter.parseBest(dateAsString, LocalDate::from);
+				examDates.put(sessionLabel, LocalDate.from(date));
+			}
 		} else {
-			LOG.debug("We found an empty session.tsv file ");
-			return examDates;
-		})
-		// Check that the list of column is known
-		List<String> columns = Arrays.asList(it.next()[0].split(CSV_SEPARATOR));
-		int sessionIdIndex = columns.indexOf("session_id");
-		int dateIndex = columns.indexOf("acq_time");
-
-		// If there is no date, just give up
-		if (dateIndex == -1) {
+			LOG.error("We found an empty session.tsv file ");
 			return examDates;
 		}
 
-		// Legal format in BIDS (are we up to date ? I don't think so)
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-DDThh:mm:ss[.000000][Z]");
-
-		while (it.hasNext()) {
-			String[] row = it.next()[0].split(CSV_SEPARATOR);
-			String sessionLabel = row[sessionIdIndex];
-			String dateAsString = row[dateIndex];
-			TemporalAccessor date = formatter.parseBest(dateAsString, LocalDate::from);
-			examDates.put(sessionLabel, LocalDate.from(date));
-		}
 		return examDates;
 	}
 
