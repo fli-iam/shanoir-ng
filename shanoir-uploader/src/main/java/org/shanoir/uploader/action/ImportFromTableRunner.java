@@ -415,6 +415,10 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		Instant studyDateInstant = studyDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
         Date studyDateDate = Date.from(studyDateInstant);
 		Long centerId = studyCard.getAcquisitionEquipment().getCenter().getId();
+		// If column SHANOIR_EXAM_COMMENT is not empty we set the examination comment to this value
+		if (importJob.getExaminationComment() != null || !importJob.getExaminationComment().isEmpty()) {
+			studyDescription = importJob.getExaminationComment();
+		}
 		Long examinationId = ImportUtils.createExamination(studyREST, subjectREST, studyDateDate, studyDescription, centerId);
 		if (examinationId == null) {
 			uploadJob.setUploadState(UploadState.ERROR);
