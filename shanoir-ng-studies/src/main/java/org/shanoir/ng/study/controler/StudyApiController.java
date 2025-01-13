@@ -189,6 +189,7 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
+	@Transactional
 	public ResponseEntity<List<IdNameCenterStudyDTO>> findStudiesNamesAndCenters() throws RestServiceException {
 		List<IdNameCenterStudyDTO> studiesDTO = new ArrayList<>();
 		final List<Study> studies = studyService.findAll();
