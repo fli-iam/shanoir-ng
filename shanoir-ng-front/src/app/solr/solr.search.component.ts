@@ -459,7 +459,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {headerName: "Tags", field: "tags", cellRenderer: (params: any) => {
                     return params?.data?.tags ? params.data.tags.join(', ') : '';
                 }},
-            {headerName: "Type", field: "datasetType"},
+            {headerName: "Modality", field: "datasetType"},
             {headerName: "Nature", field: "datasetNature"},
             {headerName: "Series date", field: "datasetCreationDate", type: "date", hidden: true},
             {headerName: "Sorting index", field: "sortingIndex"},
