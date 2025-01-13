@@ -316,7 +316,6 @@ public class BidsImporterApiController implements BidsImporterApi {
 		}
 		File sessionFile = sessionFiles[0];
 
-
 		// session_id;acq_time;pathology
 		// analyze date for every session
 		CsvMapper mapper = new CsvMapper();
@@ -325,11 +324,15 @@ public class BidsImporterApiController implements BidsImporterApi {
 
 		// Check File is not empty
 		if (sessionFile.length() > 0) {
-			LOG.error("We found a non empty session.tsv file ");
-			// Check that the list of column is known
-			List<String> columns = Arrays.asList(it.next()[0].split(CSV_SEPARATOR));
-			int sessionIdIndex = columns.indexOf("session_id");
-			int dateIndex = columns.indexOf("acq_time");
+			LOG.debug("We found a non empty session.tsv file ");
+		} else {
+			LOG.debug("We found an empty session.tsv file ");
+			return examDates;
+		})
+		// Check that the list of column is known
+		List<String> columns = Arrays.asList(it.next()[0].split(CSV_SEPARATOR));
+		int sessionIdIndex = columns.indexOf("session_id");
+		int dateIndex = columns.indexOf("acq_time");
 
 			// If there is no date, just give up
 			if (dateIndex == -1) {
@@ -350,7 +353,6 @@ public class BidsImporterApiController implements BidsImporterApi {
 			LOG.error("We found an empty session.tsv file ");
 			return examDates;
 		}
-
 		return examDates;
 	}
 
