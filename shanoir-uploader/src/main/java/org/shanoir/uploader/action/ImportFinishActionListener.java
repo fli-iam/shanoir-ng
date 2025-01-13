@@ -11,7 +11,6 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
 import org.shanoir.ng.importer.model.ImportJob;
-import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
@@ -24,16 +23,12 @@ import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
-import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
 import org.shanoir.uploader.upload.UploadJob;
-import org.shanoir.uploader.upload.UploadJobManager;
 import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.QualityUtils;
-import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * This class implements the logic when the start import button is clicked.
