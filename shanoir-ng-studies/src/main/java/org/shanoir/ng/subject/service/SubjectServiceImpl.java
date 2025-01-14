@@ -110,11 +110,15 @@ public class SubjectServiceImpl implements SubjectService {
 		if (subject.isEmpty()) {
 			throw new EntityNotFoundException(Subject.class, id);
 		}
+
 		// Delete all associated study_examination
-		studyExaminationRepository.deleteBySubject(subject.get());
+		studyExaminationRepository.deleteBySubjectId(id);
 		subjectRepository.deleteById(id);
-		// Propagate deletion
-		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_SUBJECT_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+		if (subject.get().isPreclinical())
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_ANIMAL_SUBJECT_QUEUE, id.toString());
+
+		rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, id.toString());
+
 	}
 
 	@Override

@@ -32,16 +32,17 @@ import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 
 
 @Component({
-  selector: 'subject-study-list',
-  templateUrl: 'subject-study-list.component.html',
-  styleUrls: ['subject-study-list.component.css'],
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => SubjectStudyListComponent),
-      multi: true
-    }
-]
+    selector: 'subject-study-list',
+    templateUrl: 'subject-study-list.component.html',
+    styleUrls: ['subject-study-list.component.css'],
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => SubjectStudyListComponent),
+            multi: true
+        }
+    ],
+    standalone: false
 })
 
 export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> implements OnChanges, OnDestroy {
@@ -240,7 +241,7 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
     removeSubjectStudy(subjectStudy: SubjectStudy):void {
         if (!this.warningDisplayed) {
             this.confirmDialogService.confirm('Deleting subject',
-            'Warning: If this subject is only linked to this study, it will be completely deleted from the database.')
+            'Warning: If this subject is only linked to this study, it will be completely deleted from the database. This means each examination, acquisition and dataset of this subject will be deleted. Are you sure ?')
             .then(userChoice => {
                 if (userChoice) {
                     this.removeSubjectStudyOk(subjectStudy);

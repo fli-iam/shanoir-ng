@@ -54,6 +54,11 @@ public class DatasetDTO {
 	
 	private List<StudyTagDTO> tags;
 
+	private Long source;
+
+	private List<Long> copies;
+
+
 	/**
 	 * @return the creationDate
 	 */
@@ -197,5 +202,21 @@ public class DatasetDTO {
 
 	public void setTags(List<StudyTagDTO> tags) {
 		this.tags = tags;
+	}
+
+	public Long getSource() {
+		return source;
+	}
+
+	public void setSource(Long source) {
+		this.source = source;
+	}
+
+	public List<Long> getCopies() {
+		return copies;
+	}
+
+	public void setCopies(List<Long> copies) {
+		this.copies = copies;
 	}
 }

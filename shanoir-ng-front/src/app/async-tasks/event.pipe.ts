@@ -15,7 +15,10 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 
-@Pipe({ name: "eventType", pure: false })
+@Pipe({
+    name: "eventType", pure: false,
+    standalone: false
+})
 export class EventTypePipe implements PipeTransform {
 
     transform(type: string): string {

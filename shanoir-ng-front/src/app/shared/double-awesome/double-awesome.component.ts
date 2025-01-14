@@ -17,7 +17,8 @@ import { Component, Input } from '@angular/core';
 @Component({
     selector: 'double-awesome',
     templateUrl: './double-awesome.component.html',
-    styleUrls: ['./double-awesome.component.css']
+    styleUrls: ['./double-awesome.component.css'],
+    standalone: false
 })
 export class DoubleAwesomeComponent {
 

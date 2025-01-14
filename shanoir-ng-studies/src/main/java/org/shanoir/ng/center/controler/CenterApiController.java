@@ -49,6 +49,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 
 @Controller
@@ -92,6 +93,7 @@ public class CenterApiController implements CenterApi {
 	}
 
 	@Override
+	@Transactional
 	public ResponseEntity<CenterDTO> findCenterById(
 			@Parameter(description = "id of the center", required = true) @PathVariable("centerId") final Long centerId) {
 		final Optional<Center> center = centerService.findById(centerId);
@@ -102,6 +104,7 @@ public class CenterApiController implements CenterApi {
 	}
 
 	@Override
+	@Transactional
 	public ResponseEntity<CenterDTO> findCenterOrCreateByInstitutionDicom(
 		@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 		@Parameter(description = "institution dicom to find or create a center", required = true)
@@ -151,6 +154,7 @@ public class CenterApiController implements CenterApi {
 	}
 
 	@Override
+	@Transactional
 	public ResponseEntity<List<CenterDTO>> findCenters() {
 		List<Center> centers = centerService.findAll();
 		// Remove "unknown" center
@@ -162,6 +166,7 @@ public class CenterApiController implements CenterApi {
 	}
 
 	@Override
+	@Transactional
 	public ResponseEntity<List<CenterDTO>> findCentersByStudy (
 			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
 		final List<Center> centers = centerService.findByStudy(studyId);
@@ -193,6 +198,7 @@ public class CenterApiController implements CenterApi {
 	}
 
 	@Override
+	@Transactional
 	public ResponseEntity<CenterDTO> saveNewCenter(
 			@Parameter(description = "the center to create", required = true) @RequestBody @Valid final Center center,
 			final BindingResult result) throws RestServiceException {

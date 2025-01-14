@@ -342,11 +342,11 @@ CMD ["nginx", "-g", "daemon off;"]
 
 ################ front-dev #################################################
 
-FROM node:lts-alpine3.17 as front-dev
+FROM node:lts-alpine3.21 as front-dev
 
 WORKDIR /app
 
-RUN npm install -g @angular/cli@11.2.14
+RUN npm install -g @angular/cli@19.0.1
 
 
 

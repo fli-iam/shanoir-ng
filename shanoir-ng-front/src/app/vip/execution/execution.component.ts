@@ -35,7 +35,8 @@ import {ExecutionCandidateDto} from "../models/execution-candidate.dto";
 @Component({
     selector: 'app-execution',
     templateUrl: './execution.component.html',
-    styleUrls: ['./execution.component.css']
+    styleUrls: ['./execution.component.css'],
+    standalone: false
 })
 export class ExecutionComponent implements OnInit {
 

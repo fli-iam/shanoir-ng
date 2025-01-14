@@ -44,6 +44,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.transaction.Transactional;
 
 @Controller
 public class AcquisitionEquipmentApiController implements AcquisitionEquipmentApi {
@@ -73,6 +74,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 	}
 
 	@Override
+	@Transactional
 	public ResponseEntity<AcquisitionEquipmentDTO> findAcquisitionEquipmentById(
 			@Parameter(description = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") final Long acquisitionEquipmentId) {
 		final AcquisitionEquipment equipment = acquisitionEquipmentService.findById(acquisitionEquipmentId).orElse(null);
@@ -83,6 +85,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 	}
 
 	@Override
+	@Transactional
 	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipments() {
 		List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAll();
 		// Remove "unknown" equipment
@@ -94,6 +97,8 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 				acquisitionEquipmentMapper.acquisitionEquipmentsToAcquisitionEquipmentDTOs(equipments), HttpStatus.OK);
 	}
 	
+	@Override
+	@Transactional
 	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByCenter(@Parameter(description = "id of the center", required = true) @PathVariable("centerId") Long centerId) {
 		final List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAllByCenterId(centerId);
 		if (equipments.isEmpty()) {
@@ -103,6 +108,8 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 				acquisitionEquipmentMapper.acquisitionEquipmentsToAcquisitionEquipmentDTOs(equipments), HttpStatus.OK);
 	}
 	
+	@Override
+	@Transactional
 	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByStudy(@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
 		List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAllByStudyId(studyId);
 		// Remove "unknown" equipment
@@ -115,6 +122,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 	}
 
 	@Override
+	@Transactional
 	public ResponseEntity<AcquisitionEquipmentDTO> saveNewAcquisitionEquipment(
 			@Parameter(description = "acquisition equipment to create", required = true) @RequestBody final AcquisitionEquipment acquisitionEquipment,
 			final BindingResult result) throws RestServiceException {
@@ -182,6 +190,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 	}
 
 	@Override
+	@Transactional
 	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsBySerialNumber(
 			@Parameter(description = "serial number of the acquisition equipment", required = true) @PathVariable("serialNumber") final String serialNumber) {
 		List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAllBySerialNumber(serialNumber);
@@ -195,6 +204,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 	}
 
 	@Override
+	@Transactional
 	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsOrCreateOneByEquipmentDicom(
 		@Parameter(description = "id of the center", required = true) @PathVariable("centerId") Long centerId,
 			@Parameter(description = "equipment dicom to find or create an equipment", required = true) @RequestBody final EquipmentDicom equipmentDicom,

@@ -13,7 +13,7 @@
  */
 
 import {Injectable} from "@angular/core";
-import {HttpClient} from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import {Observable} from "rxjs";
 import * as AppUtils from "../../utils/app.utils";
 import {Execution} from "../models/execution";

@@ -34,6 +34,9 @@ import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -136,10 +139,13 @@ public class StudyServiceImpl implements StudyService {
 	private StudyCenterRepository studyCenterRepository;
 
 	@Autowired
+	private ShanoirEventService eventService;
+  
+	@Autowired
 	private TagRepository tagRepository;
 
-
 	@Override
+	@Transactional
 	public void deleteById(final Long id) throws EntityNotFoundException {
 		final Study study = studyRepository.findById(id).orElse(null);
 		if (study == null) {
@@ -157,11 +163,11 @@ public class StudyServiceImpl implements StudyService {
 				LOG.error("Could not transmit study-user delete info through RabbitMQ", e);
 			}
 		}
-
-		studyRepository.deleteById(id);
+		studyRepository.delete(study);
 	}
 
 	@Override
+	@Transactional
 	public Study findById(final Long id) {
 		return studyRepository.findById(id).orElse(null);
 	}
@@ -324,10 +330,21 @@ public class StudyServiceImpl implements StudyService {
 
 			for (SubjectStudy subjectStudyDb : studyDb.getSubjectStudyList()) {
 				if(!updatedIds.contains(subjectStudyDb.getId())) {
-					removed.add(subjectStudyDb.getSubject());
+					Subject sub = subjectStudyDb.getSubject();
+					removed.add(sub);
+
+					eventService.publishEvent(
+							new ShanoirEvent(
+									ShanoirEventType.REMOVE_SUBJECT_FROM_STUDY_EVENT,
+									sub.getId().toString(),
+									KeycloakUtil.getTokenUserId(),
+									"Subject " + sub.getName() + " (id: " + sub.getId() + ") removed from study " + study.getName() + " (id: " + study.getId() + ")",
+									ShanoirEvent.SUCCESS,
+									study.getId())
+					);
+
 				}
 			}
-
 			for (Subject subject : removed) {
 				if (this.subjectStudyRepository.countBySubject(subject) == 1L) {
 					toBeDeleted.add(subject);
@@ -366,11 +383,6 @@ public class StudyServiceImpl implements StudyService {
 			studyDb = studyRepository.save(studyDb);
 		}
 
-		// Actually delete subjects
-		for (Subject subjectToDelete : toBeDeleted) {
-			subjectService.deleteById(subjectToDelete.getId());
-		}
-
 		if (studyDb.getTags() != null) {
 			studyDb.getTags().removeIf(tag -> tagsToDelete.contains(tag.getId()));
 			studyDb = studyRepository.save(studyDb);
@@ -382,7 +394,12 @@ public class StudyServiceImpl implements StudyService {
 
 		String error = this.updateStudyName(studyMapper.studyToStudyDTODetailed(studyDb));
 
-		if(error != null && !error.isEmpty()){
+		// Actually delete subjects
+		for (Subject subjectToDelete : toBeDeleted) {
+			subjectService.deleteById(subjectToDelete.getId());
+		}
+
+		if (error != null && !error.isEmpty()) {
 			LOG.error("Study [" + studyDb.getId() + "] couldn't be sync with datasets microservice : {}", error);
 			throw new ShanoirException(error);
 		}
@@ -468,6 +485,7 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
+	@Transactional
 	public List<Study> findAll() {
 		List<Study> studies;
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {

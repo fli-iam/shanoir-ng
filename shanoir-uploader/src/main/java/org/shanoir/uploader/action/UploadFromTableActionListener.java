@@ -4,8 +4,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -29,6 +32,10 @@ public class UploadFromTableActionListener implements ActionListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(UploadFromTableActionListener.class);
 
+	private static SimpleDateFormat dicomStudyDateFormat = new SimpleDateFormat("yyyymmdd");
+
+	private static SimpleDateFormat birthDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
 	private JFileChooser fileChooser;
 	private ImportFromTableWindow importFromTableWindow;
 	private ResourceBundle resourceBundle;
@@ -37,7 +44,7 @@ public class UploadFromTableActionListener implements ActionListener {
 		this.importFromTableWindow = importFromTableWindow;
 		this.fileChooser = new JFileChooser();
 		// Create a file filter for .xlsx files
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("Excel Files", "xlsx", "xls");
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Excel files", "xlsx", "xls");
         fileChooser.setFileFilter(filter);
 		this.resourceBundle = resourceBundle;
 	}
@@ -56,7 +63,7 @@ public class UploadFromTableActionListener implements ActionListener {
 	 * @param selectedFile the selected table file
 	 */
 	private void readImportJobsFromFile(File selectedFile) {
-		Map<String, ImportJob> importJobs = new HashMap<String, ImportJob>();;
+		Map<String, ImportJob> importJobs = new LinkedHashMap<String, ImportJob>(10000);
 		try (XSSFWorkbook myWorkBook = new XSSFWorkbook(selectedFile)) {
 			XSSFSheet mySheet = myWorkBook.getSheetAt(0);
 			Iterator<Row> rowIterator = mySheet.iterator();
@@ -75,6 +82,7 @@ public class UploadFromTableActionListener implements ActionListener {
 			this.importFromTableWindow.displayError(resourceBundle.getString("shanoir.uploader.import.table.error.csv"));
 			return;
 		}
+		logger.info(importJobs.entrySet().size() + " import jobs (== DICOM studies/examinations) read from table.");
 		this.importFromTableWindow.displayImportJobs(importJobs);
 	}
 
@@ -100,7 +108,7 @@ public class UploadFromTableActionListener implements ActionListener {
 		value = handleCell(birthName);
 		patientVerification.setBirthName(value);
 		Cell birthDate = row.getCell(13);
-		value = handleCell(birthDate);
+		value = handleCell(birthDate, true);
 		patientVerification.setBirthDate(value);
 		importJob.setPatientVerification(patientVerification);
 	}
@@ -155,17 +163,32 @@ public class UploadFromTableActionListener implements ActionListener {
 	}
 
 	private String handleCell(Cell cell) {
+		return handleCell(cell, false);
+	}
+
+	private String handleCell(Cell cell, boolean specialHandling) {
 		if (cell != null) {
 			switch (cell.getCellType()) {
 				case STRING:
-					return cell.getStringCellValue();
+                	return cell.getStringCellValue().trim();
 				case NUMERIC:
 					if (DateUtil.isCellDateFormatted(cell)) {
-						return String.valueOf(cell.getDateCellValue());
+						Date date = cell.getDateCellValue();
+						if (specialHandling) {
+							return birthDateFormat.format(date);
+						} else {
+							return dicomStudyDateFormat.format(date);
+						}
+					} else {
+						double numericValue = cell.getNumericCellValue();
+						if (numericValue == Math.floor(numericValue)) {
+							return String.valueOf((long) numericValue);
+						} else {
+							return BigDecimal.valueOf(cell.getNumericCellValue()).toPlainString();
+						}
 					}
-					break;
 				case BOOLEAN:
-					break;
+					return String.valueOf(cell.getBooleanCellValue());
 				case FORMULA:
 					break;
 				case BLANK:
