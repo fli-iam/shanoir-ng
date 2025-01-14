@@ -148,7 +148,7 @@ public class ImportDialog extends JDialog {
 		this.mainWindow.importDialog = this;
 
 		this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
-		this.setSize(925, 900);
+		this.setSize(1020, 900);
 		this.setLocationRelativeTo(mainWindow);
 
 		JPanel container = new JPanel();
