@@ -97,18 +97,26 @@ public class ImportUtils {
 		subjectStudy.setSubjectType(subjectType);
 		subjectStudy.setPhysicallyInvolved(physicallyInvolved);
 		subjectStudy.setTags(new ArrayList<>());
+		// Challenge here: findSubjectByIdentifier returns a subjectStudyList and findSubjectsByStudyId a subjectStudy attribute
 		if (subject.getSubjectStudyList() == null) {
 			subject.setSubjectStudyList(new ArrayList<>());
+			SubjectStudy existingSubjectStudy = subject.getSubjectStudy();
+			if (existingSubjectStudy != null) {
+				// do nothing: call of findSubjectsByStudyId
+				return false;
+			}
+			subject.getSubjectStudyList().add(subjectStudy);
 		} else {
-			// Check that this subjectStudy does not exist yet
+			// Check that this SubjectStudy does not exist yet
 			for (SubjectStudy sustu : subject.getSubjectStudyList()) {
 				if (sustu.getStudy().getId().equals(study.getId())) {
-					// Do not add a new subject study if it already exists
+					// Do not add a new SubjectStudy if it already exists
 					return false;
 				}
 			}
+			// Not yet existing: add it
+			subject.getSubjectStudyList().add(subjectStudy);
 		}
-		subject.getSubjectStudyList().add(subjectStudy);
 		return true;
 	}
 
@@ -420,7 +428,7 @@ public class ImportUtils {
 				if (subjectREST == null) {
 					return null;
 				} else {
-					logger.info("Subject created on server with ID: " + subjectREST.getId());
+					logger.info("Subject created on server: " + subjectREST.toString());
 				}
 			}
 		} else {
