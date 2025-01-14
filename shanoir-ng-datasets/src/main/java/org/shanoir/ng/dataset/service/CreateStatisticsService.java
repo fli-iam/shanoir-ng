@@ -49,29 +49,15 @@ public class CreateStatisticsService {
     @Async
     @Transactional
     public void createStats(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp, ShanoirEvent event, String params) throws RestServiceException, IOException, InterruptedException {
-
-        LOG.error("createStats : " + studyNameInRegExp);
         String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
-        LOG.error("1");
         File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
-        LOG.error("2");
         File statisticsFile = recreateFile(userDir + File.separator + "shanoirExportStatistics_" + event.getId() + ".tsv");
-        LOG.error("3");
         File zipFile = recreateFile(userDir + File.separator + "shanoirExportStatistics_" + event.getId() + ZIP);
-        LOG.error("4");
 
 
         // Get the data
         try (FileOutputStream fos = new FileOutputStream(statisticsFile);
              BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos))) {
-
-            int maxAttempts = 5;
-            int attempt = 0;
-            while (!statisticsFile.exists() && attempt < maxAttempts) {
-                Thread.sleep(500);
-                attempt++;
-            }
-            LOG.error("file exists");
 
             //List<Object[]> results = datasetService.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
 
@@ -86,7 +72,6 @@ public class CreateStatisticsService {
             query.setParameter(4, subjectNameOutRegExp);
 
             query.getResultStream().forEach(result -> {
-                LOG.error("query process");
                 float progress = 0;
                 Object[] row = (Object[]) result;
                 try {
@@ -98,26 +83,13 @@ public class CreateStatisticsService {
                             .collect(Collectors.joining("\t"));
                     bw.write(line);
                     bw.newLine();
-
-
-//            for (Object[] or : query.getResultList()) {
-//
-//                progress += 1f / results.size();
-//                event.setProgress(progress);
-//                eventService.publishEvent(event);
-//                List<String> strings = Arrays.stream(or).map(object -> Objects.toString(object, null)).collect(Collectors.toList());
-//                bw.write(String.join("\t", strings));
-//                bw.newLine();
-//            }
-
                 } catch (Exception e) {
                     event.setStatus(ShanoirEvent.ERROR);
-                    event.setMessage("Error during fetching of statistics.");
+                    event.setMessage("Error during writing of statistics.");
                     event.setProgress(-1f);
                     eventService.publishEvent(event);
-                    LOG.error("Error during fetching of statistics with id : " + event.getId());
+                    LOG.error("Error during writing of statistics with id : " + event.getId());
                 }
-
             });
         } catch (Exception e) {
             event.setStatus(ShanoirEvent.ERROR);
