@@ -595,7 +595,7 @@ public class DatasetApiController implements DatasetApi {
 			@RequestParam(value = "subjectNameInRegExp", required = false) String subjectNameInRegExp,
 			@Parameter(description = "Subject name excluding regular expression", required=false) @Valid
 			@RequestParam(value = "subjectNameOutRegExp", required = false) String subjectNameOutRegExp
-			) throws RestServiceException, IOException {
+			) throws RestServiceException, IOException, InterruptedException {
 
 		LOG.error("downloadStatistics");
 
@@ -617,6 +617,7 @@ public class DatasetApiController implements DatasetApi {
 
 		eventService.publishEvent(event);
 
+		LOG.error("call createStats");
 		createStatisticsService.createStats(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp, event, params);
 
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
