@@ -96,7 +96,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     }
 
     public void checkRightsForExecution(List<Dataset> datasets) throws EntityNotFoundException, RestServiceException {
-        if (!datasetSecurityService.hasRightOnEveryDataset(datasets.stream().map(Dataset::getId).toList(), "CAN_ADMINISTRATE")) {
+        if (!datasetSecurityService.hasRightOnDatasets(datasets.stream().map(Dataset::getId).toList(), "CAN_ADMINISTRATE")) {
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.UNAUTHORIZED.value(),
                             "You don't have the right to run pipelines on studies you don't administrate."));
