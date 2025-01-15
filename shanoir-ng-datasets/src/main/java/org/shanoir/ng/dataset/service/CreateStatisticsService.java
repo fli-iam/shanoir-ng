@@ -48,18 +48,19 @@ public class CreateStatisticsService {
 
     @Async
     @Transactional
-    public void createStats(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp, ShanoirEvent event, String params) throws RestServiceException, IOException, InterruptedException {
+    public void createStats(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp, ShanoirEvent event, String params) throws IOException {
         String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
         File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
-        File statisticsFile = recreateFile(userDir + File.separator + "shanoirExportStatistics_" + event.getId() + ".tsv");
         File zipFile = recreateFile(userDir + File.separator + "shanoirExportStatistics_" + event.getId() + ZIP);
 
+        // Get the data and write it into a zip file
+        try (FileOutputStream fos = new FileOutputStream(zipFile);
+             ZipOutputStream zos = new ZipOutputStream(fos)) {
 
-        // Get the data
-        try (FileOutputStream fos = new FileOutputStream(statisticsFile);
-             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos))) {
+            ZipEntry zipEntry = new ZipEntry("shanoirExportStatistics_" + event.getId() + ".tsv");
+            zos.putNextEntry(zipEntry);
 
-            //List<Object[]> results = datasetService.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
+            OutputStreamWriter writer = new OutputStreamWriter(zos);
 
             StoredProcedureQuery query = entityManager.createStoredProcedureQuery("getStatistics");
             query.registerStoredProcedureParameter(1, String.class, ParameterMode.IN);
@@ -81,8 +82,7 @@ public class CreateStatisticsService {
                     String line = Arrays.stream(row)
                             .map(obj -> Objects.toString(obj, ""))
                             .collect(Collectors.joining("\t"));
-                    bw.write(line);
-                    bw.newLine();
+                    writer.write(line + "\n");
                 } catch (Exception e) {
                     event.setStatus(ShanoirEvent.ERROR);
                     event.setMessage("Error during writing of statistics.");
@@ -91,50 +91,14 @@ public class CreateStatisticsService {
                     LOG.error("Error during writing of statistics with id : " + event.getId());
                 }
             });
-        } catch (Exception e) {
-            event.setStatus(ShanoirEvent.ERROR);
-            event.setMessage("Error during fetching of statistics.");
-            event.setProgress(-1f);
-            eventService.publishEvent(event);
-            LOG.error("Error during fetching of statistics with id : " + event.getId());
-
+            writer.flush();
+            zos.closeEntry();
         } finally {
-            zipSingleFile(statisticsFile, zipFile);
-            statisticsFile.delete();
             event.setObjectId(String.valueOf(event.getId()));
             event.setProgress(1f);
             event.setMessage("Statistics fetched with params : " + params + "\nDownload available for 6 hours");
             event.setStatus(ShanoirEvent.SUCCESS);
             eventService.publishEvent(event);
-        }
-
-}
-
-    /**
-     * Zip a single file
-     *
-     * @param sourceFile
-     * @param zipFile
-     * @throws IOException
-     */
-    private void zipSingleFile(final File sourceFile, final File zipFile) throws IOException {
-
-        byte[] buffer = new byte[1024];
-
-
-        try (FileOutputStream fos = new FileOutputStream(zipFile);
-             ZipOutputStream zos = new ZipOutputStream(fos);
-             FileInputStream fis = new FileInputStream(sourceFile);
-        ) {
-            // begin writing a new ZIP entry, positions the stream to the start of the entry data
-            zos.putNextEntry(new ZipEntry(sourceFile.getName()));
-
-            int length;
-
-            while ((length = fis.read(buffer)) > 0) {
-                zos.write(buffer, 0, length);
-            }
-            zos.closeEntry();
         }
     }
 }

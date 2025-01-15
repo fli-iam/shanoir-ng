@@ -28,8 +28,6 @@ public class DatasetRepositoryImpl implements DatasetRepositoryCustom {
     public List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp,
             String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception {
 
-		List<Object[]> resBloc = new ArrayList<>();
-
 		//"getStatistics" is the name of the MySQL procedure
 		StoredProcedureQuery query = entityManager.createStoredProcedureQuery("getStatistics");
 

@@ -595,7 +595,7 @@ public class DatasetApiController implements DatasetApi {
 			@RequestParam(value = "subjectNameInRegExp", required = false) String subjectNameInRegExp,
 			@Parameter(description = "Subject name excluding regular expression", required=false) @Valid
 			@RequestParam(value = "subjectNameOutRegExp", required = false) String subjectNameOutRegExp
-			) throws RestServiceException, IOException, InterruptedException {
+			) throws IOException {
 
 		String params = "";
 		if (studyNameInRegExp != null && !StringUtils.isEmpty(studyNameInRegExp)) params += "\nStudy to include : " + studyNameInRegExp;
