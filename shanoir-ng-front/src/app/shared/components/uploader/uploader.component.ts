@@ -19,7 +19,8 @@ import { ImagesUrlUtil } from '../../utils/images-url.util';
 @Component({
     selector: 'upload-file',
     templateUrl: 'uploader.component.html',
-    styleUrls: ['uploader.component.css']
+    styleUrls: ['uploader.component.css'],
+    standalone: false
 })
 export class UploaderComponent {
 

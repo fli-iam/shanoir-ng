@@ -52,7 +52,8 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"ae.name as acquisitionEquipmentName, " +
 			"su.name as subjectName, " +
 			"sust.subject_type as subjectType, " +
-			"su.id as subjectId, st.name as studyName, " +
+			"su.id as subjectId, " +
+			"st.name as studyName, " +
 			"e.study_id as studyId, " +
 			"c.name as centerName, " +
 			"c.id as centerId, mrp.slice_thickness as sliceThickness, " +
@@ -60,7 +61,8 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"mrp.magnetic_field_strength as magneticFieldStrength, " +
 			"da.import_date as importDate, " +
 			"da.username as username, " +
-			"0 as processed"
+			"da.sorting_index as sortingIndex, " +
+			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN mr_dataset_acquisition mda on mda.id = d.dataset_acquisition_id"
@@ -91,7 +93,8 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as magneticFieldStrength, " +
 			"da.import_date as importDate, " +
 			"da.username as username, " +
-			"0 as processed"
+			"da.sorting_index as sortingIndex, " +
+			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
@@ -112,7 +115,8 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"ae.name as acquisitionEquipmentName, " +
 			"su.name as subjectName, " +
 			"sust.subject_type as subjectType, " +
-			"su.id as subjectId, st.name as studyName, " +
+			"su.id as subjectId, " +
+			"st.name as studyName, " +
 			"e.study_id as studyId, " +
 			"c.name as centerName, c.id as centerId, " +
 			"null as sliceThickness, " +
@@ -120,7 +124,8 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as magneticFieldStrength, " +
 			"da.import_date as importDate, " +
 			"da.username as username, " +
-			"0 as processed"
+			"da.sorting_index as sortingIndex, " +
+			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
@@ -151,7 +156,8 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as magneticFieldStrength, " +
 			"da.import_date as importDate, " +
 			"da.username as username, " +
-			"0 as processed"
+			"da.sorting_index as sortingIndex, " +
+			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
@@ -172,7 +178,8 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"ae.name as acquisitionEquipmentName, " +
 			"su.name as subjectName, " +
 			"sust.subject_type as subjectType, " +
-			"su.id as subjectId, st.name as studyName, " +
+			"su.id as subjectId, " +
+			"st.name as studyName, " +
 			"e.study_id as studyId, " +
 			"c.name as centerName, c.id as centerId, " +
 			"null as sliceThickness, " +
@@ -180,7 +187,8 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as magneticFieldStrength, " +
 			"da.import_date as importDate, " +
 			"da.username as username, " +
-			"0 as processed"
+			"da.sorting_index as sortingIndex, " +
+			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
@@ -211,7 +219,8 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as magneticFieldStrength, " +
 			"da.import_date as importDate, " +
 			"da.username as username, " +
-			"0 as processed"
+			"da.sorting_index as sortingIndex, " +
+			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
@@ -242,7 +251,8 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as magneticFieldStrength, " +
 			"proc.processing_date as importDate, " +
 			"proc.username as username, " +
-			"1 as processed"
+			"null as sortingIndex, " +
+			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_processing proc ON proc.id = d.dataset_processing_id"
 			+ " LEFT JOIN study st ON st.id = proc.study_id"
@@ -271,7 +281,8 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as magneticFieldStrength, " +
 			"da.import_date as importDate, " +
 			"da.username as username, " +
-			"0 as processed"
+			"da.sorting_index as sortingIndex, " +
+			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset refd ON refd.id = d.referenced_dataset_for_superimposition_id"
 			+ " LEFT JOIN dataset_acquisition da on da.id = refd.dataset_acquisition_id"
@@ -297,13 +308,14 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"st.name as studyName, " +
 			"e.study_id as studyId, " +
 			"c.name as centerName, " +
-			"c.id as centerId, "
-			+ "null as sliceThickness, " +
+			"c.id as centerId, " +
+			"null as sliceThickness, " +
 			"null as pixelBandwidth, " +
 			"null as magneticFieldStrength, " +
 			"da.import_date as importDate, " +
 			"da.username as username, " +
-			"0 as processed"
+			"da.sorting_index as sortingIndex, " +
+			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset refd ON refd.id = d.referenced_dataset_for_superimposition_id"
 			+ " LEFT JOIN dataset_acquisition da on da.id = refd.dataset_acquisition_id"
@@ -335,7 +347,8 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as magneticFieldStrength, " +
 			"da.import_date as importDate, " +
 			"da.username as username, " +
-			"0 as processed"
+			"da.sorting_index as sortingIndex, " +
+			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"

@@ -45,7 +45,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class DatasetSecurityService {
@@ -467,28 +466,32 @@ public class DatasetSecurityService {
 		}
     	
     	Iterable<Dataset> datasets = datasetRepository.findAllById(datasetIds);
-    	 
-    	boolean hasRight = true;
-    	for (Dataset dataset : datasets) {
-            if (dataset.getDatasetAcquisition() == null 
-                    || dataset.getDatasetAcquisition().getExamination() == null
-                    || dataset.getDatasetAcquisition().getExamination().getStudyId() == null) {
-                
-                if (dataset.getDatasetProcessing() != null && dataset.getDatasetProcessing().getInputDatasets() != null) {
-                    for (Dataset inputDs : dataset.getDatasetProcessing().getInputDatasets()) {
-                    	hasRight &= hasRightOnTrustedDataset(inputDs, rightStr);
-                    }
-                } else {
-                    throw new IllegalStateException("Cannot check dataset n°" + dataset.getId() + " rights, this dataset has neither examination nor processing parent !");                
-                }
-            } else {
-            	hasRight &= this.hasRightOnStudyCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), dataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr);
-            }
-    	}
-    	return hasRight;
-    }
 
-    /**
+		return hasRigthOnDatasets(datasets, rightStr);
+	}
+
+	private boolean hasRigthOnDatasets(Iterable<Dataset> datasets, String rightStr) {
+		boolean hasRight = true;
+		for (Dataset dataset : datasets) {
+			if (dataset.getDatasetAcquisition() == null
+					|| dataset.getDatasetAcquisition().getExamination() == null
+					|| dataset.getDatasetAcquisition().getExamination().getStudyId() == null) {
+
+				if (dataset.getDatasetProcessing() != null && dataset.getDatasetProcessing().getInputDatasets() != null) {
+					for (Dataset inputDs : dataset.getDatasetProcessing().getInputDatasets()) {
+						hasRight &= hasRightOnTrustedDataset(inputDs, rightStr);
+					}
+				} else {
+					throw new IllegalStateException("Cannot check dataset n°" + dataset.getId() + " rights, this dataset has neither examination nor processing parent !");
+				}
+			} else {
+				hasRight &= this.hasRightOnStudyCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), dataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr);
+			}
+		}
+		return hasRight;
+	}
+
+	/**
      * Check that the connected user has the given right for the given dataset.
      * 
      * @param dataset the dataset
@@ -511,7 +514,7 @@ public class DatasetSecurityService {
 		if (!studiesRelated.isEmpty()) {
 			studies.addAll(studiesRelated);
 		}
-		return hasRightOnStudiesCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), studies, rightStr);
+		return hasRightOnStudiesCenter(dataset.getCenterId(), studies, rightStr);
     }
 
 	private static Long getStudyIdFromDataset(Dataset dataset) {
@@ -1104,5 +1107,45 @@ public class DatasetSecurityService {
 		Long id = studyInstanceUIDHandler.extractExaminationId(examinationUID);
 		return hasRightOnExamination(id, rightStr);
     }
-   
+
+	public boolean HasRightOnEveryDatasetOfProcessings(List<Long> processingIds, String rightStr) {
+		boolean hasRight = true;
+
+		for (Long processingId : processingIds) {
+			if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN") || processingId == null) {
+				continue;
+			}
+			Iterable<Dataset> datasets = datasetRepository.findDatasetsByProcessingId(processingId);
+
+			hasRight &= hasRigthOnDatasets(datasets, rightStr);
+		}
+		return hasRight;
+	}
+
+	/**
+	 * Check that the connected user has the given right for the given examination.
+	 *
+	 * @param examinationIds the examination ids
+	 * @param rightStr the right
+	 * @return true or false
+	 * @throws EntityNotFoundException
+	 */
+	public boolean hasRightOnExaminations(List<Long> examinationIds, String rightStr) throws EntityNotFoundException {
+		if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+			return true;
+		}
+		for (Long examinationId : examinationIds) {
+			Examination exam = examinationRepository.findById(examinationId).orElse(null);
+			if (exam == null) {
+				throw new EntityNotFoundException("Cannot find examination with id " + examinationId);
+			}
+			if (exam.getStudyId() == null) {
+				return false;
+			}
+			if(!this.hasRightOnStudyCenter(exam.getCenterId(), exam.getStudyId(), rightStr)){
+				return false;
+			}
+		}
+		return true;
+	}
 }

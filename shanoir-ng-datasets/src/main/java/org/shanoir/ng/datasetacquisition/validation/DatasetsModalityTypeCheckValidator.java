@@ -16,10 +16,8 @@ package org.shanoir.ng.datasetacquisition.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import org.shanoir.ng.dataset.modality.CtDataset;
-import org.shanoir.ng.dataset.modality.MrDataset;
-import org.shanoir.ng.dataset.modality.PetDataset;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetType;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
@@ -42,22 +40,22 @@ public class DatasetsModalityTypeCheckValidator
 
 	@Override
 	public boolean isValid(final DatasetAcquisition datasetAcquisition, final ConstraintValidatorContext context) {
-		if (datasetAcquisition.getDatasets() != null && !datasetAcquisition.getDatasets().isEmpty()) {			
+		if (datasetAcquisition.getDatasets() != null && !datasetAcquisition.getDatasets().isEmpty()) {
 			if (datasetAcquisition instanceof MrDatasetAcquisition) {
 				for (Dataset dataset : datasetAcquisition.getDatasets()) {
-					if (!(dataset instanceof MrDataset)) {
+					if (!(dataset.getType().equals(DatasetType.Mr))) {
 						return false;
 					}
 				}
 			} else if (datasetAcquisition instanceof PetDatasetAcquisition) {
 				for (Dataset dataset : datasetAcquisition.getDatasets()) {
-					if (!(dataset instanceof PetDataset)) {
+					if (!(dataset.getType().equals(DatasetType.Pet))) {
 						return false;
 					}
 				}
 			} else if (datasetAcquisition instanceof CtDatasetAcquisition) {
 				for (Dataset dataset : datasetAcquisition.getDatasets()) {
-					if (!(dataset instanceof CtDataset)) {
+					if (!(dataset.getType().equals(DatasetType.Ct))) {
 						return false;
 					}
 				}

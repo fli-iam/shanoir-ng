@@ -22,7 +22,8 @@ import { Selection, TreeService } from 'src/app/studies/study/tree.service';
 
 @Component({
     selector: 'member-node',
-    templateUrl: 'member-node.component.html'
+    templateUrl: 'member-node.component.html',
+    standalone: false
 })
 
 export class MemberNodeComponent implements OnChanges {

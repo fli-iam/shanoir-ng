@@ -28,14 +28,15 @@ import {ToggleSwitchComponent} from "../../shared/switch/switch.component";
           provide: NG_VALUE_ACCESSOR,
           useExisting: forwardRef(() => SolrTextSearchComponent),
           multi: true,
-        }]
+        }],
+    standalone: false
 })
 
 export class SolrTextSearchComponent implements ControlValueAccessor {
 
     showInfo: boolean = false;
     searchText: string = "";
-    searchKeyWords: string[] = ["centerName", "datasetCreationDate", "studyName", "subjectName", "subjectType", "acquisitionEquipmentName", "datasetId", "datasetName", "datasetNature", "datasetType", "processed", "examinationComment", "examinationDate", "importDate", "tags", "magneticFieldStrength", "pixelBandwidth", "sliceThickness", "studyId"];
+    searchKeyWords: string[] = ["centerName", "datasetCreationDate", "studyName", "subjectName", "subjectType", "acquisitionEquipmentName", "datasetId", "datasetName", "datasetNature", "datasetType", "processed", "examinationComment", "examinationDate", "importDate", "tags", "magneticFieldStrength", "pixelBandwidth", "sliceThickness", "studyId", "sortingIndex"];
     @Output() onChange: EventEmitter<string> = new EventEmitter();
     @Output() onType: EventEmitter<void> = new EventEmitter();
     @Output() expertModeChange: EventEmitter<boolean> = new EventEmitter();

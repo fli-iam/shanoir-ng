@@ -40,10 +40,12 @@ import { GlobalService } from '../services/global.service';
     //changeDetection: ChangeDetectionStrategy.,
     providers: [
         {
-          provide: NG_VALUE_ACCESSOR,
-          useExisting: forwardRef(() => SelectBoxComponent),
-          multi: true,
-        }]   
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => SelectBoxComponent),
+            multi: true,
+        }
+    ],
+    standalone: false
 })
 
 export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnChanges, AfterViewInit {

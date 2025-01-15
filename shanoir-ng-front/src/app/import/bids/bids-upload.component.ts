@@ -30,7 +30,8 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     selector: 'bids-upload',
     templateUrl: 'bids-upload.component.html',
     styleUrls: ['bids-upload.component.css'],
-    animations: [slideDown]
+    animations: [slideDown],
+    standalone: false
 })
 export class BidsUploadComponent {
     
@@ -49,7 +50,7 @@ export class BidsUploadComponent {
             private breadcrumbsService: BreadcrumbsService,
             private studyService: StudyService) {
                 
-    Promise.all([this.studyService.getStudyNamesAndCenters(), this.centerService.getAll()])
+    Promise.all([this.studyService.getAll(), this.centerService.getAll()])
             .then(([allStudies, allCenters]) => {
                 this.studyOptions = [];
                 for (let study of allStudies) {

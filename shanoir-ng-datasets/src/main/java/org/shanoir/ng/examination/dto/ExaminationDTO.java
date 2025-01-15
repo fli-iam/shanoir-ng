@@ -20,10 +20,7 @@ import java.util.List;
 import org.shanoir.ng.examination.model.InstrumentBasedAssessment;
 import org.shanoir.ng.examination.model.UnitOfMeasure;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
-import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.model.SubjectDTO;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Examination DTO with necessary information for front
@@ -57,6 +54,10 @@ public class ExaminationDTO {
 	private List<InstrumentBasedAssessment> instrumentBasedAssessmentList;
 
 	private List<String> extraDataFilePathList;
+
+	private Long source;
+
+	private List<Long> copies;
 
 	/**
 	 * @return the id
@@ -191,5 +192,21 @@ public class ExaminationDTO {
 
 	public void setWeightUnitOfMeasure(UnitOfMeasure weightUnitOfMeasure) {
 		this.weightUnitOfMeasure = weightUnitOfMeasure;
+	}
+
+	public Long getSource() {
+		return source;
+	}
+
+	public void setSource(Long source) {
+		this.source = source;
+	}
+
+	public List<Long> getCopies() {
+		return copies;
+	}
+
+	public void setCopies(List<Long> copies) {
+		this.copies = copies;
 	}
 }

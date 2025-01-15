@@ -80,7 +80,10 @@ public interface StudyMapper {
 	List<IdNameCenterStudyDTO> studiesToSimpleStudyDTOs(List<Study> studies);
 
 	@Named("study.idname")
-	@Mappings({ @Mapping(target = "studyCenterList", ignore = true) })
+	@Mappings({ 
+		@Mapping(target = "studyCenterList", ignore = true),
+		@Mapping(target = "tags", ignore = true) 
+	})
 	IdNameCenterStudyDTO studyToExtendedIdNameDTO(Study study);
 
 	IdName studyToIdNameDTO(Study study);

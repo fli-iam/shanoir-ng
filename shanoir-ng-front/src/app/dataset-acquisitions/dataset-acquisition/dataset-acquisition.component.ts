@@ -36,7 +36,8 @@ import { DatasetAcquisitionService } from '../shared/dataset-acquisition.service
 @Component({
     selector: 'dataset-acquisition-detail',
     templateUrl: 'dataset-acquisition.component.html',
-    styleUrls: ['dataset-acquisition.component.css']
+    styleUrls: ['dataset-acquisition.component.css'],
+    standalone: false
 })
 export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisition> {
 
@@ -110,7 +111,6 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
             'type': [this.datasetAcquisition.type],
             'study-card': [this.datasetAcquisition.studyCard],
             'acq-eq': [this.datasetAcquisition.acquisitionEquipment, [Validators.required]],
-            //'examination': [this.datasetAcquisition.examination, [Validators.required]],
             'rank': [this.datasetAcquisition.rank],
             'software-release': [this.datasetAcquisition.softwareRelease],
             'sorting-index': [this.datasetAcquisition.sortingIndex],

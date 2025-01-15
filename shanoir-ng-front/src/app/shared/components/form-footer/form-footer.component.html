@@ -11,7 +11,6 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
-
 <div class="footer command-zone">
     <span [ngSwitch]="state.mode">
         <button type="button" *ngIf="state.backButton" i18n="View subject|Back button label@@backButton" class="Button left-icon" (click)="onBack()"><i class="fas fa-angle-left"></i>Back</button>
@@ -41,3 +40,4 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <ng-content></ng-content>
     </span>
 </div>
+<div class="spacer"></div>

@@ -15,6 +15,7 @@
 package org.shanoir.ng.datasetacquisition.dto.mapper;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
@@ -71,4 +72,25 @@ public interface DatasetAcquisitionDatasetsMapper {
 		if (ds != null) return ds;
         else throw new IllegalStateException("Cannot map from a dataset dto that don't provide a valid type. Given type = " + dto.getType());
     }
+
+	default List<Long> mapCopiesFromDatasetAcquisition(List<DatasetAcquisition> copies) {
+		if (copies == null) {
+			return null;
+		}
+		return copies.stream()
+				.map(DatasetAcquisition::getId)
+				.collect(Collectors.toList());
+	}
+
+	default Long mapSourceFromDatasetAcquisition(DatasetAcquisition source) {
+		return source != null ? source.getId() : null;
+	}
+
+	default List<DatasetAcquisition> mapCopiesDatasetAcquisitionFromLong(List<Long> copies) {
+		return null;
+	}
+
+	default DatasetAcquisition mapSourceDatasetAcquisitionFromLong(Long source) {
+		return null;
+	}
 }

@@ -15,7 +15,9 @@
 package org.shanoir.ng.dataset.modality;
 
 import jakarta.persistence.Entity;
+
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetType;
 
 /**
  * Calibration dataset.
@@ -26,8 +28,6 @@ import org.shanoir.ng.dataset.model.Dataset;
 @Entity
 public class CalibrationDataset extends Dataset {
 	
-	public static final String datasetType = "Calibration";
-
 	/**
 	 * UID
 	 */
@@ -67,8 +67,8 @@ public class CalibrationDataset extends Dataset {
 	}
 
 	@Override
-	public String getType() {
-		return "Calibration";
+	public DatasetType getType() {
+		return DatasetType.Calibration;
 	}
 
 }

@@ -29,7 +29,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <select-box
                         [(ngModel)]="study"
                         (userChange)="onSelectStudy()"
-                        [viewRoute]="'/study/details/' + this.study?.id"
+                        [viewRoute]="'/study/details/' + study?.id"
                         [viewDisabled]="!study"
                         [options]="studyOptions"
                         [disabled]="loading">
@@ -52,7 +52,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <select-box
                         [(ngModel)]="studycard"
                         (userChange)="onSelectStudyCard()"
-                        [viewRoute]="'/study-card/details/' + this.studycard?.id"
+                        [viewRoute]="'/study-card/details/' + studycard?.id"
                         (onUserClear)="onClearStudyCard()"
                         [viewDisabled]="!studycard"
                         [options]="studycardOptions"
@@ -91,7 +91,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [readOnly]="useStudyCard"
                         [(ngModel)]="center"
                         (userChange)="onSelectCenter()"
-                        [viewRoute]="'/center/details/' + this.center?.id" [viewDisabled]="!center"
+                        [viewRoute]="'/center/details/' + center?.id" [viewDisabled]="!center"
                         (onNewClick)="openCreateCenter()" [newHidden]="hasCompatibleCenters"
                         [options]="centerOptions">
                 </select-box>
@@ -117,7 +117,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [readOnly]="useStudyCard"
                         [(ngModel)]="acquisitionEquipment"
                         (userChange)="onContextChange();"
-                        [viewRoute]="'/acquisition-equipment/details/' + this.acquisitionEquipment?.id" [viewDisabled]="!acquisitionEquipment"
+                        [viewRoute]="'/acquisition-equipment/details/' + acquisitionEquipment?.id" [viewDisabled]="!acquisitionEquipment"
                         (onNewClick)="openCreateAcqEqt()" [newHidden]="hasCompatibleEquipments"
                         [options]="acquisitionEquipmentOptions" [pipe]="acqEqPipe">
                 </select-box>
@@ -198,9 +198,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <checkbox [(ngModel)]="subject.subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"></checkbox>
                 </span>
             </li>
-            <li *ngIf="this.study?.tags">
+            <li *ngIf="study?.tags">
                 <label>Tags</label>
-                <tag-list [(ngModel)]="subject.subjectStudy.tags" [availableTags]="this.study?.tags"></tag-list>
+                <tag-list [(ngModel)]="subject.subjectStudy.tags" [availableTags]="study?.tags"></tag-list>
             </li>
         </div>
     </ol>
