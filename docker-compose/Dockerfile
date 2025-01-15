@@ -80,7 +80,6 @@ RUN wget -qO dcm4che-bin.zip \
     && unzip /dcm4che-bin.zip && mv dcm4che-* dcm4che \
     && rm    /dcm4che-bin.zip
 
-
 FROM base-microservice as datasets
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
@@ -91,6 +90,9 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     locales \
     locales-all
 
+RUN apt-get install -y iputils-ping
+
+
 # take care of path
 ENV PATH /opt/dcm4che/bin:$PATH
 ENV LC_ALL en_US.UTF-8
@@ -99,13 +101,18 @@ ENV LANGUAGE en_US.UTF-8
 
 # install the files from the 'dowloader' stage
 COPY --link --from=datasets-download /target/. /
-
-COPY --link datasets/entrypoint /usr/bin/
 COPY --link datasets/shanoir-ng-datasets.jar shanoir-ng-datasets.jar
 
-# Use the below line for remote debugging
+
+
+COPY --link datasets/entrypoint /usr/bin/
+COPY --link datasets/wait-for-solr.sh /usr/bin/
+
+ # Use the below line for remote debugging
 #CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9914", "-jar", "/shanoir-ng-datasets.jar"]
 CMD ["-jar", "/shanoir-ng-datasets.jar"]
+
+
 
 
 
@@ -387,6 +394,8 @@ RUN mkdir -p /etc/shanoir-core-template \
 USER solr
 
 COPY --link solr/core /etc/shanoir-core-template/
+COPY --link solr/entrypoint /usr/bin/
 
+ENTRYPOINT ["/usr/bin/entrypoint"]
 CMD ["solr-precreate", "shanoir", "/etc/shanoir-core-template"]
 
