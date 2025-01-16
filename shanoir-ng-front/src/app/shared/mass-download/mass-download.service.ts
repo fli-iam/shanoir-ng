@@ -117,7 +117,7 @@ export class MassDownloadService {
         }).catch(error => {
             if (error == this.BROWSER_COMPAT_ERROR_MSG) {
                     return this.openAltModal(inputIds).then(ret => {
-                        if (ret != 'cancel') {
+                        if (ret != 'cancel' && ret.datasets) {
                             return this._downloadAlt(ret.datasets.map(ds => ds.id), ret.format, ret.converter, downloadState).catch(error => {
                                 if (ret.datasets.length > this.datasetService.MAX_DATASETS_IN_ZIP_DL) {
                                     this.dialogService.error('Too many datasets', 'You are trying to download '
