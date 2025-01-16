@@ -49,6 +49,7 @@ public class CreateStatisticsService {
     @Async
     @Transactional
     public void createStats(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp, ShanoirEvent event, String params) throws IOException {
+        LOG.error("createStats");
         String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
         File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
         File zipFile = recreateFile(userDir + File.separator + "shanoirExportStatistics_" + event.getId() + ZIP);
@@ -82,6 +83,7 @@ public class CreateStatisticsService {
                     String line = Arrays.stream(row)
                             .map(obj -> Objects.toString(obj, ""))
                             .collect(Collectors.joining("\t"));
+                    LOG.error("line : " + line);
                     writer.write(line + "\n");
                 } catch (Exception e) {
                     event.setStatus(ShanoirEvent.ERROR);
@@ -93,6 +95,7 @@ public class CreateStatisticsService {
             });
             writer.flush();
             zos.closeEntry();
+            LOG.error("end writing stats");
         } finally {
             event.setObjectId(String.valueOf(event.getId()));
             event.setProgress(1f);
