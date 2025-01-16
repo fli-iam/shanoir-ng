@@ -71,15 +71,17 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 			// the selection of the StudyCard and its center defines
 			// the center for new created examinations
 			if (e.getSource().equals(mainWindow.importDialog.studyCardCB)) {
-				@SuppressWarnings("unchecked")
-				JComboBoxMandatory<StudyCard> comboBox = (JComboBoxMandatory<StudyCard>) e.getSource();
-				StudyCard studyCard = (StudyCard) comboBox.getSelectedItem();
-				// put center into exam using study card and acquisition equipment
-				mainWindow.importDialog.mrExaminationCenterCB.removeAllItems();
-				AcquisitionEquipment acqEquipment = studyCard.getAcquisitionEquipment();
-				if (acqEquipment != null) {
-					IdName center = acqEquipment.getCenter();
-					mainWindow.importDialog.mrExaminationCenterCB.addItem(center);
+				JComboBoxMandatory comboBox = (JComboBoxMandatory) e.getSource();
+				Object selectedStudyCard = mainWindow.importDialog.studyCardCB.getSelectedItem();
+				if (selectedStudyCard instanceof StudyCard) {
+					StudyCard studyCard = (StudyCard) selectedStudyCard;
+					// put center into exam using study card and acquisition equipment
+					mainWindow.importDialog.mrExaminationCenterCB.removeAllItems();
+					AcquisitionEquipment acqEquipment = studyCard.getAcquisitionEquipment();
+					if (acqEquipment != null) {
+						IdName center = acqEquipment.getCenter();
+						mainWindow.importDialog.mrExaminationCenterCB.addItem(center);
+					}
 				}
 			}
 			// the selection of an existing subject defines the list of existing exams
