@@ -126,7 +126,7 @@ public class MainWindow extends JFrame {
 	public UtilDateModel studyDateModel;
 	public String birthDate = "";
 	public String studyDate = "";
-	public String modality = "";
+	public String modality;
 	JScrollPane scrollPaneUpload;
 
 	public JLabel startedDownloadsLB;
