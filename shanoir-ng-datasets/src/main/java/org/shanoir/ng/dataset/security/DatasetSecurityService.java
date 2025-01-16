@@ -971,6 +971,38 @@ public class DatasetSecurityService {
 		return true;
 	}
 
+
+	/**
+	 * Check that the connected user has the given right for the given datas.
+	 *
+	 * @param ids the data ids
+	 * @param dataType the data ids
+	 * @param rightStr the right
+	 * @return true or false
+	 * @throws EntityNotFoundException
+	 */
+	public boolean hasRightOnDatas(List<Long> ids, String dataType, String rightStr) throws EntityNotFoundException {
+		if (isAdmin()) {
+			return true;
+		}
+		switch (dataType) {
+			case "study":
+				return hasRightOnStudies(ids, rightStr);
+			case "subject":
+				return hasRightOnSubjects(ids, rightStr);
+			case "examination":
+				return hasRightOnExaminations(ids, rightStr);
+			case "acquisition":
+				return hasRightOnAcquisitions(ids, rightStr);
+			case "dataset":
+				return hasRightOnDatasets(ids, rightStr);
+
+			default:
+				throw new EntityNotFoundException("Data type " + dataType + " not supported");
+
+		}
+	}
+
 	private boolean isAdmin() {
 		return KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN);
 	}

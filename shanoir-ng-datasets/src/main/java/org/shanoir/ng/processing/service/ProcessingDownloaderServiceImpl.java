@@ -2,22 +2,22 @@ package org.shanoir.ng.processing.service;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.solr.common.util.Pair;
-import org.shanoir.ng.dataset.modality.BidsDataset;
-import org.shanoir.ng.dataset.modality.EegDataset;
+import com.opencsv.CSVWriter;
+import org.assertj.core.util.Strings;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.download.DatasetDownloadError;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.processing.model.DatasetProcessing;
-import org.shanoir.ng.processing.model.DatasetProcessingType;
 import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.net.URL;
+import java.io.OutputStreamWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -156,5 +156,42 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
             path = path.substring(0, 254);
         }
         return path;
+    }
+
+
+    public void downloadPipelineDatas(List<Long> processingIds, String pipelineIdentifier, HttpServletResponse response) throws IOException {
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
+            ZipEntry zipEntry = new ZipEntry("processing_" + shapeForPath(pipelineIdentifier) + "_datas.csv");
+            zipEntry.setTime(System.currentTimeMillis());
+            zipOutputStream.putNextEntry(zipEntry);
+
+            String[] header = { "Study", "Subject", "Examination", "Acquisition", "AcquisitionId", "Dataset", "DatasetId", "Output files" };
+            CSVWriter writer = new CSVWriter(new OutputStreamWriter(zipOutputStream));
+            writer.writeNext(header);
+            for(DatasetProcessing processing : datasetProcessingService.findAllById(processingIds)){
+                for(Dataset input : processing.getInputDatasets()) {
+                    writer.writeNext(buildLineForCsv(processing, input));
+                }
+            }
+            writer.close();
+            zipOutputStream.closeEntry();
+        }
+    }
+
+    private String[] buildLineForCsv(DatasetProcessing processing, Dataset input) {
+        DatasetAcquisition datasetAcquisition = input.getDatasetAcquisition();
+        Examination examination = Objects.nonNull(datasetAcquisition) ? datasetAcquisition.getExamination() : null;
+        Subject subject = Objects.nonNull(examination) ? examination.getSubject() : null;
+        Study study = Objects.nonNull(examination) ? examination.getStudy() : null;
+
+        String studyName = Objects.nonNull(study) ? study.getName() : null;
+        String subjectName = Objects.nonNull(subject) ? subject.getName() : null;
+        String examinationId = Objects.nonNull(examination) ? examination.getId().toString() : "";
+        String acquisitionName = Objects.nonNull(datasetAcquisition) ? (Objects.nonNull(datasetAcquisition.getStudyCard()) ? datasetAcquisition.getStudyCard().getName() : "") : "";
+        String acquisitionId = Objects.nonNull(datasetAcquisition) ? datasetAcquisition.getId().toString() : "";
+        String inputName = input.getName();
+        String inputId = input.getId().toString();
+        String outputsFile = processing.getOutputDatasets().stream().map(Dataset::getName).collect(Collectors.joining(","));
+        return new String[]{studyName, subjectName, examinationId, acquisitionName, acquisitionId, inputName, inputId, outputsFile};
     }
 }
