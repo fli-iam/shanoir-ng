@@ -85,17 +85,26 @@ public class CreateStatisticsService {
                             .collect(Collectors.joining("\t"));
                     LOG.error("line : " + line);
                     writer.write(line + "\n");
+                    writer.flush();
                 } catch (Exception e) {
                     event.setStatus(ShanoirEvent.ERROR);
                     event.setMessage("Error during writing of statistics.");
                     event.setProgress(-1f);
                     eventService.publishEvent(event);
                     LOG.error("Error during writing of statistics with id : " + event.getId());
+                    LOG.error(e.getMessage(), e);
                 }
             });
-            writer.flush();
+
             zos.closeEntry();
             LOG.error("end writing stats");
+        } catch (Exception e) {
+            event.setStatus(ShanoirEvent.ERROR);
+            event.setMessage("Error during writing of statistics.");
+            event.setProgress(-1f);
+            eventService.publishEvent(event);
+            LOG.error("Error during writing of statistics with id : " + event.getId());
+            LOG.error(e.getMessage(), e);
         } finally {
             event.setObjectId(String.valueOf(event.getId()));
             event.setProgress(1f);
