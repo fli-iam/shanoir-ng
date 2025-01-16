@@ -23,21 +23,32 @@ import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetService;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 import org.shanoir.ng.processing.dto.mapper.DatasetProcessingMapper;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.model.DatasetProcessingType;
+import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.processing.service.ProcessingDownloaderServiceImpl;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.*;
+import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -74,6 +85,11 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
 	@Autowired
 	private ExaminationService examinationService;
+
+	@Autowired
+	@Lazy
+	private DatasetProcessingRepository processingRepository;
+
 
 	public DatasetProcessingApiController(){
 
@@ -227,5 +243,31 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 			}
 		}
 		processingDownloaderService.massiveDownloadByExaminations(examinationList, processingComment, resultOnly, "dcm" , response, false, null);
+	}
+
+	@Override
+	public void downloadPipelineDatas(List<Long> dataIds, String dataType, String pipelineIdentifier, HttpServletResponse response) throws IOException {
+		List<Long> processingIds = new ArrayList<>();
+		switch (dataType) {
+			case "study":
+				processingIds = processingRepository.findAllIdsByStudyIds(dataIds);
+				break;
+			case "subject":
+				processingIds = processingRepository.findAllIdsBySubjectIds(dataIds);
+				break;
+			case "examination":
+				processingIds = processingRepository.findAllIdsByExaminationIds(dataIds);
+				break;
+			case "acquisition":
+				processingIds = processingRepository.findAllIdsByAcquisitionIds(dataIds);
+				break;
+			case "dataset":
+				processingIds = processingRepository.findAllIdsByInputDatasets_Ids(dataIds);
+				break;
+		}
+		processingIds = processingRepository.filterIdsByIdentifier(processingIds, pipelineIdentifier);
+		if(!processingIds.isEmpty()) {
+			processingDownloaderService.downloadPipelineDatas(processingIds, pipelineIdentifier, response);
+		}
 	}
 }
