@@ -28,25 +28,42 @@ public class DatasetRepositoryImpl implements DatasetRepositoryCustom {
     public List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp,
             String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception {
 
-		//"getStatistics" is the name of the MySQL procedure
-		StoredProcedureQuery query = entityManager.createStoredProcedureQuery("getStatistics");
+		int startRow = 0;
+		int blocSize = 5;
 
-		//Declare the parameters in the same order
-		query.registerStoredProcedureParameter(1, String.class, ParameterMode.IN);
-		query.registerStoredProcedureParameter(2, String.class, ParameterMode.IN);
-		query.registerStoredProcedureParameter(3, String.class, ParameterMode.IN);
-		query.registerStoredProcedureParameter(4, String.class, ParameterMode.IN);
+		List<Object[]> allResults = new ArrayList<>();
 
-		//Pass the parameter values
-		query.setParameter(1, studyNameInRegExp);
-		query.setParameter(2, studyNameOutRegExp);
-		query.setParameter(3, subjectNameInRegExp);
-		query.setParameter(4, subjectNameOutRegExp);
+		while (true) {
+			//"getStatistics" is the name of the MySQL procedure
+			StoredProcedureQuery query = entityManager.createStoredProcedureQuery("getStatistics");
 
-		//Execute query
-		query.execute();
+			//Declare the parameters in the same order
+			query.registerStoredProcedureParameter(1, String.class, ParameterMode.IN);
+			query.registerStoredProcedureParameter(2, String.class, ParameterMode.IN);
+			query.registerStoredProcedureParameter(3, String.class, ParameterMode.IN);
+			query.registerStoredProcedureParameter(4, String.class, ParameterMode.IN);
+			query.registerStoredProcedureParameter(5, Integer.class, ParameterMode.IN);
+			query.registerStoredProcedureParameter(6, Integer.class, ParameterMode.IN);
 
-		List<Object[]> results = query.getResultList();
-		return results;
+			//Pass the parameter values
+			query.setParameter(1, studyNameInRegExp);
+			query.setParameter(2, studyNameOutRegExp);
+			query.setParameter(3, subjectNameInRegExp);
+			query.setParameter(4, subjectNameOutRegExp);
+			query.setParameter(5, startRow);
+			query.setParameter(6, blocSize);
+
+			//Execute query
+			@SuppressWarnings("unchecked")
+			List<Object[]> results = query.getResultList();
+
+			if (results.isEmpty()) {
+				break;
+			}
+			allResults.addAll(results);
+			startRow += blocSize;
+		}
+
+		return allResults;
     }
 }

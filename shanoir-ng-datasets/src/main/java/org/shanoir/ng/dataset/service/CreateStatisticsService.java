@@ -50,67 +50,70 @@ public class CreateStatisticsService {
     @Transactional
     public void createStats(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp, ShanoirEvent event, String params) throws IOException {
         LOG.error("createStats");
+        float progress = 0;
         String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
         File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
+        File statisticsFile = recreateFile(userDir + File.separator + "shanoirExportStatistics_" + event.getId() + ".tsv");
         File zipFile = recreateFile(userDir + File.separator + "shanoirExportStatistics_" + event.getId() + ZIP);
 
-        // Get the data and write it into a zip file
-        try (FileOutputStream fos = new FileOutputStream(zipFile);
-             ZipOutputStream zos = new ZipOutputStream(fos)) {
+        // Get the data
+        try (FileOutputStream fos = new FileOutputStream(statisticsFile);
+             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos))){
 
-            ZipEntry zipEntry = new ZipEntry("shanoirExportStatistics_" + event.getId() + ".tsv");
-            zos.putNextEntry(zipEntry);
+            List<Object[]> results = datasetService.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
 
-            OutputStreamWriter writer = new OutputStreamWriter(zos);
+            for (Object[] or : results) {
 
-            StoredProcedureQuery query = entityManager.createStoredProcedureQuery("getStatistics");
-            query.registerStoredProcedureParameter(1, String.class, ParameterMode.IN);
-            query.registerStoredProcedureParameter(2, String.class, ParameterMode.IN);
-            query.registerStoredProcedureParameter(3, String.class, ParameterMode.IN);
-            query.registerStoredProcedureParameter(4, String.class, ParameterMode.IN);
-            query.setParameter(1, studyNameInRegExp);
-            query.setParameter(2, studyNameOutRegExp);
-            query.setParameter(3, subjectNameInRegExp);
-            query.setParameter(4, subjectNameOutRegExp);
+                progress += 1f / results.size();
+                event.setProgress(progress);
+                eventService.publishEvent(event);
+                List<String> strings = Arrays.stream(or).map(object -> Objects.toString(object, null)).collect(Collectors.toList());
+                bw.write(String.join("\t", strings));
+                bw.newLine();
+            }
 
-            query.getResultStream().forEach(result -> {
-                float progress = 0;
-                Object[] row = (Object[]) result;
-                try {
-                    progress += 1f / ((Object[]) result).length;
-                    event.setProgress(progress);
-                    eventService.publishEvent(event);
-                    String line = Arrays.stream(row)
-                            .map(obj -> Objects.toString(obj, ""))
-                            .collect(Collectors.joining("\t"));
-                    LOG.error("line : " + line);
-                    writer.write(line + "\n");
-                    writer.flush();
-                } catch (Exception e) {
-                    event.setStatus(ShanoirEvent.ERROR);
-                    event.setMessage("Error during writing of statistics.");
-                    event.setProgress(-1f);
-                    eventService.publishEvent(event);
-                    LOG.error("Error during writing of statistics with id : " + event.getId());
-                    LOG.error(e.getMessage(), e);
-                }
-            });
-
-            zos.closeEntry();
-            LOG.error("end writing stats");
         } catch (Exception e) {
             event.setStatus(ShanoirEvent.ERROR);
-            event.setMessage("Error during writing of statistics.");
+            event.setMessage("Error during fetching of statistics.");
             event.setProgress(-1f);
             eventService.publishEvent(event);
-            LOG.error("Error during writing of statistics with id : " + event.getId());
-            LOG.error(e.getMessage(), e);
+            LOG.error("Error during fetching of statistics with id : " + event.getId());
         } finally {
+            zipSingleFile(statisticsFile, zipFile);
+            statisticsFile.delete();
             event.setObjectId(String.valueOf(event.getId()));
             event.setProgress(1f);
             event.setMessage("Statistics fetched with params : " + params + "\nDownload available for 6 hours");
             event.setStatus(ShanoirEvent.SUCCESS);
             eventService.publishEvent(event);
+        }
+    }
+
+    /**
+     * Zip a single file
+     *
+     * @param sourceFile
+     * @param zipFile
+     * @throws IOException
+     */
+    private void zipSingleFile(final File sourceFile, final File zipFile) throws IOException {
+
+        byte[] buffer = new byte[1024];
+
+
+        try (FileOutputStream fos = new FileOutputStream(zipFile);
+             ZipOutputStream zos = new ZipOutputStream(fos);
+             FileInputStream fis = new FileInputStream(sourceFile);
+        ) {
+            // begin writing a new ZIP entry, positions the stream to the start of the entry data
+            zos.putNextEntry(new ZipEntry(sourceFile.getName()));
+
+            int length;
+
+            while ((length = fis.read(buffer)) > 0) {
+                zos.write(buffer, 0, length);
+            }
+            zos.closeEntry();
         }
     }
 }
