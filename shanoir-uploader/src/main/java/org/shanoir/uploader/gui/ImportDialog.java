@@ -25,6 +25,7 @@ import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.event.DocumentListener;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.jdatepicker.JDatePicker;
@@ -144,7 +145,7 @@ public class ImportDialog extends JDialog {
 	 * @param importFinishAL
 	 */
 	public ImportDialog(MainWindow mainWindow, String title, Boolean trueOrFalse, ResourceBundle resourceBundle,
-			ItemListener importStudyAndStudyCardCBIL, ActionListener importFinishAL) {
+			ItemListener importStudyAndStudyCardCBIL, ActionListener importFinishAL, DocumentListener studyCardFilterItemListener) {
 		super(mainWindow, title, trueOrFalse);
 		this.mainWindow = mainWindow;
 		this.mainWindow.importDialog = this;
@@ -163,7 +164,6 @@ public class ImportDialog extends JDialog {
         dicomPanel.setBorder(BorderFactory.createTitledBorder("Informations DICOM"));
         GridBagConstraints dicomPanelGBC = new GridBagConstraints();
         dicomPanelGBC.insets = new Insets(5, 5, 5, 5);
-
 		
 		int style = Font.ITALIC;
 		Font font = new Font("about", style, 12);
@@ -335,7 +335,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridheight = 1;
 		formPanel.add(studyCardLabel, importDialogGBC);
 
-		studyCardCB = new JComboBoxMandatory();
+		studyCardCB = new JComboBoxMandatory<org.shanoir.uploader.model.rest.StudyCard>();
 		studyCardCB.setBackground(Color.WHITE);
 		studyCardCB.setToolTipText(resourceBundle.getString("shanoir.uploader.studycardFilterTooltip"));
 		importDialogGBC.weightx = 0.7;
@@ -346,8 +346,10 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridwidth = 1;
 		importDialogGBC.gridheight = 1;
 		formPanel.add(studyCardCB, importDialogGBC);
+		studyCardCB.setEditable(true);
 		studyCardCB.addItemListener(importStudyAndStudyCardCBIL);
-		AutoCompleteDecorator.decorate(studyCardCB);
+		JTextField editor = (JTextField) studyCardCB.getEditor().getEditorComponent();
+		editor.getDocument().addDocumentListener(studyCardFilterItemListener);
 
 		/**
 		 * Subject

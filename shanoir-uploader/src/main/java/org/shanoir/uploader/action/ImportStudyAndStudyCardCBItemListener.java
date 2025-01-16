@@ -38,13 +38,16 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 	private List<Examination> examinationsOfSubject;
 	
 	private Date studyDate;
+
+	private ImportStudyCardFilterDocumentListener importStudyCardDocumentListener;
 	
 	private ShanoirUploaderServiceClient serviceClient;
 
-	public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, Subject subject, Date studyDate, ShanoirUploaderServiceClient serviceClient) {
+	public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, Subject subject, Date studyDate, ImportStudyCardFilterDocumentListener importStudyCardDocumentListener, ShanoirUploaderServiceClient serviceClient) {
 		this.mainWindow = mainWindow;
 		this.subject = subject;
 		this.studyDate = studyDate;
+		this.importStudyCardDocumentListener = importStudyCardDocumentListener;
 		this.serviceClient = serviceClient;
 	}
 
@@ -68,7 +71,8 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 			// the selection of the StudyCard and its center defines
 			// the center for new created examinations
 			if (e.getSource().equals(mainWindow.importDialog.studyCardCB)) {
-				JComboBoxMandatory comboBox = (JComboBoxMandatory) e.getSource();
+				@SuppressWarnings("unchecked")
+				JComboBoxMandatory<StudyCard> comboBox = (JComboBoxMandatory<StudyCard>) e.getSource();
 				StudyCard studyCard = (StudyCard) comboBox.getSelectedItem();
 				// put center into exam using study card and acquisition equipment
 				mainWindow.importDialog.mrExaminationCenterCB.removeAllItems();
@@ -179,13 +183,16 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 	}
 
 	private void updateStudyCards(Study study) {
+		this.importStudyCardDocumentListener.isUpdating = true;
 		mainWindow.importDialog.studyCardCB.removeAllItems();
+		this.importStudyCardDocumentListener.cleanDefaultStudyCards();
 		if (study.getStudyCards() != null) {
 			for (StudyCard studyCard : study.getStudyCards()) {
 				mainWindow.importDialog.studyCardCB.addItem(studyCard);
+				this.importStudyCardDocumentListener.addDefaultStudyCard(studyCard);
 			}
 		}
-		
+		this.importStudyCardDocumentListener.isUpdating = false;
 	}
 
 	private void updateSubjectStudy(Study study, Subject subject) {
