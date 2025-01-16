@@ -16,6 +16,7 @@ public class ShanoirEventType {
 	public static final String CREATE_SUBJECT_EVENT = "createSubject.event";
 	public static final String UPDATE_SUBJECT_EVENT = "updateSubject.event";
 	public static final String DELETE_SUBJECT_EVENT = "deleteSubject.event";
+	public static final String REMOVE_SUBJECT_FROM_STUDY_EVENT = "removeSubject.event";
 
 	/** Examination **/
 	public static final String CREATE_EXAMINATION_EVENT = "createExamination.event";
