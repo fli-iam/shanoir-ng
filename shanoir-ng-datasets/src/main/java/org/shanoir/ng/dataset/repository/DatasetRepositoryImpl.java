@@ -34,6 +34,9 @@ public class DatasetRepositoryImpl implements DatasetRepositoryCustom {
 		List<Object[]> allResults = new ArrayList<>();
 
 		while (true) {
+			LOG.error("======");
+			LOG.error("startRow : " + startRow);
+			LOG.error("blocSize : " + blocSize);
 			//"getStatistics" is the name of the MySQL procedure
 			StoredProcedureQuery query = entityManager.createStoredProcedureQuery("getStatistics");
 
@@ -56,8 +59,10 @@ public class DatasetRepositoryImpl implements DatasetRepositoryCustom {
 			//Execute query
 			@SuppressWarnings("unchecked")
 			List<Object[]> results = query.getResultList();
+			LOG.error("result size : " + results.size());
 
 			if (results.isEmpty()) {
+				LOG.error("break");
 				break;
 			}
 			allResults.addAll(results);
