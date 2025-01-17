@@ -21,10 +21,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             See the list of compatible browsers :
             <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker#browser_compatibility" target="_blank">https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker#browser_compatibility</a>
         </div>
-        <div *ngIf="loading">
+        <div class="loading" *ngIf="loading">
             <i *ngIf="loading" class="fas fa-cog fa-spin"></i> Retrieving download informations...
         </div>
-        <fieldset class="body" disabled="loading">            <ol>
+        <fieldset class="body" [disabled]="loading">            <ol>
                 <li *ngIf="hasDicom">
                     <label>Dataset files format</label>
                     <span class="right-col">
@@ -40,7 +40,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </ol>
         </fieldset>
         <div class="footer">
-            <button type="button" type="button" (click)="downloadNow()" class="alt left-icon" [disabled]="form.dirty && !form.valid">
+            <button type="button" type="button" (click)="downloadNow()" class="alt left-icon" [disabled]="loading || (form.dirty && !form.valid)">
                 <i class="fas fa-download"></i>Download zip
             </button>
             <button type="button" (click)="cancel()">Cancel</button>

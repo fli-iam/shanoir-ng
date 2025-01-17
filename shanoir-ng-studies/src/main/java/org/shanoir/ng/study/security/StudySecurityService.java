@@ -245,7 +245,7 @@ public class StudySecurityService {
 		}
 		List<Subject> subjects = Utils.toList(subjectRepository.findAllById(subjectIds));
 		if (subjects == null || subjects.isEmpty()) {
-			throw new EntityNotFoundException("Cannot find any subject with id in " + subjectIds);
+			return true;
 		}
 		for (Subject subject : subjects) {
 			if (subject.getSubjectStudyList() == null) {

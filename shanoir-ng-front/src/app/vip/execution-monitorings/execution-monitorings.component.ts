@@ -12,7 +12,8 @@ import { ExecutionMonitoringService } from './execution-monitoring.service';
 @Component({
     selector: 'app-execution-monitorings',
     templateUrl: './execution-monitorings.component.html',
-    styleUrls: ['./execution-monitorings.component.css']
+    styleUrls: ['./execution-monitorings.component.css'],
+    standalone: false
 })
 export class ExecutionMonitoringsComponent extends EntityListComponent<ExecutionMonitoring> implements AfterViewInit {
     

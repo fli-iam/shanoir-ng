@@ -721,6 +721,22 @@ public class ShanoirUploaderServiceClient {
 		return null;
 	}
 
+	public List<Manufacturer> findManufacturers() {
+		try (CloseableHttpResponse response = httpService.get(this.serviceURLManufacturers)) {
+			int code = response.getCode();
+			if (code == HttpStatus.SC_OK) {
+				List<Manufacturer> manufacturers = Util.getMappedList(response,Manufacturer.class);
+				return manufacturers;
+			} else {
+				logger.error("Could not find manufacturers (status code: " + code + ", message: "
+						+ apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);			
+		}
+		return null;
+	}
+
 	public Manufacturer createManufacturer(final Manufacturer manufacturer) {
 		try {
 			String json = Util.objectWriter.writeValueAsString(manufacturer);

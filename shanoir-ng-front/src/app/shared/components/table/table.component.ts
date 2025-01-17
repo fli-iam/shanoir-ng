@@ -33,7 +33,8 @@ import {Task} from "../../../async-tasks/task.model";
     templateUrl: 'table.component.html',
     styleUrls: ['table.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    animations: [slideDown]
+    animations: [slideDown],
+    standalone: false
 })
 export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Input() getPage: (pageable: Pageable, forceRefresh: boolean) => Promise<Page<any>> | Page<any>;

@@ -35,7 +35,8 @@ export type Sort = {field: 'name' | 'id', way : 'asc' | 'desc'}
 @Component({
     selector: 'study-node',
     templateUrl: 'study-node.component.html',
-    styleUrls: ['study-node.component.css']
+    styleUrls: ['study-node.component.css'],
+    standalone: false
 })
 
 export class StudyNodeComponent implements OnChanges {

@@ -126,7 +126,7 @@ public class StudyServiceTest {
 
 		studyService.deleteById(STUDY_ID);
 
-		Mockito.verify(studyRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
+		Mockito.verify(studyRepository, Mockito.times(1)).delete(Mockito.any(Study.class));
 	}
 
 	@Test

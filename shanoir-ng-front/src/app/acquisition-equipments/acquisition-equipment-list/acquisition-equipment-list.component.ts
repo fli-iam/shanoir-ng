@@ -27,7 +27,8 @@ import {Center} from "../../centers/shared/center.model";
 
 @Component({
     selector: 'acquisition-equipment-list',
-    templateUrl: 'acquisition-equipment-list.component.html'
+    templateUrl: 'acquisition-equipment-list.component.html',
+    standalone: false
 })
 
 export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListComponent<AcquisitionEquipment> {

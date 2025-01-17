@@ -8,10 +8,11 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Point;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.stream.Stream;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -143,6 +144,7 @@ public class ImportFromTableWindow extends JFrame {
 
 		// headers for the table
 		String[] columns = new String[] {
+			"#",
 			resourceBundle.getString("shanoir.uploader.import.table.column.dicom.query.level"),
 			resourceBundle.getString("shanoir.uploader.import.table.column.dicom.patient.name"),
 			resourceBundle.getString("shanoir.uploader.import.table.column.dicom.patient.id"),
@@ -164,32 +166,38 @@ public class ImportFromTableWindow extends JFrame {
 		};
 		// Create table with data
 		table = new JTable();
-		DefaultTableModel model = (DefaultTableModel) table.getModel();
+		DefaultTableModel model = new DefaultTableModel() {
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+		};
 		model.setColumnIdentifiers(columns);
+		table.setModel(model);
+		table.getColumnModel().getColumn(0).setMinWidth(10);
 		// DicomQuery: 7 columns + 3 filter
-		table.getColumnModel().getColumn(0).setMinWidth(140);
-		table.getColumnModel().getColumn(1).setMinWidth(150);
-		table.getColumnModel().getColumn(2).setMinWidth(130);
-		table.getColumnModel().getColumn(3).setMinWidth(200);
+		table.getColumnModel().getColumn(1).setMinWidth(140);
+		table.getColumnModel().getColumn(2).setMinWidth(150);
+		table.getColumnModel().getColumn(3).setMinWidth(130);
 		table.getColumnModel().getColumn(4).setMinWidth(200);
-		table.getColumnModel().getColumn(5).setMinWidth(150);
-		table.getColumnModel().getColumn(6).setMinWidth(120);
+		table.getColumnModel().getColumn(5).setMinWidth(200);
+		table.getColumnModel().getColumn(6).setMinWidth(150);
+		table.getColumnModel().getColumn(7).setMinWidth(120);
 		// filters
-		table.getColumnModel().getColumn(7).setMinWidth(180);
 		table.getColumnModel().getColumn(8).setMinWidth(180);
 		table.getColumnModel().getColumn(9).setMinWidth(180);
+		table.getColumnModel().getColumn(10).setMinWidth(180);
 		// PatientVerification: 4 columns
-		table.getColumnModel().getColumn(10).setMinWidth(230);
 		table.getColumnModel().getColumn(11).setMinWidth(230);
 		table.getColumnModel().getColumn(12).setMinWidth(230);
 		table.getColumnModel().getColumn(13).setMinWidth(230);
+		table.getColumnModel().getColumn(14).setMinWidth(230);
 		// ImportJob
-		table.getColumnModel().getColumn(14).setMinWidth(150);
 		table.getColumnModel().getColumn(15).setMinWidth(150);
 		table.getColumnModel().getColumn(16).setMinWidth(150);
+		table.getColumnModel().getColumn(17).setMinWidth(150);
 		// State
-		table.getColumnModel().getColumn(17).setMinWidth(350);
-		
+		table.getColumnModel().getColumn(18).setMinWidth(350);
 
 		// Add the table to the frame
 		JPanel tablePanel = new JPanel(new BorderLayout());
@@ -259,25 +267,23 @@ public class ImportFromTableWindow extends JFrame {
 
 	public void displayImportJobs(Map<String, ImportJob> importJobs) {
 		DefaultTableModel model = (DefaultTableModel) table.getModel();
-		model.getDataVector().removeAllElements();
+		model.getDataVector().clear();
+		int rowIndex = 1;
 		boolean inError = false;
 		for (ImportJob importJob : importJobs.values()) {
-			String[] dicomQuery = importJob.getDicomQuery().displayDicomQuery();
-			String[] patientVerification = importJob.getPatientVerification().displayPatientVerification();
-			String[] importJobStrArray = {importJob.getStudyCardName(), importJob.getSubjectName(), importJob.getExaminationComment()};
-			String[] combinedArray1 = Stream.concat(
-				Arrays.stream(dicomQuery),
-				Arrays.stream(patientVerification)).toArray(String[]::new);
-			String[] combinedArray2 = Stream.concat(Arrays.stream(combinedArray1), Arrays.stream(importJobStrArray)).toArray(String[]::new);
-			model.addRow(combinedArray2);
-
+			List<String> rowData = new ArrayList<>();
+			rowData.add(String.valueOf(rowIndex++));
+			rowData.addAll(Arrays.asList(importJob.getDicomQuery().displayDicomQuery()));
+			rowData.addAll(Arrays.asList(importJob.getPatientVerification().displayPatientVerification()));
+			rowData.add(importJob.getStudyCardName());
+			rowData.add(importJob.getSubjectName());
+			rowData.add(importJob.getExaminationComment());
+			model.addRow(rowData.toArray());
 		}
 		this.error.setVisible(inError);
-
 		model.fireTableDataChanged();
 		table.getParent().setVisible(true);
 		this.importListener.setImportJobs(importJobs);
-
 		uploadButton.setEnabled(!inError);
 	}
 

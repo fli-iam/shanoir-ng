@@ -14,13 +14,13 @@
 
 package org.shanoir.ng.study;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.shanoir.ng.center.model.Center;
+import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyStatus;
 import org.shanoir.ng.study.repository.StudyRepository;
@@ -43,13 +43,20 @@ public class StudyRepositoryTest {
 	@Autowired
 	private StudyRepository studyRepository;
 
+	@Autowired
+	private CenterRepository centerRepository;
+
 	@Test
 	public void create() {
+		final Center center = new Center();
+		center.setName("test");
+		centerRepository.save(center);
+
 		final Study study = new Study();
 		study.setName("StudyTest");
 		StudyCenter studyCenter = new StudyCenter();
 		studyCenter.setStudy(study);
-		studyCenter.setCenter(new Center());
+		studyCenter.setCenter(center);
 		List<StudyCenter> studyCenters = new ArrayList<StudyCenter>();
 		studyCenters.add(studyCenter);
 		study.setStudyCenterList(studyCenters);

@@ -193,10 +193,13 @@ public class Subject {
 	public void setPseudonymusHashValues(PseudonymusHashValues pseudonymusHashValues) {
 		this.pseudonymusHashValues = pseudonymusHashValues;
 	}
-	
+
 	@Override
 	public String toString() {
-		return name;
+		return "Subject [id=" + id + ", name=" + name + ", identifier=" + identifier + ", birthDate=" + birthDate
+				+ ", languageHemisphericDominance=" + languageHemisphericDominance + ", manualHemisphericDominance="
+				+ manualHemisphericDominance + ", imagedObjectCategory=" + imagedObjectCategory + ", sex=" + sex
+				+ ", preclinical=" + preclinical + "]";
 	}
 
 	public SubjectStudy getSubjectStudy() {

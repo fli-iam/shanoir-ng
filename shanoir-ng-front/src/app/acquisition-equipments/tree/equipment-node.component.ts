@@ -21,7 +21,8 @@ import { Selection, TreeService } from 'src/app/studies/study/tree.service';
 
 @Component({
     selector: 'equipment-node',
-    templateUrl: 'equipment-node.component.html'
+    templateUrl: 'equipment-node.component.html',
+    standalone: false
 })
 
 export class EquipmentNodeComponent implements OnChanges {

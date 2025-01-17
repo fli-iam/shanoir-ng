@@ -123,7 +123,7 @@ public class DownloadOrCopyActionListener implements ActionListener {
 		 * 3. Download from PACS or copy from CD/DVD and write upload-job.xml + nominative-data-job.xml
 		 */
 		final String filePathDicomDir = mainWindow.getFindDicomActionListener().getFilePathDicomDir();
-		Runnable runnable = new DownloadOrCopyRunnable(mainWindow.isFromPACS, mainWindow.frame, mainWindow.downloadProgressBar, dicomServerClient, dicomFileAnalyzer,  filePathDicomDir, importJobs);
+		Runnable runnable = new DownloadOrCopyRunnable(mainWindow.isFromPACS, false, mainWindow.frame, mainWindow.downloadProgressBar, dicomServerClient, dicomFileAnalyzer,  filePathDicomDir, importJobs);
 		Thread thread = new Thread(runnable);
 		thread.start();
 		

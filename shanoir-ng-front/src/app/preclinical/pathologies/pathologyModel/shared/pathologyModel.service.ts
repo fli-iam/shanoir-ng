@@ -14,7 +14,7 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../../../utils/app.utils';
 

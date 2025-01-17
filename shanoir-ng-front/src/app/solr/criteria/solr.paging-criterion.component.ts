@@ -28,10 +28,12 @@ import { KeycloakService } from '../../shared/keycloak/keycloak.service';
     animations: [slideDown, slideRight],
     providers: [
         {
-          provide: NG_VALUE_ACCESSOR,
-          useExisting: forwardRef(() => SolrPagingCriterionComponent),
-          multi: true,
-        }]
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => SolrPagingCriterionComponent),
+            multi: true,
+        }
+    ],
+    standalone: false
 })
 
 export class SolrPagingCriterionComponent implements ControlValueAccessor, OnChanges {

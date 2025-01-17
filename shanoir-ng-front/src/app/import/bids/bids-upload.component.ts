@@ -30,7 +30,8 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     selector: 'bids-upload',
     templateUrl: 'bids-upload.component.html',
     styleUrls: ['bids-upload.component.css'],
-    animations: [slideDown]
+    animations: [slideDown],
+    standalone: false
 })
 export class BidsUploadComponent {
     
