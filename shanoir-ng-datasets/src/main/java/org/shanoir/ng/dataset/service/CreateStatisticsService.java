@@ -78,6 +78,7 @@ public class CreateStatisticsService {
             event.setProgress(-1f);
             eventService.publishEvent(event);
             LOG.error("Error during fetching of statistics with id : " + event.getId());
+            LOG.error(e.getMessage(), e);
         } finally {
             zipSingleFile(statisticsFile, zipFile);
             statisticsFile.delete();
