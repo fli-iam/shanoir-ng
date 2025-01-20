@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -60,17 +61,68 @@ public class CreateStatisticsService {
         try (FileOutputStream fos = new FileOutputStream(statisticsFile);
              BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos))){
 
-            List<Object[]> results = datasetService.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
+            int startRow = 0;
+            int blocSize = 50000;
 
-            for (Object[] or : results) {
-
-                progress += 1f / results.size();
-                event.setProgress(progress);
+            while (true) {
+                LOG.error("======");
+                LOG.error("startRow : " + startRow);
+                LOG.error("blocSize : " + blocSize);
+                event.setMessage("Querying results block from " + startRow + " to " + startRow + blocSize);
                 eventService.publishEvent(event);
-                List<String> strings = Arrays.stream(or).map(object -> Objects.toString(object, null)).collect(Collectors.toList());
-                bw.write(String.join("\t", strings));
-                bw.newLine();
+                //"getStatistics" is the name of the MySQL procedure
+                StoredProcedureQuery query = entityManager.createStoredProcedureQuery("getStatistics");
+
+                //Declare the parameters in the same order
+                query.registerStoredProcedureParameter(1, String.class, ParameterMode.IN);
+                query.registerStoredProcedureParameter(2, String.class, ParameterMode.IN);
+                query.registerStoredProcedureParameter(3, String.class, ParameterMode.IN);
+                query.registerStoredProcedureParameter(4, String.class, ParameterMode.IN);
+                query.registerStoredProcedureParameter(5, Integer.class, ParameterMode.IN);
+                query.registerStoredProcedureParameter(6, Integer.class, ParameterMode.IN);
+
+                //Pass the parameter values
+                query.setParameter(1, studyNameInRegExp);
+                query.setParameter(2, studyNameOutRegExp);
+                query.setParameter(3, subjectNameInRegExp);
+                query.setParameter(4, subjectNameOutRegExp);
+                query.setParameter(5, startRow);
+                query.setParameter(6, blocSize);
+
+                //Execute query
+                @SuppressWarnings("unchecked")
+                List<Object[]> results = query.getResultList();
+                LOG.error("result size : " + results.size());
+
+                if (results.isEmpty()) {
+                    LOG.error("break");
+                    break;
+                }
+
+                for (Object[] or : results) {
+                    LOG.error("for loop");
+                    progress += 1f / results.size();
+                    event.setProgress(progress);
+                    eventService.publishEvent(event);
+                    List<String> strings = Arrays.stream(or).map(object -> Objects.toString(object, null)).collect(Collectors.toList());
+                    bw.write(String.join("\t", strings));
+                    bw.newLine();
+                    LOG.error("write : " + strings);
+                }
+                startRow += blocSize;
             }
+
+//            List<Object[]> results = datasetService.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
+//
+//            for (Object[] or : results) {
+//
+//                progress += 1f / results.size();
+//                event.setProgress(progress);
+//                eventService.publishEvent(event);
+//                List<String> strings = Arrays.stream(or).map(object -> Objects.toString(object, null)).collect(Collectors.toList());
+//                bw.write(String.join("\t", strings));
+//                bw.newLine();
+//            }
 
         } catch (Exception e) {
             event.setStatus(ShanoirEvent.ERROR);

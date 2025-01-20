@@ -29,7 +29,7 @@ public class DatasetRepositoryImpl implements DatasetRepositoryCustom {
             String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception {
 
 		int startRow = 0;
-		int blocSize = 100000;
+		int blocSize = 50000;
 
 		List<Object[]> allResults = new ArrayList<>();
 
