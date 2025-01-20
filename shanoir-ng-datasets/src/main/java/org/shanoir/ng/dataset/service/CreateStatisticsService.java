@@ -54,24 +54,39 @@ public class CreateStatisticsService {
         float progress = 0;
         String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
         File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
-        File statisticsFile = recreateFile(userDir + File.separator + "shanoirExportStatistics_" + event.getId() + ".tsv");
+        //File statisticsFile = recreateFile(userDir + File.separator + "shanoirExportStatistics_" + event.getId() + ".tsv");
         File zipFile = recreateFile(userDir + File.separator + "shanoirExportStatistics_" + event.getId() + ZIP);
 
         // Get the data
-        try (FileOutputStream fos = new FileOutputStream(statisticsFile);
-             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos))){
+        try (FileOutputStream fos = new FileOutputStream(zipFile);
+             ZipOutputStream zos = new ZipOutputStream(fos)) {
+
+            ZipEntry zipEntry = new ZipEntry("shanoirExportStatistics_" + event.getId() + ".tsv");
+            zos.putNextEntry(zipEntry);
+
+            OutputStreamWriter writer = new OutputStreamWriter(zos);
 
             int startRow = 0;
             int blocSize = 50000;
             StoredProcedureQuery querySize = entityManager.createStoredProcedureQuery("getStatisticsSize");
-            int size = querySize.getFirstResult();
+            querySize.registerStoredProcedureParameter(1, String.class, ParameterMode.IN);
+            querySize.registerStoredProcedureParameter(2, String.class, ParameterMode.IN);
+            querySize.registerStoredProcedureParameter(3, String.class, ParameterMode.IN);
+            querySize.registerStoredProcedureParameter(4, String.class, ParameterMode.IN);
+            querySize.setParameter(1, studyNameInRegExp);
+            querySize.setParameter(2, studyNameOutRegExp);
+            querySize.setParameter(3, subjectNameInRegExp);
+            querySize.setParameter(4, subjectNameOutRegExp);
+
+            Object sizeRes = querySize.getSingleResult();
+            int size = (sizeRes != null) ? ((Number) sizeRes).intValue() : -1;
             LOG.error("query size : " + size);
 
             while (true) {
                 LOG.error("======");
                 LOG.error("startRow : " + startRow);
                 LOG.error("blocSize : " + blocSize);
-                event.setMessage("Querying results block from " + startRow + " to " + startRow + blocSize);
+                event.setMessage("Querying results block from " + startRow + " to " + (startRow + blocSize));
                 eventService.publishEvent(event);
                 //"getStatistics" is the name of the MySQL procedure
                 StoredProcedureQuery query = entityManager.createStoredProcedureQuery("getStatistics");
@@ -108,10 +123,12 @@ public class CreateStatisticsService {
                     event.setProgress(progress);
                     eventService.publishEvent(event);
                     List<String> strings = Arrays.stream(or).map(object -> Objects.toString(object, null)).collect(Collectors.toList());
-                    bw.write(String.join("\t", strings));
-                    bw.newLine();
+                    writer.write(String.join("\t", strings));
+                    writer.write('\n');
+                    writer.flush();
                 }
                 startRow += blocSize;
+                zos.closeEntry();
             }
 
 //            List<Object[]> results = datasetService.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
@@ -134,8 +151,8 @@ public class CreateStatisticsService {
             LOG.error("Error during fetching of statistics with id : " + event.getId());
             LOG.error(e.getMessage(), e);
         } finally {
-            zipSingleFile(statisticsFile, zipFile);
-            statisticsFile.delete();
+            //zipSingleFile(statisticsFile, zipFile);
+            //statisticsFile.delete();
             event.setObjectId(String.valueOf(event.getId()));
             event.setProgress(1f);
             event.setMessage("Statistics fetched with params : " + params + "\nDownload available for 6 hours");
