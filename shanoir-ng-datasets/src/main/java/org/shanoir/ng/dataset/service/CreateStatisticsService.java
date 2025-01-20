@@ -63,6 +63,9 @@ public class CreateStatisticsService {
 
             int startRow = 0;
             int blocSize = 50000;
+            StoredProcedureQuery querySize = entityManager.createStoredProcedureQuery("getStatisticsSize");
+            int size = querySize.getFirstResult();
+            LOG.error("query size : " + size);
 
             while (true) {
                 LOG.error("======");
@@ -99,15 +102,14 @@ public class CreateStatisticsService {
                     break;
                 }
 
+                LOG.error("writing...");
                 for (Object[] or : results) {
-                    LOG.error("for loop");
-                    progress += 1f / results.size();
+                    progress += 1f / size;
                     event.setProgress(progress);
                     eventService.publishEvent(event);
                     List<String> strings = Arrays.stream(or).map(object -> Objects.toString(object, null)).collect(Collectors.toList());
                     bw.write(String.join("\t", strings));
                     bw.newLine();
-                    LOG.error("write : " + strings);
                 }
                 startRow += blocSize;
             }
