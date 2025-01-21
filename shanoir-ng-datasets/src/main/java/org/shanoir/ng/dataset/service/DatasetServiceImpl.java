@@ -47,6 +47,7 @@ import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceRepository;
+import org.shanoir.ng.vip.processingResource.service.ProcessingResourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -92,9 +93,6 @@ public class DatasetServiceImpl implements DatasetService {
 	@Autowired
 	private ShanoirEventService shanoirEventService;
 
-	@Autowired
-	private SolrService solrService;
-
 	@Value("${dcm4chee-arc.dicom.web}")
 	private boolean dicomWeb;
 
@@ -121,10 +119,6 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Autowired
 	private ProcessingResourceRepository processingResourceRepository;
-
-	@Autowired
-	@Lazy
-	private DatasetServiceImpl datasetServiceImpl;
 
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
@@ -428,13 +422,13 @@ public class DatasetServiceImpl implements DatasetService {
 		shanoirEventService.publishEvent(event);
 		try {
 			int total = datasets.size();
-			datasetServiceImpl.updateEvent(0f, event, studyId);
+			updateEvent(0f, event, studyId);
 			for (List<Long> partition : ListUtils.partition(datasets, 1000)){
-				datasetServiceImpl.deletePartitionOfNiftis(partition, total, event).get();
+				deletePartitionOfNiftis(partition, total, event).get();
 			}
-			datasetServiceImpl.updateEvent(1f, event, studyId);
+			updateEvent(1f, event, studyId);
 		} catch (Exception e) {
-			datasetServiceImpl.updateEvent(-1f, event, studyId, e);
+			updateEvent(-1f, event, studyId, e);
 
 		}
 	}
@@ -452,11 +446,11 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	protected void updateEvent(float progress, ShanoirEvent event) {
-		datasetServiceImpl.updateEvent(progress, event, null, null);
+		updateEvent(progress, event, null, null);
 	}
 
     protected void updateEvent(float progress, ShanoirEvent event, Long id) {
-		datasetServiceImpl.updateEvent(progress, event, id, null);
+		updateEvent(progress, event, id, null);
 	}
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
