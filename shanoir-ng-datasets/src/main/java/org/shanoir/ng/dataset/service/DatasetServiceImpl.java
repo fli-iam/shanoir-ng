@@ -121,10 +121,6 @@ public class DatasetServiceImpl implements DatasetService {
 	@Autowired
 	DatasetExpressionRepository datasetExpressionRepository;
 
-	@Autowired
-	@Lazy
-	private DatasetServiceImpl datasetServiceImpl;
-
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
 	@Override
@@ -391,13 +387,13 @@ public class DatasetServiceImpl implements DatasetService {
 		shanoirEventService.publishEvent(event);
 		try {
 			int total = datasets.size();
-			datasetServiceImpl.updateEvent(0f, event, studyId);
+			updateEvent(0f, event, studyId);
 			for (List<Long> partition : ListUtils.partition(datasets, 1000)){
-				datasetServiceImpl.deletePartitionOfNiftis(partition, total, event).get();
+				deletePartitionOfNiftis(partition, total, event).get();
 			}
-			datasetServiceImpl.updateEvent(1f, event, studyId);
+			updateEvent(1f, event, studyId);
 		} catch (Exception e) {
-			datasetServiceImpl.updateEvent(-1f, event, studyId, e);
+			updateEvent(-1f, event, studyId, e);
 
 		}
 	}
@@ -415,11 +411,11 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	protected void updateEvent(float progress, ShanoirEvent event) {
-		datasetServiceImpl.updateEvent(progress, event, null, null);
+		updateEvent(progress, event, null, null);
 	}
 
     protected void updateEvent(float progress, ShanoirEvent event, Long id) {
-		datasetServiceImpl.updateEvent(progress, event, id, null);
+		updateEvent(progress, event, id, null);
 	}
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
