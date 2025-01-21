@@ -11,7 +11,6 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
 import org.shanoir.ng.importer.model.ImportJob;
-import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
@@ -24,16 +23,12 @@ import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
-import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
 import org.shanoir.uploader.upload.UploadJob;
-import org.shanoir.uploader.upload.UploadJobManager;
 import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.QualityUtils;
-import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * This class implements the logic when the start import button is clicked.
@@ -197,8 +192,12 @@ public class ImportFinishActionListener implements ActionListener {
 						JOptionPane.showMessageDialog(mainWindow.frame,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult), 
 						ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"), JOptionPane.WARNING_MESSAGE);
 					}
-					//Set qualityTag to the importJob in order to update subjectStudy qualityTag on server side
-					importJob.setQualityTag(qualityControlResult.getUpdatedSubjectStudies().get(0).getQualityTag());
+					// If Failed Valid No updated subject studies exist in the qualityControlResult
+					// For Now if Failed Valid then the quality tag of the subject on server side is not updated with an empty value
+					if (!qualityControlResult.hasFailedValid()) {
+						//Set qualityTag to the importJob in order to update subjectStudy qualityTag on server side
+						importJob.setQualityTag(qualityControlResult.getUpdatedSubjectStudies().get(0).getQualityTag());
+					}
 				}
 				
 				Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, importJob, subjectREST.getName());
@@ -212,7 +211,7 @@ public class ImportFinishActionListener implements ActionListener {
         } catch (Exception ex) {
 			logger.error(ex.getMessage(), ex);
 			JOptionPane.showMessageDialog(mainWindow.frame,  ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.exception.message") + ex.getMessage(), 
-			ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"), JOptionPane.ERROR_MESSAGE);
+			ShUpConfig.resourceBundle.getString("shanoir.uploader.select.error.title"), JOptionPane.ERROR_MESSAGE);
 			// set status FAILED
 			ShUpOnloadConfig.getCurrentNominativeDataController().updateNominativeDataPercentage(uploadFolder, UploadState.ERROR.toString());
         }

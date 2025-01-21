@@ -30,7 +30,8 @@ import { TherapyService } from '../shared/therapy.service';
     selector: 'therapy-form',
     templateUrl: 'therapy-form.component.html',
     providers: [TherapyService, ReferenceService],
-    animations: [slideDown]
+    animations: [slideDown],
+    standalone: false
 })
 @ModesAware
 export class TherapyFormComponent extends EntityComponent<Therapy>{

@@ -21,7 +21,8 @@ import { ConsoleService, Message } from './console.service';
     selector: 'shanoir-console',
     templateUrl: './console.component.html',
     styleUrls: ['./console.component.css'],
-    animations: [slideDown]
+    animations: [slideDown],
+    standalone: false
 })
 export class ConsoleComponent implements OnDestroy {
 

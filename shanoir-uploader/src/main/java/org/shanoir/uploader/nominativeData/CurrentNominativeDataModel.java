@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 
+@SuppressWarnings("deprecation")
 public class CurrentNominativeDataModel extends Observable {
 
 	private static final Logger logger = LoggerFactory.getLogger(CurrentNominativeDataModel.class);

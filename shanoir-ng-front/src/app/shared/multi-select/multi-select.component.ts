@@ -23,10 +23,12 @@ import { Option } from '../select/select.component';
     styleUrls: ['multi-select.component.css'],
     providers: [
         {
-          provide: NG_VALUE_ACCESSOR,
-          useExisting: forwardRef(() => MultiSelectComponent),
-          multi: true,
-        }]
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => MultiSelectComponent),
+            multi: true,
+        }
+    ],
+    standalone: false
 })
 
 export class MultiSelectComponent implements ControlValueAccessor, OnChanges {

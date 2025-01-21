@@ -26,7 +26,8 @@ import { Selection } from 'src/app/studies/study/tree.service';
 @Component({
     selector: 'center-detail',
     templateUrl: 'center.component.html',
-    styleUrls: ['center.component.css']
+    styleUrls: ['center.component.css'],
+    standalone: false
 })
 
 export class CenterComponent extends EntityComponent<Center> {

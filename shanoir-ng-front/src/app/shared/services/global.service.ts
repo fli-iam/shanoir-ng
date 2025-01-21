@@ -13,7 +13,7 @@
  */
 
 import { Injectable, ElementRef, OnDestroy } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { Subject, Subscription, fromEvent } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { LocationStrategy } from '@angular/common';

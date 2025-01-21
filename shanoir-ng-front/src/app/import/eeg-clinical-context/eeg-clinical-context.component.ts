@@ -39,7 +39,8 @@ import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
     selector: 'eeg-clinical-context',
     templateUrl: 'eeg-clinical-context.component.html',
     styleUrls: ['../clinical-context/clinical-context.component.css', '../shared/import.step.css'],
-    animations: [slideDown, preventInitialChildAnimations]
+    animations: [slideDown, preventInitialChildAnimations],
+    standalone: false
 })
 
 export class EegClinicalContextComponent extends AbstractClinicalContextComponent implements OnInit {

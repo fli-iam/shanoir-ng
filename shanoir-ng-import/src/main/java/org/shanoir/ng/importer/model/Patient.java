@@ -53,10 +53,10 @@ public class Patient {
 
 	@JsonProperty("patientSex")
 	private String patientSex;
-	
+
 	@JsonProperty("patientIdentityRemoved")
 	private boolean patientIdentityRemoved;
-	
+
 	@JsonProperty("deIdentificationMethod")
 	private String deIdentificationMethod;
 
@@ -64,7 +64,8 @@ public class Patient {
 	private Subject subject;
 
 	// Keep this empty constructor to avoid Jackson deserialization exceptions
-	public Patient() {}
+	public Patient() {
+	}
 
 	public Patient(final Attributes attributes) {
 		this.patientID = attributes.getString(Tag.PatientID);
@@ -72,6 +73,7 @@ public class Patient {
 		this.patientBirthName = attributes.getString(Tag.PatientBirthName);
 		this.patientBirthDate = DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.PatientBirthDate));
 		this.patientSex = attributes.getString(Tag.PatientSex);
+		splitPatientName(this.patientName);
 	}
 
 	@JsonProperty("studies")
@@ -173,6 +175,29 @@ public class Patient {
 
 	public String toTreeString() {
 		return patientName + " [patientID=" + patientID + ", patientBirthDate=" + patientBirthDate + "]";
+	}
+
+	private void splitPatientName(String patientName) {
+		if (patientName == null || patientName.isEmpty()) {
+			this.patientLastName = "";
+			this.patientFirstName = "";
+			return;
+		}
+		// DICOM names are encoded as LastName^FirstName^MiddleName^Prefix^Suffix
+		String[] nameParts = patientName.split("\\^");
+		this.patientLastName = nameParts.length > 0 ? nameParts[0].trim() : "";
+		this.patientFirstName = nameParts.length > 1 ? nameParts[1].trim() : "";
+		// Handle cases where name might have been entered as "FirstName LastName"
+		if (this.patientLastName.isEmpty() && this.patientFirstName.contains(" ")) {
+			String[] parts = this.patientFirstName.split(" ", 2);
+			this.patientFirstName = parts.length > 0 ? parts[0].trim() : "";
+			this.patientLastName = parts.length > 1 ? parts[1].trim() : "";
+		}
+		// If birth name is missing in DICOM: use last name by default
+		// Users can adapt it in PatientVerification on using ShUp
+		if (patientBirthName == null || patientBirthName.isEmpty()) {
+			this.patientBirthName = this.patientLastName;
+		}
 	}
 
 }

@@ -25,7 +25,8 @@ import { AcquisitionEquipmentService } from 'src/app/acquisition-equipments/shar
 
 @Component({
     selector: 'center-node',
-    templateUrl: 'center-node.component.html'
+    templateUrl: 'center-node.component.html',
+    standalone: false
 })
 
 export class CenterNodeComponent implements OnChanges {

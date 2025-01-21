@@ -19,8 +19,9 @@ import { Range } from '../../shared/models/range.model';
 @Component({
     selector: 'solr-range-criterion',
     templateUrl: 'solr.range-criterion.component.html',
-    styleUrls: ['solr.criterion.component.css', 'solr.range-criterion.component.css'], 
-    animations: [slideDown]
+    styleUrls: ['solr.criterion.component.css', 'solr.range-criterion.component.css'],
+    animations: [slideDown],
+    standalone: false
 })
 
 export class SolrRangeCriterionComponent {

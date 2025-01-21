@@ -168,6 +168,7 @@ public class SubjectApiController implements SubjectApi {
 		}
 	}
 
+	// Attention: this method is used by ShanoirUploader!!!
 	@Override
 	public ResponseEntity<List<SimpleSubjectDTO>> findSubjectsByStudyId(
 			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
@@ -193,6 +194,7 @@ public class SubjectApiController implements SubjectApi {
 		return new ResponseEntity<>(simpleSubjectDTOList, HttpStatus.OK);
 	}
 
+	// Attention: this method is used by ShanoirUploader!!!
 	@Override
 	public ResponseEntity<SubjectDTO> findSubjectByIdentifier(
 			@Parameter(description = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier) {

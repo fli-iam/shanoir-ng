@@ -27,7 +27,8 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     selector: 'bruker-upload',
     templateUrl: 'bruker-upload.component.html',
     styleUrls: ['bruker-upload.component.css', '../../..//import/shared/import.step.css'],
-    animations: [slideDown]
+    animations: [slideDown],
+    standalone: false
 })
 export class BrukerUploadComponent {
 

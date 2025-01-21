@@ -9,9 +9,10 @@ import {StudyUser} from "../shared/study-user.model";
 import {Examination} from "../../examinations/shared/examination.model";
 
 @Component({
-  selector: 'study-history',
-  templateUrl: './study-history.component.html',
-  styleUrls: ['./study-history.component.css']
+    selector: 'study-history',
+    templateUrl: './study-history.component.html',
+    styleUrls: ['./study-history.component.css'],
+    standalone: false
 })
 export class StudyHistoryComponent {
 

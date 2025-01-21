@@ -115,56 +115,24 @@ public class DatasetUtils {
 
 	public static Dataset copyDatasetFromDataset(Dataset d) {
 		DatasetType type = d.getType();
-		Dataset dataset = null;
-
-		switch(type) {
-			case DatasetType.Calibration:
-				dataset = new CalibrationDataset(d);
-				break;
-			case DatasetType.Ct:
-				dataset = new CtDataset(d);
-				break;
-			case DatasetType.Eeg:
-				dataset = new EegDataset(d);
-				break;
-			case DatasetType.Meg:
-				dataset = new MegDataset(d);
-				break;
-			case DatasetType.Mesh:
-				dataset = new MeshDataset(d);
-				break;
-			case DatasetType.ParameterQuantification:
-				dataset = new ParameterQuantificationDataset(d);
-				break;
-			case DatasetType.Pet:
-				dataset = new PetDataset(d);
-				break;
-			case DatasetType.Registration:
-				dataset = new RegistrationDataset(d);
-				break;
-			case DatasetType.Segmentation:
-				dataset = new SegmentationDataset(d);
-				break;
-			case DatasetType.Spect:
-				dataset = new SpectDataset(d);
-				break;
-			case DatasetType.Statistical:
-				dataset = new StatisticalDataset(d);
-				break;
-			case DatasetType.Template:
-				dataset = new TemplateDataset(d);
-				break;
-			case DatasetType.BIDS:
-				dataset = new BidsDataset(d);
-				break;
-			case DatasetType.Xa:
-				dataset = new XaDataset(d);
-				break;
-			default:
-				dataset = new GenericDataset(d);
-				break;
-		}
-		return dataset;
+	
+		return switch (type) {
+			case Calibration -> new CalibrationDataset(d);
+			case Ct -> new CtDataset(d);
+			case Eeg -> new EegDataset(d);
+			case Meg -> new MegDataset(d);
+			case Mesh -> new MeshDataset(d);
+			case ParameterQuantification -> new ParameterQuantificationDataset(d);
+			case Pet -> new PetDataset(d);
+			case Registration -> new RegistrationDataset(d);
+			case Segmentation -> new SegmentationDataset(d);
+			case Spect -> new SpectDataset(d);
+			case Statistical -> new StatisticalDataset(d);
+			case Template -> new TemplateDataset(d);
+			case BIDS -> new BidsDataset(d);
+			case Xa -> new XaDataset(d);
+			default -> new GenericDataset(d);
+		};
 	}
 	
 }
