@@ -56,92 +56,75 @@ public class CreateStatisticsService {
         File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
         //File statisticsFile = recreateFile(userDir + File.separator + "shanoirExportStatistics_" + event.getId() + ".tsv");
         File zipFile = recreateFile(userDir + File.separator + "shanoirExportStatistics_" + event.getId() + ZIP);
+        int startRow = 0;
+        int blocSize = 50000;
+        int procedureSize = querySize(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
 
         // Get the data
         try (FileOutputStream fos = new FileOutputStream(zipFile);
              ZipOutputStream zos = new ZipOutputStream(fos)) {
 
             ZipEntry zipEntry = new ZipEntry("shanoirExportStatistics_" + event.getId() + ".tsv");
+
             zos.putNextEntry(zipEntry);
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(zos);
+            BufferedWriter writer = new BufferedWriter(outputStreamWriter);
+            try {
 
-            OutputStreamWriter writer = new OutputStreamWriter(zos);
-
-            int startRow = 0;
-            int blocSize = 50000;
-            StoredProcedureQuery querySize = entityManager.createStoredProcedureQuery("getStatisticsSize");
-            querySize.registerStoredProcedureParameter(1, String.class, ParameterMode.IN);
-            querySize.registerStoredProcedureParameter(2, String.class, ParameterMode.IN);
-            querySize.registerStoredProcedureParameter(3, String.class, ParameterMode.IN);
-            querySize.registerStoredProcedureParameter(4, String.class, ParameterMode.IN);
-            querySize.setParameter(1, studyNameInRegExp);
-            querySize.setParameter(2, studyNameOutRegExp);
-            querySize.setParameter(3, subjectNameInRegExp);
-            querySize.setParameter(4, subjectNameOutRegExp);
-
-            Object sizeRes = querySize.getSingleResult();
-            int size = (sizeRes != null) ? ((Number) sizeRes).intValue() : -1;
-            LOG.error("query size : " + size);
-
-            while (true) {
-                LOG.error("======");
-                LOG.error("startRow : " + startRow);
-                LOG.error("blocSize : " + blocSize);
-                event.setMessage("Querying results block from " + startRow + " to " + (startRow + blocSize));
-                eventService.publishEvent(event);
-                //"getStatistics" is the name of the MySQL procedure
-                StoredProcedureQuery query = entityManager.createStoredProcedureQuery("getStatistics");
-
-                //Declare the parameters in the same order
-                query.registerStoredProcedureParameter(1, String.class, ParameterMode.IN);
-                query.registerStoredProcedureParameter(2, String.class, ParameterMode.IN);
-                query.registerStoredProcedureParameter(3, String.class, ParameterMode.IN);
-                query.registerStoredProcedureParameter(4, String.class, ParameterMode.IN);
-                query.registerStoredProcedureParameter(5, Integer.class, ParameterMode.IN);
-                query.registerStoredProcedureParameter(6, Integer.class, ParameterMode.IN);
-
-                //Pass the parameter values
-                query.setParameter(1, studyNameInRegExp);
-                query.setParameter(2, studyNameOutRegExp);
-                query.setParameter(3, subjectNameInRegExp);
-                query.setParameter(4, subjectNameOutRegExp);
-                query.setParameter(5, startRow);
-                query.setParameter(6, blocSize);
-
-                //Execute query
-                @SuppressWarnings("unchecked")
-                List<Object[]> results = query.getResultList();
-                LOG.error("result size : " + results.size());
-
-                if (results.isEmpty()) {
-                    LOG.error("break");
-                    break;
-                }
-
-                LOG.error("writing...");
-                for (Object[] or : results) {
-                    progress += 1f / size;
-                    event.setProgress(progress);
+                while (true) {
+                    LOG.error("======");
+                    LOG.error("startRow : " + startRow);
+                    LOG.error("blocSize : " + blocSize);
+                    event.setMessage("Querying results block from " + startRow + " to " + (startRow + blocSize));
                     eventService.publishEvent(event);
-                    List<String> strings = Arrays.stream(or).map(object -> Objects.toString(object, null)).collect(Collectors.toList());
-                    writer.write(String.join("\t", strings));
-                    writer.write('\n');
-                    writer.flush();
+                    //"getStatistics" is the name of the MySQL procedure
+                    StoredProcedureQuery query = entityManager.createStoredProcedureQuery("getStatistics");
+
+                    //Declare the parameters in the same order
+                    query.registerStoredProcedureParameter(1, String.class, ParameterMode.IN);
+                    query.registerStoredProcedureParameter(2, String.class, ParameterMode.IN);
+                    query.registerStoredProcedureParameter(3, String.class, ParameterMode.IN);
+                    query.registerStoredProcedureParameter(4, String.class, ParameterMode.IN);
+                    query.registerStoredProcedureParameter(5, Integer.class, ParameterMode.IN);
+                    query.registerStoredProcedureParameter(6, Integer.class, ParameterMode.IN);
+
+                    //Pass the parameter values
+                    query.setParameter(1, studyNameInRegExp);
+                    query.setParameter(2, studyNameOutRegExp);
+                    query.setParameter(3, subjectNameInRegExp);
+                    query.setParameter(4, subjectNameOutRegExp);
+                    query.setParameter(5, startRow);
+                    query.setParameter(6, blocSize);
+
+                    //Execute query
+                    @SuppressWarnings("unchecked")
+                    List<Object[]> results = query.getResultList();
+                    LOG.error("result size : " + results.size());
+
+                    if (results.isEmpty()) {
+                        LOG.error("break");
+                        break;
+                    }
+
+                    LOG.error("writing...");
+                    for (Object[] or : results) {
+                        progress += 1f / procedureSize;
+                        event.setProgress(progress);
+                        eventService.publishEvent(event);
+                        List<String> strings = Arrays.stream(or).map(object -> Objects.toString(object, null)).collect(Collectors.toList());
+                        writer.write(String.join("\t", strings));
+                        writer.write('\n');
+                    }
+                    startRow += blocSize;
                 }
-                startRow += blocSize;
-                zos.closeEntry();
+
+                writer.flush();
+
+            } finally {
+                outputStreamWriter.flush();
             }
 
-//            List<Object[]> results = datasetService.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
-//
-//            for (Object[] or : results) {
-//
-//                progress += 1f / results.size();
-//                event.setProgress(progress);
-//                eventService.publishEvent(event);
-//                List<String> strings = Arrays.stream(or).map(object -> Objects.toString(object, null)).collect(Collectors.toList());
-//                bw.write(String.join("\t", strings));
-//                bw.newLine();
-//            }
+            zos.closeEntry();
 
         } catch (Exception e) {
             event.setStatus(ShanoirEvent.ERROR);
@@ -159,6 +142,24 @@ public class CreateStatisticsService {
             event.setStatus(ShanoirEvent.SUCCESS);
             eventService.publishEvent(event);
         }
+    }
+
+    private int querySize(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) {
+        StoredProcedureQuery querySize = entityManager.createStoredProcedureQuery("getStatisticsSize");
+        querySize.registerStoredProcedureParameter(1, String.class, ParameterMode.IN);
+        querySize.registerStoredProcedureParameter(2, String.class, ParameterMode.IN);
+        querySize.registerStoredProcedureParameter(3, String.class, ParameterMode.IN);
+        querySize.registerStoredProcedureParameter(4, String.class, ParameterMode.IN);
+        querySize.setParameter(1, studyNameInRegExp);
+        querySize.setParameter(2, studyNameOutRegExp);
+        querySize.setParameter(3, subjectNameInRegExp);
+        querySize.setParameter(4, subjectNameOutRegExp);
+
+        Object sizeRes = querySize.getSingleResult();
+        int size = (sizeRes != null) ? ((Number) sizeRes).intValue() : -1;
+        LOG.error("query size : " + size);
+
+        return size;
     }
 
     /**
