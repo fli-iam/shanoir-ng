@@ -60,6 +60,11 @@ public class CreateStatisticsService {
 
         int procedureSize = querySize(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
         if (procedureSize > -1) {
+
+            if (procedureSize < blocSize) {
+                blocSize = procedureSize;
+            }
+
             // Get the data
             try (FileOutputStream fos = new FileOutputStream(zipFile);
                  ZipOutputStream zos = new ZipOutputStream(fos)) {
