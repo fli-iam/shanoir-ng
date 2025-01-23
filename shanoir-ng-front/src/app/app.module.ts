@@ -273,6 +273,7 @@ import { StudyTreeComponent } from './studies/study/study-tree.component';
 import { TreeService } from './studies/study/tree.service';
 import { CoilNodeComponent } from './coils/coil/tree/coil-node.component';
 import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.component';
+import { MetadataNodeComponent } from './datasets/tree/metadata-node.component';
 
 @NgModule({ 
     declarations: [
@@ -450,7 +451,8 @@ import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.c
         TestQualityCardOptionsComponent,
         StudyTreeComponent,
         CoilNodeComponent,
-        DoubleAwesomeComponent
+        DoubleAwesomeComponent,
+        MetadataNodeComponent
     ],
     bootstrap: [AppComponent], 
     imports: [

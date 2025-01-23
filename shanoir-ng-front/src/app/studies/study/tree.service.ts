@@ -42,11 +42,12 @@ import { StudyRightsService } from "../shared/study-rights.service";
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyService } from '../shared/study.service';
 import { WaitBurstEnd } from "src/app/utils/wait-burst-end";
+import { Subject as RxjsSubject } from 'rxjs';
 
 @Injectable()
 export class TreeService {
 
-    _selection: Selection = null;
+    private selection: Selection = null;
     public studyNode: StudyNode = null;
     studyNodeOpenPromise: SuperPromise<void> = new SuperPromise();
     study: Study;
@@ -56,20 +57,10 @@ export class TreeService {
     private _treeOpened: boolean = true;
     private _treeAvailable: boolean = false;
     selectedNode: ShanoirNode;
+    nodeSelected: RxjsSubject<ShanoirNode> = new RxjsSubject();
 
     isSelected(id: number, type: NodeType): boolean {
         return this.selection?.isSelected(id, type);
-    }
-    
-    get selection(): Selection {
-        return this._selection;
-    }
-
-    set selection(selection: Selection) {
-        this._selection = selection;
-        if (this.treeOpened) {
-            this.changeSelection();
-        }
     }   
 
     get treeOpened(): boolean {
@@ -167,12 +158,13 @@ export class TreeService {
         activatedRoute.snapshot.data['treeAvailable'] = true;
     }
     
-    private changeSelection(): void {
+    private changeSelection(): Promise<ShanoirNode> {
         if (this.selection?.type == 'study') {
-            this.initStudy(this.selection.id).then(() => {
+            return this.initStudy(this.selection.id).then(() => {
                 this.studyNode.subjectsNode.open();
                 this.selectedNode = this.studyNode;
                 this.treeAvailable = !!this.selectedNode;
+                return this.studyNode;
             });
         } else {
             let studyLoaded: Promise<void>;
@@ -184,17 +176,29 @@ export class TreeService {
                 this.treeAvailable = false;
             }
             
-            Promise.all([studyLoaded]).then(() => {
+            return Promise.all([studyLoaded]).then(() => {
                 return this.selectNode(this.selection)
             }).then(node => {
                 this.selectedNode = node;
                 this.treeAvailable = !!this.selectedNode;
+                return node;
             });
             
         }
     }
 
-    selectNode(selection: Selection): Promise<ShanoirNode> {
+    select(selection: Selection): Promise<void> {
+        this.selection = selection;
+        if (this.treeOpened) {
+            return this.changeSelection().then(node => {
+                setTimeout(() => {
+                    this.nodeSelected.next(node);
+                })
+            });
+        }
+    }
+
+    private selectNode(selection: Selection): Promise<ShanoirNode> {
         if (selection?.type == 'dataset') {
             return this.selectDataset(selection.entity as Dataset);
         } else if (selection?.type == 'dicomMetadata') {
@@ -281,8 +285,9 @@ export class TreeService {
 
     private selectDicomMetadata(ds: number | Dataset): Promise<MetadataNode> {
         return this.selectDataset(ds).then(parentDsNode => {
-            parentDsNode?.open();
-            return new MetadataNode(parentDsNode, parentDsNode?.id, 'Dicom Metadata')
+            return parentDsNode?.open().then(() => {
+                return parentDsNode.metadata;
+            });
         });
     }
 
