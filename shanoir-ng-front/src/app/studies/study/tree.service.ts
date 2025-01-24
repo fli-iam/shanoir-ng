@@ -57,7 +57,7 @@ export class TreeService {
     private _treeOpened: boolean = true;
     private _treeAvailable: boolean = false;
     selectedNode: ShanoirNode;
-    nodeSelected: RxjsSubject<ShanoirNode> = new RxjsSubject();
+    onScrollToSelected: RxjsSubject<ShanoirNode> = new RxjsSubject();
 
     isSelected(id: number, type: NodeType): boolean {
         return this.selection?.isSelected(id, type);
@@ -134,6 +134,32 @@ export class TreeService {
         });
     }
 
+    collapseAll() {
+        this.collapseNode(this.studyNode, false);
+    }
+
+    private collapseNode(node: ShanoirNode, collapseRoot: boolean = true): Promise<void> {
+        return Promise.all(
+            Object.getOwnPropertyNames(node).map(propLabel => {
+                let prop = node[propLabel];
+                if (prop instanceof ShanoirNode && propLabel != 'parent') {
+                    return this.collapseNode(prop);
+                } else if (Array.isArray(prop) && prop[0] instanceof ShanoirNode) {
+                    return Promise.all(prop.map(el => this.collapseNode(el))).then();
+                }
+            })
+        ).then(() => {
+            if (collapseRoot) {
+                return node.close();
+            }
+        });
+        
+    }
+
+    scrollToSelected() {
+        this.onScrollToSelected.next(this.selectedNode);
+    }
+
     removeCurrentNode() {
         if (this.selectedNode?.parent) {
             const route: string = this.selectedNode.route;
@@ -190,9 +216,9 @@ export class TreeService {
     select(selection: Selection): Promise<void> {
         this.selection = selection;
         if (this.treeOpened) {
-            return this.changeSelection().then(node => {
+            return this.changeSelection().then(() => {
                 setTimeout(() => {
-                    this.nodeSelected.next(node);
+                    this.scrollToSelected();
                 })
             });
         }

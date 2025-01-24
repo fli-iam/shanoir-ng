@@ -55,7 +55,7 @@ export class StudyTreeComponent implements OnDestroy {
         treeService.studyNodeOpenPromise.then(() => this.loaded = true);
 
         this.subscriptions.push(
-            treeService.nodeSelected.subscribe(node => {
+            treeService.onScrollToSelected.subscribe(node => {
                 this.autoScrollTo(node);
             })
         );
@@ -71,7 +71,7 @@ export class StudyTreeComponent implements OnDestroy {
         const currentScroll: number = this.treeContainer.nativeElement.scrollTop;
         const diff: number = nodeTop - containerHeight - currentScroll;
         if (diff > 0) {
-            this.treeContainer.nativeElement.scrollTop = diff + currentScroll;
+            this.treeContainer.nativeElement.scrollTop = diff + currentScroll + (containerHeight/2);
         }
 
     }

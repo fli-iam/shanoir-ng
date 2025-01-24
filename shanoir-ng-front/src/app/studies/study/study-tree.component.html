@@ -15,21 +15,33 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<button class="dl-button" 
 			type="button" 
 			(click)="treeService.updateTree()" 
-			title="Refresh">
+			title="refresh">
 		<i class="fa-solid fa-arrows-rotate"></i>
+	</button>
+	<button class="dl-button" 
+			type="button" 
+			(click)="treeService.collapseAll()" 
+			title="collapse all">
+		<i class="fa-solid fa-chevron-up"></i>
+	</button>	
+	<button class="dl-button" 
+			type="button" 
+			(click)="treeService.scrollToSelected()" 
+			title="scroll to selected">
+			<i class="fa-solid fa-arrows-to-circle"></i>
 	</button>
     <button class="dl-button" 
 			type="button" 
 			(click)="downloadSelected()" 
 			[disabled]="selectionEmpty" 
-			title="Download selection">
+			title="download selection">
 		<i class="fas fa-download"></i>
 	</button>
     <button class="dl-button" 
 			type="button" 
 			(click)="goToProcessing()" 
 			[disabled]="selectionEmpty" 
-			title="Process selection">
+			title="process selection">
 		<i class="fas fa-rocket"></i>
 	</button>
     <button class="dl-button" 
@@ -37,15 +49,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			(click)="openInViewer()" 
 			[disabled]="!loaded || (!canOpenDicomSingleExam && !canOpenDicomMultiExam)" 
 			[title]="loaded && canOpenDicomMultiExam ? 
-					'View DICOM images for the selected acquisitions/examinations' 
-					: 'View selected DICOM images for the one examination selected'">
+					'view DICOM images for the selected acquisitions/examinations' 
+					: 'view selected DICOM images for the one examination selected'">
 		<double-awesome main="fas fa-eye" [sub]="loaded && canOpenDicomMultiExam? 'far fa-copy' : 'far fa-file'"></double-awesome>
 	</button>
 	<button class="dl-button" 
 			type="button" 
 			(click)="resetSelection()" 
 			[disabled]="selectionEmpty" 
-			title="Unselect all">
+			title="unselect all">
 		<i class="fas fa-broom"></i>
 	</button>
 </div>
