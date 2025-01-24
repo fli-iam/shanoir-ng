@@ -254,8 +254,11 @@ public class BidsImporterService {
 			files.add(dsFile);
 			if(equipmentId == 0L && importedFile.getName().endsWith(".json") && Files.size(Path.of(importedFile.getPath())) < 1000000) {
 				// Check equipment in json file
-				JSONParser json = new JSONParser(new FileReader(importedFile));
-				LinkedHashMap jsonObject = (LinkedHashMap) json.parse();
+				ObjectMapper objectMapper = new ObjectMapper();
+				// Parse JSON into a LinkedHashMap
+				LinkedHashMap<String, Object> jsonObject = objectMapper.readValue(importedFile, LinkedHashMap.class);
+//				JSONParser json = new JSONParser(new FileReader(importedFile));
+//				LinkedHashMap jsonObject = (LinkedHashMap) json.parse();
 				if (jsonObject.get("DeviceSerialNumber") != null) {
 					String code = (String) jsonObject.get("DeviceSerialNumber");
 					equipmentId = equipments.get(code) != null ? Long.valueOf(equipments.get(code)) : 0L;
