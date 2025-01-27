@@ -194,9 +194,9 @@ export class TreeService {
             });
         } else {
             let studyLoaded: Promise<void>;
-            if (this.study?.id && this.selection.studyId?.includes(this.study?.id)) {
+            if (this.study?.id && this.selection?.studyId?.includes(this.study?.id)) {
                 studyLoaded = Promise.resolve();
-            } else if (this.selection.studyId?.[0]) {
+            } else if (this.selection?.studyId?.[0]) {
                 studyLoaded = this.initStudy(this.selection.studyId[0]);
             } else {
                 this.treeAvailable = false;
