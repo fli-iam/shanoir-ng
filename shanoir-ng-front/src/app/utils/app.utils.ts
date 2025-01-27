@@ -13,12 +13,11 @@
  */
 
 import { Pipe, PipeTransform } from '@angular/core';
-import { environment } from '../../environments/environment';
 import { HttpClient, HttpEvent, HttpEventType, HttpParams, HttpProgressEvent, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { TaskState, TaskStatus } from '../async-tasks/task.model';
 import { ServiceLocator } from './locator.service';
-import { map, mergeMap, shareReplay } from 'rxjs/operators';
+import { last, map, mergeMap, shareReplay } from 'rxjs/operators';
 
 
 // Base urls
@@ -194,7 +193,11 @@ export function browserDownloadFile(blob: Blob, filename: string) {
 }
 
 export function browserDownloadFileFromResponse(response: HttpResponse<any>) {
-    browserDownloadFile(response.body, getFilename(response));
+    if (response.body) {
+        browserDownloadFile(response.body, getFilename(response));
+    } else {
+        throw new Error('can\'t download, server response is empty');
+    }
 }
 
 export function downloadBlob(url: string, params?: HttpParams): Promise<Blob> {
@@ -213,7 +216,7 @@ export function downloadBlob(url: string, params?: HttpParams): Promise<Blob> {
     .toPromise();
 }
 
-export function downloadWithStatusGET(url: string, params?: HttpParams, state ?: TaskState): Observable<TaskState> {
+export function downloadWithStatusGET(url: string, params?: HttpParams, state?: TaskState): Observable<TaskState> {
     const http: HttpClient = ServiceLocator.injector.get(HttpClient);
     let obs: Observable<HttpEvent<Blob>> = http.get(
         url,
@@ -224,7 +227,9 @@ export function downloadWithStatusGET(url: string, params?: HttpParams, state ?:
             params: params
         }
     ).pipe(shareReplay());
-    obs.toPromise().then(response => browserDownloadFileFromResponse(response as HttpResponse<Blob>));
+    obs.pipe(last()).subscribe(response => {
+        browserDownloadFileFromResponse(response as HttpResponse<Blob>)
+    });
     return obs.pipe(mergeMap(event => {
         return extractState(event).then(s => {
             state = s
@@ -244,7 +249,9 @@ export function downloadWithStatusPOST(url: string, formData: FormData, state ?:
             responseType: 'blob'
         }
     ).pipe(shareReplay());
-    obs.toPromise().then(response => browserDownloadFileFromResponse(response as HttpResponse<Blob>));
+    obs.pipe(last()).subscribe(response => {
+        browserDownloadFileFromResponse(response as HttpResponse<Blob>)
+    });
     return obs.pipe(mergeMap(event => {
         return extractState(event).then(s => {
             state = s
@@ -262,13 +269,15 @@ export function extractState(event: HttpEvent<any>): Promise<TaskState> {
             return Promise.resolve(task);
         }
         case HttpEventType.DownloadProgress: {
+            let total: number = (event as HttpProgressEvent).total;
             task = new TaskState(TaskStatus.IN_PROGRESS, (event as HttpProgressEvent).loaded);
+            if (total) task.progress /= total;
             return Promise.resolve(task);
         }
         case HttpEventType.Response: {
             task = new TaskState(TaskStatus.DONE);
             const blob: Blob = (event as HttpResponse<Blob>).body;
-            if (blob) {
+            if (blob && event.headers.get('Content-Type') == 'application/zip') {
                 //report.list[id].zipSize = getSizeStr(blob?.size);
                 // Check ERRORS file in zip
                 let zip: any = new JSZip();
@@ -283,6 +292,8 @@ export function extractState(event: HttpEvent<any>): Promise<TaskState> {
                     }
                     return task;
                 });
+            } else {
+                return Promise.resolve(task);
             }
         }
         default: return Promise.resolve(task);
@@ -292,7 +303,7 @@ export function extractState(event: HttpEvent<any>): Promise<TaskState> {
 export function getFilename(response: HttpResponse<any>): string {
     const prefix = 'attachment;filename=';
     let contentDispHeader: string = response.headers.get('Content-Disposition');
-    return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
+    return contentDispHeader?.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
 }
 
 export function pad(n, width, z?): string {
