@@ -73,8 +73,7 @@ public class CreateStatisticsService {
                 zos.putNextEntry(zipEntry);
                 OutputStreamWriter outputStreamWriter = new OutputStreamWriter(zos);
 
-                BufferedWriter writer = new BufferedWriter(outputStreamWriter);
-                try {
+                try (BufferedWriter writer = new BufferedWriter(outputStreamWriter)) {
 
                     while (true) {
                         event.setMessage("Querying results: " + (startRow + blocSize) + "/" + procedureSize);
@@ -124,7 +123,6 @@ public class CreateStatisticsService {
                 }
 
                 zos.closeEntry();
-                writer.close();
 
             } catch (Exception e) {
                 event.setStatus(ShanoirEvent.ERROR);
