@@ -118,11 +118,7 @@ public class CreateStatisticsService {
 
                     writer.flush();
 
-                } finally {
-                    outputStreamWriter.flush();
                 }
-
-                zos.closeEntry();
 
             } catch (Exception e) {
                 event.setStatus(ShanoirEvent.ERROR);
