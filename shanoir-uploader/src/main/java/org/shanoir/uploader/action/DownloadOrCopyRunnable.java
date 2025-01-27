@@ -48,6 +48,8 @@ public class DownloadOrCopyRunnable implements Runnable {
 
 	private boolean isFromPACS;
 
+	private boolean isTableImport;
+
 	private IDicomServerClient dicomServerClient;
 
 	private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
@@ -60,10 +62,11 @@ public class DownloadOrCopyRunnable implements Runnable {
 
 	private JProgressBar downloadProgressBar;
 
-	public DownloadOrCopyRunnable(boolean isFromPACS, JFrame frame, JProgressBar downloadProgressBar,
+	public DownloadOrCopyRunnable(boolean isFromPACS, boolean isTableImport, JFrame frame, JProgressBar downloadProgressBar,
 			final IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer,
 			final String filePathDicomDir, Map<String, ImportJob> importJobs) {
 		this.isFromPACS = isFromPACS;
+		this.isTableImport = isTableImport;
 		this.frame = frame;
 		this.downloadProgressBar = downloadProgressBar;
 		this.dicomFileAnalyzer = dicomFileAnalyzer;
@@ -153,22 +156,25 @@ public class DownloadOrCopyRunnable implements Runnable {
 			}
 			downloadOrCopyReportSummary.append(downloadOrCopyReportPerStudy.toString() + "\n\n");
 		}
-		/**
-		 * Display downloadOrCopy summary to user.
-		 */
-		JTextArea textArea = new JTextArea(downloadOrCopyReportSummary.toString());
-		textArea.setEditable(false);
-		textArea.setWrapStyleWord(true);
-		textArea.setLineWrap(true);
-		textArea.setCaretPosition(0);
-		JScrollPane scrollPane = new JScrollPane(textArea);
-		scrollPane.setPreferredSize(new java.awt.Dimension(650, 550));
-		JOptionPane.showMessageDialog(
-			frame,
-			scrollPane,
-			"Download or copy report",
-			JOptionPane.INFORMATION_MESSAGE);
-
+		if (isTableImport) {
+			logger.info(downloadOrCopyReportSummary.toString());
+		} else {
+			/**
+			 * Display downloadOrCopy summary to user.
+			 */
+			JTextArea textArea = new JTextArea(downloadOrCopyReportSummary.toString());
+			textArea.setEditable(false);
+			textArea.setWrapStyleWord(true);
+			textArea.setLineWrap(true);
+			textArea.setCaretPosition(0);
+			JScrollPane scrollPane = new JScrollPane(textArea);
+			scrollPane.setPreferredSize(new java.awt.Dimension(650, 550));
+			JOptionPane.showMessageDialog(
+				frame,
+				scrollPane,
+				"Download or copy report",
+				JOptionPane.INFORMATION_MESSAGE);
+		}
 	}
 
 }

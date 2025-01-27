@@ -404,7 +404,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     }
 
     delete(): void {
-        this.openDeleteConfirmDialog(this.entity)
+        this.openDeleteConfirmDialog(this.entity);
     }
 
     protected openDeleteConfirmDialog = (entity: T) => {
