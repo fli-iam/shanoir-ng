@@ -106,13 +106,15 @@ public class CreateStatisticsService {
                         }
 
                         for (Object[] or : results) {
-                            progress += 1f / procedureSize;
-                            event.setProgress(progress);
-                            eventService.publishEvent(event);
                             List<String> strings = Arrays.stream(or).map(object -> Objects.toString(object, null)).collect(Collectors.toList());
                             writer.write(String.join("\t", strings));
                             writer.write('\n');
                         }
+
+                        progress += blocSize / procedureSize;
+                        event.setProgress(progress);
+                        eventService.publishEvent(event);
+
                         startRow += blocSize;
                     }
 
