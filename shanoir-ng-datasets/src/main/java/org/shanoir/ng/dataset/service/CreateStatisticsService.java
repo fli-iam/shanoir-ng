@@ -111,7 +111,7 @@ public class CreateStatisticsService {
                             writer.write('\n');
                         }
 
-                        progress += blocSize / procedureSize;
+                        progress += (1f + blocSize) / procedureSize;
                         event.setProgress(progress);
                         eventService.publishEvent(event);
 
