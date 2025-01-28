@@ -259,6 +259,7 @@ import { LoginGuard } from "./shared/roles/login-guard";
 import { AccessRequestService } from './users/access-request/access-request.service';
 import { AccessRequestListComponent } from './users/access-request/access-request-list.component';
 import { MassDownloadService } from './shared/mass-download/mass-download.service';
+import { SingleDownloadService } from './shared/mass-download/single-download.service';
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { TaskStatusComponent } from './async-tasks/status/task-status.component';
 import { DatasetCopyDialogComponent } from "./shared/components/dataset-copy-dialog/dataset-copy-dialog.component";
@@ -550,6 +551,7 @@ import { MetadataNodeComponent } from './datasets/tree/metadata-node.component';
         QualityCardService,
         QualityCardDTOService,
         MassDownloadService,
+        SingleDownloadService,
         SessionService,
         ShanoirEventService,
         TreeService,
