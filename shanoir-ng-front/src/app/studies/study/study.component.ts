@@ -11,9 +11,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {Component, ElementRef, EventEmitter, Output, ViewChild} from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { AbstractControl, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
-import {ActivatedRoute, Router} from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
 import { KeyValue } from "@angular/common";
 import { TaskState } from 'src/app/async-tasks/task.model';
@@ -41,12 +41,12 @@ import { SubjectService } from '../../subjects/shared/subject.service';
 import { User } from '../../users/shared/user.model';
 import { UserService } from '../../users/shared/user.service';
 import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
+import { SuperPromise } from "../../utils/super-promise";
 import { StudyCenter } from '../shared/study-center.model';
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
-import {SuperPromise} from "../../utils/super-promise";
 import { Selection } from './tree.service';
 import { Tag } from 'src/app/tags/tag.model';
 
@@ -65,6 +65,7 @@ export class StudyComponent extends EntityComponent<Study> {
     protected pdfDownloadState: TaskState = new TaskState();
     protected duaDownloadState: TaskState = new TaskState();
     protected studyDownloadState: TaskState = new TaskState();
+    protected downloadState: TaskState = new TaskState();
 
     subjects: IdName[];
     selectedCenter: IdName;
@@ -103,9 +104,7 @@ export class StudyComponent extends EntityComponent<Study> {
             private studyRightsService: StudyRightsService,
             private studyCardService: StudyCardService,
             private accessRequestService: AccessRequestService,
-            private processingService: ExecutionDataService,
-            private downloadService: MassDownloadService
-            ) {
+            protected downloadService: MassDownloadService) {
         super(route, 'study');
         this.activeTab = 'general';
     }
@@ -471,8 +470,13 @@ export class StudyComponent extends EntityComponent<Study> {
         this.studyService.downloadProtocolFile(file, this.study.id, this.pdfDownloadState);
     }
 
+
     public builFileUrl(file): string {
         return this.studyService.buildProtocolFileUrl(file, this.study.id);
+    }
+
+    downloadAll() {
+        this.downloadService.downloadAllByStudyId(this.study?.id, this.study.totalSize, this.downloadState);
     }
 
     public attachNewFile(event: any) {
@@ -592,10 +596,6 @@ export class StudyComponent extends EntityComponent<Study> {
                 this.study.subjectStudyList = study.subjectStudyList;
             });
         }, 1000);
-    }
-
-    storageVolumePrettyPrint(size: number) {
-        return this.studyService.storageVolumePrettyPrint(size);
     }
 
     studyCardPolicyStr() {

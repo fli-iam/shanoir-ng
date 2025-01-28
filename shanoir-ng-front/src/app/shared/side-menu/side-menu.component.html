@@ -68,6 +68,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <!-- *ngIf="state.jobsOpened" -->
     <div class="sub-menu jobs" [@slideDown]="state.jobsOpened" [@disapearUp]>
         <li *ngFor="let task of notificationsService.freshCompletedTasks.concat(notificationsService.tasksInProgress).concat(notificationsService.tasksInWait)" [ngSwitch]="task.eventType" [@.disabled]="task.status == 2 || task.status == 5">
+            <span class="remove-task" (click)="notificationsService.removeTaskFromFresh(task)">
+                <i class="fa-regular fa-circle-xmark"></i>
+            </span>
             <a routerLink="/task"  routerLinkActive="active">
                 <progress-bar [progress]="task.progress" [width]="50" [warning]="task.status == 5 || task.status == 3"></progress-bar>
                 <i *ngIf="task.status == 4" class="fa-solid fa-hourglass-half status-icon"></i>
