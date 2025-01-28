@@ -10,3 +10,8 @@ input[type="number"] { width: 52px; }
 .warning i { margin-right: 2px; }
 
 .format-preview { position: absolute; top: 0; right: 0; width: 220px; }
+
+.msg { max-width: 600px; color: blue; line-height: 20px; text-align: left; background-color: lightsteelblue; padding: 10px 20px; border-radius: 2px; }
+.msg i { font-size: 20px; color: blue; opacity: 0.5; }
+.msg a { cursor: pointer; }
+.loading-msg { position: absolute; top: 0; right: 0; padding: 10px; font-size: 20px; }

@@ -80,3 +80,4 @@ progress-bar >>> .text, progress-bar >>> .left-text { line-height: 14px; }
 .notif.error { color: #ff1900; }
 
 .menu-link {width: 100%; display: inline-block; }
+.remove-task { position: absolute; left: 7px; padding-top: 1px; }
