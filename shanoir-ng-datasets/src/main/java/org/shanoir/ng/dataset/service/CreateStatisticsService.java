@@ -116,6 +116,9 @@ public class CreateStatisticsService {
                         eventService.publishEvent(event);
 
                         startRow += blocSize;
+                        if (startRow > procedureSize) {
+                            break;
+                        }
                     }
 
                     writer.flush();
