@@ -33,7 +33,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 @Component({
     selector: 'subject-pathology-form',
     templateUrl: 'subjectPathology-form.component.html',
-    providers: [SubjectPathologyService, PathologyModelService, PathologyService, ReferenceService],
     animations: [slideDown],
     standalone: false
 })
