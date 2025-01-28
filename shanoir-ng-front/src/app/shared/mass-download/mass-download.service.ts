@@ -78,6 +78,8 @@ export class MassDownloadService {
     readonly BROWSER_COMPAT_ERROR_MSG: string = 'browser not compatible';
     readonly REPORT_FILENAME: string = 'downloadReport.json';
     winOs: boolean;
+    // @ts-ignore
+    public advancedDownloadCompat: boolean = !!window.showDirectoryPicker;
 
     constructor(
         private datasetService: DatasetService,
@@ -88,6 +90,10 @@ export class MassDownloadService {
         deviceInformationService: AngularDeviceInformationService) {
 
         this.winOs = deviceInformationService.getDeviceInfo()?.os?.toLocaleLowerCase().includes('windows');
+    }
+
+    downloadAllByStudyId(studyId: number, totalSize: number, downloadState?: TaskState) {
+        return this.downloadByDatasets({studyId: studyId}, downloadState, totalSize);
     }
 
     downloadAllByExaminationId(examinationId: number, downloadState?: TaskState): Promise<void> {
@@ -109,8 +115,8 @@ export class MassDownloadService {
     /**
      * This method is the generic entry to download multiple datasets.
      */
-    private downloadByDatasets(inputIds: DownloadInputIds, downloadState?: TaskState): Promise<void> {
-        return this.openModal(inputIds).then(ret => {
+    private downloadByDatasets(inputIds: DownloadInputIds, downloadState?: TaskState, totalSize?: number): Promise<void> {
+        return this.openModal(inputIds, totalSize).then(ret => {
             if (ret != 'cancel') {
                 return this._downloadDatasets(ret, downloadState);
             } else return Promise.resolve();
@@ -253,6 +259,7 @@ export class MassDownloadService {
         task.report = JSON.stringify(report, null, 4);
         if (report.nbError > 0) {
             task.status = 3;
+            task.progress = 1;
             const tab: string = '- ';
             task.message = (report.nbSuccess > 0 ? 'download partially succeed in ' : 'download failed in ') + report.duration + 'ms.\n'
                 + tab + report.nbSuccess + ' datasets were successfully downloaded\n'
@@ -541,11 +548,12 @@ export class MassDownloadService {
         return task;
     }
 
-    private openModal(inputIds: DownloadInputIds): Promise<DownloadSetup | 'cancel'> {
+    private openModal(inputIds: DownloadInputIds, totalSize?: number): Promise<DownloadSetup | 'cancel'> {
         // @ts-ignore
         if (window.showDirectoryPicker) { // test compatibility
             let modalRef: ComponentRef<DownloadSetupComponent> = ServiceLocator.rootViewContainerRef.createComponent(DownloadSetupComponent);
             modalRef.instance.inputIds = inputIds;
+            modalRef.instance.totalSize = totalSize;
             return this.waitForEnd(modalRef);
         } else {
             return Promise.reject(this.BROWSER_COMPAT_ERROR_MSG);

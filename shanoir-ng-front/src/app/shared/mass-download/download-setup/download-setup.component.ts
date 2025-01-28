@@ -35,6 +35,7 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
     @Output() go: EventEmitter<DownloadSetup> = new EventEmitter();
     @Output() close: EventEmitter<void> = new EventEmitter();
     @Input() inputIds: DownloadInputIds;
+    @Input() totalSize?: number;
     form: UntypedFormGroup;
     loading: boolean;
     loaded: boolean = false;
