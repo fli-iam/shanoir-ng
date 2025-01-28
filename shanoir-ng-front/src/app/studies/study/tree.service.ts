@@ -157,7 +157,13 @@ export class TreeService {
     }
 
     scrollToSelected() {
-        this.onScrollToSelected.next(this.selectedNode);
+        this.scrollTo(this.selectedNode);
+    }
+
+    scrollTo(node: ShanoirNode) {
+        setTimeout(() => {
+            this.onScrollToSelected.next(node);
+        })
     }
 
     removeCurrentNode() {
@@ -217,9 +223,7 @@ export class TreeService {
         this.selection = selection;
         if (this.treeOpened) {
             return this.changeSelection().then(() => {
-                setTimeout(() => {
-                    this.scrollToSelected();
-                })
+                this.scrollToSelected();
             });
         }
     }
@@ -261,10 +265,12 @@ export class TreeService {
                             return sn.id == ret.topParent.datasetAcquisition?.examination?.subject?.id;
                         });
                         if (subjectNode) {
+                            this.scrollTo(subjectNode);
                             return subjectNode.open().then(() => {
                                 if (subjectNode.examinations != UNLOADED) {
                                     let examNode: ExaminationNode = subjectNode.examinations?.find(exam => exam.id == ret.topParent.datasetAcquisition?.examination?.id);
                                     if (examNode) {
+                                        this.scrollTo(examNode);
                                         return examNode.open().then(() => {
                                             if (examNode.datasetAcquisitions != UNLOADED) {
                                                 let acqNode: DatasetAcquisitionNode = examNode.datasetAcquisitions?.find(acq => acq.id == ret.topParent.datasetAcquisition?.id);
@@ -366,10 +372,12 @@ export class TreeService {
                     if (this.studyNode.subjectsNode.subjects != UNLOADED) {
                         let subjectNode: SubjectNode = this.studyNode.subjectsNode.subjects?.find(sn => sn.id == dsa.examination?.subject?.id);
                         if (subjectNode) {
+                            this.scrollTo(subjectNode);
                             return subjectNode.open().then(() => {
                                 if (subjectNode.examinations != UNLOADED) {
                                     let examNode: ExaminationNode = subjectNode.examinations?.find(exam => exam.id == dsa.examination?.id);
                                     if (examNode) {
+                                        this.scrollTo(examNode);
                                         return examNode.open().then(() => {
                                             if (examNode.datasetAcquisitions != UNLOADED) {
                                                 return examNode.datasetAcquisitions?.find(dsan => dsan.id == dsa.id);
@@ -398,6 +406,7 @@ export class TreeService {
                     if (this.studyNode.subjectsNode.subjects != UNLOADED) {
                         let subjectNode: SubjectNode = this.studyNode.subjectsNode.subjects?.find(sn => sn.id == exam.subject?.id);
                         if (subjectNode) {
+                            this.scrollTo(subjectNode);
                             return subjectNode.open().then(() => {
                                 if (subjectNode.examinations != UNLOADED) {
                                     return subjectNode.examinations?.find(en => en.id == exam.id);
