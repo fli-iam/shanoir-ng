@@ -94,16 +94,6 @@ public class SolrServiceImpl implements SolrService {
 	@Autowired
 	private ShanoirEventService eventService;
 
-	//This attribute is a bean of the class itself.
-	//Its goal is to avoid transactional self-invocation issue,
-	//which appears when a transactional method calls another transactional method,
-	//and both are defined in the same class.
-	//When the issue occurs, Spring might have difficulties to manage the transactions,
-	//which is not the case anymore when methods are called with various beans of the class.
-	@Lazy
-	@Autowired
-	private SolrServiceImpl solrServiceImpl;
-
 	private static final Logger LOG = LoggerFactory.getLogger(SolrServiceImpl.class);
 
 	public void addToIndex (final ShanoirSolrDocument document) throws SolrServerException, IOException {
@@ -129,17 +119,17 @@ public class SolrServiceImpl implements SolrService {
 
 	@Override
 	@Async
-	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
+	@Transactional
 	public void indexAll() {
 		List<ShanoirMetadata> documents = new ArrayList<>();
 		Map<Long, List<String>> tags = new HashMap<>();
 		ShanoirEvent event;
 
         try {
-			event = solrServiceImpl.beginIndexationProcess();
-			solrServiceImpl.cleanOldIndex(event);
-			solrServiceImpl.fetchDatasToIndex(event, documents, tags);
-			solrServiceImpl.indexDatas(event, documents, tags);
+			event = beginIndexationProcess();
+			cleanOldIndex(event);
+			fetchDatasToIndex(event, documents, tags);
+			indexDatas(event, documents, tags);
 		} catch (SolrServerException | IOException ignored) {
         }
     }
@@ -151,7 +141,7 @@ public class SolrServiceImpl implements SolrService {
 			for (List<ShanoirMetadata> partition : ListUtils.partition(documents, 100000)) {
 				indexedData += partition.size();
 				event.setProgress((float) Math.floor(30F + ((indexedData / (float) totalData) * 70F)) / 100F);
-				solrServiceImpl.indexDataPartition(event, partition, tags, indexedData);
+				indexDataPartition(event, partition, tags, indexedData);
 			}
 		} catch (Exception e) {
 			LOG.error("Error indexing datasets into Solr.", e);
@@ -159,7 +149,6 @@ public class SolrServiceImpl implements SolrService {
 		}
 	}
 
-	@Transactional
 	protected void indexDataPartition(ShanoirEvent event, List<ShanoirMetadata> documents, Map<Long, List<String>> tags, int indexedSize) throws SolrServerException, IOException {
 		indexDocumentsInSolr(documents, tags);
 		if(Objects.equals(1f, event.getProgress())){
@@ -169,7 +158,6 @@ public class SolrServiceImpl implements SolrService {
 		}
 	}
 
-	@Transactional
 	protected void fetchDatasToIndex(ShanoirEvent event, List<ShanoirMetadata> documents, Map<Long, List<String>> tags) {
 		try {
 			documents.addAll(shanoirMetadataRepository.findAllAsSolrDoc());
@@ -183,7 +171,6 @@ public class SolrServiceImpl implements SolrService {
 		}
 	}
 
-	@Transactional
 	protected void cleanOldIndex(ShanoirEvent event) throws SolrServerException, IOException {
 		try {
 			deleteAll();

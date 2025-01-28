@@ -510,6 +510,10 @@ export class StudyComponent extends EntityComponent<Study> {
     downloadAll() {
         this.downloadService.downloadAllByStudyId(this.study?.id, this.study.totalSize, this.downloadState);
     }
+    
+    public builFileUrl(file): string {
+        return this.studyService.buildProtocolFileUrl(file, this.study.id);
+    }
 
     public attachNewFile(event: any) {
         let fileToAdd = event.target.files[0];

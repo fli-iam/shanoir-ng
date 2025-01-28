@@ -26,6 +26,8 @@ import { StudyService } from './studies/shared/study.service';
 import { TreeService } from './studies/study/tree.service';
 import { UserService } from './users/shared/user.service';
 import { ServiceLocator } from './utils/locator.service';
+import { Observable } from 'rxjs';
+import { NotificationsService } from './shared/notifications/notifications.service';
 
 
 @Component({
@@ -51,7 +53,8 @@ export class AppComponent {
             protected router: Router,
             private studyService: StudyService,
             private userService: UserService,
-            public treeService: TreeService) {
+            public treeService: TreeService,
+            private notificationsService: NotificationsService) {
         
         ServiceLocator.rootViewContainerRef = this.viewContainerRef;
     }
@@ -69,6 +72,12 @@ export class AppComponent {
     onResize(event) {
         this.windowService.width = event.target.innerWidth;
     }
+
+    @HostListener('window:beforeunload')
+    canDeactivate(): boolean {
+        return !this.notificationsService.hasOnGoingDownloads();
+    }
+
 
     toggleMenu(open: boolean) {
         this.menuOpen = open;
