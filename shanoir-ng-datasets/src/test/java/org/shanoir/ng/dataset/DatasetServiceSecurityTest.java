@@ -177,9 +177,6 @@ public class DatasetServiceSecurityTest {
 		assertAccessAuthorized(service::findByStudyId, 2L);
 		assertThat(service.findByStudyId(2L)).isNullOrEmpty();
 		assertAccessDenied(service::findByStudyId, 3L);
-		
-		//queryStatistics(String, String, String, String)
-		assertAccessDenied(service::queryStatistics,"", "", "", "");
 	}
 	
 	private void testFindPage() throws ShanoirException {

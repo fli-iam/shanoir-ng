@@ -11,18 +11,13 @@
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 use datasets;
-
--- There are two procedure here, getStatisticsSize and getStatistics
--- The getStatisticsSize is used to show progress while the other actually queries the stats
-
 DROP PROCEDURE IF EXISTS getStatisticsSize;
 
 delimiter //
 CREATE PROCEDURE getStatisticsSize(IN studyNameInRegExp VARCHAR(255), IN studyNameOutRegExp VARCHAR(255), IN subjectNameInRegExp VARCHAR(255), IN subjectNameOutRegExp VARCHAR(255))
 BEGIN
 SELECT COUNT(*) AS total_count
-FROM ( 
-SELECT 'patient_id', 'shanoir_name', 'double_hash', 'birthname1', 'birthname2', 'birthname3', 'lastname1', 'lastname2', 'lastname3', 'firstname1', 'firstname2', 'firstname3', 'birthdate1', 'sex', 'birth_year', 'study_id', 'study_name', 'sequence_id', 'norm_sequence_name', 'sequence_name', 'center_id', 'center', 'center_postcode', 'center_city', 'device_manufacturer', 'device_model', 'device_field_strength', 'device_serial_number', 'examination_id', 'examination_date', 'import_date', 'creation_date', 'series_number', 'protocol_type', 'dicom_size_mo', 'execution'
+FROM ( SELECT 'patient_id', 'shanoir_name', 'double_hash', 'birthname1', 'birthname2', 'birthname3', 'lastname1', 'lastname2', 'lastname3', 'firstname1', 'firstname2', 'firstname3', 'birthdate1', 'sex', 'birth_year', 'study_id', 'study_name', 'sequence_id', 'norm_sequence_name', 'sequence_name', 'center_id', 'center', 'center_postcode', 'center_city', 'device_manufacturer', 'device_model', 'device_field_strength', 'device_serial_number', 'examination_id', 'examination_date', 'import_date', 'creation_date', 'series_number', 'protocol_type', 'dicom_size_mo', 'execution'
 UNION ALL
 SELECT
     subject.id AS patient_id,
@@ -90,12 +85,8 @@ FROM dataset
     LEFT JOIN studies.center AS center ON (center.id = examination.center_id)
     LEFT JOIN studies.pseudonymus_hash_values AS pseudonymus_hash_values ON (pseudonymus_hash_values.id = subject.pseudonymus_hash_values_id)
 
-WHERE subject.name rlike if(subjectNameInRegExp IS NULL  OR subjectNameInRegExp = '', '.*', subjectNameInRegExp)
-  AND subject.name NOT rlike if(subjectNameOutRegExp IS NULL  OR subjectNameOutRegExp = '', '^\b\B$', subjectNameOutRegExp)
-  AND study.name rlike if(studyNameInRegExp IS NULL  OR studyNameInRegExp = '', '.*', studyNameInRegExp)
-  AND study.name NOT rlike if(studyNameOutRegExp IS NULL  OR studyNameOutRegExp = '', '^\b\B$', studyNameOutRegExp))
-  
-  AS full_query;
+WHERE subject.name NOT rlike if(subjectNameOutRegExp IS NULL  OR subjectNameOutRegExp = '', '^\b\B$', subjectNameOutRegExp) AND study.name rlike if(studyNameInRegExp IS NULL  OR studyNameInRegExp = '', '.*', studyNameInRegExp)
+) as full_query;
 END //
 
 delimiter ;
@@ -173,11 +164,8 @@ FROM dataset
     LEFT JOIN studies.center AS center ON (center.id = examination.center_id)
     LEFT JOIN studies.pseudonymus_hash_values AS pseudonymus_hash_values ON (pseudonymus_hash_values.id = subject.pseudonymus_hash_values_id)
 
-WHERE subject.name rlike if(subjectNameInRegExp IS NULL  OR subjectNameInRegExp = '', '.*', subjectNameInRegExp)
-  AND subject.name NOT rlike if(subjectNameOutRegExp IS NULL  OR subjectNameOutRegExp = '', '^\b\B$', subjectNameOutRegExp)
-  AND study.name rlike if(studyNameInRegExp IS NULL  OR studyNameInRegExp = '', '.*', studyNameInRegExp)
-  AND study.name NOT rlike if(studyNameOutRegExp IS NULL  OR studyNameOutRegExp = '', '^\b\B$', studyNameOutRegExp)
-  LIMIT blocSize OFFSET startRow;
+WHERE subject.name NOT rlike if(subjectNameOutRegExp IS NULL  OR subjectNameOutRegExp = '', '^\b\B$', subjectNameOutRegExp) AND study.name rlike if(studyNameInRegExp IS NULL  OR studyNameInRegExp = '', '.*', studyNameInRegExp)
+	LIMIT blocSize OFFSET startRow;
 END //
 
 delimiter ;
