@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: /usr/local/bin/kompose convert
+    kompose.version: 1.35.0 (9532ceef3)
+  labels:
+    io.kompose.service: import
+  name: import
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: import
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: /usr/local/bin/kompose convert
+        kompose.version: 1.35.0 (9532ceef3)
+      labels:
+        io.kompose.service: import
+    spec:
+      containers:
+        - image: ghcr.io/fli-iam/shanoir-ng/import:NG_v2.5.1
+          name: import
+          ports:
+            - containerPort: 9903
+              protocol: TCP
+            - containerPort: 9913
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /var/log/shanoir-ng-logs
+              name: logs
+            - mountPath: /etc/ssl/certs/java
+              name: certificate-share-data
+              readOnly: true
+            - mountPath: /tmp
+              name: tmp
+      restartPolicy: Always
+      volumes:
+        - name: logs
+          persistentVolumeClaim:
+            claimName: logs
+        - name: certificate-share-data
+          persistentVolumeClaim:
+            claimName: certificate-share-data
+            readOnly: true
+        - name: tmp
+          persistentVolumeClaim:
+            claimName: tmp
