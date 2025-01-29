@@ -326,7 +326,7 @@ public class DICOMWebService {
 		}
 	}
 
-	@Scheduled(cron = "0 0 */1 * * *", zone="Europe/Paris")
+	@Scheduled(cron = "*/15 * * * *", zone="Europe/Paris")
 	public void deleteDicomFilesFromPacs() throws ShanoirException {
 		// Doc : https://smart-api.info/ui/be87344696148a41f577aca202ce84df#/IOCM-RS/deleteRejectedInstancesPermanently
 		LOG.info("Scheduled call to delete all rejected instances from pacs.");
