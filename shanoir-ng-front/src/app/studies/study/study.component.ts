@@ -153,7 +153,8 @@ export class StudyComponent extends EntityComponent<Study> {
 
     initView(): Promise<void> {
         this.studyRightsService.getMyRightsForStudy(this.id).then(rights => {
-            this.hasDownloadRight = this.keycloakService.isUserAdmin() || rights.includes(StudyUserRight.CAN_DOWNLOAD);
+            this.hasDownloadRight = this.keycloakService.isUserAdmin() 
+                || (this.keycloakService.isUserExpert() && rights.includes(StudyUserRight.CAN_DOWNLOAD));
         })
 
         this.setLabeledSizes(this.study);
@@ -558,10 +559,6 @@ export class StudyComponent extends EntityComponent<Study> {
 
     getFileName(element): string {
         return element.split('\\').pop().split('/').pop();
-    }
-
-    public hasDownloadRights(): boolean {
-        return this.keycloakService.isUserAdmin() || this.hasDownloadRight;
     }
 
     onTagListChange() {
