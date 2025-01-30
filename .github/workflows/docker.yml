@@ -107,13 +107,17 @@ jobs:
           # - we push the cache (cache_to) after development builds of the
           #   main branch only
           # - we never use the cache on production builds
+          #
+          # The image is exported in the OCI format ('image-manifest=true')
+          # to avoid a "failed to solve: not found" error when pushing to the
+          # github container registry.
           enable_cache_from = not env['PRODUCTION'] and not env['NO_CACHE']
           enable_cache_to   = not env['PRODUCTION'] and (
             main_branch_sha == env['IMAGE_TAG'] == env['SHA'])
           print(f"{enable_cache_from = }\n{enable_cache_to = }\n")
 
           def cache_arg(enabled: bool, image: str, extra=""):
-            return [f"type=registry,ref={env['DOCKER_REPOSITORY']}/{image}:cache{extra}"
+            return [f"type=registry,image-manifest=true,ref={env['DOCKER_REPOSITORY']}/{image}:cache{extra}"
                    ] if enabled else []
   
           # extract the list of images to be built from the docker-compose config
@@ -141,7 +145,7 @@ jobs:
         run: mvn -f ./shanoir-ng-parent/pom.xml install -DskipTests
 
       - name: Build docker images
-        uses: docker/bake-action@v4
+        uses: docker/bake-action@v5
         with:
           files: |
             docker-compose-dev.yml
