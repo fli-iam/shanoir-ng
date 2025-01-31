@@ -70,7 +70,7 @@ export class StudyTreeComponent implements OnDestroy {
         const containerHeight: number = this.treeContainer.nativeElement.offsetHeight;
         const currentScroll: number = this.treeContainer.nativeElement.scrollTop;
         const diff: number = nodeTop - containerHeight - currentScroll;
-        if (diff > 0) {
+        if (diff > 0 || nodeTop - currentScroll < 0) {
             this.treeContainer.nativeElement.scrollTop = diff + currentScroll + (containerHeight/2);
         }
 
