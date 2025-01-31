@@ -100,9 +100,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [(ngModel)]="subject"
                         (userChange)="onSelectSubject();"
                         [viewRoute]="'/subject/details/' + subject?.id" [viewDisabled]="!subject"
-                        (onNewClick)="openCreateSubject()" [newDisabled]="!study || !acquisitionEquipment"
                         [optionArr]="subjects">
                 </select-box>
+                <button class="new-subject" (click)="openCreateSubject()" [disabled]="!study || !acquisitionEquipment">
+                    <i class="fa-solid fa-user"></i>
+                    <i class="fa-solid fa-plus secondary"></i>
+                    New subject
+                </button>
             </span>
         </li>
         <li *ngIf="editSubjectStudy" class="required">
@@ -163,8 +167,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <span class="right-col">
                 <select-box [disabled]="!study || !subject || loading" [(ngModel)]="examination" (userChange)="onSelectExam()"
                         [viewRoute]="'/examination/details/' + examination?.id" [viewDisabled]="!examination"
-                        (onNewClick)="openCreateExam()" [newDisabled]="!study || !subject" [optionArr]="examinations" [pipe]="subjectExaminationLabelPipe">
+                        [optionArr]="examinations" [pipe]="subjectExaminationLabelPipe">
                 </select-box>
+                <button class="new-subject" (click)="openCreateExam()" [disabled]="!study || !subject">
+                    <i class="fa-solid fa-stethoscope"></i>
+                    <i class="fa-solid fa-plus secondary"></i>
+                    New examination
+                </button>
             </span>
         </li>
     </ol>
