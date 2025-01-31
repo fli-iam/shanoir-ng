@@ -157,7 +157,9 @@ export class TreeService {
     }
 
     scrollToSelected() {
-        this.scrollTo(this.selectedNode);
+        return this.selectNode(this.selection).then(() => {
+            this.scrollTo(this.selectedNode);
+        })
     }
 
     scrollTo(node: ShanoirNode) {
