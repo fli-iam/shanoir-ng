@@ -255,7 +255,7 @@ export class TreeService {
             return this.selectUser(selection.id);
         } else if (selection?.type == 'coil') {
             return this.selectCoil(selection.entity as Coil);
-        }
+        } else return Promise.resolve(null);
     }
 
     private selectDataset(dataset: number | Dataset): Promise<DatasetNode> {
