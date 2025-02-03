@@ -121,16 +121,15 @@ public class DatasetServiceImpl implements DatasetService {
 		final Dataset dataset = repository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
 
-		// Do not delete entity if it is the source. If getSourceId() is not null, it means it's a copy
-		List<Dataset> childDs = repository.findBySourceId(id);
-		if (!CollectionUtils.isEmpty(childDs)) {
+		// Do not delete entity if it is the source (or if it has copies). If getSourceId() is not null, it means it's a copy
+		if (!CollectionUtils.isEmpty(dataset.getCopies())) {
 			throw new RestServiceException(
 					new ErrorModel(
 							HttpStatus.UNPROCESSABLE_ENTITY.value(),
 							"This dataset is linked to another dataset that was copied."
 					));
-
 		}
+
 		// Remove parent processing to avoid errors
 		dataset.setDatasetProcessing(null);
 		processingService.removeDatasetFromAllProcessingInput(id);
@@ -138,7 +137,7 @@ public class DatasetServiceImpl implements DatasetService {
 		propertyService.deleteByDatasetId(id);
 		repository.deleteById(id);
 
-		if (dataset.getSource() != null) {
+		if (CollectionUtils.isEmpty(dataset.getCopies())) {
 			this.deleteDatasetFromPacs(dataset);
 		}
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, dataset.getStudyId()));
