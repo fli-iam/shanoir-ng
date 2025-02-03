@@ -289,6 +289,7 @@ public class ImportUtils {
 			List<Instance> instances = serie.getInstances();
 			if (instances == null) {
 				serie.setSelected(false);
+				logger.warn("Serie [" + serie.getSeriesDescription() + "] found with instances == null. Serie de-selected.");
 				continue;
 			}
 			/**
