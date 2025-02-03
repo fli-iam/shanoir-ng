@@ -287,9 +287,10 @@ public class ImportUtils {
 		final List<Serie> series = new ArrayList<>(importJob.getSelectedSeries());
 		for (Serie serie : series) {
 			List<Instance> instances = serie.getInstances();
-			if (instances == null) {
+			if (instances == null || instances.isEmpty()) {
+				serie.setIgnored(true);
 				serie.setSelected(false);
-				logger.warn("Serie [" + serie.getSeriesDescription() + "] found with instances == null. Serie de-selected.");
+				logger.warn("Serie [" + serie.getSeriesDescription() + "] found with instances == null or empty. Serie de-selected.");
 				continue;
 			}
 			/**
