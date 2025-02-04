@@ -43,7 +43,7 @@ public class QualityUtils {
 
 	private static DatasetsCreatorService datasetsCreatorService = new DatasetsCreatorService();
 
-	public static QualityCardResult checkQualityAtImport(ImportJob importJob) throws Exception {
+	public static QualityCardResult checkQualityAtImport(ImportJob importJob, boolean isImportFromPACS) throws Exception {
 
 		QualityCardResult qualityCardResult = new QualityCardResult();
 		ExaminationData examinationData = new ExaminationData();
@@ -66,7 +66,7 @@ public class QualityUtils {
 		}
 		
 		// Convert instances to images with parameter isFromShUpQualityControl set to true to keep absolute filepath for the images
-		imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob.getPatients(), importJobDir.getAbsolutePath(), false, null, true);
+		imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob.getPatients(), importJobDir.getAbsolutePath(), isImportFromPACS, null, true);
 
 		// Construct Dicom datasets from images
 		for (org.shanoir.ng.importer.model.Patient patient : importJob.getPatients()) {
@@ -159,4 +159,5 @@ public class QualityUtils {
 
 		return scrollPane;
 	}
+
 }

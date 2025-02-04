@@ -50,9 +50,6 @@ public class ImportFinishActionListener implements ActionListener {
 	
 	private ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBILNG;
 
-	// @Autowired
-	// private CurrentNominativeDataController currentNominativeDataController;
-
 	public ImportFinishActionListener(final MainWindow mainWindow, UploadJob uploadJob, File uploadFolder, Subject subjectREST,
 			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBILNG) {
 		this.mainWindow = mainWindow;
@@ -171,7 +168,7 @@ public class ImportFinishActionListener implements ActionListener {
 		
 		// Quality Check if the Study selected has Quality Cards to be checked at import
         try {
-			QualityCardResult qualityControlResult = QualityUtils.checkQualityAtImport(importJob);
+			QualityCardResult qualityControlResult = QualityUtils.checkQualityAtImport(importJob, mainWindow.isFromPACS);
 			// If quality check resulted in errors, show a message and do not start the import
 			if (!qualityControlResult.isEmpty() && (qualityControlResult.hasError())) {
 				JOptionPane.showMessageDialog(mainWindow.frame,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult), 
