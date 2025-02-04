@@ -19,6 +19,9 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.dicom.web.SeriesInstanceUIDHandler;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
+import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -64,6 +67,15 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
     @Autowired
     private DatasetService datasetService;
+
+    @Autowired
+    private StudyInstanceUIDHandler studyInstanceUIDHandler;
+
+    @Autowired
+    private DICOMWebService dicomWebService;
+
+    @Autowired
+    private SeriesInstanceUIDHandler seriesInstanceUIDHandler;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetAcquisitionServiceImpl.class);
     @Override
@@ -208,11 +220,52 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
                     }
 
                     datasetIds.add(ds.getId());
-                    datasetService.deleteById(ds.getId());
+                    datasetService.deleteByIdCascade(ds.getId());
+                }
+                if (!datasetIds.isEmpty()) solrService.deleteFromIndex(datasetIds);
+            }
+            String seriesInstanceUID = studyInstanceUIDHandler.findStudyInstanceUID(entity.getExamination());
+            String studyInstanceUID = seriesInstanceUIDHandler.findSeriesInstanceUID(entity);
+            dicomWebService.rejectAcquisitionFromPacs(seriesInstanceUID, studyInstanceUID);
+
+            repository.deleteById(id);
+            shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
+        }
+    }
+
+    public void deleteByIdCascade(Long id, ShanoirEvent event) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException {
+        final DatasetAcquisition entity = repository.findById(id).orElse(null);
+        if (entity == null) {
+            throw new EntityNotFoundException("Cannot find entity with id = " + id);
+        }
+
+        // Do not delete entity if it is the source. If getSourceId() is not null, it means it's a copy
+        List<DatasetAcquisition> childDsAc = repository.findBySourceId(id);
+        if (!CollectionUtils.isEmpty(childDsAc)) {
+            throw new RestServiceException(
+                    new ErrorModel(
+                            HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                            "This datasetAcquisition is linked to another datasetAcquisition that was copied."
+                    ));
+        } else {
+            List<Dataset> datasets = entity.getDatasets();
+            if (datasets != null) {
+                List<Long> datasetIds = new ArrayList<>();
+                for (Dataset ds : datasets) {
+                    if (event != null) {
+                        event.setMessage("Delete examination - dataset with id : " + ds.getId());
+                        float progressMax = Float.valueOf(event.getEventProperties().get("progressMax"));
+                        event.setProgress(event.getProgress() + (1f / progressMax));
+                        shanoirEventService.publishEvent(event);
+                    }
+
+                    datasetIds.add(ds.getId());
+                    datasetService.deleteByIdCascade(ds.getId());
                 }
                 if (!datasetIds.isEmpty()) solrService.deleteFromIndex(datasetIds);
             }
             repository.deleteById(id);
+
             shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
         }
     }

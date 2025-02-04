@@ -22,6 +22,8 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
+import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.processing.model.DatasetProcessing;
@@ -103,7 +105,13 @@ public class ExaminationServiceImpl implements ExaminationService {
 	private ObjectMapper objectMapper;
 	@Value("${datasets-data}")
 	private String dataDir;
-	
+
+	@Autowired
+	private StudyInstanceUIDHandler studyInstanceUIDHandler;
+
+	@Autowired
+	private DICOMWebService dicomWebService;
+
 	@Override
 	public void deleteById(final Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
 		Optional<Examination> examinationOpt = examinationRepository.findById(id);
@@ -136,7 +144,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 						event.setMessage("Delete examination - acquisition with id : " + dsAcq.getId());
 						eventService.publishEvent(event);
 					}
-					this.datasetAcquisitionService.deleteById(dsAcq.getId(), event);
+					this.datasetAcquisitionService.deleteByIdCascade(dsAcq.getId(), event);
 				}
 				if (event != null) {
 					event.setObjectId(String.valueOf(event.getId()));
@@ -146,6 +154,9 @@ public class ExaminationServiceImpl implements ExaminationService {
 					eventService.publishEvent(event);
 				}
 			}
+			String seriesInstanceUID = studyInstanceUIDHandler.findStudyInstanceUID(examination);
+			dicomWebService.rejectExaminationFromPacs(seriesInstanceUID);
+
 			examinationRepository.deleteById(id);
 		}
 		rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(examination.getStudyId()));

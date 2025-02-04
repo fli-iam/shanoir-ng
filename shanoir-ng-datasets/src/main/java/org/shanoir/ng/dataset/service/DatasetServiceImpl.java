@@ -143,6 +143,30 @@ public class DatasetServiceImpl implements DatasetService {
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, dataset.getStudyId()));
 	}
 
+
+	public void deleteByIdCascade(final Long id) throws ShanoirException, SolrServerException, IOException, RestServiceException {
+		final Dataset dataset = repository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
+
+		// Do not delete entity if it is the source (or if it has copies). If getSourceId() is not null, it means it's a copy
+		if (!CollectionUtils.isEmpty(dataset.getCopies())) {
+			throw new RestServiceException(
+					new ErrorModel(
+							HttpStatus.UNPROCESSABLE_ENTITY.value(),
+							"This dataset is linked to another dataset that was copied."
+					));
+		}
+
+		// Remove parent processing to avoid errors
+		dataset.setDatasetProcessing(null);
+		processingService.removeDatasetFromAllProcessingInput(id);
+		processingResourceService.deleteByDatasetId(id);
+		propertyService.deleteByDatasetId(id);
+		repository.deleteById(id);
+
+		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, dataset.getStudyId()));
+	}
+
 	@Override
 	public void deleteDatasetFromPacs(Dataset dataset) throws ShanoirException {
         if (!dicomWeb) {
@@ -155,7 +179,6 @@ public class DatasetServiceImpl implements DatasetService {
 			for (DatasetFile file : expression.getDatasetFiles()) {
 				if (isDicom && file.isPacs()) {
 					dicomWebService.rejectDatasetFromPacs(file.getPath());
-					break;
 				} else if (!file.isPacs()) {
 					try {
 						URL url = new URL(file.getPath().replaceAll("%20", " "));
