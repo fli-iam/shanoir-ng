@@ -45,9 +45,9 @@ public class QualityUtils {
 
 	public static QualityCardResult checkQualityAtImport(ImportJob importJob) throws Exception {
 
+		QualityCardResult qualityCardResult = new QualityCardResult();
 		ExaminationData examinationData = new ExaminationData();
 		SubjectStudy subjectStudy = new SubjectStudy();
-		QualityCardResult qualityCardResult = new QualityCardResult();
 		final File importJobDir = new File(importJob.getWorkFolder());
 		List<QualityCard> qualityCards = new ArrayList<>();
 		
@@ -58,12 +58,10 @@ public class QualityUtils {
 			logger.error("Error while retrieving quality cards from server for study " + importJob.getStudyId() + " : " + e.getMessage());
 			throw e;
 		}
-		
 
 		// If no quality cards are found for the study we skip the quality control
 		if (qualityCards == null || qualityCards.isEmpty()) {
 			logger.info("Quality Control At Import - No quality cards found for study " + importJob.getStudyId());
-
 			return qualityCardResult;
 		}
 		
@@ -103,7 +101,6 @@ public class QualityUtils {
 			throw e;
 		}
 		
-	
 		return qualityCardResult;
 	}
 
