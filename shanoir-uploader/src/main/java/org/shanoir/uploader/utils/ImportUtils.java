@@ -240,6 +240,8 @@ public class ImportUtils {
 
 	/**
 	 * subjectId and examinationId are created in the window of ImportDialog and are not known before.
+	 * In this method selectedSeries as attribute of ImportJob are copied into patient - study - serie
+	 * tree, as still expected like this on the server.
 	 * 
 	 * @param uploadJob
 	 * @param subjectName
