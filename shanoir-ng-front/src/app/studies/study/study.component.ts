@@ -208,7 +208,9 @@ export class StudyComponent extends EntityComponent<Study> {
             });
         }
         this.getCenters().then(centers => {
-            this.onMonoMultiChange();
+            let option = this.centerOptions.find(option => option.value.id == this.study.studyCenterList[0].center.id);
+            if (option) this.selectedCenter = option.value;
+            this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
         });
         return Promise.resolve();
     }
@@ -252,9 +254,8 @@ export class StudyComponent extends EntityComponent<Study> {
             'license': [this.study.license],
             'visibleByDefault': [this.study.visibleByDefault],
             'downloadableByDefault': [this.study.downloadableByDefault],
-            'monoCenter': [{value: this.study.monoCenter, disabled: this.study.studyCenterList && this.study.studyCenterList.length > 1}, [Validators.required]],
-            'selectedCenter': [this.selectedCenter, this.study.monoCenter ? [Validators.required] : []],
-            'studyCenterList': [this.study.studyCenterList, [this.validateCenter]],
+            'selectedCenter': [this.selectedCenter, [Validators.required]],
+            'studyCenterList': [{value: this.study.studyCenterList}, [this.validateCenter]],
             'subjectStudyList': [this.study.subjectStudyList],
             'tags': [this.study.tags],
             'studyTags': [this.study.studyTags],
@@ -264,10 +265,6 @@ export class StudyComponent extends EntityComponent<Study> {
             'studyUserList': [this.study.studyUserList]
         });
 
-        this.subscriptions.push(formGroup.get('monoCenter').valueChanges.subscribe(val => {
-            formGroup.get('selectedCenter').setValidators(val ? [Validators.required] : []);
-            this.reloadRequiredStyles();
-        }));
         return formGroup;
     }
     private setLabeledSizes(study: Study): Promise<void> {
@@ -326,7 +323,6 @@ export class StudyComponent extends EntityComponent<Study> {
     private newStudy(): Study {
         let study: Study = new Study();
         study.clinical = false;
-        study.monoCenter = true;
         study.studyCenterList = [];
         study.tags = [];
         study.studyTags = [];
@@ -371,15 +367,6 @@ export class StudyComponent extends EntityComponent<Study> {
             });
     }
 
-    /** Center section management  **/
-    onMonoMultiChange() {
-        if (this.study.monoCenter && this.study.studyCenterList.length >= 1) {
-            this.study.studyCenterList = [this.study.studyCenterList[0]];
-            let option = this.centerOptions.find(option => option.value.id == this.study.studyCenterList[0].center.id);
-            if (option) this.selectedCenter = option.value;
-        }
-    }
-
     goToCenter(id: number) {
         this.router.navigate(['/center/details/' + id]);
     }
@@ -398,51 +385,24 @@ export class StudyComponent extends EntityComponent<Study> {
         this.form.get('studyCenterList').updateValueAndValidity();
     }
 
-    onCenterChange(center: IdName): void {
-      this.selectedCenter = center;
-      if (this.study.monoCenter) {
-        this.study.studyCenterList = []
-        this.onCenterAdd();
-      }
-    }
-
     onPrefixChange() {
         this.form.get('studyCenterList').markAsDirty();
         this.form.get('studyCenterList').updateValueAndValidity();
     }
 
     private validateCenter = (control: AbstractControl): ValidationErrors | null => {
-        if (!this.study.studyCenterList || this.study.studyCenterList.length == 0) {
+        if (!Array.isArray(this.study.studyCenterList) || this.study.studyCenterList.length == 0) {
             return { noCenter: true}
         }
         return null;
     }
 
     removeCenterFromStudy(centerId: number): void {
-        if (!this.study.studyCenterList || this.study.studyCenterList.length < 2) return;
+        if (!this.study.studyCenterList) return;
         this.study.studyCenterList = this.study.studyCenterList.filter(item => item.center.id !== centerId);
-        if (this.study.studyCenterList.length < 2) {
-            this.study.monoCenter = true;
-            this.onMonoMultiChange();
-        }
         this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
         this.form.get('studyCenterList').markAsDirty();
         this.form.get('studyCenterList').updateValueAndValidity();
-    }
-
-    enableAddIcon(): boolean {
-        return this.selectedCenter && !this.isCenterAlreadyLinked(this.selectedCenter.id)
-            && (!this.study.monoCenter || !this.study.studyCenterList || this.study.studyCenterList.length == 0);
-    }
-
-    isCenterAlreadyLinked(centerId: number): boolean {
-        if (!this.study.studyCenterList) return false;
-        for (let studyCenter of this.study.studyCenterList) {
-            if (centerId == studyCenter.center.id) {
-                return true;
-            }
-        }
-        return false;
     }
 
     isMe(user: User): boolean {

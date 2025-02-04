@@ -31,7 +31,6 @@ export class Study extends Entity {
     experimentalGroupsOfSubjects: IdName[];
     id: number;
     challenge: boolean;
-    monoCenter: boolean;
     name: string;
     nbExaminations: number;
     nbSubjects: number;

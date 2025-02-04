@@ -187,7 +187,9 @@ public class DICOMWebService {
 				if (entity != null) {
 					ByteArrayResource byteArrayResource = new ByteArrayResource(EntityUtils.toByteArray(entity));
 					HttpHeaders responseHeaders = new HttpHeaders();
-					responseHeaders.setContentLength(entity.getContentLength());
+					if (!entity.isChunked() && entity.getContentLength() >= 0) {
+						responseHeaders.setContentLength(entity.getContentLength());
+					}					
 					return new ResponseEntity(byteArrayResource, responseHeaders, HttpStatus.OK);
 				} else {
 					LOG.error("DICOMWeb: findFrameOfStudyOfSerieOfInstance: empty response entity.");				

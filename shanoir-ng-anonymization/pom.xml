@@ -13,7 +13,7 @@
 
 	<groupId>org.shanoir.anonymization</groupId>
 	<artifactId>anonymization</artifactId>
-	<version>3.2.2</version>
+	<version>3.4.0</version>
 	<packaging>jar</packaging>
 
 	<name>anonymization</name>
