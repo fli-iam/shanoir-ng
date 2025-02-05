@@ -153,9 +153,9 @@ public class Examination extends HalEntity {
 
     /**
      * The DICOM StudyInstanceUID present in the backup PACS of Shanoir,
-     * dcm4chee arc light and generated during pseudonymization.
+     * dcm4chee arc light, and generated during examination creation.
      */
-    @Column(unique = true)
+    @Column(name = "study_instance_uid", unique = true)
     private String studyInstanceUID;
 
     @ManyToOne(fetch = FetchType.LAZY)
