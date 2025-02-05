@@ -160,6 +160,7 @@ public class ExaminationApiController implements ExaminationApi {
 		for (Examination exam : examinations) {
 			orderDatasetAcquisitions(exam);
 		}
+		LOG.error("examination order acq");
 		if (examinations.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}

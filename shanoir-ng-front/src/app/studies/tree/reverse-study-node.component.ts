@@ -107,7 +107,7 @@ export class ReverseStudyNodeComponent extends TreeNodeAbstractComponent<Reverse
                         this.node.open();
                     }).catch(err => {
                     this.loading = false;
-                    throw err;
+                    throw new Error('Error while loading examinations : ' + err);
                 });
             }
         });
