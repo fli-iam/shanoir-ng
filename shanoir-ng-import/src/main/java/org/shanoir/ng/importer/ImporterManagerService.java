@@ -161,7 +161,6 @@ public class ImporterManagerService {
 				if (!importJob.isFromShanoirUploader()) {
 					pseudonymize(importJob, event, importJobDir, patient);
 				}
-
 				datasetsCreatorService.createDatasets(patient, importJobDir, importJob);
 			}
 			this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_QUEUE_DATASET, objectMapper.writeValueAsString(importJob));
@@ -218,7 +217,7 @@ public class ImporterManagerService {
 			event.setMessage("Pseudonymizing DICOM files for subject [" + subjectName + "]...");
 			eventService.publishEvent(event);
 			try {
-				ANONYMIZER.anonymizeForShanoir(dicomFiles, importJob.getAnonymisationProfileToUse(), subjectName, subjectName);
+				ANONYMIZER.anonymizeForShanoir(dicomFiles, importJob.getAnonymisationProfileToUse(), subjectName, subjectName, importJob.getStudyInstanceUID());
 			} catch (Exception e) {
 				LOG.error(e.getMessage(), e);
 				throw new ShanoirException("Error during pseudonymization.");

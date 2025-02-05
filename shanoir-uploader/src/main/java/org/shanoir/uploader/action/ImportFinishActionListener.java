@@ -139,14 +139,14 @@ public class ImportFinishActionListener implements ActionListener {
 			}
 		}
 		
-		Long examinationId = null;
+		Examination examination = null;
 		// If the user wants to create a new examination
 		if (mainWindow.importDialog.mrExaminationNewExamCB.isSelected()) {
 			IdName center = (IdName) mainWindow.importDialog.mrExaminationCenterCB.getSelectedItem();
 			Date examinationDate = (Date) mainWindow.importDialog.mrExaminationDateDP.getModel().getValue();
 			String examinationComment = mainWindow.importDialog.mrExaminationCommentTF.getText();
-			examinationId = ImportUtils.createExamination(study, subjectREST, examinationDate, examinationComment, center.getId());
-			if (examinationId == null) {
+			examination = ImportUtils.createExamination(study, subjectREST, examinationDate, examinationComment, center.getId());
+			if (examination == null) {
 				JOptionPane.showMessageDialog(mainWindow.frame,
 						mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.createmrexamination"),
 						"Error", JOptionPane.ERROR_MESSAGE);
@@ -154,20 +154,19 @@ public class ImportFinishActionListener implements ActionListener {
 				((JButton) event.getSource()).setEnabled(true);
 				return;
 			} else {
-				logger.info("Examination created on server with ID: " + examinationId);
+				logger.info("Examination created on server with ID: " + examination.getId());
 			}
 		// If the user wants to use an existing examination
 		} else {
-			Examination examinationDTO = (Examination) mainWindow.importDialog.mrExaminationExistingExamCB.getSelectedItem();
-			examinationId = examinationDTO.getId();
-			logger.info("Examination used on server with ID: " + examinationId);
+			examination = (Examination) mainWindow.importDialog.mrExaminationExistingExamCB.getSelectedItem();
+			logger.info("Examination (existing) re-used on server with ID: " + examination.getId());
 		}
 				
 		/**
 		 * 3. Fill importJob, check quality if needed, start pseudo and prepare upload
 		 */
-		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examinationId, 
-		(Study) mainWindow.importDialog.studyCB.getSelectedItem(), (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem());
+		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examination.getId(), examination.getStudyInstanceUID(),
+			(Study) mainWindow.importDialog.studyCB.getSelectedItem(), (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem());
 		
 		QualityCardResult qualityControlResult = new QualityCardResult();
 
@@ -215,13 +214,11 @@ public class ImportFinishActionListener implements ActionListener {
 			// set status FAILED
 			ShUpOnloadConfig.getCurrentNominativeDataController().updateNominativeDataPercentage(uploadFolder, UploadState.ERROR.toString());
         }
-		
 		mainWindow.importDialog.setVisible(false);
 		mainWindow.importDialog.mrExaminationExamExecutiveLabel.setVisible(true);
 		mainWindow.importDialog.mrExaminationExamExecutiveCB.setVisible(true);
 		mainWindow.setCursor(null); // turn off the wait cursor
 		((JButton) event.getSource()).setEnabled(true);	
-		
 	}
 
 }

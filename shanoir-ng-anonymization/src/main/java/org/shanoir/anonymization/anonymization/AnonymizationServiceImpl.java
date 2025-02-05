@@ -84,13 +84,13 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
 	@Override
 	public void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientLastName,
-			String patientFirstName, String patientID) throws Exception {
+			String patientFirstName, String patientID, String studyInstanceUID) throws Exception {
 		String patientName = patientLastName + "^" + patientFirstName + "^^^";
-		anonymizeForShanoir(dicomFiles, profile, patientName, patientID);
+		anonymizeForShanoir(dicomFiles, profile, patientName, patientID, studyInstanceUID);
 	}
 
 	@Override
-	public void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientName, String patientID) throws Exception {
+	public void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientName, String patientID, String studyInstanceUID) throws Exception {
 		long startTime = System.currentTimeMillis();
 		final int totalAmount = dicomFiles.size();
 		LOG.info("Start anonymization, for {} DICOM files.", totalAmount);

@@ -39,6 +39,10 @@ import org.shanoir.ng.shared.quality.QualityTag;
  * If it contains a subjectName, an existing subject is to use.
  * Same logic for the exams.
  * 
+ * Therefore one ImportJob contains as well the DICOM StudyInstanceUID
+ * of the DICOM study (== examination in Shanoir). This is required to
+ * use the same UID in MS Import (pseudo) and in MS Datasets (exam).
+ * 
  * @todo: later we will remove the patients list from here, that is a
  * legacy error, that has to be corrected, e.g. move the subject out into
  * import job as written above.
@@ -113,6 +117,8 @@ public class ImportJob implements Serializable {
 	private String errorMessage;
 
 	private QualityTag qualityTag;
+
+	private String studyInstanceUID;
 
 	public long getTimestamp() {
         return timestamp;
@@ -298,7 +304,7 @@ public class ImportJob implements Serializable {
 		}
 		return 	"userId=" + userId + ",studyName=" + studyName + ",studyCardId=" + studyCardId + ",type=" + importType +
 				",workFolder=" + workFolder + ",pseudoProfile=" + anonymisationProfileToUse + ",modality=" + modality + ",enhanced=" + enhanced +
-				",subjectName=" + subjectName + ",examId=" + examinationId + ",numberOfSeries=" + numberOfSeries +
+				",subjectName=" + subjectName + ",examId=" + examinationId + ",StudyInstanceUID=" + studyInstanceUID + ",numberOfSeries=" + numberOfSeries +
 				",seriesNames=" + seriesNames.toString();
 	}
 
@@ -380,6 +386,14 @@ public class ImportJob implements Serializable {
 
 	public void setQualityTag(QualityTag qualityTag) {
 		this.qualityTag = qualityTag;
+	}
+
+	public String getStudyInstanceUID() {
+		return studyInstanceUID;
+	}
+
+	public void setStudyInstanceUID(String studyInstanceUID) {
+		this.studyInstanceUID = studyInstanceUID;
 	}
 
 }
