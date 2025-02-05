@@ -53,7 +53,7 @@ export class ReverseStudyNodeComponent extends TreeNodeAbstractComponent<Reverse
             private studyRightsService: StudyRightsService,
             private downloadService: MassDownloadService,
             elementRef: ElementRef) {
-        
+
         super(elementRef);
         this.idPromise.then(id => {
             (this.keycloakService.isUserAdmin
@@ -87,25 +87,27 @@ export class ReverseStudyNodeComponent extends TreeNodeAbstractComponent<Reverse
     }
 
     loadExaminations() {
+        console.log("load examinations");
         this.idPromise.then(() => {
             if (this.node.examinations == UNLOADED) {
                 this.loading = true;
                 this.examinationService.findExaminationsBySubjectAndStudy(this.subjectId, this.node.id)
-                .then(examinations => {
-                    let sortedExaminations = examinations.sort((a: SubjectExamination, b: SubjectExamination) => {
-                        return (new Date(a.examinationDate)).getTime() - (new Date(b.examinationDate)).getTime();
-                    })
-                    this.node.examinations = [];
-                    if (sortedExaminations) {
-                        sortedExaminations.forEach(exam => {
-                            let examNode = ExaminationNode.fromExam(exam, this.node, this.canAdmin, this.canDownload);
-                            (this.node.examinations as ExaminationNode[]).push(examNode);
-                        });
-                    }
+                    .then(examinations => {
+                        let sortedExaminations = examinations.sort((a: SubjectExamination, b: SubjectExamination) => {
+                            return (new Date(a.examinationDate)).getTime() - (new Date(b.examinationDate)).getTime();
+                        })
+                        this.node.examinations = [];
+                        if (sortedExaminations) {
+                            sortedExaminations.forEach(exam => {
+                                let examNode = ExaminationNode.fromExam(exam, this.node, this.canAdmin, this.canDownload);
+                                (this.node.examinations as ExaminationNode[]).push(examNode);
+                            });
+                        }
+                        this.loading = false;
+                        this.node.open();
+                    }).catch(err => {
                     this.loading = false;
-                    this.node.open();
-                }).catch(() => {
-                    this.loading = false;
+                    throw err;
                 });
             }
         });

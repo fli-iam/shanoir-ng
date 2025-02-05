@@ -154,7 +154,9 @@ public class ExaminationApiController implements ExaminationApi {
 	public ResponseEntity<List<SubjectExaminationDTO>> findExaminationsBySubjectIdStudyId(
 			@Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+		LOG.error("findExaminationsBySubjectIdStudyId");
 		final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, studyId);
+		LOG.error("examination list size : " + examinations.size());
 		for (Examination exam : examinations) {
 			orderDatasetAcquisitions(exam);
 		}
