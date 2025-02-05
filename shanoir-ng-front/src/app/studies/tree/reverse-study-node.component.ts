@@ -87,12 +87,13 @@ export class ReverseStudyNodeComponent extends TreeNodeAbstractComponent<Reverse
     }
 
     loadExaminations() {
-        console.log("load examinations");
+        console.log("load examinations start");
         this.idPromise.then(() => {
             if (this.node.examinations == UNLOADED) {
                 this.loading = true;
                 this.examinationService.findExaminationsBySubjectAndStudy(this.subjectId, this.node.id)
                     .then(examinations => {
+                        console.log("examination loaded");
                         let sortedExaminations = examinations.sort((a: SubjectExamination, b: SubjectExamination) => {
                             return (new Date(a.examinationDate)).getTime() - (new Date(b.examinationDate)).getTime();
                         })
@@ -105,6 +106,7 @@ export class ReverseStudyNodeComponent extends TreeNodeAbstractComponent<Reverse
                         }
                         this.loading = false;
                         this.node.open();
+                        console.log("load examinations end");
                     }).catch(err => {
                     this.loading = false;
                     throw new Error('Error while loading examinations : ' + err);
