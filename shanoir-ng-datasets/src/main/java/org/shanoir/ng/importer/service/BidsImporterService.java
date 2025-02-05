@@ -181,7 +181,11 @@ public class BidsImporterService {
 		Set<Dataset> datasets = new HashSet<>();
 		float progress = 0f;
 
-		File[] filesToImport = new File(importJob.getWorkFolder()).listFiles();
+		File[] filesToImport = new File(importJob.getWorkFolder()).listFiles(new FilenameFilter() {
+			@Override
+			public boolean accept(File arg0, String name) {
+				return !name.startsWith(".DS_Store") && !name.startsWith("__MAC") && !name.startsWith("._") && !name.startsWith(".AppleDouble");
+			}});
 		
 		Map<String, BidsDataset> datasetsByName = new HashMap<>();
 		
@@ -256,6 +260,9 @@ public class BidsImporterService {
 				// Check equipment in json file
 				JSONParser json = new JSONParser(new FileReader(importedFile));
 				LinkedHashMap jsonObject = (LinkedHashMap) json.parse();
+				ObjectMapper objectMapper = new ObjectMapper();
+				// Parse JSON file into a LinkedHashMap
+				LinkedHashMap<String, Object> jsonObject = objectMapper.readValue(importedFile, LinkedHashMap.class);
 				if (jsonObject.get("DeviceSerialNumber") != null) {
 					String code = (String) jsonObject.get("DeviceSerialNumber");
 					equipmentId = equipments.get(code) != null ? Long.valueOf(equipments.get(code)) : 0L;
