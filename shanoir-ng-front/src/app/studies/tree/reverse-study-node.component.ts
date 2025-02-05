@@ -87,7 +87,6 @@ export class ReverseStudyNodeComponent extends TreeNodeAbstractComponent<Reverse
     }
 
     loadExaminations() {
-        console.log("load examinations");
         this.idPromise.then(() => {
             if (this.node.examinations == UNLOADED) {
                 this.loading = true;
@@ -105,9 +104,8 @@ export class ReverseStudyNodeComponent extends TreeNodeAbstractComponent<Reverse
                     }
                     this.loading = false;
                     this.node.open();
-                }).catch(err => {
+                }).catch(() => {
                     this.loading = false;
-                    throw err;
                 });
             }
         });

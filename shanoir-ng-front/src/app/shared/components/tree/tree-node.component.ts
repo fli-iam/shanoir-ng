@@ -115,7 +115,6 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
     }
 
     public open() {
-        console.log("open");
         this.dataLoading = false;
         this.isOpen = true;
         this.openedChange.emit(this.isOpen);
@@ -131,7 +130,6 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
     }
 
     public toggle() {
-        console.log("toggle");
         if (this.isOpen) this.close();
         else {
             this.open();
