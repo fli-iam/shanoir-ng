@@ -172,7 +172,7 @@ public class ExaminationsConsistencyChecker {
 			 * To avoid confusion on this, we only check data from yesterday or older.
 			 */
 			DatasetAcquisition firstAcquisition = acquisitions.get(0);
-			if (!LocalDate.now().equals(firstAcquisition.getCreationDate())) {
+			if (!LocalDate.now().equals(firstAcquisition.getImportDate())) {
 				acquisitions.stream().forEach(a -> {
 					checkAcquisition(a, filesInPACS);
 				});
