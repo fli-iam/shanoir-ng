@@ -53,7 +53,7 @@ export class ReverseStudyNodeComponent extends TreeNodeAbstractComponent<Reverse
             private studyRightsService: StudyRightsService,
             private downloadService: MassDownloadService,
             elementRef: ElementRef) {
-        
+
         super(elementRef);
         this.idPromise.then(id => {
             (this.keycloakService.isUserAdmin
@@ -87,6 +87,7 @@ export class ReverseStudyNodeComponent extends TreeNodeAbstractComponent<Reverse
     }
 
     loadExaminations() {
+        console.log("load examinations");
         this.idPromise.then(() => {
             if (this.node.examinations == UNLOADED) {
                 this.loading = true;
@@ -104,8 +105,9 @@ export class ReverseStudyNodeComponent extends TreeNodeAbstractComponent<Reverse
                     }
                     this.loading = false;
                     this.node.open();
-                }).catch(() => {
+                }).catch(err => {
                     this.loading = false;
+                    throw err;
                 });
             }
         });
