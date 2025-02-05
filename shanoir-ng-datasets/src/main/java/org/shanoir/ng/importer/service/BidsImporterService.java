@@ -1,6 +1,7 @@
 package org.shanoir.ng.importer.service;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -196,7 +197,6 @@ public class BidsImporterService {
 		float progress = 0f;
 
 		File[] filesToImport = new File(importJob.getWorkFolder()).listFiles(new FilenameFilter() {
-			@Override
 			public boolean accept(File arg0, String name) {
 				return !name.startsWith(".DS_Store") && !name.startsWith("__MAC") && !name.startsWith("._") && !name.startsWith(".AppleDouble");
 			}});
@@ -272,11 +272,11 @@ public class BidsImporterService {
 			files.add(dsFile);
 			if(equipmentId == 0L && importedFile.getName().endsWith(".json") && Files.size(Path.of(importedFile.getPath())) < 1000000) {
 				// Check equipment in json file
-				JSONParser json = new JSONParser(new FileReader(importedFile));
-				LinkedHashMap jsonObject = (LinkedHashMap) json.parse();
-				ObjectMapper objectMapper = new ObjectMapper();
+				//JSONParser json = new JSONParser(new FileReader(importedFile));
+				// LinkedHashMap jsonObject = (LinkedHashMap) json.parse();
+				ObjectMapper jsonMapper = new ObjectMapper();
 				// Parse JSON file into a LinkedHashMap
-				LinkedHashMap<String, Object> jsonObject = objectMapper.readValue(importedFile, LinkedHashMap.class);
+				LinkedHashMap<String, Object> jsonObject = jsonMapper.readValue(importedFile, LinkedHashMap.class);
 				if (jsonObject.get("DeviceSerialNumber") != null) {
 					String code = (String) jsonObject.get("DeviceSerialNumber");
 					equipmentId = equipments.get(code) != null ? Long.valueOf(equipments.get(code)) : 0L;
