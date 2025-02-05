@@ -14,11 +14,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened"
+        [class.selected]="menuOpened || treeService.isSelected(node.id, 'dataset')"
         [label]="node.label"
-        awesome="fas fa-camera"
-        [(opened)]="node.open"
+        [tags]="node.tags"
+        [awesome]="node.awesome"
+        [(opened)]="node.opened"
         (labelClick)="toggleMenu()"
+        [route]="'/dataset/details/' + node.id"
         [dataLoading]="loading"
         [hasBox]="hasBox"
         [(ngModel)]="node.selected"
@@ -26,17 +28,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [hasChildren]="hasChildren()"
         [title]="node.title + ' n°' + node.id">
 
-    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
-        <a [routerLink]="this.detailsPath + this.node.id" class="open-new-tab">
+    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu">
+        <a [routerLink]="detailsPath + node.id" class="open-new-tab">
           <menu-item *ngIf="!related" label="Details..." awesome="fa-regular fa-eye"></menu-item>
         </a>
-        <menu-item *ngIf="node.type != 'Eeg' && node.type != 'BIDS' && !node.processed" [disabled]="loading" label="Download as DICOM" awesome="fas fa-download" (click)="download('dcm')"></menu-item>
-        <menu-item *ngIf="node.type != 'Eeg' && node.type != 'BIDS' && !node.processed" [disabled]="loading" label="Download as NIfTI" awesome="fas fa-download" (click)="download('nii')"></menu-item>
-        <menu-item *ngIf="node.processed" [disabled]="loading" label="Download processed data" awesome="fas fa-download" (click)="download('nii')"></menu-item>
-        <menu-item *ngIf="node.type == 'Eeg'" [disabled]="loading" label="Download as EEG" awesome="fas fa-download" (click)="download('eeg')"></menu-item>
-        <menu-item *ngIf="node.type == 'BIDS'" [disabled]="loading" label="Download BIDS" awesome="fas fa-download" (click)="download('BIDS')"></menu-item>
-        <menu-item *ngIf="this.node.canDelete"  label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteDataset()"></menu-item>
+        <menu-item [disabled]="loading" label="Download" awesome="fas fa-download" (click)="download()"></menu-item>
+        <menu-item *ngIf="node.canDelete"  label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteDataset()"></menu-item>
     </dropdown-menu>
+
+    <metadata-node
+            *ngIf="node.open && node.inPacs"
+            [input]="node.metadata">
+    </metadata-node>
 
     <ng-container *ngIf="node.open && node.processings && node.processings != $any('UNLOADED')">
         <processing-node
@@ -46,6 +49,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 (selectedChange)="selectedChange.emit()"
                 [hasBox]="hasBox"
                 (onProcessingDelete)="onProcessingDelete(i)"
+                [withMenu]="withMenu"
         >
         </processing-node>
 

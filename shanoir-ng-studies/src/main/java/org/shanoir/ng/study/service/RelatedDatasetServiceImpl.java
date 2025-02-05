@@ -18,6 +18,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
+import org.shanoir.ng.messaging.SubjectStudyUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.dataset.RelatedDataset;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
@@ -35,6 +36,7 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -51,18 +53,28 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 
 	@Autowired
 	private StudyUserRepository studyUserRepository;
+
 	@Autowired
 	private StudyService studyService;
+
 	@Autowired
 	private CenterRepository centerRepository;
+
 	@Autowired
 	private StudyRepository studyRepository;
+
 	@Autowired
 	private SubjectRepository subjectRepository;
+
 	@Autowired
 	private SubjectStudyRepository subjectStudyRepository;
+
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
+
+	@Autowired
+	private SubjectStudyUpdateBroadcastService subjectStudyUpdateBroadcastService;
+
 	@Autowired
 	private ObjectMapper objectMapper;
 	private static final Logger LOG = LoggerFactory.getLogger(RelatedDatasetServiceImpl.class);
@@ -104,7 +116,14 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 
 				subjectStudyList.add(ssToAdd);
 				studyTarget.setSubjectStudyList(subjectStudyList);
+
 				studyRepository.save(studyTarget);
+				// then send it to dataset ms which has a duplicated table
+				try {
+					subjectStudyUpdateBroadcastService.send(subjectStudyList);
+				} catch (Exception e) {
+					throw new AmqpRejectAndDontRequeueException("subject studies could not be replicated into datasets ms after datasets copy", e);
+				}
 			}
 		}
 	}
@@ -155,7 +174,6 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 				centerToAdd.setCenter(center);
 				centerToAdd.setSubjectNamePrefix(null);
 				studyCenterList.add(centerToAdd);
-				study.setMonoCenter(false);
 				study.setStudyCenterList(studyCenterList);
 				studyRepository.save(study);
 			}

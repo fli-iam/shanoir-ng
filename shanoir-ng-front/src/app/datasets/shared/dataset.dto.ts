@@ -13,21 +13,21 @@
  */
 import { Injectable, Injector } from '@angular/core';
 
+import { DiffusionGradient } from '../../dataset-acquisitions/modality/mr/mr-protocol.model';
+import { DatasetAcquisitionDTO, DatasetAcquisitionDTOService } from '../../dataset-acquisitions/shared/dataset-acquisition.dto';
+import { DatasetAcquisitionUtils } from '../../dataset-acquisitions/shared/dataset-acquisition.utils';
+import { DatasetProcessingService } from '../../datasets/shared/dataset-processing.service';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
+import { Tag } from "../../tags/tag.model";
+import { Channel, EegDataset, Event } from '../dataset/eeg/dataset.eeg.model';
+import { EchoTime, FlipAngle, InversionTime, MrDataset, MrDatasetNature, MrQualityProcedureType, RepetitionTime } from '../dataset/mr/dataset.mr.model';
+import { DatasetProcessing } from './dataset-processing.model';
 import { DatasetType } from './dataset-type.model';
 import { Dataset, DatasetMetadata } from './dataset.model';
 import { DatasetUtils } from './dataset.utils';
-import { MrDataset, EchoTime, FlipAngle, InversionTime, MrDatasetMetadata, RepetitionTime, MrQualityProcedureType, MrDatasetNature } from '../dataset/mr/dataset.mr.model';
-import { DiffusionGradient } from '../../dataset-acquisitions/modality/mr/mr-protocol.model';
-import { Channel, Event, EegDataset } from '../dataset/eeg/dataset.eeg.model';
-import { DatasetProcessing } from './dataset-processing.model';
-import { DatasetProcessingService } from '../../datasets/shared/dataset-processing.service';
-import { DatasetAcquisitionDTO, DatasetAcquisitionDTOService } from '../../dataset-acquisitions/shared/dataset-acquisition.dto';
-import { DatasetAcquisitionUtils } from '../../dataset-acquisitions/shared/dataset-acquisition.utils';
-import {DatasetExpressionFormat} from "../../enum/dataset-expression-format.enum";
 
 @Injectable()
 export class DatasetDTOService {
@@ -43,26 +43,34 @@ export class DatasetDTOService {
      * Warning : DO NOT USE THIS IN A LOOP, use toEntityList instead
      * @param result can be used to get an immediate temporary result without waiting async data
      */
-    public toEntity(dto: DatasetDTO, result?: Dataset, mode: 'eager' | 'lazy' = 'eager'): Promise<Dataset> {   
+    public toEntity(dto: DatasetDTO, result?: Dataset, mode: 'eager' | 'lazy' = 'eager'): Promise<Dataset> {
         if(!this.datasetProcessingService) {
             this.datasetProcessingService = this.injector.get<DatasetProcessingService>(DatasetProcessingService);
         }
         if (!result) result = DatasetUtils.getDatasetInstance(dto.type);
         DatasetDTOService.mapSyncFields(dto, result);
         let promises: Promise<any>[] = [];
-        if (dto.processings) {
-            for(let p of dto.processings) {
-                promises.push(this.datasetProcessingService.get(p.id).then(
-                    processing => result.processings.push(processing))
-                );
-            }
-        }
-        if (dto.datasetProcessing) {
-    	    promises.push(this.datasetProcessingService.get(dto.datasetProcessing.id).then(
-                processing => result.datasetProcessing = processing
-            ));
-        }
         if (mode == 'eager') {
+            if (dto.processings) {
+                for(let p of dto.processings) {
+                    promises.push(this.datasetProcessingService.get(p.id).then(
+                        processing => {
+                            if (!processing.inputDatasets) processing.inputDatasets = [];
+                            if (!processing.inputDatasets.find(inds => inds.id == result.id)) {
+                                processing.inputDatasets.push(result);
+                            }
+                            result.processings.push(processing);
+                        }
+                    ));
+                }
+            }
+            if (dto.datasetProcessing) {
+                promises.push(this.datasetProcessingService.get(dto.datasetProcessing.id).then(
+                    processing => {
+                        result.datasetProcessing = processing;
+                    }
+                ));
+            }
             if (dto.studyId) promises.push(this.studyService.get(dto.studyId).then(study => result.study = study));
             if (dto.subjectId) promises.push(this.subjectService.get(dto.subjectId).then(subject => result.subject = subject));
             return Promise.all(promises).then(([]) => {
@@ -118,8 +126,11 @@ export class DatasetDTOService {
         entity.creationDate = dto.creationDate;
         entity.name = dto.name;
         entity.type = dto.type;
+        entity.source = dto.source;
+        entity.copies = dto.copies;
         entity.originMetadata = dto.originMetadata;
         entity.updatedMetadata = dto.updatedMetadata;
+        entity.inPacs = dto.inPacs;
         if (dto.studyId) {
             entity.study = new Study();
             entity.study.id = dto.studyId;
@@ -151,6 +162,7 @@ export class DatasetDTOService {
             process.id = dto.datasetProcessing.id;
 			entity.datasetProcessing = process;
 		}
+        entity.tags = dto.tags ? dto.tags : [];
         return entity;
     }
 
@@ -194,6 +206,10 @@ export class DatasetDTO {
     processings: {id: number}[];
 	datasetProcessing: {id: number};
     datasetAcquisition: DatasetAcquisitionDTO;
+    inPacs: boolean;
+    tags: Tag[];
+    copies: number[];
+    source: number;
 
     constructor(dataset?: Dataset) {
         if (dataset) {
@@ -203,6 +219,8 @@ export class DatasetDTO {
             this.studyId = dataset.study ? dataset.study.id : null;
             this.subjectId = dataset.subject ? dataset.subject.id : null;
             this.updatedMetadata = dataset.updatedMetadata;
+            this.source = dataset.source;
+            this.copies = dataset.copies;
             this.name = dataset.name;
             this.datasetProcessing = dataset.datasetProcessing;
             this.type = dataset.type;
@@ -210,6 +228,7 @@ export class DatasetDTO {
             if(dataset.datasetAcquisition) {
                 this.datasetAcquisition = new DatasetAcquisitionDTO(dataset.datasetAcquisition);
             }
+            this.tags = dataset.tags;
         }
     }
 }

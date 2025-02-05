@@ -11,34 +11,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 
-import { AcquisitionEquipmentNode, UNLOADED } from '../../tree/tree.model';
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
+import { TreeService } from 'src/app/studies/study/tree.service';
+import { AcquisitionEquipmentNode } from '../../tree/tree.model';
 import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
-import {AcquisitionEquipmentService} from "../shared/acquisition-equipment.service";
-import {KeycloakService} from "../../shared/keycloak/keycloak.service";
+import { AcquisitionEquipmentService } from "../shared/acquisition-equipment.service";
 
 
 @Component({
     selector: 'equipment-node',
-    templateUrl: 'equipment-node.component.html'
+    templateUrl: 'equipment-node.component.html',
+    standalone: false
 })
 
-export class EquipmentNodeComponent implements OnChanges {
+export class EquipmentNodeComponent extends TreeNodeAbstractComponent<AcquisitionEquipmentNode> implements OnChanges {
 
     @Input() input: AcquisitionEquipmentNode | AcquisitionEquipment;
-    @Output() selectedChange: EventEmitter<void> = new EventEmitter();
     @Output() onEquipmentDelete: EventEmitter<void> = new EventEmitter();
-
-    node: AcquisitionEquipmentNode;
-    loading: boolean = false;
-    menuOpened: boolean = false;
     detailsPath: string = '/acquisition-equipment/details/';
 
     constructor(
-        private router: Router,
-        private equipmentService: AcquisitionEquipmentService) {
+            private equipmentService: AcquisitionEquipmentService,
+            protected treeService: TreeService,
+            elementRef: ElementRef) {
+        super(elementRef);
     }
 
     ngOnChanges(changes: SimpleChanges): void {

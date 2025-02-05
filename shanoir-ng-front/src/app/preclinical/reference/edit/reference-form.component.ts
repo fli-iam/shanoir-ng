@@ -29,7 +29,8 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
     templateUrl: 'reference-form.component.html',
     styleUrls: ['reference-form.component.css'],
     providers: [ReferenceService],
-    animations: [slideDown]
+    animations: [slideDown],
+    standalone: false
 })
 @ModesAware
 export class ReferenceFormComponent extends EntityComponent<Reference>{
@@ -56,18 +57,13 @@ export class ReferenceFormComponent extends EntityComponent<Reference>{
     }
 
     initView(): Promise<void> {
-        return this.referenceService.get(this.id).then(reference => {
-            this.reference = reference;
-        });
+        return Promise.resolve();   
     }
 
     initEdit(): Promise<void> {
         this.loadCategories();
-        return this.referenceService.get(this.id).then(reference => {
-            this.reference = reference;
-            if (this.reference && this.reference.category) 
-                this.loadTypesByCategory(this.reference.category);
-        });
+        if (this.reference && this.reference.category) this.loadTypesByCategory(this.reference.category);
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {

@@ -16,7 +16,7 @@
 	<parent>
 		<groupId>org.shanoir-ng</groupId>
 		<artifactId>shanoir-ng-back</artifactId>
-		<version>3.2.2</version>
+		<version>3.4.0</version>
 		<relativePath>../shanoir-ng-back</relativePath>
 	</parent>
 
@@ -26,31 +26,27 @@
 	<name>shanoir-ng-import</name>
 	<description>Shanoir-NG Import Microservice</description>
 
-	<properties>
-		<weasis.version>5.14.1</weasis.version>
-	</properties>
-
 	<dependencies>
 		<!-- Shanoir-NG dependencies -->
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-ms-common</artifactId>
-			<version>3.2.2</version>
+			<version>3.4.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-study-rights</artifactId>
-			<version>3.2.2</version>
+			<version>3.4.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.shanoir.anonymization</groupId>
 			<artifactId>anonymization</artifactId>
-			<version>3.2.2</version>
+			<version>3.4.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-exchange</artifactId>
-			<version>3.2.2</version>
+			<version>3.4.0</version>
 		</dependency>
 
 		<dependency>
@@ -62,7 +58,7 @@
 		<dependency>
 			<groupId>org.weasis</groupId>
 			<artifactId>weasis-dicom-tools</artifactId>
-			<version>${weasis.version}</version>
+			<version>${dcm4che.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -110,18 +106,6 @@
 			<artifactId>httpmime</artifactId>
 			<version>4.5.14</version>
 		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.apache.poi/poi -->
-		<dependency>
-			<groupId>org.apache.poi</groupId>
-			<artifactId>poi</artifactId>
-			<version>3.16</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.poi</groupId>
-			<artifactId>poi-ooxml</artifactId>
-			<version>3.16</version>
-		</dependency>
 		
 		<dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
@@ -131,8 +115,6 @@
 
 	<build>
 		<plugins>
-			<!-- Package shanoir-ng-import.jar as Spring Boot executable: Avoid error: 
-				no main manifest attribute, in /shanoir-ng-import.jar -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
@@ -142,7 +124,9 @@
 					</classpathDependencyExcludes>
 				</configuration>
 			</plugin>
-			<!-- Used here for ShanoirUploader: creae an additional single jar to be used by ShUp -->
+			<!-- Package shanoir-ng-import.jar as Spring Boot executable: Avoid error: 
+				no main manifest attribute, in /shanoir-ng-import.jar -->
+			<!-- Used here for ShanoirUploader: create an additional single jar to be used by ShUp -->
 	        <plugin>
 	            <groupId>org.springframework.boot</groupId>
 	            <artifactId>spring-boot-maven-plugin</artifactId>
@@ -161,12 +145,6 @@
 							<target>
 								<copy file="target/${project.build.finalName}-exec.jar"
 									tofile="${basedir}/../docker-compose/import/${project.artifactId}.jar" />
-								<copy file="../utils/entrypoint_common"
-									tofile="${basedir}/../docker-compose/import/entrypoint_common" />
-								<copy file="../utils/oneshot"
-									tofile="${basedir}/../docker-compose/import/oneshot" />
-								<chmod perm="+x"
-									file="${basedir}/../docker-compose/import/oneshot" />
 							</target>
 						</configuration>
 						<goals>

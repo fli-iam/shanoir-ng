@@ -17,7 +17,9 @@ package org.shanoir.ng.study.repository;
 import java.util.List;
 import java.util.Set;
 
+import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.study.model.StudyUser;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -35,11 +37,16 @@ public interface StudyUserRepository extends CrudRepository<StudyUser, Long> {
 	
 	StudyUser findByUserIdAndStudy_Id(Long userId, Long studyId);
 	
+	@EntityGraph(attributePaths = "studyUserRights")
 	List<StudyUser> findByStudy_Id(Long studyId);
-
+	
+	@Query("SELECT DISTINCT su.centers FROM StudyUser su WHERE su.study.id = :studyId")
+    List<Center> findDistinctCentersByStudyId(@Param("studyId") Long studyId);
+	
 	@Transactional
 	void deleteByIdIn(Set<Long> ids);
 	
 	@Query("select s.id from StudyUser su inner join su.study as s where su.userId = :userId and su.confirmed = true and :right in elements(su.studyUserRights)")
 	List<Long> findDistinctStudyIdByUserId(@Param("userId") Long userId, @Param("right") int right);
+
 }

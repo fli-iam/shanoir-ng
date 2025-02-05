@@ -11,42 +11,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
-import { DatasetAcquisition } from '../../dataset-acquisitions/shared/dataset-acquisition.model';
-import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
-import { Dataset } from '../../datasets/shared/dataset.model';
-import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
 import { ExaminationPipe } from '../../examinations/shared/examination.pipe';
 
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { SuperPromise } from 'src/app/utils/super-promise';
+import { TaskState } from "../../async-tasks/task.model";
 import { ExaminationService } from '../../examinations/shared/examination.service';
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
-import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode, ReverseStudyNode, UNLOADED } from '../../tree/tree.model';
+import { KeycloakService } from "../../shared/keycloak/keycloak.service";
+import { ExaminationNode, ReverseStudyNode, ShanoirNode, UNLOADED } from '../../tree/tree.model';
+import { StudyRightsService } from "../shared/study-rights.service";
+import { StudyUserRight } from "../shared/study-user-right.enum";
 import { Study } from '../shared/study.model';
-import {KeycloakService} from "../../shared/keycloak/keycloak.service";
-import {StudyRightsService} from "../shared/study-rights.service";
-import {StudyUserRight} from "../shared/study-user-right.enum";
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 
 @Component({
     selector: 'reverse-study-node',
-    templateUrl: 'reverse-study-node.component.html'
+    templateUrl: 'reverse-study-node.component.html',
+    standalone: false
 })
 
-export class ReverseStudyNodeComponent implements OnChanges {
+export class ReverseStudyNodeComponent extends TreeNodeAbstractComponent<ReverseStudyNode> implements OnChanges {
 
-    @Input() input: ReverseStudyNode | Study;
+    @Input() input: ReverseStudyNode | {study: Study, parentNode: ShanoirNode};
     @Input() subjectId: number;
-    @Output() nodeInit: EventEmitter<ReverseStudyNode> = new EventEmitter();
-    @Output() selectedChange: EventEmitter<ReverseStudyNode> = new EventEmitter();
-    node: ReverseStudyNode;
-    loading: boolean = false;
-    menuOpened: boolean = false;
     studyCardsLoading: boolean = false;
-    showDetails: boolean;
-    @Input() hasBox: boolean = false;
+    hasDicom: boolean = true;
     detailsPath: string = '/study/details/';
     private canAdmin: boolean = false;
+    private canDownload: boolean = false;
+    public downloadState: TaskState = new TaskState();
+    idPromise: SuperPromise<number> = new SuperPromise();
 
     constructor(
             private router: Router,
@@ -54,91 +51,64 @@ export class ReverseStudyNodeComponent implements OnChanges {
             private examPipe: ExaminationPipe,
             private keycloakService: KeycloakService,
             private studyRightsService: StudyRightsService,
-            private downloadService: MassDownloadService) {
+            private downloadService: MassDownloadService,
+            elementRef: ElementRef) {
+        
+        super(elementRef);
+        this.idPromise.then(id => {
+            (this.keycloakService.isUserAdmin
+                ? Promise.resolve(StudyUserRight.all())
+                : this.studyRightsService.getMyRightsForStudy(id)
+            ).then(rights => {
+                this.canAdmin = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
+                this.canDownload = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+            });
+        });
     }
 
     ngOnChanges(changes: SimpleChanges): void {
         if (!changes['input']) {
             return;
         }
-
-        this.studyRightsService.getMyRightsForStudy(this.input.id).then(rights => {
-            this.canAdmin = this.keycloakService.isUserAdmin()
-                || (this.keycloakService.isUserExpert() && rights.includes(StudyUserRight.CAN_ADMINISTRATE));
-
-            if (this.input instanceof ReverseStudyNode) {
-                this.node = this.input;
-            } else {
-                this.node = new ReverseStudyNode(
-                    this.input.id,
-                    this.input.name,
-                    [],
-                    UNLOADED);
-            }
-            this.nodeInit.emit(this.node);
-            this.showDetails = this.router.url != '/study/details/' + this.node.id;
-        });
+        let id: number = this.input instanceof ReverseStudyNode ? this.input.id : this.input.study.id;
+        this.idPromise.resolve(id);
+        if (this.input instanceof ReverseStudyNode) {
+            this.node = this.input;
+        } else {
+            this.node = new ReverseStudyNode(
+                this.input.parentNode,
+                this.input.study.id,
+                this.input.study.name,
+                [],
+                UNLOADED);
+        }
+        this.nodeInit.emit(this.node);
+        this.showDetails = this.router.url != '/study/details/' + this.node.id;
     }
 
     loadExaminations() {
-        if (this.node.examinations == UNLOADED) {
-            this.loading = true;
-            this.examinationService.findExaminationsBySubjectAndStudy(this.subjectId, this.node.id)
-            .then(examinations => {
-                let sortedExaminations = examinations.sort((a: SubjectExamination, b: SubjectExamination) => {
-                    return (new Date(a.examinationDate)).getTime() - (new Date(b.examinationDate)).getTime();
-                })
-                this.node.examinations = [];
-                if (sortedExaminations) {
-                    sortedExaminations.forEach(exam => {
-                        (this.node.examinations as ExaminationNode[]).push(this.mapExamNode(exam));
-                    });
-                }
-                this.loading = false;
-                this.node.open = true;
-            }).catch(() => {
-                this.loading = false;
-            });
-        }
-    }
-
-    private mapExamNode(exam: SubjectExamination): ExaminationNode {
-        return new ExaminationNode(
-            exam.id,
-            this.examPipe.transform(exam),
-            exam.datasetAcquisitions ? exam.datasetAcquisitions.map(dsAcq => this.mapAcquisitionNode(dsAcq)) : [],
-            exam.extraDataFilePathList,
-            this.canAdmin
-        );
-    }
-
-    private mapAcquisitionNode(dsAcq: DatasetAcquisition): DatasetAcquisitionNode {
-        return new DatasetAcquisitionNode(
-            dsAcq.id,
-            dsAcq.name,
-            dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds, false)) : [],
-            this.canAdmin
-        );
-    }
-
-    private mapDatasetNode(dataset: Dataset, processed: boolean): DatasetNode {
-        return new DatasetNode(
-            dataset.id,
-            dataset.name,
-            dataset.type,
-            dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : [],
-            processed,
-            this.canAdmin
-        );
-    }
-
-    private mapProcessingNode(processing: DatasetProcessing): ProcessingNode {
-        return new ProcessingNode(
-            processing.id,
-            DatasetProcessingType.getLabel(processing.datasetProcessingType),
-            processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],
-            this.canAdmin
-        );
+        this.idPromise.then(() => {
+            if (this.node.examinations == UNLOADED) {
+                this.loading = true;
+                this.examinationService.findExaminationsBySubjectAndStudy(this.subjectId, this.node.id)
+                .then(examinations => {
+                    let sortedExaminations = examinations.sort((a: SubjectExamination, b: SubjectExamination) => {
+                        return (new Date(a.examinationDate)).getTime() - (new Date(b.examinationDate)).getTime();
+                    })
+                    this.node.examinations = [];
+                    if (sortedExaminations) {
+                        sortedExaminations.forEach(exam => {
+                            let examNode = ExaminationNode.fromExam(exam, this.node, this.canAdmin, this.canDownload);
+                            (this.node.examinations as ExaminationNode[]).push(examNode);
+                        });
+                    }
+                    this.loading = false;
+                    this.node.open();
+                }).catch(() => {
+                    this.loading = false;
+                });
+            }
+        });
     }
 
     hasDependency(dependencyArr: any[] | UNLOADED): boolean | 'unknown' {
@@ -149,7 +119,7 @@ export class ReverseStudyNodeComponent implements OnChanges {
 
     download() {
         this.loading = true;
-        this.downloadService.downloadAllByStudyIdAndSubjectId(this.node.id, this.subjectId)
+        this.downloadService.downloadAllByStudyIdAndSubjectId(this.node.id, this.subjectId, this.downloadState)
             .finally(() => this.loading = false);
     }
 }

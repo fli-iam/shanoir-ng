@@ -8,6 +8,8 @@ public class EmailDatasetImportFailed extends EmailBase {
 
 	private String examinationId;
 
+	private String studyCardId;
+
 	/**
 	 * @return the subjectName
 	 */
@@ -48,5 +50,19 @@ public class EmailDatasetImportFailed extends EmailBase {
 	 */
 	public void setErrorMessage(String errorMessage) {
 		this.errorMessage = errorMessage;
+	}
+
+	/**
+	 * @return the studyCardId
+	 */
+	public String getStudyCardId() {
+		return studyCardId;
+	}
+
+	/**
+	 * @param studyId the studyCardId to set
+	 */
+	public void setStudyCardId(String studyCardId) {
+		this.studyCardId = studyCardId;
 	}
 }

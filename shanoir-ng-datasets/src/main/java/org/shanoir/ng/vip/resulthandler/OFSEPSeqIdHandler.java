@@ -13,6 +13,8 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.WADODownloaderService;
+import org.shanoir.ng.shared.service.StudyService;
+import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.vip.monitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.property.model.DatasetProperty;
 import org.shanoir.ng.property.service.DatasetPropertyService;
@@ -35,6 +37,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -81,6 +85,7 @@ public class OFSEPSeqIdHandler extends ResultHandler {
             "axis"
 
     };
+
     public static final String TYPE = "type";
     public static final String SERIES = "series";
     public static final String ID = "id";
@@ -101,6 +106,9 @@ public class OFSEPSeqIdHandler extends ResultHandler {
 
     @Autowired
     private SolrService solrService;
+
+    @Autowired
+    private StudyService studyService;
 
 
     @Override
@@ -171,7 +179,9 @@ public class OFSEPSeqIdHandler extends ResultHandler {
 
             for(Dataset ds : datasets){
 
-                JSONObject vol = this.getMatchingVolume(ds, serie);
+                Attributes attributes = this.getDicomAttributes(ds);
+
+                JSONObject vol = this.getMatchingVolume(ds, serie, attributes);
 
                 if(vol == null){
                     LOG.error("No volume from serie [{}] could be match with dataset [{}].", serieId, ds.getId());
@@ -186,6 +196,11 @@ public class OFSEPSeqIdHandler extends ResultHandler {
                 }
 
                 List<DatasetProperty> properties = this.getDatasetPropertiesFromVolume(ds, vol, execution);
+
+                this.setDatasetTags(ds, properties);
+
+                properties.addAll(this.getDatasetPropertiesFromDicom(attributes, ds, execution));
+
                 datasetPropertyService.createAll(properties);
 
             }
@@ -206,6 +221,7 @@ public class OFSEPSeqIdHandler extends ResultHandler {
         DatasetMetadataField.NAME.update(ds, vol.getString(TYPE));
         datasetRepository.save(ds);
 
+
         if(ds.getDatasetAcquisition() instanceof MrDatasetAcquisition){
             DatasetAcquisition acq = ds.getDatasetAcquisition();
             DatasetAcquisitionMetadataField.MR_SEQUENCE_NAME.update(acq, serie.getString(TYPE));
@@ -214,6 +230,22 @@ public class OFSEPSeqIdHandler extends ResultHandler {
 
         solrService.updateDatasets(Arrays.asList(ds.getId()));
 
+    }
+
+    private void setDatasetTags(Dataset ds, List<DatasetProperty> properties) {
+        Map<String, StudyTag> studyTagsByName = studyService.findById(ds.getStudyId()).getStudyTags().stream()
+                .collect(Collectors.toMap(StudyTag::getName, Function.identity()));
+
+        for(DatasetProperty property : properties){
+            String tagName = property.getName() + ":" + property.getValue();
+            if(studyTagsByName.containsKey(tagName)){
+                StudyTag tag = studyTagsByName.get(tagName);
+                if(!ds.getTags().contains(tag)){
+                    ds.getTags().add(tag);
+                }
+            }
+        }
+        datasetRepository.save(ds);
     }
 
 
@@ -270,7 +302,7 @@ public class OFSEPSeqIdHandler extends ResultHandler {
      * @return JSONObject
      * @throws JSONException
      */
-    public JSONObject getMatchingVolume(Dataset dataset, JSONObject serie) throws JSONException, PacsException {
+    public JSONObject getMatchingVolume(Dataset dataset, JSONObject serie, Attributes attributes) throws JSONException {
 
         if(serie.isNull(VOLUMES)){
             LOG.error("Volumes set is null in result file for serie [{}]", serie.getLong(ID));
@@ -278,8 +310,6 @@ public class OFSEPSeqIdHandler extends ResultHandler {
         }
 
         JSONArray volumes = serie.getJSONArray(VOLUMES);
-
-        Attributes attributes = wadoDownloaderService.getDicomAttributesForDataset(dataset);
 
         double[] dsOrientation = attributes.getDoubles(Tag.ImageOrientationPatient);
 
@@ -340,6 +370,31 @@ public class OFSEPSeqIdHandler extends ResultHandler {
 
         return true;
 
+    }
+
+    private List<DatasetProperty> getDatasetPropertiesFromDicom(Attributes attributes, Dataset ds, ExecutionMonitoring monitoring){
+
+        List<DatasetProperty> properties = new ArrayList<>();
+
+        DatasetProperty institutionName = new DatasetProperty();
+        institutionName.setDataset(ds);
+        institutionName.setName("dicom.InstitutionName");
+        institutionName.setValue(attributes.getString(Tag.InstitutionName));
+        institutionName.setProcessing(monitoring);
+        properties.add(institutionName);
+
+        DatasetProperty institutionAddress = new DatasetProperty();
+        institutionAddress.setDataset(ds);
+        institutionAddress.setName("dicom.InstitutionAddress");
+        institutionAddress.setValue(attributes.getString(Tag.InstitutionAddress));
+        institutionAddress.setProcessing(monitoring);
+        properties.add(institutionAddress);
+
+        return properties;
+    }
+
+    private Attributes getDicomAttributes(Dataset ds) throws PacsException {
+        return wadoDownloaderService.getDicomAttributesForDataset(ds);
     }
 
 }

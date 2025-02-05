@@ -39,7 +39,8 @@ import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
     selector: 'eeg-clinical-context',
     templateUrl: 'eeg-clinical-context.component.html',
     styleUrls: ['../clinical-context/clinical-context.component.css', '../shared/import.step.css'],
-    animations: [slideDown, preventInitialChildAnimations]
+    animations: [slideDown, preventInitialChildAnimations],
+    standalone: false
 })
 
 export class EegClinicalContextComponent extends AbstractClinicalContextComponent implements OnInit {
@@ -127,7 +128,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
 
     protected getContext(): EegContextData {
         return new EegContextData(this.study, null, false, this.center, this.acquisitionEquipment,
-            this.subject, this.examination, null, this.coordsystem, null, null, null, null, null, null);
+            this.subject, this.examination, this.coordsystem, null, null, null, null, null, null);
     }
 
     get valid(): boolean {

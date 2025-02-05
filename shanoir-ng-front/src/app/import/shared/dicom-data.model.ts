@@ -27,7 +27,6 @@ export class ImportJob {
     studyId: number;
     studyCardId: number;
     acquisitionEquipmentId: number;
-    converterId: number;
     archive: string;
     subjectName: String;
     studyName: String;
@@ -106,4 +105,5 @@ export class DicomQuery {
     patientBirthDate: string = "";
     studyDescription: string = "";
     studyDate: string = "";
+    modality:  'MR' | 'CT' | 'PT' | 'NM' | 'XA' | '' = 'MR';
 }

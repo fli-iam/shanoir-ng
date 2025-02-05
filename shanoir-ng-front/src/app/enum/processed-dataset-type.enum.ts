@@ -19,6 +19,7 @@ export enum ProcessedDatasetType {
 
     RECONSTRUCTEDDATASET = 'RECONSTRUCTEDDATASET',
     NONRECONSTRUCTEDDATASET = 'NONRECONSTRUCTEDDATASET',
+    EXECUTION_RESULT = 'EXECUTION_RESULT',
     UNDEFINED = 'UNDEFINED'
 
 } export namespace ProcessedDatasetType {
@@ -33,6 +34,8 @@ export enum ProcessedDatasetType {
                 return 'Non-reconstructed'
             case ProcessedDatasetType.RECONSTRUCTEDDATASET:
                 return 'Reconstructed'
+            case ProcessedDatasetType.EXECUTION_RESULT:
+                return 'Execution result'
             default:
                 return 'Undefined'
         }

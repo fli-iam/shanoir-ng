@@ -12,29 +12,30 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 <div [hidden]="!progressStatus?.progress">
-    <progress-bar [progress]="progressStatus?.progress" [text]="'Preparing download'" [unknownDownload]="true" 
+    <progress-bar [progress]="progressStatus?.progress" [text]="'Preparing download'" [unknownDownload]="true"
         [class.error]="progressStatus?.status == -1" [class.done]="progressStatus?.status == 1"></progress-bar>
 </div>
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened"
+        [class.selected]="menuOpened || treeService.isSelected(node.id, 'acquisition')"
         [label]="node.label"
-        [clickable] = "this.node.id != null"
+        [clickable] = "node.id != null"
         awesome="fas fa-procedures"
-        [(opened)]="node.open"
-        (labelClick)="menuOpened = !menuOpened"
+        [(opened)]="node.opened"
+        (labelClick)="menuOpened = withMenu && !menuOpened"
+        [hasBox]="hasBox"
+        [(ngModel)]="node.selected"
+        (chkbxChange)="selectedChange.emit()"
+        [route]="node.route"
         [hasChildren]="hasChildren()"
         (firstOpen)="loadDatasets()"
         [title]="node.title + ' n°' + node.id">
 
-    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && this.node.id != null">
-        <a [routerLink]="this.detailsPath + this.node.id" class="open-new-tab">
+    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu && withMenu && node.id != null">
+        <a [routerLink]="detailsPath + node.id" class="open-new-tab">
             <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
         </a>
-            <menu-item *ngIf="hasEEG && datasetIds && datasetIds.length != 0" label="Download all EEG" awesome="fas fa-download" (click)="download('eeg')"></menu-item>
-            <menu-item *ngIf="hasBids && datasetIds && datasetIds.length != 0" label="Download all BIDS" awesome="fas fa-download" (click)="download('BIDS')"></menu-item>
-            <menu-item [disabled]="!hasDicom || (datasetIds && datasetIds.length == 0) || downloading" label="Download all DICOM" awesome="fas fa-download" (click)="download('dcm')"></menu-item>
-            <menu-item [disabled]="!hasDicom || (datasetIds && datasetIds.length == 0) || downloading" label="Download all Nifti" awesome="fas fa-download" (click)="download('nii')"></menu-item>
+            <menu-item [disabled]="(datasetIds && datasetIds.length == 0) || downloading" label="Download" awesome="fas fa-download" (click)="download()"></menu-item>
             <menu-item *ngIf="node.canDelete"  label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteAcquisition()"></menu-item>
     </dropdown-menu>
 
@@ -47,6 +48,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             (selectedChange)="selectedChange.emit()"
             [hasBox]="hasBox"
             (onDatasetDelete)="onDatasetDelete(i)"
+            [withMenu]="withMenu"
         >
         </dataset-node>
 

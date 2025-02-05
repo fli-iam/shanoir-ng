@@ -34,7 +34,8 @@ import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.ssl.TLS;
 import org.apache.hc.core5.ssl.SSLContexts;
 import org.apache.hc.core5.ssl.TrustStrategy;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.ShUpOnloadConfig;
 
 /**
@@ -56,7 +57,7 @@ import org.shanoir.uploader.ShUpOnloadConfig;
  */
 public class HttpService {
 
-	private static Logger logger = Logger.getLogger(HttpService.class);
+	private static final Logger logger = LoggerFactory.getLogger(HttpService.class);
 
 	private static ServiceConfiguration serviceConfiguration = ServiceConfiguration.getInstance();
 

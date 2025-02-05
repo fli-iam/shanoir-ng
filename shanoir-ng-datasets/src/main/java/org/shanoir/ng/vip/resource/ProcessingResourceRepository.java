@@ -13,4 +13,6 @@ public interface ProcessingResourceRepository  extends CrudRepository<Processing
     List<Long> findDatasetIdsByResourceId(String resourceId);
 
     void deleteByProcessingId(Long processingId);
+
+    void deleteByDatasetId(Long datasetId);
 }

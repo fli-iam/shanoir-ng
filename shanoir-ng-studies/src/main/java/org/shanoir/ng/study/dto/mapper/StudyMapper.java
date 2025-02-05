@@ -17,14 +17,18 @@ package org.shanoir.ng.study.dto.mapper;
 import java.util.List;
 
 import org.mapstruct.DecoratedWith;
+import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
+import org.mapstruct.Named;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
-import org.shanoir.ng.study.dto.PublicStudyDTO;
+import org.shanoir.ng.study.dto.StudyLightDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
+import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.timepoint.TimepointMapper;
 
 /**
@@ -37,39 +41,56 @@ import org.shanoir.ng.timepoint.TimepointMapper;
 @DecoratedWith(StudyDecorator.class)
 public interface StudyMapper {
 
-	/**
-	 * Map list of @Study to list of @StudyDTO.
-	 * 
-	 * @param studies list of studies.
-	 * @return list of studies DTO.
-	 */
-	List<StudyDTO> studiesToStudyDTOs (List<Study> studies);
+	@Named("studies.simple")
+	@IterableMapping(qualifiedByName = "study.simple")
+	List<StudyDTO> studiesToStudyDTOs(List<Study> studies);
 
-	/**
-	 * Map a @Study to a @StudyDTO.
-	 * 
-	 * @param study study to map.
-	 * @return study DTO.
-	 */
+	@Named("study.simple")
 	@Mappings({ @Mapping(target = "experimentalGroupsOfSubjects", ignore = true),
-			@Mapping(target = "nbExaminations", ignore = true),
-			@Mapping(target = "nbSujects", ignore = true),
-			@Mapping(target = "studyCards", ignore = true),
-			@Mapping(target = "studyCenterList", ignore = true),
-			@Mapping(target = "subjectStudyList", ignore = true),
-			@Mapping(target = "tags", ignore = true),
-			@Mapping(target = "storageVolume", ignore = true) }
-	)
-	StudyDTO studyToStudyDTO (Study study);
+		@Mapping(target = "studyCards", ignore = true), @Mapping(target = "studyCenterList", ignore = true),
+		@Mapping(target = "subjectStudyList", ignore = true), @Mapping(target = "tags", ignore = true), @Mapping(target = "studyTags", ignore = true),
+		@Mapping(target = "storageVolume", ignore = true), @Mapping(target = "dataUserAgreementPaths", ignore = true),
+		@Mapping(target = "protocolFilePaths", ignore = true), @Mapping(target = "timepoints", ignore = true)})
+	StudyDTO studyToStudyDTO(Study study);
 	
-	@Mappings({ @Mapping(target = "studyCenterList", ignore = true) })
-	IdNameCenterStudyDTO studyToExtendedIdNameDTO (Study study);
-	
-	List<IdNameCenterStudyDTO> studiesToSimpleStudyDTOs (List<Study> studies);
-	
-	IdName studyToIdNameDTO (Study study);
+	@Named("studies.detailed")
+	@IterableMapping(qualifiedByName = "study.detailed")
+	List<StudyDTO> studiesToStudyDTOsDetailed(List<Study> studies);
 
+	@Named("study.detailed")
+	StudyDTO studyToStudyDTODetailed(Study study);
 
-	PublicStudyDTO studyToPublicStudyDTO (Study study);
+	@Named("studies.light")
+	@IterableMapping(qualifiedByName = "study.light")
+	List<StudyLightDTO> studiesToStudyLightDTOs(List<Study> studies);
+
+	@Named("study.light")
+	@Mapping(target = "studyTags", ignore = true)
+	StudyLightDTO studyToStudyLightDTO(Study study);
+
+	@Named("study.light.no.paths")
+	@Mappings({
+		@Mapping(target = "protocolFilePaths", ignore = true),
+		@Mapping(target = "dataUserAgreementPaths", ignore = true)
+	})
+	StudyLightDTO studyToStudyLightDTONoFilePaths(Study study);
+
+	@Named("studies.idname")
+	@IterableMapping(qualifiedByName = "study.idname")
+	List<IdNameCenterStudyDTO> studiesToSimpleStudyDTOs(List<Study> studies);
+
+	@Named("study.idname")
+	@Mappings({ 
+		@Mapping(target = "studyCenterList", ignore = true),
+		@Mapping(target = "tags", ignore = true) 
+	})
+	IdNameCenterStudyDTO studyToExtendedIdNameDTO(Study study);
+
+	IdName studyToIdNameDTO(Study study);
+
+	@Mappings({
+		@Mapping(target = "subjectPreclinical", source = "subject.preclinical")
+	})
+	SubjectStudyDTO subjectStudyToSubjectStudyDTO(SubjectStudy subjectStudy);
 
 }

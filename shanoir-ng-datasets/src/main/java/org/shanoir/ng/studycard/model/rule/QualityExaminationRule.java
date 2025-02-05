@@ -87,9 +87,13 @@ public class QualityExaminationRule extends AbstractEntity {
     public void apply(Examination examination, QualityCardResult result, WADODownloaderService downloader) {
         apply(examination, null, result, downloader);	        
     }
+
+    public void apply(ExaminationData examination, QualityCardResult result, WADODownloaderService downloader) {
+        apply(examination, null, result, downloader);
+    }
 	
 	public void apply(Examination examination, ExaminationAttributes<?> examinationDicomAttributes, QualityCardResult result, WADODownloaderService downloader) {
-	    ExaminationData examData = convert(examination);
+	    ExaminationData examData = new ExaminationData(examination);
 	    if (examData.getSubjectStudy() == null) {
 	        Logger log = LoggerFactory.getLogger(QualityExaminationRule.class);
 	        log.warn("No subject study in exam " + examination.getId());
@@ -99,7 +103,12 @@ public class QualityExaminationRule extends AbstractEntity {
     }
 
     public void apply(ExaminationData examination, ExaminationAttributes<?> examinationDicomAttributes, QualityCardResult result, WADODownloaderService downloader) {
+        // In case a rule was added without condition (= set as Always in gui)
         if (this.getConditions() == null || this.getConditions().isEmpty()) {
+            QualityCardResultEntry resultEntry = initResult(examination);
+            resultEntry.setTagSet(getQualityTag());
+            resultEntry.setMessage("Tag " + getQualityTag().name() + " was set by the quality card rule without any condition.");
+            result.add(resultEntry);
             result.addUpdatedSubjectStudy( 
                     setTagToSubjectStudy(examination.getSubjectStudy()));
         } else {
@@ -107,7 +116,7 @@ public class QualityExaminationRule extends AbstractEntity {
             if (conditionResult.isFulfilled()) {
                 result.addUpdatedSubjectStudy( 
                         setTagToSubjectStudy(examination.getSubjectStudy()));
-            }            
+            }          
             // if conditions not fulfilled for a VALID tag
             // or if conditions fulfilled for a ERROR or WARNING tag
             // then add an entry to the report
@@ -124,7 +133,7 @@ public class QualityExaminationRule extends AbstractEntity {
                 result.add(resultEntry);
             }
         }
-    }            
+    }
           
     
     /**
@@ -154,12 +163,12 @@ public class QualityExaminationRule extends AbstractEntity {
         ConditionResult condResult = new ConditionResult();
         Collections.sort(conditions, new ConditionComparator()); // sort by level
         boolean pilotedByDicomAttributes;
-        ExaminationAttributes<Long> examinationAttributesCache = new ExaminationAttributes<Long>(downloader.getWadoURLHandler());
+        ExaminationAttributes<Long> examinationAttributesCache = null;
         if (dicomAttributes != null) {
             pilotedByDicomAttributes = true;
         } else {
             pilotedByDicomAttributes = false;
-            examinationAttributesCache = new ExaminationAttributes<Long>(downloader.getWadoURLHandler());
+            examinationAttributesCache = new ExaminationAttributes<>(downloader.getWadoURLHandler());
         }
         for (StudyCardCondition condition : getConditions()) {
             StringBuffer msg = new StringBuffer();
@@ -200,25 +209,6 @@ public class QualityExaminationRule extends AbstractEntity {
         result.setExaminationDate(examination.getExaminationDate());
         result.setExaminationComment(examination.getExaminationComment());
         return result;
-    }
-    
-    private ExaminationData convert(Examination examination) {
-        if (examination == null) throw new IllegalArgumentException("examination can't be null");
-        if (examination.getDatasetAcquisitions() == null) throw new IllegalArgumentException("examination acquisitions can't be null");
-        if (examination.getStudy() == null) throw new IllegalArgumentException("study can't be null");
-        if (examination.getStudy().getSubjectStudyList() == null) throw new IllegalArgumentException("subjectStudyList can't be null");
-        // Keep only MR acquisitions
-        // List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions().stream().filter(a -> a instanceof MrDatasetAcquisition).collect(Collectors.toList());
-        ExaminationData examData = new ExaminationData();
-        examData.setDatasetAcquisitions(examination.getDatasetAcquisitions());
-        examData.setExaminationComment(examination.getComment());
-        examData.setExaminationDate(examination.getExaminationDate());
-        examData.setSubjectName(examination.getSubject().getName());
-        examData.setSubjectStudy(
-                examination.getSubject().getSubjectStudyList().stream()
-                    .filter(ss -> ss.getStudy().getId().equals(examination.getStudy().getId()))
-                    .findFirst().orElse(null));
-        return examData;
     }
     
     public class ConditionComparator implements Comparator<StudyCardCondition> {

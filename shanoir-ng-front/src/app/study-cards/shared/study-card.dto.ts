@@ -13,11 +13,7 @@
  */
 import { Injectable } from '@angular/core';
 
-import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../../acquisition-equipments/shared/acquisition-equipment.service';
-import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
-import { NiftiConverterService } from '../../niftiConverters/nifti.converter.service';
-import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { DicomService } from './dicom.service';
 import { DicomTag, Operation, StudyCard, StudyCardAssignment, StudyCardCondition, StudyCardRule } from './study-card.model';
@@ -32,7 +28,6 @@ export class StudyCardDTOService extends StudyCardDTOServiceAbstract {
     constructor(
         private acqEqService: AcquisitionEquipmentService,
         private studyService: StudyService,
-        private niftiService: NiftiConverterService,
         private dicomService: DicomService,
         private coilService: CoilService
     ) {
@@ -50,7 +45,6 @@ export class StudyCardDTOService extends StudyCardDTOServiceAbstract {
         return Promise.all([
             this.studyService.get(dto.studyId).then(study => result.study = study),
             dto.acquisitionEquipmentId ? this.acqEqService.get(dto.acquisitionEquipmentId).then(acqEq => result.acquisitionEquipment = acqEq) : null,
-            this.niftiService.get(dto.niftiConverterId).then(nifti => result.niftiConverter = nifti),
             this.dicomService.getDicomTags().then(tags => this.completeDicomTagNames(result, tags)),
             this.coilService.getAll().then(coils => this.completeCoils(result, coils))
         ]).then(([]) => {
@@ -80,6 +74,13 @@ export class StudyCardDTOService extends StudyCardDTOServiceAbstract {
                         }
                     }
                 }
+                rule.conditions?.forEach(cond => {
+                    cond.values?.forEach((val, index) => {
+                        if (StudyCardDTOService.isCoil(cond.shanoirField)) {
+                            if (val instanceof Coil) cond.values[index] = coils.find(coil => coil.id == (val as Coil).id);
+                        }
+                    });
+                });
             }
         }
     }
@@ -108,12 +109,6 @@ export class StudyCardDTOService extends StudyCardDTOServiceAbstract {
                 for (let entity of result) {
                     if (entity.acquisitionEquipment) 
                         entity.acquisitionEquipment = acqs.find(acq => acq.id == entity.acquisitionEquipment?.id);
-                }
-            }),
-            this.niftiService.getAll().then(niftis => {
-                for (let entity of result) {
-                    if (entity.niftiConverter) 
-                        entity.niftiConverter = niftis.find(nifti => nifti.id == entity.niftiConverter.id);
                 }
             }),
             // this.dicomService.getDicomTags().then(tags => {

@@ -14,6 +14,8 @@ import java.io.IOException;
  */
 public interface BIDSService {
 
+	File getBidsFolderpath(Long studyId, String studyName);
+
 	/**
 	 * Creates a full BIDS folder with all the data
 	 * @param studyId the study ID for which we create the BIDS folder
@@ -21,14 +23,6 @@ public interface BIDSService {
 	 * @return the folder File named [study_id]_[study_name]
 	 */
 	public File exportAsBids(Long studyId, String studyName) throws IOException ;
-
-	/**
-	 * Outdates a study (or deletes it simply) when an update is performed on the study:
-	 * Update, delete subject & study
-	 * Add or delete dataset / examination
-	 * @param  the shnoir event
-	 */
-	public void deleteBids(String event);
 
 	/**
 	 * Deletes the folder of a given study to update / delete

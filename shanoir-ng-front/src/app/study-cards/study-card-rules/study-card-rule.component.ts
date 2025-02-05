@@ -29,12 +29,14 @@ import { Option } from '../../shared/select/select.component';
 import { SuperPromise } from '../../utils/super-promise';
 import { StudyCardAssignment, StudyCardCondition, StudyCardRule } from '../shared/study-card.model';
 import { ShanoirMetadataField, StudyCardActionComponent } from './action/action.component';
+import { FormGroup } from '@angular/forms';
 
 
 @Component({
     selector: 'study-card-rule',
     templateUrl: 'study-card-rule.component.html',
-    styleUrls: ['study-card-rule.component.css']
+    styleUrls: ['study-card-rule.component.css'],
+    standalone: false
 })
 export class StudyCardRuleComponent implements OnChanges {
 
@@ -51,9 +53,9 @@ export class StudyCardRuleComponent implements OnChanges {
     @Input() showErrors: boolean = false;
     @ViewChildren(StudyCardActionComponent) assignmentChildren: QueryList<StudyCardActionComponent>;
     touched: boolean = false;
-
     assignmentFieldOptions: Option<string>[];
     conditionFieldOptions: Option<string>[];
+    @Input() addSubForm: (subForm: FormGroup) => FormGroup;
 
     constructor(public elementRef: ElementRef) { }
 

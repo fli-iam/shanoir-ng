@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -24,18 +24,20 @@ import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 @Component({
     selector: 'solr-paging-criterion',
     templateUrl: 'solr.paging-criterion.component.html',
-    styleUrls: ['solr.criterion.component.css', 'solr.paging-criterion.component.css'], 
+    styleUrls: ['solr.criterion.component.css', 'solr.paging-criterion.component.css'],
     animations: [slideDown, slideRight],
     providers: [
         {
-          provide: NG_VALUE_ACCESSOR,
-          useExisting: forwardRef(() => SolrPagingCriterionComponent),
-          multi: true,
-        }]  
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => SolrPagingCriterionComponent),
+            multi: true,
+        }
+    ],
+    standalone: false
 })
 
 export class SolrPagingCriterionComponent implements ControlValueAccessor, OnChanges {
-   
+
     @Input() getPage: (pageable: FacetPageable, facetName: string) => Promise<FacetResultPage>;
     displayedFacets: FacetField[] = [];
     selectedFacets: FacetField[] = [];
@@ -69,7 +71,7 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
             this.reloadSettings();
         }
     }
-    
+
     goToPage(pageNumber: number): Promise<void> {
         let pageable: FacetPageable = new FacetPageable(pageNumber, SolrPagingCriterionComponent.PAGE_SIZE, this.sortMode, this.filterText);
         this.loading = true;
@@ -86,9 +88,11 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
 
     loadPage(page: FacetResultPage) {
         if (!page || !page.content || page.content.length == 0) {
+            if (this.currentPage?.number != page?.number - 1) {
+                this.displayedFacets = [];
+                this.currentPage = page ? page : new Page();
+            }
             this.maxPage = this.currentPage ? this.currentPage.number : 1;
-            this.displayedFacets = [];
-            this.currentPage = page ? page : new Page();
         } else {
             if (page.content.length < SolrPagingCriterionComponent.PAGE_SIZE) {
                 this.maxPage = page.number;
@@ -133,7 +137,7 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
         this.filterText = "";
         this.onFilterChange();
     }
-    
+
     onCheckChange(facet: FacetField) {
         if (facet.checked) {
             this.selectedFacets.push(facet);
@@ -146,11 +150,11 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
         this.propagateChange(selectedValues);
         this.onChange.emit(selectedValues);
     }
-    
+
     updateHasChecked() {
         this.hasChecked = this.selectedFacets.length > 0;
     }
-    
+
     onFilterChange() {
         // wait till the user has stopped typing for 500ms before querying
         if (this.filterTimeout <= 0) {

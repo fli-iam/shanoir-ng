@@ -23,7 +23,8 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 
 @Component({
     selector: 'manufacturer-detail',
-    templateUrl: 'manufacturer.component.html'
+    templateUrl: 'manufacturer.component.html',
+    standalone: false
 })
 
 export class ManufacturerComponent extends EntityComponent<Manufacturer> {
@@ -45,11 +46,11 @@ export class ManufacturerComponent extends EntityComponent<Manufacturer> {
     }
 
     initView(): Promise<void> {
-        return this.getManufacturer();
+        return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
-        return this.getManufacturer();
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {

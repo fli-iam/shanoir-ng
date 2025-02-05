@@ -14,22 +14,36 @@
 
 package org.shanoir.ng.dataset.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-import jakarta.persistence.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.dataset.modality.*;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+import org.shanoir.ng.tag.model.StudyTag;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Transient;
 
 /**
  * Dataset.
@@ -39,25 +53,25 @@ import java.util.List;
  */
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-@JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "type")
+@JsonTypeInfo(use = Id.NAME, include = As.EXISTING_PROPERTY, property = "type", defaultImpl=GenericDataset.class, visible=true)
 @JsonSubTypes({
-		@JsonSubTypes.Type(value = CalibrationDataset.class, name = "Calibration"),
-		@JsonSubTypes.Type(value = CtDataset.class, name = "Ct"),
-		@JsonSubTypes.Type(value = EegDataset.class, name = "Eeg"),
-		@JsonSubTypes.Type(value = MegDataset.class, name = "Meg"),
-		@JsonSubTypes.Type(value = MeshDataset.class, name = "Mesh"),
-		@JsonSubTypes.Type(value = MrDataset.class, name = "Mr"),
-		@JsonSubTypes.Type(value = GenericDataset.class, name = "Generic"),
-		@JsonSubTypes.Type(value = ParameterQuantificationDataset.class, name = "ParameterQuantification"),
-		@JsonSubTypes.Type(value = PetDataset.class, name = "Pet"),
-		@JsonSubTypes.Type(value = RegistrationDataset.class, name = "Registration"),
-		@JsonSubTypes.Type(value = SegmentationDataset.class, name = "Segmentation"),
-		@JsonSubTypes.Type(value = SpectDataset.class, name = "Spect"),
-		@JsonSubTypes.Type(value = StatisticalDataset.class, name = "Statistical"),
-		@JsonSubTypes.Type(value = TemplateDataset.class, name = "Template"),
-		@JsonSubTypes.Type(value = BidsDataset.class, name = "BIDS"),
-		@JsonSubTypes.Type(value = MeasurementDataset.class, name = "Measurement"),
-		@JsonSubTypes.Type(value = XaDataset.class, name = "Xa") })
+		@JsonSubTypes.Type(value = CalibrationDataset.class, name = DatasetType.Names.Calibration),
+		@JsonSubTypes.Type(value = CtDataset.class, name = DatasetType.Names.Ct),
+		@JsonSubTypes.Type(value = EegDataset.class, name = DatasetType.Names.Eeg),
+		@JsonSubTypes.Type(value = MegDataset.class, name = DatasetType.Names.Meg),
+		@JsonSubTypes.Type(value = MeshDataset.class, name = DatasetType.Names.Mesh),
+		@JsonSubTypes.Type(value = MrDataset.class, name = DatasetType.Names.Mr),
+		@JsonSubTypes.Type(value = GenericDataset.class, name = DatasetType.Names.Generic),
+		@JsonSubTypes.Type(value = ParameterQuantificationDataset.class, name = DatasetType.Names.ParameterQuantification),
+		@JsonSubTypes.Type(value = PetDataset.class, name = DatasetType.Names.Pet),
+		@JsonSubTypes.Type(value = RegistrationDataset.class, name = DatasetType.Names.Registration),
+		@JsonSubTypes.Type(value = SegmentationDataset.class, name = DatasetType.Names.Segmentation),
+		@JsonSubTypes.Type(value = SpectDataset.class, name = DatasetType.Names.Spect),
+		@JsonSubTypes.Type(value = StatisticalDataset.class, name = DatasetType.Names.Statistical),
+		@JsonSubTypes.Type(value = TemplateDataset.class, name = DatasetType.Names.Template),
+		@JsonSubTypes.Type(value = BidsDataset.class, name = DatasetType.Names.BIDS),
+		@JsonSubTypes.Type(value = MeasurementDataset.class, name = DatasetType.Names.Measurement),
+		@JsonSubTypes.Type(value = XaDataset.class, name = DatasetType.Names.Xa) })
 public abstract class Dataset extends AbstractEntity {
 
 	/**
@@ -81,7 +95,7 @@ public abstract class Dataset extends AbstractEntity {
 
 	/** Dataset Processing. */
 	@JsonIgnore
-	@ManyToOne(cascade = CascadeType.REMOVE)
+	@ManyToOne
 	@JoinColumn(name = "dataset_processing_id")
 	private DatasetProcessing datasetProcessing;
 
@@ -131,7 +145,16 @@ public abstract class Dataset extends AbstractEntity {
 	@OneToOne(cascade = CascadeType.ALL)
 	private DatasetMetadata updatedMetadata;
 
-	private Long sourceId;
+	@ManyToMany(fetch = FetchType.LAZY)
+	@JoinTable(name = "DATASET_TAG", joinColumns = @JoinColumn(name = "DATASET_ID"), inverseJoinColumns = @JoinColumn(name = "STUDY_TAG_ID"))
+	private List<StudyTag> tags;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "source_id")
+	private Dataset source;
+
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "source", cascade = CascadeType.ALL)
+	private List<Dataset> copies;
 
 	@JsonIgnore
 	@Transient
@@ -165,11 +188,11 @@ public abstract class Dataset extends AbstractEntity {
 		}
 
 		this.importedStudyId = d.getImportedStudyId();
-		this.studyId = d.getStudyId();
 		this.subjectId = d.getSubjectId();
 		this.downloadable = d.downloadable;
 		this.updatedMetadata = new DatasetMetadata(d.getUpdatedMetadata());
-		this.sourceId = d.getSourceId();
+		this.source = d.getSource();
+		this.copies = d.getCopies();
 	}
 
 	/**
@@ -281,15 +304,22 @@ public abstract class Dataset extends AbstractEntity {
 			if (creationDate != null) {
 				result.append(" ").append(creationDate.toString());
 			}
-			String modalityType = "?";
-			if (updatedMetadata != null && updatedMetadata.getDatasetModalityType() != null) {
-				modalityType = updatedMetadata.getDatasetModalityType().name();
-			} else if (originMetadata != null && originMetadata.getDatasetModalityType() != null) {
-				modalityType = originMetadata.getDatasetModalityType().name();
-			}
-			result.append(" ").append(modalityType.split("_")[0]);
+			DatasetModalityType modalityType = getModalityType();
+			String modalityTypeStr;
+			if (modalityType == null) modalityTypeStr = "?";
+			else modalityTypeStr = modalityType.name();
+			result.append(" ").append(modalityTypeStr.split("_")[0]);
 			return result.toString();
 		}
+	}
+
+	@JsonIgnore @Transient
+	public DatasetModalityType getModalityType() {
+		if (updatedMetadata != null && updatedMetadata.getDatasetModalityType() != null) {
+			return updatedMetadata.getDatasetModalityType();
+		} else if (originMetadata != null && originMetadata.getDatasetModalityType() != null) {
+			return originMetadata.getDatasetModalityType();
+		} else return null;
 	}
 
 	/**
@@ -353,12 +383,15 @@ public abstract class Dataset extends AbstractEntity {
 	}
 	
 	/**
-	 * @return the studyId
+	 * @return the centerId
 	 */
 	@Transient
 	public Long getCenterId() {
 		if (getDatasetAcquisition() == null || getDatasetAcquisition().getExamination() == null) {
-			return studyId;
+			if (getDatasetProcessing() != null && getDatasetProcessing().getInputDatasets() != null) {
+				return getDatasetProcessing().getInputDatasets().get(0).getCenterId();
+			}
+			return null;
 		}
 		return getDatasetAcquisition().getExamination().getCenterId();
 	}
@@ -406,7 +439,7 @@ public abstract class Dataset extends AbstractEntity {
 	 * @return the type
 	 */
 	@Transient
-	public abstract String getType();
+	public abstract DatasetType getType();
 
 	/**
 	 * You probably want to use getStudyId() instead.
@@ -434,12 +467,12 @@ public abstract class Dataset extends AbstractEntity {
 		this.downloadable = downloadable;
 	}
 
-	public Long getSourceId() {
-		return sourceId;
+	public Dataset getSource() {
+		return source;
 	}
 
-	public void setSourceId(Long sourceId) {
-		this.sourceId = sourceId;
+	public void setSource(Dataset source) {
+		this.source = source;
 	}
 
 	public String getSOPInstanceUID() {
@@ -449,4 +482,25 @@ public abstract class Dataset extends AbstractEntity {
 	public void setSOPInstanceUID(String sOPInstanceUID) {
 		SOPInstanceUID = sOPInstanceUID;
 	}
+
+	public boolean getInPacs() {
+		return getDatasetExpressions() != null && getDatasetExpressions().size() > 0;
+	}
+
+	public List<StudyTag> getTags() {
+		return tags;
+	}
+
+	public void setTags(List<StudyTag> tags) {
+		this.tags = tags;
+	}
+
+	public List<Dataset> getCopies() {
+		return copies;
+	}
+
+	public void setCopies(List<Dataset> copies) {
+		this.copies = copies;
+	}
+
 }

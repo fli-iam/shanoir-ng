@@ -25,8 +25,6 @@ import { Examination } from '../../examinations/shared/examination.model';
 import { ExaminationService } from '../../examinations/shared/examination.service';
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
 import { SubjectExaminationPipe } from '../../examinations/shared/subject-examination.pipe';
-import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
-import { NiftiConverterService } from '../../niftiConverters/nifti.converter.service';
 import { ConsoleService } from '../../shared/console/console.service';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { ShanoirError } from '../../shared/models/error.model';
@@ -55,14 +53,12 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     public acquisitionEquipmentOptions: Option<AcquisitionEquipment>[] = [];
     public subjects: SubjectWithSubjectStudy[] = [];
     public examinations: SubjectExamination[] = [];
-    public niftiConverters: NiftiConverter[] = [];
     public study: Study;
     public studycard: StudyCard;
     public center: Center;
     public acquisitionEquipment: AcquisitionEquipment;
     public subject: SubjectWithSubjectStudy;
     public examination: SubjectExamination;
-    public niftiConverter: NiftiConverter;
     public subjectNamePrefix: string;
     protected subscribtions: Subscription[] = [];
     public subjectTypes: Option<string>[] = [
@@ -85,7 +81,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     constructor(
             public studyService: StudyService,
             public centerService: CenterService,
-            public niftiConverterService: NiftiConverterService,
             public subjectService: SubjectService,
             public examinationService: ExaminationService,
             protected router: Router,
@@ -106,8 +101,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         breadcrumbsService.nameStep('3. Context');
 
         this.preConstructor();
-        this.niftiConverters = [];
-        this.niftiConverterService.getAll().then(niftiConverters => this.niftiConverters = niftiConverters);
         this.postConstructor()
     }
 
@@ -143,7 +136,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         let acquisitionEquipment = this.importDataService.contextBackup(this.stepTs).acquisitionEquipment;
         let subject = this.importDataService.contextBackup(this.stepTs).subject;
         let examination = this.importDataService.contextBackup(this.stepTs).examination;
-        let niftiConverter = this.importDataService.contextBackup(this.stepTs).niftiConverter;
         this.study = study;
         let studyOption = this.studyOptions.find(s => s.value.id == study.id);
         if (studyOption) {
@@ -167,9 +159,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
                         return this.onSelectExam();
                     }
                 }));
-            }
-            if (niftiConverter) {
-                this.niftiConverter = niftiConverter;
             }
         }));
         return Promise.all(promises).then();
@@ -210,7 +199,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     private completeStudyCenters(): Promise<void> {
-        return Promise.all([this.studyService.getStudyNamesAndCenters(), this.centerService.getAll()])
+        return Promise.all([this.studyService.getAll(), this.centerService.getAll()])
             .then(([allStudies, allCenters]) => {
                 this.studyOptions = [];
                 this.allCenters = allCenters;
@@ -258,19 +247,25 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         let studyEquipments: AcquisitionEquipment[] = [];
         if (!study) return Promise.resolve([]);
         /* find equipments for this study - needed for checking studycards compatibilities */
-        study.studyCenterList.forEach(sc => {
-            sc.center.acquisitionEquipments.forEach(eq => {
+        study.studyCenterList.forEach(studyCenter => {
+            studyCenter.center.acquisitionEquipments.forEach(eq => {
                 if (studyEquipments.findIndex(se => se.id == eq.id) == -1) studyEquipments.push(eq);
             });
         });
         /* build the studycards options and set their compatibilies */
-        return this.studycardService.getAllForStudy(study.id).then(studycards => {
-            if (!studycards) studycards = [];
-            return studycards.map(sc => {
-                let opt = new Option(sc, sc.name);
-                let scEq = sc.acquisitionEquipment ? studyEquipments.find(se => se.id == sc.acquisitionEquipment.id) : null;
-                opt.compatible = this.acqEqCompatible(scEq);
-                return opt;
+        return this.centerService.getCentersByStudyId(study.id).then(centers => {
+            let accessibleCenterIds = centers.map(center => center.id);
+            return this.studycardService.getAllForStudy(study.id).then(studyCards => {
+                if (!studyCards) studyCards = [];
+
+                return studyCards.filter(studyCard => {
+                    return accessibleCenterIds.includes(studyCard.acquisitionEquipment.center.id);
+                }).map(studyCard => {
+                    let opt = new Option(studyCard, studyCard.name);
+                    let scEq = studyCard.acquisitionEquipment ? studyEquipments.find(se => se.id == studyCard.acquisitionEquipment.id) : null;
+                    opt.compatible = this.acqEqCompatible(scEq);
+                    return opt;
+                });
             });
         });
     }
@@ -323,7 +318,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     /**
-     * auto-select center, equipment, nifti converter from studycard
+     * auto-select center, equipment from studycard
      */
     private selectDataFromStudyCard(studyCard: StudyCard, studyCenterList: StudyCenter[]) {
         if (studyCard && studyCenterList) {
@@ -334,7 +329,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
                 return (!!eqFound);
             })
             this.center = scFound ? scFound.center : this.studycard?.acquisitionEquipment?.center;
-            this.niftiConverter = this.studycard.niftiConverter;
             return this.onSelectCenter().then(() => {
                 this.acquisitionEquipment = eqFound;
             });
@@ -373,9 +367,11 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
                 return this.selectDefaultCenter(options);
             });
         }
-
         let subjectsPromise: Promise<void> = this.getSubjectList(this.study?.id).then(subjects => {
             this.subjects = subjects ? subjects : [];
+        });
+        let tagsPromise: Promise<void> = this.studyService.getTagsFromStudyId(this.study?.id).then(tags => {
+            this.study.tags = tags ? tags : [];
         });
         return Promise.all([studycardsOrCentersPromise, subjectsPromise]).finally(() => this.loading--)
             .then(() => this.onContextChange());
@@ -450,10 +446,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         this.onContextChange();
     }
 
-    public onSelectNifti(): void {
-        this.onContextChange();
-    }
-
     public onContextChange() {
         this.importDataService.setContextBackup(this.stepTs, this.getContext());
         if (this.valid) {
@@ -463,7 +455,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
 
     protected getContext(): any {
         return new ContextData(this.study, this.studycard, this.useStudyCard, this.center, this.acquisitionEquipment,
-            this.subject, this.examination, this.niftiConverter, null, null, null, null, null, null);
+            this.subject, this.examination, null, null, null, null, null, null);
     }
 
     public openCreateCenter = () => {
@@ -573,8 +565,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         });
     }
 
-
-
     private examToSubjectExam(examination: Examination): SubjectExamination {
         if (!examination) return;
         // Add the new created exam to the select box and select it
@@ -582,6 +572,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         subjectExam.id = examination.id;
         subjectExam.examinationDate = examination.examinationDate;
         subjectExam.comment = examination.comment;
+        subjectExam.preclinical = examination.preclinical;
         return subjectExam;
     }
 
@@ -610,7 +601,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             && !!context.acquisitionEquipment
             && !!context.subject?.subjectStudy?.subjectType
             && !!context.examination
-            && !!context.niftiConverter
         );
     }
 

@@ -17,6 +17,8 @@ import javax.swing.border.EmptyBorder;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.action.init.LoginPanelActionListener;
 import org.shanoir.uploader.action.init.StartupStateContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * 
@@ -25,6 +27,7 @@ import org.shanoir.uploader.action.init.StartupStateContext;
  * @author atouboul
  * 
  */
+@Component
 public class LoginConfigurationPanel extends JPanel {
 
 	public JLabel loginLabel;
@@ -32,8 +35,12 @@ public class LoginConfigurationPanel extends JPanel {
 	public JLabel passwordLabel;
 	public JPasswordField passwordText;
 	public JButton connect;
+	public JButton connectLater;
 
-	public LoginConfigurationPanel(StartupStateContext sSC) {
+	@Autowired
+	private LoginPanelActionListener loginPanelActionListener;
+
+	public void configure(StartupStateContext sSC) {
 		Container container = new Container();
 		container.setLayout(new GridBagLayout());
 		GridBagConstraints shanoirStartupGBC = new GridBagConstraints();
@@ -52,7 +59,7 @@ public class LoginConfigurationPanel extends JPanel {
 		container.add(loginLabel, shanoirStartupGBC);
 
 		loginText = new JTextField("");
-		loginText.setPreferredSize(new Dimension(150, 20));
+		loginText.setPreferredSize(new Dimension(200, 20));
 		loginText.setHorizontalAlignment(SwingConstants.LEFT);
 		shanoirStartupGBC.weightx = 0.7;
 		shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
@@ -71,7 +78,7 @@ public class LoginConfigurationPanel extends JPanel {
 		container.add(passwordLabel, shanoirStartupGBC);
 
 		passwordText = new JPasswordField();
-		passwordText.setPreferredSize(new Dimension(150, 20));
+		passwordText.setPreferredSize(new Dimension(200, 20));
 		passwordText.setHorizontalAlignment(SwingConstants.LEFT);
 		shanoirStartupGBC.weightx = 0.7;
 		shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
@@ -81,7 +88,7 @@ public class LoginConfigurationPanel extends JPanel {
 		container.add(passwordText, shanoirStartupGBC);
 
 		connect = new JButton(ShUpConfig.resourceBundle.getString("shanoir.uploader.connect"));
-		connect.setPreferredSize(new Dimension(150, 20));
+		connect.setPreferredSize(new Dimension(200, 20));
 		connect.setHorizontalAlignment(SwingConstants.CENTER);
 		shanoirStartupGBC.weightx = 0.7;
 		shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
@@ -89,9 +96,20 @@ public class LoginConfigurationPanel extends JPanel {
 		shanoirStartupGBC.gridx = 2;
 		shanoirStartupGBC.gridy = 2;
 		container.add(connect, shanoirStartupGBC);
+
+		connectLater = new JButton(ShUpConfig.resourceBundle.getString("shanoir.uploader.connect.later"));
+		connectLater.setPreferredSize(new Dimension(200, 20));
+		connectLater.setHorizontalAlignment(SwingConstants.CENTER);
+		shanoirStartupGBC.weightx = 0.7;
+		shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
+		shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
+		shanoirStartupGBC.gridx = 2;
+		shanoirStartupGBC.gridy = 3;
+		container.add(connectLater, shanoirStartupGBC);
 		
-		LoginPanelActionListener lPAL = new LoginPanelActionListener(this, sSC);
-		connect.addActionListener(lPAL);
-		
+		loginPanelActionListener.configure(this, sSC);
+		connect.addActionListener(loginPanelActionListener);
+		connectLater.addActionListener(loginPanelActionListener);
 	}
+
 }

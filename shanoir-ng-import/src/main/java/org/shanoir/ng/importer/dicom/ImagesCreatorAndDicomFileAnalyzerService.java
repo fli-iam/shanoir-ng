@@ -32,13 +32,13 @@ import org.dcm4che3.io.DicomInputStream;
 import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
 import org.shanoir.ng.importer.model.Image;
 import org.shanoir.ng.importer.model.Instance;
-import org.shanoir.ng.importer.model.InstitutionDicom;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.dicom.EchoTime;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
+import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.slf4j.Logger;
@@ -72,12 +72,14 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 
 	private static final String SUFFIX_DCM = ".dcm";
 	
+	private static final String UNKNOWN = "unknown";
+
 	private static final String YES = "YES";
 
 	@Autowired
 	private ShanoirEventService eventService;
 
-	public void createImagesAndAnalyzeDicomFiles(List<Patient> patients, String folderFileAbsolutePath, boolean isImportFromPACS, ShanoirEvent event)
+	public void createImagesAndAnalyzeDicomFiles(List<Patient> patients, String folderFileAbsolutePath, boolean isImportFromPACS, ShanoirEvent event, boolean isFromShUpQualityControl)
 			throws FileNotFoundException {
 		// patient level
 		for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
@@ -98,7 +100,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 							eventService.publishEvent(event);
 						}
 						try {
-							filterAndCreateImages(folderFileAbsolutePath, serie, isImportFromPACS);
+							filterAndCreateImages(folderFileAbsolutePath, serie, isImportFromPACS, isFromShUpQualityControl);
 						} catch (Exception e) { // one serie/file could cause problems, log and mark as erroneous, but continue with next serie
 							handleError(event, nbSeries, cpt, serie, e);
 						}
@@ -151,14 +153,14 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param serie
 	 * @throws FileNotFoundException
 	 */
-	private void filterAndCreateImages(String folderFileAbsolutePath, Serie serie, boolean isImportFromPACS) throws Exception {
+	private void filterAndCreateImages(String folderFileAbsolutePath, Serie serie, boolean isImportFromPACS, boolean isFromShUpQualityControl) throws Exception {
 		List<Image> images = new ArrayList<Image>();
 		List<Instance> instances = serie.getInstances();
 		if (instances != null) {
 			for (Iterator<Instance> instancesIt = instances.iterator(); instancesIt.hasNext();) {
 				Instance instance = instancesIt.next();
 				File instanceFile = getFileFromInstance(instance, serie, folderFileAbsolutePath, isImportFromPACS);
-				processDicomFilePerInstanceAndCreateImage(instanceFile, images, folderFileAbsolutePath);
+				processDicomFilePerInstanceAndCreateImage(instanceFile, images, folderFileAbsolutePath, isFromShUpQualityControl);
 			}
 			/**
 			 * Old versions of ShUp v7.0.1, still installed and running, send "ignored" series.
@@ -230,7 +232,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param nonImages
 	 * @param images
 	 */
-	private void processDicomFilePerInstanceAndCreateImage(File dicomFile, List<Image> images, String folderFileAbsolutePath) throws Exception {
+	private void processDicomFilePerInstanceAndCreateImage(File dicomFile, List<Image> images, String folderFileAbsolutePath, boolean isFromShUpQualityControl) throws Exception {
 		try (DicomInputStream dIS = new DicomInputStream(dicomFile)) { // keep try to finally close input stream
 			Attributes attributes = dIS.readDataset();
 			// Some DICOM files with a particular SOPClassUID are ignored: such as Raw Data Storage etc.
@@ -238,11 +240,18 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				// do nothing here as instances list will be emptied after split between images and non-images
 			} else {
 				Image image = new Image();
+				String relativeFilePath = new String();
 				/**
 				 * Attention: the path of each image is always relative: either to the temporary folder created
-				 * with dicom zip import during the upload or with the DicomStoreSCPServer folder for PACS import
+				 * with dicom zip import during the upload or with the DicomStoreSCPServer folder for PACS import.
+				 * If the import is from ShanoirUploader, the path stays absolute to allow the execution of quality control.
 				 */
-				String relativeFilePath = dicomFile.getAbsolutePath().replace(folderFileAbsolutePath + SLASH, "");
+				if (!isFromShUpQualityControl) {
+					relativeFilePath = dicomFile.getAbsolutePath().replace(folderFileAbsolutePath + SLASH, "");
+				} else {
+					relativeFilePath = dicomFile.getAbsolutePath();
+				}
+				
 				image.setPath(relativeFilePath);
 				addImageSeparateDatasetsInfo(image, attributes);
 				images.add(image);
@@ -339,13 +348,18 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 */
 	private void addSeriesEquipment(Serie serie, Attributes attributes) {
 		if (serie.getEquipment() == null || !serie.getEquipment().isComplete()) {
-			String manufacturer = attributes.getString(Tag.Manufacturer);
-			String manufacturerModelName = attributes.getString(Tag.ManufacturerModelName);
-			String deviceSerialNumber = attributes.getString(Tag.DeviceSerialNumber);
-			String stationName = attributes.getString(Tag.StationName);
-			String magneticFieldStrength = attributes.getString(Tag.MagneticFieldStrength);
+			String manufacturer = getOrSetToUnknown(attributes, Tag.Manufacturer, UNKNOWN);
+			String manufacturerModelName = getOrSetToUnknown(attributes, Tag.ManufacturerModelName, UNKNOWN);
+			String deviceSerialNumber = getOrSetToUnknown(attributes, Tag.DeviceSerialNumber, UNKNOWN);
+			String stationName = getOrSetToUnknown(attributes, Tag.StationName, UNKNOWN);
+			String magneticFieldStrength = getOrSetToUnknown(attributes, Tag.MagneticFieldStrength, UNKNOWN);
 			serie.setEquipment(new EquipmentDicom(manufacturer, manufacturerModelName, deviceSerialNumber, stationName, magneticFieldStrength));
 		}
+	}
+	
+	private String getOrSetToUnknown(Attributes attributes, int tag, String defaultValue) {
+		String value = attributes.getString(tag);
+		return (value == null || value.isEmpty()) ? defaultValue : value;
 	}
 
 	/**
@@ -357,8 +371,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	private void addSeriesCenter(Serie serie, Attributes attributes) {
 		if (serie.getInstitution() == null) {
 			InstitutionDicom institution = new InstitutionDicom();
-			String institutionName = attributes.getString(Tag.InstitutionName);
-			String institutionAddress = attributes.getString(Tag.InstitutionAddress);
+			String institutionName = getOrSetToUnknown(attributes, Tag.InstitutionName, UNKNOWN);
+			String institutionAddress = getOrSetToUnknown(attributes, Tag.InstitutionAddress, UNKNOWN);
 			institution.setInstitutionName(institutionName);
 			institution.setInstitutionAddress(institutionAddress);
 			serie.setInstitution(institution);
@@ -378,6 +392,13 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			String sopClassUIDDicomFile = attributes.getString(Tag.SOPClassUID);
 			if (StringUtils.isNotEmpty(sopClassUIDDicomFile)) {
 				serie.setSopClassUID(sopClassUIDDicomFile);
+			}
+		}
+		if (StringUtils.isEmpty(serie.getSeriesNumber())) {
+			// has not been sent by PACS (case for Telemis), get it from .dcm file:
+			String seriesNumberDicomFile = attributes.getString(Tag.SeriesNumber);
+			if (StringUtils.isNotEmpty(seriesNumberDicomFile)) {
+				serie.setSeriesNumber(seriesNumberDicomFile);
 			}
 		}
 		if (StringUtils.isEmpty(serie.getSeriesDescription())) {

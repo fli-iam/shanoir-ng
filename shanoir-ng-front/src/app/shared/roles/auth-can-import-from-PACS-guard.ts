@@ -13,12 +13,12 @@
  */
 
 import { Injectable } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { KeycloakService } from "../keycloak/keycloak.service";
 import { ConsoleService } from '../console/console.service';
 
 @Injectable()
-export class CanImportFromPACSGuard implements CanActivate {
+export class CanImportFromPACSGuard  {
 
     constructor(
         private keycloakService: KeycloakService, 

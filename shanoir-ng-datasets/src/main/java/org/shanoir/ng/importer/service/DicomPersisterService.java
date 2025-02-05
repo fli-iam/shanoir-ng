@@ -58,34 +58,46 @@ public class DicomPersisterService {
 	private DICOMWebService dicomWebService;
 
 	/**
-	 * This method reads the datasets for each serie from the json (String), gets
-	 * the dicom expression format and sends the images to the PACS.
+	 * This method reads the datasets for each serie from the json (String),
+	 * gets the dicom expression format and sends the images to the PACS.
 	 * 
 	 * @param serie
 	 * @throws Exception
 	 */
 	public void persistAllForSerie(Serie serie) throws Exception {
-		if (serie != null) {
-			for (Dataset dataset : serie.getDatasets()) {
-				for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
-					if (expressionFormat.getType().equals("dcm")) {
-						List<DatasetFile> datasetFiles = expressionFormat.getDatasetFiles();
-						if (datasetFiles != null && !datasetFiles.isEmpty()) {
-							DatasetFile firstDatasetFile = datasetFiles.get(0);
-							if (firstDatasetFile.getPath() != null && !firstDatasetFile.getPath().isEmpty()) {
-								File firstDicomFile = new File(firstDatasetFile.getPath());
-								File directoryWithDicomFiles = firstDicomFile.getParentFile();
-								if (dicomWeb) {
-									dicomWebService.sendDicomFilesToPacs(directoryWithDicomFiles);
-								} else {
-									dimseService.sendDicomFilesToPacs(directoryWithDicomFiles);
-								}
-							} else {
-								throw new ShanoirException("Send Dicoms to Pacs: DatasetFile with empty path found.");
-							}
+		if (serie == null) {
+			return;
+		}
+		for (Dataset dataset : serie.getDatasets()) {
+			for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
+				if (!expressionFormat.getType().equals("dcm")) {
+					continue;
+				}
+				List<DatasetFile> datasetFiles = expressionFormat.getDatasetFiles();
+				if (datasetFiles == null || datasetFiles.isEmpty()) {
+					throw new ShanoirException("Send Dicoms to Pacs: DatasetFiles null or empty.");
+				}
+				// Iterate over all dataset files (DICOM files), in case all files might be
+				// distributed over multiple parent directories and therefore require multiple
+				// calls to sendDicomFilesToPacs (advantage: do not create to big multiparts)
+				File lastParentFile = null;
+				for (DatasetFile datasetFile : datasetFiles) {
+					String path = datasetFile.getPath();
+					if (path == null || path.isEmpty()) {
+						throw new ShanoirException("Send Dicoms to Pacs: DatasetFile with null or empty path found.");
+					}
+					File dicomFile = new File(path);
+					if (!dicomFile.exists()) {
+						throw new ShanoirException("Send Dicoms to Pacs: dicomFile from DatasetFile.path not existing on disk.");
+					}
+					File parentFile = dicomFile.getParentFile();
+					if (!parentFile.equals(lastParentFile)) {
+						if (dicomWeb) {
+							dicomWebService.sendDicomFilesToPacs(parentFile);
 						} else {
-							throw new ShanoirException("Send Dicoms to Pacs: DatasetFiles null or empty.");
+							dimseService.sendDicomFilesToPacs(parentFile);
 						}
+						lastParentFile = parentFile;	
 					}
 				}
 			}

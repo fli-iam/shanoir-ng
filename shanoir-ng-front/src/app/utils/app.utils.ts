@@ -13,16 +13,16 @@
  */
 
 import { Pipe, PipeTransform } from '@angular/core';
-import { environment } from '../../environments/environment';
 import { HttpClient, HttpEvent, HttpEventType, HttpParams, HttpProgressEvent, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { TaskState, TaskStatus } from '../async-tasks/task.model';
 import { ServiceLocator } from './locator.service';
+import { last, map, mergeMap, shareReplay } from 'rxjs/operators';
 
 
 // Base urls
 let url = window.location;
-const BACKEND_API_URL = url.protocol + "//" + url.hostname + "/shanoir-ng";
+export const BACKEND_API_URL = url.protocol + "//" + url.hostname + "/shanoir-ng";
 export const KEYCLOAK_BASE_URL = url.protocol + "//" + url.hostname + "/auth";
 export const LOGOUT_REDIRECT_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/welcome";
 export const LOGIN_REDIRECT_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/index.html";
@@ -32,6 +32,7 @@ export const SILENT_CHECK_SSO_URL = url.protocol + "//" + url.hostname + "/shano
 // Users http api
 export const BACKEND_API_USERS_MS_URL: string = BACKEND_API_URL + "/users";
 export const BACKEND_API_USER_URL: string = BACKEND_API_USERS_MS_URL + '/users';
+export const BACKEND_API_USER_EVENTS: string = BACKEND_API_USERS_MS_URL + '/events';
 export const BACKEND_API_USER_ACCOUNT_REQUEST_URL: string = BACKEND_API_USERS_MS_URL + '/accountrequest';
 export const BACKEND_API_USER_CONFIRM_ACCOUNT_REQUEST_URL: string = '/confirmaccountrequest';
 export const BACKEND_API_USER_DENY_ACCOUNT_REQUEST_URL: string = '/denyaccountrequest';
@@ -55,9 +56,9 @@ export const BACKEND_API_CENTER_STUDY_URL: string = BACKEND_API_CENTER_URL + '/s
 
 // Studies http api
 export const BACKEND_API_STUDY_URL: string = BACKEND_API_STUDIES_MS_URL + '/studies';
+export const BACKEND_API_STUDY_STUDIES_LIGHT_URL: string = BACKEND_API_STUDIES_MS_URL + '/studies/light';
 export const BACKEND_API_STUDY_ALL_NAMES_URL: string = BACKEND_API_STUDY_URL + '/names';
 export const BACKEND_API_STUDY_DELETE_USER: string = BACKEND_API_STUDY_URL + '/studyUser';
-export const BACKEND_API_STUDY_ALL_NAMES_AND_CENTERS_URL: string = BACKEND_API_STUDY_URL + '/namesAndCenters';
 export const BACKEND_API_STUDY_RIGHTS: string = BACKEND_API_STUDY_URL + '/rights';
 export const BACKEND_API_STUDY_HAS_ONE_STUDY_TO_IMPORT: string = BACKEND_API_STUDY_URL + '/hasOneStudy';
 export const BACKEND_API_STUDY_PUBLIC_STUDIES_URL: string = BACKEND_API_STUDY_URL + '/public';
@@ -87,7 +88,7 @@ export const BACKEND_API_SUBJECT_STUDY_URL: string = BACKEND_API_STUDIES_MS_URL 
 export const BACKEND_API_COIL_URL: string = BACKEND_API_STUDIES_MS_URL + '/coils';
 
 // Datasets http api
-const BACKEND_API_DATASET_MS_URL: string = BACKEND_API_URL + '/datasets';
+export const BACKEND_API_DATASET_MS_URL: string = BACKEND_API_URL + '/datasets';
 export const BACKEND_API_DATASET_URL: string = BACKEND_API_DATASET_MS_URL + '/datasets';
 export const BACKEND_API_PROCESSED_DATASET_URL: string = BACKEND_API_DATASET_URL + '/processedDataset';
 
@@ -149,9 +150,11 @@ export const BACKEND_API_NIFTI_CONVERTER_URL: string = BACKEND_API_IMPORT_MS_URL
 export const BACKEND_API_PRECLINICAL_MS_URL: string = BACKEND_API_URL + '/preclinical';
 
 // vip
-export const VIP_BASE_URL : string = environment.vipUrl + "/rest";
+export const BACKEND_API_VIP_URL: string = BACKEND_API_DATASET_MS_URL + '/vip';
+export const BACKEND_API_VIP_EXEC_URL : string = BACKEND_API_VIP_URL + "/execution";
+export const BACKEND_API_VIP_PIPE_URL : string = BACKEND_API_VIP_URL + "/pipeline";
 
-export const BACKEND_API_VIP_EXEC_MONITORING_URL: string = BACKEND_API_DATASET_MS_URL + '/executionMonitoring';
+export const BACKEND_API_VIP_EXEC_MONITORING_URL: string = BACKEND_API_DATASET_MS_URL + '/execution-monitoring';
 
 declare var JSZip: any;
 
@@ -190,7 +193,11 @@ export function browserDownloadFile(blob: Blob, filename: string) {
 }
 
 export function browserDownloadFileFromResponse(response: HttpResponse<any>) {
-    browserDownloadFile(response.body, getFilename(response));
+    if (response.body) {
+        browserDownloadFile(response.body, getFilename(response));
+    } else {
+        throw new Error('can\'t download, server response is empty');
+    }
 }
 
 export function downloadBlob(url: string, params?: HttpParams): Promise<Blob> {
@@ -203,13 +210,13 @@ export function downloadBlob(url: string, params?: HttpParams): Promise<Blob> {
             params: params
         }
     )
-    .map(response => {
+    .pipe(map(response => {
         return response;
-    })
+    }))
     .toPromise();
 }
 
-export function downloadWithStatusGET(url: string, params?: HttpParams, state ?: TaskState): Observable<TaskState> {
+export function downloadWithStatusGET(url: string, params?: HttpParams, state?: TaskState): Observable<TaskState> {
     const http: HttpClient = ServiceLocator.injector.get(HttpClient);
     let obs: Observable<HttpEvent<Blob>> = http.get(
         url,
@@ -219,14 +226,16 @@ export function downloadWithStatusGET(url: string, params?: HttpParams, state ?:
             responseType: 'blob',
             params: params
         }
-    );
-    obs.toPromise().then(response => browserDownloadFileFromResponse(response as HttpResponse<Blob>));
-    return obs.mergeMap(event => {
+    ).pipe(shareReplay());
+    obs.pipe(last()).subscribe(response => {
+        browserDownloadFileFromResponse(response as HttpResponse<Blob>)
+    });
+    return obs.pipe(mergeMap(event => {
         return extractState(event).then(s => {
             state = s
             return s;
         });
-    });
+    }));
 }
 
 export function downloadWithStatusPOST(url: string, formData: FormData, state ?: TaskState): Observable<TaskState> {
@@ -239,14 +248,16 @@ export function downloadWithStatusPOST(url: string, formData: FormData, state ?:
             observe: 'events',
             responseType: 'blob'
         }
-    );
-    obs.toPromise().then(response => browserDownloadFileFromResponse(response as HttpResponse<Blob>));
-    return obs.mergeMap(event => {
+    ).pipe(shareReplay());
+    obs.pipe(last()).subscribe(response => {
+        browserDownloadFileFromResponse(response as HttpResponse<Blob>)
+    });
+    return obs.pipe(mergeMap(event => {
         return extractState(event).then(s => {
             state = s
             return s;
         });
-    });
+    }));
 }
 
 export function extractState(event: HttpEvent<any>): Promise<TaskState> {
@@ -258,13 +269,15 @@ export function extractState(event: HttpEvent<any>): Promise<TaskState> {
             return Promise.resolve(task);
         }
         case HttpEventType.DownloadProgress: {
+            let total: number = (event as HttpProgressEvent).total;
             task = new TaskState(TaskStatus.IN_PROGRESS, (event as HttpProgressEvent).loaded);
+            if (total) task.progress /= total;
             return Promise.resolve(task);
         }
         case HttpEventType.Response: {
             task = new TaskState(TaskStatus.DONE);
             const blob: Blob = (event as HttpResponse<Blob>).body;
-            if (blob) {
+            if (blob && event.headers.get('Content-Type') == 'application/zip') {
                 //report.list[id].zipSize = getSizeStr(blob?.size);
                 // Check ERRORS file in zip
                 let zip: any = new JSZip();
@@ -279,6 +292,8 @@ export function extractState(event: HttpEvent<any>): Promise<TaskState> {
                     }
                     return task;
                 });
+            } else {
+                return Promise.resolve(task);
             }
         }
         default: return Promise.resolve(task);
@@ -288,7 +303,7 @@ export function extractState(event: HttpEvent<any>): Promise<TaskState> {
 export function getFilename(response: HttpResponse<any>): string {
     const prefix = 'attachment;filename=';
     let contentDispHeader: string = response.headers.get('Content-Disposition');
-    return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
+    return contentDispHeader?.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
 }
 
 export function pad(n, width, z?): string {
@@ -316,7 +331,10 @@ export function findLastIndex<T>(array: Array<T>, predicate: (value: T, index: n
 }
 
 
-@Pipe({ name: 'times' })
+@Pipe({
+    name: 'times',
+    standalone: false
+})
 export class TimesPipe implements PipeTransform {
     transform(value: number): any {
         const iterable = {};
@@ -330,7 +348,10 @@ export class TimesPipe implements PipeTransform {
     }
 }
 
-@Pipe({ name: 'getValues' })
+@Pipe({
+    name: 'getValues',
+    standalone: false
+})
 export class GetValuesPipe implements PipeTransform {
     transform(map: Map<any, any>): any[] {
         let ret = [];
@@ -443,3 +464,7 @@ export function getSizeStr(size: number): string {
     let unit: string = units[exponent];
     return value + " " + unit;
 }
+
+type UnionKeys<T> = T extends T ? keyof T : never;
+type StrictUnionHelper<T, TAll> = T extends any ? T & Partial<Record<Exclude<UnionKeys<TAll>, keyof T>, never>> : never;
+export type StrictUnion<T> = StrictUnionHelper<T, T>

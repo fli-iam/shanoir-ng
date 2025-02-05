@@ -1,9 +1,9 @@
-import {CanActivate, Router} from "@angular/router";
+import { Router } from "@angular/router";
 import {Injectable} from "@angular/core";
 import {KeycloakService} from "../keycloak/keycloak.service";
 
 @Injectable()
-export class LoginGuard implements CanActivate {
+export class LoginGuard  {
 
   constructor(
     private router: Router) {

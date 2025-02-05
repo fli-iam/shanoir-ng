@@ -22,7 +22,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.bids.BidsDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
@@ -34,11 +33,9 @@ import org.shanoir.ng.datasetacquisition.validation.DatasetsModalityTypeCheck;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
-import org.shanoir.ng.shared.model.InversionTime;
 import org.shanoir.ng.studycard.model.StudyCard;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -99,9 +96,17 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 
 	/** Represents the date the acquisition was created on shanoir AND NOT the acquisition date in itself. */
 	@LocalDateAnnotations
-	private LocalDate creationDate;
+	private LocalDate importDate;
 
-	private Long sourceId;
+	/** Name of the user who did the import */
+	private String username;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "source_id")
+	private DatasetAcquisition source;
+
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "source", cascade = CascadeType.ALL)
+	private List<DatasetAcquisition> copies;
 
 	public DatasetAcquisition() {
 	}
@@ -115,8 +120,10 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 		this.rank = other.rank;
 		this.softwareRelease = other.softwareRelease;
 		this.sortingIndex = other.sortingIndex;
-		this.creationDate = other.creationDate;
-		this.sourceId = other.sourceId;
+		this.importDate = other.importDate;
+		this.username = other.username;
+		this.copies = other.copies;
+		this.source = other.source;
 	}
 
 	/**
@@ -228,15 +235,15 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	/**
 	 * @return the creationDate
 	 */
-	public LocalDate getCreationDate() {
-		return creationDate;
+	public LocalDate getImportDate() {
+		return importDate;
 	}
 
 	/**
 	 * @param creationDate the creationDate to set
 	 */
-	public void setCreationDate(LocalDate creationDate) {
-		this.creationDate = creationDate;
+	public void setImportDate(LocalDate creationDate) {
+		this.importDate = creationDate;
 	}
 
 	/**
@@ -247,11 +254,28 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	@Transient
 	public abstract String getType();
 
-	public Long getSourceId() {
-		return sourceId;
+	public String getUsername() {
+		return username;
 	}
 
-	public void setSourceId(Long sourceId) {
-		this.sourceId = sourceId;
+	public void setUsername(String username) {
+		this.username = username;
 	}
+
+	public DatasetAcquisition getSource() {
+		return source;
+	}
+
+	public void setSource(DatasetAcquisition source) {
+		this.source = source;
+	}
+
+	public List<DatasetAcquisition> getCopies() {
+		return copies;
+	}
+
+	public void setCopies(List<DatasetAcquisition> copies) {
+		this.copies = copies;
+	}
+
 }

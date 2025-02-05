@@ -34,7 +34,8 @@ sed -i -E "s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g" /opt/keycloak/themes/shanoir-
 # NOTE: options that must also be set at build-time (eg: KC_DB,
 #       KC_HTTP_RELATIVE_PATH) are set in the Dockerfile.
 #
-export KC_PROXY="${KC_PROXY:-edge}"
+export KC_PROXY_HEADERS="${KC_PROXY_HEADERS:-xforwarded}"
+export KC_HTTP_ENABLED="${KC_HTTP_ENABLED:-true}"
 export KC_SPI_THEME_WELCOME_THEME="shanoir-theme"
 
 # we disable strict hostname checking by default because:
@@ -66,7 +67,7 @@ auto|dev)
 	#       (the realm has to be reimported manually)
 	mkdir -p /opt/keycloak/data/import
 	cp /tmp/import/shanoir-ng-realm.json /opt/keycloak/data/import/
-	extra+=(start --import-realm)
+	extra+=(start --optimized --import-realm)
 	;;
 init)
 	# wipe out the shanoir-ng realm and recreate it
@@ -76,7 +77,15 @@ never)
 	# FIXME: should we provide a facade for these too
 	# TODO: ensure that the realm config is up-to-date
 	#-> add an optional data volume to store the config of the imported realm
-	extra+=(start)
+
+	# NOTE: we force using the optimized image because quarkus gets
+	#       confused by our plugin mtime being rounded (possibly somewhere
+	#       in the docker build)
+	# ex: (from "kc.sh show-config")
+	# 	kc.provider.file.shanoir-ng-keycloak-auth.jar.last-modified =  1721751809614
+	#   vs:
+	# 	kc.provider.file.shanoir-ng-keycloak-auth.jar.last-modified =  1721751809000
+	extra+=(start --optimized)
 	;;
 
 import)

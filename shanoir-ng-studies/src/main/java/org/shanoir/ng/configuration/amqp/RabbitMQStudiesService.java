@@ -1,14 +1,10 @@
 package org.shanoir.ng.configuration.amqp;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.quality.SubjectStudyQualityTagDTO;
@@ -25,17 +21,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.ExchangeTypes;
-import org.springframework.amqp.rabbit.annotation.Exchange;
-import org.springframework.amqp.rabbit.annotation.Queue;
-import org.springframework.amqp.rabbit.annotation.QueueBinding;
-import org.springframework.amqp.rabbit.annotation.RabbitHandler;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class RabbitMQStudiesService {
@@ -49,7 +45,7 @@ public class RabbitMQStudiesService {
 
 	@Autowired
 	private StudyService studyService;
-	
+
 	@Autowired
 	private SubjectStudyRepository subjectStudyRepository;
 	
@@ -59,6 +55,8 @@ public class RabbitMQStudiesService {
 	@Autowired
 	private ObjectMapper objectMapper;
 
+	@Autowired
+	ShanoirEventService eventService;
 	/**
 	 * Receives a shanoirEvent as a json object, concerning an examination creation
 	 * @param commandArrStr the task as a json string.
@@ -67,7 +65,7 @@ public class RabbitMQStudiesService {
 			key = ShanoirEventType.CREATE_EXAMINATION_EVENT,
 			value = @Queue(value = RabbitMQConfiguration.EXAMINATION_STUDY_QUEUE, durable = "true"),
 			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
+			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)), containerFactory = "multipleConsumersFactory"
 			)
 	@RabbitHandler
 	@Transactional
@@ -101,15 +99,9 @@ public class RabbitMQStudiesService {
 
 	/**
 	 * Receives a shanoirEvent as a json object, concerning an examination creation
-	 * @param commandArrStr the task as a json string.
+	 * @param eventStr the event as a json string.
 	 */
-	@RabbitListener(bindings = @QueueBinding(
-			key = ShanoirEventType.DELETE_EXAMINATION_EVENT,
-			value = @Queue(value = RabbitMQConfiguration.EXAMINATION_STUDY_DELETE_QUEUE, durable = "true"),
-			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
-			)
-	@RabbitHandler
+	@RabbitListener(queues = RabbitMQConfiguration.EXAMINATION_STUDY_DELETE_QUEUE, containerFactory = "singleConsumerFactory")
 	@Transactional
 	public void deleteExaminationStudy(final String eventStr) {
 		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
@@ -117,7 +109,7 @@ public class RabbitMQStudiesService {
 			ObjectMapper objectMapper = new ObjectMapper();
 			ShanoirEvent event =  objectMapper.readValue(eventStr, ShanoirEvent.class);
 			Long examinationId = Long.valueOf(event.getObjectId());
-			Long studyId = Long.valueOf(event.getMessage());
+			Long studyId = Long.valueOf(event.getStudyId());
 			this.studyService.deleteExamination(examinationId, studyId);
 		} catch (Exception e) {
 			LOG.error("Could not index examination on given study ", e);
@@ -125,7 +117,7 @@ public class RabbitMQStudiesService {
 		}
 	}
 
-	@RabbitListener(queues = RabbitMQConfiguration.STUDY_NAME_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_NAME_QUEUE, containerFactory = "singleConsumerFactory")
 	@Transactional
 	public String getStudyName(final long studyId) {
 		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
@@ -136,7 +128,7 @@ public class RabbitMQStudiesService {
 		return null;
 	}
 
-	@RabbitListener(queues = RabbitMQConfiguration.STUDY_ANONYMISATION_PROFILE_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_ANONYMISATION_PROFILE_QUEUE, containerFactory = "singleConsumerFactory")
 	@Transactional
 	public String getStudyAnonymisationProfile(final long studyId) {
 		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
@@ -151,7 +143,7 @@ public class RabbitMQStudiesService {
 	 * Receives a json object, concerning a study subscription
 	 * @param commandArrStr the studyUser as a json string.
 	 */
-	@RabbitListener(queues = RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE, containerFactory = "singleConsumerFactory")
 	@Transactional
 	public boolean studySubscription(final String studyStr) {
 		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
@@ -177,6 +169,7 @@ public class RabbitMQStudiesService {
 			subscription.setReceiveStudyUserReport(false);
 			subscription.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD));
 			subscription.setUserName(event.getMessage());
+
 			if (studyToUpdate.getDataUserAgreementPaths() != null && !studyToUpdate.getDataUserAgreementPaths().isEmpty()) {
 				subscription.setConfirmed(false);
 				dataUserAgreementService.createDataUserAgreementForUserInStudy(studyToUpdate, subscription.getUserId());
@@ -184,6 +177,7 @@ public class RabbitMQStudiesService {
 				subscription.setConfirmed(true);
 			}
 			studyService.addStudyUserToStudy(subscription, studyToUpdate);
+			eventService.publishEvent(event);
 			return true;
 		} catch (Exception e) {
 			LOG.error("Could not directly subscribe a user to the study: ", e);
@@ -192,7 +186,7 @@ public class RabbitMQStudiesService {
 	}
 	
 	@Transactional
-	@RabbitListener(queues = RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG)
+	@RabbitListener(queues = RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG, containerFactory = "singleConsumerFactory")
 	@RabbitHandler
 	public void receiveSubjectStudyStudyCardTagUpdate(final String messageStr) {
 		try {

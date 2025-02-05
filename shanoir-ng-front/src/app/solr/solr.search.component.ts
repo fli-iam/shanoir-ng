@@ -26,7 +26,6 @@ import { environment } from "../../environments/environment";
 import { DatasetAcquisition } from '../dataset-acquisitions/shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../dataset-acquisitions/shared/dataset-acquisition.service';
 import { ExecutionDataService } from '../vip/execution.data-service';
-import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
 import { ColumnDefinition } from '../shared/components/table/column.definition.type';
 import { Page, Pageable } from "../shared/components/table/pageable.model";
 import { TableComponent } from "../shared/components/table/table.component";
@@ -44,21 +43,18 @@ import { Clipboard } from '@angular/cdk/clipboard';
 import {StudyService} from "../studies/shared/study.service";
 import {Study} from "../studies/shared/study.model";
 import {ServiceLocator} from "../utils/locator.service";
-import { Observable } from 'rxjs-compat';
-import { SuperPromise } from 'src/app/utils/super-promise';
-import {take} from "rxjs/operators";
-import {Format} from "@angular-devkit/build-angular/src/builders/extract-i18n/schema";
 import { TaskState } from '../async-tasks/task.model';
 import {DatasetCopyDialogComponent} from "../shared/components/dataset-copy-dialog/dataset-copy-dialog.component";
 
-const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags'];
-const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength'];
+const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags', 'processed'];
+const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength', 'examinationDate', 'importDate'];
 export type TextualFacet = typeof TextualFacetNames[number];
 @Component({
     selector: 'solr-search',
     templateUrl: 'solr.search.component.html',
     styleUrls: ['solr.search.component.css'],
     animations: [slideDown],
+    standalone: false
 })
 
 export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
@@ -75,9 +71,11 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     @ViewChild('selectionTable', { static: false }) selectionTable: TableComponent;
     selectedDatasetIds: Set<number> = new Set();
     syntaxError: boolean = false;
+    syntaxErrorMsg : string = "";
     dateOpen: boolean = false;
+    importDateOpen: boolean = false;
+    public downloadState: TaskState = new TaskState();
     datasetStudymap: Map<number, number> = new Map();
-
     tab: 'results' | 'selected' = 'results';
     role: 'admin' | 'expert' | 'user';
     rights: Map<number, StudyUserRight[]>;
@@ -88,7 +86,6 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     solrRequest: SolrRequest = new SolrRequest();
     private facetPageable: Map<string, FacetPageable>;
     contentPage: SolrResultPage[] = [];
-
     studies: Study[];
     selectedStudies: string[]=[];
     hasCopyRight: boolean = false;
@@ -162,11 +159,21 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     buildForm(): UntypedFormGroup {
-        const searchBarRegex = '^((studyName|subjectName|datasetName|examinationComment|datasetTypes|datasetNatures|acquisitionEquipmentName)[:][*]?[a-zA-Z0-9\\s_\W\.\!\@\#\$\%\^\&\*\(\)\_\+\-\=]+[*]?[;])+$';
+        const searchBarRegex = '^((studyName|subjectName|datasetName|examinationComment|datasetTypes|processed|datasetNatures|acquisitionEquipmentName)[:][*]?[a-zA-Z0-9\\s_\W\.\!\@\#\$\%\^\&\*\(\)\_\+\-\=]+[*]?[;])+$';
         let formGroup = this.formBuilder.group({
             'startDate': [this.solrRequest.datasetStartDate, [DatepickerComponent.validator]],
             'endDate': [this.solrRequest.datasetEndDate, [DatepickerComponent.validator, this.dateOrderValidator]],
+            'importStartDate': [this.solrRequest.importStartDate, [DatepickerComponent.validator]],
+            'importEndDate': [this.solrRequest.importEndDate, [DatepickerComponent.validator, this.dateOrderValidator]],
         });
+
+        formGroup.valueChanges.subscribe(() => {
+            formGroup.get('importEndDate').updateValueAndValidity({ emitEvent: false });
+        });
+        formGroup.valueChanges.subscribe(() => {
+            formGroup.get('endDate').updateValueAndValidity({ emitEvent: false });
+        });
+
         return formGroup;
     }
 
@@ -189,9 +196,17 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     dateOrderValidator = (control: AbstractControl): ValidationErrors | null => {
+        this.solrRequest.datasetStartDate = this.form?.get('startDate')?.value;
+        this.solrRequest.datasetEndDate = this.form?.get('endDate')?.value;
+        this.solrRequest.importStartDate = this.form?.get('importStartDate')?.value;
+        this.solrRequest.importEndDate = this.form?.get('importEndDate')?.value;
         if (this.solrRequest.datasetStartDate && this.solrRequest.datasetEndDate
             && this.solrRequest.datasetStartDate > this.solrRequest.datasetEndDate) {
                 return { order: true }
+        }
+        if (this.solrRequest.importStartDate && this.solrRequest.importEndDate
+            && this.solrRequest.importStartDate > this.solrRequest.importEndDate) {
+            return { order: true }
         }
         return null;
     }
@@ -209,14 +224,26 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         this.selections = [];
         if (this.solrRequest.datasetStartDate && this.solrRequest.datasetStartDate != 'invalid') {
             this.selections.push(new DateSelectionBlock(
-                    'from: ' + formatDate(this.solrRequest.datasetStartDate, 'dd/MM/yyy', 'en-US', 'UTC'),
-                    () => this.solrRequest.datasetStartDate = null
+                'from: ' + formatDate(this.solrRequest.datasetStartDate, 'dd/MM/yyy', 'en-US', 'UTC'),
+                () => this.solrRequest.datasetStartDate = null
             ));
         }
         if (this.solrRequest.datasetEndDate && this.solrRequest.datasetEndDate != 'invalid') {
             this.selections.push(new DateSelectionBlock(
-                    'to: ' + formatDate(this.solrRequest.datasetEndDate, 'dd/MM/yyy', 'en-US', 'UTC'),
-                    () => this.solrRequest.datasetEndDate = null
+                'to: ' + formatDate(this.solrRequest.datasetEndDate, 'dd/MM/yyy', 'en-US', 'UTC'),
+                () => this.solrRequest.datasetEndDate = null
+            ));
+        }
+        if (this.solrRequest.importStartDate && this.solrRequest.importStartDate != 'invalid') {
+            this.selections.push(new DateSelectionBlock(
+                'from: ' + formatDate(this.solrRequest.importStartDate, 'dd/MM/yyy', 'en-US', 'UTC'),
+                () => this.solrRequest.importStartDate = null
+            ));
+        }
+        if (this.solrRequest.importEndDate && this.solrRequest.importEndDate != 'invalid') {
+            this.selections.push(new DateSelectionBlock(
+                'to: ' + formatDate(this.solrRequest.importEndDate, 'dd/MM/yyy', 'en-US', 'UTC'),
+                () => this.solrRequest.importEndDate = null
             ));
         }
         TextualFacetNames.forEach(facetName => {
@@ -247,6 +274,10 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         this.facetPageable = this.buildFacetPageable(updatedFacetName);
         if (this.tab != 'results') this.openResultTab();
         this.table.refresh(1);
+    }
+
+    setExpertMode(value: boolean): void {
+        this.solrRequest.expertMode = value;
     }
 
     openResultTab() {
@@ -282,11 +313,12 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         if (this.form.valid) {
             this.saveState();
             this.solrRequest.facetPaging = this.facetPageable ? this.facetPageable : this.buildFacetPageable();
-            return this.solrService.search(this.solrRequest, pageable).then(solrResultPage => {
+            let facetPagingTmp: Map<String, FacetPageable> = new Map(this.solrRequest.facetPaging); // shallow copy
+            let search = this.solrService.search(this.solrRequest, pageable).then(solrResultPage => {
                 // populate criteria
                 if (solrResultPage) {
                     this.pagingCriterion.forEach(criterionComponent => {
-                        if (this.solrRequest.facetPaging.has(criterionComponent.facetName)) {
+                        if (facetPagingTmp?.has(criterionComponent.facetName)) {
                             let facetPage: FacetResultPage = solrResultPage.facetResultPages.find(facetResPage => facetResPage.content[0]?.key?.name == criterionComponent.facetName)
                             if (!facetPage) facetPage = new FacetResultPage();
                             criterionComponent.refresh(facetPage);
@@ -295,17 +327,19 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                 }
                 this.firstPageLoaded = true;
                 this.contentPage.push(solrResultPage);
+                this.syntaxErrorMsg = "";
 
                 return solrResultPage;
             }).catch(reason => {
-                if (reason?.error?.code == 422 && reason.error.message == 'solr query failed') {
-                    this.syntaxError = true;
+                if (reason?.error?.code == 422) {
+					this.syntaxError = true;
+                    this.syntaxErrorMsg = reason?.error?.message;
                     return new SolrResultPage();
                 } else throw reason;
-            }).finally(() => {
-                this.solrRequest.facetPaging = null;
-                this.facetPageable = null;
             });
+            this.solrRequest.facetPaging = null;
+            this.facetPageable = null;
+            return search;
         } else {
             return Promise.resolve(new SolrResultPage());
         }
@@ -417,43 +451,48 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     private getCommonColumnDefs() {
-
-        function dateRenderer(date: number) {
-            if (date) {
-                return formatDate(new Date(date),'dd/MM/yyyy', 'en-US', 'UTC');
-            }
-            return null;
-        };
         let columnDefs: ColumnDefinition[] = [
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {headerName: "Admin", type: "boolean", cellRenderer: row => this.hasAdminRight(row.data.studyId), awesome: "fa-solid fa-shield", color: "goldenrod", disableSorting: true},
+            {headerName: "Processed", type: "boolean", cellRenderer: row => row.data.processed, awesome: "fa-solid fa-gears", color: "dimgrey", disableSorting: true, tip: item => { return item.processed ? "processed dataset" : "" }},
             {headerName: "Name", field: "datasetName"},
-            {headerName: "Tags", field: "tags"},
-            {headerName: "Type", field: "datasetType"},
+            {headerName: "Tags", field: "tags", cellRenderer: (params: any) => {
+                    return params?.data?.tags ? params.data.tags.join(', ') : '';
+                }},
+            {headerName: "Modality", field: "datasetType"},
             {headerName: "Nature", field: "datasetNature"},
-            {headerName: "Creation", field: "datasetCreationDate", type: "date", hidden: true, cellRenderer: (params: any) => dateRenderer(params.data.datasetCreationDate)},
+            {headerName: "Series date", field: "datasetCreationDate", type: "date", hidden: true},
+            {headerName: "Sorting index", field: "sortingIndex"},
             {headerName: "Study", field: "studyName",
-                route: item => '/study/details/' + item.studyId
+                route: function(item) {
+                    return item.studyId ? '/study/details/' + item.studyId : null;
+                }
             },
             {headerName: "Subject", field: "subjectName",
-                route: item => '/subject/details/' + item.subjectId
+                route: function(item) {
+                    return item.subjectId ? '/subject/details/' + item.subjectId : null;
+                }
             },
-            {headerName: "Center", field: "centerName",
-                route: item => '/center/details/' + item.centerId
+            {headerName: "Acquisition Center", field: "centerName",
+                route: function(item) {
+                    return item.centerId ? '/center/details/' + item.centerId : null;
+                }
             },
             {headerName: "Exam", field: "examinationComment",
-                route: item => '/examination/details/' + item.examinationId
+                route: function(item) {
+                    return item.examinationId ? '/examination/details/' + item.examinationId : null;
+                }
             },
-            {headerName: "Exam Date", field:"examinationDate", type: "date", cellRenderer: (params: any) => {
-                return dateRenderer(params.data.examinationDate);
-              }},
-            {headerName: "Slice", field: "sliceThickness"},
+            {headerName: "Exam Date", field:"examinationDate", type: "date"},
+            {headerName: "Import Date", field:"importDate", type: "date"},
+            {headerName: "Imported by", field:"username"},
+            {headerName: "Slice Thickness", field: "sliceThickness"},
             {headerName: "Pixel", field: "pixelBandwidth"},
             {headerName: "Mag. strength", field: "magneticFieldStrength"},
-            {headerName: "OHIF Viewer", type: "button", awesome: "fa-solid fa-up-right-from-square",
-              condition: item => (item.datasetType.includes("MR") || item.datasetType.includes("Pet") || item.datasetType.includes("Ct")),
+            {headerName: "View DICOM", type: "button", awesome: "fa-solid fa-up-right-from-square",
+              condition: item => (!item.processed && (item.datasetType.includes("MR") || item.datasetType.includes("Pet") || item.datasetType.includes("Ct"))),
               action: item => {
-                window.open(environment.viewerUrl + '/viewer/1.4.9.12.34.1.8527.' + item.examinationId, '_blank');
+                window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + item.examinationId, '_blank');
               }
             }
         ];
@@ -515,7 +554,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
     downloadSelected() {
         if (this.selectedDatasetIds && this.canDownload) {
-            this.downloadService.downloadByIds([...this.selectedDatasetIds]);
+            this.downloadService.downloadByIds([...this.selectedDatasetIds], this.downloadState);
         } else {
             this.consoleService.log('error', "Could not download data, please check your right on the studies for these datasets.")
         }
@@ -581,20 +620,21 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     initExecutionMode() {
-        let noAdminStudies: Set<string> = new Set();
-        this.datasetAcquisitionService.getAllForDatasets([...this.selectedDatasetIds]).then(acquisitions => {
-            acquisitions.forEach(acq => {
-                if (!this.hasAdminRight(acq.examination?.study?.id)) {
-                    noAdminStudies.add(acq.examination?.study?.name);
-                }
-            });
-            if(noAdminStudies.size > 0){
-                this.confirmDialogService.error('Invalid selection', 'You don\'t have the right to run pipelines on studies you don\'t administrate. '
-                    + 'Remove datasets that belongs to the following study(ies) from your selection : ' + [...noAdminStudies].join(', '));
-            }else{
-                this.processingService.setDatasets(this.selectedDatasetIds);
-                this.router.navigate(['pipelines']);
+        this.datasetService.getByIds(this.selectedDatasetIds).then(datasets => {
+            let studyId = datasets[0]?.study?.id;
+
+            if (!this.hasAdminRight(studyId)) {
+                this.confirmDialogService.error('Invalid selection', 'You don\'t have the right to run pipelines on study [' + studyId + '] that you don\'t administrate.');
+                return;
             }
+            for (const ds of datasets) {
+                if(ds.study?.id != studyId){
+                    this.confirmDialogService.error('Invalid selection', 'All selected datasets must be of the same study.');
+                    return;
+                }
+            }
+            this.processingService.setDatasets(this.selectedDatasetIds);
+            this.router.navigate(['pipelines']);
         });
     }
 
@@ -612,6 +652,10 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         modalRef.instance.ownRef = modalRef;
         modalRef.instance.canCopy = this.hasCopyRight;
         modalRef.instance.lines = this.selectedLines;
+    }
+
+    private isProcessed(doc: SolrDocument) {
+        return doc.processed == true;
     }
 }
 
@@ -631,7 +675,8 @@ export class SimpleValueSelectionBlock implements SelectionBlock {
 
 export class FacetSelectionBlock implements SelectionBlock {
 
-    constructor(private facetField: FacetField) {}
+    constructor(private facetField: FacetField) {
+    }
 
     get label(): string {
         return this.facetField.value;

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -19,7 +19,8 @@ import { DatasetService } from '../shared/dataset.service';
 
 @Component({
     selector: 'download-statistics',
-    templateUrl: 'download-statistics.component.html'
+    templateUrl: 'download-statistics.component.html',
+    standalone: false
 })
 
 export class DownloadStatisticsComponent{
@@ -27,7 +28,7 @@ export class DownloadStatisticsComponent{
     public form: UntypedFormGroup;
 
     constructor(private datasetService: DatasetService,
-            private breadcrumbsService: BreadcrumbsService, 
+            private breadcrumbsService: BreadcrumbsService,
             private formBuilder: UntypedFormBuilder) {
 
         setTimeout(() => {
@@ -38,9 +39,9 @@ export class DownloadStatisticsComponent{
     }
 
     downloadStatistics(): void {
-        this.datasetService.downloadStatistics(this.form.get('studyNameInRegExp').value, 
-                                                this.form.get('studyNameOutRegExp').value, 
-                                                this.form.get('subjectNameInRegExp').value, 
+        this.datasetService.downloadStatistics(this.form.get('studyNameInRegExp').value,
+                                                this.form.get('studyNameOutRegExp').value,
+                                                this.form.get('subjectNameInRegExp').value,
                                                 this.form.get('subjectNameOutRegExp').value);
     }
 

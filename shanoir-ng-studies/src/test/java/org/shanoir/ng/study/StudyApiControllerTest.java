@@ -49,6 +49,7 @@ import org.shanoir.ng.study.service.RelatedDatasetService;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.study.service.StudyUniqueConstraintManager;
 import org.shanoir.ng.study.service.StudyUserService;
+import org.shanoir.ng.tag.model.StudyTagMapper;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +87,9 @@ public class StudyApiControllerTest {
 
 	@MockBean
 	private StudyMapper studyMapperMock;
+
+	@MockBean
+	private StudyTagMapper studyTagMapperMock;
 
 	@MockBean
 	private StudyService studyServiceMock;

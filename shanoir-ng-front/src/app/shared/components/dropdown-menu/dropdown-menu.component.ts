@@ -24,7 +24,8 @@ import { MenuItemComponent } from './menu-item/menu-item.component';
     selector: 'dropdown-menu',
     templateUrl: 'dropdown-menu.component.html',
     styleUrls: ['dropdown-menu.component.css'],
-    animations: [menuSlideRight]
+    animations: [menuSlideRight],
+    standalone: false
 })
 export class DropdownMenuComponent implements OnChanges, OnDestroy {
 
@@ -55,7 +56,7 @@ export class DropdownMenuComponent implements OnChanges, OnDestroy {
     }
     
     ngOnDestroy(): void {
-        this.globalClickSubscription.unsubscribe();
+        this.globalClickSubscription?.unsubscribe();
     }
 
     ngOnChanges(changes: SimpleChanges): void {

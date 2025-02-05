@@ -15,6 +15,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div #formContainer class="content-component">
 	<form *ngIf="form" class="max-content" [formGroup]="form" [class.disabled]="footerState && footerState.loading">
 		<div class="layout">
+			<form-footer
+					[state]="footerState"
+					(edit)="goToEdit()"
+					(cancel)="goToView()"
+                    (delete) = "delete()"
+					(back)="goBack()"
+					(save)="save()">
+				<button  *ngIf="mode == 'view' && hasDownloadRight" class="right-icon dl-button" type="button" (click)="downloadAll()" [disabled]="downloadState.isActive()">Download<i class="fas fa-download"></i></button>
+            	<!-- <button *ngIf="mode=='view' && hasDownloadRight && dataset.datasetProcessing" [disabled]="downloading" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('nii')">Download processed data<i class="fas fa-download"></i></button> -->
+				<button *ngIf="mode=='view' && hasDownloadRight && dataset.inPacs" type="button" class="right-icon" (click)="seeDicomMetadata()">Show DICOM metadata<i class="fas fa-file-code"></i></button>
+            </form-footer>
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
 					<h2 class="header command-zone"i18n="View dataset|Title@@datasetDetailViewTitle">Details on {{dataset.datasetProcessing ? 'processed ' : '' }}dataset</h2>
@@ -31,36 +42,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<mr-dataset-details *ngIf="dataset.type == 'Mr'" [mode]="mode" [dataset]="dataset" [parentFormGroup]="form"></mr-dataset-details>
             <eeg-dataset-details *ngIf="dataset.type == 'Eeg'" [mode]="mode" [dataset]="dataset"></eeg-dataset-details>
 
-			<!-- TODO : other types -->
 
-			<div>
-				<button *ngIf="mode=='view' && !isMRS && hasDownloadRight && dataset.type != 'Eeg' && !dataset.datasetProcessing && dataset.type != 'BIDS'  && dataset.type != 'Measurement'" [disabled]="downloadState.isActive()" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="convertNiftiToggle()">Convert nifti<i class="fas fa-download"></i></button>
-				<node [opened]="false" [hasChildren]="false">
-					<dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
-						<ng-template ngFor let-converter [ngForOf]="converters">
-							<menu-item label="{{converter.name}}" awesome="fas fa-download" (click)="convertNifti(converter.id)"></menu-item>
-						</ng-template>
-					</dropdown-menu>
-				</node>
-			</div>
+			<!-- TODO : other types -->
 
 			<fieldset *ngIf="mode=='view' && !isMRS && hasDownloadRight && dataset.type != 'Eeg' && dataset.type != 'BIDS' && dataset.type != 'Measurement'">
 				<legend>Preview</legend>
                 <button *ngIf="!papayaLoaded" (click)="loadDicomInMemory()">Load preview</button>
 				<papaya *ngIf="papayaLoaded" [params]="papayaParams"></papaya>
 			</fieldset>
-
-			<form-footer
-					[state]="footerState"
-					(edit)="goToEdit()"
-					(cancel)="goToView()"
-                    (delete) = "delete()"
-					(back)="goBack()"
-					(save)="save()">
-				<button  *ngIf="mode == 'view' && hasDownloadRight" class="right-icon dl-button" type="button" (click)="downloadAll()" [disabled]="downloadState.isActive()">Download<i class="fas fa-download"></i></button>
-            	<!-- <button *ngIf="mode=='view' && hasDownloadRight && dataset.datasetProcessing" [disabled]="downloading" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('nii')">Download processed data<i class="fas fa-download"></i></button> -->
-				<button *ngIf="mode=='view' && hasDownloadRight && this.dataset.type != 'Eeg' && this.dataset.type != 'BIDS' && !this.dataset.datasetProcessing" type="button" class="right-icon" (click)="seeDicomMetadata()">Show DICOM metadata<i class="fas fa-file-code"></i></button>
-            </form-footer>
 		</div>
 	</form>
 </div>

@@ -9,7 +9,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.ShUpConfig;
+import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.gui.customcomponent.JComboBoxMandatory;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
@@ -20,8 +23,11 @@ import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
+import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 
 public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
+	
+	private static final Logger logger = LoggerFactory.getLogger(ImportStudyAndStudyCardCBItemListener.class);
 
 	private MainWindow mainWindow;
 	
@@ -34,13 +40,15 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 	private Date studyDate;
 	
 	private ImportStudyCardFilterDocumentListener importStudyCardDocumentListener;
+	
+	private ShanoirUploaderServiceClient serviceClient;
 
-	public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, Subject subject, List<Examination> examinationDTOs, Date studyDate, ImportStudyCardFilterDocumentListener importStudyCardDocumentListener) {
+	public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, Subject subject, Date studyDate, ImportStudyCardFilterDocumentListener importStudyCardDocumentListener, ShanoirUploaderServiceClient serviceClient) {
 		this.mainWindow = mainWindow;
 		this.subject = subject;
-		this.examinationsOfSubject = examinationDTOs;
 		this.studyDate = studyDate;
 		this.importStudyCardDocumentListener = importStudyCardDocumentListener;
+		this.serviceClient = serviceClient;
 	}
 
 	public void itemStateChanged(ItemEvent e) {
@@ -49,7 +57,15 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 			if (e.getSource().equals(mainWindow.importDialog.studyCB)) {
 				Study study = (Study) e.getItem();
 				updateStudyCards(study);
-				updateSubjectStudy(study);
+				// Profile Neurinfo
+				if (ShUpConfig.isModeSubjectCommonNameManual()) {
+					updateExistingSubjects(study);
+					this.subject = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();	
+					// for OFSEP this is done in ImportDialogOpener as subject found before, if
+					updateImportDialogForExistingSubject(this.subject, mainWindow.importDialog);
+				}
+				updateSubjectStudy(study, subject);
+				examinationsOfSubject = updateExaminations(subject);
 				filterExistingExamsForSelectedStudy(study);
 			}
 			// the selection of the StudyCard and its center defines
@@ -57,18 +73,74 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 			if (e.getSource().equals(mainWindow.importDialog.studyCardCB)) {
 				JComboBoxMandatory comboBox = (JComboBoxMandatory) e.getSource();
 				StudyCard studyCard = (StudyCard) comboBox.getSelectedItem();
-				// put center into exam using study card and acq equipment
+				// put center into exam using study card and acquisition equipment
 				mainWindow.importDialog.mrExaminationCenterCB.removeAllItems();
 				AcquisitionEquipment acqEquipment = studyCard.getAcquisitionEquipment();
 				if (acqEquipment != null) {
 					IdName center = acqEquipment.getCenter();
 					mainWindow.importDialog.mrExaminationCenterCB.addItem(center);
 				}
-				// add investigators
-				//mainWindow.importDialog.mrExaminationExamExecutiveCB.removeAllItems();
-				//mainWindow.importDialog.mrExaminationExamExecutiveCB.addItem(investigator);				
-			}			
+			}
+			// the selection of an existing subject defines the list of existing exams
+			if (e.getSource().equals(mainWindow.importDialog.existingSubjectsCB)) {
+				Study study = (Study) mainWindow.importDialog.studyCB.getSelectedItem();
+				this.subject = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
+				updateImportDialogForExistingSubject(this.subject, mainWindow.importDialog);
+				updateSubjectStudy(study, subject);
+				examinationsOfSubject = updateExaminations(subject);
+				filterExistingExamsForSelectedStudy(study);			
+			}		
 		} // ignore otherwise
+	}
+
+	public static void updateImportDialogForExistingSubject(Subject subject, ImportDialog importDialog) {
+		if (subject != null) {
+			importDialog.subjectImageObjectCategoryCB.setEnabled(false);
+			if (subject.getImagedObjectCategory() != null) {
+				importDialog.subjectImageObjectCategoryCB.setSelectedItem(subject.getImagedObjectCategory());
+			}
+			importDialog.subjectLanguageHemisphericDominanceCB.setEnabled(false);
+			if (subject.getLanguageHemisphericDominance() != null) {
+				importDialog.subjectLanguageHemisphericDominanceCB.setSelectedItem(subject.getLanguageHemisphericDominance().getName());
+			} else {
+				importDialog.subjectLanguageHemisphericDominanceCB.setSelectedItem("");
+			}
+			importDialog.subjectManualHemisphericDominanceCB.setEnabled(false);		
+			if (subject.getManualHemisphericDominance() != null) {
+				importDialog.subjectManualHemisphericDominanceCB.setSelectedItem(subject.getManualHemisphericDominance().getName());
+			} else {
+				importDialog.subjectManualHemisphericDominanceCB.setSelectedItem("");
+			}
+			// not used anymore on server: remove later
+			importDialog.subjectPersonalCommentTextArea.setBackground(Color.LIGHT_GRAY);
+			importDialog.subjectPersonalCommentTextArea.setEditable(false);
+		}
+	}
+
+	private void updateExistingSubjects(Study study) {
+		try {
+			mainWindow.importDialog.existingSubjectsCB.removeAllItems();
+			List<Subject> subjects = serviceClient.findSubjectsByStudy(study.getId());
+			if (subjects != null) {
+				for (Subject subject : subjects) {
+					mainWindow.importDialog.existingSubjectsCB.addItem(subject);
+				}
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+	}
+
+	private List<Examination> updateExaminations(Subject subject) {
+		try {
+			if (subject != null) {
+				List<Examination> examinationList = serviceClient.findExaminationsBySubjectId(subject.getId());
+				return examinationList;
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+		return null;
 	}
 
 	/**
@@ -85,7 +157,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 		// Exams exist, but maybe not for the study selected
 		if (examinationsOfSubject != null && !examinationsOfSubject.isEmpty()) {
 			List<Examination> examinationsFilteredByStudy = examinationsOfSubject.parallelStream()
-				.filter(e -> e.getStudyId() == study.getId())
+				.filter(e -> e.getStudyId().equals(study.getId()))
 				.collect(Collectors.toList());
 			for (Iterator iterator = examinationsFilteredByStudy.iterator(); iterator.hasNext();) {
 				Examination examination = (Examination) iterator.next();
@@ -121,41 +193,65 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 		
 	}
 
-	private void updateSubjectStudy(Study study) {
-		if (this.subject != null) {
-			// Check if RelSubjectStudy exists for selected study
-			List<SubjectStudy> subjectStudyList = subject.getSubjectStudyList();
-			if (subjectStudyList != null) {
-				for (Iterator iterator = subjectStudyList.iterator(); iterator.hasNext();) {
-					SubjectStudy subjectStudy = (SubjectStudy) iterator.next();
-					// subject is already in study: display values in GUI and stop editing
-					if (subjectStudy.getStudy().getId().equals(study.getId())) {
-						mainWindow.importDialog.subjectStudyIdentifierTF.setText(subjectStudy.getSubjectStudyIdentifier());
-						mainWindow.importDialog.subjectStudyIdentifierTF.setBackground(Color.LIGHT_GRAY);
-						mainWindow.importDialog.subjectStudyIdentifierTF.setEnabled(false);
-						mainWindow.importDialog.subjectStudyIdentifierTF.setEditable(false);
-						mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.setSelected(subjectStudy.isPhysicallyInvolved());
-						mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(false);
-						mainWindow.importDialog.subjectTypeCB.setSelectedItem(subjectStudy.getSubjectType());
-						mainWindow.importDialog.subjectTypeCB.setEnabled(false);
-						this.subjectStudy = subjectStudy;
-						return;
+	private void updateSubjectStudy(Study study, Subject subject) {
+		// Check if RelSubjectStudy exists for selected study
+		if (subject != null) {
+			// Profile Neurinfo: findSubjectsByStudyId returns single subject-study
+			if (ShUpConfig.isModeSubjectCommonNameManual()) {
+				SubjectStudy subjectStudy = subject.getSubjectStudy();
+				if (subjectStudy != null) {
+					logger.info("Existing subjectStudy found with ID: " + subjectStudy.getId());
+					updateSubjectStudyInImportDialog(subjectStudy, mainWindow.importDialog);
+					this.subjectStudy = subjectStudy;
+					return;
+				} else {
+					logger.error("subjectStudy empty for existing subject in study.");
+				}
+			// Profile OFSEP: findByIdentifier returns list of subject-study
+			} else {
+				List<SubjectStudy> subjectStudyList = subject.getSubjectStudyList();
+				if (subjectStudyList != null) {
+					for (Iterator iterator = subjectStudyList.iterator(); iterator.hasNext();) {
+						SubjectStudy subjectStudy = (SubjectStudy) iterator.next();
+						// subject is already in study: display values in GUI and stop editing
+						if (subjectStudy.getStudy().getId().equals(study.getId())) {
+							logger.info("Existing subjectStudy found with ID: " + subjectStudy.getId());
+							updateSubjectStudyInImportDialog(subjectStudy, mainWindow.importDialog);
+							this.subjectStudy = subjectStudy;
+							return;
+						}
 					}
+				} else {
+					logger.error("subjectStudy list empty for existing subject in study.");
 				}
 			}
 		}
-		// subject is not in study, enable editing and display defaults
-		if (ShUpConfig.isModeSubjectStudyIdentifier()) {
-			mainWindow.importDialog.subjectStudyIdentifierTF.setEnabled(true);
-			mainWindow.importDialog.subjectStudyIdentifierTF.setEditable(true);
-			mainWindow.importDialog.subjectStudyIdentifierTF.setBackground(Color.WHITE);
-		}
-		mainWindow.importDialog.subjectStudyIdentifierTF.setText("");
-		mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(true);
-		mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.setSelected(true);
-		mainWindow.importDialog.subjectTypeCB.setEnabled(true);
-		mainWindow.importDialog.subjectTypeCB.setSelectedItem(SubjectType.values()[1]);
 		this.subjectStudy = null;
+	}
+
+	public static void updateSubjectStudyInImportDialog(SubjectStudy subjectStudy, ImportDialog importDialog) {
+		if (subjectStudy != null) {
+			importDialog.subjectStudyIdentifierTF.setText(subjectStudy.getSubjectStudyIdentifier());
+			importDialog.subjectStudyIdentifierTF.setBackground(Color.LIGHT_GRAY);
+			importDialog.subjectStudyIdentifierTF.setEnabled(false);
+			importDialog.subjectStudyIdentifierTF.setEditable(false);
+			importDialog.subjectIsPhysicallyInvolvedCB.setSelected(subjectStudy.isPhysicallyInvolved());
+			importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(false);
+			importDialog.subjectTypeCB.setSelectedItem(subjectStudy.getSubjectType());
+			importDialog.subjectTypeCB.setEnabled(false);	
+		} else {
+			// subject is not in study, enable editing and display defaults
+			if (ShUpConfig.isModeSubjectStudyIdentifier()) {
+				importDialog.subjectStudyIdentifierTF.setEnabled(true);
+				importDialog.subjectStudyIdentifierTF.setEditable(true);
+				importDialog.subjectStudyIdentifierTF.setBackground(Color.WHITE);
+			}
+			importDialog.subjectStudyIdentifierTF.setText("");
+			importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(true);
+			importDialog.subjectIsPhysicallyInvolvedCB.setSelected(true);
+			importDialog.subjectTypeCB.setEnabled(true);
+			importDialog.subjectTypeCB.setSelectedItem(SubjectType.values()[1]);
+		}
 	}
 
 	public SubjectStudy getSubjectStudy() {

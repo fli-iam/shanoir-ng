@@ -14,26 +14,9 @@
 
 package org.shanoir.ng.importer;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.file.Files;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
@@ -46,16 +29,7 @@ import org.shanoir.ng.importer.eeg.brainvision.BrainVisionReader;
 import org.shanoir.ng.importer.eeg.edf.EDFAnnotation;
 import org.shanoir.ng.importer.eeg.edf.EDFParser;
 import org.shanoir.ng.importer.eeg.edf.EDFParserResult;
-import org.shanoir.ng.importer.model.Channel;
-import org.shanoir.ng.importer.model.EegDataset;
-import org.shanoir.ng.importer.model.EegImportJob;
-import org.shanoir.ng.importer.model.Event;
-import org.shanoir.ng.importer.model.ImportJob;
-import org.shanoir.ng.importer.model.Patient;
-import org.shanoir.ng.importer.model.Serie;
-import org.shanoir.ng.importer.model.Study;
-import org.shanoir.ng.importer.model.Subject;
-import org.shanoir.ng.importer.model.SubjectStudy;
+import org.shanoir.ng.importer.model.*;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -86,10 +60,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.validation.Valid;
+import java.io.*;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.file.Files;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This is the main component of the import of Shanoir-NG. The front-end in
@@ -177,6 +155,7 @@ public class ImporterApiController implements ImporterApi {
 			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 					"Wrong content type of file upload, .zip required.", null));
 		}
+		File tempFile = null;
 		try {
 			/**
 			 * 1. STEP: Handle file management. Always create a userId specific folder in
@@ -185,7 +164,7 @@ public class ImporterApiController implements ImporterApi {
 			 */
 			File userImportDir = ImportUtils.getUserImportDir(importDir);
 			boolean createDicomDir = false;
-			File tempFile = ImportUtils.saveTempFile(userImportDir, dicomZipFile);
+			tempFile = ImportUtils.saveTempFile(userImportDir, dicomZipFile);
 			if (!ImportUtils.checkZipContainsFile(DICOMDIR, tempFile)) {
 				createDicomDir = true;
 			}
@@ -211,7 +190,7 @@ public class ImporterApiController implements ImporterApi {
 			 * 3. STEP: split instances into non-images and images and get additional meta-data
 			 * from first dicom file of each serie, meta-data missing in dicomdir.
 			 */
-			imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), false, null);
+			imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), false, null, false);
 
 			/**
 			 * . STEP: create ImportJob
@@ -223,7 +202,11 @@ public class ImporterApiController implements ImporterApi {
 			importJob.setWorkFolder(importJobDir.getName());
 			importJob.setPatients(patients);
 			return new ResponseEntity<>(importJob, HttpStatus.OK);
-		} catch (IOException e) {
+		} catch (Exception e) {
+			// If there is an exception, we should delete the temporary folder
+			if (tempFile != null) {
+				FileUtils.deleteQuietly(tempFile);
+			}
 			LOG.error(e.getMessage(), e);
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), ERROR_WHILE_SAVING_UPLOADED_FILE, null));
@@ -308,7 +291,7 @@ public class ImporterApiController implements ImporterApi {
 			// Import dicomfile
 			return uploadDicomZipFile(multiPartFile);
 		} catch (IOException e) {
-			LOG.error("ERROR while loading zip fiole, please contact an administrator");
+			LOG.error("ERROR while loading zip file, please contact an administrator");
 			LOG.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 		} finally {
@@ -353,6 +336,7 @@ public class ImporterApiController implements ImporterApi {
 			importJob.setUserId(userId);
 			importJob.setArchive(eegFile.getOriginalFilename());
 			importJob.setWorkFolder(importJobDir.getAbsolutePath());
+			importJob.setUsername(KeycloakUtil.getTokenUserName());
 			return new ResponseEntity<>(importJob, HttpStatus.OK);
 		} catch (IOException ioe) {
 			throw new RestServiceException(ioe, new ErrorModel(HttpStatus.BAD_REQUEST.value(), "Invalid file"));
@@ -399,6 +383,7 @@ public class ImporterApiController implements ImporterApi {
 			}
 
 			importJob.setDatasets(datasets);
+			importJob.setUsername(KeycloakUtil.getTokenUserName());
 
 			return new ResponseEntity<>(importJob, HttpStatus.OK);
 		} catch (ShanoirImportException e) {
@@ -406,19 +391,18 @@ public class ImporterApiController implements ImporterApi {
 		}
 	}
 
-	private File convertAnalyzeToNifti(File imageFile, File headerFile) throws IOException, InterruptedException {
+	private File convertAnalyzeToNifti(File imageFile, File headerFile) throws ShanoirException {
 		String imageName = imageFile.getAbsolutePath();
 		String newImageName = imageName.replace(".img", ".nii.gz");
 		File parentFolder = imageFile.getParentFile().getAbsoluteFile();
-		String[] command = { "/bin/bash", "-c", "animaConvertImage -i " + imageName + " -o " + newImageName};
-		ProcessBuilder processBuilder = new ProcessBuilder(command);
-		processBuilder.directory(parentFolder);
-		Process process = processBuilder.start();
 
-		int exitCode = process.waitFor();
-		if(exitCode != 0) {
-			throw new IOException("Impossible to convert Analyze image to nifti.");
+		// Send to nifti conversion micro service
+		boolean result = (boolean) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.ANIMA_CONVERSION_QUEUE, imageName);
+
+		if (!result) {
+			throw new ShanoirException("Could not convert from anima to nifti, please contact an administrator.");
 		}
+
 		return new File(parentFolder, newImageName);
 	}
 
@@ -467,7 +451,7 @@ public class ImporterApiController implements ImporterApi {
 			}
 
 			return new ResponseEntity<String>(destinationImageFile.getAbsolutePath(), HttpStatus.OK);
-		} catch (IOException | InterruptedException e) {
+		} catch (IOException | ShanoirException e) {
 			LOG.error(e.getMessage(), e);
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), ERROR_WHILE_SAVING_UPLOADED_FILE, null));
@@ -625,6 +609,9 @@ public class ImporterApiController implements ImporterApi {
 			@Parameter(name = "EegImportJob", required = true) @Valid @RequestBody final EegImportJob importJob) {
 		// Comment: Anonymisation is not necessary for pure brainvision EEGs data
 		try {
+			importJob.setUsername(KeycloakUtil.getTokenUserName());
+			ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS, 0f, importJob.getStudyId());
+			importJob.setShanoirEvent(event);
 			Integer integg = (Integer) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.IMPORT_EEG_QUEUE,  objectMapper.writeValueAsString(importJob));
 			return new ResponseEntity<Void>(HttpStatusCode.valueOf(integg.intValue()));			
 		} catch (Exception e) {
@@ -713,7 +700,6 @@ public class ImporterApiController implements ImporterApi {
 			@Parameter(name = "studyName", required = true) @PathVariable("studyName") String studyName,
 			@Parameter(name = "studyCardId", required = true) @PathVariable("studyCardId") Long studyCardId,
 			@Parameter(name = "centerId", required = true) @PathVariable("centerId") Long centerId,
-			@Parameter(name = "converterId", required = true) @PathVariable("converterId") Long converterId, 
 			@Parameter(name = "equipmentId", required = true) @PathVariable("equipmentId") Long equipmentId) throws RestServiceException {
 		// STEP 1: Unzip file
 		if (dicomZipFile == null || !ImportUtils.isZipFile(dicomZipFile)) {
@@ -832,7 +818,6 @@ public class ImporterApiController implements ImporterApi {
 				for (Patient pat : job.getPatients()) {
 					pat.setSubject(subject);
 				}
-				job.setConverterId(converterId);
 
 				// STEP 4.4 Select all series
 				for(Study study : job.getPatients().get(0).getStudies()) {

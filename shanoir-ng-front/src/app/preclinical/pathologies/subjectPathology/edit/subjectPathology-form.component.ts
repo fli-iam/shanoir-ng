@@ -34,7 +34,8 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
     selector: 'subject-pathology-form',
     templateUrl: 'subjectPathology-form.component.html',
     providers: [SubjectPathologyService, PathologyModelService, PathologyService, ReferenceService],
-    animations: [slideDown]
+    animations: [slideDown],
+    standalone: false
 })
 @ModesAware
 export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathology> {
@@ -73,35 +74,23 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
     }
 
     initView(): Promise<void> {
-        return new  Promise<void>(resolve => {
-            this.subjectPathology = new SubjectPathology();
-            this.loadPathologies();
-            this.loadModels();
-            this.loadReferences();
-            if (this.subjectpathoSelected) {
-                this.subjectPathology = this.subjectpathoSelected;
-            }
-            this.subjectPathologyService.get(this.id).then(subjectPathology => {
-                this.subjectPathology = subjectPathology;
-                resolve();
-            });
-        });        
+        this.loadPathologies();
+        this.loadModels();
+        this.loadReferences();
+        if (this.subjectpathoSelected) {
+            this.subjectPathology = this.subjectpathoSelected;
+        }
+        return Promise.resolve();   
     }
 
     initEdit(): Promise<void> {
-        return new  Promise<void>(resolve => {
-            this.subjectPathology = new SubjectPathology();
-            this.loadPathologies();
-            this.loadModels();
-            this.loadReferences();
-            if (this.subjectpathoSelected) {
-                this.subjectPathology = this.subjectpathoSelected;
-            }
-            this.subjectPathologyService.get(this.id).then(subjectPathology => {
-                this.subjectPathology = subjectPathology;
-                resolve();
-            });
-        });
+        this.loadPathologies();
+        this.loadModels();
+        this.loadReferences();
+        if (this.subjectpathoSelected) {
+            this.subjectPathology = this.subjectpathoSelected;
+        }
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {

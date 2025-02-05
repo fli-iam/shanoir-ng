@@ -19,9 +19,12 @@ import java.util.List;
 
 import org.shanoir.ng.dataset.modality.BidsDataset;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetModalityType;
+import org.shanoir.ng.dataset.model.DatasetType;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.bids.BidsDatasetAcquisition;
+import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -45,6 +48,14 @@ public abstract class ExaminationDatasetAcquisitionDecorator implements Examinat
 		}
 		final List<ExaminationDatasetAcquisitionDTO> datasetAcquisitionDTOs = new ArrayList<>();
 		for (DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
+			// Remove dataset processing input childs here #2121
+			for (Dataset datasetToBe : datasetAcquisition.getDatasets()) {
+				if (datasetToBe.getProcessings() != null) {
+					for (DatasetProcessing processing : datasetToBe.getProcessings()) {
+						processing.setInputDatasets(null);
+					}
+				}
+			}
 			datasetAcquisitionDTOs.add(datasetAcquisitionToExaminationDatasetAcquisitionDTO(datasetAcquisition));
 		}
 		return datasetAcquisitionDTOs;
@@ -81,18 +92,20 @@ public abstract class ExaminationDatasetAcquisitionDecorator implements Examinat
 			}
 		} else if (datasetAcquisition.getDatasets() != null) {
 			for (final Dataset dataset : datasetAcquisition.getDatasets()) {
-				final String datasetName = dataset.getName();
-				if (!StringUtils.isEmpty(datasetName) && !datasetNameSet.contains(datasetName)) {
-					datasetNameSet.add(datasetName);
-				}
-				String datasetComment = null;
-				if (dataset.getUpdatedMetadata() != null && dataset.getUpdatedMetadata().getComment() != null) {
-					datasetComment = dataset.getUpdatedMetadata().getComment();
-				} else if (dataset.getOriginMetadata() != null && dataset.getOriginMetadata().getComment() != null) {
-					datasetComment = dataset.getOriginMetadata().getComment();
-				}
-				if (!StringUtils.isEmpty(datasetComment) && !datasetCommentSet.contains(datasetComment)) {
-					datasetCommentSet.add(datasetComment);
+				if (!DatasetType.Measurement.equals(dataset.getType())) {
+					final String datasetName = dataset.getName();
+					if (!StringUtils.isEmpty(datasetName) && !datasetNameSet.contains(datasetName)) {
+						datasetNameSet.add(datasetName);
+					}
+					String datasetComment = null;
+					if (dataset.getUpdatedMetadata() != null && dataset.getUpdatedMetadata().getComment() != null) {
+						datasetComment = dataset.getUpdatedMetadata().getComment();
+					} else if (dataset.getOriginMetadata() != null && dataset.getOriginMetadata().getComment() != null) {
+						datasetComment = dataset.getOriginMetadata().getComment();
+					}
+					if (!StringUtils.isEmpty(datasetComment) && !datasetCommentSet.contains(datasetComment)) {
+						datasetCommentSet.add(datasetComment);
+					}
 				}
 			}
 		}

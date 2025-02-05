@@ -18,7 +18,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <ol>
             <li>
                 <label>Id</label>
-                <span class="right-col">{{task.id}}</span>
+                <span class="right-col">{{task.idAsString}}</span>
             </li>
             <li>
                 <label>Label</label>
@@ -28,9 +28,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <label>Status</label>
                 <span class="right-col">
                     <progress-bar [progress]="task?.progress" [warning]="task.status == 5 || task.status == 3"></progress-bar>
-                    <button [disabled]="loading" *ngIf="task.eventType == 'downloadDataset.event' && task?.progress == -1 && browserCompatible" class="alt left-icon normal" (click)="retry()">
+                    <button [disabled]="loading" *ngIf="task.eventType == 'downloadDataset.event' && (task?.status == -1 || task.status == 3) && browserCompatible" class="alt left-icon normal" (click)="retry()">
                         <i class="fas fa-download"></i>
-                        Retry
+                        Retry / Resume
                     </button>
                 </span>
             </li>
@@ -45,7 +45,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <li *ngIf="task.route">
                 <label>Link</label>
                 <span class="right-col left-icon">
-                    <a [routerLink]="task.route">
+                    <a *ngIf="task._eventType != 'downloadStatistics.event'" [routerLink]="task.route">
+                        <i class="fa-solid fa-link"></i>
+                        {{task.route}}
+                    </a>
+                    <a *ngIf="task._eventType == 'downloadStatistics.event'" (click)="downloadStats($event)" href="#">
                         <i class="fa-solid fa-link"></i>
                         {{task.route}}
                     </a>
@@ -68,7 +72,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </span>
             </li>
         </ol>
-        <ol *ngIf="this.report && (task._eventType == 'checkQuality.event' || task._eventType == 'importDataset.event')">
+        <ol *ngIf="report && (task._eventType == 'checkQuality.event' || task._eventType == 'importDataset.event')">
             <legend>Report</legend>
             <li>
                 <shanoir-table #table class="report"

@@ -14,16 +14,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened"
+        [class.selected]="menuOpened || (node.type == 'studycard' && treeService.isSelected(node.id, 'studycard')) || (node.type == 'qualitycard' && treeService.isSelected(node.id, 'qualitycard'))"
         [label]="node.label"
         awesome="fa-solid fa-shuffle"
-        [(opened)]="node.open"
-        (labelClick)="menuOpened = !menuOpened"
+        [(opened)]="node.opened"
+        (labelClick)="menuOpened = withMenu && !menuOpened"
+        [route]="node.route"
         [hasChildren]="false"
         [title]="node.title + ' n°' + node.id">
 
-    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
-        <a [routerLink]="this.detailsPath + this.node.id" class="open-new-tab">
+    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu">
+        <a [routerLink]="detailsPath + node.id" class="open-new-tab">
             <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
         </a>
         <menu-item *ngIf="node.canDelete"  label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteStudyCard()"></menu-item>

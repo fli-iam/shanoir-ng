@@ -63,9 +63,6 @@ public class OFSEPSeqIdProcessingTest {
         Attributes attr = new Attributes();
         attr.setDouble(Tag.ImageOrientationPatient, VR.DS, this.getDsOrientation());
 
-        given(wadoDownloaderService.getDicomAttributesForDataset(Mockito.any(Dataset.class))).willReturn(attr);
-
-
         JSONObject vol1 = new JSONObject()
             .put("orientation", this.getMatchingVolumeOrientation())
             .put("id", "volume_1");
@@ -78,7 +75,7 @@ public class OFSEPSeqIdProcessingTest {
                 .put("id", 1L)
                 .put("volumes", new JSONArray().put(vol1).put(vol2));
 
-        JSONObject volume = outputProcessing.getMatchingVolume(ds, serie);
+        JSONObject volume = outputProcessing.getMatchingVolume(ds, serie, attr);
 
         assertEquals("volume_1", volume.get("id"));
 

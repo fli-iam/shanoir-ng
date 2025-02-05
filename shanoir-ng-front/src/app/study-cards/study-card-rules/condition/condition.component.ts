@@ -11,24 +11,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, Input, OnInit, Output, EventEmitter, OnDestroy, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 
-import { StudyCardCondition, DicomTag, Operation, ConditionScope, MetadataFieldScope } from '../../shared/study-card.model';
-import { Mode } from '../../../shared/components/entity/entity.component.abstract';
-import { DicomService } from '../../shared/dicom.service';
-import { Option } from '../../../shared/select/select.component';
-import { ShanoirMetadataField } from '../action/action.component';
+import { FormArray, FormControl, FormGroup, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { Mode } from '../../../shared/components/entity/entity.component.abstract';
+import { Option } from '../../../shared/select/select.component';
+import { DicomService } from '../../shared/dicom.service';
+import { ConditionScope, DicomTag, Operation, StudyCardCondition, TagType, VM } from '../../shared/study-card.model';
+import { ShanoirMetadataField } from '../action/action.component';
+import { Coil } from 'src/app/coils/shared/coil.model';
 
 
 
 @Component({
     selector: 'condition',
     templateUrl: 'condition.component.html',
-    styleUrls: ['condition.component.css']
+    styleUrls: ['condition.component.css'],
+    standalone: false
 })
 export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges {
     
+    form: UntypedFormGroup;
     @Input() ruleScope: 'Dataset' | 'DatasetAcquisition' | 'Examination';
     @Input() condition: StudyCardCondition;
     @Output() conditionChange: EventEmitter<StudyCardCondition> = new EventEmitter();
@@ -43,30 +47,86 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
         new Option('SMALLER_THAN', ' ', null, null, 'fa-solid fa-less-than'),
         new Option('BIGGER_THAN', ' ', null, null, 'fa-solid fa-greater-than'),
         new Option('CONTAINS', 'contains', null, null),
-        new Option('DOES_NOT_CONTAIN', '! contains', null, null),
-        new Option('STARTS_WITH', 'starts with', null, null),
-        new Option('DOES_NOT_START_WITH', '! starts with', null, null),
-        new Option('ENDS_WITH', 'ends with', null, null),
+        new Option('DOES_NOT_CONTAIN', '! contains'),
+        new Option('STARTS_WITH', 'starts with'),
+        new Option('DOES_NOT_START_WITH', '! starts with'),
+        new Option('ENDS_WITH', 'ends with'),
         new Option('DOES_NOT_END_WITH', '! ends with'),
+        new Option('PRESENT', 'present'),
+        new Option('ABSENT', 'absent'),
     ];
     @Output() delete: EventEmitter<void> = new EventEmitter();
     init: boolean = false;
     conditionTypeOptions: Option<ConditionScope>[];
     fieldLabel: string;
     cardinalityType: 'NONE' | 'ALL' | 'AT_LEAST' = 'ALL';
-
     @Input() showErrors: boolean;
     tagTouched: boolean = false;
     operationTouched: boolean = false;
     valueTouched: boolean = false;
     shanoirFieldTouched: boolean = false;
-
     private computeConditionOptionsSubscription: Subscription;
     private conditionChangeSubscription: Subscription;
+    @Input() addSubForm: (subForm: FormGroup) => FormGroup;
+    private parentForm: FormGroup;
 
     constructor(
             private dicomService: DicomService,
-            private cdr: ChangeDetectorRef) {}
+            private cdr: ChangeDetectorRef,
+            private formBuilder: UntypedFormBuilder) {}
+
+    buildForm(): UntypedFormGroup {
+        let form: UntypedFormGroup = this.formBuilder.group({
+            'values': new FormArray(this.condition.values?.map(val => {
+                return this.buildValueControl(val);
+            })),
+        });
+        return form;
+    }
+
+    private buildValueControl(value: string | Coil) {
+        let validators: ValidatorFn[] = [Validators.required, Validators.minLength(1)]
+        let type: TagType = this.condition?.dicomTag?.type;
+        let vm: VM = this.condition?.dicomTag?.vm;
+        if (['Double', 'Float'].includes(type)) {
+            validators.push(Validators.pattern('[+-]?([0-9]*[.])?[0-9]+')); // reals : only numbers, with dot as decimal separator
+        } else if (['Integer', 'Long'].includes(type)) {
+            validators.push(Validators.pattern('[+-]?[0-9]+')); // only numbers w/o decimals 
+        } else if (type == 'String') {
+            validators.push(Validators.pattern('^[^\"]*$')); // exclude "
+        } else if (type == 'Date') {
+            validators.push(Validators.pattern((/^\d{4}(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])$/))); // yyyyMMdd
+        } else if (type == 'FloatArray') {
+            validators.push(Validators.pattern(this.buildArrayPattern(vm, 'float')));
+        } else if ( type == 'IntArray') {
+            validators.push(Validators.pattern(this.buildArrayPattern(vm, 'int'))); // comma separated integers
+        }
+        return new FormControl(value, validators);
+    }
+
+    private buildArrayPattern(vm: VM, type: 'float' | 'int') {
+        let regexp: string;
+        let charBlock: string;
+        if (type == 'float') {
+            charBlock = '[+-]?([0-9]*[.])?[0-9]+';
+        } else if (type == 'int') {
+            charBlock = '[+-]?[0-9]+';
+        } else throw new Error('bad type');
+
+        if (vm.max.multiplier) {
+            if (vm.max.number > 1) {
+                regexp = '((' + charBlock + ')(,' + charBlock + '){' 
+                        + (vm.max.number - 1) + ',' + (vm.max.number - 1)
+                        + '})(,(' + charBlock + ')(,' + charBlock + '){' 
+                        + (vm.max.number - 1) + ',' + (vm.max.number - 1) + '})*';
+            } else {
+                regexp = '(' + charBlock + ')(,' + charBlock + '){' + (vm.min - 1) + ',}';
+            }
+        } else {
+            regexp = '(' + charBlock + ')(,' + charBlock + '){' + (vm.min - 1) + ',' + (vm.max.number - 1) + '}';
+        }
+        return regexp;
+    }
             
     ngOnInit(): void {
         if (this.mode != 'view') {
@@ -74,17 +134,38 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
                 this.tagOptions = [];
                 for (let tag of tags) {
                     let hexStr: string = tag.code.toString(16).padStart(8, '0').toUpperCase();
-                    let label: string = hexStr.substr(0, 4) + ',' + hexStr.substr(4, 4) + ' - ' + tag.label;
+                    let cardinality: string = this.buildCadinalityLabel(tag.vm);
+                    let label: string = hexStr.substr(0, 4) + ',' + hexStr.substr(4, 4) + ' - ' + tag.label + ' <' + tag.type + cardinality +'>';
                     this.tagOptions.push(new Option<DicomTag>(tag, label));
                 }
             });
         }
+        this.parentForm = this.addSubForm(this.form);
         setTimeout(() => this.init = true);
+    }
+
+    private buildCadinalityLabel(vm: VM): string {
+        if (vm.max.multiplier) {
+            if (vm.min == vm.max.number) {
+                if (vm.min == 1) return '[n]' ;
+                else return '[' + vm.min + ',' + vm.max.number + 'n]';
+            }
+            else return '[' + vm.min + ',' + vm.max.number + 'n]';
+        } else {
+            if (vm.min == vm.max.number) {
+                if (vm.min == 1) return '' ;
+                else return '[' + vm.min + ']';
+            }
+            else return '[' + vm.min + ',' + vm.max.number + ']';
+        }
     }
             
     ngOnDestroy(): void {
         this.computeConditionOptionsSubscription?.unsubscribe();
         this.conditionChangeSubscription?.unsubscribe();
+        setTimeout(() => {
+            (this.form?.get('values') as FormArray)?.clear();
+        });
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -156,7 +237,10 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
                     
                 } else {
                     this.shanoirFieldOptions = null;
-                } 
+                }
+                this.form = this.buildForm();
+                this.filterOperations();
+                this.previousField = this.condition.dicomTag; 
             }
         }
     }
@@ -166,12 +250,12 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
     }
 
     onConditionValueChange(value: any, index: number) {
+        this.onConditionChange();
         this.cdr.detectChanges();
     }
 
     onConditionOptionSelect(option: Option<any>) {
         if (option) option.disabled = true;
-        this.onConditionChange();
     }
 
     onConditionOptionUnselect(option: Option<any>) {
@@ -179,34 +263,150 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
         option.disabled = false;
         setTimeout(() => { // without setTimeout angular mix up everything
             if(index > -1) this.condition.values?.splice(index, 1);
-            if (this.condition.values?.length == 0) this.condition.values = [null];
+            if (this.condition.values?.length == 0) this.resetValues();
             this.onConditionChange();
         })
     }
 
     onTextValueRemove(index: number) {
-        this.condition.values?.splice(index, 1);
+        if (this.condition.values?.splice(index, 1)?.length > 0) {
+            (this.form.get('values') as FormArray).removeAt(index);
+            this.form.get('values').markAsTouched();
+            this.form.get('values').markAsDirty();
+        }
         this.onConditionChange();
     }
 
-    onFieldChange(field: string) {
-        if (!(this.condition.scope == 'StudyCardDICOMConditionOnDatasets' && this.condition.dicomTag.code+"" == field)) {
-            this.computeConditionOptions();
-            if (this.shanoirFieldOptions?.length > 0) this.condition.operation = 'EQUALS';
-            else this.condition.operation = null;
-            this.condition.values = [null];
-            this.valueTouched = false;
-            this.conditionChange.emit(this.condition);
+    onTextValueAdd() {
+        if (this.condition.values?.push(null)) {
+            (this.form.get('values') as FormArray).push(this.buildValueControl(null));
+            this.form.get('values').markAsTouched();
+            this.form.get('values').markAsDirty();
         }
     }
+
+    private resetValues() {
+        this.clearValues()
+        if (this.condition.operation != 'PRESENT' && this.condition.operation != 'ABSENT') {
+            setTimeout(() => { // otherwise bugs
+                this.onTextValueAdd();
+            })
+        }
+    }
+
+    private clearValues() {
+        this.condition.values = [];
+        (this.form.get('values') as FormArray).clear();
+    }
+
+    onFieldChange(field: string) {
+        this.computeConditionOptions();
+        this.filterOperations();
+        this.resetValues();
+        this.valueTouched = false;
+        this.conditionChange.emit(this.condition);
+    }
+
+    onDicomFieldChange(field: DicomTag) {
+        if (field?.code != this.previousField?.code) {
+            this.filterOperations();
+            //if (field?.type != this.previousField?.type && field?.vm != this.previousField?.vm) {
+                this.resetValues();
+                this.valueTouched = false;
+            //}
+            this.onConditionChange();
+            this.previousField = field;
+        }
+    }
+
+    /**
+     * Filter the available operations
+     */
+    private filterOperations() {
+        if (this.condition.scope == 'StudyCardDICOMConditionOnDatasets') { // DICOM fields
+            if (this.condition?.dicomTag) {
+                let type: TagType = this.condition.dicomTag.type;
+                if (['Double', 'Float', 'Integer', 'Long', 'Date'].includes(type)) {
+                    this.operations.forEach(op => {
+                        if (['EQUALS', 'SMALLER_THAN', 'BIGGER_THAN', 'NOT_EQUALS','PRESENT', 'ABSENT'].includes(op.value)) {
+                            op.disabled = false;
+                        } else {
+                            op.disabled = true;
+                        }
+                       ;
+                    });
+                } else if (type == 'String') {
+                    this.operations.forEach(op => {
+                        if (['STARTS_WITH', 'EQUALS', 'ENDS_WITH', 'CONTAINS', 'DOES_NOT_CONTAIN', 'DOES_NOT_START_WITH', 'NOT_EQUALS', 'DOES_NOT_END_WITH', 'PRESENT', 'ABSENT'].includes(op.value)) {
+                            op.disabled = false;
+                        } else {
+                            op.disabled = true;
+                        }
+                       ;
+                    });
+                } else if (['FloatArray', 'IntArray'].includes(type)) {
+                    this.operations.forEach(op => {
+                        if (['EQUALS', 'NOT_EQUALS', 'PRESENT', 'ABSENT'].includes(op.value)) {
+                            op.disabled = false;
+                        } else {
+                            op.disabled = true;
+                        }
+                       ;
+                    });
+                } else {
+                    this.operations.forEach(op => {
+                        if (['PRESENT', 'ABSENT'].includes(op.value)) {
+                            op.disabled = false;
+                        } else {
+                            op.disabled = true;
+                        }
+                    });
+                }
+            } else {
+                this.operations.forEach(op => op.disabled = false);
+            }
+        } else { // Shanoir fields
+            if (this.shanoirFieldOptions?.length > 0) { // with option list such as coils
+                this.operations.forEach(op => {
+                    if (['EQUALS', 'NOT_EQUALS'].includes(op.value)) {
+                        op.disabled = false;
+                    } else {
+                        op.disabled = true;
+                    }
+                   ;
+                });
+            } else { // string fields
+                this.operations.forEach(op => {
+                    if (['STARTS_WITH', 'EQUALS', 'ENDS_WITH', 'CONTAINS', 'DOES_NOT_CONTAIN', 'DOES_NOT_START_WITH', 'NOT_EQUALS', 'DOES_NOT_END_WITH'].includes(op.value)) {
+                        op.disabled = false;
+                    } else {
+                        op.disabled = true;
+                    }
+                   ;
+                });
+            }
+        }
+        // unselect disabled option
+        if (this.condition.operation) {
+            let selectOperation: Option<Operation> = this.operations.find(op => op.value == this.condition.operation);
+            if (selectOperation?.disabled) {
+                this.condition.operation = null;
+            } 
+        }
+        if (this.shanoirFieldOptions?.length > 0) this.condition.operation = 'EQUALS';
+    }
+
+    private previousField: DicomTag;
 
     onConditionTypeChange(value: ConditionScope) {
         if (value != this.condition.scope) {
             this.condition.scope = value;
             this.condition.shanoirField = null;
             this.condition.dicomTag = null;
-            this.condition.operation = null;
-            this.condition.values = [null];
+            this.filterOperations();
+            this.resetValues();
+            this.form = this.buildForm();
+            this.onConditionChange();
             if (value.endsWith('OnDataset') || value.endsWith('OnDatasets')) {
                 this.fieldOptions.forEach(opt => opt.disabled = opt.section != 'Dataset');
             } else if (value.endsWith('OnAcq') || value.endsWith('OnAcq')) {
@@ -215,6 +415,15 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
                 this.fieldOptions.forEach(opt => opt.disabled = false);
             }
         }
+    }
+
+    onOperationChange() {
+        if (this.condition.operation == 'PRESENT' || this.condition.operation == 'ABSENT') {
+            this.clearValues();
+        } else if (this.condition.values.length == 0) {
+            this.resetValues();
+        }
+        this.onConditionChange(); 
     }
 
     private computeConditionOptions() {
@@ -242,6 +451,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
         } else if (this.cardinalityType == 'AT_LEAST' && this.condition.cardinality <= 1) {
             this.condition.cardinality = 1;
         }
+        this.onConditionChange(); 
     }
 
     get tagError(): boolean {

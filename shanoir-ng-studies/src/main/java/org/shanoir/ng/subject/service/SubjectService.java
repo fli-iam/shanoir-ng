@@ -48,7 +48,6 @@ public interface SubjectService {
 	@PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(filterObject, 'CAN_SEE_ALL')")
 	List<Subject> findAll();
 	
-	
 	/**
 	 * Get all the subjects.
 	 *
@@ -67,9 +66,8 @@ public interface SubjectService {
 	 * @return list of subjects
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnSubjectForOneStudy(filterObject.getId(), 'CAN_SEE_ALL')")
-	public List<SimpleSubjectDTO> findAllSubjectsOfStudy(final Long studyId);
-	
+	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnSubjectsForOneStudy(returnObject, 'CAN_SEE_ALL')")
+	public List<SimpleSubjectDTO> findAllSubjectsOfStudyId(final Long studyId);
 	
 	/**
 	 * Get all the subjects of a study
@@ -79,8 +77,8 @@ public interface SubjectService {
 	 * @return list of subjects
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnSubjectForOneStudy(filterObject.getId(), 'CAN_SEE_ALL')")
-	List<SimpleSubjectDTO> findAllSubjectsOfStudyAndPreclinical(Long studyId, boolean preclinical);
+	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnSubjectsForOneStudy(returnObject, 'CAN_SEE_ALL')")
+	List<SimpleSubjectDTO> findAllSubjectsOfStudyAndPreclinical(Long studyId, Boolean preclinical);
 	
 	/**
 	 * Find subject by data.
@@ -103,14 +101,19 @@ public interface SubjectService {
 	Subject findById(Long id);
 
 	/**
-	 * Find subject by its identifier.
+	 * Find subject by its identifier and a list of studies (based on the rights).
+	 * 
+	 * As only the list of accessible studies is used here, that is rights filtered,
+	 * I remove here the additional PostAuthorize filter to check again the rights
+	 * on the subject. We do not want to impact performance to heavily with double
+	 * or triple rights checks.
 	 *
-	 * @param indentifier
+	 * @param identifier - hash to search a subject
+	 * @param studies - list of studies to search with identifier
 	 * @return the subject or null
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(returnObject, 'CAN_SEE_ALL')")
-	Subject findByIdentifier(String indentifier);
+	Subject findByIdentifierInStudiesWithRights(String identifier, List<Study> studies);
 	
 	/**
 	 * Find a subject by its subject-study relationship id.
@@ -120,7 +123,7 @@ public interface SubjectService {
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(returnObject, 'CAN_SEE_ALL')")
-	Subject findByIdWithSubjecStudies(Long subjectStudyId);
+	Subject findByIdWithSubjectStudies(Long subjectStudyId);
 
 	/**
 	 * Find a subject from a center code
@@ -171,21 +174,12 @@ public interface SubjectService {
 	@PreAuthorize("hasAnyRole('ADMIN') or hasAnyRole('EXPERT') and @studySecurityService.hasRightOnSubjectForEveryStudy(#id, 'CAN_ADMINISTRATE')")
 	void deleteById(Long id) throws EntityNotFoundException;
 
-
-	/**
-	 * This method should not be used directly. Same as findAllSubjectsOfStudy but with no roles
-	 * @param studyId
-	 * @return
-	 */
-	List<SimpleSubjectDTO> findAllSubjectsOfStudyId(Long studyId);
-
 	/**
 	 * Update subject name and values for other microservices.
 	 * @param subjectToSubjectDTO the subject DTO to update
 	 * @throws MicroServiceCommunicationException 
 	 */
 	boolean updateSubjectName(SubjectDTO subjectToSubjectDTO) throws MicroServiceCommunicationException;
-
 
 	/**
 	 * Returns a filtered page by clinical subject name.

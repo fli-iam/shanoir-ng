@@ -47,7 +47,7 @@ public interface QualityCardApi {
 	@RequestMapping(value = "/{qualityCardId}", produces = { "application/json" }, method = RequestMethod.DELETE)
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnQualityCard(#qualityCardId, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> deleteQualityCard(
-			@Parameter(name = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId) throws RestServiceException;
+			 @Parameter(description = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId) throws RestServiceException;
 
 	@Operation(summary = "", description = "If exists, returns the quality card corresponding to the given id")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found quality card"),
@@ -59,7 +59,7 @@ public interface QualityCardApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.hasRightOnStudy(returnObject.getBody().getStudyId(), 'CAN_SEE_ALL')")
 	ResponseEntity<QualityCard> findQualityCardById(
-			@Parameter(name = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId);
+			 @Parameter(description = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId);
 	
 	@Operation(summary = "", description = "If exists, returns the quality cards corresponding to the given study id")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found quality cards"),
@@ -71,7 +71,7 @@ public interface QualityCardApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<QualityCard>> findQualityCardByStudyId(
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId);
+			 @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 	
 	@Operation(summary = "", description = "Returns all the quality Cards")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found quality cards"),
@@ -94,7 +94,7 @@ public interface QualityCardApi {
 			"application/json" }, method = RequestMethod.POST)
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(#qualityCard.getStudyId(), 'CAN_ADMINISTRATE'))")
 	ResponseEntity<QualityCard> saveNewQualityCard(
-			@Parameter(name = "Quality Card to create", required = true) @RequestBody QualityCard QualityCard,
+			 @Parameter(description = "Quality Card to create", required = true) @RequestBody QualityCard QualityCard,
 			final BindingResult result) throws RestServiceException;
 	
 	@Operation(summary = "", description = "Updates a quality card")
@@ -107,8 +107,8 @@ public interface QualityCardApi {
 			"application/json" }, method = RequestMethod.PUT)
 	@PreAuthorize("hasRole('ADMIN') or ( hasRole('EXPERT') and #qualityCardId == #qualityCard.getId() and @datasetSecurityService.hasUpdateRightOnQualityCard(#qualityCard, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> updateQualityCard(
-			@Parameter(name = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId,
-			@Parameter(name = "quality card to update", required = true) @RequestBody QualityCard qualityCard,
+			 @Parameter(description = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId,
+			 @Parameter(description = "quality card to update", required = true) @RequestBody QualityCard qualityCard,
 			final BindingResult result) throws RestServiceException;
 
 	@Operation(summary = "", description = "Apply a quality card on a study for quality control")
@@ -122,7 +122,7 @@ public interface QualityCardApi {
 	@RequestMapping(value = "/apply/{qualityCardId}", method = RequestMethod.GET)
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnQualityCard(#qualityCardId, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<QualityCardResult> applyQualityCardOnStudy(
-		@Parameter(name = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException;
+		 @Parameter(description = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException;
 	
 	@Operation(summary = "", description = "Test a quality card on a study for quality control")
     @ApiResponses(value = {
@@ -135,7 +135,7 @@ public interface QualityCardApi {
     @RequestMapping(value = "/test/{qualityCardId}", method = RequestMethod.GET)
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnQualityCard(#qualityCardId, 'CAN_ADMINISTRATE'))")
     ResponseEntity<QualityCardResult> testQualityCardOnStudy(
-        @Parameter(name = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException;
+         @Parameter(description = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException;
 
 	@Operation(summary = "", description = "Test a quality card on a study for quality control")
     @ApiResponses(value = {
@@ -149,7 +149,7 @@ public interface QualityCardApi {
     @RequestMapping(value = "/test/{qualityCardId}/{start}/{stop}", method = RequestMethod.GET)
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnQualityCard(#qualityCardId, 'CAN_ADMINISTRATE'))")
     ResponseEntity<QualityCardResult> testQualityCardOnStudy(
-        @Parameter(name = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId,
-		@Parameter(name = "examination number start ", required = true) @PathVariable("start") int start,
-		@Parameter(name = "examination number stop", required = true) @PathVariable("stop") int stop) throws RestServiceException, MicroServiceCommunicationException;
+         @Parameter(description = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId,
+		 @Parameter(description = "examination number start ", required = true) @PathVariable("start") int start,
+		 @Parameter(description = "examination number stop", required = true) @PathVariable("stop") int stop) throws RestServiceException, MicroServiceCommunicationException;
 }

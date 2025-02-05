@@ -42,7 +42,9 @@ import java.time.LocalDate;
 				@ColumnResult(name="studyName", type = String.class), @ColumnResult(name="studyId", type = Long.class),
 				@ColumnResult(name="centerName", type = String.class), @ColumnResult(name="centerId", type = Long.class),
 				@ColumnResult(name="sliceThickness", type = Double.class), @ColumnResult(name="pixelBandwidth", type = Double.class),
-				@ColumnResult(name="magneticFieldStrength", type = Double.class)
+				@ColumnResult(name="magneticFieldStrength", type = Double.class),
+				@ColumnResult(name="processed", type = Boolean.class), @ColumnResult(name="importDate", type = LocalDate.class),
+				@ColumnResult(name="username", type = String.class), @ColumnResult(name="sortingIndex", type = Integer.class)
 		})
 })
 
@@ -91,6 +93,15 @@ public class ShanoirMetadata {
 
 	private Long subjectId;
 
+	private Integer sortingIndex;
+
+	private boolean processed;
+
+	@LocalDateAnnotations
+	private LocalDate importDate;
+
+	private String username;
+
 	public ShanoirMetadata () {
 
 	}
@@ -98,7 +109,7 @@ public class ShanoirMetadata {
 	public ShanoirMetadata (Long datasetId, String datasetName, Integer datasetType, Integer datasetNature,
 							LocalDate datasetCreationDate, Long examinationId, String examinationComment, LocalDate examinationDate, String acquisitionEquipmentName,
 							String subjectName, Integer subjectType, Long subjectId, String studyName, Long studyId, String centerName, Long centerId, Double sliceThickness,
-							Double pixelBandwidth, Double magneticFieldStrength) {
+							Double pixelBandwidth, Double magneticFieldStrength, boolean processed, LocalDate importDate, String username, Integer sortingIndex) {
 		this.datasetId = datasetId;
 		this.datasetName = datasetName;
 		this.datasetType = datasetType;
@@ -111,6 +122,7 @@ public class ShanoirMetadata {
 		this.subjectName = subjectName;
 		this.subjectType = subjectType;
 		this.subjectId = subjectId;
+		this.sortingIndex = sortingIndex;
 		this.studyName = studyName;
 		this.studyId = studyId;
 		this.centerName = centerName;
@@ -118,6 +130,9 @@ public class ShanoirMetadata {
 		this.sliceThickness = sliceThickness;
 		this.pixelBandwidth = pixelBandwidth;
 		this.magneticFieldStrength = magneticFieldStrength;
+		this.processed = processed;
+		this.importDate = importDate;
+		this.username = username;
 	}
 
 	/**
@@ -346,11 +361,43 @@ public class ShanoirMetadata {
 		this.subjectId = subjectId;
 	}
 
+	public Integer getSortingIndex() {
+		return sortingIndex;
+	}
+
+	public void setSortingIndex(Integer sortingIndex) {
+		this.sortingIndex = sortingIndex;
+	}
+
 	public Long getCenterId() {
 		return centerId;
 	}
 
 	public void setCenterId(Long centerId) {
 		this.centerId = centerId;
+	}
+
+	public boolean isProcessed() {
+		return processed;
+	}
+
+	public void setProcessed(boolean processed) {
+		this.processed = processed;
+	}
+
+	public LocalDate getImportDate() {
+		return importDate;
+	}
+
+	public void setImportDate(LocalDate importDate) {
+		this.importDate = importDate;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
 	}
 }

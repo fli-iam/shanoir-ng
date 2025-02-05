@@ -27,7 +27,8 @@ import { BrowserPaging } from '../shared/components/table/browser-paging.model';
 @Component({
     selector: 'async-tasks',
     templateUrl: 'async-tasks.component.html',
-    styleUrls: ['async-tasks.component.css']
+    styleUrls: ['async-tasks.component.css'],
+    standalone: false
 })
 
 export class AsyncTasksComponent extends EntityListComponent<Task> implements AfterViewInit {
@@ -84,7 +85,15 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
         return [];
     }
 
+    downloadStats(item: any) {
+        if (item instanceof Task && item.eventType == "downloadStatistics.event" && item.progress == 1) {
+            this.taskService.downloadStats(item);
+        }
+    }
+
     select(lightTask: Task) {
+        this.notificationsService.nbNew = 0;
+        this.notificationsService.nbNewError = 0;
         this.selected = null;
         if (!lightTask) return;
         if (lightTask.report || !lightTask.hasReport) {

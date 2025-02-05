@@ -17,6 +17,7 @@ package org.shanoir.ng.shared.validation;
 import java.util.List;
 
 import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 /**
  * Custom repository for entities.

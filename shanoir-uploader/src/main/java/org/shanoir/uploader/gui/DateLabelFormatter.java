@@ -7,31 +7,34 @@ package org.shanoir.uploader.gui;
  * 
  */
 
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 import javax.swing.JFormattedTextField.AbstractFormatter;
 
-public class DateLabelFormatter extends AbstractFormatter{
-	
-//	 private String datePattern = "yyyy-MM-dd";
-	 private String datePattern = "dd/MM/yyyy";
-	    private SimpleDateFormat dateFormatter = new SimpleDateFormat(datePattern);
+public class DateLabelFormatter extends AbstractFormatter {
 
-	    public Object stringToValue(String text) throws ParseException {
-	        return dateFormatter.parseObject(text);
-	    }
+	private String datePattern = "dd/MM/yyyy";
 
-	    public String valueToString(Object value) throws ParseException {
-	        if (value != null) {
-	            Calendar cal = (Calendar) value;
-	            return dateFormatter.format(cal.getTime());
-	        }
+	private SimpleDateFormat dateFormatter = new SimpleDateFormat(datePattern);
 
-	        return "";
-	    }
+	public Object stringToValue(String text) throws ParseException {
+		return dateFormatter.parseObject(text);
+	}
 
+	public String valueToString(Object value) throws ParseException {
+		if (value != null) {
+			if (value instanceof Calendar) {
+				Calendar cal = (Calendar) value;
+				return dateFormatter.format(cal.getTime());
+			}
+			if (value instanceof Date) {
+				return dateFormatter.format(value);
+			}
+		}
+		return "";
+	}
 
 }

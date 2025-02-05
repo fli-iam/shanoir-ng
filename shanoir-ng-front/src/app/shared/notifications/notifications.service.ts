@@ -20,6 +20,7 @@ import { TaskService } from '../../async-tasks/task.service';
 import * as AppUtils from '../../utils/app.utils';
 import { KeycloakService } from '../keycloak/keycloak.service';
 import { SuperTimeout } from 'src/app/utils/super-timeout';
+import { SessionService } from '../services/session.service';
 
 @Injectable()
 export class NotificationsService {
@@ -42,10 +43,9 @@ export class NotificationsService {
     readonly readInterval: number = 1000;
     readonly persistenceTime: number = 1800000;
     private freshTimeouts: SuperTimeout[] = [];
-    private readonly TIMEOUT: number = 300000;
 
 
-    constructor(private taskService: TaskService, private keycloakService: KeycloakService) {
+    constructor(private taskService: TaskService, private keycloakService: KeycloakService, private sessionService: SessionService) {
         this.connectToServer();
         this.connectReadSessionToLocalStorage();
     }
@@ -99,10 +99,10 @@ export class NotificationsService {
         let tmpTasksInProgress = [];
         let tmpTasksInWait = [];
         for (let task of this.allTasks) {
-            if (task.eventType.startsWith("downloadDataset") && (task.status == 2 || task.status == 4 || task.status == 5) && task.lastUpdate) {
-                if (Date.now() - new Date(task.lastUpdate).getTime() > this.TIMEOUT) {
+            if (task.eventType.startsWith("downloadDataset") && (task.status == 2 || task.status == 4 || task.status == 5)) {
+                if (!this.sessionService.isActive(task.sessionId)) {
                     task.status = -1;
-                    task.message = 'timeout';
+                    task.message = 'interrupted';
                 }
             }
             if (task.status == -1 && task.lastUpdate) {
@@ -160,7 +160,18 @@ export class NotificationsService {
                 });
             this.source.addEventListener('message', message => {
                 if (message.data !== "{}") {
-                    this.refresh();
+                    let task: Task = this.taskService.toRealObject(JSON.parse(message.data));
+                    let existingTask = this.tasks.find(t => t.completeId == task.completeId);
+                    if (existingTask) {
+                        existingTask.updateWith(task);
+                    } else {
+                        task.creationDate = new Date();
+                        task.lastUpdate = new Date();
+                        this.tasks.push(task);
+                    }
+                    this.updateStatusVars();
+                    this.emitTasks();
+                    //this.refresh();
                 }
             });
             this.refresh();
@@ -197,7 +208,14 @@ export class NotificationsService {
         this.lastLocalStorageRead = Date.now();
         let storageTasks: Task[] = [];
         if (storageTasksStr) {
-            storageTasks = JSON.parse(storageTasksStr).map(task => Object.assign(new Task(), task));
+            storageTasks = JSON.parse(storageTasksStr).map(task => {
+                let newTask: Task = Object.assign(new Task(), task);
+                newTask.creationDate = new Date(task.creationDate as string);
+                newTask.lastUpdate = new Date(task.lastUpdate as string);
+                return newTask;
+            })?.filter(task => { // remove single files downloads that have been interrupted or are over
+                return task.eventType != 'downloadFile.event' || task.sessionId == this.sessionService.sessionId;
+            });
         }
         this.localTasks = storageTasks;
     }
@@ -206,7 +224,13 @@ export class NotificationsService {
         this.readLocalTasks();
         let tmpTasks: Task[] = this.localTasks.filter(lt => !this.newLocalTasksQueue.find(nlt => lt.id == nlt.id));
         tmpTasks = tmpTasks.concat(this.newLocalTasksQueue);
-        let tmpTasksStr: string = this.serializeTasks(tmpTasks); // also checks the size limit
+        tmpTasks.sort((a, b) => (a.lastUpdate?.getTime() || a.creationDate?.getDate()) - (b.lastUpdate?.getTime() || b.creationDate?.getDate()));
+        let tmpTasksStr: string = this.serializeTasks(tmpTasks);
+        // check the size limit
+        while (tmpTasksStr.length > 4000000) {
+            tmpTasks.pop();
+            tmpTasksStr = this.serializeTasks(tmpTasks);
+        }
         localStorage.setItem(this.storageKey, tmpTasksStr);
         this.newLocalTasksQueue = [];
         this.localTasks = tmpTasks;
@@ -217,10 +241,6 @@ export class NotificationsService {
     private serializeTasks(tasks: Task[]): string {
         let tasksToStore: Task[] = [].concat(tasks);
         let str: string = '[' + tasksToStore.map(t => t.stringify()).join(',') + ']';
-        while (str.length > 5200000) {
-            tasksToStore.shift();
-            str = '[' + tasksToStore.map(t => t.stringify()).join(',') + ']';
-        }
         return str;
     }
 
@@ -228,5 +248,11 @@ export class NotificationsService {
         let total: number = 0;
         this.tasksInProgress.forEach(task => total += task.progress);
         return total/this.tasksInProgress.length;
+    }
+
+    hasOnGoingDownloads(): boolean {
+        return !!this.tasksInProgress.find(task => {
+            return ['downloadDataset.event', 'downloadFile.event'].includes(task.eventType);  
+        });
     }
 }

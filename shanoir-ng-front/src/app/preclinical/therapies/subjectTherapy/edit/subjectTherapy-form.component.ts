@@ -37,7 +37,8 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
     selector: 'subject-therapy-form',
     templateUrl: 'subjectTherapy-form.component.html',
     providers: [SubjectTherapyService, TherapyService, ReferenceService],
-    animations: [slideDown]
+    animations: [slideDown],
+    standalone: false
 })
 @ModesAware
 export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>{
@@ -73,37 +74,23 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
     }
 
     initView(): Promise<void> {
-        return new  Promise<void>(resolve => {
-            this.subjectTherapy = new SubjectTherapy();
-            this.getEnums();
-            this.loadTherapies();
-            this.loadUnits();
-            if (this.subTherapySelected) {
-                this.subjectTherapy = this.subTherapySelected;
-            }
-            this.subjectTherapyService.get(this.id).then(subjectTherapy => {
-                this.subjectTherapy = subjectTherapy;
-                resolve();
-            });
-        });
-
-
+        this.getEnums();
+        this.loadTherapies();
+        this.loadUnits();
+        if (this.subTherapySelected) {
+            this.subjectTherapy = this.subTherapySelected;
+        }
+        return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
-        return new  Promise<void>(resolve => {
-            this.subjectTherapy = new SubjectTherapy();
-            this.getEnums();
-            this.loadTherapies();
-            this.loadUnits();
-            if (this.subTherapySelected) {
-                this.subjectTherapy = this.subTherapySelected;
-            }
-            this.subjectTherapyService.get(this.id).then(subjectTherapy => {
-                this.subjectTherapy = subjectTherapy;
-                resolve();
-            });
-        });
+        this.getEnums();
+        this.loadTherapies();
+        this.loadUnits();
+        if (this.subTherapySelected) {
+            this.subjectTherapy = this.subTherapySelected;
+        }
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {

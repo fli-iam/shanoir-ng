@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -30,15 +30,16 @@ import { EntityService } from '../../shared/components/entity/entity.abstract.se
     selector: 'study-card-list',
     templateUrl: 'study-card-list.component.html',
     styleUrls: ['study-card-list.component.css'],
+    standalone: false
 })
 export class StudyCardListComponent extends BrowserPaginEntityListComponent<StudyCard> {
-    
+
     @ViewChild('table', { static: false }) table: TableComponent;
 
     constructor(
             private studyCardService: StudyCardService,
             private acqEqptLabelPipe: AcquisitionEquipmentPipe) {
-                
+
         super('study-card');
     }
 
@@ -49,8 +50,8 @@ export class StudyCardListComponent extends BrowserPaginEntityListComponent<Stud
     getOptions() {
         return {
             new: true,
-            view: true, 
-            edit: this.keycloakService.isUserAdminOrExpert(), 
+            view: true,
+            edit: this.keycloakService.isUserAdminOrExpert(),
             delete: this.keycloakService.isUserAdminOrExpert()
         };
     }
@@ -65,7 +66,7 @@ export class StudyCardListComponent extends BrowserPaginEntityListComponent<Stud
             { headerName: "Study", field: 'study.name', defaultField: 'study.id',
 			 	route: (studyCard: StudyCard) => '/study/details/' + studyCard.study.id
 			},
-            { headerName: "Center", field: 'acquisitionEquipment.center.name',
+            { headerName: "Acquisition Center", field: 'acquisitionEquipment.center.name',
 				route: (studyCard: StudyCard) => studyCard.acquisitionEquipment && studyCard.acquisitionEquipment.center ? '/center/details/' + studyCard.acquisitionEquipment.center.id : null
 			},
             { headerName: "Equipment", field: "acquisitionEquipment", width: '200%',
@@ -73,7 +74,7 @@ export class StudyCardListComponent extends BrowserPaginEntityListComponent<Stud
 				route: (studyCard: StudyCard) => studyCard.acquisitionEquipment? '/acquisition-equipment/details/' + studyCard.acquisitionEquipment.id : null
 			}
         ];
-        return colDef;       
+        return colDef;
     }
 
     format(acqEqpt: AcquisitionEquipment): string {

@@ -27,6 +27,9 @@
   "paths": {
     "file-saver-es": [
       "@types/file-saver"
+    ],
+    "wicg-file-system-access": [
+      "@types/wicg-file-system-access"
     ]
   } 
 }

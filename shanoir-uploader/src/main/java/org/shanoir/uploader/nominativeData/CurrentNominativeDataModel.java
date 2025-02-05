@@ -1,10 +1,12 @@
 package org.shanoir.uploader.nominativeData;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Observable;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class contains a hash key of nominative data extracted from the
@@ -14,9 +16,10 @@ import org.apache.log4j.Logger;
  *
  */
 
+@SuppressWarnings("deprecation")
 public class CurrentNominativeDataModel extends Observable {
 
-	private static Logger logger = Logger.getLogger(CurrentNominativeDataModel.class);
+	private static final Logger logger = LoggerFactory.getLogger(CurrentNominativeDataModel.class);
 	// Hash key = folder name;
 	Map<String, NominativeDataUploadJob> currentUploads = null;
 
@@ -24,9 +27,9 @@ public class CurrentNominativeDataModel extends Observable {
 
 	public HashMap<String, NominativeDataUploadJob> getCurrentUploads() {
 		if (currentUploads == null) {
-			return new HashMap<String, NominativeDataUploadJob>();
+			return new LinkedHashMap<String, NominativeDataUploadJob>();
 		}
-		return (HashMap<String, NominativeDataUploadJob>) currentUploads;
+		return (LinkedHashMap<String, NominativeDataUploadJob>) currentUploads;
 	}
 
 	public void setCurrentUploads(Map<String, NominativeDataUploadJob> currentUploads) {

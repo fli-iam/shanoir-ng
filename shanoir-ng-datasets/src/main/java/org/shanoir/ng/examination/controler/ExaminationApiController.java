@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.examination.controler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -26,6 +28,7 @@ import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -37,6 +40,7 @@ import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -77,6 +81,12 @@ public class ExaminationApiController implements ExaminationApi {
 	@Autowired
 	private ShanoirEventService eventService;
 
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
+
+	@Autowired
+	private ObjectMapper objectMapper;
+
 	private final HttpServletRequest request;
 
 	@org.springframework.beans.factory.annotation.Autowired
@@ -86,35 +96,29 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Override
 	public ResponseEntity<Void> deleteExamination(
-			@Parameter(name = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId)
-					throws RestServiceException {
-		try {
-			// Delete extra data
-			Long studyId = examinationService.findById(examinationId).getStudyId();
-			String dataPath = examinationService.getExtraDataFilePath(examinationId, "");
-			File fileToDelete = new File(dataPath);
-			if (fileToDelete.exists()) {
-				FileUtils.deleteDirectory(fileToDelete);
-			}
-	
-			examinationService.deleteById(examinationId);
+			@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId) {
+		Long studyId = examinationService.findById(examinationId).getStudyId();
 
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, examinationId.toString(), KeycloakUtil.getTokenUserId(), "" + studyId, ShanoirEvent.SUCCESS, studyId));
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		} catch (SolrServerException | ShanoirException e) {
-			throw new RestServiceException(e, new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while deleting examination."));
-		} catch (IOException e) {
-			LOG.error("Something went wrong while deleting extra-data file: {}" , e);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
+		ShanoirEvent event = null;
+		event = new ShanoirEvent(
+				ShanoirEventType.DELETE_EXAMINATION_EVENT,
+				String.valueOf(examinationId),
+				KeycloakUtil.getTokenUserId(),
+				"Starting deletion of examination with id : " + examinationId,
+				ShanoirEvent.IN_PROGRESS,
+				0,
+				studyId);
+
+		eventService.publishEvent(event);
+
+		examinationService.deleteExaminationAsync(examinationId, studyId, event);
+
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	@Override
 	public ResponseEntity<ExaminationDTO> findExaminationById(
-			@Parameter(name = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId)
-					throws RestServiceException {
+			@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId) {
 		Examination examination = examinationService.findById(examinationId);
 		orderDatasetAcquisitions(examination);
 		if (examination == null) {
@@ -124,21 +128,22 @@ public class ExaminationApiController implements ExaminationApi {
 	}
 
 	@Override
-	public ResponseEntity<Page<ExaminationDTO>> findExaminations(final Pageable pageable) {
-		Page<Examination> examinations = examinationService.findPage(pageable, false);
-		if (examinations.getContent().isEmpty()) {
+	public ResponseEntity<Page<ExaminationDTO>> findExaminations(final Pageable pageable, String searchStr, String searchField) {
+		Page<Examination> examinations = examinationService.findPage(pageable, false, searchStr, searchField);
+		if (examinations == null || examinations.getContent().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<>(examinationMapper.examinationsToExaminationDTOs(examinations), HttpStatus.OK);
 	}
+
 	
 	@Override
 	public ResponseEntity<Page<ExaminationDTO>> findPreclinicalExaminations(
-			@Parameter(name = "preclinical", required = true) @PathVariable("isPreclinical") Boolean isPreclinical, Pageable pageable) {
+			@Parameter(description = "preclinical", required = true) @PathVariable("isPreclinical") Boolean isPreclinical, Pageable pageable) {
 		Page<Examination> examinations;
 
 		// Get examinations reachable by connected user
-		examinations = examinationService.findPage(pageable, isPreclinical);
+		examinations = examinationService.findPage(pageable, isPreclinical, null, null);
 		if (examinations.getContent().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
@@ -147,8 +152,8 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Override
 	public ResponseEntity<List<SubjectExaminationDTO>> findExaminationsBySubjectIdStudyId(
-			@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+			@Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
+			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
 		final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, studyId);
 		for (Examination exam : examinations) {
 			orderDatasetAcquisitions(exam);
@@ -161,7 +166,7 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Override
 	public ResponseEntity<List<Long>> findExaminationsByStudyId(
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
 		final List<Long> examinations = examinationService.findIdsByStudyId(studyId);
 		if (examinations.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -172,7 +177,7 @@ public class ExaminationApiController implements ExaminationApi {
 	// Attention: this method is used by ShanoirUploader!!!
 	@Override
 	public ResponseEntity<ExaminationDTO> saveNewExamination(
-			@Parameter(name = "the examination to create", required = true) @RequestBody @Valid final ExaminationDTO examinationDTO,
+			@Parameter(description = "the examination to create", required = true) @RequestBody @Valid final ExaminationDTO examinationDTO,
 			final BindingResult result) throws RestServiceException {
 		validate(result);
         final Examination createdExamination = examinationService.save(examinationMapper.examinationDTOToExamination(examinationDTO));
@@ -183,15 +188,16 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Override
 	public ResponseEntity<Void> updateExamination(
-			@Parameter(name = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId,
-			@Parameter(name = "the examination to update", required = true) @RequestBody @Valid final ExaminationDTO examination,
+			@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId,
+			@Parameter(description = "the examination to update", required = true) @RequestBody @Valid final ExaminationDTO examination,
 			final BindingResult result) throws RestServiceException {
 		/* Update examination in db. */
 		try {
 			examinationService.update(examinationMapper.examinationDTOToExamination(examination));
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_EXAMINATION_EVENT, examination.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, examination.getStudyId()));
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(examination.getStudyId()));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} catch (EntityNotFoundException e) {
+		} catch (JsonProcessingException | EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		} catch (ShanoirException e) {
 			throw new RestServiceException(new ErrorModel(e.getErrorCode(), e.getMessage()));
@@ -199,7 +205,7 @@ public class ExaminationApiController implements ExaminationApi {
 	}
 
 	@Override
-	public ResponseEntity<List<ExaminationDTO>> findExaminationsBySubjectId(@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
+	public ResponseEntity<List<ExaminationDTO>> findExaminationsBySubjectId(@Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
 		final List<Examination> examinations = examinationService.findBySubjectId(subjectId);
 		if (examinations.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -210,8 +216,8 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Override
 	public ResponseEntity<Void> addExtraData(
-			@Parameter(name = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
-			@Parameter(name = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
+			@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
+			@Parameter(description = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
 		if (examinationService.addExtraData(examinationId, file) != null) {
 			return new ResponseEntity<>(HttpStatus.OK);
 		}
@@ -220,9 +226,9 @@ public class ExaminationApiController implements ExaminationApi {
 	
 	@Override
 	public ResponseEntity<Void> createExaminationAndAddExtraData(
-			@Parameter(name = "name of the subject", required = true) @PathVariable("subjectName") String subjectName,
-			@Parameter(name = "id of the center", required = true) @PathVariable("centerId") Long centerId,
-			@Parameter(name = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
+			@Parameter(description = "name of the subject", required = true) @PathVariable("subjectName") String subjectName,
+			@Parameter(description = "id of the center", required = true) @PathVariable("centerId") Long centerId,
+			@Parameter(description = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
 		
 		Subject subject = subjectRepository.findByName(subjectName);
 		if (subject == null) {
@@ -258,8 +264,8 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Override
 	public void downloadExtraData(
-			@Parameter(name = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
-			@Parameter(name = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException {
+			@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
+			@Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException {
 		String filePath = this.examinationService.getExtraDataFilePath(examinationId, fileName);
 		LOG.info("Retrieving file : {}", filePath);
 		File fileToDownLoad = new File(filePath);
@@ -313,5 +319,4 @@ public class ExaminationApiController implements ExaminationApi {
 			}
 		});
 	}
-
 }

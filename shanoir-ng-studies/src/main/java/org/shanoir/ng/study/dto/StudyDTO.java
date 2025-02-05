@@ -25,6 +25,7 @@ import org.shanoir.ng.study.model.StudyType;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.studycenter.StudyCenterDTO;
 import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
+import org.shanoir.ng.tag.model.StudyTagDTO;
 import org.shanoir.ng.tag.model.TagDTO;
 import org.shanoir.ng.timepoint.TimepointDTO;
 
@@ -47,15 +48,13 @@ public class StudyDTO {
 
 	private Long id;
 
-	private boolean monoCenter;
-
 	private String name;
 
 	private Profile profile;
 
 	private int nbExaminations;
 
-	private int nbSujects;
+	private int nbSubjects;
 
 	private List<String> protocolFilePaths;
 	
@@ -63,7 +62,7 @@ public class StudyDTO {
 
 	private List<TagDTO> tags;
 
-	private List<TagDTO> studyTags;
+	private List<StudyTagDTO> studyTags;
 
 	@LocalDateAnnotations
 	private LocalDate startDate;
@@ -83,7 +82,9 @@ public class StudyDTO {
 	private boolean visibleByDefault;
 
 	private boolean withExamination;
-	
+
+	private String studyCardPolicy;
+
 	private List<StudyUser> studyUserList;
 
 	private boolean challenge;
@@ -177,21 +178,6 @@ public class StudyDTO {
 	}
 
 	/**
-	 * @return the monoCenter
-	 */
-	public boolean isMonoCenter() {
-		return monoCenter;
-	}
-
-	/**
-	 * @param monoCenter
-	 *            the monoCenter to set
-	 */
-	public void setMonoCenter(boolean monoCenter) {
-		this.monoCenter = monoCenter;
-	}
-
-	/**
 	 * @return the name
 	 */
 	public String getName() {
@@ -239,16 +225,16 @@ public class StudyDTO {
 	/**
 	 * @return the nbSujects
 	 */
-	public int getNbSujects() {
-		return nbSujects;
+	public int getNbSubjects() {
+		return nbSubjects;
 	}
 
 	/**
 	 * @param nbSujects
 	 *            the nbSujects to set
 	 */
-	public void setNbSujects(int nbSujects) {
-		this.nbSujects = nbSujects;
+	public void setNbSubjects(int nbSubjects) {
+		this.nbSubjects = nbSubjects;
 	}
 
 	/**
@@ -401,6 +387,14 @@ public class StudyDTO {
 		this.withExamination = withExamination;
 	}
 
+	public String getStudyCardPolicy() {
+		return studyCardPolicy;
+	}
+
+	public void setStudyCardPolicy(String studyCardPolicy) {
+		this.studyCardPolicy = studyCardPolicy;
+	}
+
 	/**
 	 * @return the studyUserList
 	 */
@@ -451,11 +445,11 @@ public class StudyDTO {
 		this.tags = tags;
 	}
 
-	public List<TagDTO> getStudyTags() {
+	public List<StudyTagDTO> getStudyTags() {
 		return studyTags;
 	}
 
-	public void setStudyTags(List<TagDTO> studyTags) {
+	public void setStudyTags(List<StudyTagDTO> studyTags) {
 		this.studyTags = studyTags;
 	}
 
@@ -475,7 +469,6 @@ public class StudyDTO {
 		this.license = license;
 	}
 
-
 	public StudyStorageVolumeDTO getStorageVolume() {
 		return storageVolume;
 	}
@@ -483,4 +476,19 @@ public class StudyDTO {
 	public void setStorageVolume(StudyStorageVolumeDTO storageVolume) {
 		this.storageVolume = storageVolume;
 	}
+
+	@Override
+	public String toString() {
+		return "StudyDTO [clinical=" + clinical + ", downloadableByDefault=" + downloadableByDefault + ", endDate="
+				+ endDate + ", experimentalGroupsOfSubjects=" + experimentalGroupsOfSubjects + ", id=" + id
+				+ ", name=" + name + ", profile=" + profile + ", nbExaminations="
+				+ nbExaminations + ", nbSubjects=" + nbSubjects + ", protocolFilePaths=" + protocolFilePaths
+				+ ", dataUserAgreementPaths=" + dataUserAgreementPaths + ", tags=" + tags + ", studyTags=" + studyTags
+				+ ", startDate=" + startDate + ", studyCards=" + studyCards + ", studyCenterList=" + studyCenterList
+				+ ", studyStatus=" + studyStatus + ", studyType=" + studyType + ", subjectStudyList=" + subjectStudyList
+				+ ", timepoints=" + timepoints + ", visibleByDefault=" + visibleByDefault + ", withExamination="
+				+ withExamination + ", studyUserList=" + studyUserList + ", challenge=" + challenge + ", description="
+				+ description + ", license=" + license + ", storageVolume=" + storageVolume + "]";
+	}
+
 }

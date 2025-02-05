@@ -22,6 +22,7 @@ import org.shanoir.ng.dataset.controler.DatasetApi;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.dataset.service.CreateStatisticsService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.examination.model.Examination;
@@ -76,9 +77,11 @@ public class DatasetApiSecurityTest {
 	
 	@Autowired
 	private DatasetApi api;
-	
+
 	@MockBean
 	StudyRightsService rightsService;
+	@MockBean
+	CreateStatisticsService createStatisticsService;
 	
 	@MockBean
 	private StudyUserRightsRepository rightsRepository;
@@ -244,12 +247,12 @@ public class DatasetApiSecurityTest {
 		assertAccessDenied(api::createProcessedDataset, job);
 		
 		//massiveDownloadByDatasetIds(List<Long>, String, HttpServletResponse)
-		assertAccessAuthorized(api::massiveDownloadByDatasetIds, Utils.toList(1L), "file", null);
-		assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(1L, 3L), "file", null);
-		assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(3L), "file", null);
-		assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(1L, 2L), "file", null);
-		assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(2L), "file", null);
-		assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(4L), "file", null);
+		assertAccessAuthorized(api::massiveDownloadByDatasetIds, Utils.toList(1L), "file", 1L,null);
+		assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(1L, 3L), "file", 1L, null);
+		assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(3L), "file", 1L, null);
+		assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(1L, 2L), "file", 1L, null);
+		assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(2L), "file", 1L, null);
+		assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(4L), "file", 1L, null);
 		
 		//massiveDownloadByStudyId(Long, String, HttpServletResponse)
 		assertAccessAuthorized(api::massiveDownloadByStudyId, 1L, "file", null);

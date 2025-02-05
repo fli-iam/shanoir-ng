@@ -14,8 +14,10 @@
 
 package org.shanoir.ng.processing.repository;
 
+import java.util.List;
 import java.util.Optional;
 import org.shanoir.ng.processing.model.DatasetProcessing;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 /**
@@ -33,4 +35,26 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
 	 */
 	Optional<DatasetProcessing> findByComment(String comment);
 
+	/**
+	 * Find all processings that are linked to given dataset through INPUT_OF_DATASET_PROCESSING table
+	 *
+	 * @param datasetId
+	 * @return
+	 */
+	List<DatasetProcessing> findAllByInputDatasets_Id(Long datasetId);
+
+    List<DatasetProcessing> findAllByParentId(Long id);
+	
+	/**
+	 * Find all processings that are linked to given examinations
+	 *
+	 * @param examinationIds
+	 * @return
+	 */
+	@Query(value="SELECT DISTINCT processing.id FROM dataset_processing as processing " +
+			"INNER JOIN input_of_dataset_processing as input ON processing.id=input.processing_id " +
+			"INNER JOIN dataset as dataset ON dataset.id=input.dataset_id " +
+			"INNER JOIN dataset_acquisition as acquisition ON acquisition.id=dataset.dataset_acquisition_id " +
+			"WHERE acquisition.examination_id IN (:examinationIds)", nativeQuery = true)
+	List<Long> findAllIdsByExaminationIds(List<Long> examinationIds);
 }

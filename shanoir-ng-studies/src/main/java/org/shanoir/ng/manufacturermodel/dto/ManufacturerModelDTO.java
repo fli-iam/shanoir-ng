@@ -14,7 +14,7 @@
 
 package org.shanoir.ng.manufacturermodel.dto;
 
-import org.shanoir.ng.manufacturermodel.model.DatasetModalityType;
+import org.shanoir.ng.shared.dataset.DatasetModalityType;
 
 /**
  * DTO for manufacturer models.

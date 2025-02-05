@@ -24,7 +24,7 @@ import {
     SimpleChanges,
     ViewChildren,
 } from '@angular/core';
-import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErrors } from '@angular/forms';
+import { AbstractControl, ControlValueAccessor, FormGroup, NG_VALUE_ACCESSOR, ValidationErrors } from '@angular/forms';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 
 import { Coil } from '../../coils/shared/coil.model';
@@ -52,12 +52,13 @@ import { QualityCardRuleComponent } from './quality-card-rule.component';
     templateUrl: 'study-card-rules.component.html',
     styleUrls: ['study-card-rules.component.css'],
     providers: [
-        { 
-          provide: NG_VALUE_ACCESSOR,
-          multi: true,
-          useExisting: forwardRef(() => StudyCardRulesComponent),
+        {
+            provide: NG_VALUE_ACCESSOR,
+            multi: true,
+            useExisting: forwardRef(() => StudyCardRulesComponent),
         }
-      ]
+    ],
+    standalone: false
 })
 export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor {
     
@@ -69,6 +70,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     onChangeCallback = (_: any) => {};
     @Input() manufModelId: number;
     @Input() allCoils: Coil[];
+    @Input() studyId: number;
     assignmentFields: ShanoirMetadataField[];
     conditionFields: ShanoirMetadataField[];
     private coilOptionsSubject: Subject<Option<Coil>[]> = new BehaviorSubject<Option<Coil>[]>(null);
@@ -79,6 +81,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     @Output() selectedRulesChange: EventEmitter<(StudyCardRule | QualityCardRule)[]> = new EventEmitter();
     selectedRules: Map<number, StudyCardRule | QualityCardRule> = new Map();
     rulesToAnimate: Set<number> = new Set();
+    @Input() addSubForm: (subForm: FormGroup) => FormGroup;
 
     
     constructor(
@@ -115,20 +118,25 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     }
     
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes.manufModelId) {
-            if (this.manufModelId) {
-                this.allCoilsPromise.then(allCoils => {
-                    let optionArr: Option<Coil>[] = [];
-                    allCoils
-                        .filter(coil => coil.manufacturerModel.id == this.manufModelId)
-                        .forEach(coil => optionArr.push(new Option<Coil>(coil, coil.name)));
-                    this.coilOptionsSubject.next(optionArr);
-                });
-            } else if (this.coilOptionsSubject) {
-                this.coilOptionsSubject.next([]);
-
-            }
+        if (changes.manufModelId && this.manufModelId) {
+            this.allCoilsPromise.then(allCoils => {
+                let optionArr: Option<Coil>[] = [];
+                allCoils
+                    .filter(coil => coil.manufacturerModel.id == this.manufModelId)
+                    .forEach(coil => optionArr.push(new Option<Coil>(coil, coil.name)));
+                this.coilOptionsSubject.next(optionArr);
+            });
         } 
+        if(changes.studyId && this.studyId) {
+            this.allCoilsPromise.then(allCoils => {
+                let optionArr: Option<Coil>[] = [];
+                allCoils
+                    .filter(coil => coil.center?.studyCenterList?.find(sc => sc.study.id == this.studyId))
+                    .forEach(coil => optionArr.push(new Option<Coil>(coil, coil.name)));
+                this.coilOptionsSubject.next(optionArr);
+            });
+
+        }
         if (changes.allCoils && this.allCoils) {
             this.allCoilsPromise.resolve(this.allCoils);
         } 
@@ -259,7 +267,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
                 if (rule.conditions?.find(cond => !cond.operation)) {
                     errors.missingField = 'condition operation';
                 }      
-                if (rule.conditions?.find(cond => cond.values?.length <= 0)) {
+                if (rule.conditions?.find(cond => cond.operation != 'PRESENT' && cond.operation != 'ABSENT' && cond.values?.length <= 0)) {
                     errors.missingField = 'condition values';
                 }                     
                 if (rule instanceof StudyCardRule) {

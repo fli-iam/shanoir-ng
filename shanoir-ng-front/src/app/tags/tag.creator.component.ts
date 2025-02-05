@@ -2,16 +2,16 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, forwardRef, Input, Output } from '@angular/core';
+import {Component, EventEmitter, forwardRef, Input, Output, ViewChild} from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
@@ -19,6 +19,8 @@ import { AbstractInput } from '../shared/form/input.abstract';
 import { Study } from '../studies/shared/study.model';
 import { isDarkColor } from '../utils/app.utils';
 import { Tag } from './tag.model';
+import {TableComponent} from "../shared/components/table/table.component";
+import {TagInputComponent} from "./tag.input.component";
 
 
 export type Mode =  "view" | "edit" | "create";
@@ -27,21 +29,24 @@ export type Mode =  "view" | "edit" | "create";
     templateUrl: 'tag.creator.component.html',
     styleUrls: ['tag.creator.component.css'],
     providers: [
-    { 
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => TagCreatorComponent),
-      multi: true
-    }
-]
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => TagCreatorComponent),
+            multi: true
+        }
+    ],
+    standalone: false
 })
 
 export class TagCreatorComponent extends AbstractInput<Tag[]> {
+    @ViewChild('input', { static: false }) input: any;
     @Input() study: Study;
     @Input() mode: Mode;
     @Output() onChange: EventEmitter<any> = new EventEmitter();
     selectedColor: string;
     text: string = null;
     addTagVisible: boolean = false;
+    message: string = "";
     displayedTags: Set<{tag: Tag, darkFont: boolean}>;
     newTagDarkFont: boolean;
 
@@ -51,6 +56,12 @@ export class TagCreatorComponent extends AbstractInput<Tag[]> {
         this.onColorChange();
     }
 
+    ngOnChanges() {
+    }
+
+    focus() {
+        setTimeout(() => this.input.nativeElement.focus());
+    }
     public addTag() {
         if (this.text != null && this.selectedColor != null) {
             let newTag = new Tag();
@@ -95,7 +106,7 @@ export class TagCreatorComponent extends AbstractInput<Tag[]> {
         super.writeValue(obj);
         this.displayedTags = new Set();
         if (this.model) {
-            (this.model as Tag[]).forEach(tag => 
+            (this.model as Tag[]).forEach(tag =>
                 this.displayedTags.add({tag: tag, darkFont: isDarkColor(tag.color)})
             );
         }

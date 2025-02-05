@@ -31,10 +31,11 @@ import { ExtraData } from '../../extraData/shared/extradata.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
-  selector: 'physiological-data-upload-form',
-  templateUrl: 'physiologicalData-form.component.html',
-  providers: [ExtraDataService],
-  animations: [slideDown]
+    selector: 'physiological-data-upload-form',
+    templateUrl: 'physiologicalData-form.component.html',
+    providers: [ExtraDataService],
+    animations: [slideDown],
+    standalone: false
 })
 @ModesAware
 export class PhysiologicalDataFormComponent extends EntityComponent<PhysiologicalData> {
@@ -63,19 +64,17 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
         return this.extradatasService;
     }
 
-    initView(): Promise<void> {
-        this.entity = new PhysiologicalData();
-        this.extradatasService.getExtraDatas(this.examination_id).then(extradatas => {
-            this.loadExaminationExtraDatas(extradatas);
+    protected fetchEntity: () => Promise<PhysiologicalData> = () => {
+        return  this.extradatasService.getExtraDatas(this.examination_id).then(extradatas => {
+            return this.getExaminationExtraDatas(extradatas);
         });
+    }
+
+    initView(): Promise<void> {
         return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
-        this.entity = new PhysiologicalData();
-        this.extradatasService.getExtraDatas(this.examination_id).then(extradatas => {
-            this.loadExaminationExtraDatas(extradatas);
-        });
         return Promise.resolve();
     }
 
@@ -84,13 +83,14 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
         return Promise.resolve();
     }
 
-    loadExaminationExtraDatas(extradatas: ExtraData[]){
+    getExaminationExtraDatas(extradatas: ExtraData[]): PhysiologicalData {
     	for (let ex of extradatas) {
     		// instanceof does not work??
     		if (ex.extradatatype == "Physiological data"){
-    			this.physioData = <PhysiologicalData>ex;
+    			return this.physioData;
     		}
     	}
+        return new PhysiologicalData();
     }
 
     buildForm(): UntypedFormGroup {

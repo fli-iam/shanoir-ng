@@ -36,10 +36,10 @@ public class RabbitMQImportService {
 	@RabbitListener(bindings = @QueueBinding(
 	        value = @Queue(value = RabbitMQConfiguration.STUDY_USER_QUEUE_IMPORT, durable = "true"),
 	        exchange = @Exchange(value = RabbitMQConfiguration.STUDY_USER_EXCHANGE, ignoreDeclarationExceptions = "true",
-	        	autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT))
+	        	autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT)), containerFactory = "multipleConsumersFactory"
 	)
 	public void receiveMessage(String commandArrStr) {
-		listener.receiveMessageImport(commandArrStr);
+		listener.receiveStudyUsers(commandArrStr);
 	}
 
 }

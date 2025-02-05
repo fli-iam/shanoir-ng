@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="header command-zone">1. Select Bids archive</div>
+<div class="header command-zone">1. Select BIDS (Brain Imaging Data Structure) archive</div>
 <fieldset>
     <p>This import allows to import a single subject from a BIDS dataset.</p>
     <p>Select a subject folder from a BIDS dataset and zip it.</p>
@@ -36,7 +36,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
      </p>
      <p>
        <u> 4) Equipment </u><br/>
-        The acquisition equipment will be automatically referenced from the json metadata files, if existing. <br/>
+        The center equipment will be automatically referenced from the json metadata files, if existing. <br/>
         - "DeviceSerialNumber" will be used to check for a match in Shanoir database. <br/>
         - If not existing, an "unknown" equipment will be used.<br/><br/>
      </p>
@@ -51,7 +51,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <select-box
                         [(ngModel)]="study"
                         (userChange)="onSelectStudy();"
-                        [viewRoute]="'/study/details/' + this.study?.id"
+                        [viewRoute]="'/study/details/' + study?.id"
                         [viewDisabled]="!study"
                         [options]="studyOptions">
                 </select-box>
@@ -61,9 +61,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label class="required-label">Select an associated center</label>
             <span class="right-col">
                 <select-box
-                        [disabled]="(!study || !centerOptions || study.monoCenter || this.study.studyCenterList.length == 1)"
+                        [disabled]="(!study || !centerOptions || this.study.studyCenterList.length == 1)"
                         [(ngModel)]="center"
-                        [viewRoute]="'/center/details/' + this.center?.id"
+                        [viewRoute]="'/center/details/' + center?.id"
                         [viewDisabled]="!center"
                         [options]="centerOptions">
                 </select-box>

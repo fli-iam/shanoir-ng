@@ -16,7 +16,6 @@ package org.shanoir.ng.dicom;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
@@ -36,12 +35,12 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class DicomProcessing {
 
-	UIDGeneration uidGenerator = new UIDGeneration();
+	private static UIDGeneration uidGenerator = new UIDGeneration();
 	
 	@Autowired
-	private WADOURLHandler wadoURLHandler;
+	private static WADOURLHandler wadoURLHandler;
 
-	public Attributes getDicomObjectAttributes(DatasetFile image, Boolean isEnhancedMR) throws IOException {
+	public static Attributes getDicomObjectAttributes(DatasetFile image, Boolean isEnhancedMR) throws IOException {
 		File dicomFile = new File(image.getPath());
 		try (DicomInputStream dIS = new DicomInputStream(dicomFile)) {
 			Attributes datasetAttributes;
@@ -57,7 +56,7 @@ public class DicomProcessing {
 	}
 
     public ExaminationAttributes<String> getDicomExaminationAttributes(Study study, Boolean isEnhanced) throws ShanoirException {
-		ExaminationAttributes<String> attributes = new ExaminationAttributes<String>(wadoURLHandler);
+		ExaminationAttributes<String> attributes = new ExaminationAttributes<>(wadoURLHandler);
 		if (study != null) {
 			for (Serie serie : study.getSeries()) {
 				attributes.addAcquisitionAttributes(serie.getSeriesInstanceUID(), getDicomAcquisitionAttributes(serie, isEnhanced));
@@ -66,8 +65,8 @@ public class DicomProcessing {
 		return attributes;
     }
 
-	public ExaminationAttributes<String> getDicomExaminationAttributes(Study study) throws ShanoirException {
-		ExaminationAttributes<String> attributes = new ExaminationAttributes<String>(wadoURLHandler);
+	public static ExaminationAttributes<String> getDicomExaminationAttributes(Study study) throws ShanoirException {
+		ExaminationAttributes<String> attributes = new ExaminationAttributes<>(wadoURLHandler);
 		if (study != null) {
 			for (Serie serie : study.getSeries()) {
 				attributes.addAcquisitionAttributes(serie.getSeriesInstanceUID(), getDicomAcquisitionAttributes(serie));
@@ -76,26 +75,29 @@ public class DicomProcessing {
 		return attributes;
     }
 
-	public AcquisitionAttributes<String> getDicomAcquisitionAttributes(Serie serie, Boolean isEnhanced) throws ShanoirException {
-		AcquisitionAttributes<String> attributes = new AcquisitionAttributes<String>();
+	public static AcquisitionAttributes<String> getDicomAcquisitionAttributes(Serie serie, Boolean isEnhanced) throws ShanoirException {
+		AcquisitionAttributes<String> attributes = new AcquisitionAttributes<>();
 		String sopUID = null;
 		if (!CollectionUtils.isEmpty(serie.getImages())) {
 			sopUID = serie.getImages().get(0).getSOPInstanceUID();
 		} else {
 			sopUID = uidGenerator.getNewUID();
 		}
-		for (Dataset dataset : serie.getDatasets()) {
-			try {
-				dataset.setFirstImageSOPInstanceUID(sopUID);
-				attributes.addDatasetAttributes(dataset.getFirstImageSOPInstanceUID(), getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), isEnhanced));
-			} catch (IOException e) {
-				throw new ShanoirException("Could not read dicom metadata from file for serie " + serie.getSopClassUID(), e);
+		// In case of Quality Check during Import from ShUp, Serie does not have any Dataset and conditions are applied on DICOM metadata only.
+		if (!CollectionUtils.isEmpty(serie.getDatasets())) {
+			for (Dataset dataset : serie.getDatasets()) {
+				try {
+					dataset.setFirstImageSOPInstanceUID(sopUID);
+					attributes.addDatasetAttributes(dataset.getFirstImageSOPInstanceUID(), getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), isEnhanced));
+				} catch (IOException e) {
+					throw new ShanoirException("Could not read dicom metadata from file for serie " + serie.getSopClassUID(), e);
+				}
 			}
 		}
 		return attributes;
 	}
 
-	public AcquisitionAttributes<String> getDicomAcquisitionAttributes(Serie serie) throws ShanoirException {
+	public static AcquisitionAttributes<String> getDicomAcquisitionAttributes(Serie serie) throws ShanoirException {
 		return getDicomAcquisitionAttributes(serie, serie.getIsEnhanced());
 	}
 

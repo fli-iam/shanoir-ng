@@ -72,6 +72,9 @@ public class DatasetServiceSecurityTest {
 	
 	@MockBean
 	private DatasetRepository datasetRepository;
+
+	@MockBean
+	private SolrService solrService;
 	
 	@MockBean
 	private DatasetAcquisitionRepository datasetAcquisitionRepository;
@@ -90,10 +93,7 @@ public class DatasetServiceSecurityTest {
 	
 	@MockBean
 	private ShanoirEventService shanoirEventService;
-	
-	@MockBean
-	private SolrService solrService;
-	
+
 	@Test
 	@WithAnonymousUser
 	public void testAsAnonymous() throws ShanoirException {
@@ -177,9 +177,6 @@ public class DatasetServiceSecurityTest {
 		assertAccessAuthorized(service::findByStudyId, 2L);
 		assertThat(service.findByStudyId(2L)).isNullOrEmpty();
 		assertAccessDenied(service::findByStudyId, 3L);
-		
-		//queryStatistics(String, String, String, String)
-		assertAccessDenied(service::queryStatistics,"", "", "", "");
 	}
 	
 	private void testFindPage() throws ShanoirException {

@@ -36,8 +36,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Anonymization serviceImpl. mkain: bug fixing done for multi-threading errors,
- * e.g. when used by server. bug fixed for identical media storage sop instance
- * uid and sop instance uid and bug fixed for invalid uid generation.
+ * e.g. when used by server; bug fixed for identical media storage sop instance
+ * uid and sop instance uid; bug fixed for invalid uid generation.
  * 
  * @author ifakhfakh
  * @author mkain
@@ -66,6 +66,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		tagsToDeleteForManufacturer = AnonymizationRulesSingleton.getInstance().getTagsToDeleteForManufacturer();
 		// init here for multi-threading reasons
 		Map<String, String> seriesInstanceUIDs = new HashMap<>();
+		Map<String, String> frameOfReferenceUIDs = new HashMap<>();
 		Map<String, String> studyInstanceUIDs = new HashMap<>();
 		Map<String, String> studyIds = new HashMap<>();
 		LOG.debug("anonymize : totalAmount={}", totalAmount);
@@ -73,7 +74,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		for (int i = 0; i < dicomFiles.size(); ++i) {
 			final File file = dicomFiles.get(i);
 			// Perform the anonymization
-			performAnonymization(file, anonymizationMap, false, "", "", seriesInstanceUIDs, studyInstanceUIDs, studyIds);
+			performAnonymization(file, anonymizationMap, false, "", "", seriesInstanceUIDs, frameOfReferenceUIDs, studyInstanceUIDs, studyIds);
 			current++;
 			final int currentPercent = current * 100 / totalAmount;
 			LOG.debug("anonymize : anonymization current percent= {} %", currentPercent);
@@ -96,9 +97,10 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		Map<String, Profile> profiles = AnonymizationRulesSingleton.getInstance().getProfiles();
 		Map<String, String> anonymizationMap = profiles.get(profile).getAnonymizationMap();
 		tagsToDeleteForManufacturer = AnonymizationRulesSingleton.getInstance().getTagsToDeleteForManufacturer();
-		// init here for multi-threading reasons
 
+		// init here for multi-threading reasons
 		Map<String, String> seriesInstanceUIDs = new HashMap<>();
+		Map<String, String> frameOfReferenceUIDs = new HashMap<>();
 		Map<String, String> studyInstanceUIDs = new HashMap<>();
 		Map<String, String> studyIds = new HashMap<>();
 		LOG.debug("anonymize : totalAmount={}", totalAmount);
@@ -106,7 +108,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		for (int i = 0; i < dicomFiles.size(); ++i) {
 			final File file = dicomFiles.get(i);
 			// Perform the anonymization
-			performAnonymization(file, anonymizationMap, true, patientName, patientID, seriesInstanceUIDs, studyInstanceUIDs, studyIds);
+			performAnonymization(file, anonymizationMap, true, patientName, patientID, seriesInstanceUIDs, frameOfReferenceUIDs, studyInstanceUIDs, studyIds);
 			current++;
 			final int currentPercent = current * 100 / totalAmount;
 			LOG.debug("anonymize : anonymization current percent= {} %", currentPercent);
@@ -156,7 +158,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	 * @throws Exception
 	 */
 	public void performAnonymization(final File dicomFile, Map<String, String> anonymizationMap, boolean isShanoirAnonymization,
-			String patientName, String patientID, Map<String, String> seriesInstanceUIDs,
+			String patientName, String patientID, Map<String, String> seriesInstanceUIDs, Map<String, String> frameOfReferenceUIDs,
 			Map<String, String> studyInstanceUIDs, Map<String, String> studyIds) throws Exception {
 		DicomInputStream din = null;
 		DicomOutputStream dos = null;
@@ -178,9 +180,12 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 					.getString(Tag.MediaStorageSOPInstanceUID);
 			
 			/**
-			 * DICOM "body": read tags
+			 * MK: Read entire dataset with PixelData. Attention: do NOT change here to only
+			 * readDatasetUntilPixelData(), as the modified DICOM image will MISS the PixelData!
+			 * It writes into the image, what has been read from the image, that is why we read
+			 * the entire dataset here (I made the mistake already twice...).
 			 */
-			Attributes datasetAttributes = din.readDataset(-1, -1);
+			Attributes datasetAttributes = din.readDataset();
 			
 			// temporarily keep the patient credentials in memory to search in private tags
 			String patientNameAttr = datasetAttributes.getString(Tag.PatientName);
@@ -210,18 +215,17 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 					anonymizeTag(tagInt, action, datasetAttributes);
 				// even: public tags
 				} else if (anonymizationMap.containsKey(tagString)) {
-					if (tagInt == Tag.SOPInstanceUID) {
-						anonymizeSOPInstanceUID(tagInt, datasetAttributes, mediaStorageSOPInstanceUIDGenerated);
-					} else if (tagInt == Tag.SeriesInstanceUID) {
-						anonymizeSeriesInstanceUID(tagInt, datasetAttributes, seriesInstanceUIDs);
-					} else if (tagInt == Tag.StudyInstanceUID) {
-						anonymizeStudyInstanceUID(tagInt, datasetAttributes, studyInstanceUIDs);
-					} else if (tagInt == Tag.StudyID) {
-						anonymizeStudyId(tagInt, datasetAttributes, studyIds);
-					} else {
-						final String action = anonymizationMap.get(tagString);
-						anonymizeTag(tagInt, action, datasetAttributes);
-					}
+                                    switch (tagInt) {
+                                        case Tag.SOPInstanceUID -> anonymizeSOPInstanceUID(tagInt, datasetAttributes, mediaStorageSOPInstanceUIDGenerated);
+                                        case Tag.SeriesInstanceUID -> anonymizeUID(tagInt, datasetAttributes, seriesInstanceUIDs);
+                                        case Tag.FrameOfReferenceUID -> anonymizeUID(tagInt, datasetAttributes, frameOfReferenceUIDs);
+                                        case Tag.StudyInstanceUID -> anonymizeUID(tagInt, datasetAttributes, studyInstanceUIDs);
+                                        case Tag.StudyID -> anonymizeStudyId(tagInt, datasetAttributes, studyIds);
+                                        default -> {
+                                            final String action = anonymizationMap.get(tagString);
+                                            anonymizeTag(tagInt, action, datasetAttributes);
+                                        }
+                                    }
 				} else {
 					if (0x50000000 <= tagInt && tagInt <= 0x50FFFFFF) {
 						final String action = anonymizationMap.get(CURVE_DATA_TAGS);
@@ -347,44 +351,6 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		anonymizeTagAccordingToVR(attributes, tagInt, mediaStorageSOPInstanceUID);
 	}
 
-	private void anonymizeSeriesInstanceUID(int tagInt, Attributes attributes, Map<String, String> seriesInstanceUIDs) {
-		String value;
-		if (seriesInstanceUIDs != null && seriesInstanceUIDs.size() != 0
-				&& seriesInstanceUIDs.get(attributes.getString(tagInt)) != null) {
-			value = seriesInstanceUIDs.get(attributes.getString(tagInt));
-		} else {
-			UIDGeneration generator = new UIDGeneration();
-			String newUID = null;
-			try {
-				newUID = generator.getNewUID();
-			} catch (Exception e) {
-				LOG.error(e.getMessage());
-			}
-			value = newUID;
-			seriesInstanceUIDs.put(attributes.getString(tagInt), value);
-		}
-		anonymizeTagAccordingToVR(attributes, tagInt, value);
-	}
-
-	private void anonymizeStudyInstanceUID(int tagInt, Attributes attributes, Map<String, String> studyInstanceUIDs) {
-		String value;
-		if (studyInstanceUIDs != null && studyInstanceUIDs.size() != 0
-				&& studyInstanceUIDs.get(attributes.getString(tagInt)) != null) {
-			value = studyInstanceUIDs.get(attributes.getString(tagInt));
-		} else {
-			UIDGeneration generator = new UIDGeneration();
-			String newUID = null;
-			try {
-				newUID = generator.getNewUID();
-			} catch (Exception e) {
-				LOG.error(e.getMessage());
-			}
-			value = newUID;
-			studyInstanceUIDs.put(attributes.getString(tagInt), value);
-		}
-		anonymizeTagAccordingToVR(attributes, tagInt, value);
-	}
-
 	private void anonymizeStudyId(int tagInt, Attributes attributes, Map<String, String> studyIds) {
 		String value;
 		if (studyIds != null && studyIds.size() != 0 && studyIds.get(attributes.getString(tagInt)) != null) {
@@ -398,6 +364,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 			}
 			String output = sb.toString();
 			value = output.toString();
+			LOG.info("New StudyID generated for DICOM study/exam: {}", value);
 			studyIds.put(attributes.getString(tagInt), value);
 		}
 		anonymizeTagAccordingToVR(attributes, tagInt, value);
@@ -515,6 +482,32 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		// VR.UR = Universal Resource Identifier or Universal
 		// Resource Locator (URI/URL)
 		// VR.OD = Other Double String
+	}
+
+	private void anonymizeUID(int tagInt, Attributes attributes, Map<String, String> UIDs) {
+		String value;
+		if (UIDs != null && UIDs.size() != 0
+				&& UIDs.get(attributes.getString(tagInt)) != null) {
+			value = UIDs.get(attributes.getString(tagInt));
+			// We log only concerning the studyInstanceUID
+			if(Tag.StudyInstanceUID == tagInt) {
+				LOG.debug("Existing StudyInstanceUID reused: {}", value);
+			}
+		} else {
+			UIDGeneration generator = new UIDGeneration();
+			String newUID = null;
+			try {
+				newUID = generator.getNewUID();
+			} catch (Exception e) {
+				LOG.error(e.getMessage());
+			}
+			value = newUID;
+			if(Tag.StudyInstanceUID == tagInt) {
+				LOG.info("New StudyInstanceUID generated for DICOM study/exam: {}", newUID);
+			}
+			UIDs.put(attributes.getString(tagInt), value);
+		}
+		anonymizeTagAccordingToVR(attributes, tagInt, value);
 	}
 
 }

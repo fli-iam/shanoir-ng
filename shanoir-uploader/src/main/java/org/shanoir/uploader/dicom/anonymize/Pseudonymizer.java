@@ -3,11 +3,13 @@ package org.shanoir.uploader.dicom.anonymize;
 import java.io.File;
 
 import org.apache.commons.lang.SystemUtils;
-import org.apache.log4j.Logger;
-import org.shanoir.uploader.action.DicomDataTransferObject;
+import org.shanoir.ng.importer.model.Patient;
+import org.shanoir.ng.importer.model.PseudonymusHashValues;
 import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.utils.StreamGobbler;
 import org.shanoir.uploader.utils.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is used for pseudonymization. Pseudonymization is a data management and
@@ -32,7 +34,7 @@ public class Pseudonymizer {
 	
 	private static final String DEBUG = "DEBUG";
 
-	private static Logger logger = Logger.getLogger(Pseudonymizer.class);
+	private static final Logger logger = LoggerFactory.getLogger(Pseudonymizer.class);
 
 	public static final String PSEUDONYMUS_FOLDER = "pseudonymus";
 	private static final String PSEUDONYMUS_SHANOIR = "PseudonymusShanoir";
@@ -105,44 +107,45 @@ public class Pseudonymizer {
 	 * firstNameHash_3 birthDateHash, avec 1 pour le traitement de la chaine
 	 * brute, 2 pour soundex simple et 3 pour soundex avancé.
 	 */
-	public DicomDataTransferObject createHashValuesWithPseudonymus(final DicomDataTransferObject dicomData)
+	public PseudonymusHashValues createHashValuesWithPseudonymus(final Patient patient)
 			throws PseudonymusException {
 		/**
 		 * Use pseudonymus to create hash values for all values.
 		 */
-		String birthNameHash1 = pseudonymusExec(dicomData.getBirthName(),
+		String birthNameHash1 = pseudonymusExec(patient.getPatientBirthName(),
 				pseudonymusExePath, 0);
-		String birthNameHash2 = pseudonymusExec(dicomData.getBirthName(),
+		String birthNameHash2 = pseudonymusExec(patient.getPatientBirthName(),
 				pseudonymusExePath, 1);
-		String birthNameHash3 = pseudonymusExec(dicomData.getBirthName(),
+		String birthNameHash3 = pseudonymusExec(patient.getPatientBirthName(),
 				pseudonymusExePath, 2);
-		String lastNameHash1 = pseudonymusExec(dicomData.getLastName(),
+		String lastNameHash1 = pseudonymusExec(patient.getPatientLastName(),
 				pseudonymusExePath, 0);
-		String lastNameHash2 = pseudonymusExec(dicomData.getLastName(),
+		String lastNameHash2 = pseudonymusExec(patient.getPatientLastName(),
 				pseudonymusExePath, 1);
-		String lastNameHash3 = pseudonymusExec(dicomData.getLastName(),
+		String lastNameHash3 = pseudonymusExec(patient.getPatientLastName(),
 				pseudonymusExePath, 2);
-		String firstNameHash1 = pseudonymusExec(dicomData.getFirstName(),
+		String firstNameHash1 = pseudonymusExec(patient.getPatientFirstName(),
 				pseudonymusExePath, 0);
-		String firstNameHash2 = pseudonymusExec(dicomData.getFirstName(),
+		String firstNameHash2 = pseudonymusExec(patient.getPatientFirstName(),
 				pseudonymusExePath, 1);
-		String firstNameHash3 = pseudonymusExec(dicomData.getFirstName(),
+		String firstNameHash3 = pseudonymusExec(patient.getPatientFirstName(),
 				pseudonymusExePath, 2);
-		final String birthDate = Util.convertLocalDateToString(dicomData.getBirthDate());
+		final String birthDate = Util.convertLocalDateToString(patient.getPatientBirthDate());
 		final String birthDateHash = pseudonymusExec(birthDate, pseudonymusExePath, 0);
 		/**
 		 * Store all created hash values in DTO.
 		 */
-		dicomData.setBirthNameHash1(birthNameHash1);
-		dicomData.setBirthNameHash2(birthNameHash2);
-		dicomData.setBirthNameHash3(birthNameHash3);
-		dicomData.setLastNameHash1(lastNameHash1);
-		dicomData.setLastNameHash2(lastNameHash2);
-		dicomData.setLastNameHash3(lastNameHash3);
-		dicomData.setFirstNameHash1(firstNameHash1);
-		dicomData.setFirstNameHash2(firstNameHash2);
-		dicomData.setFirstNameHash3(firstNameHash3);
-		dicomData.setBirthDateHash(birthDateHash);
+		PseudonymusHashValues pseudonymusHashValues = new PseudonymusHashValues();
+		pseudonymusHashValues.setBirthNameHash1(birthNameHash1);
+		pseudonymusHashValues.setBirthNameHash2(birthNameHash2);
+		pseudonymusHashValues.setBirthNameHash3(birthNameHash3);
+		pseudonymusHashValues.setLastNameHash1(lastNameHash1);
+		pseudonymusHashValues.setLastNameHash2(lastNameHash2);
+		pseudonymusHashValues.setLastNameHash3(lastNameHash3);
+		pseudonymusHashValues.setFirstNameHash1(firstNameHash1);
+		pseudonymusHashValues.setFirstNameHash2(firstNameHash2);
+		pseudonymusHashValues.setFirstNameHash3(firstNameHash3);
+		pseudonymusHashValues.setBirthDateHash(birthDateHash);
 		
 		/**
 		 * Log all created hash values into su.log file.
@@ -167,7 +170,7 @@ public class Pseudonymizer {
 			|| (birthDateHash == null || "".equals(birthDateHash) || birthDateHash.contains(DEBUG))) {
 			throw new PseudonymusException("Some hash fields are malformed!");
 		}
-		return dicomData;
+		return pseudonymusHashValues;
 	}
 
 	/**

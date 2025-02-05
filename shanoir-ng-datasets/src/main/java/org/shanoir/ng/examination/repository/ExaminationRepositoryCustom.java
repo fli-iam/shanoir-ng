@@ -14,7 +14,9 @@ public interface ExaminationRepositoryCustom {
 	Page<Examination> findPageByStudyCenterOrStudyIdIn(Iterable<Pair<Long, Long>> studyCenterIds, Iterable<Long> studyIds, Pageable pageable);
 	
 	Page<Examination> findPageByStudyCenterOrStudyIdInAndSubjectName(Iterable<Pair<Long, Long>> studyCenterIds, Iterable<Long> studyIds, String subjectName, Pageable pageable);
-	
+
+	Page<Examination> findPageByStudyCenterOrStudyIdInAndSearch(Iterable<Pair<Long, Long>> studyCenterIds, Iterable<Long> studyIds, Pageable pageable, Boolean preclinical, String searchStr, String searchField);
+
 	List<Examination> findAllByStudyCenterOrStudyIdIn(Iterable<Pair<Long, Long>> studyCenterIds, Iterable<Long> studyIds);
-	
+
 }

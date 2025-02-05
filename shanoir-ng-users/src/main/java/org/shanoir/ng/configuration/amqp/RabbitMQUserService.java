@@ -14,30 +14,23 @@
 
 package org.shanoir.ng.configuration.amqp;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.events.ShanoirEvent;
 import org.shanoir.ng.events.ShanoirEventsService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
-import org.shanoir.ng.shared.email.EmailBase;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
-import org.shanoir.ng.shared.email.StudyInvitationEmail;
+import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.ExchangeTypes;
-import org.springframework.amqp.rabbit.annotation.Exchange;
-import org.springframework.amqp.rabbit.annotation.Queue;
-import org.springframework.amqp.rabbit.annotation.QueueBinding;
-import org.springframework.amqp.rabbit.annotation.RabbitHandler;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @Component
 public class RabbitMQUserService {
@@ -53,6 +46,17 @@ public class RabbitMQUserService {
 	@Autowired
 	private ObjectMapper mapper;
 
+	@Autowired
+	private RabbitMqStudyUserService listener;
+	@RabbitListener(bindings = @QueueBinding(
+			value = @Queue(value = RabbitMQConfiguration.STUDY_USER_QUEUE_USERS, durable = "true"),
+			exchange = @Exchange(value = RabbitMQConfiguration.STUDY_USER_EXCHANGE, ignoreDeclarationExceptions = "true",
+					autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT)), containerFactory = "multipleConsumersFactory"
+	)
+	public void receiveMessage(String commandArrStr) {
+		listener.receiveStudyUsers(commandArrStr);
+	}
+
 	/**
 	 * Receives a shanoirEvent as a json object, thus create a event in the queue
 	 * @param commandArrStr the task as a json string.
@@ -61,7 +65,7 @@ public class RabbitMQUserService {
 			key = "*.event",
 			value = @Queue( value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
 	        exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-	        	autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
+	        	autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)), containerFactory = "singleConsumerFactory"
 	)
 	public void receiveEvent(String eventAsString) throws AmqpRejectAndDontRequeueException {
 		LOG.info("Receiving event: " + eventAsString);
@@ -78,7 +82,7 @@ public class RabbitMQUserService {
 	 * Receives an import end event as a json object, thus send a mail to study manager to notice him
 	 * @param commandArrStr the task as a json string.
 	 */
-	@RabbitListener(queues = RabbitMQConfiguration.IMPORT_DATASET_MAIL_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.IMPORT_DATASET_MAIL_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	public void receiveImportEvent(String generatedMailAsString) throws AmqpRejectAndDontRequeueException {
 		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
@@ -96,7 +100,7 @@ public class RabbitMQUserService {
 	 * that the import failed
 	 * @param commandArrStr the task as a json string.
 	 */
-	@RabbitListener(queues = RabbitMQConfiguration.IMPORT_DATASET_FAILED_MAIL_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.IMPORT_DATASET_FAILED_MAIL_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	public void receiveImportFailedEvent(String generatedMailAsString) throws AmqpRejectAndDontRequeueException {
 		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
@@ -114,7 +118,7 @@ public class RabbitMQUserService {
 	 * Receives an study user report as a json object, thus send a mail to study manager to notice him
 	 * @param commandArrStr the task as a json string.
 	 */
-	@RabbitListener(queues = RabbitMQConfiguration.STUDY_USER_MAIL_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_USER_MAIL_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	public void receiveStudyUserReport(String generatedMailAsString) throws AmqpRejectAndDontRequeueException {
 		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");

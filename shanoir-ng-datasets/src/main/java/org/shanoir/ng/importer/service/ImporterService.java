@@ -29,14 +29,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.joda.time.DateTime;
 import org.shanoir.ng.dataset.modality.CalibrationDataset;
 import org.shanoir.ng.dataset.modality.CtDataset;
 import org.shanoir.ng.dataset.modality.EegDataset;
+import org.shanoir.ng.dataset.modality.GenericDataset;
 import org.shanoir.ng.dataset.modality.MegDataset;
 import org.shanoir.ng.dataset.modality.MeshDataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
-import org.shanoir.ng.dataset.modality.XaDataset;
 import org.shanoir.ng.dataset.modality.ParameterQuantificationDataset;
 import org.shanoir.ng.dataset.modality.PetDataset;
 import org.shanoir.ng.dataset.modality.RegistrationDataset;
@@ -44,19 +43,19 @@ import org.shanoir.ng.dataset.modality.SegmentationDataset;
 import org.shanoir.ng.dataset.modality.SpectDataset;
 import org.shanoir.ng.dataset.modality.StatisticalDataset;
 import org.shanoir.ng.dataset.modality.TemplateDataset;
+import org.shanoir.ng.dataset.modality.XaDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.dataset.service.DatasetService;
+import org.shanoir.ng.dataset.service.DatasetUtils;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.download.AcquisitionAttributes;
-import org.shanoir.ng.download.ExaminationAttributes;
-import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -74,12 +73,12 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.shared.service.SubjectStudyService;
+import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
-import org.shanoir.ng.studycard.model.QualityCard;
+import org.shanoir.ng.studycard.model.ExaminationData;
 import org.shanoir.ng.studycard.model.QualityException;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
-import org.shanoir.ng.studycard.service.QualityCardService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.utils.Utils;
@@ -126,9 +125,6 @@ public class ImporterService {
 
     @Autowired
     private StudyCardRepository studyCardRepository;
-
-    @Autowired
-    private QualityCardService qualityCardService;
    
     @Autowired
     private DatasetAcquisitionService datasetAcquisitionService;
@@ -137,10 +133,10 @@ public class ImporterService {
 	private SubjectStudyService subjectStudyService;
 
     @Autowired
-    private DicomProcessing dicomProcessing;
+    private SolrService solrService;
 
     @Autowired
-    private WADODownloaderService downloader;
+    private QualityService qualityService;
 
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
 
@@ -177,28 +173,50 @@ public class ImporterService {
                     .filter(ss -> ss.getStudy().getId().equals(examination.getStudy().getId()))
                     .findFirst().orElse(null);
                 QualityTag tagSave = subjectStudy != null ? subjectStudy.getQualityTag() : null;
-                QualityCardResult qualityResult = checkQuality(examination, generatedAcquisitions, importJob);                				
+                ExaminationData examData = new ExaminationData(examination);
+                examData.setDatasetAcquisitions(Utils.toList(generatedAcquisitions));
+                QualityCardResult qualityResult;
+                
+                // If import comes from ShanoirUploader, the check quality at import has already been done
+                if (!importJob.isFromShanoirUploader()) {
+                    qualityResult = qualityService.checkQuality(examData, importJob, null);
+                } else {
+                    LOG.info("Importing Data from ShanoirUploader.");
+                    // We retrieve quality card result from ShUp import job
+                    qualityResult = qualityService.retrieveQualityCardResult(importJob);
+                    if (!qualityResult.isEmpty()) {
+                        LOG.info("Retrieving Quality Control result from ShanoirUploader.");
+                        if(subjectStudy != null) {
+                            subjectStudy.setQualityTag(qualityResult.get(0).getTagSet());
+                            qualityResult.addUpdatedSubjectStudy(subjectStudy);
+                        }
+                    }
+                }
+                                				
                 // Has quality check passed ?
-                if (qualityResult.hasError()) {
+                if (qualityResult != null && !qualityResult.isEmpty() && qualityResult.hasError()) {
                     throw new QualityException(examination, qualityResult);
                 } else { // Then do the import
-                    if (qualityResult.hasWarning() || qualityResult.hasFailedValid()) {
-                        event.setReport(qualityResult.toString());
+                    if (qualityResult != null && !qualityResult.isEmpty()) {
+                        if (qualityResult.hasWarning() || qualityResult.hasFailedValid()) {
+                            event.setReport(qualityResult.toString());
+                        }
+                        // add tag to subject-study
+                        subjectStudyService.update(qualityResult.getUpdatedSubjectStudies());
                     }
-                    // add tag to subject-study
-                    subjectStudyService.update(qualityResult.getUpdatedSubjectStudies());
-
-                	generatedAcquisitions = new HashSet<DatasetAcquisition>(datasetAcquisitionService.createAll(generatedAcquisitions));
+                	generatedAcquisitions = new HashSet<>(datasetAcquisitionService.createAll(generatedAcquisitions));
                     try {
                         persistPatientInPacs(importJob.getPatients(), event);
                     } catch (Exception e) { // if error in pacs
                         // revert dataset acquisitions
                         for (DatasetAcquisition acquisition : generatedAcquisitions) {
-                            datasetAcquisitionService.deleteById(acquisition.getId());
+                            datasetAcquisitionService.deleteById(acquisition.getId(), null);
                         }
                         // revert quality tag
-                        subjectStudy.setQualityTag(tagSave);
-                        subjectStudyService.update(qualityResult.getUpdatedSubjectStudies());
+                        if(subjectStudy != null) {
+                            subjectStudy.setQualityTag(tagSave);
+                            subjectStudyService.update(qualityResult.getUpdatedSubjectStudies());
+                        }
                         throw new ShanoirException("Error while saving data in pacs, the import is canceled and acquisitions were not saved", e);
                     }
                 }
@@ -253,7 +271,7 @@ public class ImporterService {
             throw new ShanoirException(msg, e);
         } catch (Exception e) {
             event.setStatus(ShanoirEvent.ERROR);
-            event.setMessage("Unexpected error during the import: " + e.getMessage() + ", please contact an administrator.");
+            event.setMessage("Unexpected error during the import: " + e.getClass() + " : " + e.getMessage() + ", please contact an administrator.");
             event.setProgress(-1f);
             eventService.publishEvent(event);
             LOG.error("Error during import for exam: {} : {}", importJob.getExaminationId(), e); 
@@ -274,7 +292,7 @@ public class ImporterService {
                     // get dicomAttributes
                     AcquisitionAttributes<String> dicomAttributes = null;
                     try {
-                        dicomAttributes = dicomProcessing.getDicomAcquisitionAttributes(serie, serie.getIsEnhanced());
+                        dicomAttributes = DicomProcessing.getDicomAcquisitionAttributes(serie, serie.getIsEnhanced());
                     } catch (PacsException e) {
                         throw new ShanoirException("Unable to retrieve dicom attributes in file " + serie.getFirstDatasetFileForCurrentSerie().getPath(), e);
                     }
@@ -303,58 +321,12 @@ public class ImporterService {
         return generatedAcquisitions;
     }
 
-    private QualityCardResult checkQuality(Examination examination, ImportJob importJob) throws ShanoirException {
-        QualityCardResult qualityResult = new QualityCardResult();
-        List<QualityCard> qualityCards = qualityCardService.findByStudy(examination.getStudyId());
-        if (qualityCards == null || qualityCards.isEmpty()) {
-            return qualityResult;
-        }
-        boolean qualityCheck = false;
-        for (QualityCard qualityCard : qualityCards) {
-            if (qualityCard.isToCheckAtImport()) {
-                qualityCheck = true;
-                break;
-            }
-        }
-        if (!qualityCheck) {
-            return  qualityResult;
-        }
-        ExaminationAttributes<String> dicomAttributes = null;          
-        Study firstStudy = importJob.getFirstStudy();
-        if (firstStudy == null) {
-            throw new ShanoirException("The given import job does not provide any serie. Examination : " + examination.getId());
-        }
-        dicomAttributes = dicomProcessing.getDicomExaminationAttributes(firstStudy);
-
-        for (QualityCard qualityCard : qualityCards) {
-            if (qualityCard.isToCheckAtImport()) {
-                qualityResult.merge(qualityCard.apply(examination, dicomAttributes, downloader));                       
-            }
-        }
-        return qualityResult;
-    }
-
-    private QualityCardResult checkQuality(Examination examination, Set<DatasetAcquisition> limitToTheseAcquisitions, ImportJob importJob) throws ShanoirException {
-        // save the exam acquisitions
-        List<DatasetAcquisition> saveList = new ArrayList<>();
-        for (DatasetAcquisition acquisition : examination.getDatasetAcquisitions()) {
-            saveList.add(acquisition);
-        }
-        // replace ths exam acquisitions by the reduced set
-        examination.setDatasetAcquisitions(Utils.toList(limitToTheseAcquisitions));
-        // check quality
-        QualityCardResult result = checkQuality(examination, importJob);
-        // set the data back
-        examination.setDatasetAcquisitions(saveList);
-        return result;
-    }
-
     StudyCard getStudyCard(ImportJob importJob) {
         if (importJob.getStudyCardId() != null) { // makes sense: imports without studycard exist
             StudyCard studyCard = getStudyCard(importJob.getStudyCardId());
             return studyCard;
         } else {
-            LOG.warn("No studycard given for this import");
+            LOG.warn("No studycard given for this import.");
             return null;
         }
     }
@@ -426,7 +398,7 @@ public class ImporterService {
      * @param serie
      * @return
      */
-    private boolean checkSerieForDicomImages(Serie serie) {
+    private static boolean checkSerieForDicomImages(Serie serie) {
         return serie.getModality() != null
                 && serie.getDatasets() != null
                 && !serie.getDatasets().isEmpty()
@@ -459,88 +431,54 @@ public class ImporterService {
      * Create a processed dataset dataset associated with a dataset processing.
      * @param importJob the import job from importer MS.
      */
-    public Dataset createProcessedDataset(final ProcessedDatasetImportJob importJob) throws IOException, Exception {
+    public Dataset createProcessedDataset(final ProcessedDatasetImportJob importJob) throws Exception {
 
-        ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getProcessedDatasetFilePath(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS, 0f);
+        ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getProcessedDatasetFilePath(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS, 0f, importJob.getStudyId());
         eventService.publishEvent(event);
 
-        if (importJob == null || importJob.getDatasetProcessing() == null) {
+        DatasetProcessing datasetProcessing = importJob.getDatasetProcessing();
+
+        if (datasetProcessing == null) {
             event.setStatus(ShanoirEvent.ERROR);
             event.setMessage("Dataset processing missing.");
             event.setProgress(-1f);
             eventService.publishEvent(event);
             return null;
         }
-        
-        // Metadata
-        DatasetMetadata originMetadata = new DatasetMetadata();
-        originMetadata.setProcessedDatasetType(importJob.getProcessedDatasetType());
-        originMetadata.setName(importJob.getProcessedDatasetName());
+
+        if (importJob.getDatasetProcessing().getInputDatasets() == null ||
+                importJob.getDatasetProcessing().getInputDatasets().isEmpty()) {
+            event.setStatus(ShanoirEvent.ERROR);
+            event.setMessage("Processing input dataset(s) missing.");
+            event.setProgress(-1f);
+            eventService.publishEvent(event);
+            return null;
+        }
+
+        if (importJob.getStudyId() == null) {
+            event.setStatus(ShanoirEvent.ERROR);
+            event.setMessage("Study missing.");
+            event.setProgress(-1f);
+            eventService.publishEvent(event);
+            return null;
+        }
+
+        for(Dataset input : datasetProcessing.getInputDatasets()){
+            Long studyId = datasetService.getStudyId(input);
+            if (studyId != null && !studyId.equals(importJob.getStudyId())) {
+                event.setStatus(ShanoirEvent.ERROR);
+                event.setMessage("Study from input dataset [" + input.getId() + "] not the same as [" + studyId + "]");
+                event.setProgress(-1f);
+                eventService.publishEvent(event);
+                return null;
+            }
+        }
 
         try {
-            DatasetProcessing datasetProcessing = importJob.getDatasetProcessing();
-            Dataset dataset = null;
-            
-            switch(importJob.getDatasetType()) {
-                case CalibrationDataset.datasetType:
-                    dataset = new CalibrationDataset();
-                    originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
-                    break;
-                case CtDataset.datasetType:
-                    dataset = new CtDataset();
-                    originMetadata.setDatasetModalityType(DatasetModalityType.CT_DATASET);
-                    break;
-                case EegDataset.datasetType:
-                    dataset = new EegDataset();
-                    originMetadata.setDatasetModalityType(DatasetModalityType.EEG_DATASET);
-                    break;
-                case MegDataset.datasetType:
-                    dataset = new MegDataset();
-                    originMetadata.setDatasetModalityType(DatasetModalityType.EEG_DATASET);
-                    break;
-                case MeshDataset.datasetType:
-                    dataset = new MeshDataset();
-                    originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
-                    break;
-                case MrDataset.datasetType:
-                    dataset = new MrDataset();
-                    originMetadata.setDatasetModalityType(DatasetModalityType.MR_DATASET);
-                    break;
-                case ParameterQuantificationDataset.datasetType:
-                    dataset = new ParameterQuantificationDataset();
-                    originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
-                    break;
-                case PetDataset.datasetType:
-                    dataset = new PetDataset();
-                    originMetadata.setDatasetModalityType(DatasetModalityType.PET_DATASET);
-                    break;
-                case RegistrationDataset.datasetType:
-                    dataset = new RegistrationDataset();
-                    originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
-                    break;
-                case SegmentationDataset.datasetType:
-                    dataset = new SegmentationDataset();
-                    originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
-                    break;
-                case SpectDataset.datasetType:
-                    dataset = new SpectDataset();
-                    originMetadata.setDatasetModalityType(DatasetModalityType.SPECT_DATASET);
-                    break;
-                case StatisticalDataset.datasetType:
-                    dataset = new StatisticalDataset();
-                    originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
-                    break;
-                case TemplateDataset.datasetType:
-                    dataset = new TemplateDataset();
-                    originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
-                    break;
-                case XaDataset.datasetType:
-                    dataset = new TemplateDataset();
-                    originMetadata.setDatasetModalityType(DatasetModalityType.XA_DATASET);
-                    break;
-                default:
-                break;
-            }
+
+            Dataset dataset = DatasetUtils.buildDatasetFromType(importJob.getDatasetType());
+            dataset.getOriginMetadata().setProcessedDatasetType(importJob.getProcessedDatasetType());
+            dataset.getOriginMetadata().setName(importJob.getProcessedDatasetName());
             
             datasetProcessing.addOutputDataset(dataset);
             dataset.setDatasetProcessing(datasetProcessing);
@@ -583,12 +521,12 @@ public class ImporterService {
 
             // Fill dataset with informations
             dataset.setCreationDate(LocalDate.now());
-            dataset.setOriginMetadata(originMetadata);
             dataset.setUpdatedMetadata(dataset.getOriginMetadata());
             dataset.setStudyId(importJob.getStudyId());
             dataset.setSubjectId(importJob.getSubjectId());
 
             dataset = datasetService.create(dataset);
+            solrService.indexDataset(dataset.getId());
             
             event.setStatus(ShanoirEvent.SUCCESS);
 
@@ -603,7 +541,7 @@ public class ImporterService {
         } catch (Exception e) {
             LOG.error("Error while importing processed dataset: ", e);
             event.setStatus(ShanoirEvent.ERROR);
-            event.setMessage("Unexpected error during the import of the processed dataset: " + e.getMessage() + ", please contact an administrator.");
+            event.setMessage("Unexpected error during the import: " + e.getClass() + " : " + e.getMessage() + ", please contact an administrator.");
             event.setProgress(-1f);
             eventService.publishEvent(event);
             throw e;

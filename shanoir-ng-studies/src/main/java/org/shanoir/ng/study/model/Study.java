@@ -16,15 +16,11 @@ package org.shanoir.ng.study.model;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import jakarta.persistence.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
-import org.hibernate.validator.constraints.NotBlank;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.shanoir.ng.groupofsubjects.ExperimentalGroupOfSubjects;
 import org.shanoir.ng.profile.model.Profile;
 import org.shanoir.ng.shared.core.model.IdName;
@@ -44,15 +40,40 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ColumnResult;
+import jakarta.persistence.ConstructorResult;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.SqlResultSetMapping;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotNull;
 
 /**
  * Study.
  * 
  * @author msimon
+ * @author mkain
  *
  */
 @Entity
+@NamedEntityGraph(name = "Study.All", attributeNodes = { @NamedAttributeNode("studyUserList"),
+		@NamedAttributeNode("studyCenterList"), @NamedAttributeNode("subjectStudyList"),
+		@NamedAttributeNode("experimentalGroupsOfSubjects"), @NamedAttributeNode("studyTags"),
+		@NamedAttributeNode("protocolFilePaths"), @NamedAttributeNode("dataUserAgreementPaths"),
+		@NamedAttributeNode("timepoints"), @NamedAttributeNode("tags"), @NamedAttributeNode("profile"),
+		@NamedAttributeNode("examinations") })
 @JsonPropertyOrder({ "_links", "id", "name" })
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 @SqlResultSetMapping(name = "studyNameResult", classes = { @ConstructorResult(targetClass = IdName.class, columns = {
@@ -83,24 +104,21 @@ public class Study extends HalEntity {
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, orphanRemoval = true)
 	private List<ExperimentalGroupOfSubjects> experimentalGroupsOfSubjects;
 
-	/** The is mono center. */
-	@NotNull
-	private boolean monoCenter;
-
-	@NotBlank
 	@Column(unique = true)
 	@Unique
 	@EditableOnlyBy(roles = { "ROLE_ADMIN", "ROLE_EXPERT" })
 	private String name;
 
 	/** List of protocol files directly attached to the study. */
-	@ElementCollection
+	@ElementCollection(fetch = FetchType.EAGER)
+	@Fetch(FetchMode.JOIN)
 	@CollectionTable(name = "protocol_file_path")
 	@Column(name = "path")
 	private List<String> protocolFilePaths;
 	
 	/** List of data user agreement form directly attached to the study. */
-	@ElementCollection
+	@ElementCollection(fetch = FetchType.EAGER)
+	@Fetch(FetchMode.JOIN)
 	@CollectionTable(name = "data_user_agreement_file")
 	@Column(name = "path")
 	private List<String> dataUserAgreementPaths;
@@ -110,32 +128,36 @@ public class Study extends HalEntity {
 	private LocalDate startDate;
 
 	/** Relations between the investigators, the centers and the studies. */
-	@NotEmpty
-	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy="study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<StudyCenter> studyCenterList;
 
 	@NotNull
 	private Integer studyStatus;
 
-	@ManyToOne()
+	@ManyToOne(fetch = FetchType.EAGER)
+	@Fetch(FetchMode.JOIN)
 	@JoinColumn(name = "profile_id")
 	private Profile profile;
 
 	private Integer studyType;
 
 	/** Users associated to the research study. */
-	@OneToMany(mappedBy = "study", targetEntity = StudyUser.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "study", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<StudyUser> studyUserList;
 
 	/** List of the examinations related to this study. */
-	@OneToMany(mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
-	@LazyCollection(LazyCollectionOption.EXTRA)
+	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<StudyExamination> examinations;
+	
+	@Transient
+	private int nbExaminations;
 
 	/** Relations between the subjects and the studies. */
-	@OneToMany(mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
-	@LazyCollection(LazyCollectionOption.EXTRA)
+	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<SubjectStudy> subjectStudyList;
+	
+	@Transient
+	private int nbSubjects;
 
 	/** List of Timepoints dividing the study **/
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -147,6 +169,8 @@ public class Study extends HalEntity {
 
 	/** Is with examination. */
 	private boolean withExamination;
+
+	private StudyCardPolicy studyCardPolicy;
 
 	private boolean challenge;
 	
@@ -251,6 +275,22 @@ public class Study extends HalEntity {
 		}
 	}
 
+	public int getNbExaminations() {
+		return nbExaminations;
+	}
+
+	public void setNbExaminations(int nbExaminations) {
+		this.nbExaminations = nbExaminations;
+	}
+
+	public int getNbSubjects() {
+		return nbSubjects;
+	}
+
+	public void setNbSubjects(int nbSubjects) {
+		this.nbSubjects = nbSubjects;
+	}
+
 	/**
 	 * @return the experimentalGroupsOfSubjects
 	 */
@@ -264,21 +304,6 @@ public class Study extends HalEntity {
 	 */
 	public void setExperimentalGroupsOfSubjects(List<ExperimentalGroupOfSubjects> experimentalGroupsOfSubjects) {
 		this.experimentalGroupsOfSubjects = experimentalGroupsOfSubjects;
-	}
-
-	/**
-	 * @return the monoCenter
-	 */
-	public boolean isMonoCenter() {
-		return monoCenter;
-	}
-
-	/**
-	 * @param monoCenter
-	 *            the monoCenter to set
-	 */
-	public void setMonoCenter(boolean monoCenter) {
-		this.monoCenter = monoCenter;
 	}
 
 	/**
@@ -478,6 +503,14 @@ public class Study extends HalEntity {
 	 */
 	public void setWithExamination(boolean withExamination) {
 		this.withExamination = withExamination;
+	}
+
+	public StudyCardPolicy getStudyCardPolicy() {
+		return studyCardPolicy;
+	}
+
+	public void setStudyCardPolicy(StudyCardPolicy studyCardPolicy) {
+		this.studyCardPolicy = studyCardPolicy;
 	}
 
 	/**

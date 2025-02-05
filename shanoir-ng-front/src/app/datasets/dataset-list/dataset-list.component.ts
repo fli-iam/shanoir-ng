@@ -29,7 +29,8 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 
 @Component({
     selector: 'dataset-list',
-    templateUrl: 'dataset-list.component.html'
+    templateUrl: 'dataset-list.component.html',
+    standalone: false
 })
 
 export class DatasetListComponent extends EntityListComponent<Dataset>{
@@ -57,12 +58,6 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
 
     // Grid columns definition
     getColumnDefs(): ColumnDefinition[] {
-        function dateRenderer(date: number) {
-            if (date) {
-                return new Date(date).toLocaleDateString();
-            }
-            return null;
-        };
         return [
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {headerName: "Name", field: "name", orderBy: ["updatedMetadata.name", "originMetadata.name", "id"]},
@@ -75,7 +70,7 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
 				route: (ds: Dataset) => '/study/details/' + ds.study.id,
                 disableSorting: true
 			},
-            {headerName: "Creation date", field: "creationDate", type: "date", cellRenderer: (params: any) => dateRenderer(params.data.creationDate)},
+            {headerName: "Creation date", field: "creationDate", type: "date"},
             {headerName: "Comment", field: "originMetadata.comment", },
         ];
     }

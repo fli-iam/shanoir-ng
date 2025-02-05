@@ -95,12 +95,12 @@ public class ExaminationServiceSecurityTest {
 		Set<Long> ids = Mockito.anySet();
 		given(rightsService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
 		assertAccessDenied(service::findById, ENTITY_ID);
-		assertAccessDenied(service::findPage, PageRequest.of(0, 10), false);
+		assertAccessDenied(service::findPage, PageRequest.of(0, 10), false, "", "");
 		assertAccessDenied(service::findBySubjectId, 1L);
 		assertAccessDenied(service::findBySubjectIdStudyId, 1L, 1L);
 		assertAccessDenied(service::save, mockExam(null));
 		assertAccessDenied(service::update, mockExam(1L));
-		assertAccessDenied(service::deleteById, ENTITY_ID);
+		assertAccessDenied(service::deleteById, ENTITY_ID, null);
 	}
 
 	@Test
@@ -135,12 +135,12 @@ public class ExaminationServiceSecurityTest {
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
 	public void testAsAdmin() throws ShanoirException {
 		assertAccessAuthorized(service::findById, ENTITY_ID);
-		assertAccessAuthorized(service::findPage, PageRequest.of(0, 10), false);
+		assertAccessAuthorized(service::findPage, PageRequest.of(0, 10), false, "", "");
 		assertAccessAuthorized(service::findBySubjectId, 1L);
 		assertAccessAuthorized(service::findBySubjectIdStudyId, 1L, 1L);
 		assertAccessAuthorized(service::save, mockExam(null));
 		assertAccessAuthorized(service::update, mockExam(1L));
-		assertAccessAuthorized(service::deleteById, ENTITY_ID);
+		assertAccessAuthorized(service::deleteById, ENTITY_ID, null);
 	}
 	
 	
@@ -153,8 +153,8 @@ public class ExaminationServiceSecurityTest {
 	
 	
 	private void testFindPage() throws ShanoirException {
-		assertAccessAuthorized(service::findPage, PageRequest.of(0, 10), false);
-		assertThat(service.findPage(PageRequest.of(0, 10), false)).hasSize(1);
+		assertAccessAuthorized(service::findPage, PageRequest.of(0, 10), false, "", "");
+		assertThat(service.findPage(PageRequest.of(0, 10), false, "", "")).hasSize(1);
 	}
 	
 	private void testFindBySubjectId() throws ShanoirException {
@@ -199,16 +199,16 @@ public class ExaminationServiceSecurityTest {
 	
 	private void testDelete(String role) throws ShanoirException {
 		if (role.equals("ROLE_USER")) {			
-			assertAccessDenied(service::deleteById, 1L);
+			assertAccessDenied(service::deleteById, 1L, null);
 		} else if (role.equals("ROLE_EXPERT")) {
-			assertAccessDenied(service::deleteById, 1L);
+			assertAccessDenied(service::deleteById, 1L, null);
 			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
-			assertAccessAuthorized(service::deleteById, 1L);
+			assertAccessAuthorized(service::deleteById, 1L, null);
 			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
 		}
-		assertAccessDenied(service::deleteById, 2L);
-		assertAccessDenied(service::deleteById, 3L);
-		assertAccessDenied(service::deleteById, 4L);
+		assertAccessDenied(service::deleteById, 2L, null);
+		assertAccessDenied(service::deleteById, 3L, null);
+		assertAccessDenied(service::deleteById, 4L, null);
 	}
 
 	private void testUpdate() throws ShanoirException {

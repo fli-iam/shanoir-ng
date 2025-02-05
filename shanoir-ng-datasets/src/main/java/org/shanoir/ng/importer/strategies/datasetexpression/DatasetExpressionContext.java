@@ -38,9 +38,6 @@ public class DatasetExpressionContext implements DatasetExpressionStrategy {
 	@Autowired
 	private DicomDatasetExpressionStrategy dicomDatasetExpressionStrategy;
 
-	@Autowired
-	private NiftiDatasetExpressionStrategy niftiDatasetExpressionStrategy;
-	
 	private DatasetExpressionStrategy datasetExpressionStrategy;
 
 	/**
@@ -50,8 +47,6 @@ public class DatasetExpressionContext implements DatasetExpressionStrategy {
 	public void setDatasetExpressionStrategy(String format) {
 		if ("dcm".equals(format)) {
 			this.datasetExpressionStrategy = dicomDatasetExpressionStrategy;
-		} else if ("nii".equals(format)) {
-			this.datasetExpressionStrategy = niftiDatasetExpressionStrategy;
 		}
 		// else... add other format strategies here
 	}

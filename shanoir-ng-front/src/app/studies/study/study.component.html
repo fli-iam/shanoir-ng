@@ -15,6 +15,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div #formContainer class="content-component detail max-content">
 	<div class="layout" [ngClass]="{'left': mode=='view'}">
 		<form *ngIf="form" [formGroup]="form" novalidate [class.disabled]="footerState.loading">
+			<form-footer
+					[state]="footerState"
+					(save)="save()"
+					(edit)="goToEdit()"
+					(delete) = "delete()"
+					(cancel)="goToView()"
+					(back)="goBack()">
+			</form-footer>
+
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
 					<h2 class="header command-zone" i18n="View study|Title@@studyDetailViewTitle">Details on study</h2>
@@ -26,7 +35,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<h2 class="header command-zone" i18n="Create study|Title@@studyDetailCreateTitle">Create study</h2>
 				</ng-template>
 			</span>
-
 			<ul class="tabs">
 				<li [class.active]="activeTab == 'general'" [routerLink]="'.'" [fragment]="'general'" replaceUrl="true">
 					<span class="general">General</span>
@@ -43,18 +51,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<li [class.active]="activeTab == 'members'" [routerLink]="'.'" [fragment]="'members'" replaceUrl="true">
 					<span class="members">Members</span>
 				</li>
-				<li class="tags" [class.active]="activeTab == 'tags'" [routerLink]="'.'" [fragment]="'tags'" replaceUrl="true">
-					<span class="tags">Tags</span>
-				</li>
+                <li class="tags" [class.active]="activeTab == 'tags'" [routerLink]="'.'" [fragment]="'tags'" replaceUrl="true">
+                    <span class="tags">Tags</span>
+                </li>
 				<ng-container *ngIf="mode == 'view'">
-					<li *ngIf="isStudyAdmin" [class.active]="activeTab == 'quality'" [routerLink]="'.'" [fragment]="'quality'" replaceUrl="true">Quality</li>
-					<li [class.active]="activeTab == 'tree'" [routerLink]="'.'" [fragment]="'tree'" replaceUrl="true">Tree</li>
+                    <li *ngIf="isStudyAdmin" [class.active]="activeTab == 'quality'" [routerLink]="'.'" [fragment]="'quality'" replaceUrl="true">Quality</li>
 					<li [class.active]="activeTab == 'bids'" [routerLink]="'.'" [fragment]="'bids'" replaceUrl="true">BIDS</li>
 				</ng-container>
 				<ng-container *ngIf="mode != 'view'">
-					<li [class.active]="activeTab == 'tree'" class="disabled" replaceUrl="true">Tree</li>
+                    <li [class.active]="activeTab == 'quality'" class="disabled" replaceUrl="true">Quality</li>
 					<li [class.active]="activeTab == 'bids'" class="disabled" replaceUrl="true">BIDS</li>
 				</ng-container>
+                <li class="tags" *ngIf="isStudyAdmin" [class.active]="activeTab == 'history'" [routerLink]="'.'" [fragment]="'history'" replaceUrl="true" (click)="loadHistory()">
+                    <span class="history">History</span>
+                </li>
 			</ul>
 
 			<fieldset [class.hidden-tab]="activeTab != 'general'" tab="general">
@@ -146,10 +156,25 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								<label *ngIf="hasError('profile', ['required'])" class="form-validation-alert" i18n="Study detail|Profile required error@@studyDetailStatusRequiredError">Profile is required!</label>
 							</ng-container>
 						</span>
-					</li>
-					<li>
-						<label i18n="Study detail|Status label@@studyDetailStatus">Storage volume</label>
-						<span class="right-col" *ngIf="!uploading">
+                    </li>
+                    <li>
+                        <label i18n="Study detail|With examination label@@studyDetailWithExamination">Study card policy</label>
+                        <span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								<ng-container *ngIf="mode == 'view'">
+								    {{studyCardPolicyStr()}}
+							    </ng-container>
+							</ng-template>
+							<ng-template ngSwitchDefault>
+                                <input type="radio" [(ngModel)]="study.studyCardPolicy" formControlName="studyCardPolicy" value="MANDATORY"/>Mandatory
+                                <input type="radio" [(ngModel)]="study.studyCardPolicy" formControlName="studyCardPolicy" value="OPTIONAL"/>Optional
+                                <input type="radio" [(ngModel)]="study.studyCardPolicy" formControlName="studyCardPolicy" value="DISABLED"/>Disabled
+                            </ng-template>
+						</span>
+                    </li>
+                    <li>
+                        <label i18n="Study detail|Status label@@studyDetailStatus">Storage volume</label>
+                        <span class="right-col" *ngIf="!uploading">
                             <table class="no-spacing">
                                 <tr *ngFor="let item of study.detailedSizes | keyvalue: valueDescOrder">
                                     <td class="volume-storage-left">
@@ -190,7 +215,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 						</span>
 					</li>
-					<li *ngIf="keycloakService.isUserAdmin()">
+					<li>
 						<label i18n="Study detail|Challenge label@@studyDetailChalenge">Challenge</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
@@ -201,26 +226,26 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								<checkbox [(ngModel)]="study.challenge" formControlName="challenge"></checkbox>
 							</ng-template>
 						</span>
-					</li>
-					<li>
-						<label i18n="Study detail|With examination label@@studyDetailWithExamination">Is with examination</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								<span *ngIf="study.withExamination" class="bool-true"><i class="fas fa-check"></i></span>
-								<span *ngIf="!study.withExamination" class="bool-false"><i class="fas fa-times"></i></span>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<checkbox [(ngModel)]="study.withExamination" formControlName="withExamination"></checkbox>
-							</ng-template>
+                    </li>
+                    <li>
+                        <label i18n="Study detail|Display as public label@@studyDetailVisibleByDefault">Display as public</label>
+                        <span class="right-col" [ngSwitch]="mode">
+                            <ng-template [ngSwitchCase]="'view'">
+                                <span *ngIf="study.visibleByDefault" class="bool-true"><i class="fas fa-check"></i></span>
+                                <span *ngIf="!study.visibleByDefault" class="bool-false"><i class="fas fa-times"></i></span>
+                            </ng-template>
+                            <ng-template ngSwitchDefault>
+                                <checkbox [(ngModel)]="study.visibleByDefault" formControlName="visibleByDefault"></checkbox>
+                            </ng-template>
 						</span>
 					</li>
 				</ol>
 			</fieldset>
 			<fieldset [class.hidden-tab]="activeTab != 'files'" tab="files">
 				<legend i18n="Study detail|Data User Agreement label@@studyDetailDataUserAgreement">
-					Data user agreement (DUA)
+					Data use agreement (DUA)
 					<tool-tip class="larger">
-						Adding a data user agreement (DUA) to a study changes the study member experience, for all members.
+						Adding a data use agreement (DUA) to a study changes the study member experience, for all members.
 						If a DUA is present all members of the study will have to accept the DUA after signing in the next time to Shanoir.
 						Until the DUA is accepted, a member has no access/no rights to any data of the study, except administrators.
 					</tool-tip>
@@ -253,59 +278,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</span>
 							<span *ngIf="!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]">-</span>
 						</span>
-					</li>
-				</ol>
-			</fieldset>
-			<fieldset [class.hidden-tab]="activeTab != 'general'" tab="general">
-				<legend i18n="Study detail|Name label@@studyDetailDefaultAccessLevel">Access level</legend>
-				<ol>
-					<li>
-						<label i18n="Study detail|Visible by default label@@studyDetailVisibleByDefault">Visible</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								<span *ngIf="study.visibleByDefault" class="bool-true"><i class="fas fa-check"></i></span>
-								<span *ngIf="!study.visibleByDefault" class="bool-false"><i class="fas fa-times"></i></span>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<checkbox [(ngModel)]="study.visibleByDefault" formControlName="visibleByDefault"></checkbox>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Study detail|Data downloadable by default label@@studyDetailDownloadableByDefault">Data accessibility</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								<span *ngIf="study.downloadableByDefault" class="bool-true"><i class="fas fa-check"></i></span>
-								<span *ngIf="!study.downloadableByDefault" class="bool-false"><i class="fas fa-times"></i></span>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<checkbox [(ngModel)]="study.downloadableByDefault" formControlName="downloadableByDefault"></checkbox>
-							</ng-template>
-						</span>
-					</li>
-				</ol>
-			</fieldset>
-			<fieldset [class.hidden-tab]="activeTab != 'subjects'" tab="subjects">
-				<legend>Subject tags</legend>
-				<tag-creator ngDefaultControl [mode]="mode" [study]="study" [(ngModel)]="study.tags" (onChange)="onTagListChange()" formControlName="tags"></tag-creator>
-				<subject-study-list [study]="study" [selectableList]="subjects" [(ngModel)]="study.subjectStudyList" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>
-			</fieldset>
-			<fieldset [class.hidden-tab]="activeTab != 'centers'" tab="centers">
-				<legend i18n="Study detail|Name label@@studyDetailCentersAndPITitle">List of centers</legend>
-				<ol>
-					<li>
-						<label i18n="Study detail|Multicenter label@@studyDetailMultiCenter">Multi / single center</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								<span *ngIf="study.monoCenter">Single center</span>
-								<span *ngIf="!study.monoCenter">Multicenter</span>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<span [class.disabled]="study.studyCenterList?.length > 1">Single center</span>
-								<toggle-switch formControlName="monoCenter" [(ngModel)]="study.monoCenter" (onChange)="onMonoMultiChange()" [reverse]="true"></toggle-switch>
-								<span>Multicenter</span>
-							</ng-template>
-						</span>
+                    </li>
+                </ol>
+            </fieldset>
+            <fieldset [class.hidden-tab]="activeTab != 'subjects'" tab="subjects">
+                <legend>Subject tags</legend>
+                <tag-creator ngDefaultControl [mode]="mode" [study]="study" [(ngModel)]="study.tags" (onChange)="onTagListChange()" formControlName="tags"></tag-creator>
+                <subject-study-list [study]="study" [selectableList]="subjects" [(ngModel)]="study.subjectStudyList" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>
+            </fieldset>
+            <fieldset [class.hidden-tab]="activeTab != 'centers'" tab="centers">
+                <legend i18n="Study detail|Name label@@studyDetailCentersAndPITitle">List of centers</legend>
+                <ol>
+                    <li>
 						<span *ngIf="mode == 'view'" class="left-col">
 						    <p><b>Centers</b></p>
 						    <ol *ngFor="let studyCenter of study.studyCenterList; let i = index; let even = even; let odd = odd;" [class.even]="even" [class.odd]="odd">
@@ -316,27 +300,26 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li *ngIf="mode != 'view'">
 						<label i18n="Study detail|List of centers label@@studyDetailCentersAndPI">Center</label>
 						<span class="right-col">
-							<select-box [ngModel]="selectedCenter" formControlName="selectedCenter" (userChange)="onCenterChange($event)" placeholder="Select a center ..." (onAddClick)="onCenterAdd()" [addDisabled]="!enableAddIcon()" [options]="centerOptions">
+							<select-box [(ngModel)]="selectedCenter" formControlName="selectedCenter" placeholder="Select a center ..." (onAddClick)="onCenterAdd()" [options]="centerOptions">
 							</select-box>
-							<label *ngIf="hasError('studyCenterList', ['required'])" class="form-validation-alert right-col">At least one center is required !</label>
+							<label *ngIf="hasError('studyCenterList', ['noCenter'])" class="form-validation-alert right-col">At least one center is required !</label>
 						</span>
 					</li>
-					<li *ngIf="mode != 'view' && study.monoCenter">
-						<label>Subject prefix for this center</label>
-						<span class="right-col">
-							<span class="prefix">{{study.name}}-</span><input class="prefix-input" *ngIf="study.studyCenterList[0]" type="text" [(ngModel)]="study.studyCenterList[0].subjectNamePrefix" (input)="onPrefixChange()" [ngModelOptions]="{standalone: true}"/>
-						</span>
-					</li>
-					<li *ngIf="mode != 'view' && !study.monoCenter">
+					<li *ngIf="mode != 'view'">
 						<span class="study-center-list">
 							<input type="hidden" formControlName="studyCenterList" [(ngModel)]="study.studyCenterList"/>
 							<table>
 								<tr>
-									<th>Center</th>
+									<th>Acquisition Center</th>
 									<th></th>
 									<th>Subject Prefix (optional) <tool-tip>A default prefix for the new subjects created when importing datasets in this study</tool-tip></th>
 									<th></th>
 								</tr>
+                                <tr *ngIf="study.studyCenterList.length == 0">
+                                    <td>
+                                        List of center cannot be empty.
+                                    </td>
+                                </tr>
 								<tr *ngFor="let studyCenter of study.studyCenterList; let i = index; let even = even; let odd = odd;" [class.even]="even" [class.odd]="odd">
 									<td>{{studyCenter.center.name}}</td>
 									<td class="icon icon-clickable center-link" (click)="goToCenter(studyCenter.center.id)">
@@ -368,8 +351,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         </span>
 					</li>
                     <li *ngIf="mode == 'view'">
-                        <div [hidden]="!pfDownloadState?.progress">
-                            <progress-bar [progress]="pfDownloadState?.progress" [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
+                        <div [hidden]="!pdfDownloadState?.progress">
+                            <progress-bar [progress]="pdfDownloadState?.progress" [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
                         </div>
                         <span class="right-col">
                             <span *ngIf="study.protocolFilePaths && study.protocolFilePaths[0]">
@@ -406,19 +389,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 				</ul>
       		</fieldset>
-			<fieldset [class.hidden-tab]="activeTab != 'quality'" *ngIf="mode == 'view'" tab="quality">
+			<fieldset [class.hidden-tab]="activeTab != 'quality'" tab="quality">
 				<legend>Quality control</legend>
 				<quality-control [studyId]="study.id" (tagUpdate)="reloadSubjectStudies()"></quality-control>
 			</fieldset>
-			<fieldset [class.hidden-tab]="activeTab != 'tree'" *ngIf="mode != 'create'" tab="tree">
-				<legend>Tree</legend>
-				<study-node [input]="studyNode"
-						(selectedChange)="onTreeSelectedChange($event)"
-						(nodeInit)="onStudyNodeInit($event)"
-						[hasBox]="true">
-				</study-node>
-			</fieldset>
-            <fieldset [class.hidden-tab]="activeTab != 'tags'" *ngIf="mode != 'view' || (study.studyTags && study.studyTags.length > 0)" class="tags">
+            <fieldset [class.hidden-tab]="activeTab != 'tags'" class="tags">
                 <legend>Public Study tags</legend>
                 <tag-creator ngDefaultControl [mode]="mode" [study]="study" [(ngModel)]="study.studyTags" (onChange)="onStudyTagListChange()" formControlName="studyTags"></tag-creator>
             </fieldset>
@@ -426,17 +401,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				        <legend>BIDS tree</legend>
                 <bids-tree [studyId]="id" [studyName]="study.name"></bids-tree>
             </fieldset>
-			<form-footer
-					[state]="footerState"
-					(save)="save()"
-					(edit)="goToEdit()"
-					(delete) = "delete()"
-					(cancel)="goToView()"
-					(back)="goBack()">
-				<button  *ngIf="mode == 'view' && hasDownloadRights()" class="right-icon dl-button" type="button" (click)="downloadAll()">Download study<i class="fas fa-download"></i></button>
-				<button  *ngIf="mode == 'view' && hasDownloadRights()" class="right-icon dl-button" type="button" (click)="downloadSelected()" [disabled]="!selectedDatasetIds">Download selected<i class="fas fa-download"></i></button>
-				<button class="right-icon dl-button" type="button" (click)="goToProcessing()" [disabled]="mode != 'view' || !selectedDatasetIds || selectedDatasetIds.length <= 0">Apply processing on selection<i class="fas fa-rocket"></i></button>
-			</form-footer>
+            <fieldset *ngIf="mode == 'view'" [class.hidden-tab]="activeTab != 'history'" tab="history">
+                <legend>History</legend>
+                <study-history #studyHistory
+                   [eventHistory]="openHistory"
+                   [study]="study">
+                </study-history>
+            </fieldset>
 		</form>
 	</div>
 </div>

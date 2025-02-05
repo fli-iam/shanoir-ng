@@ -111,7 +111,8 @@ public class CenterServiceImpl implements CenterService {
 	}
 	
 	public List<Center> findAll() {
-		return Utils.toList(centerRepository.findAll());
+		List<Center> centers = centerRepository.findAll();
+		return centers;
 	}
 	
 	@Override
@@ -132,11 +133,11 @@ public class CenterServiceImpl implements CenterService {
 	public List<Center> findByStudy(Long studyId) {
 		List<Center> centers = centerRepository.findByStudy(studyId);
 		StudyUser studyUser = studyUserRepo.findByUserIdAndStudy_Id(KeycloakUtil.getTokenUserId(), studyId);
-
 		if (studyUser != null && !CollectionUtils.isEmpty(studyUser.getCenterIds())) {
 			centers = centers.stream().filter(center -> studyUser.getCenterIds().contains(center.getId())).collect(Collectors.toList());
 		}
-
+		// do this here: because of two bags exception, when annotating this additionally to the query in the repository
+		//centers.stream().forEach(c -> c.setAcquisitionEquipments(centerRepository.findDistinctAcquisitionEquipmentsByCenterId(c.getId())));
 		return centers;
 	}
 
@@ -148,6 +149,7 @@ public class CenterServiceImpl implements CenterService {
 		to.setPostalCode(from.getPostalCode());
 		to.setStreet(from.getStreet());
 		to.setWebsite(from.getWebsite());
+		to.setStudyCenterList(from.getStudyCenterList());
 		return to;
 	}
 	
@@ -182,7 +184,7 @@ public class CenterServiceImpl implements CenterService {
 	}
 
 	@Override
-	public Center findByName(String name) {
+	public Optional<Center> findByName(String name) {
 		return centerRepository.findByName(name);
 	}
 	

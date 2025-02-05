@@ -41,8 +41,9 @@ import { Option } from '../../../../shared/select/select.component';
     selector: 'anesthetic-form',
     templateUrl: 'anesthetic-form.component.html',
     styleUrls: ['anesthetic-form.component.css'],
-    providers: [AnestheticService,  AnestheticIngredientService],
-    animations: [slideDown]
+    providers: [AnestheticService, AnestheticIngredientService],
+    animations: [slideDown],
+    standalone: false
 })
 @ModesAware
 export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
@@ -92,18 +93,16 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         this.loadNames();  
         this.entity = new Anesthetic();
         this.anesthetic.ingredients = [];
-        return this.anestheticService.get(this.id).then(anesthetic => {
-            this.anesthetic = anesthetic;
-            if (this.anesthetic && this.anesthetic.id){
-                this.ingredientService.getIngredients(this.anesthetic).then(ingredients => {
-                    if (ingredients){
-                        this.anesthetic.ingredients = ingredients;
-                        this.browserPaging.setItems(ingredients);
-                        this.table.refresh();
-                    }
-                });
-            }
-        });
+        if (this.anesthetic && this.anesthetic.id){
+            this.ingredientService.getIngredients(this.anesthetic).then(ingredients => {
+                if (ingredients){
+                    this.anesthetic.ingredients = ingredients;
+                    this.browserPaging.setItems(ingredients);
+                    this.table.refresh();
+                }
+            });
+        }
+        return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
@@ -115,18 +114,15 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         this.loadNames();  
         this.entity = new Anesthetic();
         this.anesthetic.ingredients = [];
-        this.anestheticService.get(this.id).then(anesthetic => {
-            this.anesthetic = anesthetic;
-            if (this.anesthetic && this.anesthetic.id){
-                this.ingredientService.getIngredients(this.anesthetic).then(ingredients => {
-                    if (ingredients){
-                        this.anesthetic.ingredients = ingredients;
-                        this.browserPaging.setItems(ingredients);
-                        this.table.refresh();
-                    }
-                });
-            }
-        });
+        if (this.anesthetic && this.anesthetic.id){
+            this.ingredientService.getIngredients(this.anesthetic).then(ingredients => {
+                if (ingredients){
+                    this.anesthetic.ingredients = ingredients;
+                    this.browserPaging.setItems(ingredients);
+                    this.table.refresh();
+                }
+            });
+        }
         return Promise.resolve();
     }
 

@@ -84,6 +84,8 @@ public class EmailServiceImpl implements EmailService {
 	private static final String SERIES = "series";
 	
 	private static final String MOTIVATION = "motivation";
+
+	private static final String STUDYCARD_URL = "studyCardUrl";
 	
 	private static final Logger LOG = LoggerFactory.getLogger(EmailServiceImpl.class);
 	
@@ -205,9 +207,8 @@ public class EmailServiceImpl implements EmailService {
 			final String content = build("notifyCreateAccountRequest", variables);
 			messageHelper.setText(content, true);
 		};
-		LOG.error("User asked for an account" + user.getUsername());
+		LOG.info("User asked for an account: {}", user.getUsername());
 		mailSender.send(messagePreparator);
-
 	}
 
 	@Override
@@ -431,6 +432,8 @@ public class EmailServiceImpl implements EmailService {
 		examDetail.setName(generatedMail.getExaminationId());
 		examDetail.setUrl(shanoirServerAddress + "examination/details/" + generatedMail.getExaminationId());
 
+		String studyCardUrl = shanoirServerAddress + "study-card/details/" + generatedMail.getStudyCardId();
+
 		for (User admin : admins) {
 			MimeMessagePreparator messagePreparator = mimeMessage -> {
 				final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
@@ -446,6 +449,7 @@ public class EmailServiceImpl implements EmailService {
 				variables.put(EXAMINATION, examDetail);
 				variables.put(FAILURE_MESSAGE, generatedMail.getErrorMessage());
 				variables.put(SERVER_ADDRESS, shanoirServerAddress);
+				variables.put(STUDYCARD_URL, studyCardUrl);
 				final String content = build("notifyStudyAdminImportFailed", variables);
 				LOG.info(content);
 				messageHelper.setText(content, true);

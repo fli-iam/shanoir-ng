@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package  org.shanoir.ng.subject.dto;
+package org.shanoir.ng.subject.dto;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -28,29 +28,29 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 
-
 public class SubjectDTO {
- 
-    private Long id;
-    
-    private String name;
-    
-    private String identifier;
+
+	private Long id;
+
+	private String name;
+
+	private String identifier;
 
 	@JsonSerialize(using = LocalDateSerializer.class)
 	@JsonDeserialize(using = LocalDateDeserializer.class)
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	private LocalDate birthDate;
 
-    private HemisphericDominance languageHemisphericDominance;
+	private HemisphericDominance languageHemisphericDominance;
 
-    private HemisphericDominance manualHemisphericDominance;
+	private HemisphericDominance manualHemisphericDominance;
 
-    private ImagedObjectCategory imagedObjectCategory;
+	private ImagedObjectCategory imagedObjectCategory;
 
-    private Sex sex;
-    
-    private List<SubjectStudyDTO> subjectStudyList;
+	private Sex sex;
+
+	private List<SubjectStudyDTO> subjectStudyList;
+	
 	private boolean preclinical;
 
 	/**

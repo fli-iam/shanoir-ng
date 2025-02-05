@@ -21,11 +21,13 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { Selection } from 'src/app/studies/study/tree.service';
 
 @Component({
     selector: 'center-detail',
     templateUrl: 'center.component.html',
-    styleUrls: ['center.component.css']
+    styleUrls: ['center.component.css'],
+    standalone: false
 })
 
 export class CenterComponent extends EntityComponent<Center> {
@@ -48,16 +50,16 @@ export class CenterComponent extends EntityComponent<Center> {
         return this.centerService;
     }
 
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromCenter(this.center);
+    }
+
     initView(): Promise<void> {
-        return this.centerService.get(this.id).then(center => {
-            this.center = center;
-        });
+        return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
-        return this.centerService.get(this.id).then(center => {
-            this.center = center;
-        });
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {

@@ -1,7 +1,10 @@
 package org.shanoir.uploader.action.init;
 
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.service.rest.ServiceConfiguration;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
@@ -19,10 +22,17 @@ import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
  * @author mkain
  * 
  */
+@Component
 public class ProxyConfigurationState implements State {
 
-	private static Logger logger = Logger.getLogger(ProxyConfigurationState.class);
+	private static final Logger logger = LoggerFactory.getLogger(ProxyConfigurationState.class);
 		
+	@Autowired
+	private SelectProfileConfigurationState selectProfileConfigurationState;
+
+	@Autowired
+	private ProxyManualConfigurationState proxyManualConfigurationState;
+
 	public void load(StartupStateContext context) {
 		String testURL = ServiceConfiguration.getInstance().getTestURL();
 		int httpResponseCode = 0;
@@ -35,12 +45,12 @@ public class ProxyConfigurationState implements State {
 		switch (httpResponseCode){
 			case 200 :
 				context.getShUpStartupDialog().updateStartupText("\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.proxy.success"));
-				context.setState(new SelectProfileConfigurationState());
+				context.setState(selectProfileConfigurationState);
 				context.nextState();
 				break;
 			default:
 				context.getShUpStartupDialog().updateStartupText("\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.proxy.fail"));
-				context.setState(new ProxyManualConfigurationState());
+				context.setState(proxyManualConfigurationState);
 				context.nextState();
 				break;
 		}

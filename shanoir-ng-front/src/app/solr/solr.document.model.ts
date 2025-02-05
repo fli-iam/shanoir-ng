@@ -19,21 +19,26 @@ export class SolrDocument {
     datasetId: string;
     datasetName: string;
     datasetType: string;
+    processed: boolean;
     datasetNature: string;
     datasetCreationDate: Date;
     examinationId: string;
     examinationComment: string;
     centerName: string;
     centerId: string;
-    tags: string;
+    tags: string[];
     examinationDate: Date;
     subjectName: string;
     subjectType: string;
     acquisitionEquipmentName: string;
     subjectId: string;
+
+    sortingIndex: number;
     studyName: string;
     studyId: string;
     id: number; // only for the table component..
+    username: string;
+    importDate: Date;
 }
 
 export class SolrRequest {
@@ -41,6 +46,7 @@ export class SolrRequest {
     studyId: string[];
     subjectName: string[];
     subjectId: string[];
+    sortingIndex: number[];
     subjectType: string[];
     acquisitionEquipmentName: string[];
     examinationId: string[];
@@ -50,10 +56,14 @@ export class SolrRequest {
     datasetName: string[];
     datasetStartDate: Date | 'invalid';
     datasetEndDate: Date | 'invalid';
+    importStartDate: Date | 'invalid';
+    importEndDate: Date | 'invalid';
     datasetType: string[];
+    processed: boolean[];
     datasetNature: string[];
     tags: string[];
     searchText: string;
+    username: string;
     expertMode: boolean = false;
     sliceThickness: Range = new Range(null, null);
     pixelBandwidth: Range = new Range(null, null);

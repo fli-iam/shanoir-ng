@@ -25,14 +25,12 @@ import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
  */
 public class CoilDTO {
 
-	//private IdNameDTO center;
 	private CenterDTO center;
 
 	private CoilType coilType;
 	
 	private Long id;
 
-	//private IdNameDTO manufacturerModel;
 	private ManufacturerModel manufacturerModel;
 
 	private String name;
@@ -48,22 +46,6 @@ public class CoilDTO {
 		// empty constructor
 	}
 	
-	/**
-	 * @return the center
-	 */
-	/*public IdNameDTO getCenter() {
-		return center;
-	}*/
-
-	/**
-	 * @param center the center to set
-	 */
-	/*public void setCenter(IdNameDTO center) {
-		this.center = center;
-	}*/
-	
-	
-
 	/**
 	 * @return the coilType
 	 */
@@ -105,24 +87,6 @@ public class CoilDTO {
 	public void setId(Long id) {
 		this.id = id;
 	}
-
-
-
-	/**
-	 * @return the manufacturerModel
-	 */
-	/*public IdNameDTO getManufacturerModel() {
-		return manufacturerModel;
-	}
-
-	/**
-	 * @param manufacturerModel the manufacturerModel to set
-	 */
-	/*public void setManufacturerModel(IdNameDTO manufacturerModel) {
-		this.manufacturerModel = manufacturerModel;
-	}
-	
-	
 
 	/**
 	 * @return the name

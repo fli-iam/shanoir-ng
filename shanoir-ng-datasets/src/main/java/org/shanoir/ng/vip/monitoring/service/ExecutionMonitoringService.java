@@ -1,7 +1,9 @@
 package org.shanoir.ng.vip.monitoring.service;
 
+import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.vip.dto.DatasetParameterDTO;
 import org.shanoir.ng.vip.monitoring.model.ExecutionMonitoring;
-import org.shanoir.ng.processing.dto.ParameterResourcesDTO;
+import org.shanoir.ng.processing.dto.ParameterResourceDTO;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -65,5 +67,7 @@ public interface ExecutionMonitoringService {
 
     List<ExecutionMonitoring> findAllRunning();
 
-    List<ParameterResourcesDTO> createProcessingResources(ExecutionMonitoring createdProcessing, List<ParameterResourcesDTO> parameterDatasets);
+    List<ParameterResourceDTO> createProcessingResources(ExecutionMonitoring createdProcessing, List<DatasetParameterDTO> parameterDatasets) throws EntityNotFoundException;
+
+	void validateExecutionMonitoring(ExecutionMonitoring executionMonitoring) throws RestServiceException;
 }

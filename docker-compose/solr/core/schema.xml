@@ -461,8 +461,12 @@
   <field name="studyName" type="lowercase"/>
   <field name="subjectName" type="lowercase"/>
   <field name="subjectId" type="plong"/>
+  <field name="sortingIndex" type="pint"/>
   <field name="subjectType" type="lowercase"/>
   <field name="tags" type="strings"/>
+  <field name="processed" type="boolean" indexed="true" stored="true" required="true" />
+  <field name="importDate" type="pdate"/>
+  <field name="username" type="lowercase"/>
   <dynamicField name="*_txt_en_split_tight" type="text_en_splitting_tight" indexed="true" stored="true"/>
   <dynamicField name="*_descendent_path" type="descendent_path" indexed="true" stored="true"/>
   <dynamicField name="*_ancestor_path" type="ancestor_path" indexed="true" stored="true"/>

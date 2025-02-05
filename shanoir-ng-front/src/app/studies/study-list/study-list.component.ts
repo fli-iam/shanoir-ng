@@ -31,7 +31,8 @@ import { StudyService } from '../shared/study.service';
 @Component({
     selector: 'study-list',
     templateUrl: 'study-list.component.html',
-    styleUrls: ['study-list.component.css']
+    styleUrls: ['study-list.component.css'],
+    standalone: false
 })
 
 export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
@@ -40,7 +41,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
     accessRequestValidated = false;
     hasDUA: boolean;
     isSuConfirmed: boolean;
-    
+
     constructor(
         private studyService: StudyService,
         private confirmService: ConfirmDialogService,
@@ -97,24 +98,26 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
     }
 
     private fetchStorageVolumesByChunk(studies) {
-        const chunkSize = 10;
-        let chunks: Study[][] = [];
-        for (let i = 0; i < studies.length; i += chunkSize) {
-            const chunk = studies.slice(i, i + chunkSize);
-            chunks.push(chunk);
+        if (studies) {
+            const chunkSize = 10;
+            let chunks: Study[][] = [];
+            for (let i = 0; i < studies.length; i += chunkSize) {
+                const chunk = studies.slice(i, i + chunkSize);
+                chunks.push(chunk);
+            }
+            let queue: Promise<void> = Promise.resolve();
+            chunks.forEach(chunk => {
+                queue = queue.then(() => this.fetchStorageVolumes(chunk));
+            });
+            queue.then(() => {
+                this.columnDefs.forEach(column => {
+                    if (column.headerName === "Storage volume") {
+                        column.disableSorting = false;
+                    }
+                })
+            });
+            return studies;
         }
-        let queue: Promise<void> = Promise.resolve();               
-        chunks.forEach(chunk => {
-            queue = queue.then(() => this.fetchStorageVolumes(chunk));
-        });
-        queue.then(() => {
-            this.columnDefs.forEach(column => {
-                if(column.headerName === "Storage volume"){
-                    column.disableSorting = false;
-                }
-            })
-        });
-        return studies;
     }
 
     private fetchStorageVolumes(studies: Study[]): Promise<void> {
@@ -153,18 +156,10 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                     return capitalsAndUnderscoresToDisplayable(params.data.studyStatus);
                 }
             },
+            { headerName: "Start date", field: "startDate", type: "date" },
+            { headerName: "End date", field: "endDate", type: "date" },
             {
-                headerName: "Start date", field: "startDate", type: "date", cellRenderer: (params: any) => {
-                    return this.dateRenderer(params.data.startDate);
-                }
-            },
-            {
-                headerName: "End date", field: "endDate", type: "date", cellRenderer: (params: any) => {
-                    return this.dateRenderer(params.data.endDate);
-                }
-            },
-            {
-                headerName: "Subjects", field: "nbSujects", type: "number", width: '30px'
+                headerName: "Subjects", field: "nbSubjects", type: "number", width: '30px'
             },
             {
                 headerName: "Examinations", field: "nbExaminations", type: "number", width: '30px'
@@ -175,9 +170,10 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             {
                 headerName: "Storage volume", field: "totalSize", disableSearch: true, disableSorting: true, type: "number", orderBy: ["totalSize"],
                 cellRenderer: (params: any) => {
-                    params.data.totalSize
                     if (params.data?.totalSize >= 0) {
                         return this.studyService.storageVolumePrettyPrint(params.data.totalSize);
+                    } else if (params.data.locked) {
+                        return "";
                     } else {
                         return "Fetching..."
                     }

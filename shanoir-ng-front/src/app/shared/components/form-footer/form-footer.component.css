@@ -1,0 +1,11 @@
+:host /deep/ button {     
+    color: var(--color-a);
+    background-color: transparent;
+    border: 1px solid var(--color-a-light) !important; 
+}
+:host /deep/ button:disabled {     
+    color: var(--greyer);
+    border: 1px solid var(--grey) !important; 
+}
+.footer { position: fixed;  background-color: var(--very-light-grey); display: block; width: 100%; }
+.spacer { height: 45px; }

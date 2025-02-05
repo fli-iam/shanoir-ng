@@ -12,36 +12,34 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ViewChild } from '@angular/core';
-import { UntypedFormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-import { Option } from '../../shared/select/select.component';
-import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
-import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
-import { Dataset } from '../shared/dataset.model';
-import { DatasetService } from '../shared/dataset.service';
-import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
-import { DatasetProcessingService } from '../shared/dataset-processing.service';
-import { StudyService } from '../../studies/shared/study.service';
-import { Study } from '../../studies/shared/study.model';
-import { Subject } from '../../subjects/shared/subject.model';
-import { EntityService } from '../../shared/components/entity/entity.abstract.service';
-import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
-import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
-import { TableComponent } from '../../shared/components/table/table.component';
-import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
-import { ExecutionMonitoringService } from 'src/app/vip/shared/execution-monitoring.service';
-import { ExecutionMonitoring } from 'src/app/vip/models/execution-monitoring.model';
-import { SuperPromise } from '../../utils/super-promise';
-import {VipClientService} from "../../vip/shared/vip-client.service";
-import {HttpResponse} from "@angular/common/http";
+import {Component, ViewChild} from '@angular/core';
+import {UntypedFormGroup, Validators} from '@angular/forms';
+import {ActivatedRoute} from '@angular/router';
+import {Option} from '../../shared/select/select.component';
+import {EntityComponent} from '../../shared/components/entity/entity.component.abstract';
+import {DatasetProcessingType} from '../../enum/dataset-processing-type.enum';
+import {Dataset} from '../shared/dataset.model';
+import {DatasetService} from '../shared/dataset.service';
+import {DatasetProcessing} from '../../datasets/shared/dataset-processing.model';
+import {DatasetProcessingService} from '../shared/dataset-processing.service';
+import {StudyService} from '../../studies/shared/study.service';
+import {Study} from '../../studies/shared/study.model';
+import {Subject} from '../../subjects/shared/subject.model';
+import {EntityService} from '../../shared/components/entity/entity.abstract.service';
+import {TableComponent} from '../../shared/components/table/table.component';
+import {ColumnDefinition} from '../../shared/components/table/column.definition.type';
+import {ExecutionMonitoringService} from 'src/app/vip/execution-monitorings/execution-monitoring.service';
+import {ExecutionMonitoring} from 'src/app/vip/models/execution-monitoring.model';
+import {ExecutionService} from "../../vip/execution/execution.service";
 import * as AppUtils from "../../utils/app.utils";
 import {formatDate} from "@angular/common";
+import { Selection } from 'src/app/studies/study/tree.service';
 
 @Component({
     selector: 'dataset-processing-detail',
     templateUrl: 'dataset-processing.component.html',
-    styleUrls: ['dataset-processing.component.css']
+    styleUrls: ['dataset-processing.component.css'],
+    standalone: false
 })
 
 export class DatasetProcessingComponent extends EntityComponent<DatasetProcessing> {
@@ -69,14 +67,13 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             private datasetService: DatasetService,
             private datasetProcessingService: DatasetProcessingService,
             private executionMonitoringService: ExecutionMonitoringService,
-            private vipClientService: VipClientService
+            private vipClientService: ExecutionService
             ) {
 
         super(route, 'dataset-processing');
     }
 
     ngOnInit(): void {
-        super.ngOnInit();
         this.createColumnDefs();
     }
 
@@ -87,31 +84,28 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         return this.datasetProcessingService;
     }
 
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromProcessing(this.datasetProcessing);
+    }
 
     initView(): Promise<void> {
-        return this.datasetProcessingService.get(this.id).then((entity)=> {
-            // checking if the datasetProcessing is not execution monitoring
-            this.executionMonitoringService.getExecutionMonitoring(entity.id).subscribe(
-                (executionMonitoring: ExecutionMonitoring) => {
-                    this.setExecutionMonitoring(executionMonitoring);
-                }, (error) => {
-                    // 404 : if it's not found then it's not execution monitoring !
-                    this.resetExecutionMonitoring();
-                }
-            )
-
-            this.datasetProcessing = entity;
-            this.fetchOneStudy(this.datasetProcessing?.studyId).then(() => {
-                this.study = this.studyOptions?.[0]?.value;
-            });
-        })
+        // checking if the datasetProcessing is not execution monitoring
+        this.executionMonitoringService.getExecutionMonitoring(this.datasetProcessing.id).subscribe(
+            (executionMonitoring: ExecutionMonitoring) => {
+                this.setExecutionMonitoring(executionMonitoring);
+            }, (error) => {
+                // 404 : if it's not found then it's not execution monitoring !
+                this.resetExecutionMonitoring();
+            }
+        )
+        this.fetchOneStudy(this.datasetProcessing?.studyId).then(() => {
+            this.study = this.studyOptions?.[0]?.value;
+        });
+        return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
-        let processingPromise: Promise<void> = this.datasetProcessingService.get(this.id).then(entity => {
-            this.datasetProcessing = entity;
-        });
-        Promise.all([this.fetchStudies(), processingPromise]).then(() => {
+        this.fetchStudies().then(() => {
             this.study = this.studyOptions?.find(opt => opt.value.id == this.datasetProcessing.studyId)?.value;
             let subjectId = this.datasetProcessing.inputDatasets?.[0]?.subject?.id;
             this.fetchSubjects().then(() => {
@@ -120,7 +114,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
                 return this.fetchDatasets();
             });
         });
-        return processingPromise;
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {

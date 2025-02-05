@@ -11,148 +11,123 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
+import { ConsoleService } from 'src/app/shared/console/console.service';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { DatasetAcquisition } from '../../dataset-acquisitions/shared/dataset-acquisition.model';
-import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
-import { Dataset } from '../../datasets/shared/dataset.model';
-import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
+import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
+import { TreeService } from 'src/app/studies/study/tree.service';
 import { ExaminationPipe } from '../../examinations/shared/examination.pipe';
 import { ExaminationService } from '../../examinations/shared/examination.service';
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
 import {
     ClinicalSubjectNode,
-    DatasetAcquisitionNode,
-    DatasetNode,
     ExaminationNode,
     PreclinicalSubjectNode,
-    ProcessingNode,
+    ShanoirNode,
     SubjectNode,
-    UNLOADED,
+    UNLOADED
 } from '../../tree/tree.model';
 import { Subject } from '../shared/subject.model';
-import { SubjectService } from "../shared/subject.service";
+import { SubjectService } from '../shared/subject.service';
 
 
 @Component({
     selector: 'subject-node',
-    templateUrl: 'subject-node.component.html'
+    templateUrl: 'subject-node.component.html',
+    standalone: false
 })
 
-export class SubjectNodeComponent implements OnChanges {
+export class SubjectNodeComponent extends TreeNodeAbstractComponent<SubjectNode> implements OnChanges {
 
-    @Input() input: Subject | SubjectNode;
+    @Input() input: SubjectNode | {subject: Subject, parentNode: ShanoirNode};
+    @Input() rights: StudyUserRight[];
     @Input() studyId: number;
-    @Output() nodeInit: EventEmitter<SubjectNode> = new EventEmitter();
-    @Output() selectedChange: EventEmitter<void> = new EventEmitter();
-    node: SubjectNode;
-    loading: boolean = false;
-    menuOpened: boolean = false;
-    showDetails: boolean;
-    @Input() hasBox: boolean = false;
-    detailsPath: string = "";
-
+   
     constructor(
-        private examinationService: ExaminationService,
-        private subjectService: SubjectService,
-        private router: Router,
-        private examPipe: ExaminationPipe,
-        private downloadService: MassDownloadService) {
+            private examinationService: ExaminationService,
+            private router: Router,
+            private examPipe: ExaminationPipe,
+            private downloadService: MassDownloadService,
+            protected treeService: TreeService,
+            private consoleService: ConsoleService,
+            private subjectService: SubjectService,
+            elementRef: ElementRef) {
+        super(elementRef);
     }
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {
             if (this.input instanceof SubjectNode) {
                 this.node = this.input;
-            } else if (this.input.preclinical){
+            } else if (this.input.subject.preclinical) {
                 this.node = new PreclinicalSubjectNode(
-                    this.input.id,
-                    this.input.name,
+                    this.node,
+                    this.input.subject.id,
+                    this.input.subject.name,
                     [],
                     UNLOADED,
                     null,
-                    false);
+                    this.rights.includes(StudyUserRight.CAN_ADMINISTRATE),
+                    this.rights.includes(StudyUserRight.CAN_DOWNLOAD),
+                );
             } else {
                 this.node = new ClinicalSubjectNode(
-                    this.input.id,
-                    this.input.name,
+                    this.node,
+                    this.input.subject.id,
+                    this.input.subject.name,
                     [],
                     UNLOADED,
                     null,
-                    false);
+                    this.rights.includes(StudyUserRight.CAN_ADMINISTRATE),
+                    this.rights.includes(StudyUserRight.CAN_DOWNLOAD)
+                );
             }
+            this.node.registerOpenPromise(this.contentLoaded);
             this.nodeInit.emit(this.node);
             this.detailsPath = '/' + this.node.title + '/details/' + this.node.id;
             this.showDetails = this.router.url != this.detailsPath;
         }
     }
 
-    loadExaminations() {
+    loadExaminations(): Promise<void> {
         if (this.node.examinations == UNLOADED) {
-            this.loading = true;
-            this.examinationService.findExaminationsBySubjectAndStudy(this.node.id, this.studyId)
+            setTimeout(() => this.loading = true);
+            return this.examinationService.findExaminationsBySubjectAndStudy(this.node.id, this.studyId)
                 .then(examinations => {
-                    let sortedExaminations = examinations.sort((a: SubjectExamination, b: SubjectExamination) => {
-                        return (new Date(a.examinationDate)).getTime() - (new Date(b.examinationDate)).getTime();
-                    })
                     this.node.examinations = [];
-                    if (sortedExaminations) {
-                        sortedExaminations.forEach(exam => {
-                            (this.node.examinations as ExaminationNode[]).push(this.mapExamNode(exam));
-                        });
+                    if (examinations) {
+                        let sortedExaminations = examinations.sort((a: SubjectExamination, b: SubjectExamination) => {
+                            return (new Date(a.examinationDate)).getTime() - (new Date(b.examinationDate)).getTime();
+                        })
+                        if (sortedExaminations) {
+                            sortedExaminations.forEach(exam => {
+                                (this.node.examinations as ExaminationNode[]).push(ExaminationNode.fromExam(exam, this.node, this.node.canDeleteChildren, this.node.canDownload));
+                            });
+                        }
                     }
                     this.loading = false;
-                    this.node.open = true;
-                }).catch(() => {
-                this.loading = false;
-            });
+                    this.node.open();
+                }).catch(error => {
+                    this.loading = false;
+                    this.consoleService.log('error', error.toString());
+                });
+        } else {
+            return Promise.resolve();
         }
     }
 
-    private mapExamNode(exam: SubjectExamination): ExaminationNode {
-        return new ExaminationNode(
-            exam.id,
-            this.examPipe.transform(exam),
-            exam.datasetAcquisitions ? exam.datasetAcquisitions.map(dsAcq => this.mapAcquisitionNode(dsAcq)) : [],
-            exam.extraDataFilePathList,
-            this.node.canDeleteChildren
-        );
-    }
-
-    private mapAcquisitionNode(dsAcq: DatasetAcquisition): DatasetAcquisitionNode {
-        return new DatasetAcquisitionNode(
-            dsAcq.id,
-            dsAcq.name,
-            dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds, false)) : [],
-            this.node.canDeleteChildren
-        );
-    }
-
-    private mapDatasetNode(dataset: Dataset, processed: boolean): DatasetNode {
-        return new DatasetNode(
-            dataset.id,
-            dataset.name,
-            dataset.type,
-            dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : [],
-            processed,
-            this.node.canDeleteChildren
-        );
-    }
-
-    private mapProcessingNode(processing: DatasetProcessing): ProcessingNode {
-        return new ProcessingNode(
-            processing.id,
-            DatasetProcessingType.getLabel(processing.datasetProcessingType),
-            processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],
-            this.node.canDeleteChildren
-        );
+    onFirstOpen() {
+        this.loadExaminations().then(() => {
+            this.contentLoaded.resolve();
+        });
     }
 
     hasChildren(): boolean | 'unknown' {
         if (!this.node.examinations) return false;
-        else if (this.node.examinations == (UNLOADED as any)) return 'unknown';
+        else if (this.node.examinations == UNLOADED) return 'unknown';
         else return this.node.examinations.length > 0;
     }
 
@@ -169,7 +144,7 @@ export class SubjectNodeComponent implements OnChanges {
 
     download() {
         this.loading = true;
-        this.downloadService.downloadAllByStudyIdAndSubjectId(this.studyId, this.node.id)
+        this.downloadService.downloadAllByStudyIdAndSubjectId(this.studyId, this.node.id, this.downloadState)
             .finally(() => this.loading = false);
     }
 }

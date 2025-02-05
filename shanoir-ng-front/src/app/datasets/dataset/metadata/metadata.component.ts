@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {Component, ViewChild} from '@angular/core';
+import {Component, OnDestroy, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {DatasetService} from '../../shared/dataset.service';
 import {DicomService} from '../../../study-cards/shared/dicom.service'
@@ -22,37 +22,55 @@ import {TableComponent} from "../../../shared/components/table/table.component";
 import {ColumnDefinition} from "../../../shared/components/table/column.definition.type";
 import {DicomMetadata} from "./dicom-metadata.model";
 import {BrowserPaging} from "../../../shared/components/table/browser-paging.model";
+import { Selection, TreeService } from 'src/app/studies/study/tree.service';
+import { Subscription } from 'rxjs';
 
 
 @Component({
     selector: 'dicom-metadata',
     templateUrl: 'metadata.component.html',
-    styleUrls: ['metadata.component.css']
+    styleUrls: ['metadata.component.css'],
+    standalone: false
 })
 
-export class MetadataComponent {
+export class MetadataComponent implements OnDestroy {
 
     metadata: DicomMetadata[] = [];
     columnDefs: ColumnDefinition[];
+    subscriptions: Subscription[] = [];
 
     @ViewChild('table', { static: false }) table: TableComponent;
 
     constructor(
-        private datasetService: DatasetService,
-        private activatedRoute: ActivatedRoute,
-        private dicomService: DicomService,
-        private breadcrumbsService: BreadcrumbsService,
-        private location: Location) {
-            breadcrumbsService.nameStep('Dicom metadata');
-            this.columnDefs = this.getColumnDefs();
-            this.loadMetadata().then(() => {
-                this.table.maxResults = this.metadata.length
-                this.table.refresh();
-        })
+            private datasetService: DatasetService,
+            private activatedRoute: ActivatedRoute,
+            private dicomService: DicomService,
+            private breadcrumbsService: BreadcrumbsService,
+            private location: Location,
+            private treeService: TreeService) {
+
+        this.subscriptions.push(this.activatedRoute.params.subscribe(
+            params => {
+                this.treeService.activateTree(this.activatedRoute); // at each routing event
+                breadcrumbsService.nameStep('Dicom metadata');
+                const id = +params['id'];
+                this.metadata = [];
+                this.loadMetadata(id).then(() => {
+                    this.table.maxResults = this.metadata.length
+                    this.table.refresh();
+            })
+        }));
+        this.columnDefs = this.getColumnDefs();
+    }
+    ngOnDestroy(): void {
+        this.subscriptions.forEach(s => s.unsubscribe());
     }
 
-    private loadMetadata() {
-        const id: number = +this.activatedRoute.snapshot.params['id'];
+    private loadMetadata(id: number) {
+        this.datasetService.get(id, 'lazy').then(ds => {
+            this.treeService.select(new Selection(id, 'dicomMetadata', [ds.study.id], ds));
+        });
+
         return Promise.all([this.datasetService.downloadDicomMetadata(id), this.dicomService.getDicomTags()]).then(([data, tags]) => {
             if (!data) {
                 return;

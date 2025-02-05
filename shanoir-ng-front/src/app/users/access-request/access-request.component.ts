@@ -27,7 +27,8 @@ import { IdName } from 'src/app/shared/models/id-name.model';
 @Component({
     selector: 'access-request',
     templateUrl: 'access-request.component.html',
-    styleUrls: ['access-request.component.css']
+    styleUrls: ['access-request.component.css'],
+    standalone: false
 })
 
 export class AccessRequestComponent extends EntityComponent<AccessRequest> {
@@ -90,12 +91,8 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     }
 
     initView(): Promise<void> {
-        let studies = this.studyService.getPublicStudiesConnected();
-        let access = this.accessRequestService.get(this.id);
-        
-        return Promise.all([studies, access]).then(([studiesRes, accessRequestRes]) => {
+        return this.studyService.getPublicStudiesConnected().then(studiesRes => {
             this.studies = studiesRes;
-            this.accessRequest = accessRequestRes;
         });
     }
 

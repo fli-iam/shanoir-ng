@@ -1,5 +1,9 @@
 package org.shanoir.ng.shared.event;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Transient;
+
+import java.util.Map;
 import java.util.UUID;
 
 public class ShanoirEvent {
@@ -28,13 +32,17 @@ public class ShanoirEvent {
 	
 	private Long timestamp;
 
+	@Transient
+	@JsonProperty("eventProperties")
+	private Map<String, String> eventProperties;
+
    
 	public ShanoirEvent() {
 	}
 
 	public ShanoirEvent(String eventType, String objectId, Long userId, String message,	int status) {
 		this.eventType = eventType;
-		this.objectId = objectId;
+		setObjectId(objectId);
 		this.userId = userId;
 		this.message = message;
 		this.status = status;
@@ -44,7 +52,7 @@ public class ShanoirEvent {
 
 	public ShanoirEvent(String eventType, String objectId, Long userId, String message,	int status, Long studyId) {
 		this.eventType = eventType;
-		this.objectId = objectId;
+		setObjectId(objectId);
 		this.userId = userId;
 		this.message = message;
 		this.status = status;
@@ -55,6 +63,11 @@ public class ShanoirEvent {
 
 	public ShanoirEvent(String eventType, String objectId, Long userId, String message,	int status, float progress) {
 		this(eventType, objectId, userId, message, status);
+		this.progress = Float.valueOf(progress);
+	}
+
+	public ShanoirEvent(String eventType, String objectId, Long userId, String message,	int status, float progress, Long studyId) {
+		this(eventType, objectId, userId, message, status, studyId);
 		this.progress = Float.valueOf(progress);
 	}
 
@@ -97,7 +110,11 @@ public class ShanoirEvent {
 	 * @param objectId the objectId to set
 	 */
 	public void setObjectId(String objectId) {
-		this.objectId = objectId;
+		if (objectId != null && objectId.length() > 255) {
+			this.objectId = objectId.substring(0, 250) + "...";
+		} else {
+			this.objectId = objectId;
+		}
 	}
 
 	/**
@@ -187,6 +204,11 @@ public class ShanoirEvent {
         this.timestamp = timestamp;
     }
 
-	
+	public Map<String, String> getEventProperties() {
+		return eventProperties;
+	}
 
+	public void setEventProperties(Map<String, String> eventProperties) {
+		this.eventProperties = eventProperties;
+	}
 }

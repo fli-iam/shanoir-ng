@@ -16,7 +16,7 @@
 	<parent>
 		<groupId>org.shanoir-ng</groupId>
 		<artifactId>shanoir-ng-back</artifactId>
-		<version>3.2.2</version>
+		<version>3.4.0</version>
 		<relativePath>../shanoir-ng-back</relativePath>
 	</parent>
 	
@@ -27,9 +27,8 @@
 	<description>Dataset microservice for Shanoir NG</description>
 
 	<properties>
-		<solrj.version>9.2.1</solrj.version>
-		<spring.data.solr.version>4.3.15</spring.data.solr.version>
-		<orika.version>1.5.4</orika.version>
+		<solrj.version>9.4.1</solrj.version>
+		<spring.data.solr.version>4.3.15</spring.data.solr.version>		
 		<opencsv.version>5.7.1</opencsv.version>
 	</properties>
 
@@ -38,17 +37,17 @@
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-ms-common</artifactId>
-			<version>3.2.2</version>
+			<version>3.4.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.shanoir.anonymization</groupId>
 			<artifactId>anonymization</artifactId>
-			<version>3.2.2</version>
+			<version>3.4.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-study-rights</artifactId>
-			<version>3.2.2</version>
+			<version>3.4.0</version>
 		</dependency>
 
 		<!-- gson -->
@@ -125,18 +124,18 @@
 		    <version>${spring.data.solr.version}</version>
 		</dependency>
 		
-		<!-- Orika dependency for deep copy -->
-		<dependency>
-			<groupId>ma.glasnost.orika</groupId>
-			<artifactId>orika-core</artifactId>
-			<version>${orika.version}</version>
-		</dependency>
-		
 		<dependency>
 		    <groupId>com.opencsv</groupId>
 		    <artifactId>opencsv</artifactId>
 		    <version>${opencsv.version}</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
+			<version>3.4.0</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -150,6 +149,7 @@
 					<profiles>
 						<profile>${spring.active.profile}</profile>
 					</profiles>
+					<classifier>exec</classifier>
 				</configuration>
 				<executions>
 					<execution>
@@ -169,14 +169,8 @@
 						<phase>package</phase>
 						<configuration>
 							<target>
-								<copy file="target/${project.build.finalName}.jar"
+								<copy file="target/${project.build.finalName}-exec.jar"
 									tofile="${basedir}/../docker-compose/datasets/${project.artifactId}.jar" />
-								<copy file="../utils/entrypoint_common"
-									tofile="${basedir}/../docker-compose/datasets/entrypoint_common" />
-								<copy file="../utils/oneshot"
-									tofile="${basedir}/../docker-compose/datasets/oneshot" />
-								<chmod perm="+x"
-									file="${basedir}/../docker-compose/datasets/oneshot" />
 							</target>
 						</configuration>
 						<goals>

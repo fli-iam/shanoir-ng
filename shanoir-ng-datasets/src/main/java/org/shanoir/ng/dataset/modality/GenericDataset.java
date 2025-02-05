@@ -1,8 +1,9 @@
 package org.shanoir.ng.dataset.modality;
 
-import jakarta.persistence.Entity;
-import net.bytebuddy.description.type.TypeList;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetType;
+
+import jakarta.persistence.Entity;
 
 @Entity
 public class GenericDataset extends Dataset {
@@ -21,8 +22,8 @@ public class GenericDataset extends Dataset {
 	}
 
 	@Override
-	public String getType() {
-		return "Generic";
+	public DatasetType getType() {
+		return DatasetType.Generic;
 	}
 
 }

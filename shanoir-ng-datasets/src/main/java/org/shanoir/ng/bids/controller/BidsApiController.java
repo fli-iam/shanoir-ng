@@ -62,23 +62,23 @@ public class BidsApiController implements BidsApi {
 
 	@Override
 	public ResponseEntity<Void> generateBIDSByStudyId(
-    		@Parameter(name = "id of the study", required=true) @PathVariable("studyId") Long studyId,
-    		@Parameter(name = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException {
+    		@Parameter(description = "id of the study", required=true) @PathVariable("studyId") Long studyId,
+    		@Parameter(description = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException {
 		bidsService.exportAsBids(studyId, studyName);
 		return ResponseEntity.ok().build();
 	}
 
     public ResponseEntity<BidsElement> refreshBIDSByStudyId(
-    		@Parameter(name = "id of the study", required=true) @PathVariable("studyId") Long studyId,
-    		@Parameter(name = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException {
+    		@Parameter(description = "id of the study", required=true) @PathVariable("studyId") Long studyId,
+    		@Parameter(description = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException {
     	this.bidsService.deleteBidsFolder(studyId, studyName);
     	return this.getBIDSStructureByStudyId(studyId);
     }
 
 	@Override
     public void exportBIDSFile(
-    		@Parameter(name = "Id of the study", required=true) @PathVariable("studyId") Long studyId,
-    		@Parameter(name = "file path") @Valid @RequestParam(value = "filePath", required = true) String filePath, HttpServletResponse response) throws RestServiceException, IOException {
+    		@Parameter(description = "Id of the study", required=true) @PathVariable("studyId") Long studyId,
+    		@Parameter(description = "file path") @Valid @RequestParam(value = "filePath", required = true) String filePath, HttpServletResponse response) throws RestServiceException, IOException {
 		// Check filePath too
 		// /var/datasets-data/bids-data/stud-1_NATIVE
 		if (!filePath.startsWith("/var/datasets-data/bids-data/stud-" + studyId)) {
@@ -141,7 +141,7 @@ public class BidsApiController implements BidsApi {
 
 	@Override
 	public ResponseEntity<BidsElement> getBIDSStructureByStudyId(
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId)
+			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId)
 			throws RestServiceException, IOException {
 
 		BidsElement studyBidsElement = new BidsFolder("Error while retrieving the study bids structure, please reload the page");

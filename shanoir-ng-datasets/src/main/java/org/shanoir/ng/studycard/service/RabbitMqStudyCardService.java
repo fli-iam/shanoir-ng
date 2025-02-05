@@ -42,7 +42,7 @@ public class RabbitMqStudyCardService {
 	@Autowired
 	private ObjectMapper mapper;
 	
-	@RabbitListener(queues = RabbitMQConfiguration.FIND_STUDY_CARD_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.FIND_STUDY_CARD_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	@Transactional
 	public String findStudyCard(String message) {
@@ -53,7 +53,7 @@ public class RabbitMqStudyCardService {
 		}
 	}
 
-	@RabbitListener(queues = RabbitMQConfiguration.IMPORT_STUDY_CARD_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.IMPORT_STUDY_CARD_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	@Transactional
 	public Long getBestStudyCard(String message) {

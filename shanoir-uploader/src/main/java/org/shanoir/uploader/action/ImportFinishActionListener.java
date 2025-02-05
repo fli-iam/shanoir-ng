@@ -4,34 +4,31 @@ import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.text.ParseException;
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.Date;
 
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
-import org.apache.log4j.Logger;
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
-import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.model.rest.Examination;
-import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.IdName;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
-import org.shanoir.uploader.model.rest.PseudonymusHashValues;
-import org.shanoir.uploader.model.rest.Sex;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
-import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 import org.shanoir.uploader.upload.UploadJob;
+import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.ImportUtils;
-import org.shanoir.uploader.utils.Util;
+import org.shanoir.uploader.utils.QualityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class implements the logic when the start import button is clicked.
@@ -41,7 +38,7 @@ import org.shanoir.uploader.utils.Util;
  */
 public class ImportFinishActionListener implements ActionListener {
 
-	private static Logger logger = Logger.getLogger(ImportFinishActionListener.class);
+	private static final Logger logger = LoggerFactory.getLogger(ImportFinishActionListener.class);
 
 	private MainWindow mainWindow;
 	
@@ -49,20 +46,20 @@ public class ImportFinishActionListener implements ActionListener {
 	
 	private File uploadFolder;
 	
-	private Subject subject;
-	
-	private ShanoirUploaderServiceClient shanoirUploaderServiceClient;
+	private Subject subjectREST;
 	
 	private ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBILNG;
 
-	public ImportFinishActionListener(final MainWindow mainWindow, UploadJob uploadJob, File uploadFolder, Subject subject,
+	// @Autowired
+	// private CurrentNominativeDataController currentNominativeDataController;
+
+	public ImportFinishActionListener(final MainWindow mainWindow, UploadJob uploadJob, File uploadFolder, Subject subjectREST,
 			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBILNG) {
 		this.mainWindow = mainWindow;
 		this.uploadJob = uploadJob;
 		this.uploadFolder = uploadFolder;
-		this.subject = subject;
+		this.subjectREST = subjectREST;
 		this.importStudyAndStudyCardCBILNG = importStudyAndStudyCardCBILNG;
-		this.shanoirUploaderServiceClient = ShUpOnloadConfig.getShanoirUploaderServiceClient();
 	}
 
 	/**
@@ -79,15 +76,26 @@ public class ImportFinishActionListener implements ActionListener {
 					"Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
+
+		/**
+		 * In case of Neurinfo: the user can either enter a new common name to create a new subject
+		 * or select an existing subject from the combo box. This is not possible for OFSEP profile.
+		 */
+		boolean useExistingSubjectInStudy = false;
 		if (ShUpConfig.isModeSubjectCommonNameManual()) {
-			// minimal length for subject common name is 2, same for subject study identifier
-			if (mainWindow.importDialog.subjectTextField.getText().length() < 2
-				|| !mainWindow.importDialog.subjectStudyIdentifierTF.getText().isEmpty()
-						&& mainWindow.importDialog.subjectStudyIdentifierTF.getText().length() < 2) {
-				JOptionPane.showMessageDialog(mainWindow.frame,
-						mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.subject.creation"),
-						"Error", JOptionPane.ERROR_MESSAGE);
-				return;
+			// minimal length for subject common name is 1, same for subject study identifier
+			// if nothing is entered, use existing subject selected
+			if (mainWindow.importDialog.existingSubjectsCB.isEnabled()) {
+				subjectREST = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
+				if (subjectREST != null) {
+					logger.info("Existing subject used from server with ID: " + subjectREST.getId() + ", name: " + subjectREST.getName());
+					useExistingSubjectInStudy = true;
+				} else {
+					JOptionPane.showMessageDialog(mainWindow.frame,
+							mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.subject.creation"),
+							"Error", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
 			}
 		}
 		
@@ -95,71 +103,50 @@ public class ImportFinishActionListener implements ActionListener {
 		((JButton) event.getSource()).setEnabled(false);
 		mainWindow.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-		/**
-		 * Handle subject here: creation or use existing
-		 */
-		if (subject == null) {
-			try {
-				 subject = fillSubject(mainWindow.importDialog, uploadJob);
-			} catch (ParseException e) {
-				logger.error(e.getMessage(), e);
+		ImportJob importJob = null;
+		try {
+			importJob = ImportUtils.readImportJob(uploadFolder);
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+			JOptionPane.showMessageDialog(mainWindow.frame,
+					mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.import.study"),
+					"Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+
+		// In case user selects existing subject from study, just use it
+		if (!useExistingSubjectInStudy) {
+			// common name: entered by the user in the GUI
+			String subjectName = mainWindow.importDialog.subjectTextField.getText();
+			ImagedObjectCategory category = (ImagedObjectCategory) mainWindow.importDialog.subjectImageObjectCategoryCB.getSelectedItem();
+			String languageHemDom = (String) mainWindow.importDialog.subjectLanguageHemisphericDominanceCB.getSelectedItem();
+			String manualHemDom = (String) mainWindow.importDialog.subjectManualHemisphericDominanceCB.getSelectedItem();
+			SubjectStudy subjectStudy = importStudyAndStudyCardCBILNG.getSubjectStudy();
+			String subjectStudyIdentifier = mainWindow.importDialog.subjectStudyIdentifierTF.getText();
+			SubjectType subjectType = (SubjectType) mainWindow.importDialog.subjectTypeCB.getSelectedItem();
+			boolean isPhysicallyInvolved = mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.isSelected();
+			subjectREST = ImportUtils.manageSubject(
+				subjectREST, importJob.getSubject(), subjectName, category, languageHemDom, manualHemDom,
+				subjectStudy, subjectType, useExistingSubjectInStudy, isPhysicallyInvolved, subjectStudyIdentifier,
+				study, studyCard);
+			if(subjectREST == null) {
 				JOptionPane.showMessageDialog(mainWindow.frame,
-						mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.subjectcreator.createSubjectFromShup"),
-						"Error", JOptionPane.ERROR_MESSAGE);
+					mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.subjectcreator.createSubjectFromShup"),
+				"Error", JOptionPane.ERROR_MESSAGE);
 				mainWindow.setCursor(null); // turn off the wait cursor
 				((JButton) event.getSource()).setEnabled(true);
 				return;
 			}
-			ImportUtils.addSubjectStudy(study, subject,
-					(SubjectType) mainWindow.importDialog.subjectTypeCB.getSelectedItem(),
-					mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.isSelected(),
-					mainWindow.importDialog.subjectStudyIdentifierTF.getText());
-			// create subject with subject-study filled to avoid access denied exception because of rights check
-			Long centerId = studyCard.getAcquisitionEquipment().getCenter().getId();
-			subject = shanoirUploaderServiceClient.createSubject(subject, ShUpConfig.isModeSubjectCommonNameManual(), centerId);
-			if (subject == null) {
-				JOptionPane.showMessageDialog(mainWindow.frame,
-						mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.subjectcreator.createSubjectFromShup"),
-						"Error", JOptionPane.ERROR_MESSAGE);
-				mainWindow.setCursor(null); // turn off the wait cursor
-				((JButton) event.getSource()).setEnabled(true);
-				return;
-			} else {
-				logger.info("Auto-Import: subject created on server with ID: " + subject.getId());
-			}
-		} else {
-			// if rel-subject-study does not exist for existing subject, create one
-			if (importStudyAndStudyCardCBILNG.getSubjectStudy() == null) {
-				ImportUtils.addSubjectStudy(study, subject,
-						(SubjectType) mainWindow.importDialog.subjectTypeCB.getSelectedItem(),
-						mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.isSelected(),
-						mainWindow.importDialog.subjectStudyIdentifierTF.getText());
-				if (shanoirUploaderServiceClient.createSubjectStudy(subject) == null) {
-					JOptionPane.showMessageDialog(mainWindow.frame,
-							mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.subjectcreator.createSubjectFromShup"),
-							"Error", JOptionPane.ERROR_MESSAGE);
-					mainWindow.setCursor(null); // turn off the wait cursor
-					((JButton) event.getSource()).setEnabled(true);
-					return;
-				}
-				
-			}
-			logger.info("Auto-Import: subject used on server with ID: " + subject.getId());
 		}
 		
 		Long examinationId = null;
+		// If the user wants to create a new examination
 		if (mainWindow.importDialog.mrExaminationNewExamCB.isSelected()) {
-			Examination examinationDTO = new Examination();
-			examinationDTO.setStudyId(study.getId());
-			examinationDTO.setSubjectId(subject.getId());
 			IdName center = (IdName) mainWindow.importDialog.mrExaminationCenterCB.getSelectedItem();
-			examinationDTO.setCenterId(center.getId());
 			Date examinationDate = (Date) mainWindow.importDialog.mrExaminationDateDP.getModel().getValue();
 			String examinationComment = mainWindow.importDialog.mrExaminationCommentTF.getText();
-			examinationDTO.setExaminationDate(examinationDate);
-			examinationDTO.setComment(examinationComment);
-			examinationDTO = shanoirUploaderServiceClient.createExamination(examinationDTO);
-			if (examinationDTO == null) {
+			examinationId = ImportUtils.createExamination(study, subjectREST, examinationDate, examinationComment, center.getId());
+			if (examinationId == null) {
 				JOptionPane.showMessageDialog(mainWindow.frame,
 						mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.createmrexamination"),
 						"Error", JOptionPane.ERROR_MESSAGE);
@@ -167,88 +154,74 @@ public class ImportFinishActionListener implements ActionListener {
 				((JButton) event.getSource()).setEnabled(true);
 				return;
 			} else {
-				examinationId = examinationDTO.getId();
-				logger.info("Auto-Import: examination created on server with ID: " + examinationId);
+				logger.info("Examination created on server with ID: " + examinationId);
 			}
+		// If the user wants to use an existing examination
 		} else {
 			Examination examinationDTO = (Examination) mainWindow.importDialog.mrExaminationExistingExamCB.getSelectedItem();
 			examinationId = examinationDTO.getId();
-			logger.info("Auto-Import: examination used on server with ID: " + examinationId);
+			logger.info("Examination used on server with ID: " + examinationId);
 		}
 				
 		/**
-		 * 3. Fill import-job.json
+		 * 3. Fill importJob, check quality if needed, start pseudo and prepare upload
 		 */
-		ImportJob importJob = ImportUtils.prepareImportJob(uploadJob, subject.getName(), subject.getId(), examinationId, (Study) mainWindow.importDialog.studyCB.getSelectedItem(), (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem());
-		Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, importJob, subject.getName());
-		Thread thread = new Thread(runnable);
-		thread.start();
+		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examinationId, 
+		(Study) mainWindow.importDialog.studyCB.getSelectedItem(), (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem());
+		
+		QualityCardResult qualityControlResult = new QualityCardResult();
+
+		// Quality Check if the Study selected has Quality Cards to be checked at import
+        try {
+            qualityControlResult = QualityUtils.checkQualityAtImport(importJob);
+
+			// If quality check resulted in errors, show a message and do not start the import
+			if (!qualityControlResult.isEmpty() && (qualityControlResult.hasError())) {
+				JOptionPane.showMessageDialog(mainWindow.frame,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult), 
+				ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"), JOptionPane.ERROR_MESSAGE);
+
+				// set status FAILED
+				ShUpOnloadConfig.getCurrentNominativeDataController().updateNominativeDataPercentage(uploadFolder, UploadState.ERROR.toString());
+				logger.error("The upload for the patient {} failed due to quality control errors.", importJob.getSubject().getName());
+
+			} else {
+				// If quality control condition is VALID we do not set a quality card result entry but we update the subjectStudy qualityTag
+				if (!qualityControlResult.isEmpty() || !qualityControlResult.getUpdatedSubjectStudies().isEmpty()) {
+					// If quality control has one warning or failed valid condition fulfilled we inform the user and allow import to continue
+					if (qualityControlResult.hasWarning() || qualityControlResult.hasFailedValid()) {
+						JOptionPane.showMessageDialog(mainWindow.frame,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult), 
+						ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"), JOptionPane.WARNING_MESSAGE);
+					}
+					// If Failed Valid No updated subject studies exist in the qualityControlResult
+					// For Now if Failed Valid then the quality tag of the subject on server side is not updated with an empty value
+					if (!qualityControlResult.hasFailedValid()) {
+						//Set qualityTag to the importJob in order to update subjectStudy qualityTag on server side
+						importJob.setQualityTag(qualityControlResult.getUpdatedSubjectStudies().get(0).getQualityTag());
+					}
+				}
+				
+				Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, importJob, subjectREST.getName());
+				Thread thread = new Thread(runnable);
+				thread.start();
+	
+				JOptionPane.showMessageDialog(mainWindow.frame,
+				ShUpConfig.resourceBundle.getString("shanoir.uploader.import.start.auto.import.message"),
+				"Import", JOptionPane.INFORMATION_MESSAGE);
+		}
+        } catch (Exception ex) {
+			logger.error(ex.getMessage(), ex);
+			JOptionPane.showMessageDialog(mainWindow.frame,  ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.exception.message") + ex.getMessage(), 
+			ShUpConfig.resourceBundle.getString("shanoir.uploader.select.error.title"), JOptionPane.ERROR_MESSAGE);
+			// set status FAILED
+			ShUpOnloadConfig.getCurrentNominativeDataController().updateNominativeDataPercentage(uploadFolder, UploadState.ERROR.toString());
+        }
 		
 		mainWindow.importDialog.setVisible(false);
 		mainWindow.importDialog.mrExaminationExamExecutiveLabel.setVisible(true);
 		mainWindow.importDialog.mrExaminationExamExecutiveCB.setVisible(true);
 		mainWindow.setCursor(null); // turn off the wait cursor
-		((JButton) event.getSource()).setEnabled(true);
+		((JButton) event.getSource()).setEnabled(true);	
 		
-		JOptionPane.showMessageDialog(mainWindow.frame,
-				ShUpConfig.resourceBundle.getString("shanoir.uploader.import.start.auto.import.message"),
-				"Import", JOptionPane.INFORMATION_MESSAGE);
-	}
-	
-
-
-	private Subject fillSubject(final ImportDialog importDialog, final UploadJob uploadJob) throws ParseException {
-		final Subject subjectDTO = new Subject();
-		/**
-		 * Values coming from UploadJob
-		 */
-		subjectDTO.setIdentifier(uploadJob.getSubjectIdentifier());
-        Date birthDate = ShUpConfig.formatter.parse(uploadJob.getPatientBirthDate());
-		subjectDTO.setBirthDate(Util.convertToLocalDateViaInstant(birthDate));
-		if (uploadJob.getPatientSex().compareTo(Sex.F.name()) == 0) {
-			subjectDTO.setSex(Sex.F);
-		} else if (uploadJob.getPatientSex().compareTo(Sex.M.name()) == 0) {
-			subjectDTO.setSex(Sex.M);
-		}
-		if (ShUpConfig.isModePseudonymus()) {
-			fillPseudonymusHashValues(uploadJob, subjectDTO);
-		}
-		/**
-		 * Values coming from ImportDialog
-		 */
-		if (ShUpConfig.isModeSubjectCommonNameManual()) {
-			subjectDTO.setName(importDialog.subjectTextField.getText());
-		}
-		subjectDTO.setImagedObjectCategory((ImagedObjectCategory) importDialog.subjectImageObjectCategoryCB.getSelectedItem());
-		String languageHemDom = (String) importDialog.subjectLanguageHemisphericDominanceCB.getSelectedItem();
-		if (HemisphericDominance.Left.getName().compareTo(languageHemDom) == 0) {
-			subjectDTO.setLanguageHemisphericDominance(HemisphericDominance.Left);
-		} else if (HemisphericDominance.Right.getName().compareTo(languageHemDom) == 0) {
-			subjectDTO.setLanguageHemisphericDominance(HemisphericDominance.Right);
-		}
-		String manualHemDom = (String) importDialog.subjectManualHemisphericDominanceCB.getSelectedItem();
-		if (HemisphericDominance.Left.getName().compareTo(manualHemDom) == 0) {
-			subjectDTO.setManualHemisphericDominance(HemisphericDominance.Left);
-		} else if (HemisphericDominance.Right.getName().compareTo(manualHemDom) == 0) {
-			subjectDTO.setManualHemisphericDominance(HemisphericDominance.Right);
-		}
-		subjectDTO.setSubjectStudyList(new ArrayList<SubjectStudy>());
-		return subjectDTO;
-	}
-
-	private void fillPseudonymusHashValues(final UploadJob uploadJob, final Subject subjectDTO) {
-		PseudonymusHashValues pseudonymusHashValues = new PseudonymusHashValues();
-		pseudonymusHashValues.setFirstNameHash1(uploadJob.getFirstNameHash1());
-		pseudonymusHashValues.setFirstNameHash2(uploadJob.getFirstNameHash2());
-		pseudonymusHashValues.setFirstNameHash3(uploadJob.getFirstNameHash3());
-		pseudonymusHashValues.setLastNameHash1(uploadJob.getLastNameHash1());
-		pseudonymusHashValues.setLastNameHash2(uploadJob.getLastNameHash2());
-		pseudonymusHashValues.setLastNameHash3(uploadJob.getLastNameHash3());
-		pseudonymusHashValues.setBirthNameHash1(uploadJob.getBirthNameHash1());
-		pseudonymusHashValues.setBirthNameHash2(uploadJob.getBirthNameHash2());
-		pseudonymusHashValues.setBirthNameHash3(uploadJob.getBirthNameHash3());
-		pseudonymusHashValues.setBirthDateHash(uploadJob.getBirthDateHash());
-		subjectDTO.setPseudonymusHashValues(pseudonymusHashValues);
 	}
 
 }

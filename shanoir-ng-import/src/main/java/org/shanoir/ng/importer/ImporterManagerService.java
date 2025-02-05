@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.shanoir.anonymization.anonymization.AnonymizationServiceImpl;
-import org.shanoir.ng.importer.dcm2nii.DatasetsCreatorAndNIfTIConverterService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.query.DicomStoreSCPServer;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
@@ -91,9 +90,6 @@ public class ImporterManagerService {
 	private ImagesCreatorAndDicomFileAnalyzerService imagesCreatorAndDicomFileAnalyzer;
 		
 	@Autowired
-	private DatasetsCreatorAndNIfTIConverterService datasetsCreatorAndNIfTIConverter;
-	
-	@Autowired
     private RabbitTemplate rabbitTemplate;
 	
 	@Autowired
@@ -103,6 +99,9 @@ public class ImporterManagerService {
 	private ShanoirEventService eventService;
 	
 	@Autowired
+	private DatasetsCreatorService datasetsCreatorService;
+	
+	@Autowired
 	StudyUserRightsRepository studyUserRightRepo;
 
 	@Value("${shanoir.import.directory}")
@@ -110,10 +109,11 @@ public class ImporterManagerService {
 	
 	@Async
 	public void manageImportJob(final ImportJob importJob) {
-	    ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), importJob.getUserId(), "Starting import configuration", ShanoirEvent.IN_PROGRESS, 0f);
+	    ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), importJob.getUserId(), "Starting import configuration", ShanoirEvent.IN_PROGRESS, 0f, importJob.getStudyId());
 	    event.setTimestamp(importJob.getTimestamp());
 		eventService.publishEvent(event);
 		importJob.setShanoirEvent(event);
+		importJob.setUsername(KeycloakUtil.getTokenUserName());
 		try {
 			// Always create a userId specific folder in the import work folder (the root of everything):
 			// split imports to clearly separate them into separate folders for each user
@@ -135,11 +135,11 @@ public class ImporterManagerService {
 				// at first all dicom files arrive normally in /tmp/shanoir-dcmrcv (see config DicomStoreSCPServer)
 				downloadAndMoveDicomFilesToImportJobDir(importJobDir, patients, event);
 				// convert instances to images, as already done after zip file upload
-				imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), true, event);
+				imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), true, event, false);
 			} else if (importJob.isFromShanoirUploader()) {
 				importJobDir = new File(importJob.getWorkFolder());
 				// convert instances to images, as already done after zip file upload
-				imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), false, event);
+				imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), false, event, false);
 			} else if (importJob.isFromDicomZip()) {
 				// images creation and analyze of dicom files has been done after upload already
 				importJobDir = new File(importJob.getWorkFolder());
@@ -161,8 +161,8 @@ public class ImporterManagerService {
 				if (!importJob.isFromShanoirUploader()) {
 					pseudonymize(importJob, event, importJobDir, patient);
 				}
-				Long converterId = importJob.getConverterId();
-				datasetsCreatorAndNIfTIConverter.createDatasetsAndRunConversion(patient, importJobDir, converterId, importJob);
+
+				datasetsCreatorService.createDatasets(patient, importJobDir, importJob);
 			}
 			this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_QUEUE_DATASET, objectMapper.writeValueAsString(importJob));
 			long importJobDirSize = ImportUtils.getDirectorySize(importJobDir.toPath());
@@ -301,7 +301,7 @@ public class ImporterManagerService {
 	 * @param patients
 	 * @throws ShanoirException
 	 */
-	private void downloadAndMoveDicomFilesToImportJobDir(final File importJobDir, List<Patient> patients, ShanoirEvent event) throws ShanoirException {
+	private void downloadAndMoveDicomFilesToImportJobDir(final File importJobDir, List<Patient> patients, ShanoirEvent event) throws Exception {
 		for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
 			Patient patient = patientsIt.next();
 			List<Study> studies = patient.getStudies();
@@ -317,7 +317,8 @@ public class ImporterManagerService {
 
 					String studyInstanceUID = study.getStudyInstanceUID();
 					String seriesInstanceUID = serie.getSeriesInstanceUID();
-					queryPACSService.queryCMOVE(studyInstanceUID, seriesInstanceUID);
+					queryPACSService.queryCFINDInstances(studyInstanceUID, serie);
+					queryPACSService.queryCMOVE(studyInstanceUID, serie);
 					File serieIDFolderDir = new File(importJobDir + File.separator + seriesInstanceUID);
 
 					if(!serieIDFolderDir.exists()) {

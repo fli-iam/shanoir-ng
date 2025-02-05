@@ -11,37 +11,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 
-import { StudyCardNode } from '../../tree/tree.model';
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
+import { CardNode } from '../../tree/tree.model';
+import { QualityCard } from '../shared/quality-card.model';
+import { QualityCardService } from '../shared/quality-card.service';
 import { StudyCard } from '../shared/study-card.model';
-import {StudyCardService} from "../shared/study-card.service";
+import { StudyCardService } from "../shared/study-card.service";
+import { TreeService } from 'src/app/studies/study/tree.service';
 
 
 @Component({
-    selector: 'studycard-node',
-    templateUrl: 'study-card-node.component.html'
+    selector: 'card-node',
+    templateUrl: 'study-card-node.component.html',
+    standalone: false
 })
 
-export class StudyCardNodeComponent implements OnChanges {
+export class StudyCardNodeComponent extends TreeNodeAbstractComponent<CardNode> implements OnChanges {
 
-    @Input() input: StudyCardNode | StudyCard;
-    @Output() selectedChange: EventEmitter<void> = new EventEmitter();
+    @Input() input: CardNode | StudyCard | QualityCard;
     @Output() onCardDelete: EventEmitter<void> = new EventEmitter();
-    node: StudyCardNode;
-    loading: boolean = false;
-    menuOpened: boolean = false;
-    detailsPath: string = '/study-card/details/';
+    @Input() detailsPath: string;
 
     constructor(
-        private router: Router,
-        private cardService: StudyCardService) {
+            private studycardService: StudyCardService,
+            private qualitycardService: QualityCardService,
+            protected treeService: TreeService,
+            elementRef: ElementRef) {
+        super(elementRef);
     }
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {
-            if (this.input instanceof StudyCardNode) {
+            if (this.input instanceof CardNode) {
                 this.node = this.input;
             } else {
                 throw new Error('not implemented yet');
@@ -50,8 +53,10 @@ export class StudyCardNodeComponent implements OnChanges {
     }
 
     deleteStudyCard() {
-        this.cardService.get(this.node.id).then(entity => {
-            this.cardService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
+        const service = this.node.type == 'studycard' ? this.studycardService : this.qualitycardService;
+
+        service.get(this.node.id).then(entity => {
+            service.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
                 if (deleted) {
                     this.onCardDelete.emit();
                 }

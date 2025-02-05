@@ -15,13 +15,12 @@
 import { AppRoutingModule } from './app-routing.module';
 import { PreclinicalRoutingModule } from './preclinical/preclinical-routing.module'
 import { APP_BASE_HREF, CommonModule } from '@angular/common';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { ErrorHandler, Injector, NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 // import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { Autosize } from 'ng-autosize';
 import { NgxJsonViewerModule } from 'ngx-json-viewer';
 import { AcquisitionEquipmentListComponent } from './acquisition-equipments/acquisition-equipment-list/acquisition-equipment-list.component';
 import { AcquisitionEquipmentComponent } from './acquisition-equipments/acquisition-equipment/acquisition-equipment.component';
@@ -91,7 +90,6 @@ import { SelectSeriesComponent } from './import/select-series/select-series.comp
 import { DicomArchiveService } from './import/shared/dicom-archive.service';
 import { ImportDataService } from './import/shared/import.data-service';
 import { ImportService } from './import/shared/import.service';
-import { NiftiConverterService } from './niftiConverters/nifti.converter.service';
 import { RoleService } from './roles/role.service';
 import { AutoAdjustInputComponent } from './shared/auto-ajust-input/auto-ajust-input.component';
 import { CheckboxListComponent } from './shared/checkbox-list/checkbox-list.component';
@@ -245,10 +243,10 @@ import { AccessRequestComponent } from './users/access-request/access-request.co
 import { MultiSelectComponent } from './shared/multi-select/multi-select.component';
 import { MultiSelectTableComponent } from './shared/multi-select-table/multi-select-table.component';
 import { PipelinesComponent } from './vip/pipelines/pipelines.component';
-import { VipClientService } from './vip/shared/vip-client.service';
+import { ExecutionService } from './vip/execution/execution.service';
 import { PipelineComponent } from './vip/pipelines/pipeline/pipeline.component';
 import { ExecutionComponent } from './vip/execution/execution.component';
-import { ExecutionMonitoringService } from './vip/shared/execution-monitoring.service';
+import { ExecutionMonitoringService } from './vip/execution-monitorings/execution-monitoring.service';
 import { ExecutionMonitoringsComponent } from './vip/execution-monitorings/execution-monitorings.component';
 import { QualityControlComponent } from './quality-control/quality-control.component';
 import { QualityCardService } from './study-cards/shared/quality-card.service';
@@ -261,27 +259,24 @@ import { LoginGuard } from "./shared/roles/login-guard";
 import { AccessRequestService } from './users/access-request/access-request.service';
 import { AccessRequestListComponent } from './users/access-request/access-request-list.component';
 import { MassDownloadService } from './shared/mass-download/mass-download.service';
+import { SingleDownloadService } from './shared/mass-download/single-download.service';
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { TaskStatusComponent } from './async-tasks/status/task-status.component';
-import {DatasetCopyDialogComponent} from "./shared/components/dataset-copy-dialog/dataset-copy-dialog.component";
+import { DatasetCopyDialogComponent } from "./shared/components/dataset-copy-dialog/dataset-copy-dialog.component";
 import { DownloadSetupComponent } from './shared/mass-download/download-setup/download-setup.component';
 import { DownloadSetupAltComponent } from './shared/mass-download/download-setup-alt/download-setup-alt.component';
 import { TestQualityCardOptionsComponent } from './study-cards/test-quality-card-options/test-quality-card-options.component';
+import { SessionService } from './shared/services/session.service';
+import { PipelineService } from "./vip/pipelines/pipeline/pipeline.service";
+import {ShanoirEventService} from "./users/shanoir-event/shanoir-event.service";
+import {StudyHistoryComponent} from "./studies/study-history/study-history.component";
+import { StudyTreeComponent } from './studies/study/study-tree.component';
+import { TreeService } from './studies/study/tree.service';
+import { CoilNodeComponent } from './coils/coil/tree/coil-node.component';
+import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.component';
+import { MetadataNodeComponent } from './datasets/tree/metadata-node.component';
 
-@NgModule({
-    imports: [
-        BrowserModule,
-        BrowserAnimationsModule,
-        CommonModule,
-        FormsModule,
-        HttpClientModule,
-        ReactiveFormsModule,
-        NgxJsonViewerModule,
-        AppRoutingModule,
-        PreclinicalRoutingModule,
-        RouterModule,
-        ClipboardModule
-    ],
+@NgModule({ 
     declarations: [
         AccountRequestComponent,
         AccountRequestInfoComponent,
@@ -289,11 +284,11 @@ import { TestQualityCardOptionsComponent } from './study-cards/test-quality-card
         AcquisitionEquipmentListComponent,
         AcquisitionEquipmentPipe,
         AppComponent,
-        Autosize,
         CenterComponent,
         CenterListComponent,
         ConfirmDialogComponent,
         DatasetCopyDialogComponent,
+        StudyHistoryComponent,
         DropdownMenuComponent,
         UserComponent,
         ExaminationListComponent,
@@ -454,8 +449,25 @@ import { TestQualityCardOptionsComponent } from './study-cards/test-quality-card
         TaskStatusComponent,
         DownloadSetupComponent,
         DownloadSetupAltComponent,
-        TestQualityCardOptionsComponent
+        TestQualityCardOptionsComponent,
+        StudyTreeComponent,
+        CoilNodeComponent,
+        DoubleAwesomeComponent,
+        MetadataNodeComponent
     ],
+    bootstrap: [AppComponent], 
+    imports: [
+        BrowserModule,
+        BrowserAnimationsModule,
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        NgxJsonViewerModule,
+        AppRoutingModule,
+        PreclinicalRoutingModule,
+        RouterModule,
+        ClipboardModule
+    ], 
     providers: [
         AcquisitionEquipmentService,
         AuthAdminGuard,
@@ -465,7 +477,8 @@ import { TestQualityCardOptionsComponent } from './study-cards/test-quality-card
         CenterService,
         ConfirmDialogService,
         ExaminationService,
-        VipClientService,
+        ExecutionService,
+        PipelineService,
         ExecutionMonitoringService,
         {
             provide: ErrorHandler,
@@ -505,7 +518,6 @@ import { TestQualityCardOptionsComponent } from './study-cards/test-quality-card
         BreadcrumbsService,
         GlobalService,
         ImportDataService,
-        NiftiConverterService,
         TaskService,
         StudyRightsService,
         // {
@@ -539,9 +551,13 @@ import { TestQualityCardOptionsComponent } from './study-cards/test-quality-card
         QualityCardService,
         QualityCardDTOService,
         MassDownloadService,
-        { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
-    ],
-    bootstrap: [AppComponent]
+        SingleDownloadService,
+        SessionService,
+        ShanoirEventService,
+        TreeService,
+        { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true },
+        provideHttpClient(withInterceptorsFromDi())
+    ] 
 })
 export class AppModule {
 

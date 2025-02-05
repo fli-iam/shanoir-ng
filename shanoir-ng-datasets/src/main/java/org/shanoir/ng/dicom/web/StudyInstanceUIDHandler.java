@@ -8,9 +8,11 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -69,7 +71,7 @@ public class StudyInstanceUIDHandler {
 
 	@Autowired
 	private ExaminationService examinationService;
-	
+
 	private ConcurrentHashMap<String, String> examinationUIDToStudyInstanceUIDCache;
 	
 	@PostConstruct
@@ -77,19 +79,19 @@ public class StudyInstanceUIDHandler {
 		examinationUIDToStudyInstanceUIDCache = new ConcurrentHashMap<String, String>(1000);
 		LOG.info("DICOMWeb cache created: examinationUIDToStudyInstanceUIDCache");
 	}
-	
+
 	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
 	public void clearExaminationIdToStudyInstanceUIDCache() {
 		examinationUIDToStudyInstanceUIDCache.clear();
 		LOG.info("DICOMWeb cache cleared: examinationUIDToStudyInstanceUIDCache");
 	}
-	
+
 	/**
 	 * This method replaces StudyInstanceUIDs returned from the PACS with IDs
 	 * of examinations in Shanoir, in the Json returned.
 	 * 
 	 * @param root
-	 * @param examinationId
+	 * @param examinationUID
 	 * @param studyLevel
 	 */
 	public void replaceStudyInstanceUIDsWithExaminationUIDs(JsonNode root, String examinationUID, boolean studyLevel) {
@@ -135,7 +137,7 @@ public class StudyInstanceUIDHandler {
 	 * with the pseudonymization module and present in the PACS, either from a local cache to accelerate the
 	 * request response time or from the database, in table dataset_file.
 	 * 
-	 * @param examinationId
+	 * @param examinationUID
 	 * @return
 	 */
 	public String findStudyInstanceUIDFromCacheOrDatabase(String examinationUID) {
@@ -167,8 +169,10 @@ public class StudyInstanceUIDHandler {
 		List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
 		for (DatasetAcquisition acquisition : acquisitions) {
 			if (acquisition instanceof MrDatasetAcquisition
-				|| acquisition instanceof CtDatasetAcquisition
-				|| acquisition instanceof PetDatasetAcquisition) {
+					|| acquisition instanceof CtDatasetAcquisition
+					|| acquisition instanceof PetDatasetAcquisition
+					|| acquisition instanceof XaDatasetAcquisition
+					|| acquisition instanceof GenericDatasetAcquisition) {
 				List<Dataset> datasets = acquisition.getDatasets();
 				if (!datasets.isEmpty()) {
 					Dataset dataset = datasets.get(0);
@@ -188,7 +192,7 @@ public class StudyInstanceUIDHandler {
 							}
 						}
 					}
-				}				
+				}
 			}
 		}
 		return null;
@@ -214,11 +218,10 @@ public class StudyInstanceUIDHandler {
 		}
 		return null;
 	}
-	
+
 	public Long extractExaminationId(String examinationUID) {
 		String examinationUIDWithoutPrefix = examinationUID.substring(PREFIX.length());
 		Long id = Long.parseLong(examinationUIDWithoutPrefix);
 		return id;
 	}
-	
 }

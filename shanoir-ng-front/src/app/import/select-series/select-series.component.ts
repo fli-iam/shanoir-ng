@@ -26,7 +26,8 @@ import { ImportService } from '../shared/import.service';
     selector: 'select-series',
     templateUrl: 'select-series.component.html',
     styleUrls: ['select-series.component.css', '../shared/import.step.css'],
-    animations: [slideDown]
+    animations: [slideDown],
+    standalone: false
 })
 export class SelectSeriesComponent {
 
@@ -52,10 +53,11 @@ export class SelectSeriesComponent {
             return;
         }
         breadcrumbsService.nameStep('2. Series');
+
         this.patients = this.importDataService.patientList.patients;
+
         this.workFolder = this.importDataService.patientList.workFolder;
     }
-
 
     showSerieDetails(serie: SerieDicom): void {
         this.detailedPatient = null;
@@ -97,22 +99,21 @@ export class SelectSeriesComponent {
         this.onPatientUpdate();
     }
 
-    onSerieCheckChange(checked: boolean, study: StudyDicom, patient: PatientDicom) {
-
+    onSerieCheckChange(study: StudyDicom, patient: PatientDicom) {
         if (study.series) {
             let nbChecked: number = 0;
             study.series.forEach(serie => {
                 if (serie.selected) nbChecked++;
             });
             if (nbChecked == study.series.length) {
-              this.studiesCheckboxes[study.studyInstanceUID] = true;
-              study.selected = true;
+                this.studiesCheckboxes[study.studyInstanceUID] = true;
+                study.selected = true;
             } else if (nbChecked == 0) {
-              study.selected = false;
-              this.studiesCheckboxes[study.studyInstanceUID] = false;
+                study.selected = false;
+                this.studiesCheckboxes[study.studyInstanceUID] = false;
             } else {
-              this.studiesCheckboxes[study.studyInstanceUID] = 'indeterminate';
-              study.selected = true;
+                this.studiesCheckboxes[study.studyInstanceUID] = 'indeterminate';
+                study.selected = true;
             }
         }
         this.onPatientUpdate();

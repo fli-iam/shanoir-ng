@@ -1,4 +1,4 @@
-/**
+/**rabbitMqCon
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
@@ -13,9 +13,7 @@
  */
 import { Component, OnDestroy } from '@angular/core';
 
-import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
-import { Center } from '../../centers/shared/center.model';
 import { Examination } from '../../examinations/shared/examination.model';
 import { AnimalSubject } from '../../preclinical/animalSubject/shared/animalSubject.model';
 import { AnimalSubjectService } from '../../preclinical/animalSubject/shared/animalSubject.service';
@@ -24,7 +22,7 @@ import { preventInitialChildAnimations, slideDown } from '../../shared/animation
 import { IdName } from '../../shared/models/id-name.model';
 import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-category.enum';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
-import { SimpleSubject, Subject } from '../../subjects/shared/subject.model';
+import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { ServiceLocator } from '../../utils/locator.service';
 import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
@@ -36,7 +34,8 @@ import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
     selector: 'pre-clinical-context',
     templateUrl: '../clinical-context/clinical-context.component.html',
     styleUrls: ['../clinical-context/clinical-context.component.css', '../shared/import.step.css'],
-    animations: [slideDown, preventInitialChildAnimations]
+    animations: [slideDown, preventInitialChildAnimations],
+    standalone: false
 })
 export class PreClinicalContextComponent extends AbstractClinicalContextComponent implements OnDestroy {
 
@@ -47,7 +46,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
 
     postConstructor() {
         this.patient = this.importDataService.patients[0];
-        this.useStudyCard = false;
+        this.useStudyCard = true;
     }
 
     protected exitCondition(): boolean {
@@ -86,10 +85,9 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         importJob.examinationId = context.examination.id;
         importJob.studyId = context.study.id;
         importJob.acquisitionEquipmentId = context.acquisitionEquipment.id;
-        importJob.anonymisationProfileToUse = context.study.profile?.profileName;
-        importJob.converterId = context.niftiConverter.id;
         importJob.archive = contextImportJob.archive;
         importJob.timestamp = timestamp;
+        importJob.anonymisationProfileToUse = context.study.profile?.profileName;
         return this.importService.startImportJob(importJob);
     }
 
@@ -100,6 +98,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
                     .getAnimalSubject(this.subject.id)
                     .then(animalSubject => this.animalSubject = animalSubject);
             }
+            this.onContextChange();
         });
     }
 
@@ -214,18 +213,6 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
             && !!context.acquisitionEquipment
             && !!context.subject
             && !!context.examination
-            && !!context.niftiConverter
         );
-    }
-
-    getImportedCenterDataStr(): string {
-        return this.patient?.studies[0]?.series[0]?.institution?.institutionName + " - "
-                + this.patient?.studies[0]?.series[0]?.institution?.institutionAddress;
-    }
-
-    getImportedEquipmentDataStr(): string {
-        return this.patient?.studies[0]?.series[0]?.equipment?.manufacturer
-                + '-' + this. patient?.studies[0]?.series[0]?.equipment?.manufacturerModelName
-                + '-' + this.patient?.studies[0]?.series[0]?.equipment?.deviceSerialNumber;
     }
 }

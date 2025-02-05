@@ -1,15 +1,15 @@
-import {Component, Input, OnInit} from '@angular/core';
-import { Router } from '@angular/router';
-import { BreadcrumbsService } from 'src/app/breadcrumbs/breadcrumbs.service';
-import { Pipeline } from 'src/app/vip/models/pipeline';
-import { VipClientService } from 'src/app/vip/shared/vip-client.service';
-import { ExecutionDataService } from '../execution.data-service';
-import {Mode} from "../../shared/components/entity/entity.component.abstract";
+import {Component, OnInit} from '@angular/core';
+import {Router} from '@angular/router';
+import {BreadcrumbsService} from 'src/app/breadcrumbs/breadcrumbs.service';
+import {Pipeline} from 'src/app/vip/models/pipeline';
+import {ExecutionDataService} from '../execution.data-service';
+import {PipelineService} from "./pipeline/pipeline.service";
 
 @Component({
-  selector: 'app-pipelines',
-  templateUrl: './pipelines.component.html',
-  styleUrls: ['./pipelines.component.css']
+    selector: 'app-pipelines',
+    templateUrl: './pipelines.component.html',
+    styleUrls: ['./pipelines.component.css'],
+    standalone: false
 })
 export class PipelinesComponent implements OnInit {
 
@@ -17,7 +17,7 @@ export class PipelinesComponent implements OnInit {
   selectedPipeline:Pipeline;
   descriptionLoading:boolean;
 
-  constructor(private breadcrumbsService: BreadcrumbsService, private vipClientService: VipClientService, private router: Router, private processingService:ExecutionDataService) {
+  constructor(private breadcrumbsService: BreadcrumbsService, private pipelineService: PipelineService, private router: Router, private processingService:ExecutionDataService) {
     this.pipelines = [];
     this.descriptionLoading = false;
 
@@ -26,7 +26,7 @@ export class PipelinesComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.vipClientService.listPipelines().subscribe(
+    this.pipelineService.listPipelines().subscribe(
       (pipelines :Pipeline[])=>{
         this.pipelines = pipelines;
       }
@@ -35,7 +35,7 @@ export class PipelinesComponent implements OnInit {
 
   selectPipeline(pipeline:Pipeline) {
     this.descriptionLoading = true;
-    this.vipClientService.getPipeline(pipeline.identifier).subscribe(
+    this.pipelineService.getPipeline(pipeline.identifier).subscribe(
       (pipeline:Pipeline)=>{
         this.descriptionLoading = false;
         this.selectedPipeline = pipeline;

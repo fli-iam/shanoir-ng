@@ -14,13 +14,8 @@
 
 package org.shanoir.ng.dataset.dto.mapper;
 
-import java.util.List;
-
-import org.mapstruct.DecoratedWith;
-import org.mapstruct.IterableMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.Named;
-import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTO;
+import org.mapstruct.*;
+import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTO;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
@@ -28,6 +23,9 @@ import org.shanoir.ng.processing.dto.mapper.DatasetProcessingMapper;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.data.domain.Page;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Mapper for datasets.
@@ -66,7 +64,9 @@ public interface DatasetMapper {
 	 * @return dataset DTO.
 	 */
 	@Named(value = "withProcessings")
-	DatasetAndProcessingsDTO datasetToDatasetAndProcessingsDTO(Dataset dataset);
+	@Mapping(target = "copies", expression = "java(mapCopiesFromDataset(dataset.getCopies()))")
+	@Mapping(target = "source", expression = "java(mapSourceFromDataset(dataset.getSource()))")
+	DatasetWithDependenciesDTO datasetToDatasetWithParentsAndProcessingsDTO(Dataset dataset);
 	
 	/**
 	 * Map a @Dataset list to a @DatasetDTO list.
@@ -98,4 +98,25 @@ public interface DatasetMapper {
 	 */
 	IdName datasetToIdNameDTO(Dataset dataset);
 
+	default List<Long> mapCopiesFromDataset(List<Dataset> copies) {
+		if (copies == null) {
+			return null;
+		}
+		return copies.stream()
+				.map(Dataset::getId)
+				.collect(Collectors.toList());
+	}
+
+	default Long mapSourceFromDataset(Dataset source) {
+		return source != null ? source.getId() : null;
+	}
+
+
+	default List<Dataset> mapCopiesFromLong(List<Long> copies) {
+		return null;
+	}
+
+	default Dataset mapSourceFromLong(Long source) {
+		return null;
+	}
 }

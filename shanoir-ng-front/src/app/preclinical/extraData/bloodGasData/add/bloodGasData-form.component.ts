@@ -12,28 +12,28 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component,  Input, Output, EventEmitter } from '@angular/core';
-import { UntypedFormGroup} from '@angular/forms';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { BloodGasData }    from '../shared/bloodGasData.model';
-import { BloodGasDataFile }    from '../shared/bloodGasDataFile.model';
 import { ExtraDataService } from '../../extraData/shared/extradata.service';
+import { BloodGasData } from '../shared/bloodGasData.model';
+import { BloodGasDataFile } from '../shared/bloodGasDataFile.model';
 
-import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-import { ModesAware } from "../../../shared/mode/mode.decorator";
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { slideDown } from '../../../../shared/animations/animations';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
+import { ModesAware } from "../../../shared/mode/mode.decorator";
+import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 import { ExtraData } from '../../extraData/shared/extradata.model';
-import { ConsoleService } from '../../../../shared/console/console.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 @Component({
-  selector: 'bloodgas-data-upload-form',
-  templateUrl: 'bloodGasData-form.component.html',
-  providers: [ExtraDataService],
-  animations: [slideDown]
+    selector: 'bloodgas-data-upload-form',
+    templateUrl: 'bloodGasData-form.component.html',
+    providers: [ExtraDataService],
+    animations: [slideDown],
+    standalone: false
 })
 @ModesAware
 export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
@@ -58,20 +58,18 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
     getService(): EntityService<BloodGasData> {
         return this.extradatasService;
     }
+
+    protected fetchEntity: () => Promise<BloodGasData> = () => {
+        return  this.extradatasService.getExtraDatas(this.examination_id).then(extradatas => {
+            return this.loadExaminationExtraDatas(extradatas);
+        });
+    }
    
     initView(): Promise<void> {
-        this.entity = new BloodGasData();
-        this.extradatasService.getExtraDatas(this.examination_id).then(extradatas => {
-            this.loadExaminationExtraDatas(extradatas);
-        });
         return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
-        this.entity = new BloodGasData();
-        this.extradatasService.getExtraDatas(this.examination_id).then(extradatas => {
-            this.loadExaminationExtraDatas(extradatas);
-        });
         return Promise.resolve();
     }
 
@@ -80,13 +78,14 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
         return Promise.resolve();
     }
 
-    loadExaminationExtraDatas(extradatas: ExtraData[]){
+    loadExaminationExtraDatas(extradatas: ExtraData[]): BloodGasData {
     	for (let ex of extradatas) {
     		// instanceof does not work??
     		if (ex.extradatatype != "Physiological data"){
-    			this.bloodGasData = <BloodGasData>ex;
+    			return <BloodGasData>ex;
     		}
     	}
+        return new BloodGasData();
     }
 
     buildForm(): UntypedFormGroup {

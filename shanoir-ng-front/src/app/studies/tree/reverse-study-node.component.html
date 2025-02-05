@@ -14,11 +14,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <node
         *ngIf="node"
-        [class.selected]="showDetails && this.menuOpened"
+        [class.selected]="showDetails && menuOpened"
         [label]="node.label"
         [tags]="node.tags"
         awesome="fa-regular fa-folder-open"
-        [(opened)]="node.open"
+        [(opened)]="node.opened"
         (labelClick)="menuOpened = !menuOpened"
         (firstOpen)="loadExaminations()"
         [hasChildren]="hasDependency(node.examinations)"
@@ -26,7 +26,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [dataLoading]="loading">
 
         <dropdown-menu [(openInput)]="menuOpened" *ngIf="showDetails && menuOpened">
-            <a [routerLink]="this.detailsPath + this.node.id" class="open-new-tab">
+            <a [routerLink]="detailsPath + node.id" class="open-new-tab">
                 <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
             </a>
             <menu-item [disabled]="loading" label="Download" awesome="fas fa-download" (click)="loading ? null : download()"></menu-item>

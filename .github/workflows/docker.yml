@@ -2,99 +2,152 @@
 name: Publish Docker images
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ghcr.io/${{ github.repository }}
-  TAG: ${{ github.ref_name }}
+  DOCKER_REPOSITORY: ghcr.io/${{ github.repository }}
+  GIT_REPO_URL: https://github.com/${{ github.repository }}
+
+  # production builds
+  # - triggered by pushing a tag
+  # - builds the current commit
+  # - cache is disabled
+  # development builds
+  # - triggered by workflow_call (in the deploy-qualif workflow)
+  # - builds the commit provided in the 'sha' input variable
+  # - cache is enabled
+  PRODUCTION: ${{ github.event_name == 'push' && '1' || '' }}
+
+  # id of the git commit to be built
+  SHA: ${{ github.event_name == 'push' && github.sha || inputs.sha }}
+
+  # tag of the resulting docker image
+  # - name of the git tag (production builds)
+  # - commit id (develpment builds)
+  IMAGE_TAG: ${{ github.event_name == 'push' && github.ref_name || inputs.sha }}
+
+  # boolean: force rebuilding the docker images from scratch
+  NO_CACHE: ${{ inputs.no_cache && '1' || '' }}
+
 on:
-  workflow_dispatch:
   push:
     tags:
       - '*'
-  
+  workflow_call:
+    inputs:
+      sha:
+        description: 'git commit to be built'
+        type: string
+        required: true
+      no_cache:
+        description: 'force rebuilding the docker images from scratch'
+        type: boolean
+        default: false
+
 jobs:
-  push_to_registry:
-    name: Push Docker images to Container registry
+  build_images:
     runs-on: ubuntu-latest
     permissions:
       packages: write
       contents: read
     steps:
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v1
-        with:
-          java-version: 17
-
       - name: Check out the repo
-        uses: actions/checkout@v3
-
-      - name: Create directory /shanoir-ng-logs
-        run: sudo mkdir -m777 /var/log/shanoir-ng-logs
-      
-      - name: Maven build
-        run: mvn -f ./shanoir-ng-parent/pom.xml install -DskipTests
-        env:
-          SHANOIR_URL_HOST: localhost
-          SHANOIR_URL_SCHEME: http
-          SHANOIR_PREFIX: github
-          SHANOIR_ADMIN_EMAIL: nobody@inria.fr
-          SHANOIR_KEYCLOAK_USER: admin
-          SHANOIR_KEYCLOAK_PASSWORD: '&a1A&a1A'
-        
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: actions/checkout@v4
         with:
-          registry: ${{ env.REGISTRY }}
+          repository: ${{ env.PRODUCTION && github.repository || 'fli-iam/shanoir-ng' }}
+          ref: ${{ env.IMAGE_TAG }}
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      # maven cache only enabled on development builds
+      - name: Set up Maven cache
+        uses: actions/cache@v4
+        if: "${{ ! env.production }}"
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3.1.0
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3.0.0
+        with:
+          registry: ${{ env.DOCKER_REPOSITORY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-        
-      - name: USERS - Build & push Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: ./docker-compose/users
-          builder: ${{ steps.buildx.outputs.name }}
-          push: true
-          tags: ${{ env.IMAGE_NAME }}/users:latest, ${{ env.IMAGE_NAME }}/users:${{ env.TAG }}
-          
-      - name: STUDIES - Build & push Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: ./docker-compose/studies
-          builder: ${{ steps.buildx.outputs.name }}
-          push: true
-          tags: ${{ env.IMAGE_NAME }}/studies:latest, ${{ env.IMAGE_NAME }}/studies:${{ env.TAG }}
-          
-      - name: IMPORT - Build & push Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: ./docker-compose/import
-          builder: ${{ steps.buildx.outputs.name }}
-          push: true
-          tags: ${{ env.IMAGE_NAME }}/import:latest, ${{ env.IMAGE_NAME }}/import:${{ env.TAG }}
-          
-      - name: DATASETS  - Build & push Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: ./docker-compose/datasets
-          builder: ${{ steps.buildx.outputs.name }}
-          push: true
-          tags: ${{ env.IMAGE_NAME }}/datasets:latest, ${{ env.IMAGE_NAME }}/datasets:${{ env.TAG }}
 
-      - name: PRECLINICAL - Build & push Docker image
-        uses: docker/build-push-action@v2
+      - name: Generate the docker bake config
+        shell: python
+        run: |
+          import json, os, pathlib, requests, subprocess
+          env = os.environ
+
+          # query the sha of the head of the main branch
+          MAIN_REPO, MAIN_BRANCH = "fli-iam/shanoir-ng", "develop"
+          main_branch_sha = requests.get(
+              f"${{ github.api_url }}/repos/{MAIN_REPO}/branches/{MAIN_BRANCH}",
+              headers={"Authorization": "Bearer ${{ github.token }}"},
+            ).json().get("commit", {}).get("sha")
+
+          # cache configuration
+          #
+          # We do not use 'type=gha' because the github actions cache is not
+          # able to reliably reuse an existing cache for all images in every
+          # build, thus rendering the cache ineffective (this is probably
+          # caused by the size limits).
+          #
+          # Instead we explicitely store the cache in container repository of
+          # the project ('type=registry'), under the tag 'cache'
+          # - we pull the cache (cache_from) before development builds of any
+          #   branch when inputs.no_cache is false
+          # - we push the cache (cache_to) after development builds of the
+          #   main branch only
+          # - we never use the cache on production builds
+          #
+          # The image is exported in the OCI format ('image-manifest=true')
+          # to avoid a "failed to solve: not found" error when pushing to the
+          # github container registry.
+          enable_cache_from = not env['PRODUCTION'] and not env['NO_CACHE']
+          enable_cache_to   = not env['PRODUCTION'] and (
+            main_branch_sha == env['IMAGE_TAG'] == env['SHA'])
+          print(f"{enable_cache_from = }\n{enable_cache_to = }\n")
+
+          def cache_arg(enabled: bool, image: str, extra=""):
+            return [f"type=registry,image-manifest=true,ref={env['DOCKER_REPOSITORY']}/{image}:cache{extra}"
+                   ] if enabled else []
+  
+          # extract the list of images to be built from the docker-compose config
+          images = json.loads(subprocess.check_output(
+                  ["docker", "buildx", "bake", "--print", "-f", "docker-compose-dev.yml"])
+              )["group"]["default"]["targets"]
+
+          # override the bake config (add cache config + set tags & labels)
+          pathlib.Path("docker-bake.json").write_text(json.dumps({
+            #"group": { "default": { "targets": ["database"] }}, # TODO: remove
+            "target": {
+              image: {
+                "cache-from": cache_arg(enable_cache_from, image),
+                "cache-to":   cache_arg(enable_cache_to,   image, ",mode=max"),
+                "tags": [f"{env['DOCKER_REPOSITORY']}/{image}:{env['IMAGE_TAG']}"],
+                "labels": {
+                  "org.opencontainers.image.url":      env['GIT_REPO_URL'],
+                  "org.opencontainers.image.source":   env['GIT_REPO_URL'],
+                  "org.opencontainers.image.version":  env['IMAGE_TAG'],
+                  "org.opencontainers.image.revision": env['SHA'],
+                },
+                } for image in images }}))
+
+      - name: Maven build
+        run: mvn -f ./shanoir-ng-parent/pom.xml install -DskipTests
+
+      - name: Build docker images
+        uses: docker/bake-action@v5
         with:
-          context: ./docker-compose/preclinical
-          builder: ${{ steps.buildx.outputs.name }}
+          files: |
+            docker-compose-dev.yml
+            docker-bake.json
           push: true
-          tags: ${{ env.IMAGE_NAME }}/preclinical:latest, ${{ env.IMAGE_NAME }}/preclinical:${{ env.TAG }}
-          
-      - name:  NGINX - Build & push Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: ./docker-compose/nginx
-          builder: ${{ steps.buildx.outputs.name }}
-          push: true
-          tags: ${{ env.IMAGE_NAME }}/nginx:latest, ${{ env.IMAGE_NAME }}/nginx:${{ env.TAG }}

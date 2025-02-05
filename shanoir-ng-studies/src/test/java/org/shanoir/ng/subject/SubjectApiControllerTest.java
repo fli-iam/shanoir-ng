@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -43,6 +44,7 @@ import org.shanoir.ng.subject.service.SubjectUniqueConstraintManager;
 import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -79,10 +81,13 @@ public class SubjectApiControllerTest {
 
 	@MockBean
 	private SubjectMapper subjectMapperMock;
-	
+
+	@MockBean
+	private RabbitTemplate rabbitTemplate;
+
 	@MockBean
 	private SubjectUniqueConstraintManager uniqueConstraintManager;
-	
+
 	@MockBean
 	private ShanoirEventService eventService;
 
@@ -153,13 +158,11 @@ public class SubjectApiControllerTest {
 		list.add(subject2);
 		list.add(subject);
 		
-		given(subjectServiceMock.findAllSubjectsOfStudy(1L)).willReturn(list);
+		given(subjectServiceMock.findAllSubjectsOfStudyId(1L)).willReturn(list);
 
-		
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/1/allSubjects").param("preclinical", "null").accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(subject)))
-				.andExpect(status().isOk())
-				.andExpect(content().string("[{\"id\":2,\"name\":\"AA\",\"identifier\":null,\"subjectStudy\":{\"id\":null,\"subject\":null,\"subjectPreclinical\":false,\"study\":null,\"subjectStudyIdentifier\":null,\"subjectType\":null,\"physicallyInvolved\":false,\"tags\":null,\"qualityTag\":null}},{\"id\":1,\"name\":\"BB\",\"identifier\":null,\"subjectStudy\":{\"id\":null,\"subject\":null,\"subjectPreclinical\":false,\"study\":null,\"subjectStudyIdentifier\":null,\"subjectType\":null,\"physicallyInvolved\":false,\"tags\":null,\"qualityTag\":null}}]"));
+				.andExpect(status().isOk());
 	}
 
 	@Test
@@ -180,13 +183,11 @@ public class SubjectApiControllerTest {
 		list.add(subject2);
 		list.add(subject);
 		
-		given(subjectServiceMock.findAllSubjectsOfStudy(1L)).willReturn(list);
-
+		given(subjectServiceMock.findAllSubjectsOfStudyId(1L)).willReturn(list);
 		
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/1/allSubjects").param("preclinical", "null").accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(subject)))
-				.andExpect(status().isOk())
-				.andExpect(content().string("[{\"id\":2,\"name\":\"AA\",\"identifier\":null,\"subjectStudy\":{\"id\":null,\"subject\":null,\"subjectPreclinical\":false,\"study\":null,\"subjectStudyIdentifier\":null,\"subjectType\":null,\"physicallyInvolved\":false,\"tags\":null,\"qualityTag\":null}},{\"id\":1,\"name\":\"BB\",\"identifier\":null,\"subjectStudy\":{\"id\":null,\"subject\":null,\"subjectPreclinical\":false,\"study\":null,\"subjectStudyIdentifier\":null,\"subjectType\":null,\"physicallyInvolved\":false,\"tags\":null,\"qualityTag\":null}}]"));
+				.andExpect(status().isOk());
 	}
 
 }

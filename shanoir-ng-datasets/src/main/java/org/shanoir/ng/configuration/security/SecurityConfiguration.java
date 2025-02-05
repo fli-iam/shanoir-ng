@@ -14,7 +14,10 @@
 
 package org.shanoir.ng.configuration.security;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.shanoir.ng.dicom.web.StowRSMultipartRelatedRequestFilter;
+import org.shanoir.ng.utils.MDCFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -30,6 +33,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.web.cors.CorsConfiguration;
@@ -53,7 +57,10 @@ public class SecurityConfiguration {
 
 	@Value("${front.server.url}")
 	private String frontServerUrl;
-	
+
+	@Autowired
+	private MDCFilter mdcFilter;
+
 	@Autowired
 	private StowRSMultipartRelatedRequestFilter multipartRelatedRequestFilter;
 
@@ -70,6 +77,7 @@ public class SecurityConfiguration {
 		http
 			.sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.csrf(AbstractHttpConfigurer::disable)
+			.addFilterAfter(mdcFilter, FilterSecurityInterceptor.class)
 			.addFilterAfter(multipartRelatedRequestFilter, FilterSecurityInterceptor.class)
 			.authorizeHttpRequests(
 				matcher -> matcher.requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/api-docs/**")

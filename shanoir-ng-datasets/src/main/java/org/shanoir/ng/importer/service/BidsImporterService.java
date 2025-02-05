@@ -3,7 +3,6 @@ package org.shanoir.ng.importer.service;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.tomcat.util.json.JSONParser;
 import org.apache.tomcat.util.json.ParseException;
 import org.json.JSONException;
@@ -81,7 +80,7 @@ public class BidsImporterService {
 	 * @throws JsonMappingException 
 	 * @throws JsonParseException 
 	 */
-	@RabbitListener(queues = RabbitMQConfiguration.IMPORTER_BIDS_DATASET_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.IMPORTER_BIDS_DATASET_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	@Transactional
 	public void createAllBidsDatasetAcquisition(Message importJobStr) throws AmqpRejectAndDontRequeueException {
@@ -195,10 +194,7 @@ public class BidsImporterService {
 			event.setProgress(progress);
 			eventService.publishEvent(event);
 
-			String name = FilenameUtils.removeExtension(importedFile.getName());
-			if (name.endsWith(".nii")) {
-				name = FilenameUtils.removeExtension(name);
-			}
+			String name = importedFile.getName().replaceAll("\\.", "_");
 
 			// Parse name to get acquisition / session / run / task
 			
@@ -274,7 +270,10 @@ public class BidsImporterService {
 
 		datasetAcquisition.setDatasets(new ArrayList<>(datasets));
 		datasetAcquisition.setAcquisitionEquipmentId(equipmentId);
-		datasetAcquisition.setCreationDate(LocalDateTime.now().toLocalDate());
+		datasetAcquisition.setImportDate(LocalDateTime.now().toLocalDate());
+		datasetAcquisition.setUsername(importJob.getUsername());
+
+
 		datasetAcquisitionRepository.save(datasetAcquisition);
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, datasetAcquisition.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, examination.getStudyId()));
 		

@@ -17,6 +17,8 @@ package org.shanoir.ng.dataset.service;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -54,7 +56,7 @@ public interface DatasetService {
 	 * @throws EntityNotFoundException
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnEveryDataset(#ids, 'CAN_ADMINISTRATE'))")
-	void deleteByIdIn(List<Long> ids) throws EntityNotFoundException, SolrServerException, IOException, RestServiceException;
+	void deleteByIdIn(List<Long> ids) throws ShanoirException, SolrServerException, IOException, RestServiceException;
 
 	/**
 	 * Find dataset by its id.
@@ -104,6 +106,7 @@ public interface DatasetService {
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetList(returnObject, 'CAN_SEE_ALL')")
 	List<Dataset> findAll();
 
+
 	/**
 	 * Fetch the asked page
 	 * 
@@ -137,16 +140,20 @@ public interface DatasetService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetList(returnObject, 'CAN_SEE_ALL')")
 	List<Dataset> findByStudycard(Long studycardId);
-  
-	/**
-	 * Get database statistics
-	 * 
-	 * @return statistics
-	 */
-	@PreAuthorize("hasRole('ADMIN')")
-	List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception;
-	
-	
+
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#dataset.getId(), 'CAN_ADMINISTRATE'))")
 	void deleteDatasetFromPacs(Dataset dataset) throws ShanoirException;
+
+	boolean existsById(Long id);
+
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT','USER') and @datasetSecurityService.hasRightOnDataset(#dataset.id, 'CAN_SEE_ALL'))")
+	Long getStudyId(Dataset dataset);
+
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT','USER') and @datasetSecurityService.hasRightOnDataset(#dataset.id, 'CAN_SEE_ALL'))")
+	Examination getExamination(Dataset dataset);
+
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT','USER') and @datasetSecurityService.hasRightOnDataset(#dataset.id, 'CAN_SEE_ALL'))")
+	DatasetAcquisition getAcquisition(Dataset dataset);
+
+	void deleteNiftis(Long studyId);
 }

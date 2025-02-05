@@ -25,7 +25,8 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 @Component({
     selector: 'pathology-form',
     templateUrl: 'pathology-form.component.html',
-    providers: [PathologyService]
+    providers: [PathologyService],
+    standalone: false
 })
 @ModesAware
 export class PathologyFormComponent extends EntityComponent<Pathology>{
@@ -48,15 +49,11 @@ export class PathologyFormComponent extends EntityComponent<Pathology>{
     }
 
     initView(): Promise<void> {
-        return this.pathologyService.get(this.id).then(pathology => {
-            this.pathology = pathology;
-        });
+        return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
-        return this.pathologyService.get(this.id).then(pathology => {
-            this.pathology = pathology;
-        });
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {

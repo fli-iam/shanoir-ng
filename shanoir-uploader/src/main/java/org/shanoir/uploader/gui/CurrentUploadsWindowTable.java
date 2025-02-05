@@ -18,10 +18,12 @@ import org.shanoir.uploader.nominativeData.CurrentNominativeDataModel;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
 import org.shanoir.uploader.upload.UploadState;
 
+@SuppressWarnings("deprecation")
 public class CurrentUploadsWindowTable implements Observer {
 
-	public MainWindow frame;
-	public static JTable table;
+	private static CurrentUploadsWindowTable instance;
+	public final MainWindow frame;
+	public final JTable table;
 	Object[] columnNames;
 	Object[] paths;
 	public int importColumn = 7;
@@ -36,7 +38,7 @@ public class CurrentUploadsWindowTable implements Observer {
 	public int selectedRow;
 	public int rowsNb;
 
-	public CurrentUploadsWindowTable(final MainWindow frame) {
+	private CurrentUploadsWindowTable(MainWindow frame) {
 		this.frame = frame;
 		final Object[] columnNames = {
 			"id",
@@ -50,8 +52,29 @@ public class CurrentUploadsWindowTable implements Observer {
 			frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete")
 		};
 		this.columnNames = columnNames;
-		table = new JTable(new DefaultTableModel(columnNames, 0));
-		table.setPreferredScrollableViewportSize(new Dimension(800, 100));
+		// Create the non editable table to display the current uploads
+		this.table = new JTable(new DefaultTableModel(columnNames, 0) {
+
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+		});
+		
+		initTable();
+		frame.scrollPaneUpload.getViewport().add(table);
+	}
+
+	// Method to create the singleton instance of the class
+	public static synchronized CurrentUploadsWindowTable getInstance(MainWindow frame) {
+        if (instance == null) {
+            instance = new CurrentUploadsWindowTable(frame);
+        }
+        return instance;
+    }
+
+	private void initTable() {
+        table.setPreferredScrollableViewportSize(new Dimension(800, 100));
 		table.setFillsViewportHeight(true);
 
 		table.getColumnModel().getColumn(0).setPreferredWidth(0);
@@ -80,8 +103,7 @@ public class CurrentUploadsWindowTable implements Observer {
 		// Change Background color of action column
 		table.getColumnModel().getColumn(importColumn).setCellRenderer(new Background_Renderer());
 		table.getColumnModel().getColumn(deleteColumn).setCellRenderer(new Background_Renderer());
-		frame.scrollPaneUpload.getViewport().add(table);
-	}
+    }
 
 	public void fillTable(Map<String, NominativeDataUploadJob> initialUploads) {
 		DefaultTableModel model = (DefaultTableModel) table.getModel();
@@ -101,32 +123,44 @@ public class CurrentUploadsWindowTable implements Observer {
 	}
 
 	private void addRow(DefaultTableModel model, String key, NominativeDataUploadJob nominativeDataUploadJob) {
-		if (UploadState.READY.equals(nominativeDataUploadJob.getUploadState())) {
-			model.addRow(new Object[] { key, nominativeDataUploadJob.getPatientPseudonymusHash(),
-				nominativeDataUploadJob.getPatientName(), nominativeDataUploadJob.getIPP(),
-				nominativeDataUploadJob.getStudyDate(), nominativeDataUploadJob.getMriSerialNumber(),
+		String actionImport = (String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.import");
+		String actionDelete = (String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete");
+		Object[] row = switch (nominativeDataUploadJob.getUploadState()) {
+			case READY, ERROR -> new Object[] {
+				key,
+				nominativeDataUploadJob.getPatientPseudonymusHash(),
+				nominativeDataUploadJob.getPatientName(),
+				nominativeDataUploadJob.getIPP(),
+				nominativeDataUploadJob.getStudyDate(),
+				nominativeDataUploadJob.getMriSerialNumber(),
 				nominativeDataUploadJob.getUploadState().toString(),
-				(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.import"),
-				(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete")
-			});
-		} else if (UploadState.FINISHED_UPLOAD.equals(nominativeDataUploadJob.getUploadState())) {
-			model.addRow(new Object[] { key, nominativeDataUploadJob.getPatientPseudonymusHash(),
-				nominativeDataUploadJob.getPatientName(), nominativeDataUploadJob.getIPP(),
-				nominativeDataUploadJob.getStudyDate(), nominativeDataUploadJob.getMriSerialNumber(),
-				nominativeDataUploadJob.getUploadPercentage(), "",
-				(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete") });
-		} else if (UploadState.ERROR.equals(nominativeDataUploadJob.getUploadState())) {
-			model.addRow(new Object[] { key, nominativeDataUploadJob.getPatientPseudonymusHash(),
-				nominativeDataUploadJob.getPatientName(), nominativeDataUploadJob.getIPP(),
-				nominativeDataUploadJob.getStudyDate(), nominativeDataUploadJob.getMriSerialNumber(),
-				nominativeDataUploadJob.getUploadState().toString(), "",
-				(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete") });
-		} else {
-			model.addRow(new Object[] { key, nominativeDataUploadJob.getPatientPseudonymusHash(),
-				nominativeDataUploadJob.getPatientName(), nominativeDataUploadJob.getIPP(),
-				nominativeDataUploadJob.getStudyDate(), nominativeDataUploadJob.getMriSerialNumber(),
-				nominativeDataUploadJob.getUploadPercentage(), "", "" });
-		}
+				actionImport,
+				actionDelete
+			};
+			case FINISHED_UPLOAD -> new Object[] {
+				key,
+				nominativeDataUploadJob.getPatientPseudonymusHash(),
+				nominativeDataUploadJob.getPatientName(),
+				nominativeDataUploadJob.getIPP(),
+				nominativeDataUploadJob.getStudyDate(),
+				nominativeDataUploadJob.getMriSerialNumber(),
+				nominativeDataUploadJob.getUploadPercentage(),
+				"",
+				actionDelete
+			};
+			default -> new Object[] {
+				key,
+				nominativeDataUploadJob.getPatientPseudonymusHash(),
+				nominativeDataUploadJob.getPatientName(),
+				nominativeDataUploadJob.getIPP(),
+				nominativeDataUploadJob.getStudyDate(),
+				nominativeDataUploadJob.getMriSerialNumber(),
+				nominativeDataUploadJob.getUploadPercentage(),
+				"",
+				""
+			};
+		};
+		model.addRow(row);
 	}
 
 	public void addLineToTable(String absolutePath, NominativeDataUploadJob nominativeDataUploadJob) {
@@ -151,17 +185,17 @@ public class CurrentUploadsWindowTable implements Observer {
 	 * Create the GUI and show it. For thread safety, this method should be invoked
 	 * from the event-dispatching thread.
 	 */
-	private void showGUI(MainWindow frame, final Object[][] currentUploadsTable) {
+	private void showGUI(MainWindow frame) {
 		frame.scrollPaneUpload.getViewport().add(table);
 	}
 
-	public void showWindow(final MainWindow frame, final Object[][] currentUploadsTable, final Object[] paths) {
+	public void showWindow(final MainWindow frame, final Object[] paths) {
 		// Schedule a job for the event-dispatching thread:
 		// creating and showing this application's GUI.
 		this.paths = paths;
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				showGUI(frame, currentUploadsTable);
+				showGUI(frame);
 			}
 		});
 	}
@@ -198,14 +232,14 @@ public class CurrentUploadsWindowTable implements Observer {
 					|| "READY".compareTo(entry.getValue().getUploadPercentage()) == 0) {
 					// Do Nothing
 				} else {
-					if (entry.getValue().getUploadPercentage().equals("FINISHED")) {
+					if (entry.getValue().getUploadPercentage().equals(finishedUploadState)) {
 						totalUploadPercent += 100;
 						nbFinishUpload++;
-					} else if (entry.getValue().getUploadPercentage().equals("ERROR")) {
+					} else if (entry.getValue().getUploadPercentage().equals(errorUploadState)) {
 						nbErrorUpload++;
 					} else {
 						nbStartUpload++;
-						int percent = Integer.valueOf(entry.getValue().getUploadPercentage().substring(0,
+						int percent = Integer.parseInt(entry.getValue().getUploadPercentage().substring(0,
 								entry.getValue().getUploadPercentage().length() - 2));
 						totalUploadPercent += percent;
 					}
@@ -225,13 +259,14 @@ public class CurrentUploadsWindowTable implements Observer {
 		frame.errorUploadsLB
 				.setText(frame.resourceBundle.getString("shanoir.uploader.failedUploadsSummary") + nbErrorUpload);
 		if (nbErrorUpload != 0) {
-			frame.errorAlert.setText(frame.resourceBundle.getString("shanoir.uploader.failedUploadsMessagePart1")
+			frame.uploadErrorAlert.setText(frame.resourceBundle.getString("shanoir.uploader.failedUploadsMessagePart1")
 					+ frame.resourceBundle.getString("shanoir.uploader.failedUploadsMessagePart2"));
 		} else {
-			frame.errorAlert.setText("");
+			frame.uploadErrorAlert.setText("");
 		}
 	}
 
+    @Override
 	public void update(Observable o, Object arg) {
 		CurrentNominativeDataModel currentNominativeDataModel = (CurrentNominativeDataModel) o;
 		String[] msg = (String[]) arg;

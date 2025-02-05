@@ -11,13 +11,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { Observable } from 'rxjs/Observable';
+import { Observable, Subscription } from 'rxjs';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
-import { BidsElement } from '../../bids/model/bidsElement.model';
+import { SingleDownloadService } from 'src/app/shared/mass-download/single-download.service';
+import { Tag } from 'src/app/tags/tag.model';
 import { DataUserAgreement } from '../../dua/shared/dua.model';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
@@ -29,9 +29,9 @@ import { StudyUserRight } from './study-user-right.enum';
 import { StudyUser } from "./study-user.model";
 import {
     CenterStudyDTO,
-    PublicStudyData,
     StudyDTO,
     StudyDTOService,
+    StudyLight,
     StudyStorageVolumeDTO,
     SubjectWithSubjectStudyDTO
 } from './study.dto';
@@ -46,8 +46,9 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     fileUploads: Map<number, Promise<void>> = new Map(); // current uploads
     private studyVolumesCache: Map<number, StudyStorageVolumeDTO> = new Map();
 
-    constructor(protected http: HttpClient, private keycloakService: KeycloakService, private studyDTOService: StudyDTOService) {
-        super(http)
+    constructor(protected http: HttpClient, private keycloakService: KeycloakService, private studyDTOService: StudyDTOService, 
+            private downloadService: SingleDownloadService) {
+        super(http);
     }
 
     getEntityInstance() { return new Study(); }
@@ -59,16 +60,27 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             .then(this.mapEntity);
     }
 
+    getStudiesLight(): Promise<StudyLight[]> {
+      return this.http.get<StudyLight[]>(AppUtils.BACKEND_API_STUDY_STUDIES_LIGHT_URL)
+        .toPromise().then((typeResult: StudyLight[]) => {
+          return typeResult;
+        });
+    }
+    
     findStudiesByUserId(): Promise<Study[]> {
         return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL)
         .toPromise()
         .then(entities => entities?.map((entity) => Object.assign(new Study(), entity)) || []);
     }
 
-
     getStudiesNames(): Promise<IdName[]> {
         return this.http.get<IdName[]>(AppUtils.BACKEND_API_STUDY_ALL_NAMES_URL)
             .toPromise();
+    }
+
+    getStudyNamesAndCenters(): Promise<Study[]> {
+        return this.http.get<CenterStudyDTO[]>(AppUtils.BACKEND_API_STUDY_URL + '/namesAndCenters')
+            .toPromise().then(dtos => dtos.map(dto => StudyDTOService.centerStudyDTOtoStudy(dto)));
     }
 
     getStudiesProfiles(): Promise<Profile[]> {
@@ -76,9 +88,9 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         .toPromise();
     }
 
-    getPublicStudiesData(): Promise<PublicStudyData[]> {
-      return this.http.get<PublicStudyData[]>(AppUtils.BACKEND_API_STUDY_PUBLIC_STUDIES_DATA_URL)
-        .toPromise().then((typeResult: PublicStudyData[]) => {
+    getPublicStudiesData(): Promise<StudyLight[]> {
+      return this.http.get<StudyLight[]>(AppUtils.BACKEND_API_STUDY_PUBLIC_STUDIES_DATA_URL)
+        .toPromise().then((typeResult: StudyLight[]) => {
           return typeResult;
         });
     }
@@ -95,11 +107,6 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             .toPromise().then((typeResult: IdName[]) => {
                 return typeResult;
             });
-    }
-
-    getStudyNamesAndCenters(): Promise<Study[]> {
-        return this.http.get<CenterStudyDTO[]>(AppUtils.BACKEND_API_STUDY_ALL_NAMES_AND_CENTERS_URL)
-            .toPromise().then(dtos => dtos.map(dto => StudyDTOService.centerStudyDTOtoStudy(dto)));
     }
 
     getStudyUserFromStudyId(studyId: number): Promise<StudyUser[]> {
@@ -166,12 +173,16 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
 
     downloadProtocolFile(fileName: string, studyId: number, state?: TaskState) {
         const endpoint = this.API_URL + '/protocol-file-download/' + studyId + "/" + fileName + "/";
-        return AppUtils.downloadWithStatusGET(endpoint, null, state);
+        return this.downloadService.downloadSingleFile(endpoint, null, state);
+    }
+
+    buildProtocolFileUrl(fileName: string, studyId: number): string {
+        return this.API_URL + '/protocol-file-download/' + studyId + "/" + fileName;
     }
 
     downloadDuaFile(fileName: string, studyId: number, state?: TaskState) {
         const endpoint = this.API_URL + '/dua-download/' + studyId + "/" + fileName + "/";
-        return AppUtils.downloadWithStatusGET(endpoint, null, state);
+        return this.downloadService.downloadSingleFile(endpoint, null, state);
     }
 
     downloadDuaBlob(fileName: string, studyId: number): Promise<Blob> {
@@ -222,18 +233,6 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             observe: 'events',
             responseType: 'blob'
         });
-    }
-
-    getBidsStructure(studyId: number): Promise<BidsElement> {
-        if (!studyId) throw Error('study id is required');
-        return this.http.get<BidsElement>(AppUtils.BACKEND_API_BIDS_STRUCTURE_URL + '/studyId/' + studyId)
-            .toPromise();
-    }
-
-    refreshBidsStructure(studyId: number, studyName: string): Promise<BidsElement> {
-        if (!studyId) throw Error('study id is required');
-        return this.http.get<BidsElement>(AppUtils.BACKEND_API_BIDS_REFRESH_URL + '/studyId/' + studyId + '/studyName/' + studyName)
-            .toPromise();
     }
 
     protected getIgnoreList(): string[] {
@@ -314,5 +313,11 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
 
     storageVolumePrettyPrint(size: number) {
         return AppUtils.getSizeStr(size);
+    }
+
+    getTagsFromStudyId(studyId: number): Promise<Tag[]> {
+        return this.http.get<any[]>(AppUtils.BACKEND_API_STUDY_URL + '/tags/' + studyId)
+            .toPromise()
+            .then(dtos => dtos?.map(dto => StudyDTOService.tagDTOToTag(dto)));
     }
 }

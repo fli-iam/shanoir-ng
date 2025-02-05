@@ -74,15 +74,6 @@ public class ImportUtils {
 
 	private static final SecureRandom RANDOM = new SecureRandom();
 
-	/**
-	 * @todo: read from application.yml -> Yao
-	 */
-	// dcmdjpeg (from dcmtk) path under linux
-	private static final String DCMDJPEG_LINUX_PATH = "/usr/bin/dcmdjpeg";
-
-	// dcmdjpeg (from dcmtk) path under windows
-	private static final String DCMDJPEG_WINDOWS_PATH = "dcmdjpeg/windows/dcmdjpeg.exe";
-
 	/** The Constant KB. */
 	private static final int KB = 1024;
 
@@ -121,21 +112,6 @@ public class ImportUtils {
 		return o1.equals(o2) || o2.equals(o1);
 		// o1.equals(o2) is not equivalent to o2.equals(o1) ! For instance with
 		// java.sql.Timestamp and java.util.Date
-	}
-
-	/**
-	 * Returns the path to dcmdjpeg.
-	 *
-	 * @return the dcmdjpeg path
-	 */
-	public static String getDcmdjpegPath() {
-		String cmd = "";
-		if (SystemUtils.IS_OS_WINDOWS) {
-			cmd = DCMDJPEG_WINDOWS_PATH;
-		} else if (SystemUtils.IS_OS_LINUX) {
-			cmd = DCMDJPEG_LINUX_PATH;
-		}
-		return cmd;
 	}
 
 	/**
@@ -298,40 +274,6 @@ public class ImportUtils {
 	}
 
 	/**
-	 * Replace the file separators to make it work under windows or unix system.
-	 *
-	 * @param firstImagePath
-	 *            the first image path
-	 *
-	 * @return the string
-	 */
-	public static String convertFilePath(final String firstImagePath) {
-		return firstImagePath.replaceAll("\\\\", "/");
-	}
-
-	/**
-	 * List all the folders of the given directory.
-	 *
-	 * @param serieFolder
-	 *            the serie folder
-	 *
-	 * @return the list< file>
-	 */
-	public static List<File> listFolders(File serieFolder) {
-		List<File> result = null;
-		if (serieFolder != null) {
-			result = new ArrayList<>();
-			final File[] listFiles = serieFolder.listFiles();
-			for (final File file : listFiles) {
-				if (file.isDirectory()) {
-					result.add(file);
-				}
-			}
-		}
-		return result;
-	}
-
-	/**
 	 * Convert a String with a wildcard to a regular expression.
 	 *
 	 * @param wildcard the wildcard
@@ -372,133 +314,6 @@ public class ImportUtils {
 		}
 		s.append('$');
 		return s.toString();
-	}
-
-	/**
-	 * copyFiles folder into destination,respecting the hierarchy
-	 * 
-	 * @param folder
-	 * @param destination
-	 */
-	public static void copyAllFiles(File folder, File destination) {
-		LOG.debug(" copyAllFiles from " + folder.getName() + " is directory " + folder.isDirectory() + INTO
-				+ destination.getName());
-		if (folder.isDirectory()) {
-			for (File inner : Arrays.asList(folder.listFiles())) {
-				if (inner.isDirectory()) {
-					copyAllFiles(inner, destination);
-				} else {
-					LOG.debug("copyAllFiles copying file {}", inner.getName());
-					copyFile(inner, new File(destination + File.pathSeparator + inner.getName()), false);
-				}
-			}
-		} else {
-			LOG.debug("copyAllFiles directly copying file {}", folder.getName());
-			copyFile(folder, new File(destination + File.pathSeparator + folder.getName()), false);
-		}
-	}
-
-	/***
-	 * 
-	 * Copy File in to file out.
-	 * 
-	 * @param in
-	 *            the in
-	 * @param out
-	 *            the out
-	 * @param overwrite
-	 *            the overwrite
-	 * @return a hashmap with the key=success if the copy is ok and the value is the
-	 *         real output file.
-	 */
-
-	public static Map<Boolean, File> copyFile(final File in, final File out, final boolean overwrite) {
-		return moveOrCopyFile(in, out, overwrite, false);
-	}
-
-	/**
-	 * Move or copy the file. It is possible to overwrite or not the destination
-	 * file.
-	 *
-	 * @param in
-	 *            the in
-	 * @param out
-	 *            the out
-	 * @param overwrite
-	 *            the overwrite
-	 * @param move
-	 *            the move
-	 *
-	 * @return the hash map< boolean, file>
-	 */
-	private static HashMap<Boolean, File> moveOrCopyFile(final File in, final File out, final boolean overwrite,
-			final boolean move) {
-		final HashMap<Boolean, File> result = new HashMap<>();
-
-		LOG.debug("moveOrCopyFile : (File in {}, File out {}, overwrite {}, move {})", in, out, overwrite, move);
-
-		// rename the file if needed
-		if (out.exists() && !overwrite) {
-			final String folder = out.getParent();
-			String newName = getRenamedFile(out.getName());
-			File realOut = new File(folder + '/' + newName);
-			return moveOrCopyFile(in, realOut, overwrite, move);
-		} else {
-			result.clear();
-			if (move) { // move file
-				try {
-					Files.move(in.toPath(), out.toPath());
-					result.put(Boolean.TRUE, out);
-				} catch (IOException e) {
-					result.put(Boolean.FALSE, out);
-					LOG.error("Error while moving file " + in + INTO + out, e);
-				} catch (IllegalArgumentException e2) {
-					result.put(Boolean.FALSE, out);
-					LOG.error("Error while moving same file " + in + INTO + out, e2);
-				}
-			} else { // copy file
-				try {
-					FileUtils.copyFile(in, out);
-					result.put(Boolean.TRUE, out);
-				} catch (IOException exc) {
-					LOG.error("moveOrCopyFile : error while copying file : " + exc.getMessage(), exc);
-					result.put(Boolean.FALSE, out);
-				}
-			}
-		}
-		return result;
-	}
-
-	/**
-	 * Gets a new name for the given filename, by adding the next letter in the
-	 * alphabet, (before extension)
-	 * 
-	 * @param name
-	 * @return new filename
-	 */
-	private static String getRenamedFile(String name) {
-		final String[] alphabet = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q",
-				"R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
-		final List<String> alphabetList = Arrays.asList(alphabet);
-		String newName = null;
-		String nameNoExtension = name;
-		String extension = "";
-		if (name.lastIndexOf('.') != -1) {
-			nameNoExtension = name.substring(0, name.lastIndexOf('.'));
-			extension = name.substring(name.lastIndexOf('.'), name.length());
-		}
-
-		final String lastCharacter = Character.toString(nameNoExtension.charAt(nameNoExtension.length() - 1));
-		if ("Z".equals(lastCharacter)) {
-			newName = nameNoExtension.substring(0, nameNoExtension.length() - 1) + "AA" + extension;
-		} else if (alphabetList.contains(lastCharacter)) {
-			int index = alphabetList.indexOf(lastCharacter);
-			newName = nameNoExtension.substring(0, nameNoExtension.length() - 1) + alphabetList.get(index + 1)
-			+ extension;
-		} else {
-			newName = nameNoExtension + "A" + extension;
-		}
-		return newName;
 	}
 
 	/**

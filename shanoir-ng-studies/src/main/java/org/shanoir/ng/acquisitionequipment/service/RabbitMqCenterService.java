@@ -45,7 +45,7 @@ public class RabbitMqCenterService {
 	@Autowired
 	private ObjectMapper mapper;
 	
-	@RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPMENT_CENTER_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPMENT_CENTER_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	@Transactional
 	public String findCenterIdFromAcquisitionEquipment(String message) {
@@ -61,7 +61,7 @@ public class RabbitMqCenterService {
 		}
 	}
 
-	@RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPMENT_CODE_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPMENT_CODE_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	@Transactional
 	public String findAcquisitionEquipments(String message) {
@@ -79,7 +79,7 @@ public class RabbitMqCenterService {
 		}
 	}
 
-	@RabbitListener(queues = RabbitMQConfiguration.EQUIPMENT_FROM_CODE_QUEUE)
+	@RabbitListener(queues = RabbitMQConfiguration.EQUIPMENT_FROM_CODE_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	@Transactional
 	public Long getEquipmentFromCode(String message) {

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -27,6 +27,7 @@ import { ColumnDefinition } from '../../shared/components/table/column.definitio
     selector: 'study-card-list-for-rules',
     templateUrl: 'study-card-list-for-rules.component.html',
     styleUrls: ['study-card-list.component.css'],
+    standalone: false
 })
 export class StudyCardForRulesListComponent extends StudyCardListComponent implements OnInit {
 
@@ -36,9 +37,9 @@ export class StudyCardForRulesListComponent extends StudyCardListComponent imple
             studyCardService: StudyCardService,
             acqEqptLabelPipe: AcquisitionEquipmentPipe,
             private activatedRoute: ActivatedRoute) {
-            
+
         super(studyCardService, acqEqptLabelPipe);
-        this.breadcrumbsService.resetMilestone();   
+        this.breadcrumbsService.resetMilestone();
     }
 
     ngOnInit() {
@@ -50,27 +51,27 @@ export class StudyCardForRulesListComponent extends StudyCardListComponent imple
         let colDef: ColumnDefinition[] = [
             { headerName: "Name", field: "name" },
             { headerName: "Study", field: 'study.name', defaultField: 'study.id' },
-            { headerName: "Center", field: 'acquisitionEquipment.center.name'},
+            { headerName: "Acquisition Center", field: 'acquisitionEquipment.center.name'},
             { headerName: "Equipment", field: "acquisitionEquipment", width: '200%',
                 cellRenderer: params => this.format(params.data.acquisitionEquipment) },
             { headerName: "Nb of rules", type: 'number', field: "rules.length", width: '30px' ,
                 cellRenderer: params => params.data.rules ? params.data.rules.length+'' : '0' }
         ];
-        return colDef;       
+        return colDef;
     }
 
     disableCondition(studycard: StudyCard): boolean {
-        return studycard.id == this.idToExclude || !studycard.rules || studycard.rules.length == 0; 
+        return studycard.id == this.idToExclude || !studycard.rules || studycard.rules.length == 0;
     }
 
     getOptions() {
         return {
             new: false,
-            view: false, 
-            edit: false, 
+            view: false,
+            edit: false,
             delete: false
         };
-    }  
+    }
 
     onRowClick(sc: StudyCard) {
         let currentStep: Step = this.breadcrumbsService.currentStep;

@@ -26,7 +26,7 @@ import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.importer.service.DicomSRImporterService;
+import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -40,6 +40,7 @@ import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.security.ControlerSecurityService;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -61,10 +62,11 @@ import static org.mockito.Mockito.times;
 @SpringBootTest
 @ActiveProfiles("test")
 public class DatasetDownloaderServiceTest {
-	
-	@Autowired
+
+    @Qualifier("datasetDownloaderServiceImpl")
+    @Autowired
 	DatasetDownloaderServiceImpl datasetDownloaderService;
-	
+
 	@MockBean
 	private DatasetService datasetServiceMock;
 
@@ -108,7 +110,7 @@ public class DatasetDownloaderServiceTest {
 	private ImporterService importerService;
 	
 	@MockBean
-	private DicomSRImporterService dicomSRImporterService;
+	private DicomSEGAndSRImporterService dicomSRImporterService;
 
 	private Subject subject = new Subject(3L, "name");
 	private Study study = new Study(1L, "studyName");

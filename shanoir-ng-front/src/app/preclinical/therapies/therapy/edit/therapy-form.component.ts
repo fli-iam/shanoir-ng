@@ -30,7 +30,8 @@ import { TherapyService } from '../shared/therapy.service';
     selector: 'therapy-form',
     templateUrl: 'therapy-form.component.html',
     providers: [TherapyService, ReferenceService],
-    animations: [slideDown]
+    animations: [slideDown],
+    standalone: false
 })
 @ModesAware
 export class TherapyFormComponent extends EntityComponent<Therapy>{
@@ -54,15 +55,11 @@ export class TherapyFormComponent extends EntityComponent<Therapy>{
     }
 
     initView(): Promise<void> {
-        return this.therapyService.get(this.id).then(therapy => {
-            this.therapy = therapy;
-        });
+        return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
-        return this.therapyService.get(this.id).then(therapy => {
-            this.therapy = therapy;
-        });
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {

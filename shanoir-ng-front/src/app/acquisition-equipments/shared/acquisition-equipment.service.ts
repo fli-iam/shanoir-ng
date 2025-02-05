@@ -17,7 +17,7 @@ import { EntityService } from '../../shared/components/entity/entity.abstract.se
 import * as AppUtils from '../../utils/app.utils';
 import { AcquisitionEquipment } from './acquisition-equipment.model';
 
-import {HttpClient, HttpErrorResponse} from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import {ShanoirError} from "../../shared/models/error.model";
 import {StudyCard} from "../../study-cards/shared/study-card.model";
 
@@ -35,6 +35,7 @@ export class AcquisitionEquipmentService extends EntityService<AcquisitionEquipm
     getAllByCenter(centerId: number): Promise<AcquisitionEquipment[]> {
         return this.http.get<AcquisitionEquipment[]>(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/byCenter/' + centerId)
             .toPromise()
+            .catch(this.arrayFrom404)
             .then(this.mapEntityList);
     }
 

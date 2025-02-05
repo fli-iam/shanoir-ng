@@ -33,10 +33,11 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 
 
 @Component({
-  selector: 'anesthetic-ingredient-form',
-  templateUrl: 'anestheticIngredient-form.component.html',
-  providers: [AnestheticIngredientService,ReferenceService],
-  animations: [slideDown]
+    selector: 'anesthetic-ingredient-form',
+    templateUrl: 'anestheticIngredient-form.component.html',
+    providers: [AnestheticIngredientService, ReferenceService],
+    animations: [slideDown],
+    standalone: false
 })
 @ModesAware   
 export class AnestheticIngredientFormComponent extends EntityComponent<AnestheticIngredient>{
@@ -67,18 +68,14 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
 
     initView(): Promise<void> {
         this.loadUnits();
-        this.loadNames();   
-        return this.ingredientsService.get(this.id).then(ingredient => {
-            this.ingredient = ingredient;
-        });
+        this.loadNames();
+        return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
         this.loadUnits();
         this.loadNames(); 
-        return this.ingredientsService.get(this.id).then(ingredient => {
-            this.ingredient = ingredient;
-        });
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {

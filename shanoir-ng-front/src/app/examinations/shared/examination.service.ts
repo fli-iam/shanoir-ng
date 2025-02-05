@@ -11,11 +11,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient, HttpResponse } from '@angular/common/http';
-import { Injectable, OnDestroy } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
+import { TaskState } from 'src/app/async-tasks/task.model';
+import { SingleDownloadService } from 'src/app/shared/mass-download/single-download.service';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
@@ -30,7 +31,7 @@ export class ExaminationService extends EntityService<Examination> {
 
     API_URL = AppUtils.BACKEND_API_EXAMINATION_URL;
 
-    constructor(protected http: HttpClient) {
+    constructor(protected http: HttpClient, private downloadService: SingleDownloadService) {
         super(http)
     }
     protected examinationDtoService: ExaminationDTOService = ServiceLocator.injector.get(ExaminationDTOService);
@@ -52,10 +53,13 @@ export class ExaminationService extends EntityService<Examination> {
             .toPromise();
     }
 
-    getPage(pageable: Pageable, preclinical: boolean = false): Promise<Page<Examination>> {
+    getPage(pageable: Pageable, preclinical: boolean = false, searchStr : string, searchField : string): Promise<Page<Examination>> {
+        let params = { 'params': pageable.toParams() };
+        params['params']['searchStr'] = searchStr;
+        params['params']['searchField'] = searchField;
         return this.http.get<Page<Examination>>(
             (!preclinical) ? AppUtils.BACKEND_API_EXAMINATION_URL : (AppUtils.BACKEND_API_EXAMINATION_PRECLINICAL_URL+'/1'),
-            { 'params': pageable.toParams() }
+            params
         )
         .toPromise()
         .then(this.mapPage);
@@ -79,11 +83,7 @@ export class ExaminationService extends EntityService<Examination> {
 
     downloadFile(fileName: string, examId: number, state?: TaskState): Observable<TaskState>  {
         const endpoint: string = this.API_URL + '/extra-data-download/' + examId + "/" + fileName + "/";
-        return AppUtils.downloadWithStatusGET(endpoint, null, state);
-    }
-
-    private downloadIntoBrowser(response: HttpResponse<Blob>){
-        AppUtils.browserDownloadFileFromResponse(response);
+        return this.downloadService.downloadSingleFile(endpoint, null, state);
     }
 
     public stringify(entity: Examination) {

@@ -19,7 +19,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label>Processing</label>
             <span class="right-col">
                 <a [routerLink]="['/dataset-processing/details/', dataset?.datasetProcessing?.id]">
-                    Dataset processing n°{{dataset.datasetProcessing?.id}}
+					Dataset processing n°{{dataset.datasetProcessing?.id}}
                 </a>
             </span>
         </li>
@@ -46,7 +46,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label>Examination</label>
             <span class="right-col">
                 <a [routerLink]="['/examination/details/', dataset?.datasetAcquisition?.examination?.id]">
-                    {{dataset.datasetAcquisition?.examination?.comment ? dataset.datasetAcquisition?.examination?.comment : dataset.datasetAcquisition?.examination?.examinationDate  | date: 'dd/MM/yyyy'}}
+					{{dataset.datasetAcquisition?.examination?.comment ? dataset.datasetAcquisition?.examination?.comment : dataset.datasetAcquisition?.examination?.examinationDate  | date: 'dd/MM/yyyy'}}
                 </a>
             </span>
         </li>
@@ -81,7 +81,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					{{dataset.type}}
 			</span>
 		</li>
-	</ol>
+
+        <li *ngIf="mode != 'create' && dataset.copies?.length > 0">
+            <label>This dataset has been copied :</label>
+            <span class="right-col">
+                <div *ngFor="let entityId of dataset.copies">
+                    <a [routerLink]="['/dataset/details/', entityId]"> [ {{ entityId }} ] </a>
+                </div>
+            </span>
+        </li>
+        <li *ngIf="mode != 'create' && dataset.source != null">
+            <label>This dataset is the copy of :</label>
+            <span class="right-col">
+                <a [routerLink]="['/dataset/details/', dataset.source]"> [ {{ dataset.source }} ] </a>
+            </span>
+        </li>
+
+    </ol>
 </fieldset>
 
 <fieldset>

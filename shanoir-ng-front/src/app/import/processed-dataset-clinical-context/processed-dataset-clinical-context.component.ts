@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -30,8 +30,9 @@ import { ProcessedDatasetImportJob } from '../shared/processed-dataset-data.mode
 @Component({
     selector: 'processed-dataset-clinical-context',
     templateUrl: 'processed-dataset-clinical-context.component.html',
-    styleUrls: ['../clinical-context/clinical-context.component.css', '../shared/import.step.css'],
-    animations: [slideDown, preventInitialChildAnimations]
+    styleUrls: ['../clinical-context/clinical-context.component.css', '../shared/import.step.css','./processed-dataset-clinical-context.component.css'],
+    animations: [slideDown, preventInitialChildAnimations],
+    standalone: false
 })
 export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalContextComponent {
 
@@ -51,7 +52,7 @@ export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalCo
     getNextUrl(): string {
         return '/imports/processed-dataset';
     }
-    
+
     protected exitCondition(): boolean {
         return !this.importDataService.processedDatasetImportJob;
     }
@@ -74,7 +75,7 @@ export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalCo
     }
 
     public postConstructor(): void {
-        this.breadcrumbsService.nameStep('2. Context'); 
+        this.breadcrumbsService.nameStep('2. Context');
         if(this.importDataService.processedDatasetImportJob != null) {
             this.processedDatasetFilePath = this.importDataService.processedDatasetImportJob.processedDatasetFilePath;
         }
@@ -127,42 +128,22 @@ export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalCo
             return this.onSelectStudy().then(() => {
                 if (subject) {
                     this.subject = subject;
-                    return this.onSelectSubject().then(() => {
-                        if (datasetProcessing) {
-                            this.datasetProcessing = datasetProcessing;
-                        }
-                    });
+                    if (datasetProcessing) {
+                        this.datasetProcessing = datasetProcessing;
+                    }
                 }
             });
-        }
-    }
-
-    public onSelectSubject(): Promise<any> {
-        this.loading++;
-        this.datasetProcessing = null;
-        if (this.subject && !this.subject.subjectStudy) this.subject = null;
-        if (this.subject) {
-            return this.datasetProcessingService.findAllByStudyIdAndSubjectId(this.study.id, this.subject.id)
-                    .finally(() => this.loading--)
-                    .then(processings => {
-                        this.datasetProcessings = processings;
-                        this.onContextChange();
-                    });
-        } else {
-            this.loading--;
-            this.openSubjectStudy = false;
-            return Promise.resolve();
         }
     }
 
     protected getContext(): ProcessedContextData {
         return new ProcessedContextData(this.study,
                             this.subject,
-                            this.datasetType,  
-                            this.processedDatasetFilePath, 
-                            this.processedDatasetType, 
-                            this.processedDatasetName, 
-                            this.processedDatasetComment, 
+                            this.datasetType,
+                            this.processedDatasetFilePath,
+                            this.processedDatasetType,
+                            this.processedDatasetName,
+                            this.processedDatasetComment,
                             this.datasetProcessing);
     }
 

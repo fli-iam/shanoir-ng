@@ -15,4 +15,6 @@ public interface ProcessingResourceService {
     String create(ExecutionMonitoring processing, List<Dataset> datasets);
 
     void deleteByProcessingId(Long processingId);
+
+    void deleteByDatasetId(Long datasetId);
 }

@@ -23,7 +23,8 @@ import { EntityService } from '../../shared/components/entity/entity.abstract.se
 @Component({
     selector: 'dataset-processing-list',
     templateUrl: 'dataset-processing-list.component.html',
-    styleUrls: ['dataset-processing-list.component.css']
+    styleUrls: ['dataset-processing-list.component.css'],
+    standalone: false
 })
 export class DatasetProcessingListComponent extends BrowserPaginEntityListComponent<DatasetProcessing> {
 
@@ -51,18 +52,11 @@ export class DatasetProcessingListComponent extends BrowserPaginEntityListCompon
     }
 
     getColumnDefs(): ColumnDefinition[] {
-        function dateRenderer(date: number) {
-            if (date) {
-                return new Date(date).toLocaleDateString();
-            }
-            return null;
-        };
-
         let columnDefs: ColumnDefinition[] = [
             { headerName: 'Id', field: 'id', type: 'number', width: '30px', defaultSortCol: true},
             { headerName: "Processing", field: "datasetProcessingType" },
             { headerName: "Comment", field: "comment" },
-            { headerName: "Date", field: "processingDate", type: "date", cellRenderer: (params: any) => dateRenderer(params.data.processingDate) }
+            { headerName: "Date", field: "processingDate", type: "date" }
         ];
         return columnDefs;
     }

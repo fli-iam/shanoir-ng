@@ -14,7 +14,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div class="header command-zone">2. Select series</div>
 <fieldset class="step">
-    <p>Please select only the series useful for your study, to save precious disk space.</p>
+    <p *ngIf="patients.length > 0">Please select only the series useful for your study, to save precious disk space.</p>
+    <p *ngIf="patients.length == 0">No series found with chosen filters.</p>
     <div class="tree">
         <node
             *ngFor="let patient of patients"
@@ -51,7 +52,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             awesome="fa fa-brain"
                             hasBox="true"
                             [(ngModel)]="serie.selected"
-                            (chkbxChange)="onSerieCheckChange($event, study, patient)"
+                            (chkbxChange)="onSerieCheckChange(study, patient)"
                             (labelClick)="showSerieDetails(serie)"
                             [class.selected]="detailedSerie == serie"
                             [ngModelOptions]="{standalone: true}"

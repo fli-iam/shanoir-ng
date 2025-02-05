@@ -1,9 +1,8 @@
 package org.shanoir.ng.configuration.amqp;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
+
 import org.shanoir.ng.events.ShanoirEvent;
-import org.shanoir.ng.events.ShanoirEventRepository;
 import org.shanoir.ng.events.ShanoirEventsService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -17,7 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
 public class RabbitMQEventService {
@@ -30,7 +30,7 @@ public class RabbitMQEventService {
     @Autowired
     public ShanoirEventsService service;
 
-    @RabbitListener(queues = RabbitMQConfiguration.EXECUTION_MONITORING_TASK)
+    @RabbitListener(queues = RabbitMQConfiguration.EXECUTION_MONITORING_TASK, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
     @Transactional
     public String getExecutionMonitoringEventByObjectId(Long objectId) {

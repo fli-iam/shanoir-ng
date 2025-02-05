@@ -16,7 +16,7 @@
 	<parent>
 		<groupId>org.shanoir-ng</groupId>
 		<artifactId>shanoir-ng-back</artifactId>
-		<version>3.2.2</version>
+		<version>3.4.0</version>
 		<relativePath>../shanoir-ng-back</relativePath>
 	</parent>
 
@@ -31,7 +31,7 @@
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-ms-common</artifactId>
-			<version>3.2.2</version>
+			<version>3.4.0</version>
 		</dependency>
 
 		<dependency>
@@ -72,12 +72,6 @@
 							<target>
 								<copy file="target/${project.build.finalName}.jar"
 									tofile="${basedir}/../docker-compose/studies/${project.artifactId}.jar" />
-								<copy file="../utils/entrypoint_common"
-									tofile="${basedir}/../docker-compose/studies/entrypoint_common" />
-								<copy file="../utils/oneshot"
-									tofile="${basedir}/../docker-compose/studies/oneshot" />
-								<chmod perm="+x"
-									file="${basedir}/../docker-compose/studies/oneshot" />
 							</target>
 						</configuration>
 						<goals>

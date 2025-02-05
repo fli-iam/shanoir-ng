@@ -11,32 +11,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
+import { TreeService } from 'src/app/studies/study/tree.service';
 import { MemberNode } from '../../tree/tree.model';
 import { User } from '../shared/user.model';
 
 
 @Component({
     selector: 'member-node',
-    templateUrl: 'member-node.component.html'
+    templateUrl: 'member-node.component.html',
+    standalone: false
 })
 
-export class MemberNodeComponent implements OnChanges {
+export class MemberNodeComponent extends TreeNodeAbstractComponent<MemberNode> implements OnChanges {
 
     @Input() input: MemberNode | User;
-    @Output() selectedChange: EventEmitter<void> = new EventEmitter();
-    node: MemberNode;
-    loading: boolean = false;
-    menuOpened: boolean = false;
     isAdmin: boolean;
     detailsPath: string = '/user/details/';
 
     constructor(
             private router: Router,
-            private keycloakService: KeycloakService) {
+            keycloakService: KeycloakService,
+            protected treeService: TreeService,
+            elementRef: ElementRef) {
+        super(elementRef);
         this.isAdmin = keycloakService.isUserAdmin();
     }
 
@@ -54,9 +56,5 @@ export class MemberNodeComponent implements OnChanges {
         if (!this.node.rights) return false;
         else if (this.node.rights == 'UNLOADED') return 'unknown';
         else return this.node.rights.length > 0;
-    }
-
-    showDetails() {
-        this.router.navigate(['/user/details/' + this.node.id]);
     }
 }

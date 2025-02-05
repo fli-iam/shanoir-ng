@@ -14,13 +14,17 @@
 
 package org.shanoir.ng.processing.service;
 
-import org.springframework.security.access.prepost.PreAuthorize;
-
-import java.util.List;
-import java.util.Optional;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
+import org.springframework.security.access.prepost.PreAuthorize;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * DatasetProcessing service.
@@ -83,7 +87,27 @@ public interface DatasetProcessingService {
      * @throws EntityNotFoundException if the entity cannot be found.
      */
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-    void deleteById(Long id) throws EntityNotFoundException;
+    void deleteById(Long id) throws ShanoirException, RestServiceException, SolrServerException, IOException;
 
+    /**
+     * Unlink given dataset from all processing
+     * Remove processing if linked to no other dataset
+     *
+     * @param datasetId
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+    void removeDatasetFromAllProcessingInput(Long datasetId) throws ShanoirException, RestServiceException, SolrServerException, IOException;
 
+    /**
+     * Delete child processing of given processing
+     *
+     * @param id
+     * @throws RestServiceException
+     * @throws ShanoirException
+     * @throws SolrServerException
+     * @throws IOException
+     */
+    void deleteByParentId(Long id) throws RestServiceException, ShanoirException, SolrServerException, IOException;
+
+    void validateDatasetProcessing(DatasetProcessing processing) throws RestServiceException;
 }

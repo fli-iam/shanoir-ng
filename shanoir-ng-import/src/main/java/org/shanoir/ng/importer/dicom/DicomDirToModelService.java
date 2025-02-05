@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
 import org.dcm4che3.media.DicomDirReader;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
@@ -47,6 +48,7 @@ public class DicomDirToModelService {
 
 	/**
 	 * This method reads a DICOMDIR and returns its higher-level content as a list of patients.
+	 * 
 	 * @param file DICOMDIR file
 	 * @return List<Patient>
 	 * @throws IOException
@@ -72,10 +74,11 @@ public class DicomDirToModelService {
 						handleSerieAndInstanceRecords(series, serieRecord, dicomDirReader);
 						serieRecord = dicomDirReader.findNextSeriesRecord(serieRecord);
 					}
-					series.sort(new SeriesNumberSorter());
+					series.sort(new SeriesNumberOrDescriptionSorter());
 					study.setSeries(series);
 					studyRecord = dicomDirReader.findNextStudyRecord(studyRecord);
 				}
+				studies.sort(new StudyDateSorter());
 				patient.setStudies(studies);
 				patientRecord = dicomDirReader.findNextPatientRecord(patientRecord);
 			}
@@ -98,13 +101,13 @@ public class DicomDirToModelService {
 		Serie serie = new Serie(serieRecord);
 		if (!DicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(serieRecord)) {
 			List<Instance> instances = new ArrayList<Instance>();
-			Attributes instanceRecord = dicomDirReader.findLowerInstanceRecord(serieRecord, true);
+			Attributes instanceRecord = dicomDirReader.findLowerInstanceRecord(serieRecord, false);
 			while(instanceRecord != null) {
 				Instance instance = new Instance(instanceRecord);
 				if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(instanceRecord)) {
 					instances.add(instance);
 				}
-				instanceRecord = dicomDirReader.findNextInstanceRecord(instanceRecord, true);
+				instanceRecord = dicomDirReader.findNextInstanceRecord(instanceRecord, false);
 			}
 			if (!instances.isEmpty()) {
 				instances.sort(new InstanceNumberSorter());

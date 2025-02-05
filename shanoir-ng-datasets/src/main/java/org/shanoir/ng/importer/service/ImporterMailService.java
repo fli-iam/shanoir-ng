@@ -46,7 +46,7 @@ public class ImporterMailService {
     public void sendImportEmail(ImportJob importJob, Long userId, Examination examination, Set<DatasetAcquisition> generatedAcquisitions) {
         EmailDatasetsImported generatedMail = new EmailDatasetsImported();
 
-        Map<Long, String> datasets = new HashMap<>();
+        LinkedHashMap<Long, String> datasets = new LinkedHashMap<>();
         if (CollectionUtils.isEmpty(generatedAcquisitions)) {
             return;
         }
@@ -58,7 +58,7 @@ public class ImporterMailService {
         generatedMail.setUserId(userId);
         generatedMail.setStudyCard(importJob.getStudyCardName());
 
-        for (DatasetAcquisition acq : generatedAcquisitions) {
+        for (DatasetAcquisition acq : generatedAcquisitions.stream().sorted(Comparator.comparingInt(DatasetAcquisition::getSortingIndex)).toList()) {
             if (!CollectionUtils.isEmpty(acq.getDatasets())) {
                 for (Dataset dataset : acq.getDatasets()) {
                     datasets.put(dataset.getId(), dataset.getName());
@@ -74,6 +74,7 @@ public class ImporterMailService {
         EmailDatasetImportFailed generatedMail = new EmailDatasetImportFailed();
         generatedMail.setExaminationId(importJob.getExaminationId().toString());
         generatedMail.setStudyId(importJob.getStudyId().toString());
+        generatedMail.setStudyCardId(importJob.getStudyCardId().toString());
         generatedMail.setSubjectName(importJob.getSubjectName());
         generatedMail.setStudyName(importJob.getStudyName());
         generatedMail.setUserId(userId);

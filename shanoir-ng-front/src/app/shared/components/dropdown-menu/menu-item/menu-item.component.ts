@@ -20,7 +20,8 @@ import { menuAnimDur, menuSlideRight } from '../../../../shared/animations/anima
     selector: 'menu-item',
     templateUrl: 'menu-item.component.html',
     styleUrls: ['menu-item.component.css'],
-    animations: [menuSlideRight]
+    animations: [menuSlideRight],
+    standalone: false
 })
 
 export class MenuItemComponent {
@@ -31,7 +32,7 @@ export class MenuItemComponent {
     @Input() disabled: boolean;
     @ContentChildren(forwardRef(() => MenuItemComponent)) itemMenus: QueryList<MenuItemComponent>;
 
-    public opened: boolean = false;
+    public opened: boolean = true;
     public siblings: QueryList<MenuItemComponent>;
     public parent: any;
     public hasChildren: boolean = true;

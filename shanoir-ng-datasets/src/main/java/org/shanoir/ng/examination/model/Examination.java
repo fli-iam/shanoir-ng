@@ -14,6 +14,19 @@
 
 package org.shanoir.ng.examination.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+import org.shanoir.ng.shared.hateoas.HalEntity;
+import org.shanoir.ng.shared.hateoas.Links;
+import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.model.Subject;
+
 import java.sql.Types;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -138,13 +151,21 @@ public class Examination extends HalEntity {
     @ColumnDefault("false")
     private boolean preclinical;
 
-    private Long sourceId;
-    
+    /**
+     * The DICOM StudyInstanceUID present in the backup PACS of Shanoir,
+     * dcm4chee arc light and generated during pseudonymization.
+     */
     @Column(unique = true)
     private String studyInstanceUID;
 
-    public Examination() {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "source_id")
+    private Examination source;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "source", cascade = CascadeType.ALL)
+    private List<Examination> copies;
+
+    public Examination() {
     }
 
     public Examination(Examination other, Study study, Subject subject) {
@@ -170,7 +191,8 @@ public class Examination extends HalEntity {
         this.timepointId = other.timepointId;
         this.weightUnitOfMeasure = other.weightUnitOfMeasure;
         this.preclinical = other.preclinical;
-        this.sourceId = other.sourceId;
+        this.source = other.source;
+        this.copies = other.copies;
     }
 
     /**
@@ -219,7 +241,7 @@ public class Examination extends HalEntity {
     }
 
     /**
-     * @param datasetAcquisitionList
+     * @param datasetAcquisitions
      *            the datasetAcquisitionList to set
      */
     public void setDatasetAcquisitions(List<DatasetAcquisition> datasetAcquisitions) {
@@ -439,11 +461,20 @@ public class Examination extends HalEntity {
         this.preclinical = preclinical;
     }
 
-    public Long getSourceId() {
-        return sourceId;
+    public Examination getSource() {
+        return source;
     }
 
-    public void setSourceId(Long sourceId) {
-        this.sourceId = sourceId;
+    public void setSource(Examination source) {
+        this.source = source;
     }
+
+    public List<Examination> getCopies() {
+        return copies;
+    }
+
+    public void setCopies(List<Examination> copies) {
+        this.copies = copies;
+    }
+
 }

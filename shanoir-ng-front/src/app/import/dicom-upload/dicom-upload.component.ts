@@ -30,6 +30,7 @@ import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { Option } from '../../shared/select/select.component';
 import { ImportJob } from '../shared/dicom-data.model';
 import { TaskState } from 'src/app/async-tasks/task.model';
+import { StudyLight } from 'src/app/studies/shared/study.dto';
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 
@@ -37,7 +38,8 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     selector: 'dicom-upload',
     templateUrl: 'dicom-upload.component.html',
     styleUrls: ['dicom-upload.component.css', '../shared/import.step.css'],
-    animations: [slideDown]
+    animations: [slideDown],
+    standalone: false
 })
 export class DicomUploadComponent implements OnDestroy {
 
@@ -51,7 +53,7 @@ export class DicomUploadComponent implements OnDestroy {
     studyCard: StudyCard;
     center: Center;
     modality: string;
-    studyOptions: Option<Study>[] = [];
+    studyOptions: Option<StudyLight>[] = [];
     studycardOptions: Option<StudyCard>[] = [];
     otherErrorMessage: string;
     uploadState: TaskState = new TaskState();
@@ -71,9 +73,9 @@ export class DicomUploadComponent implements OnDestroy {
             breadcrumbsService.currentStep.importMode = 'DICOM';
         });
 
-        this.studyService.getStudyNamesAndCenters().then(allStudies => {
+        this.studyService.getStudiesLight().then(allStudies => {
             for (let study of allStudies) {
-                    let studyOption: Option<Study> = new Option(study, study.name);
+                    let studyOption: Option<StudyLight> = new Option(study, study.name);
                     this.studyOptions.push(studyOption);
                 }
         });
@@ -126,7 +128,6 @@ export class DicomUploadComponent implements OnDestroy {
             // Send to multiple
             let job = new ImportJob();
             job.acquisitionEquipmentId = this.studyCard.acquisitionEquipment.id;
-            job.converterId = this.studyCard.niftiConverter.id;
             job.studyId = this.study.id;
             job.studyName = this.study.name;
             job.studyCardId = this.studyCard.id;

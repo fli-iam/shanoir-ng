@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -28,17 +28,19 @@ import * as AppUtils from '../utils/app.utils';
 @Component({
     selector: 'quality-control',
     templateUrl: 'quality-control.component.html',
-    styleUrls: ['quality-control.component.css'] 
+    styleUrls: ['quality-control.component.css'],
+    standalone: false
 })
 
 export class QualityControlComponent implements OnChanges {
-    
+
     @Input() studyId: number;
     @Output() tagUpdate: EventEmitter<void> = new EventEmitter();
     qualityCards: QualityCard[] = [];
     allCoils: Coil[];
     selectedQualityCard: QualityCard;
     timeoutId: number;
+    message: string;
     overTimeout: any;
     pagings: Map<number, BrowserPaging<any>> = new Map();
     getPage: Map<number, (FilterablePageable) => Promise<Page<any>>> = new Map();
@@ -49,7 +51,7 @@ export class QualityControlComponent implements OnChanges {
         {headerName: 'Examination Date', field: 'examinationDate', type: 'date', width: 'auto'},
         {headerName: 'Details', field: 'message', wrap: true, width: 'auto'}
     ];
-    
+
     constructor(
             private qualityCardService: QualityCardService,
             coilService: CoilService,
@@ -60,13 +62,15 @@ export class QualityControlComponent implements OnChanges {
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.studyId && this.studyId) {
-            this.qualityCardService.getAllForStudy(this.studyId).then(qualityCards => this.qualityCards = qualityCards);
+            this.qualityCardService.getAllForStudy(this.studyId).then(qualityCards => {
+                this.qualityCards = qualityCards;
+            });
         }
     }
 
     apply(qualityCard: QualityCard) {
         this.confirmService.confirm(
-            'Apply Quality Card', 
+            'Apply Quality Card',
             `Do you want to apply the quality card named "${qualityCard.name}" all over the study "${qualityCard.study.name}" ? This would permanentely overwrite previous quality tags for the study's subjects.`
         ).then(accept => {
             if (accept) {

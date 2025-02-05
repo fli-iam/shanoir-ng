@@ -26,6 +26,8 @@ public class DicomSerieAndInstanceAnalyzer {
 
 	private static final String RTSTRUCT = "RTSTRUCT";
 
+	private static final String DICOM_VR_CODE_STRING_YES = "YES";
+
 	private static final String DOUBLE_EQUAL = "==";
 
 	private static final String SEMI_COLON = ";";
@@ -57,6 +59,10 @@ public class DicomSerieAndInstanceAnalyzer {
 			|| UID.SurfaceSegmentationStorage.equals(referencedSOPClassUIDInFile)) {
 			return true;
 		}
+		final String burnedInAnnotation = attributes.getString(Tag.BurnedInAnnotation);
+		if (DICOM_VR_CODE_STRING_YES.equals(burnedInAnnotation)) {
+			return true;
+		}
 		return false;
 	}
 	
@@ -67,11 +73,8 @@ public class DicomSerieAndInstanceAnalyzer {
 	 */
 	public static boolean checkSerieIsIgnored(Attributes attributes) {
 		String modality = attributes.getString(Tag.Modality);
-		if (AcquisitionModality.codeOf(modality) != null || RTSTRUCT.equals(modality) || RTDOSE.equals(modality) || RTPLAN.equals(modality)) {
-			return false;
-		}
-		return true;
-	}
+        return AcquisitionModality.codeOf(modality) == null && !RTSTRUCT.equals(modality) && !RTDOSE.equals(modality) && !RTPLAN.equals(modality);
+    }
 
 	public static void checkSerieIsSpectroscopy(Serie serie) {
 		final String sopClassUID = serie.getSopClassUID();
@@ -138,7 +141,7 @@ public class DicomSerieAndInstanceAnalyzer {
 				serie.setIsEnhanced(false);
 			}
 		} else {
-			LOG.warn("SOPClassUID not found to detect Enhanced DICOM.");
+			LOG.debug("SOPClassUID not found to detect Enhanced DICOM.");
 		}
 	}
 	

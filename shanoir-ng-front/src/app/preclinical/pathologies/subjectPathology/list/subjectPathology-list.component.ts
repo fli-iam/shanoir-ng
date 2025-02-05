@@ -28,7 +28,8 @@ import { ColumnDefinition } from '../../../../shared/components/table/column.def
     templateUrl: 'subjectPathology-list.component.html',
     providers: [
         SubjectPathologyService
-    ]
+    ],
+    standalone: false
 })
 
 @ModesAware
@@ -88,26 +89,12 @@ export class SubjectPathologiesListComponent extends SubjectAbstractListInput<Su
     }
 
      getColumnDefs(): ColumnDefinition[] {
-        function dateRenderer(date) {
-            if (date) {
-                return new Date(date).toLocaleDateString();
-            }
-            return null;
-        };
         let columnDefs: ColumnDefinition[] = [
             { headerName: "Pathology", field: "pathology.name" },
             { headerName: "PathologyModel", field: "pathologyModel.name" },
             { headerName: "Location", field: "location.value" },
-            {
-                headerName: "Start Date", field: "startDate", type: "date", cellRenderer: function(params: any) {
-                    return dateRenderer(params.data.startDate);
-                }
-            },
-            {
-                headerName: "End Date", field: "endDate", type: "date", cellRenderer: function(params: any) {
-                    return dateRenderer(params.data.endDate);
-                }
-            },
+            { headerName: "Start Date", field: "startDate", type: "date" },
+            { headerName: "End Date", field: "endDate", type: "date" },
         ];
          setTimeout(() => {
             if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {

@@ -86,6 +86,8 @@ springdoc:
     config-url: /shanoir-ng/datasets/api-docs/swagger-config
     enabled: true
     disable-swagger-default-url: true
+    oauth:
+      client-id: shanoir-swagger
 
 front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
@@ -101,6 +103,8 @@ datasets-data: /var/datasets-data
 bids-data-folder: /var/datasets-data/bids-data
 # logging configuration
 logging:
+  pattern:
+    file: '%d{yyyy-MM-dd_HH:mm:ss.SSS} %-5level [%mdc{username}] %logger{35} - %msg%n'
   file:
     name: /var/log/shanoir-ng-logs/shanoir-ng-datasets.log
   level:
@@ -138,7 +142,7 @@ dcm4chee-arc:
 
 # VIP
 vip:
-  uri: ${VIP_URL_SCHEME}://${VIP_URL_HOST}/rest/executions/
+  uri: ${VIP_URL_SCHEME}://${VIP_URL_HOST}/rest
   upload-folder: /tmp/vip_uploads
   sleep-time: 20000
   file-formats: .nii.gz, .nii

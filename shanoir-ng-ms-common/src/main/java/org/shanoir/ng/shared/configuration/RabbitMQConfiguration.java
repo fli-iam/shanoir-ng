@@ -16,6 +16,9 @@ package org.shanoir.ng.shared.configuration;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -31,6 +34,30 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 @Profile("!test")
 public class RabbitMQConfiguration {
+
+	@Autowired
+	private ConnectionFactory connectionFactory;
+
+	@Bean(name = "multipleConsumersFactory")
+	public SimpleRabbitListenerContainerFactory multipleConsumersFactory() {
+		SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+		factory.setConnectionFactory(connectionFactory);
+		factory.setMaxConcurrentConsumers(100);
+		factory.setConcurrentConsumers(10);
+		factory.setStartConsumerMinInterval(100L);
+		factory.setConsecutiveActiveTrigger(1);
+		factory.setAutoStartup(true);
+		factory.setPrefetchCount(1);
+		return factory;
+	}
+
+	@Bean(name = "singleConsumerFactory")
+	public SimpleRabbitListenerContainerFactory singleConsumerFactory() {
+		SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+		factory.setConnectionFactory(connectionFactory);
+		factory.setConcurrentConsumers(1);
+		return factory;
+	}
 
 	////////////////// QUEUES //////////////////
 
@@ -52,8 +79,14 @@ public class RabbitMQConfiguration {
 	/** Update / create a study user to import MS. */
 	public static final String STUDY_USER_QUEUE_IMPORT = "study-user-queue-import";
 
-	/** Queue to notify when a user / study is update / deleted. */
+	/** Queue to notify when a user / study is updated / deleted. */
 	public static final String STUDY_USER_QUEUE = "study-user";
+
+	/** Update / create a study user to users MS. */
+	public static final String STUDY_USER_QUEUE_USERS = "study-user-queue-users";
+
+	/** Queue to notify when a subject / study is updated / deleted. */
+	public static final String SUBJECT_STUDY_QUEUE = "subject-study";
 
 	/** BIDS purpose => Get a list of subjects to create bids participants file. */
 	public static final String SUBJECTS_QUEUE = "subjects-queue";
@@ -109,7 +142,7 @@ public class RabbitMQConfiguration {
 
 	/** Queue to retrieve the center ID from an acquisition equipment ID. */
 	public static final String ACQUISITION_EQUIPMENT_CENTER_QUEUE = "acquisition-equipment-center-queue";
-	
+
 	/** Queue to retrieve the center ID from an acquisition equipment ID. */
 	public static final String ACQUISITION_EQUIPEMENT_UPDATE_QUEUE = "acquisition-equipment-update-queue";
 	
@@ -136,6 +169,9 @@ public class RabbitMQConfiguration {
 
 	/** Queue to consume BIDS related events */
 	public static final String BIDS_EVENT_QUEUE = "bids-event-queue";
+
+	/** Queue to consume BIDS related events */
+	public static final String RELOAD_BIDS = "reload-bids-queue";
 	
 	/** Queue to create examination extra data from import */
 	public static final String EXAMINATION_EXTRA_DATA_QUEUE = "examination-extra-data-queue";
@@ -173,13 +209,22 @@ public class RabbitMQConfiguration {
 	/** Queue used to get anonymisation profile of a study. */
 	public static final String STUDY_ANONYMISATION_PROFILE_QUEUE = "study-anonymisation-profile-queue";
 
+    /** Queue used to make bruker to dicom conversion. */
+    public static final String BRUKER_CONVERSION_QUEUE = "bruker-conversion-queue";
+
+    /** Queue used to make anima to nifti conversion. */
+    public static final String ANIMA_CONVERSION_QUEUE = "anima-conversion-queue";
+
 	////////////////// EXCHANGES //////////////////
 
 	/** Exchange used to publish / treat all sort of shanoir events. */
 	public static final String EVENTS_EXCHANGE = "events-exchange";
 
-	/** Exchange to notify when a user / study is update / deleted. */
+	/** Exchange to notify when a user / study is updated / deleted. */
 	public static final String STUDY_USER_EXCHANGE = "study-user-exchange";
+
+	/** Exchange to notify when a subject / study is updated / deleted. */
+	public static final String SUBJECT_STUDY_EXCHANGE = "subject-study-exchange";
 
     @Bean
     public static Queue getMSUsersToMSStudiesUserDelete() {
@@ -200,7 +245,12 @@ public class RabbitMQConfiguration {
 	public static Queue studyUserQueueImport() {
 		return new Queue(STUDY_USER_QUEUE_IMPORT, true);
 	}
-	
+
+	@Bean
+	public static Queue studyUserQueueUsers() {
+		return new Queue(STUDY_USER_QUEUE_USERS, true);
+	}
+
 	@Bean
 	public static Queue studyUserDatasetQueue() {
 		return new Queue(STUDY_USER_QUEUE_DATASET, true);
@@ -252,12 +302,27 @@ public class RabbitMQConfiguration {
 	public static Queue datasetSubjectStudyQueue() {
 		return new Queue(DATASET_SUBJECT_STUDY_QUEUE, true);
 	}
+
+	@Bean
+	public static Queue subjectStudyQueue() {
+		return new Queue(SUBJECT_STUDY_QUEUE, true);
+	}
 	
 	@Bean
 	public static Queue studiesSubjectStudyStudyCardTagQueue() {
 		return new Queue(STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG, true);
 	}
+
+	@Bean
+	public static Queue deleteSubjectQueue() {
+		return new Queue(DELETE_SUBJECT_QUEUE, true);
+  	}
 	
+  	@Bean
+	public static Queue deleteAnimalSubjectQueue() {
+		return new Queue(DELETE_ANIMAL_SUBJECT_QUEUE, true);
+  	}
+
 	@Bean
 	public static Queue importerQueue() {
 		return new Queue(IMPORTER_QUEUE_DATASET, true);
@@ -265,9 +330,8 @@ public class RabbitMQConfiguration {
 
 	@Bean
 	public FanoutExchange fanout() {
-	    return new FanoutExchange(STUDY_USER_EXCHANGE, true, false);
+		return new FanoutExchange(STUDY_USER_EXCHANGE, true, false);
 	}
-
 	@Bean
 	public TopicExchange topicExchange() {
 	    return new TopicExchange(EVENTS_EXCHANGE);
@@ -275,7 +339,7 @@ public class RabbitMQConfiguration {
 
 	@Bean
 	public FanoutExchange fanoutSubjectExchange() {
-	    return new FanoutExchange(STUDY_USER_EXCHANGE, true, false);
+		return new FanoutExchange(STUDY_USER_EXCHANGE, true, false);
 	}
 
 	@Bean
@@ -336,10 +400,15 @@ public class RabbitMQConfiguration {
 	public static Queue importDatasetMailQueue() {
 		return new Queue(IMPORT_DATASET_MAIL_QUEUE, true);
 	}
-	
+
 	@Bean
 	public static Queue bidsEventQueue() {
 		return new Queue(BIDS_EVENT_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue reloadBidsQueue() {
+		return new Queue(RELOAD_BIDS, true);
 	}
 
 	@Bean
@@ -416,5 +485,16 @@ public class RabbitMQConfiguration {
 	public static Queue studyAnonymisationProfileQueue() {
 		return new Queue(STUDY_ANONYMISATION_PROFILE_QUEUE, true);
 	}
+
+	@Bean
+	public static Queue brukerConversionQueue() {
+		return new Queue(BRUKER_CONVERSION_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue animaConversionQueue() {
+		return new Queue(ANIMA_CONVERSION_QUEUE, true);
+	}
+
 
 }

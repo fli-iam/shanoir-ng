@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -23,11 +23,13 @@ import { StudyService } from '../../studies/shared/study.service';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+import {DatasetService} from "../../datasets/shared/dataset.service";
 
 @Component({
     selector: 'bids-tree',
     templateUrl: 'bids-tree.component.html',
     styleUrls: ['bids-tree.component.css'],
+    standalone: false
 })
 
 export class BidsTreeComponent implements OnDestroy, OnInit {
@@ -45,8 +47,8 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
     private hasDownloadRight: boolean;
 
     constructor(private globalService: GlobalService,
-                private elementRef: ElementRef, 
-                private studyService: StudyService, 
+                private elementRef: ElementRef,
+                private datasetService: DatasetService,
                 protected http: HttpClient,
                 private keycloakService: KeycloakService,
                 private studyRightsService: StudyRightsService) {
@@ -71,7 +73,7 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
     getBidsStructure() {
        if (!this.load) {
         this.load="loading"
-            this.studyService.getBidsStructure(this.studyId).then(element => {
+            this.datasetService.getBidsStructure(this.studyId).then(element => {
                 this.sort(element);
                 this.list = [element];
                 this.load = "loaded";
@@ -84,7 +86,7 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
         this.load = null;
         if (!this.load) {
             this.load ="loading";
-            this.studyService.refreshBidsStructure(this.studyId, this.studyName).then(element => {
+            this.datasetService.refreshBidsStructure(this.studyId, this.studyName).then(element => {
                 this.sort(element);
                 this.list = [element];
                 this.load = "loaded";
@@ -152,7 +154,7 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
     public download(item: BidsElement): void {
         const endpoint = this.API_URL + "/exportBIDS/studyId/" + this.studyId;
         let params = new HttpParams().set("filePath", item.path);
-        
+
         this.http.get(endpoint, { observe: 'response', responseType: 'blob', params: params }).toPromise().then(response => {
             if (response.status == 200) {
                 this.downloadIntoBrowser(response);

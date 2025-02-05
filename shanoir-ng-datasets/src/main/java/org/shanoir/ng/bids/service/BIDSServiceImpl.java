@@ -1,6 +1,7 @@
 package org.shanoir.ng.bids.service;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -8,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,12 +18,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.io.FileUtils;
+import org.joda.time.DateTime;
 import org.shanoir.ng.dataset.DatasetDescription;
-import org.shanoir.ng.dataset.controler.DatasetApiController.CoordinatesSystem;
+import org.shanoir.ng.dataset.controler.DatasetApiController;
 import org.shanoir.ng.dataset.modality.*;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
@@ -33,6 +38,7 @@ import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
 import org.shanoir.ng.datasetacquisition.model.mr.MrProtocolSCMetadata;
 import org.shanoir.ng.datasetacquisition.model.mr.MrSequenceApplication;
 import org.shanoir.ng.datasetfile.DatasetFile;
+import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.eeg.model.Channel;
 import org.shanoir.ng.eeg.model.Event;
 import org.shanoir.ng.examination.model.Examination;
@@ -41,11 +47,13 @@ import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectStudyRepository;
+import org.shanoir.ng.utils.DatasetFileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.ExchangeTypes;
@@ -53,10 +61,10 @@ import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriUtils;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -139,64 +147,29 @@ public class BIDSServiceImpl implements BIDSService {
 	@Autowired
 	DatasetSecurityService datasetSecurityService;
 
-	@Override
-	/**
-	 * Receives a shanoirEvent as a json object, concerning a study update => Update BIDS folder too
-	 * @param commandArrStr the task as a json string.
-	 */
-	@RabbitListener(bindings = {
-			@QueueBinding(
-					key = ShanoirEventType.DELETE_EXAMINATION_EVENT,
-					value = @Queue(value = RabbitMQConfiguration.BIDS_EVENT_QUEUE, durable = "true"),
-					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
-			@QueueBinding(
-					key = ShanoirEventType.DELETE_DATASET_EVENT,
-					value = @Queue(value = RabbitMQConfiguration.BIDS_EVENT_QUEUE, durable = "true"),
-					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
-			@QueueBinding(
-					key = ShanoirEventType.UPDATE_DATASET_EVENT,
-					value = @Queue(value = RabbitMQConfiguration.BIDS_EVENT_QUEUE, durable = "true"),
-					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
-			@QueueBinding(
-					key = ShanoirEventType.UPDATE_EXAMINATION_EVENT,
-					value = @Queue(value = RabbitMQConfiguration.BIDS_EVENT_QUEUE, durable = "true"),
-					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
-			@QueueBinding(
-					key = ShanoirEventType.CREATE_EXAMINATION_EVENT,
-					value = @Queue(value = RabbitMQConfiguration.BIDS_EVENT_QUEUE, durable = "true"),
-					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
-			@QueueBinding(
-					key = ShanoirEventType.CREATE_DATASET_EVENT,
-					value = @Queue(value = RabbitMQConfiguration.BIDS_EVENT_QUEUE, durable = "true"),
-					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
-	}
-			)
-	public void deleteBids(String eventAsString) {
-		ShanoirEvent event;
-		try {
-			event = objectMapper.readValue(eventAsString, ShanoirEvent.class);
-			if (event.getStudyId() == null) {
-				LOG.error("This event did not triggered a BIDs folder deletion {}", eventAsString);
-				return;
-			}
-			Study studyDeleted = studyRepo.findById(event.getStudyId()).orElse(null);
-			this.deleteBidsFolder(studyDeleted.getId(), studyDeleted.getName());
-		} catch (Exception e) {
-			LOG.error("ERROR when deleting BIDS folder: please delete it manually: {}", eventAsString, e);
-		}
+	@Autowired
+	private WADODownloaderService downloader;
+
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
+
+	SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+
+	DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
+	@RabbitListener(queues = RabbitMQConfiguration.RELOAD_BIDS)
+	public void deleteBidsForStudy(String studyId) {
+		Study studyDeleted = studyRepo.findById(Long.valueOf(studyId)).orElse(null);
+		this.deleteBidsFolder(studyDeleted.getId(), studyDeleted.getName());
 	}
 
 	@Override
 	public void deleteBidsFolder(Long studyId, String studyName) {
 		try {
 			if (studyName == null) {
-				studyName = this.studyRepo.findById(studyId).get().getName();
+				Optional<Study> study = studyRepo.findById(studyId);
+				if (!study.isEmpty())
+					studyName = study.get().getName();
 			}
 			// Try to delete the BIDS folder recursively if possible
 			File bidsDir = new File(bidsStorageDir + File.separator + STUDY_PREFIX + studyId + studyName);
@@ -208,17 +181,24 @@ public class BIDSServiceImpl implements BIDSService {
 		}
 	}
 
+	@Override
+	public File getBidsFolderpath(final Long studyId, String studyName) {
+		studyName = this.formatLabel(studyName);
+		String tmpFilePath = bidsStorageDir + File.separator + STUDY_PREFIX + studyId + studyName;
+		return new File(tmpFilePath);
+	}
+
 	/**
 	 * Returns data from the study formatted as BIDS in a .zip file.
+	 * @param studyId the study ID we want to export as BIDS
+	 * @param studyName the study name
 	 * @return data from the study formatted as BIDS in a .zip file.
 	 * @throws IOException
 	 */
 	@Override
 	public File exportAsBids(final Long studyId, String studyName) throws IOException {
 		// Get folder
-		studyName = this.formatLabel(studyName);
-		String tmpFilePath = bidsStorageDir + File.separator + STUDY_PREFIX + studyId + studyName;
-		File workFolder = new File(tmpFilePath);
+		File workFolder = getBidsFolderpath(studyId, studyName);
 		if (workFolder.exists()) {
 			// If the file already exists, just return it
 			return workFolder;
@@ -229,6 +209,9 @@ public class BIDSServiceImpl implements BIDSService {
 
 		// Iterate over subjects got from call to SubjectApiController.findSubjectsByStudyId() and get list of subjects
 		List<Subject> subjs = getSubjectsForStudy(studyId);
+		if (org.apache.commons.collections4.CollectionUtils.isEmpty(subjs)) {
+			return baseDir;
+		}
 
 		// Sort by ID
 		subjs.sort(Comparator.comparing(Subject::getId));
@@ -426,6 +409,10 @@ public class BIDSServiceImpl implements BIDSService {
 	private void createDatasetBidsFiles(final Dataset dataset, final File workDir, final String studyName, final String subjectName) throws IOException {
 		File dataFolder = null;
 
+		if (dataset.getDatasetProcessing() != null) {
+			LOG.warn("Submitted dataset is a processed dataset.");
+			return;
+		}
 		String subjectNameUpdated = this.formatLabel(subjectName);
 		String datasetFilePrefix = workDir.getName().contains(SESSION_PREFIX) ? workDir.getParentFile().getName() + "_" + workDir.getName() : workDir.getName();
 		
@@ -433,9 +420,63 @@ public class BIDSServiceImpl implements BIDSService {
 
 		// Copy dataset files in the directory AS hard link to avoid duplicating files
 		List<URL> pathURLs = new ArrayList<>();
-		getDatasetFilePathURLs(dataset, pathURLs, null);
 
-		DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+		if (!"Eeg".equals(dataset.getType()) && !"BIDS".equals(dataset.getType()) && onlyHasDicom(dataset)) {
+			// DCM2NIIX
+			Long converterId = 6L;
+			if ("CT".equals(dataset.getType())) {
+				converterId = 8L;
+			}
+			File userDir = DatasetFileUtils.getUserImportDir("/tmp");
+			String tmpFilePath = userDir + File.separator + dataset.getId() + "_DCM";
+			File workFolder = new File(tmpFilePath + "-" + formatter.format(new DateTime().toDate()));
+			try {
+				DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, null);
+
+				// Create temporary workfolder with dicom files, to be able to convert them
+				workFolder.mkdirs();
+
+				downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset, null);
+
+				// Convert them, sending to import microservice
+				boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + workFolder.getAbsolutePath() + ";" + dataFolder.getAbsolutePath());
+
+				if (!result) {
+					throw new ShanoirException("Could not convert from dicom to nifti.");
+				}
+
+				File[] newFiles = dataFolder.listFiles(new FileFilter() {
+					@Override
+					public boolean accept(File file) {
+						return file.getName().startsWith(dataset.getId() + "_");
+					}
+				});
+
+                if (newFiles != null && newFiles.length != 0) {
+					// Add the file to the scans.tsv reference
+					File scansTsvFile = getScansFile(workDir, subjectName);
+					for (File fileResult : newFiles) {
+						String buffer = fileResult.getParentFile().getName() + File.separator + fileResult.getName() + TABULATION +
+								format.format(dataset.getDatasetAcquisition().getExamination().getExaminationDate().atStartOfDay()) + TABULATION +
+								dataset.getDatasetAcquisition().getExamination().getId() +
+								NEW_LINE;
+
+						Files.write(Paths.get(scansTsvFile.getAbsolutePath()), buffer.getBytes(), StandardOpenOption.APPEND);
+					}
+				}
+
+			} catch (Exception e) {
+				LOG.error("Could not convert from dicom to nifti", e);
+				File errorfile = new File(dataFolder.getAbsolutePath() + "/error.txt");
+				Files.createFile(errorfile.toPath());
+				Files.write(errorfile.toPath(), "Could not convert data from dicom to nifti for this dataset.".getBytes());
+			} finally {
+				FileUtils.deleteQuietly(workFolder);
+			}
+			return;
+		}
+
+		getDatasetFilePathURLs(dataset, pathURLs, null);
 
 		for (Iterator<URL> iterator = pathURLs.iterator(); iterator.hasNext();) {
 			URL url =  iterator.next();
@@ -483,7 +524,19 @@ public class BIDSServiceImpl implements BIDSService {
 		}
 	}
 
+	private boolean onlyHasDicom(Dataset dataset) {
+		for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+			if (DatasetExpressionFormat.NIFTI_SINGLE_FILE.equals(expression.getDatasetExpressionFormat())) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	private File createSpecificDataFolder(Dataset dataset, File workDir, File dataFolder, String subjectName, String studyName) throws IOException {
+
+
+
 		// Create specific files (EEG, MS, MEG, etc..)
 		if (dataset instanceof EegDataset) {
 			dataFolder = createDataFolder("eeg", workDir);
@@ -708,7 +761,7 @@ public class BIDSServiceImpl implements BIDSService {
 		buffer = new StringBuilder();
 		buffer.append("{\n")
 		.append("\"EEGCoordinateSystem\": ").append("\"" + dataset.getCoordinatesSystem()).append("\",\n")
-		.append("\"EEGCoordinateUnits\": ").append("\"" + CoordinatesSystem.valueOf(dataset.getCoordinatesSystem()).getUnit()).append("\"\n")
+		.append("\"EEGCoordinateUnits\": ").append("\"" + DatasetApiController.CoordinatesSystem.valueOf(dataset.getCoordinatesSystem()).getUnit()).append("\"\n")
 		.append("}");
 
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());

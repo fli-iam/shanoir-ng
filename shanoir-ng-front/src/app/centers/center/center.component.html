@@ -14,15 +14,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div #formContainer class="content-component detail">
 	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
+		<form-footer
+			[state]="footerState"
+			(save)="save()"
+			(edit)="goToEdit()"
+            (delete) = "delete()"
+			(cancel)="goToView()"
+			(back)="goBack()"
+		></form-footer>
 		<span [ngSwitch]="mode">
 			<ng-template [ngSwitchCase]="'view'">
-				<h2 class="header command-zone"i18n="View center|Title@@centerDetailViewTitle">Details on center</h2>
+				<h2 class="header command-zone"i18n="View acquisition center|Title@@centerDetailViewTitle">Details on acquisition center</h2>
 			</ng-template>
 			<ng-template [ngSwitchCase]="'edit'">
-				<h2 class="header command-zone"i18n="Edit center|Title@@centerDetailEditTitle">Edit center</h2>
+				<h2 class="header command-zone"i18n="Edit acquisition center|Title@@centerDetailEditTitle">Edit acquisition center</h2>
 			</ng-template>
 			<ng-template [ngSwitchCase]="'create'">
-				<h2 class="header command-zone"i18n="Create center|Title@@centerDetailCreateTitle">Create center</h2>
+				<h2 class="header command-zone"i18n="Create acquisition center|Title@@centerDetailCreateTitle">Create acquisition center</h2>
 			</ng-template>
 		</span>
 		<help-message [help]="'institution'"></help-message>
@@ -115,7 +123,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<legend (click)="openAcqEq = !openAcqEq">
 				<span *ngIf="openAcqEq"><i class="fas fa-chevron-up"></i></span>
 				<span *ngIf="!openAcqEq"><i class="fas fa-chevron-down"></i></span>
-				Acquisition Equipments
+				Center Equipments
 			</legend>
 			<ul *ngIf="openAcqEq">
 				<li *ngFor="let o of center.acquisitionEquipments">
@@ -124,13 +132,5 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</li>
 			</ul>
 		</fieldset>
-		<form-footer
-			[state]="footerState"
-			(save)="save()"
-			(edit)="goToEdit()"
-            (delete) = "delete()"
-			(cancel)="goToView()"
-			(back)="goBack()"
-		></form-footer>
 	</form>
 </div>

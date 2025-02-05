@@ -11,34 +11,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
-import {DatasetNode, ProcessingNode, UNLOADED} from '../../tree/tree.model';
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
+import { TreeService } from 'src/app/studies/study/tree.service';
+import { MassDownloadService } from "../../shared/mass-download/mass-download.service";
+import { DatasetNode, ProcessingNode } from '../../tree/tree.model';
 import { Dataset } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
 
 
 @Component({
     selector: 'dataset-node',
-    templateUrl: 'dataset-node.component.html'
+    templateUrl: 'dataset-node.component.html',
+    standalone: false
 })
 
-export class DatasetNodeComponent implements OnChanges {
+export class DatasetNodeComponent extends TreeNodeAbstractComponent<DatasetNode> implements OnChanges {
 
     @Input() input: DatasetNode | Dataset;
-    @Output() selectedChange: EventEmitter<void> = new EventEmitter();
-    node: DatasetNode;
-    loading: boolean = false;
-    menuOpened: boolean = false;
-    @Input() hasBox: boolean = false;
     @Input() related: boolean = false;
     detailsPath: string = '/dataset/details/';
     @Output() onDatasetDelete: EventEmitter<void> = new EventEmitter();
 
     constructor(
-        private router: Router,
-        private datasetService: DatasetService) {
+            private router: Router,
+            private datasetService: DatasetService,
+            private downloadService: MassDownloadService,
+            protected treeService: TreeService,
+            elementRef: ElementRef) {
+        super(elementRef);
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -52,21 +55,26 @@ export class DatasetNodeComponent implements OnChanges {
     }
 
     toggleMenu() {
-        this.menuOpened = !this.menuOpened;
+        this.menuOpened = this.withMenu && !this.menuOpened;
     }
 
-    download(format: string) {
+    download() {
         if (this.loading) {
             return;
         }
         this.loading = true;
-        this.datasetService.downloadFromId(this.node.id, format).then(() => this.loading = false);
+        this.downloadService.downloadByIds([this.node.id], this.downloadState)
+            .then(() => this.loading = false);
     }
 
     hasChildren(): boolean | 'unknown' {
-        if (!this.node.processings) return false;
-        else if (this.node.processings == 'UNLOADED') return 'unknown';
-        else return this.node.processings.length > 0;
+        if (this.node.inPacs) {
+            return true;
+        } else {
+            if (!this.node.processings) return false;
+            else if (this.node.processings == 'UNLOADED') return 'unknown';
+            else return this.node.processings.length > 0;
+        }
     }
 
     deleteDataset() {

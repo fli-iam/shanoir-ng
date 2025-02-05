@@ -19,6 +19,8 @@ import org.shanoir.ng.shared.model.Study;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * Study service.
  *
@@ -35,4 +37,8 @@ public interface StudyService {
 	 */
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT') and (@datasetSecurityService.hasRightOnStudy(#id, 'CAN_SEE_ALL') or @datasetSecurityService.hasRightOnStudy(#id, 'CAN_ADMINISTRATE'))")
 	Study findById(Long id);
+
+    void updateStudy(Study updated, Study current);
+
+	List<String> validate(Study updated, Study current);
 }

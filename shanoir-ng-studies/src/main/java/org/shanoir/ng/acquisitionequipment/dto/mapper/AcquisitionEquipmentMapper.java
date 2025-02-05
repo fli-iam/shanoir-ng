@@ -20,8 +20,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.shanoir.ng.acquisitionequipment.dto.AcquisitionEquipmentDTO;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
-import org.shanoir.ng.center.dto.mapper.CenterMapper;
 import org.shanoir.ng.manufacturermodel.dto.mapper.ManufacturerModelMapper;
+import org.shanoir.ng.acquisitionequipment.dto.mapper.EquipmentCenterMapper;
 
 /**
  * Mapper for acquisition equipments.
@@ -29,7 +29,7 @@ import org.shanoir.ng.manufacturermodel.dto.mapper.ManufacturerModelMapper;
  * @author msimon
  *
  */
-@Mapper(componentModel = "spring", uses = { CenterMapper.class, ManufacturerModelMapper.class })
+@Mapper(componentModel = "spring", uses = { EquipmentCenterMapper.class, ManufacturerModelMapper.class })
 public interface AcquisitionEquipmentMapper {
 
 	/**

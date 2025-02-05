@@ -23,15 +23,19 @@ import { GlobalService } from './shared/services/global.service';
 import { WindowService } from './shared/services/window.service';
 import { KeycloakSessionService } from './shared/session/keycloak-session.service';
 import { StudyService } from './studies/shared/study.service';
+import { TreeService } from './studies/study/tree.service';
 import { UserService } from './users/shared/user.service';
 import { ServiceLocator } from './utils/locator.service';
+import { Observable } from 'rxjs';
+import { NotificationsService } from './shared/notifications/notifications.service';
 
 
 @Component({
     selector: 'app-root',
     templateUrl: 'app.component.html',
     styleUrls: ['app.component.css'],
-    animations: [ slideRight, slideMarginLeft, parent ]
+    animations: [slideRight, slideMarginLeft, parent],
+    standalone: false
 })
 
 export class AppComponent {
@@ -48,7 +52,9 @@ export class AppComponent {
             private confirmService: ConfirmDialogService,
             protected router: Router,
             private studyService: StudyService,
-            private userService: UserService) {
+            private userService: UserService,
+            public treeService: TreeService,
+            private notificationsService: NotificationsService) {
         
         ServiceLocator.rootViewContainerRef = this.viewContainerRef;
     }
@@ -67,8 +73,18 @@ export class AppComponent {
         this.windowService.width = event.target.innerWidth;
     }
 
+    @HostListener('window:beforeunload')
+    canDeactivate(): boolean {
+        return !this.notificationsService.hasOnGoingDownloads();
+    }
+
+
     toggleMenu(open: boolean) {
         this.menuOpen = open;
+    }
+
+    toggleTree(open: boolean) {
+        this.treeService.treeOpened = open;    
     }
 
     isAuthenticated(): boolean {

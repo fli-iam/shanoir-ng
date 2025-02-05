@@ -40,16 +40,19 @@ import {ConsoleService} from '../../console/console.service';
 import {FooterState} from '../form-footer/footer-state.model';
 import {Entity, EntityRoutes} from './entity.abstract';
 import {EntityService} from './entity.abstract.service';
+import { SuperPromise } from 'src/app/utils/super-promise';
+import { Selection, TreeService } from 'src/app/studies/study/tree.service';
 
 
 export type Mode = "view" | "edit" | "create";
 
 @Directive()
-export abstract class EntityComponent<T extends Entity> implements OnInit, OnDestroy, OnChanges {
+export abstract class EntityComponent<T extends Entity> implements OnDestroy, OnChanges {
 
     private _entity: T;
     @Input() mode: Mode;
-    @Input() id: number; // optional
+    @Input() id: number; // if not given via url
+    @Input() entityInput: T; // if id not given via url
     @Output() close: EventEmitter<any> = new EventEmitter();
     footerState: FooterState;
     protected onSave: Subject<any> = new Subject<any>();
@@ -58,7 +61,11 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     protected saveError: ShanoirError;
     protected onSubmitValidatedFields: string[] = [];
     @ViewChild('formContainer', {static: false}) formContainerElement: ElementRef;
-    activeTab: string;
+    _activeTab: string;
+    protected isMainComponent: boolean;
+    idPromise: SuperPromise<number> = new SuperPromise();
+    entityPromise: SuperPromise<T> = new SuperPromise();
+    static ActivateTreeOnThisPage: boolean = true;
 
     /* services */
     protected confirmDialogService: ConfirmDialogService;
@@ -69,15 +76,16 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     public keycloakService: KeycloakService;
     protected consoleService: ConsoleService;
     public breadcrumbsService: BreadcrumbsService;
+    public treeService: TreeService;
 
     /* abstract methods */
     abstract initView(): Promise<void>;
-
     abstract initEdit(): Promise<void>;
-
     abstract initCreate(): Promise<void>;
-
     abstract buildForm(): UntypedFormGroup;
+    protected getTreeSelection: () => Selection; //optional
+    protected fetchEntity: () => Promise<any>; // optional
+    getOnDeleteConfirmMessage?(entity: Entity): Promise<string>;
 
     constructor(
         protected activatedRoute: ActivatedRoute,
@@ -90,9 +98,28 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         this.formBuilder = ServiceLocator.injector.get(UntypedFormBuilder);
         this.consoleService = ServiceLocator.injector.get(ConsoleService);
         this.breadcrumbsService = ServiceLocator.injector.get(BreadcrumbsService);
+        this.treeService = ServiceLocator.injector.get(TreeService);
 
         this.mode = this.activatedRoute.snapshot.data['mode'];
+        if (this.mode != 'create') this.treeService.activateTree(this.activatedRoute);
         this.addBCStep();
+
+        setTimeout(() => { // force it to be after child constructor, we need this.fetchEntity
+            this.subscriptions.push(this.activatedRoute.params.subscribe(
+                params => {
+                    this.mode = this.activatedRoute.snapshot.data['mode'];
+                    if (this.mode != 'create') this.treeService.activateTree(this.activatedRoute); // at each routing event
+                    this.addBCStep();
+                    this.isMainComponent = true;
+                    const id = +params['id'];
+                    this.id = id;
+                    this.idPromise = new SuperPromise();
+                    this.entityPromise = new SuperPromise();
+                    this.idPromise.resolve(id);
+                    this.init();
+                })
+            );
+        });
     }
 
     public get entity(): T {
@@ -101,43 +128,70 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
 
     public set entity(entity: T) {
         this._entity = entity;
+        if (entity) this.entityPromise.resolve(entity);
     }
 
-    ngOnInit(): void {
-        //if (!this.id) this.id = +this.activatedRoute.snapshot.params['id'];
-        this.subscriptions.push(this.activatedRoute.params.subscribe(
-            params => {
-                const id = +params['id'];
-                this.id = id;
-                const choose = (): Promise<void> => {
-                    switch (this.mode) {
-                        case 'create' :
-                            return this.initCreate();
-                        case 'edit' :
-                            return this.initEdit();
-                        case 'view' :
-                            return this.initView();
-                        default:
-                            throw Error('mode has to be set!');
-                    }
-                }
-                choose().then(() => {
-                    this.footerState = new FooterState(this.mode);
-                    this.hasEditRight().then(right => this.footerState.canEdit = right);
-                    this.hasDeleteRight().then(right => this.footerState.canDelete = right);
-                    if ((this.mode == 'create' || this.mode == 'edit') && this.breadcrumbsService.currentStep.entity) {
-                        this.entity = this.breadcrumbsService.currentStep.entity as T;
-                    }
-                    this.breadcrumbsService.currentStep.entity = this.entity;
-                    this.manageFormSubscriptions();
+    public get activeTab(): string {
+        return this._activeTab;
+    }
+
+    public set activeTab(param: string) {
+        this._activeTab = param;
+    }
+
+    private loadEntity(): Promise<T> {
+        let promise: Promise<T>;
+        if (this.entityInput) {
+            promise = Promise.resolve(this.entityInput);
+        } else {
+            if (this.fetchEntity) {
+                promise = this.fetchEntity();
+            } else {
+                promise = this.idPromise.then(id => {
+                    return this.getService().get(id);
                 });
             }
-        ));
+        }
+        return promise.then(entity => {
+            this.entity = entity;
+            return entity;
+        });
+    }
+
+    init(): void {
+        const choose = (): Promise<void> => {
+            switch (this.mode) {
+                case 'create' :
+                    return this.initCreate();
+                case 'edit' :
+                    return this.loadEntity().then(() => this.initEdit());
+                case 'view' :
+                    return this.loadEntity().then(() => this.initView());
+                default:
+                    throw Error('mode has to be set!');
+            }
+        }
+        let choosePromise: Promise<void> = choose();
+        Promise.all([this.entityPromise, choosePromise]).then(() => {
+            if (this.mode != 'create' && this.getTreeSelection) this.treeService.select(this.getTreeSelection());
+        });
+        choosePromise.then(() => {
+            this.footerState = new FooterState(this.mode);
+            this.footerState.backButton = this.isMainComponent;
+            this.hasEditRight().then(right => this.footerState.canEdit = right);
+            this.hasDeleteRight().then(right => this.footerState.canDelete = right);
+            if ((this.mode == 'create' || this.mode == 'edit') && this.breadcrumbsService.currentStep.entity) {
+                this.entity = this.breadcrumbsService.currentStep.entity as T;
+            }
+            this.breadcrumbsService.currentStep.entity = this.entity;
+            this.manageFormSubscriptions();
+        });
+
         // load called tab
         this.subscriptions.push(
             this.activatedRoute.fragment.subscribe(fragment => {
                 if (fragment) {
-                    this.activeTab = fragment;
+                    this._activeTab = fragment;
                     this.reloadRequiredStyles();
                 }
             })
@@ -145,9 +199,18 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        if ((changes['id'] && !changes['id'].isFirstChange())
-            || (changes['mode'] && !changes['mode'].isFirstChange()))
-            this.ngOnInit();
+        if ((changes['id'] && !changes['id'].isFirstChange()) && this.id !=  changes['id'].previousValue) {
+            this.idPromise = new SuperPromise();
+            this.entityPromise = new SuperPromise();
+            this.init();
+        }
+        if (changes['id']) {
+            this.isMainComponent = false;
+            this.idPromise.resolve(this.id);
+        }
+        if (changes['mode'] && !changes['mode'].isFirstChange()) {
+            this.init();
+        }
     }
 
     private manageFormSubscriptions() {
@@ -284,6 +347,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         return this.modeSpecificSave(afterSave)
             .then(study => {
                 this.footerState.loading = false;
+                this.treeService.updateTree();
                 return study;
             })
             /* manages "after submit" errors like a unique constraint */
@@ -341,14 +405,26 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     delete(): void {
-        this.openDeleteConfirmDialog(this.entity)
+        this.openDeleteConfirmDialog(this.entity);
     }
 
     protected openDeleteConfirmDialog = (entity: T) => {
-        this.getService().deleteWithConfirmDialog(this.ROUTING_NAME, entity).then(deleted => {
-            if (deleted) {
-                this.goToList();
-            }
+        let promise: Promise<string>;
+        if (this.getOnDeleteConfirmMessage) {
+            promise = this.getOnDeleteConfirmMessage(entity);
+        } else {
+            promise = Promise.resolve('');
+        }
+        promise.then(studyListStr => {
+            this.getService().deleteWithConfirmDialog(this.ROUTING_NAME, entity, studyListStr).then(deleted => {
+                if (deleted) {
+                    if (this.treeService.treeOpened && this.treeService.treeAvailable) {
+                        this.goToParent();
+                    } else {
+                        this.goBack();
+                    }
+                }
+            });
         });
     }
 
@@ -368,6 +444,9 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     goToEdit(id?: number): void {
+        if (this.activeTab == "quality" || this.activeTab == "tree" || this.activeTab == "bids") {
+            this.activeTab = "general";
+        }
         if (!id) {
             if (this.mode == 'edit') return;
             else if (this.mode == 'view') id = this.entity.id;
@@ -383,6 +462,11 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
 
     goToList(): void {
         this.router.navigate([this.entityRoutes.getRouteToList()]);
+    }
+
+    goToParent(): void {
+        this.treeService.goToParent();
+        this.treeService.removeCurrentNode();
     }
 
     goBack(): void {
@@ -425,4 +509,5 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     abstract getService(): EntityService<T>;
+
 }

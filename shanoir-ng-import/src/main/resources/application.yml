@@ -35,6 +35,7 @@ spring:
       ddl-auto: validate
       id:
         db_structure_naming_strategy: legacy
+    open-in-view: false
     properties:
       hibernate:
         connection:
@@ -95,13 +96,14 @@ front.server:
 ms.url:
   shanoir-ng-datasets: http://${SHANOIR_PREFIX}datasets:9904/datasetacquisition
   shanoir-ng-datasets-eeg: http://${SHANOIR_PREFIX}datasets:9904/datasetacquisition_eeg
-  dicom2nifti: http://${SHANOIR_PREFIX}preclinical-bruker2dicom:5000/dicom2nifti
   shanoir-ng-studies-name: http://${SHANOIR_PREFIX}studies:9902/studies/names
   shanoir-ng-studies-subjects-names: http://${SHANOIR_PREFIX}studies:9902/subjects/names
   shanoir-ng-create-examination: http://${SHANOIR_PREFIX}datasets:9904/examinations
   shanoir-ng-studies-commons: http://${SHANOIR_PREFIX}studies:9902/common
 # logging configuration
 logging:
+  pattern:
+    file: '%d{yyyy-MM-dd_HH:mm:ss.SSS} %-5level [%mdc{username}] %logger{35} - %msg%n'
   file:
     name: /var/log/shanoir-ng-logs/shanoir-ng-import.log
   level:
@@ -137,13 +139,6 @@ shanoir:
       # this long name has been kept, as Elise and Isabelle know it like this; to find it for further adaptions in later time
       # Also during the nifti conversion, it will be reconstructed as 4D volumes.
       seriesProperties: seriesDescription==*ASL*;seriesDescription==*asl*;protocolName==*ASL*;seriesDescription==*VIBE*DYN*;seriesDescription==*MoCoSeries*;seriesDescription==*DIFF*;seriesDescription==*Diff*;seriesDescription==*diff*;seriesDescription==*DTI*;seriesDescription==*DWI*;seriesDescription==*PERF*;seriesDescription==*Perf*;seriesDescription==*perf*;seriesDescription==*BOLD*;seriesDescription==*Bold*;seriesDescription==*bold*;seriesDescription==*intermediate t-Map*;protocolName==*DYN*;protocolName==*Dyn*;protocolName==*dyn*;seriesDescription==*QSM*;seriesDescription==*qsm*;seriesDescription==*RELAXO*;seriesDescription==*relaxo*;seriesDescription==*Relaxo*;seriesDescription==IRMF;protocolName==IRMF;seriesDescription==*mc*gse*;protocolName==*mc*gse*;seriesDescription==*MULTIGRE*;protocolName==*MULTIGRE*;seriesDescription==*multigre*;protocolName==*multigre*;seriesDescription==*Multigre*;protocolName==*Multigre*;
-  conversion:
-    converters:
-      path: /opt/nifti-converters/
-        # Format "tag==value;". If in the serie, the dicom value equals the "value" for the "tag", then use clidcm instead of dcmnii to convert from dicom to nifti
-      convertwithclidcm: seriesDescription==*Diff*;seriesDescription==*DIFF*;seriesDescription==*diff*;seriesDescription==*DTI*;seriesDescription==*DWI*;seriesDescription==*PERF*;seriesDescription==*Perf*;seriesDescription==*perf*; 
-        # Format "tag==value;". If in the serie, the dicom value equals the "value" for the "tag", then output niftii file will be reconstructed as 4D volumes
-      mriconverter: "/opt/nifti-converters/mriconverter/MRIFileManager/MRIManager.jar"
 
 ---
 
@@ -181,7 +176,6 @@ front.server:
 ms.url:
   shanoir-ng-datasets: http://localhost:9904/datasetacquisition
   shanoir-ng-datasets-eeg: http://localhost:9904/datasetacquisition_eeg
-  dicom2nifti: http://localhost:5000/dicom2nifti
   shanoir-ng-studies-name: http://localhost:9902/studies/names
   shanoir-ng-studies-subjects-names: http://localhost:9902/subjects/names
   shanoir-ng-create-examination: http://localhost:9904/examinations

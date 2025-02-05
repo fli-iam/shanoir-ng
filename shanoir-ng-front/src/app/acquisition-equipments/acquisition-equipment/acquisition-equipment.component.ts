@@ -28,11 +28,12 @@ import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Center } from '../../centers/shared/center.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ManufacturerModelPipe } from '../shared/manufacturer-model.pipe';
-import {StudyCardService} from "../../study-cards/shared/study-card.service";
+import { Selection } from 'src/app/studies/study/tree.service';
 
 @Component({
     selector: 'acquisition-equipment-detail',
-    templateUrl: 'acquisition-equipment.component.html'
+    templateUrl: 'acquisition-equipment.component.html',
+    standalone: false
 })
 
 export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEquipment> {
@@ -65,19 +66,20 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         return this.acqEquipService;
     }
 
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromEquipment(this.acqEquip);
+    }
+
     async initView(): Promise<void> {
-        this.acqEquip = await this.acqEquipService.get(this.id);
         this.updateAcquEq();
     }
 
     initEdit(): Promise<void> {
         this.getManufModels();
         return Promise.all([
-            this.centerService.getCentersNames(),
-            this.acqEquipService.get(this.id)
-        ]).then(([centers, ae]) => {
+            this.centerService.getCentersNames()
+        ]).then(([centers]) => {
             this.centers = centers;
-            this.acqEquip = ae;
             this.updateAcquEq();
         });
     }

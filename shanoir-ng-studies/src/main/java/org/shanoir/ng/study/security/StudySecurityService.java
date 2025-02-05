@@ -14,7 +14,12 @@
 
 package org.shanoir.ng.study.security;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -33,7 +38,10 @@ import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
+import org.shanoir.ng.tag.model.StudyTag;
+import org.shanoir.ng.tag.repository.StudyTagRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -56,6 +64,9 @@ public class StudySecurityService {
 	@Autowired
 	DataUserAgreementRepository dataUserAgreementRepository;
 
+	@Autowired
+	StudyTagRepository studyTagRepository;
+
 	/**
 	 * Check that the connected user has the given right for the given study.
 	 * 
@@ -73,6 +84,37 @@ public class StudySecurityService {
 			throw new EntityNotFoundException("Cannot find study with id " + studyId);
 		}
 		return hasPrivilege(study, right);
+	}
+
+	/**
+	 * Check that the connected user has any of the given rights for the given study.
+	 * 
+	 * @param studyId the study id
+	 * @param rightStr the right
+	 * @return true or false
+	 */
+    public boolean hasAnyRightOnStudy(Long studyId, List<String> rightStrs) throws EntityNotFoundException {
+    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")){
+			return true;
+		}
+    	if (studyId == null || rightStrs == null) {
+			return false;
+		}
+		Study study = studyRepository.findById(studyId).orElse(null);
+		if (study == null) {
+			throw new EntityNotFoundException("Cannot find study with id " + studyId);
+		}
+        List<StudyUserRight> rights = rightStrs.stream().map(str -> StudyUserRight.valueOf(str)).collect(Collectors.toList());
+		return hasAnyPrivilege(study, rights);
+	}
+
+	public boolean hasRightOnStudyTag(Long id, String rightStr) throws EntityNotFoundException {
+		StudyTag tag = studyTagRepository.findById(id)
+				.orElseThrow(() ->
+						new EntityNotFoundException("Cannot find study tag with id [" + id + "]"));
+		return this.hasRightOnStudy(tag.getStudy().getId(), rightStr) &&
+				this.studyUsersMatchStudy(tag.getStudy());
+
 	}
 
 	public boolean filterVolumesHasRightOnStudies(List<Long> studyIds, String rightStr) throws EntityNotFoundException {
@@ -183,6 +225,42 @@ public class StudySecurityService {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Check that the connected user has the given right for every subject
+	 * 
+	 * @param subjectId
+	 *            the subject id
+	 * @param rightStr
+	 *            the right
+	 * @return true or false
+	 * @throws EntityNotFoundException
+	 */
+	public boolean hasRightOnSubjectsForOneStudy(List<SimpleSubjectDTO> subjectDTOs, String rightStr) throws EntityNotFoundException {
+		if (subjectDTOs == null || subjectDTOs.isEmpty()) return true;
+		List<Long> subjectIds = new ArrayList<>();
+		for (SimpleSubjectDTO dto : subjectDTOs) {
+			subjectIds.add(dto.getId());	
+		}
+		List<Subject> subjects = Utils.toList(subjectRepository.findAllById(subjectIds));
+		if (subjects == null || subjects.isEmpty()) {
+			return true;
+		}
+		for (Subject subject : subjects) {
+			if (subject.getSubjectStudyList() == null) {
+				return false;
+			}
+			StudyUserRight right = StudyUserRight.valueOf(rightStr);
+			boolean hasRight = false;
+			for (SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
+				if (hasPrivilege(subjectStudy.getStudy(), right)) {
+					hasRight = true;
+				} 
+			}
+			if (!hasRight) return false;
+		}
+		return true;
 	}
 
 	/**
@@ -359,33 +437,6 @@ public class StudySecurityService {
 	 * @param rightStr
 	 * @return true or false
 	 */
-	public boolean filterStudyDTOsHasRight(List<StudyDTO> dtos, String rightStr) {
-		StudyUserRight right = StudyUserRight.valueOf(rightStr);
-		if (dtos == null) {
-			return true;
-		}
-		List<StudyDTO> newList = new ArrayList<>();
-		Map<Long, StudyDTO> map = new HashMap<>();
-		for (StudyDTO dto : dtos) {
-			map.put(dto.getId(), dto);
-		}
-		for (Study study : studyRepository.findAllById(new ArrayList<>(map.keySet()))) {
-			if (hasPrivilege(study, right)) {
-				newList.add(map.get(study.getId()));
-			}
-		}
-		dtos = newList;
-		return true;
-	}
-
-	/**
-	 * For every study of the list, check that the connected user has the given
-	 * right.
-	 *
-	 * @param dtos
-	 * @param rightStr
-	 * @return true or false
-	 */
 	public boolean filterStudyIdNameDTOsHasRight(List<IdName> dtos, String rightStr) {
 		StudyUserRight right = StudyUserRight.valueOf(rightStr);
 		if (dtos == null) {
@@ -449,6 +500,7 @@ public class StudySecurityService {
 		}
 		int nbStudies = 0;
 		for (Study study : studyRepository.findAllById(ids)) {
+			study.setStudyUserList(studyUserRepository.findByStudy_Id(study.getId()));
 			nbStudies++;
 			if (!hasPrivilege(study, right)) {
 				return false;
@@ -508,6 +560,25 @@ public class StudySecurityService {
 	 */
 	private boolean hasPrivilege(Study study, StudyUserRight neededRight) {
 		return study != null && hasPrivilege(study.getStudyUserList(), neededRight);
+	}
+
+	/**
+	 * Check that the connected user has any of these rights on this study.
+	 * 
+	 * @param study
+	 * @param neededRight
+	 * @return true or false
+	 */
+	private boolean hasAnyPrivilege(Study study, List<StudyUserRight> neededRights) {
+		if (neededRights == null || study == null) return false;
+		else {
+			for (StudyUserRight right : neededRights) {
+				if (hasPrivilege(study.getStudyUserList(), right)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
