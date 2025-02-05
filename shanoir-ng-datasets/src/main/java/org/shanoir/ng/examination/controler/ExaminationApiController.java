@@ -14,14 +14,16 @@
 
 package org.shanoir.ng.examination.controler;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
-import org.apache.commons.io.FileUtils;
-import org.apache.solr.client.solrj.SolrServerException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
@@ -33,7 +35,11 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.shared.exception.*;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ErrorDetails;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
@@ -52,14 +58,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 
 @Controller
 public class ExaminationApiController implements ExaminationApi {
@@ -98,7 +103,6 @@ public class ExaminationApiController implements ExaminationApi {
 	public ResponseEntity<Void> deleteExamination(
 			@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId) {
 		Long studyId = examinationService.findById(examinationId).getStudyId();
-
 		ShanoirEvent event = null;
 		event = new ShanoirEvent(
 				ShanoirEventType.DELETE_EXAMINATION_EVENT,
@@ -108,11 +112,8 @@ public class ExaminationApiController implements ExaminationApi {
 				ShanoirEvent.IN_PROGRESS,
 				0,
 				studyId);
-
 		eventService.publishEvent(event);
-
 		examinationService.deleteExaminationAsync(examinationId, studyId, event);
-
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
@@ -135,7 +136,6 @@ public class ExaminationApiController implements ExaminationApi {
 		}
 		return new ResponseEntity<>(examinationMapper.examinationsToExaminationDTOs(examinations), HttpStatus.OK);
 	}
-
 	
 	@Override
 	public ResponseEntity<Page<ExaminationDTO>> findPreclinicalExaminations(
@@ -180,7 +180,9 @@ public class ExaminationApiController implements ExaminationApi {
 			@Parameter(description = "the examination to create", required = true) @RequestBody @Valid final ExaminationDTO examinationDTO,
 			final BindingResult result) throws RestServiceException {
 		validate(result);
-        final Examination createdExamination = examinationService.save(examinationMapper.examinationDTOToExamination(examinationDTO));
+		Examination examination = examinationMapper.examinationDTOToExamination(examinationDTO);
+		generateStudyInstanceUID(examination);
+        final Examination createdExamination = examinationService.save(examination);
 		// NB: Message as centerId / subjectId is important in RabbitMQStudiesService
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, createdExamination.getId().toString(), KeycloakUtil.getTokenUserId(), "centerId:" + createdExamination.getCenterId() + ";subjectId:" + (createdExamination.getSubject() != null ? createdExamination.getSubject().getId() : null), ShanoirEvent.SUCCESS, createdExamination.getStudyId()));
 		return new ResponseEntity<>(examinationMapper.examinationToExaminationDTO(createdExamination), HttpStatus.OK);
@@ -250,10 +252,9 @@ public class ExaminationApiController implements ExaminationApi {
 		List<String> pathList = new ArrayList<>();
 		pathList.add(file.getOriginalFilename());
 		examination.setExtraDataFilePathList(pathList);
+		generateStudyInstanceUID(examination);
 		Examination dbExamination = examinationService.save(examination);
-		
 		String path = examinationService.addExtraData(dbExamination.getId(), file);
-		
 		if (path != null) {
 			return new ResponseEntity<>(HttpStatus.OK);
 		} else {
@@ -261,7 +262,6 @@ public class ExaminationApiController implements ExaminationApi {
 		}		
 	}
 	
-
 	@Override
 	public void downloadExtraData(
 			@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
@@ -273,9 +273,7 @@ public class ExaminationApiController implements ExaminationApi {
 			response.sendError(HttpStatus.NO_CONTENT.value());
 			return;
 		}
-
 		String contentType = request.getServletContext().getMimeType(fileToDownLoad.getAbsolutePath());
-
 		try (InputStream is = new FileInputStream(fileToDownLoad);) {
 			response.setHeader("Content-Disposition", "attachment;filename=" + fileToDownLoad.getName());
 			response.setContentType(contentType);
@@ -319,4 +317,18 @@ public class ExaminationApiController implements ExaminationApi {
 			}
 		});
 	}
+
+	/**
+	 * This method generates during the examination creation a DICOM
+	 * StudyInstanceUID, that will be used for all DICOM files of this
+	 * examination == DICOM study.
+	 * 
+	 * @param examination
+	 */
+	private void generateStudyInstanceUID(Examination examination) {
+		UIDGeneration generator = new UIDGeneration();
+		String newUID = generator.getNewUID();
+		examination.setStudyInstanceUID(newUID);
+	}
+
 }
