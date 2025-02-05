@@ -115,6 +115,28 @@ public class DatasetServiceImpl implements DatasetService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
+	private void delete(Dataset entity) throws ShanoirException, SolrServerException, IOException, RestServiceException {
+		Long id = entity.getId();
+
+		// Remove parent processing to avoid errors
+		entity.setDatasetProcessing(null);
+		processingService.removeDatasetFromAllProcessingInput(id);
+		processingResourceService.deleteByDatasetId(id);
+		propertyService.deleteByDatasetId(id);
+		repository.deleteById(id);
+
+		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getStudyId()));
+
+	}
+
+	/**
+	 * Call by dataset-details. Also reject from pacs
+	 * @param id dataset id.
+	 * @throws ShanoirException
+	 * @throws SolrServerException
+	 * @throws IOException
+	 * @throws RestServiceException
+	 */
 	@Override
 	@Transactional
 	public void deleteById(final Long id) throws ShanoirException, SolrServerException, IOException, RestServiceException {
@@ -130,20 +152,21 @@ public class DatasetServiceImpl implements DatasetService {
 					));
 		}
 
-		// Remove parent processing to avoid errors
-		dataset.setDatasetProcessing(null);
-		processingService.removeDatasetFromAllProcessingInput(id);
-		processingResourceService.deleteByDatasetId(id);
-		propertyService.deleteByDatasetId(id);
-		repository.deleteById(id);
+		delete(dataset);
 
 		if (CollectionUtils.isEmpty(dataset.getCopies())) {
 			this.deleteDatasetFromPacs(dataset);
 		}
-		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, dataset.getStudyId()));
 	}
 
-
+	/**
+	 * Called by acquisition delete. Does not reject from pacs as acquisition already does it.
+	 * @param id
+	 * @throws ShanoirException
+	 * @throws SolrServerException
+	 * @throws IOException
+	 * @throws RestServiceException
+	 */
 	public void deleteByIdCascade(final Long id) throws ShanoirException, SolrServerException, IOException, RestServiceException {
 		final Dataset dataset = repository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
@@ -157,14 +180,7 @@ public class DatasetServiceImpl implements DatasetService {
 					));
 		}
 
-		// Remove parent processing to avoid errors
-		dataset.setDatasetProcessing(null);
-		processingService.removeDatasetFromAllProcessingInput(id);
-		processingResourceService.deleteByDatasetId(id);
-		propertyService.deleteByDatasetId(id);
-		repository.deleteById(id);
-
-		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, dataset.getStudyId()));
+		delete(dataset);
 	}
 
 	@Override
