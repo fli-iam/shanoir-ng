@@ -27,7 +27,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class Subject {
 
 	@JsonProperty("id")
-	private long id;
+	private Long id;
 
 	@JsonProperty("name")
 	private String name;
@@ -49,11 +49,11 @@ public class Subject {
 
 	private PseudonymusHashValues pseudonymusHashValues;
 	
-	public long getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
