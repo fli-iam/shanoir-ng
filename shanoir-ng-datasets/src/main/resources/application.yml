@@ -37,11 +37,12 @@ spring:
         db_structure_naming_strategy: legacy
     properties:
       hibernate:
+        show_sql: true
         connection:
           charset: UTF-8
         hbm2ddl:
           import_files_sql_extractor: org.hibernate.tool.hbm2ddl.MultipleLinesSqlCommandExtractor
-    show_sql: true
+
   main:
     allow-circular-references: true
   mvc:
