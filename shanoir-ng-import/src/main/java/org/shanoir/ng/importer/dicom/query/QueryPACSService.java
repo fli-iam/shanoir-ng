@@ -570,9 +570,15 @@ public class QueryPACSService {
 					}
 				}
 			});
-			instances.sort(new InstanceNumberSorter());
-			serie.setInstances(instances);
-			LOG.info(instances.size() + " instances found for serie " + serie.getSeriesDescription());
+			if (!instances.isEmpty()) {
+				instances.sort(new InstanceNumberSorter());
+				serie.setInstances(instances);
+				LOG.info(instances.size() + " instances found for serie " + serie.getSeriesDescription());
+			} else {
+				LOG.warn("Serie found with empty instances and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
+				serie.setIgnored(true);
+				serie.setSelected(false);
+			}
 		}
 	}
 
