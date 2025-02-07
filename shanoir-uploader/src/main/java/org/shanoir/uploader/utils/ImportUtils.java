@@ -7,7 +7,6 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -17,6 +16,7 @@ import javax.swing.JProgressBar;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
+import org.shanoir.ng.importer.dicom.SeriesNumberOrDescriptionSorter;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
@@ -43,7 +43,6 @@ import org.shanoir.uploader.model.rest.ManufacturerModel;
 import org.shanoir.uploader.model.rest.Sex;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
-import org.shanoir.uploader.model.rest.StudyCenter;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
@@ -241,6 +240,8 @@ public class ImportUtils {
 
 	/**
 	 * subjectId and examinationId are created in the window of ImportDialog and are not known before.
+	 * In this method selectedSeries as attribute of ImportJob are copied into patient - study - serie
+	 * tree, as still expected like this on the server.
 	 * 
 	 * @param uploadJob
 	 * @param subjectName
@@ -288,8 +289,10 @@ public class ImportUtils {
 		final List<Serie> series = new ArrayList<>(importJob.getSelectedSeries());
 		for (Serie serie : series) {
 			List<Instance> instances = serie.getInstances();
-			if (instances == null) {
+			if (instances == null || instances.isEmpty()) {
+				serie.setIgnored(true);
 				serie.setSelected(false);
+				logger.warn("Serie [" + serie.getSeriesDescription() + "] found with instances == null or empty. Serie de-selected.");
 				continue;
 			}
 			/**
@@ -307,9 +310,12 @@ public class ImportUtils {
 			}
 			serie.setSelected(true);
 		}
+		// We sort again here, even if the QueryPACSService or the DicomDirToModelService sort already
+		// The user select after both components in the tree GUI of ShanoirUploader, where a linked list
+		// is used, therefore as the user can click and series on his behalf, we sort again here.
+		series.sort(new SeriesNumberOrDescriptionSorter());
 		studyImportJob.setSeries(series);
 		studiesImportJob.add(studyImportJob);
-		//importJob.setStudy(studyImportJob);
 		patient.setStudies(studiesImportJob);
 		importJob.setPatients(patients);
 		return importJob;
@@ -629,18 +635,6 @@ public class ImportUtils {
 		for (AcquisitionEquipment acquisitionEquipment : acquisitionEquipments) {
 			if (acquisitionEquipment.getManufacturerModel().getManufacturer().getName().equalsIgnoreCase(manufacturer)) {
 				return acquisitionEquipment.getManufacturerModel().getManufacturer();
-			}
-		}
-		return null;
-	}
-
-	private static Center findCenterOfStudy(Study studyREST, UploadJob uploadJob) {
-		String institutionName = uploadJob.getMriInformation().getInstitutionName().toLowerCase();
-		List<StudyCenter> studyCenters = studyREST.getStudyCenterList();
-		for (StudyCenter studyCenter : studyCenters) {
-			String centerName = studyCenter.getCenter().getName().toLowerCase();
-			if (centerName.contains(institutionName) || institutionName.contains(centerName)) {
-				return studyCenter.getCenter();
 			}
 		}
 		return null;
