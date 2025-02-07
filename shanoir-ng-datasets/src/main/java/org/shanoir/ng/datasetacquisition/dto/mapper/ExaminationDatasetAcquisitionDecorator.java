@@ -69,7 +69,6 @@ public abstract class ExaminationDatasetAcquisitionDecorator implements Examinat
 		datasetAcquisitionDTO.setName(getExaminationDatasetAcquisitionDTOName(datasetAcquisition));
 		datasetAcquisitionDTO.setStudyId(datasetAcquisition.getExamination().getStudyId());
 		datasetAcquisitionDTO.setExaminationId(datasetAcquisition.getExamination().getId());
-
 		return datasetAcquisitionDTO;
 	}
 
