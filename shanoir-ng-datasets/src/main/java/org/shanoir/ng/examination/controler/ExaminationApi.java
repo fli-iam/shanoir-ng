@@ -103,8 +103,6 @@ public interface ExaminationApi {
 			@ApiResponse(responseCode = "403", description = "forbidden"),
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/subject/{subjectId}/study/{studyId}", produces = { "application/json" })
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterSubjectExaminationDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<SubjectExaminationDTO>> findExaminationsBySubjectIdStudyId(
 			@Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
