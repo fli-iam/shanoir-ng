@@ -321,14 +321,16 @@ public class ExaminationApiController implements ExaminationApi {
 	/**
 	 * This method generates during the examination creation a DICOM
 	 * StudyInstanceUID, that will be used for all DICOM files of this
-	 * examination == DICOM study.
+	 * examination (== DICOM study).
 	 * 
 	 * @param examination
 	 */
 	private void generateStudyInstanceUID(Examination examination) {
-		UIDGeneration generator = new UIDGeneration();
-		String newUID = generator.getNewUID();
-		examination.setStudyInstanceUID(newUID);
+		if (examination != null) {
+			UIDGeneration generator = new UIDGeneration();
+			String newUID = generator.getNewUID();
+			examination.setStudyInstanceUID(newUID);	
+		}
 	}
 
 }
