@@ -58,7 +58,7 @@ public class CtDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 	private DatasetStrategy<CtDataset> datasetStrategy;
 	
 	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
+	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, String seriesInstanceUID, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
 		CtDatasetAcquisition datasetAcquisition = new CtDatasetAcquisition();
 		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}",serie.getSequenceName(), serie.getProtocolName(), rank);
 		

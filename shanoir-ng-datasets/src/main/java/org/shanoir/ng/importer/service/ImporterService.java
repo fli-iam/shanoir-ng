@@ -368,12 +368,11 @@ public class ImporterService {
 
     public DatasetAcquisition createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
         if (checkSerieForDicomImages(serie)) {
-            DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob, dicomAttributes);			
+            DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, null, rank, importJob, dicomAttributes);			
             datasetAcquisition.setExamination(examination);
             if (datasetAcquisition.getAcquisitionEquipmentId() == null) {
                 datasetAcquisition.setAcquisitionEquipmentId(importJob.getAcquisitionEquipmentId());
             }
-
             return datasetAcquisition;
         } else {
             LOG.warn("Serie " + serie.getSequenceName() + ", " + serie.getProtocolName() + " found without images. Ignored.");

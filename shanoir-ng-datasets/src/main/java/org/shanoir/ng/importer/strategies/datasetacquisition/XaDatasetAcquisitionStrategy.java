@@ -53,7 +53,7 @@ public class XaDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy{
 	
 	
 	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes)
+	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, String seriesInstanceUID, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes)
 			throws Exception {
 		
 		XaDatasetAcquisition datasetAcquisition = new XaDatasetAcquisition();
