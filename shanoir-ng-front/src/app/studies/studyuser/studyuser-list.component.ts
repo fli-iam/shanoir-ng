@@ -132,7 +132,6 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
             // { headerName: 'First Name', field: 'user.firstName' },
             // { headerName: 'Last Name', field: 'user.lastName' },
             // { headerName: 'Email', field: 'user.email', width: '200%' },
-            { headerName: 'Role', field: 'user.role.displayName', width: '80px', defaultSortCol: true },
             { headerName: 'Confirmed', field: 'confirmed', type: 'boolean', editable: false, width: '54px', disableSorting: true},
             // { headerName: 'Centers', type: 'boolean', editable: false, width: '54px', disableSorting: true,
             //     cellRenderer: (params: any) => !params.data.centers || params.data.centers.length == 0},
@@ -153,6 +152,9 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         ];
         if (deleteButton) {
             this.columnDefs.push({ headerName: '', type: 'button', awesome: 'fa-regular fa-trash-can', action: this.removeStudyUser, editable: (su: StudyUser) => !this.disableEdit(su)});
+        }
+        if(this.keycloakService.isUserAdminOrExpert()){
+            this.columnDefs.splice(1, 0, { headerName: 'Role', field: 'user.role.displayName', width: '80px', defaultSortCol: true});
         }
     }
 
