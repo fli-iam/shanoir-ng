@@ -73,7 +73,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<fieldset>
 					<legend>General rights</legend>
 					<ul>
-						<li>
+						<li *ngIf="pannelStudyUser.user">
 							<label>Role</label>
 							<span class="right-col left-icon fix-icon user-icon">
 								<i *ngIf="pannelStudyUser.user?.role?.id == 2" class="fas fa-user"></i>

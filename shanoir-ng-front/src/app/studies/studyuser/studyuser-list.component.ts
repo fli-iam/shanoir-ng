@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -55,7 +55,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     @Input() studies: Study[] = [];
     @Input() study: Study;
     @Input() studyCenters: StudyCenter[] = [];
-    protected consoleService: ConsoleService; 
+    protected consoleService: ConsoleService;
     centers: Center[] = [];
     studyOptions: Option<Study>[];
     private browserPaging: BrowserPaging<StudyUser>;
@@ -131,20 +131,19 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
             // { headerName: 'First Name', field: 'user.firstName' },
             // { headerName: 'Last Name', field: 'user.lastName' },
             // { headerName: 'Email', field: 'user.email', width: '200%' },
-            { headerName: 'Role', field: 'user.role.displayName', width: '80px', defaultSortCol: true },
             { headerName: 'Confirmed', field: 'confirmed', type: 'boolean', editable: false, width: '54px', disableSorting: true},
             // { headerName: 'Centers', type: 'boolean', editable: false, width: '54px', disableSorting: true,
             //     cellRenderer: (params: any) => !params.data.centers || params.data.centers.length == 0},
             { headerName: 'Can see all', type: 'boolean', editable: false, width: '54px', disableSorting: true,
                 //onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_SEE_ALL, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL)},
-            { headerName: 'Can download', type: 'boolean', editable: (su: StudyUser) => !this.disableEdit(su), width: '54px', disableSorting: true, 
+            { headerName: 'Can download', type: 'boolean', editable: (su: StudyUser) => !this.disableEdit(su), width: '54px', disableSorting: true,
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_DOWNLOAD, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_DOWNLOAD)},
-            { headerName: 'Can import', type: 'boolean', editable: (su: StudyUser) => !this.disableEdit(su), width: '54px', disableSorting: true, 
+            { headerName: 'Can import', type: 'boolean', editable: (su: StudyUser) => !this.disableEdit(su), width: '54px', disableSorting: true,
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_IMPORT, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_IMPORT)},
-            { headerName: 'Can admin', type: 'boolean',  disableSorting: true, editable: (su: StudyUser) => su.user && su.user.role.displayName != 'User' && !this.disableEdit(su), width: '54px', 
+            { headerName: 'Can admin', type: 'boolean',  disableSorting: true, editable: (su: StudyUser) => su.user && su.user.role.displayName != 'User' && !this.disableEdit(su), width: '54px',
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_ADMINISTRATE, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE), },
             // { headerName: 'Receive Import Mail', type: 'boolean', field: 'receiveNewImportReport', editable: true, width: '54px' },
@@ -153,10 +152,13 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         if (deleteButton) {
             this.columnDefs.push({ headerName: '', type: 'button', awesome: 'fa-regular fa-trash-can', action: this.removeStudyUser, editable: (su: StudyUser) => !this.disableEdit(su)});
         }
+        if(this.keycloakService.isUserAdminOrExpert()){
+            this.columnDefs.splice(1, 0, { headerName: 'Role', field: 'user.role.displayName', width: '80px', defaultSortCol: true});
+        }
     }
 
     /**
-     * On select/unselect given right for the given study user 
+     * On select/unselect given right for the given study user
      */
     onEditRight(right: StudyUserRight, su: StudyUser, selected: boolean) {
         if (!su.studyUserRights.includes(right) && selected) {
@@ -228,7 +230,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
             return;
         }
         if (!this.studyUserList.find(su => su.study?.id == selectedStudy.id)){
-            return;   
+            return;
         }
         this.addStudy(selectedStudy);
     }
@@ -284,7 +286,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         }
         if (this.studyUserList.filter(user => user.userId == selectedUser.id).length > 0){
             this.consoleService.log('warn', "User already in the list.");
-            return;   
+            return;
         }
         if (this.isMe(selectedUser)) {
             this.freshlyAddedMe = true;
