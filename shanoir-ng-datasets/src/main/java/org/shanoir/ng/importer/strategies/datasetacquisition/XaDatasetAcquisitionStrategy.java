@@ -58,9 +58,9 @@ public class XaDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy{
 		
 		XaDatasetAcquisition datasetAcquisition = new XaDatasetAcquisition();
 		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}", serie.getSequenceName(), serie.getProtocolName(), rank);
-
 		datasetAcquisition.setImportDate(LocalDate.now());
 		datasetAcquisition.setUsername(importJob.getUsername());
+		datasetAcquisition.setSeriesInstanceUID(seriesInstanceUID);
 		datasetAcquisition.setRank(rank);
 		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
 		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());

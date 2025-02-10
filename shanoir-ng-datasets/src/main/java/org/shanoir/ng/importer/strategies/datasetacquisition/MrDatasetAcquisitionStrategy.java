@@ -85,6 +85,7 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}", serie.getSequenceName(), serie.getProtocolName(), rank);
 		mrDatasetAcquisition.setUsername(importJob.getUsername());
 		mrDatasetAcquisition.setImportDate(LocalDate.now());
+		mrDatasetAcquisition.setSeriesInstanceUID(seriesInstanceUID);
 		mrDatasetAcquisition.setRank(rank);
 		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
 		mrDatasetAcquisition.setSortingIndex(serie.getSeriesNumber());

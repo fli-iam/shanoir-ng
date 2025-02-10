@@ -58,9 +58,9 @@ public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy
 		
 		PetDatasetAcquisition datasetAcquisition = new PetDatasetAcquisition();
 		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}", serie.getSequenceName(), serie.getProtocolName(), rank);
-
 		datasetAcquisition.setImportDate(LocalDate.now());
 		datasetAcquisition.setUsername(importJob.getUsername());
+		datasetAcquisition.setSeriesInstanceUID(seriesInstanceUID);
 		datasetAcquisition.setRank(rank);
 		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
 
