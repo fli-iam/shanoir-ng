@@ -24,6 +24,7 @@ export class ImportJob {
     workFolder: string;
     patients: PatientDicom[];
     examinationId: number;
+    studyInstanceUID: string;
     studyId: number;
     studyCardId: number;
     acquisitionEquipmentId: number;

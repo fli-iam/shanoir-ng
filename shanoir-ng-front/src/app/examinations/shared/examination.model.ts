@@ -24,6 +24,7 @@ import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
 export class Examination extends Entity {
     id: number;
     examinationDate: Date;
+    studyInstanceUID: string;
     subject: IdName | Subject;
     study: IdName | Study;
     center: IdName | Center;

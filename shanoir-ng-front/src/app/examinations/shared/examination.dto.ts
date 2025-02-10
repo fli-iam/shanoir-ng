@@ -72,6 +72,7 @@ export class ExaminationDTOService {
     static mapSyncFields(dto: ExaminationDTO, entity: Examination): Examination {
         entity.id = dto.id;
         entity.examinationDate = new Date(dto.examinationDate);
+        entity.studyInstanceUID = dto.studyInstanceUID;
         entity.comment = dto.comment;
         entity.source = dto.source;
         entity.copies = dto.copies;
@@ -103,6 +104,7 @@ export class ExaminationDTO {
     centerId: number;
 	comment: string;
     examinationDate: Date;
+    studyInstanceUID: string;
     note: string;
     studyId: number;
     subject: IdName;
