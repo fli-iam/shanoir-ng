@@ -121,6 +121,7 @@ export class ExaminationDTO {
             this.centerId = examination.center ? examination.center.id : null;
             this.comment = examination.comment;
             this.examinationDate = examination.examinationDate;
+            this.studyInstanceUID = examination.studyInstanceUID;
             this.note = examination.note;
             this.studyId = examination.study ? examination.study.id : null;
             this.subject = examination.subject ? new IdName(examination.subject.id, examination.subject.name) : null;
