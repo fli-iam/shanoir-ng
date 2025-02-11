@@ -2,7 +2,6 @@ package org.shanoir.uploader.action;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -18,7 +17,6 @@ import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
-import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.DicomTreeNode;
 import org.shanoir.uploader.dicom.query.PatientTreeNode;
 import org.shanoir.uploader.dicom.query.SerieTreeNode;
