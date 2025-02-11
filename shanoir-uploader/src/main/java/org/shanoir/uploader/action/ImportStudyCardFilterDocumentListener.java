@@ -61,6 +61,12 @@ import org.shanoir.uploader.gui.MainWindow;
                     if (model.getSize() > 0) {
                         mainWindow.importDialog.studyCardCB.setSelectedIndex(0);
                     }
+                    // We deactivate the import button if the user has not selected any study card or emptied filter
+                    if (filter.isEmpty()) {
+                        mainWindow.importDialog.exportButton.setEnabled(false);
+                    } else {
+                        mainWindow.importDialog.exportButton.setEnabled(true);
+                    }
                     this.isUpdating = false;
                 });    
             } catch (Exception ex) {
