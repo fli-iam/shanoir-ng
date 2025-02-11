@@ -83,6 +83,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         importJob.subjectName = context.subject.name;
         importJob.studyName = context.study.name;
         importJob.examinationId = context.examination.id;
+        importJob.studyInstanceUID = context.examination.studyInstanceUID;
         importJob.studyId = context.study.id;
         importJob.acquisitionEquipmentId = context.acquisitionEquipment.id;
         importJob.archive = contextImportJob.archive;
