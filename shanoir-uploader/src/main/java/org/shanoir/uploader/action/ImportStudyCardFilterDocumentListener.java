@@ -43,35 +43,45 @@ import org.shanoir.uploader.gui.MainWindow;
     public void changedUpdate(DocumentEvent e) {
     }
  
-      private void filter(DocumentEvent e) {
-            try {
-                String filter = e.getDocument().getText(0, e.getDocument().getLength());
-                SwingUtilities.invokeLater(() -> {
-                    this.isUpdating = true;
-                    DefaultComboBoxModel<StudyCard> model = (DefaultComboBoxModel<StudyCard>) mainWindow.importDialog.studyCardCB.getModel();
-                    model.removeAllElements();
+    private void filter(DocumentEvent e) {
+        try {
+            String filter = e.getDocument().getText(0, e.getDocument().getLength());
+            SwingUtilities.invokeLater(() -> {
+                this.isUpdating = true;
+                DefaultComboBoxModel<StudyCard> model = (DefaultComboBoxModel<StudyCard>) mainWindow.importDialog.studyCardCB.getModel();
+                model.removeAllElements();
 
-                    for (StudyCard studyCard : defaultStudyCards) {
-                        if (studyCard.toString().toLowerCase().contains(filter.toLowerCase())) {
-                            model.addElement(studyCard);
-                        }
+                for (StudyCard studyCard : defaultStudyCards) {
+                    if (studyCard.toString().toLowerCase().contains(filter.toLowerCase())) {
+                        model.addElement(studyCard);
                     }
-                    JTextComponent editor = (JTextComponent) mainWindow.importDialog.studyCardCB.getEditor().getEditorComponent();
-                    editor.setText(filter);
-                    if (model.getSize() > 0) {
-                        mainWindow.importDialog.studyCardCB.setSelectedIndex(0);
+                }
+                JTextComponent editor = (JTextComponent) mainWindow.importDialog.studyCardCB.getEditor().getEditorComponent();
+                editor.setText(filter);
+
+                // if the filter shows results, we select the first one by default and show the list of results
+                if (model.getSize() > 0) {
+                    mainWindow.importDialog.studyCardCB.showPopup();
+                } else {
+                    mainWindow.importDialog.studyCardCB.hidePopup();
+                }
+
+                // Check if the filter matches an existing study card to activate the export button
+                boolean foundMatch = false;
+                for (int i = 0; i < model.getSize(); i++) {
+                    if (model.getElementAt(i).toString().equalsIgnoreCase(filter)) {
+                        foundMatch = true;
+                        break;
                     }
-                    // We deactivate the import button if the user has not selected any study card or emptied filter
-                    if (filter.isEmpty()) {
-                        mainWindow.importDialog.exportButton.setEnabled(false);
-                    } else {
-                        mainWindow.importDialog.exportButton.setEnabled(true);
-                    }
-                    this.isUpdating = false;
-                });    
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+                }
+
+                mainWindow.importDialog.exportButton.setEnabled(foundMatch);
+
+                this.isUpdating = false;
+            });    
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
         
     }
 
