@@ -146,7 +146,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
             'study': [{value: this.examination.study, disabled: this.inImport}, Validators.required],
-            'subject': [{value: this.examination.subject, disabled: this.inImport}],
+            'subject': [{value: this.examination.subject, disabled: this.inImport}, Validators.required],
             'center': [{value: this.examination.center, disabled: this.inImport}, Validators.required],
             'examinationDate': [this.examination.examinationDate, [Validators.required, DatepickerComponent.validator]],
             'comment': [this.examination.comment, Validators.pattern(this.pattern)],

@@ -12,49 +12,36 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { Router } from '@angular/router';
-import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 import { TreeService } from 'src/app/studies/study/tree.service';
-import { MemberNode } from '../../tree/tree.model';
-import { User } from '../shared/user.model';
+import { DatasetNode, MetadataNode } from '../../tree/tree.model';
 
 
 @Component({
-    selector: 'member-node',
-    templateUrl: 'member-node.component.html',
+    selector: 'metadata-node',
+    templateUrl: 'metadata-node.component.html',
     standalone: false
 })
 
-export class MemberNodeComponent extends TreeNodeAbstractComponent<MemberNode> implements OnChanges {
+export class MetadataNodeComponent extends TreeNodeAbstractComponent<MetadataNode> implements OnChanges {
 
-    @Input() input: MemberNode | User;
-    isAdmin: boolean;
-    detailsPath: string = '/user/details/';
+    @Input() input: MetadataNode;
+    detailsPath: string = '/dataset/details/dicom/';
 
     constructor(
-            private router: Router,
-            keycloakService: KeycloakService,
             protected treeService: TreeService,
             elementRef: ElementRef) {
         super(elementRef);
-        this.isAdmin = keycloakService.isUserAdmin();
     }
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {
-            if (this.input instanceof MemberNode) {
+            if (this.input instanceof MetadataNode) {
                 this.node = this.input;
             } else {
                 throw new Error('not implemented yet');
             }
         }
-    }
-
-    hasChildren(): boolean | 'unknown' {
-        if (!this.node.rights) return false;
-        else if (this.node.rights == 'UNLOADED') return 'unknown';
-        else return this.node.rights.length > 0;
     }
 }
