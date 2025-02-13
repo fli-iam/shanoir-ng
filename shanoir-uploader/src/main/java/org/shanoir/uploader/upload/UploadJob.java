@@ -40,6 +40,9 @@ public class UploadJob {
 	private UploadState uploadState;
 	
 	private Collection<SerieTreeNode> series;
+
+	// Default is MR modality, used to determine the display of study card selection
+	private boolean isModalityMR = true;
 	
 	private MRI mriInformation;
 	
@@ -153,6 +156,15 @@ public class UploadJob {
 
 	public void setStudyDate(String studyDate) {
 		this.studyDate = studyDate;
+	}
+
+	public boolean isModalityMR() {
+		return isModalityMR;
+	}
+
+	@XmlElement
+	public void setModalityMR(boolean isModalityMR) {
+		this.isModalityMR = isModalityMR;
 	}
 	
 	@XmlElement

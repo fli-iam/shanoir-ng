@@ -186,6 +186,14 @@ public class ImportUtils {
 		 * Serie level
 		 */
 		List<Serie> selectedSeries = new ArrayList<>(importJob.getSelectedSeries());
+
+		// set modality to MR if at least one serie is MR to manage study card field in import dialog
+		for (Serie serie : selectedSeries) {
+			if (!("MR".equals(serie.getModality()))) {
+				uploadJob.setModalityMR(false);
+				break;
+			}
+		}
 		Serie firstSerie = selectedSeries.iterator().next();
 		MRI mriInformation = new MRI();
 		InstitutionDicom institutionDicom = firstSerie.getInstitution();

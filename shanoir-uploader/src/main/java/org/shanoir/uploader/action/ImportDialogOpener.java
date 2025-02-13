@@ -72,6 +72,13 @@ public class ImportDialogOpener {
 			updateImportDialogForNewExamFields(studyDate, uploadJob.getStudyDescription());
 			updateImportDialogForStudyAndStudyCard(studiesWithStudyCards);
 			updateImportDialogForMRICenter(uploadJob);
+
+			// We hide study card selection in case modality is not MR
+			if (!(uploadJob.isModalityMR())) {
+				importDialog.studyCardLabel.setVisible(false);
+				importDialog.studyCardCB.setVisible(false);
+			}
+
 			importDialog.mrExaminationExamExecutiveLabel.setVisible(false);
 			importDialog.mrExaminationExamExecutiveCB.setVisible(false);
 		} catch (Exception e) {
