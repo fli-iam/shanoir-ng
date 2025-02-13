@@ -154,9 +154,7 @@ public class DatasetServiceImpl implements DatasetService {
 
 		delete(dataset);
 
-		if (CollectionUtils.isEmpty(dataset.getCopies())) {
-			this.deleteDatasetFromPacs(dataset);
-		}
+		this.deleteDatasetFromPacs(dataset);
 	}
 
 	/**

@@ -154,8 +154,8 @@ public class ExaminationServiceImpl implements ExaminationService {
 					eventService.publishEvent(event);
 				}
 			}
-			String seriesInstanceUID = studyInstanceUIDHandler.findStudyInstanceUID(examination);
-			dicomWebService.rejectExaminationFromPacs(seriesInstanceUID);
+			String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUID(examination);
+			dicomWebService.rejectExaminationFromPacs(studyInstanceUID);
 
 			examinationRepository.deleteById(id);
 		}

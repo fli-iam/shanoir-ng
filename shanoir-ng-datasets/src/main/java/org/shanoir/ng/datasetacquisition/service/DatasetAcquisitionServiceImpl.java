@@ -247,9 +247,9 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         }
         delete(entity, event);
 
-        String seriesInstanceUID = studyInstanceUIDHandler.findStudyInstanceUID(entity.getExamination());
-        String studyInstanceUID = seriesInstanceUIDHandler.findSeriesInstanceUID(entity);
-        dicomWebService.rejectAcquisitionFromPacs(seriesInstanceUID, studyInstanceUID);
+        String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUID(entity.getExamination());
+        String seriesInstanceUID = seriesInstanceUIDHandler.findSeriesInstanceUID(entity);
+        dicomWebService.rejectAcquisitionFromPacs(studyInstanceUID, seriesInstanceUID);
 
         repository.deleteById(id);
         shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));

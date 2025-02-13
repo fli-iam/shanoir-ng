@@ -296,24 +296,14 @@ public class DICOMWebService {
 		}
 	}
 
-	public void rejectExaminationFromPacs(String studyUID) throws ShanoirException {
-		String rejectURL = this.serverURL + "/" + studyUID;
-		if (wadoURLHandler.isWADO_URI(rejectURL)) {
-			rejectURL = wadoURLHandler.convertWADO_URI_TO_WADO_RS(rejectURL) + REJECT_SUFFIX;
-		} else {
-			rejectURL = rejectURL + REJECT_SUFFIX;
-		}
+	public void rejectExaminationFromPacs(String studyInstanceUID) throws ShanoirException {
+		String rejectURL = this.serverURL + "/" + studyInstanceUID + REJECT_SUFFIX;
 
 		rejectURLFromPacs(rejectURL);
 	}
 
-	public void rejectAcquisitionFromPacs(String studyUID, String seriesUID) throws ShanoirException {
-		String rejectURL = this.serverURL + "/" + studyUID + "/series/" + seriesUID;
-		if (wadoURLHandler.isWADO_URI(rejectURL)) {
-			rejectURL = wadoURLHandler.convertWADO_URI_TO_WADO_RS(rejectURL) + REJECT_SUFFIX;
-		} else {
-			rejectURL = rejectURL + REJECT_SUFFIX;
-		}
+	public void rejectAcquisitionFromPacs(String studyInstanceUID, String seriesInstanceUID) throws ShanoirException {
+		String rejectURL = this.serverURL + "/" + studyInstanceUID + "/series/" + seriesInstanceUID + REJECT_SUFFIX;
 
 		rejectURLFromPacs(rejectURL);
 	}
@@ -352,7 +342,7 @@ public class DICOMWebService {
 		}
 	}
 
-	@Scheduled(cron = "0 */15 * * * *", zone="Europe/Paris")
+	@Scheduled(cron = "0 0 */6 * * *", zone="Europe/Paris")
 	public void deleteDicomFilesFromPacs() throws ShanoirException {
 		// Doc : https://smart-api.info/ui/be87344696148a41f577aca202ce84df#/IOCM-RS/deleteRejectedInstancesPermanently
 		LOG.error("Scheduled call to delete all rejected instances from pacs.");
