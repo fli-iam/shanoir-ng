@@ -71,7 +71,7 @@ public class SeriesInstanceUIDHandler {
         return seriesInstanceUID;
     }
 
-    private String findSeriesInstanceUID(DatasetAcquisition acquisition) {
+    public String findSeriesInstanceUID(DatasetAcquisition acquisition) {
         if (acquisition instanceof MrDatasetAcquisition
                 || acquisition instanceof CtDatasetAcquisition
                 || acquisition instanceof PetDatasetAcquisition) {
