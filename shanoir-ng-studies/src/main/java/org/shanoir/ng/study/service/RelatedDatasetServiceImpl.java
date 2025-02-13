@@ -174,7 +174,6 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 				centerToAdd.setCenter(center);
 				centerToAdd.setSubjectNamePrefix(null);
 				studyCenterList.add(centerToAdd);
-				study.setMonoCenter(false);
 				study.setStudyCenterList(studyCenterList);
 				studyRepository.save(study);
 			}

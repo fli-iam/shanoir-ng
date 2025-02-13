@@ -6,7 +6,7 @@
 	<groupId>org.shanoir-ng</groupId>
 	<artifactId>shanoir-ng-exchange</artifactId>
 	<packaging>jar</packaging>
-	<version>3.2.2</version>
+	<version>3.4.0</version>
 
 	<name>shanoir-ng-exchange</name>
 	<description>
@@ -28,7 +28,7 @@
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-ms-common</artifactId>
-			<version>3.2.2</version>
+			<version>3.4.0</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
 		<dependency>

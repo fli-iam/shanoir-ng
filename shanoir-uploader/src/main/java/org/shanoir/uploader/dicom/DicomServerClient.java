@@ -202,8 +202,15 @@ public class DicomServerClient implements IDicomServerClient {
 						}
 					}
 				}
-				instances.sort(new InstanceNumberSorter());
-				serie.setInstances(instances);
+				if (!instances.isEmpty()) {
+					instances.sort(new InstanceNumberSorter());
+					serie.setInstances(instances);
+					logger.info(instances.size() + " instances found for serie " + serie.getSeriesDescription());
+				} else {
+					logger.warn("Serie found with empty instances and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
+					serie.setIgnored(true);
+					serie.setSelected(false);
+				}
 				downloadOrCopyReport.append("Download: serie "
 					+ (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
 					+ serie.getSeriesDescription()
@@ -232,7 +239,7 @@ public class DicomServerClient implements IDicomServerClient {
 			} else {
 				downloadOrCopyReport.append("Error: Download: serie "
 					+ (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
-				 	+ serie.getSeriesDescription() + " downloaded with not existing serie folder.\n");
+				 	+ serie.getSeriesDescription() + " downloaded without an existing serie folder.\n");
 				logger.error(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
 						+ " DICOM files for serie " + seriesInstanceUID + ": " + serie.getSeriesDescription()
 						+ " has failed.\n\n");

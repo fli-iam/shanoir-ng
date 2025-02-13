@@ -64,7 +64,9 @@ export class CoilComponent extends EntityComponent<Coil> {
     }
     
     initView(): Promise<void> {
-        return Promise.resolve();
+        return this.centerService.getAll().then(centers => {
+            this.coil.center = centers.find(center => center.id == this.coil.center.id);
+        });
     }
 
     initEdit(): Promise<void> {
