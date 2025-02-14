@@ -3,6 +3,7 @@ package org.shanoir.ng.vip.executionMonitoring.security;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.vip.executionMonitoring.repository.ExecutionMonitoringRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,34 +16,18 @@ public class ExecutionMonitoringSecurityService {
     @Autowired
     private StudyRightsService studyRightsService;
 
+    @Autowired
+    private ExecutionMonitoringRepository executionMonitoringRepository;
+
     /**
-     * Check that the connected user has the given right for the given execution monitoring.
+     * Check that the connected user has the given right for the given execution monitoring relative to the id paramater.
      *
-     * @param executionMonitoring
+     * @param id
      * @param rightStr
-     * @return
+     * @return boolean
      */
-    public boolean hasRightOnExecutionMonitoring(ExecutionMonitoring executionMonitoring, String rightStr){
-        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-            return true;
-        }
-        if(executionMonitoring == null){
-            throw new IllegalArgumentException("ExecutionMonitoring cannot be null here.");
-        }
-        if(executionMonitoring.getStudyId() == null){
-            throw new IllegalArgumentException("Study id cannot be null here.");
-        }
-
-        return studyRightsService.hasRightOnStudy(executionMonitoring.getStudyId(), rightStr);
-    }
-
-    /**
-     * Check that the connected user has the given right to access all the execution monitoring.
-     *
-     * @return
-     */
-    public boolean hasRightOnEveryExecutionMonitoring(){
-        return KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN");
+    public boolean hasRightOnExecutionMonitoringById(Long id, String rightStr){
+        return hasRightOnExecutionMonitoring(executionMonitoringRepository.findById(id).get(), rightStr);
     }
 
     /**
@@ -53,21 +38,18 @@ public class ExecutionMonitoringSecurityService {
      * @return
      */
     public List<ExecutionMonitoring> filterExecutionMonitoringList(List<ExecutionMonitoring> executionMonitorings, String rightStr){
-        if(hasRightOnEveryExecutionMonitoring()) return executionMonitorings;
-
-        List<ExecutionMonitoring> validExecutionMonitorings = new ArrayList<>();
-
-        for(ExecutionMonitoring executionMonitoring : executionMonitorings){
-            if(executionMonitoring.getStudyId() == null){
-                throw new IllegalArgumentException("Study id cannot be null here. Execution monitoring id is : " + executionMonitoring.getId());
-            }
-            if(studyRightsService.hasRightOnStudy(executionMonitoring.getStudyId(), rightStr)){
-                validExecutionMonitorings.add(executionMonitoring);
-            }
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")){
+            return executionMonitorings;
+        } else {
+            return executionMonitorings.stream().filter(it -> hasRightOnExecutionMonitoring(it, rightStr)).toList();
         }
-
-        return validExecutionMonitorings;
     }
 
+    private boolean hasRightOnExecutionMonitoring(ExecutionMonitoring executionMonitoring, String rightStr){
+        if(executionMonitoring.getStudyId() == null){
+            throw new IllegalArgumentException("Study id cannot be null here.");
+        }
+        return studyRightsService.hasRightOnStudy(executionMonitoring.getStudyId(), rightStr);
+    }
 
 }

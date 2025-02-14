@@ -1,4 +1,4 @@
-package org.shanoir.ng.vip.path.controler;
+package org.shanoir.ng.vip.path;
 
 import java.io.IOException;
 

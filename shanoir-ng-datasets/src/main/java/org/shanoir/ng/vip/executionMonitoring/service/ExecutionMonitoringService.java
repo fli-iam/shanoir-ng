@@ -1,12 +1,18 @@
 package org.shanoir.ng.vip.executionMonitoring.service;
 
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.SecurityException;
+import org.shanoir.ng.vip.execution.dto.ExecutionCandidateDTO;
 import org.shanoir.ng.vip.shared.dto.DatasetParameterDTO;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.processing.dto.ParameterResourceDTO;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,60 +20,36 @@ import java.util.Optional;
 public interface ExecutionMonitoringService {
 
 	/**
-	 * Find entity by its id.
+	 * Create execution monitoring
 	 *
-	 * @param id id
-	 * @return an entity or null.
+	 * @param execution
+	 * @param inputDatasets
+	 * @return the created execution monitoring
 	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	Optional<ExecutionMonitoring> findById(Long id);
+	ExecutionMonitoring createExecutionMonitoring(ExecutionCandidateDTO execution, List<Dataset> inputDatasets) throws RestServiceException;
 
 	/**
-	 * Get all entities.
-	 *
-	 * @return a list of manufacturers.
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	List<ExecutionMonitoring> findAll();
-
-	/**
-	 * Save an entity.
-	 *
-	 * @param executionMonitoring the entity to create.
-	 * @return created entity.
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and #executionMonitoring.getId() == null")
-	ExecutionMonitoring create(ExecutionMonitoring executionMonitoring);
-
-	/**
-	 * Update an entity.
+	 * Update an execution monitoring.
 	 *
 	 * @param executionMonitoring the entity to update.
-	 * @return updated entity.
-	 * @throws EntityNotFoundException
-	 * @throws MicroServiceCommunicationException
+	 * @return updated execution monitoring.
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ExecutionMonitoring update(ExecutionMonitoring executionMonitoring) throws EntityNotFoundException;
 
 	/**
-	 * Delete an entity.
+	 * Find all allowed execution monitoring
 	 *
-	 * @param id the entity id to be deleted.
-	 * @throws EntityNotFoundException if the entity cannot be found.
+	 * @return list of all allowed executing monitoring for the current user.
 	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-	void deleteById(Long id) throws EntityNotFoundException;
-
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     List<ExecutionMonitoring> findAllAllowed();
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    Optional<ExecutionMonitoring> findByIdentifier(String identifier);
-
-    List<ExecutionMonitoring> findAllRunning();
-
-    List<ParameterResourceDTO> createProcessingResources(ExecutionMonitoring createdProcessing, List<DatasetParameterDTO> parameterDatasets) throws EntityNotFoundException;
-
-	void validateExecutionMonitoring(ExecutionMonitoring executionMonitoring) throws RestServiceException;
+	/**
+	 * Async job that monitor the state of the VIP execution and process its outcome
+	 *
+	 * @param processing
+	 * @param event
+	 */
+	void startMonitoringJob(ExecutionMonitoring processing, ShanoirEvent event) throws EntityNotFoundException, SecurityException;
 }

@@ -15,7 +15,7 @@
 
 package org.shanoir.ng.vip.pipeline.controler;
 
-import org.shanoir.ng.vip.pipeline.service.VipClientService;
+import org.shanoir.ng.vip.pipeline.service.PipelineServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -24,19 +24,13 @@ import org.springframework.stereotype.Controller;
 public class PipelineApiController implements PipelineApi {
 
     @Autowired
-    private VipClientService vipClient;
+    private PipelineServiceImpl pipelineService;
 
-    @Override
     public ResponseEntity<String> getPipelineAll() {
-        return ResponseEntity.ok(vipClient.getPipelineAll().block());
+        return ResponseEntity.ok(pipelineService.getPipelineAll().block());
     }
 
-    /**
-     * @param identifier
-     * @return
-     */
-    @Override
     public ResponseEntity<String> getPipeline(String identifier, String version) {
-        return ResponseEntity.ok(vipClient.getPipeline(identifier, version).block());
+        return ResponseEntity.ok(pipelineService.getPipeline(identifier, version).block());
     }
 }

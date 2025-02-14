@@ -1,4 +1,4 @@
-package org.shanoir.ng.vip.result.exception;
+package org.shanoir.ng.vip.output.exception;
 
 public class ResultHandlerException extends Exception{
 
