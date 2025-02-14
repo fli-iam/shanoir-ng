@@ -1,4 +1,4 @@
-package org.shanoir.ng.vip.result.handler;
+package org.shanoir.ng.vip.output.service;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -9,8 +9,9 @@ import org.apache.commons.io.IOUtils;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
-import org.shanoir.ng.vip.processingResource.service.ProcessingResourceService;
-import org.shanoir.ng.vip.result.exception.ResultHandlerException;
+import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceRepository;
+import org.shanoir.ng.vip.output.exception.ResultHandlerException;
+import org.shanoir.ng.vip.output.handler.OutputHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,36 +32,21 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
-public abstract class ResultHandler {
-    private static final Logger LOG = LoggerFactory.getLogger(ResultHandler.class);
+public class OutputService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(OutputService.class);
 
     @Value("${vip.upload-folder}")
     private String importDir;
 
     @Autowired
-    private List<ResultHandler> resultHandlers;
+    private List<OutputHandler> outputHandlers;
+
     @Autowired
     private DatasetProcessingService datasetProcessingService;
+
     @Autowired
-    private ProcessingResourceService processingResourceService;
-
-    /**
-     * Return true if the implementation can process the result of the given processing
-     *
-     * @param monitoring ExecutionMonitoring
-     * @return
-     */
-    public abstract boolean canProcess(ExecutionMonitoring monitoring) throws ResultHandlerException;
-
-    /**
-     * This methods manages the single result of an execution
-     *
-     * @param resultFiles  the result file as tar.gz of the processing
-     * @param parentFolder the temporary arent folder in which we are currently working
-     * @param processing   the corresponding dataset processing.
-     */
-
-    public abstract void manageTarGzResult(List<File> resultFiles, File parentFolder, ExecutionMonitoring processing) throws ResultHandlerException;
+    private ProcessingResourceRepository processingResourceRepository;
 
     /**
      *
@@ -70,51 +56,40 @@ public abstract class ResultHandler {
      * @throws ResultHandlerException
      */
     public void process(ExecutionMonitoring monitoring) throws ResultHandlerException, EntityNotFoundException {
-
-        final File userImportDir = new File(
-                this.importDir + File.separator +
-                        monitoring.getResultsLocation());
+        final File userImportDir = new File(this.importDir + File.separator + monitoring.getResultsLocation());
 
         for (File archive : this.getArchivesToProcess(userImportDir)) {
-
             File cacheFolder = new File(userImportDir.getAbsolutePath() + File.separator + FilenameUtils.getBaseName(archive.getName()));
-
             List<File> outputFiles = this.extractTarIntoCache(archive, cacheFolder);
 
-            for (ResultHandler resultHandler : resultHandlers) {
-                if (resultHandler.canProcess(monitoring)) {
-                    LOG.info("Processing result file [{}] with [{}] output processing", archive.getAbsolutePath(), resultHandler.getClass().getSimpleName());
-                    resultHandler.manageTarGzResult(outputFiles, userImportDir, monitoring);
+            for (OutputHandler outputHandler : outputHandlers) {
+                if (outputHandler.canProcess(monitoring)) {
+                    LOG.info("Processing result file [{}] with [{}] output processing", archive.getAbsolutePath(), outputHandler.getClass().getSimpleName());
+                    outputHandler.manageTarGzResult(outputFiles, userImportDir, monitoring);
                 }
             }
-
             this.deleteCache(cacheFolder);
         }
+
         // Remove processed datasets from current execution monitoring
         monitoring.setInputDatasets(Collections.emptyList());
         datasetProcessingService.update(monitoring);
-        processingResourceService.deleteByProcessingId(monitoring.getId());
+        processingResourceRepository.deleteByProcessingId(monitoring.getId());
     }
 
     private List<File> getArchivesToProcess(File userImportDir) throws ResultHandlerException {
-
         LOG.info("Processing result in import directory [{}]...", userImportDir.getAbsolutePath());
 
-        final PathMatcher matcher = userImportDir.toPath().getFileSystem()
-                .getPathMatcher("glob:**/*.{tgz,tar.gz}");
+        final PathMatcher matcher = userImportDir.toPath().getFileSystem().getPathMatcher("glob:**/*.{tgz,tar.gz}");
 
         try (Stream<Path> stream = Files.list(userImportDir.toPath())) {
-
             return  stream.filter(matcher::matches).map(Path::toFile).collect(Collectors.toList());
-
         } catch (IOException e) {
             throw new ResultHandlerException("I/O error while listing files in import directory", e);
         }
-
     }
 
     private List<File> extractTarIntoCache(File archive, File cacheFolder) throws ResultHandlerException {
-
         List<File> outputFiles = new ArrayList<>();
 
         try (TarArchiveInputStream fin = new TarArchiveInputStream(
@@ -126,7 +101,6 @@ public abstract class ResultHandler {
             }
 
             while ((entry = fin.getNextTarEntry()) != null) {
-
                 String parsedEntry = entry.getName();
 
                 if (entry.isDirectory()) {
@@ -135,9 +109,7 @@ public abstract class ResultHandler {
 
                 File currentFile = new File(cacheFolder, Paths.get(parsedEntry).getFileName().toString());
                 IOUtils.copy(fin, Files.newOutputStream(currentFile.toPath()));
-
                 outputFiles.add(currentFile);
-
             }
 
         } catch (IOException e) {
@@ -147,9 +119,7 @@ public abstract class ResultHandler {
         if(outputFiles.isEmpty()) {
             throw new ResultHandlerException("No processable file found in result archive [" + archive.getAbsolutePath() + "]", null);
         }
-
         return outputFiles;
-
     }
 
     private void deleteCache(File cacheFolder) {
