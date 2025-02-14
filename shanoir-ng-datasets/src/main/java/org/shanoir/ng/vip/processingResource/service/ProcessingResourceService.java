@@ -7,14 +7,10 @@ import java.util.List;
 
 public interface ProcessingResourceService {
 
-    List<Dataset> findDatasetsByResourceId(String resourceId);
-
-
-    List<Long> findDatasetIdsByResourceId(String resourceId);
-
+    /**
+     * Create and save all resources objects relative to an execution monitoring under a unique resource id
+     *
+     * @return the resource Id
+     */
     String create(ExecutionMonitoring processing, List<Dataset> datasets);
-
-    void deleteByProcessingId(Long processingId);
-
-    void deleteByDatasetId(Long datasetId);
 }

@@ -1,11 +1,11 @@
-package org.shanoir.ng.vip.path.controler;
+package org.shanoir.ng.vip.path;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.vip.processingResource.service.ProcessingResourceService;
+import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ public class PathApiController implements PathApi {
     private DatasetDownloaderServiceImpl datasetDownloaderService;
 
     @Autowired
-    private ProcessingResourceService processingResourceService;
+    private ProcessingResourceRepository processingResourceRepository;
 
     @Override
     public ResponseEntity<?> getPath(String completePath, String action, final String format, Long converterId, HttpServletResponse response)
@@ -42,8 +42,7 @@ public class PathApiController implements PathApi {
             case "properties":
                 return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
             case "content":
-
-                List<Dataset> datasets = this.processingResourceService.findDatasetsByResourceId(completePath);
+                List<Dataset> datasets = processingResourceRepository.findDatasetsByResourceId(completePath);
 
                 if (datasets.isEmpty()) {
                     LOG.error("No dataset found for resource id [{}]", completePath);
@@ -51,11 +50,8 @@ public class PathApiController implements PathApi {
                 }
 
                 datasetDownloaderService.massiveDownload(format, datasets, response, true, converterId);
-
                 return new ResponseEntity<Void>(HttpStatus.OK);
         }
-
         return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
-
     }
 }
