@@ -1,4 +1,4 @@
-package org.shanoir.ng.vip.executionMonitoring.schedule;
+package org.shanoir.ng.vip.executionMonitoring.service;
 
 import java.util.List;
 
@@ -9,7 +9,9 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
-import org.shanoir.ng.vip.executionMonitoring.service.ExecutionMonitoringService;
+import org.shanoir.ng.vip.executionMonitoring.model.ExecutionStatus;
+import org.shanoir.ng.vip.executionMonitoring.repository.ExecutionMonitoringRepository;
+import org.shanoir.ng.vip.executionMonitoring.schedule.ExecutionStatusMonitorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -23,21 +25,21 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
-public class ExecutionStatusMonitorRunner implements ApplicationRunner {
+public class ExecutionMonitoringResumptionRunner implements ApplicationRunner {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ExecutionStatusMonitorRunner.class);
-
-    @Autowired
-    private ExecutionMonitoringService execMonitoringSrv;
+    private static final Logger LOG = LoggerFactory.getLogger(ExecutionMonitoringResumptionRunner.class);
 
     @Autowired
-    private ExecutionStatusMonitorService execMonitor;
+    private ExecutionMonitoringService executionMonitoringService;
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private ExecutionMonitoringRepository executionMonitoringRepository;
 
     /**
      * At the end of the Spring context loading (on application startup),
@@ -51,17 +53,17 @@ public class ExecutionStatusMonitorRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws EntityNotFoundException, SecurityException, JsonProcessingException {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-        List<ExecutionMonitoring> runningMonitorings = execMonitoringSrv.findAllRunning();
+        List<ExecutionMonitoring> runningMonitorings = executionMonitoringRepository.findByStatus(ExecutionStatus.RUNNING);
         for(ExecutionMonitoring monitoring : runningMonitorings){
             List<ShanoirEvent> events;
-            String eventsAsString = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXECUTION_MONITORING_TASK, monitoring.getId());
+            String eventsAsString = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXECUTION_MONITORING_TASK, monitoring.getId());
             if (eventsAsString == null || eventsAsString.isEmpty()) {
                 LOG.error("No [{}] type event found for object id [{}]", ShanoirEventType.EXECUTION_MONITORING_EVENT, monitoring.getId());
                 continue;
             }
             events = objectMapper.readValue(eventsAsString, new TypeReference<List<ShanoirEvent>>() {});
             for(ShanoirEvent event : events){
-                execMonitor.startMonitoringJob(monitoring, event);
+                executionMonitoringService.startMonitoringJob(monitoring, event);
                 LOG.info("Monitoring of VIP execution [{}] resumed", monitoring.getName());
             }
         }
