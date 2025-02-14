@@ -1,4 +1,4 @@
-package org.shanoir.ng.vip.result.handler;
+package org.shanoir.ng.vip.output.handler;
 
 import jakarta.ws.rs.NotFoundException;
 import org.apache.commons.io.IOUtils;
@@ -13,14 +13,13 @@ import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
-import org.shanoir.ng.vip.processingResource.service.ProcessingResourceService;
-import org.shanoir.ng.vip.result.exception.ResultHandlerException;
+import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceRepository;
+import org.shanoir.ng.vip.output.exception.ResultHandlerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +37,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
-public class DefaultHandler extends ResultHandler {
+public class DefaultHandler extends OutputHandler {
     @Value("${vip.result-file-name}")
     private String resultFileName;
 
@@ -58,7 +57,7 @@ public class DefaultHandler extends ResultHandler {
     private DatasetService datasetService;
 
     @Autowired
-    private ProcessingResourceService processingResourceService;
+    private ProcessingResourceRepository processingResourceRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(DefaultHandler.class);
 
@@ -77,7 +76,7 @@ public class DefaultHandler extends ResultHandler {
             File resultJson = null;
 
             for(File file : resultFiles){
-                if (file.getAbsolutePath().endsWith("/" + this.resultFileName)) {
+                if (file.getAbsolutePath().endsWith("/" + resultFileName)) {
                     resultJson = file;
                 } else {
                     // For all other files that are not a result.json or a folder, create a processed dataset and a dataset processing
@@ -86,7 +85,7 @@ public class DefaultHandler extends ResultHandler {
                 }
             }
 
-            List<Dataset> inputDatasets = this.getInputDatasets(resultJson, parent.getName());
+            List<Dataset> inputDatasets = getInputDatasets(resultJson, parent.getName());
 
             if(inputDatasets.isEmpty()) {
                 throw new ResultHandlerException("No input datasets found.", null);
@@ -96,7 +95,7 @@ public class DefaultHandler extends ResultHandler {
                 throw new ResultHandlerException("No processable file found in Tar result.", null);
             }
 
-            this.createProcessedDatasets(outputFiles, monitoring, inputDatasets);
+            createProcessedDatasets(outputFiles, monitoring, inputDatasets);
 
         } catch (Exception e) {
             importerService.createFailedJob(parent.getPath());
@@ -106,8 +105,6 @@ public class DefaultHandler extends ResultHandler {
 
 
     private List<Dataset> getInputDatasets(File resultJson, String tarName) throws IOException, JSONException {
-
-        HashSet<Long> datasetIds = new HashSet<>();
         List<String> candidates = new ArrayList<>();
 
         candidates.add(tarName);
@@ -132,51 +129,47 @@ public class DefaultHandler extends ResultHandler {
                     // case "["resource_id+XXX+filename.nii", "resource_id+YYY+filename.nii", ...]"
                     for (int i = 0; i < array.length(); i++) {
                         String value = array.optString(i);
-                        if(value != null){
+                        if (value != null) {
                             candidates.add(array.getString(i));
                         }
                     }
                 } else {
                     String value = json.optString(key);
-                    if(value != null){
+                    if (value != null) {
                         // Case "resource_id+XXX+filename.nii"
                         candidates.add(value);
                     }
                 }
             }
         }
+        List<Dataset> datasets = new ArrayList<>();
 
         for (String name : candidates) {
-            datasetIds.addAll(this.getDatasetIdsFromFilename(name));
+            datasets.addAll(getDatasetFromFilename(name));
         }
-
-        return datasetService.findByIdIn(new ArrayList<>(datasetIds));
+        return datasets;
     }
 
-    public List<Long> getDatasetIdsFromFilename(String name){
-        // "resource_id+[processing resource id]+whatever.nii"
+    /**
+     * Creates a list of processed dataset and a dataset processing associated to the list of files given in entry.
+     */
+    private List<Dataset> getDatasetFromFilename(String name){
         Matcher matcher = Pattern.compile("resource_id\\+(.+)\\+.*").matcher(name);
         if (matcher.matches()) {
-            return this.processingResourceService.findDatasetIdsByResourceId(matcher.group(1));
+            return processingResourceRepository.findDatasetsByResourceId(matcher.group(1));
         }
-
         return new ArrayList<>();
     }
 
     /**
      * Creates a list of processed dataset and a dataset processing associated to the list of files given in entry.
-     * @param processedFiles the list of files to treat as processed files
-     * @param execution The execution monitoring
-     * @throws EntityNotFoundException
-     * @throws IOException
      */
     private void createProcessedDatasets(List<File> processedFiles, ExecutionMonitoring execution, List<Dataset> inputDatasets) throws Exception {
 
         // Create dataset processing
-        DatasetProcessing processing = this.createProcessing(execution, inputDatasets);
+        DatasetProcessing processing = createProcessing(execution, inputDatasets);
 
         for (File file : processedFiles) {
-
             LOG.info("Processing [{}]...", file.getAbsolutePath());
 
             ProcessedDatasetImportJob processedDataset = new ProcessedDatasetImportJob();
@@ -190,36 +183,28 @@ public class DefaultHandler extends ResultHandler {
             processedDataset.setProcessedDatasetName(datasetName);
 
             if(!inputDatasets.isEmpty()) {
-
                 Long studyId = datasetService.getStudyId(inputDatasets.get(0));
                 Study study = studyRepository.findById(studyId)
                         .orElseThrow(() -> new NotFoundException("Study [" + studyId + "] not found."));
-
                 processedDataset.setStudyId(studyId);
                 processedDataset.setStudyName(study.getName());
 
                 List<Long> subjectIds = inputDatasets.stream().map(Dataset::getSubjectId).toList();
-
                 Predicate<Long> predicate = obj -> Objects.equals(inputDatasets.get(0).getSubjectId(), obj);
 
                 if (subjectIds.stream().allMatch(predicate)) {
                     Subject subject = subjectRepository.findById(inputDatasets.get(0).getSubjectId())
                             .orElseThrow(() -> new NotFoundException("Subject [" + inputDatasets.get(0).getSubjectId() + "] not found"));
-
                     processedDataset.setSubjectId(subject.getId());
                     processedDataset.setSubjectName(subject.getName());
                 }
             }
+
             processedDataset.setDatasetType(DatasetType.Generic.name());
-
             importerService.createProcessedDataset(processedDataset);
-
             LOG.info("Processed dataset [{}] has been created from [{}].", processedDataset.getProcessedDatasetName(), file.getAbsolutePath());
-
         }
-
         datasetProcessingService.update(processing);
-
     }
 
     private DatasetProcessing createProcessing(ExecutionMonitoring execution, List<Dataset> inputDatasets) {
@@ -235,10 +220,4 @@ public class DefaultHandler extends ResultHandler {
         processing = datasetProcessingService.create(processing);
         return processing;
     }
-
-    private String getNameWithoutExtension(String file) {
-        int dotIndex = file.indexOf('.');
-        return (dotIndex == -1) ? file : file.substring(0, dotIndex);
-    }
-
 }
