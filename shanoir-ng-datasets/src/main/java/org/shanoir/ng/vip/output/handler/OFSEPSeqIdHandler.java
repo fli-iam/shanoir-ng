@@ -1,4 +1,4 @@
-package org.shanoir.ng.vip.result.handler;
+package org.shanoir.ng.vip.output.handler;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -24,7 +24,7 @@ import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.studycard.model.field.DatasetAcquisitionMetadataField;
 import org.shanoir.ng.studycard.model.field.DatasetMetadataField;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
-import org.shanoir.ng.vip.result.exception.ResultHandlerException;
+import org.shanoir.ng.vip.output.exception.ResultHandlerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +43,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class OFSEPSeqIdHandler extends ResultHandler {
+public class OFSEPSeqIdHandler extends OutputHandler {
 
 
     private static final Logger LOG = LoggerFactory.getLogger(OFSEPSeqIdHandler.class);
@@ -143,7 +143,7 @@ public class OFSEPSeqIdHandler extends ResultHandler {
                     return;
                 }
 
-                this.processSeries(series, processing);
+                processSeries(series, processing);
 
             } catch (Exception e) {
                 LOG.error("An error occured while extracting result from result archive.", e);
@@ -154,14 +154,8 @@ public class OFSEPSeqIdHandler extends ResultHandler {
 
     /**
      * Process all series / acquisitions found in output JSON
-     *
-     * @param series JSONArray
-     * @param execution ExecutionMonitoring
-     * @throws JSONException
-     * @throws PacsException
-     * @throws EntityNotFoundException
      */
-    public void processSeries(JSONArray series, ExecutionMonitoring execution) throws JSONException, PacsException, EntityNotFoundException, CheckedIllegalClassException, SolrServerException, IOException {
+    private void processSeries(JSONArray series, ExecutionMonitoring execution) throws JSONException, PacsException, EntityNotFoundException, CheckedIllegalClassException, SolrServerException, IOException {
 
         for (int i = 0; i < series.length(); i++) {
 
@@ -180,10 +174,8 @@ public class OFSEPSeqIdHandler extends ResultHandler {
             }
 
             for(Dataset ds : datasets){
-
-                Attributes attributes = this.getDicomAttributes(ds);
-
-                JSONObject vol = this.getMatchingVolume(ds, serie, attributes);
+                Attributes attributes = wadoDownloaderService.getDicomAttributesForDataset(ds);
+                JSONObject vol = getMatchingVolume(ds, serie, attributes);
 
                 if(vol == null){
                     LOG.error("No volume from serie [{}] could be match with dataset [{}].", serieId, ds.getId());
@@ -191,18 +183,15 @@ public class OFSEPSeqIdHandler extends ResultHandler {
                 }
 
                 try {
-                    this.updateDataset(serie, ds, vol);
+                    updateDataset(serie, ds, vol);
                 } catch (CheckedIllegalClassException | EntityNotFoundException | SolrServerException | IOException e) {
                     LOG.error("Error while updating dataset [{}]", ds.getId(), e);
                     throw e;
                 }
 
-                List<DatasetProperty> properties = this.getDatasetPropertiesFromVolume(ds, vol, execution);
-
-                this.setDatasetTags(ds, properties);
-
-                properties.addAll(this.getDatasetPropertiesFromDicom(attributes, ds, execution));
-
+                List<DatasetProperty> properties = getDatasetPropertiesFromVolume(ds, vol, execution);
+                addDatasetTags(ds, properties);
+                properties.addAll(getDatasetPropertiesFromDicom(attributes, ds, execution));
                 datasetPropertyService.createAll(properties);
 
             }
@@ -211,18 +200,10 @@ public class OFSEPSeqIdHandler extends ResultHandler {
 
     /**
      * Update dataset from pipeline output serie & volume
-     *
-     * @param serie JSONObject
-     * @param ds Dataset
-     * @param vol JSONObject
-     * @throws JSONException
-     * @throws EntityNotFoundException
      */
     public void updateDataset(JSONObject serie, Dataset ds, JSONObject vol) throws JSONException, EntityNotFoundException, CheckedIllegalClassException, SolrServerException, IOException {
-
         DatasetMetadataField.NAME.update(ds, vol.getString(TYPE));
         datasetRepository.save(ds);
-
 
         if(ds.getDatasetAcquisition() instanceof MrDatasetAcquisition){
             DatasetAcquisition acq = ds.getDatasetAcquisition();
@@ -231,17 +212,21 @@ public class OFSEPSeqIdHandler extends ResultHandler {
         }
 
         solrService.updateDatasets(Arrays.asList(ds.getId()));
-
     }
 
-    private void setDatasetTags(Dataset ds, List<DatasetProperty> properties) {
+    /**
+     * Add tags to a dataset
+     */
+    private void addDatasetTags(Dataset ds, List<DatasetProperty> properties) {
         Map<String, StudyTag> studyTagsByName = studyService.findById(ds.getStudyId()).getStudyTags().stream()
                 .collect(Collectors.toMap(StudyTag::getName, Function.identity()));
 
         for(DatasetProperty property : properties){
             String tagName = property.getName() + ":" + property.getValue();
+
             if(studyTagsByName.containsKey(tagName)){
                 StudyTag tag = studyTagsByName.get(tagName);
+
                 if(!ds.getTags().contains(tag)){
                     ds.getTags().add(tag);
                 }
@@ -253,16 +238,11 @@ public class OFSEPSeqIdHandler extends ResultHandler {
 
     /**
      * Create dataset properties from pipeline output volume
-     *
-     * @param ds Dataset
-     * @param volume JSONObject
-     * @return
      */
     private List<DatasetProperty> getDatasetPropertiesFromVolume(Dataset ds, JSONObject volume, ExecutionMonitoring monitoring) throws JSONException {
         List<DatasetProperty> properties = new ArrayList<>();
 
         for(String name : SERIE_PROPERTIES){
-
             if(!volume.has(name)){
                 continue;
             }
@@ -276,7 +256,6 @@ public class OFSEPSeqIdHandler extends ResultHandler {
         }
 
         for(String name : VOLUME_PROPERTIES){
-
             if(!volume.has(name)){
                 continue;
             }
@@ -288,23 +267,15 @@ public class OFSEPSeqIdHandler extends ResultHandler {
             property.setProcessing(monitoring);
             properties.add(property);
         }
-
         return properties;
-
     }
 
 
     /**
      * Return JSON volume matching Shanoir dataset
      * Match is made by orientation DICOM property
-     *
-     * @param dataset Dataset
-     * @param serie JSONObject
-     *
-     * @return JSONObject
-     * @throws JSONException
      */
-    public JSONObject getMatchingVolume(Dataset dataset, JSONObject serie, Attributes attributes) throws JSONException {
+    private JSONObject getMatchingVolume(Dataset dataset, JSONObject serie, Attributes attributes) throws JSONException {
 
         if(serie.isNull(VOLUMES)){
             LOG.error("Volumes set is null in result file for serie [{}]", serie.getLong(ID));
@@ -312,7 +283,6 @@ public class OFSEPSeqIdHandler extends ResultHandler {
         }
 
         JSONArray volumes = serie.getJSONArray(VOLUMES);
-
         double[] dsOrientation = attributes.getDoubles(Tag.ImageOrientationPatient);
 
         for (int i = 0 ; i < volumes.length(); i++) {
@@ -336,25 +306,17 @@ public class OFSEPSeqIdHandler extends ResultHandler {
                 continue;
             }
 
-            if(this.areOrientationsEquals(dsOrientation, volOrientation)){
+            if(areOrientationsEquals(dsOrientation, volOrientation)){
                 return volume;
             }
-
         }
-
         return null;
-
     }
 
     /**
      * Check if the two arrays are equals
-     *
-     * @param dsOrientation double[]
-     * @param volOrientation JSONArray
-     * @return boolean
-     * @throws JSONException
      */
-    public boolean areOrientationsEquals(double[] dsOrientation, JSONArray volOrientation) throws JSONException {
+    private boolean areOrientationsEquals(double[] dsOrientation, JSONArray volOrientation) throws JSONException {
 
         if(dsOrientation == null || dsOrientation.length == 0 || volOrientation == null || volOrientation.length() == 0){
             return false;
@@ -369,13 +331,13 @@ public class OFSEPSeqIdHandler extends ResultHandler {
                 return false;
             }
         }
-
         return true;
-
     }
 
+    /**
+     * Get institution properties from attributes associated to dataset
+     */
     private List<DatasetProperty> getDatasetPropertiesFromDicom(Attributes attributes, Dataset ds, ExecutionMonitoring monitoring){
-
         List<DatasetProperty> properties = new ArrayList<>();
 
         DatasetProperty institutionName = new DatasetProperty();
@@ -393,9 +355,5 @@ public class OFSEPSeqIdHandler extends ResultHandler {
         properties.add(institutionAddress);
 
         return properties;
-    }
-
-    private Attributes getDicomAttributes(Dataset ds) throws PacsException {
-        return wadoDownloaderService.getDicomAttributesForDataset(ds);
     }
 }

@@ -1,6 +1,7 @@
 package org.shanoir.ng.vip.executionMonitoring.controller;
 
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
+import org.shanoir.ng.vip.executionMonitoring.repository.ExecutionMonitoringRepository;
 import org.shanoir.ng.vip.executionMonitoring.service.ExecutionMonitoringService;
 import org.shanoir.ng.vip.executionMonitoring.dto.ExecutionMonitoringDTO;
 import org.shanoir.ng.vip.executionMonitoring.dto.mapper.ExecutionMonitoringMapper;
@@ -26,34 +27,22 @@ public class ExecutionMonitoringApiController implements ExecutionMonitoringApi 
     private ExecutionMonitoringService executionMonitoringService;
 
     @Autowired
+    private ExecutionMonitoringRepository executionMonitoringRepository;
+
+    @Autowired
     private ExecutionMonitoringMapper mapper;
 
-    @Override
     public ResponseEntity<ExecutionMonitoringDTO> findExecutionMonitoringById(Long executionMonitoringId) {
-        final Optional<ExecutionMonitoring> monitoring = executionMonitoringService.findById(executionMonitoringId);
-        if (monitoring.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(mapper.executionMonitoringToExecutionMonitoringDTO(monitoring.get()), HttpStatus.OK);
+        final Optional<ExecutionMonitoring> monitoring = executionMonitoringRepository.findById(executionMonitoringId);
+        return monitoring.map(executionMonitoring -> new ResponseEntity<>(mapper.executionMonitoringToExecutionMonitoringDTO(executionMonitoring), HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @Override
     public ResponseEntity<List<ExecutionMonitoringDTO>> getAllExecutionMonitoring() {
         final List<ExecutionMonitoring> monitorings = executionMonitoringService.findAllAllowed();
+
         if (monitorings.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(mapper.executionMonitoringsToExecutionMonitoringDTOs(monitorings), HttpStatus.OK);
     }
-
-    private void validate(BindingResult result) throws RestServiceException {
-        final FieldErrorMap errors = new FieldErrorMap(result);
-        if (!errors.isEmpty()) {
-            ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments",
-                    new ErrorDetails(errors));
-            throw new RestServiceException(error);
-        }
-    }
-
-
 }

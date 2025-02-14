@@ -26,7 +26,8 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.Utils;
-import org.shanoir.ng.vip.resource.ProcessingResourceService;
+import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceRepository;
+import org.shanoir.ng.vip.processingResource.service.ProcessingResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -50,7 +51,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
 	private DatasetProcessingRepository repository;
 
     @Autowired
-    private ProcessedDatasetService processedDatasetService;
+    private ProcessingResourceRepository processingResourceRepository;
 
     @Autowired
     ProcessingResourceService processingResourceService;
@@ -111,7 +112,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
         entity.orElseThrow(() -> new EntityNotFoundException("Cannot find dataset processing [" + id + "]"));
 
         // delete associated ressources
-        processingResourceService.deleteByProcessingId(id);
+        processingResourceRepository.deleteByProcessingId(id);
 
         for (Dataset ds : entity.get().getOutputDatasets()) {
             datasetService.deleteById(ds.getId());
