@@ -177,6 +177,7 @@ public class CardsProcessingService {
             // main loop
             try {
                 examinations.parallelStream().forEach(examination -> {
+                    LOG.error("quality examination: " + examination.getId());
                     event.setStatus(2);
                     event.setProgress(0.5f + (i.floatValue() * 0.5f / examinations.size()));
                     event.setMessage("checking quality for examination " + examination.getComment());
