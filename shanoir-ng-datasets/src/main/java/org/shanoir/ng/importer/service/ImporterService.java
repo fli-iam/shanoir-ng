@@ -147,7 +147,7 @@ public class ImporterService {
     private static int instancesCreated = 0;
 
     //This constructor will be called everytime a new bean instance is created
-    public ImporterService(){
+    public ImporterService() {
         instancesCreated++;
     }
 
@@ -156,7 +156,7 @@ public class ImporterService {
     }
 
     public void createAllDatasetAcquisition(ImportJob importJob, Long userId) throws ShanoirException {
-        LOG.info("createAllDatasetAcquisition: " + this + " instances: " + getInstancesCreated());
+        LOG.info("createAllDatasetAcquisition: " + this + " ImporterService-instances created: " + getInstancesCreated());
         ShanoirEvent event = importJob.getShanoirEvent();
         event.setMessage("Creating datasets...");
         eventService.publishEvent(event);
