@@ -328,11 +328,9 @@ public class ExaminationApiController implements ExaminationApi {
 	 * @param examination
 	 */
 	private void generateStudyInstanceUID(Examination examination) {
-		if (examination != null) {
-			UIDGeneration generator = new UIDGeneration();
-			String newUID = generator.getNewUID();
-			examination.setStudyInstanceUID(newUID);	
-		}
+		UIDGeneration generator = new UIDGeneration();
+		String newUID = generator.getNewUID();
+		examination.setStudyInstanceUID(newUID);
 	}
 
 }
