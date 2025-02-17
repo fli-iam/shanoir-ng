@@ -226,10 +226,10 @@ public class CardsProcessingService {
                 event.setMessage("Loading examination " + examination.getComment() + " data from Shanoir database");
                 event.setProgress(i * 0.4f / examinations.size());
                 eventService.publishEvent(event);
-                Subject subject = examination.getSubject();
-                if (subject != null) {
-                    Hibernate.initialize(subject.getSubjectStudyList());
-                }
+//                Subject subject = examination.getSubject();
+//                if (subject != null) {
+//                    Hibernate.initialize(subject.getSubjectStudyList());
+//                }
                 List<DatasetAcquisition> dsAcq = examination.getDatasetAcquisitions();
                 if (dsAcq != null) {
                     for(DatasetAcquisition acquisition : dsAcq) {
