@@ -173,11 +173,13 @@ public class CardsProcessingService {
                 examinations = study.getExaminations();
             }
             // Load lazy data before go parallel
-            loadExaminationsLazyCollections(study.getExaminations(), event);
+            // loadExaminationsLazyCollections(study.getExaminations(), event);
             loadRulesLazyCollections(qualityCard.getRules(), event);
             // main loop
             try {
-                examinations.parallelStream().forEach(examination -> {
+                //examinations.parallelStream().forEach(examination -> {
+                examinations.stream().forEach(examination -> {
+                    loadExaminationLazyCollections(examination, event);
                     LOG.error("quality examination: " + examination.getId());
                     event.setStatus(2);
                     event.setProgress(0.5f + (i.floatValue() * 0.5f / examinations.size()));
@@ -250,6 +252,38 @@ public class CardsProcessingService {
                     }
                 }
                 i++;
+            }
+        }
+    }
+
+    private void loadExaminationLazyCollections(Examination examination, ShanoirEvent event) {
+        if (examination != null) {
+            LOG.error("load examination : " + examination.getId());
+
+            List<DatasetAcquisition> dsAcq = examination.getDatasetAcquisitions();
+            if (dsAcq != null) {
+                int i = 0;
+                for(DatasetAcquisition acquisition : dsAcq) {
+                    event.setMessage("Loading examination " + examination.getComment() + " data from Shanoir database");
+                    event.setProgress(i * 0.4f / dsAcq.size());
+                    eventService.publishEvent(event);
+
+                    LOG.error("- acquisition : " + acquisition.getId());
+                    List<Dataset> datasets = acquisition.getDatasets();
+                    if (datasets != null) {
+                        for (Dataset dataset : datasets) {
+                            LOG.error("-- dataset : " + dataset.getId());
+                            List<DatasetExpression> expressions = dataset.getDatasetExpressions();
+                            if (expressions != null) {
+                                for (DatasetExpression expression : expressions) {
+                                    LOG.error("--- expression : " + expression.getId());
+                                    Hibernate.initialize(expression.getDatasetFiles());
+                                }
+                            }
+                        }
+                    }
+                    i++;
+                }
             }
         }
     }
