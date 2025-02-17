@@ -36,6 +36,7 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.exception.StreamExceptionWrapper;
 import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.shared.service.SubjectStudyService;
@@ -221,18 +222,26 @@ public class CardsProcessingService {
         if (examinations != null) {
             int i = 0;
             for (Examination examination : examinations) {
+                LOG.error("load examination : " + examination.getId());
                 event.setMessage("Loading examination " + examination.getComment() + " data from Shanoir database");
                 event.setProgress(i * 0.4f / examinations.size());
                 eventService.publishEvent(event);
-                if (examination.getSubject() != null) {
-                    Hibernate.initialize(examination.getSubject().getSubjectStudyList());
+                Subject subject = examination.getSubject();
+                if (subject != null) {
+                    Hibernate.initialize(subject.getSubjectStudyList());
                 }
-                if (examination.getDatasetAcquisitions() != null) {
-                    for(DatasetAcquisition acquisition : examination.getDatasetAcquisitions()) {
-                        if (acquisition.getDatasets() != null) {
-                            for (Dataset dataset : acquisition.getDatasets()) {
-                                if (dataset.getDatasetExpressions() != null) {
-                                    for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+                List<DatasetAcquisition> dsAcq = examination.getDatasetAcquisitions();
+                if (dsAcq != null) {
+                    for(DatasetAcquisition acquisition : dsAcq) {
+                        LOG.error("- acquisition : " + acquisition.getId());
+                        List<Dataset> datasets = acquisition.getDatasets();
+                        if (datasets != null) {
+                            for (Dataset dataset : datasets) {
+                                LOG.error("-- dataset : " + dataset.getId());
+                                List<DatasetExpression> expressions = dataset.getDatasetExpressions();
+                                if (expressions != null) {
+                                    for (DatasetExpression expression : expressions) {
+                                        LOG.error("--- expression : " + expression.getId());
                                         Hibernate.initialize(expression.getDatasetFiles());
                                     }
                                 }
