@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.joda.time.Instant;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -56,9 +57,7 @@ public class ExaminationsConsistencyChecker {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ExaminationsConsistencyChecker.class);
 	
-	private static final String ECC = "ecc_";
-	
-	private static final String CSV = ".csv";
+	private static final String ECC_CSV = "ecc.csv";
 
 	@Value("${logging.file.name}")
     private String loggingFileName;
@@ -75,7 +74,7 @@ public class ExaminationsConsistencyChecker {
 	private final AtomicBoolean isTaskRunning = new AtomicBoolean(false);
 
 //    @Scheduled(fixedRate = 2 * 60 * 60 * 1000) // Run every 2 hours (in milliseconds)
-	@Scheduled(fixedRate = 20000) // Run every 2 hours (in milliseconds)
+	@Scheduled(fixedRate = 60000) // Run every 2 hours (in milliseconds)
 	@Transactional
 	public void check() {
 		if (!isTaskRunning.compareAndSet(false, true)) {
@@ -107,15 +106,18 @@ public class ExaminationsConsistencyChecker {
 			File datasetsLogFile = new File(loggingFileName);
 			if (datasetsLogFile.exists()) {
 				File parent = datasetsLogFile.getParentFile();
-				File csvFile = new File(parent.getAbsolutePath() + File.separator + ECC + examinationsToCheck.get(0).getId() + CSV);
-				if (csvFile.createNewFile()) {
-					try (CSVWriter writer = new CSVWriter(new FileWriter(csvFile))) {
-						for (Examination examination : examinationsToCheck) {
-							checkExamination(latestCheckedExamination, examination, writer);
-						}
-			        } catch (IOException e) {
-			        	LOG.error(e.getMessage(), e);
-			        }
+				File csvFile = new File(parent.getAbsolutePath() + File.separator + ECC_CSV);
+				try (CSVWriter writer = new CSVWriter(new FileWriter(csvFile))) {
+					if (!csvFile.exists()) {
+						csvFile.createNewFile();
+						String[] lineInCSV = { "ExaminationID", "Files in PACS", "StudyInstanceUID-Single?"};
+						writer.writeNext(lineInCSV);
+					}
+					for (Examination examination : examinationsToCheck) {
+						checkExamination(latestCheckedExamination, examination, writer);
+					}
+				} catch (IOException e) {
+					LOG.error(e.getMessage(), e);
 				}
 			}				
 		} else {
@@ -126,6 +128,7 @@ public class ExaminationsConsistencyChecker {
 	private void checkExamination(LatestCheckedExamination latestCheckedExamination,
 			Examination examination, CSVWriter writer) {
 		LOG.info("Processing examination with ID: " + examination.getId());
+		long startTime = System.currentTimeMillis();
 		List<String> filesInPACS = new ArrayList<String>();
 		boolean checked = checkExamination(examination, filesInPACS);
 		if (checked) {
@@ -141,6 +144,9 @@ public class ExaminationsConsistencyChecker {
 			latestCheckedExamination.setExaminationId(examination.getId());
 			latestCheckedExaminationRepository.save(latestCheckedExamination);
 		}
+        long endTime = System.currentTimeMillis();
+        long duration = endTime - startTime;
+        LOG.info("Time required for exam check: " + duration + " milliseconds.");
 	}
 
 	private boolean checkStudyInstanceUIDs(Examination examination, List<String> filesInPACS) {
@@ -150,16 +156,22 @@ public class ExaminationsConsistencyChecker {
 			studyInstanceUIDs.add(studyInstanceUID);
 		});
 		if (studyInstanceUIDs.isEmpty()) {
-			LOG.error("Examination {} contains NULL StudyInstanceUIDs.");
+			LOG.error("Examination {}: contains NULL StudyInstanceUIDs.");
 			return false;
 		} else if (studyInstanceUIDs.size() > 1) {
-			LOG.error("Examination {} contains multiple StudyInstanceUIDs ({}).", examination.getId(), studyInstanceUIDs.size());
+			LOG.error("Examination {}: contains multiple StudyInstanceUIDs ({}).", examination.getId(), studyInstanceUIDs.size());
 			return false;
 		} else {
 			String studyInstanceUID = studyInstanceUIDs.iterator().next();
-			LOG.info("Examination {} StudyInstanceUID updated in database: {}", studyInstanceUID);
-			examination.setStudyInstanceUID(studyInstanceUID);
-			examinationRepository.save(examination);
+			if(examination.getStudyInstanceUID() != null && !examination.getStudyInstanceUID().isBlank()) {
+				examination.setStudyInstanceUID(studyInstanceUID);
+				examinationRepository.save(examination);
+				LOG.info("Examination {}: StudyInstanceUID added in database: {}", examination.getId(), studyInstanceUID);
+			} else {
+				if (studyInstanceUID.equals(examination.getStudyInstanceUID())) {
+					LOG.info("Examination {}: has correct StudyInstanceUID in database: {}", examination.getId(), examination.getStudyInstanceUID());
+				}
+			}
 			return true;
 		}
 	}
