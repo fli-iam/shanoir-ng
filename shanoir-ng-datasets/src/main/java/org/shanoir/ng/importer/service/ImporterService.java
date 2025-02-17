@@ -148,7 +148,8 @@ public class ImporterService {
 
     //This constructor will be called everytime a new bean instance is created
     public ImporterService() {
-        instancesCreated++;
+        LOG.info("New server-instance created of ImporterService.");
+        instancesCreated = instancesCreated + 1;
     }
 
     public static int getInstancesCreated(){
