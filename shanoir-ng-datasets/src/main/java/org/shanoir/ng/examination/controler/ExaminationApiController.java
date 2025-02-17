@@ -183,6 +183,7 @@ public class ExaminationApiController implements ExaminationApi {
 		Examination examination = examinationMapper.examinationDTOToExamination(examinationDTO);
 		generateStudyInstanceUID(examination);
         final Examination createdExamination = examinationService.save(examination);
+		LOG.info("New examination created: " + examination.toString());
 		// NB: Message as centerId / subjectId is important in RabbitMQStudiesService
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, createdExamination.getId().toString(), KeycloakUtil.getTokenUserId(), "centerId:" + createdExamination.getCenterId() + ";subjectId:" + (createdExamination.getSubject() != null ? createdExamination.getSubject().getId() : null), ShanoirEvent.SUCCESS, createdExamination.getStudyId()));
 		return new ResponseEntity<>(examinationMapper.examinationToExaminationDTO(createdExamination), HttpStatus.OK);
@@ -255,6 +256,7 @@ public class ExaminationApiController implements ExaminationApi {
 		generateStudyInstanceUID(examination);
 		Examination dbExamination = examinationService.save(examination);
 		String path = examinationService.addExtraData(dbExamination.getId(), file);
+		LOG.info("New examination created: " + examination.toString());
 		if (path != null) {
 			return new ResponseEntity<>(HttpStatus.OK);
 		} else {

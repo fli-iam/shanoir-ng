@@ -94,6 +94,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		long startTime = System.currentTimeMillis();
 		final int totalAmount = dicomFiles.size();
 		LOG.info("Start anonymization, for {} DICOM files.", totalAmount);
+		LOG.info("StudyInstanceUID used from ImportJob: " + studyInstanceUID);
 		Map<String, Profile> profiles = AnonymizationRulesSingleton.getInstance().getProfiles();
 		Map<String, String> anonymizationMap = profiles.get(profile).getAnonymizationMap();
 		tagsToDeleteForManufacturer = AnonymizationRulesSingleton.getInstance().getTagsToDeleteForManufacturer();
@@ -200,6 +201,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
 			String studyInstanceUIDVendor = datasetAttributes.getString(Tag.StudyInstanceUID);
 			if (studyInstanceUID != null && !studyInstanceUID.isEmpty()) {
+				LOG.debug("StudyInstanceUID used from ImportJob: " + studyInstanceUID);
 				studyInstanceUIDs.put(studyInstanceUIDVendor, studyInstanceUID);
 			}
 

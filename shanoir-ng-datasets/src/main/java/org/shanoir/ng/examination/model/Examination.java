@@ -465,4 +465,11 @@ public class Examination extends HalEntity {
         this.copies = copies;
     }
 
+    @Override
+    public String toString() {
+        return "Examination [centerId=" + centerId + ", comment=" + comment + ", examinationDate=" + examinationDate
+                + ", extraDataFilePathList=" + extraDataFilePathList + ", note=" + note + ", subject=" + subject.getName()
+                + ", preclinical=" + preclinical + ", studyInstanceUID=" + studyInstanceUID + "]";
+    }
+
 }
