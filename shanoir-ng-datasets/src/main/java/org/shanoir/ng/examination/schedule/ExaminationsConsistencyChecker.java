@@ -15,6 +15,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.WADOURLHandler;
 import org.shanoir.ng.examination.model.Examination;
@@ -200,7 +201,10 @@ public class ExaminationsConsistencyChecker {
 			 * To avoid confusion on this, we only check data from yesterday or older.
 			 */
 			DatasetAcquisition firstAcquisition = acquisitions.get(0);
-			if (!LocalDate.now().equals(firstAcquisition.getImportDate())) {
+			LocalDate importDate = firstAcquisition.getImportDate();
+			// Old acquisitions in database do not have an importDate, so we go further,
+			// and we avoid using examinations from today, in case still ongoing import
+			if (importDate == null || !LocalDate.now().equals(importDate)) {
 				acquisitions.stream().forEach(a -> {
 					checkAcquisition(a, filesInPACS);
 				});
