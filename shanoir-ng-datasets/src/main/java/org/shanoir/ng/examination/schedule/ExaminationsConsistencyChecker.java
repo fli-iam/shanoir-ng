@@ -43,7 +43,8 @@ import jakarta.transaction.Transactional;
  * 
  * 1) It checks, if an examination is empty and has no data below.
  * 
- * 2) Add one StudyInstanceUID to the mysql database, per examination.
+ * 2) Add one StudyInstanceUID to the mysql database, per examination. If not
+ * already existing in database. Checks if equal to found.
  * 
  * 2) It checks the StudyInstanceUID per exam. Is it unique? Is there only one
  * StudyInstanceUID in all dataset files of the DICOM WADO path?
