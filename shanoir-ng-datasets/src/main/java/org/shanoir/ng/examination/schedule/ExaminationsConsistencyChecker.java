@@ -136,7 +136,7 @@ public class ExaminationsConsistencyChecker {
 		List<String> filesInPACS = new ArrayList<String>();
 		boolean checked = checkExamination(examination, filesInPACS);
 		if (checked) {
-			LOG.info("Examination {} references {} files in PACS.", examination.getId(), filesInPACS.size());
+			LOG.info("Examination {}: references {} files in PACS.", examination.getId(), filesInPACS.size());
 			if (!filesInPACS.isEmpty()) {
 				boolean uidsOK = checkStudyInstanceUIDs(examination, filesInPACS);
 				String[] lineInCSV = { examination.getId().toString(), ""+filesInPACS.size(), ""+uidsOK};
@@ -167,7 +167,7 @@ public class ExaminationsConsistencyChecker {
 			return false;
 		} else {
 			String studyInstanceUID = studyInstanceUIDs.iterator().next();
-			if(examination.getStudyInstanceUID() != null && !examination.getStudyInstanceUID().isBlank()) {
+			if(examination.getStudyInstanceUID() != null && examination.getStudyInstanceUID().isBlank()) {
 				examination.setStudyInstanceUID(studyInstanceUID);
 				examinationRepository.save(examination);
 				LOG.info("Examination {}: StudyInstanceUID added in database: {}", examination.getId(), studyInstanceUID);
