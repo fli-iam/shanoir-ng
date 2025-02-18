@@ -16,4 +16,4 @@ Some tips :
 
 * Execution and execution monitoring are structured in a really stranged way. Execution monitoring are extending execution (in their class definition, not in their usage). When Shanoir's back receives a VIP execution request : 
   * it creates 1st an execution monitoring with an partial execution as child.
-  * when a VIP response is received, instead of completing the existing execution with outputs an other datas, a new one is created (without any parent/child relation)
+  * when a VIP response is received, instead of completing the existing execution with outputs an other datas, a new one is created (without any parent/child relation), and the old one is removed (with its child)

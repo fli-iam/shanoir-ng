@@ -1,6 +1,5 @@
 package org.shanoir.ng.processing.resulthandler.output;
 
-
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.VR;
@@ -9,36 +8,22 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
-import org.shanoir.ng.dicom.web.service.DICOMWebService;
-import org.shanoir.ng.download.WADODownloaderService;
-import org.shanoir.ng.vip.monitoring.model.ExecutionMonitoring;
-import org.shanoir.ng.vip.resulthandler.OFSEPSeqIdHandler;
-import org.shanoir.ng.vip.resulthandler.ResultHandlerException;
+import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
+import org.shanoir.ng.vip.output.handler.OFSEPSeqIdHandler;
+import org.shanoir.ng.vip.output.exception.ResultHandlerException;
 import org.shanoir.ng.shared.exception.PacsException;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
-
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.BDDMockito.given;
 
 @SpringBootTest
 @ActiveProfiles("test")
 public class OFSEPSeqIdProcessingTest {
-
-    @Mock
-    private WADODownloaderService wadoDownloaderService;
     
     @InjectMocks
     private OFSEPSeqIdHandler outputProcessing;
-
-    @MockBean
-    private StudyInstanceUIDHandler studyInstanceUIDHandler;
 
     @Test
     public void canProcessTest() throws ResultHandlerException {
@@ -53,16 +38,12 @@ public class OFSEPSeqIdProcessingTest {
 
     @Test
     public void areArraysEqualsTest() throws JSONException {
-
         assertTrue(outputProcessing.areOrientationsEquals(this.getDsOrientation(), this.getMatchingVolumeOrientation()));
-
         assertFalse(outputProcessing.areOrientationsEquals(this.getDsOrientation(), this.getNonMatchingVolumeOrientation()));
-
     }
 
     @Test
     public void getMatchingVolumeTest() throws JSONException, PacsException {
-
         Dataset ds = new MrDataset();
         ds.setId(1L);
 
@@ -84,8 +65,6 @@ public class OFSEPSeqIdProcessingTest {
         JSONObject volume = outputProcessing.getMatchingVolume(ds, serie, attr);
 
         assertEquals("volume_1", volume.get("id"));
-
-
     }
 
     private double[] getDsOrientation(){

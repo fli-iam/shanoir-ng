@@ -95,8 +95,9 @@ public class DefaultHandler extends OutputHandler {
                 throw new ResultHandlerException("No processable file found in Tar result.", null);
             }
 
-            createProcessedDatasets(outputFiles, monitoring, inputDatasets);
+            DatasetProcessing newProcessing = createProcessedDatasets(outputFiles, monitoring, inputDatasets);
 
+            executionTrackingService.completeTracking(monitoring, newProcessing);
         } catch (Exception e) {
             importerService.createFailedJob(parent.getPath());
             throw new ResultHandlerException("An error occured while extracting result from result archive.", e);
@@ -164,7 +165,7 @@ public class DefaultHandler extends OutputHandler {
     /**
      * Creates a list of processed dataset and a dataset processing associated to the list of files given in entry.
      */
-    private void createProcessedDatasets(List<File> processedFiles, ExecutionMonitoring execution, List<Dataset> inputDatasets) throws Exception {
+    private DatasetProcessing createProcessedDatasets(List<File> processedFiles, ExecutionMonitoring execution, List<Dataset> inputDatasets) throws Exception {
 
         // Create dataset processing
         DatasetProcessing processing = createProcessing(execution, inputDatasets);
@@ -205,6 +206,7 @@ public class DefaultHandler extends OutputHandler {
             LOG.info("Processed dataset [{}] has been created from [{}].", processedDataset.getProcessedDatasetName(), file.getAbsolutePath());
         }
         datasetProcessingService.update(processing);
+        return processing;
     }
 
     private DatasetProcessing createProcessing(ExecutionMonitoring execution, List<Dataset> inputDatasets) {
