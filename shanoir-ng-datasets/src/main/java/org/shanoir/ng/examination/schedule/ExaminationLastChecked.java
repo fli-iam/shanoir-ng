@@ -6,7 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
-public class LatestCheckedExamination {
+public class ExaminationLastChecked {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

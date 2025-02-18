@@ -1,4 +1,4 @@
-CREATE TABLE latest_checked_examination (
+CREATE TABLE examination_last_checked (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     examination_id BIGINT NOT NULL
 );

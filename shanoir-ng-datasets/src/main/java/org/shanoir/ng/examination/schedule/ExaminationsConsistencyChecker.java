@@ -66,7 +66,7 @@ public class ExaminationsConsistencyChecker {
 	private ExaminationRepository examinationRepository;
 
 	@Autowired
-	private LatestCheckedExaminationRepository latestCheckedExaminationRepository;
+	private ExaminationLastCheckedRepository examinationLastCheckedRepository;
 	
 	@Autowired
 	private WADOURLHandler wadoURLHandler;
@@ -83,14 +83,14 @@ public class ExaminationsConsistencyChecker {
 		try {
 			LOG.info("START...");
 			List<Examination> examinationsToCheck;
-			LatestCheckedExamination latestCheckedExamination =
-					latestCheckedExaminationRepository.findTopByOrderByIdDesc().orElse(null);
-			if (latestCheckedExamination != null) {
-				examinationsToCheck = examinationRepository.findByIdGreaterThan(latestCheckedExamination.getExaminationId());
+			ExaminationLastChecked examinationLastChecked =
+					examinationLastCheckedRepository.findTopByOrderByIdDesc().orElse(null);
+			if (examinationLastChecked != null) {
+				examinationsToCheck = examinationRepository.findByIdGreaterThan(examinationLastChecked.getExaminationId());
 			} else {
 				examinationsToCheck = examinationRepository.findAll();
 			}
-			checkExaminations(examinationsToCheck, latestCheckedExamination);
+			checkExaminations(examinationsToCheck, examinationLastChecked);
 			LOG.info("STOP...");
 		} catch(Exception e) {
 			LOG.info("STOPPED with exception...");
@@ -101,7 +101,7 @@ public class ExaminationsConsistencyChecker {
 	}
 
 	private void checkExaminations(List<Examination> examinationsToCheck,
-			LatestCheckedExamination latestCheckedExamination) throws IOException {
+			ExaminationLastChecked examinationLastChecked) throws IOException {
 		if (!examinationsToCheck.isEmpty()) {
 			File datasetsLogFile = new File(loggingFileName);
 			if (datasetsLogFile.exists()) {
@@ -114,18 +114,22 @@ public class ExaminationsConsistencyChecker {
 						writer.writeNext(lineInCSV);
 					}
 					for (Examination examination : examinationsToCheck) {
-						checkExamination(latestCheckedExamination, examination, writer);
+						examinationLastChecked = checkExamination(examinationLastChecked, examination, writer);
 					}
+					// One insert is sufficient, only write at the end where stopped
+					examinationLastCheckedRepository.save(examinationLastChecked);
 				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 				}
-			}				
+			} else {
+				LOG.error("Log file of datasets not found.");
+			}
 		} else {
 			LOG.info("No new examinations found.");
 		}
 	}
 
-	private void checkExamination(LatestCheckedExamination latestCheckedExamination,
+	private ExaminationLastChecked checkExamination(ExaminationLastChecked examinationLastChecked,
 			Examination examination, CSVWriter writer) {
 		LOG.info("Processing examination with ID: " + examination.getId());
 		long startTime = System.currentTimeMillis();
@@ -138,15 +142,15 @@ public class ExaminationsConsistencyChecker {
 				String[] lineInCSV = { examination.getId().toString(), ""+filesInPACS.size(), ""+uidsOK};
 	            writer.writeNext(lineInCSV);
 			}
-			if (latestCheckedExamination == null) {
-				latestCheckedExamination = new LatestCheckedExamination();
+			if (examinationLastChecked == null) {
+				examinationLastChecked = new ExaminationLastChecked();
 			}
-			latestCheckedExamination.setExaminationId(examination.getId());
-			latestCheckedExaminationRepository.save(latestCheckedExamination);
+			examinationLastChecked.setExaminationId(examination.getId());
 		}
         long endTime = System.currentTimeMillis();
         long duration = endTime - startTime;
-        LOG.info("Time required for exam check: " + duration + " milliseconds.");
+        LOG.info("Time required for examination check: " + duration + " milliseconds.");
+		return examinationLastChecked;
 	}
 
 	private boolean checkStudyInstanceUIDs(Examination examination, List<String> filesInPACS) {
