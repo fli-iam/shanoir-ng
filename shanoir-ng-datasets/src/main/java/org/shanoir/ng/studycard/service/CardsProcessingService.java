@@ -173,14 +173,11 @@ public class CardsProcessingService {
                 examinations = study.getExaminations();
             }
             // Load lazy data before go parallel
-            // loadExaminationsLazyCollections(study.getExaminations(), event);
+            loadExaminationsLazyCollections(study.getExaminations(), event);
             loadRulesLazyCollections(qualityCard.getRules(), event);
             // main loop
             try {
-                //examinations.parallelStream().forEach(examination -> {
-                examinations.stream().forEach(examination -> {
-                    loadExaminationLazyCollections(examination, event);
-                    LOG.error("quality examination: " + examination.getId());
+                examinations.parallelStream().forEach(examination -> {
                     event.setStatus(2);
                     event.setProgress(0.5f + (i.floatValue() * 0.5f / examinations.size()));
                     event.setMessage("checking quality for examination " + examination.getComment());
@@ -224,26 +221,18 @@ public class CardsProcessingService {
         if (examinations != null) {
             int i = 0;
             for (Examination examination : examinations) {
-                LOG.error("load examination : " + examination.getId());
                 event.setMessage("Loading examination " + examination.getComment() + " data from Shanoir database");
                 event.setProgress(i * 0.4f / examinations.size());
                 eventService.publishEvent(event);
-//                Subject subject = examination.getSubject();
-//                if (subject != null) {
-//                    Hibernate.initialize(subject.getSubjectStudyList());
-//                }
-                List<DatasetAcquisition> dsAcq = examination.getDatasetAcquisitions();
-                if (dsAcq != null) {
-                    for(DatasetAcquisition acquisition : dsAcq) {
-                        LOG.error("- acquisition : " + acquisition.getId());
-                        List<Dataset> datasets = acquisition.getDatasets();
-                        if (datasets != null) {
-                            for (Dataset dataset : datasets) {
-                                LOG.error("-- dataset : " + dataset.getId());
-                                List<DatasetExpression> expressions = dataset.getDatasetExpressions();
-                                if (expressions != null) {
-                                    for (DatasetExpression expression : expressions) {
-                                        LOG.error("--- expression : " + expression.getId());
+                if (examination.getSubject() != null) {
+                    Hibernate.initialize(examination.getSubject().getSubjectStudyList());
+                }
+                if (examination.getDatasetAcquisitions() != null) {
+                    for(DatasetAcquisition acquisition : examination.getDatasetAcquisitions()) {
+                        if (acquisition.getDatasets() != null) {
+                            for (Dataset dataset : acquisition.getDatasets()) {
+                                if (dataset.getDatasetExpressions() != null) {
+                                    for (DatasetExpression expression : dataset.getDatasetExpressions()) {
                                         Hibernate.initialize(expression.getDatasetFiles());
                                     }
                                 }
@@ -252,38 +241,6 @@ public class CardsProcessingService {
                     }
                 }
                 i++;
-            }
-        }
-    }
-
-    private void loadExaminationLazyCollections(Examination examination, ShanoirEvent event) {
-        if (examination != null) {
-            LOG.error("load examination : " + examination.getId());
-
-            List<DatasetAcquisition> dsAcq = examination.getDatasetAcquisitions();
-            if (dsAcq != null) {
-                int i = 0;
-                for(DatasetAcquisition acquisition : dsAcq) {
-                    event.setMessage("Loading examination " + examination.getComment() + " data from Shanoir database");
-                    event.setProgress(i * 0.4f / dsAcq.size());
-                    eventService.publishEvent(event);
-
-                    LOG.error("- acquisition : " + acquisition.getId());
-                    List<Dataset> datasets = acquisition.getDatasets();
-                    if (datasets != null) {
-                        for (Dataset dataset : datasets) {
-                            LOG.error("-- dataset : " + dataset.getId());
-                            List<DatasetExpression> expressions = dataset.getDatasetExpressions();
-                            if (expressions != null) {
-                                for (DatasetExpression expression : expressions) {
-                                    LOG.error("--- expression : " + expression.getId());
-                                    Hibernate.initialize(expression.getDatasetFiles());
-                                }
-                            }
-                        }
-                    }
-                    i++;
-                }
             }
         }
     }
