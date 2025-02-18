@@ -71,7 +71,6 @@ public interface ExaminationMapper {
 	 */
 	@Mapping(target = "copies", expression = "java(mapCopiesFromExamination(examination.getCopies()))")
 	@Mapping(target = "source", expression = "java(mapSourceFromExamination(examination.getSource()))")
-	@Transactional
 	ExaminationDTO examinationToExaminationDTO(Examination examination);
 
 	/**

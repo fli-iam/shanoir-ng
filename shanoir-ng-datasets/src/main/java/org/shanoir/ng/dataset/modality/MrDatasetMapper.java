@@ -54,6 +54,7 @@ public interface MrDatasetMapper {
 	 * @return dataset DTO.
 	 */
 	@Named(value = "standard")
+	@Mappings({ @Mapping(target = "source", ignore = true), @Mapping(target = "copies", ignore = true) })
 	MrDatasetDTO datasetToDatasetDTO(MrDataset dataset);
 	
 	/**
