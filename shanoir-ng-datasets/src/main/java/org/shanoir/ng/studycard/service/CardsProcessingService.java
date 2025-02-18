@@ -36,7 +36,6 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.exception.StreamExceptionWrapper;
 import org.shanoir.ng.shared.model.Study;
-import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.shared.service.SubjectStudyService;
