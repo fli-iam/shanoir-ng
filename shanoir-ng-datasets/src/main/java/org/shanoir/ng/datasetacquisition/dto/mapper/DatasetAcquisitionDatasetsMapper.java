@@ -17,11 +17,7 @@ package org.shanoir.ng.datasetacquisition.dto.mapper;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.mapstruct.DecoratedWith;
-import org.mapstruct.Mapper;
-import org.mapstruct.MapperConfig;
-import org.mapstruct.MappingInheritanceStrategy;
-import org.mapstruct.ObjectFactory;
+import org.mapstruct.*;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -48,7 +44,8 @@ public interface DatasetAcquisitionDatasetsMapper {
 			List<DatasetAcquisition> datasetAcquisitions);
 
 	PageImpl<DatasetAcquisitionDatasetsDTO> datasetAcquisitionsToDatasetAcquisitionDatasetsDTOs(Page<DatasetAcquisition> daPage);
-			
+
+	@Mappings({ @Mapping(target = "source", ignore = true), @Mapping(target = "copies", ignore = true) })
 	DatasetAcquisitionDatasetsDTO datasetAcquisitionToDatasetAcquisitionDatasetsDTO(
 			DatasetAcquisition datasetAcquisition);
 
