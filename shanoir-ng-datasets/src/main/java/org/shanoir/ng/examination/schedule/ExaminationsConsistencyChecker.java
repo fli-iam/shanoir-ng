@@ -81,6 +81,8 @@ public class ExaminationsConsistencyChecker {
             return;
         }
 		try {
+			LOG.info("---------------");
+			LOG.info("---------------");
 			LOG.info("START...");
 			long startTime = System.currentTimeMillis();
 			List<Examination> examinationsToCheck;
@@ -94,11 +96,14 @@ public class ExaminationsConsistencyChecker {
 			checkExaminations(examinationsToCheck, examinationLastChecked);
 			long endTime = System.currentTimeMillis();
 			long duration = endTime - startTime;
-			LOG.info("Time required entire check: " + duration + " milliseconds.");
+			LOG.info("---------------");
+			LOG.info("Summary: time required for entire check: " + duration + " milliseconds.");
 			if (examinationsToCheck != null && !examinationsToCheck.isEmpty()) {
-				LOG.info("Average per examination: " + duration/examinationsToCheck.size() + " milliseconds.");
+				LOG.info("Summary: average per examination: " + duration/examinationsToCheck.size() + " milliseconds.");
 			}
 			LOG.info("STOP...");
+			LOG.info("---------------");
+			LOG.info("---------------");
 		} catch(Exception e) {
 			LOG.info("STOPPED with exception...");
 			LOG.error(e.getMessage(), e);
