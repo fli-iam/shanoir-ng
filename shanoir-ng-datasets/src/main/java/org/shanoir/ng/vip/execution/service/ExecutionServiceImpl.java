@@ -1,5 +1,6 @@
 package org.shanoir.ng.vip.execution.service;
 
+import jakarta.annotation.PostConstruct;
 import org.keycloak.representations.AccessTokenResponse;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
@@ -23,6 +24,7 @@ import org.shanoir.ng.vip.shared.service.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -41,8 +43,13 @@ public class ExecutionServiceImpl implements ExecutionService {
     private static final Logger LOG = LoggerFactory.getLogger(ExecutionServiceImpl.class);
 
     public static final String SHANOIR_URI_SCHEME = "shanoir:/";
+
     private final String vipExecutionUri = "/executions/";
+
     private WebClient webClient;
+
+    @Value("${vip.uri}")
+    private String vipUrl;
 
     @Autowired
     private ExecutionMonitoringService executionMonitoringService;
@@ -60,13 +67,22 @@ public class ExecutionServiceImpl implements ExecutionService {
     private KeycloakServiceAccountUtils keycloakServiceAccountUtils;
 
     @Autowired
+    private ExecutionTrackingServiceImpl executionTrackingService;
+
+    @Autowired
     private Utils utils;
 
-    public IdName createExecution(ExecutionCandidateDTO candidate, List<Dataset> inputDatasets) throws SecurityException, EntityNotFoundException, RestServiceException {
+    @PostConstruct
+    public void init() {
+        this.webClient = WebClient.create(vipUrl);
+    }
 
+    public IdName createExecution(ExecutionCandidateDTO candidate, List<Dataset> inputDatasets) throws SecurityException, EntityNotFoundException, RestServiceException {
         ExecutionMonitoring executionMonitoring = executionMonitoringService.createExecutionMonitoring(candidate, inputDatasets);
+        executionTrackingService.updateTrackingFile(executionMonitoring, ExecutionTrackingServiceImpl.execStatus.VALID);
 
         VipExecutionDTO createdExecution = createVipExecution(candidate, executionMonitoring);
+        executionTrackingService.updateTrackingFile(executionMonitoring, ExecutionTrackingServiceImpl.execStatus.SENT);
 
         return updateAndStartExecutionMonitoring(executionMonitoring, createdExecution);
     }

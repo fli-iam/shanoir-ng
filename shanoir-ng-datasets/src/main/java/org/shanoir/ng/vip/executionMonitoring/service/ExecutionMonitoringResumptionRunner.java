@@ -11,7 +11,6 @@ import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionStatus;
 import org.shanoir.ng.vip.executionMonitoring.repository.ExecutionMonitoringRepository;
-import org.shanoir.ng.vip.executionMonitoring.schedule.ExecutionStatusMonitorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
