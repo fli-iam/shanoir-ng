@@ -153,6 +153,77 @@ public class OFSEPSeqIdHandler extends OutputHandler {
     }
 
     /**
+     * Check if the two arrays are equal
+     *
+     * @param dsOrientation
+     * @param volOrientation
+     * @return true if the two arrays are equal
+     */
+    public boolean areOrientationsEquals(double[] dsOrientation, JSONArray volOrientation) throws JSONException {
+
+        if(dsOrientation == null || dsOrientation.length == 0 || volOrientation == null || volOrientation.length() == 0){
+            return false;
+        }
+
+        if(dsOrientation.length != volOrientation.length()){
+            return false;
+        }
+
+        for (int i = 0 ; i < dsOrientation.length; i++) {
+            if(dsOrientation[i] != volOrientation.getDouble(i)){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Return JSON volume matching Shanoir dataset
+     * Match is made by orientation DICOM property
+     *
+     * @param dataset
+     * @param serie
+     * @param attributes
+     * @return the JSON volume matching Shanoir dataset
+     */
+    public JSONObject getMatchingVolume(Dataset dataset, JSONObject serie, Attributes attributes) throws JSONException {
+
+        if(serie.isNull(VOLUMES)){
+            LOG.error("Volumes set is null in result file for serie [{}]", serie.getLong(ID));
+            return null;
+        }
+
+        JSONArray volumes = serie.getJSONArray(VOLUMES);
+        double[] dsOrientation = attributes.getDoubles(Tag.ImageOrientationPatient);
+
+        for (int i = 0 ; i < volumes.length(); i++) {
+            JSONObject volume = volumes.getJSONObject(i);
+
+            if(volume.isNull(ORIENTATION)){
+                LOG.error("Orientation is null in result file for volume [{}]", volume.getString(ID));
+                continue;
+            }
+
+            JSONArray volOrientation = volume.getJSONArray(ORIENTATION);
+
+            if(dsOrientation == null || dsOrientation.length == 0){
+                LOG.error("ImageOrientationPatient DICOM property is empty for dataset [{}]", dataset.getId());
+                continue;
+            }
+
+            if(volOrientation == null || volOrientation.length() == 0){
+                LOG.error("Orientation is empty in result file for volume [{}]", volume.getString(ID));
+                continue;
+            }
+
+            if(areOrientationsEquals(dsOrientation, volOrientation)){
+                return volume;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Process all series / acquisitions found in output JSON
      */
     private void processSeries(JSONArray series, ExecutionMonitoring execution) throws JSONException, PacsException, EntityNotFoundException, CheckedIllegalClassException, SolrServerException, IOException {
@@ -201,7 +272,7 @@ public class OFSEPSeqIdHandler extends OutputHandler {
     /**
      * Update dataset from pipeline output serie & volume
      */
-    public void updateDataset(JSONObject serie, Dataset ds, JSONObject vol) throws JSONException, EntityNotFoundException, CheckedIllegalClassException, SolrServerException, IOException {
+    private void updateDataset(JSONObject serie, Dataset ds, JSONObject vol) throws JSONException, EntityNotFoundException, CheckedIllegalClassException, SolrServerException, IOException {
         DatasetMetadataField.NAME.update(ds, vol.getString(TYPE));
         datasetRepository.save(ds);
 
@@ -268,70 +339,6 @@ public class OFSEPSeqIdHandler extends OutputHandler {
             properties.add(property);
         }
         return properties;
-    }
-
-
-    /**
-     * Return JSON volume matching Shanoir dataset
-     * Match is made by orientation DICOM property
-     */
-    private JSONObject getMatchingVolume(Dataset dataset, JSONObject serie, Attributes attributes) throws JSONException {
-
-        if(serie.isNull(VOLUMES)){
-            LOG.error("Volumes set is null in result file for serie [{}]", serie.getLong(ID));
-            return null;
-        }
-
-        JSONArray volumes = serie.getJSONArray(VOLUMES);
-        double[] dsOrientation = attributes.getDoubles(Tag.ImageOrientationPatient);
-
-        for (int i = 0 ; i < volumes.length(); i++) {
-
-            JSONObject volume = volumes.getJSONObject(i);
-
-            if(volume.isNull(ORIENTATION)){
-                LOG.error("Orientation is null in result file for volume [{}]", volume.getString(ID));
-                continue;
-            }
-
-            JSONArray volOrientation = volume.getJSONArray(ORIENTATION);
-
-            if(dsOrientation == null || dsOrientation.length == 0){
-                LOG.error("ImageOrientationPatient DICOM property is empty for dataset [{}]", dataset.getId());
-                continue;
-            }
-
-            if(volOrientation == null || volOrientation.length() == 0){
-                LOG.error("Orientation is empty in result file for volume [{}]", volume.getString(ID));
-                continue;
-            }
-
-            if(areOrientationsEquals(dsOrientation, volOrientation)){
-                return volume;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Check if the two arrays are equals
-     */
-    private boolean areOrientationsEquals(double[] dsOrientation, JSONArray volOrientation) throws JSONException {
-
-        if(dsOrientation == null || dsOrientation.length == 0 || volOrientation == null || volOrientation.length() == 0){
-            return false;
-        }
-
-        if(dsOrientation.length != volOrientation.length()){
-            return false;
-        }
-
-        for (int i = 0 ; i < dsOrientation.length; i++) {
-            if(dsOrientation[i] != volOrientation.getDouble(i)){
-                return false;
-            }
-        }
-        return true;
     }
 
     /**
