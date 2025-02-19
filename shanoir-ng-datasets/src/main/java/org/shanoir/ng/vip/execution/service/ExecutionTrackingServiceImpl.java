@@ -13,9 +13,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
@@ -53,12 +51,12 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
 
             boolean retrievedLine = false;
             for (String line : lastLines) {
-                String[] lineParts = line.split(",");
+                List<String> lineParts = new ArrayList<>(Arrays.asList(line.split(",")));
 
-                if(Long.parseLong(lineParts[1]) == executionMonitoring.getId()) {
-                    lineParts[1] = newProcessing.getId().toString();
-                    lineParts[7] = newProcessing.getOutputDatasets().stream().anyMatch(file -> Objects.equals("results.yaml", file.getName())) ? "true" : "false";
-                    lineParts[8] = newProcessing.getOutputDatasets().stream().anyMatch(file -> Objects.equals("error.yaml", file.getName())) ? "true" : "false";
+                if(Long.parseLong(lineParts.get(1)) == executionMonitoring.getId()) {
+                    lineParts.set(1, newProcessing.getId().toString());
+                    lineParts.add(newProcessing.getOutputDatasets().stream().anyMatch(file -> Objects.equals("results.yaml", file.getName())) ? "true" : "false");
+                    lineParts.add(newProcessing.getOutputDatasets().stream().anyMatch(file -> Objects.equals("error.yaml", file.getName())) ? "true" : "false");
 
                     lastLines.set(lastLines.indexOf(line), String.join(",", lineParts));
                     retrievedLine = true;
@@ -79,7 +77,7 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
      * Create a new line for the execution input
      */
     private void createTrackingLine(ExecutionMonitoring executionMonitoring, File trackingFile) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(trackingFile));
+        BufferedWriter writer = new BufferedWriter(new FileWriter(trackingFile,true));
         String newLine;
 
         writer.newLine();
@@ -100,11 +98,10 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
 
         boolean retrievedLine = false;
         for (String line : lastLines) {
-            String[] lineParts = line.split(",");
+            List<String> lineParts = new ArrayList<>(Arrays.asList(line.split(",")));
 
-            if (Long.parseLong(lineParts[1]) == executionMonitoring.getId()) {
-                lineParts[6] = "true";
-
+            if (Long.parseLong(lineParts.get(1)) == executionMonitoring.getId()) {
+                lineParts.add("true,,");
                 lastLines.set(lastLines.indexOf(line), String.join(",", lineParts));
                 retrievedLine = true;
                 break;
@@ -131,7 +128,7 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
         while (pointer >= 0 && lines.size() < MAX_LAST_LINES_TO_CHECK) {
             file.seek(pointer);
             char c = (char) file.readByte();
-            if (c == '\n') {
+            if (c == '\n' && pointer != fileLength - 1) {
                 lines.addFirst(currentLine.reverse().toString());
                 currentLine.setLength(0);
             } else {
@@ -139,7 +136,6 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
             }
             pointer--;
         }
-        lines.addFirst(currentLine.reverse().toString());
 
         file.close();
         return lines;
@@ -150,9 +146,16 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
      */
     private void writeLastLines(List<String> lastLines, File trackingFile) throws IOException {
         List<String> lines = Files.readAllLines(trackingFile.toPath());
-        List<String> updatedLines = lines.subList(0, Math.max(0, lines.size() - MAX_LAST_LINES_TO_CHECK));
+        List<String> updatedLines = lines.subList(0, Math.max(1, lines.size() - MAX_LAST_LINES_TO_CHECK));
         updatedLines.addAll(lastLines);
-        Files.write(trackingFile.toPath(), updatedLines);
+
+        BufferedWriter writer = new BufferedWriter(new FileWriter(trackingFile));
+        for(String line : updatedLines.subList(0, updatedLines.size() - 1)) {
+            writer.write(line);
+            writer.newLine();
+        }
+        writer.write(updatedLines.getLast());
+        writer.close();
     }
 
     /**
