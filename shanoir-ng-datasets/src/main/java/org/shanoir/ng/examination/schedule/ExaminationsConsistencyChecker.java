@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -61,6 +62,8 @@ public class ExaminationsConsistencyChecker {
 	
 	private static final String ECC_CSV = "ecc.csv";
 
+	public static final int EXAMINATION_BATCH_SIZE = 100;
+
 	@Value("${logging.file.name}")
     private String loggingFileName;
 
@@ -87,21 +90,46 @@ public class ExaminationsConsistencyChecker {
 			LOG.info("---------------");
 			LOG.info("START...");
 			long startTime = System.currentTimeMillis();
-			List<Examination> examinationsToCheck;
+			long examinationsCount = examinationRepository.countExaminations();
+			LOG.info("Examinations count: " + examinationsCount);
+			Examination lastExamination = null;
 			ExaminationLastChecked examinationLastChecked =
 					examinationLastCheckedRepository.findTopByOrderByIdDesc().orElse(null);
 			if (examinationLastChecked != null) {
-				examinationsToCheck = examinationRepository.findByIdGreaterThan(examinationLastChecked.getExaminationId());
-			} else {
-				examinationsToCheck = examinationRepository.findAll();
+				lastExamination = examinationRepository.findById(examinationLastChecked.getExaminationId()).orElse(null);
+				// in case last checked examination is not existing anymore (deletion in between)
+				if (lastExamination == null) {
+					LOG.info("Last checked examination has been deleted.");
+				} else {
+					LOG.info("Last checked examination has ID: " + lastExamination.getId());
+				}
 			}
-			checkExaminations(examinationsToCheck, examinationLastChecked);
+
+			int pageNumber = 0;
+			int totalExaminationsChecked = 0;
+			List<Examination> examinationsToCheck;
+			do {
+				if (lastExamination != null) {
+					examinationsToCheck = examinationRepository.findByIdGreaterThan(lastExamination.getId(), PageRequest.of(pageNumber, EXAMINATION_BATCH_SIZE)).getContent();
+				} else {
+					LOG.info("First run of ECC, start with first examination (or last checked deleted).");
+					examinationsToCheck = examinationRepository.findAll(PageRequest.of(pageNumber, EXAMINATION_BATCH_SIZE)).getContent();
+				}
+				if (!examinationsToCheck.isEmpty()) {
+					checkExaminations(examinationsToCheck, examinationLastChecked);
+					totalExaminationsChecked += examinationsToCheck.size();
+					lastExamination = examinationsToCheck.get(examinationsToCheck.size() - 1);
+					pageNumber++;
+				}				
+			} while (!examinationsToCheck.isEmpty());
+			
 			long endTime = System.currentTimeMillis();
 			long duration = endTime - startTime;
 			LOG.info("---------------");
+			LOG.info("Summary: total examinations checked: " + totalExaminationsChecked);
 			LOG.info("Summary: time required for entire check: " + duration + " milliseconds.");
-			if (examinationsToCheck != null && !examinationsToCheck.isEmpty()) {
-				LOG.info("Summary: average per examination: " + duration/examinationsToCheck.size() + " milliseconds.");
+			if (totalExaminationsChecked > 0) {
+				LOG.info("Summary: average per examination: " + duration/totalExaminationsChecked + " milliseconds.");
 			}
 			LOG.info("STOP...");
 			LOG.info("---------------");
@@ -145,7 +173,7 @@ public class ExaminationsConsistencyChecker {
 
 	private ExaminationLastChecked checkExamination(ExaminationLastChecked examinationLastChecked,
 			Examination examination, CSVWriter writer) {
-		LOG.info("Processing examination with ID: " + examination.getId());
+		LOG.debug("Processing examination with ID: " + examination.getId());
 		long startTime = System.currentTimeMillis();
 		List<String> filesInPACS = new ArrayList<String>();
 		boolean checked = checkExamination(examination, filesInPACS);

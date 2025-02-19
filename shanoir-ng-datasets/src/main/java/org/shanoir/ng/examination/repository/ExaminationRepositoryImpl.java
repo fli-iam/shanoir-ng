@@ -35,7 +35,6 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
 	@Override
 	public Page<Examination> findPageByStudyCenterOrStudyIdIn(Iterable<Pair<Long, Long>> studyCenterIds,
 			Iterable<Long> studyIds, Pageable pageable, Boolean preclinical) {
-		
 		Pair<List<Examination>, Long> pair = find(studyCenterIds, studyIds, pageable, preclinical, null, null, null);
 		return new PageImpl<Examination>(pair.getFirst(), pageable, pair.getSecond()); 
 	}
@@ -43,7 +42,6 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
 	@Override
 	public Page<Examination> findPageByStudyCenterOrStudyIdIn(Iterable<Pair<Long, Long>> studyCenterIds,
 			Iterable<Long> studyIds, Pageable pageable) {
-		
 		Pair<List<Examination>, Long> pair = find(studyCenterIds, studyIds, pageable, null, null, null, null);
 		return new PageImpl<Examination>(pair.getFirst(), pageable, pair.getSecond()); 
 	}
@@ -51,21 +49,19 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
 	@Override
 	public Page<Examination> findPageByStudyCenterOrStudyIdInAndSubjectName(Iterable<Pair<Long, Long>> studyCenterIds,
 																			Iterable<Long> studyIds, String subjectName, Pageable pageable) {
-
 		Pair<List<Examination>, Long> pair = find(studyCenterIds, studyIds, pageable, null, subjectName, null, null);
 		return new PageImpl<Examination>(pair.getFirst(), pageable, pair.getSecond());
 	}
+
 	@Override
 	public Page<Examination> findPageByStudyCenterOrStudyIdInAndSearch(Iterable<Pair<Long, Long>> studyCenterIds,
 																			Iterable<Long> studyIds, Pageable pageable, Boolean preclinical, String searchStr, String searchField) {
-
 		Pair<List<Examination>, Long> pair = find(studyCenterIds, studyIds, pageable, preclinical, null, searchStr, searchField);
 		return new PageImpl<Examination>(pair.getFirst(), pageable, pair.getSecond());
 	}
 
 	@Override
 	public List<Examination> findAllByStudyCenterOrStudyIdIn(Iterable<Pair<Long, Long>> studyCenterIds, Iterable<Long> studyIds) {
-		
 		Pair<List<Examination>, Long> pair = find(studyCenterIds, studyIds, null, null, null, null, null);
 		return pair.getFirst();
 	}

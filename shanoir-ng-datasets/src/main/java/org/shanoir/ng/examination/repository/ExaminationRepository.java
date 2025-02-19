@@ -31,6 +31,10 @@ import java.util.List;
  */
 public interface ExaminationRepository extends PagingAndSortingRepository<Examination, Long>, CrudRepository<Examination, Long>, ExaminationRepositoryCustom {
 
+	// faster than .count() as uses count(1) on database
+	@Query("SELECT COUNT(e) FROM Examination e")
+	long countExaminations();
+
 	/**
 	 * Get a list of examinations for a subject.
 	 * 
@@ -58,7 +62,7 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	 */
 	List<Examination> findBySubjectIdAndStudy_Id(Long subjectId, Long studyId);
 
-	List<Examination> findByIdGreaterThan(Long id);
+	Page<Examination> findByIdGreaterThan(long examinationId, Pageable pageable);
 	
 	/**
 	 * Get a paginated list of examinations
@@ -120,4 +124,5 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	Examination findBySourceIdAndStudy_Id(Long sourceId, Long studyId);
 
 	Page<Examination> findPageByComment(String comment, Pageable pageable);
+
 }
