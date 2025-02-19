@@ -17,6 +17,7 @@ package org.shanoir.ng.studycard;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -61,7 +62,10 @@ public class StudyCardSecurityTest {
 	
 	@MockBean
 	StudyRightsService commService;
-	
+
+	@MockBean
+	private StudyInstanceUIDHandler studyInstanceUIDHandler;
+
 	@BeforeEach
 	public void setup() {
 		mockBindingResult = new BeanPropertyBindingResult(mockStudyCard(1L), "dataset");

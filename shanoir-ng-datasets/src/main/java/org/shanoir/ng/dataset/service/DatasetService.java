@@ -48,7 +48,9 @@ public interface DatasetService {
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#id, 'CAN_ADMINISTRATE'))")
 	void deleteById(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
-	
+
+	void deleteByIdCascade(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
+
 	/**
 	 * Delete several datasets.
 	 * 
