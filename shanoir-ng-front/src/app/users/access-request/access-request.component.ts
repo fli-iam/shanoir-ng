@@ -27,7 +27,8 @@ import { IdName } from 'src/app/shared/models/id-name.model';
 @Component({
     selector: 'access-request',
     templateUrl: 'access-request.component.html',
-    styleUrls: ['access-request.component.css']
+    styleUrls: ['access-request.component.css'],
+    standalone: false
 })
 
 export class AccessRequestComponent extends EntityComponent<AccessRequest> {

@@ -28,7 +28,8 @@ import * as AppUtils from '../utils/app.utils';
 @Component({
     selector: 'quality-control',
     templateUrl: 'quality-control.component.html',
-    styleUrls: ['quality-control.component.css']
+    styleUrls: ['quality-control.component.css'],
+    standalone: false
 })
 
 export class QualityControlComponent implements OnChanges {

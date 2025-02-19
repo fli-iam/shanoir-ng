@@ -20,7 +20,8 @@ import { Observable } from 'rxjs';
 
 @Component({
     selector: 'file-upload',
-    template: '<input type="file" [multiple]="multiple" #fileInput>'
+    template: '<input type="file" [multiple]="multiple" #fileInput>',
+    standalone: false
 })
 
 export class FileUploadComponent {

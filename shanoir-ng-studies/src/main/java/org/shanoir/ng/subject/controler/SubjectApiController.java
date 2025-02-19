@@ -14,21 +14,17 @@
 
 package org.shanoir.ng.subject.controler;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+
+import io.swagger.v3.oas.annotations.Parameter;
 
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.ErrorDetails;
-import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
-import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
@@ -38,6 +34,7 @@ import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.subject.service.SubjectUniqueConstraintManager;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -49,7 +46,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import io.swagger.v3.oas.annotations.Parameter;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+import jakarta.transaction.Transactional;
 
 @Controller
 public class SubjectApiController implements SubjectApi {
@@ -69,6 +70,9 @@ public class SubjectApiController implements SubjectApi {
 	@Autowired
 	private StudyService studyService;
 
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
+
 	@Override
 	public ResponseEntity<Void> deleteSubject(
 			@Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
@@ -76,6 +80,7 @@ public class SubjectApiController implements SubjectApi {
 			// Delete all associated bids folders
 			subjectService.deleteById(subjectId);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_SUBJECT_EVENT, subjectId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, subjectId.toString());
 
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
@@ -94,6 +99,7 @@ public class SubjectApiController implements SubjectApi {
 	}
 
 	@Override
+	@Transactional
 	public ResponseEntity<List<SubjectDTO>> findSubjects(boolean preclinical, boolean clinical) {
 		List<Subject> subjects = new ArrayList<>();
 		if(preclinical && clinical){
@@ -136,6 +142,10 @@ public class SubjectApiController implements SubjectApi {
 		validate(subject, result);
 		Subject createdSubject;
 		if (centerId == null) {
+			// #2475 Trim subject common name, only when not coming from SHUP
+			if (subject.getName() != null) {
+				subject.setName(subject.getName().trim());
+			}
 			createdSubject = subjectService.create(subject);
 		} else {
 			createdSubject = subjectService.createAutoIncrement(subject, centerId);
@@ -163,10 +173,12 @@ public class SubjectApiController implements SubjectApi {
 		}
 	}
 
+	// Attention: this method is used by ShanoirUploader!!!
 	@Override
 	public ResponseEntity<List<SimpleSubjectDTO>> findSubjectsByStudyId(
 			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@Parameter(description="preclinical", required = false) @RequestParam(value="preclinical", required = false) String preclinical) {
+		
 		final List<SimpleSubjectDTO> simpleSubjectDTOList;
 		if ("null".equals(preclinical)) {
 			simpleSubjectDTOList = subjectService.findAllSubjectsOfStudyId(studyId);
@@ -187,6 +199,7 @@ public class SubjectApiController implements SubjectApi {
 		return new ResponseEntity<>(simpleSubjectDTOList, HttpStatus.OK);
 	}
 
+	// Attention: this method is used by ShanoirUploader!!!
 	@Override
 	public ResponseEntity<SubjectDTO> findSubjectByIdentifier(
 			@Parameter(description = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier) {

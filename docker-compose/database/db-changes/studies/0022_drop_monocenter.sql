@@ -1,0 +1,1 @@
+ALTER TABLE study DROP COLUMN mono_center;

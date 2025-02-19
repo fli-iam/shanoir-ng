@@ -11,6 +11,7 @@ import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
+import org.shanoir.ng.dataset.model.DatasetType;
 import org.shanoir.ng.datasetfile.DatasetFile;
 
 public class DatasetUtils {
@@ -43,63 +44,63 @@ public class DatasetUtils {
 		Dataset dataset = null;
 			
 		switch(type) {
-			case CalibrationDataset.datasetType:
+			case DatasetType.Names.Generic:
 				dataset = new CalibrationDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
 				break;
-			case CtDataset.datasetType:
+			case DatasetType.Names.Ct:
 				dataset = new CtDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.CT_DATASET);
 				break;
-			case EegDataset.datasetType:
+			case DatasetType.Names.Eeg:
 				dataset = new EegDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.EEG_DATASET);
 				break;
-			case MegDataset.datasetType:
+			case DatasetType.Names.Meg:
 				dataset = new MegDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.EEG_DATASET);
 				break;
-			case MeshDataset.datasetType:
+			case DatasetType.Names.Mesh:
 				dataset = new MeshDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
 				break;
-			case MrDataset.datasetType:
+			case DatasetType.Names.Mr:
 				dataset = new MrDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.MR_DATASET);
 				break;
-			case ParameterQuantificationDataset.datasetType:
+			case DatasetType.Names.ParameterQuantification:
 				dataset = new ParameterQuantificationDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
 				break;
-			case PetDataset.datasetType:
+			case DatasetType.Names.Pet:
 				dataset = new PetDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.PET_DATASET);
 				break;
-			case RegistrationDataset.datasetType:
+			case DatasetType.Names.Registration:
 				dataset = new RegistrationDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
 				break;
-			case SegmentationDataset.datasetType:
+			case DatasetType.Names.Segmentation:
 				dataset = new SegmentationDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
 				break;
-			case SpectDataset.datasetType:
+			case DatasetType.Names.Spect:
 				dataset = new SpectDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.SPECT_DATASET);
 				break;
-			case StatisticalDataset.datasetType:
+			case DatasetType.Names.Statistical:
 				dataset = new StatisticalDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
 				break;
-			case TemplateDataset.datasetType:
+			case DatasetType.Names.Template:
 				dataset = new TemplateDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
 				break;
-			case BidsDataset.datasetType:
+			case DatasetType.Names.BIDS:
 				dataset = new BidsDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.MR_DATASET);
 				break;
-			case XaDataset.datasetType:
+			case DatasetType.Names.Xa:
 				dataset = new XaDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.XA_DATASET);
 				break;
@@ -113,57 +114,25 @@ public class DatasetUtils {
 	}
 
 	public static Dataset copyDatasetFromDataset(Dataset d) {
-		String type = d.getType();
-		Dataset dataset = null;
-
-		switch(type) {
-			case CalibrationDataset.datasetType:
-				dataset = new CalibrationDataset(d);
-				break;
-			case CtDataset.datasetType:
-				dataset = new CtDataset(d);
-				break;
-			case EegDataset.datasetType:
-				dataset = new EegDataset(d);
-				break;
-			case MegDataset.datasetType:
-				dataset = new MegDataset(d);
-				break;
-			case MeshDataset.datasetType:
-				dataset = new MeshDataset(d);
-				break;
-			case ParameterQuantificationDataset.datasetType:
-				dataset = new ParameterQuantificationDataset(d);
-				break;
-			case PetDataset.datasetType:
-				dataset = new PetDataset(d);
-				break;
-			case RegistrationDataset.datasetType:
-				dataset = new RegistrationDataset(d);
-				break;
-			case SegmentationDataset.datasetType:
-				dataset = new SegmentationDataset(d);
-				break;
-			case SpectDataset.datasetType:
-				dataset = new SpectDataset(d);
-				break;
-			case StatisticalDataset.datasetType:
-				dataset = new StatisticalDataset(d);
-				break;
-			case TemplateDataset.datasetType:
-				dataset = new TemplateDataset(d);
-				break;
-			case BidsDataset.datasetType:
-				dataset = new BidsDataset(d);
-				break;
-			case XaDataset.datasetType:
-				dataset = new XaDataset(d);
-				break;
-			default:
-				dataset = new GenericDataset(d);
-				break;
-		}
-		return dataset;
+		DatasetType type = d.getType();
+	
+		return switch (type) {
+			case Calibration -> new CalibrationDataset(d);
+			case Ct -> new CtDataset(d);
+			case Eeg -> new EegDataset(d);
+			case Meg -> new MegDataset(d);
+			case Mesh -> new MeshDataset(d);
+			case ParameterQuantification -> new ParameterQuantificationDataset(d);
+			case Pet -> new PetDataset(d);
+			case Registration -> new RegistrationDataset(d);
+			case Segmentation -> new SegmentationDataset(d);
+			case Spect -> new SpectDataset(d);
+			case Statistical -> new StatisticalDataset(d);
+			case Template -> new TemplateDataset(d);
+			case BIDS -> new BidsDataset(d);
+			case Xa -> new XaDataset(d);
+			default -> new GenericDataset(d);
+		};
 	}
 	
 }

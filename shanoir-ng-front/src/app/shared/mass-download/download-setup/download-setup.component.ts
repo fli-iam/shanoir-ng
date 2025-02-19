@@ -26,7 +26,8 @@ import { Subscription } from 'rxjs';
 @Component({
     selector: 'download-setup',
     templateUrl: 'download-setup.component.html',
-    styleUrls: ['download-setup.component.css']
+    styleUrls: ['download-setup.component.css'],
+    standalone: false
 })
 
 export class DownloadSetupComponent implements OnInit, OnDestroy {
@@ -36,6 +37,7 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
     @Input() inputIds: DownloadInputIds;
     form: UntypedFormGroup;
     loading: boolean;
+    loaded: boolean = false;
     format: Format;
     converter: number;
     datasets: Dataset[];
@@ -96,6 +98,7 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
                     }
                 ).finally(() => {
                     this.loading = false;
+                    this.loaded = true;
                 });
             }
         }

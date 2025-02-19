@@ -11,37 +11,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { SimpleStudy } from '../../studies/shared/study.model';
-import { ReverseStudyNode, ReverseSubjectNode, ShanoirNode, UNLOADED } from '../../tree/tree.model';
-import { Subject } from '../shared/subject.model';
-import { Selection, TreeService } from 'src/app/studies/study/tree.service';
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
+import { TreeService } from 'src/app/studies/study/tree.service';
 import { Tag } from 'src/app/tags/tag.model';
+import { ReverseStudyNode, ReverseSubjectNode, ShanoirNode } from '../../tree/tree.model';
+import { Subject } from '../shared/subject.model';
 
 
 @Component({
     selector: 'reverse-subject-node',
-    templateUrl: 'reverse-subject-node.component.html'
+    templateUrl: 'reverse-subject-node.component.html',
+    standalone: false
 })
 
-export class ReverseSubjectNodeComponent implements OnChanges {
+export class ReverseSubjectNodeComponent extends TreeNodeAbstractComponent<ReverseSubjectNode> implements OnChanges {
 
     @Input() input: ReverseSubjectNode | { subject: Subject, parentNode: ShanoirNode };
     @Input() studyId: number;
     @Output() nodeInit: EventEmitter<ReverseSubjectNode> = new EventEmitter();
-    @Output() selectedChange: EventEmitter<void> = new EventEmitter();
-    node: ReverseSubjectNode = null;
-    loading: boolean = false;
-    menuOpened: boolean = false;
-    showDetails: boolean;
-    @Input() hasBox: boolean = false;
     awesome = "fas fa-user-injured";
 
     constructor(
             private router: Router,
-            protected treeService: TreeService) {
+            protected treeService: TreeService,
+            elementRef: ElementRef) {
+        super(elementRef);
     }
 
     ngOnChanges(changes: SimpleChanges): void {

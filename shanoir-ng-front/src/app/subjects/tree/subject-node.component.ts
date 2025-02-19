@@ -11,60 +11,41 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
+import { ConsoleService } from 'src/app/shared/console/console.service';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
 import { TreeService } from 'src/app/studies/study/tree.service';
-import { SuperPromise } from 'src/app/utils/super-promise';
-import { DatasetAcquisition } from '../../dataset-acquisitions/shared/dataset-acquisition.model';
-import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
-import { Dataset } from '../../datasets/shared/dataset.model';
-import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
 import { ExaminationPipe } from '../../examinations/shared/examination.pipe';
 import { ExaminationService } from '../../examinations/shared/examination.service';
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
 import {
     ClinicalSubjectNode,
-    DatasetAcquisitionNode,
-    DatasetNode,
     ExaminationNode,
     PreclinicalSubjectNode,
-    ProcessingNode,
     ShanoirNode,
     SubjectNode,
-    UNLOADED,
+    UNLOADED
 } from '../../tree/tree.model';
 import { Subject } from '../shared/subject.model';
-import { ConsoleService } from 'src/app/shared/console/console.service';
 import { SubjectService } from '../shared/subject.service';
-import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
 
 
 @Component({
     selector: 'subject-node',
-    templateUrl: 'subject-node.component.html'
+    templateUrl: 'subject-node.component.html',
+    standalone: false
 })
 
-export class SubjectNodeComponent implements OnChanges {
+export class SubjectNodeComponent extends TreeNodeAbstractComponent<SubjectNode> implements OnChanges {
 
     @Input() input: SubjectNode | {subject: Subject, parentNode: ShanoirNode};
     @Input() rights: StudyUserRight[];
     @Input() studyId: number;
-    @Output() nodeInit: EventEmitter<SubjectNode> = new EventEmitter();
-    @Output() selectedChange: EventEmitter<void> = new EventEmitter();
-    @Output() onNodeSelect: EventEmitter<number> = new EventEmitter();
-    node: SubjectNode;
-    loading: boolean = false;
-    menuOpened: boolean = false;
-    showDetails: boolean;
-    @Input() hasBox: boolean = false;
-    detailsPath: string = "";
-    @Input() withMenu: boolean = true;
-    protected contentLoaded: SuperPromise<void> = new SuperPromise();
-    public downloadState: TaskState = new TaskState();
-
+   
     constructor(
             private examinationService: ExaminationService,
             private router: Router,
@@ -72,7 +53,9 @@ export class SubjectNodeComponent implements OnChanges {
             private downloadService: MassDownloadService,
             protected treeService: TreeService,
             private consoleService: ConsoleService,
-            private subjectService: SubjectService) {
+            private subjectService: SubjectService,
+            elementRef: ElementRef) {
+        super(elementRef);
     }
 
     ngOnChanges(changes: SimpleChanges): void {

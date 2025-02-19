@@ -17,7 +17,8 @@ import { InstrumentBasedAssessment, Instrument, VariableAssessment } from '../in
 
 @Component({
     selector: 'instrument-assessment-detail',
-    templateUrl: 'instrument-assessment.component.html'
+    templateUrl: 'instrument-assessment.component.html',
+    standalone: false
 })
 
 export class InstrumentAssessmentComponent {

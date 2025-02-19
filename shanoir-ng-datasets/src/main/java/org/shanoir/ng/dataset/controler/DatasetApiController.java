@@ -60,6 +60,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
@@ -139,8 +140,9 @@ public class DatasetApiController implements DatasetApi {
 	@Autowired
 	private SolrService solrService;
 
-	@Autowired
-	DatasetDownloaderServiceImpl datasetDownloaderService;
+    @Qualifier("datasetDownloaderServiceImpl")
+    @Autowired
+	protected DatasetDownloaderServiceImpl datasetDownloaderService;
 
 	@Autowired
 	private ObjectMapper objectMapper;
@@ -593,7 +595,7 @@ public class DatasetApiController implements DatasetApi {
 			@RequestParam(value = "subjectNameInRegExp", required = false) String subjectNameInRegExp,
 			@Parameter(description = "Subject name excluding regular expression", required=false) @Valid
 			@RequestParam(value = "subjectNameOutRegExp", required = false) String subjectNameOutRegExp
-			) throws RestServiceException, IOException {
+			) throws IOException {
 
 		String params = "";
 		if (studyNameInRegExp != null && !StringUtils.isEmpty(studyNameInRegExp)) params += "\nStudy to include : " + studyNameInRegExp;

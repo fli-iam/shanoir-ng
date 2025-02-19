@@ -67,6 +67,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 	private static final String ACQUISITION_EQUIPMENT_FACET = "acquisitionEquipmentName";
 	private static final String SUBJECT_NAME_FACET = "subjectName";
 	private static final String SUBJECT_ID_FACET = "subjectId";
+	private static final String SORTING_INDEX_FACET = "sortingIndex";
 	private static final String SUBJECT_TYPE_FACET = "subjectType";
 	private static final String STUDY_NAME_FACET = "studyName";
 	private static final String STUDY_ID_FACET = "studyId";
@@ -96,6 +97,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 			CENTER_NAME_FACET,
 			STUDY_ID_FACET,
 			SUBJECT_ID_FACET,
+			SORTING_INDEX_FACET,
 			SUBJECT_TYPE_FACET,
 			CENTER_ID_FACET,
 			SLICE_THICKNESS_FACET,
@@ -187,7 +189,8 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 		} catch (IOException e) {
 			throw new RestServiceException(e, new ErrorModel(500, "Error querying Solr"));
 		} catch (SolrException | SolrServerException e) {
-			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "solr query failed");
+			String errorMessage = e.getMessage().substring(e.getMessage().indexOf("shanoir") + 9);
+			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), errorMessage);
 			throw new RestServiceException(e, error);
 		}
 		return response;
@@ -405,6 +408,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 			solrDoc.setAcquisitionEquipmentName((String) document.getFirstValue("acquisitionEquipmentName"));
 			solrDoc.setSubjectName((String) document.getFirstValue("subjectName"));
 			solrDoc.setSubjectId((Long) document.getFirstValue("subjectId"));
+			solrDoc.setSortingIndex( (Integer) document.getFirstValue("sortingIndex"));
 			if (document.getFieldValues("tags") != null) {
 				solrDoc.setTags(document.getFieldValues("tags").stream()
 						.map(object -> Objects.toString(object, null))

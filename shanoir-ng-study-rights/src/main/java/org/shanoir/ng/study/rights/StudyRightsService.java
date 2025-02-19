@@ -58,7 +58,8 @@ public class StudyRightsService {
 			throw new IllegalStateException("UserId should not be null. Cannot check rights on the study " + studyId);
 		}
 		StudyUser founded = repo.findByUserIdAndStudyId(userId, studyId);
-		
+		List<Long> centerIds = repo.findCenterIdsByStudyUserId(founded.getId());
+		founded.setCenterIds(centerIds);
 		return
 				founded != null
 				&& 
@@ -80,6 +81,8 @@ public class StudyRightsService {
 		}
 		boolean hasRight = false;
 		for (StudyUser su  : founded) {
+			List<Long> centerIds = repo.findCenterIdsByStudyUserId(su.getId());
+			su.setCenterIds(centerIds);
 			hasRight = hasRight || CollectionUtils.isEmpty(su.getCenterIds()) || su.getCenterIds().contains(centerId);
 		}
 		return hasRight;
