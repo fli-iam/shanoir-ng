@@ -34,6 +34,9 @@ import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -63,6 +66,7 @@ import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.tag.repository.TagRepository;
+import org.shanoir.ng.utils.EqualCheckInterface;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ListDependencyUpdate;
 import org.shanoir.ng.utils.Utils;
@@ -136,8 +140,10 @@ public class StudyServiceImpl implements StudyService {
 	private StudyCenterRepository studyCenterRepository;
 
 	@Autowired
+	private ShanoirEventService eventService;
+  
+	@Autowired
 	private TagRepository tagRepository;
-
 
 	@Override
 	@Transactional
@@ -264,6 +270,24 @@ public class StudyServiceImpl implements StudyService {
 		return studyDb;
 	}
 
+	private class StudyEqualCheck implements EqualCheckInterface<StudyCenter> {
+
+        @Override
+        public boolean check(StudyCenter a, StudyCenter b) {
+            boolean result =  a != null && b != null && (
+				a.getId() != null && a.getId().equals(b.getId()) || (
+					   a.getCenter() != null && a.getCenter().getId() != null 
+					&& b.getCenter() != null && b.getCenter().getId() != null 
+					&& a.getCenter().getId().equals(b.getCenter().getId())
+					&& a.getStudy() != null && a.getStudy().getId() != null
+					&& b.getStudy() != null && b.getStudy().getId() != null
+					&& a.getStudy().getId().equals(b.getStudy().getId())
+				) 
+			);
+			return result;
+        }
+	}
+
 	@Override
 	@Transactional(rollbackOn = {ShanoirException.class})
 	public Study update(Study study) throws ShanoirException {
@@ -288,13 +312,15 @@ public class StudyServiceImpl implements StudyService {
 		studyDb.setVisibleByDefault(study.isVisibleByDefault());
 		studyDb.setStudyCardPolicy(study.getStudyCardPolicy());
 		studyDb.setWithExamination(study.isWithExamination());
-		studyDb.setMonoCenter(study.isMonoCenter());
 
 		if (study.getStudyCenterList() != null) {
-			ListDependencyUpdate.updateWith(studyDb.getStudyCenterList(), study.getStudyCenterList());
 			for (StudyCenter studyCenter : studyDb.getStudyCenterList()) {
 				studyCenter.setStudy(studyDb);
 			}
+			for (StudyCenter studyCenter : study.getStudyCenterList()) {
+				studyCenter.setStudy(studyDb);
+			}
+			ListDependencyUpdate.updateWith(studyDb.getStudyCenterList(), study.getStudyCenterList(), new StudyEqualCheck());
 		}
 
 		if (study.getTags() != null) {
@@ -325,10 +351,21 @@ public class StudyServiceImpl implements StudyService {
 
 			for (SubjectStudy subjectStudyDb : studyDb.getSubjectStudyList()) {
 				if(!updatedIds.contains(subjectStudyDb.getId())) {
-					removed.add(subjectStudyDb.getSubject());
+					Subject sub = subjectStudyDb.getSubject();
+					removed.add(sub);
+
+					eventService.publishEvent(
+							new ShanoirEvent(
+									ShanoirEventType.REMOVE_SUBJECT_FROM_STUDY_EVENT,
+									sub.getId().toString(),
+									KeycloakUtil.getTokenUserId(),
+									"Subject " + sub.getName() + " (id: " + sub.getId() + ") removed from study " + study.getName() + " (id: " + study.getId() + ")",
+									ShanoirEvent.SUCCESS,
+									study.getId())
+					);
+
 				}
 			}
-
 			for (Subject subject : removed) {
 				if (this.subjectStudyRepository.countBySubject(subject) == 1L) {
 					toBeDeleted.add(subject);

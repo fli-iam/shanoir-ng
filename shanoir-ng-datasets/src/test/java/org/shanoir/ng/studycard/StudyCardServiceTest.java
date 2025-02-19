@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.studycard.model.StudyCard;
@@ -27,6 +28,7 @@ import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.studycard.service.StudyCardServiceImpl;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Arrays;
@@ -51,6 +53,8 @@ public class StudyCardServiceTest {
 	@Mock
 	private StudyCardRepository studyCardRepository;
 
+	@MockBean
+	private StudyInstanceUIDHandler studyInstanceUIDHandler;
 	@InjectMocks
 	private StudyCardServiceImpl studyCardService;
 

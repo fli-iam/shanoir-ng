@@ -143,14 +143,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li class="required">
             <label class="required-label">Select a subject</label>
             <span class="right-col">
-                <select-box
+                <select-box class="subject-select"
                         [disabled]="loading || !study || !acquisitionEquipment"
                         [(ngModel)]="subject"
                         (userChange)="onSelectSubject();"
-                        [viewRoute]="'/subject/details/' + subject?.id" [viewDisabled]="!subject"
-                        (onNewClick)="openCreateSubject()" [newDisabled]="!study || !acquisitionEquipment"
+                        [viewRoute]="'/subject/details/' + this.subject?.id" [viewDisabled]="!subject"
                         [optionArr]="subjects">
                 </select-box>
+                <button class="new-subject" (click)="openCreateSubject()" [disabled]="!study || !acquisitionEquipment">
+                    <i class="fa-solid fa-user"></i>
+                    <i class="fa-solid fa-plus secondary"></i>
+                    New subject
+                </button>
             </span>
         </li>
         <li *ngIf="editSubjectStudy" class="required">
@@ -209,10 +213,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li>
             <label class="required-label">Select an examination</label>
             <span class="right-col">
-                <select-box [disabled]="!study || !subject || loading" [(ngModel)]="examination" (userChange)="onSelectExam()"
-                        [viewRoute]="'/examination/details/' + examination?.id" [viewDisabled]="!examination"
-                        (onNewClick)="openCreateExam()" [newDisabled]="!study || !subject" [optionArr]="examinations" [pipe]="subjectExaminationLabelPipe">
+                <select-box class="examination-select" 
+                        [disabled]="!study || !subject || loading" [(ngModel)]="examination" (userChange)="onSelectExam()"
+                        [viewRoute]="'/examination/details/' + this.examination?.id" [viewDisabled]="!examination"
+                        [optionArr]="examinations" [pipe]="subjectExaminationLabelPipe">
                 </select-box>
+                <button class="new-subject" (click)="openCreateExam()" [disabled]="!study || !subject">
+                    <i class="fa-solid fa-stethoscope"></i>
+                    <i class="fa-solid fa-plus secondary"></i>
+                    New examination
+                </button>
             </span>
         </li>
     </ol>

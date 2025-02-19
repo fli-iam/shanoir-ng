@@ -44,14 +44,6 @@ public class StudyCenter extends AbstractEntity {
 	@JoinColumn(name = "center_id", nullable=false)
 	private Center center;
 
-	/** Investigator. */
-//	@ManyToOne
-//	@JoinColumn(name = "investigator_id")
-//	private Investigator investigator;
-
-	/** Investigator function in the study */
-//	private InvestigatorFunction investigatorFunction;
-
 	/** The study. */
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "study_id", nullable=false)

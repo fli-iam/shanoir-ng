@@ -16,7 +16,9 @@ package org.shanoir.ng.subject.controler;
 
 
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+
 import io.swagger.v3.oas.annotations.Parameter;
+
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -47,6 +49,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+
+import jakarta.transaction.Transactional;
 
 @Controller
 public class SubjectApiController implements SubjectApi {
@@ -95,6 +99,7 @@ public class SubjectApiController implements SubjectApi {
 	}
 
 	@Override
+	@Transactional
 	public ResponseEntity<List<SubjectDTO>> findSubjects(boolean preclinical, boolean clinical) {
 		List<Subject> subjects = new ArrayList<>();
 		if(preclinical && clinical){
@@ -168,6 +173,7 @@ public class SubjectApiController implements SubjectApi {
 		}
 	}
 
+	// Attention: this method is used by ShanoirUploader!!!
 	@Override
 	public ResponseEntity<List<SimpleSubjectDTO>> findSubjectsByStudyId(
 			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
@@ -193,6 +199,7 @@ public class SubjectApiController implements SubjectApi {
 		return new ResponseEntity<>(simpleSubjectDTOList, HttpStatus.OK);
 	}
 
+	// Attention: this method is used by ShanoirUploader!!!
 	@Override
 	public ResponseEntity<SubjectDTO> findSubjectByIdentifier(
 			@Parameter(description = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier) {

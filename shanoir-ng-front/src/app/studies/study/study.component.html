@@ -282,25 +282,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </fieldset>
             <fieldset [class.hidden-tab]="activeTab != 'subjects'" tab="subjects">
                 <legend>Subject tags</legend>
-                <tag-creator ngDefaultControl [mode]="mode" [study]="study" [(ngModel)]="study.tags" (onChange)="onTagListChange()" formControlName="tags"></tag-creator>
+                <tag-creator ngDefaultControl [mode]="mode" [tagsInUse]="subjectTagsInUse" [(ngModel)]="study.tags" (onChange)="onTagListChange()" formControlName="tags"></tag-creator>
                 <subject-study-list [study]="study" [selectableList]="subjects" [(ngModel)]="study.subjectStudyList" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>
             </fieldset>
             <fieldset [class.hidden-tab]="activeTab != 'centers'" tab="centers">
                 <legend i18n="Study detail|Name label@@studyDetailCentersAndPITitle">List of centers</legend>
                 <ol>
                     <li>
-                        <label i18n="Study detail|Multicenter label@@studyDetailMultiCenter">Multi / single center</label>
-                        <span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								<span *ngIf="study.monoCenter">Single center</span>
-								<span *ngIf="!study.monoCenter">Multicenter</span>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<span [class.disabled]="study.studyCenterList?.length > 1">Single center</span>
-								<toggle-switch formControlName="monoCenter" [(ngModel)]="study.monoCenter" (onChange)="onMonoMultiChange()" [reverse]="true"></toggle-switch>
-								<span>Multicenter</span>
-							</ng-template>
-						</span>
 						<span *ngIf="mode == 'view'" class="left-col">
 						    <p><b>Centers</b></p>
 						    <ol *ngFor="let studyCenter of study.studyCenterList; let i = index; let even = even; let odd = odd;" [class.even]="even" [class.odd]="odd">
@@ -311,18 +299,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li *ngIf="mode != 'view'">
 						<label i18n="Study detail|List of centers label@@studyDetailCentersAndPI">Center</label>
 						<span class="right-col">
-							<select-box [ngModel]="selectedCenter" formControlName="selectedCenter" (userChange)="onCenterChange($event)" placeholder="Select a center ..." (onAddClick)="onCenterAdd()" [addDisabled]="!enableAddIcon()" [options]="centerOptions">
+							<select-box [(ngModel)]="selectedCenter" formControlName="selectedCenter" placeholder="Select a center ..." (onAddClick)="onCenterAdd()" [options]="centerOptions">
 							</select-box>
-							<label *ngIf="hasError('studyCenterList', ['required'])" class="form-validation-alert right-col">At least one center is required !</label>
+							<label *ngIf="hasError('studyCenterList', ['noCenter'])" class="form-validation-alert right-col">At least one center is required !</label>
 						</span>
 					</li>
-					<li *ngIf="mode != 'view' && study.monoCenter">
-						<label>Subject prefix for this center</label>
-						<span class="right-col">
-							<span class="prefix">{{study.name}}-</span><input class="prefix-input" *ngIf="study.studyCenterList[0]" type="text" [(ngModel)]="study.studyCenterList[0].subjectNamePrefix" (input)="onPrefixChange()" [ngModelOptions]="{standalone: true}"/>
-						</span>
-					</li>
-					<li *ngIf="mode != 'view' && !study.monoCenter">
+					<li *ngIf="mode != 'view'">
 						<span class="study-center-list">
 							<input type="hidden" formControlName="studyCenterList" [(ngModel)]="study.studyCenterList"/>
 							<table>
@@ -332,6 +314,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									<th>Subject Prefix (optional) <tool-tip>A default prefix for the new subjects created when importing datasets in this study</tool-tip></th>
 									<th></th>
 								</tr>
+                                <tr *ngIf="study.studyCenterList.length == 0">
+                                    <td>
+                                        List of center cannot be empty.
+                                    </td>
+                                </tr>
 								<tr *ngFor="let studyCenter of study.studyCenterList; let i = index; let even = even; let odd = odd;" [class.even]="even" [class.odd]="odd">
 									<td>{{studyCenter.center.name}}</td>
 									<td class="icon icon-clickable center-link" (click)="goToCenter(studyCenter.center.id)">
@@ -407,7 +394,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</fieldset>
             <fieldset [class.hidden-tab]="activeTab != 'tags'" class="tags">
                 <legend>Public Study tags</legend>
-                <tag-creator ngDefaultControl [mode]="mode" [study]="study" [(ngModel)]="study.studyTags" (onChange)="onStudyTagListChange()" formControlName="studyTags"></tag-creator>
+                <tag-creator ngDefaultControl [mode]="mode" [(ngModel)]="study.studyTags" (onChange)="onStudyTagListChange()" formControlName="studyTags"></tag-creator>
             </fieldset>
             <fieldset *ngIf="mode == 'view'" [class.hidden-tab]="activeTab != 'bids'" tab="bids">
 				        <legend>BIDS tree</legend>
