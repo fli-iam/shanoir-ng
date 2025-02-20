@@ -298,13 +298,11 @@ public class DICOMWebService {
 
 	public void rejectExaminationFromPacs(String studyInstanceUID) throws ShanoirException {
 		String rejectURL = this.serverURL + "/" + studyInstanceUID + REJECT_SUFFIX;
-
 		rejectURLFromPacs(rejectURL);
 	}
 
 	public void rejectAcquisitionFromPacs(String studyInstanceUID, String seriesInstanceUID) throws ShanoirException {
 		String rejectURL = this.serverURL + "/" + studyInstanceUID + "/series/" + seriesInstanceUID + REJECT_SUFFIX;
-
 		rejectURLFromPacs(rejectURL);
 	}
 
@@ -324,7 +322,7 @@ public class DICOMWebService {
 		post.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_JSON);
 		try (CloseableHttpResponse response = httpClient.execute(post)) {
 			if (HttpStatus.OK.value() == response.getCode()) {
-				LOG.info("Rejected from PACS: " + post);
+				LOG.debug("Rejected from PACS: " + post);
 			} else {
 				LOG.error(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
 						+ " for rejectURL: " + url);
