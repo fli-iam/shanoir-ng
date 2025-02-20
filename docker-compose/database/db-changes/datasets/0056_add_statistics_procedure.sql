@@ -11,10 +11,6 @@
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 use datasets;
-
--- There are two procedure here, getStatisticsSize and getStatistics
--- The getStatisticsSize is used to show progress while the other actually queries the stats
-
 DROP PROCEDURE IF EXISTS getStatisticsSize;
 
 delimiter //
@@ -43,12 +39,8 @@ FROM dataset
     LEFT JOIN studies.subject AS subject ON (subject.id = examination.subject_id)
     LEFT JOIN studies.study AS study ON (study.id = examination.study_id)
 
-WHERE subject.name rlike if(subjectNameInRegExp IS NULL  OR subjectNameInRegExp = '', '.*', subjectNameInRegExp)
-  AND subject.name NOT rlike if(subjectNameOutRegExp IS NULL  OR subjectNameOutRegExp = '', '^\b\B$', subjectNameOutRegExp)
-  AND study.name rlike if(studyNameInRegExp IS NULL  OR studyNameInRegExp = '', '.*', studyNameInRegExp)
-  AND study.name NOT rlike if(studyNameOutRegExp IS NULL  OR studyNameOutRegExp = '', '^\b\B$', studyNameOutRegExp))
-  
-  AS full_query;
+WHERE subject.name NOT rlike if(subjectNameOutRegExp IS NULL  OR subjectNameOutRegExp = '', '^\b\B$', subjectNameOutRegExp) AND study.name rlike if(studyNameInRegExp IS NULL  OR studyNameInRegExp = '', '.*', studyNameInRegExp)
+) as full_query;
 END //
 
 delimiter ;
@@ -126,11 +118,8 @@ FROM dataset
     LEFT JOIN studies.center AS center ON (center.id = examination.center_id)
     LEFT JOIN studies.pseudonymus_hash_values AS pseudonymus_hash_values ON (pseudonymus_hash_values.id = subject.pseudonymus_hash_values_id)
 
-WHERE subject.name rlike if(subjectNameInRegExp IS NULL  OR subjectNameInRegExp = '', '.*', subjectNameInRegExp)
-  AND subject.name NOT rlike if(subjectNameOutRegExp IS NULL  OR subjectNameOutRegExp = '', '^\b\B$', subjectNameOutRegExp)
-  AND study.name rlike if(studyNameInRegExp IS NULL  OR studyNameInRegExp = '', '.*', studyNameInRegExp)
-  AND study.name NOT rlike if(studyNameOutRegExp IS NULL  OR studyNameOutRegExp = '', '^\b\B$', studyNameOutRegExp)
-  LIMIT blocSize OFFSET startRow;
+WHERE subject.name NOT rlike if(subjectNameOutRegExp IS NULL  OR subjectNameOutRegExp = '', '^\b\B$', subjectNameOutRegExp) AND study.name rlike if(studyNameInRegExp IS NULL  OR studyNameInRegExp = '', '.*', studyNameInRegExp)
+	LIMIT blocSize OFFSET startRow;
 END //
 
 delimiter ;

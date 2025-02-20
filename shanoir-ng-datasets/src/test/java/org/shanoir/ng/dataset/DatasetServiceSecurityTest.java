@@ -22,6 +22,7 @@ import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -93,6 +94,9 @@ public class DatasetServiceSecurityTest {
 	
 	@MockBean
 	private ShanoirEventService shanoirEventService;
+
+	@MockBean
+	private StudyInstanceUIDHandler studyInstanceUIDHandler;
 
 	@Test
 	@WithAnonymousUser
@@ -177,9 +181,6 @@ public class DatasetServiceSecurityTest {
 		assertAccessAuthorized(service::findByStudyId, 2L);
 		assertThat(service.findByStudyId(2L)).isNullOrEmpty();
 		assertAccessDenied(service::findByStudyId, 3L);
-		
-		//queryStatistics(String, String, String, String)
-		assertAccessDenied(service::queryStatistics,"", "", "", "");
 	}
 	
 	private void testFindPage() throws ShanoirException {

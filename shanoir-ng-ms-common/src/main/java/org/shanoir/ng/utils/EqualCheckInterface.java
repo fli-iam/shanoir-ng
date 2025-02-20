@@ -12,19 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package io.swagger.configuration;
+package org.shanoir.ng.utils;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-/**
- * Home redirection to swagger api documentation
- */
-@Controller
-public class HomeController {
-	@RequestMapping(value = "/")
-	public String index() {
-		System.out.println("swagger-ui.html");
-		return "redirect:swagger-ui.html";
-	}
+@FunctionalInterface
+public interface EqualCheckInterface <T> {
+    boolean check(T a, T b);
 }

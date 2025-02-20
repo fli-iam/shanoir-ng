@@ -20,7 +20,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<parent>
 		<groupId>org.shanoir-ng</groupId>
 		<artifactId>shanoir-ng-back</artifactId>
-		<version>3.2.2</version>
+		<version>3.4.0</version>
 		<relativePath>../shanoir-ng-back</relativePath>
 	</parent>
 
@@ -34,7 +34,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-ms-common</artifactId>
-			<version>3.2.2</version>
+			<version>3.4.0</version>
 		</dependency>
 
 		<!-- SpringFox Swagger UI -->

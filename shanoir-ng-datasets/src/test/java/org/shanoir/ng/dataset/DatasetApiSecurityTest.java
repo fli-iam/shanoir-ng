@@ -25,6 +25,7 @@ import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.CreateStatisticsService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
@@ -105,7 +106,9 @@ public class DatasetApiSecurityTest {
 	
 	@MockBean
 	private SolrService solrService;
-	
+
+	@MockBean
+	private StudyInstanceUIDHandler studyInstanceUIDHandler;
 	@BeforeEach
 	public void setup() {
 		mockBindingResult = new BeanPropertyBindingResult(mockDataset(1L), "dataset");
