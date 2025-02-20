@@ -5,7 +5,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -34,23 +36,27 @@ import jakarta.transaction.Transactional;
 
 /**
  * This class iterates over all examinations in the database of Shanoir and
- * applies multiple consistency checks on the data below in the tree. It
+ * applies multiple consistency checks on the DICOM data below in the tree. It
  * produces a .csv file with the result of his consistency check on the server.
- * It runs every two hours and stores the latest analyzed exam in its database.
+ * It runs in an intervall and stores the latest analyzed exam in its database.
  * As ongoing imports can create temporarily empty examinations, we only check
  * on examinations older than yesterday, not from today.
  * 
+ * StudyInstanceUIDs of examinations should be unique by default, but are not
+ * unique in the database to cover the feature "copy datasets", where a clone
+ * examination, should still point to the same DICOMs and therefore has the
+ * same StudyInstanceUID.
+ * 
  * The following is checked:
  * 
- * 1) It checks, if an examination is empty and has no data below.
+ * "ExaminationID", "ExaminationDate", "Today?", "Empty?", "#Files",
+ * "StudyInstanceUID", "Multiple?", "Unique?"
  * 
- * 2) Add one StudyInstanceUID to the mysql database, per examination. If not
- * already existing in database. Checks if equal to found.
- * 
- * 2) It checks the StudyInstanceUID per exam. Is it unique? Is there only one
- * StudyInstanceUID in all dataset files of the DICOM WADO path?
- * 
- * 3) Are all dataset files available in the PACS?
+ * Today - do not touch, in case ongoing import
+ * #Files - number of dataset_files in pacs (only check dicoms)
+ * Multiple - does the examination, after multiple imports contains multiple
+ * 				StudyInstanceUIDs
+ * Unique - is the StudyInstanceUID unique
  * 
  * @author mkain
  *
@@ -105,6 +111,8 @@ public class ExaminationsConsistencyChecker {
 				}
 			}
 
+			Map<Long, String> examinationIDToStudyInstanceUID = new LinkedHashMap<Long, String>();
+			List<Long> emptyExaminations = new ArrayList<Long>();
 			int pageNumber = 0;
 			int totalExaminationsChecked = 0;
 			List<Examination> examinationsToCheck;
@@ -116,7 +124,7 @@ public class ExaminationsConsistencyChecker {
 					examinationsToCheck = examinationRepository.findAll(PageRequest.of(pageNumber, EXAMINATION_BATCH_SIZE)).getContent();
 				}
 				if (!examinationsToCheck.isEmpty()) {
-					checkExaminations(examinationsToCheck, examinationLastChecked);
+					checkExaminations(examinationsToCheck, examinationLastChecked, examinationIDToStudyInstanceUID, emptyExaminations);
 					totalExaminationsChecked += examinationsToCheck.size();
 					lastExamination = examinationsToCheck.get(examinationsToCheck.size() - 1);
 					pageNumber++;
@@ -131,6 +139,7 @@ public class ExaminationsConsistencyChecker {
 			if (totalExaminationsChecked > 0) {
 				LOG.info("Summary: average per examination: " + duration/totalExaminationsChecked + " milliseconds.");
 			}
+			LOG.info("Summary: number of empty examinations: " + emptyExaminations.size());
 			LOG.info("STOP...");
 			LOG.info("---------------");
 			LOG.info("---------------");
@@ -143,7 +152,7 @@ public class ExaminationsConsistencyChecker {
 	}
 
 	private void checkExaminations(List<Examination> examinationsToCheck,
-			ExaminationLastChecked examinationLastChecked) throws IOException {
+			ExaminationLastChecked examinationLastChecked, Map<Long, String> examinationIDToStudyInstanceUID,List<Long> emptyExaminations) throws IOException {
 		if (!examinationsToCheck.isEmpty()) {
 			File datasetsLogFile = new File(loggingFileName);
 			if (datasetsLogFile.exists()) {
@@ -152,13 +161,14 @@ public class ExaminationsConsistencyChecker {
 				try (CSVWriter writer = new CSVWriter(new FileWriter(csvFile))) {
 					if (!csvFile.exists()) {
 						csvFile.createNewFile();
-						String[] lineInCSV = { "ExaminationID", "Files in PACS", "StudyInstanceUID-Single?"};
-						writer.writeNext(lineInCSV);
+						String[] header = {"ExaminationID", "ExaminationDate", "Today?", "Empty?", "#Files", "StudyInstanceUID", "Multiple?", "Unique?"};
+						writer.writeNext(header);
 					}
 					for (Examination examination : examinationsToCheck) {
-						examinationLastChecked = checkExamination(examinationLastChecked, examination, writer);
+						examinationLastChecked = checkExamination(examinationLastChecked,
+							examination, writer, examinationIDToStudyInstanceUID, emptyExaminations);
 					}
-					// One insert is sufficient, only write at the end where stopped
+					// One insert is sufficient, only write at the end where it stopped
 					examinationLastCheckedRepository.save(examinationLastChecked);
 				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
@@ -172,30 +182,37 @@ public class ExaminationsConsistencyChecker {
 	}
 
 	private ExaminationLastChecked checkExamination(ExaminationLastChecked examinationLastChecked,
-			Examination examination, CSVWriter writer) {
+			Examination examination, CSVWriter writer, Map<Long, String> examinationIDToStudyInstanceUID,List<Long> emptyExaminations) {
 		LOG.debug("Processing examination with ID: " + examination.getId());
 		long startTime = System.currentTimeMillis();
+		String[] line = new String[7];
+		line[0] = examination.getId().toString();
+		line[1] = examination.getExaminationDate().toString();
 		List<String> filesInPACS = new ArrayList<String>();
-		boolean checked = checkExamination(examination, filesInPACS);
+		boolean checked = checkExamination(examination, line, filesInPACS, emptyExaminations);
 		if (checked) {
-			LOG.info("Examination {}: references {} files in PACS.", examination.getId(), filesInPACS.size());
+			line[3] = "0";
+			LOG.debug("Examination {}: references {} files in PACS.", examination.getId(), filesInPACS.size());
 			if (!filesInPACS.isEmpty()) {
-				boolean uidsOK = checkStudyInstanceUIDs(examination, filesInPACS);
-				String[] lineInCSV = { examination.getId().toString(), ""+filesInPACS.size(), ""+uidsOK};
-	            writer.writeNext(lineInCSV);
+				checkStudyInstanceUIDs(examination, filesInPACS, line, examinationIDToStudyInstanceUID, emptyExaminations);
 			}
 			if (examinationLastChecked == null) {
 				examinationLastChecked = new ExaminationLastChecked();
 			}
 			examinationLastChecked.setExaminationId(examination.getId());
+		} else {
+			line[3] = "1";
 		}
+		line[4] = Integer.toString(filesInPACS.size());
+		writer.writeNext(line);
         long endTime = System.currentTimeMillis();
         long duration = endTime - startTime;
-        LOG.info("Time required for examination check: " + duration + " milliseconds.");
+        LOG.debug("Time required for examination check: " + duration + " milliseconds.");
 		return examinationLastChecked;
 	}
 
-	private boolean checkStudyInstanceUIDs(Examination examination, List<String> filesInPACS) {
+	private void checkStudyInstanceUIDs(Examination examination, List<String> filesInPACS, String[] line,
+		Map<Long, String> examinationIDToStudyInstanceUID, List<Long> emptyExaminations) {
 		Set<String> studyInstanceUIDs = ConcurrentHashMap.newKeySet();
 		filesInPACS.parallelStream().forEach(f -> {
 			String studyInstanceUID = wadoURLHandler.extractUIDs(f)[0];
@@ -203,28 +220,41 @@ public class ExaminationsConsistencyChecker {
 		});
 		if (studyInstanceUIDs.isEmpty()) {
 			LOG.error("Examination {}: contains NULL StudyInstanceUIDs.");
-			return false;
 		} else if (studyInstanceUIDs.size() > 1) {
-			LOG.error("Examination {}: contains multiple StudyInstanceUIDs ({}).", examination.getId(), studyInstanceUIDs.size());
-			return false;
+			line[5] = "1";
+			LOG.warn("Examination {}: contains multiple StudyInstanceUIDs ({}).", examination.getId(), studyInstanceUIDs.size());
+			saveStudyInstanceUIDInCaseEmpty(examination, studyInstanceUIDs);
 		} else {
-			String studyInstanceUID = studyInstanceUIDs.iterator().next();
-			if(examination.getStudyInstanceUID() != null && examination.getStudyInstanceUID().isBlank()) {
-				examination.setStudyInstanceUID(studyInstanceUID);
-				examinationRepository.save(examination);
-				LOG.info("Examination {}: StudyInstanceUID added in database: {}", examination.getId(), studyInstanceUID);
-			} else {
-				if (studyInstanceUID.equals(examination.getStudyInstanceUID())) {
-					LOG.info("Examination {}: has correct StudyInstanceUID in database: {}", examination.getId(), examination.getStudyInstanceUID());
-				}
+			line[5] = "0";
+			saveStudyInstanceUIDInCaseEmpty(examination, studyInstanceUIDs);
+		}
+		String studyInstanceUID = examination.getStudyInstanceUID();
+		line[6] = studyInstanceUID;
+		if (examinationIDToStudyInstanceUID.containsValue(studyInstanceUID)) {
+			line[7] = "0";
+		} else {
+			line[7] = "1";
+		}
+		examinationIDToStudyInstanceUID.put(examination.getId(), examination.getStudyInstanceUID());
+	}
+
+	private void saveStudyInstanceUIDInCaseEmpty(Examination examination, Set<String> studyInstanceUIDs) {
+		String studyInstanceUID = studyInstanceUIDs.iterator().next();
+		if(examination.getStudyInstanceUID() != null && examination.getStudyInstanceUID().isBlank()) {
+			examination.setStudyInstanceUID(studyInstanceUID);
+			examinationRepository.save(examination);
+			LOG.debug("Examination {}: StudyInstanceUID added in database: {}", examination.getId(), studyInstanceUID);
+		} else {
+			if (studyInstanceUID.equals(examination.getStudyInstanceUID())) {
+				LOG.debug("Examination {}: has correct StudyInstanceUID in database: {}", examination.getId(), examination.getStudyInstanceUID());
 			}
-			return true;
 		}
 	}
 	
-	private boolean checkExamination(Examination examination, List<String> filesInPACS) {
+	private boolean checkExamination(Examination examination, String[] line, List<String> filesInPACS, List<Long> emptyExaminations) {
 		List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
 		if (acquisitions != null && !acquisitions.isEmpty()) {
+			line[2] = "0";
 			/**
 			 * Ongoing imports can create empty examinations and fill them up later.
 			 * To avoid confusion on this, we only check data from yesterday or older.
@@ -242,7 +272,9 @@ public class ExaminationsConsistencyChecker {
 				return false;
 			}
 		} else {
-			LOG.info("Examination found without acquisitions: {}", examination.getId());
+			line[2] = "1";
+			emptyExaminations.add(examination.getId());
+			LOG.warn("Examination found without acquisitions: {}", examination.getId());
 			List<String> extraDataFilePaths = examination.getExtraDataFilePathList();
 			if (extraDataFilePaths != null && !extraDataFilePaths.isEmpty()) {
 				// keep examination for extra data
