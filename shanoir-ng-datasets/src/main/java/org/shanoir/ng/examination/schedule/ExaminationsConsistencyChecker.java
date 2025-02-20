@@ -224,15 +224,15 @@ public class ExaminationsConsistencyChecker {
 		if (studyInstanceUIDs.isEmpty()) {
 			LOG.error("Examination {}: contains NULL StudyInstanceUIDs.");
 		} else if (studyInstanceUIDs.size() > 1) {
-			line[5] = "1";
+			line[6] = "1";
 			LOG.warn("Examination {}: contains multiple StudyInstanceUIDs ({}).", examination.getId(), studyInstanceUIDs.size());
 			saveStudyInstanceUIDInCaseEmpty(examination, studyInstanceUIDs);
 		} else {
-			line[5] = "0";
+			line[6] = "0";
 			saveStudyInstanceUIDInCaseEmpty(examination, studyInstanceUIDs);
 		}
 		String studyInstanceUID = examination.getStudyInstanceUID();
-		line[6] = studyInstanceUID;
+		line[5] = studyInstanceUID;
 		if (examinationIDToStudyInstanceUID.containsValue(studyInstanceUID)) {
 			line[7] = "0";
 		} else {
