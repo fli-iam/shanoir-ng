@@ -185,7 +185,7 @@ public class ExaminationsConsistencyChecker {
 			Examination examination, CSVWriter writer, Map<Long, String> examinationIDToStudyInstanceUID,List<Long> emptyExaminations) {
 		LOG.debug("Processing examination with ID: " + examination.getId());
 		long startTime = System.currentTimeMillis();
-		String[] line = new String[7];
+		String[] line = new String[8];
 		line[0] = examination.getId().toString();
 		line[1] = examination.getExaminationDate().toString();
 		List<String> filesInPACS = new ArrayList<String>();
