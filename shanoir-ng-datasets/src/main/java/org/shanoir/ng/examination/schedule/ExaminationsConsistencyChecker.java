@@ -157,10 +157,13 @@ public class ExaminationsConsistencyChecker {
 			File datasetsLogFile = new File(loggingFileName);
 			if (datasetsLogFile.exists()) {
 				File parent = datasetsLogFile.getParentFile();
+				boolean newCSVFileCreated = false;
 				File csvFile = new File(parent.getAbsolutePath() + File.separator + ECC_CSV);
+				if (!csvFile.exists()) {
+					newCSVFileCreated = csvFile.createNewFile();
+				}
 				try (CSVWriter writer = new CSVWriter(new FileWriter(csvFile))) {
-					if (!csvFile.exists()) {
-						csvFile.createNewFile();
+					if (newCSVFileCreated) {
 						String[] header = {"ExaminationID", "ExaminationDate", "Today?", "Empty?", "#Files", "StudyInstanceUID", "Multiple?", "Unique?"};
 						writer.writeNext(header);
 					}
