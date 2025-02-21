@@ -110,11 +110,18 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         if (this.reloading) {
             this.fetchStudies(false).then(() => {
                 this.reloadSavedData().finally(() => this.reloading = false);
+                this.getStudyCardPolicy(this.study).then(policy => {
+                    this.study.studyCardPolicy = policy;
+                })
             }).catch(error => {
                 throw new ShanoirError({error: {message: 'the study list failed loading', details: error}});
             });
         } else {
-            this.fetchStudies(true);
+            this.fetchStudies(true).then( () => {
+                this.getStudyCardPolicy(this.study).then(policy => {
+                    this.study.studyCardPolicy = policy;
+                })
+            });
         }
     }
 
@@ -294,6 +301,21 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             });
         } else {
             return Promise.resolve([]);
+        }
+    }
+
+    private getStudyCardPolicy(study: Study): Promise<string> {
+        if (study && study.id) {
+            return this.studyService.get(study.id).then(study => {
+                if (study.studyCardPolicy == 'MANDATORY') {
+                    this.useStudyCard = true;
+                } else {
+                    this.useStudyCard = false;
+                }
+                return study.studyCardPolicy;
+            })
+        } else {
+            return Promise.resolve('MANDATORY');
         }
     }
 
