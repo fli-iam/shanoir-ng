@@ -43,9 +43,10 @@ public class DateTimeUtils {
 	}
 
 	public static LocalTime stringToLocalTime(String time) {
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHMMSS.FFFFFF");
-		if (time == null) return null;
-		else return LocalTime.parse(time, formatter);
+		if (time == null || time.isEmpty()) return null;
+
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmmss.SSSSSS");
+		return LocalTime.parse(time, formatter);
 	}
 	
 	public static LocalDateTime dateToLocalDateTime(Date date) {
