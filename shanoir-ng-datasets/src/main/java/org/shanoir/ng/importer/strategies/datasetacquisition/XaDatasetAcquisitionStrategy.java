@@ -14,6 +14,7 @@
 package org.shanoir.ng.importer.strategies.datasetacquisition;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,7 +67,8 @@ public class XaDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy{
 		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
 		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
 		datasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
-		datasetAcquisition.setAcquisitionStartTime(DateTimeUtils.dateToLocalDateTime(dicomAttributes.getFirstDatasetAttributes().getDate(Tag.AcquisitionTime)));
+		datasetAcquisition.setAcquisitionStartTime(LocalDateTime.of(DateTimeUtils.pacsStringToLocalDate(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate)), 
+													DateTimeUtils.stringToLocalTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime))));
 		
 		XaProtocol protocol = protocolStrategy.generateProtocolForSerie(dicomAttributes, serie);
 		datasetAcquisition.setXaProtocol(protocol);

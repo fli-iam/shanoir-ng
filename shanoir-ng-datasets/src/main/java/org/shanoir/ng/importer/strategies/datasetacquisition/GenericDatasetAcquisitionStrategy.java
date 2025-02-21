@@ -1,5 +1,6 @@
 package org.shanoir.ng.importer.strategies.datasetacquisition;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +37,8 @@ public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStra
 		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
 		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
 		datasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
-		datasetAcquisition.setAcquisitionStartTime(DateTimeUtils.dateToLocalDateTime(dicomAttributes.getFirstDatasetAttributes().getDate(Tag.AcquisitionTime)));
+		datasetAcquisition.setAcquisitionStartTime(LocalDateTime.of(DateTimeUtils.pacsStringToLocalDate(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate)), 
+													DateTimeUtils.stringToLocalTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime))));
 		DatasetsWrapper<GenericDataset> datasetsWrapper = datasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
 		List<Dataset> genericizedList = new ArrayList<>();
 		for (Dataset dataset : datasetsWrapper.getDatasets()) {
