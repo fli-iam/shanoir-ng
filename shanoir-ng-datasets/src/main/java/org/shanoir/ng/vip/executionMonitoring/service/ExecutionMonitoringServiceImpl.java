@@ -45,7 +45,6 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
     @Value("${vip.sleep-time}")
     private long sleepTime;
     private ThreadLocal<Boolean> stop = new ThreadLocal<>();
-    private String identifier;
     private static final Logger LOG = LoggerFactory.getLogger(ExecutionMonitoringServiceImpl.class);
     private final String RIGHT_STR = "CAN_SEE_ALL";
 
@@ -103,9 +102,9 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
 
     @Async
     @Transactional
-    public void startMonitoringJob(ExecutionMonitoring processing, ShanoirEvent event) throws EntityNotFoundException, SecurityException {
+    public void startMonitoringJob(ExecutionMonitoring processing, ShanoirEvent event) {
         int attempts = 1;
-        identifier = processing.getIdentifier();
+        String identifier = processing.getIdentifier();
 
         stop.set(false);
 

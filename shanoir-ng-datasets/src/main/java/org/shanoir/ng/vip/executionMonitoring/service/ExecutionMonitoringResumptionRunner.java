@@ -8,6 +8,7 @@ import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.utils.SecurityContextUtil;
+import org.shanoir.ng.vip.execution.service.ExecutionService;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionStatus;
 import org.shanoir.ng.vip.executionMonitoring.repository.ExecutionMonitoringRepository;
@@ -34,6 +35,9 @@ public class ExecutionMonitoringResumptionRunner implements ApplicationRunner {
     private ExecutionMonitoringService executionMonitoringService;
 
     @Autowired
+    private ExecutionService executionService;
+
+    @Autowired
     private RabbitTemplate rabbitTemplate;
 
     @Autowired
@@ -53,24 +57,30 @@ public class ExecutionMonitoringResumptionRunner implements ApplicationRunner {
      */
     @Override
     public void run(ApplicationArguments args) throws EntityNotFoundException, SecurityException, JsonProcessingException {
-        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-        List<ExecutionMonitoring> runningMonitorings = executionMonitoringRepository.findByStatus(ExecutionStatus.RUNNING);
-        for(ExecutionMonitoring monitoring : runningMonitorings){
-            List<ShanoirEvent> events;
-            String eventsAsString = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXECUTION_MONITORING_TASK, monitoring.getId());
-            if (eventsAsString == null || eventsAsString.isEmpty()) {
-                LOG.error("No [{}] type event found for object id [{}]", ShanoirEventType.EXECUTION_MONITORING_EVENT, monitoring.getId());
-                continue;
-            }
-            try {
-                events = objectMapper.readValue(eventsAsString, new TypeReference<List<ShanoirEvent>>() {});
-                for(ShanoirEvent event : events){
-                    executionMonitoringService.startMonitoringJob(monitoring, event);
-                    LOG.info("Monitoring of VIP execution [{}] resumed", monitoring.getName());
+        try {
+            SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+            List<ExecutionMonitoring> runningMonitorings = executionMonitoringRepository.findByStatus(ExecutionStatus.RUNNING);
+            for (ExecutionMonitoring monitoring : runningMonitorings) {
+                List<ShanoirEvent> events;
+                String eventsAsString = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXECUTION_MONITORING_TASK, monitoring.getId());
+                if (eventsAsString == null || eventsAsString.isEmpty()) {
+                    LOG.error("No [{}] type event found for object id [{}]", ShanoirEventType.EXECUTION_MONITORING_EVENT, monitoring.getId());
+                    continue;
                 }
-            } catch (JsonProcessingException | EntityNotFoundException | SecurityException e) {
-                LOG.error("Monitoring of VIP execution [{}] failed", monitoring.getName(), e);
+                events = objectMapper.readValue(eventsAsString, new TypeReference<List<ShanoirEvent>>() {
+                });
+                for (ShanoirEvent event : events) {
+                    try {
+                        executionService.getExecutionAsServiceAccount(1, monitoring.getIdentifier()).block();
+                        executionMonitoringService.startMonitoringJob(monitoring, event);
+                        LOG.info("Monitoring of VIP execution [{}] resumed", monitoring.getName());
+                    } catch (Exception e) {
+                        LOG.error("Monitoring resumption of VIP execution [" + monitoring.getName() + "," + monitoring.getIdentifier() + "] failed.");
+                    }
+                }
             }
+        } catch (Exception ignored) {
+            //Try-catch is only for dodging container shutdown if exception is raised (due to @Component state)
         }
     }
 }
