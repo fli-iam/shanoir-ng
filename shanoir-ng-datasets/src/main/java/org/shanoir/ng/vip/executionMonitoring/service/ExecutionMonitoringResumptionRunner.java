@@ -8,9 +8,12 @@ import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.utils.SecurityContextUtil;
+import org.shanoir.ng.vip.execution.dto.VipExecutionDTO;
+import org.shanoir.ng.vip.execution.service.ExecutionService;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionStatus;
 import org.shanoir.ng.vip.executionMonitoring.repository.ExecutionMonitoringRepository;
+import org.shanoir.ng.vip.output.exception.ResultHandlerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -30,6 +33,9 @@ public class ExecutionMonitoringResumptionRunner implements ApplicationRunner {
 
     @Autowired
     private ExecutionMonitoringService executionMonitoringService;
+
+    @Autowired
+    private ExecutionService executionService;
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
@@ -62,10 +68,14 @@ public class ExecutionMonitoringResumptionRunner implements ApplicationRunner {
             }
             events = objectMapper.readValue(eventsAsString, new TypeReference<List<ShanoirEvent>>() {});
             for(ShanoirEvent event : events){
-                executionMonitoringService.startMonitoringJob(monitoring, event);
-                LOG.info("Monitoring of VIP execution [{}] resumed", monitoring.getName());
+                try{
+                    executionService.getExecutionAsServiceAccount(1, monitoring.getIdentifier()).block();
+                    executionMonitoringService.startMonitoringJob(monitoring, event);
+                    LOG.info("Monitoring of VIP execution [{}] resumed", monitoring.getName());
+                } catch (Exception e) {
+                   LOG.error("Monitoring resumption of VIP execution [" + monitoring.getName() + "," + monitoring.getIdentifier() + "] failed.");
+                }
             }
         }
     }
-
 }
