@@ -1,1 +1,0 @@
-alter table dataset_acquisition add acquisition_start_time datetime default null;

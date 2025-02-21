@@ -137,6 +137,7 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 		this.username = other.username;
 		this.copies = other.copies;
 		this.source = other.source;
+		this.acquisitionStartTime = other.acquisitionStartTime;
 	}
 
 	/**
