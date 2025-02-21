@@ -19,6 +19,7 @@ package org.shanoir.ng.shared.dateTime;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -39,6 +40,12 @@ public class DateTimeUtils {
 		if (localDate == null) return null;
 		// Here we use UTC, otherwise the date can be "changed" if the system is not in UTC
 		else return Date.from(localDate.atStartOfDay().atZone(ZoneId.of("UTC")).toInstant());
+	}
+
+	public static LocalTime stringToLocalTime(String time) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHMMSS.FFFFFF");
+		if (time == null) return null;
+		else return LocalTime.parse(time, formatter);
 	}
 	
 	public static LocalDateTime dateToLocalDateTime(Date date) {
