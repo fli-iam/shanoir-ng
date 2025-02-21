@@ -326,6 +326,7 @@ public class DICOMWebService {
 			} else {
 				LOG.error(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
 						+ " for rejectURL: " + url);
+				// in case one URL is Not Found (no DICOM instance present), we continue with deletion
 				if (response.getCode() == 404 && response.getReasonPhrase().startsWith("Not Found")) {
 					return;
 				} else {
