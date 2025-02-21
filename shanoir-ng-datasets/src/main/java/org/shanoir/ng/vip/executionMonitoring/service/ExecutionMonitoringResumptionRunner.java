@@ -72,8 +72,8 @@ public class ExecutionMonitoringResumptionRunner implements ApplicationRunner {
                     executionService.getExecutionAsServiceAccount(1, monitoring.getIdentifier()).block();
                     executionMonitoringService.startMonitoringJob(monitoring, event);
                     LOG.info("Monitoring of VIP execution [{}] resumed", monitoring.getName());
-                } catch (Exception e) {
-                   LOG.error("Monitoring resumption of VIP execution [" + monitoring.getName() + "," + monitoring.getIdentifier() + "] failed.");
+                } catch (ResultHandlerException e) {
+                   LOG.error("Monitoring resumption of VIP execution [" + monitoring.getName() + "] failed.");
                 }
             }
         }
