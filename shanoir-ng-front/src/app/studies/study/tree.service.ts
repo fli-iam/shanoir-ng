@@ -264,7 +264,7 @@ export class TreeService {
         console.log('a selectDataset', Date.now())
         return this.studyNodeOpenPromise.then(() => {
             console.log('b', Date.now())
-            return this.studyNode.subjectsNode.open().then(() => {
+            return this.studyNode.subjectsNode.open(true).then(() => {
                 console.log('c', Date.now())
                 return this.findDatasetParent(dataset).then(ret => {
                     console.log('d', Date.now())
