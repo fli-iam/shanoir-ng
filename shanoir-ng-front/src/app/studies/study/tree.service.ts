@@ -163,7 +163,9 @@ export class TreeService {
     }
 
     scrollTo(node: ShanoirNode) {
+        console.log(1, node.label, Date.now())
         setTimeout(() => {
+            console.log(2, node.label, Date.now())
             this.onScrollToSelected.next(node);
         })
     }
