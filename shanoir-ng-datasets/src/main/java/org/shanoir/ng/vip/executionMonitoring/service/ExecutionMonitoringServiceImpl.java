@@ -7,7 +7,6 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.vip.execution.dto.ExecutionCandidateDTO;
 import org.shanoir.ng.vip.execution.dto.VipExecutionDTO;
@@ -25,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.Exceptions;
@@ -38,6 +38,7 @@ import java.util.*;
  * @author KhalilKes
  */
 @Service
+@EnableAsync
 public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringService {
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
@@ -65,7 +66,6 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
 
     @Autowired
     private OutputService outputService;
-
 
     public ExecutionMonitoring createExecutionMonitoring(ExecutionCandidateDTO execution, List<Dataset> inputDatasets) throws RestServiceException {
         ExecutionMonitoring executionMonitoring = new ExecutionMonitoring();
@@ -100,7 +100,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
         return executionMonitoringSecurityService.filterExecutionMonitoringList(Utils.toList(repository.findAll()), RIGHT_STR);
     }
 
-    @Async
+    @Async("asyncExecutor")
     @Transactional
     public void startMonitoringJob(ExecutionMonitoring processing, ShanoirEvent event) {
         int attempts = 1;
@@ -122,7 +122,6 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
                 }else{
                     attempts = 1;
                 }
-
                 switch (dto.getStatus()) {
                     case FINISHED -> processFinishedJob(processing, event, dto.getEndDate());
                     case UNKNOWN,EXECUTION_FAILED,KILLED -> processKilledJob(processing, event, dto);

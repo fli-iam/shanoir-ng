@@ -55,8 +55,8 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
 
                 if(Long.parseLong(lineParts.get(1)) == executionMonitoring.getId()) {
                     lineParts.set(1, newProcessing.getId().toString());
-                    lineParts.add(newProcessing.getOutputDatasets().stream().anyMatch(file -> Objects.equals("results.yaml", file.getName())) ? "true" : "false");
                     lineParts.add(newProcessing.getOutputDatasets().stream().anyMatch(file -> Objects.equals("error.yaml", file.getName())) ? "true" : "false");
+                    lineParts.add(newProcessing.getOutputDatasets().stream().anyMatch(file -> Objects.equals("results.yaml", file.getName())) ? "true" : "false");
 
                     lastLines.set(lastLines.indexOf(line), String.join(",", lineParts));
                     retrievedLine = true;
