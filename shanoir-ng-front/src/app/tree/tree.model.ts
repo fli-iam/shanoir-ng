@@ -44,17 +44,29 @@ export abstract class ShanoirNode {
 
     public selected: boolean = false;
 
-    open(): Promise<void> {
+    open(test?: boolean): Promise<void> {
+        if (test) console.log(21)
         if (!this._opened) {
+            if (test) console.log(22)
             if (this.parent) {
+                if (test) console.log(23)
                 this.parent.open();
             }
+            if (test) console.log(24)
             setTimeout(() => {
+                if (test) console.log(25)
                 // removing timeout may cause random bugs in the tree
                 this._opened = true;
             });
-            return (this.openPromise || Promise.resolve()).then(() => SuperPromise.timeoutPromise());
+            if (test && this.openPromise) this.openPromise.then(() => console.log(26))
+            return (this.openPromise || Promise.resolve()).then(() => {
+                if (test) console.log(26)
+                return SuperPromise.timeoutPromise().then(() => {
+                    if (test) console.log(27)
+                })
+            });
         } else {
+            if (test) console.log(28)
             return Promise.resolve();
         }
     }
