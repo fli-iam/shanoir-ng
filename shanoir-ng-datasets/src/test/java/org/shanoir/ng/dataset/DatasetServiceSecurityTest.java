@@ -234,20 +234,20 @@ public class DatasetServiceSecurityTest {
 		if ("ROLE_USER".equals(role)) {
 			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
 			given(rightsService.hasRightOnStudies(Utils.toSet(1L), "CAN_ADMINISTRATE")).willReturn(Utils.toSet(1L));
-			assertAccessDenied(service::deleteDatasetFromPacs, mockDataset(1L, 1L, 1L, 1L, 1L));
+			assertAccessDenied(service::deleteDatasetFromDiskAndPacs, mockDataset(1L, 1L, 1L, 1L, 1L));
 			assertAccessDenied(service::deleteById, 1L);
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 2L, 3L, 4L));
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 3L));
 		} else if ("ROLE_EXPERT".equals(role)) {
 			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
 			given(rightsService.hasRightOnStudies(Utils.toSet(1L), "CAN_ADMINISTRATE")).willReturn(Utils.toSet());
-			assertAccessDenied(service::deleteDatasetFromPacs, mockDataset(1L, 1L, 1L, 1L, 1L));
+			assertAccessDenied(service::deleteDatasetFromDiskAndPacs, mockDataset(1L, 1L, 1L, 1L, 1L));
 			assertAccessDenied(service::deleteById, 1L);
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 2L, 3L, 4L));
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 3L));
 			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
 			given(rightsService.hasRightOnStudies(Utils.toSet(1L), "CAN_ADMINISTRATE")).willReturn(Utils.toSet(1L));
-			assertAccessAuthorized(service::deleteDatasetFromPacs, mockDataset(1L, 1L, 1L, 1L, 1L));
+			assertAccessAuthorized(service::deleteDatasetFromDiskAndPacs, mockDataset(1L, 1L, 1L, 1L, 1L));
 			assertAccessAuthorized(service::deleteById, 1L);
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 2L, 3L, 4L));
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 3L));
