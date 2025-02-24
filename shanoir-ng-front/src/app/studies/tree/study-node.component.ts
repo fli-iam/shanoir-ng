@@ -174,7 +174,9 @@ export class StudyNodeComponent extends TreeNodeAbstractComponent<StudyNode> imp
 
     onSubjectNodeInit() {
         this.nbSubjectsInit++;
+        console.log('subject inited', this.nbSubjectsInit)
         if (this.nbSubjectsInit == this.node.subjectsNode?.subjects?.length) {
+            console.log('!!! all subject inited')
             this.subjectsInited.resolve();
         }
     }
