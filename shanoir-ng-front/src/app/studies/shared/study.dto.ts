@@ -72,7 +72,7 @@ export class StudyDTOService {
                 entity.name = dto.name;
                 entity.identifier = dto.identifier;
                 entity.birthDate = dto.birthDate ? new Date(dto.birthDate) : null;
-                //entity.subjectStudy = dto.subjectStudy ? StudyDTOService.dtoToSubjectStudy(dto.subjectStudy) : null;
+                entity.subjectStudy = dto.subjectStudy ? StudyDTOService.dtoToSubjectStudy(dto.subjectStudy) : null;
                 result.push(entity);
             }
         }
@@ -80,6 +80,7 @@ export class StudyDTOService {
     }
 
     static mapSyncFields(dto: StudyDTO, entity: Study): Study {
+        let t1 = Date.now();
         entity.clinical = dto.clinical;
         entity.downloadableByDefault = dto.downloadableByDefault;
         entity.endDate = dto.endDate ? new Date(dto.endDate) : null;
@@ -106,11 +107,14 @@ export class StudyDTOService {
         }
         entity.studyStatus = dto.studyStatus;
         entity.studyType = dto.studyType;
+        let t11 = Date.now();
         if (dto.subjectStudyList) {
             entity.subjectStudyList = dto.subjectStudyList.map(subjectStudyDto => this.dtoToSubjectStudy(subjectStudyDto, entity));
         } else {
             entity.subjectStudyList = [];
         }
+        let t12 = Date.now();
+        console.log('subject study list dto conversion time', t12 - t11)
         if (dto.studyUserList) {
             entity.studyUserList = dto.studyUserList.map(studyUserDto => {
                 let studyUser: StudyUser = new StudyUser();
@@ -162,7 +166,8 @@ export class StudyDTOService {
             entity.totalSize = dto.storageVolume.total;
             entity.detailedSizes = this.studyStorageVolumeDTOToDetailedSizes(dto.storageVolume)
         }
-
+        let t2 = Date.now();
+        console.log('study dto conversion time', t2 - t1)
         return entity;
     }
 
@@ -192,6 +197,7 @@ export class StudyDTOService {
     }
 
     static dtoToSubjectStudy(subjectStudyDto: SubjectStudyDTO, study?: Study, subject?: Subject): SubjectStudy {
+        let t1 = Date.now();
         let subjectStudy: SubjectStudy = new SubjectStudy();
         subjectStudy.id = subjectStudyDto.id;
         subjectStudy.physicallyInvolved = subjectStudyDto.physicallyInvolved;
@@ -226,6 +232,8 @@ export class StudyDTOService {
           subjectStudy.tags = [];
         }
         subjectStudy.qualityTag = subjectStudyDto.qualityTag;
+        let t2 = Date.now();
+        console.log('subject study dto conversion time', t2 - t1)
         return subjectStudy;
     }
 
