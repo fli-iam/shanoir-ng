@@ -72,7 +72,7 @@ export class StudyDTOService {
                 entity.name = dto.name;
                 entity.identifier = dto.identifier;
                 entity.birthDate = dto.birthDate ? new Date(dto.birthDate) : null;
-                entity.subjectStudy = dto.subjectStudy ? StudyDTOService.dtoToSubjectStudy(dto.subjectStudy) : null;
+                //entity.subjectStudy = dto.subjectStudy ? StudyDTOService.dtoToSubjectStudy(dto.subjectStudy) : null;
                 result.push(entity);
             }
         }
