@@ -9,8 +9,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
@@ -24,6 +22,8 @@ import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 	
@@ -38,7 +38,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 	private List<Examination> examinationsOfSubject;
 	
 	private Date studyDate;
-	
+
 	private ImportStudyCardFilterDocumentListener importStudyCardDocumentListener;
 	
 	private ShanoirUploaderServiceClient serviceClient;
@@ -72,13 +72,16 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 			// the center for new created examinations
 			if (e.getSource().equals(mainWindow.importDialog.studyCardCB)) {
 				JComboBoxMandatory comboBox = (JComboBoxMandatory) e.getSource();
-				StudyCard studyCard = (StudyCard) comboBox.getSelectedItem();
-				// put center into exam using study card and acquisition equipment
-				mainWindow.importDialog.mrExaminationCenterCB.removeAllItems();
-				AcquisitionEquipment acqEquipment = studyCard.getAcquisitionEquipment();
-				if (acqEquipment != null) {
-					IdName center = acqEquipment.getCenter();
-					mainWindow.importDialog.mrExaminationCenterCB.addItem(center);
+				Object selectedStudyCard = mainWindow.importDialog.studyCardCB.getSelectedItem();
+				if (selectedStudyCard instanceof StudyCard) {
+					StudyCard studyCard = (StudyCard) selectedStudyCard;
+					// put center into exam using study card and acquisition equipment
+					mainWindow.importDialog.mrExaminationCenterCB.removeAllItems();
+					AcquisitionEquipment acqEquipment = studyCard.getAcquisitionEquipment();
+					if (acqEquipment != null) {
+						IdName center = acqEquipment.getCenter();
+						mainWindow.importDialog.mrExaminationCenterCB.addItem(center);
+					}
 				}
 			}
 			// the selection of an existing subject defines the list of existing exams
@@ -182,6 +185,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 	}
 
 	private void updateStudyCards(Study study) {
+		this.importStudyCardDocumentListener.isUpdating = true;
 		mainWindow.importDialog.studyCardCB.removeAllItems();
 		this.importStudyCardDocumentListener.cleanDefaultStudyCards();
 		if (study.getStudyCards() != null) {
@@ -190,7 +194,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 				this.importStudyCardDocumentListener.addDefaultStudyCard(studyCard);
 			}
 		}
-		
+		this.importStudyCardDocumentListener.isUpdating = false;
 	}
 
 	private void updateSubjectStudy(Study study, Subject subject) {
