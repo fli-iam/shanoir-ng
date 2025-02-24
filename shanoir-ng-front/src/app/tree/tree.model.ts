@@ -53,7 +53,7 @@ export abstract class ShanoirNode {
                 // removing timeout may cause random bugs in the tree
                 this._opened = true;
             });
-            return (this.openPromise || Promise.resolve()).then(() => SuperPromise.timeoutPromise());
+            return (this.openPromise || Promise.resolve());
         } else {
             return Promise.resolve();
         }
