@@ -115,59 +115,95 @@ public class DatasetServiceImpl implements DatasetService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
-	@Override
-	@Transactional
-	public void deleteById(final Long id) throws ShanoirException, SolrServerException, IOException, RestServiceException {
-		final Dataset dataset = repository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
+	private void delete(Dataset entity) throws ShanoirException, SolrServerException, IOException, RestServiceException {
+		Long id = entity.getId();
 
-		// Do not delete entity if it is the source. If getSourceId() is not null, it means it's a copy
-		List<Dataset> childDs = repository.findBySourceId(id);
-		if (!CollectionUtils.isEmpty(childDs)) {
-			throw new RestServiceException(
-					new ErrorModel(
-							HttpStatus.UNPROCESSABLE_ENTITY.value(),
-							"This dataset is linked to another dataset that was copied."
-					));
-
-		}
 		// Remove parent processing to avoid errors
-		dataset.setDatasetProcessing(null);
+		entity.setDatasetProcessing(null);
 		processingService.removeDatasetFromAllProcessingInput(id);
 		processingResourceService.deleteByDatasetId(id);
 		propertyService.deleteByDatasetId(id);
 		repository.deleteById(id);
 
-		if (dataset.getSourceId() == null) {
-			this.deleteDatasetFromPacs(dataset);
+		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getStudyId()));
+
+	}
+
+	/**
+	 * Call by dataset-details. Also reject from pacs
+	 * @param id dataset id.
+	 * @throws ShanoirException
+	 * @throws SolrServerException
+	 * @throws IOException
+	 * @throws RestServiceException
+	 */
+	@Override
+	@Transactional
+	public void deleteById(final Long id) throws ShanoirException, SolrServerException, IOException, RestServiceException {
+		final Dataset dataset = repository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
+		// Do not delete entity if it is the source (or if it has copies). If getSourceId() is not null, it means it's a copy
+		if (!CollectionUtils.isEmpty(dataset.getCopies())) {
+			throw new RestServiceException(
+					new ErrorModel(
+							HttpStatus.UNPROCESSABLE_ENTITY.value(),
+							"This dataset is linked to another dataset that was copied."
+					));
 		}
-		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, dataset.getStudyId()));
+		long startTime = System.currentTimeMillis();
+		delete(dataset);
+		deleteDatasetFromDiskAndPacs(dataset);
+        long endTime = System.currentTimeMillis();
+        long elapsedTime = endTime - startTime;
+        LOG.info("Dataset deletion time: " + elapsedTime + " milliseconds");
+	}
+
+	/**
+	 * Called by acquisition delete. Does not reject from pacs as acquisition already does it.
+	 * @param id
+	 * @throws ShanoirException
+	 * @throws SolrServerException
+	 * @throws IOException
+	 * @throws RestServiceException
+	 */
+	public void deleteByIdCascade(final Long id) throws ShanoirException, SolrServerException, IOException, RestServiceException {
+		final Dataset dataset = repository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
+
+		// Do not delete entity if it is the source (or if it has copies). If getSourceId() is not null, it means it's a copy
+		if (!CollectionUtils.isEmpty(dataset.getCopies())) {
+			throw new RestServiceException(
+					new ErrorModel(
+							HttpStatus.UNPROCESSABLE_ENTITY.value(),
+							"This dataset is linked to another dataset that was copied."
+					));
+		}
+
+		delete(dataset);
 	}
 
 	@Override
-	public void deleteDatasetFromPacs(Dataset dataset) throws ShanoirException {
+	public void deleteDatasetFromDiskAndPacs(Dataset dataset) throws ShanoirException {
         if (!dicomWeb) {
             return;
         }
-
 		for (DatasetExpression expression : dataset.getDatasetExpressions()) {
 			boolean isDicom = DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat());
-
 			for (DatasetFile file : expression.getDatasetFiles()) {
+				// DICOM
 				if (isDicom && file.isPacs()) {
 					dicomWebService.rejectDatasetFromPacs(file.getPath());
-					break;
+				// NIfTI
 				} else if (!file.isPacs()) {
 					try {
 						URL url = new URL(file.getPath().replaceAll("%20", " "));
 						File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
 						FileUtils.deleteQuietly(srcFile);
 					} catch (MalformedURLException e) {
-						throw new ShanoirException("Error while deleting dataset file", e);
+						throw new ShanoirException("Error while deleting dataset file.", e);
 					}
 				}
 			}
-			break;
 		}
 	}
 
@@ -366,11 +402,6 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
-	public List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception {
-		return repository.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
-	}
-
-	@Override
 	public void deleteNiftis(Long studyId) {
 		List<Dataset> datasets = this.findByStudyId(studyId);
 		for (Dataset dataset : datasets) {
@@ -425,8 +456,16 @@ public class DatasetServiceImpl implements DatasetService {
 	 */
 	@Override
 	public Long getStudyId(Dataset dataset){
+		if (dataset.getStudyId() != null) {
+			return dataset.getStudyId();
+		}
 		if (dataset.getDatasetProcessing() != null) {
 			return dataset.getDatasetProcessing().getStudyId();
+		}
+		try {
+			LOG.error(objectMapper.writeValueAsString(dataset));
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
 		}
 		if(dataset.getDatasetAcquisition() != null && dataset.getDatasetAcquisition().getExamination() != null){
 			return dataset.getDatasetAcquisition().getExamination().getStudyId();

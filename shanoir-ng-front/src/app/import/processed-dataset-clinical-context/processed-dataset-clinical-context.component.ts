@@ -30,8 +30,9 @@ import { ProcessedDatasetImportJob } from '../shared/processed-dataset-data.mode
 @Component({
     selector: 'processed-dataset-clinical-context',
     templateUrl: 'processed-dataset-clinical-context.component.html',
-    styleUrls: ['../clinical-context/clinical-context.component.css', '../shared/import.step.css'],
-    animations: [slideDown, preventInitialChildAnimations]
+    styleUrls: ['../clinical-context/clinical-context.component.css', '../shared/import.step.css','./processed-dataset-clinical-context.component.css'],
+    animations: [slideDown, preventInitialChildAnimations],
+    standalone: false
 })
 export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalContextComponent {
 

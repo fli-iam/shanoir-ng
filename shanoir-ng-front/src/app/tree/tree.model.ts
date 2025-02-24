@@ -12,6 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { ElementRef } from "@angular/core";
 import { ExaminationDatasetAcquisitionDTO } from "../dataset-acquisitions/shared/dataset-acquisition.dto";
 import { DatasetAcquisition } from "../dataset-acquisitions/shared/dataset-acquisition.model";
 import { DatasetProcessing } from "../datasets/shared/dataset-processing.model";
@@ -28,11 +29,12 @@ import { Tag } from '../tags/tag.model';
 import { SuperPromise } from "../utils/super-promise";
 
 export abstract class ShanoirNode {
-
+    
     abstract title: string;
     private _opened: boolean = false;
     private openPromise: Promise<void>;
     protected readonly routeBase: string;
+    getTop: () => number; // to scroll to the node
 
     constructor(
         public parent: ShanoirNode,
@@ -47,7 +49,10 @@ export abstract class ShanoirNode {
             if (this.parent) {
                 this.parent.open();
             }
-            this._opened = true;
+            setTimeout(() => {
+                // removing timeout may cause random bugs in the tree
+                this._opened = true;
+            });
             return (this.openPromise || Promise.resolve()).then(() => SuperPromise.timeoutPromise());
         } else {
             return Promise.resolve();
@@ -341,7 +346,8 @@ export class DatasetNode extends ShanoirNode {
         public processed: boolean,
         public canDelete: boolean,
         public canDownload: boolean,
-        public inPacs: boolean
+        public inPacs: boolean,
+        public metadata: MetadataNode
     ) {
         super(parent, id, label);
         this.tags = !tags ? [] : tags;
@@ -367,9 +373,12 @@ export class DatasetNode extends ShanoirNode {
             processed,
             canDelete,
             canDownload,
-            dataset.inPacs
+            dataset.inPacs,
+            null
         );
         node.processings = dataset.processings ? dataset.processings.map(proc => ProcessingNode.fromProcessing(proc, node, canDelete, canDownload)) : [];
+        let metadataNode: MetadataNode = new MetadataNode(node, node?.id, 'Dicom Metadata');
+        node.metadata = metadataNode;
         return node;
     }
 }

@@ -33,7 +33,8 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 @Component({
     selector: 'examination-anesthetic-form',
     templateUrl: 'examinationAnesthetic-form.component.html',
-    providers: [ExaminationAnestheticService, ReferenceService, AnestheticService]
+    providers: [ExaminationAnestheticService, ReferenceService, AnestheticService],
+    standalone: false
 })
 @ModesAware
 export class ExaminationAnestheticFormComponent extends EntityComponent<ExaminationAnesthetic> {

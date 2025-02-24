@@ -161,14 +161,12 @@ public final class Util {
 		try {
 			iS = Util.class.getResourceAsStream("/" + fileName);
 			if (iS != null) {
-				boolean created = file.createNewFile();
-				if (created) {
-					fOS = new FileOutputStream(file);
-					byte[] buffer = new byte[1024];
-					int len;
-					while ((len = iS.read(buffer)) != -1) {
-						fOS.write(buffer, 0, len);
-					}
+				file.createNewFile();
+				fOS = new FileOutputStream(file);
+				byte[] buffer = new byte[1024];
+				int len;
+				while ((len = iS.read(buffer)) != -1) {
+					fOS.write(buffer, 0, len);
 				}
 			}
 		} catch (FileNotFoundException e) {

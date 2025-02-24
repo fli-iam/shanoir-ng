@@ -19,8 +19,8 @@ import java.util.List;
 
 import org.shanoir.ng.groupofsubjects.ExperimentalGroupOfSubjectsMapper;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
-import org.shanoir.ng.study.dto.StudyLightDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
+import org.shanoir.ng.study.dto.StudyLightDTO;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.studycenter.StudyCenterMapper;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyMapper;
@@ -79,7 +79,7 @@ public abstract class StudyDecorator implements StudyMapper {
 	public IdNameCenterStudyDTO studyToExtendedIdNameDTO (final Study study) {
 		final IdNameCenterStudyDTO simpleStudyDTO = delegate.studyToExtendedIdNameDTO(study);
 		simpleStudyDTO.setStudyCenterList(studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
-		simpleStudyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));
+		//simpleStudyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));
 		simpleStudyDTO.setProfile(study.getProfile());
 		return simpleStudyDTO;
 	}
@@ -105,9 +105,9 @@ public abstract class StudyDecorator implements StudyMapper {
 	 */
 	private StudyDTO convertStudyToStudyDTO(final Study study, final boolean withData) {
 		final StudyDTO studyDTO = delegate.studyToStudyDTO(study);
+		studyDTO.setStudyCenterList(
+				studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
 		if (withData) {
-			studyDTO.setStudyCenterList(
-					studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
 			studyDTO.setSubjectStudyList(subjectStudyMapper.subjectStudyListToSubjectStudyDTOList(study.getSubjectStudyList()));
 			studyDTO.setExperimentalGroupsOfSubjects(experimentalGroupOfSubjectsMapper
 					.experimentalGroupOfSubjectsToIdNameDTOs(study.getExperimentalGroupsOfSubjects()));

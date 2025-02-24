@@ -48,7 +48,9 @@ public interface DatasetService {
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#id, 'CAN_ADMINISTRATE'))")
 	void deleteById(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
-	
+
+	void deleteByIdCascade(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
+
 	/**
 	 * Delete several datasets.
 	 * 
@@ -140,18 +142,9 @@ public interface DatasetService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetList(returnObject, 'CAN_SEE_ALL')")
 	List<Dataset> findByStudycard(Long studycardId);
-  
-	/**
-	 * Get database statistics
-	 * 
-	 * @return statistics
-	 */
-	@PreAuthorize("hasRole('ADMIN')")
-	List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception;
-	
-	
+
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#dataset.getId(), 'CAN_ADMINISTRATE'))")
-	void deleteDatasetFromPacs(Dataset dataset) throws ShanoirException;
+	void deleteDatasetFromDiskAndPacs(Dataset dataset) throws ShanoirException;
 
 	boolean existsById(Long id);
 

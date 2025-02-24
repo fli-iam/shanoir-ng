@@ -169,4 +169,12 @@ public class DicomQuery {
 		this.serieFilter = serieFilter;
 	}
 
+	@Override
+	public String toString() {
+		return "DicomQuery [patientName=" + patientName + ", patientID=" + patientID + ", patientBirthDate="
+				+ patientBirthDate + ", studyDescription=" + studyDescription + ", studyDate=" + studyDate
+				+ ", modality=" + modality + ", studyRootQuery=" + studyRootQuery + ", studyFilter=" + studyFilter
+				+ ", minStudyDateFilter=" + minStudyDateFilter + ", serieFilter=" + serieFilter + "]";
+	}
+
 }

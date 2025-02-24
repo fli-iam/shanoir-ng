@@ -187,7 +187,9 @@ public class DICOMWebService {
 				if (entity != null) {
 					ByteArrayResource byteArrayResource = new ByteArrayResource(EntityUtils.toByteArray(entity));
 					HttpHeaders responseHeaders = new HttpHeaders();
-					responseHeaders.setContentLength(entity.getContentLength());
+					if (!entity.isChunked() && entity.getContentLength() >= 0) {
+						responseHeaders.setContentLength(entity.getContentLength());
+					}					
 					return new ResponseEntity(byteArrayResource, responseHeaders, HttpStatus.OK);
 				} else {
 					LOG.error("DICOMWeb: findFrameOfStudyOfSerieOfInstance: empty response entity.");				
@@ -294,39 +296,51 @@ public class DICOMWebService {
 		}
 	}
 
+	public void rejectExaminationFromPacs(String studyInstanceUID) throws ShanoirException {
+		String rejectURL = this.serverURL + "/" + studyInstanceUID + REJECT_SUFFIX;
+		rejectURLFromPacs(rejectURL);
+	}
+
+	public void rejectAcquisitionFromPacs(String studyInstanceUID, String seriesInstanceUID) throws ShanoirException {
+		String rejectURL = this.serverURL + "/" + studyInstanceUID + "/series/" + seriesInstanceUID + REJECT_SUFFIX;
+		rejectURLFromPacs(rejectURL);
+	}
+
 	public void rejectDatasetFromPacs(String url) throws ShanoirException {
 		String rejectURL;
 		if (wadoURLHandler.isWADO_URI(url)) {
 			rejectURL = wadoURLHandler.convertWADO_URI_TO_WADO_RS(url) + REJECT_SUFFIX;
 		} else {
-			url = url.substring(0, url.indexOf("/instances"));
 			rejectURL = url + REJECT_SUFFIX;
 		}
+		rejectURLFromPacs(rejectURL);
+	}
 
+	private void rejectURLFromPacs(String url) throws ShanoirException {
 		// STEP 1: Reject from the PACS
-		HttpPost post = new HttpPost(rejectURL);
+		HttpPost post = new HttpPost(url);
 		post.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_JSON);
 		try (CloseableHttpResponse response = httpClient.execute(post)) {
 			if (HttpStatus.OK.value() == response.getCode()) {
-				LOG.info("Rejected from PACS: " + url);
+				LOG.debug("Rejected from PACS: " + post);
 			} else {
 				LOG.error(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
-						+ " for rejectURL: " + rejectURL);
+						+ " for rejectURL: " + url);
+				// in case one URL is Not Found (no DICOM instance present), we continue with deletion
 				if (response.getCode() == 404 && response.getReasonPhrase().startsWith("Not Found")) {
-					LOG.error("Could not delete from pacs: " + response.getCode() + " " + response.getReasonPhrase());
 					return;
 				} else {
 					throw new ShanoirException(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
-							+ " for rejectURL: " + rejectURL);
+							+ " for rejectURL: " + url);
 				}
 			}
 		} catch (IOException e) {
-			LOG.error("Could not reject instance from PACS: for rejectURL: " + rejectURL, e);
+			LOG.error("Could not reject instance from PACS: for rejectURL: " + url, e);
 			throw new ShanoirException("Could not reject instance from PACS: for rejectURL: " + url, e);
 		}
 	}
 
-	@Scheduled(cron = "0 0 */6 * * *", zone="Europe/Paris")
+	@Scheduled(cron = "0 */30 * * * *", zone="Europe/Paris")
 	public void deleteDicomFilesFromPacs() throws ShanoirException {
 		// Doc : https://smart-api.info/ui/be87344696148a41f577aca202ce84df#/IOCM-RS/deleteRejectedInstancesPermanently
 		LOG.info("Scheduled call to delete all rejected instances from pacs.");

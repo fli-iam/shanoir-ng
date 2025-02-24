@@ -22,6 +22,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
+import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationServiceImpl;
@@ -83,6 +85,13 @@ public class ExaminationServiceTest {
 	@Mock
 	private ObjectMapper mapper;
 
+	@Mock
+	private StudyInstanceUIDHandler studyInstanceUIDHandler;
+
+	@Mock
+	private DICOMWebService dicomWebService;
+
+
 	@BeforeEach
 	public void setup() throws ShanoirException {
 		// given(examinationRepository.findByStudy_IdIn(Mockito.anyListOf(Long.class), Mockito.any(Pageable.class)))
@@ -94,7 +103,7 @@ public class ExaminationServiceTest {
 	@Test
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void deleteByIdTest() throws ShanoirException, SolrServerException, IOException, RestServiceException {
-		examinationService.deleteById(EXAMINATION_ID);
+		examinationService.deleteById(EXAMINATION_ID, null);
 		Mockito.verify(examinationRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 

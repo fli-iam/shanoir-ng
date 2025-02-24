@@ -23,7 +23,8 @@ import { of } from 'rxjs';
 @Component({
     selector: 'action',
     templateUrl: 'action.component.html',
-    styleUrls: ['action.component.css']
+    styleUrls: ['action.component.css'],
+    standalone: false
 })
 export class StudyCardActionComponent implements OnChanges, OnDestroy {
     @Input() assignment: StudyCardAssignment;

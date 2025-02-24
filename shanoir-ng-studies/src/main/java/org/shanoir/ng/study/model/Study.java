@@ -104,10 +104,6 @@ public class Study extends HalEntity {
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, orphanRemoval = true)
 	private List<ExperimentalGroupOfSubjects> experimentalGroupsOfSubjects;
 
-	/** The is mono center. */
-	@NotNull
-	private boolean monoCenter;
-
 	@Column(unique = true)
 	@Unique
 	@EditableOnlyBy(roles = { "ROLE_ADMIN", "ROLE_EXPERT" })
@@ -132,7 +128,7 @@ public class Study extends HalEntity {
 	private LocalDate startDate;
 
 	/** Relations between the investigators, the centers and the studies. */
-	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy="study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<StudyCenter> studyCenterList;
 
 	@NotNull
@@ -146,7 +142,7 @@ public class Study extends HalEntity {
 	private Integer studyType;
 
 	/** Users associated to the research study. */
-	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "study", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<StudyUser> studyUserList;
 
 	/** List of the examinations related to this study. */
@@ -308,21 +304,6 @@ public class Study extends HalEntity {
 	 */
 	public void setExperimentalGroupsOfSubjects(List<ExperimentalGroupOfSubjects> experimentalGroupsOfSubjects) {
 		this.experimentalGroupsOfSubjects = experimentalGroupsOfSubjects;
-	}
-
-	/**
-	 * @return the monoCenter
-	 */
-	public boolean isMonoCenter() {
-		return monoCenter;
-	}
-
-	/**
-	 * @param monoCenter
-	 *            the monoCenter to set
-	 */
-	public void setMonoCenter(boolean monoCenter) {
-		this.monoCenter = monoCenter;
 	}
 
 	/**

@@ -18,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.internal.util.collections.Sets;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -80,7 +81,9 @@ public class ExaminationServiceSecurityTest {
 	
 	@MockBean
 	StudyRightsService rightsService;
-	
+
+	@MockBean
+	private StudyInstanceUIDHandler studyInstanceUIDHandler;
 	@BeforeEach
 	public void setup() {
 		given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(false);
@@ -100,7 +103,7 @@ public class ExaminationServiceSecurityTest {
 		assertAccessDenied(service::findBySubjectIdStudyId, 1L, 1L);
 		assertAccessDenied(service::save, mockExam(null));
 		assertAccessDenied(service::update, mockExam(1L));
-		assertAccessDenied(service::deleteById, ENTITY_ID);
+		assertAccessDenied(service::deleteById, ENTITY_ID, null);
 	}
 
 	@Test
@@ -140,7 +143,7 @@ public class ExaminationServiceSecurityTest {
 		assertAccessAuthorized(service::findBySubjectIdStudyId, 1L, 1L);
 		assertAccessAuthorized(service::save, mockExam(null));
 		assertAccessAuthorized(service::update, mockExam(1L));
-		assertAccessAuthorized(service::deleteById, ENTITY_ID);
+		assertAccessAuthorized(service::deleteById, ENTITY_ID, null);
 	}
 	
 	
@@ -199,16 +202,16 @@ public class ExaminationServiceSecurityTest {
 	
 	private void testDelete(String role) throws ShanoirException {
 		if (role.equals("ROLE_USER")) {			
-			assertAccessDenied(service::deleteById, 1L);
+			assertAccessDenied(service::deleteById, 1L, null);
 		} else if (role.equals("ROLE_EXPERT")) {
-			assertAccessDenied(service::deleteById, 1L);
+			assertAccessDenied(service::deleteById, 1L, null);
 			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
-			assertAccessAuthorized(service::deleteById, 1L);
+			assertAccessAuthorized(service::deleteById, 1L, null);
 			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
 		}
-		assertAccessDenied(service::deleteById, 2L);
-		assertAccessDenied(service::deleteById, 3L);
-		assertAccessDenied(service::deleteById, 4L);
+		assertAccessDenied(service::deleteById, 2L, null);
+		assertAccessDenied(service::deleteById, 3L, null);
+		assertAccessDenied(service::deleteById, 4L, null);
 	}
 
 	private void testUpdate() throws ShanoirException {

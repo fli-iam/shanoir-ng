@@ -34,7 +34,8 @@ import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
     selector: 'pre-clinical-context',
     templateUrl: '../clinical-context/clinical-context.component.html',
     styleUrls: ['../clinical-context/clinical-context.component.css', '../shared/import.step.css'],
-    animations: [slideDown, preventInitialChildAnimations]
+    animations: [slideDown, preventInitialChildAnimations],
+    standalone: false
 })
 export class PreClinicalContextComponent extends AbstractClinicalContextComponent implements OnDestroy {
 

@@ -7,7 +7,6 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -17,6 +16,7 @@ import javax.swing.JProgressBar;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
+import org.shanoir.ng.importer.dicom.SeriesNumberOrDescriptionSorter;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
@@ -43,7 +43,6 @@ import org.shanoir.uploader.model.rest.ManufacturerModel;
 import org.shanoir.uploader.model.rest.Sex;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
-import org.shanoir.uploader.model.rest.StudyCenter;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
@@ -97,18 +96,26 @@ public class ImportUtils {
 		subjectStudy.setSubjectType(subjectType);
 		subjectStudy.setPhysicallyInvolved(physicallyInvolved);
 		subjectStudy.setTags(new ArrayList<>());
+		// Challenge here: findSubjectByIdentifier returns a subjectStudyList and findSubjectsByStudyId a subjectStudy attribute
 		if (subject.getSubjectStudyList() == null) {
 			subject.setSubjectStudyList(new ArrayList<>());
+			SubjectStudy existingSubjectStudy = subject.getSubjectStudy();
+			if (existingSubjectStudy != null) {
+				// do nothing: call of findSubjectsByStudyId
+				return false;
+			}
+			subject.getSubjectStudyList().add(subjectStudy);
 		} else {
-			// Check that this subjectStudy does not exist yet
+			// Check that this SubjectStudy does not exist yet
 			for (SubjectStudy sustu : subject.getSubjectStudyList()) {
 				if (sustu.getStudy().getId().equals(study.getId())) {
-					// Do not add a new subject study if it already exists
+					// Do not add a new SubjectStudy if it already exists
 					return false;
 				}
 			}
+			// Not yet existing: add it
+			subject.getSubjectStudyList().add(subjectStudy);
 		}
-		subject.getSubjectStudyList().add(subjectStudy);
 		return true;
 	}
 
@@ -233,6 +240,8 @@ public class ImportUtils {
 
 	/**
 	 * subjectId and examinationId are created in the window of ImportDialog and are not known before.
+	 * In this method selectedSeries as attribute of ImportJob are copied into patient - study - serie
+	 * tree, as still expected like this on the server.
 	 * 
 	 * @param uploadJob
 	 * @param subjectName
@@ -279,12 +288,14 @@ public class ImportUtils {
 		final List<Serie> series = new ArrayList<>(importJob.getSelectedSeries());
 		for (Serie serie : series) {
 			List<Instance> instances = serie.getInstances();
-			if (instances == null) {
+			if (instances == null || instances.isEmpty()) {
+				serie.setIgnored(true);
 				serie.setSelected(false);
+				logger.warn("Serie [" + serie.getSeriesDescription() + "] found with instances == null or empty. Serie de-selected.");
 				continue;
 			}
 			/**
-			 * Attention: the below switch is important, as all import jobs from ShUp
+			 * Warning: the below switch is important, as all import jobs from ShUp
 			 * are considered as "from-disk" on the server, nevertheless if within ShUp
 			 * they come from a pacs or a local disk, so the below setReferencedFileID
 			 * is necessary, that import-from-pacs with ShUp run on the server.
@@ -298,6 +309,10 @@ public class ImportUtils {
 			}
 			serie.setSelected(true);
 		}
+		// We sort again here, even if the QueryPACSService or the DicomDirToModelService sort already
+		// The user select after both components in the tree GUI of ShanoirUploader, where a linked list
+		// is used, therefore as the user can click and series on his behalf, we sort again here.
+		series.sort(new SeriesNumberOrDescriptionSorter());
 		studyImportJob.setSeries(series);
 		studiesImportJob.add(studyImportJob);
 		patient.setStudies(studiesImportJob);
@@ -359,6 +374,7 @@ public class ImportUtils {
 				logger.info(uploadFolder.getName() + ": " + allFileNames.size() + " DICOM files copied from CD/DVD/local file system.");
 			} else {
 				logger.error("Error while copying file from CD/DVD/local file system.");
+				return null;
 			}
 		}
 		return allFileNames;
@@ -418,7 +434,7 @@ public class ImportUtils {
 				if (subjectREST == null) {
 					return null;
 				} else {
-					logger.info("Subject created on server with ID: " + subjectREST.getId());
+					logger.info("Subject created on server: " + subjectREST.toString());
 				}
 			}
 		} else {
@@ -618,18 +634,6 @@ public class ImportUtils {
 		for (AcquisitionEquipment acquisitionEquipment : acquisitionEquipments) {
 			if (acquisitionEquipment.getManufacturerModel().getManufacturer().getName().equalsIgnoreCase(manufacturer)) {
 				return acquisitionEquipment.getManufacturerModel().getManufacturer();
-			}
-		}
-		return null;
-	}
-
-	private static Center findCenterOfStudy(Study studyREST, UploadJob uploadJob) {
-		String institutionName = uploadJob.getMriInformation().getInstitutionName().toLowerCase();
-		List<StudyCenter> studyCenters = studyREST.getStudyCenterList();
-		for (StudyCenter studyCenter : studyCenters) {
-			String centerName = studyCenter.getCenter().getName().toLowerCase();
-			if (centerName.contains(institutionName) || institutionName.contains(centerName)) {
-				return studyCenter.getCenter();
 			}
 		}
 		return null;

@@ -15,12 +15,12 @@
 package org.shanoir.ng.dataset.modality;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.mapstruct.DecoratedWith;
-import org.mapstruct.IterableMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.Named;
+import org.mapstruct.*;
+import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMetadataMapper;
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.paging.PageImpl;
@@ -54,6 +54,7 @@ public interface MrDatasetMapper {
 	 * @return dataset DTO.
 	 */
 	@Named(value = "standard")
+	@Mappings({ @Mapping(target = "source", ignore = true), @Mapping(target = "copies", ignore = true) })
 	MrDatasetDTO datasetToDatasetDTO(MrDataset dataset);
 	
 	/**
@@ -64,6 +65,8 @@ public interface MrDatasetMapper {
 	 * @return dataset DTO.
 	 */
 	@Named(value = "withProcessings")
+	@Mapping(target = "copies", expression = "java(mapCopiesFromDataset(dataset.getCopies()))")
+	@Mapping(target = "source", expression = "java(mapSourceFromDataset(dataset.getSource()))")
 	MrDatasetWithDependenciesDTO datasetToDatasetAndProcessingsDTO(MrDataset dataset);
 	
 	/**
@@ -94,6 +97,17 @@ public interface MrDatasetMapper {
 	 * @return dataset DTO.
 	 */
 	IdName datasetToIdNameDTO(MrDataset dataset);
-	
 
+	default List<Long> mapCopiesFromDataset(List<Dataset> copies) {
+		if (copies == null) {
+			return null;
+		}
+		return copies.stream()
+				.map(Dataset::getId)
+				.collect(Collectors.toList());
+	}
+
+	default Long mapSourceFromDataset(Dataset source) {
+		return source != null ? source.getId() : null;
+	}
 }

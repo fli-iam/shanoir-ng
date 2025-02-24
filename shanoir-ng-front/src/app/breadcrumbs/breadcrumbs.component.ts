@@ -22,7 +22,8 @@ import { take } from 'rxjs/operators';
 @Component({
     selector: 'breadcrumbs',
     templateUrl: 'breadcrumbs.component.html',
-    styleUrls: ['breadcrumbs.component.css']
+    styleUrls: ['breadcrumbs.component.css'],
+    standalone: false
 })
 
 export class BreadcrumbsComponent implements AfterViewInit, OnDestroy, AfterViewChecked {

@@ -15,13 +15,12 @@
 import { AppRoutingModule } from './app-routing.module';
 import { PreclinicalRoutingModule } from './preclinical/preclinical-routing.module'
 import { APP_BASE_HREF, CommonModule } from '@angular/common';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { ErrorHandler, Injector, NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 // import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { Autosize } from 'ng-autosize';
 import { NgxJsonViewerModule } from 'ngx-json-viewer';
 import { AcquisitionEquipmentListComponent } from './acquisition-equipments/acquisition-equipment-list/acquisition-equipment-list.component';
 import { AcquisitionEquipmentComponent } from './acquisition-equipments/acquisition-equipment/acquisition-equipment.component';
@@ -260,6 +259,7 @@ import { LoginGuard } from "./shared/roles/login-guard";
 import { AccessRequestService } from './users/access-request/access-request.service';
 import { AccessRequestListComponent } from './users/access-request/access-request-list.component';
 import { MassDownloadService } from './shared/mass-download/mass-download.service';
+import { SingleDownloadService } from './shared/mass-download/single-download.service';
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { TaskStatusComponent } from './async-tasks/status/task-status.component';
 import { DatasetCopyDialogComponent } from "./shared/components/dataset-copy-dialog/dataset-copy-dialog.component";
@@ -274,21 +274,9 @@ import { StudyTreeComponent } from './studies/study/study-tree.component';
 import { TreeService } from './studies/study/tree.service';
 import { CoilNodeComponent } from './coils/coil/tree/coil-node.component';
 import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.component';
+import { MetadataNodeComponent } from './datasets/tree/metadata-node.component';
 
-@NgModule({
-    imports: [
-        BrowserModule,
-        BrowserAnimationsModule,
-        CommonModule,
-        FormsModule,
-        HttpClientModule,
-        ReactiveFormsModule,
-        NgxJsonViewerModule,
-        AppRoutingModule,
-        PreclinicalRoutingModule,
-        RouterModule,
-        ClipboardModule
-    ],
+@NgModule({ 
     declarations: [
         AccountRequestComponent,
         AccountRequestInfoComponent,
@@ -296,7 +284,6 @@ import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.c
         AcquisitionEquipmentListComponent,
         AcquisitionEquipmentPipe,
         AppComponent,
-        Autosize,
         CenterComponent,
         CenterListComponent,
         ConfirmDialogComponent,
@@ -465,8 +452,22 @@ import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.c
         TestQualityCardOptionsComponent,
         StudyTreeComponent,
         CoilNodeComponent,
-        DoubleAwesomeComponent
+        DoubleAwesomeComponent,
+        MetadataNodeComponent
     ],
+    bootstrap: [AppComponent], 
+    imports: [
+        BrowserModule,
+        BrowserAnimationsModule,
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        NgxJsonViewerModule,
+        AppRoutingModule,
+        PreclinicalRoutingModule,
+        RouterModule,
+        ClipboardModule
+    ], 
     providers: [
         AcquisitionEquipmentService,
         AuthAdminGuard,
@@ -513,7 +514,7 @@ import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.c
         AnestheticService,
         ImportBrukerService,
         EnumUtils,
-        {provide: HTTP_INTERCEPTORS, useClass: KeycloakHttpInterceptor, multi: true},
+        { provide: HTTP_INTERCEPTORS, useClass: KeycloakHttpInterceptor, multi: true },
         BreadcrumbsService,
         GlobalService,
         ImportDataService,
@@ -550,12 +551,13 @@ import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.c
         QualityCardService,
         QualityCardDTOService,
         MassDownloadService,
+        SingleDownloadService,
         SessionService,
         ShanoirEventService,
         TreeService,
-        { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
-    ],
-    bootstrap: [AppComponent]
+        { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true },
+        provideHttpClient(withInterceptorsFromDi())
+    ] 
 })
 export class AppModule {
 

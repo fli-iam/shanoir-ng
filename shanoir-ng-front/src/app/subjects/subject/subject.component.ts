@@ -37,7 +37,8 @@ import { StudyRightsService } from 'src/app/studies/shared/study-rights.service'
     selector: 'subject-detail',
     templateUrl: 'subject.component.html',
     styleUrls: ['subject.component.css'],
-    animations: [slideDown, preventInitialChildAnimations]
+    animations: [slideDown, preventInitialChildAnimations],
+    standalone: false
 })
 
 export class SubjectComponent extends EntityComponent<Subject> {
@@ -270,5 +271,13 @@ export class SubjectComponent extends EntityComponent<Subject> {
     download() {
         // TODO : select study
         this.downloadService.downloadAllByStudyIdAndSubjectId(this.treeService.study.id, this.subject.id, this.downloadState);
+    }
+
+    getOnDeleteConfirmMessage(entity: Subject): Promise<string> {
+        let studyListStr : string = "\n\nThis subject belongs to the studies: \n- ";
+        const studiesNames = entity.subjectStudyList.map(study => study.study.name).join('\n- ');
+        studyListStr += studiesNames;
+        studyListStr += '\n\nAttention: this action deletes all datasets from ALL studies listed above.';
+        return Promise.resolve(studyListStr);
     }
 }

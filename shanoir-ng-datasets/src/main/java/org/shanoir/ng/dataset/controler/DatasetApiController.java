@@ -60,6 +60,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
@@ -139,8 +140,9 @@ public class DatasetApiController implements DatasetApi {
 	@Autowired
 	private SolrService solrService;
 
-	@Autowired
-	DatasetDownloaderServiceImpl datasetDownloaderService;
+    @Qualifier("datasetDownloaderServiceImpl")
+    @Autowired
+	protected DatasetDownloaderServiceImpl datasetDownloaderService;
 
 	@Autowired
 	private ObjectMapper objectMapper;
@@ -163,13 +165,11 @@ public class DatasetApiController implements DatasetApi {
 			if (ds == null) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
+			LOG.info("Deletion of dataset with ID: " + ds.getId());
 			Long studyId = datasetService.getStudyId(ds);
-
-
 			datasetService.deleteById(datasetId);
 			solrService.deleteFromIndex(datasetId);
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
-
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException | RestServiceException e) {
 			throw e;
@@ -185,6 +185,10 @@ public class DatasetApiController implements DatasetApi {
 			@RequestBody List<Long> datasetIds)
 			throws RestServiceException {
 		try {
+			if (datasetIds.size() > DATASET_LIMIT) {
+				throw new RestServiceException(
+						new ErrorModel(HttpStatus.FORBIDDEN.value(), "This selection includes " + datasetIds.size() + " datasets. You can't delete more than " + DATASET_LIMIT + " datasets."));
+			}
 			datasetService.deleteByIdIn(datasetIds);
 			solrService.deleteFromIndex(datasetIds);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -593,7 +597,7 @@ public class DatasetApiController implements DatasetApi {
 			@RequestParam(value = "subjectNameInRegExp", required = false) String subjectNameInRegExp,
 			@Parameter(description = "Subject name excluding regular expression", required=false) @Valid
 			@RequestParam(value = "subjectNameOutRegExp", required = false) String subjectNameOutRegExp
-			) throws RestServiceException, IOException {
+			) throws IOException {
 
 		String params = "";
 		if (studyNameInRegExp != null && !StringUtils.isEmpty(studyNameInRegExp)) params += "\nStudy to include : " + studyNameInRegExp;

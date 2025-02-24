@@ -33,9 +33,10 @@ export class Examination extends Entity {
     note: string;
     subjectWeight: number;
     weightUnitOfMeasure: UnitOfMeasure;
-
     instrumentBasedAssessmentList: InstrumentBasedAssessment[];
     extraDataFilePathList: string[] = [];
     preclinical: boolean;
     hasStudyCenterData: boolean = false;
+    copies: number[];
+    source: number;
 }

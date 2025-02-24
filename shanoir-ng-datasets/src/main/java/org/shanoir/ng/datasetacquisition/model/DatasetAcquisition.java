@@ -98,10 +98,15 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	@LocalDateAnnotations
 	private LocalDate importDate;
 
-	private Long sourceId;
-
 	/** Name of the user who did the import */
 	private String username;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "source_id")
+	private DatasetAcquisition source;
+
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "source", cascade = CascadeType.ALL)
+	private List<DatasetAcquisition> copies;
 
 	public DatasetAcquisition() {
 	}
@@ -116,8 +121,9 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 		this.softwareRelease = other.softwareRelease;
 		this.sortingIndex = other.sortingIndex;
 		this.importDate = other.importDate;
-		this.sourceId = other.sourceId;
 		this.username = other.username;
+		this.copies = other.copies;
+		this.source = other.source;
 	}
 
 	/**
@@ -248,14 +254,6 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	@Transient
 	public abstract String getType();
 
-	public Long getSourceId() {
-		return sourceId;
-	}
-
-	public void setSourceId(Long sourceId) {
-		this.sourceId = sourceId;
-	}
-
 	public String getUsername() {
 		return username;
 	}
@@ -263,4 +261,21 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	public void setUsername(String username) {
 		this.username = username;
 	}
+
+	public DatasetAcquisition getSource() {
+		return source;
+	}
+
+	public void setSource(DatasetAcquisition source) {
+		this.source = source;
+	}
+
+	public List<DatasetAcquisition> getCopies() {
+		return copies;
+	}
+
+	public void setCopies(List<DatasetAcquisition> copies) {
+		this.copies = copies;
+	}
+
 }

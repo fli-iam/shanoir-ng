@@ -190,7 +190,7 @@ public class ImporterApiController implements ImporterApi {
 			 * 3. STEP: split instances into non-images and images and get additional meta-data
 			 * from first dicom file of each serie, meta-data missing in dicomdir.
 			 */
-			imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), false, null);
+			imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), false, null, false);
 
 			/**
 			 * . STEP: create ImportJob
@@ -291,7 +291,7 @@ public class ImporterApiController implements ImporterApi {
 			// Import dicomfile
 			return uploadDicomZipFile(multiPartFile);
 		} catch (IOException e) {
-			LOG.error("ERROR while loading zip fiole, please contact an administrator");
+			LOG.error("ERROR while loading zip file, please contact an administrator");
 			LOG.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 		} finally {
@@ -610,6 +610,8 @@ public class ImporterApiController implements ImporterApi {
 		// Comment: Anonymisation is not necessary for pure brainvision EEGs data
 		try {
 			importJob.setUsername(KeycloakUtil.getTokenUserName());
+			ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS, 0f, importJob.getStudyId());
+			importJob.setShanoirEvent(event);
 			Integer integg = (Integer) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.IMPORT_EEG_QUEUE,  objectMapper.writeValueAsString(importJob));
 			return new ResponseEntity<Void>(HttpStatusCode.valueOf(integg.intValue()));			
 		} catch (Exception e) {
