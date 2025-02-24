@@ -16,7 +16,7 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.vip.execution.dto.ExecutionCandidateDTO;
 import org.shanoir.ng.vip.execution.dto.VipExecutionDTO;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
-import org.shanoir.ng.vip.executionMonitoring.service.ExecutionMonitoringService;
+import org.shanoir.ng.vip.executionMonitoring.service.ExecutionMonitoringServiceImpl;
 import org.shanoir.ng.vip.processingResource.service.ProcessingResourceServiceImpl;
 import org.shanoir.ng.vip.output.exception.ResultHandlerException;
 import org.shanoir.ng.vip.shared.dto.DatasetParameterDTO;
@@ -52,7 +52,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     private String vipUrl;
 
     @Autowired
-    private ExecutionMonitoringService executionMonitoringService;
+    private ExecutionMonitoringServiceImpl executionMonitoringService;
 
     @Autowired
     private ProcessingResourceServiceImpl processingResourceService;
@@ -83,7 +83,6 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         VipExecutionDTO createdExecution = createVipExecution(candidate, executionMonitoring);
         executionTrackingService.updateTrackingFile(executionMonitoring, ExecutionTrackingServiceImpl.execStatus.SENT);
-
         return updateAndStartExecutionMonitoring(executionMonitoring, createdExecution);
     }
 
