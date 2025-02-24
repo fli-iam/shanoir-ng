@@ -73,5 +73,5 @@ public interface ExecutionService {
      * @return
      * @throws ResultHandlerException
      */
-    public Mono<VipExecutionDTO> getExecutionAsServiceAccount(int attempts, String identifier) throws ResultHandlerException, SecurityException;
+     Mono<VipExecutionDTO> getExecutionAsServiceAccount(int attempts, String identifier) throws ResultHandlerException, SecurityException;
 }
