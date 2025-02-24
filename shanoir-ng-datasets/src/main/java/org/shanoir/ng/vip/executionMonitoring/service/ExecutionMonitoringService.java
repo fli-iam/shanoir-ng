@@ -51,6 +51,5 @@ public interface ExecutionMonitoringService {
 	 * @param processing
 	 * @param event
 	 */
-	@Async
 	void startMonitoringJob(ExecutionMonitoring processing, ShanoirEvent event) throws EntityNotFoundException, SecurityException;
 }
