@@ -15,10 +15,12 @@
 package org.shanoir.ng.studycard;
 
 import org.junit.jupiter.api.Test;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Arrays;
@@ -45,7 +47,9 @@ public class StudyCardRepositoryTest {
 	
 	@Autowired
 	private StudyCardRepository studyCardRepository;
-	
+
+	@MockBean
+	private StudyInstanceUIDHandler studyInstanceUIDHandler;
 	@Test
 	public void findAllTest() throws Exception {
 		Iterable<StudyCard> studyCardDb = studyCardRepository.findAll();

@@ -213,6 +213,8 @@ export class NotificationsService {
                 newTask.creationDate = new Date(task.creationDate as string);
                 newTask.lastUpdate = new Date(task.lastUpdate as string);
                 return newTask;
+            })?.filter(task => { // remove single files downloads that have been interrupted or are over
+                return task.eventType != 'downloadFile.event' || task.sessionId == this.sessionService.sessionId;
             });
         }
         this.localTasks = storageTasks;
@@ -246,5 +248,11 @@ export class NotificationsService {
         let total: number = 0;
         this.tasksInProgress.forEach(task => total += task.progress);
         return total/this.tasksInProgress.length;
+    }
+
+    hasOnGoingDownloads(): boolean {
+        return !!this.tasksInProgress.find(task => {
+            return ['downloadDataset.event', 'downloadFile.event'].includes(task.eventType);  
+        });
     }
 }

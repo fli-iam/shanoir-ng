@@ -17,6 +17,7 @@ package org.shanoir.ng.examination;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.examination.controler.ExaminationApi;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
@@ -83,7 +84,10 @@ public class ExaminationApiSecurityTest {
 	
 	@MockBean
 	StudyUserRightsRepository studyUserRightsRepository;
-	
+
+	@MockBean
+	private StudyInstanceUIDHandler studyInstanceUIDHandler;
+
 	@BeforeEach
 	public void setup() {
 		mockBindingResult = new BeanPropertyBindingResult(mockExam(1L), "examination");

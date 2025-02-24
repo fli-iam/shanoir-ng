@@ -17,6 +17,7 @@ package org.shanoir.ng.studycard;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
@@ -64,7 +65,10 @@ public class StudyCardServiceSecurityTest {
 	
 	@MockBean
 	private StudyUserRightsRepository rightsRepository;
-	
+
+	@MockBean
+	private StudyInstanceUIDHandler studyInstanceUIDHandler;
+
 	@BeforeEach
 	public void setup() {
 		given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(false);

@@ -11,7 +11,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 
 import { TreeService } from 'src/app/studies/study/tree.service';
 import { CoilNode } from 'src/app/tree/tree.model';
@@ -23,17 +24,15 @@ import { CoilNode } from 'src/app/tree/tree.model';
     standalone: false
 })
 
-export class CoilNodeComponent implements OnChanges {
+export class CoilNodeComponent extends TreeNodeAbstractComponent<CoilNode> implements OnChanges {
 
     @Input() input: CoilNode;
-
-    node: CoilNode;
-    loading: boolean = false;
-    menuOpened: boolean = false;
     detailsPath: string = '/coil/details/';
 
     constructor(
-        protected treeService: TreeService) {
+            protected treeService: TreeService,
+            elementRef: ElementRef) {
+        super(elementRef);
     }
 
     ngOnChanges(changes: SimpleChanges): void {

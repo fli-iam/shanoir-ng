@@ -42,11 +42,12 @@ import { StudyRightsService } from "../shared/study-rights.service";
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyService } from '../shared/study.service';
 import { WaitBurstEnd } from "src/app/utils/wait-burst-end";
+import { Subject as RxjsSubject } from 'rxjs';
 
 @Injectable()
 export class TreeService {
 
-    _selection: Selection = null;
+    private selection: Selection = null;
     public studyNode: StudyNode = null;
     studyNodeOpenPromise: SuperPromise<void> = new SuperPromise();
     study: Study;
@@ -56,20 +57,10 @@ export class TreeService {
     private _treeOpened: boolean = true;
     private _treeAvailable: boolean = false;
     selectedNode: ShanoirNode;
+    onScrollToSelected: RxjsSubject<ShanoirNode> = new RxjsSubject();
 
     isSelected(id: number, type: NodeType): boolean {
         return this.selection?.isSelected(id, type);
-    }
-    
-    get selection(): Selection {
-        return this._selection;
-    }
-
-    set selection(selection: Selection) {
-        this._selection = selection;
-        if (this.treeOpened) {
-            this.changeSelection();
-        }
     }   
 
     get treeOpened(): boolean {
@@ -143,6 +134,40 @@ export class TreeService {
         });
     }
 
+    collapseAll() {
+        this.collapseNode(this.studyNode, false);
+    }
+
+    private collapseNode(node: ShanoirNode, collapseRoot: boolean = true): Promise<void> {
+        return Promise.all(
+            Object.getOwnPropertyNames(node).map(propLabel => {
+                let prop = node[propLabel];
+                if (prop instanceof ShanoirNode && propLabel != 'parent') {
+                    return this.collapseNode(prop);
+                } else if (Array.isArray(prop) && prop[0] instanceof ShanoirNode) {
+                    return Promise.all(prop.map(el => this.collapseNode(el))).then();
+                }
+            })
+        ).then(() => {
+            if (collapseRoot) {
+                return node.close();
+            }
+        });
+        
+    }
+
+    scrollToSelected() {
+        return this.selectNode(this.selection).then(() => {
+            this.scrollTo(this.selectedNode);
+        })
+    }
+
+    scrollTo(node: ShanoirNode) {
+        setTimeout(() => {
+            this.onScrollToSelected.next(node);
+        })
+    }
+
     removeCurrentNode() {
         if (this.selectedNode?.parent) {
             const route: string = this.selectedNode.route;
@@ -167,34 +192,45 @@ export class TreeService {
         activatedRoute.snapshot.data['treeAvailable'] = true;
     }
     
-    private changeSelection(): void {
+    private changeSelection(): Promise<ShanoirNode> {
         if (this.selection?.type == 'study') {
-            this.initStudy(this.selection.id).then(() => {
+            return this.initStudy(this.selection.id).then(() => {
                 this.studyNode.subjectsNode.open();
                 this.selectedNode = this.studyNode;
                 this.treeAvailable = !!this.selectedNode;
+                return this.studyNode;
             });
         } else {
             let studyLoaded: Promise<void>;
-            if (this.study?.id && this.selection.studyId?.includes(this.study?.id)) {
+            if (this.study?.id && this.selection?.studyId?.includes(this.study?.id)) {
                 studyLoaded = Promise.resolve();
-            } else if (this.selection.studyId?.[0]) {
+            } else if (this.selection?.studyId?.[0]) {
                 studyLoaded = this.initStudy(this.selection.studyId[0]);
             } else {
                 this.treeAvailable = false;
             }
             
-            Promise.all([studyLoaded]).then(() => {
+            return Promise.all([studyLoaded]).then(() => {
                 return this.selectNode(this.selection)
             }).then(node => {
                 this.selectedNode = node;
                 this.treeAvailable = !!this.selectedNode;
+                return node;
             });
             
         }
     }
 
-    selectNode(selection: Selection): Promise<ShanoirNode> {
+    select(selection: Selection): Promise<void> {
+        this.selection = selection;
+        if (this.treeOpened) {
+            return this.changeSelection().then(() => {
+                this.scrollToSelected();
+            });
+        }
+    }
+
+    private selectNode(selection: Selection): Promise<ShanoirNode> {
         if (selection?.type == 'dataset') {
             return this.selectDataset(selection.entity as Dataset);
         } else if (selection?.type == 'dicomMetadata') {
@@ -219,7 +255,7 @@ export class TreeService {
             return this.selectUser(selection.id);
         } else if (selection?.type == 'coil') {
             return this.selectCoil(selection.entity as Coil);
-        }
+        } else return Promise.resolve(null);
     }
 
     private selectDataset(dataset: number | Dataset): Promise<DatasetNode> {
@@ -231,10 +267,12 @@ export class TreeService {
                             return sn.id == ret.topParent.datasetAcquisition?.examination?.subject?.id;
                         });
                         if (subjectNode) {
+                            if (!subjectNode.opened) this.scrollTo(subjectNode);
                             return subjectNode.open().then(() => {
                                 if (subjectNode.examinations != UNLOADED) {
                                     let examNode: ExaminationNode = subjectNode.examinations?.find(exam => exam.id == ret.topParent.datasetAcquisition?.examination?.id);
                                     if (examNode) {
+                                        if (!examNode.opened) this.scrollTo(examNode);
                                         return examNode.open().then(() => {
                                             if (examNode.datasetAcquisitions != UNLOADED) {
                                                 let acqNode: DatasetAcquisitionNode = examNode.datasetAcquisitions?.find(acq => acq.id == ret.topParent.datasetAcquisition?.id);
@@ -281,8 +319,9 @@ export class TreeService {
 
     private selectDicomMetadata(ds: number | Dataset): Promise<MetadataNode> {
         return this.selectDataset(ds).then(parentDsNode => {
-            parentDsNode?.open();
-            return new MetadataNode(parentDsNode, parentDsNode?.id, 'Dicom Metadata')
+            return parentDsNode?.open().then(() => {
+                return parentDsNode.metadata;
+            });
         });
     }
 
@@ -335,10 +374,12 @@ export class TreeService {
                     if (this.studyNode.subjectsNode.subjects != UNLOADED) {
                         let subjectNode: SubjectNode = this.studyNode.subjectsNode.subjects?.find(sn => sn.id == dsa.examination?.subject?.id);
                         if (subjectNode) {
+                            if (!subjectNode.opened) this.scrollTo(subjectNode);
                             return subjectNode.open().then(() => {
                                 if (subjectNode.examinations != UNLOADED) {
                                     let examNode: ExaminationNode = subjectNode.examinations?.find(exam => exam.id == dsa.examination?.id);
                                     if (examNode) {
+                                        if (!examNode.opened) this.scrollTo(examNode);
                                         return examNode.open().then(() => {
                                             if (examNode.datasetAcquisitions != UNLOADED) {
                                                 return examNode.datasetAcquisitions?.find(dsan => dsan.id == dsa.id);
@@ -367,6 +408,7 @@ export class TreeService {
                     if (this.studyNode.subjectsNode.subjects != UNLOADED) {
                         let subjectNode: SubjectNode = this.studyNode.subjectsNode.subjects?.find(sn => sn.id == exam.subject?.id);
                         if (subjectNode) {
+                            if (!subjectNode.opened) this.scrollTo(subjectNode);
                             return subjectNode.open().then(() => {
                                 if (subjectNode.examinations != UNLOADED) {
                                     return subjectNode.examinations?.find(en => en.id == exam.id);

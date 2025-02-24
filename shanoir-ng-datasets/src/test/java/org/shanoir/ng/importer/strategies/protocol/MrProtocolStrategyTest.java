@@ -8,12 +8,16 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
+import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Serie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.io.File;
@@ -36,6 +40,9 @@ public class MrProtocolStrategyTest {
 	
 	@InjectMocks
 	private MrProtocolStrategy mrProtocolStrategy;
+
+	@MockBean
+	private StudyInstanceUIDHandler studyInstanceUIDHandler;
 	
 	@BeforeEach
 	public void setup() {
