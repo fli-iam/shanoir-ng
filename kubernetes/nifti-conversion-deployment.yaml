@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: /usr/local/bin/kompose convert
+    kompose.version: 1.35.0 (9532ceef3)
+  labels:
+    io.kompose.service: nifti-conversion
+  name: nifti-conversion
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: nifti-conversion
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: /usr/local/bin/kompose convert
+        kompose.version: 1.35.0 (9532ceef3)
+      labels:
+        io.kompose.service: nifti-conversion
+    spec:
+      containers:
+        - image: ghcr.io/fli-iam/shanoir-ng/nifti-conversion:NG_v2.5.1
+          name: nifti-conversion
+          volumeMounts:
+            - mountPath: /var/log/shanoir-ng-logs
+              name: logs
+            - mountPath: /var/datasets-data
+              name: datasets-data
+            - mountPath: /tmp
+              name: tmp
+      restartPolicy: Always
+      volumes:
+        - name: logs
+          persistentVolumeClaim:
+            claimName: logs
+        - name: datasets-data
+          persistentVolumeClaim:
+            claimName: datasets-data
+        - name: tmp
+          persistentVolumeClaim:
+            claimName: tmp
