@@ -77,17 +77,22 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
      * Create a new line for the execution input
      */
     private void createTrackingLine(ExecutionMonitoring executionMonitoring, File trackingFile) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(trackingFile,true));
-        String newLine;
+        BufferedWriter writer = null;
+        try {
+            writer = new BufferedWriter(new FileWriter(trackingFile,true));
+            String newLine;
 
-        writer.newLine();
-        newLine = LocalDateTime.now().format(formatter) + ",";
-        newLine += executionMonitoring.getId() + ",";
-        newLine += executionMonitoring.getInputDatasets().getFirst().getDatasetAcquisition().getExamination().getId() + ",";
-        newLine += executionMonitoring.getInputDatasets().stream().map(dataset -> String.valueOf(dataset.getId())).reduce((id1, id2) -> id1 + " / " + id2).orElse("") + ",";
-        newLine += executionMonitoring.getInputDatasets().stream().map(Dataset::getName).reduce((id1, id2) -> id1 + " / " + id2).orElse("") + ",,,";
-        writer.write(newLine);
-        writer.close();
+            writer.newLine();
+            newLine = LocalDateTime.now().format(formatter) + ",";
+            newLine += executionMonitoring.getId() + ",";
+            newLine += executionMonitoring.getInputDatasets().getFirst().getDatasetAcquisition().getExamination().getId() + ",";
+            newLine += executionMonitoring.getInputDatasets().stream().map(dataset -> String.valueOf(dataset.getId())).reduce((id1, id2) -> id1 + " / " + id2).orElse("") + ",";
+            newLine += executionMonitoring.getInputDatasets().stream().map(Dataset::getName).reduce((id1, id2) -> id1 + " / " + id2).orElse("") + ",,,";
+            writer.write(newLine);
+            writer.close();
+        } catch (IOException e) {
+            Objects.requireNonNull(writer).close();
+        }
     }
 
     /**
@@ -110,7 +115,6 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
         if (!retrievedLine) {
             throw new ShanoirException("Execution monitoring tracking line is lost, can not update line.");
         }
-
         writeLastLines(lastLines, trackingFile);
     }
 
@@ -145,17 +149,22 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
      * Rewrite the lines at the end of the files according to MAX_LAST_LINES_TO_CHECK
      */
     private void writeLastLines(List<String> lastLines, File trackingFile) throws IOException {
+        BufferedWriter writer = null;
+
         List<String> lines = Files.readAllLines(trackingFile.toPath());
         List<String> updatedLines = lines.subList(0, Math.max(1, lines.size() - MAX_LAST_LINES_TO_CHECK));
         updatedLines.addAll(lastLines);
-
-        BufferedWriter writer = new BufferedWriter(new FileWriter(trackingFile));
-        for(String line : updatedLines.subList(0, updatedLines.size() - 1)) {
-            writer.write(line);
-            writer.newLine();
+        try{
+            writer = new BufferedWriter(new FileWriter(trackingFile));
+            for(String line : updatedLines.subList(0, updatedLines.size() - 1)) {
+                writer.write(line);
+                writer.newLine();
+            }
+            writer.write(updatedLines.getLast());
+            writer.close();
+        } catch (IOException e) {
+            Objects.requireNonNull(writer).close();
         }
-        writer.write(updatedLines.getLast());
-        writer.close();
     }
 
     /**
@@ -172,10 +181,15 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
     private void createTrackingFile(File trackingFile) throws IOException {
         new File(trackingFilePrefixe).mkdirs();
         if(trackingFile.createNewFile()) {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(trackingFile));
-            String headers = "Date (HH:mm dd/MM/yyyy),Processing_id,Exam_id,Dataset_id,Dataset_name,Sent_to_VIP,Error_file,Result_file";
-            writer.write(headers);
-            writer.close();
+            BufferedWriter writer = null;
+            try {
+                writer = new BufferedWriter(new FileWriter(trackingFile));
+                String headers = "Date (HH:mm dd/MM/yyyy),Processing_id,Exam_id,Dataset_id,Dataset_name,Sent_to_VIP,Error_file,Result_file";
+                writer.write(headers);
+                writer.close();
+            } catch (IOException e) {
+                Objects.requireNonNull(writer).close();
+            }
         }
     }
 }
