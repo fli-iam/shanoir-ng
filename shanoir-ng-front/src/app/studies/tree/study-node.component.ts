@@ -30,6 +30,7 @@ import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
 import { TreeService } from '../study/tree.service';
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
+import { Entity } from 'src/app/shared/components/entity/entity.abstract';
 
 export type Sort = {field: 'name' | 'id', way : 'asc' | 'desc'}
 
@@ -185,5 +186,9 @@ export class StudyNodeComponent extends TreeNodeAbstractComponent<StudyNode> imp
         if (!state) {
             this.nbSubjectsInit = 0;
         }
+    }
+
+    trackByFn(index, item: Entity) {
+        return item.id;
     }
 }
