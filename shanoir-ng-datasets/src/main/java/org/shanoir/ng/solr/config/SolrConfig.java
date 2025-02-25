@@ -43,5 +43,4 @@ public class SolrConfig {
 			    .withSocketTimeout(60000)
 			    .build();
 	}
-
 }
