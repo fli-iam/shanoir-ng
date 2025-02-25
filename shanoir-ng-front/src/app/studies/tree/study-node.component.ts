@@ -144,8 +144,9 @@ export class StudyNodeComponent extends TreeNodeAbstractComponent<StudyNode> imp
     }
 
     onFilterChange() {
+        console.log('on filter change')
         if (this.node.subjectsNode.subjects != 'UNLOADED' && this.filter?.trim().length > 0) {
-            this.filteredNodes = (this.node.subjectsNode.subjects as SubjectNode[]).filter(node => {
+            this.filteredNodes = (this.node.subjectsNode.subjects as SubjectNode[]).slice(0, 100).filter(node => {
                 return node.label.toLowerCase().includes(this.filter.toLowerCase());
             });
         } else {
