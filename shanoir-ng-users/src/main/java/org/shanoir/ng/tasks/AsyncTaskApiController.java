@@ -45,7 +45,8 @@ public class AsyncTaskApiController implements AsyncTaskApi {
 			ShanoirEventType.CHECK_QUALITY_EVENT, 
 			ShanoirEventType.SOLR_INDEX_ALL_EVENT, 
 			ShanoirEventType.DOWNLOAD_STATISTICS_EVENT, 
-			ShanoirEventType.DELETE_EXAMINATION_EVENT);
+			ShanoirEventType.DELETE_EXAMINATION_EVENT,
+			ShanoirEventType.DELETE_DATASET_EVENT);
  		// Order by last update date
 		Comparator<ShanoirEventLight> comparator = new Comparator<ShanoirEventLight>() {
 			@Override
