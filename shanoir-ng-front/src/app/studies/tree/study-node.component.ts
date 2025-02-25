@@ -30,6 +30,7 @@ import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
 import { TreeService } from '../study/tree.service';
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
+import { Entity } from 'src/app/shared/components/entity/entity.abstract';
 
 export type Sort = {field: 'name' | 'id', way : 'asc' | 'desc'}
 
@@ -143,8 +144,9 @@ export class StudyNodeComponent extends TreeNodeAbstractComponent<StudyNode> imp
     }
 
     onFilterChange() {
+        console.log('on filter change')
         if (this.node.subjectsNode.subjects != 'UNLOADED' && this.filter?.trim().length > 0) {
-            this.filteredNodes = (this.node.subjectsNode.subjects as SubjectNode[]).filter(node => {
+            this.filteredNodes = (this.node.subjectsNode.subjects as SubjectNode[]).slice(0, 100).filter(node => {
                 return node.label.toLowerCase().includes(this.filter.toLowerCase());
             });
         } else {
@@ -174,7 +176,9 @@ export class StudyNodeComponent extends TreeNodeAbstractComponent<StudyNode> imp
 
     onSubjectNodeInit() {
         this.nbSubjectsInit++;
+        console.log('subject inited', this.nbSubjectsInit)
         if (this.nbSubjectsInit == this.node.subjectsNode?.subjects?.length) {
+            console.log('!!! all subject inited')
             this.subjectsInited.resolve();
         }
     }
@@ -183,5 +187,9 @@ export class StudyNodeComponent extends TreeNodeAbstractComponent<StudyNode> imp
         if (!state) {
             this.nbSubjectsInit = 0;
         }
+    }
+
+    trackByFn(index, item: Entity) {
+        return item.id;
     }
 }

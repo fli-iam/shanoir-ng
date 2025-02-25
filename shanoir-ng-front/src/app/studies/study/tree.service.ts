@@ -163,7 +163,9 @@ export class TreeService {
     }
 
     scrollTo(node: ShanoirNode) {
+        console.log(1, node.label, Date.now())
         setTimeout(() => {
+            console.log(2, node.label, Date.now())
             this.onScrollToSelected.next(node);
         })
     }
@@ -259,14 +261,20 @@ export class TreeService {
     }
 
     private selectDataset(dataset: number | Dataset): Promise<DatasetNode> {
+        console.log('a selectDataset', Date.now())
         return this.studyNodeOpenPromise.then(() => {
-            return this.studyNode.subjectsNode.open().then(() => {
+            console.log('b', Date.now())
+            return this.studyNode.subjectsNode.open(true).then(() => {
+                console.log('c', Date.now())
                 return this.findDatasetParent(dataset).then(ret => {
+                    console.log('d', Date.now())
                     if (this.studyNode.subjectsNode.subjects != UNLOADED) {
                         let subjectNode: SubjectNode = this.studyNode.subjectsNode.subjects?.find(sn => {
                             return sn.id == ret.topParent.datasetAcquisition?.examination?.subject?.id;
                         });
+                        console.log('e', Date.now())
                         if (subjectNode) {
+                            console.log('f', Date.now())
                             if (!subjectNode.opened) this.scrollTo(subjectNode);
                             return subjectNode.open().then(() => {
                                 if (subjectNode.examinations != UNLOADED) {

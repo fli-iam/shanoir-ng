@@ -61,7 +61,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
         <ng-container *ngIf="node.subjectsNode.opened && node.subjectsNode.subjects && node.subjectsNode.subjects != $any('UNLOADED')">
             <subject-node
-                    *ngFor="let subject of filteredNodes || node.subjectsNode.subjects"
+                    *ngFor="let subject of filteredNodes || node.subjectsNode.subjects; trackBy: trackByFn"
                     [input]="subject"
                     [studyId]="node.id"
                     (selectedChange)="selectedChange.emit(node)"
