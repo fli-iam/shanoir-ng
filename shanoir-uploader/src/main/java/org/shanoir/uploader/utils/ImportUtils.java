@@ -254,7 +254,7 @@ public class ImportUtils {
 	 * @throws DatabindException 
 	 * @throws StreamReadException 
 	 */
-	public static ImportJob prepareImportJob(ImportJob importJob, String subjectName, Long subjectId, Long examinationId, Study study, StudyCard studyCard) {
+	public static ImportJob prepareImportJob(ImportJob importJob, String subjectName, Long subjectId, Long examinationId, String studyInstanceUID, Study study, StudyCard studyCard) {
 		// Handle study and study card
 		importJob.setStudyId(study.getId());
 		importJob.setStudyName(study.getName());
@@ -264,6 +264,7 @@ public class ImportUtils {
 		importJob.setStudyCardId(studyCard.getId());
 		importJob.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
 		importJob.setExaminationId(examinationId);
+		importJob.setStudyInstanceUID(studyInstanceUID);
 
 		/**
 		 * @todo: refactor to remove patients list from import job.
@@ -481,7 +482,7 @@ public class ImportUtils {
 		return subjectREST;
 	}
 
-	public static Long createExamination(Study study, org.shanoir.uploader.model.rest.Subject subjectREST, Date examinationDate, String examinationComment, Long centerId) {
+	public static Examination createExamination(Study study, org.shanoir.uploader.model.rest.Subject subjectREST, Date examinationDate, String examinationComment, Long centerId) {
 		Examination examinationREST = new Examination();
 		examinationREST.setStudyId(study.getId());
 		examinationREST.setSubjectId(subjectREST.getId());
@@ -493,7 +494,7 @@ public class ImportUtils {
 			return null;
 		} else {
 			logger.info("Examination created on server with ID: " + examinationREST.getId());
-			return examinationREST.getId();
+			return examinationREST;
 		}
 	}
 

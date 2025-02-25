@@ -108,12 +108,18 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "source", cascade = CascadeType.ALL)
 	private List<DatasetAcquisition> copies;
 
+    /**
+     * The DICOM SeriesInstanceUID present in the backup PACS of Shanoir,
+     * dcm4chee arc light, and generated during pseudonymization.
+     */
+    @Column(name = "series_instance_uid", unique = true)
+    private String seriesInstanceUID;
+
 	public DatasetAcquisition() {
 	}
 
 	public DatasetAcquisition(DatasetAcquisition other) {
 		this.acquisitionEquipmentId = other.acquisitionEquipmentId;
-
 		this.examination = other.examination;
 		this.studyCard = null;
 		this.studyCardTimestamp = other.studyCardTimestamp;
@@ -276,6 +282,14 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 
 	public void setCopies(List<DatasetAcquisition> copies) {
 		this.copies = copies;
+	}
+
+	public String getSeriesInstanceUID() {
+		return seriesInstanceUID;
+	}
+
+	public void setSeriesInstanceUID(String seriesInstanceUID) {
+		this.seriesInstanceUID = seriesInstanceUID;
 	}
 
 }

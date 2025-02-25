@@ -14,10 +14,11 @@
 
 package org.shanoir.ng.examination.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
+import java.sql.Types;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -27,10 +28,20 @@ import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 
-import java.sql.Types;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.PostLoad;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Examination.
@@ -39,7 +50,7 @@ import java.util.List;
  *
  */
 @Entity
-@JsonPropertyOrder({ "_links", "id", "examinationDate", "centerId", "subjectId", "studyId", "preclinical" })
+@JsonPropertyOrder({ "_links", "id", "examinationDate", "studyInstanceUID", "centerId", "subjectId", "studyId", "preclinical" })
 public class Examination extends HalEntity {
 
     /**
@@ -127,6 +138,13 @@ public class Examination extends HalEntity {
     @ColumnDefault("false")
     private boolean preclinical;
 
+    /**
+     * The DICOM StudyInstanceUID present in the backup PACS of Shanoir,
+     * dcm4chee arc light, and generated during examination creation.
+     */
+    @Column(name = "study_instance_uid")
+    private String studyInstanceUID;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "source_id")
     private Examination source;
@@ -135,7 +153,6 @@ public class Examination extends HalEntity {
     private List<Examination> copies;
 
     public Examination() {
-
     }
 
     public Examination(Examination other, Study study, Subject subject) {
@@ -163,6 +180,7 @@ public class Examination extends HalEntity {
         this.preclinical = other.preclinical;
         this.source = other.source;
         this.copies = other.copies;
+        this.studyInstanceUID = other.studyInstanceUID;
     }
 
     /**
@@ -358,7 +376,15 @@ public class Examination extends HalEntity {
         this.study = study;
     }
 
-    public Subject getSubject() {
+    public String getStudyInstanceUID() {
+		return studyInstanceUID;
+	}
+
+	public void setStudyInstanceUID(String studyInstanceUID) {
+		this.studyInstanceUID = studyInstanceUID;
+	}
+
+	public Subject getSubject() {
         return subject;
     }
 
@@ -437,6 +463,13 @@ public class Examination extends HalEntity {
 
     public void setCopies(List<Examination> copies) {
         this.copies = copies;
+    }
+
+    @Override
+    public String toString() {
+        return "Examination [centerId=" + centerId + ", comment=" + comment + ", examinationDate=" + examinationDate
+                + ", extraDataFilePathList=" + extraDataFilePathList + ", note=" + note + ", subject=" + subject.getName()
+                + ", preclinical=" + preclinical + ", studyInstanceUID=" + studyInstanceUID + "]";
     }
 
 }
