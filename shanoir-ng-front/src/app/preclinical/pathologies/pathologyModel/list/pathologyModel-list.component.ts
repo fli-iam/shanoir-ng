@@ -30,7 +30,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
     selector: 'pathologyModel-list',
     templateUrl: 'pathologyModel-list.component.html',
     styleUrls: ['pathologyModel-list.component.css'],
-    providers: [PathologyModelService],
     standalone: false
 })
 export class PathologyModelsListComponent extends BrowserPaginEntityListComponent<PathologyModel> {

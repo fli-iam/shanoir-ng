@@ -275,6 +275,7 @@ import { TreeService } from './studies/study/tree.service';
 import { CoilNodeComponent } from './coils/coil/tree/coil-node.component';
 import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.component';
 import { MetadataNodeComponent } from './datasets/tree/metadata-node.component';
+import { SizePipe } from './shared/utils/size.pipe';
 
 @NgModule({ 
     declarations: [
@@ -453,7 +454,8 @@ import { MetadataNodeComponent } from './datasets/tree/metadata-node.component';
         StudyTreeComponent,
         CoilNodeComponent,
         DoubleAwesomeComponent,
-        MetadataNodeComponent
+        MetadataNodeComponent,
+        SizePipe
     ],
     bootstrap: [AppComponent], 
     imports: [

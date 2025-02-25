@@ -25,7 +25,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
     selector: 'examination-anesthetics-list',
     templateUrl: 'examinationAnesthetic-list.component.html',
     styleUrls: ['examinationAnesthetic-list.component.css'],
-    providers: [ExaminationAnestheticService],
     standalone: false
 })
 export class ExaminationAnestheticsListComponent  extends BrowserPaginEntityListComponent<ExaminationAnesthetic>{
