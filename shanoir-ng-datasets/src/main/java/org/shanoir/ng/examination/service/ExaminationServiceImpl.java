@@ -85,16 +85,11 @@ public class ExaminationServiceImpl implements ExaminationService {
 	private SecurityService securityService;
 
 	@Autowired
-	private SolrService solrService;
-
-	@Autowired
 	private ShanoirEventService eventService;
 
 	@Autowired
 	private SubjectRepository subjectService;
 
-	@Autowired
-	private DatasetService datasetService;
 	@Autowired
 	private DatasetAcquisitionService datasetAcquisitionService;
 
