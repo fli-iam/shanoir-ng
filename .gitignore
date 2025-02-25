@@ -19,6 +19,7 @@ target
 **/.classpath
 .factorypath
 .project
+docker-compose-dev-debug.yml
 .vscode
 bin/
 docker-compose/database/3_init_preclinical.sql
