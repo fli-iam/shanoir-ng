@@ -19,6 +19,4 @@ handle_microservice_migration
 
 abort_if_error
 
-/usr/bin/wait-for-solr.sh
-
 run_microservice "$@"
