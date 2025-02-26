@@ -32,7 +32,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
     selector: 'therapy-list',
     templateUrl: 'therapy-list.component.html',
     styleUrls: ['therapy-list.component.css'],
-    providers: [TherapyService],
     standalone: false
 })
 export class TherapiesListComponent  extends BrowserPaginEntityListComponent<Therapy> {
