@@ -36,6 +36,7 @@ Many thanks to all these giants, on their shoulders we are standing to develop S
 You can easily connect and investigate the REST-interface of Shanoir-NG using Swagger3.
 Depending on your server domain just call (e.g. for Neurinfo server):
 
+* MS Users: https://shanoir.irisa.fr/shanoir-ng/users/swagger-ui/index.html and explore /api-docs
 * MS Studies: https://shanoir.irisa.fr/shanoir-ng/studies/swagger-ui/index.html and explore /api-docs
 * MS Import: https://shanoir.irisa.fr/shanoir-ng/import/swagger-ui/index.html and explore /api-docs
 * MS Datasets: https://shanoir.irisa.fr/shanoir-ng/datasets/swagger-ui/index.html and explore /api-docs
