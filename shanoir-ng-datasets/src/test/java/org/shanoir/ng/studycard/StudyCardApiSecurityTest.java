@@ -22,6 +22,7 @@ import org.mockito.internal.util.collections.Sets;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -98,7 +99,10 @@ public class StudyCardApiSecurityTest {
 	
 	@MockBean
 	private DatasetAcquisitionRepository datasetAcquisitionRepository;
-	
+
+	@MockBean
+	private StudyInstanceUIDHandler studyInstanceUIDHandler;
+
 //	@MockBean
 //	private WADODownloaderService downloader;
 	

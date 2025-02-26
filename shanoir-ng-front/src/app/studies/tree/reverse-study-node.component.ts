@@ -53,7 +53,7 @@ export class ReverseStudyNodeComponent extends TreeNodeAbstractComponent<Reverse
             private studyRightsService: StudyRightsService,
             private downloadService: MassDownloadService,
             elementRef: ElementRef) {
-        
+
         super(elementRef);
         this.idPromise.then(id => {
             (this.keycloakService.isUserAdmin

@@ -22,6 +22,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
+import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationServiceImpl;
@@ -82,6 +84,13 @@ public class ExaminationServiceTest {
 
 	@Mock
 	private ObjectMapper mapper;
+
+	@Mock
+	private StudyInstanceUIDHandler studyInstanceUIDHandler;
+
+	@Mock
+	private DICOMWebService dicomWebService;
+
 
 	@BeforeEach
 	public void setup() throws ShanoirException {

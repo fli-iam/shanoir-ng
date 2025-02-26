@@ -48,6 +48,7 @@ import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 import {SuperPromise} from "../../utils/super-promise";
 import { Selection } from './tree.service';
+import { Tag } from 'src/app/tags/tag.model';
 
 @Component({
     selector: 'study-detail',
@@ -76,6 +77,7 @@ export class StudyComponent extends EntityComponent<Study> {
     protected hasDownloadRight: boolean;
     accessRequests: AccessRequest[];
     isStudyAdmin: boolean;
+    subjectTagsInUse: Tag[] = [];
 
     public openPrefix: boolean = false;
 
@@ -127,6 +129,7 @@ export class StudyComponent extends EntityComponent<Study> {
 
     public set entity(study: Study) {
         super.entity = study;
+        this.updateSubjectTagsInUse();
     }
 
     public get entity(): Study {
@@ -558,25 +561,25 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     onTagListChange() {
-      // hack : force change detection
-      this.study.tags = [].concat(this.study.tags);
+        // hack : force change detection
+        this.study.tags = [].concat(this.study.tags);
+        // hack : force change detection for the subject-study tag list
+        this.study.subjectStudyList.forEach(subjStu => {
+            subjStu.study.tags = this.study.tags;
+        });
+        this.study.subjectStudyList = [].concat(this.study.subjectStudyList);
 
-      // hack : force change detection for the subject-study tag list
-      this.study.subjectStudyList.forEach(subjStu => {
-        subjStu.study.tags = this.study.tags;
-      });
-      this.study.subjectStudyList = [].concat(this.study.subjectStudyList);
+        this.updateSubjectTagsInUse();
     }
 
     onStudyTagListChange() {
-      // hack : force change detection
-      this.study.studyTags = [].concat(this.study.studyTags);
-
-      // hack : force change detection for the subject-study tag list
-      this.study.subjectStudyList.forEach(subjStu => {
-        subjStu.study.studyTags = this.study.studyTags;
-      });
-      this.study.subjectStudyList = [].concat(this.study.subjectStudyList);
+        // hack : force change detection
+        this.study.studyTags = [].concat(this.study.studyTags);
+        // hack : force change detection for the subject-study tag list
+        this.study.subjectStudyList.forEach(subjStu => {
+            subjStu.study.studyTags = this.study.studyTags;
+        });
+        this.study.subjectStudyList = [].concat(this.study.subjectStudyList);
     }
 
     goToAccessRequest(accessRequest : AccessRequest) {
@@ -597,5 +600,13 @@ export class StudyComponent extends EntityComponent<Study> {
 
     studyCardPolicyStr() {
         return capitalsAndUnderscoresToDisplayable(this.study.studyCardPolicy);
+    }
+
+    private updateSubjectTagsInUse() {
+        let tags: Tag[] = [];
+        this.study.subjectStudyList.forEach(ss => {
+            tags = tags.concat(ss.tags);
+        });
+        this.subjectTagsInUse = tags;
     }
 }
