@@ -241,6 +241,7 @@ public class ImportDialogOpener {
 				importDialog.subjectTextField.setBackground(Color.WHITE);
 				importDialog.subjectTextField.setEnabled(true);
 				importDialog.subjectTextField.setEditable(true);
+				importDialog.existingSubjectsCB.setEditable(true);
 			// Profile OFSEP: display, that subject will be created automatically
 			} else if (ShUpConfig.isModeSubjectCommonNameAutoIncrement()) {
 				importDialog.subjectTextField
