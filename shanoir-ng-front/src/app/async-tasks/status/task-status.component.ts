@@ -21,7 +21,7 @@ import { QualityCardComponent } from 'src/app/study-cards/quality-card/quality-c
 import { NotificationsService } from '../../shared/notifications/notifications.service';
 import {Task} from '../task.model';
 import {TaskService} from "../task.service";
-import {HttpClient, HttpHeaders, HttpResponse} from "@angular/common/http";
+import { HttpClient, HttpHeaders, HttpResponse } from "@angular/common/http";
 import * as AppUtils from "../../utils/app.utils";
 import {KeycloakService} from "../../shared/keycloak/keycloak.service";
 import {ConsoleService} from "../../shared/console/console.service";
@@ -31,6 +31,7 @@ import {ConsoleService} from "../../shared/console/console.service";
     selector: 'task-status',
     templateUrl: 'task-status.component.html',
     styleUrls: ['task-status.component.css'],
+    standalone: false
 })
 export class TaskStatusComponent implements OnDestroy, OnChanges {
 

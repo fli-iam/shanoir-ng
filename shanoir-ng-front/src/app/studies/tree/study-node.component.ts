@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
 
@@ -29,30 +29,25 @@ import { StudyRightsService } from "../shared/study-rights.service";
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
 import { TreeService } from '../study/tree.service';
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 
 export type Sort = {field: 'name' | 'id', way : 'asc' | 'desc'}
 
 @Component({
     selector: 'study-node',
     templateUrl: 'study-node.component.html',
-    styleUrls: ['study-node.component.css']
+    styleUrls: ['study-node.component.css'],
+    standalone: false
 })
 
-export class StudyNodeComponent implements OnChanges {
+export class StudyNodeComponent extends TreeNodeAbstractComponent<StudyNode> implements OnChanges {
 
     @Input() input: StudyNode | { study: Study, rights: StudyUserRight[] };
-    @Output() nodeInit: EventEmitter<StudyNode> = new EventEmitter();
-    @Output() selectedChange: EventEmitter<StudyNode> = new EventEmitter();
-    node: StudyNode;
-    loading: boolean = false;
-    menuOpened: boolean = false;
     subjectsMenuOpened: boolean = false;
     studyCardsLoading: boolean = false;
     qualityCardsLoading: boolean = false;
     showDetails: boolean;
-    @Input() hasBox: boolean = false;
     detailsPath: string = '/study/details/';
-    @Input() withMenu: boolean = true;
     idPromise: SuperPromise<number> = new SuperPromise();
     protected rights: StudyUserRight[];
     filter: string;
@@ -62,13 +57,15 @@ export class StudyNodeComponent implements OnChanges {
     private subjectsInited: SuperPromise<void>;
 
     constructor(
-        private router: Router,
-        private studyCardService: StudyCardService,
-        private qualityCardService: QualityCardService,
-        private keycloakService: KeycloakService,
-        private studyRightsService: StudyRightsService,
-        protected treeService: TreeService) {
+            private router: Router,
+            private studyCardService: StudyCardService,
+            private qualityCardService: QualityCardService,
+            private keycloakService: KeycloakService,
+            private studyRightsService: StudyRightsService,
+            protected treeService: TreeService,
+            elementRef: ElementRef) {
 
+        super(elementRef);
         this.idPromise.then(id => {
             (this.keycloakService.isUserAdmin
                     ? Promise.resolve(StudyUserRight.all())

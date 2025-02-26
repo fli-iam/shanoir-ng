@@ -30,10 +30,11 @@ import { BrowserPaginEntityListComponent } from '../../../../shared/components/e
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
-  selector: 'pathology-list',
-  templateUrl:'pathology-list.component.html',
-  styleUrls: ['pathology-list.component.css'], 
-  providers: [PathologyService]
+    selector: 'pathology-list',
+    templateUrl: 'pathology-list.component.html',
+    styleUrls: ['pathology-list.component.css'],
+    providers: [PathologyService],
+    standalone: false
 })
 export class PathologiesListComponent extends BrowserPaginEntityListComponent<Pathology>{
     @ViewChild('pathologiesTableTable') table: TableComponent;

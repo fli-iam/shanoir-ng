@@ -238,14 +238,14 @@ public class StudySecurityService {
 	 * @throws EntityNotFoundException
 	 */
 	public boolean hasRightOnSubjectsForOneStudy(List<SimpleSubjectDTO> subjectDTOs, String rightStr) throws EntityNotFoundException {
-		if (subjectDTOs == null) return true;
+		if (subjectDTOs == null || subjectDTOs.isEmpty()) return true;
 		List<Long> subjectIds = new ArrayList<>();
 		for (SimpleSubjectDTO dto : subjectDTOs) {
 			subjectIds.add(dto.getId());	
 		}
 		List<Subject> subjects = Utils.toList(subjectRepository.findAllById(subjectIds));
 		if (subjects == null || subjects.isEmpty()) {
-			throw new EntityNotFoundException("Cannot find any subject with id in " + subjectIds);
+			return true;
 		}
 		for (Subject subject : subjects) {
 			if (subject.getSubjectStudyList() == null) {

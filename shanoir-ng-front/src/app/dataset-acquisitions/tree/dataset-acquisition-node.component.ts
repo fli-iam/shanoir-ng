@@ -11,35 +11,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
-import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
-import { Dataset } from '../../datasets/shared/dataset.model';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { DatasetService } from '../../datasets/shared/dataset.service';
-import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
 
 import { Subscription } from 'rxjs';
 import { TaskState } from 'src/app/async-tasks/task.model';
-import { Selection, TreeService } from 'src/app/studies/study/tree.service';
+import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
+import { TreeService } from 'src/app/studies/study/tree.service';
 import { ConsoleService } from "../../shared/console/console.service";
 import { MassDownloadService } from "../../shared/mass-download/mass-download.service";
-import { DatasetAcquisitionNode, DatasetNode, ProcessingNode, ShanoirNode, UNLOADED } from '../../tree/tree.model';
+import { DatasetAcquisitionNode, DatasetNode, ShanoirNode, UNLOADED } from '../../tree/tree.model';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from "../shared/dataset-acquisition.service";
-import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 
 @Component({
     selector: 'dataset-acquisition-node',
-    templateUrl: 'dataset-acquisition-node.component.html'
+    templateUrl: 'dataset-acquisition-node.component.html',
+    standalone: false
 })
 
-export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
+export class DatasetAcquisitionNodeComponent extends TreeNodeAbstractComponent<DatasetAcquisitionNode> implements OnChanges {
 
     progressStatus: TaskState;
     @Input() input: DatasetAcquisitionNode | {datasetAcquisition: DatasetAcquisition, parentNode: ShanoirNode, studyRights: StudyUserRight[]} ;
-    @Output() selectedChange: EventEmitter<void> = new EventEmitter();
-    node: DatasetAcquisitionNode;
-    loading: boolean = false;
-    menuOpened: boolean = false;
     @Input() hasBox: boolean = false;
     detailsPath: string = '/dataset-acquisition/details/';
     @Output() onAcquisitionDelete: EventEmitter<void> = new EventEmitter();
@@ -48,16 +43,15 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
     hasDicom: boolean = false;
     downloading = false;
     hasBids: boolean = false;
-    protected subscriptions: Subscription[] = [];
-    @Input() withMenu: boolean = true;
-    protected downloadState: TaskState = new TaskState();
 
     constructor(
-        private datasetService: DatasetService,
-        private datasetAcquisitionService: DatasetAcquisitionService,
-        private consoleService: ConsoleService,
-        private massDownloadService: MassDownloadService,
-        protected treeService: TreeService) {
+            private datasetService: DatasetService,
+            private datasetAcquisitionService: DatasetAcquisitionService,
+            private consoleService: ConsoleService,
+            private massDownloadService: MassDownloadService,
+            protected treeService: TreeService,
+            elementRef: ElementRef) {
+        super(elementRef);
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -87,6 +81,7 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
         else if (this.node.datasets == 'UNLOADED') return 'unknown';
         else return this.node.datasets.length > 0;
     }
+    
     loadDatasets() {
         if (this.node.datasets == UNLOADED) {
             this.datasetService.getByAcquisitionId(this.node.id).then(datasets => {
@@ -145,11 +140,5 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
         datasetIdsReady.then(() => {
             this.massDownloadService.downloadAllByAcquisitionId(this.node.id, this.downloadState);
         });
-    }
-
-    ngOnDestroy() {
-        for (let subscribtion of this.subscriptions) {
-            subscribtion.unsubscribe();
-        }
     }
 }

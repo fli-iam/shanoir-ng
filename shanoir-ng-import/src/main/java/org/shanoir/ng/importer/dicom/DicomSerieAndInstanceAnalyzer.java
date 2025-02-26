@@ -48,6 +48,7 @@ public class DicomSerieAndInstanceAnalyzer {
 			|| UID.DeformableSpatialRegistrationStorage.equals(sopClassUID)
 			|| UID.SegmentationStorage.equals(sopClassUID)
 			|| UID.SurfaceSegmentationStorage.equals(sopClassUID)) {
+			LOG.warn("Instance (image) ignored, because of SOPClassUID: " + sopClassUID);
 			return true;
 		}
 		final String referencedSOPClassUIDInFile = attributes.getString(Tag.ReferencedSOPClassUIDInFile);
@@ -57,10 +58,12 @@ public class DicomSerieAndInstanceAnalyzer {
 			|| UID.DeformableSpatialRegistrationStorage.equals(referencedSOPClassUIDInFile)
 			|| UID.SegmentationStorage.equals(referencedSOPClassUIDInFile)
 			|| UID.SurfaceSegmentationStorage.equals(referencedSOPClassUIDInFile)) {
+			LOG.warn("Instance (image) ignored, because of ReferencedSOPClassUIDInFile: " + referencedSOPClassUIDInFile);
 			return true;
 		}
 		final String burnedInAnnotation = attributes.getString(Tag.BurnedInAnnotation);
 		if (DICOM_VR_CODE_STRING_YES.equals(burnedInAnnotation)) {
+			LOG.warn("Instance (image) ignored, because of burnedInAnnotation: " + burnedInAnnotation);
 			return true;
 		}
 		return false;

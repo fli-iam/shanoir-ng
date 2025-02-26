@@ -14,7 +14,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened || treeService.isSelected(node.id, 'dataset')"
+        [class.selected]="menuOpened || treeService.isSelected(node.id, 'dataset')"
         [label]="node.label"
         [tags]="node.tags"
         [awesome]="node.awesome"
@@ -29,22 +29,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [title]="node.title + ' n°' + node.id">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu">
-        <a [routerLink]="this.detailsPath + this.node.id" class="open-new-tab">
+        <a [routerLink]="detailsPath + node.id" class="open-new-tab">
           <menu-item *ngIf="!related" label="Details..." awesome="fa-regular fa-eye"></menu-item>
         </a>
         <menu-item [disabled]="loading" label="Download" awesome="fas fa-download" (click)="download()"></menu-item>
-        <menu-item *ngIf="this.node.canDelete"  label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteDataset()"></menu-item>
+        <menu-item *ngIf="node.canDelete"  label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteDataset()"></menu-item>
     </dropdown-menu>
 
-    <node
+    <metadata-node
             *ngIf="node.open && node.inPacs"
-            [class.selected]="treeService.isSelected(node.id, 'dicomMetadata')"
-            (labelClick)="null"
-            [route]="'/dataset/details/dicom/' + node.id"
-            label="DICOM metadata"
-            awesome="fas fa-file-code"
-            [hasChildren]="false">
-    </node>
+            [input]="node.metadata">
+    </metadata-node>
 
     <ng-container *ngIf="node.open && node.processings && node.processings != $any('UNLOADED')">
         <processing-node

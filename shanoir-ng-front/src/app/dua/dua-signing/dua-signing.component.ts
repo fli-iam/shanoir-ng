@@ -24,7 +24,8 @@ import { DataUserAgreement } from '../shared/dua.model';
 @Component({
     selector: 'dua-signing',
     templateUrl: 'dua-signing.component.html',
-    styleUrls: ['dua-signing.component.css'] 
+    styleUrls: ['dua-signing.component.css'],
+    standalone: false
 })
 
 export class DUASigningComponent implements OnChanges {

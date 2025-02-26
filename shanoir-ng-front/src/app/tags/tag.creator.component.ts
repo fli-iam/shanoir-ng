@@ -29,17 +29,18 @@ export type Mode =  "view" | "edit" | "create";
     templateUrl: 'tag.creator.component.html',
     styleUrls: ['tag.creator.component.css'],
     providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => TagCreatorComponent),
-      multi: true
-    }
-]
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => TagCreatorComponent),
+            multi: true
+        }
+    ],
+    standalone: false
 })
 
 export class TagCreatorComponent extends AbstractInput<Tag[]> {
     @ViewChild('input', { static: false }) input: any;
-    @Input() study: Study;
+    @Input() tagsInUse: Tag[];
     @Input() mode: Mode;
     @Output() onChange: EventEmitter<any> = new EventEmitter();
     selectedColor: string;
@@ -93,12 +94,7 @@ export class TagCreatorComponent extends AbstractInput<Tag[]> {
     }
 
     private tagUsed(tag: Tag) {
-        for (let subjectStudy of this.study.subjectStudyList) {
-            if (subjectStudy.tags.findIndex(element => element.equals(tag)) != -1) {
-                return true;
-            }
-        }
-        return false;
+        return !!this.tagsInUse?.find(ssTag => ssTag.equals(tag));
     }
 
     writeValue(obj: any): void {

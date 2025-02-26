@@ -11,13 +11,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component } from '@angular/core';
+import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/confirm-dialog.service';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, StudyNode } from 'src/app/tree/tree.model';
+import { SubjectNodeComponent } from 'src/app/subjects/tree/subject-node.component';
+import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ShanoirNode, StudyNode } from 'src/app/tree/tree.model';
 import { ExecutionDataService } from 'src/app/vip/execution.data-service';
 import { environment } from "../../../environments/environment";
 import { TreeService } from './tree.service';
@@ -26,10 +28,11 @@ import { TreeService } from './tree.service';
 @Component({
     selector: 'study-tree',
     templateUrl: 'study-tree.component.html',
-    styleUrls: ['study-tree.component.css']
+    styleUrls: ['study-tree.component.css'],
+    standalone: false
 })
 
-export class StudyTreeComponent {
+export class StudyTreeComponent implements OnDestroy {
 
     _selectedDatasetNodes: DatasetNode[] = [];
     selectedExaminationNodes: ExaminationNode[] = [];
@@ -38,6 +41,9 @@ export class StudyTreeComponent {
     canOpenDicomSingleExam: boolean = false;
     canOpenDicomMultiExam: boolean = false;
     protected loaded: boolean = false;
+    private subscriptions: Subscription[] = [];
+    subjectNodes: SubjectNodeComponent[] = [];
+    @ViewChild('tree') treeContainer: ElementRef;
 
     constructor(
             protected treeService: TreeService,
@@ -47,6 +53,27 @@ export class StudyTreeComponent {
             private dialogService: ConfirmDialogService) {
 
         treeService.studyNodeOpenPromise.then(() => this.loaded = true);
+
+        this.subscriptions.push(
+            treeService.onScrollToSelected.subscribe(node => {
+                this.autoScrollTo(node);
+            })
+        );
+    }
+
+    ngOnDestroy(): void {
+        this.subscriptions.forEach(s => s.unsubscribe());
+    }
+
+    private autoScrollTo(node: ShanoirNode) {
+        const nodeTop: number = node?.getTop?.();
+        const containerHeight: number = this.treeContainer.nativeElement.offsetHeight;
+        const currentScroll: number = this.treeContainer.nativeElement.scrollTop;
+        const diff: number = nodeTop - containerHeight - currentScroll;
+        if (diff > 0 || nodeTop - currentScroll < 0) {
+            this.treeContainer.nativeElement.scrollTop = diff + currentScroll + (containerHeight/2);
+        }
+
     }
 
     protected set selectedDatasetNodes(selectedDatasetNodes: DatasetNode[]) {

@@ -19,7 +19,8 @@ import { DatasetService } from '../shared/dataset.service';
 
 @Component({
     selector: 'download-statistics',
-    templateUrl: 'download-statistics.component.html'
+    templateUrl: 'download-statistics.component.html',
+    standalone: false
 })
 
 export class DownloadStatisticsComponent{
