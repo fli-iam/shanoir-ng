@@ -188,8 +188,7 @@ public class DatasetServiceImpl implements DatasetService {
 		for (DatasetExpression expression : dataset.getDatasetExpressions()) {
 			boolean isDicom = DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat());
 			List<DatasetFile> datasetFiles = expression.getDatasetFiles();
-			datasetAsyncService.deleteDatasetFilesFromDiskAndPacs(datasetFiles, isDicom, id);
-
+			datasetAsyncService.deleteDatasetFilesFromDiskAndPacsAsync(datasetFiles, isDicom, id);
 		}
 	}
 
