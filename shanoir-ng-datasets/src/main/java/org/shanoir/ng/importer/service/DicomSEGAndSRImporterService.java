@@ -154,7 +154,7 @@ public class DicomSEGAndSRImporterService {
 		Examination examination = examinationRepository.findById(examinationID).get();
 		// replace artificial examinationUID with real StudyInstanceUID in DICOM server
 		String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
-		datasetAttributes.setString(Tag.StudyInstanceUID, VR.UI, studyInstanceUID);		
+		datasetAttributes.setString(Tag.StudyInstanceUID, VR.UI, studyInstanceUID);
 		// replace subject name, that is sent by the viewer wrongly with P-0000001 etc.
 		Optional<Subject> subjectOpt = subjectRepository.findById(examination.getSubject().getId());
 		String subjectName = "error_subject_name_not_found_in_db";
@@ -163,7 +163,7 @@ public class DicomSEGAndSRImporterService {
 		}
 		datasetAttributes.setString(Tag.PatientName, VR.PN, subjectName);
 		datasetAttributes.setString(Tag.PatientID, VR.LO, subjectName);
-		// set user name, as person, who created the measurement
+		// set user name, as person, who created the measurement/segmentation
 		final String userName = KeycloakUtil.getTokenUserName();
 		datasetAttributes.setString(Tag.PersonName, VR.PN, userName);
 		// set as well person observer name in content sequence
