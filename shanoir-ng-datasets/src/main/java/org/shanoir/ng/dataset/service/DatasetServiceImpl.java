@@ -90,6 +90,8 @@ public class DatasetServiceImpl implements DatasetService {
 	@Autowired
 	private SolrService solrService;
 
+	@Value("${dcm4chee-arc.dicom.web}")
+	private boolean dicomWeb;
 
 	@Autowired
 	private DatasetPropertyService propertyService;
@@ -148,7 +150,7 @@ public class DatasetServiceImpl implements DatasetService {
 		}
 		long startTime = System.currentTimeMillis();
 		delete(dataset);
-		datasetAsyncService.deleteDatasetFromDiskAndPacs(dataset);
+		deleteDatasetFilesFromDiskAndPacs(dataset);
         long endTime = System.currentTimeMillis();
         long elapsedTime = endTime - startTime;
         LOG.error("Dataset deletion time: " + elapsedTime + " milliseconds");
@@ -178,7 +180,18 @@ public class DatasetServiceImpl implements DatasetService {
 		delete(dataset);
 	}
 
+	public void deleteDatasetFilesFromDiskAndPacs(Dataset dataset) throws ShanoirException {
+		if (!dicomWeb) {
+			return;
+		}
+		Long id = dataset.getId();
+		for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+			boolean isDicom = DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat());
+			List<DatasetFile> datasetFiles = expression.getDatasetFiles();
+			datasetAsyncService.deleteDatasetFilesFromDiskAndPacs(datasetFiles, isDicom, id);
 
+		}
+	}
 
 	@Override
 	public boolean existsById(Long id) {

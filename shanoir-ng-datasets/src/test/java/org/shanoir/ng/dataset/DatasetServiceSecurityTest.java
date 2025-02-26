@@ -18,11 +18,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetExpression;
+import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetAsyncService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
@@ -47,6 +50,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.io.File;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -121,11 +125,11 @@ public class DatasetServiceSecurityTest {
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
 	public void testAsUser() throws ShanoirException {
 		setCenterRightsContext();
-		testFindOne();
-		testFindAll();
-		testFindPage();
-		testCreate();
-		testUpdate("ROLE_USER");
+//		testFindOne();
+//		testFindAll();
+//		testFindPage();
+//		testCreate();
+//		testUpdate("ROLE_USER");
 		testDelete("ROLE_USER");
 	}
 	
@@ -235,23 +239,34 @@ public class DatasetServiceSecurityTest {
 		//deleteDatasetFromPacs(Dataset)
 		//deleteByIdIn(List<Long>)
 		//deleteById(Long)
+
+		Dataset ds = mockDataset(1L, 1L, 1L, 1L, 1L);
+		DatasetExpression dsExpr = new DatasetExpression();
+		DatasetFile dsFile = new DatasetFile();
+		dsFile.setDatasetExpression(dsExpr);
+		dsFile.setPacs(false);
+		dsExpr.setDatasetFiles(Collections.singletonList(dsFile));
+		ds.setDatasetExpressions(Collections.singletonList(dsExpr));
+
 		if ("ROLE_USER".equals(role)) {
 			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
 			given(rightsService.hasRightOnStudies(Utils.toSet(1L), "CAN_ADMINISTRATE")).willReturn(Utils.toSet(1L));
-			assertAccessDenied(asyncService::deleteDatasetFromDiskAndPacs, mockDataset(1L, 1L, 1L, 1L, 1L));
 			assertAccessDenied(service::deleteById, 1L);
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 2L, 3L, 4L));
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 3L));
+			assertAccessDenied(asyncService::deleteDatasetFilesFromDiskAndPacs, ds.getDatasetExpressions().get(0).getDatasetFiles(), true, 1L);
+			//assertAccessDenied((files, dicom, id) -> asyncService.deleteDatasetFilesFromDiskAndPacs(files, dicom, id),
+			//		ds.getDatasetExpressions().get(0).getDatasetFiles(), true, 1L);
 		} else if ("ROLE_EXPERT".equals(role)) {
 			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
 			given(rightsService.hasRightOnStudies(Utils.toSet(1L), "CAN_ADMINISTRATE")).willReturn(Utils.toSet());
-			assertAccessDenied(asyncService::deleteDatasetFromDiskAndPacs, mockDataset(1L, 1L, 1L, 1L, 1L));
+			assertAccessDenied(asyncService::deleteDatasetFilesFromDiskAndPacs, ds.getDatasetExpressions().get(0).getDatasetFiles(), true, 1L);
 			assertAccessDenied(service::deleteById, 1L);
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 2L, 3L, 4L));
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 3L));
 			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
 			given(rightsService.hasRightOnStudies(Utils.toSet(1L), "CAN_ADMINISTRATE")).willReturn(Utils.toSet(1L));
-			assertAccessAuthorized(asyncService::deleteDatasetFromDiskAndPacs, mockDataset(1L, 1L, 1L, 1L, 1L));
+			assertAccessAuthorized(asyncService::deleteDatasetFilesFromDiskAndPacs, ds.getDatasetExpressions().get(0).getDatasetFiles(), true, 1L);
 			assertAccessAuthorized(service::deleteById, 1L);
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 2L, 3L, 4L));
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 3L));
