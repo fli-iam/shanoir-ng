@@ -325,7 +325,7 @@ public interface DatasetApi {
 			@Parameter(description = "Subject name including regular expression", required=false) @Valid
 			@RequestParam(value = "subjectNameInRegExp", required = false) String subjectNameInRegExp,
 			@Parameter(description = "Subject name excluding regular expression", required=false) @Valid
-			@RequestParam(value = "subjectNameOutRegExp", required = false) String subjectNameOutRegExp) throws RestServiceException, IOException;
+			@RequestParam(value = "subjectNameOutRegExp", required = false) String subjectNameOutRegExp) throws RestServiceException, IOException, InterruptedException;
 
 	@Operation(summary = "downloadStatistics", description = "Download statistics for event")
 	@ApiResponses(value = {

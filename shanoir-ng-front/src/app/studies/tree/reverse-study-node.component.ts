@@ -11,24 +11,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
-import { DatasetAcquisition } from '../../dataset-acquisitions/shared/dataset-acquisition.model';
-import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
-import { Dataset } from '../../datasets/shared/dataset.model';
-import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
 import { ExaminationPipe } from '../../examinations/shared/examination.pipe';
 
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { SuperPromise } from 'src/app/utils/super-promise';
+import { TaskState } from "../../async-tasks/task.model";
 import { ExaminationService } from '../../examinations/shared/examination.service';
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
-import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode, ReverseStudyNode, ShanoirNode, UNLOADED } from '../../tree/tree.model';
+import { KeycloakService } from "../../shared/keycloak/keycloak.service";
+import { ExaminationNode, ReverseStudyNode, ShanoirNode, UNLOADED } from '../../tree/tree.model';
+import { StudyRightsService } from "../shared/study-rights.service";
+import { StudyUserRight } from "../shared/study-user-right.enum";
 import { Study } from '../shared/study.model';
-import {KeycloakService} from "../../shared/keycloak/keycloak.service";
-import {StudyRightsService} from "../shared/study-rights.service";
-import {StudyUserRight} from "../shared/study-user-right.enum";
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import {TaskState} from "../../async-tasks/task.model";
-import { SuperPromise } from 'src/app/utils/super-promise';
 
 @Component({
     selector: 'reverse-study-node',
@@ -36,19 +33,12 @@ import { SuperPromise } from 'src/app/utils/super-promise';
     standalone: false
 })
 
-export class ReverseStudyNodeComponent implements OnChanges {
+export class ReverseStudyNodeComponent extends TreeNodeAbstractComponent<ReverseStudyNode> implements OnChanges {
 
     @Input() input: ReverseStudyNode | {study: Study, parentNode: ShanoirNode};
     @Input() subjectId: number;
-    @Output() nodeInit: EventEmitter<ReverseStudyNode> = new EventEmitter();
-    @Output() selectedChange: EventEmitter<ReverseStudyNode> = new EventEmitter();
-    node: ReverseStudyNode;
-    loading: boolean = false;
-    menuOpened: boolean = false;
     studyCardsLoading: boolean = false;
-    showDetails: boolean;
     hasDicom: boolean = true;
-    @Input() hasBox: boolean = false;
     detailsPath: string = '/study/details/';
     private canAdmin: boolean = false;
     private canDownload: boolean = false;
@@ -61,8 +51,10 @@ export class ReverseStudyNodeComponent implements OnChanges {
             private examPipe: ExaminationPipe,
             private keycloakService: KeycloakService,
             private studyRightsService: StudyRightsService,
-            private downloadService: MassDownloadService) {
+            private downloadService: MassDownloadService,
+            elementRef: ElementRef) {
 
+        super(elementRef);
         this.idPromise.then(id => {
             (this.keycloakService.isUserAdmin
                 ? Promise.resolve(StudyUserRight.all())

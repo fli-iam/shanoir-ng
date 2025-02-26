@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { DatasetAcquisitionService } from '../../dataset-acquisitions/shared/dataset-acquisition.service';
 import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
 import { Dataset } from '../../datasets/shared/dataset.model';
@@ -27,6 +27,7 @@ import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode, S
 import { Examination } from '../shared/examination.model';
 import { ExaminationPipe } from '../shared/examination.pipe';
 import { ExaminationService } from '../shared/examination.service';
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 
 @Component({
     selector: 'examination-node',
@@ -34,34 +35,27 @@ import { ExaminationService } from '../shared/examination.service';
     standalone: false
 })
 
-export class ExaminationNodeComponent implements OnChanges {
+export class ExaminationNodeComponent extends TreeNodeAbstractComponent<ExaminationNode> implements OnChanges {
 
     @Input() input: ExaminationNode | {examination: Examination, parentNode: ShanoirNode, hasDeleteRights: boolean, hasDownloadRights: boolean};
-    @Output() selectedChange: EventEmitter<void> = new EventEmitter();
-    @Output() nodeInit: EventEmitter<ExaminationNode> = new EventEmitter();
     @Output() onExaminationDelete: EventEmitter<void> = new EventEmitter();
 
-    protected downloadState: TaskState = new TaskState();
-    node: ExaminationNode;
     loading: boolean = false;
-    menuOpened: boolean = false;
     @Input() hasBox: boolean = true;
     datasetIds: number[];
     hasDicom: boolean = false;
     downloading = false;
     detailsPath: string = '/examination/details/';
-    @Input() withMenu: boolean = true;
-    private contentLoaded: SuperPromise<void> = new SuperPromise();
     preclinical: boolean;
 
     constructor(
-        private examinationService: ExaminationService,
-        private datasetAcquisitionService: DatasetAcquisitionService,
-        private examPipe: ExaminationPipe,
-        private downloadService: MassDownloadService,
-        private massDownloadService : MassDownloadService,
-        private consoleService: ConsoleService,
-        protected treeService: TreeService) {
+            private examinationService: ExaminationService,
+            private datasetAcquisitionService: DatasetAcquisitionService,
+            private examPipe: ExaminationPipe,
+            private massDownloadService : MassDownloadService,
+            protected treeService: TreeService,
+            elementRef: ElementRef) {
+        super(elementRef);
     }
 
     ngOnChanges(changes: SimpleChanges): void {

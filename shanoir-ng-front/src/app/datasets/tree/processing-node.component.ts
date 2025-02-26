@@ -11,13 +11,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
+import { TreeService } from 'src/app/studies/study/tree.service';
 import { DatasetNode, ProcessingNode } from '../../tree/tree.model';
 import { DatasetProcessing } from '../shared/dataset-processing.model';
 import { DatasetProcessingService } from "../shared/dataset-processing.service";
-import { Selection, TreeService } from 'src/app/studies/study/tree.service';
 
 
 @Component({
@@ -26,21 +27,17 @@ import { Selection, TreeService } from 'src/app/studies/study/tree.service';
     standalone: false
 })
 
-export class ProcessingNodeComponent implements OnChanges {
+export class ProcessingNodeComponent extends TreeNodeAbstractComponent<ProcessingNode> implements OnChanges {
 
     @Input() input: ProcessingNode | DatasetProcessing;
-    @Output() selectedChange: EventEmitter<void> = new EventEmitter();
-    node: ProcessingNode;
-    loading: boolean = false;
-    menuOpened: boolean = false;
-    @Input() hasBox: boolean = false;
     @Output() onProcessingDelete: EventEmitter<void> = new EventEmitter();
-    @Input() withMenu: boolean = true;
 
     constructor(
-        private router: Router,
-        private processingService: DatasetProcessingService,
-        protected treeService: TreeService) {
+            private router: Router,
+            private processingService: DatasetProcessingService,
+            protected treeService: TreeService,
+            elementRef: ElementRef) {
+        super(elementRef);
     }
 
     ngOnChanges(changes: SimpleChanges): void {

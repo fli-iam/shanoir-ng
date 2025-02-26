@@ -12,10 +12,51 @@
 
 use datasets;
 
+-- There are two procedure here, getStatisticsSize and getStatistics
+-- The getStatisticsSize is used to show progress while the other actually queries the stats
+
+DROP PROCEDURE IF EXISTS getStatisticsSize;
+
+delimiter //
+CREATE PROCEDURE getStatisticsSize(IN studyNameInRegExp VARCHAR(255), IN studyNameOutRegExp VARCHAR(255), IN subjectNameInRegExp VARCHAR(255), IN subjectNameOutRegExp VARCHAR(255))
+BEGIN
+SELECT COUNT(1) AS total_count
+FROM ( 
+SELECT 'patient_id', 'shanoir_name', 'double_hash', 'study_id', 'study_name', 'sequence_id', 'norm_sequence_name', 'sequence_name', 'examination_id', 'series_number'
+UNION ALL
+SELECT
+    subject.id AS patient_id,
+    subject.name AS shanoir_name,
+    subject.identifier AS double_hash,
+    study.id AS study_id,
+    study.name AS study_name,
+    dataset.id AS sequence_id,
+    dataset_metadata.name AS norm_sequence_name,
+    dataset_metadata.comment AS sequence_name,
+    examination.id AS examination_id,
+    dataset_acquisition.sorting_index as series_number
+FROM dataset
+    LEFT JOIN dataset_acquisition ON (dataset_acquisition.id = dataset.dataset_acquisition_id)
+    LEFT JOIN dataset_metadata ON (dataset_metadata.id = dataset.updated_metadata_id)
+    LEFT JOIN mr_dataset_acquisition ON (mr_dataset_acquisition.id = dataset_acquisition.id)
+    LEFT JOIN examination ON (examination.id = dataset_acquisition.examination_id)
+    LEFT JOIN studies.subject AS subject ON (subject.id = examination.subject_id)
+    LEFT JOIN studies.study AS study ON (study.id = examination.study_id)
+
+WHERE subject.name rlike if(subjectNameInRegExp IS NULL  OR subjectNameInRegExp = '', '.*', subjectNameInRegExp)
+  AND subject.name NOT rlike if(subjectNameOutRegExp IS NULL  OR subjectNameOutRegExp = '', '^\b\B$', subjectNameOutRegExp)
+  AND study.name rlike if(studyNameInRegExp IS NULL  OR studyNameInRegExp = '', '.*', studyNameInRegExp)
+  AND study.name NOT rlike if(studyNameOutRegExp IS NULL  OR studyNameOutRegExp = '', '^\b\B$', studyNameOutRegExp))
+  
+  AS full_query;
+END //
+
+delimiter ;
+
 DROP PROCEDURE IF EXISTS getStatistics;
 
 delimiter //
-CREATE PROCEDURE getStatistics(IN studyNameInRegExp VARCHAR(255), IN studyNameOutRegExp VARCHAR(255), IN subjectNameInRegExp VARCHAR(255), IN subjectNameOutRegExp VARCHAR(255))
+CREATE PROCEDURE getStatistics(IN studyNameInRegExp VARCHAR(255), IN studyNameOutRegExp VARCHAR(255), IN subjectNameInRegExp VARCHAR(255), IN subjectNameOutRegExp VARCHAR(255), IN startRow INT, IN blocSize INT)
 BEGIN
 SELECT 'patient_id', 'shanoir_name', 'double_hash', 'birthname1', 'birthname2', 'birthname3', 'lastname1', 'lastname2', 'lastname3', 'firstname1', 'firstname2', 'firstname3', 'birthdate1', 'sex', 'birth_year', 'study_id', 'study_name', 'sequence_id', 'norm_sequence_name', 'sequence_name', 'center_id', 'center', 'center_postcode', 'center_city', 'device_manufacturer', 'device_model', 'device_field_strength', 'device_serial_number', 'examination_id', 'examination_date', 'import_date', 'creation_date', 'series_number', 'protocol_type', 'dicom_size_mo', 'execution'
 UNION ALL
@@ -88,7 +129,8 @@ FROM dataset
 WHERE subject.name rlike if(subjectNameInRegExp IS NULL  OR subjectNameInRegExp = '', '.*', subjectNameInRegExp)
   AND subject.name NOT rlike if(subjectNameOutRegExp IS NULL  OR subjectNameOutRegExp = '', '^\b\B$', subjectNameOutRegExp)
   AND study.name rlike if(studyNameInRegExp IS NULL  OR studyNameInRegExp = '', '.*', studyNameInRegExp)
-  AND study.name NOT rlike if(studyNameOutRegExp IS NULL  OR studyNameOutRegExp = '', '^\b\B$', studyNameOutRegExp);
+  AND study.name NOT rlike if(studyNameOutRegExp IS NULL  OR studyNameOutRegExp = '', '^\b\B$', studyNameOutRegExp)
+  LIMIT blocSize OFFSET startRow;
 END //
 
 delimiter ;

@@ -48,8 +48,6 @@ public class StudyDTO {
 
 	private Long id;
 
-	private boolean monoCenter;
-
 	private String name;
 
 	private Profile profile;
@@ -177,21 +175,6 @@ public class StudyDTO {
 	 */
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	/**
-	 * @return the monoCenter
-	 */
-	public boolean isMonoCenter() {
-		return monoCenter;
-	}
-
-	/**
-	 * @param monoCenter
-	 *            the monoCenter to set
-	 */
-	public void setMonoCenter(boolean monoCenter) {
-		this.monoCenter = monoCenter;
 	}
 
 	/**
@@ -498,7 +481,7 @@ public class StudyDTO {
 	public String toString() {
 		return "StudyDTO [clinical=" + clinical + ", downloadableByDefault=" + downloadableByDefault + ", endDate="
 				+ endDate + ", experimentalGroupsOfSubjects=" + experimentalGroupsOfSubjects + ", id=" + id
-				+ ", monoCenter=" + monoCenter + ", name=" + name + ", profile=" + profile + ", nbExaminations="
+				+ ", name=" + name + ", profile=" + profile + ", nbExaminations="
 				+ nbExaminations + ", nbSubjects=" + nbSubjects + ", protocolFilePaths=" + protocolFilePaths
 				+ ", dataUserAgreementPaths=" + dataUserAgreementPaths + ", tags=" + tags + ", studyTags=" + studyTags
 				+ ", startDate=" + startDate + ", studyCards=" + studyCards + ", studyCenterList=" + studyCenterList

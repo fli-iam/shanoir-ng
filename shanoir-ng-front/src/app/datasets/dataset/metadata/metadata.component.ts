@@ -68,7 +68,7 @@ export class MetadataComponent implements OnDestroy {
 
     private loadMetadata(id: number) {
         this.datasetService.get(id, 'lazy').then(ds => {
-            this.treeService.selection = new Selection(id, 'dicomMetadata', [ds.study.id], ds);
+            this.treeService.select(new Selection(id, 'dicomMetadata', [ds.study.id], ds));
         });
 
         return Promise.all([this.datasetService.downloadDicomMetadata(id), this.dicomService.getDicomTags()]).then(([data, tags]) => {

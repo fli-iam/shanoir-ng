@@ -1,4 +1,4 @@
-:host { position: relative; padding: 0 4px; cursor: default; margin-top: 1px; margin-bottom: 1px; display: block; }
+:host { padding: 0 4px; cursor: default; margin-top: 1px; margin-bottom: 1px; display: block; }
 :host(.selected) > .node { background-color: var(--grey); border: 1px solid var(--grey); }
 :host(:not(.selected)).clickable-node:hover > .label { color: blue; }
 .label { padding: 0 8px 0 3px; border: 1px solid transparent; vertical-align: 1px; }

@@ -19,6 +19,9 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.dicom.web.SeriesInstanceUIDHandler;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
+import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -64,6 +67,15 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
     @Autowired
     private DatasetService datasetService;
+
+    @Autowired
+    private StudyInstanceUIDHandler studyInstanceUIDHandler;
+
+    @Autowired
+    private DICOMWebService dicomWebService;
+
+    @Autowired
+    private SeriesInstanceUIDHandler seriesInstanceUIDHandler;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetAcquisitionServiceImpl.class);
     @Override
@@ -179,16 +191,18 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         return updatedAcqs;
     }
 
-    @Override
-    @Transactional
-    public void deleteById(Long id, ShanoirEvent event) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException {
-        final DatasetAcquisition entity = repository.findById(id).orElse(null);
-        if (entity == null) {
-            throw new EntityNotFoundException("Cannot find entity with id = " + id);
-        }
-
+    /**
+     * Deletes children datasets then delete current acquisition
+     * @param entity
+     * @param event
+     * @throws ShanoirException
+     * @throws SolrServerException
+     * @throws IOException
+     * @throws RestServiceException
+     */
+    private void delete(DatasetAcquisition entity, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
         // Do not delete entity if it is the source. If getSourceId() is not null, it means it's a copy
-        List<DatasetAcquisition> childDsAc = repository.findBySourceId(id);
+        List<DatasetAcquisition> childDsAc = repository.findBySourceId(entity.getId());
         if (!CollectionUtils.isEmpty(childDsAc)) {
             throw new RestServiceException(
                     new ErrorModel(
@@ -208,13 +222,57 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
                     }
 
                     datasetIds.add(ds.getId());
-                    datasetService.deleteById(ds.getId());
+                    datasetService.deleteByIdCascade(ds.getId());
                 }
                 if (!datasetIds.isEmpty()) solrService.deleteFromIndex(datasetIds);
             }
-            repository.deleteById(id);
-            shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
         }
+    }
+
+    /**
+     * Call by acquisition-details > delete. Also reject current acquisition from pacs
+     * @param id
+     * @param event
+     * @throws ShanoirException
+     * @throws SolrServerException
+     * @throws IOException
+     * @throws RestServiceException
+     */
+    @Override
+    @Transactional
+    public void deleteById(Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
+        final DatasetAcquisition entity = repository.findById(id).orElse(null);
+        if (entity == null) {
+            throw new EntityNotFoundException("Cannot find entity with id = " + id);
+        }
+        delete(entity, event);
+
+        String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUID(entity.getExamination());
+        String seriesInstanceUID = seriesInstanceUIDHandler.findSeriesInstanceUID(entity);
+        dicomWebService.rejectAcquisitionFromPacs(studyInstanceUID, seriesInstanceUID);
+
+        repository.deleteById(id);
+        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
+    }
+
+    /**
+     * Called by examination delete. Does not call reject from pacs as examination delete already does it
+     * @param id
+     * @param event
+     * @throws ShanoirException
+     * @throws SolrServerException
+     * @throws IOException
+     * @throws RestServiceException
+     */
+    public void deleteByIdCascade(Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
+        final DatasetAcquisition entity = repository.findById(id).orElse(null);
+        if (entity == null) {
+            throw new EntityNotFoundException("Cannot find entity with id = " + id);
+        }
+        delete(entity, event);
+
+        repository.deleteById(id);
+        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
     }
     
     @Override
