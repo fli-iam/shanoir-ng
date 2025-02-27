@@ -25,8 +25,8 @@ spring:
     username: datasets
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
-    hikari.maximum-pool-size: 60
-    hikari.minimum-idle:  60
+    hikari.maximum-pool-size: 70
+    hikari.minimum-idle:  70
   jpa:
     defer-datasource-initialization: true
     generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
