@@ -144,7 +144,7 @@ public interface DatasetService {
 	List<Dataset> findByStudycard(Long studycardId);
 
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#dataset.getId(), 'CAN_ADMINISTRATE'))")
-	void deleteDatasetFromPacs(Dataset dataset) throws ShanoirException;
+	void deleteDatasetFromDiskAndPacs(Dataset dataset) throws ShanoirException;
 
 	boolean existsById(Long id);
 

@@ -142,7 +142,6 @@ public class DatasetServiceImpl implements DatasetService {
 	public void deleteById(final Long id) throws ShanoirException, SolrServerException, IOException, RestServiceException {
 		final Dataset dataset = repository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
-
 		// Do not delete entity if it is the source (or if it has copies). If getSourceId() is not null, it means it's a copy
 		if (!CollectionUtils.isEmpty(dataset.getCopies())) {
 			throw new RestServiceException(
@@ -151,10 +150,12 @@ public class DatasetServiceImpl implements DatasetService {
 							"This dataset is linked to another dataset that was copied."
 					));
 		}
-
+		long startTime = System.currentTimeMillis();
 		delete(dataset);
-
-		this.deleteDatasetFromPacs(dataset);
+		deleteDatasetFromDiskAndPacs(dataset);
+        long endTime = System.currentTimeMillis();
+        long elapsedTime = endTime - startTime;
+        LOG.info("Dataset deletion time: " + elapsedTime + " milliseconds");
 	}
 
 	/**
@@ -182,28 +183,27 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
-	public void deleteDatasetFromPacs(Dataset dataset) throws ShanoirException {
+	public void deleteDatasetFromDiskAndPacs(Dataset dataset) throws ShanoirException {
         if (!dicomWeb) {
             return;
         }
-
 		for (DatasetExpression expression : dataset.getDatasetExpressions()) {
 			boolean isDicom = DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat());
-
 			for (DatasetFile file : expression.getDatasetFiles()) {
+				// DICOM
 				if (isDicom && file.isPacs()) {
 					dicomWebService.rejectDatasetFromPacs(file.getPath());
+				// NIfTI
 				} else if (!file.isPacs()) {
 					try {
 						URL url = new URL(file.getPath().replaceAll("%20", " "));
 						File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
 						FileUtils.deleteQuietly(srcFile);
 					} catch (MalformedURLException e) {
-						throw new ShanoirException("Error while deleting dataset file", e);
+						throw new ShanoirException("Error while deleting dataset file.", e);
 					}
 				}
 			}
-			break;
 		}
 	}
 

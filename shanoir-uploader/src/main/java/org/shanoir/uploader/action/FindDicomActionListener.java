@@ -121,7 +121,8 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 					+ mainWindow.patientIDTF.getText() + " "
 					+ mainWindow.birthDate.toString() + " "
 					+ mainWindow.studyDescriptionTF.getText() + " "
-					+ mainWindow.studyDate.toString()) ;
+					+ mainWindow.studyDate.toString() + " "
+					+ mainWindow.modality);
 			this.mainWindow.isFromPACS = true;
 
 			this.mainWindow.setCursor(Cursor

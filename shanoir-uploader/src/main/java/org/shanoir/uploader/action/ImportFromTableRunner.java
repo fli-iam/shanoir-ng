@@ -122,7 +122,8 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				String patientName = importJob.getDicomQuery().getPatientName();
 				String patientID = importJob.getDicomQuery().getPatientID();
 				String studyDate = importJob.getDicomQuery().getStudyDate();
-				String importJobIdentifier = "[Line: " + i + ", patientName: " + patientName + ", patientID: " + patientID + ", studyDate: " + studyDate + "]";
+				String modality = importJob.getDicomQuery().getModality();
+				String importJobIdentifier = "[Line: " + i + ", patientName: " + patientName + ", patientID: " + patientID + ", studyDate: " + studyDate +  ", modality: " + modality + "]";
 				logger.info("\r\n------------------------------------------------------\r\n"
 					+ "Starting importJob " + importJobIdentifier + "\r\n"
 					+ "------------------------------------------------------");
@@ -294,7 +295,12 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 						logger.error(importJob.getErrorMessage());
 						return false;
 					}
+
+					// Modality is mandatory to create a new Manufacturer model, but not mandatory in the dicom query
 					String modality = importJob.getDicomQuery().getModality();
+					if (modality == null || modality.isBlank()) {
+						modality = importJob.getSelectedSeries().iterator().next().getModality();
+					}
 					Integer datasetModalityType = DatasetModalityType.getIdFromModalityName(modality);
 					String magneticFieldStrength = uploadJob.getMriInformation().getMagneticFieldStrength();
 					if (magneticFieldStrength == null || magneticFieldStrength.isBlank() || "unknown".equals(magneticFieldStrength)) {
