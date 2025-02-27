@@ -231,31 +231,36 @@ export class TreeService {
     }
 
     private selectNode(selection: Selection): Promise<ShanoirNode> {
+        let node: Promise<ShanoirNode>;
         if (selection?.type == 'dataset') {
-            return this.selectDataset(selection.entity as Dataset);
+            node = this.selectDataset(selection.entity as Dataset);
         } else if (selection?.type == 'dicomMetadata') {
-            return this.selectDicomMetadata(selection.entity as Dataset);
+            node = this.selectDicomMetadata(selection.entity as Dataset);
         } else if (selection?.type == 'subject') {
-            return this.selectSubject(selection.id);
+            node = this.selectSubject(selection.id);
         } else if (selection?.type == 'acquisition') {
-            return this.selectAcquisition(selection.entity as DatasetAcquisition);
+            node = this.selectAcquisition(selection.entity as DatasetAcquisition);
         } else if (selection?.type == 'processing') {
-            return this.selectProcessing(selection.entity as DatasetProcessing);
+            node = this.selectProcessing(selection.entity as DatasetProcessing);
         } else if (selection?.type == 'examination') {
-            return this.selectExamination(selection.entity as Examination);
+            node = this.selectExamination(selection.entity as Examination);
         } else if (selection?.type == 'center') {
-            return this.selectCenter(selection.id);
+            node = this.selectCenter(selection.id);
         } else if (selection?.type == 'equipment') {
-            return this.selectEquipment(selection.entity as AcquisitionEquipment);
+            node = this.selectEquipment(selection.entity as AcquisitionEquipment);
         } else if (selection?.type == 'qualitycard') {
-            return this.selectQualitycard(selection.id);
+            node = this.selectQualitycard(selection.id);
         } else if (selection?.type == 'studycard') {
-            return this.selectStudycard(selection.id);
+            node = this.selectStudycard(selection.id);
         } else if (selection?.type == 'user') {
-            return this.selectUser(selection.id);
+            node = this.selectUser(selection.id);
         } else if (selection?.type == 'coil') {
-            return this.selectCoil(selection.entity as Coil);
-        } else return Promise.resolve(null);
+            node = this.selectCoil(selection.entity as Coil);
+        } else node = Promise.resolve(null);
+        node.then(n => {
+            if(!!n) n.hidden = false;
+        });
+        return node;
     }
 
     private selectDataset(dataset: number | Dataset): Promise<DatasetNode> {
@@ -584,11 +589,21 @@ export class TreeService {
         members.sort((a: MemberNode, b: MemberNode) => {
             return a.label.toLowerCase().localeCompare(b.label.toLowerCase())
         })
-        studyNode.subjectsNode = new SubjectsNode(studyNode, null, 'Subjects', subjects);
+        studyNode.subjectsNode = new SubjectsNode(studyNode, null, 'Subjects', subjects.concat(this.generateSubs(100, studyNode.subjectsNode)));
         studyNode.centersNode = new CentersNode(studyNode, null, 'Centers', centers);
         studyNode.membersNode = new MembersNode(studyNode, null, 'Members', members);
         studyNode.membersNode.open();
         return studyNode;
+    }
+
+    generateSubs(times: number, parent: ShanoirNode): SubjectNode[] {
+        let res = [];
+        for (let i = 0; i < times; i++) {
+            let n: SubjectNode = new ClinicalSubjectNode(parent, 100000 + i, 'test ' + i, [], [], null, true, false);
+            (n.examinations as ExaminationNode[]).push(new ExaminationNode(n, 100000 + i, 'test', UNLOADED, UNLOADED, true, true, false));
+            res.push(n);
+        }
+        return res;
     }
 
     unSelectAll() {

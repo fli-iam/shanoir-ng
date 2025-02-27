@@ -28,8 +28,10 @@ import {
 import { StudyRightsService } from "../shared/study-rights.service";
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
-import { TreeService } from '../study/tree.service';
+import { Selection, TreeService } from '../study/tree.service';
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
+import { Entity } from 'src/app/shared/components/entity/entity.abstract';
+import { isDarkColor } from 'src/app/utils/app.utils';
 
 export type Sort = {field: 'name' | 'id', way : 'asc' | 'desc'}
 
@@ -53,8 +55,6 @@ export class StudyNodeComponent extends TreeNodeAbstractComponent<StudyNode> imp
     filter: string;
     filteredNodes: SubjectNode[];
     subjectsOrder: Sort;
-    protected nbSubjectsInit: number = 0;
-    private subjectsInited: SuperPromise<void>;
 
     constructor(
             private router: Router,
@@ -85,18 +85,16 @@ export class StudyNodeComponent extends TreeNodeAbstractComponent<StudyNode> imp
             let id: number = this.input instanceof StudyNode ? this.input.id : this.input.study.id;
             this.idPromise.resolve(id);
             if (this.input instanceof StudyNode) {
-                this.subjectsInited = new SuperPromise();
-                this.nbSubjectsInit = 0;
                 this.node = this.input;
             } else if (this.input.study && this.input.rights) {
-                this.subjectsInited = new SuperPromise();
-                this.nbSubjectsInit = 0;
                 this.node = this.treeService.buildStudyNode(this.input.study, this.input.rights);
             } else {
                 throw new Error('Illegal argument type');
             }
             this.sortSubjects({field: 'name', way: 'asc'});
-            this.node.subjectsNode.registerOpenPromise(this.subjectsInited);
+            if (!!this.node.subjectsNode.subjects && this.node.subjectsNode.subjects != UNLOADED) {
+                this.node.subjectsNode.subjects.forEach(s => s.hidden = !this.treeService.isSelected(s.id, 'subject'));
+            }
             this.nodeInit.emit(this.node);
             this.showDetails = this.router.url != this.detailsPath + this.node.id;
         }
@@ -172,16 +170,20 @@ export class StudyNodeComponent extends TreeNodeAbstractComponent<StudyNode> imp
         }
     }
 
-    onSubjectNodeInit() {
-        this.nbSubjectsInit++;
-        if (this.nbSubjectsInit == this.node.subjectsNode?.subjects?.length) {
-            this.subjectsInited.resolve();
-        }
+    trackByFn(index, item: Entity) {
+        return item.id;
     }
 
-    onOpenedChange(state) {
-        if (!state) {
-            this.nbSubjectsInit = 0;
-        }
+    protected clickNode(node: SubjectNode) {
+        node.hidden = false;
+    }
+
+    protected clickOpen(node: SubjectNode) {
+        node.opened = true;
+        node.hidden = false;
+    }
+
+    getFontColor(colorInp: string): boolean {
+        return isDarkColor(colorInp);
     }
 }
