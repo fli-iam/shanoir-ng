@@ -51,6 +51,10 @@ public interface DatasetService {
 
 	void deleteByIdCascade(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
 
+
+	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#dataset.getId(), 'CAN_ADMINISTRATE'))")
+	void deleteDatasetFilesFromDiskAndPacs(Dataset dataset) throws ShanoirException;
+
 	/**
 	 * Delete several datasets.
 	 * 
@@ -142,9 +146,6 @@ public interface DatasetService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetList(returnObject, 'CAN_SEE_ALL')")
 	List<Dataset> findByStudycard(Long studycardId);
-
-	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#dataset.getId(), 'CAN_ADMINISTRATE'))")
-	void deleteDatasetFromDiskAndPacs(Dataset dataset) throws ShanoirException;
 
 	boolean existsById(Long id);
 
