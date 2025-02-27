@@ -52,23 +52,17 @@ public class SolrApiController implements SolrApi {
 	@Autowired
 	private SolrService solrService;
 
-	@Autowired
-	private ShanoirEventService eventService;
-
-	@Override
 	public ResponseEntity<Void> indexAll() throws SolrServerException, IOException {
 		solrService.indexAll();
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
-	@Override
 	public ResponseEntity<SolrResultPage<ShanoirSolrDocument>> facetSearch(
 			@Parameter(description = "facets", required = true) @Valid @RequestBody ShanoirSolrQuery facet, Pageable pageable) throws RestServiceException {
 		SolrResultPage<ShanoirSolrDocument> documents = solrService.facetSearch(facet, pageable);
 		return new ResponseEntity<>(documents, HttpStatus.OK);
 	}
 	
-	@Override
 	public ResponseEntity<Page<ShanoirSolrDocument>> findByIdIn(@Parameter(description = "dataset ids", required = true) @Valid @RequestBody List<Long> datasetIds, Pageable pageable) throws RestServiceException {
 		Page<ShanoirSolrDocument> documents = solrService.getByIdIn(datasetIds, pageable);
 		if (documents.getContent().isEmpty()) {
