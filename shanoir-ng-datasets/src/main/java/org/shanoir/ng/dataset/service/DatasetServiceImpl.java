@@ -56,6 +56,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriUtils;
@@ -89,8 +90,8 @@ public class DatasetServiceImpl implements DatasetService {
 	@Autowired
 	private SolrService solrService;
 
-	@Autowired
-	private DICOMWebService dicomWebService;
+	@Value("${dcm4chee-arc.dicom.web}")
+	private boolean dicomWeb;
 
 	@Autowired
 	private DatasetPropertyService propertyService;
@@ -101,14 +102,14 @@ public class DatasetServiceImpl implements DatasetService {
 	@Autowired
 	private ObjectMapper objectMapper;
 
-	@Value("${dcm4chee-arc.dicom.web}")
-	private boolean dicomWeb;
-
 	@Autowired
 	private DatasetProcessingService processingService;
 
 	@Autowired
 	private ProcessingResourceService processingResourceService;
+
+	@Autowired
+	private DatasetAsyncService datasetAsyncService;
 
 	@Autowired
 	DatasetExpressionRepository datasetExpressionRepository;
@@ -124,9 +125,6 @@ public class DatasetServiceImpl implements DatasetService {
 		processingResourceService.deleteByDatasetId(id);
 		propertyService.deleteByDatasetId(id);
 		repository.deleteById(id);
-
-		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getStudyId()));
-
 	}
 
 	/**
@@ -152,7 +150,7 @@ public class DatasetServiceImpl implements DatasetService {
 		}
 		long startTime = System.currentTimeMillis();
 		delete(dataset);
-		deleteDatasetFromDiskAndPacs(dataset);
+		deleteDatasetFilesFromDiskAndPacs(dataset);
         long endTime = System.currentTimeMillis();
         long elapsedTime = endTime - startTime;
         LOG.info("Dataset deletion time: " + elapsedTime + " milliseconds");
@@ -182,28 +180,15 @@ public class DatasetServiceImpl implements DatasetService {
 		delete(dataset);
 	}
 
-	@Override
-	public void deleteDatasetFromDiskAndPacs(Dataset dataset) throws ShanoirException {
-        if (!dicomWeb) {
-            return;
-        }
+	public void deleteDatasetFilesFromDiskAndPacs(Dataset dataset) throws ShanoirException {
+		if (!dicomWeb) {
+			return;
+		}
+		Long id = dataset.getId();
 		for (DatasetExpression expression : dataset.getDatasetExpressions()) {
 			boolean isDicom = DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat());
-			for (DatasetFile file : expression.getDatasetFiles()) {
-				// DICOM
-				if (isDicom && file.isPacs()) {
-					dicomWebService.rejectDatasetFromPacs(file.getPath());
-				// NIfTI
-				} else if (!file.isPacs()) {
-					try {
-						URL url = new URL(file.getPath().replaceAll("%20", " "));
-						File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
-						FileUtils.deleteQuietly(srcFile);
-					} catch (MalformedURLException e) {
-						throw new ShanoirException("Error while deleting dataset file.", e);
-					}
-				}
-			}
+			List<DatasetFile> datasetFiles = expression.getDatasetFiles();
+			datasetAsyncService.deleteDatasetFilesFromDiskAndPacsAsync(datasetFiles, isDicom, id);
 		}
 	}
 

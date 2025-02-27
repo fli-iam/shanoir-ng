@@ -18,10 +18,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetExpression;
+import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.dataset.service.DatasetAsyncService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
@@ -46,6 +50,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.io.File;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -67,9 +72,12 @@ public class DatasetServiceSecurityTest {
 	private static final long LOGGED_USER_ID = 2L;
 	private static final String LOGGED_USER_USERNAME = "logged";
 	private static final long ENTITY_ID = 1L;
-	
+
 	@Autowired
 	private DatasetService service;
+
+	@Autowired
+	private DatasetAsyncService asyncService;
 	
 	@MockBean
 	private DatasetRepository datasetRepository;
@@ -231,23 +239,25 @@ public class DatasetServiceSecurityTest {
 		//deleteDatasetFromPacs(Dataset)
 		//deleteByIdIn(List<Long>)
 		//deleteById(Long)
+
 		if ("ROLE_USER".equals(role)) {
 			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
 			given(rightsService.hasRightOnStudies(Utils.toSet(1L), "CAN_ADMINISTRATE")).willReturn(Utils.toSet(1L));
-			assertAccessDenied(service::deleteDatasetFromDiskAndPacs, mockDataset(1L, 1L, 1L, 1L, 1L));
 			assertAccessDenied(service::deleteById, 1L);
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 2L, 3L, 4L));
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 3L));
+			assertAccessDenied(service::deleteDatasetFilesFromDiskAndPacs, mockDataset(1L));
+
 		} else if ("ROLE_EXPERT".equals(role)) {
 			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
 			given(rightsService.hasRightOnStudies(Utils.toSet(1L), "CAN_ADMINISTRATE")).willReturn(Utils.toSet());
-			assertAccessDenied(service::deleteDatasetFromDiskAndPacs, mockDataset(1L, 1L, 1L, 1L, 1L));
+			assertAccessDenied(service::deleteDatasetFilesFromDiskAndPacs, mockDataset(1L));
 			assertAccessDenied(service::deleteById, 1L);
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 2L, 3L, 4L));
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 3L));
 			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
 			given(rightsService.hasRightOnStudies(Utils.toSet(1L), "CAN_ADMINISTRATE")).willReturn(Utils.toSet(1L));
-			assertAccessAuthorized(service::deleteDatasetFromDiskAndPacs, mockDataset(1L, 1L, 1L, 1L, 1L));
+			assertAccessAuthorized(service::deleteDatasetFilesFromDiskAndPacs, mockDataset(1L));
 			assertAccessAuthorized(service::deleteById, 1L);
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 2L, 3L, 4L));
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 3L));
