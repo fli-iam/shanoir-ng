@@ -128,6 +128,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li>
+						<label>Acquisition start time</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{datasetAcquisition.acquisitionStartTime | date: 'dd/MM/yyyy HH:mm:ss'}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<input type="text" formControlName="startTime" [(ngModel)]="datasetAcquisition.acquisitionStartTime" />
+							</ng-template>
+						</span>
+					</li>
+					<li>
 						<label>Software release</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
@@ -168,7 +179,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 			<ng-container *ngIf="datasetAcquisition.protocol">
 				<mr-protocol *ngIf="datasetAcquisition.type == 'Mr'" [(ngModel)]="datasetAcquisition.protocol" formControlName="protocol"></mr-protocol>
+				<ct-protocol *ngIf="datasetAcquisition.type == 'Ct'" [(ngModel)]="datasetAcquisition.protocol" formControlName="protocol"></ct-protocol>
 				<pet-protocol *ngIf="datasetAcquisition.type == 'Pet'" [(ngModel)]="datasetAcquisition.protocol" formControlName="protocol"></pet-protocol>
+				<xa-protocol *ngIf="datasetAcquisition.type == 'Xa'" [(ngModel)]="datasetAcquisition.protocol" formControlName="protocol"></xa-protocol>
 			</ng-container>
 
 			<progress-bar *ngIf="downloadState.status > 1" [progress]="downloadState?.progress" [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
