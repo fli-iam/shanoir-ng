@@ -153,7 +153,7 @@ public class DatasetServiceImpl implements DatasetService {
 		deleteDatasetFilesFromDiskAndPacs(dataset);
         long endTime = System.currentTimeMillis();
         long elapsedTime = endTime - startTime;
-        LOG.error("Dataset deletion time: " + elapsedTime + " milliseconds");
+        LOG.info("Dataset deletion time: " + elapsedTime + " milliseconds");
 	}
 
 	/**
