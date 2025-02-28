@@ -69,7 +69,10 @@ export class TreeService {
 
     set treeOpened(opened: boolean) {
         if (!this._treeOpened && opened) {
-            this.changeSelection();
+            this._treeOpened = opened;
+            this.studyNodeInit.then(() => {
+                this.changeSelection();
+            });
         }
         this._treeOpened = opened;
         localStorage.setItem('treeOpened', this._treeOpened ? 'true' : 'false');
@@ -272,12 +275,13 @@ export class TreeService {
                             return sn.id == ret.topParent.datasetAcquisition?.examination?.subject?.id;
                         });
                         if (subjectNode) {
-                            if (!subjectNode.opened) this.scrollTo(subjectNode);
+                            subjectNode.hidden = false;
+                            this.scrollTo(subjectNode);
                             return subjectNode.open().then(() => {
                                 if (subjectNode.examinations != UNLOADED) {
                                     let examNode: ExaminationNode = subjectNode.examinations?.find(exam => exam.id == ret.topParent.datasetAcquisition?.examination?.id);
                                     if (examNode) {
-                                        if (!examNode.opened) this.scrollTo(examNode);
+                                        this.scrollTo(examNode);
                                         return examNode.open().then(() => {
                                             if (examNode.datasetAcquisitions != UNLOADED) {
                                                 let acqNode: DatasetAcquisitionNode = examNode.datasetAcquisitions?.find(acq => acq.id == ret.topParent.datasetAcquisition?.id);
@@ -379,12 +383,12 @@ export class TreeService {
                     if (this.studyNode.subjectsNode.subjects != UNLOADED) {
                         let subjectNode: SubjectNode = this.studyNode.subjectsNode.subjects?.find(sn => sn.id == dsa.examination?.subject?.id);
                         if (subjectNode) {
-                            if (!subjectNode.opened) this.scrollTo(subjectNode);
+                            this.scrollTo(subjectNode);
                             return subjectNode.open().then(() => {
                                 if (subjectNode.examinations != UNLOADED) {
                                     let examNode: ExaminationNode = subjectNode.examinations?.find(exam => exam.id == dsa.examination?.id);
                                     if (examNode) {
-                                        if (!examNode.opened) this.scrollTo(examNode);
+                                        this.scrollTo(examNode);
                                         return examNode.open().then(() => {
                                             if (examNode.datasetAcquisitions != UNLOADED) {
                                                 return examNode.datasetAcquisitions?.find(dsan => dsan.id == dsa.id);
@@ -413,7 +417,7 @@ export class TreeService {
                     if (this.studyNode.subjectsNode.subjects != UNLOADED) {
                         let subjectNode: SubjectNode = this.studyNode.subjectsNode.subjects?.find(sn => sn.id == exam.subject?.id);
                         if (subjectNode) {
-                            if (!subjectNode.opened) this.scrollTo(subjectNode);
+                            this.scrollTo(subjectNode);
                             return subjectNode.open().then(() => {
                                 if (subjectNode.examinations != UNLOADED) {
                                     return subjectNode.examinations?.find(en => en.id == exam.id);
@@ -576,6 +580,9 @@ export class TreeService {
                     this.canDownloadStudy
                 );
             }
+        }).map(s => {
+            s.hidden = !this.isSelected(s.id, 'subject');
+            return s;
         });
         let centers: CenterNode[] = study.studyCenterList.map(studyCenter => {
             return new CenterNode(studyNode, studyCenter.center.id, studyCenter.center.name, UNLOADED, UNLOADED);
@@ -589,21 +596,11 @@ export class TreeService {
         members.sort((a: MemberNode, b: MemberNode) => {
             return a.label.toLowerCase().localeCompare(b.label.toLowerCase())
         })
-        studyNode.subjectsNode = new SubjectsNode(studyNode, null, 'Subjects', subjects.concat(this.generateSubs(100, studyNode.subjectsNode)));
+        studyNode.subjectsNode = new SubjectsNode(studyNode, null, 'Subjects', subjects);
         studyNode.centersNode = new CentersNode(studyNode, null, 'Centers', centers);
         studyNode.membersNode = new MembersNode(studyNode, null, 'Members', members);
         studyNode.membersNode.open();
         return studyNode;
-    }
-
-    generateSubs(times: number, parent: ShanoirNode): SubjectNode[] {
-        let res = [];
-        for (let i = 0; i < times; i++) {
-            let n: SubjectNode = new ClinicalSubjectNode(parent, 100000 + i, 'test ' + i, [], [], null, true, false);
-            (n.examinations as ExaminationNode[]).push(new ExaminationNode(n, 100000 + i, 'test', UNLOADED, UNLOADED, true, true, false));
-            res.push(n);
-        }
-        return res;
     }
 
     unSelectAll() {

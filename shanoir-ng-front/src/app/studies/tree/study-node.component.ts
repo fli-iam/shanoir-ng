@@ -11,11 +11,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, QueryList, SimpleChanges, ViewChildren } from '@angular/core';
 import { Router } from '@angular/router';
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
 
+import { Entity } from 'src/app/shared/components/entity/entity.abstract';
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 import { QualityCardService } from 'src/app/study-cards/shared/quality-card.service';
+import { isDarkColor } from 'src/app/utils/app.utils';
 import { SuperPromise } from 'src/app/utils/super-promise';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import {
@@ -28,10 +31,7 @@ import {
 import { StudyRightsService } from "../shared/study-rights.service";
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
-import { Selection, TreeService } from '../study/tree.service';
-import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
-import { Entity } from 'src/app/shared/components/entity/entity.abstract';
-import { isDarkColor } from 'src/app/utils/app.utils';
+import { TreeService } from '../study/tree.service';
 
 export type Sort = {field: 'name' | 'id', way : 'asc' | 'desc'}
 
@@ -55,6 +55,7 @@ export class StudyNodeComponent extends TreeNodeAbstractComponent<StudyNode> imp
     filter: string;
     filteredNodes: SubjectNode[];
     subjectsOrder: Sort;
+    @ViewChildren('fake') fakeSubjectNodes: QueryList<ElementRef>;
 
     constructor(
             private router: Router,
@@ -92,12 +93,28 @@ export class StudyNodeComponent extends TreeNodeAbstractComponent<StudyNode> imp
                 throw new Error('Illegal argument type');
             }
             this.sortSubjects({field: 'name', way: 'asc'});
-            if (!!this.node.subjectsNode.subjects && this.node.subjectsNode.subjects != UNLOADED) {
-                this.node.subjectsNode.subjects.forEach(s => s.hidden = !this.treeService.isSelected(s.id, 'subject'));
-            }
             this.nodeInit.emit(this.node);
             this.showDetails = this.router.url != this.detailsPath + this.node.id;
+            setTimeout(() => {
+                if (this.fakeSubjectNodes.length > 0) {
+                    this.setFakeTops();
+                }
+                this.subscriptions.push(this.fakeSubjectNodes.changes.subscribe(() => this.setFakeTops()));
+            });
         }
+    }
+
+    /**
+     * Tells the top position of the fake nodes so the auto-scroll doesn't have to wait for the real node to be loaded
+     */
+    private setFakeTops() {
+        this.fakeSubjectNodes.forEach(fake => {
+            const id: number = fake.nativeElement.getAttribute('id');
+            if (!!this.node.subjectsNode.subjects && this.node.subjectsNode.subjects != UNLOADED) {
+                const node: SubjectNode = this.node.subjectsNode.subjects?.find(sn => sn.id == id);
+                node.getTop = () => fake.nativeElement?.offsetTop;
+            }
+        });
     }
 
     hasDependency(dependencyArr: any[] | UNLOADED): boolean | 'unknown' {

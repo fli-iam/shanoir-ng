@@ -58,8 +58,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </span>
         </div>
 
-        <ng-container *ngIf="node.subjectsNode.opened && node.subjectsNode.subjects && node.subjectsNode.subjects != $any('UNLOADED')">
-            <ng-container *ngFor="let subject of filteredNodes || node.subjectsNode.subjects; trackBy:trackByFn; let i = index">
+        <div *ngIf="node.subjectsNode.opened && node.subjectsNode.subjects && node.subjectsNode.subjects != $any('UNLOADED')">
+            <div *ngFor="let subject of filteredNodes || node.subjectsNode.subjects; trackBy:trackByFn; let i = index">
                 @if (!subject.hidden) {
                     <subject-node
                             [input]="subject"
@@ -71,7 +71,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     >
                     </subject-node>
                 } @else {
-                    <div class="fake-node">
+                    <div class="fake-node" #fake [id]="subject.id">
                         <i class="fas fa-angle-right chevron" (click)="clickOpen(subject)"></i>
                         <a [routerLink]="['/subject/details/', subject.id]" class="inner" (click)="clickNode(subject)">
                             <i [class]="subject.awesome" class="picto"></i>
@@ -82,8 +82,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         </span>
                     </div>
                 }
-            </ng-container>
-        </ng-container>
+            </div>
+        </div>
 
     </node>
 

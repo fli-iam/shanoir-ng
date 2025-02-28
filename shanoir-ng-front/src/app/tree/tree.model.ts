@@ -46,8 +46,8 @@ export abstract class ShanoirNode {
     public selected: boolean = false;
 
     open(): Promise<void> {
+        this.hidden = false;
         if (!this._opened) {
-            this.hidden = false;
             if (this.parent) {
                 this.parent.open();
             }
