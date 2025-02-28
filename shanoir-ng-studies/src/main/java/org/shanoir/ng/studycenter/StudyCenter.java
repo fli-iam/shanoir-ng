@@ -40,21 +40,13 @@ public class StudyCenter extends AbstractEntity {
 	private static final long serialVersionUID = 1007750133610651645L;
 
 	/** Center. */
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "center_id")
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "center_id", nullable=false)
 	private Center center;
 
-	/** Investigator. */
-//	@ManyToOne
-//	@JoinColumn(name = "investigator_id")
-//	private Investigator investigator;
-
-	/** Investigator function in the study */
-//	private InvestigatorFunction investigatorFunction;
-
 	/** The study. */
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "study_id")
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "study_id", nullable=false)
 	private Study study;
 	
 	/** The subject name prefix associated to the center. */

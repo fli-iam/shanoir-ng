@@ -26,7 +26,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 
 import java.util.List;
 
-public interface DatasetRepository extends PagingAndSortingRepository<Dataset, Long>, CrudRepository<Dataset, Long>, DatasetRepositoryCustom {
+public interface DatasetRepository extends PagingAndSortingRepository<Dataset, Long>, CrudRepository<Dataset, Long> {
 
 	@Query(value="SELECT COUNT(*) FROM dataset as ds " +
 			"INNER JOIN dataset_acquisition as acq ON ds.dataset_acquisition_id=acq.id " +
@@ -79,4 +79,9 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
     List<Dataset> deleteByDatasetProcessingId(Long id);
 
 	boolean existsByTagsContains(StudyTag tag);
+
+	@Query(value="SELECT ds.id FROM dataset as ds " +
+			"INNER JOIN input_of_dataset_processing as input ON ds.id=input.dataset_id " +
+			"WHERE input.processing_id = :processingId or ds.dataset_processing_id = :processingId", nativeQuery = true)
+	List<Dataset> findDatasetsByProcessingId(Long processingId);
 }

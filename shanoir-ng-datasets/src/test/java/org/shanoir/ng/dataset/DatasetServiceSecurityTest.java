@@ -22,6 +22,7 @@ import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -93,6 +94,9 @@ public class DatasetServiceSecurityTest {
 	
 	@MockBean
 	private ShanoirEventService shanoirEventService;
+
+	@MockBean
+	private StudyInstanceUIDHandler studyInstanceUIDHandler;
 
 	@Test
 	@WithAnonymousUser
@@ -177,9 +181,6 @@ public class DatasetServiceSecurityTest {
 		assertAccessAuthorized(service::findByStudyId, 2L);
 		assertThat(service.findByStudyId(2L)).isNullOrEmpty();
 		assertAccessDenied(service::findByStudyId, 3L);
-		
-		//queryStatistics(String, String, String, String)
-		assertAccessDenied(service::queryStatistics,"", "", "", "");
 	}
 	
 	private void testFindPage() throws ShanoirException {
@@ -233,20 +234,20 @@ public class DatasetServiceSecurityTest {
 		if ("ROLE_USER".equals(role)) {
 			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
 			given(rightsService.hasRightOnStudies(Utils.toSet(1L), "CAN_ADMINISTRATE")).willReturn(Utils.toSet(1L));
-			assertAccessDenied(service::deleteDatasetFromPacs, mockDataset(1L, 1L, 1L, 1L, 1L));
+			assertAccessDenied(service::deleteDatasetFromDiskAndPacs, mockDataset(1L, 1L, 1L, 1L, 1L));
 			assertAccessDenied(service::deleteById, 1L);
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 2L, 3L, 4L));
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 3L));
 		} else if ("ROLE_EXPERT".equals(role)) {
 			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
 			given(rightsService.hasRightOnStudies(Utils.toSet(1L), "CAN_ADMINISTRATE")).willReturn(Utils.toSet());
-			assertAccessDenied(service::deleteDatasetFromPacs, mockDataset(1L, 1L, 1L, 1L, 1L));
+			assertAccessDenied(service::deleteDatasetFromDiskAndPacs, mockDataset(1L, 1L, 1L, 1L, 1L));
 			assertAccessDenied(service::deleteById, 1L);
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 2L, 3L, 4L));
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 3L));
 			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
 			given(rightsService.hasRightOnStudies(Utils.toSet(1L), "CAN_ADMINISTRATE")).willReturn(Utils.toSet(1L));
-			assertAccessAuthorized(service::deleteDatasetFromPacs, mockDataset(1L, 1L, 1L, 1L, 1L));
+			assertAccessAuthorized(service::deleteDatasetFromDiskAndPacs, mockDataset(1L, 1L, 1L, 1L, 1L));
 			assertAccessAuthorized(service::deleteById, 1L);
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 2L, 3L, 4L));
 			assertAccessDenied(service::deleteByIdIn, Utils.toList(1L, 3L));

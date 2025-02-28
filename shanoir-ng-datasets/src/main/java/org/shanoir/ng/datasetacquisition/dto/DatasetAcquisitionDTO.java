@@ -15,6 +15,7 @@
 package org.shanoir.ng.datasetacquisition.dto;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.studycard.model.StudyCard;
@@ -45,7 +46,10 @@ public class DatasetAcquisitionDTO {
 
 	private String username;
 
-	
+	private Long source;
+
+	private List<Long> copies;
+
 	public Long getId() {
 		return id;
 	}
@@ -141,4 +145,21 @@ public class DatasetAcquisitionDTO {
 	public void setUsername(String username) {
 		this.username = username;
 	}
+
+	public Long getSource() {
+		return source;
+	}
+
+	public void setSource(Long source) {
+		this.source = source;
+	}
+
+	public List<Long> getCopies() {
+		return copies;
+	}
+
+	public void setCopies(List<Long> copies) {
+		this.copies = copies;
+	}
+
 }

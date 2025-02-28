@@ -170,6 +170,10 @@ public class SerieTreeNode implements DicomTreeNode {
 		} else if (id != null && !id.equals("")) {
 			result += id;
 		}
+		Integer numberOfSeriesRelatedInstances = this.serie.getNumberOfSeriesRelatedInstances();
+		if (numberOfSeriesRelatedInstances != 0) {
+			result += " (" + numberOfSeriesRelatedInstances + ")";
+		}
 		EquipmentDicom equipment = this.serie.getEquipment();
 		if (equipment != null) {
 			String stationName = equipment.getStationName();

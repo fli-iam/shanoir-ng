@@ -22,10 +22,12 @@ import { FacetResultPage } from "../../solr/solr.document.model";
     styleUrls: ['checkbox-list.component.css'],
     providers: [
         {
-          provide: NG_VALUE_ACCESSOR,
-          useExisting: forwardRef(() => CheckboxListComponent),
-          multi: true,
-        }]   
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => CheckboxListComponent),
+            multi: true,
+        }
+    ],
+    standalone: false
 })
 
 export class CheckboxListComponent implements ControlValueAccessor, OnChanges{

@@ -22,11 +22,11 @@ public class DicomSerieAndInstanceAnalyzer {
 
 	private static final String RTPLAN = "RTPLAN";
 
-	private static final String OT = "OT";
-
 	private static final String RTDOSE = "RTDOSE";
 
 	private static final String RTSTRUCT = "RTSTRUCT";
+
+	private static final String DICOM_VR_CODE_STRING_YES = "YES";
 
 	private static final String DOUBLE_EQUAL = "==";
 
@@ -48,6 +48,7 @@ public class DicomSerieAndInstanceAnalyzer {
 			|| UID.DeformableSpatialRegistrationStorage.equals(sopClassUID)
 			|| UID.SegmentationStorage.equals(sopClassUID)
 			|| UID.SurfaceSegmentationStorage.equals(sopClassUID)) {
+			LOG.warn("Instance (image) ignored, because of SOPClassUID: " + sopClassUID);
 			return true;
 		}
 		final String referencedSOPClassUIDInFile = attributes.getString(Tag.ReferencedSOPClassUIDInFile);
@@ -57,6 +58,12 @@ public class DicomSerieAndInstanceAnalyzer {
 			|| UID.DeformableSpatialRegistrationStorage.equals(referencedSOPClassUIDInFile)
 			|| UID.SegmentationStorage.equals(referencedSOPClassUIDInFile)
 			|| UID.SurfaceSegmentationStorage.equals(referencedSOPClassUIDInFile)) {
+			LOG.warn("Instance (image) ignored, because of ReferencedSOPClassUIDInFile: " + referencedSOPClassUIDInFile);
+			return true;
+		}
+		final String burnedInAnnotation = attributes.getString(Tag.BurnedInAnnotation);
+		if (DICOM_VR_CODE_STRING_YES.equals(burnedInAnnotation)) {
+			LOG.warn("Instance (image) ignored, because of burnedInAnnotation: " + burnedInAnnotation);
 			return true;
 		}
 		return false;

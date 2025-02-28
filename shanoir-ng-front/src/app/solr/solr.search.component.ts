@@ -54,6 +54,7 @@ export type TextualFacet = typeof TextualFacetNames[number];
     templateUrl: 'solr.search.component.html',
     styleUrls: ['solr.search.component.css'],
     animations: [slideDown],
+    standalone: false
 })
 
 export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
@@ -70,6 +71,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     @ViewChild('selectionTable', { static: false }) selectionTable: TableComponent;
     selectedDatasetIds: Set<number> = new Set();
     syntaxError: boolean = false;
+    syntaxErrorMsg : string = "";
     dateOpen: boolean = false;
     importDateOpen: boolean = false;
     public downloadState: TaskState = new TaskState();
@@ -274,6 +276,10 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         this.table.refresh(1);
     }
 
+    setExpertMode(value: boolean): void {
+        this.solrRequest.expertMode = value;
+    }
+
     openResultTab() {
         this.tab = 'results';
     }
@@ -321,11 +327,13 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                 }
                 this.firstPageLoaded = true;
                 this.contentPage.push(solrResultPage);
+                this.syntaxErrorMsg = "";
 
                 return solrResultPage;
             }).catch(reason => {
-                if (reason?.error?.code == 422 && reason.error.message == 'solr query failed') {
-                    this.syntaxError = true;
+                if (reason?.error?.code == 422) {
+					this.syntaxError = true;
+                    this.syntaxErrorMsg = reason?.error?.message;
                     return new SolrResultPage();
                 } else throw reason;
             });
@@ -446,14 +454,15 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         let columnDefs: ColumnDefinition[] = [
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {headerName: "Admin", type: "boolean", cellRenderer: row => this.hasAdminRight(row.data.studyId), awesome: "fa-solid fa-shield", color: "goldenrod", disableSorting: true},
-            {headerName: "", type: "boolean", cellRenderer: row => row.data.processed, awesome: "fa-solid fa-gears", color: "dimgrey", disableSorting: true, tip: item => { return item.processed ? "processed dataset" : "" }},
+            {headerName: "Processed", type: "boolean", cellRenderer: row => row.data.processed, awesome: "fa-solid fa-gears", color: "dimgrey", disableSorting: true, tip: item => { return item.processed ? "processed dataset" : "" }},
             {headerName: "Name", field: "datasetName"},
             {headerName: "Tags", field: "tags", cellRenderer: (params: any) => {
                     return params?.data?.tags ? params.data.tags.join(', ') : '';
                 }},
-            {headerName: "Type", field: "datasetType"},
+            {headerName: "Modality", field: "datasetType"},
             {headerName: "Nature", field: "datasetNature"},
             {headerName: "Series date", field: "datasetCreationDate", type: "date", hidden: true},
+            {headerName: "Sorting index", field: "sortingIndex"},
             {headerName: "Study", field: "studyName",
                 route: function(item) {
                     return item.studyId ? '/study/details/' + item.studyId : null;
@@ -477,7 +486,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {headerName: "Exam Date", field:"examinationDate", type: "date"},
             {headerName: "Import Date", field:"importDate", type: "date"},
             {headerName: "Imported by", field:"username"},
-            {headerName: "Slice", field: "sliceThickness"},
+            {headerName: "Slice Thickness", field: "sliceThickness"},
             {headerName: "Pixel", field: "pixelBandwidth"},
             {headerName: "Mag. strength", field: "magneticFieldStrength"},
             {headerName: "View DICOM", type: "button", awesome: "fa-solid fa-up-right-from-square",

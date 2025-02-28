@@ -26,7 +26,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </li>
         <li>
             <span class="label">Study card : </span>
-            <span *ngIf="status == 'default'"><select-box [(ngModel)]="studycard" [options]="studycardOptions" (userChange)="updateStudyCard()" [viewRoute]="'/study-card/details/' + this.studycard?.id" [viewDisabled]="!studycard" [readOnly]="!studyCards"></select-box></span>
+            <span *ngIf="status == 'default'"><select-box [(ngModel)]="studycard" [options]="studycardOptions" (userChange)="updateStudyCard()" [viewRoute]="'/study-card/details/' + studycard?.id" [viewDisabled]="!studycard" [readOnly]="!studyCards"></select-box></span>
             <span *ngIf="status != 'default'"class="value">{{studycard?.name}}</span>
         </li>
         <li *ngIf="status == 'default' && studyCards">

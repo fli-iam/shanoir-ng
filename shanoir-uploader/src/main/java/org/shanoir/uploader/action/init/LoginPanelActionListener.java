@@ -33,9 +33,16 @@ public class LoginPanelActionListener implements ActionListener {
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		String username = this.loginPanel.loginText.getText();
-		String password = String.valueOf(this.loginPanel.passwordText.getPassword());
-		login(username, password);
+		if (e.getSource().equals(loginPanel.connect)) {
+			String username = this.loginPanel.loginText.getText();
+			String password = String.valueOf(this.loginPanel.passwordText.getPassword());
+			login(username, password);	
+		} else if (e.getSource().equals(loginPanel.connectLater)) {
+			logger.info("Connect later, no username.");
+			ShUpConfig.username = "anonymous";
+			sSC.setState(pacsConfigurationState);
+			sSC.nextState();
+		}
 	}
 
 	public void login(String username, String password) {

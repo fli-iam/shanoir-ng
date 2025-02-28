@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import {Component, ElementRef, EventEmitter, Output, ViewChild} from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
@@ -33,10 +33,12 @@ import { StudyService } from '../../studies/shared/study.service';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
+import {ExaminationNode} from "../../tree/tree.model";
 
 @Component({
     selector: 'examination-detail',
-    templateUrl: 'examination.component.html'
+    templateUrl: 'examination.component.html',
+    standalone: false
 })
 
 export class ExaminationComponent extends EntityComponent<Examination> {
@@ -64,7 +66,6 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     hasBids: boolean = false;
     unit = UnitOfMeasure;
     defaultUnit = this.unit.KG;
-
 
     constructor(
             private route: ActivatedRoute,
@@ -145,7 +146,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
             'study': [{value: this.examination.study, disabled: this.inImport}, Validators.required],
-            'subject': [{value: this.examination.subject, disabled: this.inImport}],
+            'subject': [{value: this.examination.subject, disabled: this.inImport}, Validators.required],
             'center': [{value: this.examination.center, disabled: this.inImport}, Validators.required],
             'examinationDate': [this.examination.examinationDate, [Validators.required, DatepickerComponent.validator]],
             'comment': [this.examination.comment, Validators.pattern(this.pattern)],
@@ -166,6 +167,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     openSegmentationViewer() {
         window.open(environment.viewerUrl + '/segmentation?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
     }
+
     getCenters(): void {
         this.centerService
             .getCentersNames()
@@ -201,13 +203,9 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         this.getSubjects();
     }
 
-    instAssessment() {
-    }
-
     public async hasEditRight(): Promise<boolean> {
 	   return this.keycloakService.isUserAdmin() || this.hasImportRight;
     }
-
 
     public async hasDeleteRight(): Promise<boolean> {
          return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
@@ -241,7 +239,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             }
             return Promise.all(uploads).then(() => null);
         }).then(() => null).catch(reason => { if (reason.status == 403) {
-            this.consoleService.log('error', 'Examination ' + this.examination.id + ' Updating study / subject / center of an examination is forbiden.');
+            this.consoleService.log('error', 'Examination ' + this.examination.id + ' Updating study / subject / center of an examination is forbidden.');
             return null;
         } else {
             throw reason;
@@ -255,5 +253,4 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     getUnit(key: string) {
         return UnitOfMeasure.getLabelByKey(key);
     }
-
 }

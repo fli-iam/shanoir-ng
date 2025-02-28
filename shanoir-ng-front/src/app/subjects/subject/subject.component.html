@@ -55,7 +55,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ol>
 				<ol>
 					<div *ngIf="humanSelected()" [@slideDown]="humanSelected()">
-						<li *ngIf="mode == 'create' && humanSelected() && this.importMode != 'EEG'">
+						<li *ngIf="mode == 'create' && humanSelected() && importMode != 'EEG'">
 							<label i18n="Subject detail|Subject is already anonymized label@@SubjectDetailSubjectIsAlreadyAnonymized">Is the subject already anonymized?</label>
 							<span class="right-col">
 								<input type="radio" formControlName="isAlreadyAnonymized" [(ngModel)]="isAlreadyAnonymized" (ngModelChange)="toggleAnonymised()" [value]="true" [checked]="isAlreadyAnonymized == true"
@@ -105,6 +105,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 <label *ngIf="hasError('name', ['unique'])" class="form-validation-alert" i18n="Subject detail|Name unique error@@subjectDetailNameUniqueError">This name is already taken !</label>
                                 <label *ngIf="hasError('name', ['subjectNamePrefix'])" class="form-validation-alert" i18n="Subject detail|Name unique error@@subjectDetailNameUniqueError">The name should not be equal to the study prefix.</label>
                                 <label *ngIf="hasError('name', ['pattern'])" class="form-validation-alert" i18n="Subject detail|Name chars error@@subjectDetailNameCharsError">Forbidden characters</label>
+                                <label *ngIf="hasError('name', ['notEmptyValidator'])" class="form-validation-alert" i18n="Subject detail|Name empty error@@subjectDetailNameCharsError">Name must contain more than one character</label>
                             </ng-template>
                         </span>
 					</li>

@@ -11,7 +11,7 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
-<span class="subtitle" *ngIf="this.study.studyTags?.length == 0 || !this.study.studyTags">There are no public tags for this study.</span>
+<span class="subtitle" *ngIf="model?.length == 0">There are no public tags for this study.</span>
 <div class="tags" *ngIf="displayedTags">
     <span class="tag" [class.dark]="dtag.darkFont" [style.background]="dtag.tag.color" *ngFor="let dtag of displayedTags">
         <span *ngIf="mode != 'view'" class="clickable" (click)="deleteTag(dtag)" [class.used]="dtag.used">

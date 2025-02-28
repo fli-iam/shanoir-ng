@@ -20,6 +20,7 @@ import org.mockito.internal.util.collections.Sets;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -94,7 +95,10 @@ public class DatasetAcquisitionServiceSecurityTest {
 	
 	@MockBean
 	private StudyRepository studyRepository;
-	
+
+	@MockBean
+	private StudyInstanceUIDHandler studyInstanceUIDHandler;
+
 	@Test
 	@WithAnonymousUser
 	public void testAsAnonymous() throws ShanoirException {
@@ -107,7 +111,7 @@ public class DatasetAcquisitionServiceSecurityTest {
 		
 		assertAccessDenied(service::create, mockDsAcq());
 		assertAccessDenied(service::update, mockDsAcq(1L));
-		assertAccessDenied(service::deleteById, 1L);
+		assertAccessDenied(service::deleteById, 1L, null);
 	}
 
 	@Test
@@ -136,7 +140,7 @@ public class DatasetAcquisitionServiceSecurityTest {
 		assertEquals(4, page.getTotalElements());
 		assertAccessAuthorized(service::create, mockDsAcq());
 		assertAccessAuthorized(service::update, mockDsAcq(1L));
-		assertAccessAuthorized(service::deleteById, 1L);
+		assertAccessAuthorized(service::deleteById, 1L, null);
 	}
 
 	
@@ -199,19 +203,19 @@ public class DatasetAcquisitionServiceSecurityTest {
 		// deleteById(Long)
 		given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
 		if ("ROLE_USER".equals(role)) {
-			assertAccessDenied(service::deleteById, 1L);
+			assertAccessDenied(service::deleteById, 1L, null);
 		} else if ("ROLE_EXPERT".equals(role)) {
 			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
-			assertAccessDenied(service::deleteById, 1L);
+			assertAccessDenied(service::deleteById, 1L, null);
 			given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
-			assertAccessAuthorized(service::deleteById, 1L);
+			assertAccessAuthorized(service::deleteById, 1L, null);
 		}
 		given(rightsService.hasRightOnStudy(2L, "CAN_ADMINISTRATE")).willReturn(true);
-		assertAccessDenied(service::deleteById, 2L);
+		assertAccessDenied(service::deleteById, 2L, null);
 		given(rightsService.hasRightOnStudy(3L, "CAN_ADMINISTRATE")).willReturn(true);
-		assertAccessDenied(service::deleteById, 3L);
+		assertAccessDenied(service::deleteById, 3L, null);
 		given(rightsService.hasRightOnStudy(4L, "CAN_ADMINISTRATE")).willReturn(true);
-		assertAccessDenied(service::deleteById, 4L);
+		assertAccessDenied(service::deleteById, 4L, null);
 		given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
 		given(rightsService.hasRightOnStudy(2L, "CAN_ADMINISTRATE")).willReturn(false);
 		given(rightsService.hasRightOnStudy(3L, "CAN_ADMINISTRATE")).willReturn(false);

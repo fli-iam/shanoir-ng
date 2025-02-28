@@ -28,6 +28,7 @@ import { EntityService } from '../../shared/components/entity/entity.abstract.se
     selector: 'dataset-acquisition-list',
     templateUrl: 'dataset-acquisition-list.component.html',
     styleUrls: ['dataset-acquisition-list.component.css'],
+    standalone: false
 })
 export class DatasetAcquisitionListComponent extends EntityListComponent<DatasetAcquisition> {
 

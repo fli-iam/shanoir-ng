@@ -5,7 +5,7 @@
 
 .header { font-size: 20px; font-weight: bold; padding: 14px 10px 10px; }
 
-.body { padding: 0 20px; }
+.body { padding: 0 20px; white-space: pre-wrap; text-align: left; }
 
 .footer { padding: 15px 20px 20px; }
 
