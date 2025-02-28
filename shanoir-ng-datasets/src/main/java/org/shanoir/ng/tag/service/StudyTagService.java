@@ -1,22 +1,21 @@
 package org.shanoir.ng.tag.service;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.repository.StudyTagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.BindingResult;
-
-import java.io.IOException;
-import java.util.*;
 
 @Service
 public class StudyTagService {
