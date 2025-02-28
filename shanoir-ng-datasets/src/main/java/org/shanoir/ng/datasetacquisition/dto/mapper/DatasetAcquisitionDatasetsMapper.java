@@ -49,6 +49,7 @@ public interface DatasetAcquisitionDatasetsMapper {
 	DatasetAcquisitionDatasetsDTO datasetAcquisitionToDatasetAcquisitionDatasetsDTO(
 			DatasetAcquisition datasetAcquisition);
 
+	@Mappings({ @Mapping(target = "source", ignore = true), @Mapping(target = "copies", ignore = true) })
 	DatasetAcquisition datasetAcquisitionDatasetsDTOToDatasetAcquisition(DatasetAcquisitionDatasetsDTO dto);
 	
 	@ObjectFactory
