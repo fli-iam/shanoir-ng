@@ -56,6 +56,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriUtils;
@@ -89,8 +90,8 @@ public class DatasetServiceImpl implements DatasetService {
 	@Autowired
 	private SolrService solrService;
 
-	@Autowired
-	private DICOMWebService dicomWebService;
+	@Value("${dcm4chee-arc.dicom.web}")
+	private boolean dicomWeb;
 
 	@Autowired
 	private DatasetPropertyService propertyService;
@@ -101,14 +102,14 @@ public class DatasetServiceImpl implements DatasetService {
 	@Autowired
 	private ObjectMapper objectMapper;
 
-	@Value("${dcm4chee-arc.dicom.web}")
-	private boolean dicomWeb;
-
 	@Autowired
 	private DatasetProcessingService processingService;
 
 	@Autowired
 	private ProcessingResourceService processingResourceService;
+
+	@Autowired
+	private DatasetAsyncService datasetAsyncService;
 
 	@Autowired
 	DatasetExpressionRepository datasetExpressionRepository;
@@ -124,9 +125,6 @@ public class DatasetServiceImpl implements DatasetService {
 		processingResourceService.deleteByDatasetId(id);
 		propertyService.deleteByDatasetId(id);
 		repository.deleteById(id);
-
-		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getStudyId()));
-
 	}
 
 	/**
@@ -142,7 +140,6 @@ public class DatasetServiceImpl implements DatasetService {
 	public void deleteById(final Long id) throws ShanoirException, SolrServerException, IOException, RestServiceException {
 		final Dataset dataset = repository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
-
 		// Do not delete entity if it is the source (or if it has copies). If getSourceId() is not null, it means it's a copy
 		if (!CollectionUtils.isEmpty(dataset.getCopies())) {
 			throw new RestServiceException(
@@ -151,10 +148,12 @@ public class DatasetServiceImpl implements DatasetService {
 							"This dataset is linked to another dataset that was copied."
 					));
 		}
-
+		long startTime = System.currentTimeMillis();
 		delete(dataset);
-
-		this.deleteDatasetFromPacs(dataset);
+		deleteDatasetFilesFromDiskAndPacs(dataset);
+        long endTime = System.currentTimeMillis();
+        long elapsedTime = endTime - startTime;
+        LOG.info("Dataset deletion time: " + elapsedTime + " milliseconds");
 	}
 
 	/**
@@ -181,29 +180,15 @@ public class DatasetServiceImpl implements DatasetService {
 		delete(dataset);
 	}
 
-	@Override
-	public void deleteDatasetFromPacs(Dataset dataset) throws ShanoirException {
-        if (!dicomWeb) {
-            return;
-        }
-
+	public void deleteDatasetFilesFromDiskAndPacs(Dataset dataset) throws ShanoirException {
+		if (!dicomWeb) {
+			return;
+		}
+		Long id = dataset.getId();
 		for (DatasetExpression expression : dataset.getDatasetExpressions()) {
 			boolean isDicom = DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat());
-
-			for (DatasetFile file : expression.getDatasetFiles()) {
-				if (isDicom && file.isPacs()) {
-					dicomWebService.rejectDatasetFromPacs(file.getPath());
-				} else if (!file.isPacs()) {
-					try {
-						URL url = new URL(file.getPath().replaceAll("%20", " "));
-						File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
-						FileUtils.deleteQuietly(srcFile);
-					} catch (MalformedURLException e) {
-						throw new ShanoirException("Error while deleting dataset file", e);
-					}
-				}
-			}
-			break;
+			List<DatasetFile> datasetFiles = expression.getDatasetFiles();
+			datasetAsyncService.deleteDatasetFilesFromDiskAndPacsAsync(datasetFiles, isDicom, id);
 		}
 	}
 
