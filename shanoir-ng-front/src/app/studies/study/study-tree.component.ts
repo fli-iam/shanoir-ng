@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angular/core';
 
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -56,7 +56,9 @@ export class StudyTreeComponent implements OnDestroy {
 
         this.subscriptions.push(
             treeService.onScrollToSelected.subscribe(node => {
-                this.autoScrollTo(node);
+                setTimeout(() => {
+                    this.autoScrollTo(node);
+                });
             })
         );
     }
@@ -209,6 +211,12 @@ export class StudyTreeComponent implements OnDestroy {
     resetSelection() {
         this.treeService.unSelectAll();
         this.onSelectedChange(this.treeService.studyNode);
+    }
+
+    @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
+        if (event.key == '²') {
+            console.log('tree', this.treeService.studyNode);
+        }
     }
 
 }
