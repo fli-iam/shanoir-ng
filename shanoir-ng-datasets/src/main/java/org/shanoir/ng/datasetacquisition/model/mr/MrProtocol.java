@@ -14,15 +14,20 @@
 
 package org.shanoir.ng.datasetacquisition.model.mr;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.model.DiffusionGradient;
-import org.shanoir.ng.shared.model.InversionTime;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 
 /**
  * MR protocol.
@@ -172,12 +177,15 @@ public class MrProtocol extends AbstractEntity {
 	 */
 	private Double sliceSpacing;
 
+	/** (0054, 0081) Number of Slices */
+	private Integer numberOfSlices;
+
 	/**
 	 * (0018,0050) Slice thickness Nominal reconstructed slice thickness, in mm.
 	 * The unit of measure of the slice thickness must be in mm.
 	 */
 	private Double sliceThickness;
-	
+
 	/**
 	 * Functional only. From (0020,0110) Time delta between Images in a dynamic
 	 * or functional set of Images. The unit of measure of the temporal
@@ -639,4 +647,11 @@ public class MrProtocol extends AbstractEntity {
 		this.magneticFieldStrength = magneticFieldStrength;
 	}
 
+    public Integer getNumberOfSlices() {
+        return numberOfSlices;
+    }
+
+    public void setNumberOfSlices(Integer numberOfSlices) {
+        this.numberOfSlices = numberOfSlices;
+    }
 }
