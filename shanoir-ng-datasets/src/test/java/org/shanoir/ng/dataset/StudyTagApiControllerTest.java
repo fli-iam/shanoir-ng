@@ -86,7 +86,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = DatasetApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
-public class DatasetApiControllerTest {
+public class StudyTagApiControllerTest {
 
 	private static final String REQUEST_PATH = "/datasets";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
