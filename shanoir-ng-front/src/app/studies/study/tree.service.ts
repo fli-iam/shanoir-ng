@@ -85,21 +85,13 @@ export class TreeService {
     get canDownloadStudy(): boolean {
         return this.studyRights.includes(StudyUserRight.CAN_DOWNLOAD);
     }
-    
-    private openCloseBurst: WaitBurstEnd = new WaitBurstEnd(this.setTreeAvailable.bind(this), 100);
-    private _lastTreeAvailable: boolean;
  
     get treeAvailable(): boolean {
         return this._treeAvailable;
     }
 
     set treeAvailable(treeAvailable: boolean) {
-        this._lastTreeAvailable = treeAvailable;
-        this.openCloseBurst.fire();
-    }
-
-    setTreeAvailable() {
-        this._treeAvailable = this._lastTreeAvailable; 
+        this._treeAvailable = treeAvailable;
     }
 
     constructor(
