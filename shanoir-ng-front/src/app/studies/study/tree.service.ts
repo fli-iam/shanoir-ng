@@ -287,7 +287,7 @@ export class TreeService {
                                                                         if (dsNode.processings != UNLOADED) {
                                                                             let procNode: ProcessingNode = dsNode.processings.find(proc => {
                                                                                 if (proc.datasets != UNLOADED) {
-                                                                                    proc.datasets?.find(outDs => outDs.id == (typeof dataset == 'number' ? dataset : dataset.id));
+                                                                                    return proc.datasets?.find(outDs => outDs.id == (typeof dataset == 'number' ? dataset : dataset.id));
                                                                                 }
                                                                             });
                                                                             if (procNode) {
