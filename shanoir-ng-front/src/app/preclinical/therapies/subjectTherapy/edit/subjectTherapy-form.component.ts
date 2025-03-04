@@ -36,7 +36,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 @Component({
     selector: 'subject-therapy-form',
     templateUrl: 'subjectTherapy-form.component.html',
-    providers: [SubjectTherapyService, TherapyService, ReferenceService],
     animations: [slideDown],
     standalone: false
 })
