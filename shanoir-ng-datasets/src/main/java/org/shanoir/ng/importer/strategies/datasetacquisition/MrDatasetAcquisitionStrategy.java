@@ -16,6 +16,7 @@ package org.shanoir.ng.importer.strategies.datasetacquisition;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,6 +37,7 @@ import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.dataset.DatasetStrategy;
 import org.shanoir.ng.importer.strategies.protocol.MrProtocolStrategy;
+import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,6 +113,9 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 				mrDatasetAcquisition.getMrProtocol().setAcquisitionDuration(null);
 			}
 		}
+
+		mrDatasetAcquisition.setAcquisitionStartTime(LocalDateTime.of(DateTimeUtils.pacsStringToLocalDate(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate)), 
+													DateTimeUtils.stringToLocalTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime))));
 
 		// Can be overridden by study cards
 		String imageType = dicomAttributes.getFirstDatasetAttributes().getString(Tag.ImageType, 2);		

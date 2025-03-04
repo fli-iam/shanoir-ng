@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="header command-zone">1. Select Bids archive</div>
+<div class="header command-zone">1. Select BIDS (Brain Imaging Data Structure) archive</div>
 <fieldset>
     <p>This import allows to import a single subject from a BIDS dataset.</p>
     <p>Select a subject folder from a BIDS dataset and zip it.</p>
@@ -61,7 +61,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label class="required-label">Select an associated center</label>
             <span class="right-col">
                 <select-box
-                        [disabled]="(!study || !centerOptions || study.monoCenter || study.studyCenterList.length == 1)"
+                        [disabled]="(!study || !centerOptions || this.study.studyCenterList.length == 1)"
                         [(ngModel)]="center"
                         [viewRoute]="'/center/details/' + center?.id"
                         [viewDisabled]="!center"

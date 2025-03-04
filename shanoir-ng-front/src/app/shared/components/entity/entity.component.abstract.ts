@@ -171,10 +171,11 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
                     throw Error('mode has to be set!');
             }
         }
-        Promise.all([this.entityPromise, choose]).then(() => {
-            if (this.mode != 'create' && this.getTreeSelection) this.treeService.selection = this.getTreeSelection();
+        let choosePromise: Promise<void> = choose();
+        Promise.all([this.entityPromise, choosePromise]).then(() => {
+            if (this.mode != 'create' && this.getTreeSelection) this.treeService.select(this.getTreeSelection());
         });
-        choose().then(() => {
+        choosePromise.then(() => {
             this.footerState = new FooterState(this.mode);
             this.footerState.backButton = this.isMainComponent;
             this.hasEditRight().then(right => this.footerState.canEdit = right);
@@ -404,7 +405,7 @@ export abstract class EntityComponent<T extends Entity> implements OnDestroy, On
     }
 
     delete(): void {
-        this.openDeleteConfirmDialog(this.entity)
+        this.openDeleteConfirmDialog(this.entity);
     }
 
     protected openDeleteConfirmDialog = (entity: T) => {

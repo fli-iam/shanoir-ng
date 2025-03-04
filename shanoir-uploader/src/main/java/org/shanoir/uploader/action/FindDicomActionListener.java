@@ -78,6 +78,7 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 		mainWindow.birthDateTF.setText("");
 		mainWindow.mSexR.setSelected(true);
 		mainWindow.fSexR.setSelected(false);
+		mainWindow.oSexR.setSelected(false);
 
 		Media media = new Media();
 		// when the open file from CD/DVD menu is clicked
@@ -120,7 +121,8 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 					+ mainWindow.patientIDTF.getText() + " "
 					+ mainWindow.birthDate.toString() + " "
 					+ mainWindow.studyDescriptionTF.getText() + " "
-					+ mainWindow.studyDate.toString()) ;
+					+ mainWindow.studyDate.toString() + " "
+					+ mainWindow.modality);
 			this.mainWindow.isFromPACS = true;
 
 			this.mainWindow.setCursor(Cursor
@@ -165,19 +167,7 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 							+ firstName1.toUpperCase();
 				else
 					patientNameFinal = lastName.toUpperCase();
-
-					String modality = null;
-					if (!mainWindow.noRB.isSelected()) {
-						if (mainWindow.mrRB.isSelected()) {
-							modality = "MR";
-						} else if (mainWindow.ctRB.isSelected()) {
-							modality = "CT";
-						} else if (mainWindow.ptRB.isSelected()) {
-							modality = "PT";
-						} else if (mainWindow.nmRB.isSelected()) {
-							modality = "NM";
-						}
-					}
+					String modality = mainWindow.modality;
 					boolean studyRootQuery = false;
 					if (mainWindow.sRB.isSelected()) {
 						studyRootQuery = true;

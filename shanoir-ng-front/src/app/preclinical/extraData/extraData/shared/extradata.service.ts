@@ -12,21 +12,20 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-
+import { SingleDownloadService } from 'src/app/shared/mass-download/single-download.service';
 import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
-import { ExtraData } from './extradata.model';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-import * as AppUtils from '../../../../utils/app.utils';
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { ExtraData } from './extradata.model';
 
 @Injectable()
 export class ExtraDataService extends EntityService<ExtraData>{
         
     API_URL = PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL;
 
-    constructor(protected http: HttpClient) {
+    constructor(protected http: HttpClient, private downloadService: SingleDownloadService) {
         super(http)
     }
     
@@ -39,7 +38,8 @@ export class ExtraDataService extends EntityService<ExtraData>{
             .then(entities => entities?.map((entity) => this.toRealObject(entity)) || []);
     }
   
-    getExtraData(id:string): Promise<ExtraData>{
+    getExtraData(id:string): Promise<ExtraData> {
+        console.log('prout')
         return this.http.get<ExtraData>(PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL+"/"+id)
             .toPromise()
             .then((entity) => this.toRealObject(entity));
@@ -48,16 +48,7 @@ export class ExtraDataService extends EntityService<ExtraData>{
 
     downloadFile(examId: number): Promise<void> {
         const endpoint = this.API_URL + '/extradata/download/' + examId;
-        return this.http.get(endpoint, { observe: 'response', responseType: 'blob' }
-        ).toPromise().then(
-            response => {
-                this.downloadIntoBrowser(response);
-            }
-        );
-    }
-
-    private downloadIntoBrowser(response: HttpResponse<Blob>){
-        AppUtils.browserDownloadFileFromResponse(response);
+        return this.downloadService.downloadSingleFile(endpoint).toPromise().then(() => null);
     }
     
     createExtraData(datatype:string,extradata: any): Promise<any> {

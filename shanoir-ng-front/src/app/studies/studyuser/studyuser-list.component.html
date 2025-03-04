@@ -29,7 +29,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	</li>
 	<li>
 		<shanoir-table #memberTable
-			[getPage]="getPage.bind(this)" 
+			[getPage]="getPage.bind(this)"
 			[columnDefs]="columnDefs"
 			(rowClick)="onUserClick($event)"
 			[selectedId]="pannelStudyUser?.id">
@@ -92,18 +92,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<li>
 							<label>Can see all</label>
 							<span class="right-col">
-								<checkbox 
+								<checkbox
 									[mode]="mode == 'view' ? mode : 'edit'"
 									[ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL)"
 									(onChange)="onEditRight(StudyUserRight.CAN_SEE_ALL, pannelStudyUser, $event)"
-									[disabled]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL) && pannelStudyUser.user.id == getLoggedUserId()"
+									[disabled]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL) && pannelStudyUser.userId == getLoggedUserId()"
 								></checkbox>
 							</span>
 						</li>
 						<li>
 							<label>Can download</label>
 							<span class="right-col">
-								<checkbox 
+								<checkbox
 									[mode]="mode == 'view' ? mode : 'edit'"
 									[ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_DOWNLOAD)"
 									(onChange)="onEditRight(StudyUserRight.CAN_DOWNLOAD, pannelStudyUser, $event)"
@@ -124,7 +124,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<label>Can administrate</label>
 							<span class="right-col">
 								<checkbox
-									[mode]="mode == 'view' ? mode : 'edit'" 
+									[mode]="mode == 'view' ? mode : 'edit'"
 									[ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)"
 									(onChange)="onEditRight(StudyUserRight.CAN_ADMINISTRATE, pannelStudyUser, $event)"
 								></checkbox>
@@ -138,7 +138,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<li class="all-centers" *ngIf="mode == 'edit' || pannelStudyUser.centers?.length == 0">
 							<label>All centers (default)</label>
 							<checkbox
-								[mode]="mode == 'view' ? mode : 'edit'" 
+								[mode]="mode == 'view' ? mode : 'edit'"
 								[ngModel]="!(pannelStudyUser.centers?.length > 0)"
 								(onChange)="onToggleAllCenters($event)"
 							></checkbox>
@@ -149,7 +149,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<label>{{center.name}}</label>
 							<span class="right-col">
 								<checkbox
-									[mode]="mode == 'view' ? mode : 'edit'" 
+									[mode]="mode == 'view' ? mode : 'edit'"
 									[ngModel]="hasCenter(center, pannelStudyUser)"
 									(onChange)="onEditCenter(center, pannelStudyUser, $event)"
 								></checkbox>

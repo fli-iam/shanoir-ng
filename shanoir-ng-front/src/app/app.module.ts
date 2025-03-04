@@ -259,6 +259,7 @@ import { LoginGuard } from "./shared/roles/login-guard";
 import { AccessRequestService } from './users/access-request/access-request.service';
 import { AccessRequestListComponent } from './users/access-request/access-request-list.component';
 import { MassDownloadService } from './shared/mass-download/mass-download.service';
+import { SingleDownloadService } from './shared/mass-download/single-download.service';
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { TaskStatusComponent } from './async-tasks/status/task-status.component';
 import { DatasetCopyDialogComponent } from "./shared/components/dataset-copy-dialog/dataset-copy-dialog.component";
@@ -273,6 +274,10 @@ import { StudyTreeComponent } from './studies/study/study-tree.component';
 import { TreeService } from './studies/study/tree.service';
 import { CoilNodeComponent } from './coils/coil/tree/coil-node.component';
 import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.component';
+import { CtProtocol } from './dataset-acquisitions/modality/ct/ct-protocol.model';
+import { CtProtocolComponent } from './dataset-acquisitions/modality/ct/ct-protocol.component';
+import { XaProtocolComponent } from './dataset-acquisitions/modality/xa/xa-protocol.component';
+import { MetadataNodeComponent } from './datasets/tree/metadata-node.component';
 
 @NgModule({ 
     declarations: [
@@ -367,7 +372,9 @@ import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.c
         DatasetAcquisitionListComponent,
         DatasetAcquisitionComponent,
         MrProtocolComponent,
+        CtProtocolComponent,
         PetProtocolComponent,
+        XaProtocolComponent,
         DicomTagPipe,
         AutoAdjustInputComponent,
         SolrSearchComponent,
@@ -450,7 +457,8 @@ import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.c
         TestQualityCardOptionsComponent,
         StudyTreeComponent,
         CoilNodeComponent,
-        DoubleAwesomeComponent
+        DoubleAwesomeComponent,
+        MetadataNodeComponent
     ],
     bootstrap: [AppComponent], 
     imports: [
@@ -548,6 +556,7 @@ import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.c
         QualityCardService,
         QualityCardDTOService,
         MassDownloadService,
+        SingleDownloadService,
         SessionService,
         ShanoirEventService,
         TreeService,
