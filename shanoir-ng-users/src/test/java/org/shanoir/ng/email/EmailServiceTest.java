@@ -32,6 +32,7 @@ import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.utils.ModelsUtil;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -89,6 +90,7 @@ public class EmailServiceTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 4, username = "phdauvergne", authorities = { "ROLE_ADMIN" })
 	public void notifyAccountRequestAcceptedTest() throws Exception {
 		emailService.notifyAccountRequestAccepted(ModelsUtil.createUser());
 		assertReceivedMessageContains("Granted: Your Shanoir account has been activated", "Your account request has been granted");
@@ -101,6 +103,7 @@ public class EmailServiceTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 4, username = "phdauvergne", authorities = { "ROLE_ADMIN" })
 	public void notifyExtensionRequestAcceptedTest() throws Exception {
 		emailService.notifyExtensionRequestAccepted(ModelsUtil.createUser());
 		assertReceivedMessageContains("Granted: Your Shanoir account extension has been extended", "Your account extension request has been granted");
