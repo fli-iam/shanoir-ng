@@ -159,6 +159,10 @@ public class SerieTreeNode implements DicomTreeNode {
 	@XmlTransient
 	public String getDisplayString() {
 		String result = "";
+		final String seriesNumber = this.serie.getSeriesNumber();
+		if (seriesNumber != null && !seriesNumber.isEmpty()) {
+			result += seriesNumber + " ";
+		}
 		final String modality = this.serie.getModality();
 		if (modality != null && !"".equals(modality)) {
 			result += "[" + modality + "] ";
