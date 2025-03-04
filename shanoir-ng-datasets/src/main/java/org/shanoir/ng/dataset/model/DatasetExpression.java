@@ -58,7 +58,7 @@ public class DatasetExpression extends AbstractEntity {
 	private Long size;
 
 	/** Set of files. */
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "datasetExpression", cascade = { CascadeType.ALL })
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "datasetExpression", cascade = { CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST, CascadeType.DETACH })
 	private List<DatasetFile> datasetFiles;
 
 	/** Dataset processing type. */
