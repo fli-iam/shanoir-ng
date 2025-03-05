@@ -51,16 +51,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span *ngIf="!editMode">{{info.institution}}</span>
             </span>
         </li>
-        <li>
+        <li *ngIf="!editMode && info.function">
             <label i18n="Edit user|Function label@@editUserFunction" [class.required-label]="editMode">Role in the study</label> 
             <span class="right-col">
-                <span *ngIf="!editMode">{{info.function}}</span>
+                <span>{{info.function}}</span>
             </span>
         </li>
-        <li>
+        <li *ngIf="!editMode && info.contact">
             <label i18n="Edit user|Contact label@@editUserContact">Invitation issuer</label> 
             <span class="right-col">
-                <span *ngIf="!editMode">{{info.contact}}</span>
+                <span>{{info.contact}}</span>
             </span>
         </li>
     </ol>

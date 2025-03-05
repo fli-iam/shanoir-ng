@@ -82,7 +82,7 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
 
     checkAccess(studyId: number) {
         this.studyService.getStudiesNames().then(studies => {
-            if (studies.find(s => s.id == studyId)) {
+            if (studies?.find(s => s.id == studyId)) {
                 this.confirmDialogService.inform('You already have access to this study', 'No need to request an access.', 'Go to the study').then(() => {
                     this.router.navigate(['study/details', studyId]);
                 });
