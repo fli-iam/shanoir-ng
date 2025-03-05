@@ -24,6 +24,7 @@ import javax.swing.SwingWorker;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
+import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.PatientVerification;
@@ -68,6 +69,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 	private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 	private ShanoirUploaderServiceClient shanoirUploaderServiceClientNG;
 	private DownloadOrCopyActionListener dOCAL;
+	private ImportFromTableCSVWriter csvWriter;
 
 	public ImportFromTableRunner(Map<String, ImportJob> importJobs, ResourceBundle ressourceBundle, ImportFromTableWindow importFromTableWindow, IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG, DownloadOrCopyActionListener dOCAL) {
 		this.importJobs = importJobs;
@@ -112,6 +114,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 
 		boolean resultAllJobs = true;
 		int i = 1;
+		csvWriter = new ImportFromTableCSVWriter();
 		logger.info("\r\n**********************************\r\n"
 			+ "Starting Excel mass import...\r\n"
 			+ "**********************************");
@@ -127,7 +130,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				logger.info("\r\n------------------------------------------------------\r\n"
 					+ "Starting importJob " + importJobIdentifier + "\r\n"
 					+ "------------------------------------------------------");
-				boolean resultOneJob = importData(importJob, study, acquisitionEquipments);
+				boolean resultOneJob = importData(importJob, study, acquisitionEquipments, csvWriter);
 				resultAllJobs = resultOneJob && resultAllJobs;
 				logger.info("\r\n------------------------------------------------------\r\n"
 					+ "Finished importJob " + importJobIdentifier + ", success?: " + resultOneJob + "\r\n"
@@ -155,7 +158,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		return null;
 	}
 
-	private boolean importData(ImportJob importJob, org.shanoir.uploader.model.rest.Study studyREST, List<AcquisitionEquipment> acquisitionEquipments) throws UnsupportedEncodingException, NoSuchAlgorithmException, PseudonymusException {
+	private boolean importData(ImportJob importJob, org.shanoir.uploader.model.rest.Study studyREST, List<AcquisitionEquipment> acquisitionEquipments, ImportFromTableCSVWriter csvWriter) throws UnsupportedEncodingException, NoSuchAlgorithmException, PseudonymusException {
 		if (!queryPacs(importJob)) {
 			return false;
 		}
@@ -409,6 +412,14 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
                         .toLocalDate();
 					if (examinationLocalDate.equals(studyDate)) {
 						logger.info("Import job only downloaded, manual user decision needed: existing examination with the same date.");
+						String[] line = {
+							patientVerification.getFirstName(),
+							patientVerification.getLastName(),
+							patientVerification.getBirthName(),
+							patientVerification.getBirthDate(),
+							importJob.getSubjectName(),
+							examinationDate.toString()};
+						csvWriter.addExaminationLine(false, line);
 						return false;
 					}
 				}
@@ -444,6 +455,14 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		while (importThread.isAlive()) {
 			// wait for import thread to finish 
 		}
+		String[] line = {
+			patientVerification.getFirstName(),
+			patientVerification.getLastName(),
+			patientVerification.getBirthName(),
+			patientVerification.getBirthDate(),
+			importJob.getSubjectName(),
+			studyDateDate.toString()};
+		csvWriter.addExaminationLine(true, line);
 		return true;
 	}
 	
