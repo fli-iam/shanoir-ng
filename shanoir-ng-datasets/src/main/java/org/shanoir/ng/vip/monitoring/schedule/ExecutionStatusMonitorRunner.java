@@ -16,6 +16,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -23,6 +24,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
+@Profile("!test")
 public class ExecutionStatusMonitorRunner implements ApplicationRunner {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExecutionStatusMonitorRunner.class);
@@ -49,7 +51,7 @@ public class ExecutionStatusMonitorRunner implements ApplicationRunner {
      * @throws SecurityException
      */
     @Override
-    public void run(ApplicationArguments args) throws EntityNotFoundException, SecurityException, JsonProcessingException {
+    public void run(ApplicationArguments args) {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         List<ExecutionMonitoring> runningMonitorings = execMonitoringSrv.findAllRunning();
         for(ExecutionMonitoring monitoring : runningMonitorings){
@@ -59,12 +61,15 @@ public class ExecutionStatusMonitorRunner implements ApplicationRunner {
                 LOG.error("No [{}] type event found for object id [{}]", ShanoirEventType.EXECUTION_MONITORING_EVENT, monitoring.getId());
                 continue;
             }
-            events = objectMapper.readValue(eventsAsString, new TypeReference<List<ShanoirEvent>>() {});
-            for(ShanoirEvent event : events){
-                execMonitor.startMonitoringJob(monitoring, event);
-                LOG.info("Monitoring of VIP execution [{}] resumed", monitoring.getName());
+            try {
+                events = objectMapper.readValue(eventsAsString, new TypeReference<List<ShanoirEvent>>() {});
+                for(ShanoirEvent event : events){
+                    execMonitor.startMonitoringJob(monitoring, event);
+                    LOG.info("Monitoring of VIP execution [{}] resumed", monitoring.getName());
+                }
+            } catch (JsonProcessingException | EntityNotFoundException | SecurityException e) {
+                LOG.error("Monitoring of VIP execution [{}] failed", monitoring.getName(), e);
             }
         }
     }
-
 }
