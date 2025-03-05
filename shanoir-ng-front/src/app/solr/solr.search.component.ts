@@ -54,6 +54,7 @@ export type TextualFacet = typeof TextualFacetNames[number];
     templateUrl: 'solr.search.component.html',
     styleUrls: ['solr.search.component.css'],
     animations: [slideDown],
+    standalone: false
 })
 
 export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
@@ -453,12 +454,12 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         let columnDefs: ColumnDefinition[] = [
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {headerName: "Admin", type: "boolean", cellRenderer: row => this.hasAdminRight(row.data.studyId), awesome: "fa-solid fa-shield", color: "goldenrod", disableSorting: true},
-            {headerName: "", type: "boolean", cellRenderer: row => row.data.processed, awesome: "fa-solid fa-gears", color: "dimgrey", disableSorting: true, tip: item => { return item.processed ? "processed dataset" : "" }},
+            {headerName: "Processed", type: "boolean", cellRenderer: row => row.data.processed, awesome: "fa-solid fa-gears", color: "dimgrey", disableSorting: true, tip: item => { return item.processed ? "processed dataset" : "" }},
             {headerName: "Name", field: "datasetName"},
             {headerName: "Tags", field: "tags", cellRenderer: (params: any) => {
                     return params?.data?.tags ? params.data.tags.join(', ') : '';
                 }},
-            {headerName: "Type", field: "datasetType"},
+            {headerName: "Modality", field: "datasetType"},
             {headerName: "Nature", field: "datasetNature"},
             {headerName: "Series date", field: "datasetCreationDate", type: "date", hidden: true},
             {headerName: "Sorting index", field: "sortingIndex"},
@@ -485,7 +486,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {headerName: "Exam Date", field:"examinationDate", type: "date"},
             {headerName: "Import Date", field:"importDate", type: "date"},
             {headerName: "Imported by", field:"username"},
-            {headerName: "Slice", field: "sliceThickness"},
+            {headerName: "Slice Thickness", field: "sliceThickness"},
             {headerName: "Pixel", field: "pixelBandwidth"},
             {headerName: "Mag. strength", field: "magneticFieldStrength"},
             {headerName: "View DICOM", type: "button", awesome: "fa-solid fa-up-right-from-square",

@@ -13,12 +13,15 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
+import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.vip.monitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.resulthandler.OFSEPSeqIdHandler;
 import org.shanoir.ng.vip.resulthandler.ResultHandlerException;
 import org.shanoir.ng.shared.exception.PacsException;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,6 +36,9 @@ public class OFSEPSeqIdProcessingTest {
     
     @InjectMocks
     private OFSEPSeqIdHandler outputProcessing;
+
+    @MockBean
+    private StudyInstanceUIDHandler studyInstanceUIDHandler;
 
     @Test
     public void canProcessTest() throws ResultHandlerException {

@@ -29,7 +29,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <select-box
                         [(ngModel)]="study"
                         (userChange)="onSelectStudy()"
-                        [viewRoute]="'/study/details/' + this.study?.id"
+                        [viewRoute]="'/study/details/' + study?.id"
                         [viewDisabled]="!study"
                         [options]="studyOptions"
                         [disabled]="loading">
@@ -52,7 +52,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <select-box
                         [(ngModel)]="studycard"
                         (userChange)="onSelectStudyCard()"
-                        [viewRoute]="'/study-card/details/' + this.studycard?.id"
+                        [viewRoute]="'/study-card/details/' + studycard?.id"
                         (onUserClear)="onClearStudyCard()"
                         [viewDisabled]="!studycard"
                         [options]="studycardOptions"
@@ -91,7 +91,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [readOnly]="useStudyCard"
                         [(ngModel)]="center"
                         (userChange)="onSelectCenter()"
-                        [viewRoute]="'/center/details/' + this.center?.id" [viewDisabled]="!center"
+                        [viewRoute]="'/center/details/' + center?.id" [viewDisabled]="!center"
                         (onNewClick)="openCreateCenter()" [newHidden]="hasCompatibleCenters"
                         [options]="centerOptions">
                 </select-box>
@@ -117,7 +117,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [readOnly]="useStudyCard"
                         [(ngModel)]="acquisitionEquipment"
                         (userChange)="onContextChange();"
-                        [viewRoute]="'/acquisition-equipment/details/' + this.acquisitionEquipment?.id" [viewDisabled]="!acquisitionEquipment"
+                        [viewRoute]="'/acquisition-equipment/details/' + acquisitionEquipment?.id" [viewDisabled]="!acquisitionEquipment"
                         (onNewClick)="openCreateAcqEqt()" [newHidden]="hasCompatibleEquipments"
                         [options]="acquisitionEquipmentOptions" [pipe]="acqEqPipe">
                 </select-box>
@@ -143,14 +143,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li class="required">
             <label class="required-label">Select a subject</label>
             <span class="right-col">
-                <select-box
+                <select-box class="subject-select"
                         [disabled]="loading || !study || !acquisitionEquipment"
                         [(ngModel)]="subject"
                         (userChange)="onSelectSubject();"
                         [viewRoute]="'/subject/details/' + this.subject?.id" [viewDisabled]="!subject"
-                        (onNewClick)="openCreateSubject()" [newDisabled]="!study || !acquisitionEquipment"
                         [optionArr]="subjects">
                 </select-box>
+                <button class="new-subject" (click)="openCreateSubject()" [disabled]="!study || !acquisitionEquipment">
+                    <i class="fa-solid fa-user"></i>
+                    <i class="fa-solid fa-plus secondary"></i>
+                    New subject
+                </button>
             </span>
         </li>
         <li *ngIf="editSubjectStudy" class="required">
@@ -194,9 +198,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <checkbox [(ngModel)]="subject.subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"></checkbox>
                 </span>
             </li>
-            <li *ngIf="this.study?.tags">
+            <li *ngIf="study?.tags">
                 <label>Tags</label>
-                <tag-list [(ngModel)]="subject.subjectStudy.tags" [availableTags]="this.study?.tags"></tag-list>
+                <tag-list [(ngModel)]="subject.subjectStudy.tags" [availableTags]="study?.tags"></tag-list>
             </li>
         </div>
     </ol>
@@ -209,10 +213,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li>
             <label class="required-label">Select an examination</label>
             <span class="right-col">
-                <select-box [disabled]="!study || !subject || loading" [(ngModel)]="examination" (userChange)="onSelectExam()"
+                <select-box class="examination-select" 
+                        [disabled]="!study || !subject || loading" [(ngModel)]="examination" (userChange)="onSelectExam()"
                         [viewRoute]="'/examination/details/' + this.examination?.id" [viewDisabled]="!examination"
-                        (onNewClick)="openCreateExam()" [newDisabled]="!study || !subject" [optionArr]="examinations" [pipe]="subjectExaminationLabelPipe">
+                        [optionArr]="examinations" [pipe]="subjectExaminationLabelPipe">
                 </select-box>
+                <button class="new-subject" (click)="openCreateExam()" [disabled]="!study || !subject">
+                    <i class="fa-solid fa-stethoscope"></i>
+                    <i class="fa-solid fa-plus secondary"></i>
+                    New examination
+                </button>
             </span>
         </li>
     </ol>

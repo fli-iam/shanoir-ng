@@ -32,7 +32,8 @@ import { CoilService } from '../shared/coil.service';
 @Component({
     selector: 'coil',
     templateUrl: 'coil.component.html',
-    styleUrls: ['coil.component.css']
+    styleUrls: ['coil.component.css'],
+    standalone: false
 })
 export class CoilComponent extends EntityComponent<Coil> {
 
@@ -63,7 +64,9 @@ export class CoilComponent extends EntityComponent<Coil> {
     }
     
     initView(): Promise<void> {
-        return Promise.resolve();
+        return this.centerService.getAll().then(centers => {
+            this.coil.center = centers.find(center => center.id == this.coil.center.id);
+        });
     }
 
     initEdit(): Promise<void> {
