@@ -15,6 +15,7 @@ package org.shanoir.ng.importer.strategies.datasetacquisition;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,9 +69,13 @@ public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy
 
 		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
 		datasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
-		datasetAcquisition.setAcquisitionStartTime(LocalDateTime.of(DateTimeUtils.pacsStringToLocalDate(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate)), 
-													DateTimeUtils.stringToLocalTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime))));
-
+		try {
+			datasetAcquisition.setAcquisitionStartTime(LocalDateTime.of(DateTimeUtils.pacsStringToLocalDate(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate)), 
+				DateTimeUtils.stringToLocalTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime))));
+		} catch (DateTimeParseException e) {
+			LOG.warn("could not parse the acquisition date : " + dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate));
+			datasetAcquisition.setAcquisitionStartTime(null);
+		}
 		PetProtocol protocol = protocolStrategy.generateProtocolForSerie(dicomAttributes.getFirstDatasetAttributes(), serie);
 		datasetAcquisition.setPetProtocol(protocol);
 	
