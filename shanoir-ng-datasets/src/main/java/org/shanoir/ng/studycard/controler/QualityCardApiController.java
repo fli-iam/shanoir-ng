@@ -24,7 +24,6 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
-import org.shanoir.ng.studycard.model.rule.QualityExaminationRule;
 import org.shanoir.ng.studycard.service.CardsProcessingService;
 import org.shanoir.ng.studycard.service.QualityCardService;
 import org.shanoir.ng.studycard.service.QualityCardUniqueConstraintManager;
@@ -35,7 +34,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import io.swagger.v3.oas.annotations.Parameter;
@@ -172,6 +170,7 @@ public class QualityCardApiController implements QualityCardApi {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         LOG.info("test quality card: name:" + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
+		LOG.error("########################################## test qc 1");
         QualityCardResult results = cardProcessingService.applyQualityCardOnStudy(qualityCard, false);
         return new ResponseEntity<>(results, HttpStatus.OK);
     }
@@ -187,6 +186,7 @@ public class QualityCardApiController implements QualityCardApi {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         LOG.info("test quality card: name:" + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
+		LOG.error("########################################## test qc 2");
         QualityCardResult results = cardProcessingService.applyQualityCardOnStudy(qualityCard, start, stop);
         return new ResponseEntity<>(results, HttpStatus.OK);
     }
