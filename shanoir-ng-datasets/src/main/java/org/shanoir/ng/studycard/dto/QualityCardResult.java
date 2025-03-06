@@ -16,7 +16,6 @@ package org.shanoir.ng.studycard.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.SubjectStudy;
@@ -40,9 +39,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author mkain
  *
  */
-public class QualityCardResult extends CopyOnWriteArrayList<QualityCardResultEntry> {
+public class QualityCardResult extends ArrayList<QualityCardResultEntry> {
     
-    private List<SubjectStudy> updatedSubjectStudies = new CopyOnWriteArrayList<>();
+    private List<SubjectStudy> updatedSubjectStudies = new ArrayList<>();
     
     public List<SubjectStudy> getUpdatedSubjectStudies() {
         return updatedSubjectStudies;
