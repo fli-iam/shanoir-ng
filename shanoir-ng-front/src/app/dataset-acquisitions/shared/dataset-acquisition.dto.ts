@@ -101,7 +101,6 @@ export class DatasetAcquisitionDTOService {
         }
         entity.rank = dto.rank;
         entity.softwareRelease = dto.softwareRelease;
-        if (dto.acquisitionStartTime) entity.acquisitionStartTime = new Date(dto.acquisitionStartTime);
         entity.sortingIndex = dto.sortingIndex;
         entity.type = dto.type;
         entity.source = dto.source;
@@ -170,7 +169,6 @@ export class DatasetAcquisitionDTO {
     examination: ExaminationDTO;
     rank: number;
     softwareRelease: string;
-    acquisitionStartTime: Date;
     sortingIndex: number;
     importDate: Date;
     type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Xa' | 'Generic' | 'Processed' | 'BIDS';
