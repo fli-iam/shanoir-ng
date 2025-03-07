@@ -42,7 +42,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </span>
             </td>
             <td>
-                <button type="button" *ngIf="!pagings.get(qualityCard.id)" class="alt right-icon apply" (click)="apply(qualityCard)" [disabled]="true || loading.get(qualityCard.id)">
+                <button type="button" *ngIf="!pagings.get(qualityCard.id)" class="alt right-icon apply" (click)="apply(qualityCard)" [disabled]="loading.get(qualityCard.id)">
                     Apply now
                     <i *ngIf="!loading.get(qualityCard.id)" class="fa-solid fa-play"></i>
                     <i *ngIf="loading.get(qualityCard.id)" class="fa fa-cog fa-spin"></i>
