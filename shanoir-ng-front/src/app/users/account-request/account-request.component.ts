@@ -42,7 +42,7 @@ export class AccountRequestComponent {
     protected router: Router;
     studyName: string; // optional : study display name
     invitationIssuer: string; // optional : issuer of the invitation (from the study details)
-    role: string; // optional : operator/researcher
+    function: string; // optional : operator/researcher
 
     language: 'english' | 'french' = 'english';
 
@@ -55,7 +55,7 @@ export class AccountRequestComponent {
                 this.router = ServiceLocator.injector.get(Router)
                 this.studyName = this.route.snapshot.queryParams['study'];
                 this.invitationIssuer = this.route.snapshot.queryParams['from'];
-                this.role = this.route.snapshot.queryParams['role'];
+                this.function = this.route.snapshot.queryParams['function'];
             }
 
     ngOnInit(): void {
@@ -89,7 +89,7 @@ export class AccountRequestComponent {
     accountRequest(): void {
         if (this.studyName) this.user.accountRequestInfo.studyName = this.studyName;
         if (this.invitationIssuer) this.user.accountRequestInfo.contact = this.invitationIssuer;
-        if (this.role) this.user.accountRequestInfo.function = this.role;
+        if (this.function) this.user.accountRequestInfo.function = this.function;
         this.userService.requestAccount(this.user)
             .then((res) => {
                  this.requestSent = true;

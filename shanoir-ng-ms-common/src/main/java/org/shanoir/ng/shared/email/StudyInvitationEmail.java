@@ -6,7 +6,7 @@ public class StudyInvitationEmail extends EmailBase {
 
 	private String invitationIssuer = null;
 
-	private String role = null;
+	private String function = null;
 	
 	public String getInvitedMail() {
 		return invitedMail;
@@ -24,12 +24,12 @@ public class StudyInvitationEmail extends EmailBase {
         this.invitationIssuer = invitationIssuer;
     }
 
-    public String getRole() {
-        return role;
+    public String getFunction() {
+        return function;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    public void setFunction(String function) {
+        this.function = function;
     }
 
 }

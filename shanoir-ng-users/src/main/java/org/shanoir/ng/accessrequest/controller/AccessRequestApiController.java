@@ -210,8 +210,8 @@ public class AccessRequestApiController implements AccessRequestApi {
 				@RequestParam(value = "studyName", required = true) String studyName,
 			@Parameter(name = "Issuer of the invitation", required = true) 
 				@RequestParam(value = "issuer", required = false) String issuer,
-			@Parameter(name = "The future role of the user in the study he is invited in", required = true) 
-				@RequestParam(value = "role", required = false) String role,
+			@Parameter(name = "The future function of the user in the study he is invited in", required = true) 
+				@RequestParam(value = "function", required = false) String function,
 			@Parameter(name = "The email or login of the invited user.") 
 				@RequestParam(value = "email", required = true) String emailOrLogin) throws RestServiceException, JsonProcessingException, AmqpException {
 
@@ -255,7 +255,7 @@ public class AccessRequestApiController implements AccessRequestApi {
 				mail.setStudyId(studyId.toString());
 				mail.setStudyName(studyName);
 				mail.setInvitationIssuer(issuer);
-				mail.setRole(role);
+				mail.setFunction(function);
 				this.emailService.inviteToStudy(mail);
 				return new ResponseEntity<AccessRequest>(HttpStatus.NO_CONTENT);
 			} else {

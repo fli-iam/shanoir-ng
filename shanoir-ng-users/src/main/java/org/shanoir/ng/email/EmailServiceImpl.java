@@ -598,8 +598,8 @@ public class EmailServiceImpl implements EmailService {
 	private String buildInvitationLink(StudyInvitationEmail email) {
 		String link = shanoirServerAddress + "account/study/" + email.getStudyId() + "/account-request";
 		List<String> params = new ArrayList<>();
-		if (email.getRole() != null) {
-			params.add("role=" + URLEncoder.encode(email.getRole()));
+		if (email.getFunction() != null) {
+			params.add("function=" + URLEncoder.encode(email.getFunction()));
 		}
 		if (email.getStudyName() != null) {
 			params.add("study=" + URLEncoder.encode(email.getStudyName()));

@@ -75,9 +75,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </ol>
         </fieldset>
 
-        <span>
+        <fieldset>
             <account-request-info formControlName="accountRequestInfo" [(ngModel)]="user.accountRequestInfo" [editMode]="true" (valid)="onInfoValidityUpdate($event)"></account-request-info>
-        </span>
+        </fieldset>
 
         <div class="footer command-zone">
             <button i18n="Edit user|Cancel button label@@cancelButton" class="Button" (click)="cancelAccountRequest()">Cancel</button>

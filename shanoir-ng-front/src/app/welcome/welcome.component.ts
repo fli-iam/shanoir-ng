@@ -174,7 +174,7 @@ export class WelcomeComponent implements OnInit {
             if (choice == 'yes') {
                 window.location.href = window.location.protocol + "//" + window.location.hostname + "/shanoir-ng/access-request/study/" + study.id;
             } else if (choice == 'no') {
-                window.location.href = window.location.protocol + "//" + window.location.hostname + "/shanoir-ng/account/study/" + study.id + "/account-request?study=" + study.name + "&role=consumer";
+                window.location.href = window.location.protocol + "//" + window.location.hostname + "/shanoir-ng/account/study/" + study.id + "/account-request?study=" + study.name + "&function=consumer";
             }
         });
 	}
