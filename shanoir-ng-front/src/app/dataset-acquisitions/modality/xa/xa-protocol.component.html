@@ -12,12 +12,16 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
-<head></head>
-<body>
-    <p><span>Dear administrator,</span></p>
-    <p>The account request for <span th:text="${user.firstName}"></span> <span th:text="${user.lastName}"></span> (<span th:text="${user.email}"></span>) has been granted by <span th:text="${adminName}"></span>.</p>
-    <p><span th:text="Regards"></span></p>
-</body>
-</html>
+<fieldset>
+	<legend>XA protocol</legend>
+	<ol>
+		<li>
+			<label>Slice thickness ({{getUnit("MM")}})</label>
+			<span class="right-col">{{protocol.sliceThickness}}</span>
+		</li>
+		<li>
+			<label>Number of slices</label>
+			<span class="right-col">{{protocol.numberOfSlices}}</span>
+		</li>
+	</ol>
+</fieldset>

@@ -87,8 +87,8 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
         }
         this.form = this.formBuilder.group({
             'institution': [this.info.institution, [Validators.required, Validators.maxLength(200)]],
-            'function': [this.info.function, [Validators.required, Validators.maxLength(200)]],
-            'contact': [this.info.contact, [Validators.maxLength(200)]],
+            // 'function': [this.info.function, [Validators.required, Validators.maxLength(200)]],
+            // 'contact': [this.info.contact, [Validators.maxLength(200)]],
             'studyId': [this.info.studyId, [Validators.required]],
             'studyName': [this.info.studyName]
         });
