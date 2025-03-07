@@ -32,6 +32,7 @@ import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.email.StudyInvitationEmail;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -242,6 +243,7 @@ public class EmailServiceImpl implements EmailService {
 	private void notifyAdminAccountRequestAccepted(final User user) {
 		// Get admins emails
 		final List<String> adminEmails = userRepository.findAdminEmails();
+		User userAdmin = userRepository.findById(KeycloakUtil.getTokenUserId()).orElse(null);
 
 		MimeMessagePreparator messagePreparator = mimeMessage -> {
 			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
@@ -249,6 +251,9 @@ public class EmailServiceImpl implements EmailService {
 			messageHelper.setTo(adminEmails.toArray(new String[0]));
 			messageHelper.setSubject("User account request granted (" + shanoirServerAddress + ")");
 			final Map<String, Object> variables = new HashMap<>();
+			if (userAdmin != null) {
+				variables.put("adminName", userAdmin.getUsername());
+			}
 			variables.put("user", user);
 			final String content = build("notifyAdminAccountRequestAccepted", variables);
 			messageHelper.setText(content, true);
@@ -276,6 +281,7 @@ public class EmailServiceImpl implements EmailService {
 	private void notifyAdminExtensionRequestAccepted(final User user) {
 		// Get admins emails
 		final List<String> adminEmails = userRepository.findAdminEmails();
+		User userAdmin = userRepository.findById(KeycloakUtil.getTokenUserId()).orElse(null);
 
 		MimeMessagePreparator messagePreparator = mimeMessage -> {
 			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
@@ -284,6 +290,9 @@ public class EmailServiceImpl implements EmailService {
 			messageHelper.setSubject("User account request granted (" + shanoirServerAddress + ")");
 			final Map<String, Object> variables = new HashMap<>();
 			variables.put("user", user);
+			if (userAdmin != null) {
+				variables.put("adminName", userAdmin.getUsername());
+			}
 			final String content = build("notifyAdminExtensionRequestAccepted", variables);
 			messageHelper.setText(content, true);
 		};
@@ -520,7 +529,7 @@ public class EmailServiceImpl implements EmailService {
 	@Override
 	public void notifyStudyManagerAccessRequest(AccessRequest createdRequest) {
         // Find requester users
-        User user = userRepository.findById(createdRequest.getUser().getId()).orElse(null);
+         User user = userRepository.findById(createdRequest.getUser().getId()).orElse(null);
 
         // get study admin
         List<User> studyAdmins = this.findStudyAdmin(createdRequest.getStudyId());
