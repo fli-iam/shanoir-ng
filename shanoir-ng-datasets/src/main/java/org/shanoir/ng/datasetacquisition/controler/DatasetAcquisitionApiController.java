@@ -210,8 +210,19 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 			throws RestServiceException {
 		try {
 			Long studyId = datasetAcquisitionService.findById(datasetAcquisitionId).getExamination().getStudyId();
-			
-			datasetAcquisitionService.deleteById(datasetAcquisitionId, null);
+
+			ShanoirEvent event = new ShanoirEvent(
+					ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT,
+					String.valueOf(datasetAcquisitionId),
+					KeycloakUtil.getTokenUserId(),
+					"Starting deletion of acquisition with id : " + datasetAcquisitionId,
+					ShanoirEvent.IN_PROGRESS,
+					0,
+					studyId);
+
+			eventService.publishEvent(event);
+
+			datasetAcquisitionService.deleteById(datasetAcquisitionId, event);
 
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
 
