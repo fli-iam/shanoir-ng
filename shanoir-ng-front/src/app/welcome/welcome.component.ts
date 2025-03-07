@@ -169,7 +169,7 @@ export class WelcomeComponent implements OnInit {
 	}
 
 	accessRequest(study: any): void {
-        this.confirmDialogService.choose('Do you already have a Shanoir access ?', null, {yes: 'Yes, log in', no: 'No, request an account', cancel: 'Cancel'})
+        this.confirmDialogService.choose('Do you already have a Shanoir account ?', null, {yes: 'Yes, log in', no: 'No, request an account', cancel: 'Cancel'})
         .then(choice => {
             if (choice == 'yes') {
                 window.location.href = window.location.protocol + "//" + window.location.hostname + "/shanoir-ng/access-request/study/" + study.id;
