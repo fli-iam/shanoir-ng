@@ -164,59 +164,59 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
         List<DatasetAcquisition> daList = datasetAcquisitionService.findByExamination(examinationId);
         daList.sort(new Comparator<DatasetAcquisition>() {
 
-            @Override
-            public int compare(DatasetAcquisition o1, DatasetAcquisition o2) {
-                return (o1.getSortingIndex() != null ? o1.getSortingIndex() : 0)
-                        - (o2.getSortingIndex() != null ? o2.getSortingIndex() : 0);
-            }
-        });
-        if (daList.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            return new ResponseEntity<>(examDsAcqMapper.datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(daList), HttpStatus.OK);
-        }
-    }
+			@Override
+			public int compare(DatasetAcquisition o1, DatasetAcquisition o2) {
+				return (o1.getSortingIndex() != null ? o1.getSortingIndex() : 0) 
+						- (o2.getSortingIndex() != null ? o2.getSortingIndex() : 0);
+			}
+		});
+		if (daList.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} else {
+			return new ResponseEntity<>(examDsAcqMapper.datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(daList), HttpStatus.OK);
+		}
+	}
+	
+	@Override
+	public ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findDatasetAcquisitionByDatasetIds(
+			@Parameter(description = "ids of the datasets", required = true) @RequestBody Long[] datasetIds) {
+		
+		List<DatasetAcquisition> daList = datasetAcquisitionService.findByDatasetId(datasetIds);
+		
+		daList.sort(new Comparator<DatasetAcquisition>() {
+			@Override
+			public int compare(DatasetAcquisition o1, DatasetAcquisition o2) {
+				return o1.getExamination() != null && o2.getExamination() != null 
+						? Long.compare(o1.getExamination().getStudyId(), o2.getExamination().getStudyId())
+						: 0;
+			}
+		});
+		if (daList.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} else {
+			return new ResponseEntity<>(dsAcqDsMapper.datasetAcquisitionsToDatasetAcquisitionDatasetsDTOs(daList), HttpStatus.OK);
+		}
+	}
+	
+	@Override
+	public ResponseEntity<Void> deleteDatasetAcquisition(
+			  Long datasetAcquisitionId)
+			throws RestServiceException {
+		try {
+			Long studyId = datasetAcquisitionService.findById(datasetAcquisitionId).getExamination().getStudyId();
 
-    @Override
-    public ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findDatasetAcquisitionByDatasetIds(
-            @Parameter(description = "ids of the datasets", required = true) @RequestBody Long[] datasetIds) {
+			ShanoirEvent event = new ShanoirEvent(
+					ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT,
+					String.valueOf(datasetAcquisitionId),
+					KeycloakUtil.getTokenUserId(),
+					"Starting deletion of acquisition with id : " + datasetAcquisitionId,
+					ShanoirEvent.IN_PROGRESS,
+					0,
+					studyId);
 
-        List<DatasetAcquisition> daList = datasetAcquisitionService.findByDatasetId(datasetIds);
+			eventService.publishEvent(event);
 
-        daList.sort(new Comparator<DatasetAcquisition>() {
-            @Override
-            public int compare(DatasetAcquisition o1, DatasetAcquisition o2) {
-                return o1.getExamination() != null && o2.getExamination() != null
-                        ? Long.compare(o1.getExamination().getStudyId(), o2.getExamination().getStudyId())
-                        : 0;
-            }
-        });
-        if (daList.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            return new ResponseEntity<>(dsAcqDsMapper.datasetAcquisitionsToDatasetAcquisitionDatasetsDTOs(daList), HttpStatus.OK);
-        }
-    }
-
-    @Override
-    public ResponseEntity<Void> deleteDatasetAcquisition(
-              Long datasetAcquisitionId)
-            throws RestServiceException {
-        try {
-            Long studyId = datasetAcquisitionService.findById(datasetAcquisitionId).getExamination().getStudyId();
-
-            ShanoirEvent event = new ShanoirEvent(
-                    ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT,
-                    String.valueOf(datasetAcquisitionId),
-                    KeycloakUtil.getTokenUserId(),
-                    "Starting deletion of acquisition with id : " + datasetAcquisitionId,
-                    ShanoirEvent.IN_PROGRESS,
-                    0,
-                    studyId);
-
-            eventService.publishEvent(event);
-
-            datasetAcquisitionService.deleteById(datasetAcquisitionId, event);
+			datasetAcquisitionService.deleteById(datasetAcquisitionId, event);
 
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
 

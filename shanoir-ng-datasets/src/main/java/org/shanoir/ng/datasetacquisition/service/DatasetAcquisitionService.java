@@ -73,11 +73,11 @@ public interface DatasetAcquisitionService {
 	@PreAuthorize("#entity.getId() == null and (hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#entity.getExamination().getId(), 'CAN_IMPORT')))")
 	DatasetAcquisition create(DatasetAcquisition entity);
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnExamination(#entity.examination.id, 'CAN_ADMINISTRATE')")
-    DatasetAcquisition update(DatasetAcquisition entity) throws EntityNotFoundException;
-
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.filterDatasetAcquisitionList(#entities, 'CAN_ADMINISTRATE')")
-    Iterable<DatasetAcquisition> update(List<DatasetAcquisition> entities) throws EntityNotFoundException;
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnExamination(#entity.examination.id, 'CAN_ADMINISTRATE')")
+	DatasetAcquisition update(DatasetAcquisition entity) throws EntityNotFoundException;
+	
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnEveryTrustedDatasetAcquisition(#entities, 'CAN_ADMINISTRATE')")
+	Iterable<DatasetAcquisition> update(List<DatasetAcquisition> entities);
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnDatasetAcquisition(#id, 'CAN_ADMINISTRATE')")
 	void deleteById(Long id, ShanoirEvent event) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
