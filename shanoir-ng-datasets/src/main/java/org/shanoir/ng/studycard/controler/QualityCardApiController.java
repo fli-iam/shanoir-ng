@@ -24,7 +24,7 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
-import org.shanoir.ng.studycard.model.rule.QualityExaminationRule;
+import org.shanoir.ng.studycard.service.AsyncCardsProcessingService;
 import org.shanoir.ng.studycard.service.CardsProcessingService;
 import org.shanoir.ng.studycard.service.QualityCardService;
 import org.shanoir.ng.studycard.service.QualityCardUniqueConstraintManager;
@@ -35,10 +35,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.transaction.Transactional;
 
 @Controller
 public class QualityCardApiController implements QualityCardApi {
@@ -55,6 +55,9 @@ public class QualityCardApiController implements QualityCardApi {
 
 	@Autowired
 	private CardsProcessingService cardProcessingService;
+
+	@Autowired
+	private AsyncCardsProcessingService asyncCardProcessingService;
 
 	@Override
 	public ResponseEntity<Void> deleteQualityCard(
@@ -164,16 +167,15 @@ public class QualityCardApiController implements QualityCardApi {
 	}
 	
 	@Override
+	@Transactional
     public ResponseEntity<QualityCardResult> testQualityCardOnStudy(
              Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException {
-        
-        final QualityCard qualityCard = qualityCardService.findById(qualityCardId);
-        if (qualityCard == null) {
+        try {
+			asyncCardProcessingService.applyQualityCardOnStudy(qualityCardId, false);
+		} catch(EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        LOG.info("test quality card: name:" + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
-        QualityCardResult results = cardProcessingService.applyQualityCardOnStudy(qualityCard, false);
-        return new ResponseEntity<>(results, HttpStatus.OK);
+		}
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 	@Override
