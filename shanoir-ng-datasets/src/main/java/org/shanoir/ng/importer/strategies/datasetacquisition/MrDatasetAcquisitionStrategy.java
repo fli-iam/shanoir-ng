@@ -17,6 +17,7 @@ package org.shanoir.ng.importer.strategies.datasetacquisition;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -114,8 +115,13 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 			}
 		}
 
-		mrDatasetAcquisition.setAcquisitionStartTime(LocalDateTime.of(DateTimeUtils.pacsStringToLocalDate(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate)), 
-													DateTimeUtils.stringToLocalTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime))));
+		try {
+			mrDatasetAcquisition.setAcquisitionStartTime(LocalDateTime.of(DateTimeUtils.pacsStringToLocalDate(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate)), 
+				DateTimeUtils.stringToLocalTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime))));
+		} catch (DateTimeParseException e) {
+			mrLOG.warn("could not parse the acquisition date : " + dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate));
+			datasetAcquisition.setAcquisitionStartTime(null);
+		}
 
 		// Can be overridden by study cards
 		String imageType = dicomAttributes.getFirstDatasetAttributes().getString(Tag.ImageType, 2);		
