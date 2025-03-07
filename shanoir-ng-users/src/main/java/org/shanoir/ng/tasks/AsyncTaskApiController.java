@@ -15,7 +15,9 @@
 package org.shanoir.ng.tasks;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
@@ -63,6 +65,7 @@ public class AsyncTaskApiController implements AsyncTaskApi {
                 ShanoirEventType.DELETE_EXAMINATION_EVENT,
                 ShanoirEventType.DELETE_NIFTI_EVENT,
                 ShanoirEventType.DELETE_DATASET_EVENT,
+                ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT,
                 ShanoirEventType.BIDS_EXPORT);
 
         // Get only event with last updates < 7 days

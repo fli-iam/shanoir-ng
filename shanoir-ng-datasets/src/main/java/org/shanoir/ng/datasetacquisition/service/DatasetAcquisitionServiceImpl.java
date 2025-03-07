@@ -55,6 +55,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -88,6 +89,9 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
     @Autowired
     private SeriesInstanceUIDHandler seriesInstanceUIDHandler;
+
+    @Autowired
+    private DatasetAcquisitionAsyncService datasetAcquisitionAsyncService;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetAcquisitionServiceImpl.class);
 
@@ -244,7 +248,8 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
      * @throws IOException
      * @throws RestServiceException
      */
-    private void delete(DatasetAcquisition entity, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
+    public void delete(DatasetAcquisition entity, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
+        LOG.error("delete entity " + entity.getId());
         // Do not delete entity if it is the source. If getSourceId() is not null, it means it's a copy
         List<DatasetAcquisition> childDsAc = repository.findBySourceId(entity.getId());
         if (!CollectionUtils.isEmpty(childDsAc)) {
@@ -259,7 +264,6 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
                 List<Long> datasetIds = new ArrayList<>();
                 for (Dataset ds : datasets) {
                     if (event != null) {
-                        event.setMessage("Delete examination - dataset with id : " + ds.getId());
                         float progressMax = Float.valueOf(event.getEventProperties().get("progressMax"));
                         event.setProgress(event.getProgress() + (1f / progressMax));
                         shanoirEventService.publishEvent(event);
@@ -315,6 +319,8 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         if (entity == null) {
             throw new EntityNotFoundException("Cannot find entity with id = " + id);
         }
+        event.setMessage("Delete examination - datasetAcquisition with id : " + id);
+        shanoirEventService.publishEvent(event);
         delete(entity, event);
 
         repository.deleteById(id);

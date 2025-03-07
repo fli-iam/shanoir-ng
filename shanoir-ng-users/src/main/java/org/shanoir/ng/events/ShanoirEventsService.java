@@ -70,6 +70,7 @@ public class ShanoirEventsService {
                 || ShanoirEventType.DELETE_DATASET_EVENT.equals(event.getEventType())
                 || ShanoirEventType.MASSIVE_OUTPUTS_DOWNLOAD.equals(event.getEventType())
                 || ShanoirEventType.DELETE_EXAMINATION_EVENT.equals(event.getEventType())
+                || ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT.equals(event.getEventType())
                 || ShanoirEventType.DELETE_NIFTI_EVENT.equals(event.getEventType())
                 || ShanoirEventType.BIDS_EXPORT.equals(event.getEventType())) {
             sendSseEventsToUI(saved);
