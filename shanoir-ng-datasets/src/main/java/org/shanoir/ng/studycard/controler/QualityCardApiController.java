@@ -156,14 +156,12 @@ public class QualityCardApiController implements QualityCardApi {
 	@Override
     public ResponseEntity<QualityCardResult> applyQualityCardOnStudy(
 	         Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException {
-		
-	    final QualityCard qualityCard = qualityCardService.findById(qualityCardId);
-	    if (qualityCard == null) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		try {
+			asyncCardProcessingService.applyQualityCardOnStudy(qualityCardId, true);
+		} catch(EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		LOG.info("apply quality card: name:" + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
-		QualityCardResult results = cardProcessingService.applyQualityCardOnStudy(qualityCard, true);
-		return new ResponseEntity<>(results, HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
 	@Override
@@ -180,16 +178,15 @@ public class QualityCardApiController implements QualityCardApi {
 
 	@Override
     public ResponseEntity<QualityCardResult> testQualityCardOnStudy(
-         Long qualityCardId,
-		 int start,
-		 int stop) throws RestServiceException, MicroServiceCommunicationException {
+			Long qualityCardId,
+			int start,
+			int stop) throws RestServiceException, MicroServiceCommunicationException {
 
-        final QualityCard qualityCard = qualityCardService.findById(qualityCardId);
-        if (qualityCard == null) {
+        try {
+			asyncCardProcessingService.applyQualityCardOnStudy(qualityCardId, start, stop);
+		} catch(EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        LOG.info("test quality card: name:" + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
-        QualityCardResult results = cardProcessingService.applyQualityCardOnStudy(qualityCard, start, stop);
-        return new ResponseEntity<>(results, HttpStatus.OK);
+		}
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

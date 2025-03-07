@@ -52,7 +52,26 @@ public class AsyncCardsProcessingService {
             throw new EntityNotFoundException(QualityCard.class, qualityCardId);
         } else {
 			LOG.info("test quality card: name:" + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
-			service.applyQualityCardOnStudy(qualityCardService.findById(qualityCard.getId()), updateTags);
+			service.applyQualityCardOnStudy(qualityCard, updateTags);
+		}
+	}
+
+	/**
+	 * Study cards for quality control: apply on entire study.
+	 *
+	 * @param studyCard
+	 * @throws MicroServiceCommunicationException
+	 */
+ 	@Async
+	@Transactional
+	public void applyQualityCardOnStudy(Long qualityCardId, Integer start, Integer stop) throws MicroServiceCommunicationException, EntityNotFoundException {
+        
+		final QualityCard qualityCard = qualityCardService.findById(qualityCardId);
+        if (qualityCard == null) {
+            throw new EntityNotFoundException(QualityCard.class, qualityCardId);
+        } else {
+			LOG.info("test quality card: name:" + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
+			service.applyQualityCardOnStudy(qualityCard, false, start, stop);
 		}
 	}
 }

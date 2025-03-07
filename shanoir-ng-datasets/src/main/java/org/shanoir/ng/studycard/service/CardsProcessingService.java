@@ -210,7 +210,7 @@ public class CardsProcessingService {
         return applyQualityCardOnStudy(qualityCard, updateTags, null, null);
 	}
 
-        /**
+    /**
 	 * Study cards for quality control: apply on entire study.
 	 *
 	 * @param studyCard
