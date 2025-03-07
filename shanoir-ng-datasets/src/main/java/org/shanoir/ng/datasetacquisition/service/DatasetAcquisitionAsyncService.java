@@ -14,13 +14,13 @@
 
 package org.shanoir.ng.datasetacquisition.service;
 
+import java.io.IOException;
+
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-
-import java.io.IOException;
 
 
 public interface DatasetAcquisitionAsyncService {

@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.datasetacquisition.service;
 
+import java.io.IOException;
+
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -23,8 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.io.IOException;
 
 @Service
 public class DatasetAcquisitionAsyncServiceImpl implements DatasetAcquisitionAsyncService {
