@@ -16,10 +16,7 @@ package org.shanoir.ng.dicom;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
 
-import org.apache.commons.collections4.ListUtils;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.io.DicomInputStream;
@@ -28,7 +25,6 @@ import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.download.ExaminationAttributes;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetFile;
-import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.dto.Study;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -43,20 +39,6 @@ public class DicomProcessing {
 	
 	@Autowired
 	private static WADOURLHandler wadoURLHandler;
-
-	public static int countUniqueInstances(Serie serie, Boolean isEnhancedMR) throws IOException {
-		Set<String> instanceUIDs = new HashSet<>();
-		for (Dataset dataset : ListUtils.emptyIfNull(serie.getDatasets())) {
-			for (ExpressionFormat format : ListUtils.emptyIfNull(dataset.getExpressionFormats())) {
-				for (DatasetFile datasetFile : ListUtils.emptyIfNull(format.getDatasetFiles())) {
-					Attributes attributes = getDicomObjectAttributes(datasetFile, isEnhancedMR);
-					String instanceUID = attributes.getString(Tag.InstanceNumber);
-					instanceUIDs.add(instanceUID);
-				}
-			}
-		}
-		return instanceUIDs.size();
-	}
 
 	public static Attributes getDicomObjectAttributes(DatasetFile image, Boolean isEnhancedMR) throws IOException {
 		File dicomFile = new File(image.getPath());
@@ -104,8 +86,8 @@ public class DicomProcessing {
 		// In case of Quality Check during Import from ShUp, Serie does not have any Dataset and conditions are applied on DICOM metadata only.
 		if (!CollectionUtils.isEmpty(serie.getDatasets())) {
 			for (Dataset dataset : serie.getDatasets()) {
-				dataset.setFirstImageSOPInstanceUID(sopUID);
 				try {
+					dataset.setFirstImageSOPInstanceUID(sopUID);
 					attributes.addDatasetAttributes(dataset.getFirstImageSOPInstanceUID(), getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), isEnhanced));
 				} catch (IOException e) {
 					throw new ShanoirException("Could not read dicom metadata from file for serie " + serie.getSopClassUID(), e);

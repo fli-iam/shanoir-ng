@@ -35,5 +35,4 @@ export abstract class DatasetAcquisition extends Entity {
     username: string;
     copies: number[];
     source: number;
-    acquisitionStartTime: Date;
 }

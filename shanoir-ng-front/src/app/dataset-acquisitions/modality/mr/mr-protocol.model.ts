@@ -36,7 +36,6 @@ export class MrProtocol {
     pixelSpacingY: number;
     sliceSpacing: number;
     sliceThickness: number;
-    numberOfSlices: number;
     temporalResolution: number;
     magneticFieldStrength: number;
     originMetadata: MrProtocolMetadata;

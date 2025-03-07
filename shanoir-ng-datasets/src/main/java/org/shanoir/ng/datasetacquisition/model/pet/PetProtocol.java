@@ -14,14 +14,12 @@
 
 package org.shanoir.ng.datasetacquisition.model.pet;
 
-import org.shanoir.ng.shared.core.model.AbstractEntity;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 /**
  * PET protocol.
@@ -78,12 +76,6 @@ public class PetProtocol extends AbstractEntity {
 	/** (0054, 0081) Number of Slices */
 	@NotNull
 	private Integer numberOfSlices;
-
-	/**
-	 * (0018,0050) Slice thickness Nominal reconstructed slice thickness, in mm.
-	 * The unit of measure of the slice thickness must be in mm.
-	 */
-	private Double sliceThickness;
 
 	/** (0018,9740) number of subsets */
 	private String numberOfSubsets;
@@ -571,11 +563,4 @@ public class PetProtocol extends AbstractEntity {
 		this.voxelSizeZ = voxelSizeZ;
 	}
 
-    public Double getSliceThickness() {
-        return sliceThickness;
-    }
-
-    public void setSliceThickness(Double sliceThickness) {
-        this.sliceThickness = sliceThickness;
-    }
 }

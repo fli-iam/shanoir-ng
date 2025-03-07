@@ -14,7 +14,4 @@
 
 export class CtProtocol {
    
-    sliceThickness: number;
-    numberOfSlices: number;
-    
 }

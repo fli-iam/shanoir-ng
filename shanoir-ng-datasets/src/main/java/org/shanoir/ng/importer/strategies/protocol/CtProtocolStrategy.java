@@ -14,45 +14,16 @@
 
 package org.shanoir.ng.importer.strategies.protocol;
 
-import java.io.IOException;
-
-import org.dcm4che3.data.Attributes;
-import org.dcm4che3.data.Tag;
 import org.shanoir.ng.datasetacquisition.model.ct.CtProtocol;
-import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Serie;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CtProtocolStrategy {
 
-	private static final Logger LOG = LoggerFactory.getLogger(CtProtocolStrategy.class);
-
-	public CtProtocol generateProtocolForSerie(AcquisitionAttributes<String> acquisitionAttributes, Serie serie) {		
-		CtProtocol protocol = new CtProtocol();
-		Attributes attributes = acquisitionAttributes.getFirstDatasetAttributes();
-
-		// Slice thickness
-		Double sliceThickness = attributes.getDouble(Tag.SliceThickness, -1);
-		sliceThickness = (sliceThickness != -1 ? sliceThickness : null);
-		LOG.debug("extractMetadata : sliceThickness=" + sliceThickness);
-		protocol.setSliceThickness(sliceThickness);
-
-		/** (0054, 0081) Number of Slices */
-		Integer numberOfSlices = attributes.getInt(Tag.NumberOfSlices, -1);
-		numberOfSlices = (numberOfSlices != -1) ? numberOfSlices : null;
-		LOG.debug("extractMetadata : numberOfSlices=" + numberOfSlices);
-		if (numberOfSlices == null) {
-			try {
-				numberOfSlices = DicomProcessing.countUniqueInstances(serie, false);
-				LOG.debug("count nb of slices within the serie : numberOfSlices=" + numberOfSlices);
-			} catch (IOException e) {}
-		}
-		protocol.setNumberOfSlices(numberOfSlices);
-
+	public CtProtocol generateProtocolForSerie(AcquisitionAttributes<String> attributes, Serie serie) {		
+		CtProtocol protocol = new CtProtocol();        
 		return protocol;
 	}
 
