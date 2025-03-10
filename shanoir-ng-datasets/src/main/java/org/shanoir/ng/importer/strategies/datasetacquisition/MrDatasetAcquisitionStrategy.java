@@ -119,8 +119,8 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 			mrDatasetAcquisition.setAcquisitionStartTime(LocalDateTime.of(DateTimeUtils.pacsStringToLocalDate(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate)), 
 				DateTimeUtils.stringToLocalTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime))));
 		} catch (DateTimeParseException e) {
-			mrLOG.warn("could not parse the acquisition date : " + dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate));
-			datasetAcquisition.setAcquisitionStartTime(null);
+			LOG.warn("could not parse the acquisition date : " + dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate));
+			mrDatasetAcquisition.setAcquisitionStartTime(null);
 		}
 
 		// Can be overridden by study cards
