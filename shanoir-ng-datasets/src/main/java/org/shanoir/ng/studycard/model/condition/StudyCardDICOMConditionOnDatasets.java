@@ -312,16 +312,17 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
     }
 
     private Attributes downloadAttributes(Dataset dataset, WADODownloaderService downloader, StringBuffer errorMsg) {
-        try {
-            Attributes attributes = downloader.getDicomAttributesForDataset(dataset);
+        // try {
+            Attributes attributes = new Attributes();
+            //Attributes attributes = downloader.getDicomAttributesForDataset(dataset);
             return attributes;
-        } catch (PacsException e) {
-            if (errorMsg != null) errorMsg.append("\nThe condition [" + toString() 
-                + "] was ignored on dataset " + dataset.getId() + " because no dicom data could be found on pacs");
-            LOG.warn("The condition [" + toString() 
-                + "] was ignored on dataset " + dataset.getId() + " because no dicom data could be found on pacs, reason : " + e.getMessage());
-            return null;
-        }
+        // } catch (PacsException e) {
+        //     if (errorMsg != null) errorMsg.append("\nThe condition [" + toString() 
+        //         + "] was ignored on dataset " + dataset.getId() + " because no dicom data could be found on pacs");
+        //     LOG.warn("The condition [" + toString() 
+        //         + "] was ignored on dataset " + dataset.getId() + " because no dicom data could be found on pacs, reason : " + e.getMessage());
+        //     return null;
+        // }
     }
 
     private void writeConditionsReport(StringBuffer errorMsg, boolean complies, int nbOk, int nbUnknown, int total) {

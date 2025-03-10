@@ -250,7 +250,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
         let resPromise: SuperPromise<any | 'cancel'> = new SuperPromise();
         let result: Observable<any> = race([
             modalRef.instance.test, 
-            modalRef.instance.close.map(() => 'cancel')
+            modalRef.instance.close?.map?.(() => 'cancel')
         ]);
         result.pipe(take(1)).subscribe(ret => {
             modalRef.destroy();

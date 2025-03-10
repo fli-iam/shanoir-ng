@@ -35,15 +35,19 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.json.JSONReader;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.dataset.service.DatasetUtils;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.dicom.WADOURLHandler;
 import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.utils.DatasetFileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -282,11 +286,10 @@ public class WADODownloaderService {
 	}
 
 	public Attributes getDicomAttributesForDataset(Dataset dataset) throws PacsException {
-		List<URL> urls = new ArrayList<>();
 		try {
-			DatasetUtils.getDatasetFilePathURLs(dataset, urls, DatasetExpressionFormat.DICOM);
-			if (!urls.isEmpty()) {
-				String jsonMetadataStr = downloadDicomMetadataForURL(urls.get(0));
+			URL firstUrl = DatasetFileUtils.getDatasetFirstFilePathURLs(dataset, DatasetExpressionFormat.DICOM);
+			if (firstUrl != null) {
+				String jsonMetadataStr = downloadDicomMetadataForURL(firstUrl);
 				JsonParser parser = Json.createParser(new StringReader(jsonMetadataStr));
 				Attributes dicomAttributes = new JSONReader(parser).readDataset(null);
 				if (dicomAttributes != null) {
