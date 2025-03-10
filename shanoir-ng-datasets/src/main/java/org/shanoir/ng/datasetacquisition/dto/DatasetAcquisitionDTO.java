@@ -15,6 +15,7 @@
 package org.shanoir.ng.datasetacquisition.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.shanoir.ng.examination.dto.ExaminationDTO;
@@ -49,6 +50,8 @@ public class DatasetAcquisitionDTO {
 	private Long source;
 
 	private List<Long> copies;
+
+	private LocalDateTime acquisitionStartTime;
 
 	public Long getId() {
 		return id;
@@ -162,4 +165,11 @@ public class DatasetAcquisitionDTO {
 		this.copies = copies;
 	}
 
+	public LocalDateTime getAcquisitionStartTime() {
+        return acquisitionStartTime;
+    }
+
+    public void setAcquisitionStartTime(LocalDateTime acquisitionStartTime) {
+        this.acquisitionStartTime = acquisitionStartTime;
+    }
 }

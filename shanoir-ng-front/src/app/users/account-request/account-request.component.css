@@ -2,6 +2,3 @@
 .language span { margin: 0 20px 0 0; color: var(--dark-grey); text-decoration: underline; cursor: pointer; }
 .language span.selected { color: var(--color-a); font-weight: bold; }
 .console { display: none; }
-.subtitle { margin: 30px 0 40px; font-size: 16px; }
-.subtitle span { font-weight: bold; color: var(--color-a); }
-.main-fieldset { margin-bottom: -30px; }
