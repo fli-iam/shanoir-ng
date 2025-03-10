@@ -70,11 +70,33 @@ public class DatasetFileUtils {
 						url = new URL(datasetFile.getPath().replace("%20", " "));
 						pathURLs.add(url);
 					} catch (MalformedURLException e) {
-						downloadResult.update("Malformed URI: " + datasetFile.getPath().replace("%20", " "), DatasetDownloadError.PARTIAL_FAILURE);
+						if (downloadResult != null) {
+							downloadResult.update("Malformed URI: " + datasetFile.getPath().replace("%20", " "), DatasetDownloadError.PARTIAL_FAILURE);
+						}
 					}
 				}
 			}
 		}
+	}
+
+	public static void getDatasetFilePathURLs(final Dataset dataset, final List<URL> pathURLs, final DatasetExpressionFormat format) {
+		getDatasetFilePathURLs(dataset, pathURLs, format, null);
+	}
+
+	public static URL getDatasetFirstFilePathURLs(final Dataset dataset, DatasetExpressionFormat format) throws MalformedURLException {
+		List<DatasetExpression> datasetExpressions = dataset.getDatasetExpressions();
+		if (datasetExpressions != null && !datasetExpressions.isEmpty()) {
+			DatasetExpression datasetExpression = datasetExpressions.get(0);
+			if (datasetExpression.getDatasetExpressionFormat().equals(format)) {
+				List<DatasetFile> datasetFiles = datasetExpression.getDatasetFiles();
+				if (datasetFiles != null && !datasetFiles.isEmpty()) {
+					DatasetFile datasetFile = (DatasetFile) datasetFiles.get(0);
+					URL url = new URL(datasetFile.getPath().replace("%20", " "));
+					return url;
+				}
+			}
+		}
+		return null;
 	}
 
 	/**
