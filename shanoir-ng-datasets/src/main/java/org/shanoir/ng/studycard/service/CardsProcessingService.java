@@ -136,7 +136,7 @@ public class CardsProcessingService {
 		}
 	}
 
-/**
+    /**
 	 * Study cards for quality control: apply on entire study.
 	 * 
 	 * @param studyCard
