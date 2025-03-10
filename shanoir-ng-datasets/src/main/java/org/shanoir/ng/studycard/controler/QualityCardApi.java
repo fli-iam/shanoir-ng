@@ -121,7 +121,7 @@ public interface QualityCardApi {
 	})
 	@RequestMapping(value = "/apply/{qualityCardId}", method = RequestMethod.GET)
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnQualityCard(#qualityCardId, 'CAN_ADMINISTRATE'))")
-	ResponseEntity<QualityCardResult> applyQualityCardOnStudy(
+	ResponseEntity<Long> applyQualityCardOnStudy(
 		 @Parameter(description = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException;
 	
 	@Operation(summary = "", description = "Test a quality card on a study for quality control")
@@ -134,7 +134,7 @@ public interface QualityCardApi {
     })
     @RequestMapping(value = "/test/{qualityCardId}", method = RequestMethod.GET)
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnQualityCard(#qualityCardId, 'CAN_ADMINISTRATE'))")
-    ResponseEntity<QualityCardResult> testQualityCardOnStudy(
+    ResponseEntity<Long> testQualityCardOnStudy(
          @Parameter(description = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException;
 
 	@Operation(summary = "", description = "Test a quality card on a study for quality control")
@@ -148,7 +148,7 @@ public interface QualityCardApi {
 
     @RequestMapping(value = "/test/{qualityCardId}/{start}/{stop}", method = RequestMethod.GET)
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnQualityCard(#qualityCardId, 'CAN_ADMINISTRATE'))")
-    ResponseEntity<QualityCardResult> testQualityCardOnStudy(
+    ResponseEntity<Long> testQualityCardOnStudy(
          @Parameter(description = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId,
 		 @Parameter(description = "examination number start ", required = true) @PathVariable("start") int start,
 		 @Parameter(description = "examination number stop", required = true) @PathVariable("stop") int stop) throws RestServiceException, MicroServiceCommunicationException;

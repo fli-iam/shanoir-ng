@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.studycard.service;
 
+import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.studycard.model.QualityCard;
@@ -45,14 +46,14 @@ public class AsyncCardsProcessingService {
 	 */
     @Async
 	@Transactional
-	public void applyQualityCardOnStudy(Long qualityCardId, boolean updateTags) throws MicroServiceCommunicationException, EntityNotFoundException {
+	public void applyQualityCardOnStudy(Long qualityCardId, boolean updateTags, Long eventId) throws MicroServiceCommunicationException, EntityNotFoundException {
 
 		final QualityCard qualityCard = qualityCardService.findById(qualityCardId);
         if (qualityCard == null) {
             throw new EntityNotFoundException(QualityCard.class, qualityCardId);
         } else {
 			LOG.info("test quality card: name:" + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
-			service.applyQualityCardOnStudy(qualityCard, updateTags);
+			service.applyQualityCardOnStudy(qualityCard, updateTags, eventId);
 		}
 	}
 
@@ -64,14 +65,14 @@ public class AsyncCardsProcessingService {
 	 */
  	@Async
 	@Transactional
-	public void applyQualityCardOnStudy(Long qualityCardId, Integer start, Integer stop) throws MicroServiceCommunicationException, EntityNotFoundException {
+	public void  applyQualityCardOnStudy(Long qualityCardId, Integer start, Integer stop, Long eventId) throws MicroServiceCommunicationException, EntityNotFoundException {
         
 		final QualityCard qualityCard = qualityCardService.findById(qualityCardId);
         if (qualityCard == null) {
             throw new EntityNotFoundException(QualityCard.class, qualityCardId);
         } else {
 			LOG.info("test quality card: name:" + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
-			service.applyQualityCardOnStudy(qualityCard, false, start, stop);
+			service.applyQualityCardOnStudy(qualityCard, false, start, stop, eventId);
 		}
 	}
 }

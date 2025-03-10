@@ -32,7 +32,8 @@ export class NotificationsService {
     public tasksInWait: Task[] = [];
     public freshCompletedTasks: Task[] = [];
     private source;
-    private tasksSubject: BehaviorSubject<Task[]> = new BehaviorSubject<Task[]>([]) ;
+    private tasksSubject: BehaviorSubject<Task[]> = new BehaviorSubject<Task[]>([]);
+    public backTaskSubject: BehaviorSubject<Task> = new BehaviorSubject<Task>(null);
     private storageKey: string = KeycloakService.auth.userId + 'downloadTasks';
     private newLocalTasksQueue: Task[] = [];
     private localTasks: Task[] = [];
@@ -171,6 +172,7 @@ export class NotificationsService {
                     }
                     this.updateStatusVars();
                     this.emitTasks();
+                    this.backTaskSubject.next(task);
                     //this.refresh();
                 }
             });

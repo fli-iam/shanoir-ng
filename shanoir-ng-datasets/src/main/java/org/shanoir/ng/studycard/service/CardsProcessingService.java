@@ -136,20 +136,35 @@ public class CardsProcessingService {
 		}
 	}
 
-	/**
+/**
 	 * Study cards for quality control: apply on entire study.
 	 * 
 	 * @param studyCard
 	 * @throws MicroServiceCommunicationException 
 	 */
 	public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags, Integer start, Integer stop) throws MicroServiceCommunicationException {
+        return applyQualityCardOnStudy(qualityCard, updateTags, start, stop, null);
+    }
+
+	/**
+	 * Study cards for quality control: apply on entire study.
+	 * 
+	 * @param studyCard
+	 * @throws MicroServiceCommunicationException 
+	 */
+	public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags, Integer start, Integer stop, Long eventId) throws MicroServiceCommunicationException {
         long startTs = new Date().getTime();
         if (qualityCard == null) throw new IllegalArgumentException("qualityCard can't be null");
-        ShanoirEvent event = new ShanoirEvent(ShanoirEventType.CHECK_QUALITY_EVENT, null, KeycloakUtil.getTokenUserId(), "Quality check started on study " + qualityCard.getStudyId() , 4, qualityCard.getStudyId());
+        ShanoirEvent event;
+        if (eventId == null) {
+            event = new ShanoirEvent(ShanoirEventType.CHECK_QUALITY_EVENT, null, KeycloakUtil.getTokenUserId(), "Quality check started on study " + qualityCard.getStudyId() , 4, qualityCard.getStudyId());
+        } else {
+            event = new ShanoirEvent(eventId, ShanoirEventType.CHECK_QUALITY_EVENT, null, KeycloakUtil.getTokenUserId(), "Quality check started on study " + qualityCard.getStudyId() , 4, qualityCard.getStudyId());
+        }   
         eventService.publishEvent(event);
         Study study = studyService.findById(qualityCard.getStudyId());
         if (study == null ) throw new IllegalArgumentException("study can't be null");
-        if (qualityCard.getStudyId() != study.getId()) throw new IllegalStateException("study and studycard ids don't match");
+        if (!qualityCard.getStudyId().equals(study.getId())) throw new IllegalStateException("study and studycard ids don't match");
         if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {
             if (updateTags) { // first reset subject studies
                 event.setMessage("resetting quality subject tags");
@@ -206,8 +221,18 @@ public class CardsProcessingService {
 	 * @param studyCard
 	 * @throws MicroServiceCommunicationException
 	 */
+	public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags, Long eventId) throws MicroServiceCommunicationException {
+        return applyQualityCardOnStudy(qualityCard, updateTags, null, null, eventId);
+	}
+
+    /**
+	 * Study cards for quality control: apply on entire study.
+	 *
+	 * @param studyCard
+	 * @throws MicroServiceCommunicationException
+	 */
 	public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags) throws MicroServiceCommunicationException {
-        return applyQualityCardOnStudy(qualityCard, updateTags, null, null);
+        return applyQualityCardOnStudy(qualityCard, updateTags, null);
 	}
 
     /**

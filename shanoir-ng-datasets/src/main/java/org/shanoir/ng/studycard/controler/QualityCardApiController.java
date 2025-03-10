@@ -14,9 +14,11 @@
 
 package org.shanoir.ng.studycard.controler;
 
+import java.nio.LongBuffer;
 import java.util.List;
 
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -154,39 +156,40 @@ public class QualityCardApiController implements QualityCardApi {
 	}
 
 	@Override
-    public ResponseEntity<QualityCardResult> applyQualityCardOnStudy(
+    public ResponseEntity<Long> applyQualityCardOnStudy(
 	         Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException {
+		Long eventId = ShanoirEvent.generateId();
 		try {
-			asyncCardProcessingService.applyQualityCardOnStudy(qualityCardId, true);
+			asyncCardProcessingService.applyQualityCardOnStudy(qualityCardId, true, eventId);
 		} catch(EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(eventId, HttpStatus.OK);
 	}
 	
 	@Override
-	@Transactional
-    public ResponseEntity<QualityCardResult> testQualityCardOnStudy(
+    public ResponseEntity<Long> testQualityCardOnStudy(
              Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException {
-        try {
-			asyncCardProcessingService.applyQualityCardOnStudy(qualityCardId, false);
+        Long eventId = ShanoirEvent.generateId();
+		try {
+			asyncCardProcessingService.applyQualityCardOnStudy(qualityCardId, false, eventId);
 		} catch(EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(eventId, HttpStatus.OK);
     }
 
 	@Override
-    public ResponseEntity<QualityCardResult> testQualityCardOnStudy(
+    public ResponseEntity<Long> testQualityCardOnStudy(
 			Long qualityCardId,
 			int start,
 			int stop) throws RestServiceException, MicroServiceCommunicationException {
-
+		Long eventId = ShanoirEvent.generateId();
         try {
-			asyncCardProcessingService.applyQualityCardOnStudy(qualityCardId, start, stop);
+			asyncCardProcessingService.applyQualityCardOnStudy(qualityCardId, start, stop, eventId);
 		} catch(EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(eventId, HttpStatus.OK);
     }
 }
