@@ -130,9 +130,9 @@ public interface DatasetProcessingApi {
             @ApiResponse(responseCode = "404", description = "no dataset found"),
             @ApiResponse(responseCode = "500", description = "unexpected error")})
     @PostMapping(value = "/massiveDownloadByProcessingIds")
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.HasRightOnEveryDatasetOfProcessings(#processingIds, 'CAN_DOWNLOAD'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.HasRightOnDatasetOfProcessings(#processingIds, 'CAN_DOWNLOAD'))")
     void massiveDownloadByProcessingIds(
-            @Parameter(description = "id of the processing", required = true) @Valid
+            @Parameter(description = "ids of the processing", required = true) @Valid
             @RequestBody List<Long> processingIds,
             @Parameter(description = "outputs to extract") @Valid
             @RequestParam(value = "resultOnly", defaultValue = "false") boolean resultOnly, HttpServletResponse response) throws RestServiceException;
@@ -147,11 +147,28 @@ public interface DatasetProcessingApi {
     @PostMapping(value = "/massiveDownloadProcessingByExaminationIds")
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExaminations(#examinationIds, 'CAN_DOWNLOAD'))")
     void massiveDownloadProcessingByExaminationIds(
-            @Parameter(description = "id of the examination", required = true) @Valid
+            @Parameter(description = "ids of the examination", required = true) @Valid
             @RequestBody List<Long> examinationIds,
             @Parameter(description = "comment of the desired processings") @Valid
             @RequestParam(value = "processingComment", required = false) String processingComment,
             @Parameter(description = "outputs to extract") @Valid
             @RequestParam(value = "resultOnly", defaultValue = "false") boolean resultOnly, HttpServletResponse response) throws RestServiceException;
+
+    @Operation(summary = "downloadPipelineDatas", description = "Return a .csv file describing datas used for pipeline executions and their results. ")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "csv file"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no datas found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error")})
+    @PostMapping(value = "/downloadPipelineDatas")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDatas(#ids, #dataType, 'CAN_SEE_ALL'))")
+    void downloadPipelineDatas(
+            @Parameter(description = "ids ", required = true) @Valid
+            @RequestBody List<Long> dataIds,
+            @Parameter(description = "data type", required = true) @Valid
+            @RequestParam String dataType,
+            @Parameter(description = "pipeline identifier", required = true) @Valid
+            @RequestParam String pipelineIdentifier, HttpServletResponse response) throws RestServiceException, IOException;
 
 }

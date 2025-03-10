@@ -31,7 +31,7 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
 	 * Find dataset processing by name.
 	 *
 	 * @param comment comment.
-	 * @return a dataset processing.
+	 * @return a dataset processing (Optional).
 	 */
 	Optional<DatasetProcessing> findByComment(String comment);
 
@@ -39,17 +39,34 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
 	 * Find all processings that are linked to given dataset through INPUT_OF_DATASET_PROCESSING table
 	 *
 	 * @param datasetId
-	 * @return
+	 * @return list of processing
 	 */
 	List<DatasetProcessing> findAllByInputDatasets_Id(Long datasetId);
 
-    List<DatasetProcessing> findAllByParentId(Long id);
+	/**
+	 * Find all processings ids that are linked to given datasets through INPUT_OF_DATASET_PROCESSING table
+	 *
+	 * @param datasetIds
+	 * @return list of processing ids
+	 */
+	@Query(value="SELECT DISTINCT processing.id FROM dataset_processing as processing " +
+			"INNER JOIN input_of_dataset_processing as input ON processing.id=input.processing_id " +
+			"WHERE input.dataset_id IN (:datasetIds)", nativeQuery = true)
+	List<Long> findAllIdsByInputDatasets_Ids(List<Long> datasetIds);
+
+	/**
+	 * Find all processings ids that are linked to given processing id
+	 *
+	 * @param id
+	 * @return list of processing
+	 */
+	List<DatasetProcessing> findAllByParentId(Long id);
 	
 	/**
 	 * Find all processings that are linked to given examinations
 	 *
 	 * @param examinationIds
-	 * @return
+	 * @return list of processing ids
 	 */
 	@Query(value="SELECT DISTINCT processing.id FROM dataset_processing as processing " +
 			"INNER JOIN input_of_dataset_processing as input ON processing.id=input.processing_id " +
@@ -57,4 +74,56 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
 			"INNER JOIN dataset_acquisition as acquisition ON acquisition.id=dataset.dataset_acquisition_id " +
 			"WHERE acquisition.examination_id IN (:examinationIds)", nativeQuery = true)
 	List<Long> findAllIdsByExaminationIds(List<Long> examinationIds);
+
+	/**
+	 * Find all processings that are linked to given studies
+	 *
+	 * @param studyIds
+	 * @return list of processing ids
+	 */
+	@Query(value="SELECT DISTINCT processing.id FROM dataset_processing as processing " +
+			"INNER JOIN input_of_dataset_processing as input ON processing.id=input.processing_id " +
+			"INNER JOIN dataset as dataset ON dataset.id=input.dataset_id " +
+			"INNER JOIN dataset_acquisition as acquisition ON acquisition.id=dataset.dataset_acquisition_id " +
+			"INNER JOIN examination as examination ON examination.id = acquisition.examination_id " +
+			"WHERE examination.study_id IN (:studyIds)", nativeQuery = true)
+	List<Long>findAllIdsByStudyIds(List<Long> studyIds);
+
+	/**
+	 * Find all processings that are linked to given acquisitions
+	 *
+	 * @param acquisitionIds
+	 * @return list of processing ids
+	 */
+	@Query(value="SELECT DISTINCT processing.id FROM dataset_processing as processing " +
+			"INNER JOIN input_of_dataset_processing as input ON processing.id=input.processing_id " +
+			"INNER JOIN dataset as dataset ON dataset.id=input.dataset_id " +
+			"WHERE dataset.dataset_acquisition_id IN (:acquisitionIds)", nativeQuery = true)
+	List<Long>findAllIdsByAcquisitionIds(List<Long> acquisitionIds);
+
+	/**
+	 * Find all processings that are linked to given subjects
+	 *
+	 * @param subjectIds
+	 * @return list of processing ids
+	 */
+	@Query(value="SELECT DISTINCT processing.id FROM dataset_processing as processing " +
+			"INNER JOIN input_of_dataset_processing as input ON processing.id=input.processing_id " +
+			"INNER JOIN dataset as dataset ON dataset.id=input.dataset_id " +
+			"INNER JOIN dataset_acquisition as acquisition ON acquisition.id=dataset.dataset_acquisition_id " +
+			"INNER JOIN examination as examination ON examination.id = acquisition.examination_id " +
+			"WHERE examination.subject_id IN (:subjectIds)", nativeQuery = true)
+	List<Long>findAllIdsBySubjectIds(List<Long> subjectIds);
+
+	/**
+	 * Filter all processing according to a specific pipelineIdentifier
+	 *
+	 * @param processingIds list of processing to filter
+	 * @param pipelineIdentifier pipelineIdentifier to filter
+	 * @return list of processing ids
+	 */
+	@Query(value="SELECT DISTINCT processing.id FROM dataset_processing as processing " +
+			"WHERE processing.comment LIKE :pipelineIdentifier " +
+			"AND processing.id IN (:processingIds)", nativeQuery = true)
+	List<Long>filterIdsByIdentifier(List<Long> processingIds, String pipelineIdentifier);
 }
