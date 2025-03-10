@@ -65,7 +65,7 @@ public class DatasetAsyncServiceImpl implements DatasetAsyncService {
                 // NIfTI
             } else if (!file.isPacs()) {
                 try {
-                    URL url = new URL(file.getPath().replaceAll("%20", " "));
+                    URL url = new URL(file.getPath().replace("%20", " "));
                     File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
                     FileUtils.deleteQuietly(srcFile);
                 } catch (MalformedURLException e) {

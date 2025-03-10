@@ -30,7 +30,7 @@ public class DatasetUtils {
 				List<DatasetFile> datasetFiles = datasetExpression.getDatasetFiles();
 				for (Iterator<DatasetFile> itFiles = datasetFiles.iterator(); itFiles.hasNext();) {
 					DatasetFile datasetFile = (DatasetFile) itFiles.next();
-					URL url = new URL(datasetFile.getPath().replaceAll("%20", " "));
+					URL url = new URL(datasetFile.getPath().replace("%20", " "));
 					pathURLs.add(url);
 				}
 			}

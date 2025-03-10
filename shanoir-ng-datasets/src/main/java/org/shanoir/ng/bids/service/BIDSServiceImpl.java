@@ -644,7 +644,7 @@ public class BIDSServiceImpl implements BIDSService {
 				for (Iterator<DatasetFile> itFiles = datasetFiles.iterator(); itFiles.hasNext();) {
 					DatasetFile datasetFile = itFiles.next();
 					if (!datasetFile.isPacs()) {
-						URL url = new URL(datasetFile.getPath().replaceAll("%20", " "));
+						URL url = new URL(datasetFile.getPath().replace("%20", " "));
 						pathURLs.add(url);
 					}
 				}

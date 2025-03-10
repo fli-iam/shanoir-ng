@@ -67,10 +67,10 @@ public class DatasetFileUtils {
 					DatasetFile datasetFile = itFiles.next();
 					URL url;
 					try {
-						url = new URL(datasetFile.getPath().replaceAll("%20", " "));
+						url = new URL(datasetFile.getPath().replace("%20", " "));
 						pathURLs.add(url);
 					} catch (MalformedURLException e) {
-						downloadResult.update("Malformed URI: " + datasetFile.getPath().replaceAll("%20", " "), DatasetDownloadError.PARTIAL_FAILURE);
+						downloadResult.update("Malformed URI: " + datasetFile.getPath().replace("%20", " "), DatasetDownloadError.PARTIAL_FAILURE);
 					}
 				}
 			}
