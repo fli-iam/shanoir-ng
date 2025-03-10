@@ -233,12 +233,12 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             this.fetchHasDUA(study),
             this.fetchStudyUsers(study),
         ]).then(([hasDUA, studyUsers]) => {
-            studyUsers?.forEach(su => {
+            for (let su of studyUsers) {
                 if (su.userId == this.keycloakService.getUserId()) {
                     this.accessRequestValidated = true;
                     this.isSuConfirmed = su.confirmed;
                 }
-            });
+            }
             if (study.visibleByDefault && study.locked && !this.keycloakService.isUserAdmin()) {
                 if (study.accessRequestedByCurrentUser) {
                     this.confirmDialogService.inform('Access request pending', 'You already have asked an access request for this study, wait for the administrator to confirm your access.');

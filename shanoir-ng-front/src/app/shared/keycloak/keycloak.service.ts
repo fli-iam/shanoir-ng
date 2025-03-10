@@ -44,7 +44,7 @@ export class KeycloakService {
 
     static init(): Promise<any> {
 
-        if (window.location.href.includes('/account-request')) {
+        if (window.location.href.endsWith('/account-request')) {
             return Promise.resolve();
         }
 
@@ -102,7 +102,7 @@ export class KeycloakService {
         if (!this.gettingToken) {
             this.gettingToken = true;
             this.tokenPromise = new Promise<string>((resolve, reject) => {
-                if (KeycloakService.auth?.authz?.token) {
+                if (KeycloakService.auth.authz.token) {
                     KeycloakService.auth.authz.updateToken(5).then(() => {
                         this.gettingToken = false;
                         resolve(<string>KeycloakService.auth.authz.token);

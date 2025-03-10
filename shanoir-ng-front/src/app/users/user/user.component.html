@@ -148,30 +148,22 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </fieldset>
         <fieldset *ngIf="isUserAdmin()">
             <legend>Joined studies</legend>
-            @if (studies?.length > 0) {
-                <ol>
-                    <li *ngFor="let study of studies; let index = index" class="userStudies">
-                    <span class="studyName">{{study?.name + ' (' + study?.id + ')'}}</span>
-                    <span *ngIf="mode == 'edit'">
-                        <span class="right-col" [ngSwitch]="mode">
-                            <button type="button" class="deleteButton" (click)="removeStudyFromUser(study, index)">
-                            <i class="fas fa-trash"></i>
-                            </button>
-                        </span>
+            <ol>
+                <li *ngFor="let study of studies; let index = index" class="userStudies">
+                <span class="studyName">{{study?.name + ' (' + study?.id + ')'}}</span>
+                <span *ngIf="mode == 'edit'">
+                    <span class="right-col" [ngSwitch]="mode">
+                        <button type="button" class="deleteButton" (click)="removeStudyFromUser(study, index)">
+                        <i class="fas fa-trash"></i>
+                        </button>
                     </span>
-                    </li>
-                </ol>
-            } @else {
-                <ol><li>none</li></ol>
-            }
+                </span>
+                </li>
+            </ol>
+
         </fieldset>
 
-        <fieldset *ngIf="user.accountRequestDemand">
-            <legend class="right-icon">
-                Account request details
-            </legend>
-            <account-request-info [ngModel]="user.accountRequestInfo" formControlName="accountRequestInfo"></account-request-info>
-        </fieldset>
+        <account-request-info *ngIf="user.accountRequestDemand" [ngModel]="user.accountRequestInfo" formControlName="accountRequestInfo"></account-request-info>
 
         <fieldset *ngIf="user.extensionRequestDemand">
             <ol>

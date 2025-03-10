@@ -67,7 +67,6 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     StudyUserRight = StudyUserRight;
     isAdmin: boolean;
     invitationMail: string;
-    invitationFunction: string;
 
     private onTouchedCallback = () => {};
     private onChangeCallback = (_: any) => {};
@@ -266,8 +265,8 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     }
 
     public inviteUser() {
-        let study = new IdName(this.study.id, this.study.name);
-        this.accessRequestService.inviteUser(this.invitationMail, this.invitationFunction, study).then(request => {
+        let stud = new IdName(this.study.id, this.study.name);
+        this.accessRequestService.inviteUser(this.invitationMail, stud).then(request => {
             if (!request) {
                 this.consoleService.log('info', "No user found with such email, an invitation was sent.");
             } else {

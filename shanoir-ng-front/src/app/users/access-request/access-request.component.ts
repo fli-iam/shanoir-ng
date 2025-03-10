@@ -23,7 +23,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 import { ActivatedRoute } from '@angular/router';
 import { AccessRequestService } from './access-request.service';
 import { IdName } from 'src/app/shared/models/id-name.model';
-import { Study } from 'src/app/studies/shared/study.model';
 
 @Component({
     selector: 'access-request',
@@ -64,7 +63,6 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
         if (this.activatedRoute.snapshot.params['id']) {
             this.accessRequest.studyId = this.activatedRoute.snapshot.params['id'];
             this.fromStudy = true;
-            this.checkAccess(this.accessRequest.studyId);
             return Promise.resolve();
         }
         return this.studyService.getPublicStudiesConnected().then(result => {
@@ -76,24 +74,6 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
                 this.studyOptions = [];
                 this.confirmDialogService.error("No public study","No public studies available for the moment. If you want to join a private study, please ask the study manager to add you directly.")
                 .then(value => this.goBack());
-            }
-        });
-    }
-
-    checkAccess(studyId: number) {
-        this.studyService.getStudiesNames().then(studies => {
-            if (studies?.find(s => s.id == studyId)) {
-                this.confirmDialogService.inform('You already have access to this study', 'No need to request an access.', 'Go to the study').then(() => {
-                    this.router.navigate(['study/details', studyId]);
-                });
-            } else {
-                this.userService.getAccessRequests().then(accessRequests => {
-                    if (accessRequests.find(ar => ar.studyId == studyId)) {
-                        this.confirmDialogService.inform('Access request pending', 'You already have asked an access request for this study, wait for the administrator to confirm your access.').then(() => {
-                            this.router.navigate(['study/list']);
-                        });
-                    }
-                });
             }
         });
     }
@@ -149,6 +129,6 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     }
 
     protected chooseRouteAfterSave() {
-        this.router.navigate(['study/list']);
+        this.goBack();
     }
 }
