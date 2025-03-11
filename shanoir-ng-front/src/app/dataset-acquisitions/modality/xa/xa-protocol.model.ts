@@ -14,7 +14,4 @@
 
 export class XaProtocol {
    
-    sliceThickness: number;
-    numberOfSlices: number;
-    
 }
