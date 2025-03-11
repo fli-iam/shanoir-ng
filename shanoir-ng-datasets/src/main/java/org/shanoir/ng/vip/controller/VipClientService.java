@@ -28,9 +28,9 @@ public class VipClientService {
     @Value("${vip.uri}")
     private String vipUrl;
 
-    private final String vipExecutionUri = "/executions/";
+    private final String vipExecutionUri = "/executions";
 
-    private final String vipPipelineUri = "/pipelines/";
+    private final String vipPipelineUri = "/pipelines";
 
     @Autowired
     private KeycloakServiceAccountUtils keycloakServiceAccountUtils;
@@ -50,7 +50,7 @@ public class VipClientService {
      * @return Execution
      */
     public Mono<VipExecutionDTO> getExecution(String identifier) {
-        String url = vipExecutionUri + identifier;
+        String url = vipExecutionUri + "/" + identifier;
         return webClient.get()
             .uri(url)
             .headers(headers -> headers.addAll(this.getUserHttpHeaders()))
@@ -76,7 +76,7 @@ public class VipClientService {
             throw new ResultHandlerException("Failed to get execution details from VIP in [" + attempts + "] attempts", null);
         }
 
-        String url = vipExecutionUri + identifier + "/summary";
+        String url = vipExecutionUri + "/" + identifier + "/summary";
 
         HttpHeaders headers = this.getServiceAccountHttpHeaders();
 
@@ -124,7 +124,7 @@ public class VipClientService {
      */
     public Mono<String> getExecutionStderr(String identifier) {
 
-        String url = vipExecutionUri + identifier + "/stderr";
+        String url = vipExecutionUri + "/" + identifier + "/stderr";
         return webClient.get()
             .uri(url)
             .headers(headers -> headers.addAll(this.getUserHttpHeaders()))
@@ -143,7 +143,7 @@ public class VipClientService {
      * @return string
      */
     public Mono<String> getExecutionStdout(String identifier) {
-        String url = vipExecutionUri + identifier + "/stdout";
+        String url = vipExecutionUri + "/" + identifier + "/stdout";
         return webClient.get()
             .uri(url)
             .headers(headers -> headers.addAll(this.getUserHttpHeaders()))
@@ -179,7 +179,7 @@ public class VipClientService {
      * @return JSON as string
      */
     public Mono<String> getPipeline(String identifier, String version) {
-        String url = vipPipelineUri + identifier + "/" + version;
+        String url = vipPipelineUri + "/" + identifier + "/" + version;
         return webClient.get()
             .uri(url)
             .headers(headers -> headers.addAll(this.getUserHttpHeaders()))
