@@ -76,7 +76,7 @@ public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy
 			LOG.warn("could not parse the acquisition date : " + dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate));
 			datasetAcquisition.setAcquisitionStartTime(null);
 		}
-		PetProtocol protocol = protocolStrategy.generateProtocolForSerie(dicomAttributes.getFirstDatasetAttributes(), serie);
+		PetProtocol protocol = protocolStrategy.generateProtocolForSerie(dicomAttributes, serie);
 		datasetAcquisition.setPetProtocol(protocol);
 	
 		// TODO ATO add Compatibility check between study card Equipment and dicomEquipment if not done at front level.

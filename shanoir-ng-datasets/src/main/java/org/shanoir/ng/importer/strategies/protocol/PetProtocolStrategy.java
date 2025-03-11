@@ -19,6 +19,7 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.datasetacquisition.model.pet.PetProtocol;
 import org.shanoir.ng.dicom.DicomProcessing;
+import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Serie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +35,9 @@ public class PetProtocolStrategy {
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(PetProtocolStrategy.class);
 	
-	public PetProtocol generateProtocolForSerie(Attributes attributes, Serie serie) {		
+	public PetProtocol generateProtocolForSerie(AcquisitionAttributes acquisitionAttributes, Serie serie) {		
 		PetProtocol petProtocol = new PetProtocol();  
+		Attributes attributes = acquisitionAttributes.getFirstDatasetAttributes();
 		
 		/** (0028, 0010) Rows */
 		final Integer dimensionX = attributes.getInt(Tag.Rows, 0);
@@ -58,10 +60,8 @@ public class PetProtocolStrategy {
 		numberOfSlices = (numberOfSlices != -1) ? numberOfSlices : null;
 		LOG.debug("extractMetadata : numberOfSlices=" + numberOfSlices);
 		if (numberOfSlices == null) {
-			try {
-				numberOfSlices = DicomProcessing.countUniqueInstances(serie, false);
-				LOG.debug("count nb of slices within the serie : numberOfSlices=" + numberOfSlices);
-			} catch (IOException e) {}
+			numberOfSlices = DicomProcessing.countUniqueInstances(acquisitionAttributes);
+			LOG.debug("count nb of slices within the serie : numberOfSlices=" + numberOfSlices);
 		}
 		petProtocol.setNumberOfSlices(numberOfSlices);
 		
