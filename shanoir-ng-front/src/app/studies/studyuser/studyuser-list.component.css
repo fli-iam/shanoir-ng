@@ -7,4 +7,5 @@ fieldset + fieldset { margin-top: 30px; }
 .fix-icon i { margin-left: 4px; }
 .user-icon i { color: var(--color-a-light); }
 .close { position: absolute; display: inline-block; right: 0; top: 0; color: var(--color-a); cursor: pointer; padding: 2px 6px; }
-.invite-button { margin-left: 20px; height: auto; }
+.invite-button { height: auto; }
+.info-txt { margin-top: 5px; padding: 1px 16px 10px; background-color: var(--color-b-light); border-radius: 2px; }
