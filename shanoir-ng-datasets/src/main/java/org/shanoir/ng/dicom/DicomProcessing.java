@@ -16,6 +16,9 @@ package org.shanoir.ng.dicom;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
@@ -39,6 +42,16 @@ public class DicomProcessing {
 	
 	@Autowired
 	private static WADOURLHandler wadoURLHandler;
+
+	public static int countUniqueInstances(AcquisitionAttributes acquisitionAttributes) {
+		Set<String> instanceUIDs = new HashSet<>();
+		List<Attributes> allAttributes = acquisitionAttributes.getAllDatasetAttributes();
+		for (Attributes datasetAttributes : allAttributes) {
+			String instanceUID = datasetAttributes.getString(Tag.InstanceNumber);
+			instanceUIDs.add(instanceUID);
+		}
+		return instanceUIDs.size();
+	}
 
 	public static Attributes getDicomObjectAttributes(DatasetFile image, Boolean isEnhancedMR) throws IOException {
 		File dicomFile = new File(image.getPath());
@@ -86,8 +99,8 @@ public class DicomProcessing {
 		// In case of Quality Check during Import from ShUp, Serie does not have any Dataset and conditions are applied on DICOM metadata only.
 		if (!CollectionUtils.isEmpty(serie.getDatasets())) {
 			for (Dataset dataset : serie.getDatasets()) {
+				dataset.setFirstImageSOPInstanceUID(sopUID);
 				try {
-					dataset.setFirstImageSOPInstanceUID(sopUID);
 					attributes.addDatasetAttributes(dataset.getFirstImageSOPInstanceUID(), getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), isEnhanced));
 				} catch (IOException e) {
 					throw new ShanoirException("Could not read dicom metadata from file for serie " + serie.getSopClassUID(), e);

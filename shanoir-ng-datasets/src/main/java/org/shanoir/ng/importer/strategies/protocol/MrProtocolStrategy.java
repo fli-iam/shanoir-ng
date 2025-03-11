@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.importer.strategies.protocol;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +35,7 @@ import org.shanoir.ng.datasetacquisition.model.mr.MrProtocolMetadata;
 import org.shanoir.ng.datasetacquisition.model.mr.MrSequenceKSpaceFill;
 import org.shanoir.ng.datasetacquisition.model.mr.ParallelAcquisitionTechnique;
 import org.shanoir.ng.datasetacquisition.model.mr.PatientPosition;
+import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.CoilDTO;
 import org.shanoir.ng.importer.dto.CoilType;
@@ -116,9 +118,15 @@ public class MrProtocolStrategy {
 		}
 
 		// Slice thickness
-		final Double sliceThickness = attributes.getDouble(Tag.SliceThickness, 0);
+		Double sliceThickness = attributes.getDouble(Tag.SliceThickness, -1);
+		sliceThickness = (sliceThickness != -1 ? sliceThickness : null);
 		LOG.debug("extractMetadata : sliceThickness=" + sliceThickness);
 		mrProtocol.setSliceThickness(sliceThickness);
+
+		/** Number of Slices */
+		Integer numberOfSlices = DicomProcessing.countUniqueInstances(acquisitionAttributes);
+		LOG.debug("count nb of slices within the serie : numberOfSlices=" + numberOfSlices);
+		mrProtocol.setNumberOfSlices(numberOfSlices);
 
 		// Spacing between slices
 		final Double sliceSpacing = attributes.getDouble(Tag.SpacingBetweenSlices, 0);
