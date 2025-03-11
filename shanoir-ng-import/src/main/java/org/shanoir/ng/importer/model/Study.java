@@ -103,7 +103,7 @@ public class Study {
 	}
 
 	public String toTreeString() {
-		return "[" + studyDate + "] " + studyDescription + " [studyInstanceUID=" + studyInstanceUID + "]";
+		return "[" + studyDate + "] " + studyDescription + "[number of series=" + series.size() +", studyInstanceUID=" + studyInstanceUID + "]";
 	}
 
 }
