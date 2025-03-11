@@ -29,5 +29,4 @@ public class DefaultHandlerTest {
         processing.setPipelineIdentifier("ct-tiqua/2.2");
         Assertions.assertTrue(outputProcessing.canProcess(processing));
     }
-
 }
