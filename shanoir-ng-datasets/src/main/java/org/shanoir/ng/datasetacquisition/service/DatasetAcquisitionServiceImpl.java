@@ -254,12 +254,18 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         if (entity == null) {
             throw new EntityNotFoundException("Cannot find entity with id = " + id);
         }
+
+        Map<String, String> eventProperties = new HashMap<>();
+        eventProperties.put("progressMax", String.valueOf(entity.getDatasets().size()));
+        event.setEventProperties(eventProperties);
         event.setMessage("Delete DatasetAcquisition with id : " + id);
         shanoirEventService.publishEvent(event);
-        datasetAcquisitionAsyncService.deleteByIdAsync(entity, event);
 
         String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUID(entity.getExamination());
         String seriesInstanceUID = seriesInstanceUIDHandler.findSeriesInstanceUID(entity);
+
+        datasetAcquisitionAsyncService.deleteByIdAsync(entity, event);
+
         dicomWebService.rejectAcquisitionFromPacs(studyInstanceUID, seriesInstanceUID);
 
         repository.deleteById(id);
