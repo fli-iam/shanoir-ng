@@ -303,11 +303,12 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         event.setMessage("Delete DatasetAcquisition with id : " + id);
         shanoirEventService.publishEvent(event);
 
-        String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUID(acquisition.getExamination());
-        String seriesInstanceUID = seriesInstanceUIDHandler.findSeriesInstanceUID(acquisition);
+        String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUID(entity.getExamination());
+        String seriesInstanceUID = seriesInstanceUIDHandler.findSeriesInstanceUID(entity);
 
-        if (acquisition.getSource() == null)
-            dicomWebService.rejectAcquisitionFromPacs(studyInstanceUID, seriesInstanceUID);
+        datasetAcquisitionAsyncService.deleteByIdAsync(entity, event);
+
+        dicomWebService.rejectAcquisitionFromPacs(studyInstanceUID, seriesInstanceUID);
 
         datasetAcquisitionAsyncService.deleteByIdAsync(acquisition, event);
     }
