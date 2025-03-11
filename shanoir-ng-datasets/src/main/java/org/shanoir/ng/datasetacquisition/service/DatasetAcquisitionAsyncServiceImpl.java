@@ -8,6 +8,8 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.io.IOException;
 
 @Service
@@ -17,6 +19,7 @@ public class DatasetAcquisitionAsyncServiceImpl implements DatasetAcquisitionAsy
     private DatasetAcquisitionService datasetAcquisitionService;
 
     @Async
+    @Transactional
     public void deleteByIdAsync(DatasetAcquisition entity, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
         datasetAcquisitionService.delete(entity, event);
     }
