@@ -16,6 +16,8 @@ package org.shanoir.ng.importer.strategies.datasetacquisition;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,6 +38,7 @@ import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.dataset.DatasetStrategy;
 import org.shanoir.ng.importer.strategies.protocol.MrProtocolStrategy;
+import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,6 +113,14 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 			} else {
 				mrDatasetAcquisition.getMrProtocol().setAcquisitionDuration(null);
 			}
+		}
+
+		try {
+			mrDatasetAcquisition.setAcquisitionStartTime(LocalDateTime.of(DateTimeUtils.pacsStringToLocalDate(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate)), 
+				DateTimeUtils.stringToLocalTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime))));
+		} catch (DateTimeParseException e) {
+			LOG.warn("could not parse the acquisition date : " + dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate));
+			mrDatasetAcquisition.setAcquisitionStartTime(null);
 		}
 
 		// Can be overridden by study cards
