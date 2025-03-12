@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.io.File;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -161,6 +163,7 @@ public class ImportDialogOpener {
 		importDialog.studyCardCB.removeAllItems();
 		if (studiesWithStudyCards != null && !studiesWithStudyCards.isEmpty()) {
 			boolean firstCompatibleStudyFound = false;
+			studiesWithStudyCards.sort(Comparator.comparing(Study::getName));
 			for (Study study : studiesWithStudyCards) {
 				importDialog.studyCB.addItem(study);
 				if (study.getCompatible() != null
