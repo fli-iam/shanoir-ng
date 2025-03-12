@@ -35,7 +35,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             label="Subjects"
             awesome="fas fa-user-injured"
             [(opened)]="node.subjectsNode.opened"
-            (openedChange)="onOpenedChange($event)"
             (labelClick)="subjectsMenuOpened = !subjectsMenuOpened"
             [hasChildren]="hasDependency(node.subjectsNode.subjects)">
 
@@ -59,19 +58,35 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </span>
         </div>
 
-        <ng-container *ngIf="node.subjectsNode.opened && node.subjectsNode.subjects && node.subjectsNode.subjects != $any('UNLOADED')">
-            <subject-node
-                    *ngFor="let subject of filteredNodes || node.subjectsNode.subjects"
-                    [input]="subject"
-                    [studyId]="node.id"
-                    (selectedChange)="selectedChange.emit(node)"
-                    [hasBox]="hasBox"
-                    [withMenu]="withMenu"
-                    [rights]="rights"
-                    (nodeInit)="onSubjectNodeInit()"
-            >
-            </subject-node>
-        </ng-container>
+        <div *ngIf="node.subjectsNode.opened && node.subjectsNode.subjects && node.subjectsNode.subjects != $any('UNLOADED')">
+            <div *ngFor="let subject of filteredNodes || node.subjectsNode.subjects; trackBy:trackByFn; let i = index">
+                @if (!subject.hidden) {
+                    <subject-node
+                            [input]="subject"
+                            [studyId]="node.id"
+                            (selectedChange)="selectedChange.emit(node)"
+                            [hasBox]="hasBox"
+                            [withMenu]="withMenu"
+                            [rights]="rights"
+                    >
+                    </subject-node>
+                } @else {
+                    <div class="fake-node" #fake [id]="subject.id" >
+                        <i class="fas fa-angle-right chevron" (click)="clickOpen(subject)"></i>
+                        <a [routerLink]="['/subject/details/', subject.id]" class="inner" (click)="clickNode(subject)" [title]="subject.title + ' n°' + subject.id">
+                            <i [class]="subject.awesome" class="picto"></i>
+                            {{subject.label}}
+                        </a>
+                        <span class="tag label" [class.dark]="getFontColor(tag.color)" [style.background]="tag.color" *ngFor="let tag of subject.tags">
+                            {{tag.name}}
+                        </span>
+                        <span *ngIf="subject.qualityTag" class="tag label dark" [style.background]="subject.qualityTag == 'ERROR' ? 'red' : (subject.qualityTag == 'WARNING' ? 'orange' : 'green')">
+                            {{subject.qualityTag}}
+                        </span>
+                    </div>
+                }
+            </div>
+        </div>
 
     </node>
 
