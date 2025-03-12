@@ -17,7 +17,7 @@ public class PipelineServiceImpl implements PipelineService {
 
     @Value("${vip.uri}")
     private String vipUrl;
-    private final String vipPipelineUri = "/pipelines/";
+    private final String vipPipelineUri = "/pipelines";
     private WebClient webClient;
 
     @Autowired
@@ -41,7 +41,7 @@ public class PipelineServiceImpl implements PipelineService {
     }
 
     public Mono<String> getPipeline(String identifier, String version) {
-        String url = vipPipelineUri + identifier + "/" + version;
+        String url = vipPipelineUri + "/" + identifier + "/" + version;
         return webClient.get()
             .uri(url)
             .headers(headers -> headers.addAll(utils.getUserHttpHeaders()))
