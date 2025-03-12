@@ -14,10 +14,10 @@
 
 package org.shanoir.ng.accountrequest.model;
 
+import org.shanoir.ng.shared.core.model.AbstractEntity;
+
 import jakarta.persistence.Entity;
 import jakarta.validation.constraints.NotNull;
-
-import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 /**
  * User account request information.
@@ -35,10 +35,8 @@ public class AccountRequestInfo extends AbstractEntity {
 
 	private String contact;
 
-	@NotNull
 	private String function;
 
-	@NotNull
 	private String institution;
 
 	@NotNull
