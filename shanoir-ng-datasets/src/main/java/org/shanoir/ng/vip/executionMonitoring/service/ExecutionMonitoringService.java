@@ -26,6 +26,7 @@ public interface ExecutionMonitoringService {
 	 * @param inputDatasets
 	 * @return the created execution monitoring
 	 */
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ExecutionMonitoring createExecutionMonitoring(ExecutionCandidateDTO execution, List<Dataset> inputDatasets) throws RestServiceException;
 
 	/**
