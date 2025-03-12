@@ -120,7 +120,7 @@ public class Serie implements Cloneable {
 		sopClassUID = attributes.getString(Tag.SOPClassUID);
 		seriesDescription = attributes.getString(Tag.SeriesDescription);
 		seriesDate = DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.SeriesDate));
-		seriesNumber = attributes.getString(Tag.SeriesNumber);
+		seriesNumber = Integer.toString(attributes.getInt(Tag.SeriesNumber, 0));
 		numberOfSeriesRelatedInstances = attributes.getInt(Tag.NumberOfSeriesRelatedInstances, 0);
 		modality = attributes.getString(Tag.Modality);
 		protocolName = attributes.getString(Tag.ProtocolName);
