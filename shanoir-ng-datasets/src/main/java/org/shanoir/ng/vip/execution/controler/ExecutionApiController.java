@@ -48,7 +48,7 @@ public class ExecutionApiController implements ExecutionApi {
 
         List<Dataset> inputDatasets = executionService.getDatasetsFromParams(candidate.getDatasetParameters());
         executionService.checkRightsForExecution(inputDatasets);
-        IdName createdMonitoring =  executionService.createExecution(candidate, inputDatasets);
+        IdName createdMonitoring = executionService.createExecution(candidate, inputDatasets);
 
         return new ResponseEntity<>(createdMonitoring, HttpStatus.OK);
     }
