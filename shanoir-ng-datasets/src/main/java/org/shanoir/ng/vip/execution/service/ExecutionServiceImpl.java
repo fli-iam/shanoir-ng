@@ -44,7 +44,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     public static final String SHANOIR_URI_SCHEME = "shanoir:/";
 
-    private final String vipExecutionUri = "/executions/";
+    private final String vipExecutionUri = "/executions";
 
     private WebClient webClient;
 
@@ -103,7 +103,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     }
 
     public Mono<VipExecutionDTO> getExecution(String identifier) {
-        String url = vipExecutionUri + identifier;
+        String url = vipExecutionUri + "/" + identifier;
         return webClient.get()
                 .uri(url)
                 .headers(headers -> headers.addAll(utils.getUserHttpHeaders()))
@@ -117,7 +117,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     public Mono<String> getExecutionStderr(String identifier) {
 
-        String url = vipExecutionUri + identifier + "/stderr";
+        String url = vipExecutionUri + "/" + identifier + "/stderr";
         return webClient.get()
                 .uri(url)
                 .headers(headers -> headers.addAll(utils.getUserHttpHeaders()))
@@ -130,7 +130,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     }
 
     public Mono<String> getExecutionStdout(String identifier) {
-        String url = vipExecutionUri + identifier + "/stdout";
+        String url = vipExecutionUri + "/" + identifier + "/stdout";
         return webClient.get()
                 .uri(url)
                 .headers(headers -> headers.addAll(utils.getUserHttpHeaders()))
@@ -148,7 +148,7 @@ public class ExecutionServiceImpl implements ExecutionService {
             throw new ResultHandlerException("Failed to get execution details from VIP in [" + attempts + "] attempts", null);
         }
 
-        String url = vipExecutionUri + identifier + "/summary";
+        String url = vipExecutionUri + "/" + identifier + "/summary";
         HttpHeaders headers = getServiceAccountHttpHeaders();
 
         return webClient.get()
