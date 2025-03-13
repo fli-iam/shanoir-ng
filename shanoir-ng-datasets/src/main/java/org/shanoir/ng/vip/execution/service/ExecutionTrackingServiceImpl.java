@@ -76,10 +76,9 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
     /**
      * Create a new line for the execution input
      */
-    private void createTrackingLine(ExecutionMonitoring executionMonitoring, File trackingFile) throws IOException {
-        BufferedWriter writer = null;
-        try {
-            writer = new BufferedWriter(new FileWriter(trackingFile,true));
+    private void createTrackingLine(ExecutionMonitoring executionMonitoring, File trackingFile) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(trackingFile,true));) {
+
             String newLine;
 
             writer.newLine();
@@ -89,9 +88,8 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
             newLine += executionMonitoring.getInputDatasets().stream().map(dataset -> String.valueOf(dataset.getId())).reduce((id1, id2) -> id1 + " / " + id2).orElse("") + ",";
             newLine += executionMonitoring.getInputDatasets().stream().map(Dataset::getName).reduce((id1, id2) -> id1 + " / " + id2).orElse("") + ",,,";
             writer.write(newLine);
-            writer.close();
         } catch (IOException e) {
-            Objects.requireNonNull(writer).close();
+            LOG.error("An error occured while trying to create a line in VIP tracking file", e);
         }
     }
 
@@ -148,14 +146,12 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
     /**
      * Rewrite the lines at the end of the files according to MAX_LAST_LINES_TO_CHECK
      */
-    private void writeLastLines(List<String> lastLines, File trackingFile) throws IOException {
-        BufferedWriter writer = null;
+    private void writeLastLines(List<String> lastLines, File trackingFile) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(trackingFile));) {
+            List<String> lines = Files.readAllLines(trackingFile.toPath());
+            List<String> updatedLines = lines.subList(0, Math.max(1, lines.size() - MAX_LAST_LINES_TO_CHECK));
+            updatedLines.addAll(lastLines);
 
-        List<String> lines = Files.readAllLines(trackingFile.toPath());
-        List<String> updatedLines = lines.subList(0, Math.max(1, lines.size() - MAX_LAST_LINES_TO_CHECK));
-        updatedLines.addAll(lastLines);
-        try{
-            writer = new BufferedWriter(new FileWriter(trackingFile));
             for(String line : updatedLines.subList(0, updatedLines.size() - 1)) {
                 writer.write(line);
                 writer.newLine();
@@ -163,7 +159,7 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
             writer.write(updatedLines.getLast());
             writer.close();
         } catch (IOException e) {
-            Objects.requireNonNull(writer).close();
+            LOG.error("An error occured while updating a line in VIP tracking file", e);
         }
     }
 
@@ -181,14 +177,12 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
     private void createTrackingFile(File trackingFile) throws IOException {
         new File(trackingFilePrefixe).mkdirs();
         if(trackingFile.createNewFile()) {
-            BufferedWriter writer = null;
-            try {
-                writer = new BufferedWriter(new FileWriter(trackingFile));
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(trackingFile));) {
                 String headers = "Date (HH:mm dd/MM/yyyy),Processing_id,Exam_id,Dataset_id,Dataset_name,Sent_to_VIP,Error_file,Result_file";
                 writer.write(headers);
                 writer.close();
             } catch (IOException e) {
-                Objects.requireNonNull(writer).close();
+                LOG.error("An error occured while creating VIP tracking file", e);
             }
         }
     }
