@@ -14,8 +14,6 @@
 
 package org.shanoir.ng.configuration.security;
 
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
-import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.shanoir.ng.dicom.web.StowRSMultipartRelatedRequestFilter;
 import org.shanoir.ng.utils.MDCFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +23,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -37,7 +34,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.web.cors.CorsConfiguration;
@@ -112,16 +108,5 @@ public class SecurityConfiguration {
 		final FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
 		bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
 		return bean;
-	}
-
-	@Bean("asyncExecutor")
-	public TaskExecutor getAsyncExecutor() {
-		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-		executor.setCorePoolSize(100);
-		executor.setMaxPoolSize(100);
-		executor.setQueueCapacity(500);
-		executor.setThreadNamePrefix("AsyncThread-");
-		executor.initialize();
-		return new DelegatingSecurityContextAsyncTaskExecutor(executor);
 	}
 }
