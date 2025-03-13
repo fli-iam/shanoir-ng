@@ -573,6 +573,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         subjectExam.examinationDate = examination.examinationDate;
         subjectExam.comment = examination.comment;
         subjectExam.preclinical = examination.preclinical;
+        subjectExam.studyInstanceUID = examination.studyInstanceUID;
         return subjectExam;
     }
 
