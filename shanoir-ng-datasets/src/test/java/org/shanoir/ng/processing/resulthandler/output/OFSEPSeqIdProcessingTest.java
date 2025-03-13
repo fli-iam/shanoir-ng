@@ -10,12 +10,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.output.handler.OFSEPSeqIdHandler;
 import org.shanoir.ng.vip.output.exception.ResultHandlerException;
-import org.shanoir.ng.shared.exception.PacsException;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -24,6 +26,9 @@ public class OFSEPSeqIdProcessingTest {
     
     @InjectMocks
     private OFSEPSeqIdHandler outputProcessing;
+
+    @MockitoBean
+    private ExaminationService examinationService; //Needed for spring management, even if not used. Do not remove
 
     @Test
     public void canProcessTest() throws ResultHandlerException {
@@ -43,7 +48,7 @@ public class OFSEPSeqIdProcessingTest {
     }
 
     @Test
-    public void getMatchingVolumeTest() throws JSONException, PacsException {
+    public void getMatchingVolumeTest() throws JSONException {
         Dataset ds = new MrDataset();
         ds.setId(1L);
 
