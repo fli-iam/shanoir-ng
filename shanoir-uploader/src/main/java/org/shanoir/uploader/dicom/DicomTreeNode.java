@@ -1,6 +1,6 @@
 package org.shanoir.uploader.dicom;
 
-import java.util.HashMap;
+import java.util.List;
 
 /**
  * 
@@ -9,11 +9,11 @@ import java.util.HashMap;
  */
 public interface DicomTreeNode {
 	
-	public void addTreeNode(final String id, final DicomTreeNode child);
+	public void addTreeNode(final DicomTreeNode child);
 	
 	public DicomTreeNode getFirstTreeNode();
 	
-	public HashMap<String, DicomTreeNode> getTreeNodes();
+	public List<DicomTreeNode> getTreeNodes();
 	
 	public void addTreeNodes(final DicomTreeNode firstLevelChild, final DicomTreeNode secondLevelChild, final DicomTreeNode thirdLevelChild);
 	

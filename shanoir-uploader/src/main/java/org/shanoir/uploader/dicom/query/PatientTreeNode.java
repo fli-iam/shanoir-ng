@@ -1,12 +1,8 @@
 package org.shanoir.uploader.dicom.query;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map.Entry;
 
 import javax.swing.tree.TreeNode;
 
@@ -25,8 +21,7 @@ public class PatientTreeNode implements DicomTreeNode {
 
 	private Patient patient;
 
-	/** List of children. */
-	private HashMap<String, DicomTreeNode> relatedStudies;
+	private List<DicomTreeNode> relatedStudies;
 
 	/**
 	 * Creates a new Patient object.
@@ -42,7 +37,7 @@ public class PatientTreeNode implements DicomTreeNode {
 	 */
 	public PatientTreeNode(final Patient patient) {
 		this.patient = patient;
-		this.relatedStudies = new LinkedHashMap<String, DicomTreeNode>();
+		this.relatedStudies = new ArrayList<DicomTreeNode>();
 	}
 	
 
@@ -54,8 +49,8 @@ public class PatientTreeNode implements DicomTreeNode {
 	 * @param study
 	 *            study
 	 */
-	public void addTreeNode(final String id, final DicomTreeNode study) {
-		this.relatedStudies.put(id, study);
+	public void addTreeNode(final DicomTreeNode study) {
+		this.relatedStudies.add(study);
 		study.setParent(this);
 	}
 
@@ -67,7 +62,7 @@ public class PatientTreeNode implements DicomTreeNode {
 	 *
 	 * @return the child
 	 */
-	public TreeNode getChild(final Object id) {
+	public TreeNode getChild(final int id) {
 		return (TreeNode)relatedStudies.get(id);
 	}
 
@@ -77,7 +72,7 @@ public class PatientTreeNode implements DicomTreeNode {
 	 * @see org.richfaces.model.TreeNodeImpl#getChildren()
 	 */
 	public Iterator getChildren() {
-		return relatedStudies.entrySet().iterator();
+		return relatedStudies.iterator();
 	}
 
 	/*
@@ -105,7 +100,7 @@ public class PatientTreeNode implements DicomTreeNode {
 	 */
 	public DicomTreeNode getFirstTreeNode() {
 		if (getTreeNodes() != null && !getTreeNodes().isEmpty()) {
-			return getTreeNodes().values().iterator().next();
+			return getTreeNodes().iterator().next();
 		}
 		return null;
 	}
@@ -133,7 +128,7 @@ public class PatientTreeNode implements DicomTreeNode {
 	 *
 	 * @return Returns the relatedStudies.
 	 */
-	public HashMap<String, DicomTreeNode> getTreeNodes() {
+	public List<DicomTreeNode> getTreeNodes() {
 		return relatedStudies;
 	}
 
@@ -153,7 +148,7 @@ public class PatientTreeNode implements DicomTreeNode {
 	 *            id
 	 */
 	public void removeChild(final Object id) {
-		relatedStudies.remove((String) id);
+		relatedStudies.remove(id);
 	}
 
 	/**

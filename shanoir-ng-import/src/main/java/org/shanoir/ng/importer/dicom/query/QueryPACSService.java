@@ -514,6 +514,7 @@ public class QueryPACSService {
 			List<Serie> series = new ArrayList<Serie>();
 			seriesAttr.parallelStream().forEach(s -> processDICOMSerie(s, association, study, modality, series));
 			series.sort(new SeriesNumberOrDescriptionSorter());
+			LOG.info("{} series returned by DICOM server", series.size());
 			study.setSeries(series);
 		}
 	}
