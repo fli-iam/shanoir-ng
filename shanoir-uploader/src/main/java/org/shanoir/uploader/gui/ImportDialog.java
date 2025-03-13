@@ -1,5 +1,6 @@
 package org.shanoir.uploader.gui;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
@@ -11,6 +12,7 @@ import java.awt.event.ItemListener;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -30,6 +32,7 @@ import org.jdatepicker.JDatePicker;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
+import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 import org.shanoir.uploader.action.CancelButtonActionListener;
 import org.shanoir.uploader.action.ImportCreateNewExamCBItemListener;
 import org.shanoir.uploader.action.ImportSubjectNameDocumentFilter;
@@ -148,169 +151,131 @@ public class ImportDialog extends JDialog {
 		this.mainWindow.importDialog = this;
 
 		this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
-		this.setSize(925, 900);
+		this.setSize(1020, 900);
 		this.setLocationRelativeTo(mainWindow);
 
-		JPanel container = new JPanel();
+		// Main Panel
+		JPanel container = new JPanel(new BorderLayout());
 		JScrollPane scrPane = new JScrollPane(container);
 		add(scrPane);
 
-		container.setLayout(new GridBagLayout());
-		GridBagConstraints importDialogGBC = new GridBagConstraints();
-		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
-
-		/**
-		 * information on site who has made the IRM
-		 */
+		// DICOM Infos Panel - information on site who has made the IRM
+        JPanel dicomPanel = new JPanel(new GridBagLayout());
+        dicomPanel.setBorder(BorderFactory.createTitledBorder("Informations DICOM"));
+        GridBagConstraints dicomPanelGBC = new GridBagConstraints();
+        dicomPanelGBC.insets = new Insets(5, 5, 5, 5);
+		
 		int style = Font.ITALIC;
 		Font font = new Font("about", style, 12);
 
+		// Left column for Center information
 		mriCenterLabel = new JLabel(resourceBundle.getString("shanoir.uploader.import.dicom.center"));
-		mriCenterLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		mriCenterLabel.setFont(font);
-		importDialogGBC.weightx = 0.2;
-		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
-		importDialogGBC.insets = new Insets(5, 5, 5, 5);
-		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 0;
-		importDialogGBC.gridwidth = 2;
-		container.add(mriCenterLabel, importDialogGBC);
+		dicomPanelGBC.gridx = 0;
+		dicomPanelGBC.gridy = 0;
+		dicomPanel.add(mriCenterLabel, dicomPanelGBC);
 
 		mriCenterText = new JLabel("");
 		mriCenterText.setFont(font);
-		importDialogGBC.weightx = 0.2;
-		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
-		importDialogGBC.insets = new Insets(5, 5, 5, 5);
-		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 0;
-		importDialogGBC.gridwidth = 1;
-		container.add(mriCenterText, importDialogGBC);
+		mriCenterText.setHorizontalAlignment(SwingConstants.LEFT);
+		dicomPanelGBC.gridx = 1;
+		dicomPanelGBC.gridy = 0;
+		dicomPanel.add(mriCenterText, dicomPanelGBC);
 
 		mriCenterAddressLabel = new JLabel(resourceBundle.getString("shanoir.uploader.import.dicom.address"));
-		mriCenterAddressLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		mriCenterAddressLabel.setFont(font);
-		importDialogGBC.weightx = 0.2;
-		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
-		importDialogGBC.insets = new Insets(5, 5, 5, 5);
-		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 1;
-		importDialogGBC.gridwidth = 2;
-		container.add(mriCenterAddressLabel, importDialogGBC);
+		dicomPanelGBC.gridx = 0;
+		dicomPanelGBC.gridy = 1;
+		dicomPanel.add(mriCenterAddressLabel, dicomPanelGBC);
 
 		mriCenterAddressText = new JLabel("");
 		mriCenterAddressText.setFont(font);
-		importDialogGBC.weightx = 0.2;
-		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
-		importDialogGBC.insets = new Insets(5, 5, 5, 5);
-		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 1;
-		importDialogGBC.gridwidth = 1;
-		container.add(mriCenterAddressText, importDialogGBC);
-		
+		mriCenterAddressText.setHorizontalAlignment(SwingConstants.LEFT);
+		dicomPanelGBC.gridx = 1;
+		dicomPanelGBC.gridy = 1;
+		dicomPanel.add(mriCenterAddressText, dicomPanelGBC);
+
 		mriStationNameLabel = new JLabel(resourceBundle.getString("shanoir.uploader.import.dicom.station.name"));
-		mriStationNameLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		mriStationNameLabel.setFont(font);
-		importDialogGBC.weightx = 0.2;
-		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
-		importDialogGBC.insets = new Insets(5, 5, 5, 5);
-		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 2;
-		importDialogGBC.gridwidth = 2;
-		container.add(mriStationNameLabel, importDialogGBC);
+		dicomPanelGBC.gridx = 0;
+		dicomPanelGBC.gridy = 2;
+		dicomPanel.add(mriStationNameLabel, dicomPanelGBC);
 
 		mriStationNameText = new JLabel("");
 		mriStationNameText.setFont(font);
-		importDialogGBC.weightx = 0.2;
-		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
-		importDialogGBC.insets = new Insets(5, 5, 5, 5);
-		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 2;
-		importDialogGBC.gridwidth = 1;
-		container.add(mriStationNameText, importDialogGBC);
-		
+		mriStationNameText.setHorizontalAlignment(SwingConstants.LEFT);
+		dicomPanelGBC.gridx = 1;
+		dicomPanelGBC.gridy = 2;
+		dicomPanel.add(mriStationNameText, dicomPanelGBC);
+
+		// Right column for Acquisition equipment information
 		mriManufacturerLabel = new JLabel(resourceBundle.getString("shanoir.uploader.import.dicom.manufacturer"));
-		mriManufacturerLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		mriManufacturerLabel.setFont(font);
-		importDialogGBC.weightx = 0.2;
-		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
-		importDialogGBC.insets = new Insets(5, 5, 5, 5);
-		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 3;
-		importDialogGBC.gridwidth = 2;
-		container.add(mriManufacturerLabel, importDialogGBC);
+		dicomPanelGBC.insets = new Insets(5, 50, 5, 5);
+		dicomPanelGBC.gridx = 2;
+		dicomPanelGBC.gridy = 0;
+		dicomPanel.add(mriManufacturerLabel, dicomPanelGBC);
 
 		mriManufacturerText = new JLabel("");
 		mriManufacturerText.setFont(font);
-		importDialogGBC.weightx = 0.2;
-		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
-		importDialogGBC.insets = new Insets(5, 5, 5, 5);
-		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 3;
-		importDialogGBC.gridwidth = 1;
-		container.add(mriManufacturerText, importDialogGBC);
-		
+		mriManufacturerText.setHorizontalAlignment(SwingConstants.LEFT);
+		dicomPanelGBC.insets = new Insets(5, 5, 5, 5);
+		dicomPanelGBC.gridx = 3;
+		dicomPanelGBC.gridy = 0;
+		dicomPanel.add(mriManufacturerText, dicomPanelGBC);
+
 		mriManufacturersModelNameLabel = new JLabel(resourceBundle.getString("shanoir.uploader.import.dicom.manufacturer.model.name"));
-		mriManufacturersModelNameLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		mriManufacturersModelNameLabel.setFont(font);
-		importDialogGBC.weightx = 0.2;
-		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
-		importDialogGBC.insets = new Insets(5, 5, 5, 5);
-		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 4;
-		importDialogGBC.gridwidth = 2;
-		container.add(mriManufacturersModelNameLabel, importDialogGBC);
+		dicomPanelGBC.insets = new Insets(5, 50, 5, 5);
+		dicomPanelGBC.gridx = 2;
+		dicomPanelGBC.gridy = 1;
+		dicomPanel.add(mriManufacturersModelNameLabel, dicomPanelGBC);
 
 		mriManufacturersModelNameText = new JLabel("");
 		mriManufacturersModelNameText.setFont(font);
-		importDialogGBC.weightx = 0.2;
-		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
-		importDialogGBC.insets = new Insets(5, 5, 5, 5);
-		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 4;
-		importDialogGBC.gridwidth = 1;
-		container.add(mriManufacturersModelNameText, importDialogGBC);
-		
+		mriManufacturersModelNameText.setHorizontalAlignment(SwingConstants.LEFT);
+		dicomPanelGBC.insets = new Insets(5, 5, 5, 5);
+		dicomPanelGBC.gridx = 3;
+		dicomPanelGBC.gridy = 1;
+		dicomPanel.add(mriManufacturersModelNameText, dicomPanelGBC);
+
 		mriMagneticFieldStrengthLabel = new JLabel(resourceBundle.getString("shanoir.uploader.import.dicom.magnetic.field.strength"));
-		mriMagneticFieldStrengthLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		mriMagneticFieldStrengthLabel.setFont(font);
-		importDialogGBC.weightx = 0.2;
-		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
-		importDialogGBC.insets = new Insets(5, 5, 5, 5);
-		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 5;
-		importDialogGBC.gridwidth = 2;
-		container.add(mriMagneticFieldStrengthLabel, importDialogGBC);
+		dicomPanelGBC.insets = new Insets(5, 50, 5, 5);
+		dicomPanelGBC.gridx = 2;
+		dicomPanelGBC.gridy = 2;
+		dicomPanel.add(mriMagneticFieldStrengthLabel, dicomPanelGBC);
 
 		mriMagneticFieldStrengthText = new JLabel("");
 		mriMagneticFieldStrengthText.setFont(font);
-		importDialogGBC.weightx = 0.2;
-		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
-		importDialogGBC.insets = new Insets(5, 5, 5, 5);
-		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 5;
-		importDialogGBC.gridwidth = 1;
-		container.add(mriMagneticFieldStrengthText, importDialogGBC);
-		
+		mriMagneticFieldStrengthText.setHorizontalAlignment(SwingConstants.LEFT);
+		dicomPanelGBC.insets = new Insets(5, 5, 5, 5);
+		dicomPanelGBC.gridx = 3;
+		dicomPanelGBC.gridy = 2;
+		dicomPanel.add(mriMagneticFieldStrengthText, dicomPanelGBC);
+
 		mriDeviceSerialNumberLabel = new JLabel(resourceBundle.getString("shanoir.uploader.import.dicom.device.serial.number"));
-		mriDeviceSerialNumberLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		mriDeviceSerialNumberLabel.setFont(font);
-		importDialogGBC.weightx = 0.2;
-		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
-		importDialogGBC.insets = new Insets(5, 5, 5, 5);
-		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 6;
-		importDialogGBC.gridwidth = 2;
-		container.add(mriDeviceSerialNumberLabel, importDialogGBC);
+		dicomPanelGBC.insets = new Insets(5, 50, 5, 5);
+		dicomPanelGBC.gridx = 2;
+		dicomPanelGBC.gridy = 3;
+		dicomPanel.add(mriDeviceSerialNumberLabel, dicomPanelGBC);
 
 		mriDeviceSerialNumberText = new JLabel("");
 		mriDeviceSerialNumberText.setFont(font);
-		importDialogGBC.weightx = 0.2;
+		mriDeviceSerialNumberText.setHorizontalAlignment(SwingConstants.LEFT);
+		dicomPanelGBC.insets = new Insets(5, 5, 5, 5);
+		dicomPanelGBC.gridx = 3;
+		dicomPanelGBC.gridy = 3;
+		dicomPanel.add(mriDeviceSerialNumberText, dicomPanelGBC);
+
+		container.add(dicomPanel, BorderLayout.NORTH);
+
+		// DICOM Form Panel - informations to be filled or selected by user
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints importDialogGBC = new GridBagConstraints();
+        importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
-		importDialogGBC.insets = new Insets(5, 5, 5, 5);
-		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 6;
-		importDialogGBC.gridwidth = 1;
-		container.add(mriDeviceSerialNumberText, importDialogGBC);
 
 		/**
 		 * Study/StudyCard
@@ -324,17 +289,17 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 1;
-		importDialogGBC.gridy = 7;
+		importDialogGBC.gridy = 4;
 		importDialogGBC.gridwidth = 1;
-		container.add(separatorSubjectStudyCardLabel, importDialogGBC);
+		formPanel.add(separatorSubjectStudyCardLabel, importDialogGBC);
 
 		separatorStudyStudyCard = new JSeparator();
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 7;
+		importDialogGBC.gridy = 4;
 		importDialogGBC.weightx = 1;
 		importDialogGBC.gridwidth = 3;
-		container.add(separatorStudyStudyCard, importDialogGBC);
+		formPanel.add(separatorStudyStudyCard, importDialogGBC);
 
 		studyLabel = new JLabel(resourceBundle.getString("shanoir.uploader.studyLabel") + " *");
 		studyLabel.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -342,10 +307,10 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 8;
+		importDialogGBC.gridy = 5;
 		importDialogGBC.gridwidth = 2;
 		importDialogGBC.gridheight = 1;
-		container.add(studyLabel, importDialogGBC);
+		formPanel.add(studyLabel, importDialogGBC);
 
 		studyCB = new JComboBoxMandatory();
 		studyCB.setBackground(Color.WHITE);
@@ -353,10 +318,10 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 8;
+		importDialogGBC.gridy = 5;
 		importDialogGBC.gridwidth = 1;
 		importDialogGBC.gridheight = 1;
-		container.add(studyCB, importDialogGBC);
+		formPanel.add(studyCB, importDialogGBC);
 		studyCB.addItemListener(importStudyAndStudyCardCBIL);
 
 		studyCardLabel = new JLabel(resourceBundle.getString("shanoir.uploader.studycardLabel") + " *");
@@ -365,10 +330,10 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 9;
+		importDialogGBC.gridy = 6;
 		importDialogGBC.gridwidth = 2;
 		importDialogGBC.gridheight = 1;
-		container.add(studyCardLabel, importDialogGBC);
+		formPanel.add(studyCardLabel, importDialogGBC);
 
 		studyCardCB = new JComboBoxMandatory();
 		studyCardCB.setBackground(Color.WHITE);
@@ -376,34 +341,34 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 9;
+		importDialogGBC.gridy = 6;
 		importDialogGBC.gridwidth = 1;
 		importDialogGBC.gridheight = 1;
-		container.add(studyCardCB, importDialogGBC);
+		formPanel.add(studyCardCB, importDialogGBC);
 		studyCardCB.addItemListener(importStudyAndStudyCardCBIL);
-		
-		studyCardFilterLabel = new JLabel(resourceBundle.getString("shanoir.uploader.studycardFilter"));
-		studyCardFilterLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-		importDialogGBC.weightx = 0.2;
-		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
-		importDialogGBC.insets = new Insets(5, 5, 5, 5);
-		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 10;
-		importDialogGBC.gridwidth = 2;
-		importDialogGBC.gridheight = 1;
-		container.add(studyCardFilterLabel, importDialogGBC);
 
-		studyCardFilterTextField = new JTextField(15);
-		studyCardFilterTextField.setBackground(Color.WHITE);
-		importDialogGBC.weightx = 0.7;
-		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
-		importDialogGBC.insets = new Insets(5, 5, 5, 5);
-		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 10;
-		importDialogGBC.gridwidth = 1;
-		importDialogGBC.gridheight = 1;
-		container.add(studyCardFilterTextField, importDialogGBC);
-		studyCardFilterTextField.getDocument().addDocumentListener(studyCardFilterItemListener);
+		studyCardFilterLabel = new JLabel(resourceBundle.getString("shanoir.uploader.studycardFilter"));
+ 		studyCardFilterLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+ 		importDialogGBC.weightx = 0.2;
+ 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
+ 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
+ 		importDialogGBC.gridx = 0;
+ 		importDialogGBC.gridy = 7;
+ 		importDialogGBC.gridwidth = 2;
+ 		importDialogGBC.gridheight = 1;
+ 		formPanel.add(studyCardFilterLabel, importDialogGBC);
+
+ 		studyCardFilterTextField = new JTextField(15);
+ 		studyCardFilterTextField.setBackground(Color.WHITE);
+ 		importDialogGBC.weightx = 0.7;
+ 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
+ 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
+ 		importDialogGBC.gridx = 2;
+ 		importDialogGBC.gridy = 7;
+ 		importDialogGBC.gridwidth = 1;
+ 		importDialogGBC.gridheight = 1;
+ 		formPanel.add(studyCardFilterTextField, importDialogGBC);
+ 		studyCardFilterTextField.getDocument().addDocumentListener(studyCardFilterItemListener);
 
 		/**
 		 * Subject
@@ -416,17 +381,17 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 1;
-		importDialogGBC.gridy = 11;
+		importDialogGBC.gridy = 8;
 		importDialogGBC.gridwidth = 1;
-		container.add(separatorSubjectLabel, importDialogGBC);
+		formPanel.add(separatorSubjectLabel, importDialogGBC);
 
 		separatorSubject = new JSeparator();
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 11;
+		importDialogGBC.gridy = 8;
 		importDialogGBC.weightx = 1;
 		importDialogGBC.gridwidth = 3;
-		container.add(separatorSubject, importDialogGBC);
+		formPanel.add(separatorSubject, importDialogGBC);
 
 		subjectLabel = new JLabel(resourceBundle.getString("shanoir.uploader.subjectLabel") + " *");
 
@@ -435,10 +400,10 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 12;
+		importDialogGBC.gridy = 9;
 		importDialogGBC.gridwidth = 2;
 		importDialogGBC.gridheight = 1;
-		container.add(subjectLabel, importDialogGBC);
+		formPanel.add(subjectLabel, importDialogGBC);
 
 		subjectTextField = new JTextFieldMandatory();
 		subjectTextField.setBackground(Color.LIGHT_GRAY);
@@ -448,9 +413,9 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 12;
+		importDialogGBC.gridy = 9;
 		importDialogGBC.gridwidth = 1;
-		container.add(subjectTextField, importDialogGBC);
+		formPanel.add(subjectTextField, importDialogGBC);
 		ImportSubjectNameDocumentFilter subjectNameFilter = new ImportSubjectNameDocumentFilter(mainWindow);
 		subjectTextField.getDocument().addDocumentListener(subjectNameFilter);
 
@@ -461,21 +426,23 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 13;
+		importDialogGBC.gridy = 10;
 		importDialogGBC.gridwidth = 2;
 		importDialogGBC.gridheight = 1;
-		container.add(existingSubjectsLabel, importDialogGBC);
+		formPanel.add(existingSubjectsLabel, importDialogGBC);
 
 		existingSubjectsCB = new JComboBox();
 		existingSubjectsCB.setBackground(Color.LIGHT_GRAY);
+		existingSubjectsCB.setToolTipText(resourceBundle.getString("shanoir.uploader.existingSubjectsTooltip"));
 		importDialogGBC.weightx = 0.7;
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 13;
+		importDialogGBC.gridy = 10;
 		importDialogGBC.gridwidth = 1;
-		container.add(existingSubjectsCB, importDialogGBC);
+		formPanel.add(existingSubjectsCB, importDialogGBC);
 		existingSubjectsCB.addItemListener(importStudyAndStudyCardCBIL);
+		AutoCompleteDecorator.decorate(existingSubjectsCB);
 		
 		subjectImageObjectCategoryLabel = new JLabel(
 				resourceBundle.getString("shanoir.uploader.subjectImageObjectCategoryLabel") + " *");
@@ -484,9 +451,9 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 14;
+		importDialogGBC.gridy = 11;
 		importDialogGBC.gridwidth = 2;
-		container.add(subjectImageObjectCategoryLabel, importDialogGBC);
+		formPanel.add(subjectImageObjectCategoryLabel, importDialogGBC);
 
 		subjectImageObjectCategoryCB = new JComboBoxMandatory();
 		subjectImageObjectCategoryCB.setBackground(Color.LIGHT_GRAY);
@@ -494,9 +461,9 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 14;
+		importDialogGBC.gridy = 11;
 		importDialogGBC.gridwidth = 1;
-		container.add(subjectImageObjectCategoryCB, importDialogGBC);
+		formPanel.add(subjectImageObjectCategoryCB, importDialogGBC);
 
 		subjectLanguageHemisphericDominanceLabel = new JLabel(
 				resourceBundle.getString("shanoir.uploader.subjectLanguageHemisphericDominanceLabel"));
@@ -505,9 +472,9 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 15;
+		importDialogGBC.gridy = 12;
 		importDialogGBC.gridwidth = 2;
-		container.add(subjectLanguageHemisphericDominanceLabel, importDialogGBC);
+		formPanel.add(subjectLanguageHemisphericDominanceLabel, importDialogGBC);
 
 		subjectLanguageHemisphericDominanceCB = new JComboBox();
 		subjectLanguageHemisphericDominanceCB.setBackground(Color.LIGHT_GRAY);
@@ -515,9 +482,9 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 15;
+		importDialogGBC.gridy = 12;
 		importDialogGBC.gridwidth = 1;
-		container.add(subjectLanguageHemisphericDominanceCB, importDialogGBC);
+		formPanel.add(subjectLanguageHemisphericDominanceCB, importDialogGBC);
 
 		subjectManualHemisphericDominanceLabel = new JLabel(
 				resourceBundle.getString("shanoir.uploader.subjectManualHemisphericDominanceLabel"));
@@ -526,9 +493,9 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 16;
+		importDialogGBC.gridy = 13;
 		importDialogGBC.gridwidth = 2;
-		container.add(subjectManualHemisphericDominanceLabel, importDialogGBC);
+		formPanel.add(subjectManualHemisphericDominanceLabel, importDialogGBC);
 
 		subjectManualHemisphericDominanceCB = new JComboBox();
 		subjectManualHemisphericDominanceCB.setBackground(Color.LIGHT_GRAY);
@@ -536,9 +503,9 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 16;
+		importDialogGBC.gridy = 13;
 		importDialogGBC.gridwidth = 1;
-		container.add(subjectManualHemisphericDominanceCB, importDialogGBC);
+		formPanel.add(subjectManualHemisphericDominanceCB, importDialogGBC);
 
 		subjectPersonalCommentLabel = new JLabel(
 				resourceBundle.getString("shanoir.uploader.subjectPersonalCommentLabel"));
@@ -547,9 +514,9 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 17;
+		importDialogGBC.gridy = 14;
 		importDialogGBC.gridwidth = 2;
-		container.add(subjectPersonalCommentLabel, importDialogGBC);
+		formPanel.add(subjectPersonalCommentLabel, importDialogGBC);
 
 		subjectPersonalCommentTextArea = new JTextArea(1, 60);
 		subjectPersonalCommentTextArea.setMargin(new Insets(5, 5, 5, 5));
@@ -557,9 +524,9 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.weightx = 0.5;
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 17;
+		importDialogGBC.gridy = 14;
 		importDialogGBC.gridwidth = 2;
-		container.add(subjectPersonalCommentTextArea, importDialogGBC);
+		formPanel.add(subjectPersonalCommentTextArea, importDialogGBC);
 
 		/**
 		 * Subject / Study
@@ -572,17 +539,17 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 1;
-		importDialogGBC.gridy = 18;
+		importDialogGBC.gridy = 15;
 		importDialogGBC.gridwidth = 1;
-		container.add(separatorSubjectStudyRelLabel, importDialogGBC);
+		formPanel.add(separatorSubjectStudyRelLabel, importDialogGBC);
 
 		separatorSubjectStudyRel = new JSeparator();
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 18;
+		importDialogGBC.gridy = 15;
 		importDialogGBC.weightx = 1;
 		importDialogGBC.gridwidth = 3;
-		container.add(separatorSubjectStudyRel, importDialogGBC);
+		formPanel.add(separatorSubjectStudyRel, importDialogGBC);
 		
 		subjectStudyIdentifierLabel = new JLabel(
 				resourceBundle.getString("shanoir.uploader.subjectStudyIdentifierLabel"));
@@ -591,9 +558,9 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 19;
+		importDialogGBC.gridy = 16;
 		importDialogGBC.gridwidth = 2;
-		container.add(subjectStudyIdentifierLabel, importDialogGBC);
+		formPanel.add(subjectStudyIdentifierLabel, importDialogGBC);
 
 		subjectStudyIdentifierTF = new JTextField();
 		subjectStudyIdentifierTF.setBackground(Color.LIGHT_GRAY);
@@ -603,9 +570,9 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 19;
+		importDialogGBC.gridy = 16;
 		importDialogGBC.gridwidth = 1;
-		container.add(subjectStudyIdentifierTF, importDialogGBC);
+		formPanel.add(subjectStudyIdentifierTF, importDialogGBC);
 
 		subjectIsPhysicallyInvolvedLabel = new JLabel(
 				resourceBundle.getString("shanoir.uploader.isPhysicallyInvolvedLabel") + " *");
@@ -614,18 +581,18 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 20;
+		importDialogGBC.gridy = 17;
 		importDialogGBC.gridwidth = 2;
-		container.add(subjectIsPhysicallyInvolvedLabel, importDialogGBC);
+		formPanel.add(subjectIsPhysicallyInvolvedLabel, importDialogGBC);
 
 		subjectIsPhysicallyInvolvedCB = new JCheckBox();
 		importDialogGBC.weightx = 0.7;
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 20;
+		importDialogGBC.gridy = 17;
 		importDialogGBC.gridwidth = 1;
-		container.add(subjectIsPhysicallyInvolvedCB, importDialogGBC);
+		formPanel.add(subjectIsPhysicallyInvolvedCB, importDialogGBC);
 
 		subjectTypeLabel = new JLabel(resourceBundle.getString("shanoir.uploader.subjectTypeLabel") + " *");
 		subjectTypeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -633,9 +600,9 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 21;
+		importDialogGBC.gridy = 18;
 		importDialogGBC.gridwidth = 2;
-		container.add(subjectTypeLabel, importDialogGBC);
+		formPanel.add(subjectTypeLabel, importDialogGBC);
 
 		subjectTypeCB = new JComboBoxMandatory();
 		subjectTypeCB.setBackground(Color.LIGHT_GRAY);
@@ -644,9 +611,9 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 21;
+		importDialogGBC.gridy = 18;
 		importDialogGBC.gridwidth = 1;
-		container.add(subjectTypeCB, importDialogGBC);
+		formPanel.add(subjectTypeCB, importDialogGBC);
 
 		/**
 		 * MrExamination
@@ -660,17 +627,17 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 1;
-		importDialogGBC.gridy = 22;
+		importDialogGBC.gridy = 19;
 		importDialogGBC.gridwidth = 1;
-		container.add(separatorMrExaminationLabel, importDialogGBC);
+		formPanel.add(separatorMrExaminationLabel, importDialogGBC);
 
 		separatorMrExamination = new JSeparator();
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 22;
+		importDialogGBC.gridy = 19;
 		importDialogGBC.weightx = 1;
 		importDialogGBC.gridwidth = 3;
-		container.add(separatorMrExamination, importDialogGBC);
+		formPanel.add(separatorMrExamination, importDialogGBC);
 
 		mrExaminationExistingExamLabel = new JLabel(
 				resourceBundle.getString("shanoir.uploader.mrExaminationExitingExamLabel"));
@@ -679,9 +646,9 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 23;
+		importDialogGBC.gridy = 20;
 		importDialogGBC.gridwidth = 2;
-		container.add(mrExaminationExistingExamLabel, importDialogGBC);
+		formPanel.add(mrExaminationExistingExamLabel, importDialogGBC);
 
 		mrExaminationExistingExamCB = new JComboBoxMandatory();
 		mrExaminationExistingExamCB.setBackground(Color.WHITE);
@@ -689,9 +656,9 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 23;
+		importDialogGBC.gridy = 20;
 		importDialogGBC.gridwidth = 1;
-		container.add(mrExaminationExistingExamCB, importDialogGBC);
+		formPanel.add(mrExaminationExistingExamCB, importDialogGBC);
 
 		mrExaminationNewExamLabel = new JLabel(resourceBundle.getString("shanoir.uploader.mrExaminationNewExamLabel"));
 		mrExaminationNewExamLabel.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -699,18 +666,18 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 24;
+		importDialogGBC.gridy = 21;
 		importDialogGBC.gridwidth = 2;
-		container.add(mrExaminationNewExamLabel, importDialogGBC);
+		formPanel.add(mrExaminationNewExamLabel, importDialogGBC);
 
 		mrExaminationNewExamCB = new JCheckBox();
 		importDialogGBC.weightx = 0.7;
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 24;
+		importDialogGBC.gridy = 21;
 		importDialogGBC.gridwidth = 1;
-		container.add(mrExaminationNewExamCB, importDialogGBC);
+		formPanel.add(mrExaminationNewExamCB, importDialogGBC);
 
 		ImportCreateNewExamCBItemListener createNewExamCBItemListener = new ImportCreateNewExamCBItemListener(this);
 		mrExaminationNewExamCB.addItemListener(createNewExamCBItemListener);
@@ -722,9 +689,9 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 25;
+		importDialogGBC.gridy = 22;
 		importDialogGBC.gridwidth = 2;
-		container.add(mrExaminationCenterLabel, importDialogGBC);
+		formPanel.add(mrExaminationCenterLabel, importDialogGBC);
 
 		mrExaminationCenterCB = new JComboBoxMandatory();
 		mrExaminationCenterCB.setBackground(Color.LIGHT_GRAY);
@@ -732,9 +699,9 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 25;
+		importDialogGBC.gridy = 22;
 		importDialogGBC.gridwidth = 1;
-		container.add(mrExaminationCenterCB, importDialogGBC);
+		formPanel.add(mrExaminationCenterCB, importDialogGBC);
 
 		mrExaminationExamExecutiveLabel = new JLabel(
 				resourceBundle.getString("shanoir.uploader.mrExaminationExamExecutiveLabel") + " *");
@@ -743,9 +710,9 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 26;
+		importDialogGBC.gridy = 23;
 		importDialogGBC.gridwidth = 2;
-		container.add(mrExaminationExamExecutiveLabel, importDialogGBC);
+		formPanel.add(mrExaminationExamExecutiveLabel, importDialogGBC);
 
 		mrExaminationExamExecutiveCB = new JComboBoxMandatory();
 		mrExaminationExamExecutiveCB.setBackground(Color.LIGHT_GRAY);
@@ -753,9 +720,9 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 26;
+		importDialogGBC.gridy = 23;
 		importDialogGBC.gridwidth = 1;
-		container.add(mrExaminationExamExecutiveCB, importDialogGBC);
+		formPanel.add(mrExaminationExamExecutiveCB, importDialogGBC);
 
 		mrExaminationDateLabel = new JLabel(resourceBundle.getString("shanoir.uploader.mrExaminationDateLabel") + " *");
 		mrExaminationDateLabel.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -763,9 +730,9 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 27;
+		importDialogGBC.gridy = 24;
 		importDialogGBC.gridwidth = 2;
-		container.add(mrExaminationDateLabel, importDialogGBC);
+		formPanel.add(mrExaminationDateLabel, importDialogGBC);
 
 		Properties p = new Properties();
 		p.put("text.today", "Today");
@@ -782,9 +749,9 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 27;
+		importDialogGBC.gridy = 24;
 		importDialogGBC.gridwidth = 1;
-		container.add((Component) mrExaminationDateDP, importDialogGBC);
+		formPanel.add((Component) mrExaminationDateDP, importDialogGBC);
 
 		mrExaminationCommentLabel = new JLabel(
 				resourceBundle.getString("shanoir.uploader.mrExaminationCommentLabel") + " *");
@@ -793,27 +760,27 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 28;
+		importDialogGBC.gridy = 25;
 		importDialogGBC.gridwidth = 2;
 		importDialogGBC.gridheight = 1;
-		container.add(mrExaminationCommentLabel, importDialogGBC);
+		formPanel.add(mrExaminationCommentLabel, importDialogGBC);
 
 		mrExaminationCommentTF = new JTextFieldMandatory();
 		importDialogGBC.weightx = 0.7;
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 28;
+		importDialogGBC.gridy = 25;
 		importDialogGBC.gridwidth = 1;
-		container.add(mrExaminationCommentTF, importDialogGBC);
+		formPanel.add(mrExaminationCommentTF, importDialogGBC);
 
 		cancelButton = new JButton(resourceBundle.getString("shanoir.uploader.cancel"));
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.weightx = 0;
 		importDialogGBC.gridx = 1;
-		importDialogGBC.gridy = 29;
+		importDialogGBC.gridy = 26;
 		importDialogGBC.gridwidth = 1;
-		container.add(cancelButton, importDialogGBC);
+		formPanel.add(cancelButton, importDialogGBC);
 
 		CancelButtonActionListener cBAL = new CancelButtonActionListener(this);
 		cancelButton.addActionListener(cBAL);
@@ -822,10 +789,12 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.weightx = 0;
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 29;
+		importDialogGBC.gridy = 26;
 		importDialogGBC.gridwidth = 2;
-		container.add(exportButton, importDialogGBC);
+		formPanel.add(exportButton, importDialogGBC);
 		exportButton.addActionListener(importFinishAL);
+
+		container.add(formPanel, BorderLayout.CENTER);
 	}
 
 	public boolean isExaminationFilledCorrectly(XMLGregorianCalendar dateMrExam, boolean skip) {
