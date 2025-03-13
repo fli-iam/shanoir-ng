@@ -217,20 +217,20 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 				final PatientTreeNode patientTreeNode = media.initChildTreeNode(patient);
 				logger.info("Patient info read: " + patient.toString());
 				// add patients
-				media.addTreeNode(patient.getPatientID(), patientTreeNode);
+				media.addTreeNode(patientTreeNode);
 				List<Study> studies = patient.getStudies();
 				for (Iterator iterator2 = studies.iterator(); iterator2.hasNext();) {
 					Study study = (Study) iterator2.next();
 					final StudyTreeNode studyTreeNode = patientTreeNode.initChildTreeNode(study);
 					// add studies
-					patientTreeNode.addTreeNode(studyTreeNode.getId(), studyTreeNode);
+					patientTreeNode.addTreeNode(studyTreeNode);
 					List<Serie> series = study.getSeries();
 					for (Iterator iterator3 = series.iterator(); iterator3.hasNext();) {
 						Serie serie = (Serie) iterator3.next();
 						if (!serie.isErroneous() && !serie.isIgnored()) {
 							final SerieTreeNode serieTreeNode = studyTreeNode.initChildTreeNode(serie);
 							// add series
-							studyTreeNode.addTreeNode(serieTreeNode.getId(), serieTreeNode);
+							studyTreeNode.addTreeNode(serieTreeNode);
 						}
 					}
 				}
