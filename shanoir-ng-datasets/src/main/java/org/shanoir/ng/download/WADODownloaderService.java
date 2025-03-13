@@ -291,10 +291,14 @@ public class WADODownloaderService {
 			if (firstUrl != null) {
 				String jsonMetadataStr = downloadDicomMetadataForURL(firstUrl);
 				Attributes dicomAttributes;
-				try (JsonParser parser = Json.createParser(new StringReader(jsonMetadataStr))) {
+				try (
+					StringReader strReader = new StringReader(jsonMetadataStr);
+					JsonParser parser = Json.createParser(strReader)
+				) {
 					JSONReader reader = new JSONReader(parser);
 					dicomAttributes = reader.readDataset(null);
 				}
+				
 				if (dicomAttributes != null) {
 					return dicomAttributes;
 				} else {
