@@ -249,7 +249,6 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
      * @throws RestServiceException
      */
     public void delete(DatasetAcquisition entity, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
-        LOG.error("delete entity " + entity.getId());
         // Do not delete entity if it is the source. If getSourceId() is not null, it means it's a copy
         List<DatasetAcquisition> childDsAc = repository.findBySourceId(entity.getId());
         if (!CollectionUtils.isEmpty(childDsAc)) {
