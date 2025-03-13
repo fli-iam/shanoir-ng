@@ -17,7 +17,7 @@ import org.shanoir.ng.shared.dateTime.LocalDateSerializer;
 public class SubjectDto {
 
     @JsonProperty("id")
-    private long id;
+    private Long id;
 
     @JsonProperty("name")
     private String name;
@@ -40,11 +40,11 @@ public class SubjectDto {
     @JsonProperty("preclinical")
     private boolean preclinical;
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
