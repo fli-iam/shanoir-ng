@@ -47,18 +47,21 @@ public class ShanoirEvent {
 		this.message = message;
 		this.status = status;
 		// Generate an ID
-		this.id = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE;
+		this.id = generateId();
 	}
 
 	public ShanoirEvent(String eventType, String objectId, Long userId, String message,	int status, Long studyId) {
+		this(generateId(), eventType, objectId, userId, message, status, studyId);
+	}
+
+	public ShanoirEvent(Long id, String eventType, String objectId, Long userId, String message, int status, Long studyId) {
 		this.eventType = eventType;
 		setObjectId(objectId);
 		this.userId = userId;
 		this.message = message;
 		this.status = status;
 		this.studyId = studyId;
-		// Generate an ID
-		this.id = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE;
+		this.id = id;
 	}
 
 	public ShanoirEvent(String eventType, String objectId, Long userId, String message,	int status, float progress) {
@@ -69,6 +72,10 @@ public class ShanoirEvent {
 	public ShanoirEvent(String eventType, String objectId, Long userId, String message,	int status, float progress, Long studyId) {
 		this(eventType, objectId, userId, message, status, studyId);
 		this.progress = Float.valueOf(progress);
+	}
+
+	public static Long generateId() {
+		return UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE;
 	}
 
 	/**
