@@ -37,42 +37,39 @@ public class ShanoirDatasetIndexation implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        SolrClient solrClient = null;
+
+        SolrClient solrClient = new HttpSolrClient.Builder(solrUrl).build();
+
+        SolrQuery q = new SolrQuery("*:*");
+        q.setRows(0);  // don't actually request any data
+	
+	long deadline = System.currentTimeMillis() + MAX_WAIT_TIME_MS;
 
         try {
-            long startTime = System.currentTimeMillis();
-
-            while (Objects.isNull(solrClient) && (System.currentTimeMillis() - startTime) < MAX_WAIT_TIME_MS) {
-                solrClient = new HttpSolrClient.Builder(solrUrl).build();
-                solrClient.ping();
-
-            }
-        } catch (ConnectException ignored) {
-            try {
-                Thread.sleep(RETRY_INTERVAL_MS);
-            } catch (InterruptedException e) {
-                LOG.error(e.getMessage(), e);
-            }
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
-
-        try{
-            if (Objects.nonNull(solrClient)) {
-                SolrQuery q = new SolrQuery("*:*");
-                q.setRows(0);  // don't actually request any data
-                if (Objects.nonNull(solrClient.query(q)) && Objects.equals(0L, solrClient.query(q).getResults().getNumFound())) {
-                    LOG.info("Solr index empty. Re-indexing...");
-                    solrServiceImpl.indexAllNoAuth();
-                    LOG.info("Solr indexation complete.");
-                } else {
-                    LOG.info("Solr index already complete, no re-indexation required.");
+            while (true) {
+                try {
+                    if (Objects.nonNull(solrClient.query(q))
+                            && Objects.equals(0L, solrClient.query(q).getResults().getNumFound())) {
+                        LOG.info("Solr index empty. Re-indexing...");
+                        solrServiceImpl.indexAllNoAuth();
+                        LOG.info("Solr indexation complete.");
+                    } else {
+                        LOG.info("Solr index already complete, no re-indexation required.");
+                    }
+                    return;
                 }
-            } else {
-                LOG.info("Solr client not available.");
+                catch (ConnectException e) {
+                    if (System.currentTimeMillis() > deadline) {
+                        LOG.warn("Solr index not checked (server not reachable)");
+                        return;
+                    }
+                }
+                Thread.sleep(RETRY_INTERVAL_MS);
             }
+        } catch (InterruptedException ignored) {
+            LOG.info("Solr index not checked (thread interrupted)");
         } catch (SolrServerException|IOException e) {
-            LOG.error("Solr server exception", e);
+            LOG.error("Failed to check the Solr index", e);
         }
     }
 }
