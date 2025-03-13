@@ -108,7 +108,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
 
     private void manageResultOnly(List<DatasetProcessing> processingList, boolean resultOnly) {
         if(resultOnly){
-            processingList.forEach(it -> {it.setOutputDatasets(it.getOutputDatasets().stream().filter(file -> Objects.equals(file.getName(), "result.yaml")).toList()); it.setInputDatasets(new ArrayList<>());});
+            processingList.forEach(it ->  it.setInputDatasets(new ArrayList<>()));
         }
     }
 
