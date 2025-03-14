@@ -29,32 +29,20 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.shanoir.ng.dataset.modality.CalibrationDataset;
-import org.shanoir.ng.dataset.modality.CtDataset;
-import org.shanoir.ng.dataset.modality.EegDataset;
-import org.shanoir.ng.dataset.modality.GenericDataset;
-import org.shanoir.ng.dataset.modality.MegDataset;
-import org.shanoir.ng.dataset.modality.MeshDataset;
-import org.shanoir.ng.dataset.modality.MrDataset;
-import org.shanoir.ng.dataset.modality.ParameterQuantificationDataset;
-import org.shanoir.ng.dataset.modality.PetDataset;
-import org.shanoir.ng.dataset.modality.RegistrationDataset;
-import org.shanoir.ng.dataset.modality.SegmentationDataset;
-import org.shanoir.ng.dataset.modality.SpectDataset;
-import org.shanoir.ng.dataset.modality.StatisticalDataset;
-import org.shanoir.ng.dataset.modality.TemplateDataset;
-import org.shanoir.ng.dataset.modality.XaDataset;
+import org.awaitility.reflect.exception.FieldNotFoundException;
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+import org.dcm4che3.io.DicomInputStream;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.dataset.model.DatasetMetadata;
-import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.dataset.service.DatasetUtils;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.DicomProcessing;
+import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
@@ -64,6 +52,7 @@ import org.shanoir.ng.importer.dto.Patient;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.dto.Study;
+import org.shanoir.ng.importer.strategies.datasetexpression.DicomDatasetExpressionStrategy;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -97,9 +86,15 @@ public class ImporterService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ImporterService.class);
 
+    private static final String PROCESSED_DATASET_PREFIX = "processed-dataset";
+
     private static final String UPLOAD_EXTENSION = ".upload";
 
-    @Value("${datasets-data}")
+    private static final String SUBJECT_PREFIX = "sub-";    
+
+    private static int instancesCreated = 0;
+
+   @Value("${datasets-data}")
     private String niftiStorageDir;
 
     @Autowired
@@ -116,6 +111,12 @@ public class ImporterService {
 
     @Autowired
     private DicomPersisterService dicomPersisterService;
+
+    @Autowired
+    private DICOMWebService dicomWebService;
+
+    @Autowired
+    private DicomDatasetExpressionStrategy dicomDatasetExpressionStrategy;
 
     @Autowired
     private ShanoirEventService eventService;
@@ -140,14 +141,8 @@ public class ImporterService {
 
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
 
-    private static final String SUBJECT_PREFIX = "sub-";
-    
-    private static final String PROCESSED_DATASET_PREFIX = "processed-dataset";
-
-    private static int instancesCreated = 0;
-
     //This constructor will be called everytime a new bean instance is created
-    public ImporterService(){
+    public ImporterService() {
         instancesCreated++;
     }
 
@@ -429,115 +424,58 @@ public class ImporterService {
 
     /**
      * Create a processed dataset dataset associated with a dataset processing.
-     * @param importJob the import job from importer MS.
+     * 
+     * @param importJob
      */
     public Dataset createProcessedDataset(final ProcessedDatasetImportJob importJob) throws Exception {
-
         ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getProcessedDatasetFilePath(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS, 0f, importJob.getStudyId());
         eventService.publishEvent(event);
 
         DatasetProcessing datasetProcessing = importJob.getDatasetProcessing();
-
-        if (datasetProcessing == null) {
-            event.setStatus(ShanoirEvent.ERROR);
-            event.setMessage("Dataset processing missing.");
-            event.setProgress(-1f);
-            eventService.publishEvent(event);
+        if (!checkProcessedDatasetImportJob(importJob, event)) {
             return null;
-        }
-
-        if (importJob.getDatasetProcessing().getInputDatasets() == null ||
-                importJob.getDatasetProcessing().getInputDatasets().isEmpty()) {
-            event.setStatus(ShanoirEvent.ERROR);
-            event.setMessage("Processing input dataset(s) missing.");
-            event.setProgress(-1f);
-            eventService.publishEvent(event);
-            return null;
-        }
-
-        if (importJob.getStudyId() == null) {
-            event.setStatus(ShanoirEvent.ERROR);
-            event.setMessage("Study missing.");
-            event.setProgress(-1f);
-            eventService.publishEvent(event);
-            return null;
-        }
-
-        for(Dataset input : datasetProcessing.getInputDatasets()){
-            Long studyId = datasetService.getStudyId(input);
-            if (studyId != null && !studyId.equals(importJob.getStudyId())) {
-                event.setStatus(ShanoirEvent.ERROR);
-                event.setMessage("Study from input dataset [" + input.getId() + "] not the same as [" + studyId + "]");
-                event.setProgress(-1f);
-                eventService.publishEvent(event);
-                return null;
-            }
         }
 
         try {
+            Dataset dataset = createDataset(importJob);
 
-            Dataset dataset = DatasetUtils.buildDatasetFromType(importJob.getDatasetType());
-            dataset.getOriginMetadata().setProcessedDatasetType(importJob.getProcessedDatasetType());
-            dataset.getOriginMetadata().setName(importJob.getProcessedDatasetName());
-            
-            datasetProcessing.addOutputDataset(dataset);
-            dataset.setDatasetProcessing(datasetProcessing);
-            dataset.setStudyId(importJob.getStudyId());
-
-            // Copy the data somewhere else
-            final String subLabel = SUBJECT_PREFIX + importJob.getSubjectName();
-
-            final File outDir = new File(niftiStorageDir + File.separator + PROCESSED_DATASET_PREFIX + File.separator + subLabel + File.separator);
-            outDir.mkdirs();
-            String filePath = importJob.getProcessedDatasetFilePath();
-            File srcFile = new File(filePath);
-            String originalNiftiName = srcFile.getName();
-            File destFile = new File(outDir.getAbsolutePath() + File.separator + formatter.format(LocalDateTime.now()) + File.separator + originalNiftiName);
-
-            // Save file
-            Path location;
-            try {
-                destFile.getParentFile().mkdirs();
-                location = Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            } catch (IOException e) {
-                LOG.error("IOException generating Processed Dataset Expression", e);
-                throw e;
-            }
-            DatasetFile datasetFile = new DatasetFile();
-            datasetFile.setPacs(false);
-            datasetFile.setPath(location.toUri().toString());
+            File processedDatasetFile = new File(importJob.getProcessedDatasetFilePath());
+            DicomInputStream dicomInputStream = checkIfDICOM(processedDatasetFile);
 
             DatasetExpression expression = new DatasetExpression();
             expression.setDataset(dataset);
-            expression.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
             expression.setDatasetProcessingType(datasetProcessing.getDatasetProcessingType());
-            expression.setSize(Files.size(location));
-            
-            datasetFile.setDatasetExpression(expression);
-            
-            expression.setDatasetFiles(Collections.singletonList(datasetFile));
-            
+            expression.setSize(Files.size(processedDatasetFile.toPath()));
             dataset.setDatasetExpressions(Collections.singletonList(expression));
 
-            // Fill dataset with informations
-            dataset.setCreationDate(LocalDate.now());
-            dataset.setUpdatedMetadata(dataset.getOriginMetadata());
-            dataset.setStudyId(importJob.getStudyId());
-            dataset.setSubjectId(importJob.getSubjectId());
-
+            DatasetFile datasetFile = new DatasetFile();
+            datasetFile.setDatasetExpression(expression);
+            // Processed dataset: DICOM
+            if (dicomInputStream != null) {
+                expression.setDatasetExpressionFormat(DatasetExpressionFormat.DICOM);
+                datasetFile.setPacs(true);
+                Attributes attributes = dicomInputStream.readDataset(Tag.PixelData);
+                datasetFile = dicomDatasetExpressionStrategy.setPath(attributes, datasetFile);
+                dicomWebService.sendDicomInputStreamToPacs(dicomInputStream);
+            // Processed dataset: other, e.g. NIfTI
+            } else {
+                expression.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+                datasetFile.setPacs(false);
+                Path location = saveProcessedDatasetFile(importJob, processedDatasetFile);
+                datasetFile.setPath(location.toUri().toString());
+            }
+            expression.setDatasetFiles(Collections.singletonList(datasetFile));
+            
             dataset = datasetService.create(dataset);
             solrService.indexDataset(dataset.getId());
-            
-            event.setStatus(ShanoirEvent.SUCCESS);
 
+            event.setStatus(ShanoirEvent.SUCCESS);
             event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")] " +
                     "Successfully created processed dataset [" + dataset.getId() + "] " +
                     "for subject [" + importJob.getSubjectName() + "]");
             event.setProgress(1f);
             eventService.publishEvent(event);
-            
             return dataset;
-            
         } catch (Exception e) {
             LOG.error("Error while importing processed dataset: ", e);
             event.setStatus(ShanoirEvent.ERROR);
@@ -551,6 +489,95 @@ public class ImporterService {
     public void createFailedJob(String datasetFilePath){
         ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, datasetFilePath, KeycloakUtil.getTokenUserId(), "Import of dataset failed.", ShanoirEvent.ERROR, -1f);
         eventService.publishEvent(event);
+    }
+
+    private DicomInputStream checkIfDICOM(File processedDatasetFile) throws FieldNotFoundException {
+        if (processedDatasetFile.exists()) {
+            // We pass here by using DicomInputStream,
+            // in case processed dataset file does not end with .dcm
+            try (DicomInputStream dIS = new DicomInputStream(processedDatasetFile)) {
+                return dIS;
+            } catch (IOException e) {
+                // We ignore the exception here: if not DICOM, we assume other format
+            }
+        } else {
+            LOG.error("Processed dataset file not existing: {}", processedDatasetFile.getAbsolutePath());
+            throw new FieldNotFoundException("Processed dataset file not existing.");
+        }
+        return null;
+    }
+
+    /**
+     * Check ProcessedDatasetImportJob.
+     * 
+     * @param job
+     * @param event
+     * @return
+     */
+    private boolean checkProcessedDatasetImportJob(ProcessedDatasetImportJob job, ShanoirEvent event) {
+        if (job.getDatasetProcessing() == null) {
+            event.setStatus(ShanoirEvent.ERROR);
+            event.setMessage("Dataset processing missing.");
+            event.setProgress(-1f);
+            eventService.publishEvent(event);
+            return false;
+        }
+        if (job.getDatasetProcessing().getInputDatasets() == null ||
+                job.getDatasetProcessing().getInputDatasets().isEmpty()) {
+            event.setStatus(ShanoirEvent.ERROR);
+            event.setMessage("Processing input dataset(s) missing.");
+            event.setProgress(-1f);
+            eventService.publishEvent(event);
+            return false;
+        }
+        if (job.getStudyId() == null) {
+            event.setStatus(ShanoirEvent.ERROR);
+            event.setMessage("Study missing.");
+            event.setProgress(-1f);
+            eventService.publishEvent(event);
+            return false;
+        }
+        for(Dataset input : job.getDatasetProcessing().getInputDatasets()){
+            Long studyId = datasetService.getStudyId(input);
+            if (studyId != null && !studyId.equals(job.getStudyId())) {
+                event.setStatus(ShanoirEvent.ERROR);
+                event.setMessage("Study from input dataset [" + input.getId() + "] not the same as [" + studyId + "]");
+                event.setProgress(-1f);
+                eventService.publishEvent(event);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private Dataset createDataset(ProcessedDatasetImportJob job) {
+        Dataset dataset = DatasetUtils.buildDatasetFromType(job.getDatasetType());
+        dataset.getOriginMetadata().setProcessedDatasetType(job.getProcessedDatasetType());
+        dataset.getOriginMetadata().setName(job.getProcessedDatasetName());
+        dataset.setStudyId(job.getStudyId());
+        dataset.setSubjectId(job.getSubjectId());
+        dataset.setCreationDate(LocalDate.now());
+        dataset.setUpdatedMetadata(dataset.getOriginMetadata());
+        dataset.setDatasetProcessing(job.getDatasetProcessing());
+        job.getDatasetProcessing().addOutputDataset(dataset);
+        return dataset;
+    }
+
+    private Path saveProcessedDatasetFile(ProcessedDatasetImportJob job, File processedDatasetFile) throws IOException {
+        final String subLabel = SUBJECT_PREFIX + job.getSubjectName();
+        final File outDir = new File(niftiStorageDir + File.separator + PROCESSED_DATASET_PREFIX + File.separator + subLabel + File.separator);
+        outDir.mkdirs();
+        String fileName = processedDatasetFile.getName();
+        File destFile = new File(outDir.getAbsolutePath() + File.separator + formatter.format(LocalDateTime.now()) + File.separator + fileName);
+        Path location;
+        try {
+            destFile.getParentFile().mkdirs();
+            location = Files.copy(processedDatasetFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            return location;
+        } catch (IOException e) {
+            LOG.error("IOException generating Processed Dataset Expression", e);
+            throw e;
+        }
     }
     
 }
