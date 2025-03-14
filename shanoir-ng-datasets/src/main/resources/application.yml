@@ -100,6 +100,7 @@ ms.url:
   shanoir-ng-studies: http://${SHANOIR_PREFIX}studies:9902/
 # Data folder configuration
 datasets-data: /var/datasets-data
+vip-data-folder: /var/datasets-data/vip-data
 bids-data-folder: /var/datasets-data/bids-data
 # logging configuration
 logging:
@@ -200,6 +201,7 @@ ms.url:
   shanoir-ng-studies: http://studies:9902/
 # Data folder configuration
 datasets-data: /var/datasets-data
+vip-data-folder: /var/datasets-data/vip-data
 bids-data-folder: /var/datasets-data/bids-data
 # logging configuration
 logging:
