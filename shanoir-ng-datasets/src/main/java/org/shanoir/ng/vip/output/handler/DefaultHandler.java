@@ -64,12 +64,14 @@ public class DefaultHandler extends OutputHandler {
     private static final Logger LOG = LoggerFactory.getLogger(DefaultHandler.class);
 
 
-    @Override
     public boolean canProcess(ExecutionMonitoring processing) {
         return true;
     }
 
-    @Override
+    public boolean canProcess(String pipelineIdentifier) {
+        return true;
+    }
+
     public void manageTarGzResult(List<File> resultFiles, File parent, ExecutionMonitoring monitoring) throws ResultHandlerException {
 
         try {
@@ -106,7 +108,9 @@ public class DefaultHandler extends OutputHandler {
         }
     }
 
-
+    /**
+     * Retrieve input datasets from a .json file returned by VIP after execution
+     */
     private List<Dataset> getInputDatasets(File resultJson, String tarName) throws IOException, JSONException {
         List<String> candidates = new ArrayList<>();
 

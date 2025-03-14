@@ -35,10 +35,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -113,15 +110,17 @@ public class OFSEPSeqIdHandler extends OutputHandler {
     private StudyService studyService;
 
 
-    @Override
     public boolean canProcess(ExecutionMonitoring processing) throws ResultHandlerException {
-        if(processing.getPipelineIdentifier() == null || processing.getPipelineIdentifier().isEmpty()){
-            throw new ResultHandlerException("Pipeline identifier is not set for processing [" + processing.getName() + "]", null);
-        }
-        return processing.getPipelineIdentifier().startsWith("ofsep_sequences_identification");
+        return canProcess(processing.getPipelineIdentifier());
     }
 
-    @Override
+    public boolean canProcess(String pipelineIdentifier) throws ResultHandlerException {
+        if(Objects.isNull(pipelineIdentifier)){
+            throw new ResultHandlerException("Pipeline identifier can not be null", null);
+        }
+        return pipelineIdentifier.startsWith("ofsep_sequences_identification");
+    }
+
     public void manageTarGzResult(List<File> resultFiles, File parentFolder, ExecutionMonitoring processing) {
 
         for (File file : resultFiles) {

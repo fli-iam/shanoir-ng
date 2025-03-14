@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionStatus;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 public interface ExecutionMonitoringRepository extends CrudRepository<ExecutionMonitoring, Long> {
@@ -12,4 +13,7 @@ public interface ExecutionMonitoringRepository extends CrudRepository<ExecutionM
     Optional<ExecutionMonitoring> findByIdentifier(String identifier);
 
     List<ExecutionMonitoring> findByStatus(ExecutionStatus status);
+
+    @Query("Select m from ExecutionMonitoring m join DatasetProcessing as p on p.parent.id = m.id where p.id IN (:datasetProcessingIds)")
+    List<ExecutionMonitoring> findByDatasetProcessingIds(List<Long> datasetProcessingIds);
 }
