@@ -74,7 +74,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
 
     private void manageProcessingsDownload(List<DatasetProcessing> processingList, Map<Long, DatasetDownloadError> downloadResults, ZipOutputStream zipOutputStream, String format, boolean withManifest, Map<Long, List<String>> filesByAcquisitionId, Long converterId) throws RestServiceException, IOException {
         for (DatasetProcessing processing : processingList) {
-            String processingFilePath = getExecFilepath(processing.getId(), getExaminationDatas(processing.getInputDatasets()));
+            String processingFilePath = getExecFilepath(processing, getExaminationDatas(processing.getInputDatasets()));
             String subjectName = getProcessingSubject(processing);
             for (Dataset dataset : processing.getInputDatasets()) {
                 manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, processingFilePath  + "/" + shapeForPath(dataset.getName()), format, withManifest, filesByAcquisitionId, converterId);
@@ -108,7 +108,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
 
     private void manageResultOnly(List<DatasetProcessing> processingList, boolean resultOnly) {
         if(resultOnly){
-            processingList.forEach(it -> {it.setOutputDatasets(it.getOutputDatasets().stream().filter(file -> Objects.equals(file.getName(), "result.yaml")).toList()); it.setInputDatasets(new ArrayList<>());});
+            processingList.forEach(it ->  it.setInputDatasets(new ArrayList<>()));
         }
     }
 
@@ -141,17 +141,34 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         return new Pair<>(0L, "");
     }
 
-    private String getExecFilepath(Long processingId, Pair<Long, String> examDatas) {
+    private String getExecFilepath(DatasetProcessing processing, Pair<Long, String> examDatas) {
+        String execFilePath = "";
+        String prefixe = "";
+        if(Objects.equals(processing.getComment(), "comete_moelle/0.1")){
+            if(!processing.getOutputDatasets().stream().filter(it -> Objects.equals(it.getName(), "results.yaml")).toList().isEmpty()) {
+                prefixe = "result/";
+            }
+            if(!processing.getOutputDatasets().stream().filter(it -> Objects.equals(it.getName(), "error.yaml")).toList().isEmpty()) {
+                if(Objects.equals("", prefixe)){
+                    prefixe = "error/";
+                } else {
+                    prefixe = "result_and_error/";
+                }
+            }
+            if(Objects.equals("", prefixe)){
+                prefixe = "unknown/";
+            }
 
-        String execFilePath = "processing_" + processingId +  "_exam_" + examDatas.first();
-        if (!Objects.equals(examDatas.second(), "")) {
+        }
+        execFilePath += "processing_" + processing.getId() +  "_exam_" + examDatas.first();
+        if (Objects.nonNull(examDatas.second()) && !Objects.equals(examDatas.second(), "")) {
             execFilePath += "_" + examDatas.second();
         }
-        return shapeForPath(execFilePath);
+        return prefixe + shapeForPath(execFilePath);
     }
 
     private String shapeForPath(String path){
-        path = path.replaceAll("[^a-zA-Z0-9_\\-]", "_");
+        path = path.replaceAll("[^a-zA-Z0-9_]", "_").replaceAll("_+$", "").replaceAll("_+", "_");
         if (path.length() > 255) {
             path = path.substring(0, 254);
         }
