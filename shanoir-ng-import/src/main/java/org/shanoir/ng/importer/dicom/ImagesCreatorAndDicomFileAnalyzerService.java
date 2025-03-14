@@ -76,6 +76,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 
 	private static final String YES = "YES";
 
+	private static final String SERIES_NUMBER_0 = "0";
+
 	@Autowired
 	private ShanoirEventService eventService;
 
@@ -401,7 +403,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				serie.setSopClassUID(sopClassUIDDicomFile);
 			}
 		}
-		if (StringUtils.isEmpty(serie.getSeriesNumber())) {
+		if (StringUtils.isEmpty(serie.getSeriesNumber()) || SERIES_NUMBER_0.equals(serie.getSeriesNumber())) {
 			// has not been sent by PACS (case for Telemis), get it from .dcm file:
 			String seriesNumberDicomFile = attributes.getString(Tag.SeriesNumber);
 			if (StringUtils.isNotEmpty(seriesNumberDicomFile)) {
