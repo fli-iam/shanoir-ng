@@ -146,9 +146,15 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
     /**
      * Rewrite the lines at the end of the files according to MAX_LAST_LINES_TO_CHECK
      */
-    private void writeLastLines(List<String> lastLines, File trackingFile) {
+    private synchronized void writeLastLines(List<String> lastLines, File trackingFile) {
+        List<String> lines = null;
+        try {
+            //BufferedWriter clear file, so we need to read it before opening buffer
+            lines = Files.readAllLines(trackingFile.toPath());
+        } catch (IOException e) {
+            LOG.error("An error occured while reading files in VIP tracking file", e);
+        }
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(trackingFile));) {
-            List<String> lines = Files.readAllLines(trackingFile.toPath());
             List<String> updatedLines = lines.subList(0, Math.max(1, lines.size() - MAX_LAST_LINES_TO_CHECK));
             updatedLines.addAll(lastLines);
 
@@ -157,7 +163,6 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
                 writer.newLine();
             }
             writer.write(updatedLines.getLast());
-            writer.close();
         } catch (IOException e) {
             LOG.error("An error occured while updating a line in VIP tracking file", e);
         }
@@ -180,7 +185,6 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(trackingFile));) {
                 String headers = "Date (HH:mm dd/MM/yyyy),Processing_id,Exam_id,Dataset_id,Dataset_name,Sent_to_VIP,Error_file,Result_file";
                 writer.write(headers);
-                writer.close();
             } catch (IOException e) {
                 LOG.error("An error occured while creating VIP tracking file", e);
             }
