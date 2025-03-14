@@ -21,6 +21,14 @@ public abstract class OutputHandler {
     public abstract boolean canProcess(ExecutionMonitoring monitoring) throws ResultHandlerException;
 
     /**
+     * Return true if the implementation can process the result of the processing relative to the given string
+     *
+     * @param pipelineIdentifier string
+     * @return true if execution monitoring can be process by this handler instance
+     */
+    public abstract boolean canProcess(String pipelineIdentifier) throws ResultHandlerException;
+
+    /**
      * This methods manages the single result of an execution
      *
      * @param resultFiles  the result file as tar.gz of the processing

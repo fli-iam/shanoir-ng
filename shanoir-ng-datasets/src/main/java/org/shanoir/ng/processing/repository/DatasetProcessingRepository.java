@@ -35,6 +35,16 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
 	 */
 	Optional<DatasetProcessing> findByComment(String comment);
 
+
+	/**
+	 * Find all dataset processing by comment and type.
+	 *
+	 * @param comment Comment.
+	 * @param type Dataset processing type.
+	 * @return List of dataset processing.
+	 */
+	List<Long> findIdsByCommentAndDatasetProcessingType(String comment, int type);
+
 	/**
 	 * Find all processings that are linked to given dataset through INPUT_OF_DATASET_PROCESSING table
 	 *
@@ -43,6 +53,12 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
 	 */
 	List<DatasetProcessing> findAllByInputDatasets_Id(Long datasetId);
 
+	/**
+	 * Find all processings that are linked to given parent processing id
+	 *
+	 * @param id
+	 * @return
+	 */
     List<DatasetProcessing> findAllByParentId(Long id);
 	
 	/**

@@ -274,17 +274,15 @@ public enum DatasetProcessingType {
 	 * Constructor.
 	 * 
 	 * @param id
-	 *            id
 	 */
-	private DatasetProcessingType(final int id) {
+	DatasetProcessingType(final int id) {
 		this.id = id;
 	}
 
 	/**
 	 * Get a dataset processing type by its id.
 	 * 
-	 * @param id
-	 *            type id.
+	 * @param id type id.
 	 * @return dataset processing type.
 	 */
 	public static DatasetProcessingType getType(final Integer id) {
@@ -306,4 +304,17 @@ public enum DatasetProcessingType {
 		return id;
 	}
 
+	/**
+	 *
+	 * @param name type name.
+	 * @return the id
+	 */
+	public static Integer getIdFromString(String name) {
+		for (DatasetProcessingType type : values()) {
+			if (type.name().equalsIgnoreCase(name)) {
+				return type.getId();
+			}
+		}
+		return null;
+	}
 }
