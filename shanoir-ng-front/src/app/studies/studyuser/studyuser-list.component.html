@@ -13,6 +13,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <ol>
+	<li *ngIf="mode == 'edit' && !studyOptions" class="info-txt">
+		<h3>Invite a new user</h3>
+		Username or email address : <input type="text" [(ngModel)]="invitationMail" placeholder="email address / username">
+		<tool-tip>If an user with such email/username already exists, he will be directly added to the study, otherwise an email with an invitation will be sent.</tool-tip>
+		<br/>Function in the study (researcher, mri manipulator, ...) : <input type="text" [(ngModel)]="invitationFunction" placeholder="function in the study">
+		<br/><button type="button" class="invite-button right-icon" (click)="inviteUser()">Invite & Add<i class="fa-solid fa-plus"></i></button>
+    </li>
 	<li *ngIf="mode != 'view' && studyOptions">
 		<label>List of studies</label>
 		<span class="right-col">
@@ -20,12 +27,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</select-box>
 		</span>
 	</li>
-	<li *ngIf="mode == 'edit' && !studyOptions">
-           <span>Invite a new user : </span>
-           <input type="text" [(ngModel)]="invitationMail" placeholder="email address / username">
-           <button type="button" class="invite-button right-icon" (click)="inviteUser()">Invite & Add<i class="fa-solid fa-plus"></i></button>
-           <tool-tip>If an user with such email/username already exists, he will be directly added to the study, otherwise an email with an invitation will be sent.</tool-tip>
-    </li>
 	<li>
 		<shanoir-table #memberTable
 			[getPage]="getPage.bind(this)"
