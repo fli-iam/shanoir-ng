@@ -440,7 +440,7 @@ public class ImporterService {
             Dataset dataset = createDataset(importJob);
 
             File processedDatasetFile = new File(importJob.getProcessedDatasetFilePath());
-            DicomInputStream dicomInputStream = checkIfDICOM(processedDatasetFile);
+            Attributes attributes = checkIfDICOM(processedDatasetFile);
 
             DatasetExpression expression = new DatasetExpression();
             expression.setDataset(dataset);
@@ -451,12 +451,11 @@ public class ImporterService {
             DatasetFile datasetFile = new DatasetFile();
             datasetFile.setDatasetExpression(expression);
             // Processed dataset: DICOM
-            if (dicomInputStream != null) {
+            if (attributes != null) {
                 expression.setDatasetExpressionFormat(DatasetExpressionFormat.DICOM);
                 datasetFile.setPacs(true);
-                Attributes attributes = dicomInputStream.readDataset(Tag.PixelData);
                 datasetFile = dicomDatasetExpressionStrategy.setPath(attributes, datasetFile);
-                dicomWebService.sendDicomInputStreamToPacs(dicomInputStream);
+                dicomWebService.sendDicomFileToPacs(processedDatasetFile);
             // Processed dataset: other, e.g. NIfTI
             } else {
                 expression.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
@@ -491,12 +490,12 @@ public class ImporterService {
         eventService.publishEvent(event);
     }
 
-    private DicomInputStream checkIfDICOM(File processedDatasetFile) throws FieldNotFoundException {
+    private Attributes checkIfDICOM(File processedDatasetFile) throws FieldNotFoundException {
         if (processedDatasetFile.exists()) {
             // We pass here by using DicomInputStream,
             // in case processed dataset file does not end with .dcm
             try (DicomInputStream dIS = new DicomInputStream(processedDatasetFile)) {
-                return dIS;
+                return dIS.readDataset(); // we close InputStream and use Attributes
             } catch (IOException e) {
                 // We ignore the exception here: if not DICOM, we assume other format
             }
