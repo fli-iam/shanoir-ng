@@ -1,5 +1,7 @@
 package org.shanoir.ng.vip.executionMonitoring.service;
 
+import org.apache.commons.lang3.tuple.Triple;
+import org.junit.jupiter.api.parallel.Execution;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.processing.model.DatasetProcessingType;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
@@ -33,6 +35,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 
 /**
  * @author KhalilKes
@@ -45,9 +49,10 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
     public static final float DEFAULT_PROGRESS = 0.5f;
     @Value("${vip.sleep-time}")
     private long sleepTime;
-    private ThreadLocal<Boolean> stop = new ThreadLocal<>();
     private static final Logger LOG = LoggerFactory.getLogger(ExecutionMonitoringServiceImpl.class);
     private final String RIGHT_STR = "CAN_SEE_ALL";
+    private final ConcurrentLinkedQueue<Map<String, Object>> monitoringQueue = new ConcurrentLinkedQueue<>();
+    private volatile boolean isRunning = false;
 
     @Autowired
     private ExecutionMonitoringRepository repository;
@@ -100,49 +105,68 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
         return executionMonitoringSecurityService.filterExecutionMonitoringList(Utils.toList(repository.findAll()), RIGHT_STR);
     }
 
-    @Async("asyncExecutor")
     @Transactional
-    public void startMonitoringJob(ExecutionMonitoring processing, ShanoirEvent event) {
-        int attempts = 1;
-        String identifier = processing.getIdentifier();
+    public void startMonitoringJob(ExecutionMonitoring createdMonitoring, ShanoirEvent event) {
+        Map<String, Object> monitoringMap = new HashMap<>();
+        monitoringMap.put("monitoring", createdMonitoring);
+        monitoringMap.put("event", event);
+        monitoringMap.put("attempt", 1);
+        monitoringQueue.add(monitoringMap);
 
-        stop.set(false);
-
-        String execLabel = getExecLabel(processing);
-        event = initShanoirEvent(processing, event, execLabel);
-
-        while (!stop.get()) {
-
-            try{
-                VipExecutionDTO dto = executionService.getExecutionAsServiceAccount(attempts, identifier).block();
-
-                if(dto == null){
-                    attempts++;
-                    continue;
-                }else{
-                    attempts = 1;
+        if (!isRunning) { //If we remove this line, each calling thread needs to wait the old ones to finish the synchronized block below before resuming the code execution. It's only for code performance.
+            synchronized (this) { //Allow the synchronized block to be executed only by one thread at a time. It avoids concurrency
+                if (!isRunning) {  //In case of two calling threads hitting the 1st !isRunning check condition at the same time, it may leads to 2 distinct monitoring loop if we remove this second !isRunning check, what we want to avoid
+                    isRunning = true;
+                    monitoringLoop();
                 }
-                switch (dto.getStatus()) {
-                    case FINISHED -> processFinishedJob(processing, event, dto.getEndDate());
-                    case UNKNOWN,EXECUTION_FAILED,KILLED -> processKilledJob(processing, event, dto);
-                    case RUNNING -> {
-                        try {
-                            Thread.sleep(sleepTime); // sleep/stop a thread for 20 seconds
-                        } catch (InterruptedException e) {
-                            event.setMessage(execLabel + " : Monitoring interrupted, current state unknown...");
-                            eventService.publishEvent(event);
-                            LOG.warn("Execution monitoring thread interrupted", e);
-                        }
+            }
+        }
+    }
+
+    @Async //We keep that method async, because the startMonitoringJob ensure that only one thread of this method can exist at a time, and it doesn't block the 1st calling method
+    protected void monitoringLoop() {
+        while (!monitoringQueue.isEmpty()) {
+            long startTime = System.currentTimeMillis();
+
+            for (Map<String, Object> emMap : monitoringQueue) {
+                ExecutionMonitoring monitoring = (ExecutionMonitoring) emMap.get("monitoring");
+                ShanoirEvent event = (ShanoirEvent) emMap.get("event");
+                int attempt = (Integer) emMap.get("attempt");
+                String execLabel = getExecLabel(monitoring);
+
+                if(Objects.isNull(event) || !Objects.equals(event.getStatus(),ShanoirEvent.IN_PROGRESS)){
+                    emMap.put("event", initShanoirEvent(monitoring, event, execLabel));
+                }
+
+                try{
+                    VipExecutionDTO dto = executionService.getExecutionAsServiceAccount(attempt, monitoring.getIdentifier()).block();
+
+                    if(dto == null){
+                        emMap.put("attempt", (Integer) emMap.get("attempt") + 1);
+                        continue;
+                    }else{
+                        emMap.put("attempt", 1);
                     }
-                    default -> stop.set(true);
+
+                    switch (dto.getStatus()) {
+                        case FINISHED -> processFinishedJob(monitoring, event, dto.getEndDate());
+                        case UNKNOWN,EXECUTION_FAILED,KILLED -> processKilledJob(monitoring, event, dto);
+                    }
+                } catch (Exception e){
+                    // Unwrap ReactiveException thrown from async method
+                    Throwable ex = Exceptions.unwrap(e);
+                    LOG.error(ex.getMessage(), ex.getCause());
+                    setEventInError(event, execLabel + " : " + ex.getMessage());
+                    LOG.warn("Error while monitoring the processing {}. Stopping the monitoring ...", monitoring.getId());
                 }
-            } catch (Exception e){
-                // Unwrap ReactiveException thrown from async method
-                Throwable ex = Exceptions.unwrap(e);
-                LOG.error(ex.getMessage(), ex.getCause());
-                setEventInError(event, execLabel + " : " + ex.getMessage());
-                LOG.warn("Stopping thread...");
-                stop.set(true);
+            }
+
+            while (System.currentTimeMillis() - startTime < sleepTime) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                        LOG.error("Error in the monitoring loop", e);
+                }
             }
         }
     }
@@ -204,8 +228,6 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
 
         LOG.info("Execution status updated, stopping job...");
 
-        stop.set(true);
-
         setEventInError(event, execLabel + " : "  + vipExecutionDTO.getStatus().getRestLabel()
                 + (vipExecutionDTO.getErrorCode() != null ? " (Error code : " + vipExecutionDTO.getErrorCode() + ")" : ""));
     }
@@ -229,8 +251,6 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
         outputService.process(execution);
 
         LOG.info("Execution status updated, stopping job...");
-
-        stop.set(true);
 
         event.setMessage(execLabel + " : Finished");
         event.setStatus(ShanoirEvent.SUCCESS);
