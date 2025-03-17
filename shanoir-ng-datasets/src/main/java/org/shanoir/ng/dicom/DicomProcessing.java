@@ -73,8 +73,8 @@ public class DicomProcessing {
 		}
 	}
 
-    public ExaminationAttributes<String> getDicomExaminationAttributes(Study study, Boolean isEnhanced) throws ShanoirException {
-		ExaminationAttributes<String> attributes = new ExaminationAttributes<>(wadoURLHandler);
+    public ExaminationAttributes<String> getDicomExaminationAttributes(Study study, Set<Integer> tagsInUse, Boolean isEnhanced) throws ShanoirException {
+		ExaminationAttributes<String> attributes = new ExaminationAttributes<>(wadoURLHandler, tagsInUse);
 		if (study != null) {
 			for (Serie serie : study.getSeries()) {
 				attributes.addAcquisitionAttributes(serie.getSeriesInstanceUID(), getDicomAcquisitionAttributes(serie, isEnhanced));
@@ -83,8 +83,8 @@ public class DicomProcessing {
 		return attributes;
     }
 
-	public static ExaminationAttributes<String> getDicomExaminationAttributes(Study study) throws ShanoirException {
-		ExaminationAttributes<String> attributes = new ExaminationAttributes<>(wadoURLHandler);
+	public static ExaminationAttributes<String> getDicomExaminationAttributes(Study study, Set<Integer> tagsInUse) throws ShanoirException {
+		ExaminationAttributes<String> attributes = new ExaminationAttributes<>(wadoURLHandler, tagsInUse);
 		if (study != null) {
 			for (Serie serie : study.getSeries()) {
 				attributes.addAcquisitionAttributes(serie.getSeriesInstanceUID(), getDicomAcquisitionAttributes(serie));

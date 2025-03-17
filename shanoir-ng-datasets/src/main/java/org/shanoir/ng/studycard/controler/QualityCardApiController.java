@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.studycard.controler;
 
+import java.lang.management.ManagementFactory;
 import java.nio.LongBuffer;
 import java.util.List;
 

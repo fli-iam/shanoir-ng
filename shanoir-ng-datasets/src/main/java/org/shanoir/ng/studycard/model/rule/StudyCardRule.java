@@ -14,12 +14,15 @@
 
 package org.shanoir.ng.studycard.model.rule;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.studycard.model.assignment.StudyCardAssignment;
 import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
+import org.shanoir.ng.studycard.model.condition.StudyCardDICOMConditionOnDatasets;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -84,5 +87,17 @@ public abstract class StudyCardRule<T> extends AbstractEntity {
 
     public void setOrConditions(boolean orConditions) {
         this.orConditions = orConditions;
+    }
+
+	public Set<Integer> getConditionsDICOMtags() {
+        Set<Integer> result = new HashSet<>();
+        if (getConditions() != null) {
+            for (StudyCardCondition condition: getConditions()) {
+                if (condition instanceof StudyCardDICOMConditionOnDatasets) {
+                    result.add(((StudyCardDICOMConditionOnDatasets) condition).getDicomTag());
+                }
+            }
+        }
+        return result;
     }
 }

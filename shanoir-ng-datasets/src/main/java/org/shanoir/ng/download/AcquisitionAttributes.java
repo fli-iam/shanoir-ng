@@ -15,6 +15,7 @@
 package org.shanoir.ng.download;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -29,6 +30,15 @@ import org.dcm4che3.data.Attributes;
 public class AcquisitionAttributes<T> {
 
 	private ConcurrentMap<T, Optional<Attributes>> datasetMap = new ConcurrentHashMap<>();
+
+	private Set<Integer> tagsInUse = null;
+
+    public AcquisitionAttributes() {
+    }
+
+	public AcquisitionAttributes(Set<Integer> tagsInUse) {
+		this.tagsInUse = tagsInUse;
+    }
 
 	public Attributes getDatasetAttributes(T id) {
 		return datasetMap.get(id).orElse(null);
@@ -46,6 +56,17 @@ public class AcquisitionAttributes<T> {
 
 	public void addDatasetAttributes(T id, Attributes attributes) {
 		if (id == null) throw new IllegalArgumentException("id cant be null here");
+		if (tagsInUse != null && attributes != null) {
+			Set<Integer> tagsToRemove = new HashSet<>();
+			for (int tag : attributes.tags()) {
+				if (!tagsInUse.contains(tag)) {
+					tagsToRemove.add(tag);
+				}
+			}
+			for (Integer tag : tagsToRemove) {
+				attributes.remove(tag);
+			}
+		}
 		this.datasetMap.put(id, Optional.ofNullable(attributes));
 	}
 
@@ -116,4 +137,8 @@ public class AcquisitionAttributes<T> {
     public boolean has(T acqId) {
         return datasetMap.containsKey(acqId);
     }
+
+	public void clear() {
+		this.datasetMap.clear();
+	}
 }

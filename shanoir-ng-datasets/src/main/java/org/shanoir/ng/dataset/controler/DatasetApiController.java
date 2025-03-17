@@ -401,11 +401,10 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<String> getDicomMetadataByDatasetId(
-		Long datasetId) throws IOException, MessagingException {
+	public ResponseEntity<String> getDicomMetadataByDatasetId(Long datasetId) throws IOException, MessagingException {
 		final Dataset dataset = datasetService.findById(datasetId);
 		URL firstUrl = DatasetFileUtils.getDatasetFirstFilePathURLs(dataset, DatasetExpressionFormat.DICOM);
-		if (firstUrl != null) {
+		if (firstUrl == null) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} else {
 			return new ResponseEntity<>(downloader.downloadDicomMetadataForURL(firstUrl), HttpStatus.OK);			

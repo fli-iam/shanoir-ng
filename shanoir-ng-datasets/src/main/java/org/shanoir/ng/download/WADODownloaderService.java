@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
+import java.lang.management.ManagementFactory;
 import java.net.URL;
 import java.nio.file.Files;
 import java.time.format.DateTimeFormatter;
@@ -298,7 +299,6 @@ public class WADODownloaderService {
 					JSONReader reader = new JSONReader(parser);
 					dicomAttributes = reader.readDataset(null);
 				}
-				
 				if (dicomAttributes != null) {
 					return dicomAttributes;
 				} else {
@@ -313,7 +313,7 @@ public class WADODownloaderService {
 		return null;
 	}
 
-	public AcquisitionAttributes<Long> getDicomAttributesForAcquisition(DatasetAcquisition acquisition) throws PacsException {
+	public AcquisitionAttributes<Long> getDicomAttributesForAcquisition(DatasetAcquisition acquisition, Set<Integer> tagsInUse) throws PacsException {
 		long ts = new Date().getTime();
 		List<Dataset> datasets = new ArrayList<>();
 		if (acquisition.getDatasets() != null) {
@@ -321,7 +321,7 @@ public class WADODownloaderService {
 				datasets.add(dataset);
 			}
 		}
-		AcquisitionAttributes<Long> dAcquisitionAttributes = new AcquisitionAttributes<>();
+		AcquisitionAttributes<Long> dAcquisitionAttributes = new AcquisitionAttributes<>(tagsInUse);
 		// remove this ?
 		datasets.forEach(
 			dataset -> {
@@ -369,7 +369,7 @@ public class WADODownloaderService {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_DICOM_JSON);
 		HttpEntity<String> entity = new HttpEntity<>(headers);
-		LOG.debug("Download metadata from pacs, url : " + url);
+		LOG.error("Download metadata from pacs, url : " + url);
 		ResponseEntity<String> response = restTemplate.exchange(url,
 				HttpMethod.GET, entity,String.class, "1");
 		if (response.getStatusCode() == HttpStatus.OK) {

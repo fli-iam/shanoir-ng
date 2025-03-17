@@ -14,8 +14,11 @@
 
 package org.shanoir.ng.studycard.service;
 
+import java.lang.management.ManagementFactory;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -38,6 +41,7 @@ import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.rule.QualityExaminationRule;
+import org.shanoir.ng.studycard.model.rule.StudyCardRule;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,10 +83,11 @@ public class CardsProcessingService {
 	 * @throws PacsException 
 	 */
 	public void applyStudyCard(StudyCard studyCard, List<DatasetAcquisition> acquisitions) throws PacsException {
+        Set<Integer> tagsInUse = studyCard.getDicomTagsInUse();
         boolean changeInAtLeastOneAcquisition = false;
         for (DatasetAcquisition acquisition : acquisitions) {
             if (CollectionUtils.isNotEmpty(acquisition.getDatasets()) && CollectionUtils.isNotEmpty(studyCard.getRules())) {
-                AcquisitionAttributes<Long> dicomAttributes = downloader.getDicomAttributesForAcquisition(acquisition);
+                AcquisitionAttributes<Long> dicomAttributes = downloader.getDicomAttributesForAcquisition(acquisition, tagsInUse);
                 changeInAtLeastOneAcquisition = studyCard.apply(acquisition, dicomAttributes);
             }
         }
@@ -102,7 +107,7 @@ public class CardsProcessingService {
         if (qualityCard == null) throw new IllegalArgumentException("qualityCard can't be null");
 		if (examination == null ) throw new IllegalArgumentException("examination can't be null");
         LOG.debug("Quality check for examination " + examination.getId() + " started");
-		if (qualityCard.getStudyId() != examination.getStudy().getId()) throw new IllegalStateException("study and studycard ids don't match");
+		if (!qualityCard.getStudyId().equals(examination.getStudy().getId())) throw new IllegalStateException("study and studycard ids don't match");
 		if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {
 		    QualityCardResult result = new QualityCardResult();
             if (updateTags) {
@@ -117,8 +122,15 @@ public class CardsProcessingService {
                 LOG.debug(acquisitions.size() + " acquisitions found for examination with id: " + examination.getId());
                 LOG.debug(qualityCard.getRules().size() + " rules found for study card with id: " + qualityCard.getId() + " and name: " + qualityCard.getName());
                 long rulesStartTs = new Date().getTime();
+
+                /* Anticipate which tags are in use so we don't have to store the whole dicom metadata for each ds in memory */
+                Set<Integer> tagsInUse = new HashSet<>();
                 for (QualityExaminationRule rule : qualityCard.getRules()) {
-                    rule.apply(examination, result, downloader);
+                    tagsInUse.addAll(rule.getConditionsDICOMtags());
+                }
+                
+                for (QualityExaminationRule rule : qualityCard.getRules()) {
+                    rule.apply(examination, result, downloader, tagsInUse);
                 }
                 LOG.debug("Quality check for examination " + examination.getId() + " : rules application took " + (new Date().getTime() - rulesStartTs) + "ms");
             }
