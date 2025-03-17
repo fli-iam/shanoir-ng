@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -e
+(
+  # Compare old and new solr scheme.xml
+  set -e
+  cd /etc/shanoir-core-template
+  for file in $(find . -maxdepth 1 -type f); do
+    cmp -- "$file" "/var/solr/data/shanoir/$file"
+  done
+  echo "Solr index is up-to-date, no rebuild needed"
+) || (
+  # If different, remove last index
+  echo 'Deleting /var/solr/data (not up-to-date with the template), the index has to be rebuilt'
+  rm -rf /var/solr/data
+)
+
+$@
