@@ -1,19 +1,30 @@
 package org.shanoir.ng.vip.resulthandler;
 
-import jakarta.ws.rs.NotFoundException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.shanoir.ng.dataset.modality.GenericDataset;
 import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetType;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
-import org.shanoir.ng.vip.monitoring.model.ExecutionMonitoring;
-import org.shanoir.ng.vip.resource.ProcessingResourceService;
+import org.shanoir.ng.importer.service.ProcessedDatasetImporterService;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -21,33 +32,29 @@ import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.vip.monitoring.model.ExecutionMonitoring;
+import org.shanoir.ng.vip.resource.ProcessingResourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.function.Predicate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import org.shanoir.ng.dataset.model.DatasetType;
+import jakarta.ws.rs.NotFoundException;
 
 @Service
 public class DefaultHandler extends ResultHandler {
+
+	private static final Logger LOG = LoggerFactory.getLogger(DefaultHandler.class);
 
 	@Value("${vip.result-file-name}")
 	private String resultFileName;
 
 	@Autowired
 	private ImporterService importerService;
+
+	@Autowired
+	private ProcessedDatasetImporterService processedDatasetImporterService;
 
 	@Autowired
 	private StudyRepository studyRepository;
@@ -63,9 +70,6 @@ public class DefaultHandler extends ResultHandler {
 
 	@Autowired
 	private ProcessingResourceService processingResourceService;
-
-	private static final Logger LOG = LoggerFactory.getLogger(DefaultHandler.class);
-
 
 	@Override
 	public boolean canProcess(ExecutionMonitoring processing) {
@@ -215,15 +219,10 @@ public class DefaultHandler extends ResultHandler {
 				}
 			}
 			processedDataset.setDatasetType(DatasetType.Generic.name());
-
-			importerService.createProcessedDataset(processedDataset);
-
+			processedDatasetImporterService.createProcessedDataset(processedDataset);
 			LOG.info("Processed dataset [{}] has been created from [{}].", processedDataset.getProcessedDatasetName(), file.getAbsolutePath());
-
 		}
-
 		datasetProcessingService.update(processing);
-
 	}
 
 	private DatasetProcessing createProcessing(ExecutionMonitoring execution, List<Dataset> inputDatasets) {
@@ -240,8 +239,4 @@ public class DefaultHandler extends ResultHandler {
 		return processing;
 	}
 
-	private String getNameWithoutExtension(String file) {
-		int dotIndex = file.indexOf('.');
-		return (dotIndex == -1) ? file : file.substring(0, dotIndex);
-	}
 }
