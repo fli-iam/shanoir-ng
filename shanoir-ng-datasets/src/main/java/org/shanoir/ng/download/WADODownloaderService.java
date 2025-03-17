@@ -369,7 +369,7 @@ public class WADODownloaderService {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_DICOM_JSON);
 		HttpEntity<String> entity = new HttpEntity<>(headers);
-		LOG.error("Download metadata from pacs, url : " + url);
+		LOG.info("Download metadata from pacs, url : " + url);
 		ResponseEntity<String> response = restTemplate.exchange(url,
 				HttpMethod.GET, entity,String.class, "1");
 		if (response.getStatusCode() == HttpStatus.OK) {
