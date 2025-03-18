@@ -69,7 +69,7 @@ public class OFSEPSeqIdProcessingTest {
 
         JSONObject volume = outputProcessing.getMatchingVolume(ds, serie, attr);
 
-        assertEquals("volume_1", volume.get("id"));
+        assertEquals("volume_1", volume.getJSONObject("volume").get("id"));
     }
 
     private double[] getDsOrientation(){
