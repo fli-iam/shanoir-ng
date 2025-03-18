@@ -8,10 +8,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetExpression;
+import org.shanoir.ng.dataset.repository.DatasetExpressionRepository;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
+import org.shanoir.ng.datasetfile.DatasetFile;
+import org.shanoir.ng.datasetfile.DatasetFileRepository;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.tag.model.StudyTag;
@@ -35,11 +39,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,7 +52,7 @@ public class OFSEPSeqIdHandler extends OutputHandler {
     private static final Logger LOG = LoggerFactory.getLogger(OFSEPSeqIdHandler.class);
 
     public static final String PIPELINE_OUTPUT = "output.json";
-    private static final String[] SERIE_PROPERTIES = {
+    private static final String[] SERIE_PROPERTIES = { // Shanoir Acquisiton
             "coil",
             "type",
             "protocolValidityStatus",
@@ -58,10 +61,13 @@ public class OFSEPSeqIdHandler extends OutputHandler {
             "deviceConstructor",
             "deviceMagneticField",
             "deviceModel",
-            "deviceSerialNumber"
+            "deviceSerialNumber",
+            "burnedInAnnotation",
+            "modality",
+            "originalSerieId"
     };
 
-    private static final String[] VOLUME_PROPERTIES = {
+    private static final String[] VOLUME_PROPERTIES = { //Shanoir Dataset
             "acquisitionDate",
             "contrastAgent",
             "contrastAgentAlgo",
@@ -84,7 +90,8 @@ public class OFSEPSeqIdHandler extends OutputHandler {
             "numberOfSlices",
             "dimension",
             "dimensions",
-            "axis"
+            "axis",
+            "sequenceList"
 
     };
 
@@ -111,6 +118,12 @@ public class OFSEPSeqIdHandler extends OutputHandler {
 
     @Autowired
     private StudyService studyService;
+
+    @Autowired
+    private DatasetFileRepository datasetFileRepository;
+
+    @Autowired
+    private DatasetExpressionRepository datasetExpressionRepository;
 
 
     @Override
@@ -197,6 +210,9 @@ public class OFSEPSeqIdHandler extends OutputHandler {
 
         for (int i = 0 ; i < volumes.length(); i++) {
             JSONObject volume = volumes.getJSONObject(i);
+            if(!checkIfSameDatasetVolume(dataset, volume)){
+                continue;
+            }
 
             if(volume.isNull(ORIENTATION)){
                 LOG.error("Orientation is null in result file for volume [{}]", volume.getString(ID));
@@ -216,10 +232,42 @@ public class OFSEPSeqIdHandler extends OutputHandler {
             }
 
             if(areOrientationsEquals(dsOrientation, volOrientation)){
-                return volume;
-            }
+                JSONObject result = new JSONObject();
+                result.put("serie", serie);
+                result.put("volume", volume);
+                return result;            }
         }
         return null;
+    }
+
+    /**
+     * Verify that volume jsonObject is relative to the given dataset
+     */
+    private boolean checkIfSameDatasetVolume(Dataset dataset, JSONObject volume) {
+        try {
+            JSONArray files = volume.getJSONArray("files");
+            String regex = "(\\d+)\\.dcm";
+            Pattern pattern = java.util.regex.Pattern.compile(regex);
+
+            for (int i = 0; i < files.length(); i++) {
+                try{
+                    Matcher matcher = pattern.matcher(files.getString(i));
+                    String code = matcher.group(1);
+                    if(Objects.nonNull(code)){
+                        List<DatasetExpression> datasetExpressions = datasetExpressionRepository.findAllByDatasetId(dataset.getId());
+                        for(DatasetExpression datasetExpression : datasetExpressions){
+                            DatasetFile datasetFile = datasetFileRepository.findByDatasetExpressionId(datasetExpression.getId());
+                            if(datasetFile.getPath().contains(code)){
+                                return true;
+                            }
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
+        } catch (JSONException e) {
+            return false;
+        }
+        return false;
     }
 
     /**
@@ -273,7 +321,7 @@ public class OFSEPSeqIdHandler extends OutputHandler {
      * Update dataset from pipeline output serie & volume
      */
     private void updateDataset(JSONObject serie, Dataset ds, JSONObject vol) throws JSONException, EntityNotFoundException, CheckedIllegalClassException, SolrServerException, IOException {
-        DatasetMetadataField.NAME.update(ds, vol.getString(TYPE));
+        DatasetMetadataField.NAME.update(ds, vol.getJSONObject("volume").getString(TYPE));
         datasetRepository.save(ds);
 
         if(ds.getDatasetAcquisition() instanceof MrDatasetAcquisition){
@@ -314,18 +362,21 @@ public class OFSEPSeqIdHandler extends OutputHandler {
     /**
      * Create dataset properties from pipeline output volume
      */
-    private List<DatasetProperty> getDatasetPropertiesFromVolume(Dataset ds, JSONObject volume, ExecutionMonitoring monitoring) throws JSONException {
+    private List<DatasetProperty> getDatasetPropertiesFromVolume(Dataset ds, JSONObject json, ExecutionMonitoring monitoring) throws JSONException {
         List<DatasetProperty> properties = new ArrayList<>();
 
+        JSONObject volume = json.getJSONObject("volume");
+        JSONObject serie = json.getJSONObject("serie");
+
         for(String name : SERIE_PROPERTIES){
-            if(!volume.has(name)){
+            if(!serie.has(name)){
                 continue;
             }
 
             DatasetProperty property = new DatasetProperty();
             property.setDataset(ds);
             property.setName("serie." + name);
-            property.setValue(volume.getString(name));
+            property.setValue(serie.getString(name));
             property.setProcessing(monitoring);
             properties.add(property);
         }
