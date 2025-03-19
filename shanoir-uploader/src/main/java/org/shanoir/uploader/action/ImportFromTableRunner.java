@@ -32,6 +32,7 @@ import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.ng.shared.dataset.DatasetModalityType;
+import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
@@ -397,6 +398,14 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		importJob.setSubjectName(subjectREST.getName());
 
 		logger.info("6.1 Search existing examinations for subject: a) same date: user has to finish import b) new date: create examination.");
+		String[] line = {
+			patientVerification.getFirstName(),
+			patientVerification.getLastName(),
+			patientVerification.getBirthName(),
+			patientVerification.getBirthDate(),
+			importJob.getSubjectName(),
+			studyDate.format(DateTimeUtils.FORMATTER),
+			""};
 		try {
 			List<Examination> examinations = shanoirUploaderServiceClientNG.findExaminationsBySubjectId(subjectREST.getId());
 			if (examinations != null && !examinations.isEmpty()) {
@@ -412,19 +421,14 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
                         .toLocalDate();
 					if (examinationLocalDate.equals(studyDate)) {
 						logger.info("Import job only downloaded, manual user decision needed: existing examination with the same date.");
-						String[] line = {
-							patientVerification.getFirstName(),
-							patientVerification.getLastName(),
-							patientVerification.getBirthName(),
-							patientVerification.getBirthDate(),
-							importJob.getSubjectName(),
-							examinationDate.toString()};
 						csvWriter.addExaminationLine(false, line);
 						return false;
 					}
 				}
 			}
 		} catch (Exception e) {
+			line[6] = e.getMessage();
+			csvWriter.addExaminationLine(false, line);
 			logger.error(e.getMessage(), e);
 			return false;
 		}
@@ -440,6 +444,8 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		if (examinationId == null) {
 			uploadJob.setUploadState(UploadState.ERROR);
 			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.examination"));
+			line[6] = resourceBundle.getString("shanoir.uploader.import.table.error.examination");
+			csvWriter.addExaminationLine(false, line);
 			logger.error(importJob.getErrorMessage());
 			return false;
 		}
@@ -455,13 +461,6 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		while (importThread.isAlive()) {
 			// wait for import thread to finish 
 		}
-		String[] line = {
-			patientVerification.getFirstName(),
-			patientVerification.getLastName(),
-			patientVerification.getBirthName(),
-			patientVerification.getBirthDate(),
-			importJob.getSubjectName(),
-			studyDateDate.toString()};
 		csvWriter.addExaminationLine(true, line);
 		return true;
 	}
