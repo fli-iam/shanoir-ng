@@ -583,6 +583,7 @@ export class TreeService {
             let memberNode: MemberNode = null;
             let rights: RightNode[] = studyUser.studyUserRights.map(suRight => new RightNode(memberNode, null, StudyUserRight.getLabel(suRight)));
             memberNode = new MemberNode(studyNode, studyUser.user?.id || studyUser.userId, studyUser.userName, rights);
+            memberNode.fake = !this.isSelected(memberNode.id, 'user');
             return memberNode;
         });
         members.sort((a: MemberNode, b: MemberNode) => {

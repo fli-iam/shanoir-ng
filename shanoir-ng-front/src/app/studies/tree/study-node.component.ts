@@ -23,6 +23,7 @@ import { SuperPromise } from 'src/app/utils/super-promise';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import {
     QualityCardNode,
+    ShanoirNode,
     StudyCardNode,
     StudyNode,
     SubjectNode,
@@ -191,11 +192,11 @@ export class StudyNodeComponent extends TreeNodeAbstractComponent<StudyNode> imp
         return item.id;
     }
 
-    protected clickNode(node: SubjectNode) {
+    protected clickFakeNode(node: ShanoirNode) {
         node.fake = false;
     }
 
-    protected clickOpen(node: SubjectNode) {
+    protected clickFakeOpen(node: ShanoirNode) {
         node.opened = true;
         node.fake = false;
     }
