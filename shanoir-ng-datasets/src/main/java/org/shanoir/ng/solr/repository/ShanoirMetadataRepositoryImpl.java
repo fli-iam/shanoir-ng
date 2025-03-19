@@ -62,7 +62,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"da.import_date as importDate, " +
 			"da.username as username, " +
 			"da.sorting_index as sortingIndex, " +
-			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
+			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN mr_dataset_acquisition mda on mda.id = d.dataset_acquisition_id"
@@ -94,7 +94,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"da.import_date as importDate, " +
 			"da.username as username, " +
 			"da.sorting_index as sortingIndex, " +
-			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
+			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
@@ -125,7 +125,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"da.import_date as importDate, " +
 			"da.username as username, " +
 			"da.sorting_index as sortingIndex, " +
-			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
+			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
@@ -157,7 +157,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"da.import_date as importDate, " +
 			"da.username as username, " +
 			"da.sorting_index as sortingIndex, " +
-			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
+			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
@@ -188,7 +188,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"da.import_date as importDate, " +
 			"da.username as username, " +
 			"da.sorting_index as sortingIndex, " +
-			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
+			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
@@ -220,7 +220,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"da.import_date as importDate, " +
 			"da.username as username, " +
 			"da.sorting_index as sortingIndex, " +
-			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
+			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
@@ -251,8 +251,8 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"null as magneticFieldStrength, " +
 			"proc.processing_date as importDate, " +
 			"proc.username as username, " +
-			"null as sortingIndex, " +
-			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
+			"da.sorting_index as sortingIndex, " +
+			"1 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_processing proc ON proc.id = d.dataset_processing_id"
 			+ " LEFT JOIN study st ON st.id = proc.study_id"
@@ -282,7 +282,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"da.import_date as importDate, " +
 			"da.username as username, " +
 			"da.sorting_index as sortingIndex, " +
-			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
+			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset refd ON refd.id = d.referenced_dataset_for_superimposition_id"
 			+ " LEFT JOIN dataset_acquisition da on da.id = refd.dataset_acquisition_id"
@@ -315,7 +315,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"da.import_date as importDate, " +
 			"da.username as username, " +
 			"da.sorting_index as sortingIndex, " +
-			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
+			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset refd ON refd.id = d.referenced_dataset_for_superimposition_id"
 			+ " LEFT JOIN dataset_acquisition da on da.id = refd.dataset_acquisition_id"
@@ -348,7 +348,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 			"da.import_date as importDate, " +
 			"da.username as username, " +
 			"da.sorting_index as sortingIndex, " +
-			"CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed"
+			"0 as processed"
 			+ " FROM dataset d"
 			+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
 			+ " LEFT JOIN examination e ON e.id = da.examination_id"
