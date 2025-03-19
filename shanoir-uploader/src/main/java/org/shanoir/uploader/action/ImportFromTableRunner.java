@@ -160,16 +160,29 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 	}
 
 	private boolean importData(ImportJob importJob, org.shanoir.uploader.model.rest.Study studyREST, List<AcquisitionEquipment> acquisitionEquipments, ImportFromTableCSVWriter csvWriter) throws UnsupportedEncodingException, NoSuchAlgorithmException, PseudonymusException {
+		PatientVerification patientVerification = importJob.getPatientVerification();
+		String[] line = {
+			patientVerification.getFirstName(),
+			patientVerification.getLastName(),
+			patientVerification.getBirthName(),
+			patientVerification.getBirthDate(),
+			"false",
+			importJob.getDicomQuery().getStudyDate(),
+			"false"
+		};
 		if (!queryPacs(importJob)) {
+			line[6] = "Not in DICOM server";
+			csvWriter.addExaminationLine(false, line);
 			return false;
 		}
 		LocalDate minDate = determineMinDate(importJob);
 		if (!selectPatientStudyAndSeries(importJob, minDate)) {
+			line[6] = "No DICOM study or series selected in DICOM server";
+			csvWriter.addExaminationLine(false, line);
 			return false;
 		}
 		logger.info("DICOM Patient selected: " + importJob.getPatient().toString());
 		logger.info("DICOM Study selected: " + importJob.getStudy().toString());
-		PatientVerification patientVerification = importJob.getPatientVerification();
 		Patient newPatient = ImportUtils.adjustPatientWithPatientVerification(
 			importJob.getPatient(),
 			patientVerification.getFirstName(),
@@ -334,6 +347,8 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		}
 
 		if (studyCard == null) {
+			line[6] = "Error with study card";
+			csvWriter.addExaminationLine(false, line);
 			this.importFromTableWindow.error.setText(resourceBundle.getString("shanoir.uploader.import.table.error.studycard"));
 			uploadJob.setUploadState(UploadState.ERROR);
 			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.studycard"));
@@ -390,6 +405,8 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			HemisphericDominance.Left.toString(), HemisphericDominance.Left.toString(),
 			null, SubjectType.PATIENT, false, false, subjectStudyIdentifier, studyREST, studyCard);
 		if (subjectREST == null) {
+				line[6] = "Error with subject";
+				csvWriter.addExaminationLine(false, line);
 				uploadJob.setUploadState(UploadState.ERROR);
 				importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.subject"));
 				logger.error(importJob.getErrorMessage());
@@ -398,14 +415,8 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		importJob.setSubjectName(subjectREST.getName());
 
 		logger.info("6.1 Search existing examinations for subject: a) same date: user has to finish import b) new date: create examination.");
-		String[] line = {
-			patientVerification.getFirstName(),
-			patientVerification.getLastName(),
-			patientVerification.getBirthName(),
-			patientVerification.getBirthDate(),
-			importJob.getSubjectName(),
-			studyDate.format(DateTimeUtils.FORMATTER),
-			"false"};
+		line[4] = importJob.getSubjectName();
+		line[5] = studyDate.format(DateTimeUtils.FORMATTER);
 		try {
 			List<Examination> examinations = shanoirUploaderServiceClientNG.findExaminationsBySubjectId(subjectREST.getId());
 			if (examinations != null && !examinations.isEmpty()) {
