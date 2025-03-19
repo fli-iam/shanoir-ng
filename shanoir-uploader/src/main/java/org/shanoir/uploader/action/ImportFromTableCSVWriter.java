@@ -35,9 +35,9 @@ public class ImportFromTableCSVWriter {
         File workFolder = ShUpOnloadConfig.getWorkFolder();
         Date now = new Date();
         String timestamp = sdf.format(now);
-        String csvFileName = MASS_IMPORT_EXAMINATIONS_OK + timestamp + CSV;
+        String csvFileName = MASS_IMPORT_EXAMINATIONS_OK + "_" + timestamp + CSV;
         this.examinationsOK = createCSVFile(workFolder, csvFileName);
-        csvFileName = MASS_IMPORT_EXAMINATIONS_KO + timestamp + CSV;
+        csvFileName = MASS_IMPORT_EXAMINATIONS_KO + "_" + timestamp + CSV;
         this.examinationsKO = createCSVFile(workFolder, csvFileName);
     }
 
@@ -66,7 +66,7 @@ public class ImportFromTableCSVWriter {
         } else {
             csvFile = examinationsKO;
         }
-        try (CSVWriter writer = new CSVWriter(new FileWriter(csvFile))) {
+        try (CSVWriter writer = new CSVWriter(new FileWriter(csvFile, true))) {
             writer.writeNext(line);
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
