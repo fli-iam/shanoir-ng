@@ -521,7 +521,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 	private boolean selectPatientStudyAndSeries(ImportJob importJob, LocalDate minDate) {
 		logger.info("2. Select patient, study and series");
 		List<Serie> selectedSeries = new ArrayList<>();
-		Map<Study, List<Serie>> selectedSeriesByStudy = new HashMap<>();
+		Map<String, List<Serie>> selectedSeriesByStudy = new HashMap<>();
 		boolean foundPatient = false;
 		LocalDate currentDate = LocalDate.now();
 		for (Patient patient : importJob.getPatients()) {
@@ -540,12 +540,11 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				if (!searchField(study.getStudyDescription(), importJob.getDicomQuery().getStudyFilter())) {
 					continue;
 				}
-				Study dicomStudy = study;
-				importJob.setStudy(dicomStudy);
-				selectedSeriesByStudy.put(dicomStudy, new ArrayList<>());
+				importJob.setStudy(study);
+				selectedSeriesByStudy.put(study.getStudyInstanceUID(), new ArrayList<>());
 				for (Serie serie : study.getSeries()) {
 					if (searchField(serie.getSeriesDescription(), importJob.getDicomQuery().getSerieFilter())) {
-						selectedSeriesByStudy.get(dicomStudy).add(serie);
+						selectedSeriesByStudy.get(study.getStudyInstanceUID()).add(serie);
 						foundPatient = true;
 						currentDate = studyDate;
 					}
@@ -556,7 +555,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.missing.data"));
 			return false;
 		}
-		selectedSeries = selectedSeriesByStudy.get(importJob.getStudy());
+		selectedSeries = selectedSeriesByStudy.get(importJob.getStudy().getStudyInstanceUID());
 		if (selectedSeries == null || selectedSeries.isEmpty()) {
 			logger.error("No series found for DICOM study: " + importJob.getStudy().toString());
 			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.missing.data"));
