@@ -173,7 +173,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 } @else {
                     <div class="fake-node" #fake [id]="member.id" >
                         <i class="fas fa-angle-right chevron" (click)="clickFakeOpen(member)"></i>
-                        <a [routerLink]="['/subject/details/', member.id]" class="inner" (click)="clickFakeNode(member)" [title]="member.title + ' n°' + member.id">
+                        <a [routerLink]="['/user/details/', member.id]" class="inner" (click)="clickFakeNode(member)" [title]="member.title + ' n°' + member.id">
                             <i class="far fa-user picto"></i>
                             {{member.label}}
                         </a>

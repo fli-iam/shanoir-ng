@@ -22,6 +22,7 @@ import { isDarkColor } from 'src/app/utils/app.utils';
 import { SuperPromise } from 'src/app/utils/super-promise';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import {
+    MemberNode,
     QualityCardNode,
     ShanoirNode,
     StudyCardNode,
@@ -56,7 +57,8 @@ export class StudyNodeComponent extends TreeNodeAbstractComponent<StudyNode> imp
     filter: string;
     filteredNodes: SubjectNode[];
     subjectsOrder: Sort;
-    @ViewChildren('fake') fakeSubjectNodes: QueryList<ElementRef>;
+    @ViewChildren('fake-subject') fakeSubjectNodes: QueryList<ElementRef>;
+    @ViewChildren('fake-member') fakeMemberNodes: QueryList<ElementRef>;
 
     constructor(
             private router: Router,
@@ -112,7 +114,14 @@ export class StudyNodeComponent extends TreeNodeAbstractComponent<StudyNode> imp
         this.fakeSubjectNodes.forEach(fake => {
             const id: number = fake.nativeElement.getAttribute('id');
             if (!!this.node.subjectsNode.subjects && this.node.subjectsNode.subjects != UNLOADED) {
-                const node: SubjectNode = this.node.subjectsNode.subjects?.find(sn => sn.id == id);
+                const node: SubjectNode = this.node.subjectsNode.subjects?.find(n => n.id == id);
+                node.getTop = () => fake.nativeElement?.offsetTop;
+            }
+        });
+        this.fakeMemberNodes.forEach(fake => {
+            const id: number = fake.nativeElement.getAttribute('id');
+            if (!!this.node.membersNode.members && this.node.membersNode.members != UNLOADED) {
+                const node: MemberNode = this.node.membersNode.members?.find(n => n.id == id);
                 node.getTop = () => fake.nativeElement?.offsetTop;
             }
         });
