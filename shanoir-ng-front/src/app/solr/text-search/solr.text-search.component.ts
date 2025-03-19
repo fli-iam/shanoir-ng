@@ -36,7 +36,7 @@ export class SolrTextSearchComponent implements ControlValueAccessor {
 
     showInfo: boolean = false;
     searchText: string = "";
-    searchKeyWords: string[] = ["centerName", "datasetCreationDate", "studyName", "subjectName", "subjectType", "acquisitionEquipmentName", "datasetId", "datasetName", "datasetNature", "datasetType", "processed", "examinationComment", "examinationDate", "importDate", "tags", "magneticFieldStrength", "pixelBandwidth", "sliceThickness", "studyId", "sortingIndex"];
+    searchKeyWords: string[] = ["centerName", "datasetCreationDate", "studyName", "subjectName", "subjectType", "acquisitionEquipmentName", "datasetId", "datasetName", "datasetNature", "datasetType", "processed", "examinationComment", "examinationDate", "importDate", "tags", "magneticFieldStrength", "pixelBandwidth", "sliceThickness", "studyId"];
     @Output() onChange: EventEmitter<string> = new EventEmitter();
     @Output() onType: EventEmitter<void> = new EventEmitter();
     @Output() expertModeChange: EventEmitter<boolean> = new EventEmitter();
