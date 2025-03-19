@@ -405,7 +405,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			patientVerification.getBirthDate(),
 			importJob.getSubjectName(),
 			studyDate.format(DateTimeUtils.FORMATTER),
-			""};
+			"false"};
 		try {
 			List<Examination> examinations = shanoirUploaderServiceClientNG.findExaminationsBySubjectId(subjectREST.getId());
 			if (examinations != null && !examinations.isEmpty()) {
