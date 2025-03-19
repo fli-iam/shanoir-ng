@@ -461,7 +461,6 @@
   <field name="studyName" type="lowercase"/>
   <field name="subjectName" type="lowercase"/>
   <field name="subjectId" type="plong"/>
-  <field name="sortingIndex" type="pint"/>
   <field name="subjectType" type="lowercase"/>
   <field name="tags" type="strings"/>
   <field name="processed" type="boolean" indexed="true" stored="true" required="true" />

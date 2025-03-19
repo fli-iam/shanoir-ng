@@ -462,7 +462,6 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {headerName: "Modality", field: "datasetType"},
             {headerName: "Nature", field: "datasetNature"},
             {headerName: "Series date", field: "datasetCreationDate", type: "date", hidden: true},
-            {headerName: "Sorting index", field: "sortingIndex"},
             {headerName: "Study", field: "studyName",
                 route: function(item) {
                     return item.studyId ? '/study/details/' + item.studyId : null;

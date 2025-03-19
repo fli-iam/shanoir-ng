@@ -39,8 +39,6 @@ public class ShanoirSolrQuery {
 
 	private Collection<Long> subjectId;
 
-	private Collection<Integer> sortingIndex;
-
 	private Collection<Long> examinationId;
 
 	private Collection<String> examinationComment;
@@ -336,14 +334,6 @@ public class ShanoirSolrQuery {
 
 	public void setSubjectId(Collection<Long> subjectId) {
 		this.subjectId = subjectId;
-	}
-
-	public Collection<Integer> getSortingIndex() {
-		return sortingIndex;
-	}
-
-	public void setSortingIndex(Collection<Integer> sortingIndex) {
-		this.sortingIndex = sortingIndex;
 	}
 
 	public Collection<Long> getCenterId() {

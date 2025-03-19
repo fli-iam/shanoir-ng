@@ -32,8 +32,6 @@ export class SolrDocument {
     subjectType: string;
     acquisitionEquipmentName: string;
     subjectId: string;
-
-    sortingIndex: number;
     studyName: string;
     studyId: string;
     id: number; // only for the table component..
@@ -46,7 +44,6 @@ export class SolrRequest {
     studyId: string[];
     subjectName: string[];
     subjectId: string[];
-    sortingIndex: number[];
     subjectType: string[];
     acquisitionEquipmentName: string[];
     examinationId: string[];
