@@ -57,8 +57,8 @@ export class StudyNodeComponent extends TreeNodeAbstractComponent<StudyNode> imp
     filter: string;
     filteredNodes: SubjectNode[];
     subjectsOrder: Sort;
-    @ViewChildren('fake-subject') fakeSubjectNodes: QueryList<ElementRef>;
-    @ViewChildren('fake-member') fakeMemberNodes: QueryList<ElementRef>;
+    @ViewChildren('fakeSubject') fakeSubjectNodes: QueryList<ElementRef>;
+    @ViewChildren('fakeMember') fakeMemberNodes: QueryList<ElementRef>;
 
     constructor(
             private router: Router,

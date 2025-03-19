@@ -71,7 +71,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     >
                     </subject-node>
                 } @else {
-                    <div class="fake-node" #fake [id]="subject.id" >
+                    <div class="fake-node" #fakeSubject [id]="subject.id" >
                         <i class="fas fa-angle-right chevron" (click)="clickFakeOpen(subject)"></i>
                         <a [routerLink]="['/subject/details/', subject.id]" class="inner" (click)="clickFakeNode(subject)" [title]="subject.title + ' n°' + subject.id">
                             <i [class]="subject.awesome" class="picto"></i>
@@ -171,7 +171,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [withMenu]="withMenu">
                     </member-node>
                 } @else {
-                    <div class="fake-node" #fake [id]="member.id" >
+                    <div class="fake-node" #fakeMember [id]="member.id" >
                         <i class="fas fa-angle-right chevron" (click)="clickFakeOpen(member)"></i>
                         <a [routerLink]="['/user/details/', member.id]" class="inner" (click)="clickFakeNode(member)" [title]="member.title + ' n°' + member.id">
                             <i class="far fa-user picto"></i>
