@@ -253,7 +253,7 @@ export class TreeService {
             node = this.selectCoil(selection.entity as Coil);
         } else node = Promise.resolve(null);
         node.then(n => {
-            if(!!n) n.hidden = false;
+            if(!!n) n.fake = false;
         });
         return node;
     }
@@ -267,7 +267,7 @@ export class TreeService {
                             return sn.id == ret.topParent.datasetAcquisition?.examination?.subject?.id;
                         });
                         if (subjectNode) {
-                            subjectNode.hidden = false;
+                            subjectNode.fake = false;
                             this.scrollTo(subjectNode);
                             return subjectNode.open().then(() => {
                                 if (subjectNode.examinations != UNLOADED) {
@@ -573,7 +573,7 @@ export class TreeService {
                 );
             }
         }).map(s => {
-            s.hidden = !this.isSelected(s.id, 'subject');
+            s.fake = !this.isSelected(s.id, 'subject');
             return s;
         });
         let centers: CenterNode[] = study.studyCenterList.map(studyCenter => {

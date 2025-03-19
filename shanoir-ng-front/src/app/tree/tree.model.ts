@@ -35,7 +35,7 @@ export abstract class ShanoirNode {
     private openPromise: Promise<void>;
     protected readonly routeBase: string;
     getTop: () => number; // to scroll to the node
-    hidden: boolean = false;
+    fake: boolean = false;
 
     constructor(
         public parent: ShanoirNode,
@@ -46,7 +46,7 @@ export abstract class ShanoirNode {
     public selected: boolean = false;
 
     open(): Promise<void> {
-        this.hidden = false;
+        this.fake = false;
         if (!this._opened) {
             if (this.parent) {
                 this.parent.open();

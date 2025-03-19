@@ -192,12 +192,12 @@ export class StudyNodeComponent extends TreeNodeAbstractComponent<StudyNode> imp
     }
 
     protected clickNode(node: SubjectNode) {
-        node.hidden = false;
+        node.fake = false;
     }
 
     protected clickOpen(node: SubjectNode) {
         node.opened = true;
-        node.hidden = false;
+        node.fake = false;
     }
 
     getFontColor(colorInp: string): boolean {
