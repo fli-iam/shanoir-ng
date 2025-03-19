@@ -166,7 +166,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <div *ngFor="let member of node.membersNode.members; trackBy:trackByFn; let i = index">
                 @if (!member.fake) {
                     <member-node
-                        *ngFor="let member of node.membersNode.members"
                         [input]="member"
                         [withMenu]="withMenu">
                     </member-node>
