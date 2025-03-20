@@ -3,7 +3,8 @@
 <module name="Checker">
     <module name="TreeWalker">
         <module name="AvoidStarImport">
-            <property name="severity" value="warning" />
+            <property name="severity" value="warning"/>
+            <property name="checkEmpty" value="false"/>
         </module>
     </module>
 </module>
