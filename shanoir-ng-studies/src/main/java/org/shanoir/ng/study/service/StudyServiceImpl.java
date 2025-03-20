@@ -66,6 +66,7 @@ import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.tag.repository.TagRepository;
+import org.shanoir.ng.utils.EqualCheckInterface;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ListDependencyUpdate;
 import org.shanoir.ng.utils.Utils;
@@ -269,6 +270,24 @@ public class StudyServiceImpl implements StudyService {
 		return studyDb;
 	}
 
+	private class StudyEqualCheck implements EqualCheckInterface<StudyCenter> {
+
+        @Override
+        public boolean check(StudyCenter a, StudyCenter b) {
+            boolean result =  a != null && b != null && (
+				a.getId() != null && a.getId().equals(b.getId()) || (
+					   a.getCenter() != null && a.getCenter().getId() != null 
+					&& b.getCenter() != null && b.getCenter().getId() != null 
+					&& a.getCenter().getId().equals(b.getCenter().getId())
+					&& a.getStudy() != null && a.getStudy().getId() != null
+					&& b.getStudy() != null && b.getStudy().getId() != null
+					&& a.getStudy().getId().equals(b.getStudy().getId())
+				) 
+			);
+			return result;
+        }
+	}
+
 	@Override
 	@Transactional(rollbackOn = {ShanoirException.class})
 	public Study update(Study study) throws ShanoirException {
@@ -295,10 +314,13 @@ public class StudyServiceImpl implements StudyService {
 		studyDb.setWithExamination(study.isWithExamination());
 
 		if (study.getStudyCenterList() != null) {
-			ListDependencyUpdate.updateWith(studyDb.getStudyCenterList(), study.getStudyCenterList());
 			for (StudyCenter studyCenter : studyDb.getStudyCenterList()) {
 				studyCenter.setStudy(studyDb);
 			}
+			for (StudyCenter studyCenter : study.getStudyCenterList()) {
+				studyCenter.setStudy(studyDb);
+			}
+			ListDependencyUpdate.updateWith(studyDb.getStudyCenterList(), study.getStudyCenterList(), new StudyEqualCheck());
 		}
 
 		if (study.getTags() != null) {

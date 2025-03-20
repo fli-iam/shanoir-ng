@@ -23,8 +23,8 @@ Shanoir-NG is copyrighted by [Inria](https://www.inria.fr/) and is now open sour
 
 * Shanoir-NG is based on a microservice architecture, that heavily uses Docker.
 * Each Docker container integrates one microservice, mostly based on Spring Boot.
-* Each microservice exposes a REST interface on using Swagger 2, as definition format.
-* The front-end/web interface is implemented on using "Angular 2" (now 5) technology.
+* Each microservice exposes a REST interface on using Swagger/OpenAPI 3, as definition format.
+* The front-end/web interface is implemented on using Angular 19 technology.
 * Nginx and Keycloak (on using OpenID-Connect) are used to glue everything together.
 * Internally dcm4che3 is used to handle all DICOM concerns and dcm4chee 5 arc-light as backup PACS.
 * Furthermore dcm2niix is used for the DICOM to NIfTI conversion and Papaya Viewer for DICOM/NIfTI web view.

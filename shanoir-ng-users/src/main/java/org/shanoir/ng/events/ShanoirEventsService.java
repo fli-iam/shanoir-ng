@@ -55,7 +55,8 @@ public class ShanoirEventsService {
 				|| ShanoirEventType.COPY_DATASET_EVENT.equals(event.getEventType())
 				|| ShanoirEventType.CHECK_QUALITY_EVENT.equals(event.getEventType())
 				|| ShanoirEventType.DOWNLOAD_STATISTICS_EVENT.equals(event.getEventType())
-				|| ShanoirEventType.DELETE_EXAMINATION_EVENT.equals(event.getEventType())) {
+				|| ShanoirEventType.DELETE_EXAMINATION_EVENT.equals(event.getEventType())
+				|| ShanoirEventType.DELETE_DATASET_EVENT.equals(event.getEventType())) {
 			sendSseEventsToUI(saved);
 		}
 	}
