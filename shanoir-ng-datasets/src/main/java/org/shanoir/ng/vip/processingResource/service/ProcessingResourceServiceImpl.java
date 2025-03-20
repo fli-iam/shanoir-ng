@@ -27,9 +27,7 @@ public class ProcessingResourceServiceImpl implements ProcessingResourceService 
     public String create(ExecutionMonitoring processing, List<Dataset> datasets) {
         List<ProcessingResource> processingResources = new ArrayList<>();
         String resourceId = UUID.randomUUID().toString();
-        for(Dataset dataset : datasets){
-            processingResources.add(new ProcessingResource(processing, dataset, resourceId));
-        }
+        processingResources.add(new ProcessingResource(processing, datasets, resourceId));
         repository.saveAll(processingResources);
         return resourceId;
     }

@@ -28,7 +28,6 @@ import org.shanoir.ng.dataset.repository.DatasetExpressionRepository;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
-import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.property.service.DatasetPropertyService;
@@ -47,6 +46,7 @@ import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
+import org.shanoir.ng.vip.processingResource.model.ProcessingResource;
 import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,7 +120,7 @@ public class DatasetServiceImpl implements DatasetService {
 		// Remove parent processing to avoid errors
 		entity.setDatasetProcessing(null);
 		processingService.removeDatasetFromAllProcessingInput(id);
-		processingResourceRepository.deleteByDatasetId(id);
+		processingResourceRepository.deleteAllByResourceIdIn(entity.getResource().stream().map(ProcessingResource::getResourceId).toList());
 		propertyService.deleteByDatasetId(id);
 		repository.deleteById(id);
 	}
