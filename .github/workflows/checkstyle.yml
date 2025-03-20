@@ -7,7 +7,7 @@ on:
     branches: [ develop ]
 
 jobs:
-  lint:
+  checkstyle:
     runs-on: ubuntu-latest
 
     steps:
