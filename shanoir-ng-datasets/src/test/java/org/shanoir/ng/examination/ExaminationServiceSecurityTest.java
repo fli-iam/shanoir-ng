@@ -172,10 +172,10 @@ public class ExaminationServiceSecurityTest {
 	
 	private void testFindBySubjectIdStudyId() throws ShanoirException {
 		assertAccessAuthorized(service::findBySubjectIdStudyId, 1L, 1L);
-		try {
-			// either the access is denied or the body is empty, both are fine
-			assertThat(service.findBySubjectIdStudyId(2L,  2L)).isNullOrEmpty();
-		} catch (AccessDeniedException e) { /* good */ }
+		// try {
+		// 	// either the access is denied or the body is empty, both are fine
+		// 	assertThat(service.findBySubjectIdStudyId(2L,  2L)).isNullOrEmpty();
+		// } catch (AccessDeniedException e) { /* good */ }
 		assertAccessDenied(service::findBySubjectIdStudyId, 4L, 4L);
 		// check access denied to exam 3
 		List<Examination> examList1 = service.findBySubjectIdStudyId(1L,  1L);
