@@ -19,6 +19,14 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
+          cache: 'maven'
+          
+      - name: Maven cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
 
       - name: Download dependencies
         run: mvn dependency:go-offline --batch-mode
