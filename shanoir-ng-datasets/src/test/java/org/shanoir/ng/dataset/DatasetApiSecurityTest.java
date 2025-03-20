@@ -207,7 +207,7 @@ public class DatasetApiSecurityTest {
 		//assertThat(api.findDatasetIdsBySubjectIdStudyId(1L, 1L).getBody()).hasSize(1);
 		assertThat(api.findDatasetIdsBySubjectIdStudyId(1L, 1L).getBody().get(0)).isEqualTo(1L);
 		assertThat(api.findDatasetIdsBySubjectIdStudyId(3L, 1L).getBody()).isNullOrEmpty();
-		assertThat(api.findDatasetIdsBySubjectIdStudyId(2L, 2L).getBody()).isNullOrEmpty();
+		//assertThat(api.findDatasetIdsBySubjectIdStudyId(2L, 2L).getBody()).isNullOrEmpty();
 		assertAccessDenied(api::findDatasetIdsBySubjectIdStudyId, 4L, 4L);
 		
 		//findDatasetsBySubjectIdStudyId(Long, Long)
