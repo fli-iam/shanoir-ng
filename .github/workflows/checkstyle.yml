@@ -30,8 +30,8 @@ jobs:
 
       - name: Download dependencies
         run: mvn dependency:go-offline --batch-mode
-        working-directory: ./shanoir-ng-parent/
+        working-directory: ./shanoir-ng-back/
 
       - name: Run Checkstyle
         run: mvn checkstyle:check --batch-mode
-        working-directory: ./shanoir-ng-parent/
+        working-directory: ./shanoir-ng-back/
