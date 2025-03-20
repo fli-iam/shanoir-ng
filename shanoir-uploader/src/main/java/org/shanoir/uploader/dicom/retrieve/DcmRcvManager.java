@@ -4,7 +4,11 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
+import org.dcm4che3.net.Device;
 import org.dcm4che3.net.TransferCapability;
 import org.dcm4che3.net.TransferCapability.Role;
 import org.dcm4che3.tool.storescp.StoreSCP;
@@ -20,7 +24,7 @@ import org.weasis.dicom.tool.DicomListener;
 /**
  * The DcmRcvManager handles the download of DICOM files and starts one DICOM
  * SCP server at run up of ShanoirUploader. We start only one and keep him up
- * and running, first to be more efficient and second to preare for DICOM push
+ * and running, first to be more efficient and second to prepare for DICOM push
  * from outside, what requires one DICOM SCP server up and running all time as
  * long as ShUp has been started.
  * 
@@ -45,6 +49,8 @@ public class DcmRcvManager {
 	private static final String STORAGE_PATTERN = "{0020000D}" + File.separator + "{0020000E}" + File.separator + "{00080018}";
 	
 	public static final String DICOM_FILE_SUFFIX = ".dcm";
+
+	private static final Integer THREADS_NUMBER = 20;
 	
 	public void configureAndStartSCPServer(final ConfigBean configBean, final String workFolderPath) throws MalformedURLException {
 		logger.info("DICOM SCP server (mini-pacs) configured locally with params:"
@@ -78,6 +84,13 @@ public class DcmRcvManager {
 			DicomListener listener = new DicomListener(storageDir);
 		    listener.start(scpNode, lParams);
 			StoreSCP storeSCP = listener.getStoreSCP();
+			// Get the associated device and allow multi-threading
+			Device device = storeSCP.getDevice();
+			ExecutorService executorService = Executors.newFixedThreadPool(THREADS_NUMBER);
+        	ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(5);
+        	device.setExecutor(executorService);
+        	device.setScheduledExecutor(scheduledExecutor);
+			logger.info("Multi-threading activated : max {} simultaneous connections.", THREADS_NUMBER);
 	        logger.info("DICOM SCP server (mini-pacs) successfully initialized: " + scpNode.toString() + ", " + workFolderPath);
 			TransferCapability tc = storeSCP.getApplicationEntity().getTransferCapabilityFor(PRIVATE_SIEMENS_CSA_NON_IMAGE_STORAGE, Role.SCP);
 			String[] ts = tc.getTransferSyntaxes();
