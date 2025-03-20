@@ -212,7 +212,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<configLocation>checkstyle.xml</configLocation>
 					<failOnViolation>false</failOnViolation>
 					<consoleOutput>true</consoleOutput>
-					<exclude>**/anonymization/**</exclude>
+					<excludes>**/anonymization/**</excludes>
 				</configuration>
 				<executions>
 					<execution>
