@@ -531,10 +531,8 @@ public class DatasetSecurityService {
 		return studyId;
 	}
 
-
 	public boolean hasRightOnStudyCenter(Long centerId, Long studyId, String rightStr) {
-    	//return commService.hasRightOnStudy(studyId, rightStr) && commService.hasRightOnCenter(studyId, centerId);
-		return true;
+    	return commService.hasRightOnCenter(studyId, centerId);
     }
 
     private boolean hasRightOnStudiesCenter(Long centerId, Set<Long> studies, String rightStr) {
