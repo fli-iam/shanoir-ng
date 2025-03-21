@@ -168,14 +168,16 @@ public class DICOMWebApiController implements DICOMWebApi {
 			acquisitionUID = allParams.get(SERIES_INSTANCE_UID);
 			seriesInstanceUID = seriesInstanceUIDHandler.findSeriesInstanceUIDFromCacheOrDatabase(acquisitionUID);
 		}
-
 		if (studyInstanceUID != null) {
 			String response = dicomWebService.findSeriesOfStudy(studyInstanceUID, includefield, seriesInstanceUID);
-			JsonNode root = mapper.readTree(response);
-			root = sortSeriesBySeriesNumber(root);
-			studyInstanceUIDHandler.replaceStudyInstanceUIDsWithExaminationUIDs(root, examinationUID, false);
-
-			return new ResponseEntity<String>(mapper.writeValueAsString(root), HttpStatus.OK);
+			if (response != null) {
+				JsonNode root = mapper.readTree(response);
+				root = sortSeriesBySeriesNumber(root);
+				studyInstanceUIDHandler.replaceStudyInstanceUIDsWithExaminationUIDs(root, examinationUID, false);
+				return new ResponseEntity<String>(mapper.writeValueAsString(root), HttpStatus.OK);	
+			} else {
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			}
 		}
 		else {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);

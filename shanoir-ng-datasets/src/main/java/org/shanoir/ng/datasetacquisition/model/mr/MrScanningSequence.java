@@ -38,7 +38,9 @@ public enum MrScanningSequence {
 	RM(5),
 
 	// Unknown, for the moment it is a test
-	S(6);
+	S(6),
+	
+	FFE(7);
 	
 	private int id;
 

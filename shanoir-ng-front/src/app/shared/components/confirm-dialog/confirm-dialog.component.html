@@ -19,7 +19,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <i *ngIf="mode == 'confirm'" class="fas fa-question-circle"></i>
             {{ title }}
         </div>
-        <div class="body">
+        <div class="body" *ngIf="message">
             <p [innerHTML]="message"></p>
             <a *ngIf="link" [href]="link">{{link}}</a>
         </div>
