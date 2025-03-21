@@ -122,7 +122,7 @@ export class StudyNodeComponent extends TreeNodeAbstractComponent<StudyNode> imp
             const id: number = fake.nativeElement.getAttribute('id');
             if (!!this.node.membersNode.members && this.node.membersNode.members != UNLOADED) {
                 const node: MemberNode = this.node.membersNode.members?.find(n => n.id == id);
-                node.getTop = () => fake.nativeElement?.offsetTop;
+                if (node) node.getTop = () => fake.nativeElement?.offsetTop;
             }
         });
     }

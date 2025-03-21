@@ -26,6 +26,7 @@ import { Subject } from "src/app/subjects/shared/subject.model";
 import { User } from 'src/app/users/shared/user.model';
 import { Study } from "../shared/study.model";
 
+import { Subject as RxjsSubject } from 'rxjs';
 import { AcquisitionEquipmentService } from 'src/app/acquisition-equipments/shared/acquisition-equipment.service';
 import { Coil } from "src/app/coils/shared/coil.model";
 import { CoilService } from "src/app/coils/shared/coil.service";
@@ -41,8 +42,6 @@ import { AcquisitionEquipmentNode, CenterNode, CentersNode, ClinicalSubjectNode,
 import { StudyRightsService } from "../shared/study-rights.service";
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyService } from '../shared/study.service';
-import { WaitBurstEnd } from "src/app/utils/wait-burst-end";
-import { Subject as RxjsSubject } from 'rxjs';
 
 @Injectable()
 export class TreeService {
@@ -58,6 +57,7 @@ export class TreeService {
     private _treeAvailable: boolean = false;
     selectedNode: ShanoirNode;
     onScrollToSelected: RxjsSubject<ShanoirNode> = new RxjsSubject();
+    studyLoading: boolean = false;
 
     isSelected(id: number, type: NodeType): boolean {
         return this.selection?.isSelected(id, type);
@@ -114,7 +114,12 @@ export class TreeService {
         router.events.subscribe(event => {
             if (event instanceof ActivationStart) {
                 setTimeout(() => {
-                    this.treeAvailable = event?.snapshot?.data?.['treeAvailable'];
+                    let newState: boolean = event?.snapshot?.data?.['treeAvailable'];
+                    if (newState && !this.treeAvailable) {
+                        this.treeAvailable = true;
+                    } else if (!newState && this.treeAvailable) {
+                        this.treeAvailable = false;
+                    }
                 });
             }
         });
@@ -517,6 +522,7 @@ export class TreeService {
         if (this.study?.id == id) {
             return Promise.resolve();
         } else {
+            this.studyLoading = true;
             this.studyNodeOpenPromise = new SuperPromise(); 
             this.studyNodeInit = new SuperPromise();
             let studyPromise: Promise<void> = this.studyService.get(id, null).then(study => {
@@ -538,7 +544,11 @@ export class TreeService {
                     return this.studyNode.open().then(() => {
                         this.studyNodeOpenPromise.resolve();
                     });
+                }).finally(() => {
+                    this.studyLoading = false;
                 });
+            }).finally(() => {
+                this.studyLoading = false;
             });
         }
     }
