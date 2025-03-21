@@ -36,13 +36,15 @@ public class PipelineServiceImpl implements PipelineService {
     }
 
     public Mono<String> getPipelineAll() {
+        String username = KeycloakUtil.getTokenUserName();
+
         return webClient.get()
             .uri(vipPipelineUri)
             .headers(headers -> ((HttpHeaders) headers).addAll(utils.getUserHttpHeaders()))
             .retrieve()
             .onStatus(HttpStatusCode::is4xxClientError, response -> {
                 if (response.statusCode().equals(HttpStatus.UNAUTHORIZED)) {
-                    LOG.error("Unauthorized, current user {} can not request VIP API", KeycloakUtil.getTokenUserName());
+                    LOG.error("Unauthorized, current user {} can not request VIP API", username);
                     return Mono.empty();
                 }
                 return Mono.error(new ResultHandlerException("Can't get pipelines descriptions from VIP API", null));
