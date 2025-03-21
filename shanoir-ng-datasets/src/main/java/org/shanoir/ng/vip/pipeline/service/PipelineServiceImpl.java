@@ -42,7 +42,7 @@ public class PipelineServiceImpl implements PipelineService {
             .retrieve()
             .onStatus(HttpStatusCode::is4xxClientError, response -> {
                 if (response.statusCode().equals(HttpStatus.UNAUTHORIZED)) {
-                    LOG.info("Unauthorized, current user can not request VIP API");
+                    LOG.error("Unauthorized, current user {} can not request VIP API", KeycloakUtil.getTokenUserName());
                     return Mono.empty();
                 }
                 return Mono.error(new ResultHandlerException("Can't get pipelines descriptions from VIP API", null));
