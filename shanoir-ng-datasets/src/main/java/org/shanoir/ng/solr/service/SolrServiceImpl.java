@@ -56,7 +56,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -194,6 +193,29 @@ public class SolrServiceImpl implements SolrService {
 		eventService.publishEvent(event);
 		return event;
 	}
+
+    @Async
+    @Transactional
+    public void indexAllNoAuth() {
+        List<ShanoirMetadata> documents = new ArrayList<>();
+        Map<Long, List<String>> tags = new HashMap<>();
+        ShanoirEvent event;
+
+        try {
+            event = new ShanoirEvent(
+                    ShanoirEventType.SOLR_INDEX_ALL_EVENT,
+                    null,
+                    0L,
+                    "Cleaning Solr index...",
+                    ShanoirEvent.IN_PROGRESS,
+                    0f);
+            eventService.publishEvent(event);
+            cleanOldIndex(event);
+            fetchDatasToIndex(event, documents, tags);
+            indexDatas(event, documents, tags);
+        } catch (SolrServerException | IOException ignored) {
+        }
+    }
 
 	@Transactional
 	@Override

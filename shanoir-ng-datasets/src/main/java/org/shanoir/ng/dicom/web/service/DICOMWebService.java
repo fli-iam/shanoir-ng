@@ -210,7 +210,9 @@ public class DICOMWebService {
 				if (entity != null) {
 					ByteArrayResource byteArrayResource = new ByteArrayResource(EntityUtils.toByteArray(entity));
 					HttpHeaders responseHeaders = new HttpHeaders();
-					responseHeaders.setContentLength(entity.getContentLength());
+					if (!entity.isChunked() && entity.getContentLength() >= 0) {
+						responseHeaders.setContentLength(entity.getContentLength());
+					}
 					return new ResponseEntity(byteArrayResource, responseHeaders, HttpStatus.OK);
 				} else {
 					LOG.error("DICOMWeb: findInstance: empty response entity.");				
@@ -298,13 +300,11 @@ public class DICOMWebService {
 
 	public void rejectExaminationFromPacs(String studyInstanceUID) throws ShanoirException {
 		String rejectURL = this.serverURL + "/" + studyInstanceUID + REJECT_SUFFIX;
-
 		rejectURLFromPacs(rejectURL);
 	}
 
 	public void rejectAcquisitionFromPacs(String studyInstanceUID, String seriesInstanceUID) throws ShanoirException {
 		String rejectURL = this.serverURL + "/" + studyInstanceUID + "/series/" + seriesInstanceUID + REJECT_SUFFIX;
-
 		rejectURLFromPacs(rejectURL);
 	}
 
@@ -324,12 +324,12 @@ public class DICOMWebService {
 		post.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_JSON);
 		try (CloseableHttpResponse response = httpClient.execute(post)) {
 			if (HttpStatus.OK.value() == response.getCode()) {
-				LOG.info("Rejected from PACS: " + post);
+				LOG.debug("Rejected from PACS: " + post);
 			} else {
 				LOG.error(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
 						+ " for rejectURL: " + url);
+				// in case one URL is Not Found (no DICOM instance present), we continue with deletion
 				if (response.getCode() == 404 && response.getReasonPhrase().startsWith("Not Found")) {
-					LOG.error("Could not delete from pacs: " + response.getCode() + " " + response.getReasonPhrase());
 					return;
 				} else {
 					throw new ShanoirException(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
@@ -345,13 +345,13 @@ public class DICOMWebService {
 	@Scheduled(cron = "0 */30 * * * *", zone="Europe/Paris")
 	public void deleteDicomFilesFromPacs() throws ShanoirException {
 		// Doc : https://smart-api.info/ui/be87344696148a41f577aca202ce84df#/IOCM-RS/deleteRejectedInstancesPermanently
-		LOG.error("Scheduled call to delete all rejected instances from pacs.");
+		LOG.info("Scheduled call to delete all rejected instances from pacs.");
 		String url = this.serverURL.substring(0, this.serverURL.indexOf("/aets/")) + REJECT_SUFFIX;
 		HttpDelete httpDelete = new HttpDelete(url);
 		httpDelete.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_JSON);
 		try (CloseableHttpResponse response = httpClient.execute(httpDelete)) {
 			if (response.getCode() == HttpStatus.OK.value()) {
-				LOG.error("Deleted from PACS: " + url);
+				LOG.info("Deleted from PACS: " + url);
 			} else {
 				LOG.error(response.getCode() + ": Could not delete instance from PACS: " + response.getReasonPhrase()
 						+ "for deleteURL: " + url);
