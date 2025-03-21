@@ -57,7 +57,7 @@ public class PostProcessingServiceImpl implements PostProcessingService {
         for (List<Long> partition : ListUtils.partition(processingIds, THREAD_NUMBER * 10)) {
             launchPostProcessingPartition(partition);
         }
-
+        LOG.info("Post processing session finished.");
     }
 
     /**
@@ -70,6 +70,7 @@ public class PostProcessingServiceImpl implements PostProcessingService {
         for (ExecutionMonitoring monitoring : monitoringRepository.findByDatasetProcessingIds(partition)) {
             executor.submit(() -> {
                 try {
+                    LOG.info("Post processing results of the processing : " + monitoring.getId());
                     outputService.process(monitoring, relevantOutputHandler);
                 } catch (ResultHandlerException | EntityNotFoundException e) {
                     LOG.error("Post processing of monitoring name: {}, {} failed.", monitoring.getName(), monitoring.getId(), e);

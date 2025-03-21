@@ -55,6 +55,8 @@ public class PostProcessingApiController implements PostProcessingApi {
 
     @Override
     public ResponseEntity<IdName> launchPostProcessing(String name, String comment) {
+        LOG.info("Initiating post processing session for type: " + name + " and comment: " + comment);
+
         Integer processingTypeId = DatasetProcessingType.getIdFromString(name);
         if(Objects.nonNull(processingTypeId)) {
             try {
