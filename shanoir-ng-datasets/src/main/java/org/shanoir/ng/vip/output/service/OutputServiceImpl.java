@@ -62,15 +62,14 @@ public class OutputServiceImpl implements OutputService {
     public void process(ExecutionMonitoring monitoring, OutputHandler outputHandler) throws ResultHandlerException, EntityNotFoundException {
         final File userImportDir = new File(this.importDir + File.separator + monitoring.getResultsLocation());
 
-        for (File archive : this.getArchivesToProcess(userImportDir)) {
+        for (File archive : getArchivesToProcess(userImportDir)) {
             File cacheFolder = new File(userImportDir.getAbsolutePath() + File.separator + FilenameUtils.getBaseName(archive.getName()));
-            List<File> outputFiles = this.extractTarIntoCache(archive, cacheFolder);
+            List<File> outputFiles = extractTarIntoCache(archive, cacheFolder);
 
             LOG.info("Processing result file [{}] with [{}] output processing", archive.getAbsolutePath(), outputHandler.getClass().getSimpleName());
             outputHandler.manageTarGzResult(outputFiles, userImportDir, monitoring);
 
-            this.deleteCache(cacheFolder);
-        }
+            deleteTemporaryDirectory(cacheFolder);        }
 
         // Remove processed datasets from current execution monitoring
         monitoring.setInputDatasets(Collections.emptyList());
@@ -79,9 +78,9 @@ public class OutputServiceImpl implements OutputService {
     }
 
     /**
-     * Get archives to process
+     * Get archives to process from vip output directory
      */
-    public List<File> getArchivesToProcess(File userImportDir) throws ResultHandlerException {
+    private List<File> getArchivesToProcess(File userImportDir) throws ResultHandlerException {
         LOG.info("Processing result in import directory [{}]...", userImportDir.getAbsolutePath());
 
         final PathMatcher matcher = userImportDir.toPath().getFileSystem().getPathMatcher("glob:**/*.{tgz,tar.gz}");
@@ -96,7 +95,7 @@ public class OutputServiceImpl implements OutputService {
     /**
      * Extract files from .tar archive and store them in cacheFolder
      */
-    public List<File> extractTarIntoCache(File archive, File cacheFolder) throws ResultHandlerException {
+    private List<File> extractTarIntoCache(File archive, File cacheFolder) throws ResultHandlerException {
         List<File> outputFiles = new ArrayList<>();
 
         try (TarArchiveInputStream fin = new TarArchiveInputStream(
@@ -130,13 +129,13 @@ public class OutputServiceImpl implements OutputService {
     }
 
     /**
-     * Remove file or directory given as parameter
+     * Remove directory given as parameter
      */
-    private void deleteCache(File cacheFolder) {
+    private void deleteTemporaryDirectory(File directory) {
         try {
-            FileUtils.deleteDirectory(cacheFolder);
+            FileUtils.deleteDirectory(directory);
         } catch (IOException e) {
-            LOG.error("I/O error while deleting cache dir [{}]", cacheFolder.getAbsolutePath());
+            LOG.error("I/O error while deleting cache dir [{}]", directory.getAbsolutePath());
         }
     }
 }

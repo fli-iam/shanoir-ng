@@ -58,11 +58,11 @@ public class PostProcessingApiController implements PostProcessingApi {
         Integer processingTypeId = DatasetProcessingType.getIdFromString(name);
         if(Objects.nonNull(processingTypeId)) {
             try {
-                List<Long> processingIds = processingRepository.findIdsByCommentAndDatasetProcessingType(comment, processingTypeId);
+                List<Long> processingIds = processingRepository.findIdsByCommentAndDatasetProcessingTypeWithStatusFinished(comment, processingTypeId);
                 processingService.launchPostProcessing(processingIds, comment);
                 return new ResponseEntity<>(HttpStatus.OK);
             } catch (ResultHandlerException e) {
-                throw new RuntimeException(e);
+                    LOG.error(e.getMessage(), e);
             }
         }
         LOG.error("No processing type found for name {}", name);

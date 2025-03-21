@@ -19,12 +19,14 @@ import java.util.Optional;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
 /**
  * Repository for dataset processings.
  *
  * @author msimon
  */
+@Repository
 public interface DatasetProcessingRepository extends CrudRepository<DatasetProcessing, Long> {
 
 	/**
@@ -43,7 +45,12 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
 	 * @param type Dataset processing type.
 	 * @return List of dataset processing.
 	 */
-	List<Long> findIdsByCommentAndDatasetProcessingType(String comment, int type);
+	@Query(value="SELECT DISTINCT processing.id FROM dataset_processing as processing " +
+			"INNER JOIN execution_monitoring AS monitoring ON monitoring.id = processing.id" +
+			"WHERE processing.dataset_processing_type = :type" +
+			"AND processing.comment LIKE :comment" +
+			"AND monitoring.status = 1", nativeQuery = true)
+	List<Long> findIdsByCommentAndDatasetProcessingTypeWithStatusFinished(String comment, int type);
 
 	/**
 	 * Find all processings that are linked to given dataset through INPUT_OF_DATASET_PROCESSING table
