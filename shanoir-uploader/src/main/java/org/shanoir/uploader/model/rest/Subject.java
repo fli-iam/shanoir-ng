@@ -196,10 +196,7 @@ public class Subject {
 
 	@Override
 	public String toString() {
-		return "Subject [id=" + id + ", name=" + name + ", identifier=" + identifier + ", birthDate=" + birthDate
-				+ ", languageHemisphericDominance=" + languageHemisphericDominance + ", manualHemisphericDominance="
-				+ manualHemisphericDominance + ", imagedObjectCategory=" + imagedObjectCategory + ", sex=" + sex
-				+ ", preclinical=" + preclinical + "]";
+		return this.getName();
 	}
 
 	public SubjectStudy getSubjectStudy() {
