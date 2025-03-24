@@ -17,7 +17,6 @@ package org.shanoir.ng.study.dto;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.shanoir.ng.profile.model.Profile;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.study.model.StudyStatus;
@@ -64,7 +63,6 @@ public class StudyLightDTO {
 	
 	private List<String> dataUserAgreementPaths;
 
-	@JsonIgnore
 	private Profile profile;
 
 	/**

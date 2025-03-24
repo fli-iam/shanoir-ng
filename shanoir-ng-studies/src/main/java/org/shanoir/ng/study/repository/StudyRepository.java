@@ -33,7 +33,7 @@ public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepos
 	@EntityGraph("Study.All")
 	void deleteById(Long id);
 
-	@EntityGraph(attributePaths = { "studyTags" })
+	@EntityGraph(attributePaths = { "studyTags", "profile" })
 	List<Study> findByVisibleByDefaultTrue();
 
 	//@EntityGraph(attributePaths = { "profile", "tags" })
