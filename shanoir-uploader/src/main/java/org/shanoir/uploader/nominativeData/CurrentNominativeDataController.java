@@ -8,7 +8,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -43,6 +42,7 @@ public class CurrentNominativeDataController {
 	private UploadJobManager uploadJobManager;
 
 	private CurrentUploadsWindowTable cuw;
+
 
 	@SuppressWarnings("deprecation")
 	public void configure(final File workFolderFilePath, final CurrentUploadsWindowTable cuw) {

@@ -115,7 +115,7 @@ public class MainWindow extends JFrame {
 	public JLabel connexionStatus;
 
 	private FindDicomActionListener fAL;
-	private DownloadOrCopyActionListener dOCAL;
+	public DownloadOrCopyActionListener dOCAL;
 	private SelectionActionListener sAL;
 
 	public JMenu mnAutoimport;
