@@ -17,6 +17,7 @@ package org.shanoir.ng.study.dto;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.shanoir.ng.profile.model.Profile;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.study.model.StudyStatus;
 import org.shanoir.ng.study.model.StudyType;
@@ -61,6 +62,8 @@ public class StudyLightDTO {
 	private List<String> protocolFilePaths;
 	
 	private List<String> dataUserAgreementPaths;
+
+	private Profile profile;
 
 	/**
 	 * Default constructor.
@@ -252,4 +255,11 @@ public class StudyLightDTO {
 		this.dataUserAgreementPaths = dataUserAgreementPaths;
 	}
 
+	public Profile getProfile() {
+		return profile;
+	}
+
+	public void setProfile(Profile profile) {
+		this.profile = profile;
+	}
 }
