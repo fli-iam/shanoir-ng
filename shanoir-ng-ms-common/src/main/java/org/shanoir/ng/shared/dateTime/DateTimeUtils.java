@@ -29,6 +29,8 @@ import java.util.Date;
  *
  */
 public class DateTimeUtils {
+
+	public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 	
 	public static LocalDate dateToLocalDate(Date date) {
 		if (date == null) return null;
