@@ -400,7 +400,7 @@ export class MassDownloadService {
             let acqName: string = dataset.datasetAcquisition.protocol?.updatedMetadata?.name 
                 || dataset.datasetAcquisition.protocol?.originMetadata?.name 
                 || dataset.datasetAcquisition.type + '_acquisition';
-            str += acqName
+            str += dataset.datasetAcquisition.sortingIndex + '_' + acqName
             + '_' + dataset.datasetAcquisition.id
             + '/';
         }
@@ -420,7 +420,7 @@ export class MassDownloadService {
             str += 'exam' + dataset.datasetAcquisition?.examination?.id + '/';
         }
         if (setup.acquisitionFolders && !dataset.datasetProcessing) {
-            str += 'acq' + dataset.datasetAcquisition?.id + '/';
+            str += 'acq' + dataset.datasetAcquisition.sortingIndex + '_' + dataset.datasetAcquisition?.id + '/';
         }
         return str;
     }
