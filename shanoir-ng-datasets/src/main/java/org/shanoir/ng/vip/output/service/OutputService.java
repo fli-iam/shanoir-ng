@@ -82,7 +82,7 @@ public class OutputService {
 
         final PathMatcher matcher = userImportDir.toPath().getFileSystem().getPathMatcher("glob:**/*.{tgz,tar.gz}");
 
-        try (Stream<Path> stream = Files.list(userImportDir.toPath())) {
+        try (Stream<Path> stream = Files.walk(userImportDir.toPath())) {
             return  stream.filter(matcher::matches).map(Path::toFile).collect(Collectors.toList());
         } catch (IOException e) {
             throw new ResultHandlerException("I/O error while listing files in import directory", e);
