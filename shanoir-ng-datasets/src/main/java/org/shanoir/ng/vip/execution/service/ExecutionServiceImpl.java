@@ -87,7 +87,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         return updateAndStartExecutionMonitoring(executionMonitoring, createdExecution);
     }
 
-    public List<Dataset> getDatasetsFromParams(List<DatasetParameterDTO> parameters){
+    public List<Dataset> getDatasetsFromParams(List<DatasetParameterDTO> parameters) {
         List<Long> datasetsIds = new ArrayList<>();
         for (DatasetParameterDTO param : parameters) {
             datasetsIds.addAll(param.getDatasetIds());
@@ -145,7 +145,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     public Mono<VipExecutionDTO> getExecutionAsServiceAccount(int attempts, String identifier) throws ResultHandlerException, SecurityException {
 
-        if(attempts >= 3){
+        if(attempts >= 3) {
             throw new ResultHandlerException("Failed to get execution details from VIP in [" + attempts + "] attempts", null);
         }
 
@@ -241,7 +241,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     /**
      * Get input values of exec as URI
      */
-    private String getInputValueUri(ExecutionCandidateDTO candidate, String groupBy, String exportFormat, String resourceId, String authenticationToken){
+    private String getInputValueUri(ExecutionCandidateDTO candidate, String groupBy, String exportFormat, String resourceId, String authenticationToken) {
         String entityName = "resource_id+" + resourceId + "+" + groupBy + ("dcm".equals(exportFormat) ? ".zip" : ".nii.gz");
         return SHANOIR_URI_SCHEME + entityName
                 + "?format=" + exportFormat

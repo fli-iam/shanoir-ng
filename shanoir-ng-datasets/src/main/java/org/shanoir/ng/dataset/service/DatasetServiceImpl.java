@@ -198,7 +198,7 @@ public class DatasetServiceImpl implements DatasetService {
 	@Override
 	@Transactional
 	public void deleteByIdIn(List<Long> ids) throws ShanoirException, SolrServerException, IOException, RestServiceException {
-		for(Long id : ids){
+		for(Long id : ids) {
 			this.deleteById(id);
 		}
 	}
@@ -336,7 +336,7 @@ public class DatasetServiceImpl implements DatasetService {
 		List<Object[]> results = repository.findExpressionSizesByStudyIdGroupByFormat(studyId);
 		List<VolumeByFormatDTO> sizesByFormat = new ArrayList<>();
 
-		for(Object[] result : results){
+		for(Object[] result : results) {
 			sizesByFormat.add(new VolumeByFormatDTO(DatasetExpressionFormat.getFormat((int) result[0]), (Long) result[1]));
 		}
 
@@ -349,11 +349,11 @@ public class DatasetServiceImpl implements DatasetService {
 		List<Object[]> results = repository.findExpressionSizesTotalByStudyIdGroupByFormat(studyIds);
 		Map<Long, List<VolumeByFormatDTO>> sizesByFormatAndStudy = new HashMap<>();
 
-		for(Long id : studyIds){
+		for(Long id : studyIds) {
 			sizesByFormatAndStudy.putIfAbsent(id, new ArrayList<>());
 		}
 
-		for(Object[] result : results){
+		for(Object[] result : results) {
 			Long studyId = (Long) result[0];
 			sizesByFormatAndStudy.get(studyId).add(new VolumeByFormatDTO(DatasetExpressionFormat.getFormat((int) result[1]), (Long) result[2]));
 		}
@@ -438,7 +438,7 @@ public class DatasetServiceImpl implements DatasetService {
 	 * @return
 	 */
 	@Override
-	public Long getStudyId(Dataset dataset){
+	public Long getStudyId(Dataset dataset) {
 		if (dataset.getStudyId() != null) {
 			return dataset.getStudyId();
 		}
@@ -450,7 +450,7 @@ public class DatasetServiceImpl implements DatasetService {
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
-		if(dataset.getDatasetAcquisition() != null && dataset.getDatasetAcquisition().getExamination() != null){
+		if(dataset.getDatasetAcquisition() != null && dataset.getDatasetAcquisition().getExamination() != null) {
 			return dataset.getDatasetAcquisition().getExamination().getStudyId();
 		}
 		return null;
@@ -463,9 +463,9 @@ public class DatasetServiceImpl implements DatasetService {
 	 * @return
 	 */
 	@Override
-	public Examination getExamination(Dataset dataset){
+	public Examination getExamination(Dataset dataset) {
 		DatasetAcquisition acquisition = this.getAcquisition(dataset);
-		if(acquisition != null){
+		if(acquisition != null) {
 			return acquisition.getExamination();
 		}
 		return null;
@@ -473,13 +473,13 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Override
 	public DatasetAcquisition getAcquisition(Dataset dataset) {
-		if(dataset.getDatasetAcquisition() != null){
+		if(dataset.getDatasetAcquisition() != null) {
 			return dataset.getDatasetAcquisition();
 		}
-		if(dataset.getDatasetProcessing().getInputDatasets() != null){
-			for(Dataset ds : dataset.getDatasetProcessing().getInputDatasets()){
+		if(dataset.getDatasetProcessing().getInputDatasets() != null) {
+			for(Dataset ds : dataset.getDatasetProcessing().getInputDatasets()) {
 				DatasetAcquisition acq = this.getAcquisition(ds);
-				if(acq != null){
+				if(acq != null) {
 					return acq;
 				}
 			}

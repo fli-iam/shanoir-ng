@@ -140,7 +140,7 @@ public class RabbitMQSubjectService {
 	@RabbitListener(queues = RabbitMQConfiguration.SUBJECTS_NAME_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
 	@Transactional
-	public boolean existsSubjectName(String name){
+	public boolean existsSubjectName(String name) {
 		return this.subjectService.existsSubjectWithName(name);
 	}
 

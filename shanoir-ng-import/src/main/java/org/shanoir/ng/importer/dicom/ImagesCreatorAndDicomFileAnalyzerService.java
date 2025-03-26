@@ -133,7 +133,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 		serie.setErroneous(true);
 		serie.setErrorMessage(e.getMessage() + ", " + e.toString());
 		serie.setSelected(false);
-		if(event != null){
+		if(event != null) {
 			event.setMessage("Error with serie [" + (serie.getSeriesDescription() == null ? serie.getSeriesInstanceUID() : serie.getSeriesDescription()) + "] " + cpt + "/" + nbSeries + ")");
 			eventService.publishEvent(event);
 		}

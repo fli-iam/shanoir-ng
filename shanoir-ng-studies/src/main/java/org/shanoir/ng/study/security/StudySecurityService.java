@@ -94,7 +94,7 @@ public class StudySecurityService {
 	 * @return true or false
 	 */
     public boolean hasAnyRightOnStudy(Long studyId, List<String> rightStrs) throws EntityNotFoundException {
-    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")){
+    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			return true;
 		}
     	if (studyId == null || rightStrs == null) {
@@ -121,8 +121,8 @@ public class StudySecurityService {
 
 		List<Long> invalidStudyIds = new ArrayList<>();
 
-		for(Long id : studyIds){
-			 if(!this.hasRightOnStudy(id, rightStr)){
+		for(Long id : studyIds) {
+			 if(!this.hasRightOnStudy(id, rightStr)) {
 				 invalidStudyIds.add(id);
 			 }
 		}
@@ -340,7 +340,7 @@ public class StudySecurityService {
 			}
 
 			ListIterator<SubjectStudyDTO> iter = subjectDto.getSubjectStudyList().listIterator();
-			while(iter.hasNext()){
+			while(iter.hasNext()) {
 				if(toRemove.contains(iter.next().getId())) {
 					iter.remove();
 				}

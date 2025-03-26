@@ -192,7 +192,7 @@ public class RabbitMQStudiesService {
 		try {
 		    LOG.info(messageStr);
 			List<SubjectStudyQualityTagDTO> subjectStudyStudyCardTagList =
-					objectMapper.readValue(messageStr, new TypeReference<List<SubjectStudyQualityTagDTO>>(){});
+					objectMapper.readValue(messageStr, new TypeReference<List<SubjectStudyQualityTagDTO>>() {});
 			// build a id -> dto map
 			Map<Long, SubjectStudyQualityTagDTO> dtoMap = new HashMap<>();
 			for (SubjectStudyQualityTagDTO dto : subjectStudyStudyCardTagList) {

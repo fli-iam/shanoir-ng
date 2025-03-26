@@ -26,7 +26,7 @@ public class DatasetDownloadError {
 
     private String status;
 
-    public DatasetDownloadError(){
+    public DatasetDownloadError() {
     }
 
     public DatasetDownloadError(String message, String status) {

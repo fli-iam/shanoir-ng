@@ -134,16 +134,16 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
         List<DatasetProcessing> toUpdate = new ArrayList<>();
         List<DatasetProcessing> toDelete = new ArrayList<>();
 
-        for(DatasetProcessing processing : processings){
+        for(DatasetProcessing processing : processings) {
             processing.getInputDatasets().removeIf(ds -> ds.getId().equals(datasetId));
-            if(processing.getInputDatasets().isEmpty()){
+            if(processing.getInputDatasets().isEmpty()) {
                 // If processing is no more linked to a dataset, delete it
                 toDelete.add(processing);
             }else{
                 toUpdate.add(processing);
             }
         }
-        for(DatasetProcessing proc : toDelete){
+        for(DatasetProcessing proc : toDelete) {
             this.deleteById(proc.getId());
         }
         repository.saveAll(toUpdate);
@@ -152,23 +152,23 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     @Override
     public void deleteByParentId(Long id) throws ShanoirException, RestServiceException, SolrServerException, IOException {
         List<DatasetProcessing> processings = repository.findAllByParentId(id);
-        for(DatasetProcessing child : processings){
+        for(DatasetProcessing child : processings) {
             this.deleteById(child.getId());
         }
     }
 
     @Override
     public void validateDatasetProcessing(DatasetProcessing processing) throws RestServiceException {
-        if(processing.getStudyId() == null){
+        if(processing.getStudyId() == null) {
             ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Processing must be linked to a study.", null);
             throw new RestServiceException(error);
         }
-        if(processing.getInputDatasets() == null || processing.getInputDatasets().isEmpty()){
+        if(processing.getInputDatasets() == null || processing.getInputDatasets().isEmpty()) {
             ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "There must be at least one input dataset.", null);
             throw new RestServiceException(error);
         }
-        for(Dataset dataset : processing.getInputDatasets()){
-            if (!processing.getStudyId().equals(datasetService.getStudyId(dataset))){
+        for(Dataset dataset : processing.getInputDatasets()) {
+            if (!processing.getStudyId().equals(datasetService.getStudyId(dataset))) {
                 ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Input dataset [" + dataset.getId() + "] is not linked to the processing study.", null);
                 throw new RestServiceException(error);
             }

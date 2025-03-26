@@ -55,7 +55,7 @@ public class AccountRequestApiController extends AbstractUserRequestApiControlle
 		/* Save user in db. */
 		try {
 			User savedUser = getUserService().createAccountRequest(user);
-			if(vipEnabled){
+			if(vipEnabled) {
 				getVipUserService().createVIPAccountRequest(savedUser);
 			}
 		} catch (PasswordPolicyException e) {

@@ -34,7 +34,7 @@ public class Cardinality {
 			isMultiplier = true;
 			number = 1;	
 		} else {
-			if (strCopy.contains("n")){
+			if (strCopy.contains("n")) {
 				isMultiplier = true;
 				strCopy = strCopy.replace("n", "");
 			} else {

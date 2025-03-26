@@ -391,7 +391,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 
 		List<ShanoirMetadata> result = this.findSolr(clause);
 
-		if(result.isEmpty()){
+		if(result.isEmpty()) {
 			return null;
 		}
 		
@@ -416,7 +416,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 		return this.findSolr(clause);
 	}
 
-	private List<ShanoirMetadata> findSolr(String clause){
+	private List<ShanoirMetadata> findSolr(String clause) {
 
 		List<ShanoirMetadata> result = new ArrayList<>();
 
@@ -452,19 +452,19 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 		return result;
 	}
 
-	private List<ShanoirMetadata> findSolrProcessed(String clause){
+	private List<ShanoirMetadata> findSolrProcessed(String clause) {
 		Query processedQuery = em.createNativeQuery(PROCESSED_QUERY + clause, RESULTSET_MAPPING);
 		return processedQuery.getResultList();
 	}
 
 	@Override
-	public Map<Long, List<String>> findAllTags(List<Long> datasetIds){
+	public Map<Long, List<String>> findAllTags(List<Long> datasetIds) {
 
 		List<Object[]> result = new ArrayList<>();
 
 		String clause = "";
 
-		if(datasetIds != null && !datasetIds.isEmpty()){
+		if(datasetIds != null && !datasetIds.isEmpty()) {
 			String ids = datasetIds.stream().map(Object::toString).collect(Collectors.joining(","));
 			clause = " AND d.id IN (" + ids + ")";
 		}
@@ -477,7 +477,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 
 		Map<Long, List<String>> tags = new HashMap<>();
 
-		for(Object[] row : result){
+		for(Object[] row : result) {
 			Long id = (Long) row[0];
 			tags.putIfAbsent(id, new ArrayList<>());
 			tags.get(id).add((String) row[1]);

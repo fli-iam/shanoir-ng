@@ -102,7 +102,7 @@ public class SubjectApiController implements SubjectApi {
 	@Transactional
 	public ResponseEntity<List<SubjectDTO>> findSubjects(boolean preclinical, boolean clinical) {
 		List<Subject> subjects = new ArrayList<>();
-		if(preclinical && clinical){
+		if(preclinical && clinical) {
 			subjects = subjectService.findAll();
 		} else if (preclinical) {
 			subjects = subjectService.findByPreclinical(true);

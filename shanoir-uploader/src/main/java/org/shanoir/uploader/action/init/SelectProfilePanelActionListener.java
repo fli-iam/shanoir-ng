@@ -44,7 +44,7 @@ public class SelectProfilePanelActionListener implements ActionListener {
 			final File propertiesFile = new File(fileName);
 			boolean propertiesExists = propertiesFile.exists();
 			if (propertiesExists) {
-				try (OutputStream out = new FileOutputStream(propertiesFile);){
+				try (OutputStream out = new FileOutputStream(propertiesFile);) {
 					Properties props = ShUpConfig.basicProperties;
 					props.setProperty(ShUpConfig.PROFILE, selectedProfile);
 					// Store the new Profile configuration in the basic.properties file

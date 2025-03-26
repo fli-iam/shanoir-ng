@@ -390,7 +390,7 @@ public class BIDSServiceImpl implements BIDSService {
 
 	private String getSessionLabel(Examination examination) {
 		String label = "" + examination.getId();
-		if(!StringUtils.isBlank(examination.getComment())){
+		if(!StringUtils.isBlank(examination.getComment())) {
 			label += examination.getComment();
 		}
 
@@ -816,7 +816,7 @@ public class BIDSServiceImpl implements BIDSService {
 		}
 	}
 
-	private String formatLabel(String label){
+	private String formatLabel(String label) {
 		return label.replaceAll("[^a-zA-Z0-9]+", "");
 	}
 

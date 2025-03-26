@@ -37,13 +37,13 @@ public class DatasetPropertyApiController implements DatasetPropertyApi {
     @Override
     public ResponseEntity<List<DatasetPropertyDTO>> getPropertiesByDatasetId(Long datasetId) {
 
-        if(!dsSrv.existsById(datasetId)){
+        if(!dsSrv.existsById(datasetId)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         List<DatasetProperty> properties = this.propertyService.getByDatasetId(datasetId);
 
-        if(properties.isEmpty()){
+        if(properties.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
@@ -55,19 +55,19 @@ public class DatasetPropertyApiController implements DatasetPropertyApi {
     @Override
     public ResponseEntity<List<DatasetPropertyDTO>> getPropertiesByProcessingId(Long processingId) throws EntityNotFoundException {
 
-        if(!propertyService.existsById(processingId)){
+        if(!propertyService.existsById(processingId)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         List<DatasetProperty> filteredProperties = new ArrayList<>();
 
-        for(DatasetProperty property : this.propertyService.getByDatasetProcessingId(processingId)){
-            if(securityService.hasRightOnDataset(property.getDataset().getId(), "CAN_SEE_ALL")){
+        for(DatasetProperty property : this.propertyService.getByDatasetProcessingId(processingId)) {
+            if(securityService.hasRightOnDataset(property.getDataset().getId(), "CAN_SEE_ALL")) {
                 filteredProperties.add(property);
             }
         }
 
-        if(filteredProperties.isEmpty()){
+        if(filteredProperties.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 

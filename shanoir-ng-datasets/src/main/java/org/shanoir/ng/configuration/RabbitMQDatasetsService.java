@@ -178,7 +178,7 @@ public class RabbitMQDatasetsService {
 
 			List<String> errors = studyService.validate(updated, current);
 
-			if(!errors.isEmpty()){
+			if(!errors.isEmpty()) {
 				return errors.get(0);
 			}
 

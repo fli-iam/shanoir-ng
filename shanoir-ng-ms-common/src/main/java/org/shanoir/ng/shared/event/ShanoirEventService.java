@@ -51,21 +51,21 @@ public class ShanoirEventService {
         }
     }
 
-    public void publishEvent(ShanoirEvent event, String message, Float progress){
+    public void publishEvent(ShanoirEvent event, String message, Float progress) {
         event.setMessage(message);
         event.setProgress(progress);
         this.publishEvent(event);
     }
 
-    public void publishErrorEvent(ShanoirEvent event, String message){
+    public void publishErrorEvent(ShanoirEvent event, String message) {
         this.publishEvent(event, message, -1f, ShanoirEvent.ERROR);
     }
 
-    public void publishSuccessEvent(ShanoirEvent event, String message){
+    public void publishSuccessEvent(ShanoirEvent event, String message) {
         this.publishEvent(event, message, 1f, ShanoirEvent.SUCCESS);
     }
 
-    private void publishEvent(ShanoirEvent event, String message, Float progress, int status){
+    private void publishEvent(ShanoirEvent event, String message, Float progress, int status) {
         event.setStatus(status);
         this.publishEvent(event, message, progress);
     }

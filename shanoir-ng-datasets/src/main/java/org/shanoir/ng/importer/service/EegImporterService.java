@@ -69,7 +69,7 @@ public class EegImporterService {
 
         Long userId = KeycloakUtil.getTokenUserId();
         ShanoirEvent event;
-        if(Objects.isNull(importJob.getShanoirEvent())){
+        if(Objects.isNull(importJob.getShanoirEvent())) {
             event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), userId, "Starting import...", ShanoirEvent.IN_PROGRESS, 0f, importJob.getStudyId());
         } else {
             event = importJob.getShanoirEvent();

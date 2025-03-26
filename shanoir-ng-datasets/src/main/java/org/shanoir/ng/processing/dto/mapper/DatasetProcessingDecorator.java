@@ -20,7 +20,7 @@ public abstract class DatasetProcessingDecorator implements DatasetProcessingMap
         }
 
         DatasetProcessingDTO dto = delegate.datasetProcessingToDatasetProcessingDTO(processing);
-        if(processing.getParent() != null){
+        if(processing.getParent() != null) {
             dto.setParentId(processing.getParent().getId());
         }
         return dto;

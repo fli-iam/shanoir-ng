@@ -147,11 +147,11 @@ public class ImporterService {
     private static int instancesCreated = 0;
 
     //This constructor will be called everytime a new bean instance is created
-    public ImporterService(){
+    public ImporterService() {
         instancesCreated++;
     }
 
-    public static int getInstancesCreated(){
+    public static int getInstancesCreated() {
         return ImporterService.instancesCreated;
     }
 
@@ -463,7 +463,7 @@ public class ImporterService {
             return null;
         }
 
-        for(Dataset input : datasetProcessing.getInputDatasets()){
+        for(Dataset input : datasetProcessing.getInputDatasets()) {
             Long studyId = datasetService.getStudyId(input);
             if (studyId != null && !studyId.equals(importJob.getStudyId())) {
                 event.setStatus(ShanoirEvent.ERROR);
@@ -548,7 +548,7 @@ public class ImporterService {
         }
     }
 
-    public void createFailedJob(String datasetFilePath){
+    public void createFailedJob(String datasetFilePath) {
         ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, datasetFilePath, KeycloakUtil.getTokenUserId(), "Import of dataset failed.", ShanoirEvent.ERROR, -1f);
         eventService.publishEvent(event);
     }

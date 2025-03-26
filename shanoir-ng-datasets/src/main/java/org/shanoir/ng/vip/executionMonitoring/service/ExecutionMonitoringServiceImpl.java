@@ -116,7 +116,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
             try{
                 VipExecutionDTO dto = executionService.getExecutionAsServiceAccount(attempts, identifier).block();
 
-                if(dto == null){
+                if(dto == null) {
                     attempts++;
                     continue;
                 }else{
@@ -136,7 +136,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
                     }
                     default -> stop.set(true);
                 }
-            } catch (Exception e){
+            } catch (Exception e) {
                 // Unwrap ReactiveException thrown from async method
                 Throwable ex = Exceptions.unwrap(e);
                 LOG.error(ex.getMessage(), ex.getCause());
@@ -174,7 +174,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
     private ShanoirEvent initShanoirEvent(ExecutionMonitoring processing, ShanoirEvent event, String execLabel) {
         String startMsg = execLabel + " : " + ExecutionStatus.RUNNING.getRestLabel();
 
-        if(event == null){
+        if(event == null) {
             event = new ShanoirEvent(
                     ShanoirEventType.EXECUTION_MONITORING_EVENT,
                     processing.getId().toString(),
@@ -248,7 +248,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
     /**
      * Set the shanoir execution monitoring event in error status
      */
-    private void setEventInError(ShanoirEvent event, String msg){
+    private void setEventInError(ShanoirEvent event, String msg) {
         event.setMessage(msg);
         event.setStatus(ShanoirEvent.ERROR);
         event.setProgress(1f);

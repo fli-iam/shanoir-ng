@@ -166,13 +166,13 @@ public class JSONUtils {
         if (val == null) {
             return defaultValue;
         }
-        if (val instanceof BigDecimal){
+        if (val instanceof BigDecimal) {
             return (BigDecimal) val;
         }
-        if (val instanceof BigInteger){
+        if (val instanceof BigInteger) {
             return new BigDecimal((BigInteger) val);
         }
-        if (val instanceof Double || val instanceof Float){
+        if (val instanceof Double || val instanceof Float) {
             if (!numberIsFinite((Number)val)) {
                 return defaultValue;
             }
@@ -186,7 +186,7 @@ public class JSONUtils {
             }
         }
         if (val instanceof Long || val instanceof Integer
-                || val instanceof Short || val instanceof Byte){
+                || val instanceof Short || val instanceof Byte) {
             return new BigDecimal(((Number) val).longValue());
         }
         // don't check if it's a string in case of unchecked Number subclasses

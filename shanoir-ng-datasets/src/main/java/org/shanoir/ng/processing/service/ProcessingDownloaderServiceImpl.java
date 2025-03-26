@@ -83,7 +83,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
                 manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, processingFilePath  + "/output", format, withManifest, filesByAcquisitionId, converterId);
             }
         }
-        if(!filesByAcquisitionId.isEmpty()){
+        if(!filesByAcquisitionId.isEmpty()) {
             DatasetFileUtils.writeManifestForExport(zipOutputStream, filesByAcquisitionId);
         }
 
@@ -100,26 +100,26 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
     public void massiveDownloadByExaminations(List<Examination> examinationList, String processingComment, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
         List<Long> processingIdsList = datasetProcessingRepository.findAllIdsByExaminationIds(examinationList.stream().map(Examination::getId).toList());
         List<DatasetProcessing> processingList = datasetProcessingService.findAllById(processingIdsList);
-        if(!Objects.isNull(processingComment)){
+        if(!Objects.isNull(processingComment)) {
             processingList = processingList.stream().filter(it -> Objects.equals(it.getComment(), processingComment)).toList();
         };
         massiveDownload(processingList, resultOnly, format, response, withManifest, converterId);
     }
 
     private void manageResultOnly(List<DatasetProcessing> processingList, boolean resultOnly) {
-        if(resultOnly){
+        if(resultOnly) {
             processingList.forEach(it -> {it.setOutputDatasets(it.getOutputDatasets().stream().filter(file -> Objects.equals(file.getName(), "result.yaml")).toList()); it.setInputDatasets(new ArrayList<>());});
         }
     }
 
     private String getProcessingSubject(DatasetProcessing processing) {
         Examination exam = null;
-        for (Dataset dataset : processing.getInputDatasets()){
+        for (Dataset dataset : processing.getInputDatasets()) {
             exam = Optional.ofNullable(dataset)
                     .map(Dataset::getDatasetAcquisition)
                     .map(DatasetAcquisition::getExamination)
                     .orElse(null);
-            if (!Objects.isNull(exam)){
+            if (!Objects.isNull(exam)) {
                 return exam.getSubject().getName();
             }
         }
@@ -128,12 +128,12 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
 
     private Pair<Long, String> getExaminationDatas(List<Dataset> inputs) {
         Examination exam = null;
-        for (Dataset dataset : inputs){
+        for (Dataset dataset : inputs) {
             exam = Optional.ofNullable(dataset)
                     .map(Dataset::getDatasetAcquisition)
                     .map(DatasetAcquisition::getExamination)
                     .orElse(null);
-            if (!Objects.isNull(exam)){
+            if (!Objects.isNull(exam)) {
                 return new Pair<>(exam.getId(), exam.getComment());
             }
         }
@@ -150,7 +150,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         return shapeForPath(execFilePath);
     }
 
-    private String shapeForPath(String path){
+    private String shapeForPath(String path) {
         path = path.replaceAll("[^a-zA-Z0-9_\\-]", "_");
         if (path.length() > 255) {
             path = path.substring(0, 254);

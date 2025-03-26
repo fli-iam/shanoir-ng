@@ -256,7 +256,7 @@ public class DatasetApiController implements DatasetApi {
 		}
 
 		List<DatasetWithDependenciesDTOInterface> dtos = new ArrayList<>();
-		for(Dataset dataset : datasets){
+		for(Dataset dataset : datasets) {
 			if (dataset instanceof MrDataset) {
 				dtos.add(mrDatasetMapper.datasetToDatasetAndProcessingsDTO((MrDataset) dataset));
 			} else if (dataset instanceof EegDataset) {

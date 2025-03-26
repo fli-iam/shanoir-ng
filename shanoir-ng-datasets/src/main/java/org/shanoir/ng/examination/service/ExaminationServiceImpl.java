@@ -336,15 +336,15 @@ public class ExaminationServiceImpl implements ExaminationService {
 	}
 
 	@Override
-	public Long getExtraDataSizeByStudyId(Long studyId){
+	public Long getExtraDataSizeByStudyId(Long studyId) {
 
 		List<Examination> exams = this.findByStudyId(studyId);
 
 		long size = 0L;
-		for(Examination exam : exams){
-			for(String path : exam.getExtraDataFilePathList()){
+		for(Examination exam : exams) {
+			for(String path : exam.getExtraDataFilePathList()) {
 				File f = new File(this.getExtraDataFilePath(exam.getId(), path));
-				if(f.exists()){
+				if(f.exists()) {
 					size += f.length();
 				}
 			}

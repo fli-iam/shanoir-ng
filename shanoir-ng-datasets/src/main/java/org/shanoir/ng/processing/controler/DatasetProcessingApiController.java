@@ -75,7 +75,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 	@Autowired
 	private ExaminationService examinationService;
 
-	public DatasetProcessingApiController(){
+	public DatasetProcessingApiController() {
 
 	}
 
@@ -185,7 +185,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 		for (Long processingId : processingIds) {
 			DatasetProcessing processing = null;
 			try {
-				if(processingId == null){
+				if(processingId == null) {
 					throw new Exception();
 				}
 				processing = datasetProcessingService.findById(processingId).get();
@@ -212,12 +212,12 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 		for (Long examinationId : examinationIds) {
 			Examination examination = null;
 			try {
-				if(examinationId == null){
+				if(examinationId == null) {
 					throw new Exception();
 				}
 				examination = examinationService.findById(examinationId);
 
-				if(Objects.isNull(examination)){
+				if(Objects.isNull(examination)) {
 					throw new Exception();
 				}
 				examinationList.add(examination);

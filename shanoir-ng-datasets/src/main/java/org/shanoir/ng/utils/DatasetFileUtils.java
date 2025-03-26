@@ -139,7 +139,7 @@ public class DatasetFileUtils {
 		for (Map.Entry<Long, List<String>> entry : filesByAcquisitionId.entrySet()) {
 			InputDTO.InputSerieDTO serie = new InputDTO.InputSerieDTO();
 			serie.setId(entry.getKey());
-			for(String file : entry.getValue()){
+			for(String file : entry.getValue()) {
 				serie.getFiles().add(file);
 			}
 			input.getSeries().add(serie);

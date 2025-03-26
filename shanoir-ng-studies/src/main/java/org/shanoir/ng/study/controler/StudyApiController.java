@@ -210,7 +210,7 @@ public class StudyApiController implements StudyApi {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		StudyDTO dto = studyMapper.studyToStudyDTODetailed(study);
-		if(withStorageVolume){
+		if(withStorageVolume) {
 			dto.setStorageVolume(studyService.getDetailedStorageVolume(dto.getId()));
 		}
 		return new ResponseEntity<>(dto, HttpStatus.OK);
@@ -276,7 +276,7 @@ public class StudyApiController implements StudyApi {
 	@Override
 	public ResponseEntity<StudyStorageVolumeDTO> getDetailedStorageVolume(@PathVariable("studyId") final Long studyId) throws RestServiceException {
 		StudyStorageVolumeDTO dto = studyService.getDetailedStorageVolume(studyId);
-		if(dto == null){
+		if(dto == null) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
 							"Error while fetching study datasets storage volume details.", null)
