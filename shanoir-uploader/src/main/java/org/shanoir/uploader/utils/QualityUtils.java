@@ -43,11 +43,11 @@ public class QualityUtils {
 
 	private static DatasetsCreatorService datasetsCreatorService = new DatasetsCreatorService();
 
-	public static QualityCardResult checkQualityAtImport(ImportJob importJob, boolean isImportFromPACS) throws Exception {
+	public static QualityCardResult checkQualityAtImport(ImportJob importJob, org.shanoir.uploader.model.rest.SubjectStudy selectedSubjectStudy, boolean isImportFromPACS) throws Exception {
 
 		QualityCardResult qualityCardResult = new QualityCardResult();
 		ExaminationData examinationData = new ExaminationData();
-		SubjectStudy subjectStudy = new SubjectStudy();
+		SubjectStudy subjectStudy = convertSubjectStudy(selectedSubjectStudy);
 		final File importJobDir = new File(importJob.getWorkFolder());
 		List<QualityCard> qualityCards = new ArrayList<>();
 		
@@ -88,10 +88,7 @@ public class QualityUtils {
 
 		// Convert Import ms ImportJob into Datasets ms ImportJob
 		org.shanoir.ng.importer.dto.ImportJob importJobDto = convertImportJob(importJob);
-
 		examinationData.setStudyId(importJob.getStudyId());
-		// Set an Id to the subjectStudy to retrieve the qualityTag
-		subjectStudy.setId(importJob.getSubject().getId());
 		examinationData.setSubjectStudy(subjectStudy);
 
 		try {
@@ -102,6 +99,17 @@ public class QualityUtils {
 		}
 		
 		return qualityCardResult;
+	}
+
+	private static SubjectStudy convertSubjectStudy(org.shanoir.uploader.model.rest.SubjectStudy selectedSubjectStudy) {
+		SubjectStudy subjectStudy = new SubjectStudy();
+		subjectStudy.setId(selectedSubjectStudy.getId());
+		//subjectStudy.setQualityTag(selectedSubjectStudy.getQualityTag());
+		org.shanoir.ng.shared.model.Study study = new org.shanoir.ng.shared.model.Study();
+		study.setId(selectedSubjectStudy.getStudy().getId());
+		study.setName(selectedSubjectStudy.getStudy().getName());
+		subjectStudy.setStudy(study);
+		return subjectStudy;
 	}
 
 	/**

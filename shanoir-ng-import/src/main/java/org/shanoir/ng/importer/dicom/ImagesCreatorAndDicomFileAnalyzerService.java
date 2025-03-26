@@ -207,7 +207,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				.append(SUFFIX_DCM);
 		} else {
 			String[] instancePathArray = instance.getReferencedFileID();
-			if (instancePathArray != null) {
+			if (instancePathArray != null || instancePathArray.length != 0) {
 				instanceFilePath.append(folderFileAbsolutePath).append(File.separator);
 				for (int count = 0; count < instancePathArray.length; count++) {
 					instanceFilePath.append(instancePathArray[count]);
@@ -217,7 +217,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				}
 			} else {
 				throw new FileNotFoundException(
-						"instancePathArray in DicomDir: missing file: " + instancePathArray);
+						"instancePathArray in DicomDir is missing for serie: {}" + serie.getSeriesInstanceUID());
 			}
 		}
 		File instanceFile = new File(instanceFilePath.toString());

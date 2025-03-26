@@ -104,7 +104,6 @@ public class ImportUtils {
 				// do nothing: call of findSubjectsByStudyId
 				return false;
 			}
-			subject.getSubjectStudyList().add(subjectStudy);
 		} else {
 			// Check that this SubjectStudy does not exist yet
 			for (SubjectStudy sustu : subject.getSubjectStudyList()) {
@@ -113,9 +112,9 @@ public class ImportUtils {
 					return false;
 				}
 			}
-			// Not yet existing: add it
-			subject.getSubjectStudyList().add(subjectStudy);
 		}
+		// In case of a newly created subjectStudyList or a not yet existing subjectStudy for the study id in the list : add it
+		subject.getSubjectStudyList().add(subjectStudy);
 		return true;
 	}
 
@@ -419,7 +418,7 @@ public class ImportUtils {
 		return allFileNames;
 	}
 
-	public static org.shanoir.uploader.model.rest.Subject manageSubject(org.shanoir.uploader.model.rest.Subject subjectREST, Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom, SubjectStudy subjectStudy, SubjectType subjectType, boolean existingSubjectInStudy, boolean isPhysicallyInvolved, String subjectStudyIdentifier, Study study, StudyCard studyCard) {
+	public static org.shanoir.uploader.model.rest.Subject manageSubject(org.shanoir.uploader.model.rest.Subject subjectREST, Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom, SubjectType subjectType, boolean existingSubjectInStudy, boolean isPhysicallyInvolved, String subjectStudyIdentifier, Study study, StudyCard studyCard) {
 		if (subjectREST == null) {
 			try {
 				subjectREST = fillSubjectREST(subject, subjectName, category, languageHemDom, manualHemDom);
