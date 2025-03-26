@@ -34,26 +34,26 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
  */
 public abstract class SecurityContextUtil {
 
-	/**
-	 * Clear the authentication
-	 */
-	public static void clearAuthentication() {
-		SecurityContextHolder.getContext().setAuthentication(null);
-	}
+    /**
+     * Clear the authentication
+     */
+    public static void clearAuthentication() {
+        SecurityContextHolder.getContext().setAuthentication(null);
+    }
 
-	/**
-	 * Set a @Principal in authentication context.
-	 *
-	 * @param role "ROLE_ADMIN" or "ROLE_EXPERT" or ...
-	 */
-	public static void initAuthenticationContext(String role) {
-		List<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
-		GrantedAuthority grantedAuth = new SimpleGrantedAuthority(role);
-		grantedAuthorities.add(grantedAuth);
-		Map<String, Object> claims = Map.of("preferred_username", "shanoir", "userId", 92233720L, "realm_access", grantedAuthorities);
-		Jwt jwt = new Jwt("mock-token-value", Instant.now(), Instant.now().plusSeconds(300), Map.of("header", "mock"), claims);
-		Authentication authentication = new JwtAuthenticationToken(jwt, grantedAuthorities);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-	}
+    /**
+     * Set a @Principal in authentication context.
+     *
+     * @param role "ROLE_ADMIN" or "ROLE_EXPERT" or ...
+     */
+    public static void initAuthenticationContext(String role) {
+        List<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
+        GrantedAuthority grantedAuth = new SimpleGrantedAuthority(role);
+        grantedAuthorities.add(grantedAuth);
+        Map<String, Object> claims = Map.of("preferred_username", "shanoir", "userId", 92233720L, "realm_access", grantedAuthorities);
+        Jwt jwt = new Jwt("mock-token-value", Instant.now(), Instant.now().plusSeconds(300), Map.of("header", "mock"), claims);
+        Authentication authentication = new JwtAuthenticationToken(jwt, grantedAuthorities);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
 
 }

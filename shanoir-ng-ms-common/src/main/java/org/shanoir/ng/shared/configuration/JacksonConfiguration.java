@@ -45,10 +45,10 @@ public class JacksonConfiguration {
     @Autowired
     public void configureJacksonObjectMapper(final ObjectMapper objectMapper) {
         objectMapper
-        		.registerModule(preparePageModule())
-		        .registerModule(new JavaTimeModule())
-		        .registerModule(new Jdk8Module())
-				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                .registerModule(preparePageModule())
+                .registerModule(new JavaTimeModule())
+                .registerModule(new Jdk8Module())
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     /**
@@ -61,7 +61,7 @@ public class JacksonConfiguration {
     }
 
     public class MyClassSerializer extends JsonSerializer<Page> {
-    	private final JsonSerializer<Object> defaultSerializer;
+        private final JsonSerializer<Object> defaultSerializer;
 
         public MyClassSerializer(JsonSerializer<Object> defaultSerializer) {
             this.defaultSerializer = defaultSerializer;
@@ -70,7 +70,7 @@ public class JacksonConfiguration {
         @Override
         public void serialize(@SuppressWarnings("rawtypes") final Page page, final JsonGenerator jsonGenerator,
                 final SerializerProvider serializers) throws IOException {
-        	defaultSerializer.serialize(page, jsonGenerator, serializers);
+            defaultSerializer.serialize(page, jsonGenerator, serializers);
         }
     }
 

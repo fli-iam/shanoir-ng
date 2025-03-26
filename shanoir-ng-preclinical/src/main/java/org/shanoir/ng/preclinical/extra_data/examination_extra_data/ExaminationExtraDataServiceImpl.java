@@ -35,61 +35,61 @@ import org.springframework.stereotype.Service;
 @Service
 public class ExaminationExtraDataServiceImpl implements ExtraDataService<ExaminationExtraData> {
 
-	/**
-	 * Logger
-	 */
-	private static final Logger LOG = LoggerFactory.getLogger(ExaminationExtraDataServiceImpl.class);
+    /**
+     * Logger
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(ExaminationExtraDataServiceImpl.class);
 
-	@Autowired
-	private ExaminationExtraDataRepository extraDataRepository;
+    @Autowired
+    private ExaminationExtraDataRepository extraDataRepository;
 
-	@Override
-	public void deleteById(final Long id) throws ShanoirException {
-		extraDataRepository.deleteById(id);
-	}
+    @Override
+    public void deleteById(final Long id) throws ShanoirException {
+        extraDataRepository.deleteById(id);
+    }
 
-	@Override
-	public List<ExaminationExtraData> findAllByExaminationId(Long id) {
-		return Utils.toList(extraDataRepository.findAllByExaminationId(id));
-	}
+    @Override
+    public List<ExaminationExtraData> findAllByExaminationId(Long id) {
+        return Utils.toList(extraDataRepository.findAllByExaminationId(id));
+    }
 
-	@Override
-	public ExaminationExtraData findById(final Long id) {
-		return extraDataRepository.findById(id).orElse(null);
-	}
+    @Override
+    public ExaminationExtraData findById(final Long id) {
+        return extraDataRepository.findById(id).orElse(null);
+    }
 
-	@Override
-	public ExaminationExtraData save(final ExaminationExtraData extradata) throws ShanoirException {
-		ExaminationExtraData savedExtraData = null;
-		try {
-			savedExtraData = extraDataRepository.save(extradata);
-		} catch (DataIntegrityViolationException dive) {
-			LOG.error("Error while creating examination extra data:  ", dive);
-			throw new ShanoirException("Error while creating examination extra data:  ", dive);
-		}
-		return savedExtraData;
-	}
+    @Override
+    public ExaminationExtraData save(final ExaminationExtraData extradata) throws ShanoirException {
+        ExaminationExtraData savedExtraData = null;
+        try {
+            savedExtraData = extraDataRepository.save(extradata);
+        } catch (DataIntegrityViolationException dive) {
+            LOG.error("Error while creating examination extra data:  ", dive);
+            throw new ShanoirException("Error while creating examination extra data:  ", dive);
+        }
+        return savedExtraData;
+    }
 
-	@Override
-	public ExaminationExtraData update(final ExaminationExtraData extradata) throws ShanoirException {
-		final ExaminationExtraData extraDataDB = extraDataRepository.findById(extradata.getId()).orElse(null);
-		updateExtraDataValues(extraDataDB, extradata);
-		try {
-			extraDataRepository.save(extraDataDB);
-		} catch (Exception e) {
-			LOG.error("Error while updating examination extra data:  ", e);
-			throw new ShanoirException("Error while updating examination extra data:  ", e);
-		}
-		return extraDataDB;
-	}
+    @Override
+    public ExaminationExtraData update(final ExaminationExtraData extradata) throws ShanoirException {
+        final ExaminationExtraData extraDataDB = extraDataRepository.findById(extradata.getId()).orElse(null);
+        updateExtraDataValues(extraDataDB, extradata);
+        try {
+            extraDataRepository.save(extraDataDB);
+        } catch (Exception e) {
+            LOG.error("Error while updating examination extra data:  ", e);
+            throw new ShanoirException("Error while updating examination extra data:  ", e);
+        }
+        return extraDataDB;
+    }
 
-	private ExaminationExtraData updateExtraDataValues(final ExaminationExtraData extraDataDb,
-			final ExaminationExtraData extraData) {
-		extraDataDb.setExaminationId(extraData.getExaminationId());
-		extraDataDb.setExtradatatype(extraData.getExtradatatype());
-		extraDataDb.setFilename(extraData.getFilename());
-		extraDataDb.setFilepath(extraData.getFilepath());
-		return extraDataDb;
-	}
+    private ExaminationExtraData updateExtraDataValues(final ExaminationExtraData extraDataDb,
+            final ExaminationExtraData extraData) {
+        extraDataDb.setExaminationId(extraData.getExaminationId());
+        extraDataDb.setExtradatatype(extraData.getExtradatatype());
+        extraDataDb.setFilename(extraData.getFilename());
+        extraDataDb.setFilepath(extraData.getFilepath());
+        return extraDataDb;
+    }
 
 }

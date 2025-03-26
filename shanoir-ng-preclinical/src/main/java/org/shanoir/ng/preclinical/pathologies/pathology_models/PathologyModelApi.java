@@ -49,7 +49,7 @@ public interface PathologyModelApi {
         produces = { "application/json" },
         consumes = { "application/json" })
     ResponseEntity<PathologyModel> createPathologyModel(@Parameter(name = "pathology model to create", required = true) @RequestBody PathologyModel model,
-	BindingResult result) throws RestServiceException;
+    BindingResult result) throws RestServiceException;
 
 
     @Operation(summary = "Deletes a pathology model", description = "")
@@ -111,8 +111,8 @@ public interface PathologyModelApi {
         produces = { "application/json" },
         consumes = { MediaType.MULTIPART_FORM_DATA_VALUE, "application/json" })
     ResponseEntity<PathologyModel> uploadModelSpecifications(@Parameter(name = "Pathology model id",required=true ) @PathVariable("id") Long id,
-    		@RequestParam("files") MultipartFile[] uploadfiles) throws RestServiceException;
-	
+            @RequestParam("files") MultipartFile[] uploadfiles) throws RestServiceException;
+
     @Operation(summary = "Download model specifications file file", description = "")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful operation"),

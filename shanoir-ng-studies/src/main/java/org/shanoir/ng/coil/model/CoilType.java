@@ -22,50 +22,50 @@ package org.shanoir.ng.coil.model;
  */
 public enum CoilType {
 
-	/**
-	 * BODY.
-	 */
-	BODY(1),
+    /**
+     * BODY.
+     */
+    BODY(1),
 
-	/**
-	 * HEAD.
-	 */
-	HEAD(2),
+    /**
+     * HEAD.
+     */
+    HEAD(2),
 
-	/**
-	 * SURFACE.
-	 */
-	SURFACE(3),
+    /**
+     * SURFACE.
+     */
+    SURFACE(3),
 
-	/**
-	 * MULTICOIL.
-	 */
-	MULTICOIL(4),
+    /**
+     * MULTICOIL.
+     */
+    MULTICOIL(4),
 
-	/**
-	 * EXTREMITY
-	 */
-	EXTREMITY(5),
+    /**
+     * EXTREMITY
+     */
+    EXTREMITY(5),
 
-	/**
-	 * VOLUME.
-	 */
-	VOLUME(6);
+    /**
+     * VOLUME.
+     */
+    VOLUME(6);
 
-	private int id;
+    private int id;
 
-	/**
-	 * Constructor.
-	 *
-	 * @param id
-	 *            id
-	 */
-	private CoilType(final int id) {
-		this.id = id;
-	}
+    /**
+     * Constructor.
+     *
+     * @param id
+     *            id
+     */
+    private CoilType(final int id) {
+        this.id = id;
+    }
 
-	/**
-	 * Get a coil type by its id.
+    /**
+     * Get a coil type by its id.
 	 *
 	 * @param id
 	 *            type id.

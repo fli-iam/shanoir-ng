@@ -30,28 +30,28 @@ import jakarta.persistence.MappedSuperclass;
 @MappedSuperclass
 public abstract class AbstractEntity implements Serializable {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -3276989363792089822L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = -3276989363792089822L;
 
-	@Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    private Long id;
 
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
 
-	/**
-	 * @param id
-	 *            the id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
+    /**
+     * @param id
+     *            the id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
 
 }

@@ -32,26 +32,26 @@ import org.shanoir.ng.coil.model.Coil;
 @Mapper(componentModel = "spring", uses = { CenterMapper.class })
 public interface CoilMapper {
 
-	/**
-	 * Map list of @Coil to list of @CoilDTO.
-	 *
-	 * @param coils
-	 *            list of coils.
-	 * @return list of coils DTO.
-	 */
-	List<CoilDTO> coilsToCoilDTOs(List<Coil> coils);
+    /**
+     * Map list of @Coil to list of @CoilDTO.
+     *
+     * @param coils
+     *            list of coils.
+     * @return list of coils DTO.
+     */
+    List<CoilDTO> coilsToCoilDTOs(List<Coil> coils);
 
-	/**
-	 * Map a @Coil to a @CoilDTO.
-	 *
-	 * @param coil
-	 *            coil to map.
-	 * @return coil DTO.
-	 */
-	@Mappings({
-		@Mapping(target = "center.acquisitionEquipments", ignore = true),
-		@Mapping(target = "center.studyCenterList", ignore = true)
-	})
-	CoilDTO coilToCoilDTO(Coil coil);
+    /**
+     * Map a @Coil to a @CoilDTO.
+     *
+     * @param coil
+     *            coil to map.
+     * @return coil DTO.
+     */
+    @Mappings({
+        @Mapping(target = "center.acquisitionEquipments", ignore = true),
+        @Mapping(target = "center.studyCenterList", ignore = true)
+    })
+    CoilDTO coilToCoilDTO(Coil coil);
 
 }

@@ -25,14 +25,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class SubjectTherapyRepositoryImpl implements SubjectTherapyRepositoryCustom {
 
-	@PersistenceContext
-	private EntityManager em;
+    @PersistenceContext
+    private EntityManager em;
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<SubjectTherapy> findByAnimalSubject(AnimalSubject animalSubject) {
-		return em.createQuery("SELECT t FROM SubjectTherapy t WHERE t.animalSubject.id = :animalSubject")
-				.setParameter("animalSubject", animalSubject.getId()).getResultList();
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<SubjectTherapy> findByAnimalSubject(AnimalSubject animalSubject) {
+        return em.createQuery("SELECT t FROM SubjectTherapy t WHERE t.animalSubject.id = :animalSubject")
+                .setParameter("animalSubject", animalSubject.getId()).getResultList();
+    }
 
 }

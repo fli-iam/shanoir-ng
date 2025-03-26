@@ -10,85 +10,85 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  */
 public class EquipmentDicom {
-	
-	@JsonProperty("manufacturer")
-	private String manufacturer;
 
-	@JsonProperty("manufacturerModelName")
-	private String manufacturerModelName;
+    @JsonProperty("manufacturer")
+    private String manufacturer;
 
-	@JsonProperty("deviceSerialNumber")
-	private String deviceSerialNumber;
-	
-	@JsonProperty("stationName")
-	private String stationName;
-	
-	@JsonProperty("magneticFieldStrength")
-	private String magneticFieldStrength;	
-	
-	// Keep this empty constructor to avoid Jackson deserialization exceptions
-	public EquipmentDicom() {}
+    @JsonProperty("manufacturerModelName")
+    private String manufacturerModelName;
 
-	public EquipmentDicom(String manufacturer, String manufacturerModelName, String deviceSerialNumber, String stationName, String magneticFieldStrength) {
-		this.manufacturer = manufacturer;
-		this.manufacturerModelName = manufacturerModelName;
-		this.deviceSerialNumber = deviceSerialNumber;
-		this.stationName = stationName;
-		this.magneticFieldStrength = magneticFieldStrength;
-	}
+    @JsonProperty("deviceSerialNumber")
+    private String deviceSerialNumber;
 
-	public String getManufacturer() {
-		return manufacturer;
-	}
+    @JsonProperty("stationName")
+    private String stationName;
 
-	public void setManufacturer(String manufacturer) {
-		this.manufacturer = manufacturer;
-	}
+    @JsonProperty("magneticFieldStrength")
+    private String magneticFieldStrength;
 
-	public String getManufacturerModelName() {
-		return manufacturerModelName;
-	}
+    // Keep this empty constructor to avoid Jackson deserialization exceptions
+    public EquipmentDicom() {}
 
-	public void setManufacturerModelName(String manufacturerModelName) {
-		this.manufacturerModelName = manufacturerModelName;
-	}
+    public EquipmentDicom(String manufacturer, String manufacturerModelName, String deviceSerialNumber, String stationName, String magneticFieldStrength) {
+        this.manufacturer = manufacturer;
+        this.manufacturerModelName = manufacturerModelName;
+        this.deviceSerialNumber = deviceSerialNumber;
+        this.stationName = stationName;
+        this.magneticFieldStrength = magneticFieldStrength;
+    }
 
-	public String getDeviceSerialNumber() {
-		return deviceSerialNumber;
-	}
+    public String getManufacturer() {
+        return manufacturer;
+    }
 
-	public void setDeviceSerialNumber(String deviceSerialNumber) {
-		this.deviceSerialNumber = deviceSerialNumber;
-	}
-	
-	public String getStationName() {
-		return stationName;
-	}
+    public void setManufacturer(String manufacturer) {
+        this.manufacturer = manufacturer;
+    }
 
-	public void setStationName(String stationName) {
-		this.stationName = stationName;
-	}
+    public String getManufacturerModelName() {
+        return manufacturerModelName;
+    }
 
-	public String getMagneticFieldStrength() {
-		return magneticFieldStrength;
-	}
+    public void setManufacturerModelName(String manufacturerModelName) {
+        this.manufacturerModelName = manufacturerModelName;
+    }
 
-	public void setMagneticFieldStrength(String magneticFieldStrength) {
-		this.magneticFieldStrength = magneticFieldStrength;
-	}
+    public String getDeviceSerialNumber() {
+        return deviceSerialNumber;
+    }
 
-	@JsonIgnore
-	public boolean isComplete() {
-		return StringUtils.isNotEmpty(this.manufacturer)
-			&& StringUtils.isNotEmpty(this.manufacturerModelName)
-			&& StringUtils.isNotEmpty(this.deviceSerialNumber);
-	}
+    public void setDeviceSerialNumber(String deviceSerialNumber) {
+        this.deviceSerialNumber = deviceSerialNumber;
+    }
 
-	@Override
-	public String toString() {
-		return "EquipmentDicom [manufacturer=" + manufacturer + ", manufacturerModelName=" + manufacturerModelName
-				+ ", deviceSerialNumber=" + deviceSerialNumber + ", stationName=" + stationName
-				+ ", magneticFieldStrength=" + magneticFieldStrength + "]";
-	}
+    public String getStationName() {
+        return stationName;
+    }
+
+    public void setStationName(String stationName) {
+        this.stationName = stationName;
+    }
+
+    public String getMagneticFieldStrength() {
+        return magneticFieldStrength;
+    }
+
+    public void setMagneticFieldStrength(String magneticFieldStrength) {
+        this.magneticFieldStrength = magneticFieldStrength;
+    }
+
+    @JsonIgnore
+    public boolean isComplete() {
+        return StringUtils.isNotEmpty(this.manufacturer)
+            && StringUtils.isNotEmpty(this.manufacturerModelName)
+            && StringUtils.isNotEmpty(this.deviceSerialNumber);
+    }
+
+    @Override
+    public String toString() {
+        return "EquipmentDicom [manufacturer=" + manufacturer + ", manufacturerModelName=" + manufacturerModelName
+                + ", deviceSerialNumber=" + deviceSerialNumber + ", stationName=" + stationName
+                + ", magneticFieldStrength=" + magneticFieldStrength + "]";
+    }
 
 }

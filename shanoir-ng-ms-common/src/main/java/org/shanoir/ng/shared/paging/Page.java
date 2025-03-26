@@ -19,14 +19,14 @@ import java.util.stream.Stream;
 
 public interface Page<T> extends org.springframework.data.domain.Page<T>, Collection<T> {
 
-	@Override
-	default Stream<T> stream() {
-		return Collection.super.stream();
-	}
+    @Override
+    default Stream<T> stream() {
+        return Collection.super.stream();
+    }
 
-	@Override
-	default boolean isEmpty() {
-		return org.springframework.data.domain.Page.super.isEmpty();
-	}
+    @Override
+    default boolean isEmpty() {
+        return org.springframework.data.domain.Page.super.isEmpty();
+    }
 
 }

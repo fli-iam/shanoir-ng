@@ -23,34 +23,34 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
  */
 public class ErrorDetails {
 
-	FieldErrorMap fieldErrors = null;
+    FieldErrorMap fieldErrors = null;
 
 
-	/**
-	 *
-	 */
-	public ErrorDetails() {
-	}
+    /**
+     *
+     */
+    public ErrorDetails() {
+    }
 
-	/**
-	 * @param errors
-	 */
-	public ErrorDetails(FieldErrorMap errors) {
-		this.fieldErrors = errors;
-	}
+    /**
+     * @param errors
+     */
+    public ErrorDetails(FieldErrorMap errors) {
+        this.fieldErrors = errors;
+    }
 
-	/**
-	 * @return the fieldErrors
-	 */
-	public FieldErrorMap getFieldErrors() {
-		return fieldErrors;
-	}
+    /**
+     * @return the fieldErrors
+     */
+    public FieldErrorMap getFieldErrors() {
+        return fieldErrors;
+    }
 
-	/**
-	 * @param formErrors the fieldErrors to set
-	 */
-	public void setFieldErrors(FieldErrorMap fieldErrors) {
-		this.fieldErrors = fieldErrors;
-	}
+    /**
+     * @param formErrors the fieldErrors to set
+     */
+    public void setFieldErrors(FieldErrorMap fieldErrors) {
+        this.fieldErrors = fieldErrors;
+    }
 
 }

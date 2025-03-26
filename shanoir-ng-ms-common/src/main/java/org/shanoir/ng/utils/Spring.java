@@ -39,7 +39,7 @@ public class Spring implements ApplicationContextAware {
     }
 
     @SuppressWarnings("unchecked")
-	public static <T> T bean(String name) {
+    public static <T> T bean(String name) {
         if (context == null) {
             throw new IllegalStateException(ERR_MSG);
         }

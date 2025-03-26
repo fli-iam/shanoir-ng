@@ -41,7 +41,7 @@ import jakarta.validation.constraints.NotNull;
 @Table(name = "anesthetic")
 @JsonPropertyOrder({ "_links", "name","anestheticType","comment" })
 public class Anesthetic extends HalEntity   {
-	
+
   @JsonProperty("name")
   @Unique
   @NotNull
@@ -61,11 +61,11 @@ public class Anesthetic extends HalEntity   {
 
 
   /**
-	* Init HATEOAS links
-	*/
+    * Init HATEOAS links
+    */
   @PostLoad
   public void initLinks() {
-		this.addLink(Links.REL_SELF, "anesthetic/" + getId());
+        this.addLink(Links.REL_SELF, "anesthetic/" + getId());
   }
 
   public Anesthetic name(String name) {
@@ -127,45 +127,45 @@ public class Anesthetic extends HalEntity   {
 
   @Override
   public int hashCode() {
-	return Objects.hash(name, anestheticType);
+    return Objects.hash(name, anestheticType);
   }
-	
+
 
 
   @Override
   public boolean equals(Object obj) {
-	if (this == obj) {
-		return true;
-	}
-	if (obj == null) {
-		return false;
-	}
-	if (getClass() != obj.getClass()) {
-		return false;
-	}
-	Anesthetic other = (Anesthetic) obj;
-	if (anestheticType == null) {
-		if (other.anestheticType != null) {
-			return false;
-		}
-	} else if (!anestheticType.equals(other.anestheticType)) {
-		return false;
-	}
-	if (ingredients == null) {
-		if (other.ingredients != null) {
-			return false;
-		}
-	} else if (!ingredients.equals(other.ingredients)) {
-		return false;
-	}
-	if (name == null) {
-		if (other.name != null) {
-			return false;
-		}
-	} else if (!name.equals(other.name)) {
-		return false;
-	}
-	return true;
+    if (this == obj) {
+        return true;
+    }
+    if (obj == null) {
+        return false;
+    }
+    if (getClass() != obj.getClass()) {
+        return false;
+    }
+    Anesthetic other = (Anesthetic) obj;
+    if (anestheticType == null) {
+        if (other.anestheticType != null) {
+            return false;
+        }
+    } else if (!anestheticType.equals(other.anestheticType)) {
+        return false;
+    }
+    if (ingredients == null) {
+        if (other.ingredients != null) {
+            return false;
+        }
+    } else if (!ingredients.equals(other.ingredients)) {
+        return false;
+    }
+    if (name == null) {
+        if (other.name != null) {
+            return false;
+        }
+    } else if (!name.equals(other.name)) {
+        return false;
+    }
+    return true;
   }
 
   @Override

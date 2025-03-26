@@ -21,5 +21,5 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface PathologyRepository extends CrudRepository<Pathology, Long> {
 
-	Optional<Pathology> findByName(String name);
+    Optional<Pathology> findByName(String name);
 }

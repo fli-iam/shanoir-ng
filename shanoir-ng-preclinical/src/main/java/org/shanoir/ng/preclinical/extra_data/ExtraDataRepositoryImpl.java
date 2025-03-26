@@ -25,14 +25,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class ExtraDataRepositoryImpl implements ExtraDataRepositoryCustom<ExaminationExtraData> {
 
-	@PersistenceContext
-	private EntityManager em;
+    @PersistenceContext
+    private EntityManager em;
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<ExaminationExtraData> findAllByExaminationId(Long id) {
-		return em.createQuery("SELECT ex FROM ExaminationExtraData ex WHERE ex.examinationId" + " LIKE :id")
-				.setParameter("id", id).getResultList();
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<ExaminationExtraData> findAllByExaminationId(Long id) {
+        return em.createQuery("SELECT ex FROM ExaminationExtraData ex WHERE ex.examinationId" + " LIKE :id")
+                .setParameter("id", id).getResultList();
+    }
 
 }

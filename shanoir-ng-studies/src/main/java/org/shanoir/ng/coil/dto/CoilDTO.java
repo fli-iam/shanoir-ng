@@ -25,123 +25,123 @@ import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
  */
 public class CoilDTO {
 
-	private CenterDTO center;
+    private CenterDTO center;
 
-	private CoilType coilType;
-	
-	private Long id;
+    private CoilType coilType;
 
-	private ManufacturerModel manufacturerModel;
+    private Long id;
 
-	private String name;
+    private ManufacturerModel manufacturerModel;
 
-	private Long numberOfChannels;
+    private String name;
 
-	private String serialNumber;
+    private Long numberOfChannels;
 
-	/**
-	 * Default constructor.
-	 */
-	public CoilDTO() {
-		// empty constructor
-	}
-	
-	/**
-	 * @return the coilType
-	 */
-	public CoilType getCoilType() {
-		return coilType;
-	}
+    private String serialNumber;
 
-	/**
-	 * @return the center
-	 */
-	public CenterDTO getCenter() {
-		return center;
-	}
+    /**
+     * Default constructor.
+     */
+    public CoilDTO() {
+        // empty constructor
+    }
 
-	/**
-	 * @param center the center to set
-	 */
-	public void setCenter(CenterDTO center) {
-		this.center = center;
-	}
+    /**
+     * @return the coilType
+     */
+    public CoilType getCoilType() {
+        return coilType;
+    }
 
-	/**
-	 * @param coilType the coilType to set
-	 */
-	public void setCoilType(CoilType coilType) {
-		this.coilType = coilType;
-	}
+    /**
+     * @return the center
+     */
+    public CenterDTO getCenter() {
+        return center;
+    }
 
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
+    /**
+     * @param center the center to set
+     */
+    public void setCenter(CenterDTO center) {
+        this.center = center;
+    }
 
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
+    /**
+     * @param coilType the coilType to set
+     */
+    public void setCoilType(CoilType coilType) {
+        this.coilType = coilType;
+    }
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
 
-	/**
-	 * @return the manufacturerModel
-	 */
-	public ManufacturerModel getManufacturerModel() {
-		return manufacturerModel;
-	}
+    /**
+     * @param id the id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	/**
-	 * @param manufacturerModel the manufacturerModel to set
-	 */
-	public void setManufacturerModel(ManufacturerModel manufacturerModel) {
-		this.manufacturerModel = manufacturerModel;
-	}
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * @param name the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * @return the manufacturerModel
+     */
+    public ManufacturerModel getManufacturerModel() {
+        return manufacturerModel;
+    }
 
-	/**
-	 * @return the numberOfChannels
-	 */
-	public Long getNumberOfChannels() {
-		return numberOfChannels;
-	}
+    /**
+     * @param manufacturerModel the manufacturerModel to set
+     */
+    public void setManufacturerModel(ManufacturerModel manufacturerModel) {
+        this.manufacturerModel = manufacturerModel;
+    }
 
-	/**
-	 * @param numberOfChannels the numberOfChannels to set
-	 */
-	public void setNumberOfChannels(Long numberOfChannels) {
-		this.numberOfChannels = numberOfChannels;
-	}
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	/**
-	 * @return the serialNumber
-	 */
-	public String getSerialNumber() {
-		return serialNumber;
-	}
+    /**
+     * @return the numberOfChannels
+     */
+    public Long getNumberOfChannels() {
+        return numberOfChannels;
+    }
 
-	/**
-	 * @param serialNumber the serialNumber to set
-	 */
-	public void setSerialNumber(String serialNumber) {
-		this.serialNumber = serialNumber;
-	}
+    /**
+     * @param numberOfChannels the numberOfChannels to set
+     */
+    public void setNumberOfChannels(Long numberOfChannels) {
+        this.numberOfChannels = numberOfChannels;
+    }
+
+    /**
+     * @return the serialNumber
+     */
+    public String getSerialNumber() {
+        return serialNumber;
+    }
+
+    /**
+     * @param serialNumber the serialNumber to set
+     */
+    public void setSerialNumber(String serialNumber) {
+        this.serialNumber = serialNumber;
+    }
 
 }

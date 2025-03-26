@@ -22,5 +22,5 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface AnestheticIngredientRepository extends CrudRepository<AnestheticIngredient, Long> {
 
-	List<AnestheticIngredient> findByAnesthetic(Anesthetic anesthetic);
+    List<AnestheticIngredient> findByAnesthetic(Anesthetic anesthetic);
 }

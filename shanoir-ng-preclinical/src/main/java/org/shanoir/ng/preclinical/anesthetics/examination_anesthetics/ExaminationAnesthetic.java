@@ -42,7 +42,7 @@ public class ExaminationAnesthetic extends HalEntity  {
   @JsonProperty("examination_id")
   @NotNull
   private Long examinationId;
-	
+
   @JsonProperty("anesthetic")
   @ManyToOne
   @NotNull
@@ -72,11 +72,11 @@ public class ExaminationAnesthetic extends HalEntity  {
   private Date endDate = null;
 
   /**
-	* Init HATEOAS links
-	*/
+    * Init HATEOAS links
+    */
   @PostLoad
   public void initLinks() {
-	  this.addLink(Links.REL_SELF, "examination/"+ examinationId +"/anesthetic/" + getId());
+      this.addLink(Links.REL_SELF, "examination/"+ examinationId +"/anesthetic/" + getId());
   }
 
   public ExaminationAnesthetic examinationId(Long id) {
@@ -92,7 +92,7 @@ public class ExaminationAnesthetic extends HalEntity  {
   public void setExaminationId(Long id) {
     this.examinationId = id;
   }
-  	
+
   public ExaminationAnesthetic anesthetic(Anesthetic anesthetic) {
     this.anesthetic = anesthetic;
     return this;
@@ -207,57 +207,57 @@ public class ExaminationAnesthetic extends HalEntity  {
 
   @Override
   public int hashCode() {
-	return Objects.hash(examinationId, anesthetic, injectionInterval, injectionSite, injectionType);
+    return Objects.hash(examinationId, anesthetic, injectionInterval, injectionSite, injectionType);
   }
 
   @Override
   public boolean equals(Object obj) {
-	if (this == obj) {
-		return true;
-	}
-	if (obj == null) {
-		return false;
-	}
-	if (getClass() != obj.getClass()) {
-		return false;
-	}
-	ExaminationAnesthetic other = (ExaminationAnesthetic) obj;
-	if (anesthetic == null) {
-		if (other.anesthetic != null) {
-			return false;
-		}
-	} else if (!anesthetic.equals(other.anesthetic)) {
-		return false;
-	}
-	if (examinationId == null) {
-		if (other.examinationId != null) {
-			return false;
-		}
-	} else if (!examinationId.equals(other.examinationId)) {
-		return false;
-	}
-	if (injectionInterval == null) {
-		if (other.injectionInterval != null) {
-			return false;
-		}
-	} else if (!injectionInterval.equals(other.injectionInterval)) {
-		return false;
-	}
-	if (injectionSite == null) {
-		if (other.injectionSite != null) {
-			return false;
-		}
-	} else if (!injectionSite.equals(other.injectionSite)) {
-		return false;
-	}
-	if (injectionType == null) {
-		if (other.injectionType != null) {
-			return false;
-		}
-	} else if (!injectionType.equals(other.injectionType)) {
-		return false;
-	}
-	return true;
+    if (this == obj) {
+        return true;
+    }
+    if (obj == null) {
+        return false;
+    }
+    if (getClass() != obj.getClass()) {
+        return false;
+    }
+    ExaminationAnesthetic other = (ExaminationAnesthetic) obj;
+    if (anesthetic == null) {
+        if (other.anesthetic != null) {
+            return false;
+        }
+    } else if (!anesthetic.equals(other.anesthetic)) {
+        return false;
+    }
+    if (examinationId == null) {
+        if (other.examinationId != null) {
+            return false;
+        }
+    } else if (!examinationId.equals(other.examinationId)) {
+        return false;
+    }
+    if (injectionInterval == null) {
+        if (other.injectionInterval != null) {
+            return false;
+        }
+    } else if (!injectionInterval.equals(other.injectionInterval)) {
+        return false;
+    }
+    if (injectionSite == null) {
+        if (other.injectionSite != null) {
+            return false;
+        }
+    } else if (!injectionSite.equals(other.injectionSite)) {
+        return false;
+    }
+    if (injectionType == null) {
+        if (other.injectionType != null) {
+            return false;
+        }
+    } else if (!injectionType.equals(other.injectionType)) {
+        return false;
+    }
+    return true;
   }
 
 @Override

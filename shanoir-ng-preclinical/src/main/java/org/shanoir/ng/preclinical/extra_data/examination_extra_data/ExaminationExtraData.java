@@ -36,11 +36,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Table(name = "examination_extradata")
 @JsonPropertyOrder({ "_links", "examination_id", "filename","extradatatype" })
 public class ExaminationExtraData extends HalEntity {
-	
+
   @JsonProperty("examination_id")
   @NotNull
   private Long examinationId;
-	
+
   @JsonProperty("filename")
   //@NotNull
   private String filename;
@@ -56,11 +56,11 @@ public class ExaminationExtraData extends HalEntity {
 
 
   /**
-	* Init HATEOAS links
+    * Init HATEOAS links
   */
   @PostLoad
   public void initLinks() {
-	  this.addLink(Links.REL_SELF, "examination/"+ examinationId +"/extradata/" + getId());
+      this.addLink(Links.REL_SELF, "examination/"+ examinationId +"/extradata/" + getId());
   }
 
   public ExaminationExtraData examinationId(Long id) {
@@ -90,7 +90,7 @@ public class ExaminationExtraData extends HalEntity {
   public void setFilename(String filename) {
     this.filename = filename;
   }
-	
+
   @JsonIgnore
   @Schema(name = "none")
   public String getFilepath() {
@@ -119,50 +119,50 @@ public class ExaminationExtraData extends HalEntity {
 
   @Override
   public int hashCode() {
-	return Objects.hash(examinationId, filename,filepath,extradatatype);
+    return Objects.hash(examinationId, filename,filepath,extradatatype);
   }
 
   @Override
   public boolean equals(Object obj) {
-	if (this == obj) {
-		return true;
-	}
-	if (obj == null) {
-		return false;
-	}
-	if (getClass() != obj.getClass()) {
-		return false;
-	}
-	ExaminationExtraData other = (ExaminationExtraData) obj;
-	if (examinationId == null) {
-		if (other.examinationId != null) {
-			return false;
-		}
-	} else if (!examinationId.equals(other.examinationId)) {
-		return false;
-	}
-	if (filename == null) {
-		if (other.filename != null) {
-			return false;
-		}
-	} else if (!filename.equals(other.filename)) {
-		return false;
-	}
-	if (filepath == null) {
-		if (other.filepath != null) {
-			return false;
-		}
-	} else if (!filepath.equals(other.filepath)) {
-		return false;
-	}
-	if (extradatatype == null) {
-		if (other.extradatatype != null) {
-			return false;
-		}
-	} else if (!extradatatype.equals(other.extradatatype)) {
-		return false;
-	}
-	return true;
+    if (this == obj) {
+        return true;
+    }
+    if (obj == null) {
+        return false;
+    }
+    if (getClass() != obj.getClass()) {
+        return false;
+    }
+    ExaminationExtraData other = (ExaminationExtraData) obj;
+    if (examinationId == null) {
+        if (other.examinationId != null) {
+            return false;
+        }
+    } else if (!examinationId.equals(other.examinationId)) {
+        return false;
+    }
+    if (filename == null) {
+        if (other.filename != null) {
+            return false;
+        }
+    } else if (!filename.equals(other.filename)) {
+        return false;
+    }
+    if (filepath == null) {
+        if (other.filepath != null) {
+            return false;
+        }
+    } else if (!filepath.equals(other.filepath)) {
+        return false;
+    }
+    if (extradatatype == null) {
+        if (other.extradatatype != null) {
+            return false;
+        }
+    } else if (!extradatatype.equals(other.extradatatype)) {
+        return false;
+    }
+    return true;
   }
 
 @Override

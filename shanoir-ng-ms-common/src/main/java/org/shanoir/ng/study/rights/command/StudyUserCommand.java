@@ -18,69 +18,69 @@ import org.shanoir.ng.study.rights.StudyUserInterface;
 
 public class StudyUserCommand {
 
-	private CommandType type;
-	
-	private StudyUserInterface studyUser;
-	
-	private Long studyUserId;
-	
-	
-	/**
-	 * Default constructor
-	 */
-	public StudyUserCommand() {
-		this.type = null;
-		this.studyUser = null;
-		this.studyUserId = null;
-	}
+    private CommandType type;
 
-	/**
-	 * Constructor
-	 *
-	 * @param delete
-	 * @param id
-	 */
-	public StudyUserCommand(CommandType type, Long id) {
-		this.type = type;
-		this.studyUser = null;
-		this.studyUserId = id;
-	}
-	
-	/**
-	 * Constructor
-	 *
-	 * @param type
-	 * @param studyUser
-	 */
-	public StudyUserCommand(CommandType type, StudyUserInterface studyUser) {
-		this.type = type;
-		this.studyUser = studyUser;
-		this.studyUserId = null;
-	}
-	
+    private StudyUserInterface studyUser;
 
-	public CommandType getType() {
-		return type;
-	}
+    private Long studyUserId;
 
-	public void setType(CommandType type) {
-		this.type = type;
-	}
 
-	public StudyUserInterface getStudyUser() {
-		return studyUser;
-	}
+    /**
+     * Default constructor
+     */
+    public StudyUserCommand() {
+        this.type = null;
+        this.studyUser = null;
+        this.studyUserId = null;
+    }
 
-	public void setStudyUser(StudyUserInterface studyUser) {
-		this.studyUser = studyUser;
-	}
+    /**
+     * Constructor
+     *
+     * @param delete
+     * @param id
+     */
+    public StudyUserCommand(CommandType type, Long id) {
+        this.type = type;
+        this.studyUser = null;
+        this.studyUserId = id;
+    }
 
-	public Long getStudyUserId() {
-		return studyUserId;
-	}
+    /**
+     * Constructor
+     *
+     * @param type
+     * @param studyUser
+     */
+    public StudyUserCommand(CommandType type, StudyUserInterface studyUser) {
+        this.type = type;
+        this.studyUser = studyUser;
+        this.studyUserId = null;
+    }
 
-	public void setStudyUserId(Long studyUserId) {
-		this.studyUserId = studyUserId;
-	}
-	
+
+    public CommandType getType() {
+        return type;
+    }
+
+    public void setType(CommandType type) {
+        this.type = type;
+    }
+
+    public StudyUserInterface getStudyUser() {
+        return studyUser;
+    }
+
+    public void setStudyUser(StudyUserInterface studyUser) {
+        this.studyUser = studyUser;
+    }
+
+    public Long getStudyUserId() {
+        return studyUserId;
+    }
+
+    public void setStudyUserId(Long studyUserId) {
+        this.studyUserId = studyUserId;
+    }
+
 }

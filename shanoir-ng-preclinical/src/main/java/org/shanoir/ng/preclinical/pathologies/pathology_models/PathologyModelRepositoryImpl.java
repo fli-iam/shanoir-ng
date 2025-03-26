@@ -26,15 +26,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class PathologyModelRepositoryImpl implements PathologyModelRepositoryCustom{
 
-	@PersistenceContext
+    @PersistenceContext
     private EntityManager em;
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<PathologyModel> findByPathology(Pathology pathology) {
-		return em.createQuery(
-				"SELECT pm FROM PathologyModel pm LEFT JOIN pm.pathology p WHERE p.id = :id")
-				.setParameter("id", pathology.getId())
-				.getResultList();
-	}
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<PathologyModel> findByPathology(Pathology pathology) {
+        return em.createQuery(
+                "SELECT pm FROM PathologyModel pm LEFT JOIN pm.pathology p WHERE p.id = :id")
+                .setParameter("id", pathology.getId())
+                .getResultList();
+    }
 }

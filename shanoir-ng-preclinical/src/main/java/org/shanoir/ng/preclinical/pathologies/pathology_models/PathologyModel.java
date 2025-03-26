@@ -39,7 +39,7 @@ import jakarta.validation.constraints.NotNull;
 @JsonPropertyOrder({ "_links", "type", "value" })
 //@JsonIdentityInfo(generator =ObjectIdGenerators.IntSequenceGenerator.class,property="@id", scope = PathologyModel.class)
 public class PathologyModel extends HalEntity   {
-	
+
   @JsonProperty("name")
   @Unique
   private String name = null;
@@ -62,11 +62,11 @@ public class PathologyModel extends HalEntity   {
   private Pathology pathology;
 
   /**
-	* Init HATEOAS links
+    * Init HATEOAS links
   */
   @PostLoad
-	public void initLinks() {
-		this.addLink(Links.REL_SELF, "pathology/model/" + getId());
+    public void initLinks() {
+        this.addLink(Links.REL_SELF, "pathology/model/" + getId());
   }
 
   public PathologyModel name(String name) {
@@ -118,7 +118,7 @@ public class PathologyModel extends HalEntity   {
   public void setFilename(String filename) {
     this.filename = filename;
   }
-	
+
   @JsonIgnore
   @Schema(name = "none")
   public String getFilepath() {

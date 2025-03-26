@@ -19,54 +19,54 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 @Service
 public class ShanoirEventService {
 
-	@Autowired
-	RabbitTemplate rabbitTemplate;
-	
-	@Autowired
-	private ObjectMapper mapper;
+    @Autowired
+    RabbitTemplate rabbitTemplate;
 
-	private static final Logger LOG = LoggerFactory.getLogger(ShanoirEventService.class);
+    @Autowired
+    private ObjectMapper mapper;
 
-	/**
-	 * Publishes an event to user microservice.
-	 * @param event
-	 */
-	public void publishEvent(ShanoirEvent event) {
-		StringBuilder builder = new StringBuilder("Event:[")
-			.append("id=").append(event.getId()).append(";")
-			.append("user_id=").append(event.getUserId()).append(";")
-			.append("event_type=").append(event.getEventType()).append(";")
-			.append("object_id=").append(event.getObjectId()).append(";")
-			.append("message=").append(event.getMessage()).append(";")
-			.append("report=").append(event.getReport()).append(";")
-			.append("status=").append(event.getStatus()).append(";")
-			.append("progress=").append(event.getProgress()).append("]");
-		LOG.info(builder.toString());
-		try {
-			String str = mapper.writeValueAsString(event);
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.EVENTS_EXCHANGE, event.getEventType(), str);
-		} catch (JsonProcessingException e) {
-			LOG.error("Error while sending event: event {}, user: {}, reference: {}", event.getEventType(), event.getUserId(), event.getObjectId());
-			LOG.error("Thrown exception: {}", e);
-		}
-	}
+    private static final Logger LOG = LoggerFactory.getLogger(ShanoirEventService.class);
 
-	public void publishEvent(ShanoirEvent event, String message, Float progress){
-		event.setMessage(message);
-		event.setProgress(progress);
-		this.publishEvent(event);
-	}
+    /**
+     * Publishes an event to user microservice.
+     * @param event
+     */
+    public void publishEvent(ShanoirEvent event) {
+        StringBuilder builder = new StringBuilder("Event:[")
+            .append("id=").append(event.getId()).append(";")
+            .append("user_id=").append(event.getUserId()).append(";")
+            .append("event_type=").append(event.getEventType()).append(";")
+            .append("object_id=").append(event.getObjectId()).append(";")
+            .append("message=").append(event.getMessage()).append(";")
+            .append("report=").append(event.getReport()).append(";")
+            .append("status=").append(event.getStatus()).append(";")
+            .append("progress=").append(event.getProgress()).append("]");
+        LOG.info(builder.toString());
+        try {
+            String str = mapper.writeValueAsString(event);
+            rabbitTemplate.convertAndSend(RabbitMQConfiguration.EVENTS_EXCHANGE, event.getEventType(), str);
+        } catch (JsonProcessingException e) {
+            LOG.error("Error while sending event: event {}, user: {}, reference: {}", event.getEventType(), event.getUserId(), event.getObjectId());
+            LOG.error("Thrown exception: {}", e);
+        }
+    }
 
-	public void publishErrorEvent(ShanoirEvent event, String message){
-		this.publishEvent(event, message, -1f, ShanoirEvent.ERROR);
-	}
+    public void publishEvent(ShanoirEvent event, String message, Float progress){
+        event.setMessage(message);
+        event.setProgress(progress);
+        this.publishEvent(event);
+    }
 
-	public void publishSuccessEvent(ShanoirEvent event, String message){
-		this.publishEvent(event, message, 1f, ShanoirEvent.SUCCESS);
-	}
+    public void publishErrorEvent(ShanoirEvent event, String message){
+        this.publishEvent(event, message, -1f, ShanoirEvent.ERROR);
+    }
 
-	private void publishEvent(ShanoirEvent event, String message, Float progress, int status){
-		event.setStatus(status);
-		this.publishEvent(event, message, progress);
-	}
+    public void publishSuccessEvent(ShanoirEvent event, String message){
+        this.publishEvent(event, message, 1f, ShanoirEvent.SUCCESS);
+    }
+
+    private void publishEvent(ShanoirEvent event, String message, Float progress, int status){
+        event.setStatus(status);
+        this.publishEvent(event, message, progress);
+    }
 }

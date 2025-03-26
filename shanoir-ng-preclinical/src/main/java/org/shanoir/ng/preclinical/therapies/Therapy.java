@@ -37,7 +37,7 @@ import jakarta.validation.constraints.NotNull;
 @Table(name = "therapy")
 @JsonPropertyOrder({ "_links", "name","therapyType","comment" })
 public class Therapy extends HalEntity   {
-	
+
   @JsonProperty("name")
   @Unique
   private String name = null;
@@ -51,11 +51,11 @@ public class Therapy extends HalEntity   {
   private TherapyType therapyType;
 
   /**
-	* Init HATEOAS links
-	*/
+    * Init HATEOAS links
+    */
   @PostLoad
-	public void initLinks() {
-		this.addLink(Links.REL_SELF, "therapy/" + getId());
+    public void initLinks() {
+        this.addLink(Links.REL_SELF, "therapy/" + getId());
   }
 
   public Therapy name(String name) {
@@ -110,7 +110,7 @@ public class Therapy extends HalEntity   {
     }
     Therapy therapy = (Therapy) o;
     return Objects.equals(this.name, therapy.name) &&
-    		Objects.equals(this.therapyType, therapy.therapyType);
+            Objects.equals(this.therapyType, therapy.therapyType);
   }
 
   @Override

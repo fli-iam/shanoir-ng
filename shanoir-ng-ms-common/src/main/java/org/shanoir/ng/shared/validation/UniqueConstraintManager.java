@@ -20,6 +20,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 public interface UniqueConstraintManager<T extends AbstractEntity> {
 
-	public FieldErrorMap validate(final T entity);
-	
+    public FieldErrorMap validate(final T entity);
+
 }

@@ -27,6 +27,6 @@ import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
  */
 public interface AnimalSubjectRepositoryCustom {
 
-	List<AnimalSubject> findByReference(Reference reference);
+    List<AnimalSubject> findByReference(Reference reference);
 
 }

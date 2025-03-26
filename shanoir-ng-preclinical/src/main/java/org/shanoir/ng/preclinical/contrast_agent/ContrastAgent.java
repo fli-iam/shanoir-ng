@@ -41,16 +41,16 @@ import jakarta.validation.constraints.NotNull;
 @Table(name = "contrast_agent")
 @JsonPropertyOrder({ "_links", "name","","" })
 public class ContrastAgent extends HalEntity   {
-	
+
   @JsonProperty("protocol_id")
   @NotNull
   private Long protocolId;
-	
+
   @JsonProperty("name")
   //@RefValueExists
   @ManyToOne
   private Reference name = null;
-	
+
   @JsonProperty("manufactured_name")
   private String manufacturedName = null;
 
@@ -84,19 +84,19 @@ public class ContrastAgent extends HalEntity   {
 
 
   /**
-	* Init HATEOAS links
+    * Init HATEOAS links
   */
   @PostLoad
-	public void initLinks() {
-		this.addLink(Links.REL_SELF, "contrastagent/" + getId());
+    public void initLinks() {
+        this.addLink(Links.REL_SELF, "contrastagent/" + getId());
   }
 
   public Long getProtocolId() {
-	return protocolId;
+    return protocolId;
   }
 
   public void setProtocolId(Long protocolId) {
-	this.protocolId = protocolId;
+    this.protocolId = protocolId;
   }
 
   public ContrastAgent name(Reference name) {
@@ -126,7 +126,7 @@ public class ContrastAgent extends HalEntity   {
   public void setManufacturedName(String manufacturedName) {
     this.manufacturedName = manufacturedName;
   }
-	
+
 
   public ContrastAgent concentration(Double concentration) {
     this.concentration = concentration;
@@ -230,57 +230,57 @@ public class ContrastAgent extends HalEntity   {
 
   @Override
   public int hashCode() {
-	return Objects.hash(name, manufacturedName,concentration,dose);
+    return Objects.hash(name, manufacturedName,concentration,dose);
   }
 
   @Override
   public boolean equals(Object obj) {
-	if (this == obj) {
-		return true;
-	}
-	if (obj == null) {
-		return false;
-	}
-	if (getClass() != obj.getClass()) {
-		return false;
-	}
-	ContrastAgent other = (ContrastAgent) obj;
-	if (injectionInterval == null) {
-		if (other.injectionInterval != null) {
-			return false;
-		}
-	} else if (!injectionInterval.equals(other.injectionInterval)) {
-		return false;
-	}
-	if (injectionSite == null) {
-		if (other.injectionSite != null) {
-			return false;
-		}
-	} else if (!injectionSite.equals(other.injectionSite)) {
-		return false;
-	}
-	if (injectionType == null) {
-		if (other.injectionType != null) {
-			return false;
-		}
-	} else if (!injectionType.equals(other.injectionType)) {
-		return false;
-	}
-	if (manufacturedName == null) {
-		if (other.manufacturedName != null) {
-			return false;
-		}
-	} else if (!manufacturedName.equals(other.manufacturedName)) {
-		return false;
-	}
-	if (name == null) {
-		if (other.name != null) {
-			return false;
-		}
-	} else if (!name.equals(other.name)) {
-		return false;
-	}
-	return true;
+    if (this == obj) {
+        return true;
+    }
+    if (obj == null) {
+        return false;
+    }
+    if (getClass() != obj.getClass()) {
+        return false;
+    }
+    ContrastAgent other = (ContrastAgent) obj;
+    if (injectionInterval == null) {
+        if (other.injectionInterval != null) {
+            return false;
+        }
+    } else if (!injectionInterval.equals(other.injectionInterval)) {
+        return false;
+    }
+    if (injectionSite == null) {
+        if (other.injectionSite != null) {
+            return false;
+        }
+    } else if (!injectionSite.equals(other.injectionSite)) {
+        return false;
+    }
+    if (injectionType == null) {
+        if (other.injectionType != null) {
+            return false;
+        }
+    } else if (!injectionType.equals(other.injectionType)) {
+        return false;
+    }
+    if (manufacturedName == null) {
+        if (other.manufacturedName != null) {
+            return false;
+        }
+    } else if (!manufacturedName.equals(other.manufacturedName)) {
+        return false;
+    }
+    if (name == null) {
+        if (other.name != null) {
+            return false;
+        }
+    } else if (!name.equals(other.name)) {
+        return false;
+    }
+    return true;
   }
 
   @Override

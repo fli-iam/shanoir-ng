@@ -41,86 +41,86 @@ import org.springframework.util.StringUtils;
  */
 @Service
 public abstract class FieldEditionSecurityManagerImpl <T extends AbstractEntity> implements FieldEditionSecurityManager<T> {
-	
-	@Autowired
-	public CrudRepository<T, Long> repository;
 
-	@Override
-	public FieldErrorMap validate(final T entity) {
-		if (entity.getId() == null) {
-			return validateCreate(entity);
-		} else {
-			T originalEntity = repository.findById(entity.getId()).orElse(null);
-			return validateUpdate(entity, originalEntity);
-		}		
-	}
-	
-	
-	private FieldErrorMap validateUpdate(final T editedEntity, final T originalEntity) {
+    @Autowired
+    public CrudRepository<T, Long> repository;
 
-		final Collection<String> connectedUserRoles = KeycloakUtil.getConnectedUserRoles();
-		final FieldErrorMap errorMap = new FieldErrorMap();
-		for (final Field field : originalEntity.getClass().getDeclaredFields()) {
-			if (field.isAnnotationPresent(EditableOnlyBy.class)) {
-				final EditableOnlyBy annotation = field.getAnnotation(EditableOnlyBy.class);
-				final String getterName = "get" + StringUtils.capitalize(field.getName());
-				try {
-					final Method originalGetter = originalEntity.getClass().getMethod(getterName);
-					final Method editedGetter = editedEntity.getClass().getMethod(getterName);
-					final Object originalValue = originalGetter.invoke(originalEntity);
-					final Object givenValue = editedGetter.invoke(editedEntity);
-					final boolean fieldHasBeenModified = !Utils.equalsIgnoreNull(originalValue, givenValue);
-					if (fieldHasBeenModified && !Utils.haveOneInCommon(Arrays.asList(annotation.roles()), connectedUserRoles)) {
-						final List<FieldError> errors = new ArrayList<FieldError>();
-						errors.add(new FieldError("unauthorized", "You do not have the right to edit this field",
-								givenValue));
-						errorMap.put(field.getName(), errors);
-					}
-				} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-					throw new IllegalStateException("Error while checking @EditableOnlyBy custom annotation", e);
-				} catch (NoSuchMethodException e) {
-					throw new IllegalStateException(
-							"Error while checking @EditableOnlyBy custom annotation, you must implement a method named "
-									+ getterName + "() for accessing " + originalEntity.getClass().getName() + "."
-									+ field.getName());
-				}
-			}
-		}
-		return errorMap;
-	}
+    @Override
+    public FieldErrorMap validate(final T entity) {
+        if (entity.getId() == null) {
+            return validateCreate(entity);
+        } else {
+            T originalEntity = repository.findById(entity.getId()).orElse(null);
+            return validateUpdate(entity, originalEntity);
+        }
+    }
 
-	/**
-	 * Validates a creation
-	 *
-	 * @param user
-	 * @return the forgotten fields names
-	 */
-	private FieldErrorMap validateCreate(final T editedEntity) {
-		final Collection<String> connectedUserRoles = KeycloakUtil.getConnectedUserRoles();
-		final FieldErrorMap errorMap = new FieldErrorMap();
-		for (final Field field : editedEntity.getClass().getDeclaredFields()) {
-			if (field.isAnnotationPresent(EditableOnlyBy.class)) {
-				final EditableOnlyBy annotation = field.getAnnotation(EditableOnlyBy.class);
-				final String getterName = "get" + StringUtils.capitalize(field.getName());
-				try {
-					final Method editedGetter = editedEntity.getClass().getMethod(getterName);
-					final Object givenValue = editedGetter.invoke(editedEntity);
-					if (givenValue != null && !Utils.haveOneInCommon(Arrays.asList(annotation.roles()), connectedUserRoles)) {
-						final List<FieldError> errors = new ArrayList<FieldError>();
-						errors.add(new FieldError("unauthorized", "You do not have the right to edit this field",
-								givenValue));
-						errorMap.put(field.getName(), errors);
-					}
-				} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-					throw new IllegalStateException("Error while checking @EditableOnlyBy custom annotation", e);
-				} catch (NoSuchMethodException e) {
-					throw new IllegalStateException(
-							"Error while checking @EditableOnlyBy custom annotation, you must implement a method named "
-									+ getterName + "() for accessing " + editedEntity.getClass().getName() + "."
-									+ field.getName());
-				}
-			}
-		}
-		return errorMap;
-	}
+
+    private FieldErrorMap validateUpdate(final T editedEntity, final T originalEntity) {
+
+        final Collection<String> connectedUserRoles = KeycloakUtil.getConnectedUserRoles();
+        final FieldErrorMap errorMap = new FieldErrorMap();
+        for (final Field field : originalEntity.getClass().getDeclaredFields()) {
+            if (field.isAnnotationPresent(EditableOnlyBy.class)) {
+                final EditableOnlyBy annotation = field.getAnnotation(EditableOnlyBy.class);
+                final String getterName = "get" + StringUtils.capitalize(field.getName());
+                try {
+                    final Method originalGetter = originalEntity.getClass().getMethod(getterName);
+                    final Method editedGetter = editedEntity.getClass().getMethod(getterName);
+                    final Object originalValue = originalGetter.invoke(originalEntity);
+                    final Object givenValue = editedGetter.invoke(editedEntity);
+                    final boolean fieldHasBeenModified = !Utils.equalsIgnoreNull(originalValue, givenValue);
+                    if (fieldHasBeenModified && !Utils.haveOneInCommon(Arrays.asList(annotation.roles()), connectedUserRoles)) {
+                        final List<FieldError> errors = new ArrayList<FieldError>();
+                        errors.add(new FieldError("unauthorized", "You do not have the right to edit this field",
+                                givenValue));
+                        errorMap.put(field.getName(), errors);
+                    }
+                } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+                    throw new IllegalStateException("Error while checking @EditableOnlyBy custom annotation", e);
+                } catch (NoSuchMethodException e) {
+                    throw new IllegalStateException(
+                            "Error while checking @EditableOnlyBy custom annotation, you must implement a method named "
+                                    + getterName + "() for accessing " + originalEntity.getClass().getName() + "."
+                                    + field.getName());
+                }
+            }
+        }
+        return errorMap;
+    }
+
+    /**
+     * Validates a creation
+     *
+     * @param user
+     * @return the forgotten fields names
+     */
+    private FieldErrorMap validateCreate(final T editedEntity) {
+        final Collection<String> connectedUserRoles = KeycloakUtil.getConnectedUserRoles();
+        final FieldErrorMap errorMap = new FieldErrorMap();
+        for (final Field field : editedEntity.getClass().getDeclaredFields()) {
+            if (field.isAnnotationPresent(EditableOnlyBy.class)) {
+                final EditableOnlyBy annotation = field.getAnnotation(EditableOnlyBy.class);
+                final String getterName = "get" + StringUtils.capitalize(field.getName());
+                try {
+                    final Method editedGetter = editedEntity.getClass().getMethod(getterName);
+                    final Object givenValue = editedGetter.invoke(editedEntity);
+                    if (givenValue != null && !Utils.haveOneInCommon(Arrays.asList(annotation.roles()), connectedUserRoles)) {
+                        final List<FieldError> errors = new ArrayList<FieldError>();
+                        errors.add(new FieldError("unauthorized", "You do not have the right to edit this field",
+                                givenValue));
+                        errorMap.put(field.getName(), errors);
+                    }
+                } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+                    throw new IllegalStateException("Error while checking @EditableOnlyBy custom annotation", e);
+                } catch (NoSuchMethodException e) {
+                    throw new IllegalStateException(
+                            "Error while checking @EditableOnlyBy custom annotation, you must implement a method named "
+                                    + getterName + "() for accessing " + editedEntity.getClass().getName() + "."
+                                    + field.getName());
+                }
+            }
+        }
+        return errorMap;
+    }
 }

@@ -40,13 +40,13 @@ import jakarta.validation.constraints.NotNull;
 @Table(name = "anesthetic_ingredient")
 @JsonPropertyOrder({ "_links", "name","concentration","concentration_unit" })
 public class AnestheticIngredient extends HalEntity   {
-	
+
   @ManyToOne
   @NotNull
   @JsonIgnore
   @JsonManagedReference
   private Anesthetic anesthetic = null;
-	
+
   @JsonProperty("name")
   @RefValueExists
   @ManyToOne
@@ -61,11 +61,11 @@ public class AnestheticIngredient extends HalEntity   {
   private Reference concentrationUnit = null;
 
   /**
-	* Init HATEOAS links
-	*/
+    * Init HATEOAS links
+    */
   @PostLoad
   public void initLinks() {
-	this.addLink(Links.REL_SELF, "anesthetic/"+ anesthetic.getId() +"/ingredient/" + getId());
+    this.addLink(Links.REL_SELF, "anesthetic/"+ anesthetic.getId() +"/ingredient/" + getId());
   }
 
   public AnestheticIngredient anesthetic(Anesthetic anesthetic) {
@@ -128,51 +128,51 @@ public class AnestheticIngredient extends HalEntity   {
 
   @Override
   public int hashCode() {
-	return Objects.hash(name);
+    return Objects.hash(name);
   }
-	
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		AnestheticIngredient other = (AnestheticIngredient) obj;
-		if (concentration == null) {
-			if (other.concentration != null) {
-				return false;
-			}
-		} else if (!concentration.equals(other.concentration)) {
-			return false;
-		}
-		if (concentrationUnit == null) {
-			if (other.concentrationUnit != null) {
-				return false;
-			}
-		} else if (!concentrationUnit.equals(other.concentrationUnit)) {
-			return false;
-		}
-		if (name == null) {
-			if (other.name != null) {
-				return false;
-			}
-		} else if (!name.equals(other.name)) {
-			return false;
-		}
-		if (anesthetic == null) {
-			if (other.anesthetic != null) {
-				return false;
-			}
-		} else if (!anesthetic.equals(other.anesthetic)) {
-			return false;
-		}
-		return true;
-	}
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        AnestheticIngredient other = (AnestheticIngredient) obj;
+        if (concentration == null) {
+            if (other.concentration != null) {
+                return false;
+            }
+        } else if (!concentration.equals(other.concentration)) {
+            return false;
+        }
+        if (concentrationUnit == null) {
+            if (other.concentrationUnit != null) {
+                return false;
+            }
+        } else if (!concentrationUnit.equals(other.concentrationUnit)) {
+            return false;
+        }
+        if (name == null) {
+            if (other.name != null) {
+                return false;
+            }
+        } else if (!name.equals(other.name)) {
+            return false;
+        }
+        if (anesthetic == null) {
+            if (other.anesthetic != null) {
+                return false;
+            }
+        } else if (!anesthetic.equals(other.anesthetic)) {
+            return false;
+        }
+        return true;
+    }
 
   @Override
   public String toString() {

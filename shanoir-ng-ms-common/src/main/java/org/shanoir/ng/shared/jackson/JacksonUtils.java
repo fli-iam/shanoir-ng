@@ -25,11 +25,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class JacksonUtils {
 
-	public static String serialize(Object obj) throws JsonProcessingException {
-		SimpleModule module = new SimpleModule();
-		module.addSerializer(LocalDate.class, new LocalDateSerializer());
-		return new ObjectMapper().registerModule(new JavaTimeModule())
-				.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false).writeValueAsString(obj).toString();
-	}
+    public static String serialize(Object obj) throws JsonProcessingException {
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(LocalDate.class, new LocalDateSerializer());
+        return new ObjectMapper().registerModule(new JavaTimeModule())
+                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false).writeValueAsString(obj).toString();
+    }
 
 }

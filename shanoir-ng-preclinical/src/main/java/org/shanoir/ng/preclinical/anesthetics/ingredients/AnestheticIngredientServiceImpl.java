@@ -35,65 +35,65 @@ import org.springframework.stereotype.Service;
 @Service
 public class AnestheticIngredientServiceImpl implements AnestheticIngredientService {
 
-	/**
-	 * Logger
-	 */
-	private static final Logger LOG = LoggerFactory.getLogger(AnestheticIngredientServiceImpl.class);
+    /**
+     * Logger
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(AnestheticIngredientServiceImpl.class);
 
-	@Autowired
-	private AnestheticIngredientRepository ingredientsRepository;
+    @Autowired
+    private AnestheticIngredientRepository ingredientsRepository;
 
-	@Override
-	public void deleteById(final Long id) throws ShanoirException {
-		ingredientsRepository.deleteById(id);
-	}
+    @Override
+    public void deleteById(final Long id) throws ShanoirException {
+        ingredientsRepository.deleteById(id);
+    }
 
-	@Override
-	public List<AnestheticIngredient> findAll() {
-		return Utils.toList(ingredientsRepository.findAll());
-	}
+    @Override
+    public List<AnestheticIngredient> findAll() {
+        return Utils.toList(ingredientsRepository.findAll());
+    }
 
-	@Override
-	public List<AnestheticIngredient> findByAnesthetic(Anesthetic anesthetic) {
-		return Utils.toList(ingredientsRepository.findByAnesthetic(anesthetic));
-	}
+    @Override
+    public List<AnestheticIngredient> findByAnesthetic(Anesthetic anesthetic) {
+        return Utils.toList(ingredientsRepository.findByAnesthetic(anesthetic));
+    }
 
-	@Override
-	public AnestheticIngredient findById(final Long id) {
-		return ingredientsRepository.findById(id).orElse(null);
-	}
+    @Override
+    public AnestheticIngredient findById(final Long id) {
+        return ingredientsRepository.findById(id).orElse(null);
+    }
 
-	@Override
-	public AnestheticIngredient save(final AnestheticIngredient ingredient) throws ShanoirException {
-		AnestheticIngredient savedIngredient = null;
-		try {
-			savedIngredient = ingredientsRepository.save(ingredient);
-		} catch (DataIntegrityViolationException dive) {
-			LOG.error("Error while creating ingredient:  ", dive);
-			throw new ShanoirException("Error while creating ingredient:  ", dive);
-		}
-		return savedIngredient;
-	}
+    @Override
+    public AnestheticIngredient save(final AnestheticIngredient ingredient) throws ShanoirException {
+        AnestheticIngredient savedIngredient = null;
+        try {
+            savedIngredient = ingredientsRepository.save(ingredient);
+        } catch (DataIntegrityViolationException dive) {
+            LOG.error("Error while creating ingredient:  ", dive);
+            throw new ShanoirException("Error while creating ingredient:  ", dive);
+        }
+        return savedIngredient;
+    }
 
-	@Override
-	public AnestheticIngredient update(final AnestheticIngredient ingredient) throws ShanoirException {
-		final AnestheticIngredient ingredientDb = ingredientsRepository.findById(ingredient.getId()).orElse(null);
-		updateModelValues(ingredientDb, ingredient);
-		try {
-			ingredientsRepository.save(ingredientDb);
-		} catch (Exception e) {
-			LOG.error("Error while updating ingredient:  ", e);
-			throw new ShanoirException("Error while updating ingredient:  ", e);
-		}
-		return ingredientDb;
-	}
+    @Override
+    public AnestheticIngredient update(final AnestheticIngredient ingredient) throws ShanoirException {
+        final AnestheticIngredient ingredientDb = ingredientsRepository.findById(ingredient.getId()).orElse(null);
+        updateModelValues(ingredientDb, ingredient);
+        try {
+            ingredientsRepository.save(ingredientDb);
+        } catch (Exception e) {
+            LOG.error("Error while updating ingredient:  ", e);
+            throw new ShanoirException("Error while updating ingredient:  ", e);
+        }
+        return ingredientDb;
+    }
 
-	private AnestheticIngredient updateModelValues(final AnestheticIngredient ingredientDb,
-			final AnestheticIngredient ingredient) {
-		ingredientDb.setName(ingredient.getName());
-		ingredientDb.setConcentration(ingredient.getConcentration());
-		ingredientDb.setConcentrationUnit(ingredient.getConcentrationUnit());
-		return ingredientDb;
-	}
+    private AnestheticIngredient updateModelValues(final AnestheticIngredient ingredientDb,
+            final AnestheticIngredient ingredient) {
+        ingredientDb.setName(ingredient.getName());
+        ingredientDb.setConcentration(ingredient.getConcentration());
+        ingredientDb.setConcentrationUnit(ingredient.getConcentrationUnit());
+        return ingredientDb;
+    }
 
 }

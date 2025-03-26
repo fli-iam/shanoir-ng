@@ -20,7 +20,7 @@ import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.springframework.data.repository.CrudRepository;
 
 public interface SubjectPathologyRepository
-		extends CrudRepository<SubjectPathology, Long>, SubjectPathologyRepositoryCustom {
+        extends CrudRepository<SubjectPathology, Long>, SubjectPathologyRepositoryCustom {
 
-	List<SubjectPathology> findByAnimalSubject(AnimalSubject animalSubject);
+    List<SubjectPathology> findByAnimalSubject(AnimalSubject animalSubject);
 }

@@ -27,13 +27,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
  */
 public interface FindByRepository<T extends AbstractEntity> {
 
-	/**
-	 * Find entities by field value.
-	 *
-	 * @param fieldName searched field name.
-	 * @param value value.
-	 * @return list of entities.
-	 */
-	List<T> findBy(String fieldName, Object value, @SuppressWarnings("rawtypes") Class clazz);
+    /**
+     * Find entities by field value.
+     *
+     * @param fieldName searched field name.
+     * @param value value.
+     * @return list of entities.
+     */
+    List<T> findBy(String fieldName, Object value, @SuppressWarnings("rawtypes") Class clazz);
 
 }

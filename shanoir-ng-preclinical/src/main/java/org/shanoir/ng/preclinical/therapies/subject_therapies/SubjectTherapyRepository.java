@@ -23,6 +23,6 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface SubjectTherapyRepository extends CrudRepository<SubjectTherapy, Long>, SubjectTherapyRepositoryCustom{
 
-	
-	List<SubjectTherapy> findByTherapy(Therapy therapy);
+
+    List<SubjectTherapy> findByTherapy(Therapy therapy);
 }

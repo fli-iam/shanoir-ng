@@ -31,27 +31,27 @@ import org.springframework.data.repository.query.Param;
  * @author msimon
  */
 public interface CenterRepository extends CrudRepository<Center, Long> {
-	
-	//@EntityGraph(attributePaths = "studyCenterList.study.name")
-	@Query("SELECT c FROM Center c LEFT JOIN FETCH c.acquisitionEquipments")
-	List<Center> findAll();
-	
-	@Query("SELECT DISTINCT c.acquisitionEquipments FROM Center c WHERE c.id = :centerId")
-    List<AcquisitionEquipment> findDistinctAcquisitionEquipmentsByCenterId(@Param("centerId") Long centerId);
-	
-	@EntityGraph(attributePaths = { "studyCenterList.study.name", "acquisitionEquipments.manufacturerModel.manufacturer" })
-	Optional<Center> findById(Long id);
-	
-	@EntityGraph(attributePaths = "studyCenterList.study.name")
-	Optional<Center> findByName(String name);
-	
-	@Query("select new org.shanoir.ng.shared.core.model.IdName(c.id, c.name) from Center c")
-	List<IdName> findIdsAndNames();
-	
-	@Query("select new org.shanoir.ng.shared.core.model.IdName(c.id, c.name) from Center c, StudyCenter sc where sc.center = c and sc.study.id = :studyId")
-	List<IdName> findIdsAndNames(@Param("studyId") Long studyId);
 
-	@Query("select c from Center c, StudyCenter sc where sc.center = c and sc.study.id = :studyId")
-	List<Center> findByStudy(@Param("studyId") Long studyId);
+    //@EntityGraph(attributePaths = "studyCenterList.study.name")
+    @Query("SELECT c FROM Center c LEFT JOIN FETCH c.acquisitionEquipments")
+    List<Center> findAll();
+
+    @Query("SELECT DISTINCT c.acquisitionEquipments FROM Center c WHERE c.id = :centerId")
+    List<AcquisitionEquipment> findDistinctAcquisitionEquipmentsByCenterId(@Param("centerId") Long centerId);
+
+    @EntityGraph(attributePaths = { "studyCenterList.study.name", "acquisitionEquipments.manufacturerModel.manufacturer" })
+    Optional<Center> findById(Long id);
+
+    @EntityGraph(attributePaths = "studyCenterList.study.name")
+    Optional<Center> findByName(String name);
+
+    @Query("select new org.shanoir.ng.shared.core.model.IdName(c.id, c.name) from Center c")
+    List<IdName> findIdsAndNames();
+
+    @Query("select new org.shanoir.ng.shared.core.model.IdName(c.id, c.name) from Center c, StudyCenter sc where sc.center = c and sc.study.id = :studyId")
+    List<IdName> findIdsAndNames(@Param("studyId") Long studyId);
+
+    @Query("select c from Center c, StudyCenter sc where sc.center = c and sc.study.id = :studyId")
+    List<Center> findByStudy(@Param("studyId") Long studyId);
 
 }

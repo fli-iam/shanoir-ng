@@ -46,7 +46,7 @@ public interface TherapyApi {
         produces = { "application/json" },
         consumes = { "application/json" })
     ResponseEntity<Therapy> createTherapy(@Parameter(name = "therapy to create", required = true) @RequestBody Therapy therapy,
-	BindingResult result) throws RestServiceException;
+    BindingResult result) throws RestServiceException;
 
 
     @Operation(summary = "Deletes a therapy value", description = "")
@@ -71,7 +71,7 @@ public interface TherapyApi {
 
     @Operation(summary = "Get Therapy by type", description = "")
     @ApiResponses(value = {
-    		@ApiResponse(responseCode = "200", description = "An array of therapies"),
+            @ApiResponse(responseCode = "200", description = "An array of therapies"),
             @ApiResponse(responseCode = "500", description = "Unexpected error") })
     @GetMapping(value = "/type/{type}",
         produces = { "application/json" })

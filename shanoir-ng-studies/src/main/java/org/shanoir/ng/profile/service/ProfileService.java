@@ -29,51 +29,51 @@ import org.springframework.security.access.prepost.PreAuthorize;
  * @author jlouis
  */
 public interface ProfileService {
-	
-	/**
-	 * Find entity by its id.
-	 *
-	 * @param id id
-	 * @return an entity or null.
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	Optional<Profile> findById(Long id);
-	
-	/**
-	 * Get all entities.
-	 *
-	 * @return a list of manufacturers.
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	List<Profile> findAll();
 
-	/**
-	 * Save an entity.
-	 *
-	 * @param entity the entity to create.
-	 * @return created entity.
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and #entity.getId() == null")
-	Profile create(Profile entity);
+    /**
+     * Find entity by its id.
+     *
+     * @param id id
+     * @return an entity or null.
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    Optional<Profile> findById(Long id);
 
-	/**
-	 * Update an entity.
-	 *
-	 * @param entity the entity to update.
-	 * @return updated entity.
-	 * @throws EntityNotFoundException
-	 * @throws MicroServiceCommunicationException
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-	Profile update(Profile entity) throws EntityNotFoundException;
-	
-	/**
-	 * Delete an entity.
-	 *
-	 * @param id the entity id to be deleted.
-	 * @throws EntityNotFoundException if the entity cannot be found.
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-	void deleteById(Long id) throws EntityNotFoundException;
+    /**
+     * Get all entities.
+     *
+     * @return a list of manufacturers.
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    List<Profile> findAll();
+
+    /**
+     * Save an entity.
+     *
+     * @param entity the entity to create.
+     * @return created entity.
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and #entity.getId() == null")
+    Profile create(Profile entity);
+
+    /**
+     * Update an entity.
+     *
+     * @param entity the entity to update.
+     * @return updated entity.
+     * @throws EntityNotFoundException
+     * @throws MicroServiceCommunicationException
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+    Profile update(Profile entity) throws EntityNotFoundException;
+
+    /**
+     * Delete an entity.
+     *
+     * @param id the entity id to be deleted.
+     * @throws EntityNotFoundException if the entity cannot be found.
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+    void deleteById(Long id) throws EntityNotFoundException;
 
 }

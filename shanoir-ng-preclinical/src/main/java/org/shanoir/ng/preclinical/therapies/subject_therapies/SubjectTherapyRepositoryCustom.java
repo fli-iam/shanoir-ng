@@ -26,5 +26,5 @@ import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
  */
 public interface SubjectTherapyRepositoryCustom {
 
-	List<SubjectTherapy> findByAnimalSubject(AnimalSubject animalSubject);
+    List<SubjectTherapy> findByAnimalSubject(AnimalSubject animalSubject);
 }

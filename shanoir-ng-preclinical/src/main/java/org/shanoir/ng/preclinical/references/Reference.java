@@ -33,10 +33,10 @@ import jakarta.persistence.PostLoad;
 @Entity
 @JsonPropertyOrder({ "_links", "category" ,"reftype", "value" })
 public class Reference extends HalEntity   {
-	
+
   @JsonProperty("category")
   private String category = "common";
-	
+
   @JsonProperty("reftype")
   private String reftype = null;
 
@@ -45,11 +45,11 @@ public class Reference extends HalEntity   {
   private String value = null;
 
   /**
-	 * Init HATEOAS links
-	 */
+     * Init HATEOAS links
+     */
   @PostLoad
-	public void initLinks() {
-		this.addLink(Links.REL_SELF, "reference/" + getId());
+    public void initLinks() {
+        this.addLink(Links.REL_SELF, "reference/" + getId());
   }
 
   public Reference category(String category) {

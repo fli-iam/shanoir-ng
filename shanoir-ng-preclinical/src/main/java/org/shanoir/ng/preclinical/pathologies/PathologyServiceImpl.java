@@ -35,91 +35,91 @@ import org.springframework.stereotype.Service;
 @Service
 public class PathologyServiceImpl implements PathologyService {
 
-	/**
-	 * Logger
-	 */
-	private static final Logger LOG = LoggerFactory.getLogger(PathologyServiceImpl.class);
+    /**
+     * Logger
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(PathologyServiceImpl.class);
 
-	@Autowired
-	private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
-	@Autowired
-	private PathologyRepository pathologiesRepository;
+    @Autowired
+    private PathologyRepository pathologiesRepository;
 
-	@Override
-	public void deleteById(final Long id) throws ShanoirException {
-		pathologiesRepository.deleteById(id);
-	}
+    @Override
+    public void deleteById(final Long id) throws ShanoirException {
+        pathologiesRepository.deleteById(id);
+    }
 
-	@Override
-	public List<Pathology> findAll() {
-		return Utils.toList(pathologiesRepository.findAll());
-	}
+    @Override
+    public List<Pathology> findAll() {
+        return Utils.toList(pathologiesRepository.findAll());
+    }
 
-	@Override
-	public Pathology findById(final Long id) {
-		return pathologiesRepository.findById(id).orElse(null);
-	}
+    @Override
+    public Pathology findById(final Long id) {
+        return pathologiesRepository.findById(id).orElse(null);
+    }
 
-	@Override
-	public Optional<Pathology> findByName(final String name) {
-		return pathologiesRepository.findByName(name);
-	}
+    @Override
+    public Optional<Pathology> findByName(final String name) {
+        return pathologiesRepository.findByName(name);
+    }
 
-	@Override
-	public Pathology save(final Pathology pathology) throws ShanoirException {
-		Pathology savedPathology = null;
-		try {
-			savedPathology = pathologiesRepository.save(pathology);
-		} catch (DataIntegrityViolationException dive) {
-			LOG.error("Error while creating  pathology:  ", dive);
-			throw new ShanoirException("Error while creating  pathology:  ", dive);
-		}
-		return savedPathology;
-	}
+    @Override
+    public Pathology save(final Pathology pathology) throws ShanoirException {
+        Pathology savedPathology = null;
+        try {
+            savedPathology = pathologiesRepository.save(pathology);
+        } catch (DataIntegrityViolationException dive) {
+            LOG.error("Error while creating  pathology:  ", dive);
+            throw new ShanoirException("Error while creating  pathology:  ", dive);
+        }
+        return savedPathology;
+    }
 
-	@Override
-	public Pathology update(final Pathology pathology) throws ShanoirException {
-		final Pathology pathologyDb = pathologiesRepository.findById(pathology.getId()).orElse(null);
-		updatePathologyValues(pathologyDb, pathology);
-		try {
-			pathologiesRepository.save(pathologyDb);
-		} catch (Exception e) {
-			LOG.error("Error while updating  pathology:  ", e);
-			throw new ShanoirException("Error while updating  pathology:  ", e);
-		}
-		return pathologyDb;
-	}
+    @Override
+    public Pathology update(final Pathology pathology) throws ShanoirException {
+        final Pathology pathologyDb = pathologiesRepository.findById(pathology.getId()).orElse(null);
+        updatePathologyValues(pathologyDb, pathology);
+        try {
+            pathologiesRepository.save(pathologyDb);
+        } catch (Exception e) {
+            LOG.error("Error while updating  pathology:  ", e);
+            throw new ShanoirException("Error while updating  pathology:  ", e);
+        }
+        return pathologyDb;
+    }
 
-	private Pathology updatePathologyValues(final Pathology pathologyDb, final Pathology pathology) {
-		pathologyDb.setName(pathology.getName());
-		return pathologyDb;
-	}
+    private Pathology updatePathologyValues(final Pathology pathologyDb, final Pathology pathology) {
+        pathologyDb.setName(pathology.getName());
+        return pathologyDb;
+    }
 
-	/*
-	 * Update Shanoir Old.
-	 *
-	 * @param template template.
-	 *
-	 * @return false if it fails, true if it succeed.
-	 */
-	@Override
-	public boolean updateFromShanoirOld(final Pathology pathology) {
-		return true;
-		/*
-		 * try { LOG.info("Send update to Shanoir Old");
-		 * System.out.println("Send update to Shanoir Old :" + new
-		 * ObjectMapper().writeValueAsString(pathology));
-		 * rabbitTemplate.convertAndSend(RabbitMqConfiguration.pathologyQueueOut().
-		 * getName(), new ObjectMapper().writeValueAsString(pathology)); return true; }
-		 * catch (AmqpException e) { LOG.error("Cannot send Pathology " +
-		 * pathology.getId() + " save/update to Shanoir Old on queue : " +
-		 * RabbitMqConfiguration.queueOut().getName(), e); } catch
-		 * (JsonProcessingException e) { LOG.error("Cannot send Pathology " +
-		 * pathology.getId() +
-		 * " save/update because of an error while serializing Pathology.", e); } return
-		 * false;
-		 */
-	}
+    /*
+     * Update Shanoir Old.
+     *
+     * @param template template.
+     *
+     * @return false if it fails, true if it succeed.
+     */
+    @Override
+    public boolean updateFromShanoirOld(final Pathology pathology) {
+        return true;
+        /*
+         * try { LOG.info("Send update to Shanoir Old");
+         * System.out.println("Send update to Shanoir Old :" + new
+         * ObjectMapper().writeValueAsString(pathology));
+         * rabbitTemplate.convertAndSend(RabbitMqConfiguration.pathologyQueueOut().
+         * getName(), new ObjectMapper().writeValueAsString(pathology)); return true; }
+         * catch (AmqpException e) { LOG.error("Cannot send Pathology " +
+         * pathology.getId() + " save/update to Shanoir Old on queue : " +
+         * RabbitMqConfiguration.queueOut().getName(), e); } catch
+         * (JsonProcessingException e) { LOG.error("Cannot send Pathology " +
+         * pathology.getId() +
+         * " save/update because of an error while serializing Pathology.", e); } return
+         * false;
+         */
+    }
 
 }

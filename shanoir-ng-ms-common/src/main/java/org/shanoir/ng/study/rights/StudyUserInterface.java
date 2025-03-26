@@ -20,63 +20,63 @@ import org.shanoir.ng.shared.security.rights.StudyUserRight;
 
 public interface StudyUserInterface {
 
-	/**
-	 * @return the receiveStudyUserReport
-	 */
-	public boolean isReceiveStudyUserReport();
+    /**
+     * @return the receiveStudyUserReport
+     */
+    public boolean isReceiveStudyUserReport();
 
-	/**
-	 * @param receiveStudyUserReport the receiveStudyUserReport to set
-	 */
-	public void setReceiveStudyUserReport(boolean receiveStudyUserReport);
+    /**
+     * @param receiveStudyUserReport the receiveStudyUserReport to set
+     */
+    public void setReceiveStudyUserReport(boolean receiveStudyUserReport);
 
-	/**
-	 * @return the receiveNewImportReport
-	 */
-	public boolean isReceiveNewImportReport();
+    /**
+     * @return the receiveNewImportReport
+     */
+    public boolean isReceiveNewImportReport();
 
-	/**
-	 * @param receiveNewImportReport the receiveNewImportReport to set
-	 */
-	public void setReceiveNewImportReport(boolean receiveNewImportReport);
+    /**
+     * @param receiveNewImportReport the receiveNewImportReport to set
+     */
+    public void setReceiveNewImportReport(boolean receiveNewImportReport);
 
-	public boolean isConfirmed();
+    public boolean isConfirmed();
 
-	public void setConfirmed(boolean confirmed);
+    public void setConfirmed(boolean confirmed);
 
-	/**
-	 * @return the studyId
-	 */
-	public Long getStudyId();
+    /**
+     * @return the studyId
+     */
+    public Long getStudyId();
 
-	/**
-	 * @return the studyUserRight
-	 */
-	public List<StudyUserRight> getStudyUserRights();
+    /**
+     * @return the studyUserRight
+     */
+    public List<StudyUserRight> getStudyUserRights();
 
-	/**
-	 * @param studyUserRight the studyUserRight to set
-	 */
-	public void setStudyUserRights(List<StudyUserRight> studyUserRights);
+    /**
+     * @param studyUserRight the studyUserRight to set
+     */
+    public void setStudyUserRights(List<StudyUserRight> studyUserRights);
 
-	/**
-	 * @return the userId
-	 */
-	public Long getUserId();
+    /**
+     * @return the userId
+     */
+    public Long getUserId();
 
-	/**
-	 * @param userId the userId to set
-	 */
-	public void setUserId(Long userId);
+    /**
+     * @param userId the userId to set
+     */
+    public void setUserId(Long userId);
 
-	public String getUserName();
+    public String getUserName();
 
-	public void setUserName(String userName);
+    public void setUserName(String userName);
 
-	public Long getId();
+    public Long getId();
 
-	public void setId(Long id);
+    public void setId(Long id);
 
-	public List<Long> getCenterIds();
+    public List<Long> getCenterIds();
 
 }

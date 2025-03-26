@@ -47,8 +47,8 @@ public interface AnestheticIngredientApi {
         produces = { "application/json" },
         consumes = { "application/json" })
     ResponseEntity<AnestheticIngredient> createAnestheticIngredient(@Parameter(name = "anesthetic id",required=true ) @PathVariable("id") Long id,
-    		@Parameter(name = "anesthetic ingredient to create", required = true) @RequestBody AnestheticIngredient ingredient,
-	BindingResult result) throws RestServiceException;
+            @Parameter(name = "anesthetic ingredient to create", required = true) @RequestBody AnestheticIngredient ingredient,
+    BindingResult result) throws RestServiceException;
 
 
     @Operation(summary = "Deletes an ingredient", description = "")
@@ -60,7 +60,7 @@ public interface AnestheticIngredientApi {
     @DeleteMapping(value = "/{aiid}",
         produces = { "application/json" })
     ResponseEntity<Void> deleteAnestheticIngredient(@Parameter(name = "anesthetic id",required=true ) @PathVariable("id") Long id,
-    		@Parameter(name = "Anesthetic Ingredient id",required=true ) @PathVariable("aiid") Long aiid);
+            @Parameter(name = "Anesthetic Ingredient id",required=true ) @PathVariable("aiid") Long aiid);
 
 
     @Operation(summary = "Get Anesthetic Ingredient by id", description = "")
@@ -71,15 +71,15 @@ public interface AnestheticIngredientApi {
     @GetMapping(value = "/{aiid}",
         produces = { "application/json" })
     ResponseEntity<AnestheticIngredient> getAnestheticIngredientById(@Parameter(name = "anesthetic id",required=true ) @PathVariable("id") Long id,
-    		@Parameter(name = "Anesthetic Ingredient id",required=true ) @PathVariable("id") Long aiid);
+            @Parameter(name = "Anesthetic Ingredient id",required=true ) @PathVariable("id") Long aiid);
 
 
     @Operation(summary = "List all anesthetic ingredients for given anesthetic", description = "")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "An array of anesthetic ingredients"),
         @ApiResponse(responseCode = "200", description = "Unexpected error"),
-    	@ApiResponse(responseCode = "404", description = "Anesthetic not found"),
-    	@ApiResponse(responseCode = "500", description = "Unexpected error") })
+        @ApiResponse(responseCode = "404", description = "Anesthetic not found"),
+        @ApiResponse(responseCode = "500", description = "Unexpected error") })
     @GetMapping(value = "/all",
         produces = { "application/json" })
     ResponseEntity<List<AnestheticIngredient>> getAnestheticIngredients(@Parameter(name = "anesthetic id",required=true ) @PathVariable("id") Long id)  throws RestServiceException ;
@@ -95,7 +95,7 @@ public interface AnestheticIngredientApi {
         produces = { "application/json" },
         consumes = { "application/json" })
     ResponseEntity<Void> updateAnestheticIngredient(@Parameter(name = "anesthetic id",required=true ) @PathVariable("id") Long id,
-    		@Parameter(name = "ID of Anesthetic Ingredient that needs to be updated",required=true ) @PathVariable("aiid") Long aiid,
+            @Parameter(name = "ID of Anesthetic Ingredient that needs to be updated",required=true ) @PathVariable("aiid") Long aiid,
         @Parameter(name = "Anesthetic Ingredient object that needs to be updated" ,required=true ) @RequestBody AnestheticIngredient ingredient,
         final BindingResult result) throws RestServiceException;
 

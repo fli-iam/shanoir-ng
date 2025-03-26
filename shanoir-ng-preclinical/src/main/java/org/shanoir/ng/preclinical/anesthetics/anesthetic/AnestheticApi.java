@@ -46,7 +46,7 @@ public interface AnestheticApi {
         produces = { "application/json" },
         consumes = { "application/json" })
     ResponseEntity<Anesthetic> createAnesthetic(@Parameter(name = "anesthetic to create", required = true) @RequestBody Anesthetic anesthetic,
-	BindingResult result) throws RestServiceException;
+    BindingResult result) throws RestServiceException;
 
 
     @Operation(summary = "Deletes an Anesthetic", description = "")

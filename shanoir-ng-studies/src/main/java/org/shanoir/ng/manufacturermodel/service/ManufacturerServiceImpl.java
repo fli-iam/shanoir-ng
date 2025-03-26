@@ -48,89 +48,89 @@ import org.springframework.stereotype.Service;
 @Service
 public class ManufacturerServiceImpl implements ManufacturerService {
 
-	@Autowired
-	private ManufacturerRepository repository;
+    @Autowired
+    private ManufacturerRepository repository;
 
-	@Autowired
-	private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
-	@Autowired
-	private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-	@Autowired
-	private AcquisitionEquipmentRepository acquisitionEquipmentRepository;
-	@Autowired
-	private ManufacturerModelRepository manufacturerModelRepository;
+    @Autowired
+    private AcquisitionEquipmentRepository acquisitionEquipmentRepository;
+    @Autowired
+    private ManufacturerModelRepository manufacturerModelRepository;
 
-	@Autowired
-	private StudyUserUpdateBroadcastService studyUserUpdateBroadcastService;
+    @Autowired
+    private StudyUserUpdateBroadcastService studyUserUpdateBroadcastService;
 
-	private static final Logger LOG = LoggerFactory.getLogger(ManufacturerServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ManufacturerServiceImpl.class);
 
-	protected Manufacturer updateValues(Manufacturer manu, Manufacturer manuDb) {
-		manuDb.setName(manu.getName());
+    protected Manufacturer updateValues(Manufacturer manu, Manufacturer manuDb) {
+        manuDb.setName(manu.getName());
 
-		try {
-			updateManufacturer(manu);
-		} catch (MicroServiceCommunicationException e) {
-			LOG.error("Could not send the manufacturer values change to the other microservices !", e);
-		}
-		return manuDb;
-	}
+        try {
+            updateManufacturer(manu);
+        } catch (MicroServiceCommunicationException e) {
+            LOG.error("Could not send the manufacturer values change to the other microservices !", e);
+        }
+        return manuDb;
+    }
 
-	public boolean updateManufacturer(Manufacturer manufacturer) throws MicroServiceCommunicationException {
-		try {
-			String manuName = manufacturer.getName();
-			if (manufacturer.getId() == null) {
-				return true;
-			}
-			List<ManufacturerModel> listManuModel = manufacturerModelRepository.findByManufacturerId(manufacturer.getId()).orElse(null);
-			if (listManuModel == null || listManuModel.isEmpty()) {
-				return true;
-			}
-			for (ManufacturerModel manuModel : listManuModel) {
-				List<AcquisitionEquipment> listAcEq = acquisitionEquipmentRepository.findByManufacturerModelId(manuModel.getId());
-				if (listAcEq != null) {
-					for (AcquisitionEquipment acEqItem : listAcEq) {
-						IdName acEq = new IdName();
-						acEq.setId(acEqItem.getId());
-						acEq.setName(manuName.trim() + " " + acEqItem.getManufacturerModel().getName());
-						rabbitTemplate.convertAndSend(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_UPDATE_QUEUE,
-								objectMapper.writeValueAsString(acEq));
-					}
-				}
-			}
-			return true;
-		} catch (AmqpException | JsonProcessingException e) {
-			throw new MicroServiceCommunicationException(
-					"Error while communicating with datasets MS to update manufacturer name.", e);
-		}
-	}
-	public Optional<Manufacturer> findById(final Long id) {
-		return repository.findById(id);
-	}
+    public boolean updateManufacturer(Manufacturer manufacturer) throws MicroServiceCommunicationException {
+        try {
+            String manuName = manufacturer.getName();
+            if (manufacturer.getId() == null) {
+                return true;
+            }
+            List<ManufacturerModel> listManuModel = manufacturerModelRepository.findByManufacturerId(manufacturer.getId()).orElse(null);
+            if (listManuModel == null || listManuModel.isEmpty()) {
+                return true;
+            }
+            for (ManufacturerModel manuModel : listManuModel) {
+                List<AcquisitionEquipment> listAcEq = acquisitionEquipmentRepository.findByManufacturerModelId(manuModel.getId());
+                if (listAcEq != null) {
+                    for (AcquisitionEquipment acEqItem : listAcEq) {
+                        IdName acEq = new IdName();
+                        acEq.setId(acEqItem.getId());
+                        acEq.setName(manuName.trim() + " " + acEqItem.getManufacturerModel().getName());
+                        rabbitTemplate.convertAndSend(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_UPDATE_QUEUE,
+                                objectMapper.writeValueAsString(acEq));
+                    }
+                }
+            }
+            return true;
+        } catch (AmqpException | JsonProcessingException e) {
+            throw new MicroServiceCommunicationException(
+                    "Error while communicating with datasets MS to update manufacturer name.", e);
+        }
+    }
+    public Optional<Manufacturer> findById(final Long id) {
+        return repository.findById(id);
+    }
 
-	public List<Manufacturer> findAll() {
-		return Utils.toList(repository.findAll());
-	}
+    public List<Manufacturer> findAll() {
+        return Utils.toList(repository.findAll());
+    }
 
-	public Manufacturer create(final Manufacturer entity) {
-		Manufacturer savedEntity = repository.save(entity);
-		return savedEntity;
-	}
+    public Manufacturer create(final Manufacturer entity) {
+        Manufacturer savedEntity = repository.save(entity);
+        return savedEntity;
+    }
 
-	public Manufacturer update(final Manufacturer entity) throws EntityNotFoundException {
-		final Optional<Manufacturer> entityDbOpt = repository.findById(entity.getId());
-		final Manufacturer entityDb = entityDbOpt.orElseThrow(
-				() -> new EntityNotFoundException(entity.getClass(), entity.getId()));
-		updateValues(entity, entityDb);
-		return repository.save(entityDb);
-	}
+    public Manufacturer update(final Manufacturer entity) throws EntityNotFoundException {
+        final Optional<Manufacturer> entityDbOpt = repository.findById(entity.getId());
+        final Manufacturer entityDb = entityDbOpt.orElseThrow(
+                () -> new EntityNotFoundException(entity.getClass(), entity.getId()));
+        updateValues(entity, entityDb);
+        return repository.save(entityDb);
+    }
 
-	public void deleteById(final Long id) throws EntityNotFoundException  {
-		final Optional<Manufacturer> entity = repository.findById(id);
-		entity.orElseThrow(() -> new EntityNotFoundException("Cannot find entity with id = " + id));
-		repository.deleteById(id);
-	}
+    public void deleteById(final Long id) throws EntityNotFoundException  {
+        final Optional<Manufacturer> entity = repository.findById(id);
+        entity.orElseThrow(() -> new EntityNotFoundException("Cannot find entity with id = " + id));
+        repository.deleteById(id);
+    }
 
 }

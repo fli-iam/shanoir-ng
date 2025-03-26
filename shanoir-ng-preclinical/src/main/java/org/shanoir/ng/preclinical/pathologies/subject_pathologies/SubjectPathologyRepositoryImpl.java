@@ -28,33 +28,33 @@ import org.springframework.stereotype.Component;
 @Component
 public class SubjectPathologyRepositoryImpl implements SubjectPathologyRepositoryCustom{
 
-	@PersistenceContext
+    @PersistenceContext
     private EntityManager em;
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<SubjectPathology> findAllByPathology(Pathology pathology) {
-		return em.createQuery(
-				"SELECT p FROM SubjectPathology p WHERE p.pathology.name LIKE :pathology")
-				.setParameter("pathology", pathology.getName())
-				.getResultList();
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<SubjectPathology> findAllByPathologyModel(PathologyModel model) {
-		return em.createQuery(
-				"SELECT p FROM SubjectPathology p WHERE p.pathologyModel.name LIKE :model")
-				.setParameter("model", model.getName())
-				.getResultList();
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<SubjectPathology> findAllByLocation(Reference location) {
-		return em.createQuery(
-				"SELECT p FROM SubjectPathology p WHERE p.location.value LIKE :location")
-				.setParameter("location", location.getValue())
-				.getResultList();
-	}
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<SubjectPathology> findAllByPathology(Pathology pathology) {
+        return em.createQuery(
+                "SELECT p FROM SubjectPathology p WHERE p.pathology.name LIKE :pathology")
+                .setParameter("pathology", pathology.getName())
+                .getResultList();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<SubjectPathology> findAllByPathologyModel(PathologyModel model) {
+        return em.createQuery(
+                "SELECT p FROM SubjectPathology p WHERE p.pathologyModel.name LIKE :model")
+                .setParameter("model", model.getName())
+                .getResultList();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<SubjectPathology> findAllByLocation(Reference location) {
+        return em.createQuery(
+                "SELECT p FROM SubjectPathology p WHERE p.location.value LIKE :location")
+                .setParameter("location", location.getValue())
+                .getResultList();
+    }
 }

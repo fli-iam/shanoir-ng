@@ -35,35 +35,35 @@ import jakarta.persistence.Entity;
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 public class Profile extends HalEntity {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 8829401300909105525L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = 8829401300909105525L;
 
-	@Column(unique = true)
-	@Unique
-	private String profileName;
+    @Column(unique = true)
+    @Unique
+    private String profileName;
 
-	public Profile() {
-	}
+    public Profile() {
+    }
 
-	public Profile(String profileName) {
-		this.profileName = profileName;
-	}
+    public Profile(String profileName) {
+        this.profileName = profileName;
+    }
 
-	/**
-	 * @return the name
-	 */
-	public String getProfileName() {
-		return profileName;
-	}
+    /**
+     * @return the name
+     */
+    public String getProfileName() {
+        return profileName;
+    }
 
-	/**
-	 * @param profileName
-	 *            the name to set
-	 */
-	public void setProfileName(String profileName) {
-		this.profileName = profileName;
-	}
+    /**
+     * @param profileName
+     *            the name to set
+     */
+    public void setProfileName(String profileName) {
+        this.profileName = profileName;
+    }
 
 }

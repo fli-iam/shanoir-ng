@@ -34,17 +34,17 @@ import jakarta.persistence.Table;
 @Table(name = "pathology")
 @JsonPropertyOrder({ "_links", "name" })
 public class Pathology extends HalEntity   {
-	
+
   @JsonProperty("name")
   @Unique
   private String name = null;
 
   /**
-	 * Init HATEOAS links
-	 */
+     * Init HATEOAS links
+     */
   @PostLoad
   public void initLinks() {
-	this.addLink(Links.REL_SELF, "pathology/" + getId());
+    this.addLink(Links.REL_SELF, "pathology/" + getId());
   }
 
   public Pathology name(String name) {

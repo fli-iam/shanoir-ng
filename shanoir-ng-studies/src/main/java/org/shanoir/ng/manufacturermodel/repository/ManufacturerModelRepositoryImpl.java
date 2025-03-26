@@ -29,20 +29,20 @@ import jakarta.persistence.PersistenceContext;
  */
 public class ManufacturerModelRepositoryImpl implements ManufacturerModelRepositoryCustom {
 
-	@PersistenceContext
-	private EntityManager em;
-	
+    @PersistenceContext
+    private EntityManager em;
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<IdName> findIdsAndNames() {
-		return em.createNativeQuery("SELECT id, name FROM manufacturer_model", "ManufacturerModelNameResult").getResultList();
-	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<IdName> findIdsAndNamesForCenter(Long centerId) {
-		return em.createNativeQuery("SELECT id, name FROM center ", "ManufacturerModelNameResult").getResultList();
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<IdName> findIdsAndNames() {
+        return em.createNativeQuery("SELECT id, name FROM manufacturer_model", "ManufacturerModelNameResult").getResultList();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<IdName> findIdsAndNamesForCenter(Long centerId) {
+        return em.createNativeQuery("SELECT id, name FROM center ", "ManufacturerModelNameResult").getResultList();
+    }
 
 }

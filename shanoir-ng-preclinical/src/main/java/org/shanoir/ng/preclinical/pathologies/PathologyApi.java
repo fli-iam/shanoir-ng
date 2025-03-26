@@ -46,7 +46,7 @@ public interface PathologyApi {
         produces = { "application/json" },
         consumes = { "application/json" })
     ResponseEntity<Pathology> createPathology(@Parameter(name = "pathology to create", required = true) @RequestBody Pathology pathology,
-	BindingResult result) throws RestServiceException;
+    BindingResult result) throws RestServiceException;
 
 
     @Operation(summary = "Deletes a pathology value", description = "")

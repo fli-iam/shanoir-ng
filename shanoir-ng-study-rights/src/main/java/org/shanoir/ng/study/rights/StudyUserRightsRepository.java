@@ -29,30 +29,30 @@ import org.springframework.data.repository.query.Param;
  */
 public interface StudyUserRightsRepository extends CrudRepository<StudyUser, Long> {
 
-	@Transactional
-	void deleteByIdIn(Set<Long> ids);
+    @Transactional
+    void deleteByIdIn(Set<Long> ids);
 
-	@EntityGraph(attributePaths = "studyUserRights")
-	StudyUser findByUserIdAndStudyId(Long userId, Long studyId);
+    @EntityGraph(attributePaths = "studyUserRights")
+    StudyUser findByUserIdAndStudyId(Long userId, Long studyId);
 
-	@Query("SELECT su.centerIds FROM StudyUser su WHERE su.id = :id")
+    @Query("SELECT su.centerIds FROM StudyUser su WHERE su.id = :id")
     List<Long> findCenterIdsByStudyUserId(@Param("id") Long studyUserId);
 
-	@EntityGraph(attributePaths = "studyUserRights")
-	Iterable<StudyUser> findByUserIdAndStudyIdIn(Long userId, Set<Long> studyIds);
+    @EntityGraph(attributePaths = "studyUserRights")
+    Iterable<StudyUser> findByUserIdAndStudyIdIn(Long userId, Set<Long> studyIds);
 
-	@EntityGraph(attributePaths = "studyUserRights")
-	Iterable<StudyUser> findByUserId(Long userId);
-	
-	Iterable<StudyUser> findByStudyId(Long studyId);
-	
-	@Query("select su.studyId from StudyUser su where su.userId = :userId and :right in elements(su.studyUserRights)")
-	List<Long> findDistinctStudyIdByUserId(Long userId, int right);
+    @EntityGraph(attributePaths = "studyUserRights")
+    Iterable<StudyUser> findByUserId(Long userId);
 
-	@Query("select su from StudyUser su where su.userId = :userId and :right in elements(su.studyUserRights)")
-	Iterable<StudyUser> findByUserIdAndRight(Long userId, int right);
-	
-	@Query("select su from StudyUser su where su.studyId = :studyId and :right in elements(su.studyUserRights)")
-	Iterable<StudyUser> findByStudyIdAndRight(Long studyId, int right);
-	
+    Iterable<StudyUser> findByStudyId(Long studyId);
+
+    @Query("select su.studyId from StudyUser su where su.userId = :userId and :right in elements(su.studyUserRights)")
+    List<Long> findDistinctStudyIdByUserId(Long userId, int right);
+
+    @Query("select su from StudyUser su where su.userId = :userId and :right in elements(su.studyUserRights)")
+    Iterable<StudyUser> findByUserIdAndRight(Long userId, int right);
+
+    @Query("select su from StudyUser su where su.studyId = :studyId and :right in elements(su.studyUserRights)")
+    Iterable<StudyUser> findByStudyIdAndRight(Long studyId, int right);
+
 }

@@ -31,7 +31,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Entity
 @JsonPropertyOrder({ "_links", "examinationId", "filename", "has_heart_rate","has_respiratory_rate","has_sao2","has_temperature" })
 public class PhysiologicalData extends ExaminationExtraData   {
-	
+
   @JsonProperty("has_heart_rate")
   @NotNull
   private boolean hasHeartRate = false;
@@ -47,7 +47,7 @@ public class PhysiologicalData extends ExaminationExtraData   {
   @JsonProperty("has_temperature")
   @NotNull
   private boolean hasTemperature = false;
-	
+
 
 
   public PhysiologicalData hasHeartRate(boolean hasHeartRate) {
@@ -111,31 +111,31 @@ public class PhysiologicalData extends ExaminationExtraData   {
 
   @Override
   public int hashCode() {
-	return Objects.hash(getExaminationId(), getFilename(),getFilepath(),hasHeartRate, hasRespiratoryRate, hasSao2, hasTemperature);
+    return Objects.hash(getExaminationId(), getFilename(),getFilepath(),hasHeartRate, hasRespiratoryRate, hasSao2, hasTemperature);
   }
 
 @Override
 public boolean equals(Object obj) {
-	if (this == obj) {
-		return true;
-	}
-	if (!super.equals(obj)) {
-		return false;
-	}
-	if (getClass() != obj.getClass()) {
-		return false;
-	}
-	PhysiologicalData other = (PhysiologicalData) obj;
-	if (hasHeartRate != other.hasHeartRate) {
-		return false;
-	}
-	if (hasRespiratoryRate != other.hasRespiratoryRate) {
-		return false;
-	}
-	if (hasSao2 != other.hasSao2) {
-		return false;
-	}
-	return hasTemperature != other.hasTemperature;
+    if (this == obj) {
+        return true;
+    }
+    if (!super.equals(obj)) {
+        return false;
+    }
+    if (getClass() != obj.getClass()) {
+        return false;
+    }
+    PhysiologicalData other = (PhysiologicalData) obj;
+    if (hasHeartRate != other.hasHeartRate) {
+        return false;
+    }
+    if (hasRespiratoryRate != other.hasRespiratoryRate) {
+        return false;
+    }
+    if (hasSao2 != other.hasSao2) {
+        return false;
+    }
+    return hasTemperature != other.hasTemperature;
 }
 
 @Override
