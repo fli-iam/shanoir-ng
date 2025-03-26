@@ -12,23 +12,23 @@ public class ShanoirEvent {
     public static final int SUCCESS = 1;
     public static final int IN_PROGRESS = 2;
 
-    protected Long id;
+    private Long id;
 
-    protected String eventType;
+    private String eventType;
 
-    protected String objectId;
+    private String objectId;
 
-    protected Long userId;
+    private Long userId;
 
-    protected String message;
+    private String message;
 
-    protected String report;
+    private String report;
 
-    protected int status;
+    private int status;
 
-    protected Float progress;
+    private Float progress;
 
-    protected Long studyId;
+    private Long studyId;
 
     private Long timestamp;
 
@@ -109,7 +109,7 @@ public class ShanoirEvent {
     /**
      * @param objectId the objectId to set
      */
-    public void setObjectId(String objectId) {
+    public final void setObjectId(String objectId) {
         if (objectId != null && objectId.length() > 255) {
             this.objectId = objectId.substring(0, 250) + "...";
         } else {
