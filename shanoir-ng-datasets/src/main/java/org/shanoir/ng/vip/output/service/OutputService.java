@@ -21,10 +21,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.PathMatcher;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -79,6 +76,14 @@ public class OutputService {
 
     private List<File> getArchivesToProcess(File userImportDir) throws ResultHandlerException {
         LOG.info("Processing result in import directory [{}]...", userImportDir.getAbsolutePath());
+
+        if (!userImportDir.exists()) {
+            boolean created = userImportDir.mkdirs();
+            if (!created) {
+                LOG.error("Failed to create directory: " + userImportDir.getAbsolutePath());
+                throw new ResultHandlerException("Failed to create directory: " + userImportDir.getAbsolutePath(), new FileSystemException(userImportDir.getAbsolutePath()));
+            }
+        }
 
         final PathMatcher matcher = userImportDir.toPath().getFileSystem().getPathMatcher("glob:**/*.{tgz,tar.gz}");
 
