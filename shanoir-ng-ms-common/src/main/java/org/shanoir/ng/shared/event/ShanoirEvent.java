@@ -1,10 +1,11 @@
 package org.shanoir.ng.shared.event;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Transient;
-
 import java.util.Map;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.persistence.Transient;
 
 public class ShanoirEvent {
 

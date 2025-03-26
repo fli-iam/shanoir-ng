@@ -15,7 +15,6 @@
 package org.shanoir.ng.utils.assertion;
 
 import static org.junit.jupiter.api.Assertions.fail;
-
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.security.access.AccessDeniedException;
 

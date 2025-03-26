@@ -1,5 +1,5 @@
 /**
- * Shanoir NG - Import, manage and share neuroimaging data
+ * Shanoir NG - import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
  *
@@ -17,7 +17,6 @@ package org.shanoir.ng.shared.validation;
 import java.util.List;
 
 import org.shanoir.ng.shared.core.model.AbstractEntity;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 /**
  * Custom repository for entities.
