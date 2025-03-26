@@ -37,7 +37,7 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
 			Iterable<Long> studyIds, Pageable pageable, Boolean preclinical) {
 		
 		Pair<List<Examination>, Long> pair = find(studyCenterIds, studyIds, pageable, preclinical, null, null, null);
-		return new PageImpl<Examination>(pair.getFirst(), pageable, pair.getSecond()); 
+		return new PageImpl<Examination>(pair.getFirst(), pageable, pair.getSecond());
 	}
 	
 	@Override
@@ -45,7 +45,7 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
 			Iterable<Long> studyIds, Pageable pageable) {
 		
 		Pair<List<Examination>, Long> pair = find(studyCenterIds, studyIds, pageable, null, null, null, null);
-		return new PageImpl<Examination>(pair.getFirst(), pageable, pair.getSecond()); 
+		return new PageImpl<Examination>(pair.getFirst(), pageable, pair.getSecond());
 	}
 
 	@Override

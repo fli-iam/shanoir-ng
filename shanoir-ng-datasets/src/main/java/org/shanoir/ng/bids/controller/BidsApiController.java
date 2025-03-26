@@ -79,7 +79,7 @@ public class BidsApiController implements BidsApi {
 	@Override
     public void exportBIDSFile(
     		@Parameter(description = "Id of the study", required=true) @PathVariable("studyId") Long studyId,
-    		@Parameter(description = "file path") @Valid @RequestParam(value = "filePath", required = true) String filePath, 
+    		@Parameter(description = "file path") @Valid @RequestParam(value = "filePath", required = true) String filePath,
 			HttpServletResponse response) throws RestServiceException, IOException {
 		// Check filePath too
 		// /var/datasets-data/bids-data/stud-1_NATIVE
@@ -157,7 +157,7 @@ public class BidsApiController implements BidsApi {
 	
 	/**
 	 * Zip
-	 * 
+	 *
 	 * @param sourceDirPath
 	 * @param zipFilePath
 	 * @throws IOException

@@ -15,10 +15,10 @@ import org.slf4j.LoggerFactory;
  * This class is used for pseudonymization. Pseudonymization is a data management and
  * de-identification procedure by which personally identifiable information fields within
  * a data record are replaced by one or more artificial identifiers, or pseudonyms.
- * 
+ *
  * The pseudonymizer does not access to DICOM files. It retrieves data records in the
  * memory and replaces specific ones with pseudonyms.
- * 
+ *
  * In the Shanoir server the common name is displayed and used as patient ID in the GUI.
  * For Neurinfo during the import users can choose the common name == newPatientID.
  * For the OFSEP server this is predefined during the import, as an incremental counter.
@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * The subjectIdentifier is an internal hash in the Shanoir database, that is normally
  * not displayed to the user.
  * Example: long hash value
- * 
+ *
  * @author mkain
  *
  */
@@ -175,14 +175,14 @@ public class Pseudonymizer {
 
 	/**
 	 * Exec the Pseudonymus command to hash DICOM values
-	 * 
+	 *
 	 * @param input
 	 *            the DICOM value we want to hash
 	 * @param pseudonymusPath
 	 *            the Pseudonymus path
 	 * @param soundexValue
 	 *            the soundex value
-	 * 
+	 *
 	 * @return the hash
 	 */
 	private String pseudonymusExec(final String input,

@@ -44,7 +44,7 @@ public class DatasetAcquisitionApiControllerTest {
 	@MockBean
 	private DicomSEGAndSRImporterService dicomSRImporterService;
 	
-	@MockBean 
+	@MockBean
 	private DatasetAcquisitionService datasetAcquisitionService;
 	
 	@MockBean

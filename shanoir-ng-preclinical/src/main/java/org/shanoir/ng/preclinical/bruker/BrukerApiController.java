@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -132,7 +132,7 @@ public class BrukerApiController implements BrukerApi {
 	/**
 	 * This method does a call to the docker container nifti-conversion
 	 * to start the conversion of bruker2dicom.
-	 * 
+	 *
 	 * @param brukerDirFile
 	 * @throws RestServiceException
 	 */
@@ -150,7 +150,7 @@ public class BrukerApiController implements BrukerApi {
 
 	/**
 	 * create temp folder file to upload bruker zip file
-	 * 
+	 *
 	 * @param fileName
 	 * @return
 	 * @throws IOException
@@ -172,7 +172,7 @@ public class BrukerApiController implements BrukerApi {
 
 	/**
 	 * save zip bruker file into the tmp folder
-	 * 
+	 *
 	 * @param brukerFile
 	 * @param brukerDirPath
 	 * @return
@@ -188,7 +188,7 @@ public class BrukerApiController implements BrukerApi {
 
 	/**
 	 * unzip a zip file
-	 * 
+	 *
 	 * @param brukerPath
 	 * @param brukerDirPath
 	 * @throws IOException
@@ -215,7 +215,7 @@ public class BrukerApiController implements BrukerApi {
 
 	/**
 	 * extract file from a zip
-	 * 
+	 *
 	 * @param zipIn
 	 * @param filePath
 	 * @throws IOException
@@ -232,7 +232,7 @@ public class BrukerApiController implements BrukerApi {
 
 	/**
 	 * check if there is reconstructed data file into a given list of files
-	 * 
+	 *
 	 * @param foldersList
 	 * @param fileNameToFind
 	 * @return

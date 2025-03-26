@@ -28,9 +28,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class implements the logic when the download or copy button is clicked.
- * 
+ *
  * @author mkain
- * 
+ *
  */
 public class DownloadOrCopyActionListener implements ActionListener {
 
@@ -141,7 +141,7 @@ public class DownloadOrCopyActionListener implements ActionListener {
 	 * This method reads the data entered by the user with the GUI
 	 * and puts it into a Patient object to ajdust the already existing
 	 * values coming from the DICOM, when the user clicks on the download or copy button.
-	 * 
+	 *
 	 * @param Patient patient
 	 * @return
 	 */

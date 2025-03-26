@@ -25,19 +25,19 @@ public class Event extends HalEntity {
 
     @JsonProperty("type")
 	private String type;
-    
+
     @JsonProperty("description")
 	private String description;
-    
+
     @JsonProperty("position")
 	private String position;
-    
+
     @JsonProperty("points")
 	private int points;
-    
+
     @JsonProperty("channelNumber")
 	private int channelNumber;
-    
+
     @JsonProperty("date")
 	private Date date;
 

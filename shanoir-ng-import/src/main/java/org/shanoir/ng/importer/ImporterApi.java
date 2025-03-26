@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -53,7 +53,7 @@ public interface ImporterApi {
 	@GetMapping(value = {"", "/"}, produces = { "application/json" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<String> createTempDir() throws RestServiceException;
-    
+
     // used by ShanoirUploader!!! 2. step: called for each DICOM file
     @Operation(summary = "Upload a file into a specific temp dir", description = "Upload a file into a specific temp dir")
 	@ApiResponses(value = {
@@ -66,7 +66,7 @@ public interface ImporterApi {
     ResponseEntity<Void> uploadFile(
     		@Parameter(name = "tempDirId", required = true) @PathVariable("tempDirId") String tempDirId,
     		@Parameter(name = "file") @RequestParam("file") MultipartFile file) throws RestServiceException, IOException;
-    
+
     @Operation(summary = "Upload one DICOM .zip file", description = "Upload DICOM .zip file")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "success returns file path"),
@@ -78,7 +78,7 @@ public interface ImporterApi {
         consumes = { "multipart/form-data" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<ImportJob> uploadDicomZipFile(@Parameter(name = "file detail") @RequestPart("file") MultipartFile dicomZipFile) throws RestServiceException;
-    
+
     @Operation(summary = "Upload multiple examinations DICOM .zip file", description = "Upload DICOM .zip file")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "success returns file path"),
@@ -117,10 +117,10 @@ public interface ImporterApi {
         consumes = { "multipart/form-data" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<String> uploadProcessedDataset(
-        @Parameter(name = "image detail") @RequestPart("image") MultipartFile imageFile, 
-        @Parameter(name = "header detail", required = false) @RequestPart(value = "header", required = false) MultipartFile headerFile) 
+        @Parameter(name = "image detail") @RequestPart("image") MultipartFile imageFile,
+        @Parameter(name = "header detail", required = false) @RequestPart(value = "header", required = false) MultipartFile headerFile)
         throws RestServiceException;
-    
+
     @Operation(summary = "Import one DICOM .zip file", description = "Import DICOM .zip file already uploaded", tags = {
 			"Import one DICOM .zip file", })
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "success returns file path"),
@@ -130,7 +130,7 @@ public interface ImporterApi {
 	@PostMapping(value = "/import_dicom/", produces = { "application/json" }, consumes = { "application/json" })
 	ResponseEntity<ImportJob> importDicomZipFile(@Parameter(name = "file path") @RequestBody String dicomZipFilename)
 			throws RestServiceException;
-    
+
     // used by ShanoirUploader!!! 3. step
     @Operation(summary = "Start import job", description = "Start import job")
     @ApiResponses(value = {
@@ -173,7 +173,7 @@ public interface ImporterApi {
         consumes = { "application/json" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT') and @importSecurityService.canImportFromPACS())")
     ResponseEntity<ImportJob> queryPACS(@Parameter(name = "DicomQuery", required=true) @RequestBody DicomQuery dicomQuery) throws RestServiceException;
-    
+
     @Operation(summary = "Get dicom image", description = "Get dicom image")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "get dicom image"),

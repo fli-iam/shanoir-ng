@@ -21,7 +21,7 @@ public class NominativeDataUploadJobManager {
 
 	public static final String NOMINATIVE_DATA_JOB_XML = "nominative-data-job.xml";
 
-	private File nominativeDataJobFile; 
+	private File nominativeDataJobFile;
 	
 	/**
 	 * Initialize UploadJobManager empty and reset uploadJobFile

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -44,17 +44,17 @@ public class ExaminationExtraData extends HalEntity {
   @JsonProperty("filename")
   //@NotNull
   private String filename;
-  
+
   //@NotNull
   @JsonIgnore
   @JsonProperty("filepath")
   private String filepath;
-  
+
   @JsonProperty("extradatatype")
   @NotNull
   private String extradatatype;
-  
-  
+
+
   /**
 	* Init HATEOAS links
   */
@@ -62,7 +62,7 @@ public class ExaminationExtraData extends HalEntity {
   public void initLinks() {
 	  this.addLink(Links.REL_SELF, "examination/"+ examinationId +"/extradata/" + getId());
   }
-  
+
   public ExaminationExtraData examinationId(Long id) {
     this.examinationId = id;
     return this;
@@ -76,12 +76,12 @@ public class ExaminationExtraData extends HalEntity {
   public void setExaminationId(Long id) {
     this.examinationId = id;
   }
-  
+
   public ExaminationExtraData filename(String filename) {
     this.filename = filename;
     return this;
   }
-  
+
   @Schema(name = "none")
   public String getFilename() {
     return filename;
@@ -90,7 +90,7 @@ public class ExaminationExtraData extends HalEntity {
   public void setFilename(String filename) {
     this.filename = filename;
   }
-	   
+	
   @JsonIgnore
   @Schema(name = "none")
   public String getFilepath() {
@@ -100,12 +100,12 @@ public class ExaminationExtraData extends HalEntity {
   public void setFilepath(String filepath) {
     this.filepath = filepath;
   }
-  
+
   public ExaminationExtraData extradatatype(String extradatatype) {
     this.extradatatype = extradatatype;
     return this;
   }
-  
+
   @Schema(name = "none")
   public String getExtradatatype() {
     return extradatatype;
@@ -114,7 +114,7 @@ public class ExaminationExtraData extends HalEntity {
   public void setExtradatatype(String extradatatype) {
     this.extradatatype = extradatatype;
   }
-    
+
 
 
   @Override
@@ -169,7 +169,7 @@ public class ExaminationExtraData extends HalEntity {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ExaminationExtraData {\n");
-    
+
     sb.append("    examination_id: ").append(toIndentedString(examinationId)).append("\n");
     sb.append("    filename: ").append(toIndentedString(filename)).append("\n");
     sb.append("    filepath: ").append(toIndentedString(filepath)).append("\n");

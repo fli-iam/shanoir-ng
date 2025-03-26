@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -41,7 +41,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Keycloak client. Used to execute requests to Keycloak server.
- * 
+ *
  * @author msimon
  *
  */
@@ -86,7 +86,7 @@ public class KeycloakClient {
 
 	/**
 	 * Create a user with a password.
-	 * 
+	 *
 	 * @param user
 	 *            user to create.
 	 * @param password
@@ -145,7 +145,7 @@ public class KeycloakClient {
 	
 	/**
 	 * Create a user with a password.
-	 * 
+	 *
 	 * @param user
 	 *            user to create.
 	 * @return keycloak user id.
@@ -158,7 +158,7 @@ public class KeycloakClient {
 
 	/**
 	 * Delete a user.
-	 * 
+	 *
 	 * @param username
 	 *            user name.
 	 */
@@ -172,7 +172,7 @@ public class KeycloakClient {
 
 	/**
 	 * Update a user.
-	 * 
+	 *
 	 * @param user
 	 *            user to update.
 	 */
@@ -202,9 +202,9 @@ public class KeycloakClient {
 
 	/*
 	 * Parse user to keycloak user representation.
-	 * 
+	 *
 	 * @param user user.
-	 * 
+	 *
 	 * @return keycloak user representation.
 	 */
 	private UserRepresentation getUserRepresentation(final User user) {

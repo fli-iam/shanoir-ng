@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -51,15 +51,15 @@ public class AnestheticIngredient extends HalEntity   {
   @RefValueExists
   @ManyToOne
   private Reference name = null;
-  
+
   @JsonProperty("concentration")
   private Double concentration;
-  
+
   @JsonProperty("concentration_unit")
   @RefValueExists
   @ManyToOne
   private Reference concentrationUnit = null;
-  
+
   /**
 	* Init HATEOAS links
 	*/
@@ -67,7 +67,7 @@ public class AnestheticIngredient extends HalEntity   {
   public void initLinks() {
 	this.addLink(Links.REL_SELF, "anesthetic/"+ anesthetic.getId() +"/ingredient/" + getId());
   }
-  
+
   public AnestheticIngredient anesthetic(Anesthetic anesthetic) {
     this.anesthetic = anesthetic;
     return this;
@@ -95,13 +95,13 @@ public class AnestheticIngredient extends HalEntity   {
   public void setName(Reference name) {
     this.name = name;
   }
-  
-    
+
+
   public AnestheticIngredient concentration(Double concentration) {
     this.concentration = concentration;
     return this;
   }
-  
+
   @Schema(name = "none")
   public Double getConcentration() {
     return concentration;
@@ -110,7 +110,7 @@ public class AnestheticIngredient extends HalEntity   {
   public void setConcentration(Double concentration) {
     this.concentration = concentration;
   }
-  
+
   public AnestheticIngredient concentrationUnit(Reference unit) {
     this.concentrationUnit = unit;
     return this;
@@ -125,7 +125,7 @@ public class AnestheticIngredient extends HalEntity   {
     this.concentrationUnit = unit;
   }
 
-  
+
   @Override
   public int hashCode() {
 	return Objects.hash(name);
@@ -178,7 +178,7 @@ public class AnestheticIngredient extends HalEntity   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class AnestheticIngredient {\n");
-    
+
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    concentration: ").append(toIndentedString(concentration)).append("\n");
     sb.append("    concentration unit: ").append(toIndentedString(concentrationUnit)).append("\n");

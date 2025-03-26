@@ -38,13 +38,13 @@ public class AsyncTaskApiController implements AsyncTaskApi {
 	public ResponseEntity<List<ShanoirEventLight>> findTasks() {
 		Long userId = KeycloakUtil.getTokenUserId();
 		List<ShanoirEventLight> taskList = taskService.getEventsByUserAndType(
-			userId, 
-			ShanoirEventType.IMPORT_DATASET_EVENT, 
-			ShanoirEventType.COPY_DATASET_EVENT, 
-			ShanoirEventType.EXECUTION_MONITORING_EVENT, 
-			ShanoirEventType.CHECK_QUALITY_EVENT, 
-			ShanoirEventType.SOLR_INDEX_ALL_EVENT, 
-			ShanoirEventType.DOWNLOAD_STATISTICS_EVENT, 
+			userId,
+			ShanoirEventType.IMPORT_DATASET_EVENT,
+			ShanoirEventType.COPY_DATASET_EVENT,
+			ShanoirEventType.EXECUTION_MONITORING_EVENT,
+			ShanoirEventType.CHECK_QUALITY_EVENT,
+			ShanoirEventType.SOLR_INDEX_ALL_EVENT,
+			ShanoirEventType.DOWNLOAD_STATISTICS_EVENT,
 			ShanoirEventType.DELETE_EXAMINATION_EVENT,
 			ShanoirEventType.DELETE_DATASET_EVENT);
  		// Order by last update date

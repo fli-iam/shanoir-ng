@@ -30,9 +30,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class implements the logic when the start import button is clicked.
- * 
+ *
  * @author mkain
- * 
+ *
  */
 public class ImportDialogOpener {
 
@@ -60,7 +60,7 @@ public class ImportDialogOpener {
 			// Profile OFSEP: search with identifier
 			if (ShUpConfig.isModeSubjectCommonNameAutoIncrement()) {
 				subject = getSubject(uploadJob);
-			} // else Profile Neurinfo: no search with identifier, user selects existing subject 
+			} // else Profile Neurinfo: no search with identifier, user selects existing subject
 			List<Study> studiesWithStudyCards = getStudiesWithStudyCards(uploadJob);
 			// init components of GUI and listeners
 			ImportStudyCardFilterDocumentListener importStudyCardFilterDocumentListener = new ImportStudyCardFilterDocumentListener(this.mainWindow);
@@ -106,10 +106,10 @@ public class ImportDialogOpener {
 
 	/**
 	 * This method calls the backend service and transforms DTO into model objects.
-	 * 
+	 *
 	 * @param dicomData
 	 * @param equipmentDicom
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	private List<Study> getStudiesWithStudyCards(final UploadJob uploadJob) throws Exception {
 		List<Study> studies = shanoirUploaderServiceClient.findStudiesNamesAndCenters();

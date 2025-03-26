@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -38,10 +38,10 @@ import org.slf4j.LoggerFactory;
  * Anonymization serviceImpl. mkain: bug fixing done for multi-threading errors,
  * e.g. when used by server; bug fixed for identical media storage sop instance
  * uid and sop instance uid; bug fixed for invalid uid generation.
- * 
+ *
  * @author ifakhfakh
  * @author mkain
- * 
+ *
  */
 public class AnonymizationServiceImpl implements AnonymizationService {
 
@@ -147,10 +147,10 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	 * file with a C-STORE request and an Affected SOP Instance UID (== header) in
 	 * the request header. If the file arrives in the PACS, the SOP Instance UID in
 	 * the file does not match with the request header and this is refused.
-	 * 
+	 *
 	 * Further does each part of an UID has to start with a non-zero value, see
 	 * UIDGeneration code.
-	 * 
+	 *
 	 * @param dicomFile
 	 *            the image path
 	 * @param profile
@@ -265,7 +265,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
 	/**
 	 * Handle tags to delete for manufacturer here
-	 * 
+	 *
 	 * @param datasetAttributes
 	 * @param tagString
 	 * @param action
@@ -328,7 +328,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
 	/**
 	 * Tag Anonymization
-	 * 
+	 *
 	 * @param tagInt
 	 *            : the tag to anonymize
 	 * @param action
@@ -372,7 +372,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
 	/**
 	 * Get the anonymized value of the tag
-	 * 
+	 *
 	 * @param action
 	 *            : the action letter to apply
 	 * @return
@@ -405,7 +405,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
 	/**
 	 * anonymize Tag According To its VR
-	 * 
+	 *
 	 * @param attributes
 	 *            : the list of dicom attributes to modify
 	 * @param tag

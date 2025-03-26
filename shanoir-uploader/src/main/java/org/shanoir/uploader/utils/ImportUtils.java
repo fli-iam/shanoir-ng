@@ -79,7 +79,7 @@ public class ImportUtils {
 	/**
 	 * Adds a subjectStudy to a given subject with the given study
 	 * and in case subject is already in study, nothing is made.
-	 * 
+	 *
 	 * @param study the added study
 	 * @param subject the subject we add a subjectStudy on
 	 * @param subjectType the type of suject
@@ -136,7 +136,7 @@ public class ImportUtils {
 
 	/**
 	 * Initializes UploadJob object to be written to file system.
-	 * 
+	 *
 	 * @param selectedSeries
 	 * @param dicomData
 	 * @param uploadJob
@@ -242,7 +242,7 @@ public class ImportUtils {
 	 * subjectId and examinationId are created in the window of ImportDialog and are not known before.
 	 * In this method selectedSeries as attribute of ImportJob are copied into patient - study - serie
 	 * tree, as still expected like this on the server.
-	 * 
+	 *
 	 * @param uploadJob
 	 * @param subjectName
 	 * @param subjectId
@@ -250,9 +250,9 @@ public class ImportUtils {
 	 * @param study
 	 * @param studyCard
 	 * @return
-	 * @throws IOException 
-	 * @throws DatabindException 
-	 * @throws StreamReadException 
+	 * @throws IOException
+	 * @throws DatabindException
+	 * @throws StreamReadException
 	 */
 	public static ImportJob prepareImportJob(ImportJob importJob, String subjectName, Long subjectId, Long examinationId, Study study, StudyCard studyCard) {
 		// Handle study and study card
@@ -322,7 +322,7 @@ public class ImportUtils {
 
 	/**
 	 * Initializes UploadStatusServiceJob object
-	 * 
+	 *
 	 */
 	public static void initDataUploadJob(final ImportJob importjob, final UploadJob uploadJob, NominativeDataUploadJob dataUploadJob) {
 		Patient patient = importjob.getPatient();
@@ -330,7 +330,7 @@ public class ImportUtils {
 		org.shanoir.ng.importer.model.Study study = importjob.getStudy();
 		dataUploadJob.setPatientName(patient.getPatientFirstName() + " " + patient.getPatientLastName());
 		dataUploadJob.setPatientPseudonymusHash(subject.getIdentifier());
-		String studyDateStr = Util.convertLocalDateToString(study.getStudyDate()); 
+		String studyDateStr = Util.convertLocalDateToString(study.getStudyDate());
 		dataUploadJob.setStudyDate(studyDateStr);
 		dataUploadJob.setIPP(patient.getPatientID());
 		dataUploadJob.setMriSerialNumber(uploadJob.getMriInformation().getManufacturer()
@@ -349,14 +349,14 @@ public class ImportUtils {
 	 * of Tag.ReferencedFileID to the uploadFolder in a flat way: the uploadFolder does not contain sub-folders.
 	 * To avoid overwrites because of the same file name, the original path to the file is used as file name,
 	 * separated by "_" underscores.
-	 * 
+	 *
 	 * @param isFromPACS
 	 * @param selectedSeries
 	 * @param uploadFolder
 	 * @param dicomServerClient
 	 * @param filePathDicomDir
 	 * @return
-	 * @throws FileNotFoundException 
+	 * @throws FileNotFoundException
 	 */
 	public static List<String> downloadOrCopyFilesIntoUploadFolder(boolean isFromPACS, JProgressBar progressBar, StringBuilder downloadOrCopyReport, String studyInstanceUID, List<Serie> selectedSeries, File uploadFolder, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, IDicomServerClient dicomServerClient, String filePathDicomDir) throws FileNotFoundException {
 		List<String> allFileNames = null;
@@ -503,7 +503,7 @@ public class ImportUtils {
 	 * added into the Excel table of the mass import or by-patient
 	 * added into the GUI of ShUp. If nothing is added for modification,
 	 * we assume, that the values from the DICOMs are correct and continue.
-	 * 
+	 *
 	 * @param patient
 	 * @param firstName
 	 * @param lastName
@@ -605,7 +605,7 @@ public class ImportUtils {
 	 * Find matching equipment via manufacturer model name + device serial number
 	 * from entire database, no study restriction, equipment points to center for
 	 * study card.
-	 * 
+	 *
 	 * @param acquisitionEquipments
 	 * @param manufacturerModelName
 	 * @param deviceSerialNumber

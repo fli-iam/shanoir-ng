@@ -185,7 +185,7 @@ public class Media implements DicomTreeNode {
 
 	/**
 	 * Initialize patient from DicomObject.
-	 * 
+	 *
 	 * @param dicomObject
 	 * @return
 	 */

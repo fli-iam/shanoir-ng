@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
- * Execution Status 
- * 
+ * Execution Status
+ *
  * @author KhalilKes
  */
 public enum ExecutionStatus {

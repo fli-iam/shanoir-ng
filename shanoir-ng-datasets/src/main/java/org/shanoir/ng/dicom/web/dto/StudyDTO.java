@@ -6,13 +6,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * This class represents a DICOM-STUDY used for the DICOMweb protocol.
- * 
+ *
  * See for the standard:
  * https://dicom.nema.org/medical/dicom/current/output/html/part18.html#sect_10.4
  * 13 attributes are required by the standard, 3 are mentioned with "C", so ignored here
- * 
+ *
  * Goal is to support OHIF viewer, v2.x
- * 
+ *
  * DICOMweb:
  * WADO-RS / RetrieveStudy
  * Supported:
@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * - DICOM Response with change in transfer syntax
  * - Bulk data response
  * - MediaType data response
- * 
+ *
  * @author mkain
  *
  */
@@ -48,22 +48,22 @@ public class StudyDTO {
 	private String studyDate;
 	
     // == not stored today, return always 000000
-    @JsonProperty("StudyTime")    
+    @JsonProperty("StudyTime")
 	private String studyTime;
-    
+
     // == number of examination per patient starting with 1
-    @JsonProperty("AccessionNumber")    
+    @JsonProperty("AccessionNumber")
     private String accessionNumber;
-    
+
     /**
      * PATIENT: 4 attributes
      */
     // subject.name == common name
-    @JsonProperty("PatientName")    
+    @JsonProperty("PatientName")
 	private String patientName;
 	
     // == subject.id
-    @JsonProperty("PatientID")    
+    @JsonProperty("PatientID")
 	private String patientID;
 	
     // == subject.birthDate 19800101
@@ -83,10 +83,10 @@ public class StudyDTO {
      */
     @JsonProperty("NumInstances")
 	private Integer numInstances;
-    
+
     @JsonProperty("Modalities")
 	private String modalities;
-    
+
     @JsonProperty("series")
 	private List<SerieDTO> series;
 

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -61,7 +61,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * This class actually does the import work and introduces the asynchronous
  * aspect into the import, that the ImporterApiController can directly answer.
- * 
+ *
  * @author mkain
  *
  */
@@ -184,7 +184,7 @@ public class ImporterManagerService {
 	 * pacs or from-sh-up it is different, as the ImagesCreatorAndDicomFileAnalyzer is called afterwards (startImportJob).
 	 * Same here for multi-exam-imports: it calls uploadDicomZipFile method, where series could be classed
 	 * as erroneous and when startImportJob is called, we want them to be removed from the import.
-	 * 
+	 *
 	 * @param importJob
 	 */
 	private void cleanSeries(final ImportJob importJob) {
@@ -265,7 +265,7 @@ public class ImporterManagerService {
 	
 	/**
 	 * This method creates a random number named work folder to work within during the import.
-	 * 
+	 *
 	 * @return file: work folder
 	 * @throws ShanoirException
 	 */
@@ -282,7 +282,7 @@ public class ImporterManagerService {
 	
 	/**
 	 * This method creates a random long number.
-	 * 
+	 *
 	 * @return long: random number
 	 */
 	private long createRandomLong() {
@@ -297,7 +297,7 @@ public class ImporterManagerService {
 
 	/**
 	 * Calls a c-move for each serie involved, files are received via DicomStoreSCPServer.
-	 * 
+	 *
 	 * @param patients
 	 * @throws ShanoirException
 	 */
@@ -349,7 +349,7 @@ public class ImporterManagerService {
 	 * For performance reasons already init with 10000 buckets, assuming,
 	 * that we will normally never have more than 10000 files to process.
 	 * Maybe to be evaluated later with more bigger imports.
-	 * 
+	 *
 	 * @param importJob
 	 * @param patient
 	 * @param workFolderPath
@@ -373,7 +373,7 @@ public class ImporterManagerService {
 	/**
 	 * This method walks trough the images of a serie, gets the path,
 	 * creates a file for it and adds it to pathsSet.
-	 * 
+	 *
 	 * @param workFolderPath
 	 * @param pathsSet
 	 * @param serie

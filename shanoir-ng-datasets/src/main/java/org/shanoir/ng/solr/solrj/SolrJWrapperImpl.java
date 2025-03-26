@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.shanoir.ng.solr.solrj;
 
@@ -238,9 +238,9 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 	private void addFilterQuery(SolrQuery query, String fieldName, Collection<String> values) {
 		if (values != null && !values.isEmpty()) {
 			query.addFilterQuery(
-					"{!tag=" + fieldName + "}" 
+					"{!tag=" + fieldName + "}"
 					+ fieldName + ":(\"" + String.join("\" OR \"", values) + "\")");
-		} 
+		}
 	}
 
 
@@ -290,7 +290,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 
 	private <T> void addFilterQueryFromRange(SolrQuery query, String fieldName, Range<T> range) {
 		if (range != null && (range.getLowerBound() != null || range.getUpperBound() != null)) {
-			String rangeQueryStr = fieldName + ":[" 
+			String rangeQueryStr = fieldName + ":["
 					+ (range.getLowerBound() != null ? ClientUtils.escapeQueryChars(range.getLowerBound().toString()) : "*")
 					+ " TO "
 					+ (range.getUpperBound() != null ? ClientUtils.escapeQueryChars(range.getUpperBound().toString()) : "*") 	
@@ -302,7 +302,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 	private void addFilterQueryFromDateRange(SolrQuery query, String fieldName, Range<LocalDate> range) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 		if (range != null && (range.getLowerBound() != null || range.getUpperBound() != null)) {
-			String rangeQueryStr = fieldName + ":[" 
+			String rangeQueryStr = fieldName + ":["
 					+ (range.getLowerBound() != null ? ClientUtils.escapeQueryChars(range.getLowerBound().plusDays(1).atStartOfDay().format(formatter)) : "*")
 					+ " TO "
 					+ (range.getUpperBound() != null ? ClientUtils.escapeQueryChars(range.getUpperBound().plusDays(1).atStartOfDay().format(formatter)) : "*") 	
@@ -419,7 +419,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 			solrDoc.setStudyId((Long) document.getFirstValue("studyId"));
 			solrDoc.setCenterName((String) document.getFirstValue("centerName"));
 			solrDoc.setCenterId((Long) document.getFirstValue("centerId"));
-			solrDoc.setSliceThickness((Double) document.getFirstValue("sliceThickness")); 
+			solrDoc.setSliceThickness((Double) document.getFirstValue("sliceThickness"));
 			solrDoc.setPixelBandwidth((Double) document.getFirstValue("pixelBandwidth"));
 			solrDoc.setMagneticFieldStrength((Double) document.getFirstValue("magneticFieldStrength"));
 			solrDoc.setProcessed((Boolean) document.getFirstValue("processed"));
@@ -446,8 +446,8 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 		for (FacetField.Count facetFieldCount : facetField.getValues()) {
 			Field field = new SimpleField(facetField.getName());
 			FacetFieldEntry facetFieldEntry = new SimpleFacetFieldEntry(
-					field, 
-					facetFieldCount.getName(), 
+					field,
+					facetFieldCount.getName(),
 					facetFieldCount.getCount());
 			content.add(facetFieldEntry);
 		}

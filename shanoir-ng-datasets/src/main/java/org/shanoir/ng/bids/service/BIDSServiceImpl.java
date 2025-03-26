@@ -375,7 +375,7 @@ public class BIDSServiceImpl implements BIDSService {
 	 * @param examination the examination for which we want to create the folder
 	 * @param subjectDir the parent folder
 	 * @return the newly created folder
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	private File createExaminationFolder(final Examination examination, final File subjectDir) throws IOException {
 		String sessionLabel = this.getSessionLabel(examination);
@@ -666,7 +666,7 @@ public class BIDSServiceImpl implements BIDSService {
 	 * @param subjectName the subject name associated
 	 * @param sessionId the session ID / examination ID associated
 	 * @param runId The run ID
-	 * @param dataFolder 
+	 * @param dataFolder
 	 * @throws RestServiceException
 	 * @throws IOException
 	 */

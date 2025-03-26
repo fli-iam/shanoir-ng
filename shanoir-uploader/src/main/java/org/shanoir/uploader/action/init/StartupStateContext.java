@@ -9,15 +9,15 @@ import org.shanoir.uploader.gui.ShUpStartupDialog;
 
 /**
  * This class is the context class as defined in the "state design pattern".
- * It knows every thing about the current state and is able to trigger an 
+ * It knows every thing about the current state and is able to trigger an
  * action link to the current state.
- * 
+ *
  * This class has 2 observers :
  * 	- ShanoirStartupController
  *  - ShanoirStartupDialog
- *  
+ *
  * @author atouboul
- *  
+ *
  */
 @Component
 public class StartupStateContext {

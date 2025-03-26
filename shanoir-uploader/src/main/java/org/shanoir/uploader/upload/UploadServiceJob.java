@@ -31,9 +31,9 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 
 /**
  * The UploadServiceJob.
- * 
+ *
  * @author mkain
- * 
+ *
  */
 @Component
 public class UploadServiceJob {
@@ -61,7 +61,7 @@ public class UploadServiceJob {
 
 	/**
 	 * Walk trough all folders within the work folder.
-	 * 
+	 *
 	 * @param workFolder
 	 */
 	private void processWorkFolder(File workFolder, CurrentNominativeDataController currentNominativeDataController) {
@@ -85,7 +85,7 @@ public class UploadServiceJob {
 
 	/**
 	 * Inspects the content of a folder.
-	 * 
+	 *
 	 * @param folder
 	 */
 	private void processFolderForServer(final File folder, final UploadJobManager uploadJobManager,
@@ -135,7 +135,7 @@ public class UploadServiceJob {
 
 	/**
 	 * This method processes the state START.
-	 * 
+	 *
 	 * @param folder
 	 * @param allFiles
 	 * @param uploadJob

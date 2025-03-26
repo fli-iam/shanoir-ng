@@ -55,11 +55,11 @@ import org.springframework.transaction.annotation.Transactional;
  * send as DICOM SR Structured Report. It modifies the by the OHIF
  * viewer created DICOM SR to correspond to shanoir needs, creates
  * the dataset in the database and sends the dicom file to the pacs.
- * 
+ *
  * The import only happens in the servers memory, as the structured
  * reports are very small memory footprint objects and as this avoids
  * us any implication of MS Import in this special case.
- * 
+ *
  * @author mkain
  *
  */
@@ -139,13 +139,13 @@ public class DicomSEGAndSRImporterService {
 	 * - use user name as person name, who created the measurement
 	 * - replace with correct study instance UID from pacs for correct storage
 	 * - add subject name according to shanoir, as viewer sends a strange P-000001.
-	 * 
+	 *
 	 * Note: the approach to replace the newly created SeriesInstanceUID
 	 * with the referenced SeriesInstanceUID, available via CurrentRequested-
 	 * ProcedureEvidenceSequence -> ReferencedSeriesSequence -> SeriesInstanceUID
 	 * did not work to get it displayed correctly in the viewer, but lead even to
 	 * an error in the viewer.
-	 * 
+	 *
 	 * @param datasetAttributes
 	 */
 	private Examination modifyDicom(Attributes datasetAttributes) {
@@ -179,7 +179,7 @@ public class DicomSEGAndSRImporterService {
 	 * A measurement dataset is related to the dataset, that has been annotated.
 	 * We use the information in the DICOM SR object to find the correct dataset
 	 * in shanoir database using studyInstanceUID, seriesInstanceUID and SOPInstanceUID.
-	 * 
+	 *
 	 * @param datasetAttributes
 	 * @return
 	 */
@@ -239,7 +239,7 @@ public class DicomSEGAndSRImporterService {
 	
 	/**
 	 * Find origin dataset using the 3 UIDs in dataset_file.path attribute.
-	 * 
+	 *
 	 * @param examination
 	 * @param studyInstanceUID
 	 * @param seriesInstanceUID
@@ -279,7 +279,7 @@ public class DicomSEGAndSRImporterService {
 	
 	/**
 	 * Create the dataset in the database.
-	 * 
+	 *
 	 * @param examination
 	 * @param dataset
 	 * @param datasetAttributes
@@ -316,7 +316,7 @@ public class DicomSEGAndSRImporterService {
 	 * e.g. for one study. This code works and has been tested to access the most
 	 * important measurement attributes and was hard to construct. Even if currently
 	 * not used, we keep it for a very high later usage.
-	 * 
+	 *
 	 * @param datasetAttributes
 	 * @param dataset
 	 */
@@ -383,7 +383,7 @@ public class DicomSEGAndSRImporterService {
 
 	/**
 	 * Create the necessary dataset expression.
-	 * 
+	 *
 	 * @param datasetAttributes
 	 * @param measurementDataset
 	 * @throws MalformedURLException
@@ -402,7 +402,7 @@ public class DicomSEGAndSRImporterService {
 	/**
 	 * Create the dataset files, as WADO-RS links in that case,
 	 * as OHIF viewer works only with new version of dcm4chee (arc-light 5.x).
-	 * 
+	 *
 	 * @param datasetAttributes
 	 * @param expression
 	 * @return
@@ -431,7 +431,7 @@ public class DicomSEGAndSRImporterService {
 	 * This method writes both attributes to an output stream and converts
 	 * this one to an input stream, that can be used to send the manipulated
 	 * file to the backend pacs.
-	 * 
+	 *
 	 * @param metaInformationAttributes
 	 * @param datasetAttributes
 	 * @throws IOException

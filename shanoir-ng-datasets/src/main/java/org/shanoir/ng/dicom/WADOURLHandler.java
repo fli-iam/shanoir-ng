@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 /**
  * This class manages WADO-URLs, either WADO-RS or WADO-URI.
- * 
+ *
  * @author mkain
  *
  */

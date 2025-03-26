@@ -60,7 +60,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 /**
  *
  * Util class needed by the ImportDetailsListener controller
- * 
+ *
  * @author mkain
  * @author atouboul
  *
@@ -206,7 +206,7 @@ public final class Util {
 
 	/**
 	 * Copy the contents of pseudonymus folder into .SU
-	 * 
+	 *
 	 * @param folderName
 	 */
 	public static void copyPseudonymusFolder(String folderName) {
@@ -250,7 +250,7 @@ public final class Util {
 	/**
 	 * This method copies the content of the dicom.server.properties in the .jar
 	 * file to the same file in the user.home.
-	 * 
+	 *
 	 * @param propertiesFile
 	 * @throws IOException
 	 * @throws FileNotFoundException
@@ -324,7 +324,7 @@ public final class Util {
 
 	/**
 	 * Generic method for converting Json object (of type list) to a list of pojo.
-	 * 
+	 *
 	 * @param List<T>
 	 */
 	public static <T> List<T> getMappedList(CloseableHttpResponse response, Class<T> classname) {
@@ -371,7 +371,7 @@ public final class Util {
 	 * List directory contents for a resource folder. Not recursive. This is
 	 * basically a brute-force implementation. Works for regular files and also
 	 * JARs.
-	 * 
+	 *
 	 * @param clazz Any java class that lives in the same place as the resources you
 	 *              want.
 	 * @param path  Should end with "/", but not start with one.
@@ -573,7 +573,7 @@ public final class Util {
 
 	/**
 	 * Formats a date according to the pattern ShanoirConstants.TIME_PATTERN.
-	 * 
+	 *
 	 * @param date
 	 * @return
 	 */
@@ -587,7 +587,7 @@ public final class Util {
 
 	/**
 	 * Returns the current time stamp usable for file systems.
-	 * 
+	 *
 	 * @return
 	 */
 	public static String getCurrentTimeStampForFS() {

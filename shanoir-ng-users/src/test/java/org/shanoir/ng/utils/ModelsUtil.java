@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -22,7 +22,7 @@ import org.shanoir.ng.user.model.User;
 /**
  * Utility class for test.
  * Generates models.
- * 
+ *
  * @author msimon
  *
  */
@@ -56,7 +56,7 @@ public final class ModelsUtil {
 	
 	/**
 	 * Create a role 'admin'.
-	 * 
+	 *
 	 * @return role
 	 */
 	public static Role createAdminRole() {
@@ -69,7 +69,7 @@ public final class ModelsUtil {
 	
 	/**
 	 * Create a role 'expert'.
-	 * 
+	 *
 	 * @return role
 	 */
 	public static Role createExpertRole() {
@@ -82,7 +82,7 @@ public final class ModelsUtil {
 	
 	/**
 	 * Create a role 'user'.
-	 * 
+	 *
 	 * @return role
 	 */
 	public static Role createUserRole() {
@@ -95,7 +95,7 @@ public final class ModelsUtil {
 	
 	/**
 	 * Create a user.
-	 * 
+	 *
 	 * @return user.
 	 */
 	public static User createAdmin() {
@@ -104,7 +104,7 @@ public final class ModelsUtil {
 	
 	/**
 	 * Create a user.
-	 * 
+	 *
 	 * @return user.
 	 */
 	public static User createAdmin(Long id) {
@@ -113,7 +113,7 @@ public final class ModelsUtil {
 	
 	/**
 	 * Create a user.
-	 * 
+	 *
 	 * @return user.
 	 */
 	public static User createUser() {
@@ -122,7 +122,7 @@ public final class ModelsUtil {
 	
 	/**
 	 * Create a user.
-	 * 
+	 *
 	 * @return user.
 	 */
 	public static User createUser(Long id) {
@@ -131,7 +131,7 @@ public final class ModelsUtil {
 	
 	/**
 	 * Create a user.
-	 * 
+	 *
 	 * @return user.
 	 */
 	public static User createExpert() {
@@ -140,7 +140,7 @@ public final class ModelsUtil {
 	
 	/**
 	 * Create a user.
-	 * 
+	 *
 	 * @return user.
 	 */
 	public static User createExpert(Long id) {
@@ -149,7 +149,7 @@ public final class ModelsUtil {
 	
 	/**
 	 * Create a user with a defined role.
-	 * 
+	 *
 	 * @param role role.
 	 * @return user.
 	 */

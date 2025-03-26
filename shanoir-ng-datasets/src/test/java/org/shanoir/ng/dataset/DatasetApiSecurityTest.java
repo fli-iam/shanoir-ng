@@ -3,12 +3,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -63,9 +63,9 @@ import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
 /**
  * DatasetAPI security test.
- * 
+ *
  * @author jlouis
- * 
+ *
  */
 
 @SpringBootTest
@@ -321,7 +321,7 @@ public class DatasetApiSecurityTest {
 	private void setCenterRightsContext() {
 		/**
 		 * -> study 1 [CAN_SEE_ALL]
-		 *     -> subject 1 
+		 *     -> subject 1
 		 *         -> center 1 [HAS_RIGHTS]
 		 *             -> exam 1
 		 *                 -> dataset acq 1
@@ -347,17 +347,17 @@ public class DatasetApiSecurityTest {
 		// has right on study 1
 		given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
 		given(rightsService.hasRightOnStudy(1L, "CAN_DOWNLOAD")).willReturn(true);
-		// has right on [study 1, center 1] 
+		// has right on [study 1, center 1]
 		given(rightsService.hasRightOnCenter(1L, 1L)).willReturn(true);
 		Set<Long> studyIds1 = new HashSet<Long>(); studyIds1.add(1L);
 		given(rightsService.hasRightOnCenter(studyIds1, 1L)).willReturn(true);
-		// does not have right on [study 1, center 3] 
+		// does not have right on [study 1, center 3]
 		given(rightsService.hasRightOnCenter(1L, 3L)).willReturn(false);
 		given(rightsService.hasRightOnCenter(studyIds1, 3L)).willReturn(false);
 		
 		// has right on study 2
 		given(rightsService.hasRightOnStudy(2L, "CAN_SEE_ALL")).willReturn(true);
-		// does not have right on [study 2, center 2] 
+		// does not have right on [study 2, center 2]
 		given(rightsService.hasRightOnCenter(2L, 2L)).willReturn(false);
 		Set<Long> studyIds2 = new HashSet<Long>(); studyIds2.add(2L);
 		given(rightsService.hasRightOnCenter(studyIds2, 2L)).willReturn(false);

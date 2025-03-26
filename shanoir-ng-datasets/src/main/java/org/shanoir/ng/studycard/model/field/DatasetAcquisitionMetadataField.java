@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -61,7 +61,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
 				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
 				if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null) {
 					return mrDsAcq.getMrProtocol().getUpdatedMetadata().getComment();
-				} 
+				}
 				return null;
 			} else {
 				throw new CheckedIllegalClassException(MrDatasetAcquisition.class, datasetAcquisition);
@@ -102,7 +102,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
 			    if (longUpdatedValue != null) {
 			        MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
 			        if (mrDsAcq.getMrProtocol().getUpdatedMetadata() == null) mrDsAcq.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
-			        mrDsAcq.getMrProtocol().getUpdatedMetadata().setTransmittingCoilId(longUpdatedValue);			        
+			        mrDsAcq.getMrProtocol().getUpdatedMetadata().setTransmittingCoilId(longUpdatedValue);			
 			    }
 			} else {
 				throw new CheckedIllegalClassException(MrDatasetAcquisition.class, datasetAcquisition);
@@ -133,7 +133,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
                 if (longUpdatedValue != null) {
                     MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
                     if (mrDsAcq.getMrProtocol().getUpdatedMetadata() == null) mrDsAcq.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
-                    mrDsAcq.getMrProtocol().getUpdatedMetadata().setReceivingCoilId(longUpdatedValue);                    
+                    mrDsAcq.getMrProtocol().getUpdatedMetadata().setReceivingCoilId(longUpdatedValue);
                 }
 			} else {
 				throw new CheckedIllegalClassException(MrDatasetAcquisition.class, datasetAcquisition);

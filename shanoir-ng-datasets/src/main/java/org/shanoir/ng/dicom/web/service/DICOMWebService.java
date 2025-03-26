@@ -43,7 +43,7 @@ import jakarta.annotation.PostConstruct;
  * as the user will see an empty result list. For all storage calls, that are
  * important to arrive an exception is thrown back to the user to avoid silent
  * none storage.
- * 
+ *
  * @author mkain
  *
  */

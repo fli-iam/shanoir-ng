@@ -7,10 +7,10 @@ import org.slf4j.LoggerFactory;
  * This concrete state class defines the state where application startup
  * has failed due to the fact that Shanoir remote server is unreachable:
  * This state is a dead end.
- * 
+ *
  * @author mkain
  * @author atouboulic
- * 
+ *
  */
 public class ServerUnreachableState implements State {
 

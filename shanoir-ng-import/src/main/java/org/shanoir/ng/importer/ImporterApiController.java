@@ -411,8 +411,8 @@ public class ImporterApiController implements ImporterApi {
 	 * This method imports dataset file, and converts them to nifti if necessary (in case of a Analyze file format from .hdr/.img files)
 	 */
 	public ResponseEntity<String> uploadProcessedDataset(
-			@Parameter(name = "image detail") @RequestPart("image") MultipartFile imageFile, 
-			@Parameter(name = "header detail", required = false) @RequestPart(value = "header", required = false) MultipartFile headerFile) 
+			@Parameter(name = "image detail") @RequestPart("image") MultipartFile imageFile,
+			@Parameter(name = "header detail", required = false) @RequestPart(value = "header", required = false) MultipartFile headerFile)
 					throws RestServiceException {
 
 		String imageFileName = imageFile == null ? "" : imageFile.getOriginalFilename();

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * If the examination is already existing in Shanoir, the id is set,
  * if not the id == null. So we have to create a new examination in sh-ng.
- * 
+ *
  * @author mkain
  *
  */

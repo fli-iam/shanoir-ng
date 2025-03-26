@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * If the study is already existing in Shanoir, the studyName or studyId (or both) is set,
  * if not the studyName == null and the studyId == null. So we have to create a new study in sh-ng.
- * 
+ *
  * @author mkain
  *
  */

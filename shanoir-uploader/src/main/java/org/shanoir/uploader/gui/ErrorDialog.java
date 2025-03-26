@@ -12,7 +12,7 @@ public class ErrorDialog extends JDialog {
 	public JLabel errorLabel;
 	public JButton errorButton;
 	public JLabel connexionStatus;
-	ResourceBundle resourceBundle; 
+	ResourceBundle resourceBundle;
 	
 	public ErrorDialog(JDialog jdialog, String title, ResourceBundle resourceBundle) {
 		super(jdialog,title,true);

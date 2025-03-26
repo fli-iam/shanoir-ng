@@ -23,9 +23,9 @@ import org.shanoir.uploader.gui.DicomServerConfigurationWindow;
 /**
  * This class implements the logic when a new DICOM server configuration is
  * introduced in the DicomServerConfigurationWindow class
- * 
+ *
  * @author ifakhfakh
- * 
+ *
  */
 
 public class DicomServerConfigurationListener implements ActionListener {

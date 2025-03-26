@@ -458,5 +458,5 @@ public interface IShanoirConfigBean {
 	/**
 	 * @return the sorlUrlForJsConfig
 	 */
-	String getSolrUrlForJsConfig(); 
+	String getSolrUrlForJsConfig();
 }

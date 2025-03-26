@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Utility class for password hash
- * 
+ *
  * @author msimon
  *
  */
@@ -65,7 +65,7 @@ public final class PasswordUtils {
 	
 	/**
 	 * Check policy of a password.
-	 * 
+	 *
 	 * @param password password to check.
 	 * @param username user name.
 	 * @throws ShanoirUsersException exception thrown if password doesn't match policy
@@ -99,7 +99,7 @@ public final class PasswordUtils {
 	/**
 	 * Generates a random password. Password must contain at least 1 letter, 1
 	 * number and 1 special character (%,$,#,@) and its minimum size is 8.
-	 * 
+	 *
 	 * @return password
 	 */
 	public static String generatePassword() {
@@ -132,12 +132,12 @@ public final class PasswordUtils {
 
 	/**
 	 * Get the hash for the given password.
-	 * 
+	 *
 	 * @param password
 	 *            password to hash.
 	 * @param hashLength
 	 *            the hash length.
-	 * 
+	 *
 	 * @return the hash for the given password.
 	 */
 	public static String getHash(final String password) {
@@ -168,11 +168,11 @@ public final class PasswordUtils {
 
 	/*
 	 * Get next password index to fill.
-	 * 
+	 *
 	 * @param rnd random object.
-	 * 
+	 *
 	 * @param pwd password.
-	 * 
+	 *
 	 * @return password index.
 	 */
 	private static int getNextIndex(final SecureRandom rnd, final char[] pwd) {

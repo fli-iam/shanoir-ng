@@ -19,7 +19,7 @@ public class Event {
 	private int channelNumber;
     @JsonProperty("date")
 	private Date date;
-    
+
     // default constructor for jackson purpose
     public Event() {
     }

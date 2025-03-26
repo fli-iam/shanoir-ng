@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -24,9 +24,9 @@ import org.springframework.beans.BeanUtils;
 public class ListDependencyUpdate {
 	
 	/**
-	 * Updates oldValues by : deleting entities that don't exist in newValues, 
+	 * Updates oldValues by : deleting entities that don't exist in newValues,
 	 * updating entities that exist in both and deleting entities that exist only in oldValues.
-	 * 
+	 *
 	 * @param <T> Class of your entities
 	 * @param oldValues values to be updated
 	 * @param newValues new values
@@ -37,9 +37,9 @@ public class ListDependencyUpdate {
 	}
 
 	/**
-	 * Updates oldValues by : deleting entities that don't exist in newValues, 
+	 * Updates oldValues by : deleting entities that don't exist in newValues,
 	 * updating entities that exist in both and deleting entities that exist only in oldValues.
-	 * 
+	 *
 	 * @param <T> Class of your entities
 	 * @param oldValues values to be updated
 	 * @param newValues new values
@@ -79,7 +79,7 @@ public class ListDependencyUpdate {
 						updated = old;
 					}
 				}
-			} 
+			}
 			if (updated == null && newEntity.getId() != null) {
 				updated = oldValuesMap.get(newEntity.getId());
 			}
@@ -95,9 +95,9 @@ public class ListDependencyUpdate {
 	}
 	
 	/**
-	 * Updates oldValues by : deleting entities that don't exist in newValues, 
+	 * Updates oldValues by : deleting entities that don't exist in newValues,
 	 * updating entities that exist in both and deleting entities that exist only in oldValues.
-	 * 
+	 *
 	 * @param <T> Class of your entities
 	 * @param oldValues values to be updated
 	 * @param newValues new values

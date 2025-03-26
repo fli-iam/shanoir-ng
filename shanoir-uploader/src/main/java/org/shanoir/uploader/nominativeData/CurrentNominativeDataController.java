@@ -178,7 +178,7 @@ public class CurrentNominativeDataController {
 
 	/**
 	 * Walk trough all folders within the work folder.
-	 * 
+	 *
 	 * @param workFolder
 	 */
 	private void processWorkFolder(File workFolder) {
@@ -195,7 +195,7 @@ public class CurrentNominativeDataController {
 
 	/**
 	 * Inspects the content of a folder. Copies the infos from one xml into the other xml, really bad.
-	 * 
+	 *
 	 * @param folder
 	 */
 	private NominativeDataUploadJob processFolder(final File folder) {
@@ -235,7 +235,7 @@ public class CurrentNominativeDataController {
 	/**
 	 * Initializes an UploadJobManager and puts the other files in the list
 	 * dicomFiles.
-	 * 
+	 *
 	 * @param folder
 	 * @param dicomFiles
 	 */

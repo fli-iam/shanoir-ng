@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
  * This component calculates subject identifiers, for more information see:
  * https://github.com/fli-iam/shanoir-ng/wiki/DICOM-Import-Single-Subject-Process-Steps
  * Import Step A.4
- * 
+ *
  * @author mkain
  *
  */
@@ -29,7 +29,7 @@ public class IdentifierCalculator {
 	/**
 	 * This method calculates a subject identifier on using three hash values.
 	 * This subject identifier is currently used by OFSEP.
-	 * 
+	 *
 	 * @param firstNameHash
 	 * @param birthNameHash
 	 * @param birthDateHash
@@ -56,7 +56,7 @@ public class IdentifierCalculator {
 	 * This method calculates a subject identifier on using three direct values.
 	 * This subject identifier is currently used by Neurinfo for not-anonymised
 	 * imports.
-	 * 
+	 *
 	 * @param firstName
 	 * @param lastName
 	 * @param birthDate
@@ -74,7 +74,7 @@ public class IdentifierCalculator {
 	 * This method calculates a subject identifier on using two direct values.
 	 * This subject identifier is currently used by Neurinfo for already anonymised
 	 * imports.
-	 * 
+	 *
 	 * @param newPatientID
 	 * @param birthDate
 	 * @return

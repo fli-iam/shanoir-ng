@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -61,7 +61,7 @@ public interface ContrastAgentApi {
     		@Parameter(name = "Contrast Agent id",required=true ) @PathVariable("cid") Long cid);
 
 
-    
+
     @Operation(summary = "Get Contrast Agent by protocol id", description = "")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "A Contrast Agent"),
@@ -70,7 +70,7 @@ public interface ContrastAgentApi {
     @GetMapping(value = "",
         produces = { "application/json" })
     ResponseEntity<ContrastAgent> getContrastAgentByProtocolId(@Parameter(name = "protocol id",required=true ) @PathVariable("pid") Long pid);
-    
+
     @Operation(summary = "Get Contrast Agent by id", description = "")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "A Contrast Agent"),
@@ -80,7 +80,7 @@ public interface ContrastAgentApi {
         produces = { "application/json" })
     ResponseEntity<ContrastAgent> getContrastAgentById(@Parameter(name = "protocol id",required=true ) @PathVariable("pid") Long pid,
     		@Parameter(name = "Contrast Agent id",required=true ) @PathVariable("cid") Long cid);
-    
+
     @Operation(summary = "Get Contrast Agent by name", description = "")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "A Contrast Agent"),
@@ -90,7 +90,7 @@ public interface ContrastAgentApi {
         produces = { "application/json" })
     ResponseEntity<ContrastAgent> getContrastAgentByName(@Parameter(name = "protocol id",required=true ) @PathVariable("pid") Long pid,
     		@Parameter(name = "Contrast Agent id",required=true ) @PathVariable("name") String name);
-    
+
 
     @Operation(summary = "List all contrast agents", description = "")
     @ApiResponses(value = {

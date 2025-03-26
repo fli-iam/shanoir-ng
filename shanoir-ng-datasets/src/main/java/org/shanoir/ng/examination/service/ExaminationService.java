@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -40,10 +40,10 @@ public interface ExaminationService {
 
 	/**
 	 * Delete an examination.
-	 * 
+	 *
 	 * @param id examination id.
 	 * @throws EntityNotFoundException
-	 * @throws ShanoirException 
+	 * @throws ShanoirException
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnExamination(#id, 'CAN_ADMINISTRATE'))")
 	void deleteById(Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException;
@@ -53,7 +53,7 @@ public interface ExaminationService {
 
 	/**
 	 * Get all examinations for a specific user to support DICOMweb.
-	 * 
+	 *
 	 * @return
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
@@ -62,7 +62,7 @@ public interface ExaminationService {
 	
 	/**
 	 * Get a paginated list of examinations reachable by connected user.
-	 * 
+	 *
 	 * @param pageable pagination data.
 	 * @return list of examinations.
 	 */
@@ -72,7 +72,7 @@ public interface ExaminationService {
 	
 	/**
 	 * Get a paginated list of examinations reachable by connected user.
-	 * 
+	 *
 	 * @param pageable pagination data.
 	 * @return list of examinations.
 	 */
@@ -121,7 +121,7 @@ public interface ExaminationService {
 
 	/**
 	 * Find examinations related to particular subject and study
-	 * 
+	 *
 	 * @param subjectId: the id of the subject
 	 * @param studyId: the id of the study
 	 * @return list of examinations.
@@ -145,7 +145,7 @@ public interface ExaminationService {
 	 * @param examination  examination to update.
 	 * @return updated examination.
 	 * @throws EntityNotFoundException
-	 * @throws ShanoirException 
+	 * @throws ShanoirException
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examination.getId(), 'CAN_IMPORT'))")
 	Examination update(Examination examination) throws EntityNotFoundException, ShanoirException;

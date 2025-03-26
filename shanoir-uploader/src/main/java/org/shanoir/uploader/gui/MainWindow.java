@@ -68,9 +68,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The MainWindow of the ShanoirUploader.
- * 
+ *
  * @author mkain
- * 
+ *
  */
 @SuppressWarnings("serial")
 public class MainWindow extends JFrame {

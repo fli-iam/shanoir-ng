@@ -41,7 +41,7 @@ import java.util.List;
 @Tag(name = "studycards", description = "the studyCard API")
 @RequestMapping("/studycards")
 public interface StudyCardApi {
-    
+
 	@Operation(summary = "", description = "Deletes a study card")
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "study card deleted"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),

@@ -44,7 +44,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
- * 
+ *
  * Service layer for REST services of sh-ng.
  *
  * @author mkain
@@ -221,7 +221,7 @@ public class ShanoirUploaderServiceClient {
 	 * We use separate HttpService here, as the proxy test comes before the profile
 	 * selection, where we learn later the final address of the Shanoir server to
 	 * communicate with.
-	 * 
+	 *
 	 * @param testURL
 	 * @return
 	 * @throws IOException
@@ -688,7 +688,7 @@ public class ShanoirUploaderServiceClient {
 					Center center = Util.getMappedObject(response, Center.class);
 					return center;
 				} else {
-					logger.error("Error in findCenterOrCreateByInstitutionDicom: with institution dicom " + institutionDicom.getInstitutionName() 
+					logger.error("Error in findCenterOrCreateByInstitutionDicom: with institution dicom " + institutionDicom.getInstitutionName()
 						+ " (status code: " + code	+ ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 				}
 			} catch (Exception e) {
@@ -781,7 +781,7 @@ public class ShanoirUploaderServiceClient {
 	
 	/**
 	 * This method creates a subject on the server.
-	 * 
+	 *
 	 * @param studyId
 	 * @param studyCardId
 	 * @param modeSubjectCommonName
@@ -821,7 +821,7 @@ public class ShanoirUploaderServiceClient {
 	/**
 	 * This method updates a subject on the server and therefore updates
 	 * the rel_subject_study list too.
-	 * 
+	 *
 	 * @param subject
 	 * @return
 	 */
@@ -848,7 +848,7 @@ public class ShanoirUploaderServiceClient {
 	
 	/**
 	 * This method creates an examination on the server.
-	 * 
+	 *
 	 * @param examinationDTO
 	 * @return
 	 */
@@ -893,7 +893,7 @@ public class ShanoirUploaderServiceClient {
 		logger.info("Retrieving qualitycards for the study : " + studyId);
 		try {
 			String studyIdentifier = URLEncoder.encode(Long.toString(studyId), "UTF-8");
-			long startTime = System.currentTimeMillis(); 
+			long startTime = System.currentTimeMillis();
 			try (CloseableHttpResponse response = httpService.get(this.serviceURLQualityCardsByStudyId + studyIdentifier)) {
 				long stopTime = System.currentTimeMillis();
 				long elapsedTime = stopTime - startTime;

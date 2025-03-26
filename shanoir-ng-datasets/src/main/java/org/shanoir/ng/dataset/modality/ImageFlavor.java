@@ -7,7 +7,7 @@ package org.shanoir.ng.dataset.modality;
  * This value 3 is called image flavor. See more information according to:
  * https://www.dicomstandard.org/News-dir/ftsup/docs/sups/sup49.pdf
  * https://dicom.innolitics.com/ciods/enhanced-mr-image/enhanced-mr-image/00080008
- * 
+ *
  * @author mkain
  *
  */

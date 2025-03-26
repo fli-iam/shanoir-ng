@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -38,7 +38,7 @@ import jakarta.validation.constraints.NotNull;
 @Table(name = "examination_anesthetic")
 @JsonPropertyOrder({ "_links" })
 public class ExaminationAnesthetic extends HalEntity  {
-  
+
   @JsonProperty("examination_id")
   @NotNull
   private Long examinationId;
@@ -47,30 +47,30 @@ public class ExaminationAnesthetic extends HalEntity  {
   @ManyToOne
   @NotNull
   private Anesthetic anesthetic = null;
- 
+
   @JsonProperty("dose")
   private Double dose;
-  
+
   @JsonProperty("dose_unit")
   //@RefValueExists
   @ManyToOne
   private Reference doseUnit = null;
-  
+
   @JsonProperty("injection_interval")
   private String injectionInterval;
-  
+
   @JsonProperty("injection_site")
   private String injectionSite;
-  
+
   @JsonProperty("injection_type")
   private String injectionType;
-  
+
   @JsonProperty("startDate")
   private Date startDate = null;
 
   @JsonProperty("endDate")
   private Date endDate = null;
-  
+
   /**
 	* Init HATEOAS links
 	*/
@@ -78,7 +78,7 @@ public class ExaminationAnesthetic extends HalEntity  {
   public void initLinks() {
 	  this.addLink(Links.REL_SELF, "examination/"+ examinationId +"/anesthetic/" + getId());
   }
-  
+
   public ExaminationAnesthetic examinationId(Long id) {
     this.examinationId = id;
     return this;
@@ -92,12 +92,12 @@ public class ExaminationAnesthetic extends HalEntity  {
   public void setExaminationId(Long id) {
     this.examinationId = id;
   }
-  	  
+  	
   public ExaminationAnesthetic anesthetic(Anesthetic anesthetic) {
     this.anesthetic = anesthetic;
     return this;
   }
-  
+
   @Schema(name = "none")
   public Anesthetic getAnesthetic() {
     return anesthetic;
@@ -106,12 +106,12 @@ public class ExaminationAnesthetic extends HalEntity  {
   public void setAnesthetic(Anesthetic anesthetic) {
     this.anesthetic = anesthetic;
   }
-  
+
   public ExaminationAnesthetic dose(Double dose) {
     this.dose = dose;
     return this;
   }
-  
+
   @Schema(name = "none")
   public Double getDose() {
     return dose;
@@ -120,7 +120,7 @@ public class ExaminationAnesthetic extends HalEntity  {
   public void setDose(Double dose) {
     this.dose = dose;
   }
-  
+
   public ExaminationAnesthetic doseUnit(Reference unit) {
     this.doseUnit = unit;
     return this;
@@ -134,7 +134,7 @@ public class ExaminationAnesthetic extends HalEntity  {
   public void setDoseUnit(Reference unit) {
     this.doseUnit = unit;
   }
-  
+
   public ExaminationAnesthetic injectionInterval(String interval) {
     this.injectionInterval = interval;
     return this;
@@ -148,7 +148,7 @@ public class ExaminationAnesthetic extends HalEntity  {
   public void setInjectionInterval(String interval) {
     this.injectionInterval = interval;
   }
-  
+
   public ExaminationAnesthetic injectionSite(String site) {
     this.injectionSite = site;
     return this;
@@ -162,7 +162,7 @@ public class ExaminationAnesthetic extends HalEntity  {
   public void setInjectionSite(String site) {
     this.injectionSite = site;
   }
-  
+
   public ExaminationAnesthetic injectionType(String type) {
     this.injectionType = type;
     return this;
@@ -176,7 +176,7 @@ public class ExaminationAnesthetic extends HalEntity  {
   public void setInjectionType(String type) {
     this.injectionType = type;
   }
-  
+
   public ExaminationAnesthetic startDate(Date startDate) {
     this.startDate = startDate;
     return this;
@@ -195,7 +195,7 @@ public class ExaminationAnesthetic extends HalEntity  {
     this.endDate = endDate;
     return this;
   }
-  
+
   @Schema(name = "none")
   public Date getEndDate() {
     return endDate;
@@ -204,7 +204,7 @@ public class ExaminationAnesthetic extends HalEntity  {
   public void setEndDate(Date endDate) {
     this.endDate = endDate;
   }
-  
+
   @Override
   public int hashCode() {
 	return Objects.hash(examinationId, anesthetic, injectionInterval, injectionSite, injectionType);

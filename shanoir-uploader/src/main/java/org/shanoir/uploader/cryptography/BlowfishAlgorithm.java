@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class is used for password en-/decryption.
- * 
+ *
  * @author ifakhfakh
  * @author mkain
  *

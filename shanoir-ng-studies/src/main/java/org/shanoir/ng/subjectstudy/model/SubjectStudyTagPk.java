@@ -20,7 +20,7 @@ public class SubjectStudyTagPk implements Serializable {
 	@JoinColumn(name = "subject_study_id", insertable = false, updatable = false, nullable = false)
 	private SubjectStudy subjectStudy;
 
-    public SubjectStudyTagPk() {} 
+    public SubjectStudyTagPk() {}
 
     public SubjectStudyTagPk(Tag tag, SubjectStudy subjectStudy) {
 		super();
@@ -30,8 +30,8 @@ public class SubjectStudyTagPk implements Serializable {
 
 	@Override
     public boolean equals(Object obj) {
-    	return obj != null 
-    			&& obj instanceof SubjectStudyTagPk 
+    	return obj != null
+    			&& obj instanceof SubjectStudyTagPk
     			&& this.getSubjectStudy() != null
     			&& this.getTag() != null
     			&& ((SubjectStudyTagPk) obj).getTag() != null
@@ -41,7 +41,7 @@ public class SubjectStudyTagPk implements Serializable {
     			&& this.getTag().getId().equals(((SubjectStudyTagPk) obj).getTag().getId())
     			&& this.getSubjectStudy().getId().equals(((SubjectStudyTagPk) obj).getSubjectStudy().getId());
     }
-    
+
     @Override
     public int hashCode() {
     	return (int) getTag().hashCode() * (getSubjectStudy() != null ? getSubjectStudy().hashCode() : null);

@@ -16,9 +16,9 @@ import org.springframework.stereotype.Component;
  * As a result, the context will change either to :
  * 		- a Manual Pacs Configuration in case of failure
  * 		- step to the READY state in case of success.
- * 
+ *
  * @author atouboul
- * 
+ *
  */
 @Component
 public class PacsConfigurationState implements State {

@@ -68,7 +68,7 @@ public class StudyCardApiController implements StudyCardApi {
 
     @Autowired
     private CardsProcessingService cardProcessingService;
-    
+
     @Autowired
     private SolrService solrService;
 
@@ -91,8 +91,8 @@ public class StudyCardApiController implements StudyCardApi {
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), MICROSERVICE_COMMUNICATION_ERROR, null));
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }    
-    
+    }
+
     @Override
     public ResponseEntity<StudyCard> findStudyCardById(
 			@Parameter(description = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) {
@@ -242,7 +242,7 @@ public class StudyCardApiController implements StudyCardApi {
         LOG.debug("re-apply studycard n° " + studyCard.getId());
         List<DatasetAcquisition> acquisitions = datasetAcquisitionService.findById(studyCardApplyObject.getDatasetAcquisitionIds());
         cardProcessingService.applyStudyCard(studyCard, acquisitions);
-        
+
         // Get all updated dataset ids
         List<Long> datasetIds = new ArrayList<Long>();
         for (DatasetAcquisition acquisition : acquisitions) {
@@ -250,10 +250,10 @@ public class StudyCardApiController implements StudyCardApi {
         		datasetIds.add(ds.getId());
         	}
         }
-        
+
         // Update solr metadata
         solrService.updateDatasetsAsync(datasetIds);
-        
+
         return new ResponseEntity<Void>(HttpStatus.OK);
     }
 

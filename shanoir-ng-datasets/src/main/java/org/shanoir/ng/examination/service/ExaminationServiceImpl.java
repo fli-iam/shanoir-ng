@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -66,7 +66,7 @@ import java.util.stream.Collectors;
 
 /**
  * Examination service implementation.
- * 
+ *
  * @author ifakhfakh
  *
  */
@@ -275,7 +275,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 		if (!KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN") && !examinationDb.getStudyId().equals(examination.getStudyId())) {
 			throw new AccessDeniedException("Cannot update the study of the examination, please ask an administrator.");
 		}
-		if (!KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN") 
+		if (!KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")
 				&& !((examinationDb.getSubject() == null && examination.getSubject() == null) || examinationDb.getSubject().getId().equals(examination.getSubject().getId()))) {
 			throw new AccessDeniedException("Cannot update the subject of the examination, please ask an administrator.");
 		}
@@ -286,7 +286,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 	/**
 	 * Update some values of examination to save them in database.
-	 * 
+	 *
 	 * @param examinationDb examination found in database.
 	 * @param examination examination with new values.
 	 * @return database examination with new values.

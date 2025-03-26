@@ -32,10 +32,10 @@ import org.slf4j.LoggerFactory;
 /**
  * This class implements the logic when the open file from CD/DVD menu or the
  * query button is clicked
- * 
+ *
  * @author mkain
  * @author yyao
- * 
+ *
  */
 public class FindDicomActionListener extends JPanel implements ActionListener {
 

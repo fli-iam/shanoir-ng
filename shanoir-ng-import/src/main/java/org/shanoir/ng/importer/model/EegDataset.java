@@ -13,7 +13,7 @@ public class EegDataset {
     /** List of events for the eeg dataset. */
     @JsonProperty("events")
     private List<Event> events;
-    
+
 	/** Name of the file -> name of the dataset created. */
 	@JsonProperty("name")
 	private String name;

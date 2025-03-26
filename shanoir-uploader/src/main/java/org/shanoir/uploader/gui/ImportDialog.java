@@ -42,11 +42,11 @@ import org.shanoir.uploader.gui.customcomponent.JTextFieldMandatory;
 /**
  * This is the view class for the Study, StudyCard, Subject and MR Examination
  * selection in order to import the data automatically under Shanoir Webapp.
- * 
+ *
  * Part of the MVC Pattern : View Controller is available under package
  * org.shanoir.uploader.action as importDetailsListener.java Model is available
  * under package org.shanoir.uploader.model as ExportData.java
- * 
+ *
  * @author mkain
  * @author atouboul
  *
@@ -136,7 +136,7 @@ public class ImportDialog extends JDialog {
 	 * On injecting both listeners the ImportDialog becomes invisible of
 	 * the differences between sh-old and sh-ng. ImportDialog is a clean
 	 * view component, no dependency to the models.
-	 * 
+	 *
 	 * @param mainWindow
 	 * @param title
 	 * @param trueOrFalse

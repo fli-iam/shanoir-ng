@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -46,20 +46,20 @@ public class Anesthetic extends HalEntity   {
   @Unique
   @NotNull
   private String name = null;
-  
+
   @JsonProperty("comment")
   private String comment;
-  
+
   @JsonProperty("anestheticType")
   @Enumerated(EnumType.STRING)
   private AnestheticType anestheticType;
-  
+
   @OneToMany(mappedBy = "anesthetic", orphanRemoval = true)
   @JsonProperty("ingredients")
   @JsonBackReference(value = "ingredients")
   private Set<AnestheticIngredient> ingredients;
 
-  
+
   /**
 	* Init HATEOAS links
 	*/
@@ -67,7 +67,7 @@ public class Anesthetic extends HalEntity   {
   public void initLinks() {
 		this.addLink(Links.REL_SELF, "anesthetic/" + getId());
   }
-  
+
   public Anesthetic name(String name) {
     this.name = name;
     return this;
@@ -81,13 +81,13 @@ public class Anesthetic extends HalEntity   {
   public void setName(String name) {
     this.name = name;
   }
-  
-    
+
+
   public Anesthetic comment(String comment) {
     this.comment = comment;
     return this;
   }
-  
+
   @Schema(name = "none")
   public String getComment() {
     return comment;
@@ -96,7 +96,7 @@ public class Anesthetic extends HalEntity   {
   public void setComment(String comment) {
     this.comment = comment;
   }
-  
+
   public Anesthetic anestheticType(AnestheticType anestheticType) {
     this.anestheticType = anestheticType;
     return this;
@@ -110,7 +110,7 @@ public class Anesthetic extends HalEntity   {
   public void setAnestheticType(AnestheticType anestheticType) {
     this.anestheticType = anestheticType;
   }
-  
+
   public Anesthetic ingredients(Set<AnestheticIngredient> ingredients) {
     this.ingredients = ingredients;
     return this;
@@ -124,13 +124,13 @@ public class Anesthetic extends HalEntity   {
     this.ingredients = ingredients;
   }
 
-  
+
   @Override
   public int hashCode() {
 	return Objects.hash(name, anestheticType);
   }
 	
-  
+
 
   @Override
   public boolean equals(Object obj) {
@@ -172,7 +172,7 @@ public class Anesthetic extends HalEntity   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class Anesthetic {\n");
-    
+
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    anesthetictype: ").append(toIndentedString(anestheticType)).append("\n");
     sb.append("    comment: ").append(toIndentedString(comment)).append("\n");

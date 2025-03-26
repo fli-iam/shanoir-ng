@@ -123,5 +123,5 @@ public class VipExecutionDTO {
     public void setResultsLocation(String resultsLocation) {
         this.resultsLocation = resultsLocation;
     }
-    
+
 }

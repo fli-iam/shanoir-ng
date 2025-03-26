@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 public class PropertiesUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(PropertiesUtil.class);
-    
+
     public static void loadPropertiesFromFile(final Properties properties, final File propertiesFile) {
 		try {
 			final FileInputStream fIS = new FileInputStream(propertiesFile);

@@ -51,7 +51,7 @@ public class ReadyState implements State {
 
 	/**
 	 * Set the frame size and location, and make it visible.
-	 * 
+	 *
 	 * @param frame
 	 */
 	private MainWindow initJFrame() {

@@ -10,7 +10,7 @@ import org.shanoir.uploader.gui.ShUpStartupDialog;
  * This class initializes the ShUpStartupDialog for the first time as required here at first.
  * It already sets the state back to ProxyConfigurationState to test the config given after
  * and continue.
- * 
+ *
  * @author mkain
  *
  */

@@ -27,7 +27,7 @@ public class DatasetFileUtilsTest {
 
     @Test
     public void writeInputFileForExport() throws IOException {
-      
+
         File sample = new File("src/test/resources/input.json");
 
         Map<Long, List<String>> files2AcquisitionId = new HashMap<>();
@@ -41,7 +41,7 @@ public class DatasetFileUtilsTest {
 
         files2AcquisitionId.put(1L, Arrays.asList(files1));
         files2AcquisitionId.put(2L, Arrays.asList(files2));
-       
+
         ByteArrayOutputStream bytesOutputStream = new ByteArrayOutputStream();
         ZipOutputStream out = new ZipOutputStream(bytesOutputStream, StandardCharsets.UTF_8);
 

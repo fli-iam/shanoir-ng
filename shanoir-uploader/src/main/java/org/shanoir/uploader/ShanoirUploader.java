@@ -9,10 +9,10 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 /**
  * This is the new version main class of the ShanoirUploader.
  * Introduced in Release 5.2
- * 
+ *
  * @author atouboul
  * @author mkain
- * 
+ *
  */
 public class ShanoirUploader {
 
@@ -20,7 +20,7 @@ public class ShanoirUploader {
 
 	/**
 	 * Main method, heart of the application.
-	 * 
+	 *
 	 * @param args
 	 */
 	public static void main(String args[]) {

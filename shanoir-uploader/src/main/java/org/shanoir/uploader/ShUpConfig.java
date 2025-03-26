@@ -9,9 +9,9 @@ import org.shanoir.uploader.utils.Encryption;
 
 /**
  * This class contains all static data needed by ShanoirUploader upon startup.
- * 
+ *
  * @author mkain
- * 
+ *
  */
 public class ShUpConfig {
 	

@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This class prepares the upload to a Shanoir server instance,
  * but does not call the server itself.
- * 
+ *
  * @author mkain
  *
  */

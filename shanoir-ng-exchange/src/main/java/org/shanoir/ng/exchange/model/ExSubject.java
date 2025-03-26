@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * If the subject is already existing in Shanoir, the subjectName or subjectId (or both) is set,
  * if not the subjectName == null and the subjectId == null. So we have to create a new subject in sh-ng.
- * 
+ *
  * @author mkain
  *
  */

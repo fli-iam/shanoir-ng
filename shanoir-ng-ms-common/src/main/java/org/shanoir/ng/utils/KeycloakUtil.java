@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -32,7 +32,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 
 /**
  * Utility class for Keycloak requests.
- * 
+ *
  * @author msimon
  *
  */
@@ -46,7 +46,7 @@ public final class KeycloakUtil {
 
 	/**
 	 * Get current user roles from Keycloak token.
-	 * 
+	 *
 	 * @return user roles.
 	 * @throws ShanoirStudiesException
 	 */
@@ -60,7 +60,7 @@ public final class KeycloakUtil {
 	
 	/**
 	 * Know if connected user can import from PACS
-	 * 
+	 *
 	 * @return a boolean
 	 */
 	public static boolean canImportFromPACS() {
@@ -70,7 +70,7 @@ public final class KeycloakUtil {
 	
 	/**
 	 * Get connected user roles. If anonymous user, returns an empty list.
-	 * 
+	 *
 	 * @return roles
 	 */
 	public static Collection<String> getConnectedUserRoles() {
@@ -94,7 +94,7 @@ public final class KeycloakUtil {
 
 	/**
 	 * Get current user id from Keycloak token.
-	 * 
+	 *
 	 * @return user id.
 	 * @throws ShanoirStudiesException
 	 */
@@ -141,7 +141,7 @@ public final class KeycloakUtil {
 
 	/**
 	 * Get headers with current Keycloak token.
-	 * 
+	 *
 	 * @return HTTP headers.
 	 * @throws ShanoirStudiesException
 	 */
@@ -155,7 +155,7 @@ public final class KeycloakUtil {
 
 	/**
 	 * Get current access token.
-	 * 
+	 *
 	 * @return access token.
 	 * @throws ShanoirStudiesException
 	 */

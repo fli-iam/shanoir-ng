@@ -4,12 +4,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * This class represents a DICOM-INSTANCE used for the DICOMweb protocol.
- * 
+ *
  * See for the standard:
  * https://dicom.nema.org/medical/dicom/current/output/html/part18.html#sect_10.4
- * 
+ *
  * Goal is to support OHIF viewer, v2.x
- * 
+ *
  * @author mkain
  *
  */

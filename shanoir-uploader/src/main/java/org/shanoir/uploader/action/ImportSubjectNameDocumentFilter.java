@@ -20,7 +20,7 @@ public class ImportSubjectNameDocumentFilter implements DocumentListener {
 
     // Cache exams of latest selected subject
     private List<Examination> examinationsOfExistingSubject = new ArrayList<>();
-    
+
     public ImportSubjectNameDocumentFilter(final MainWindow mainWindow) {
         this.mainWindow = mainWindow;
     }

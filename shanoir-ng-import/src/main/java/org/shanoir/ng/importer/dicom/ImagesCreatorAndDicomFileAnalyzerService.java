@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -56,10 +56,10 @@ import org.springframework.stereotype.Service;
  * is reading the content of each dicom file already it adds as well the informations,
  * which are later necessary to separate datasets inside each serie:
  * acquisitionNumber, echoNumbers and imageOrientationsPatient.
- * 
+ *
  * In case of the import from pacs, the files are accessed using the STORAGE_PATTERN defined
  * in DicomStoreSCPServer.
- * 
+ *
  * @author mkain
  *
  */
@@ -157,7 +157,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	/**
 	 * This method iterates over all instances, filters only the images
 	 * and puts them into a new list: images.
-	 * 
+	 *
 	 * @param folderFileAbsolutePath
 	 * @param serie
 	 * @throws FileNotFoundException
@@ -174,7 +174,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			/**
 			 * Old versions of ShUp v7.0.1, still installed and running, send "ignored" series.
 			 * The method processDicomFilePerInstanceAndCreateImage will ignore those instances,
-			 * so the images remain empty, that is why we tag these series as ignored now. 
+			 * so the images remain empty, that is why we tag these series as ignored now.
 			 */
 			if (!images.isEmpty()) {
 				serie.setImages(images);
@@ -188,7 +188,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 
 	/**
 	 * This method accesses to the dicom file of each instance and handles it.
-	 * 
+	 *
 	 * @param instance
 	 * @param folderFileAbsolutePath
 	 * @param nonImages
@@ -232,7 +232,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	/**
 	 * This method opens the connection to each dcm file and reads its attributes
 	 * and extracts meta-data from the dicom, that will be used later.
-	 * 
+	 *
 	 * @param dicomFile
 	 * @param serie
 	 * @param instances
@@ -275,7 +275,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	
 	/**
 	 * This method reads the first dicom file of a serie to complete missing informations.
-	 * 
+	 *
 	 * @param dicomFile
 	 * @param serie
 	 * @param patient
@@ -296,7 +296,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	/**
 	 * This method adds all required infos to separate datasets within series for
 	 * each image.
-	 * 
+	 *
 	 * @param image
 	 * @param datasetAttributes
 	 */
@@ -351,7 +351,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * Adds the equipment information. We suppose here that the info coming
 	 * from the first file is more reliable than the infos coming from the
 	 * dicomdir or the pacs querying.
-	 * 
+	 *
 	 * @param serie
 	 * @param attributes
 	 */
@@ -373,7 +373,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 
 	/**
 	 * Adds the equipment information.
-	 * 
+	 *
 	 * @param serie
 	 * @param datasetAttributes
 	 */
@@ -391,7 +391,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	/**
 	 * Normally we get the seriesDescription from the DicomDir, if not: null or
 	 * empty, get the seriesDescription from the .dcm file, if existing in .dcm file.
-	 * 
+	 *
 	 * @param serie
 	 * @param attributes
 	 */
@@ -437,7 +437,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * Normally we get the Patient BirthDate from the DicomDir, if not: null or
 	 * empty, get the Patient BirthDate from the .dcm file, if existing in .dcm file
 	 * add it in JsonNode tree.
-	 * 
+	 *
 	 * @param serie
 	 * @param attributes
 	 */

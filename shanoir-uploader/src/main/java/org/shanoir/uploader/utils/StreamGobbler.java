@@ -11,7 +11,7 @@ import org.jboss.seam.log.Logging;
 
 /**
  * The Class StreamGobbler.
- * 
+ *
  * @author aferial
  * @version $Revision: 1.3 $
  */
@@ -32,7 +32,7 @@ public class StreamGobbler extends Thread {
 
 	/**
 	 * Creates a new StreamGobbler object.
-	 * 
+	 *
 	 * @param is
 	 *            the is
 	 * @param type
@@ -45,7 +45,7 @@ public class StreamGobbler extends Thread {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Thread#run()
 	 */
 	public void run() {
@@ -74,7 +74,7 @@ public class StreamGobbler extends Thread {
 
 	/**
 	 * Gets the string display.
-	 * 
+	 *
 	 * @return the stringDisplay
 	 */
 	public String getStringDisplay() {
@@ -83,7 +83,7 @@ public class StreamGobbler extends Thread {
 
 	/**
 	 * Sets the string display.
-	 * 
+	 *
 	 * @param stringDisplay
 	 *            the stringDisplay to set
 	 */

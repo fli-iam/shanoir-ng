@@ -27,7 +27,7 @@ import java.util.*;
 
 /**
  * Tests the implementation of MrProtocolStrategy.
- * 
+ *
  * @author mkain
  *
  */

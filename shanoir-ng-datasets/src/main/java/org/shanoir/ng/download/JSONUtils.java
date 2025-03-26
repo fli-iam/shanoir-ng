@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -22,7 +22,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class JSONUtils {
-    
+
     /**
      * Determine if two JSONObjects are similar.
      * They must contain the same set of names which must be associated with
@@ -71,14 +71,14 @@ public class JSONUtils {
             return false;
         }
     }
-     
+
     /**
      * Determine if two JSONArrays are similar.
      * They must contain similar sequences.
      *
      * @param other The other JSONArray
      * @return true if they are equal
-     * @throws JSONException 
+     * @throws JSONException
      */
     public static boolean equals(JSONArray o1, JSONArray o2) throws JSONException {
         if (!(o2 instanceof JSONArray)) {
@@ -115,7 +115,7 @@ public class JSONUtils {
         }
         return true;
     }
-    
+
     /**
      * Compares two numbers to see if they are similar.
      *
@@ -153,7 +153,7 @@ public class JSONUtils {
         }
         return lBigDecimal.compareTo(rBigDecimal) == 0;
     }
-    
+
     /**
      * @param val value to convert
      * @param defaultValue default value to return is the conversion doesn't work or is null.

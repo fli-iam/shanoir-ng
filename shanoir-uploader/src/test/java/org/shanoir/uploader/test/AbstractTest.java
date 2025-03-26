@@ -24,7 +24,7 @@ import org.shanoir.uploader.utils.Util;
  * This class is the base class for all ShUp test classes, that do
  * integration tests on shanoir servers. It provides the login and
  * the creation of the ShanoirUploaderServiceClient.
- * 
+ *
  * @author mkain
  *
  */

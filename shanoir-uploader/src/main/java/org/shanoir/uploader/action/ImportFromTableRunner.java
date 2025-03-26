@@ -191,7 +191,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		Thread downloadThread = new Thread(downloadOrCopyRunnable);
 		downloadThread.start();
 		while (downloadThread.isAlive()) {
-			// wait for download thread to finish 
+			// wait for download thread to finish
 		}
 		File uploadJobFile = new File(importJob.getWorkFolder() + File.separator + UploadJobManager.UPLOAD_JOB_XML);
 		UploadJobManager uploadJobManager = new UploadJobManager(uploadJobFile);
@@ -442,7 +442,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		Thread importThread = new Thread(importRunnable);
 		importThread.start();
 		while (importThread.isAlive()) {
-			// wait for import thread to finish 
+			// wait for import thread to finish
 		}
 		return true;
 	}

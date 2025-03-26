@@ -175,13 +175,13 @@ public class AccessRequestApiControllerTest {
         List<AccessRequest> listOfRequests = new ArrayList<AccessRequest>();
         listOfRequests.add(createAccessRequest());
         listOfRequests.add(createAccessRequest());
-        
+
         // One is already approved, studyName should not appear
         listOfRequests.get(0).setStatus(AccessRequest.APPROVED);
-        
+
         Mockito.when(this.accessRequestService.findByUserId(Mockito.anyLong()))
             .thenReturn(listOfRequests);
-        
+
 
         mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/byUser").accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON))

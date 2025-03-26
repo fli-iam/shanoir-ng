@@ -36,7 +36,7 @@ public class ShanoirEvent {
 	@JsonProperty("eventProperties")
 	private Map<String, String> eventProperties;
 
-   
+
 	public ShanoirEvent() {
 	}
 
@@ -194,8 +194,8 @@ public class ShanoirEvent {
 	 */
 	public void setStudyId(Long studyId) {
 		this.studyId = studyId;
-	}   
-    
+	}
+
     public Long getTimestamp() {
         return timestamp;
     }

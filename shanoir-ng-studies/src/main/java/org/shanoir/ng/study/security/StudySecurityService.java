@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -69,7 +69,7 @@ public class StudySecurityService {
 
 	/**
 	 * Check that the connected user has the given right for the given study.
-	 * 
+	 *
 	 * @param studyId
 	 *            the study id
 	 * @param rightStr
@@ -88,7 +88,7 @@ public class StudySecurityService {
 
 	/**
 	 * Check that the connected user has any of the given rights for the given study.
-	 * 
+	 *
 	 * @param studyId the study id
 	 * @param rightStr the right
 	 * @return true or false
@@ -132,7 +132,7 @@ public class StudySecurityService {
 
 	/**
 	 * Check that the connected user has the given right for the given study.
-	 * 
+	 *
 	 * @param study
 	 *            the study
 	 * @param rightStr
@@ -149,7 +149,7 @@ public class StudySecurityService {
 
 	/**
 	 * Check that the connected user has the given right for at least one study.
-	 * 
+	 *
 	 * @param rightStr
 	 *            the right
 	 * @return true or false
@@ -170,7 +170,7 @@ public class StudySecurityService {
 	 * ATTENTION ! This method is meant to be used with a trusted Study, meaning it
 	 * should not be used with a Study object that comes from the user API but most
 	 * likely from a Study coming from the database.
-	 * 
+	 *
 	 * @param study
 	 *            the TRUSTED study
 	 * @param rightStr
@@ -187,7 +187,7 @@ public class StudySecurityService {
 	 * ATTENTION ! This method is meant to be used with a trusted Study, meaning it
 	 * should not be used with a Study object that comes from the user API but most
 	 * likely from a Study coming from the database.
-	 * 
+	 *
 	 * @param study
 	 *            the TRUSTED study
 	 * @param rightStr
@@ -202,7 +202,7 @@ public class StudySecurityService {
 	/**
 	 * Check that the connected user has the given right in at least one study to
 	 * which the subject participates.
-	 * 
+	 *
 	 * @param subjectId
 	 *            the subject id
 	 * @param rightStr
@@ -229,7 +229,7 @@ public class StudySecurityService {
 
 	/**
 	 * Check that the connected user has the given right for every subject
-	 * 
+	 *
 	 * @param subjectId
 	 *            the subject id
 	 * @param rightStr
@@ -256,7 +256,7 @@ public class StudySecurityService {
 			for (SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
 				if (hasPrivilege(subjectStudy.getStudy(), right)) {
 					hasRight = true;
-				} 
+				}
 			}
 			if (!hasRight) return false;
 		}
@@ -266,7 +266,7 @@ public class StudySecurityService {
 	/**
 	 * Check that the connected user has the given right in every study to which the
 	 * subject participates.
-	 * 
+	 *
 	 * @param subjectId
 	 *            the subject id
 	 * @param rightStr
@@ -294,7 +294,7 @@ public class StudySecurityService {
 	 * with a trusted Subject, meaning it should not be used with a Subject object
 	 * that comes from the user API but most likely from a Subject coming from the
 	 * database.
-	 * 
+	 *
 	 * @param subject
 	 *            the TRUSTED subject
 	 * @param rightStr
@@ -380,7 +380,7 @@ public class StudySecurityService {
 	/**
 	 * For every subject of the list, check that the connected user has the given
 	 * right in at least one study to which the subject participates.
-	 * 
+	 *
 	 * @param dtos
 	 * @param rightStr
 	 * @return true or false
@@ -406,7 +406,7 @@ public class StudySecurityService {
 	/**
 	 * For every subject of the list, check that the connected user has the given
 	 * right in at least one study to which the subject participates.
-	 * 
+	 *
 	 * @param dtos
 	 * @param rightStr
 	 * @return true or false
@@ -482,7 +482,7 @@ public class StudySecurityService {
 	/**
 	 * Check that the connected user has the given right for all the studies linked
 	 * inside the given list.
-	 * 
+	 *
 	 * @param subjectStudyList
 	 *            the list of subject-study relationship objects
 	 * @param rightStr
@@ -525,7 +525,7 @@ public class StudySecurityService {
 
 	/**
 	 * Verifies that study's studyUsers link to the correct study.
-	 * 
+	 *
 	 * @param study
 	 * @return
 	 */
@@ -539,7 +539,7 @@ public class StudySecurityService {
 
 	/**
 	 * Verifies that study's studyUsers link to no study.
-	 * 
+	 *
 	 * @param study
 	 * @return
 	 */
@@ -553,7 +553,7 @@ public class StudySecurityService {
 
 	/**
 	 * Check that the connected user has this right on this study.
-	 * 
+	 *
 	 * @param study
 	 * @param neededRight
 	 * @return true or false
@@ -564,7 +564,7 @@ public class StudySecurityService {
 
 	/**
 	 * Check that the connected user has any of these rights on this study.
-	 * 
+	 *
 	 * @param study
 	 * @param neededRight
 	 * @return true or false
@@ -583,7 +583,7 @@ public class StudySecurityService {
 
 	/**
 	 * Check that the connected user has this right on this study.
-	 * 
+	 *
 	 * @param study
 	 * @param neededRight
 	 * @return true or false

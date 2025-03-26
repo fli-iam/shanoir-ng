@@ -22,7 +22,7 @@ public enum NiftiConverter {
 
 	/**
 	 * Constructor.
-	 * 
+	 *
 	 * @param id
 	 *            id
 	 */
@@ -33,7 +33,7 @@ public enum NiftiConverter {
 
 	/**
 	 * Get a type by its id.
-	 * 
+	 *
 	 * @param id
 	 *            format id.
 	 * @return type of converter

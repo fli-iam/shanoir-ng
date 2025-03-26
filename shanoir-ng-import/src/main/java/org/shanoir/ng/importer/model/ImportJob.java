@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -38,11 +38,11 @@ import org.shanoir.ng.shared.quality.QualityTag;
  * in ms studies during the import.
  * If it contains a subjectName, an existing subject is to use.
  * Same logic for the exams.
- * 
+ *
  * @todo: later we will remove the patients list from here, that is a
  * legacy error, that has to be corrected, e.g. move the subject out into
  * import job as written above.
- * 
+ *
  * @author mkain
  */
 public class ImportJob implements Serializable {
@@ -59,7 +59,7 @@ public class ImportJob implements Serializable {
     private boolean fromShanoirUploader;
 
     private boolean fromPacs;
-    
+
 	private String workFolder;
 
 	// @todo: remove this list here later
@@ -69,7 +69,7 @@ public class ImportJob implements Serializable {
 	private Patient patient;
 
 	private PatientVerification patientVerification;
-    
+
 	// DICOM study for this import job
 	private Study study;
 
@@ -78,11 +78,11 @@ public class ImportJob implements Serializable {
 
 	// Shanoir study
     private Long studyId;
-    
+
 	private String studyName;
 
     private Long studyCardId;
-    
+
 	private String studyCardName;
 	
     private Long acquisitionEquipmentId;
@@ -101,7 +101,7 @@ public class ImportJob implements Serializable {
 	private String anonymisationProfileToUse;
 
     private String archive;
-    
+
 	private ShanoirEvent shanoirEvent;
 
 	private Long userId;

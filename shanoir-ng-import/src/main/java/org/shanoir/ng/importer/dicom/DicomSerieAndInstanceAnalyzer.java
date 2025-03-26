@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This class is a helper class, that will in the future be used to detect
  * any kind of special DICOM series and instances within an import.
- * 
+ *
  * @author mkain
  *
  */
@@ -36,7 +36,7 @@ public class DicomSerieAndInstanceAnalyzer {
 	
 	/**
 	 * By default raw data storage and sub-types are ignored.
-	 * 
+	 *
 	 * @param attributes
 	 * @return
 	 */
@@ -124,7 +124,7 @@ public class DicomSerieAndInstanceAnalyzer {
 	/**
 	 * Checks if serie is Enhanced Dicom. SOPClassUID is normally NOT part of the DICOMDIR,
 	 * but maybe part of the dicom query C-FIND and can be checked early.
-	 * 
+	 *
 	 * @param serie
 	 * @param attributes
 	 */
@@ -150,7 +150,7 @@ public class DicomSerieAndInstanceAnalyzer {
 	
 	/**
 	 * Checks for multi-frame dicom serie. Requires Enhanced DICOM check done before.
-	 * 
+	 *
 	 * @param serie
 	 * @param attributes
 	 */

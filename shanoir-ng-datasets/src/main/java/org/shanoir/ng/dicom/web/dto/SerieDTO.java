@@ -6,12 +6,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * This class represents a DICOM-SERIE used for the DICOMweb protocol.
- * 
+ *
  * See for the standard:
  * https://dicom.nema.org/medical/dicom/current/output/html/part18.html#sect_10.4
- * 
+ *
  * Goal is to support OHIF viewer, v2.x
- * 
+ *
  * @author mkain
  *
  */
@@ -24,13 +24,13 @@ public class SerieDTO {
 	// Unique key == RootPrefix + ".2." + DatasetAcquisitionID (to avoid mixing with exams==study)
     @JsonProperty("serieInstanceUID")
 	private String serieInstanceUID;
-    
+
     @JsonProperty("seriesNumber")
 	private Integer seriesNumber;
-    
+
     @JsonProperty("modality")
 	private String modality;
-    
+
     @JsonProperty("instances")
 	private List<InstanceDTO> instances;
 

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -24,7 +24,7 @@ import org.shanoir.ng.user.model.User;
 
 /**
  * Email service.
- * 
+ *
  * @author msimon, mkain
  *
  */
@@ -32,7 +32,7 @@ public interface EmailService {
 
 	/**
 	 * Send an email to user if account will expire soon.
-	 * 
+	 *
 	 * @param user
 	 *            user.
 	 */
@@ -40,7 +40,7 @@ public interface EmailService {
 
 	/**
 	 * Send an email to administrators to indicate an account extension request.
-	 * 
+	 *
 	 * @param user
 	 *            updated user.
 	 */
@@ -48,7 +48,7 @@ public interface EmailService {
 
 	/**
 	 * Send an email to the user and all administrators on account request validation.
-	 * 
+	 *
 	 * @param user
 	 *            accepted user.
 	 */
@@ -56,7 +56,7 @@ public interface EmailService {
 
 	/**
 	 * Send an email to the user and all administrators on account request validation.
-	 * 
+	 *
 	 * @param user
 	 *            accepted user.
 	 */
@@ -64,7 +64,7 @@ public interface EmailService {
 
 	/**
 	 * Send an email to the user and all administrators on extension request validation.
-	 * 
+	 *
 	 * @param user
 	 *            user.
 	 */
@@ -72,7 +72,7 @@ public interface EmailService {
 
 	/**
 	 * Send an email to the user and all administrators on extension request deny.
-	 * 
+	 *
 	 * @param user
 	 *            user.
 	 */
@@ -80,7 +80,7 @@ public interface EmailService {
 
 	/**
 	 * Send an email on account creation.
-	 * 
+	 *
 	 * @param user
 	 *            created user.
 	 * @param password
@@ -90,7 +90,7 @@ public interface EmailService {
 
 	/**
 	 * Send an email on account creation.
-	 * 
+	 *
 	 * @param user
 	 *            created user.
 	 * @param password
@@ -100,7 +100,7 @@ public interface EmailService {
 
 	/**
 	 * Send an email on user password reset.
-	 * 
+	 *
 	 * @param user
 	 *            user.
 	 * @param password
@@ -117,7 +117,7 @@ public interface EmailService {
 	/**
 	 * This method notifies a study manager that one ore more new members, StudyUsers,
 	 * have been added to his study.
-	 * 
+	 *
 	 * @param mail
 	 */
 	void notifyStudyManagerStudyUsersAdded(EmailStudyUsersAdded email);
@@ -134,7 +134,7 @@ public interface EmailService {
 	/**
 	 * This method notifies a study manager that a user asked an access to a study.
 	 * @param createdRequest the access request object
-	 * @throws ShanoirException 
+	 * @throws ShanoirException
 	 */
 	void notifyStudyManagerAccessRequest(AccessRequest createdRequest);
 

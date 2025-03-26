@@ -40,7 +40,7 @@ import org.shanoir.uploader.ShUpOnloadConfig;
 
 /**
  * This class wraps the usage of Apache HttpClient, currently 5.1.
- * 
+ *
  * In case of development environments with self-signed certificates a special
  * SocketFactory is used, that avoid the below exception:
  * sun.security.provider.certpath.SunCertPathBuilderException: unable to find
@@ -48,10 +48,10 @@ import org.shanoir.uploader.ShUpOnloadConfig;
  * certificate did not bring a solution, HttpService creates a socketFactory in
  * the constructor, that "solves" the certificate issue for testing/development
  * purpose only.
- * 
+ *
  * The SocketFactory is only used in case of "https://shanoir-ng-nginx" is
  * present in the URL.
- * 
+ *
  * @author mkain
  *
  */
@@ -236,7 +236,7 @@ public class HttpService {
 
 	/**
 	 * Create and assign a HttpContext necessary only for proxy authentication.
-	 * 
+	 *
 	 * @param proxyHost
 	 * @param credentialsProvider
 	 */
@@ -255,7 +255,7 @@ public class HttpService {
 	 * This method builds a CloseableHttpClient depending if a special SSLContext
 	 * for development or production is required, and if credentials should be used
 	 * for the proxy.
-	 * 
+	 *
 	 * @param sslContextDev
 	 * @param credentialsProvider
 	 * @return

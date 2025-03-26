@@ -20,7 +20,7 @@ public class UpdateTableImportStudyListener implements ItemListener {
     private static Logger logger = LoggerFactory.getLogger(UpdateTableImportStudyListener.class);
 
     private final ImportFromTableWindow window;
-    
+
     private final ShanoirUploaderServiceClient shanoirUploaderServiceClient;
 
     public UpdateTableImportStudyListener(ShanoirUploaderServiceClient shanoirUploaderServiceClient, ImportFromTableWindow window) {

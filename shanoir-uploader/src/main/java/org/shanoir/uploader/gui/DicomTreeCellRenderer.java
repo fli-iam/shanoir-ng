@@ -52,7 +52,7 @@ public class DicomTreeCellRenderer extends DefaultTreeCellRenderer {
             return null;
         }
     }
-    
+
     /**
      * This is the method which is called for rendering
      * each instance of a DicomTreeNode.

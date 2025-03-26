@@ -8,12 +8,12 @@ import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 import org.shanoir.uploader.service.rest.UrlConfig;
 
 /**
- * 
+ *
  * This class contains all dynamic data needed by ShanoirUploader upon startup.
- * 
+ *
  * @author atouboul
  * @author mkain
- * 
+ *
  */
 public class ShUpOnloadConfig {
 

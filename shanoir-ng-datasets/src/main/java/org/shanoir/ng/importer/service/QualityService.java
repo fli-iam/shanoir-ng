@@ -29,7 +29,7 @@ public class QualityService {
 
     @Autowired
     private WADODownloaderService downloader;
-    
+
 
     public QualityCardResult checkQuality(ExaminationData examination, ImportJob importJob, List<QualityCard> qualityCards) throws ShanoirException {
         LOG.info("Checking quality at import for examination : " + importJob.getExaminationId());
@@ -40,10 +40,10 @@ public class QualityService {
         } else {
             LOG.info("Quality cards loaded from ShUp");
         }
-        
+
         if (!hasQualityChecksAtImport(qualityCards)) {
             return new QualityCardResult();
-        }     
+        }
         Study firstStudy = importJob.getFirstStudy();
         if (firstStudy == null) {
             throw new ShanoirException("The given import job does not provide any serie. Examination : " + importJob.getExaminationId());
@@ -53,7 +53,7 @@ public class QualityService {
         for (QualityCard qualityCard : qualityCards) {
             // In case multiple quality cards are used with different roles, we check them all
             if (qualityCard.isToCheckAtImport()) {
-                qualityResult.merge(qualityCard.apply(examination, dicomAttributes, downloader));                       
+                qualityResult.merge(qualityCard.apply(examination, dicomAttributes, downloader));
             }
         }
         return qualityResult;

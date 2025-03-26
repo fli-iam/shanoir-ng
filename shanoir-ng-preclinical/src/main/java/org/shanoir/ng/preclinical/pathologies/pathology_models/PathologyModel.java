@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -46,21 +46,21 @@ public class PathologyModel extends HalEntity   {
 
   @JsonProperty("comment")
   private String comment = null;
-  
+
   @JsonProperty("filename")
   private String filename;
-  
+
   @JsonIgnore
   @JsonProperty("filepath")
   private String filepath;
-  
+
   @ManyToOne
   //fetch = FetchType.LAZY, optional = false)
   //@JoinColumn(name = "building_id")
   @NotNull
   @JsonProperty("pathology")
   private Pathology pathology;
-  
+
   /**
 	* Init HATEOAS links
   */
@@ -68,12 +68,12 @@ public class PathologyModel extends HalEntity   {
 	public void initLinks() {
 		this.addLink(Links.REL_SELF, "pathology/model/" + getId());
   }
-  
+
   public PathologyModel name(String name) {
     this.name = name;
     return this;
   }
-  
+
   /**
    * none
    * @return type
@@ -86,12 +86,12 @@ public class PathologyModel extends HalEntity   {
   public void setName(String name) {
     this.name = name;
   }
-  
+
   public PathologyModel comment(String comment) {
     this.comment = comment;
     return this;
   }
-  
+
   /**
    * none
    * @return type
@@ -104,12 +104,12 @@ public class PathologyModel extends HalEntity   {
   public void setComment(String comment) {
     this.comment = comment;
   }
-  
+
   public PathologyModel filename(String filename) {
     this.filename = filename;
     return this;
   }
-  
+
   @Schema(name = "none")
   public String getFilename() {
     return filename;
@@ -118,7 +118,7 @@ public class PathologyModel extends HalEntity   {
   public void setFilename(String filename) {
     this.filename = filename;
   }
-	   
+	
   @JsonIgnore
   @Schema(name = "none")
   public String getFilepath() {
@@ -128,12 +128,12 @@ public class PathologyModel extends HalEntity   {
   public void setFilepath(String filepath) {
     this.filepath = filepath;
   }
-  
+
   public PathologyModel pathology(Pathology pathology) {
     this.pathology = pathology;
     return this;
   }
-  
+
   /**
    * none
    * @return type
@@ -146,7 +146,7 @@ public class PathologyModel extends HalEntity   {
   public void setPathology(Pathology pathology) {
     this.pathology = pathology;
   }
-  
+
   @Override
   public boolean equals(java.lang.Object o) {
     if (this == o) {
@@ -168,7 +168,7 @@ public class PathologyModel extends HalEntity   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class PathologyModel {\n");
-    
+
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    comment: ").append(toIndentedString(comment)).append("\n");
     sb.append("    specifications file: ").append(toIndentedString(filename)).append("\n");

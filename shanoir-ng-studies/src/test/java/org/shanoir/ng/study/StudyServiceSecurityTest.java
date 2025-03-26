@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -46,9 +46,9 @@ import org.springframework.test.context.ActiveProfiles;
 
 /**
  * User security service test.
- * 
+ *
  * @author jlouis
- * 
+ *
  */
 
 @SpringBootTest
@@ -115,13 +115,13 @@ public class StudyServiceSecurityTest {
 	public void testFindAllAsUserThatCanSee() throws ShanoirException {
 		assertAccessAuthorized(service::findAll);
 		
-		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(new Study[] 
+		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(new Study[]
 				{ buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL), buildStudyMock(2L, StudyUserRight.CAN_SEE_ALL) } ));
 		given(studyUserRepository.findByStudy_Id(1L)).willReturn(buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL).getStudyUserList());
 		given(studyUserRepository.findByStudy_Id(2L)).willReturn(buildStudyMock(2L, StudyUserRight.CAN_SEE_ALL).getStudyUserList());
 		assertEquals(2, service.findAll().size());
 		
-		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(new Study[] 
+		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(new Study[]
 				{ buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL), buildStudyMock(2L, StudyUserRight.CAN_DOWNLOAD) } ));
 		given(studyUserRepository.findByStudy_Id(1L)).willReturn(buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL).getStudyUserList());
 		given(studyUserRepository.findByStudy_Id(2L)).willReturn(buildStudyMock(2L, StudyUserRight.CAN_DOWNLOAD).getStudyUserList());

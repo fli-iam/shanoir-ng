@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -31,7 +31,7 @@ public class PetProtocolStrategy {
 	private static final Logger LOG = LoggerFactory.getLogger(PetProtocolStrategy.class);
 	
 	public PetProtocol generateProtocolForSerie(Attributes attributes) {		
-		PetProtocol petProtocol = new PetProtocol();  
+		PetProtocol petProtocol = new PetProtocol();
 		
 		/** (0028, 0010) Rows */
 		final Integer dimensionX = attributes.getInt(Tag.Rows, 0);
@@ -49,7 +49,7 @@ public class PetProtocolStrategy {
 		petProtocol.setNumberOfSlices(numberOfSlices);
 		
 		/**
-		 * (0028, 0030) Pixel Spacing in X and Y direction in mm. 
+		 * (0028, 0030) Pixel Spacing in X and Y direction in mm.
 		 * The unit of measure of voxel size X, must be in mm.
 		 */
 		final double[] pixelspacing = attributes.getDoubles(Tag.PixelSpacing);
@@ -63,7 +63,7 @@ public class PetProtocolStrategy {
 		}
 		
 		/**
-		 * (0018, 0050) Slice Thickness in mm. 
+		 * (0018, 0050) Slice Thickness in mm.
 		 * The unit of measure of voxel size Z, must be in mm.
 		 */
 		final Double voxelSizeZ = attributes.getDouble(Tag.SliceThickness, 0);
@@ -96,7 +96,7 @@ public class PetProtocolStrategy {
 		petProtocol.setDoseCalibrationFactor(doseCalibrationFactor);
 
 		/**
-		 * (0054,0014) Energy window lower limit in KeV. 
+		 * (0054,0014) Energy window lower limit in KeV.
 		 * The unit of measure of the energy window lower limit must be in KeV.
 		 */
 		final Integer energyWindowLowerLimit = attributes.getInt(Tag.EnergyWindowLowerLimit, 0);
@@ -104,7 +104,7 @@ public class PetProtocolStrategy {
 		petProtocol.setEnergyWindowLowerLimit(energyWindowLowerLimit);
 
 		/**
-		 * (0054,0015) Energy window upper limit in KeV. 
+		 * (0054,0015) Energy window upper limit in KeV.
 		 * The unit of measure of the energy window upper limit must be in KeV.
 		 */
 		final Integer energyWindowUpperLimit = attributes.getInt(Tag.EnergyWindowUpperLimit, 0);
@@ -122,7 +122,7 @@ public class PetProtocolStrategy {
 		petProtocol.setNumberOfSubsets(numberOfSubsets);
 		
 		/**
-		 * (0018,1075) Radionuclide Half Life in sec. 
+		 * (0018,1075) Radionuclide Half Life in sec.
 		 * The unit of measure of the radionuclide half life must be in sec.
 		 */
 		final Double radionuclideHalfLife = attributes.getDouble(Tag.RadionuclideHalfLife, 0);
@@ -130,7 +130,7 @@ public class PetProtocolStrategy {
 		petProtocol.setRadionuclideHalfLife(radionuclideHalfLife);
 
 		/**
-		 * (0018,1074) Radionuclide Total Dose in bq. 
+		 * (0018,1074) Radionuclide Total Dose in bq.
 		 * The unit of measure of the radionuclide total dose must be in bq.
 		 */
 		final Integer radionuclideTotalDose = attributes.getInt(Tag.RadionuclideTotalDose, 0);

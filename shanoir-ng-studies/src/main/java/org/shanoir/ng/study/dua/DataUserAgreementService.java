@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
  * This service manages data user agreements. It returns a list of all DUAs waiting for one user
  * and accepts the DUA of one user for one study with a specific id. When accepted it broadcasts
  * the StudyUser update to the other microservices.
- * 
+ *
  * @author mkain
  *
  */

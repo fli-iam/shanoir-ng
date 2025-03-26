@@ -32,9 +32,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class implements the logic when the start import button is clicked.
- * 
+ *
  * @author mkain
- * 
+ *
  */
 public class ImportFinishActionListener implements ActionListener {
 
@@ -163,7 +163,7 @@ public class ImportFinishActionListener implements ActionListener {
 		/**
 		 * 3. Fill importJob, check quality if needed, start pseudo and prepare upload
 		 */
-		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examinationId, 
+		ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examinationId,
 			(Study) mainWindow.importDialog.studyCB.getSelectedItem(), (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem());
 		
 		// Quality Check if the Study selected has Quality Cards to be checked at import
@@ -171,7 +171,7 @@ public class ImportFinishActionListener implements ActionListener {
 			QualityCardResult qualityControlResult = QualityUtils.checkQualityAtImport(importJob, mainWindow.isFromPACS);
 			// If quality check resulted in errors, show a message and do not start the import
 			if (!qualityControlResult.isEmpty() && (qualityControlResult.hasError())) {
-				JOptionPane.showMessageDialog(mainWindow.frame,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult), 
+				JOptionPane.showMessageDialog(mainWindow.frame,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult),
 				ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"), JOptionPane.ERROR_MESSAGE);
 				// set status FAILED
 				ShUpOnloadConfig.getCurrentNominativeDataController().updateNominativeDataPercentage(uploadFolder, UploadState.ERROR.toString());
@@ -181,7 +181,7 @@ public class ImportFinishActionListener implements ActionListener {
 				if (!qualityControlResult.isEmpty() || !qualityControlResult.getUpdatedSubjectStudies().isEmpty()) {
 					// If quality control has one warning or failed valid condition fulfilled we inform the user and allow import to continue
 					if (qualityControlResult.hasWarning() || qualityControlResult.hasFailedValid()) {
-						JOptionPane.showMessageDialog(mainWindow.frame,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult), 
+						JOptionPane.showMessageDialog(mainWindow.frame,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult),
 							ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"), JOptionPane.WARNING_MESSAGE);
 					}
 					// If Failed Valid No updated subject studies exist in the qualityControlResult
@@ -194,8 +194,8 @@ public class ImportFinishActionListener implements ActionListener {
 			}
         } catch (Exception ex) {
 			logger.error(ex.getMessage(), ex);
-			JOptionPane.showMessageDialog(mainWindow.frame, 
-				ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.exception.message") + ex.getMessage(), 
+			JOptionPane.showMessageDialog(mainWindow.frame,
+				ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.exception.message") + ex.getMessage(),
 				ShUpConfig.resourceBundle.getString("shanoir.uploader.select.error.title"), JOptionPane.ERROR_MESSAGE);
         }
 

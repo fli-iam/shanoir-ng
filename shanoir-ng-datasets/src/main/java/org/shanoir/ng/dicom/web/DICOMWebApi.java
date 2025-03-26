@@ -19,9 +19,9 @@ import java.util.Map;
 /**
  * This implements the DICOMWeb REST-API exposed by Shanoir-NG.
  * For more informations please see:
- * 
+ *
  * https://github.com/fli-iam/shanoir-ng/wiki/DICOMWeb
- * 
+ *
  * @author mkain
  *
  */

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -48,25 +48,25 @@ import jakarta.ws.rs.core.Response;
  * Keycloak and its dedicated microservice. This class reads command line
  * arguments (options) at the end of the start-up of the microservice users
  * (ShanoirUsersApplication).
- * 
+ *
  * For security reasons, we do not provide these features using a REST
  * interface. The administrator/deploy script, that runs the ms users decides
  * with additional options on the command line, what user(s) management
  * operations should be performed:
- * 
+ *
  * For code duplication reasons, we have not put this code, that interacts with:
  * - MS keycloak - EmailService - Database users into a separate .jar file (what
  * could be done), but put it directly into ms users, as ms users has already
  * access to all these resources. I decided to run up ms users differently
  * depending what the current admin wants as result.
- * 
+ *
  * This component implements the ApplicationRunner interface, what means Spring
  * Boot will call it at the end of its start-up and pre-format the command line
  * arguments as ApplicationArguments, what is better to handle than a string.
  *
  * 1) First user creation, e.g. the first initial admin user of the system, when
  * we start with a completely empty Shanoir-NG users database.
- * 
+ *
  * 2) After a migration, when all existing users have been migrated into the ms
  * users relational database, all users not yet existing in Keycloak can be
  * copied into ms keycloak, that the accounts work. Same applies for development
@@ -87,7 +87,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 	 * Five values are necessary to init the Keycloak client: url, realm, client-id, login, pw
 	 * Login and pw are given from the command line to avoid admin pw storage on the disk and
 	 * in application.yml. URL, realm and client-id come from application.yml or env configuration.
-	 * 
+	 *
 	 */
 	@Value("${kc.admin.client.server.url}")
 	private String kcAdminClientServerUrl;

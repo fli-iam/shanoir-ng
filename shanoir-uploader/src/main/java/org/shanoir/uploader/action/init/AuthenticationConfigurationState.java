@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
  *
  * @author atouboul
  * @author mkain
- * 
+ *
  */
 @Component
 public class AuthenticationConfigurationState implements State {

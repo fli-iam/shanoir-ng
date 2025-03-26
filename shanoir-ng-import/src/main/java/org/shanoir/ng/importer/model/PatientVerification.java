@@ -1,7 +1,7 @@
 package org.shanoir.ng.importer.model;
 
 public class PatientVerification {
-    
+
     private String firstName;
 
     private String lastName;

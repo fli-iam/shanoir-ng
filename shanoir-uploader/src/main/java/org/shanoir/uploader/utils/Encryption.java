@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class is used to crypt/uncrypt the user and proxy passwords
- * 
+ *
  * @author ifakhfak
  *
  */

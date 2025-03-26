@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * If the study card is already existing in Shanoir, the name is set,
  * if not the name == null. So we have to create a new study card in sh-ng.
- * 
+ *
  * @author mkain
  *
  */

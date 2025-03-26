@@ -59,7 +59,7 @@ public class UploadFromTableActionListener implements ActionListener {
 
 	/**
 	 * Displays a table file, and checks its integrity.
-	 * 
+	 *
 	 * @param selectedFile the selected table file
 	 */
 	private void readImportJobsFromFile(File selectedFile) {

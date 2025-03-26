@@ -28,7 +28,7 @@ public interface StudyTagMapper {
 
 	/**
 	 * Map a @StudyTag to a @StudyTagDTO.
-	 * 
+	 *
 	 * @param studyTag
 	 * @return DTO.
 	 */

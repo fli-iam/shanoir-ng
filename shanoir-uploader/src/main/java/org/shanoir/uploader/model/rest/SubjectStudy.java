@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -18,7 +18,7 @@ import java.util.List;
 
 /**
  * DTO for subject of a study.
- * 
+ *
  * There is a conflict in the DTO mapping. ShUp receives a SubjectDTO
  * from the server in findByIdentifier, but to call updateSubject on
  * the server a Subject type is required. E.g. the difference is, that
@@ -28,7 +28,7 @@ import java.util.List;
  * The work-around is: copy when receiving the SubjectDTO directly into the
  * parallel list subjectStudyTags, that the mapping back on the server for
  * the update fits.
- * 
+ *
  * @author msimon
  *
  */

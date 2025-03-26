@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -37,7 +37,7 @@ public class PageImpl<T> extends org.springframework.data.domain.PageImpl<T> imp
 
     /**
 	 * Constructor of {@code PageImpl}.
-	 * 
+	 *
 	 * @param content the content of this page, must not be {@literal null}.
 	 * @param pageable the paging information, can be {@literal null}.
 	 * @param total the total amount of items available. The total might be adapted considering the length of the content
@@ -50,13 +50,13 @@ public class PageImpl<T> extends org.springframework.data.domain.PageImpl<T> imp
 	/**
 	 * Creates a new {@link PageImpl} with the given content. This will result in the created {@link Page} being identical
 	 * to the entire {@link List}.
-	 * 
+	 *
 	 * @param content must not be {@literal null}.
 	 */
 	public PageImpl(List<T> content) {
 		super(content);
     }
-    
+
     @Override
 	public boolean add(T e) {
 		return this.getContent().add(e);

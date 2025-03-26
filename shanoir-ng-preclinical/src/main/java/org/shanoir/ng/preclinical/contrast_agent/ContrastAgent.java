@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -53,36 +53,36 @@ public class ContrastAgent extends HalEntity   {
 	
   @JsonProperty("manufactured_name")
   private String manufacturedName = null;
-  
+
   @JsonProperty("concentration")
   private Double concentration;
-  
+
   @JsonProperty("concentration_unit")
   //@RefValueExists
   @ManyToOne
   private Reference concentrationUnit = null;
-  
+
   @JsonProperty("dose")
   private Double dose;
-  
+
   @JsonProperty("dose_unit")
   //@RefValueExists
   @ManyToOne
   private Reference doseUnit = null;
-  
+
   @JsonProperty("injection_interval")
   @Enumerated(EnumType.STRING)
   private InjectionInterval injectionInterval;
-  
+
   @JsonProperty("injection_site")
   @Enumerated(EnumType.STRING)
   private InjectionSite injectionSite;
-  
+
   @JsonProperty("injection_type")
   @Enumerated(EnumType.STRING)
   private InjectionType injectionType;
-  
-  
+
+
   /**
 	* Init HATEOAS links
   */
@@ -90,7 +90,7 @@ public class ContrastAgent extends HalEntity   {
 	public void initLinks() {
 		this.addLink(Links.REL_SELF, "contrastagent/" + getId());
   }
-  
+
   public Long getProtocolId() {
 	return protocolId;
   }
@@ -112,12 +112,12 @@ public class ContrastAgent extends HalEntity   {
   public void setName(Reference name) {
     this.name = name;
   }
-  
+
   public ContrastAgent manufacturedName(String manufacturedName) {
     this.manufacturedName = manufacturedName;
     return this;
   }
-  
+
   @Schema(name = "none")
   public String getManufacturedName() {
     return manufacturedName;
@@ -126,13 +126,13 @@ public class ContrastAgent extends HalEntity   {
   public void setManufacturedName(String manufacturedName) {
     this.manufacturedName = manufacturedName;
   }
-	  
-  
+	
+
   public ContrastAgent concentration(Double concentration) {
     this.concentration = concentration;
     return this;
   }
-  
+
   @Schema(name = "none")
   public Double getConcentration() {
     return concentration;
@@ -141,7 +141,7 @@ public class ContrastAgent extends HalEntity   {
   public void setConcentration(Double concentration) {
     this.concentration = concentration;
   }
-  
+
   public ContrastAgent concentrationUnit(Reference unit) {
     this.concentrationUnit = unit;
     return this;
@@ -155,12 +155,12 @@ public class ContrastAgent extends HalEntity   {
   public void setConcentrationUnit(Reference unit) {
     this.concentrationUnit = unit;
   }
-  
+
   public ContrastAgent dose(Double dose) {
     this.dose = dose;
     return this;
   }
-  
+
   @Schema(name = "none")
   public Double getDose() {
     return dose;
@@ -169,7 +169,7 @@ public class ContrastAgent extends HalEntity   {
   public void setDose(Double dose) {
     this.dose = dose;
   }
-  
+
   public ContrastAgent doseUnit(Reference unit) {
     this.doseUnit = unit;
     return this;
@@ -197,7 +197,7 @@ public class ContrastAgent extends HalEntity   {
   public void setInjectionInterval(InjectionInterval interval) {
     this.injectionInterval = interval;
   }
-  
+
   public ContrastAgent injectionSite(InjectionSite site) {
     this.injectionSite = site;
     return this;
@@ -211,7 +211,7 @@ public class ContrastAgent extends HalEntity   {
   public void setInjectionSite(InjectionSite site) {
     this.injectionSite = site;
   }
-  
+
   public ContrastAgent injectionType(InjectionType type) {
     this.injectionType = type;
     return this;
@@ -225,14 +225,14 @@ public class ContrastAgent extends HalEntity   {
   public void setInjectionType(InjectionType type) {
     this.injectionType = type;
   }
-  
-  
+
+
 
   @Override
   public int hashCode() {
 	return Objects.hash(name, manufacturedName,concentration,dose);
   }
-  
+
   @Override
   public boolean equals(Object obj) {
 	if (this == obj) {
@@ -287,7 +287,7 @@ public class ContrastAgent extends HalEntity   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ContrastAgent {\n");
-    
+
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    manufacturedName: ").append(toIndentedString(manufacturedName)).append("\n");
     sb.append("    concentration: ").append(toIndentedString(concentration)).append("\n");

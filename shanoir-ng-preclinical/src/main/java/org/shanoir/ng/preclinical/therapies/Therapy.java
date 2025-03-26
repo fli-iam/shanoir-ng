@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -41,10 +41,10 @@ public class Therapy extends HalEntity   {
   @JsonProperty("name")
   @Unique
   private String name = null;
-  
+
   @JsonProperty("comment")
   private String comment = null;
-  
+
   @JsonProperty("therapyType")
   @NotNull
   @Enumerated(EnumType.STRING)
@@ -57,7 +57,7 @@ public class Therapy extends HalEntity   {
 	public void initLinks() {
 		this.addLink(Links.REL_SELF, "therapy/" + getId());
   }
-  
+
   public Therapy name(String name) {
     this.name = name;
     return this;
@@ -71,12 +71,12 @@ public class Therapy extends HalEntity   {
   public void setName(String name) {
     this.name = name;
   }
-  
+
   public Therapy comment(String comment) {
     this.comment = comment;
     return this;
   }
-  
+
   @Schema(name = "none")
   public String getComment() {
     return comment;
@@ -85,7 +85,7 @@ public class Therapy extends HalEntity   {
   public void setComment(String comment) {
     this.comment = comment;
   }
-  
+
   public Therapy therapyType(TherapyType therapyType) {
     this.therapyType = therapyType;
     return this;
@@ -122,7 +122,7 @@ public class Therapy extends HalEntity   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class Therapy {\n");
-    
+
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    therapy type: ").append(toIndentedString(therapyType)).append("\n");
     sb.append("}");

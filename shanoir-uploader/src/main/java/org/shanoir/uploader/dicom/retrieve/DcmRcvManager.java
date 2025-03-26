@@ -23,7 +23,7 @@ import org.weasis.dicom.tool.DicomListener;
  * and running, first to be more efficient and second to preare for DICOM push
  * from outside, what requires one DICOM SCP server up and running all time as
  * long as ShUp has been started.
- * 
+ *
  * @author mkain
  *
  */
@@ -69,7 +69,7 @@ public class DcmRcvManager {
 	 * that is listening all time: to allow c-moves (DICOM push) all the
 	 * time from outside into this folder and split now by studyDate and
 	 * StudyInstanceUID and support query/c-move as well.
-	 * 
+	 *
 	 * @param folderPath
 	 */
 	private void startSCPServer(final String workFolderPath, DicomNode scpNode, ListenerParams lParams) {

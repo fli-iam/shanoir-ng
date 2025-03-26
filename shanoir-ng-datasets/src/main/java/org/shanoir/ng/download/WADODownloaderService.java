@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -60,31 +60,31 @@ import jakarta.mail.util.ByteArrayDataSource;
 
 /**
  * This class is used to download files on using WADO URLs:
- * 
+ *
  * WADO-RS URLs are supported: http://dicom.nema.org/DICOM/2013/output/chtml/part18/sect_6.5.html
  * WADO-URI URLs are supported: http://dicom.nema.org/DICOM/2013/output/chtml/part18/sect_6.2.html
- * 
+ *
  * WADO-RS: http://dcm4chee-arc:8081/dcm4chee-arc/aets/AS_RECEIVED/rs/studies/1.4.9.12.22.1.8447.5189520782175635475761938816300281982444
  * /series/1.4.9.12.22.1.3337.609981376830290333333439326036686033499
  * /instances/1.4.9.12.22.1.3327.13131999371192661094333587030092502791578
- * 
+ *
  * As the responses are encoded as multipart/related messages,
  * this class extracts as well the files contained in the response to
  * the file system.
- * 
+ *
  * WADO-URI: http://dcm4chee-arc:8081/dcm4chee-arc/aets/AS_RECEIVED/wado?requestType=WADO
  * &studyUID=1.4.9.12.22.1.8444.518952078217568647576155668816300281982444
  * &seriesUID=1.4.9.12.22.1.8444.60998137683029030014444439326036686033499
  * &objectUID=1.4.9.12.22.1.8444.1313199937119266109555587030092502791578
  * &contentType=application/dicom
- * 
+ *
  * WADO-URI Web Service Endpoint URL in dcm4chee arc light 5:
  * http[s]://<host>:<port>/dcm4chee-arc/aets/{AETitle}/wado
  *
  * This Spring service component uses the scope singleton, that is there by default,
  * as one instance should be reused for all other instances, that require usage.
  * No need to create multiple.
- * 
+ *
  * @author mkain
  *
  */
@@ -132,7 +132,7 @@ public class WADODownloaderService {
 	 *
 	 * @param urls
 	 * @param subjectName
-	 * @param dataset 
+	 * @param dataset
 	 * @param datasetFilePath
 	 * @throws IOException
 	 * @throws MessagingException
@@ -336,7 +336,7 @@ public class WADODownloaderService {
 
 	/**
 	 * This method contacts the PACS with a WADO-RS url and does the actual download.
-	 * 
+	 *
 	 * @param url
 	 * @return
 	 * @throws IOException
@@ -372,11 +372,11 @@ public class WADODownloaderService {
 	/**
 	 * This method reads in a file in format MHTML, one representation of a multipart/related response, that is given from
 	 * a PACS server, that supports WADO-RS requests.
-	 * 
+	 *
 	 * MHTML, short for MIME Encapsulation of Aggregate HTML Documents, is a web page archive format used to combine in a single document
 	 * the HTML code and its companion resources that are otherwise represented by external links (such as images, Flash animations, Java applets,
 	 * and audio files). The content of an MHTML file is encoded as if it were an HTML e-mail message, using the MIME type multipart/related.
-	 * 
+	 *
 	 * @param responseBody
 	 * @param instanceUID
 	 * @param workFolder

@@ -90,9 +90,9 @@ public class BidsImporterService {
 	 * Create BIDS dataset.
 	 * @param importJob the import job
 	 * @param userId the user id
-	 * @throws IOException 
-	 * @throws JsonMappingException 
-	 * @throws JsonParseException 
+	 * @throws IOException
+	 * @throws JsonMappingException
+	 * @throws JsonParseException
 	 */
 	@RabbitListener(queues = RabbitMQConfiguration.IMPORTER_BIDS_DATASET_QUEUE, containerFactory = "multipleConsumersFactory")
 	@RabbitHandler
@@ -177,13 +177,13 @@ public class BidsImporterService {
 
 	/**
 	 * Import some nifti datasets
-	 * @param bidsDataType 
-	 * @param modalityType 
-	 * @param event 
+	 * @param bidsDataType
+	 * @param modalityType
+	 * @param event
 	 * @param workfolder the work folder we are working in
-	 * @throws IOException 
-	 * @throws ParseException 
-	 * @throws JSONException 
+	 * @throws IOException
+	 * @throws ParseException
+	 * @throws JSONException
 	 */
 	private void importDataset(ImportJob importJob, BidsDataType bidsDataType, DatasetModalityType modalityType, ShanoirEvent event) throws IOException, ParseException, JSONException {
 

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -102,7 +102,7 @@ public interface SubjectService {
 
 	/**
 	 * Find subject by its identifier and a list of studies (based on the rights).
-	 * 
+	 *
 	 * As only the list of accessible studies is used here, that is rights filtered,
 	 * I remove here the additional PostAuthorize filter to check again the rights
 	 * on the subject. We do not want to impact performance to heavily with double
@@ -117,7 +117,7 @@ public interface SubjectService {
 	
 	/**
 	 * Find a subject by its subject-study relationship id.
-	 * 
+	 *
 	 * @param id id
 	 * @return a subject or null
 	 */
@@ -177,7 +177,7 @@ public interface SubjectService {
 	/**
 	 * Update subject name and values for other microservices.
 	 * @param subjectToSubjectDTO the subject DTO to update
-	 * @throws MicroServiceCommunicationException 
+	 * @throws MicroServiceCommunicationException
 	 */
 	boolean updateSubjectName(SubjectDTO subjectToSubjectDTO) throws MicroServiceCommunicationException;
 

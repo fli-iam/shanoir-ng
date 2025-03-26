@@ -260,7 +260,7 @@ public class DICOMWebApiController implements DICOMWebApi {
 	 * the Shanoir research study/project and the subjects, that are pure shanoir entities.
 	 * In the future there might be an option for temporary file storage via stow-rs and then
 	 * using the dicom files from this tmp folder to process a classic shanoir DICOM import.
-	 * The implementation of stow-sr for the ohif-viewer can be found in the MultipartRequestFilter. 
+	 * The implementation of stow-sr for the ohif-viewer can be found in the MultipartRequestFilter.
 	 */
 	@Override
 	public ResponseEntity<Void> stow(HttpServletRequest request) throws RestServiceException {

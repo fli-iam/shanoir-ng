@@ -21,11 +21,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * 
+ *
  * This class is the Authentication GUI which allow a user to connect
  * with his login/password in log into the remote Shanoir server.
  * @author atouboul
- * 
+ *
  */
 @Component
 public class LoginConfigurationPanel extends JPanel {

@@ -31,11 +31,11 @@ import org.slf4j.LoggerFactory;
  * This class implements the logic when a node is selected in a DicomTree.
  * The SelectionActionListener creates the multi-exam import jobs map, that
  * is used afterwards to know, what studies/series to import.
- * 
+ *
  * The SelectionActionListener is already prepared to allow multi-patient,
  * multi-exam (DICOM study) selections, to be ready for the future and not
  * have to refactor again this component.
- * 
+ *
  * @author yyao
  * @author mkain
  *

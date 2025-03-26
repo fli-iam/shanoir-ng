@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -34,7 +34,7 @@ public class StudyRightsService {
 	
 	/**
 	 * Check that the connected user has the given right for the given study.
-	 * 
+	 *
 	 * @param studyId the study id
 	 * @param rightStr the right
 	 * @return true or false
@@ -51,7 +51,7 @@ public class StudyRightsService {
 				&& founded.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr))
 				&& founded.isConfirmed();
     }
-   
+
     public boolean hasRightOnCenter(Long studyId, Long centerId) {
 		Long userId = KeycloakUtil.getTokenUserId();
 		if (userId == null) {
@@ -62,7 +62,7 @@ public class StudyRightsService {
 		founded.setCenterIds(centerIds);
 		return
 				founded != null
-				&& 
+				&&
 				( founded.getCenterIds().isEmpty() || founded.getCenterIds().contains(centerId) );
     }
 
@@ -90,7 +90,7 @@ public class StudyRightsService {
 
     /**
 	 * Check that the connected user has one of the given rights for the given study.
-	 * 
+	 *
 	 * @param studyId the study id
 	 * @param rightStr the right
 	 * @return true or false
@@ -109,7 +109,7 @@ public class StudyRightsService {
 
     /**
      * Check that the connected user has the given right for the given studies.
-     * 
+     *
      * @param studyIds the study ids.
      * @param rightStr the right
      * @return ids that have the right, removes others.
@@ -133,7 +133,7 @@ public class StudyRightsService {
 
 	/**
 	 * Check that the connected user has the given right for one study at least.
-	 * 
+	 *
 	 * @param rightStr
 	 * @return true or false
 	 */
@@ -152,6 +152,6 @@ public class StudyRightsService {
 		}
 		return false;
 	}
-    
+
 
 }

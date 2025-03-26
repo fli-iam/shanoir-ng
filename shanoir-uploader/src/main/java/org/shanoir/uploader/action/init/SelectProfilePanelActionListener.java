@@ -36,7 +36,7 @@ public class SelectProfilePanelActionListener implements ActionListener {
 		ShUpConfig.profileSelected = selectedProfile;
 		configureSelectedProfile(selectedProfile);
 		
-		// If the "Remember profile" box is ticked, we store the selected profile in basic.properties 
+		// If the "Remember profile" box is ticked, we store the selected profile in basic.properties
 		// to avoid displaying the Profile selection the next time the application starts
 		if (selectProfilePanel.rbRememberProfile.isSelected()) {
 			logger.info("Saving Profile selected in basic.properties file.");

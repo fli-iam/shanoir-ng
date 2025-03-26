@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -115,7 +115,7 @@ public class QueryPACSService {
 	
 	/**
 	 * Do configuration of QueryPACSService from outside. Used by ShanoirUploader.
-	 * 
+	 *
 	 * @param calling
 	 * @param called
 	 * @param calledNameSCP
@@ -349,7 +349,7 @@ public class QueryPACSService {
 
 	/**
 	 * This method queries on study root level.
-	 * 
+	 *
 	 * @param dicomQuery
 	 * @param calling
 	 * @param called
@@ -449,7 +449,7 @@ public class QueryPACSService {
 	 * This method queries for studies, creates studies and adds them to patients.
 	 * @param calling
 	 * @param called
-	 * @param dicomQuery 
+	 * @param dicomQuery
 	 * @param patient
 	 */
 	private void queryStudies(Association association, DicomQuery dicomQuery, Patient patient) {
@@ -487,7 +487,7 @@ public class QueryPACSService {
 
 	/**
 	 * This method queries for series, creates them and adds them to studies.
-	 * 
+	 *
 	 * @param calling
 	 * @param called
 	 * @param study
@@ -542,7 +542,7 @@ public class QueryPACSService {
 	
 	/**
 	 * This method queries for instances/images, creates them and adds them to series.
-	 * 
+	 *
 	 * @param calling
 	 * @param called
 	 * @param serie
@@ -584,12 +584,12 @@ public class QueryPACSService {
 
 	/**
 	 * This method does a C-FIND query and returns the results.
-	 * 
+	 *
 	 * The state of each c-find query is a local attribute of the method.
 	 * So, when e.g. on the server 3 users call in parallel queryCFind,
 	 * each one has its own DimseRSPHandler and its own state, so this
 	 * might work, in case the association is not caching aspects.
-	 * 
+	 *
 	 * @param params
 	 * @param level
 	 * @return

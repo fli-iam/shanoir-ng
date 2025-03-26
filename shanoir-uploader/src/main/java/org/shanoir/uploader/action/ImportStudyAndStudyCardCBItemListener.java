@@ -146,7 +146,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 	/**
 	 * Examinations in Shanoir are related to study.
 	 * @param study
-	 * @throws ParseException 
+	 * @throws ParseException
 	 */
 	private void filterExistingExamsForSelectedStudy(Study study) {
 		// manage list of existing exams, and check if study date matches
@@ -178,7 +178,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 			} else {
 				mainWindow.importDialog.mrExaminationNewExamCB.setEnabled(false);
 			}
-		} 
+		}
 	}
 
 	private void updateStudyCards(Study study) {

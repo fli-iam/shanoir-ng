@@ -132,7 +132,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
             return repository.findPageByStudyCenterOrStudyIdIn(studyCenters, unrestrictedStudies, pageable);
         }
     }
-    
+
     @Override
     public Collection<DatasetAcquisition> createAll(Collection<DatasetAcquisition> acquisitions) {
     	Iterable<DatasetAcquisition> result = this.repository.saveAll(acquisitions);
@@ -274,7 +274,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         repository.deleteById(id);
         shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
     }
-    
+
     @Override
     public boolean existsByStudyCardId(Long studyCardId) {
         return repository.existsByStudyCard_Id(studyCardId);

@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * This class maps the Examination objects from the Shanoir-NG database
  * to a DICOM-study DTO to implement the DICOMweb protocol.
- * 
+ *
  * @author mkain
  *
  */
@@ -58,7 +58,7 @@ public abstract class ExaminationToStudyDTOMapper {
 	/**
 	 * This method transforms dataset acquisitions in Shanoir back
 	 * into DICOM series for the purpose of supporting the DICOMWeb protocol.
-	 * 
+	 *
 	 * @param examination
 	 * @param studyDTO
 	 */
@@ -98,7 +98,7 @@ public abstract class ExaminationToStudyDTOMapper {
 	
 	/**
 	 * Map list of @Examination to list of @StudyDTO.
-	 *  
+	 *
 	 * @param examinations
 	 * @return list of StudyDTO
 	 */

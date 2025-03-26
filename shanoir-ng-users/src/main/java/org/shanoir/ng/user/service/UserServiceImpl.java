@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -53,7 +53,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * User service implementation.
- * 
+ *
  * @author msimon
  * @author mkain
  *
@@ -356,13 +356,13 @@ public class UserServiceImpl implements UserService {
 	/*
 	 * Update user on all systems: microservice database, Shanoir old and
 	 * Keycloak server
-	 * 
+	 *
 	 * @param userDb user found in database.
-	 * 
+	 *
 	 * @param user user with new values.
-	 * 
+	 *
 	 * @return database user with new values.
-	 * 
+	 *
 	 * @throws ShanoirUsersException
 	 */
 	private User updateUserOnAllSystems(final User userDb, final User user) {
@@ -376,11 +376,11 @@ public class UserServiceImpl implements UserService {
 
 	/*
 	 * Update some values of user to save them in database.
-	 * 
+	 *
 	 * @param userDb user found in database.
-	 * 
+	 *
 	 * @param user user with new values.
-	 * 
+	 *
 	 * @return database user with new values.
 	 */
 	private User updateUserValues(final User userDb, final User user) {

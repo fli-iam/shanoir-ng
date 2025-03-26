@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
  * installed in many hospitals. To progress with the migration and deploy
  * the new version, a "fix" is provided on the server side. Later, when
  * a new version of ShUp is deployed larger, this can be made undone.
- * 
+ *
  * @author mkain
  *
  */

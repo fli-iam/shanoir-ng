@@ -8,7 +8,7 @@ import org.shanoir.uploader.upload.UploadState;
 /**
  * This class contains Nominative date that will be displayed in the current
  * uploads tab of ShanoirUploader.
- * 
+ *
  * @author ifakhfakh
  *
  */

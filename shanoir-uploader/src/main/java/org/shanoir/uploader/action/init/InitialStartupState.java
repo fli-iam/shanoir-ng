@@ -29,19 +29,19 @@ import org.springframework.stereotype.Component;
 
 /**
  * This concrete state class is the initial state (entry point) of the state machine.
- * It initializes the ShanoirUploader application by 
+ * It initializes the ShanoirUploader application by
  * - initializing the logger
  * - initializing the .su folder
  * - loading all required property files
  * - setting the language
  * - creating and showing the startup dialog (dependency to language and properties files);
  * the dialog is then set into the context, to be used and influenced by other states after
- * 
+ *
  *  When done the state is changed to ProxyConfigurationState.
- *  
+ *
  *  @author atouboul
  *  @author mkain
- * 
+ *
  */
 @Component
 public class InitialStartupState implements State {
@@ -271,7 +271,7 @@ public class InitialStartupState implements State {
 	}
 
 	private void initProfile() throws FileNotFoundException, IOException {
-		// If profile property is not null or empty it means that the "remember profile" box was ticked in a previous execution. 
+		// If profile property is not null or empty it means that the "remember profile" box was ticked in a previous execution.
 		String profile = ShUpConfig.basicProperties.getProperty(ShUpConfig.PROFILE);
 		if (profile != null && !profile.isEmpty()) {
 			ShUpConfig.profileSelected = profile;
