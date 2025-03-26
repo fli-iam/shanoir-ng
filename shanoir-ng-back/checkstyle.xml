@@ -4,6 +4,7 @@
     <module name="TreeWalker">
         <module name="AvoidStarImport">
             <property name="severity" value="warning"/>
+            <property name="maxErrors" value="1000"/>
         </module>
     </module>
 </module>
