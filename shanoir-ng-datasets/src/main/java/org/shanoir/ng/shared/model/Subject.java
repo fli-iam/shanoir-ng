@@ -37,7 +37,7 @@ public class Subject extends IdName {
 	
 	protected String name;
 	
-	public Subject() {}
+	public Subject() { }
 	
 	/**
 	 * @param id

@@ -37,7 +37,7 @@ public class ExaminationData {
 
     private Long studyId;
 
-    public ExaminationData() {}
+    public ExaminationData() { }
 
     public ExaminationData(Examination examination) {
         if (examination == null) throw new IllegalArgumentException("examination can't be null");

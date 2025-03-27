@@ -38,7 +38,7 @@ public class Instance {
     @JsonProperty("referencedFileID")
     private String[] referencedFileID;
 
-    public Instance() {}
+    public Instance() { }
 
     public Instance(Attributes attributes) {
     		this.sopInstanceUID = attributes.getString(Tag.SOPInstanceUID);

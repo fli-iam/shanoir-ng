@@ -27,7 +27,7 @@ public class EquipmentDicom {
     private String magneticFieldStrength;
 
     // Keep this empty constructor to avoid Jackson deserialization exceptions
-    public EquipmentDicom() {}
+    public EquipmentDicom() { }
 
     public EquipmentDicom(String manufacturer, String manufacturerModelName, String deviceSerialNumber, String stationName, String magneticFieldStrength) {
         this.manufacturer = manufacturer;

@@ -846,7 +846,7 @@ public class StudyServiceImpl implements StudyService {
 		try {
 			String resultAsString = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_DATASETS_TOTAL_STORAGE_VOLUME, studyIds);
 			if(resultAsString != null && !resultAsString.isEmpty()) {
-				detailedStorageVolumes = objectMapper.readValue(resultAsString,  new TypeReference<HashMap<Long, StudyStorageVolumeDTO>>() {});
+				detailedStorageVolumes = objectMapper.readValue(resultAsString,  new TypeReference<HashMap<Long, StudyStorageVolumeDTO>>() { });
 			}else{
 				return new HashMap<>();
 			}

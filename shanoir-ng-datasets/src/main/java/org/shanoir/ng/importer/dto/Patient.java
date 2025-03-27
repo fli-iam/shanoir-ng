@@ -53,7 +53,7 @@ public class Patient {
     private Long frontExperimentalGroupOfSubjectId;
 
 	// Keep this empty constructor to avoid Jackson deserialization exceptions
-	public Patient() {}
+	public Patient() { }
 
 	public String getPatientID() {
 		return patientID;

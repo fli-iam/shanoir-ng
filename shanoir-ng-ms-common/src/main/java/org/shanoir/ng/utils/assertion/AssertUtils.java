@@ -25,7 +25,7 @@ public abstract class AssertUtils {
             try {
                 function.apply();
                 fail("This should return an AccessDeniedException.");
-            } catch (AccessDeniedException e) {}
+            } catch (AccessDeniedException e) { }
         } catch (Exception e) {
             fail(buildFailMsg(e));
         }
@@ -36,7 +36,7 @@ public abstract class AssertUtils {
             try {
                 function.apply(arg);
                 fail("This should return an AccessDeniedException.");
-            } catch (AccessDeniedException e) {}
+            } catch (AccessDeniedException e) { }
         } catch (Exception e) {
             fail(buildFailMsg(e));
         }
@@ -47,7 +47,7 @@ public abstract class AssertUtils {
             try {
                 function.apply(arg1, arg2);
                 fail("This should return an AccessDeniedException.");
-            } catch (AccessDeniedException e) {}
+            } catch (AccessDeniedException e) { }
         } catch (Exception e) {
             fail(buildFailMsg(e));
         }
@@ -58,7 +58,7 @@ public abstract class AssertUtils {
             try {
                 function.apply(arg1, arg2, arg3);
                 fail("This should return an AccessDeniedException.");
-            } catch (AccessDeniedException e) {}
+            } catch (AccessDeniedException e) { }
         } catch (Exception e) {
             fail(buildFailMsg(e));
         }
@@ -69,7 +69,7 @@ public abstract class AssertUtils {
             try {
                 function.apply(arg1, arg2, arg3, arg4);
                 fail("This should return an AccessDeniedException.");
-            } catch (AccessDeniedException e) {}
+            } catch (AccessDeniedException e) { }
         } catch (Exception e) {
             fail(buildFailMsg(e));
         }
@@ -83,7 +83,7 @@ public abstract class AssertUtils {
             } catch (AccessDeniedException e) {
                 fail("This should not return an AccessDeniedException.");
             }
-        } catch (Exception e) {}
+        } catch (Exception e) { }
     }
 
     public static <T> void assertAccessAuthorized(AccessCheckedFunction1Arg<T> function, T arg) throws ShanoirException {
@@ -93,7 +93,7 @@ public abstract class AssertUtils {
             } catch (AccessDeniedException e) {
                 fail("This should not return an AccessDeniedException.");
             }
-        } catch (Exception e) {}
+        } catch (Exception e) { }
     }
 
     public static <T, U> void assertAccessAuthorized(AccessCheckedFunction2Arg<T, U> function, T arg1, U arg2) throws ShanoirException {
@@ -103,7 +103,7 @@ public abstract class AssertUtils {
             } catch (AccessDeniedException e) {
                 fail("This should not return an AccessDeniedException.");
             }
-        } catch (Exception e) {}
+        } catch (Exception e) { }
     }
 
     public static <T, U, V> void assertAccessAuthorized(AccessCheckedFunction3Arg<T, U, V> function, T arg1, U arg2, V arg3) throws ShanoirException {
@@ -113,7 +113,7 @@ public abstract class AssertUtils {
             } catch (AccessDeniedException e) {
                 fail("This should not return an AccessDeniedException.");
             }
-        } catch (Exception e) {}
+        } catch (Exception e) { }
     }
 
     public static <T, U, V, W> void assertAccessAuthorized(AccessCheckedFunction4Arg<T, U, V, W> function, T arg1, U arg2, V arg3, W arg4) throws ShanoirException {
@@ -123,7 +123,7 @@ public abstract class AssertUtils {
             } catch (AccessDeniedException e) {
                 fail("This should not return an AccessDeniedException.");
             }
-        } catch (Exception e) {}
+        } catch (Exception e) { }
     }
 
     private static String buildFailMsg(Exception e) {

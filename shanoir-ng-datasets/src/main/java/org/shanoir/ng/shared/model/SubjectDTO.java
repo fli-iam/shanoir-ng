@@ -27,7 +27,7 @@ public class SubjectDTO {
 	
 	protected String name;
 	
-	public SubjectDTO() {};
+	public SubjectDTO() { };
 	
 	/**
 	 * @param id

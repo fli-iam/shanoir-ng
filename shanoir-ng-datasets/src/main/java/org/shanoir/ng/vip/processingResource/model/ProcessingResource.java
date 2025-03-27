@@ -24,7 +24,7 @@ public class ProcessingResource extends AbstractEntity {
     @NotNull
     private String resourceId;
 
-    public ProcessingResource() {}
+    public ProcessingResource() { }
 
     public ProcessingResource(ExecutionMonitoring processing, Dataset dataset, String resourceId) {
         this.processing = processing;

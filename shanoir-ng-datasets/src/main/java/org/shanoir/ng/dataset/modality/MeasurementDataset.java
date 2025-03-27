@@ -10,7 +10,7 @@ public class MeasurementDataset extends Dataset {
 
 	private static final long serialVersionUID = 7476089535424634218L;
 
-	public MeasurementDataset() {}
+	public MeasurementDataset() { }
 
 	public MeasurementDataset(Dataset other) {
 		super(other);

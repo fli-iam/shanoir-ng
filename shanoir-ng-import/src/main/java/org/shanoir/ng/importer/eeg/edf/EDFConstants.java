@@ -27,7 +27,7 @@ import java.nio.charset.Charset;
  */
 class EDFConstants
 {
-        private EDFConstants() {}
+        private EDFConstants() { }
 
         static final Charset CHARSET = Charset.forName("ASCII");
 

@@ -114,7 +114,7 @@ public class CardsProcessingService {
                 resetSubjectStudies(subjectsStudies);
                 try {
                     subjectStudyService.update(subjectsStudies);
-                } catch (EntityNotFoundException e) {} // too bad
+                } catch (EntityNotFoundException e) { } // too bad
             }
             List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
             if (acquisitions != null && !acquisitions.isEmpty()) {
@@ -161,7 +161,7 @@ public class CardsProcessingService {
                 resetSubjectStudies(study.getSubjectStudyList());
                 try {
                     subjectStudyService.update(study.getSubjectStudyList());
-                } catch (EntityNotFoundException e) {} // too bad
+                } catch (EntityNotFoundException e) { } // too bad
             }
             QualityCardResult result = new QualityCardResult();
             AtomicInteger i = new AtomicInteger(0);

@@ -48,7 +48,7 @@ public class Study {
 	private List<Serie> series;
 
 	// Keep this empty constructor to avoid Jackson deserialization exceptions
-	public Study() {}
+	public Study() { }
 
 	public Study(final Attributes attributes) {
 		studyInstanceUID = attributes.getString(Tag.StudyInstanceUID);

@@ -99,7 +99,7 @@ public class QueryPACSService {
 	@Value("${shanoir.import.pacs.store.aet.called.name}")
 	private String calledNameSCP;
 	
-	public QueryPACSService() {} // for ShUp usage
+	public QueryPACSService() { } // for ShUp usage
 	
 	/**
 	 * Used within microservice MS Import on the server, via PostConstruct.

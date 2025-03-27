@@ -28,7 +28,7 @@ public class VM {
 
 	private Cardinality max;
 
-	private VM() {}
+	private VM() { }
 
 	private VM(String str) {
 		String[] split = str.split("-");

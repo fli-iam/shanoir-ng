@@ -20,7 +20,7 @@ public class SubjectStudyTagPk implements Serializable {
 	@JoinColumn(name = "subject_study_id", insertable = false, updatable = false, nullable = false)
 	private SubjectStudy subjectStudy;
 
-    public SubjectStudyTagPk() {}
+    public SubjectStudyTagPk() { }
 
     public SubjectStudyTagPk(Tag tag, SubjectStudy subjectStudy) {
 		super();
