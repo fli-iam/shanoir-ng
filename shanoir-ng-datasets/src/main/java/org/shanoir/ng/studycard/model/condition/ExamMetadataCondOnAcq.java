@@ -33,7 +33,7 @@ import java.util.List;
 @Entity
 @DiscriminatorValue("ExamMetadataCondOnAcq")
 @JsonTypeName("ExamMetadataCondOnAcq")
-public class ExamMetadataCondOnAcq extends StudyCardMetadataCondition<DatasetAcquisition>{
+public class ExamMetadataCondOnAcq extends StudyCardMetadataCondition<DatasetAcquisition> {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(ExamMetadataCondOnAcq.class);
 

@@ -35,7 +35,7 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class PetDatasetStragegy implements DatasetStrategy<PetDataset>{
+public class PetDatasetStragegy implements DatasetStrategy<PetDataset> {
 	
 	@Autowired
 	DatasetExpressionContext datasetExpressionContext;

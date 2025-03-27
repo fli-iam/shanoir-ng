@@ -13,6 +13,7 @@ public class ShanoirEvent {
     public static final int SUCCESS = 1;
     public static final int IN_PROGRESS = 2;
     private static final int OBJECT_ID_MAX_SIZE = 255;
+    private static final int OBJECT_ID_TRUNCATE_SIZE = 250;
 
     private Long id;
 
@@ -113,7 +114,7 @@ public class ShanoirEvent {
      */
     public final void setObjectId(String objectId) {
         if (objectId != null && objectId.length() > OBJECT_ID_MAX_SIZE) {
-            this.objectId = objectId.substring(0, OBJECT_ID_MAX_SIZE - 5) + "...";
+            this.objectId = objectId.substring(0, OBJECT_ID_TRUNCATE_SIZE) + "...";
         } else {
             this.objectId = objectId;
         }

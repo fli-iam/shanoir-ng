@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 @Entity
 @DiscriminatorValue("DatasetMetadataCondOnDataset")
 @JsonTypeName("DatasetMetadataCondOnDataset")
-public class DatasetMetadataCondOnDataset extends StudyCardMetadataCondition<Dataset>{
+public class DatasetMetadataCondOnDataset extends StudyCardMetadataCondition<Dataset> {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetMetadataCondOnDataset.class);
 	

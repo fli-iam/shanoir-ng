@@ -32,7 +32,7 @@ import java.util.List;
 @Entity
 @DiscriminatorValue("AcqMetadataCondOnDatasets")
 @JsonTypeName("AcqMetadataCondOnDatasets")
-public class AcqMetadataCondOnDatasets extends StudyCardMetadataCondition<Dataset>{
+public class AcqMetadataCondOnDatasets extends StudyCardMetadataCondition<Dataset> {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(AcqMetadataCondOnDatasets.class);
 	

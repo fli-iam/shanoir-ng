@@ -34,7 +34,7 @@ import java.util.List;
 @Entity
 @DiscriminatorValue("ExamMetadataCondOnDatasets")
 @JsonTypeName("ExamMetadataCondOnDatasets")
-public class ExamMetadataCondOnDatasets extends StudyCardMetadataCondition<Dataset>{
+public class ExamMetadataCondOnDatasets extends StudyCardMetadataCondition<Dataset> {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(ExamMetadataCondOnDatasets.class);
 
