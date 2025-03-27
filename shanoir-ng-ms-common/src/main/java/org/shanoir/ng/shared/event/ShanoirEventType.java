@@ -1,6 +1,8 @@
 package org.shanoir.ng.shared.event;
 
-public class ShanoirEventType {
+public final class ShanoirEventType {
+
+    private ShanoirEventType() { }
 
     /** Study **/
     public static final String CREATE_STUDY_EVENT = "createStudy.event";
