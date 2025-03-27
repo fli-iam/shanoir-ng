@@ -28,7 +28,7 @@ import java.util.Date;
  * @author yyao
  *
  */
-public class DateTimeUtils {
+public final class DateTimeUtils {
 
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
