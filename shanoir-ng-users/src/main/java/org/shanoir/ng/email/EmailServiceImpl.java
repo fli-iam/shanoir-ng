@@ -390,7 +390,7 @@ public class EmailServiceImpl implements EmailService {
 
         // Get the list of recipients
         List<User> admins = (List<User>) this.userRepository.findAllById(generatedMail.getRecipients());
-    
+
         List<DatasetDetail> datasetLinks = new ArrayList<>();
         for (Entry<Long, String> dataset :  generatedMail.getDatasets().entrySet()) {
             DatasetDetail detail = new DatasetDetail();
@@ -398,7 +398,7 @@ public class EmailServiceImpl implements EmailService {
             detail.setUrl(this.shanoirServerAddress + "dataset/details/" + dataset.getKey());
             datasetLinks.add(detail);
         }
-    
+
         DatasetDetail examDetail = new DatasetDetail();
         examDetail.setName(generatedMail.getExaminationId());
         examDetail.setUrl(shanoirServerAddress + "examination/details/" + generatedMail.getExaminationId());
@@ -437,7 +437,7 @@ public class EmailServiceImpl implements EmailService {
 
         // Get the list of recipients
         List<User> admins = (List<User>) this.userRepository.findAllById(generatedMail.getRecipients());
-    
+
         DatasetDetail examDetail = new DatasetDetail();
         examDetail.setName(generatedMail.getExaminationId());
         examDetail.setUrl(shanoirServerAddress + "examination/details/" + generatedMail.getExaminationId());
@@ -480,7 +480,7 @@ public class EmailServiceImpl implements EmailService {
         if (!CollectionUtils.isEmpty(email.getRecipients())) {
             // Get the list of recipients
             List<User> studyAdmins = (List<User>) this.userRepository.findAllById(email.getRecipients());
-                
+          
             for (User studyAdmin : studyAdmins) {
                 MimeMessagePreparator messagePreparator = mimeMessage -> {
                     final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
@@ -575,7 +575,7 @@ public class EmailServiceImpl implements EmailService {
     /** Invites a user that is not in shanoir yet. */
     @Override
     public void inviteToStudy(StudyInvitationEmail email) {
-    
+
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
             messageHelper.setFrom(administratorEmail);
@@ -620,7 +620,7 @@ public class EmailServiceImpl implements EmailService {
      */
     public void notifyUserRefusedFromStudy(AccessRequest refusedRequest) {
         User user = refusedRequest.getUser();
-    
+
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
             messageHelper.setFrom(administratorEmail);

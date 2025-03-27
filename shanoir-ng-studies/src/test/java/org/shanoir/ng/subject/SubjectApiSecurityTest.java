@@ -113,16 +113,16 @@ public class SubjectApiSecurityTest {
         assertAccessDenied(api::updateSubject, ENTITY_ID, mockExisting, mockBindingResult);
 
         assertAccessDenied(api::deleteSubject, ENTITY_ID);
-    
+
         Subject mock = buildSubjectMock(ENTITY_ID);
         addStudyToMock(mock, 1L, StudyUserRight.CAN_IMPORT);
         given(repository.findById(ENTITY_ID)).willReturn(Optional.of(mock));
         assertAccessDenied(api::deleteSubject, ENTITY_ID);
-    
+
         addStudyToMock(mock, 2L, StudyUserRight.CAN_ADMINISTRATE);
         given(repository.findById(ENTITY_ID)).willReturn(Optional.of(mock));
         assertAccessDenied(api::deleteSubject, ENTITY_ID);
-    
+
         mock = buildSubjectMock(ENTITY_ID);
         addStudyToMock(mock, 1L, StudyUserRight.CAN_ADMINISTRATE);
         given(repository.findById(ENTITY_ID)).willReturn(Optional.of(mock));
@@ -134,20 +134,20 @@ public class SubjectApiSecurityTest {
     public void testAsExpert() throws ShanoirException, RestServiceException {
         testRead();
         testCreate();
-    
+
         //assertAccessDenied(api::updateSubject, ENTITY_ID, mockExisting, mockBindingResult);
 
         assertAccessDenied(api::deleteSubject, ENTITY_ID);
-    
+
         Subject mock = buildSubjectMock(ENTITY_ID);
         addStudyToMock(mock, 1L, StudyUserRight.CAN_IMPORT);
         given(repository.findById(ENTITY_ID)).willReturn(Optional.of(mock));
         assertAccessDenied(api::deleteSubject, ENTITY_ID);
-    
+
         addStudyToMock(mock, 2L, StudyUserRight.CAN_ADMINISTRATE);
         given(repository.findById(ENTITY_ID)).willReturn(Optional.of(mock));
         assertAccessDenied(api::deleteSubject, ENTITY_ID);
-    
+
         mock = buildSubjectMock(ENTITY_ID);
         addStudyToMock(mock, 1L, StudyUserRight.CAN_ADMINISTRATE);
         given(repository.findById(ENTITY_ID)).willReturn(Optional.of(mock));
@@ -170,7 +170,7 @@ public class SubjectApiSecurityTest {
 
     private void testRead() throws ShanoirException {
         final String NAME = "data";
-    
+
         // No rights
         Subject subjectMockNoRights = buildSubjectMock(1L);
         given(repository.findByName(NAME)).willReturn(subjectMockNoRights);
@@ -179,7 +179,7 @@ public class SubjectApiSecurityTest {
         given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockNoRights);
         given(repository.findAllById(Arrays.asList(1L))).willReturn(Arrays.asList(subjectMockNoRights));
         assertAccessDenied(api::findSubjectById, ENTITY_ID);
-    
+
         given(repository.findAll()).willReturn(Arrays.asList(subjectMockNoRights));
         assertAccessAuthorized(api::findSubjects,true, true);
         assertEquals(null, api.findSubjects(true, true).getBody());
@@ -194,7 +194,7 @@ public class SubjectApiSecurityTest {
         given(subjectStudyRepository.findByStudyIdAndStudy_StudyUserList_UserId(subjectStudyMock.getStudy().getId(), LOGGED_USER_ID)).willReturn(Arrays.asList(subjectStudyMock));
         given(studyRepository.findStudyWithTagsById(1L)).willReturn(buildStudyMock(1L));
         assertAccessDenied(api::findSubjectsByStudyId, 1L, "null");
-    
+
         // Wrong Rights
         Subject subjectMockWrongRights = buildSubjectMock(1L);
         addStudyToMock(subjectMockWrongRights, 100L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT);
@@ -204,7 +204,7 @@ public class SubjectApiSecurityTest {
         given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockWrongRights);
         given(repository.findAll()).willReturn(Arrays.asList(subjectMockWrongRights));
         assertAccessDenied(api::findSubjectById, ENTITY_ID);
-    
+
         given(repository.findAll()).willReturn(Arrays.asList(subjectMockWrongRights));
         assertAccessAuthorized(api::findSubjects, true, true);
         assertEquals(null, api.findSubjects(true, true).getBody());
@@ -217,7 +217,7 @@ public class SubjectApiSecurityTest {
         given(subjectStudyRepository.findByStudyId(subjectStudyMock.getStudy().getId())).willReturn(Arrays.asList(subjectStudyMock));
         given(subjectStudyRepository.findByStudyIdAndStudy_StudyUserList_UserId(subjectStudyMock.getStudy().getId(), LOGGED_USER_ID)).willReturn(Arrays.asList(subjectStudyMock));
         assertAccessDenied(api::findSubjectsByStudyId, 1L, null);
-    
+
         // Right rights (!)
         Subject subjectMockRightRights = buildSubjectMock(1L);
         addStudyToMock(subjectMockRightRights, 100L, StudyUserRight.CAN_SEE_ALL);
@@ -228,7 +228,7 @@ public class SubjectApiSecurityTest {
         given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockRightRights);
         assertAccessAuthorized(api::findSubjectById, ENTITY_ID);
         assertAccessAuthorized(api::findSubjectByIdentifier, "identifier");
-    
+
         given(repository.findAll()).willReturn(Arrays.asList(subjectMockRightRights));
         given(repository.findAllById(Arrays.asList(1L))).willReturn(Arrays.asList(subjectMockRightRights));
         assertAccessAuthorized(api::findSubjects, true, true);
@@ -249,11 +249,11 @@ public class SubjectApiSecurityTest {
 
     private void testCreate() throws ShanoirException {
         List<Study> studiesMock;
-    
+
         // Create subject without subject <-> study
         Subject newSubjectMock = buildSubjectMock(null);
         assertAccessDenied(api::saveNewSubject, newSubjectMock, null, mockBindingResult);
-    
+
         // Create subject
         studiesMock = new ArrayList<>();
         studiesMock.add(buildStudyMock(9L));
@@ -262,7 +262,7 @@ public class SubjectApiSecurityTest {
         newSubjectMock = buildSubjectMock(null);
         addStudyToMock(newSubjectMock, 9L);
         assertAccessDenied(api::saveNewSubject, newSubjectMock, null, mockBindingResult);
-    
+
         // Create subject linked to a study where I can admin, download, see all but not import.
         studiesMock = new ArrayList<>();
         studiesMock.add(buildStudyMock(10L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_SEE_ALL));
@@ -271,7 +271,7 @@ public class SubjectApiSecurityTest {
         newSubjectMock = buildSubjectMock(null);
         addStudyToMock(newSubjectMock, 10L);
         assertAccessDenied(api::saveNewSubject, newSubjectMock, null, mockBindingResult);
-    
+
         // Create subject linked to a study where I can import and also to a study where I can't.
         studiesMock = new ArrayList<>();
         studiesMock.add(buildStudyMock(11L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_SEE_ALL));
@@ -284,7 +284,7 @@ public class SubjectApiSecurityTest {
         addStudyToMock(newSubjectMock, 11L);
         addStudyToMock(newSubjectMock, 12L);
         assertAccessDenied(api::saveNewSubject, newSubjectMock, null, mockBindingResult);
-    
+
         // Create subject linked to a study where I can import
         studiesMock = new ArrayList<>();
         studiesMock.add(buildStudyMock(13L, StudyUserRight.CAN_IMPORT));
@@ -320,11 +320,11 @@ public class SubjectApiSecurityTest {
 
     private void addStudyToMock(Subject mock, Long id, StudyUserRight... rights) {
         Study study = buildStudyMock(id, rights);
-    
+
         SubjectStudy subjectStudy = new SubjectStudy();
         subjectStudy.setSubject(mock);
         subjectStudy.setStudy(study);
-    
+
         if (study.getSubjectStudyList() == null) {
             study.setSubjectStudyList(new ArrayList<SubjectStudy>());
         }

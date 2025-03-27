@@ -124,7 +124,7 @@
 //
 //    @Test
 //    public void saveNewCenterWithLogin() throws ClientProtocolException, IOException {
-//    
+//
 //        final Center center = ModelsUtil.createCenter();
 //        center.setName("tt");
 //        final HttpEntity<Center> entity = new HttpEntity<Center>(center, getHeadersWithToken(true));
@@ -132,7 +132,7 @@
 //        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity,
 //                String.class);
 //        assertEquals(HttpStatus.OK, response.getStatusCode());
-//    
+//
 //        // Get center id
 //        String centerId = response.getBody().split("\"id\":")[1].split(",")[0];
 //
@@ -145,7 +145,7 @@
 //    @Test
 //    public void updateNewCenterProtected() {
 //        final HttpEntity<Center> entity = new HttpEntity<Center>(ModelsUtil.createCenter());
-//    
+//
 //        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 //                String.class);
 //        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());

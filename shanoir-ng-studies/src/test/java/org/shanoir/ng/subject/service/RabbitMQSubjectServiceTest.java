@@ -113,7 +113,7 @@ public class RabbitMQSubjectServiceTest {
         // WHEN the subjectStudy already exists
         String message = "{id: 1, name: \"1L\"}";
         String name = rabbitMQSubjectService.updateSubjectStudy(message);
-    
+
         // THEN nothing is created
         Mockito.verifyNoInteractions(subjectStudyRepository);
         assertEquals(name, studyName);
@@ -134,7 +134,7 @@ public class RabbitMQSubjectServiceTest {
         // WHEN the subjectStudy does not exists
         String message = "{id: 1, name: \"1L\"}";
         String name = rabbitMQSubjectService.updateSubjectStudy(message);
-    
+
         // THEN a new subejctStudy is created
         Mockito.verify(subjectStudyRepository).save(Mockito.any(SubjectStudy.class));
         assertEquals(name, studyName);
@@ -145,7 +145,7 @@ public class RabbitMQSubjectServiceTest {
 
         // WHEN the call fails
         String name = rabbitMQSubjectService.updateSubjectStudy(mapper.writeValueAsString(idName));
-    
+
         // THEN a message is logged and null is sent
         assertNull(name);
     }
@@ -153,6 +153,6 @@ public class RabbitMQSubjectServiceTest {
     // TODO: complete these
     @Test
     public void testManageParticipants() {
-    
+
     }
 }

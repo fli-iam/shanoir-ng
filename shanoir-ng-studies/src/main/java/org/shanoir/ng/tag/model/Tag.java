@@ -87,7 +87,7 @@ public class Tag extends HalEntity {
             this.subjectStudyTags.clear();
             if (subjectStudyTags != null) {
                 this.subjectStudyTags.addAll(subjectStudyTags);
-            }        
+            }  
         } else {
             this.subjectStudyTags = subjectStudyTags;
         }

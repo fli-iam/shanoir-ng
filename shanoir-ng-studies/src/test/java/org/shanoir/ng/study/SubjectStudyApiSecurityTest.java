@@ -132,12 +132,12 @@ public class SubjectStudyApiSecurityTest {
 
         Subject subject = ModelsUtil.createSubject();
         subject.setId(1L);
-    
+
         SubjectStudy subjectStudy = new SubjectStudy();
         subjectStudy.setId(id);
         subjectStudy.setStudy(study);
         subjectStudy.setSubject(subject);
-    
+
         return subjectStudy;
     }
 

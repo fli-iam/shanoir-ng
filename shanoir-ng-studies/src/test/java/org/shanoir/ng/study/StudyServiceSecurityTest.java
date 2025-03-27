@@ -99,13 +99,13 @@ public class StudyServiceSecurityTest {
     @Test
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
     public void testFindByIdAsUserThatCanSee() throws ShanoirException {
-    
+
         given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L)));
         assertAccessDenied(service::findById, 1L);
-    
+
         given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT)));
         assertAccessAuthorized(service::findById, 1L);
-    
+
         given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL)));
         assertAccessAuthorized(service::findById, 1L);
     }
@@ -114,13 +114,13 @@ public class StudyServiceSecurityTest {
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
     public void testFindAllAsUserThatCanSee() throws ShanoirException {
         assertAccessAuthorized(service::findAll);
-    
+
         given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(new Study[]
                 { buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL), buildStudyMock(2L, StudyUserRight.CAN_SEE_ALL) } ));
         given(studyUserRepository.findByStudy_Id(1L)).willReturn(buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL).getStudyUserList());
         given(studyUserRepository.findByStudy_Id(2L)).willReturn(buildStudyMock(2L, StudyUserRight.CAN_SEE_ALL).getStudyUserList());
         assertEquals(2, service.findAll().size());
-    
+
         given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(new Study[]
                 { buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL), buildStudyMock(2L, StudyUserRight.CAN_DOWNLOAD) } ));
         given(studyUserRepository.findByStudy_Id(1L)).willReturn(buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL).getStudyUserList());
@@ -136,23 +136,23 @@ public class StudyServiceSecurityTest {
         assertAccessAuthorized(service::findAll);
         assertAccessAuthorized(service::create, mockNew);
         assertAccessAuthorized(service::create, mockExisting);
-    
+
         Study mockOne = buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT);
         given(repository.findById(1L)).willReturn(Optional.of(mockOne));
         assertAccessDenied(service::update, mockOne);
         assertAccessDenied(service::deleteById, 1L);
-    
+
         Study mockTwo = buildStudyMock(2L, StudyUserRight.CAN_ADMINISTRATE);
         given(repository.findById(2L)).willReturn(Optional.of(mockTwo));
         assertAccessAuthorized(service::update, mockTwo);
         assertAccessAuthorized(service::deleteById, 2L);
-    
+
         Study mockThree = buildStudyMock(3L);
         given(repository.findById(3L)).willReturn(Optional.of(mockThree));
         assertAccessDenied(service::update, mockThree);
         assertAccessDenied(service::deleteById, 3L);
-    
-    
+
+
         Study study = service.findById(1L);
         assertTrue(study != null && study.getStudyUserList() != null && study.getStudyUserList().size() > 0);
         Study hackedStudy = new Study(); hackedStudy.setId(3L);
@@ -212,9 +212,9 @@ public class StudyServiceSecurityTest {
         studyUser.setUserName(LOGGED_USER_USERNAME);
         studyUser.setStudy(study);
         studyUser.setStudyUserRights(Arrays.asList(rights));
-        studyUserList.add(studyUser);        
+        studyUserList.add(studyUser);  
         study.setStudyUserList(studyUserList);
-        return study;    
+        return study;
     }
 
 }

@@ -105,10 +105,10 @@ public class StudyApiSecurityTest {
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
     public void testAsUser() throws ShanoirException, RestServiceException {
         testRead();
-    
+
         assertAccessDenied(api::saveNewStudy, mockNew, mockBindingResult);
         assertAccessDenied(api::updateStudy, 1L, buildStudyMock(1L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_SEE_ALL), mockBindingResult);
-    
+
         assertAccessDenied(api::deleteStudy, ENTITY_ID);
         given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID)));
         assertAccessDenied(api::deleteStudy, ENTITY_ID);
@@ -161,7 +161,7 @@ public class StudyApiSecurityTest {
         assertAccessAuthorized(api::findStudiesNames);
         assertEquals(null, api.findStudiesNames().getBody());
         assertAccessDenied(api::findStudyById, 1L, false);
-    
+
         // Wrong Rights
         Study studyMockWrongRights = buildStudyMock(2L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT);
         given(repository.findAll()).willReturn(Arrays.asList(studyMockWrongRights));
@@ -173,7 +173,7 @@ public class StudyApiSecurityTest {
         assertAccessAuthorized(api::findStudiesNames);
         assertEquals(null, api.findStudiesNames().getBody());
         assertAccessDenied(api::findStudyById, 2L, false);
-    
+
         // Right rights
         Study studyMockRightRights = buildStudyMock(3L, StudyUserRight.CAN_SEE_ALL);
         given(repository.findAll()).willReturn(Arrays.asList(studyMockRightRights, studyMockWrongRights, studyMockNoRights));

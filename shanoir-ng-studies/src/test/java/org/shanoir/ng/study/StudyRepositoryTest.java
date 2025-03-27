@@ -120,7 +120,7 @@ public class StudyRepositoryTest {
 //        Study studyFound = studyRepository.findById(1L);
 //        assertEquals(2, studyFound.getStudyUserList().size());
 //        Long deletedId = studyFound.getStudyUserList().get(indexToDelete).getId();
-//    
+//
 //        assertNotNull(studyUserRepository.findById(deletedId));
 //        studyFound.getStudyUserList().remove(indexToDelete);
 //        studyRepository.save(studyFound);

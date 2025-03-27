@@ -35,7 +35,7 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
 
         //Execute query
         query.execute();
-    
+
         @SuppressWarnings("unchecked")
         List<Object[]> results = query.getResultList();
 

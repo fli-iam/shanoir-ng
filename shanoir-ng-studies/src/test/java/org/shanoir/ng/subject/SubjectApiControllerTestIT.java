@@ -99,7 +99,7 @@
 //    @Test
 //    public void updateNewSubjectProtected() {
 //        final HttpEntity<Subject> entity = new HttpEntity<Subject>(ModelsUtil.createSubject());
-//    
+//
 //        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 //                String.class);
 //        assertEquals(HttpStatus.FOUND, response.getStatusCode());

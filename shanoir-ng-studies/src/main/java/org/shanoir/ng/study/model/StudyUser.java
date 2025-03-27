@@ -72,7 +72,7 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
     @ManyToOne
     @JsonIgnore
     private Study study;
-    
+
     /** User id. */
     private Long userId;
 
