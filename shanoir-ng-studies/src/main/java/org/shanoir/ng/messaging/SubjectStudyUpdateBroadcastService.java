@@ -33,35 +33,35 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class SubjectStudyUpdateBroadcastService {
-	
-	private static final Logger LOG = LoggerFactory.getLogger(SubjectStudyUpdateBroadcastService.class);
+    
+    private static final Logger LOG = LoggerFactory.getLogger(SubjectStudyUpdateBroadcastService.class);
 
-	@Autowired
-	private RabbitTemplate rabbitTemplate;
-	
-	@Autowired
-	private ObjectMapper objectMapper;
-	
-	public void send(List<SubjectStudy> subjectStudies) throws MicroServiceCommunicationException {
-		try {
-			String str = objectMapper.writeValueAsString(toDTO(subjectStudies));
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.SUBJECT_STUDY_QUEUE, str);
-			LOG.debug("sent subject-study creations : {}", str);
-		} catch (AmqpException | JsonProcessingException e) {
-			throw new MicroServiceCommunicationException("Could not send data to subject-study-exchange");
-		}
-	}
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+    
+    @Autowired
+    private ObjectMapper objectMapper;
+    
+    public void send(List<SubjectStudy> subjectStudies) throws MicroServiceCommunicationException {
+        try {
+            String str = objectMapper.writeValueAsString(toDTO(subjectStudies));
+            rabbitTemplate.convertAndSend(RabbitMQConfiguration.SUBJECT_STUDY_QUEUE, str);
+            LOG.debug("sent subject-study creations : {}", str);
+        } catch (AmqpException | JsonProcessingException e) {
+            throw new MicroServiceCommunicationException("Could not send data to subject-study-exchange");
+        }
+    }
 
-	private List<SubjectStudyDTO> toDTO(List<SubjectStudy> subjectStudies) {
-		List<SubjectStudyDTO> dtos = new ArrayList<>();
-		for (SubjectStudy subjectStudy : subjectStudies) {
-			SubjectStudyDTO dto = new SubjectStudyDTO(
-				subjectStudy.getId(),
-				subjectStudy.getStudy().getId(),
-				subjectStudy.getSubject().getId(),
-				(subjectStudy.getSubjectType() != null ? subjectStudy.getSubjectType().getId() : null));
-			dtos.add(dto);
-		}
-		return dtos;
-	}
+    private List<SubjectStudyDTO> toDTO(List<SubjectStudy> subjectStudies) {
+        List<SubjectStudyDTO> dtos = new ArrayList<>();
+        for (SubjectStudy subjectStudy : subjectStudies) {
+            SubjectStudyDTO dto = new SubjectStudyDTO(
+                subjectStudy.getId(),
+                subjectStudy.getStudy().getId(),
+                subjectStudy.getSubject().getId(),
+                (subjectStudy.getSubjectType() != null ? subjectStudy.getSubjectType().getId() : null));
+            dtos.add(dto);
+        }
+        return dtos;
+    }
 }

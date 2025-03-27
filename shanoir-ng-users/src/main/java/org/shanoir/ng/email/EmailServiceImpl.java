@@ -55,479 +55,479 @@ import org.thymeleaf.context.Context;
 @Service
 public class EmailServiceImpl implements EmailService {
 
-	private static final String STUDY_USERS = "studyUsers";
+    private static final String STUDY_USERS = "studyUsers";
 
-	private static final String EMAIL = "email";
+    private static final String EMAIL = "email";
 
-	private static final String EXPIRATION_DATE = "expirationDate";
+    private static final String EXPIRATION_DATE = "expirationDate";
 
-	private static final String LASTNAME = "lastname";
+    private static final String LASTNAME = "lastname";
 
-	private static final String FIRSTNAME = "firstname";
-	
-	private static final String USERNAME = "username";
+    private static final String FIRSTNAME = "firstname";
+    
+    private static final String USERNAME = "username";
 
-	private static final String SERVER_ADDRESS = "serverAddress";
-	
-	private static final String SERVER_ADDRESS_PUBLIC = "serverAddressPublic";
+    private static final String SERVER_ADDRESS = "serverAddress";
+    
+    private static final String SERVER_ADDRESS_PUBLIC = "serverAddressPublic";
 
-	private static final String STUDY_NAME = "studyName";
-	
-	private static final String SUBJECT = "subject";
-	
-	private static final String EXAMINATION = "examination";
-	
-	private static final String FAILURE_MESSAGE = "failureMessage";
-	
-	private static final String EXAM_DATE = "exam_date";
+    private static final String STUDY_NAME = "studyName";
+    
+    private static final String SUBJECT = "subject";
+    
+    private static final String EXAMINATION = "examination";
+    
+    private static final String FAILURE_MESSAGE = "failureMessage";
+    
+    private static final String EXAM_DATE = "exam_date";
 
-	private static final String STUDY_CARD = "study_card";
+    private static final String STUDY_CARD = "study_card";
 
-	private static final String SERIES = "series";
-	
-	private static final String MOTIVATION = "motivation";
+    private static final String SERIES = "series";
+    
+    private static final String MOTIVATION = "motivation";
 
-	private static final String STUDYCARD_URL = "studyCardUrl";
-	
-	private static final Logger LOG = LoggerFactory.getLogger(EmailServiceImpl.class);
-	
-	@Autowired
-	private JavaMailSender mailSender;
+    private static final String STUDYCARD_URL = "studyCardUrl";
+    
+    private static final Logger LOG = LoggerFactory.getLogger(EmailServiceImpl.class);
+    
+    @Autowired
+    private JavaMailSender mailSender;
 
-	@Autowired
-	private TemplateEngine templateEngine;
+    @Autowired
+    private TemplateEngine templateEngine;
 
-	@Autowired
-	private UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-	@Value("${server.administrator.email}")
-	private String administratorEmail;
+    @Value("${server.administrator.email}")
+    private String administratorEmail;
 
-	@Value("${front.server.address}")
-	private String shanoirServerAddress;
+    @Value("${front.server.address}")
+    private String shanoirServerAddress;
 
-	@Autowired
-	RabbitTemplate rabbitTemplate;
+    @Autowired
+    RabbitTemplate rabbitTemplate;
 
-	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d yyyy");
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d yyyy");
 
-	@Override
-	public void notifyAccountWillExpire(User user) {
-		MimeMessagePreparator messagePreparator = mimeMessage -> {
-			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-			messageHelper.setFrom(administratorEmail);
-			messageHelper.setTo(user.getEmail());
-			messageHelper.setSubject("Shanoir Account Expiration");
-			final Map<String, Object> variables = new HashMap<>();
-			variables.put(FIRSTNAME, user.getFirstName());
-			variables.put(LASTNAME, user.getLastName());
-			variables.put(SERVER_ADDRESS, shanoirServerAddress);
-			variables.put(EXPIRATION_DATE, formatter.format(user.getExpirationDate()));
-			final String content = build("notifyAccountWillExpire", variables);
-			messageHelper.setText(content, true);
-		};
-		mailSender.send(messagePreparator);
+    @Override
+    public void notifyAccountWillExpire(User user) {
+        MimeMessagePreparator messagePreparator = mimeMessage -> {
+            final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            messageHelper.setFrom(administratorEmail);
+            messageHelper.setTo(user.getEmail());
+            messageHelper.setSubject("Shanoir Account Expiration");
+            final Map<String, Object> variables = new HashMap<>();
+            variables.put(FIRSTNAME, user.getFirstName());
+            variables.put(LASTNAME, user.getLastName());
+            variables.put(SERVER_ADDRESS, shanoirServerAddress);
+            variables.put(EXPIRATION_DATE, formatter.format(user.getExpirationDate()));
+            final String content = build("notifyAccountWillExpire", variables);
+            messageHelper.setText(content, true);
+        };
+        mailSender.send(messagePreparator);
 
-	}
+    }
 
-	@Override
-	public void notifyAdminAccountExtensionRequest(User user) {
-		// Get admins emails
-		final List<String> adminEmails = userRepository.findAdminEmails();
+    @Override
+    public void notifyAdminAccountExtensionRequest(User user) {
+        // Get admins emails
+        final List<String> adminEmails = userRepository.findAdminEmails();
 
-		MimeMessagePreparator messagePreparator = mimeMessage -> {
-			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-			messageHelper.setFrom(administratorEmail);
-			messageHelper.setTo(adminEmails.toArray(new String[0]));
-			messageHelper.setSubject("User account extension request from " + shanoirServerAddress);
-			final Map<String, Object> variables = new HashMap<>();
-			variables.put("user", user);
-			variables.put(SERVER_ADDRESS, shanoirServerAddress);
-			final String content = build("notifyAdminAccountExtensionRequest", variables);
-			messageHelper.setText(content, true);
-		};
-		mailSender.send(messagePreparator);
-	}
+        MimeMessagePreparator messagePreparator = mimeMessage -> {
+            final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            messageHelper.setFrom(administratorEmail);
+            messageHelper.setTo(adminEmails.toArray(new String[0]));
+            messageHelper.setSubject("User account extension request from " + shanoirServerAddress);
+            final Map<String, Object> variables = new HashMap<>();
+            variables.put("user", user);
+            variables.put(SERVER_ADDRESS, shanoirServerAddress);
+            final String content = build("notifyAdminAccountExtensionRequest", variables);
+            messageHelper.setText(content, true);
+        };
+        mailSender.send(messagePreparator);
+    }
 
-	@Override
-	public void notifyAccountRequestAccepted(final User user) {
-		notifyUserAccountRequestAccepted(user);
-		notifyAdminAccountRequestAccepted(user);
-	}
+    @Override
+    public void notifyAccountRequestAccepted(final User user) {
+        notifyUserAccountRequestAccepted(user);
+        notifyAdminAccountRequestAccepted(user);
+    }
 
-	@Override
-	public void notifyAccountRequestDenied(final User user) {
-		notifyUserAccountRequestDenied(user);
-		notifyAdminAccountRequestDenied(user);
-	}
+    @Override
+    public void notifyAccountRequestDenied(final User user) {
+        notifyUserAccountRequestDenied(user);
+        notifyAdminAccountRequestDenied(user);
+    }
 
-	@Override
-	public void notifyExtensionRequestAccepted(final User user) {
-		notifyUserExtensionRequestAccepted(user);
-		notifyAdminExtensionRequestAccepted(user);
-	}
+    @Override
+    public void notifyExtensionRequestAccepted(final User user) {
+        notifyUserExtensionRequestAccepted(user);
+        notifyAdminExtensionRequestAccepted(user);
+    }
 
-	@Override
-	public void notifyExtensionRequestDenied(final User user) {
-		notifyUserExtensionRequestDenied(user);
-		notifyAdminExtensionRequestDenied(user);
-	}
+    @Override
+    public void notifyExtensionRequestDenied(final User user) {
+        notifyUserExtensionRequestDenied(user);
+        notifyAdminExtensionRequestDenied(user);
+    }
 
-	@Override
-	public void notifyCreateUser(final User user, final String password) {
-		MimeMessagePreparator messagePreparator = mimeMessage -> {
-			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-			messageHelper.setFrom(administratorEmail);
-			messageHelper.setTo(user.getEmail());
-			messageHelper.setSubject("Shanoir Account Creation");
-			final Map<String, Object> variables = new HashMap<>();
-			variables.put(FIRSTNAME, user.getFirstName());
-			variables.put(LASTNAME, user.getLastName());
-			variables.put(SERVER_ADDRESS, shanoirServerAddress);
-			variables.put("password", password);
-			variables.put("username", user.getUsername());
-			final String content = build("notifyCreateUser", variables);
-			messageHelper.setText(content, true);
-		};
-		mailSender.send(messagePreparator);
+    @Override
+    public void notifyCreateUser(final User user, final String password) {
+        MimeMessagePreparator messagePreparator = mimeMessage -> {
+            final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            messageHelper.setFrom(administratorEmail);
+            messageHelper.setTo(user.getEmail());
+            messageHelper.setSubject("Shanoir Account Creation");
+            final Map<String, Object> variables = new HashMap<>();
+            variables.put(FIRSTNAME, user.getFirstName());
+            variables.put(LASTNAME, user.getLastName());
+            variables.put(SERVER_ADDRESS, shanoirServerAddress);
+            variables.put("password", password);
+            variables.put("username", user.getUsername());
+            final String content = build("notifyCreateUser", variables);
+            messageHelper.setText(content, true);
+        };
+        mailSender.send(messagePreparator);
 
-	}
+    }
 
-	@Override
-	public void notifyCreateAccountRequest(final User user, final String password) {
-		MimeMessagePreparator messagePreparator = mimeMessage -> {
-			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-			messageHelper.setFrom(administratorEmail);
-			messageHelper.setTo(user.getEmail());
-			messageHelper.setSubject("Shanoir Account Creation");
-			final Map<String, Object> variables = new HashMap<>();
-			variables.put(FIRSTNAME, user.getFirstName());
-			variables.put(LASTNAME, user.getLastName());
-			variables.put("password", password);
-			variables.put("username", user.getUsername());
-			variables.put(SERVER_ADDRESS, shanoirServerAddress);
-			final String content = build("notifyCreateAccountRequest", variables);
-			messageHelper.setText(content, true);
-		};
-		LOG.info("User asked for an account: {}", user.getUsername());
-		mailSender.send(messagePreparator);
-	}
+    @Override
+    public void notifyCreateAccountRequest(final User user, final String password) {
+        MimeMessagePreparator messagePreparator = mimeMessage -> {
+            final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            messageHelper.setFrom(administratorEmail);
+            messageHelper.setTo(user.getEmail());
+            messageHelper.setSubject("Shanoir Account Creation");
+            final Map<String, Object> variables = new HashMap<>();
+            variables.put(FIRSTNAME, user.getFirstName());
+            variables.put(LASTNAME, user.getLastName());
+            variables.put("password", password);
+            variables.put("username", user.getUsername());
+            variables.put(SERVER_ADDRESS, shanoirServerAddress);
+            final String content = build("notifyCreateAccountRequest", variables);
+            messageHelper.setText(content, true);
+        };
+        LOG.info("User asked for an account: {}", user.getUsername());
+        mailSender.send(messagePreparator);
+    }
 
-	@Override
-	public void notifyUserResetPassword(final User user, final String password) {
-		MimeMessagePreparator messagePreparator = mimeMessage -> {
-			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-			messageHelper.setFrom(administratorEmail);
-			messageHelper.setTo(user.getEmail());
-			messageHelper.setSubject("[Shanoir] Réinitialisation du mot de passe");
-			final Map<String, Object> variables = new HashMap<>();
-			variables.put(FIRSTNAME, user.getFirstName());
-			variables.put(LASTNAME, user.getLastName());
-			variables.put("newPassword", password);
-			final String content = build("notifyUserResetPassword", variables);
-			messageHelper.setText(content, true);
-		};
-		mailSender.send(messagePreparator);
-	}
+    @Override
+    public void notifyUserResetPassword(final User user, final String password) {
+        MimeMessagePreparator messagePreparator = mimeMessage -> {
+            final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            messageHelper.setFrom(administratorEmail);
+            messageHelper.setTo(user.getEmail());
+            messageHelper.setSubject("[Shanoir] Réinitialisation du mot de passe");
+            final Map<String, Object> variables = new HashMap<>();
+            variables.put(FIRSTNAME, user.getFirstName());
+            variables.put(LASTNAME, user.getLastName());
+            variables.put("newPassword", password);
+            final String content = build("notifyUserResetPassword", variables);
+            messageHelper.setText(content, true);
+        };
+        mailSender.send(messagePreparator);
+    }
 
-	private String build(final String templateFile, final Map<String, Object> variables) {
-		final Context context = new Context();
-		if (variables != null) {
-			for (final Entry<String, Object> entry : variables.entrySet()) {
-				context.setVariable(entry.getKey(), entry.getValue());
-			}
-		}
-		return templateEngine.process(templateFile, context);
-	}
+    private String build(final String templateFile, final Map<String, Object> variables) {
+        final Context context = new Context();
+        if (variables != null) {
+            for (final Entry<String, Object> entry : variables.entrySet()) {
+                context.setVariable(entry.getKey(), entry.getValue());
+            }
+        }
+        return templateEngine.process(templateFile, context);
+    }
 
-	private void notifyAdminAccountRequestAccepted(final User user) {
-		// Get admins emails
-		final List<String> adminEmails = userRepository.findAdminEmails();
-		User userAdmin = userRepository.findById(KeycloakUtil.getTokenUserId()).orElse(null);
+    private void notifyAdminAccountRequestAccepted(final User user) {
+        // Get admins emails
+        final List<String> adminEmails = userRepository.findAdminEmails();
+        User userAdmin = userRepository.findById(KeycloakUtil.getTokenUserId()).orElse(null);
 
-		MimeMessagePreparator messagePreparator = mimeMessage -> {
-			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-			messageHelper.setFrom(administratorEmail);
-			messageHelper.setTo(adminEmails.toArray(new String[0]));
-			messageHelper.setSubject("User account request granted (" + shanoirServerAddress + ")");
-			final Map<String, Object> variables = new HashMap<>();
-			if (userAdmin != null) {
-				variables.put("adminName", userAdmin.getUsername());
-			}
-			variables.put("user", user);
-			final String content = build("notifyAdminAccountRequestAccepted", variables);
-			messageHelper.setText(content, true);
-		};
-		mailSender.send(messagePreparator);
-	}
+        MimeMessagePreparator messagePreparator = mimeMessage -> {
+            final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            messageHelper.setFrom(administratorEmail);
+            messageHelper.setTo(adminEmails.toArray(new String[0]));
+            messageHelper.setSubject("User account request granted (" + shanoirServerAddress + ")");
+            final Map<String, Object> variables = new HashMap<>();
+            if (userAdmin != null) {
+                variables.put("adminName", userAdmin.getUsername());
+            }
+            variables.put("user", user);
+            final String content = build("notifyAdminAccountRequestAccepted", variables);
+            messageHelper.setText(content, true);
+        };
+        mailSender.send(messagePreparator);
+    }
 
-	private void notifyAdminAccountRequestDenied(final User user) {
-		// Get admins emails
-		final List<String> adminEmails = userRepository.findAdminEmails();
+    private void notifyAdminAccountRequestDenied(final User user) {
+        // Get admins emails
+        final List<String> adminEmails = userRepository.findAdminEmails();
 
-		MimeMessagePreparator messagePreparator = mimeMessage -> {
-			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-			messageHelper.setFrom(administratorEmail);
-			messageHelper.setTo(adminEmails.toArray(new String[0]));
-			messageHelper.setSubject("User account request DENIED (" + shanoirServerAddress + ")");
-			final Map<String, Object> variables = new HashMap<>();
-			variables.put("user", user);
-			final String content = build("notifyAdminAccountRequestDenied", variables);
-			messageHelper.setText(content, true);
-		};
-		mailSender.send(messagePreparator);
-	}
+        MimeMessagePreparator messagePreparator = mimeMessage -> {
+            final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            messageHelper.setFrom(administratorEmail);
+            messageHelper.setTo(adminEmails.toArray(new String[0]));
+            messageHelper.setSubject("User account request DENIED (" + shanoirServerAddress + ")");
+            final Map<String, Object> variables = new HashMap<>();
+            variables.put("user", user);
+            final String content = build("notifyAdminAccountRequestDenied", variables);
+            messageHelper.setText(content, true);
+        };
+        mailSender.send(messagePreparator);
+    }
 
-	private void notifyAdminExtensionRequestAccepted(final User user) {
-		// Get admins emails
-		final List<String> adminEmails = userRepository.findAdminEmails();
-		User userAdmin = userRepository.findById(KeycloakUtil.getTokenUserId()).orElse(null);
+    private void notifyAdminExtensionRequestAccepted(final User user) {
+        // Get admins emails
+        final List<String> adminEmails = userRepository.findAdminEmails();
+        User userAdmin = userRepository.findById(KeycloakUtil.getTokenUserId()).orElse(null);
 
-		MimeMessagePreparator messagePreparator = mimeMessage -> {
-			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-			messageHelper.setFrom(administratorEmail);
-			messageHelper.setTo(adminEmails.toArray(new String[0]));
-			messageHelper.setSubject("User account request granted (" + shanoirServerAddress + ")");
-			final Map<String, Object> variables = new HashMap<>();
-			variables.put("user", user);
-			if (userAdmin != null) {
-				variables.put("adminName", userAdmin.getUsername());
-			}
-			final String content = build("notifyAdminExtensionRequestAccepted", variables);
-			messageHelper.setText(content, true);
-		};
-		mailSender.send(messagePreparator);
-	}
+        MimeMessagePreparator messagePreparator = mimeMessage -> {
+            final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            messageHelper.setFrom(administratorEmail);
+            messageHelper.setTo(adminEmails.toArray(new String[0]));
+            messageHelper.setSubject("User account request granted (" + shanoirServerAddress + ")");
+            final Map<String, Object> variables = new HashMap<>();
+            variables.put("user", user);
+            if (userAdmin != null) {
+                variables.put("adminName", userAdmin.getUsername());
+            }
+            final String content = build("notifyAdminExtensionRequestAccepted", variables);
+            messageHelper.setText(content, true);
+        };
+        mailSender.send(messagePreparator);
+    }
 
-	private void notifyAdminExtensionRequestDenied(final User user) {
-		// Get admins emails
-		final List<String> adminEmails = userRepository.findAdminEmails();
+    private void notifyAdminExtensionRequestDenied(final User user) {
+        // Get admins emails
+        final List<String> adminEmails = userRepository.findAdminEmails();
 
-		MimeMessagePreparator messagePreparator = mimeMessage -> {
-			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-			messageHelper.setFrom(administratorEmail);
-			messageHelper.setTo(adminEmails.toArray(new String[0]));
-			messageHelper.setSubject("User account request DENIED (" + shanoirServerAddress + ")");
-			final Map<String, Object> variables = new HashMap<>();
-			variables.put("user", user);
-			final String content = build("notifyAdminExtensionRequestDenied", variables);
-			messageHelper.setText(content, true);
-		};
-		mailSender.send(messagePreparator);
-	}
+        MimeMessagePreparator messagePreparator = mimeMessage -> {
+            final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            messageHelper.setFrom(administratorEmail);
+            messageHelper.setTo(adminEmails.toArray(new String[0]));
+            messageHelper.setSubject("User account request DENIED (" + shanoirServerAddress + ")");
+            final Map<String, Object> variables = new HashMap<>();
+            variables.put("user", user);
+            final String content = build("notifyAdminExtensionRequestDenied", variables);
+            messageHelper.setText(content, true);
+        };
+        mailSender.send(messagePreparator);
+    }
 
-	private void notifyUserAccountRequestAccepted(final User user) {
-		MimeMessagePreparator messagePreparator = mimeMessage -> {
-			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-			messageHelper.setFrom(administratorEmail);
-			messageHelper.setTo(user.getEmail());
-			messageHelper.setSubject("Granted: Your Shanoir account has been activated");
-			final Map<String, Object> variables = new HashMap<>();
-			variables.put(FIRSTNAME, user.getFirstName());
-			variables.put(LASTNAME, user.getLastName());
-			variables.put(SERVER_ADDRESS, shanoirServerAddress);
-			final String content = build("notifyUserAccountRequestAccepted", variables);
-			messageHelper.setText(content, true);
-		};
-		mailSender.send(messagePreparator);
-	}
+    private void notifyUserAccountRequestAccepted(final User user) {
+        MimeMessagePreparator messagePreparator = mimeMessage -> {
+            final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            messageHelper.setFrom(administratorEmail);
+            messageHelper.setTo(user.getEmail());
+            messageHelper.setSubject("Granted: Your Shanoir account has been activated");
+            final Map<String, Object> variables = new HashMap<>();
+            variables.put(FIRSTNAME, user.getFirstName());
+            variables.put(LASTNAME, user.getLastName());
+            variables.put(SERVER_ADDRESS, shanoirServerAddress);
+            final String content = build("notifyUserAccountRequestAccepted", variables);
+            messageHelper.setText(content, true);
+        };
+        mailSender.send(messagePreparator);
+    }
 
-	private void notifyUserAccountRequestDenied(final User user) {
-		MimeMessagePreparator messagePreparator = mimeMessage -> {
-			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-			messageHelper.setFrom(administratorEmail);
-			messageHelper.setTo(user.getEmail());
-			messageHelper.setSubject("DENIED: Your Shanoir account request has been denied");
-			final Map<String, Object> variables = new HashMap<>();
-			variables.put("administratorEmail", administratorEmail);
-			variables.put(FIRSTNAME, user.getFirstName());
-			variables.put(LASTNAME, user.getLastName());
-			variables.put(SERVER_ADDRESS, shanoirServerAddress);
-			final String content = build("notifyUserAccountRequestDenied", variables);
-			messageHelper.setText(content, true);
-		};
-		mailSender.send(messagePreparator);
-	}
+    private void notifyUserAccountRequestDenied(final User user) {
+        MimeMessagePreparator messagePreparator = mimeMessage -> {
+            final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            messageHelper.setFrom(administratorEmail);
+            messageHelper.setTo(user.getEmail());
+            messageHelper.setSubject("DENIED: Your Shanoir account request has been denied");
+            final Map<String, Object> variables = new HashMap<>();
+            variables.put("administratorEmail", administratorEmail);
+            variables.put(FIRSTNAME, user.getFirstName());
+            variables.put(LASTNAME, user.getLastName());
+            variables.put(SERVER_ADDRESS, shanoirServerAddress);
+            final String content = build("notifyUserAccountRequestDenied", variables);
+            messageHelper.setText(content, true);
+        };
+        mailSender.send(messagePreparator);
+    }
 
-	private void notifyUserExtensionRequestAccepted(final User user) {
-		MimeMessagePreparator messagePreparator = mimeMessage -> {
-			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-			messageHelper.setFrom(administratorEmail);
-			messageHelper.setTo(user.getEmail());
-			messageHelper.setSubject("Granted: Your Shanoir account extension has been extended");
-			final Map<String, Object> variables = new HashMap<>();
-			variables.put(FIRSTNAME, user.getFirstName());
-			variables.put(LASTNAME, user.getLastName());
-			variables.put(SERVER_ADDRESS, shanoirServerAddress);
-			variables.put(EXPIRATION_DATE, formatter.format(user.getExpirationDate()));
-			final String content = build("notifyUserExtensionRequestAccepted", variables);
-			messageHelper.setText(content, true);
-		};
-		mailSender.send(messagePreparator);
-	}
+    private void notifyUserExtensionRequestAccepted(final User user) {
+        MimeMessagePreparator messagePreparator = mimeMessage -> {
+            final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            messageHelper.setFrom(administratorEmail);
+            messageHelper.setTo(user.getEmail());
+            messageHelper.setSubject("Granted: Your Shanoir account extension has been extended");
+            final Map<String, Object> variables = new HashMap<>();
+            variables.put(FIRSTNAME, user.getFirstName());
+            variables.put(LASTNAME, user.getLastName());
+            variables.put(SERVER_ADDRESS, shanoirServerAddress);
+            variables.put(EXPIRATION_DATE, formatter.format(user.getExpirationDate()));
+            final String content = build("notifyUserExtensionRequestAccepted", variables);
+            messageHelper.setText(content, true);
+        };
+        mailSender.send(messagePreparator);
+    }
 
-	private void notifyUserExtensionRequestDenied(final User user) {
-		MimeMessagePreparator messagePreparator = mimeMessage -> {
-			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-			messageHelper.setFrom(administratorEmail);
-			messageHelper.setTo(user.getEmail());
-			messageHelper.setSubject("DENIED: Your Shanoir account extension request has been denied");
-			final Map<String, Object> variables = new HashMap<>();
-			variables.put(FIRSTNAME, user.getFirstName());
-			variables.put(LASTNAME, user.getLastName());
-			variables.put(SERVER_ADDRESS, shanoirServerAddress);
-			variables.put(EXPIRATION_DATE, formatter.format(user.getExpirationDate()));
-			final String content = build("notifyUserExtensionRequestDenied", variables);
-			messageHelper.setText(content, true);
-		};
-		mailSender.send(messagePreparator);
-	}
+    private void notifyUserExtensionRequestDenied(final User user) {
+        MimeMessagePreparator messagePreparator = mimeMessage -> {
+            final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            messageHelper.setFrom(administratorEmail);
+            messageHelper.setTo(user.getEmail());
+            messageHelper.setSubject("DENIED: Your Shanoir account extension request has been denied");
+            final Map<String, Object> variables = new HashMap<>();
+            variables.put(FIRSTNAME, user.getFirstName());
+            variables.put(LASTNAME, user.getLastName());
+            variables.put(SERVER_ADDRESS, shanoirServerAddress);
+            variables.put(EXPIRATION_DATE, formatter.format(user.getExpirationDate()));
+            final String content = build("notifyUserExtensionRequestDenied", variables);
+            messageHelper.setText(content, true);
+        };
+        mailSender.send(messagePreparator);
+    }
 
-	@Override
-	public void notifyStudyManagerDataImported(EmailDatasetsImported generatedMail) {
+    @Override
+    public void notifyStudyManagerDataImported(EmailDatasetsImported generatedMail) {
         // Find user that imported
         User u = userRepository.findById(generatedMail.getUserId()).orElse(null);
 
-		// Get the list of recipients
-		List<User> admins = (List<User>) this.userRepository.findAllById(generatedMail.getRecipients());
-		
-		List<DatasetDetail> datasetLinks = new ArrayList<>();
-		for (Entry<Long, String> dataset :  generatedMail.getDatasets().entrySet()) {
-			DatasetDetail detail = new DatasetDetail();
-			detail.setName(dataset.getValue());
-			detail.setUrl(this.shanoirServerAddress + "dataset/details/" + dataset.getKey());
-			datasetLinks.add(detail);
-		}
-		
-		DatasetDetail examDetail = new DatasetDetail();
-		examDetail.setName(generatedMail.getExaminationId());
-		examDetail.setUrl(shanoirServerAddress + "examination/details/" + generatedMail.getExaminationId());
+        // Get the list of recipients
+        List<User> admins = (List<User>) this.userRepository.findAllById(generatedMail.getRecipients());
+        
+        List<DatasetDetail> datasetLinks = new ArrayList<>();
+        for (Entry<Long, String> dataset :  generatedMail.getDatasets().entrySet()) {
+            DatasetDetail detail = new DatasetDetail();
+            detail.setName(dataset.getValue());
+            detail.setUrl(this.shanoirServerAddress + "dataset/details/" + dataset.getKey());
+            datasetLinks.add(detail);
+        }
+        
+        DatasetDetail examDetail = new DatasetDetail();
+        examDetail.setName(generatedMail.getExaminationId());
+        examDetail.setUrl(shanoirServerAddress + "examination/details/" + generatedMail.getExaminationId());
 
-		for (User admin : admins) {
-			MimeMessagePreparator messagePreparator = mimeMessage -> {
-				final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-				messageHelper.setFrom(administratorEmail);
-				messageHelper.setTo(admin.getEmail());
-				messageHelper.setSubject("[Shanoir] Data imported to " + generatedMail.getStudyName());
-				final Map<String, Object> variables = new HashMap<>();
-				variables.put(LASTNAME, admin.getLastName());
-				variables.put(FIRSTNAME, admin.getFirstName());
-				variables.put(USERNAME, u.getUsername());
-				variables.put(STUDY_NAME, generatedMail.getStudyName());
-				variables.put(SUBJECT, generatedMail.getSubjectName());
-				variables.put(SERIES, datasetLinks);
-				variables.put(EXAMINATION, examDetail);
-				variables.put(EXAM_DATE, generatedMail.getExamDate());
-				variables.put(STUDY_CARD, generatedMail.getStudyCard());
-				variables.put(SERVER_ADDRESS, shanoirServerAddress);
-				final String content = build("notifyStudyAdminDataImported", variables);
-				LOG.info(content);
-				messageHelper.setText(content, true);
-			};
-			// Send the message
-			LOG.info("Sending import mail to {} for study {}", admin.getUsername(), generatedMail.getStudyId());
-			mailSender.send(messagePreparator);
-		}
-	}
+        for (User admin : admins) {
+            MimeMessagePreparator messagePreparator = mimeMessage -> {
+                final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+                messageHelper.setFrom(administratorEmail);
+                messageHelper.setTo(admin.getEmail());
+                messageHelper.setSubject("[Shanoir] Data imported to " + generatedMail.getStudyName());
+                final Map<String, Object> variables = new HashMap<>();
+                variables.put(LASTNAME, admin.getLastName());
+                variables.put(FIRSTNAME, admin.getFirstName());
+                variables.put(USERNAME, u.getUsername());
+                variables.put(STUDY_NAME, generatedMail.getStudyName());
+                variables.put(SUBJECT, generatedMail.getSubjectName());
+                variables.put(SERIES, datasetLinks);
+                variables.put(EXAMINATION, examDetail);
+                variables.put(EXAM_DATE, generatedMail.getExamDate());
+                variables.put(STUDY_CARD, generatedMail.getStudyCard());
+                variables.put(SERVER_ADDRESS, shanoirServerAddress);
+                final String content = build("notifyStudyAdminDataImported", variables);
+                LOG.info(content);
+                messageHelper.setText(content, true);
+            };
+            // Send the message
+            LOG.info("Sending import mail to {} for study {}", admin.getUsername(), generatedMail.getStudyId());
+            mailSender.send(messagePreparator);
+        }
+    }
 
-	@Override
-	public void notifyStudyManagerImportFailure(EmailDatasetImportFailed generatedMail) {
+    @Override
+    public void notifyStudyManagerImportFailure(EmailDatasetImportFailed generatedMail) {
         // Find user that imported
         User u = userRepository.findById(generatedMail.getUserId()).orElse(null);
 
-		// Get the list of recipients
-		List<User> admins = (List<User>) this.userRepository.findAllById(generatedMail.getRecipients());
-		
-		DatasetDetail examDetail = new DatasetDetail();
-		examDetail.setName(generatedMail.getExaminationId());
-		examDetail.setUrl(shanoirServerAddress + "examination/details/" + generatedMail.getExaminationId());
+        // Get the list of recipients
+        List<User> admins = (List<User>) this.userRepository.findAllById(generatedMail.getRecipients());
+        
+        DatasetDetail examDetail = new DatasetDetail();
+        examDetail.setName(generatedMail.getExaminationId());
+        examDetail.setUrl(shanoirServerAddress + "examination/details/" + generatedMail.getExaminationId());
 
-		String studyCardUrl = shanoirServerAddress + "study-card/details/" + generatedMail.getStudyCardId();
+        String studyCardUrl = shanoirServerAddress + "study-card/details/" + generatedMail.getStudyCardId();
 
-		for (User admin : admins) {
-			MimeMessagePreparator messagePreparator = mimeMessage -> {
-				final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-				messageHelper.setFrom(administratorEmail);
-				messageHelper.setTo(admin.getEmail());
-				messageHelper.setSubject("[Shanoir] Import failure for " + generatedMail.getStudyName());
-				final Map<String, Object> variables = new HashMap<>();
-				variables.put(LASTNAME, admin.getLastName());
-				variables.put(FIRSTNAME, admin.getFirstName());
-				variables.put(USERNAME, u.getUsername());
-				variables.put(STUDY_NAME, generatedMail.getStudyName());
-				variables.put(SUBJECT, generatedMail.getSubjectName());
-				variables.put(EXAMINATION, examDetail);
-				variables.put(FAILURE_MESSAGE, generatedMail.getErrorMessage());
-				variables.put(SERVER_ADDRESS, shanoirServerAddress);
-				variables.put(STUDYCARD_URL, studyCardUrl);
-				final String content = build("notifyStudyAdminImportFailed", variables);
-				LOG.info(content);
-				messageHelper.setText(content, true);
-			};
-			// Send the message
-			LOG.info("Sending FAIL import mail to {} for study {}", admin.getUsername(), generatedMail.getStudyId());
-			mailSender.send(messagePreparator);
-		}
-	}
+        for (User admin : admins) {
+            MimeMessagePreparator messagePreparator = mimeMessage -> {
+                final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+                messageHelper.setFrom(administratorEmail);
+                messageHelper.setTo(admin.getEmail());
+                messageHelper.setSubject("[Shanoir] Import failure for " + generatedMail.getStudyName());
+                final Map<String, Object> variables = new HashMap<>();
+                variables.put(LASTNAME, admin.getLastName());
+                variables.put(FIRSTNAME, admin.getFirstName());
+                variables.put(USERNAME, u.getUsername());
+                variables.put(STUDY_NAME, generatedMail.getStudyName());
+                variables.put(SUBJECT, generatedMail.getSubjectName());
+                variables.put(EXAMINATION, examDetail);
+                variables.put(FAILURE_MESSAGE, generatedMail.getErrorMessage());
+                variables.put(SERVER_ADDRESS, shanoirServerAddress);
+                variables.put(STUDYCARD_URL, studyCardUrl);
+                final String content = build("notifyStudyAdminImportFailed", variables);
+                LOG.info(content);
+                messageHelper.setText(content, true);
+            };
+            // Send the message
+            LOG.info("Sending FAIL import mail to {} for study {}", admin.getUsername(), generatedMail.getStudyId());
+            mailSender.send(messagePreparator);
+        }
+    }
 
-	public void notifyStudyManagerStudyUsersAdded(EmailStudyUsersAdded email) {
+    public void notifyStudyManagerStudyUsersAdded(EmailStudyUsersAdded email) {
         // Find user that edited the study
-    	// We may come from challenge, the user then does not exists.
+        // We may come from challenge, the user then does not exists.
         User user = userRepository.findById(email.getUserId()).orElse(null);
 
         List<User> newStudyUsers = this.userRepository.findByIdIn(email.getStudyUsers());
 
         if (!CollectionUtils.isEmpty(email.getRecipients())) {
-	        // Get the list of recipients
-			List<User> studyAdmins = (List<User>) this.userRepository.findAllById(email.getRecipients());
-					
-			for (User studyAdmin : studyAdmins) {
-				MimeMessagePreparator messagePreparator = mimeMessage -> {
-					final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-					messageHelper.setFrom(administratorEmail);
-					messageHelper.setCc(user!= null ? user.getEmail(): administratorEmail);
-					messageHelper.setTo(studyAdmin.getEmail());
-					messageHelper.setSubject("[Shanoir] Member(s) added to " + email.getStudyName());
-					final Map<String, Object> variables = new HashMap<>();
-					variables.put(FIRSTNAME, studyAdmin.getFirstName());
-					variables.put(LASTNAME, studyAdmin.getLastName());
-					variables.put(EMAIL, user!= null ? user.getEmail(): administratorEmail);
-					variables.put(STUDY_NAME, email.getStudyName());
-					variables.put(STUDY_USERS, newStudyUsers);
-					variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/edit/" + email.getStudyId());
-					final String content = build("notifyStudyAdminStudyUsersAdded", variables);
-					LOG.info(content);
-					messageHelper.setText(content, true);
-				};
-				// Send the message
-				LOG.info("Sending study-users-added mail to {} for study {}", studyAdmin.getUsername(), email.getStudyId());
-				mailSender.send(messagePreparator);
-			}
+            // Get the list of recipients
+            List<User> studyAdmins = (List<User>) this.userRepository.findAllById(email.getRecipients());
+                    
+            for (User studyAdmin : studyAdmins) {
+                MimeMessagePreparator messagePreparator = mimeMessage -> {
+                    final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+                    messageHelper.setFrom(administratorEmail);
+                    messageHelper.setCc(user!= null ? user.getEmail(): administratorEmail);
+                    messageHelper.setTo(studyAdmin.getEmail());
+                    messageHelper.setSubject("[Shanoir] Member(s) added to " + email.getStudyName());
+                    final Map<String, Object> variables = new HashMap<>();
+                    variables.put(FIRSTNAME, studyAdmin.getFirstName());
+                    variables.put(LASTNAME, studyAdmin.getLastName());
+                    variables.put(EMAIL, user!= null ? user.getEmail(): administratorEmail);
+                    variables.put(STUDY_NAME, email.getStudyName());
+                    variables.put(STUDY_USERS, newStudyUsers);
+                    variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/edit/" + email.getStudyId());
+                    final String content = build("notifyStudyAdminStudyUsersAdded", variables);
+                    LOG.info(content);
+                    messageHelper.setText(content, true);
+                };
+                // Send the message
+                LOG.info("Sending study-users-added mail to {} for study {}", studyAdmin.getUsername(), email.getStudyId());
+                mailSender.send(messagePreparator);
+            }
         }
 
-		// Also send email to every added user
-		for (User studyUser : newStudyUsers) {
-			MimeMessagePreparator messagePreparator = mimeMessage -> {
-				final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-				messageHelper.setFrom(administratorEmail);
-				messageHelper.setTo(studyUser.getEmail());
-				messageHelper.setSubject("[Shanoir] Welcome to " + email.getStudyName());
-				final Map<String, Object> variables = new HashMap<>();
-				variables.put(FIRSTNAME, studyUser.getFirstName());
-				variables.put(LASTNAME, studyUser.getLastName());
-				variables.put(STUDY_NAME, email.getStudyName());
-				final String content = build("notifyUserAddedToStudy", variables);
-				LOG.info(content);
-				messageHelper.setText(content, true);
-			};
-			// Send the message
-			LOG.info("Sending user-added mail to {} for study {}", studyUser.getUsername(), email.getStudyId());
-			mailSender.send(messagePreparator);
-		}
-	}
+        // Also send email to every added user
+        for (User studyUser : newStudyUsers) {
+            MimeMessagePreparator messagePreparator = mimeMessage -> {
+                final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+                messageHelper.setFrom(administratorEmail);
+                messageHelper.setTo(studyUser.getEmail());
+                messageHelper.setSubject("[Shanoir] Welcome to " + email.getStudyName());
+                final Map<String, Object> variables = new HashMap<>();
+                variables.put(FIRSTNAME, studyUser.getFirstName());
+                variables.put(LASTNAME, studyUser.getLastName());
+                variables.put(STUDY_NAME, email.getStudyName());
+                final String content = build("notifyUserAddedToStudy", variables);
+                LOG.info(content);
+                messageHelper.setText(content, true);
+            };
+            // Send the message
+            LOG.info("Sending user-added mail to {} for study {}", studyUser.getUsername(), email.getStudyId());
+            mailSender.send(messagePreparator);
+        }
+    }
 
-	@Override
-	public void notifyStudyManagerAccessRequest(AccessRequest createdRequest) {
+    @Override
+    public void notifyStudyManagerAccessRequest(AccessRequest createdRequest) {
         // Find requester users
          User user = userRepository.findById(createdRequest.getUser().getId()).orElse(null);
 
@@ -535,108 +535,108 @@ public class EmailServiceImpl implements EmailService {
         List<User> studyAdmins = this.findStudyAdmin(createdRequest.getStudyId());
 
         if (!CollectionUtils.isEmpty(studyAdmins)) {
-			for (User studyAdmin : studyAdmins) {
-				MimeMessagePreparator messagePreparator = mimeMessage -> {
-					final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-					messageHelper.setFrom(administratorEmail);
-					messageHelper.setTo(studyAdmin.getEmail());
-					messageHelper.setSubject("[Shanoir] Member(s) access request to " + createdRequest.getStudyName());
-					final Map<String, Object> variables = new HashMap<>();
-					variables.put(FIRSTNAME, studyAdmin.getFirstName());
-					variables.put(LASTNAME, studyAdmin.getLastName());
-					variables.put(EMAIL, user!= null ? user.getEmail(): administratorEmail);
-					variables.put(STUDY_NAME, createdRequest.getStudyName());
-					variables.put(MOTIVATION, createdRequest.getMotivation());
-					variables.put(USERNAME, createdRequest.getUser().getUsername());
-					final String content = build("notifyStudyAdminAccessRequest", variables);
-					LOG.info(content);
-					messageHelper.setText(content, true);
-				};
-				// Send the message
-				LOG.info("Sending study-users-added mail to {} for study {}", studyAdmin.getUsername(), createdRequest.getStudyId());
-				mailSender.send(messagePreparator);
-			}
+            for (User studyAdmin : studyAdmins) {
+                MimeMessagePreparator messagePreparator = mimeMessage -> {
+                    final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+                    messageHelper.setFrom(administratorEmail);
+                    messageHelper.setTo(studyAdmin.getEmail());
+                    messageHelper.setSubject("[Shanoir] Member(s) access request to " + createdRequest.getStudyName());
+                    final Map<String, Object> variables = new HashMap<>();
+                    variables.put(FIRSTNAME, studyAdmin.getFirstName());
+                    variables.put(LASTNAME, studyAdmin.getLastName());
+                    variables.put(EMAIL, user!= null ? user.getEmail(): administratorEmail);
+                    variables.put(STUDY_NAME, createdRequest.getStudyName());
+                    variables.put(MOTIVATION, createdRequest.getMotivation());
+                    variables.put(USERNAME, createdRequest.getUser().getUsername());
+                    final String content = build("notifyStudyAdminAccessRequest", variables);
+                    LOG.info(content);
+                    messageHelper.setText(content, true);
+                };
+                // Send the message
+                LOG.info("Sending study-users-added mail to {} for study {}", studyAdmin.getUsername(), createdRequest.getStudyId());
+                mailSender.send(messagePreparator);
+            }
         }
-	}
-	
-	/**
-	 * This method allows to get all study admins for a given study
-	 * @param studyId the study id we want the admins of
-	 * @return the list of admins
-	 */
-	private List<User> findStudyAdmin(Long studyId) {
-		List<Long> adminsId =  (List<Long>) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_ADMINS_QUEUE, studyId);
-		if (adminsId == null || adminsId.isEmpty()) {
-			return Collections.emptyList();
-		}
-		return this.userRepository.findByIdIn(adminsId);
-	}
+    }
+    
+    /**
+     * This method allows to get all study admins for a given study
+     * @param studyId the study id we want the admins of
+     * @return the list of admins
+     */
+    private List<User> findStudyAdmin(Long studyId) {
+        List<Long> adminsId =  (List<Long>) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_ADMINS_QUEUE, studyId);
+        if (adminsId == null || adminsId.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return this.userRepository.findByIdIn(adminsId);
+    }
 
-	/** Invites a user that is not in shanoir yet. */
-	@Override
-	public void inviteToStudy(StudyInvitationEmail email) {
-		
-		MimeMessagePreparator messagePreparator = mimeMessage -> {
-			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-			messageHelper.setFrom(administratorEmail);
-			messageHelper.setTo(email.getInvitedMail());
-			messageHelper.setSubject("[Shanoir] Access to study " + email.getStudyName());
-			final Map<String, Object> variables = new HashMap<>();
-			variables.put(STUDY_NAME, email.getStudyName());
-			// access-request/study/1
-			variables.put(SERVER_ADDRESS, shanoirServerAddress + "access-request/study/" + email.getStudyId());
-			// account/study/1/account-request
-			variables.put(SERVER_ADDRESS_PUBLIC, buildInvitationLink(email));
-			final String content = build("notifyAnonymousInvitation", variables);
-			messageHelper.setText(content, true);
-		};
-		// Send the message
-		LOG.error("User with mail {} invited in study {}", email.getInvitedMail(), email.getStudyId());
-		mailSender.send(messagePreparator);
-	}
+    /** Invites a user that is not in shanoir yet. */
+    @Override
+    public void inviteToStudy(StudyInvitationEmail email) {
+        
+        MimeMessagePreparator messagePreparator = mimeMessage -> {
+            final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            messageHelper.setFrom(administratorEmail);
+            messageHelper.setTo(email.getInvitedMail());
+            messageHelper.setSubject("[Shanoir] Access to study " + email.getStudyName());
+            final Map<String, Object> variables = new HashMap<>();
+            variables.put(STUDY_NAME, email.getStudyName());
+            // access-request/study/1
+            variables.put(SERVER_ADDRESS, shanoirServerAddress + "access-request/study/" + email.getStudyId());
+            // account/study/1/account-request
+            variables.put(SERVER_ADDRESS_PUBLIC, buildInvitationLink(email));
+            final String content = build("notifyAnonymousInvitation", variables);
+            messageHelper.setText(content, true);
+        };
+        // Send the message
+        LOG.error("User with mail {} invited in study {}", email.getInvitedMail(), email.getStudyId());
+        mailSender.send(messagePreparator);
+    }
 
-	private String buildInvitationLink(StudyInvitationEmail email) {
-		String link = shanoirServerAddress + "account/study/" + email.getStudyId() + "/account-request";
-		List<String> params = new ArrayList<>();
-		if (email.getFunction() != null) {
-			params.add("function=" + URLEncoder.encode(email.getFunction()));
-		}
-		if (email.getStudyName() != null) {
-			params.add("study=" + URLEncoder.encode(email.getStudyName()));
-		}
-		if (email.getInvitationIssuer() != null) {
-			params.add("from=" + URLEncoder.encode(email.getInvitationIssuer()));
-		}
-		if (!params.isEmpty()) {
-			link += "?";
-			link += String.join("&", params);
-		}
-		return link;
-	}
+    private String buildInvitationLink(StudyInvitationEmail email) {
+        String link = shanoirServerAddress + "account/study/" + email.getStudyId() + "/account-request";
+        List<String> params = new ArrayList<>();
+        if (email.getFunction() != null) {
+            params.add("function=" + URLEncoder.encode(email.getFunction()));
+        }
+        if (email.getStudyName() != null) {
+            params.add("study=" + URLEncoder.encode(email.getStudyName()));
+        }
+        if (email.getInvitationIssuer() != null) {
+            params.add("from=" + URLEncoder.encode(email.getInvitationIssuer()));
+        }
+        if (!params.isEmpty()) {
+            link += "?";
+            link += String.join("&", params);
+        }
+        return link;
+    }
 
-	/**
-	 * Notify a user its study request was refused
-	 * @param accessRequest the access request
-	 */
-	public void notifyUserRefusedFromStudy(AccessRequest refusedRequest) {
-		User user = refusedRequest.getUser();
-		
-		MimeMessagePreparator messagePreparator = mimeMessage -> {
-			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-			messageHelper.setFrom(administratorEmail);
-			messageHelper.setTo(user.getEmail());
-			messageHelper.setSubject("[Shanoir] Access to study " + refusedRequest.getStudyName());
-			final Map<String, Object> variables = new HashMap<>();
-			variables.put(FIRSTNAME, user.getFirstName());
-			variables.put(LASTNAME, user.getLastName());
-			variables.put(STUDY_NAME, refusedRequest.getStudyName());
-			final String content = build("notifyUserRefusedToStudy", variables);
-			LOG.info(content);
-			messageHelper.setText(content, true);
-		};
-		// Send the message
-		LOG.info("Sending study-users REFUSED mail to {} for study {}", user.getUsername(), refusedRequest.getStudyId());
-		mailSender.send(messagePreparator);
-	}
+    /**
+     * Notify a user its study request was refused
+     * @param accessRequest the access request
+     */
+    public void notifyUserRefusedFromStudy(AccessRequest refusedRequest) {
+        User user = refusedRequest.getUser();
+        
+        MimeMessagePreparator messagePreparator = mimeMessage -> {
+            final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            messageHelper.setFrom(administratorEmail);
+            messageHelper.setTo(user.getEmail());
+            messageHelper.setSubject("[Shanoir] Access to study " + refusedRequest.getStudyName());
+            final Map<String, Object> variables = new HashMap<>();
+            variables.put(FIRSTNAME, user.getFirstName());
+            variables.put(LASTNAME, user.getLastName());
+            variables.put(STUDY_NAME, refusedRequest.getStudyName());
+            final String content = build("notifyUserRefusedToStudy", variables);
+            LOG.info(content);
+            messageHelper.setText(content, true);
+        };
+        // Send the message
+        LOG.info("Sending study-users REFUSED mail to {} for study {}", user.getUsername(), refusedRequest.getStudyId());
+        mailSender.send(messagePreparator);
+    }
 
 }

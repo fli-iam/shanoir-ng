@@ -48,76 +48,76 @@ import org.shanoir.ng.utils.ModelsUtil;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class CoilServiceTest {
 
-	private static final Long COIL_ID = 1L;
-	private static final String UPDATED_COIL_NAME = "test";
+    private static final Long COIL_ID = 1L;
+    private static final String UPDATED_COIL_NAME = "test";
 
-	@Mock
-	private CoilMapper coilMapper;
+    @Mock
+    private CoilMapper coilMapper;
 
-	@Mock
-	private CoilRepository coilRepository;
+    @Mock
+    private CoilRepository coilRepository;
 
-	@InjectMocks
-	private CoilServiceImpl coilService;
+    @InjectMocks
+    private CoilServiceImpl coilService;
 
-	@BeforeEach
-	public void setup() {
-		given(coilRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createCoil()));
-		given(coilRepository.findById(COIL_ID)).willReturn(Optional.of(ModelsUtil.createCoil()));
-		given(coilRepository.save(Mockito.any(Coil.class))).willReturn(ModelsUtil.createCoil());
-	}
+    @BeforeEach
+    public void setup() {
+        given(coilRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createCoil()));
+        given(coilRepository.findById(COIL_ID)).willReturn(Optional.of(ModelsUtil.createCoil()));
+        given(coilRepository.save(Mockito.any(Coil.class))).willReturn(ModelsUtil.createCoil());
+    }
 
-	@Test
-	public void deleteByBadIdTest() throws EntityNotFoundException {
-		assertThrows(EntityNotFoundException.class, () -> {
-			coilService.deleteById(2L);
-		});
-	}
-	
-	@Test
-	public void deleteByIdTest() throws EntityNotFoundException {
-		coilService.deleteById(COIL_ID);
-		Mockito.verify(coilRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
-	}
+    @Test
+    public void deleteByBadIdTest() throws EntityNotFoundException {
+        assertThrows(EntityNotFoundException.class, () -> {
+            coilService.deleteById(2L);
+        });
+    }
+    
+    @Test
+    public void deleteByIdTest() throws EntityNotFoundException {
+        coilService.deleteById(COIL_ID);
+        Mockito.verify(coilRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
+    }
 
-	@Test
-	public void findAllTest() {
-		final List<Coil> coils = coilService.findAll();
-		Assertions.assertNotNull(coils);
-		Assertions.assertTrue(coils.size() == 1);
+    @Test
+    public void findAllTest() {
+        final List<Coil> coils = coilService.findAll();
+        Assertions.assertNotNull(coils);
+        Assertions.assertTrue(coils.size() == 1);
 
-		Mockito.verify(coilRepository, Mockito.times(1)).findAll();
-	}
+        Mockito.verify(coilRepository, Mockito.times(1)).findAll();
+    }
 
-	@Test
-	public void findByIdTest() {
-		final Coil coil = coilService.findById(COIL_ID).orElseThrow();
-		Assertions.assertNotNull(coil);
-		Assertions.assertTrue(ModelsUtil.COIL_NAME.equals(coil.getName()));
+    @Test
+    public void findByIdTest() {
+        final Coil coil = coilService.findById(COIL_ID).orElseThrow();
+        Assertions.assertNotNull(coil);
+        Assertions.assertTrue(ModelsUtil.COIL_NAME.equals(coil.getName()));
 
-		Mockito.verify(coilRepository, Mockito.times(1)).findById(Mockito.anyLong());
-	}
+        Mockito.verify(coilRepository, Mockito.times(1)).findById(Mockito.anyLong());
+    }
 
-	@Test
-	public void saveTest() {
-		coilService.create(createCoil());
-		Mockito.verify(coilRepository, Mockito.times(1)).save(Mockito.any(Coil.class));
-	}
+    @Test
+    public void saveTest() {
+        coilService.create(createCoil());
+        Mockito.verify(coilRepository, Mockito.times(1)).save(Mockito.any(Coil.class));
+    }
 
-	@Test
-	public void updateTest() throws EntityNotFoundException {
-		final Coil coil = createCoil();
-		final Coil updatedCoil = coilService.update(coil);
-		Assertions.assertNotNull(updatedCoil);
-		Assertions.assertTrue(UPDATED_COIL_NAME.equals(coil.getName()));
-		Mockito.verify(coilRepository, Mockito.times(1)).save(Mockito.any(Coil.class));
-	}
+    @Test
+    public void updateTest() throws EntityNotFoundException {
+        final Coil coil = createCoil();
+        final Coil updatedCoil = coilService.update(coil);
+        Assertions.assertNotNull(updatedCoil);
+        Assertions.assertTrue(UPDATED_COIL_NAME.equals(coil.getName()));
+        Mockito.verify(coilRepository, Mockito.times(1)).save(Mockito.any(Coil.class));
+    }
 
-	private Coil createCoil() {
-		final Coil coil = new Coil();
-		coil.setId(COIL_ID);
-		coil.setName(UPDATED_COIL_NAME);
-		return coil;
-	}
+    private Coil createCoil() {
+        final Coil coil = new Coil();
+        coil.setId(COIL_ID);
+        coil.setName(UPDATED_COIL_NAME);
+        return coil;
+    }
 
 }

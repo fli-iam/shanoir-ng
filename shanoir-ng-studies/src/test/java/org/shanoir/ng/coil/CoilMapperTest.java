@@ -38,32 +38,32 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class CoilMapperTest {
 
-	private static final Long COIL_ID = 1L;
-	private static final String COIL_NAME = "test";
+    private static final Long COIL_ID = 1L;
+    private static final String COIL_NAME = "test";
 
-	@Autowired
-	private CoilMapper coilMapper;
+    @Autowired
+    private CoilMapper coilMapper;
 
-	@Test
-	public void coilsToCoilDTOsTest() {
-		final List<CoilDTO> coilDTOs = coilMapper.coilsToCoilDTOs(Arrays.asList(createCoil()));
-		Assertions.assertNotNull(coilDTOs);
-		Assertions.assertTrue(coilDTOs.size() == 1);
-		Assertions.assertTrue(coilDTOs.get(0).getId().equals(COIL_ID));
-	}
+    @Test
+    public void coilsToCoilDTOsTest() {
+        final List<CoilDTO> coilDTOs = coilMapper.coilsToCoilDTOs(Arrays.asList(createCoil()));
+        Assertions.assertNotNull(coilDTOs);
+        Assertions.assertTrue(coilDTOs.size() == 1);
+        Assertions.assertTrue(coilDTOs.get(0).getId().equals(COIL_ID));
+    }
 
-	@Test
-	public void coilToCoilDTOTest() {
-		final CoilDTO coilDTO = coilMapper.coilToCoilDTO(createCoil());
-		Assertions.assertNotNull(coilDTO);
-		Assertions.assertTrue(coilDTO.getId().equals(COIL_ID));
-	}
+    @Test
+    public void coilToCoilDTOTest() {
+        final CoilDTO coilDTO = coilMapper.coilToCoilDTO(createCoil());
+        Assertions.assertNotNull(coilDTO);
+        Assertions.assertTrue(coilDTO.getId().equals(COIL_ID));
+    }
 
-	private Coil createCoil() {
-		final Coil coil = new Coil();
-		coil.setId(COIL_ID);
-		coil.setName(COIL_NAME);
-		return coil;
-	}
+    private Coil createCoil() {
+        final Coil coil = new Coil();
+        coil.setId(COIL_ID);
+        coil.setName(COIL_NAME);
+        return coil;
+    }
 
 }

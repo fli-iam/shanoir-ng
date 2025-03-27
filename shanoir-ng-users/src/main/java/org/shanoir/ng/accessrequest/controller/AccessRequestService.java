@@ -9,19 +9,19 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface AccessRequestService {
 
-	List<AccessRequest> findByUserIdAndStudyId(Long userId, Long studyId);
+    List<AccessRequest> findByUserIdAndStudyId(Long userId, Long studyId);
 
-	AccessRequest update(AccessRequest entity);
+    AccessRequest update(AccessRequest entity);
 
-	AccessRequest createAllowed(AccessRequest entity);
+    AccessRequest createAllowed(AccessRequest entity);
 
-	Optional<AccessRequest> findById(Long id);
+    Optional<AccessRequest> findById(Long id);
 
-	List<AccessRequest> findByStudyIdAndStatus(List<Long> studiesId, int status);
+    List<AccessRequest> findByStudyIdAndStatus(List<Long> studiesId, int status);
 
-	List<AccessRequest> findByUserId(Long userId);
+    List<AccessRequest> findByUserId(Long userId);
 
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-	void deleteById(Long id) throws EntityNotFoundException;
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+    void deleteById(Long id) throws EntityNotFoundException;
 
 }

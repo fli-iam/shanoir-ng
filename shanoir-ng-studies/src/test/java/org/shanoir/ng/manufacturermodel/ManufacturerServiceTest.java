@@ -49,72 +49,72 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class ManufacturerServiceTest {
 
-	private static final Long MANUFACTURER_ID = 1L;
-	private static final String UPDATED_MANUFACTURER_NAME = "test";
+    private static final Long MANUFACTURER_ID = 1L;
+    private static final String UPDATED_MANUFACTURER_NAME = "test";
 
-	@Mock
-	private ManufacturerRepository repository;
+    @Mock
+    private ManufacturerRepository repository;
 
-	@Mock
-	private RabbitTemplate rabbitTemplate;
+    @Mock
+    private RabbitTemplate rabbitTemplate;
 
-	@Mock
-	private ObjectMapper objectMapper;
+    @Mock
+    private ObjectMapper objectMapper;
 
-	@Mock
-	private ManufacturerModelRepository manufacturerModelRepository;
+    @Mock
+    private ManufacturerModelRepository manufacturerModelRepository;
 
-	@Mock
-	private AcquisitionEquipmentRepository acquisitionEquipmentRepository;
+    @Mock
+    private AcquisitionEquipmentRepository acquisitionEquipmentRepository;
 
-	@InjectMocks
-	private ManufacturerServiceImpl manufacturerService;
+    @InjectMocks
+    private ManufacturerServiceImpl manufacturerService;
 
-	@BeforeEach
-	public void setup() {
-		given(repository.findAll()).willReturn(Arrays.asList(ModelsUtil.createManufacturer()));
-		given(repository.findById(MANUFACTURER_ID)).willReturn(Optional.of(ModelsUtil.createManufacturer()));
-		given(repository.save(Mockito.any(Manufacturer.class))).willReturn(createManufacturer());
-	}
+    @BeforeEach
+    public void setup() {
+        given(repository.findAll()).willReturn(Arrays.asList(ModelsUtil.createManufacturer()));
+        given(repository.findById(MANUFACTURER_ID)).willReturn(Optional.of(ModelsUtil.createManufacturer()));
+        given(repository.save(Mockito.any(Manufacturer.class))).willReturn(createManufacturer());
+    }
 
 
-	@Test
-	public void findAllTest() {
-		final List<Manufacturer> manufacturers = manufacturerService.findAll();
-		Assertions.assertNotNull(manufacturers);
-		Assertions.assertTrue(manufacturers.size() == 1);
-		Mockito.verify(repository, Mockito.times(1)).findAll();
-	}
+    @Test
+    public void findAllTest() {
+        final List<Manufacturer> manufacturers = manufacturerService.findAll();
+        Assertions.assertNotNull(manufacturers);
+        Assertions.assertTrue(manufacturers.size() == 1);
+        Mockito.verify(repository, Mockito.times(1)).findAll();
+    }
 
-	@Test
-	public void findByIdTest() {
-		final Manufacturer manufacturer = manufacturerService.findById(MANUFACTURER_ID).orElseThrow();
-		Assertions.assertNotNull(manufacturer);
-		Assertions.assertTrue(ModelsUtil.MANUFACTURER_NAME.equals(manufacturer.getName()));
+    @Test
+    public void findByIdTest() {
+        final Manufacturer manufacturer = manufacturerService.findById(MANUFACTURER_ID).orElseThrow();
+        Assertions.assertNotNull(manufacturer);
+        Assertions.assertTrue(ModelsUtil.MANUFACTURER_NAME.equals(manufacturer.getName()));
 
-		Mockito.verify(repository, Mockito.times(1)).findById(Mockito.anyLong());
-	}
+        Mockito.verify(repository, Mockito.times(1)).findById(Mockito.anyLong());
+    }
 
-	@Test
-	public void saveTest() {
-		manufacturerService.create(createManufacturer());
+    @Test
+    public void saveTest() {
+        manufacturerService.create(createManufacturer());
 
-		Mockito.verify(repository, Mockito.times(1)).save(Mockito.any(Manufacturer.class));
-	}
+        Mockito.verify(repository, Mockito.times(1)).save(Mockito.any(Manufacturer.class));
+    }
 
-	@Test
-	public void updateTest() throws EntityNotFoundException {
-		final Manufacturer manufacturer = createManufacturer();
-		final Manufacturer updatedManufacturer = manufacturerService.update(createManufacturer());
-		Assertions.assertNotNull(updatedManufacturer);
-		Assertions.assertTrue(UPDATED_MANUFACTURER_NAME.equals(updatedManufacturer.getName()));
-		Mockito.verify(repository, Mockito.times(1)).save(Mockito.any(Manufacturer.class));
-	}
+    @Test
+    public void updateTest() throws EntityNotFoundException {
+        final Manufacturer manufacturer = createManufacturer();
+        final Manufacturer updatedManufacturer = manufacturerService.update(createManufacturer());
+        Assertions.assertNotNull(updatedManufacturer);
+        Assertions.assertTrue(UPDATED_MANUFACTURER_NAME.equals(updatedManufacturer.getName()));
+        Mockito.verify(repository, Mockito.times(1)).save(Mockito.any(Manufacturer.class));
+    }
 
-	private Manufacturer createManufacturer() {
-		final Manufacturer manufacturer = new Manufacturer();
-		manufacturer.setId(MANUFACTURER_ID);
-		manufacturer.setName(UPDATED_MANUFACTURER_NAME);
-		return manufacturer;
-	}
+    private Manufacturer createManufacturer() {
+        final Manufacturer manufacturer = new Manufacturer();
+        manufacturer.setId(MANUFACTURER_ID);
+        manufacturer.setName(UPDATED_MANUFACTURER_NAME);
+        return manufacturer;
+    }
 }

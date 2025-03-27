@@ -34,30 +34,30 @@ import jakarta.persistence.Table;
 @IdClass(SubjectStudyTagPk.class)
 public class SubjectStudyTag {
 
-	@Id
-	@ManyToOne
-	@JoinColumn(name = "tag_id", insertable = false, updatable = false, nullable = false)
-	private Tag tag;
-	
-	@Id
-	@ManyToOne
-	@JoinColumn(name = "subject_study_id", insertable = false, updatable = false, nullable = false)
-	private SubjectStudy subjectStudy;
+    @Id
+    @ManyToOne
+    @JoinColumn(name = "tag_id", insertable = false, updatable = false, nullable = false)
+    private Tag tag;
+    
+    @Id
+    @ManyToOne
+    @JoinColumn(name = "subject_study_id", insertable = false, updatable = false, nullable = false)
+    private SubjectStudy subjectStudy;
 
-	public Tag getTag() {
-		return tag;
-	}
+    public Tag getTag() {
+        return tag;
+    }
 
-	public void setTag(Tag tag) {
-		this.tag = tag;
-	}
+    public void setTag(Tag tag) {
+        this.tag = tag;
+    }
 
-	public SubjectStudy getSubjectStudy() {
-		return subjectStudy;
-	}
+    public SubjectStudy getSubjectStudy() {
+        return subjectStudy;
+    }
 
-	public void setSubjectStudy(SubjectStudy subjectStudy) {
-		this.subjectStudy = subjectStudy;
-	}
+    public void setSubjectStudy(SubjectStudy subjectStudy) {
+        this.subjectStudy = subjectStudy;
+    }
 
 }

@@ -30,13 +30,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/roles")
 public interface RoleApi {
 
-	@Operation(summary = "", description = "Returns all the roles")
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found roles"),
-			@ApiResponse(responseCode = "204", description = "no role found"),
-			@ApiResponse(responseCode = "401", description = "unauthorized"),
-			@ApiResponse(responseCode = "403", description = "forbidden"),
-			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@GetMapping(value = "", produces = { "application/json" })
-	ResponseEntity<List<Role>> findRoles();
+    @Operation(summary = "", description = "Returns all the roles")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found roles"),
+            @ApiResponse(responseCode = "204", description = "no role found"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @GetMapping(value = "", produces = { "application/json" })
+    ResponseEntity<List<Role>> findRoles();
 
 }

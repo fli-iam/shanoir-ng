@@ -41,50 +41,50 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class CenterMapperTest {
 
-	private static final Long CENTER_ID = 1L;
-	private static final String CENTER_NAME = "test";
+    private static final Long CENTER_ID = 1L;
+    private static final String CENTER_NAME = "test";
 
-	@MockBean
-	private AcquisitionEquipmentMapper acquisitionEquipmentMapperMock;
+    @MockBean
+    private AcquisitionEquipmentMapper acquisitionEquipmentMapperMock;
 
-	@Autowired
-	private CenterMapper centerMapper;
+    @Autowired
+    private CenterMapper centerMapper;
 
-	@Test
-	public void centersToCenterDTOsTest() {
-		final List<CenterDTO> centerDTOs = centerMapper.centersToCenterDTOsFlat(Arrays.asList(createCenter()));
-		Assertions.assertNotNull(centerDTOs);
-		Assertions.assertTrue(centerDTOs.size() == 1);
-		Assertions.assertTrue(centerDTOs.get(0).getId().equals(CENTER_ID));
-	}
+    @Test
+    public void centersToCenterDTOsTest() {
+        final List<CenterDTO> centerDTOs = centerMapper.centersToCenterDTOsFlat(Arrays.asList(createCenter()));
+        Assertions.assertNotNull(centerDTOs);
+        Assertions.assertTrue(centerDTOs.size() == 1);
+        Assertions.assertTrue(centerDTOs.get(0).getId().equals(CENTER_ID));
+    }
 
-	@Test
-	public void centersToIdNameDTOsTest() {
-		final List<IdName> centerDTOs = centerMapper.centersToIdNameDTOs(Arrays.asList(createCenter()));
-		Assertions.assertNotNull(centerDTOs);
-		Assertions.assertTrue(centerDTOs.size() == 1);
-		Assertions.assertTrue(centerDTOs.get(0).getId().equals(CENTER_ID));
-	}
+    @Test
+    public void centersToIdNameDTOsTest() {
+        final List<IdName> centerDTOs = centerMapper.centersToIdNameDTOs(Arrays.asList(createCenter()));
+        Assertions.assertNotNull(centerDTOs);
+        Assertions.assertTrue(centerDTOs.size() == 1);
+        Assertions.assertTrue(centerDTOs.get(0).getId().equals(CENTER_ID));
+    }
 
-	@Test
-	public void centerToCenterDTOTest() {
-		final CenterDTO centerDTO = centerMapper.centerToCenterDTOFlat(createCenter());
-		Assertions.assertNotNull(centerDTO);
-		Assertions.assertTrue(centerDTO.getId().equals(CENTER_ID));
-	}
+    @Test
+    public void centerToCenterDTOTest() {
+        final CenterDTO centerDTO = centerMapper.centerToCenterDTOFlat(createCenter());
+        Assertions.assertNotNull(centerDTO);
+        Assertions.assertTrue(centerDTO.getId().equals(CENTER_ID));
+    }
 
-	@Test
-	public void centerToIdNameDTOTest() {
-		final IdName centerDTO = centerMapper.centerToIdNameDTO(createCenter());
-		Assertions.assertNotNull(centerDTO);
-		Assertions.assertTrue(centerDTO.getId().equals(CENTER_ID));
-	}
+    @Test
+    public void centerToIdNameDTOTest() {
+        final IdName centerDTO = centerMapper.centerToIdNameDTO(createCenter());
+        Assertions.assertNotNull(centerDTO);
+        Assertions.assertTrue(centerDTO.getId().equals(CENTER_ID));
+    }
 
-	private Center createCenter() {
-		final Center center = new Center();
-		center.setId(CENTER_ID);
-		center.setName(CENTER_NAME);
-		return center;
-	}
+    private Center createCenter() {
+        final Center center = new Center();
+        center.setId(CENTER_ID);
+        center.setName(CENTER_NAME);
+        return center;
+    }
 
 }

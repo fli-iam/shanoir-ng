@@ -37,15 +37,15 @@ import org.springframework.data.domain.Page;
 @DecoratedWith(SubjectDecorator.class)
 public interface SubjectMapper {
 
-	@Named("subjectWithStudyList")
-	SubjectDTO subjectToSubjectDTO(Subject subject);
+    @Named("subjectWithStudyList")
+    SubjectDTO subjectToSubjectDTO(Subject subject);
 
-	@Named("subjectWithoutStudyList")
-	@Mappings({ @Mapping(target = "subjectStudyList", ignore = true) })
-	SubjectDTO subjectToSubjectDTONoStudies(Subject subject);
+    @Named("subjectWithoutStudyList")
+    @Mappings({ @Mapping(target = "subjectStudyList", ignore = true) })
+    SubjectDTO subjectToSubjectDTONoStudies(Subject subject);
 
-	List<SubjectDTO> subjectsToSubjectDTOs(List<Subject> subjects);
+    List<SubjectDTO> subjectsToSubjectDTOs(List<Subject> subjects);
 
-	PageImpl<SubjectDTO> subjectsToSubjectDTOs(Page<Subject> page);
+    PageImpl<SubjectDTO> subjectsToSubjectDTOs(Page<Subject> page);
 
 }

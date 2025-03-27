@@ -30,14 +30,14 @@ public interface RoleService {
      * Get all the roles
      * @return a list of roles
      */
-	List<Role> findAll();
-	
-	/**
-	 * Find role by its name.
-	 *
-	 * @param name name.
-	 * @return a role or null
-	 */
-	Role findByName(String name);
+    List<Role> findAll();
+    
+    /**
+     * Find role by its name.
+     *
+     * @param name name.
+     * @return a role or null
+     */
+    Role findByName(String name);
 
 }

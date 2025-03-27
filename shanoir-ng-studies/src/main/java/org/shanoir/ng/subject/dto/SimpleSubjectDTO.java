@@ -28,75 +28,75 @@ import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
  *
  */
 public class SimpleSubjectDTO {
-	
-	private Long id;
+    
+    private Long id;
 
     private String name;
 
     private String identifier;
 
-	private HemisphericDominance languageHemisphericDominance;
+    private HemisphericDominance languageHemisphericDominance;
 
-	private HemisphericDominance manualHemisphericDominance;
+    private HemisphericDominance manualHemisphericDominance;
 
-	private ImagedObjectCategory imagedObjectCategory;
+    private ImagedObjectCategory imagedObjectCategory;
 
     private SubjectStudyDTO subjectStudy;
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public String getIdentifier() {
-		return identifier;
-	}
+    public String getIdentifier() {
+        return identifier;
+    }
 
-	public void setIdentifier(String identifier) {
-		this.identifier = identifier;
-	}
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
 
-	public SubjectStudyDTO getSubjectStudy() {
-		return subjectStudy;
-	}
+    public SubjectStudyDTO getSubjectStudy() {
+        return subjectStudy;
+    }
 
-	public void setSubjectStudy(SubjectStudyDTO subjectStudy) {
-		this.subjectStudy = subjectStudy;
-	}
+    public void setSubjectStudy(SubjectStudyDTO subjectStudy) {
+        this.subjectStudy = subjectStudy;
+    }
 
-	public HemisphericDominance getLanguageHemisphericDominance() {
-		return languageHemisphericDominance;
-	}
+    public HemisphericDominance getLanguageHemisphericDominance() {
+        return languageHemisphericDominance;
+    }
 
-	public void setLanguageHemisphericDominance(HemisphericDominance languageHemisphericDominance) {
-		this.languageHemisphericDominance = languageHemisphericDominance;
-	}
+    public void setLanguageHemisphericDominance(HemisphericDominance languageHemisphericDominance) {
+        this.languageHemisphericDominance = languageHemisphericDominance;
+    }
 
-	public HemisphericDominance getManualHemisphericDominance() {
-		return manualHemisphericDominance;
-	}
+    public HemisphericDominance getManualHemisphericDominance() {
+        return manualHemisphericDominance;
+    }
 
-	public void setManualHemisphericDominance(HemisphericDominance manualHemisphericDominance) {
-		this.manualHemisphericDominance = manualHemisphericDominance;
-	}
+    public void setManualHemisphericDominance(HemisphericDominance manualHemisphericDominance) {
+        this.manualHemisphericDominance = manualHemisphericDominance;
+    }
 
-	public ImagedObjectCategory getImagedObjectCategory() {
-		return imagedObjectCategory;
-	}
+    public ImagedObjectCategory getImagedObjectCategory() {
+        return imagedObjectCategory;
+    }
 
-	public void setImagedObjectCategory(ImagedObjectCategory imagedObjectCategory) {
-		this.imagedObjectCategory = imagedObjectCategory;
-	}
+    public void setImagedObjectCategory(ImagedObjectCategory imagedObjectCategory) {
+        this.imagedObjectCategory = imagedObjectCategory;
+    }
 
 }

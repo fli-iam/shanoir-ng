@@ -15,24 +15,24 @@ import org.springframework.stereotype.Controller;
 
 @Controller
 public class ChallengeApiController implements ChallengeApi {
-	
-	@Autowired
-	private StudyService studyService;
+    
+    @Autowired
+    private StudyService studyService;
 
-	@Autowired
-	private StudyMapper studyMapper;
+    @Autowired
+    private StudyMapper studyMapper;
 
     @Override
-	public	ResponseEntity<List<IdName>> findChallenges() throws RestServiceException {
-		List<IdName> studiesDTO = new ArrayList<>();
-		final List<Study> studies = studyService.findChallenges();
-		if (studies.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		for (Study study : studies) {
-			studiesDTO.add(studyMapper.studyToIdNameDTO(study));
-		}
-		return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
+    public    ResponseEntity<List<IdName>> findChallenges() throws RestServiceException {
+        List<IdName> studiesDTO = new ArrayList<>();
+        final List<Study> studies = studyService.findChallenges();
+        if (studies.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        for (Study study : studies) {
+            studiesDTO.add(studyMapper.studyToIdNameDTO(study));
+        }
+        return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
     }
 
 }

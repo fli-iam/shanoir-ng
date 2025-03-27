@@ -30,23 +30,23 @@ import org.shanoir.ng.shared.core.model.IdName;
 @Mapper(componentModel = "spring")
 public interface ExperimentalGroupOfSubjectsMapper {
 
-	/**
-	 * Map list of @ExperimentalGroupOfSubjects to list of @IdNameDTO.
-	 *
-	 * @param experimentalGroupsOfSubjects
-	 *            list of experimental group of subjects.
-	 * @return list of DTO with id and name.
-	 */
-	List<IdName> experimentalGroupOfSubjectsToIdNameDTOs(List<ExperimentalGroupOfSubjects> experimentalGroupsOfSubjects);
+    /**
+     * Map list of @ExperimentalGroupOfSubjects to list of @IdNameDTO.
+     *
+     * @param experimentalGroupsOfSubjects
+     *            list of experimental group of subjects.
+     * @return list of DTO with id and name.
+     */
+    List<IdName> experimentalGroupOfSubjectsToIdNameDTOs(List<ExperimentalGroupOfSubjects> experimentalGroupsOfSubjects);
 
-	/**
-	 * Map a @ExperimentalGroupOfSubjects to a @StudyDTO.
-	 *
-	 * @param experimentalGroupOfSubjects
-	 *            experimental group of subjects to map.
-	 * @return DTO with id and name.
-	 */
-	@Mappings({ @Mapping(target = "name", source = "groupName") })
-	IdName experimentalGroupOfSubjectsToIdNameDTO(ExperimentalGroupOfSubjects experimentalGroupOfSubjects);
+    /**
+     * Map a @ExperimentalGroupOfSubjects to a @StudyDTO.
+     *
+     * @param experimentalGroupOfSubjects
+     *            experimental group of subjects to map.
+     * @return DTO with id and name.
+     */
+    @Mappings({ @Mapping(target = "name", source = "groupName") })
+    IdName experimentalGroupOfSubjectsToIdNameDTO(ExperimentalGroupOfSubjects experimentalGroupOfSubjects);
 
 }

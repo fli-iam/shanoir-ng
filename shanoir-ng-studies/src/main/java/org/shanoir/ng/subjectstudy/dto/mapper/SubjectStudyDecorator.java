@@ -31,19 +31,19 @@ import org.springframework.util.StringUtils;
  */
 public class SubjectStudyDecorator implements SubjectStudyMapper {
 
-	@Autowired
-	private SubjectStudyMapper delegate;
-	
-	@Autowired
-	private TagMapper tagMapper;
+    @Autowired
+    private SubjectStudyMapper delegate;
+    
+    @Autowired
+    private TagMapper tagMapper;
 
-	@Override
-	public List<SubjectStudyDTO> subjectStudyListToSubjectStudyDTOList(List<SubjectStudy> subjectStudies) {
-		final List<SubjectStudyDTO> subjectStudyDTOs = new ArrayList<>();
-		if (subjectStudies != null) {
-			for (SubjectStudy subjectStudy : subjectStudies) {
-				subjectStudyDTOs.add(subjectStudyToSubjectStudyDTO(subjectStudy));
-			}
+    @Override
+    public List<SubjectStudyDTO> subjectStudyListToSubjectStudyDTOList(List<SubjectStudy> subjectStudies) {
+        final List<SubjectStudyDTO> subjectStudyDTOs = new ArrayList<>();
+        if (subjectStudies != null) {
+            for (SubjectStudy subjectStudy : subjectStudies) {
+                subjectStudyDTOs.add(subjectStudyToSubjectStudyDTO(subjectStudy));
+    		}
 		}
 		return subjectStudyDTOs;
 	}

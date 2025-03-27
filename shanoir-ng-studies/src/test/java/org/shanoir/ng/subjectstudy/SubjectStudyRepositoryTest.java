@@ -38,18 +38,18 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class SubjectStudyRepositoryTest {
 
-	private static final Long STUDY_TEST_1_ID = 1L;
+    private static final Long STUDY_TEST_1_ID = 1L;
 
-	@Autowired
-	private SubjectStudyRepository subjectStudyRepository;
+    @Autowired
+    private SubjectStudyRepository subjectStudyRepository;
 
-	@Test
-	public void findByStudyTest() throws Exception {
-		final Study study = new Study();
-		study.setId(STUDY_TEST_1_ID);
-		List<SubjectStudy> subjectDb = subjectStudyRepository.findByStudyId(study.getId());
-		assertNotNull(subjectDb);
-		assertThat(subjectDb.size()).isEqualTo(2);
-	}
+    @Test
+    public void findByStudyTest() throws Exception {
+        final Study study = new Study();
+        study.setId(STUDY_TEST_1_ID);
+        List<SubjectStudy> subjectDb = subjectStudyRepository.findByStudyId(study.getId());
+        assertNotNull(subjectDb);
+        assertThat(subjectDb.size()).isEqualTo(2);
+    }
 
 }

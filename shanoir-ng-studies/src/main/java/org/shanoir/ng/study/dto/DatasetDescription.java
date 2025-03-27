@@ -22,167 +22,167 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  */
 public class DatasetDescription {
-	
-	/** REQUIRED. Name of the dataset. */
-	@JsonProperty("Name")
-	private String name;
+    
+    /** REQUIRED. Name of the dataset. */
+    @JsonProperty("Name")
+    private String name;
 
-	/** REQUIRED. The version of the BIDS standard that was used. */
-	@JsonProperty("BIDSVersion")
-	private String bidsVersion = "1.1.2-dev";
+    /** REQUIRED. The version of the BIDS standard that was used. */
+    @JsonProperty("BIDSVersion")
+    private String bidsVersion = "1.1.2-dev";
 
-	/** RECOMMENDED. What license is this dataset distributed under? The use of license name abbreviations is suggested for specifying a license. A list of common licenses with suggested abbreviations can be found in Appendix II. */
-	@JsonProperty("License")
-	private String license;
+    /** RECOMMENDED. What license is this dataset distributed under? The use of license name abbreviations is suggested for specifying a license. A list of common licenses with suggested abbreviations can be found in Appendix II. */
+    @JsonProperty("License")
+    private String license;
 
-	/** OPTIONAL. List of individuals who contributed to the creation/curation of the dataset. */
-	@JsonProperty("Authors")
-	private List<String> authors;
-	
-	/** OPTIONAL. Text acknowledging contributions of individuals or institutions beyond those listed in Authors or Funding. */
-	@JsonProperty("Acknowledgements")
-	private String acknowledgements;
-	
-	/** OPTIONAL. Text containing instructions on how researchers using this dataset should acknowledge the original authors. This field can also be used to define a publication that should be cited in publications that use the dataset. */
-	@JsonProperty("HowToAcknowledge")
-	private String howToAcknowledge;
-	
-	/** OPTIONAL. List of sources of funding (grant numbers) */
-	@JsonProperty("Funding")
-	private String funding;
-	
-	/** OPTIONAL. List of references to publication that contain information on the dataset, or links. */
-	@JsonProperty("ReferencesAndLinks")
-	private String referencesAndLinks;
-	
-	/** OPTIONAL. The Document Object Identifier of the dataset (not the corresponding paper). */
-	@JsonProperty("datasetDOI")
-	private String datasetDOI;
+    /** OPTIONAL. List of individuals who contributed to the creation/curation of the dataset. */
+    @JsonProperty("Authors")
+    private List<String> authors;
+    
+    /** OPTIONAL. Text acknowledging contributions of individuals or institutions beyond those listed in Authors or Funding. */
+    @JsonProperty("Acknowledgements")
+    private String acknowledgements;
+    
+    /** OPTIONAL. Text containing instructions on how researchers using this dataset should acknowledge the original authors. This field can also be used to define a publication that should be cited in publications that use the dataset. */
+    @JsonProperty("HowToAcknowledge")
+    private String howToAcknowledge;
+    
+    /** OPTIONAL. List of sources of funding (grant numbers) */
+    @JsonProperty("Funding")
+    private String funding;
+    
+    /** OPTIONAL. List of references to publication that contain information on the dataset, or links. */
+    @JsonProperty("ReferencesAndLinks")
+    private String referencesAndLinks;
+    
+    /** OPTIONAL. The Document Object Identifier of the dataset (not the corresponding paper). */
+    @JsonProperty("datasetDOI")
+    private String datasetDOI;
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * @param name the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	/**
-	 * @return the bidsVersion
-	 */
-	public String getBidsVersion() {
-		return bidsVersion;
-	}
+    /**
+     * @return the bidsVersion
+     */
+    public String getBidsVersion() {
+        return bidsVersion;
+    }
 
-	/**
-	 * @param bidsVersion the bidsVersion to set
-	 */
-	public void setBidsVersion(String bidsVersion) {
-		this.bidsVersion = bidsVersion;
-	}
+    /**
+     * @param bidsVersion the bidsVersion to set
+     */
+    public void setBidsVersion(String bidsVersion) {
+        this.bidsVersion = bidsVersion;
+    }
 
-	/**
-	 * @return the license
-	 */
-	public String getLicense() {
-		return license;
-	}
+    /**
+     * @return the license
+     */
+    public String getLicense() {
+        return license;
+    }
 
-	/**
-	 * @param license the license to set
-	 */
-	public void setLicense(String license) {
-		this.license = license;
-	}
+    /**
+     * @param license the license to set
+     */
+    public void setLicense(String license) {
+        this.license = license;
+    }
 
-	/**
-	 * @return the authors
-	 */
-	public List<String> getAuthors() {
-		return authors;
-	}
+    /**
+     * @return the authors
+     */
+    public List<String> getAuthors() {
+        return authors;
+    }
 
-	/**
-	 * @param authors the authors to set
-	 */
-	public void setAuthors(List<String> authors) {
-		this.authors = authors;
-	}
+    /**
+     * @param authors the authors to set
+     */
+    public void setAuthors(List<String> authors) {
+        this.authors = authors;
+    }
 
-	/**
-	 * @return the acknowledgements
-	 */
-	public String getAcknowledgements() {
-		return acknowledgements;
-	}
+    /**
+     * @return the acknowledgements
+     */
+    public String getAcknowledgements() {
+        return acknowledgements;
+    }
 
-	/**
-	 * @param acknowledgements the acknowledgements to set
-	 */
-	public void setAcknowledgements(String acknowledgements) {
-		this.acknowledgements = acknowledgements;
-	}
+    /**
+     * @param acknowledgements the acknowledgements to set
+     */
+    public void setAcknowledgements(String acknowledgements) {
+        this.acknowledgements = acknowledgements;
+    }
 
-	/**
-	 * @return the howToAcknowledge
-	 */
-	public String getHowToAcknowledge() {
-		return howToAcknowledge;
-	}
+    /**
+     * @return the howToAcknowledge
+     */
+    public String getHowToAcknowledge() {
+        return howToAcknowledge;
+    }
 
-	/**
-	 * @param howToAcknowledge the howToAcknowledge to set
-	 */
-	public void setHowToAcknowledge(String howToAcknowledge) {
-		this.howToAcknowledge = howToAcknowledge;
-	}
+    /**
+     * @param howToAcknowledge the howToAcknowledge to set
+     */
+    public void setHowToAcknowledge(String howToAcknowledge) {
+        this.howToAcknowledge = howToAcknowledge;
+    }
 
-	/**
-	 * @return the funding
-	 */
-	public String getFunding() {
-		return funding;
-	}
+    /**
+     * @return the funding
+     */
+    public String getFunding() {
+        return funding;
+    }
 
-	/**
-	 * @param funding the funding to set
-	 */
-	public void setFunding(String funding) {
-		this.funding = funding;
-	}
+    /**
+     * @param funding the funding to set
+     */
+    public void setFunding(String funding) {
+        this.funding = funding;
+    }
 
-	/**
-	 * @return the referencesAndLinks
-	 */
-	public String getReferencesAndLinks() {
-		return referencesAndLinks;
-	}
+    /**
+     * @return the referencesAndLinks
+     */
+    public String getReferencesAndLinks() {
+        return referencesAndLinks;
+    }
 
-	/**
-	 * @param referencesAndLinks the referencesAndLinks to set
-	 */
-	public void setReferencesAndLinks(String referencesAndLinks) {
-		this.referencesAndLinks = referencesAndLinks;
-	}
+    /**
+     * @param referencesAndLinks the referencesAndLinks to set
+     */
+    public void setReferencesAndLinks(String referencesAndLinks) {
+        this.referencesAndLinks = referencesAndLinks;
+    }
 
-	/**
-	 * @return the datasetDOI
-	 */
-	public String getDatasetDOI() {
-		return datasetDOI;
-	}
+    /**
+     * @return the datasetDOI
+     */
+    public String getDatasetDOI() {
+        return datasetDOI;
+    }
 
-	/**
-	 * @param datasetDOI the datasetDOI to set
-	 */
-	public void setDatasetDOI(String datasetDOI) {
-		this.datasetDOI = datasetDOI;
-	}
+    /**
+     * @param datasetDOI the datasetDOI to set
+     */
+    public void setDatasetDOI(String datasetDOI) {
+        this.datasetDOI = datasetDOI;
+    }
 
 }

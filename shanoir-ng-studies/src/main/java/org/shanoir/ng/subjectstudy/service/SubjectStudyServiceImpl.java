@@ -29,37 +29,37 @@ import org.springframework.stereotype.Service;
 @Service
 public class SubjectStudyServiceImpl implements SubjectStudyService {
 
-	@Autowired
-	private SubjectStudyRepository subjectStudyRepository;
+    @Autowired
+    private SubjectStudyRepository subjectStudyRepository;
 
-	@Override
-	public SubjectStudy findById(final Long id) {
-		return subjectStudyRepository.findById(id).orElse(null);
-	}
+    @Override
+    public SubjectStudy findById(final Long id) {
+        return subjectStudyRepository.findById(id).orElse(null);
+    }
 
-	@Override
-	public SubjectStudy update(final SubjectStudy subjectStudy) throws EntityNotFoundException {
-		final SubjectStudy subjectStudyDb = subjectStudyRepository.findById(subjectStudy.getId()).orElse(null);
-		if (subjectStudyDb == null) throw new EntityNotFoundException(SubjectStudy.class, subjectStudy.getId());
-		updateSubjectStudyValues(subjectStudyDb, subjectStudy);
-		subjectStudyRepository.save(subjectStudyDb);
-		return subjectStudyDb;
-	}
-	
-	/*
-	 * Update some values of subject study to save them in database.
-	 *
-	 * @param subjectStudyDb subjectStudy found in database.
-	 * @param subjectStudy subjectStudy with new values.
-	 * @return database subjectStudy with new values.
-	 */
-	private SubjectStudy updateSubjectStudyValues(final SubjectStudy subjectStudyDb, final SubjectStudy subjectStudy) {
-		subjectStudyDb.setId(subjectStudy.getId());
-		subjectStudyDb.setPhysicallyInvolved(subjectStudy.isPhysicallyInvolved());
-		subjectStudyDb.setSubjectStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
-		subjectStudyDb.setSubjectType(subjectStudy.getSubjectType());
-		subjectStudyDb.setSubjectStudyTags(subjectStudy.getSubjectStudyTags());
-		return subjectStudyDb;
-	}
+    @Override
+    public SubjectStudy update(final SubjectStudy subjectStudy) throws EntityNotFoundException {
+        final SubjectStudy subjectStudyDb = subjectStudyRepository.findById(subjectStudy.getId()).orElse(null);
+        if (subjectStudyDb == null) throw new EntityNotFoundException(SubjectStudy.class, subjectStudy.getId());
+        updateSubjectStudyValues(subjectStudyDb, subjectStudy);
+        subjectStudyRepository.save(subjectStudyDb);
+        return subjectStudyDb;
+    }
+    
+    /*
+     * Update some values of subject study to save them in database.
+     *
+     * @param subjectStudyDb subjectStudy found in database.
+     * @param subjectStudy subjectStudy with new values.
+     * @return database subjectStudy with new values.
+     */
+    private SubjectStudy updateSubjectStudyValues(final SubjectStudy subjectStudyDb, final SubjectStudy subjectStudy) {
+        subjectStudyDb.setId(subjectStudy.getId());
+        subjectStudyDb.setPhysicallyInvolved(subjectStudy.isPhysicallyInvolved());
+        subjectStudyDb.setSubjectStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
+        subjectStudyDb.setSubjectType(subjectStudy.getSubjectType());
+        subjectStudyDb.setSubjectStudyTags(subjectStudy.getSubjectStudyTags());
+        return subjectStudyDb;
+    }
 
 }

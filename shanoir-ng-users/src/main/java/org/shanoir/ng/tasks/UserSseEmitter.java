@@ -18,14 +18,14 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 public class UserSseEmitter extends SseEmitter {
 
-	private long userId;
+    private long userId;
 
-	UserSseEmitter(long userId) {
-		super(-1L);
-		this.userId = userId;
-	}
+    UserSseEmitter(long userId) {
+        super(-1L);
+        this.userId = userId;
+    }
 
-	public long getUserId() {
-		return userId;
-	}
+    public long getUserId() {
+        return userId;
+    }
 }

@@ -66,28 +66,28 @@ public enum CoilType {
 
     /**
      * Get a coil type by its id.
-	 *
-	 * @param id
-	 *            type id.
-	 * @return coil type.
-	 */
-	public static CoilType getType(final Integer id) {
-		if (id == null) {
-			return null;
-		}
-		for (CoilType type : CoilType.values()) {
-			if (id.equals(type.getId())) {
-				return type;
-			}
-		}
-		throw new IllegalArgumentException("No matching coil type for id " + id);
-	}
+     *
+     * @param id
+     *            type id.
+     * @return coil type.
+     */
+    public static CoilType getType(final Integer id) {
+        if (id == null) {
+            return null;
+        }
+        for (CoilType type : CoilType.values()) {
+            if (id.equals(type.getId())) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException("No matching coil type for id " + id);
+    }
 
-	/**
-	 * @return the id
-	 */
-	public int getId() {
-		return id;
-	}
+    /**
+     * @return the id
+     */
+    public int getId() {
+        return id;
+    }
 
 }

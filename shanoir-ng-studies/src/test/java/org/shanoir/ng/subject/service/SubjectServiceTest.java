@@ -68,120 +68,120 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ActiveProfiles("test")
 public class SubjectServiceTest {
 
-	private static final Long SUBJECT_ID = 1L;
+    private static final Long SUBJECT_ID = 1L;
 
-	@Mock
-	private SubjectRepository subjectRepository;
+    @Mock
+    private SubjectRepository subjectRepository;
 
-	@Mock
-	private RabbitTemplate rabbitTemplate;
-	
-	@Mock
-	private SubjectMapper subjectMapperMock;
+    @Mock
+    private RabbitTemplate rabbitTemplate;
+    
+    @Mock
+    private SubjectMapper subjectMapperMock;
 
-	@InjectMocks
-	private SubjectServiceImpl subjectService;
-	
-	@Mock
-	private ObjectMapper objectMapper;
+    @InjectMocks
+    private SubjectServiceImpl subjectService;
+    
+    @Mock
+    private ObjectMapper objectMapper;
 
-	
-	@Mock
-	private StudyExaminationRepository studyExaminationRepository;
+    
+    @Mock
+    private StudyExaminationRepository studyExaminationRepository;
 
-	@BeforeEach
-	public void setup() {
-		given(subjectRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createSubject()));
-		given(subjectRepository.findById(SUBJECT_ID)).willReturn(Optional.of(ModelsUtil.createSubject()));
-		//given(subjectRepository.save(Mockito.any(Subject.class))).willReturn(ModelsUtil.createSubject());
-		given(subjectRepository.save(Mockito.any(Subject.class))).willReturn(createSubjectTosave());
-	}
+    @BeforeEach
+    public void setup() {
+        given(subjectRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createSubject()));
+        given(subjectRepository.findById(SUBJECT_ID)).willReturn(Optional.of(ModelsUtil.createSubject()));
+        //given(subjectRepository.save(Mockito.any(Subject.class))).willReturn(ModelsUtil.createSubject());
+        given(subjectRepository.save(Mockito.any(Subject.class))).willReturn(createSubjectTosave());
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void deleteByIdTest() throws EntityNotFoundException {
-		subjectService.deleteById(SUBJECT_ID);
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void deleteByIdTest() throws EntityNotFoundException {
+        subjectService.deleteById(SUBJECT_ID);
 
-		Mockito.verify(subjectRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
-	}
+        Mockito.verify(subjectRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
+    }
 
-	@Test
-	public void findAllTest() {
-		final List<Subject> subjects = subjectService.findAll();
-		Assertions.assertNotNull(subjects);
-		Assertions.assertTrue(subjects.size() == 1);
+    @Test
+    public void findAllTest() {
+        final List<Subject> subjects = subjectService.findAll();
+        Assertions.assertNotNull(subjects);
+        Assertions.assertTrue(subjects.size() == 1);
 
-		Mockito.verify(subjectRepository, Mockito.times(1)).findAll();
-	}
+        Mockito.verify(subjectRepository, Mockito.times(1)).findAll();
+    }
 
-	@Test
-	public void findByIdTest() {
-		final Subject subject = subjectService.findById(SUBJECT_ID);
-		Assertions.assertNotNull(subject);
-		Assertions.assertTrue(ModelsUtil.SUBJECT_NAME.equals(subject.getName()));
+    @Test
+    public void findByIdTest() {
+        final Subject subject = subjectService.findById(SUBJECT_ID);
+        Assertions.assertNotNull(subject);
+        Assertions.assertTrue(ModelsUtil.SUBJECT_NAME.equals(subject.getName()));
 
-		Mockito.verify(subjectRepository, Mockito.times(1)).findById(Mockito.anyLong());
-	}
+        Mockito.verify(subjectRepository, Mockito.times(1)).findById(Mockito.anyLong());
+    }
 
-	@Test
-	public void saveTest() throws MicroServiceCommunicationException {
-		subjectService.create(createSubjectTosave());
-		Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));
-	}
+    @Test
+    public void saveTest() throws MicroServiceCommunicationException {
+        subjectService.create(createSubjectTosave());
+        Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));
+    }
 
-	@Test
-	public void updateTest() throws RestServiceException, ShanoirException {
-		final Subject updatedSubject = subjectService.update(createSubjectToUpdate());
-		Assertions.assertNotNull(updatedSubject);
-		Assertions.assertTrue(Sex.F.equals(updatedSubject.getSex()));
+    @Test
+    public void updateTest() throws RestServiceException, ShanoirException {
+        final Subject updatedSubject = subjectService.update(createSubjectToUpdate());
+        Assertions.assertNotNull(updatedSubject);
+        Assertions.assertTrue(Sex.F.equals(updatedSubject.getSex()));
 
-		Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));
-	}
+        Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));
+    }
 
-	@Test
-	public void updateTestChangeName() throws EntityNotFoundException, MicroServiceCommunicationException, RestServiceException {
-		try {
-			Subject updated = createSubjectToUpdate();
-			updated.setName("new name");
-			subjectService.update(updated);
-		} catch (ShanoirException exception) {
-			assertEquals(HttpStatus.FORBIDDEN.value(), exception.getErrorCode());
-			assertEquals("You cannot update subject common name.", exception.getMessage());
-			return;
-		}
-		fail();
-	}
+    @Test
+    public void updateTestChangeName() throws EntityNotFoundException, MicroServiceCommunicationException, RestServiceException {
+        try {
+            Subject updated = createSubjectToUpdate();
+            updated.setName("new name");
+            subjectService.update(updated);
+        } catch (ShanoirException exception) {
+            assertEquals(HttpStatus.FORBIDDEN.value(), exception.getErrorCode());
+            assertEquals("You cannot update subject common name.", exception.getMessage());
+            return;
+        }
+        fail();
+    }
 
-	private Subject createSubjectToUpdate() {
-		final Subject subject = new Subject();
-		subject.setId(SUBJECT_ID);
-		subject.setSex(Sex.F);
-		subject.setName(ModelsUtil.SUBJECT_NAME);
-		return subject;
-	}
+    private Subject createSubjectToUpdate() {
+        final Subject subject = new Subject();
+        subject.setId(SUBJECT_ID);
+        subject.setSex(Sex.F);
+        subject.setName(ModelsUtil.SUBJECT_NAME);
+        return subject;
+    }
 
-	private Subject createSubjectTosave() {
-		final Subject subject = new Subject();
-		//subject.setName("Toto");
-		//subject.setId(1L);
-		subject.setBirthDate(Instant.ofEpochMilli(1392122691000L).atZone(ZoneId.systemDefault()).toLocalDate());
-		subject.setIdentifier("Titi");
+    private Subject createSubjectTosave() {
+        final Subject subject = new Subject();
+        //subject.setName("Toto");
+        //subject.setId(1L);
+        subject.setBirthDate(Instant.ofEpochMilli(1392122691000L).atZone(ZoneId.systemDefault()).toLocalDate());
+        subject.setIdentifier("Titi");
 
-		subject.setImagedObjectCategory(ImagedObjectCategory.PHANTOM);
-		subject.setLanguageHemisphericDominance(HemisphericDominance.Left);
-		subject.setManualHemisphericDominance(HemisphericDominance.Left);
-		PseudonymusHashValues pseudonymusHashValues= new PseudonymusHashValues();
-		pseudonymusHashValues.setBirthDateHash("uihuizdhuih");
-		subject.setPseudonymusHashValues(pseudonymusHashValues);
-		subject.setSex(Sex.F);
-		UserPersonalCommentSubject userPersonalCommentList1= new UserPersonalCommentSubject();
-		userPersonalCommentList1.setComment("comment1");
-		UserPersonalCommentSubject userPersonalCommentList2= new UserPersonalCommentSubject();
-		userPersonalCommentList1.setComment("comment2");
-		List<UserPersonalCommentSubject> listSubjectComments = new ArrayList<>();
-		listSubjectComments.add(userPersonalCommentList1);
-		listSubjectComments.add(userPersonalCommentList2);
-		subject.setUserPersonalCommentList(listSubjectComments);
-		return subject;
-	}
+        subject.setImagedObjectCategory(ImagedObjectCategory.PHANTOM);
+        subject.setLanguageHemisphericDominance(HemisphericDominance.Left);
+        subject.setManualHemisphericDominance(HemisphericDominance.Left);
+        PseudonymusHashValues pseudonymusHashValues= new PseudonymusHashValues();
+        pseudonymusHashValues.setBirthDateHash("uihuizdhuih");
+        subject.setPseudonymusHashValues(pseudonymusHashValues);
+        subject.setSex(Sex.F);
+        UserPersonalCommentSubject userPersonalCommentList1= new UserPersonalCommentSubject();
+        userPersonalCommentList1.setComment("comment1");
+        UserPersonalCommentSubject userPersonalCommentList2= new UserPersonalCommentSubject();
+        userPersonalCommentList1.setComment("comment2");
+        List<UserPersonalCommentSubject> listSubjectComments = new ArrayList<>();
+        listSubjectComments.add(userPersonalCommentList1);
+        listSubjectComments.add(userPersonalCommentList2);
+        subject.setUserPersonalCommentList(listSubjectComments);
+        return subject;
+    }
 }

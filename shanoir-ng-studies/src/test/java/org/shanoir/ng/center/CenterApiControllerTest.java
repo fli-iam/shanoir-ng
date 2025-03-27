@@ -63,110 +63,110 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @ActiveProfiles("test")
 public class CenterApiControllerTest {
 
-	private static final String REQUEST_PATH = "/centers";
-	private static final String REQUEST_PATH_FOR_NAMES = REQUEST_PATH + "/names";
-	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
-	
-	@Autowired
-	private MockMvc mvc;
+    private static final String REQUEST_PATH = "/centers";
+    private static final String REQUEST_PATH_FOR_NAMES = REQUEST_PATH + "/names";
+    private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+    
+    @Autowired
+    private MockMvc mvc;
 
-	@MockBean
-	private CenterMapper centerMapperMock;
+    @MockBean
+    private CenterMapper centerMapperMock;
 
-	@MockBean
-	private CenterService centerServiceMock;
+    @MockBean
+    private CenterService centerServiceMock;
 
-	@MockBean
-	private StudyService studyServiceMock;
-	
-	@MockBean
-	private CenterFieldEditionSecurityManager fieldEditionSecurityManager;
-	
-	@MockBean
-	private CenterUniqueConstraintManager uniqueConstraintManager;
+    @MockBean
+    private StudyService studyServiceMock;
+    
+    @MockBean
+    private CenterFieldEditionSecurityManager fieldEditionSecurityManager;
+    
+    @MockBean
+    private CenterUniqueConstraintManager uniqueConstraintManager;
 
-	@MockBean
-	private ShanoirEventService eventService;
-	
-	@MockBean(name = "controlerSecurityService")
-	private ControlerSecurityService controlerSecurityService;
+    @MockBean
+    private ShanoirEventService eventService;
+    
+    @MockBean(name = "controlerSecurityService")
+    private ControlerSecurityService controlerSecurityService;
 
-	@BeforeEach
-	public void setup() throws EntityNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException  {
-		given(centerMapperMock.centersToCenterDTOsFlat(Mockito.anyList()))
-				.willReturn(Arrays.asList(new CenterDTO()));
-		Center center = new Center();
-		center.setId(Long.valueOf(123));
-		IdName idNameCenter = new IdName(1L, "naIme");
-		given(centerMapperMock.centerToCenterDTOFlat(Mockito.any(Center.class))).willReturn(new CenterDTO());
-		doNothing().when(centerServiceMock).deleteById(1L);
-		given(centerServiceMock.findAll()).willReturn(Arrays.asList(center));
-		given(centerServiceMock.findById(1L)).willReturn(Optional.of(center));
-		given(centerServiceMock.findIdsAndNames()).willReturn(Arrays.asList(idNameCenter));
-		given(centerServiceMock.create(Mockito.any(Center.class))).willReturn(center);
-		given(fieldEditionSecurityManager.validate(Mockito.any(Center.class))).willReturn(new FieldErrorMap());
-		given(uniqueConstraintManager.validate(Mockito.any(Center.class))).willReturn(new FieldErrorMap());
-		given(controlerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(Center.class))).willReturn(true);
-	}
+    @BeforeEach
+    public void setup() throws EntityNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException  {
+        given(centerMapperMock.centersToCenterDTOsFlat(Mockito.anyList()))
+                .willReturn(Arrays.asList(new CenterDTO()));
+        Center center = new Center();
+        center.setId(Long.valueOf(123));
+        IdName idNameCenter = new IdName(1L, "naIme");
+        given(centerMapperMock.centerToCenterDTOFlat(Mockito.any(Center.class))).willReturn(new CenterDTO());
+        doNothing().when(centerServiceMock).deleteById(1L);
+        given(centerServiceMock.findAll()).willReturn(Arrays.asList(center));
+        given(centerServiceMock.findById(1L)).willReturn(Optional.of(center));
+        given(centerServiceMock.findIdsAndNames()).willReturn(Arrays.asList(idNameCenter));
+        given(centerServiceMock.create(Mockito.any(Center.class))).willReturn(center);
+        given(fieldEditionSecurityManager.validate(Mockito.any(Center.class))).willReturn(new FieldErrorMap());
+        given(uniqueConstraintManager.validate(Mockito.any(Center.class))).willReturn(new FieldErrorMap());
+        given(controlerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(Center.class))).willReturn(true);
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void deleteCenterTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isNoContent());
-	}
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void deleteCenterTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void deleteUnknownCenterTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH + "/0").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isNotFound());
-	}
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void deleteUnknownCenterTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH + "/0").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
 
-	@Test
-	@WithMockUser
-	public void findCenterByIdTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser
+    public void findCenterByIdTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser
-	public void findCentersTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser
+    public void findCentersTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser
-	public void findCentersNamesTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_FOR_NAMES).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
-	
-	@Test
-	@WithMockUser
-	public void findCentersNamesByStudyIdTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_FOR_NAMES + "/1").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isNoContent());
-	}
+    @Test
+    @WithMockUser
+    public void findCentersNamesTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_FOR_NAMES).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+    
+    @Test
+    @WithMockUser
+    public void findCentersNamesByStudyIdTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_FOR_NAMES + "/1").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void saveNewCenterTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createCenter())))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void saveNewCenterTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createCenter())))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void updateCenterTest() throws Exception {
-		Center existingCenter = ModelsUtil.createCenter();
-		existingCenter.setId(1L);
-		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(existingCenter)))
-				.andExpect(status().isNoContent());
-	}
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void updateCenterTest() throws Exception {
+        Center existingCenter = ModelsUtil.createCenter();
+        existingCenter.setId(1L);
+        mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(existingCenter)))
+                .andExpect(status().isNoContent());
+    }
 
 }

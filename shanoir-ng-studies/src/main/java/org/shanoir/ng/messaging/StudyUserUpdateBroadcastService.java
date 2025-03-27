@@ -29,23 +29,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class StudyUserUpdateBroadcastService {
-	
-	private static final Logger LOG = LoggerFactory.getLogger(StudyUserUpdateBroadcastService.class);
+    
+    private static final Logger LOG = LoggerFactory.getLogger(StudyUserUpdateBroadcastService.class);
 
-	@Autowired
-	private RabbitTemplate rabbitTemplate;
-	
-	@Autowired
-	private ObjectMapper objectMapper;
-	
-	public void broadcast(Iterable<StudyUserCommand> commands) throws MicroServiceCommunicationException {
-		try {
-			String str = objectMapper.writeValueAsString(commands);
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_USER_EXCHANGE, RabbitMQConfiguration.STUDY_USER_QUEUE, str);
-			LOG.debug("Brodcasted study-user changes : {}", str);
-		} catch (AmqpException | JsonProcessingException e) {
-			throw new MicroServiceCommunicationException("Could not send data to study-user-exchange");
-		}
-	}
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+    
+    @Autowired
+    private ObjectMapper objectMapper;
+    
+    public void broadcast(Iterable<StudyUserCommand> commands) throws MicroServiceCommunicationException {
+        try {
+            String str = objectMapper.writeValueAsString(commands);
+            rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_USER_EXCHANGE, RabbitMQConfiguration.STUDY_USER_QUEUE, str);
+            LOG.debug("Brodcasted study-user changes : {}", str);
+        } catch (AmqpException | JsonProcessingException e) {
+            throw new MicroServiceCommunicationException("Could not send data to study-user-exchange");
+        }
+    }
 
 }

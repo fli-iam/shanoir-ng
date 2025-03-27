@@ -38,44 +38,44 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class SubjectRepositoryTest {
 
-	private static final String SUBJECT_TEST_1_DATA = "subject1";
-	private static final Long SUBJECT_TEST_1_ID = 1L;
+    private static final String SUBJECT_TEST_1_DATA = "subject1";
+    private static final Long SUBJECT_TEST_1_ID = 1L;
 
-	@Autowired
-	private SubjectRepository subjectRepository;
+    @Autowired
+    private SubjectRepository subjectRepository;
 
-	@Test
-	public void findAllTest() throws Exception {
-		Iterable<Subject> subjectDb = subjectRepository.findAll();
-		assertThat(subjectDb).isNotNull();
-		int nbSubject = 0;
-		Iterator<Subject> subjectIt = subjectDb.iterator();
-		while (subjectIt.hasNext()) {
-			subjectIt.next();
-			nbSubject++;
-		}
-		assertThat(nbSubject).isEqualTo(4);
-	}
+    @Test
+    public void findAllTest() throws Exception {
+        Iterable<Subject> subjectDb = subjectRepository.findAll();
+        assertThat(subjectDb).isNotNull();
+        int nbSubject = 0;
+        Iterator<Subject> subjectIt = subjectDb.iterator();
+        while (subjectIt.hasNext()) {
+            subjectIt.next();
+            nbSubject++;
+        }
+        assertThat(nbSubject).isEqualTo(4);
+    }
 
-	@Test
-	public void findByTest() throws Exception {
-		List<Subject> subjectDb = subjectRepository.findBy("name", SUBJECT_TEST_1_DATA);
-		assertNotNull(subjectDb);
-		assertThat(subjectDb.size()).isEqualTo(1);
-		assertThat(subjectDb.get(0).getId()).isEqualTo(SUBJECT_TEST_1_ID);
-	}
+    @Test
+    public void findByTest() throws Exception {
+        List<Subject> subjectDb = subjectRepository.findBy("name", SUBJECT_TEST_1_DATA);
+        assertNotNull(subjectDb);
+        assertThat(subjectDb.size()).isEqualTo(1);
+        assertThat(subjectDb.get(0).getId()).isEqualTo(SUBJECT_TEST_1_ID);
+    }
 
-	@Test
-	public void findByDataTest() throws Exception {
-		Subject subjectDb = subjectRepository.findByName(SUBJECT_TEST_1_DATA);
-		assertNotNull(subjectDb);
-		assertThat(subjectDb.getId()).isEqualTo(SUBJECT_TEST_1_ID);
-	}
+    @Test
+    public void findByDataTest() throws Exception {
+        Subject subjectDb = subjectRepository.findByName(SUBJECT_TEST_1_DATA);
+        assertNotNull(subjectDb);
+        assertThat(subjectDb.getId()).isEqualTo(SUBJECT_TEST_1_ID);
+    }
 
-	@Test
-	public void findByIdTest() throws Exception {
-		Subject subjectDb = subjectRepository.findById(SUBJECT_TEST_1_ID).orElseThrow();
-		assertThat(subjectDb.getName()).isEqualTo(SUBJECT_TEST_1_DATA);
-	}
+    @Test
+    public void findByIdTest() throws Exception {
+        Subject subjectDb = subjectRepository.findById(SUBJECT_TEST_1_ID).orElseThrow();
+        assertThat(subjectDb.getName()).isEqualTo(SUBJECT_TEST_1_DATA);
+    }
 
 }

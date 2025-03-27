@@ -52,108 +52,108 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class CenterSecurityTest {
 
-	private static final long LOGGED_USER_ID = 2L;
-	private static final String LOGGED_USER_USERNAME = "logged";
-	private static final long ENTITY_ID = 1L;
-	
-	private Center mockNew;
-	private Center mockExisting;
-	
-	@Autowired
-	private CenterService service;
-	
-	@MockBean
-	private CenterRepository repository;
-	
-	@BeforeEach
-	public void setup() {
-		mockNew = ModelsUtil.createCenter();
-		mockExisting = ModelsUtil.createCenter();
-		mockExisting.setId(ENTITY_ID);
-	}
-	
-	@Test
-	@WithAnonymousUser
-	public void testAsAnonymous() throws ShanoirException {
-		assertAccessDenied(service::findByName, "name");
-		assertAccessDenied(service::findById, ENTITY_ID);
-		assertAccessDenied(service::findAll);
-		assertAccessDenied(service::findIdsAndNames);
-		assertAccessDenied(service::create, mockNew);
-		assertAccessDenied(service::update, mockExisting);
-		assertAccessDenied(service::deleteById, ENTITY_ID);
-		assertAccessDenied(service::deleteByIdCheckDependencies, ENTITY_ID);
-	}
+    private static final long LOGGED_USER_ID = 2L;
+    private static final String LOGGED_USER_USERNAME = "logged";
+    private static final long ENTITY_ID = 1L;
+    
+    private Center mockNew;
+    private Center mockExisting;
+    
+    @Autowired
+    private CenterService service;
+    
+    @MockBean
+    private CenterRepository repository;
+    
+    @BeforeEach
+    public void setup() {
+        mockNew = ModelsUtil.createCenter();
+        mockExisting = ModelsUtil.createCenter();
+        mockExisting.setId(ENTITY_ID);
+    }
+    
+    @Test
+    @WithAnonymousUser
+    public void testAsAnonymous() throws ShanoirException {
+        assertAccessDenied(service::findByName, "name");
+        assertAccessDenied(service::findById, ENTITY_ID);
+        assertAccessDenied(service::findAll);
+        assertAccessDenied(service::findIdsAndNames);
+        assertAccessDenied(service::create, mockNew);
+        assertAccessDenied(service::update, mockExisting);
+        assertAccessDenied(service::deleteById, ENTITY_ID);
+        assertAccessDenied(service::deleteByIdCheckDependencies, ENTITY_ID);
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
-	public void testAsUser() throws ShanoirException {
-		assertAccessAuthorized(service::findByName, "name");
-		assertAccessAuthorized(service::findById, ENTITY_ID);
-		assertAccessAuthorized(service::findAll);
-		assertAccessAuthorized(service::findIdsAndNames);
-		assertAccessDenied(service::create, mockNew);
-		assertAccessDenied(service::update, mockExisting);
-		assertAccessDenied(service::deleteById, ENTITY_ID);
-		assertAccessDenied(service::deleteByIdCheckDependencies, ENTITY_ID);
-	}
+    @Test
+    @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
+    public void testAsUser() throws ShanoirException {
+        assertAccessAuthorized(service::findByName, "name");
+        assertAccessAuthorized(service::findById, ENTITY_ID);
+        assertAccessAuthorized(service::findAll);
+        assertAccessAuthorized(service::findIdsAndNames);
+        assertAccessDenied(service::create, mockNew);
+        assertAccessDenied(service::update, mockExisting);
+        assertAccessDenied(service::deleteById, ENTITY_ID);
+        assertAccessDenied(service::deleteByIdCheckDependencies, ENTITY_ID);
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
-	public void testAsExpert() throws ShanoirException {
-		assertAccessAuthorized(service::findByName, "name");
-		assertAccessAuthorized(service::findById, ENTITY_ID);
-		assertAccessAuthorized(service::findAll);
-		assertAccessAuthorized(service::findIdsAndNames);
-		assertAccessAuthorized(service::create, mockNew);
-		assertAccessDenied(service::create, mockExisting);
-		assertAccessAuthorized(service::update, mockExisting);
-		assertAccessAuthorized(service::deleteById, ENTITY_ID);
-		assertAccessAuthorized(service::deleteByIdCheckDependencies, ENTITY_ID);
-	}
-	
-	@Test
-	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
-	public void testAsAdmin() throws ShanoirException {
-		assertAccessAuthorized(service::findByName, "name");
-		assertAccessAuthorized(service::findById, ENTITY_ID);
-		assertAccessAuthorized(service::findAll);
-		assertAccessAuthorized(service::findIdsAndNames);
-		assertAccessAuthorized(service::create, mockNew);
-		assertAccessDenied(service::create, mockExisting);
-		assertAccessAuthorized(service::update, mockExisting);
-		assertAccessAuthorized(service::deleteById, ENTITY_ID);
-		assertAccessAuthorized(service::deleteByIdCheckDependencies, ENTITY_ID);
-	}
-	
-	@Test
-	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
-	public void testDependenciesCheckAcq() throws EntityNotFoundException, UndeletableDependenciesException {
-		assertThrows(UndeletableDependenciesException.class, () -> {
-			final long ID = 666L;
-			Center center = ModelsUtil.createCenter();
-			center.setId(ID);
-			List<AcquisitionEquipment> acqs = new ArrayList<>();
-			acqs.add(new AcquisitionEquipment());
-			center.setAcquisitionEquipments(acqs);
-			given(repository.findById(ID)).willReturn(Optional.of(center));
-			service.deleteByIdCheckDependencies(ID);
-		});
-	}
-	
-	@Test
-	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
-	public void testDependenciesCheckStuCenter() throws EntityNotFoundException, UndeletableDependenciesException {
-		assertThrows(UndeletableDependenciesException.class, () -> {
-			final long ID = 69L;
-			Center center = ModelsUtil.createCenter();
-			center.setId(ID);
-			List<StudyCenter> studyCenterList = new ArrayList<>();
-			studyCenterList.add(new StudyCenter());
-			center.setStudyCenterList(studyCenterList);
-			given(repository.findById(ID)).willReturn(Optional.of(center));
-			service.deleteByIdCheckDependencies(ID);
-		});
-	}
+    @Test
+    @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
+    public void testAsExpert() throws ShanoirException {
+        assertAccessAuthorized(service::findByName, "name");
+        assertAccessAuthorized(service::findById, ENTITY_ID);
+        assertAccessAuthorized(service::findAll);
+        assertAccessAuthorized(service::findIdsAndNames);
+        assertAccessAuthorized(service::create, mockNew);
+        assertAccessDenied(service::create, mockExisting);
+        assertAccessAuthorized(service::update, mockExisting);
+        assertAccessAuthorized(service::deleteById, ENTITY_ID);
+        assertAccessAuthorized(service::deleteByIdCheckDependencies, ENTITY_ID);
+    }
+    
+    @Test
+    @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
+    public void testAsAdmin() throws ShanoirException {
+        assertAccessAuthorized(service::findByName, "name");
+        assertAccessAuthorized(service::findById, ENTITY_ID);
+        assertAccessAuthorized(service::findAll);
+        assertAccessAuthorized(service::findIdsAndNames);
+        assertAccessAuthorized(service::create, mockNew);
+        assertAccessDenied(service::create, mockExisting);
+        assertAccessAuthorized(service::update, mockExisting);
+        assertAccessAuthorized(service::deleteById, ENTITY_ID);
+        assertAccessAuthorized(service::deleteByIdCheckDependencies, ENTITY_ID);
+    }
+    
+    @Test
+    @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
+    public void testDependenciesCheckAcq() throws EntityNotFoundException, UndeletableDependenciesException {
+        assertThrows(UndeletableDependenciesException.class, () -> {
+            final long ID = 666L;
+            Center center = ModelsUtil.createCenter();
+            center.setId(ID);
+            List<AcquisitionEquipment> acqs = new ArrayList<>();
+            acqs.add(new AcquisitionEquipment());
+            center.setAcquisitionEquipments(acqs);
+            given(repository.findById(ID)).willReturn(Optional.of(center));
+            service.deleteByIdCheckDependencies(ID);
+        });
+    }
+    
+    @Test
+    @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
+    public void testDependenciesCheckStuCenter() throws EntityNotFoundException, UndeletableDependenciesException {
+        assertThrows(UndeletableDependenciesException.class, () -> {
+            final long ID = 69L;
+            Center center = ModelsUtil.createCenter();
+            center.setId(ID);
+            List<StudyCenter> studyCenterList = new ArrayList<>();
+            studyCenterList.add(new StudyCenter());
+            center.setStudyCenterList(studyCenterList);
+            given(repository.findById(ID)).willReturn(Optional.of(center));
+            service.deleteByIdCheckDependencies(ID);
+        });
+    }
 
 }

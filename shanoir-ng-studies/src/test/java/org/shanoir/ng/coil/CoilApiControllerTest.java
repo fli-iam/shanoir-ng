@@ -58,73 +58,73 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @ActiveProfiles("test")
 public class CoilApiControllerTest {
 
-	private static final String REQUEST_PATH = "/coils";
-	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+    private static final String REQUEST_PATH = "/coils";
+    private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
-	@Autowired
-	private MockMvc mvc;
+    @Autowired
+    private MockMvc mvc;
 
-	@MockBean
-	private CoilMapper coilMapperMock;
+    @MockBean
+    private CoilMapper coilMapperMock;
 
-	@MockBean
-	private CoilService coilServiceMock;
+    @MockBean
+    private CoilService coilServiceMock;
 
-	@MockBean
-	private ShanoirEventService eventService;
-	
-	@MockBean(name = "controlerSecurityService")
-	private ControlerSecurityService controlerSecurityService;
+    @MockBean
+    private ShanoirEventService eventService;
+    
+    @MockBean(name = "controlerSecurityService")
+    private ControlerSecurityService controlerSecurityService;
 
-	@BeforeEach
-	public void setup() throws EntityNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		given(coilMapperMock.coilsToCoilDTOs(Mockito.anyList()))
-				.willReturn(Arrays.asList(new CoilDTO()));
-		given(coilMapperMock.coilToCoilDTO(Mockito.any(Coil.class))).willReturn(new CoilDTO());
-		doNothing().when(coilServiceMock).deleteById(1L);
-		given(coilServiceMock.findAll()).willReturn(Arrays.asList(new Coil()));
-		given(coilServiceMock.findById(1L)).willReturn(Optional.of(new Coil()));
-		Coil coil = new Coil();
-		coil.setId(Long.valueOf(123));
-		given(coilServiceMock.create(Mockito.any(Coil.class))).willReturn(coil );
-		given(controlerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(Coil.class))).willReturn(true);
-	}
+    @BeforeEach
+    public void setup() throws EntityNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        given(coilMapperMock.coilsToCoilDTOs(Mockito.anyList()))
+                .willReturn(Arrays.asList(new CoilDTO()));
+        given(coilMapperMock.coilToCoilDTO(Mockito.any(Coil.class))).willReturn(new CoilDTO());
+        doNothing().when(coilServiceMock).deleteById(1L);
+        given(coilServiceMock.findAll()).willReturn(Arrays.asList(new Coil()));
+        given(coilServiceMock.findById(1L)).willReturn(Optional.of(new Coil()));
+        Coil coil = new Coil();
+        coil.setId(Long.valueOf(123));
+        given(coilServiceMock.create(Mockito.any(Coil.class))).willReturn(coil );
+        given(controlerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(Coil.class))).willReturn(true);
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void deleteCoilTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isNoContent());
-	}
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void deleteCoilTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+    }
 
-	@Test
-	public void findCoilByIdTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    public void findCoilByIdTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	public void findCoilsTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    public void findCoilsTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void saveNewCoilTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createCoil())))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void saveNewCoilTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createCoil())))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void updateCoilTest() throws Exception {
-		Coil coil = ModelsUtil.createCoil();
-		coil.setId(1L);
-		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(coil)))
-				.andExpect(status().isNoContent());
-	}
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void updateCoilTest() throws Exception {
+        Coil coil = ModelsUtil.createCoil();
+        coil.setId(1L);
+        mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(coil)))
+                .andExpect(status().isNoContent());
+    }
 
 }

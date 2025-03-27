@@ -30,17 +30,17 @@ import org.shanoir.ng.study.model.Study;
  */
 
 public class UtilsTest {
-	
-	@Test
-	public void testCopyList() throws ShanoirException {
+    
+    @Test
+    public void testCopyList() throws ShanoirException {
 
-		List<Study> list = Arrays.asList(ModelsUtil.createStudy());
-		List<Study> copiedList = Utils.copyList(list);
+        List<Study> list = Arrays.asList(ModelsUtil.createStudy());
+        List<Study> copiedList = Utils.copyList(list);
 
-		Assertions.assertTrue(copiedList.equals(list));
-		Assertions.assertNotNull(copiedList);
-		Assertions.assertTrue(copiedList.size() == list.size());
-		Assertions.assertTrue(list.get(0).getStudyCenterList().size() > 0);
-		Assertions.assertTrue(copiedList.get(0).getStudyCenterList().size() == list.get(0).getStudyCenterList().size());
-	}
+        Assertions.assertTrue(copiedList.equals(list));
+        Assertions.assertNotNull(copiedList);
+        Assertions.assertTrue(copiedList.size() == list.size());
+        Assertions.assertTrue(list.get(0).getStudyCenterList().size() > 0);
+        Assertions.assertTrue(copiedList.get(0).getStudyCenterList().size() == list.get(0).getStudyCenterList().size());
+    }
 }

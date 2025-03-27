@@ -29,49 +29,49 @@ import io.swagger.v3.oas.annotations.Parameter;
 @Controller
 public class AsyncTaskApiController implements AsyncTaskApi {
 
-	@Autowired
-	ShanoirEventsService taskService;
+    @Autowired
+    ShanoirEventsService taskService;
 
     public static final List<UserSseEmitter> emitters = Collections.synchronizedList(new ArrayList<>());
 
-	@Override
-	public ResponseEntity<List<ShanoirEventLight>> findTasks() {
-		Long userId = KeycloakUtil.getTokenUserId();
-		List<ShanoirEventLight> taskList = taskService.getEventsByUserAndType(
-			userId,
-			ShanoirEventType.IMPORT_DATASET_EVENT,
-			ShanoirEventType.COPY_DATASET_EVENT,
-			ShanoirEventType.EXECUTION_MONITORING_EVENT,
-			ShanoirEventType.CHECK_QUALITY_EVENT,
-			ShanoirEventType.SOLR_INDEX_ALL_EVENT,
-			ShanoirEventType.DOWNLOAD_STATISTICS_EVENT,
-			ShanoirEventType.DELETE_EXAMINATION_EVENT,
-			ShanoirEventType.DELETE_DATASET_EVENT);
- 		// Order by last update date
-		Comparator<ShanoirEventLight> comparator = new Comparator<ShanoirEventLight>() {
-			@Override
-			public int compare(ShanoirEventLight event1, ShanoirEventLight event2) {
-				return event1.getLastUpdate().before(event2.getLastUpdate()) ? 1 : -1;
-			}
-		};
-		taskList.sort(comparator);
-		return new ResponseEntity<>(taskList, HttpStatus.OK);
-	}
+    @Override
+    public ResponseEntity<List<ShanoirEventLight>> findTasks() {
+        Long userId = KeycloakUtil.getTokenUserId();
+        List<ShanoirEventLight> taskList = taskService.getEventsByUserAndType(
+            userId,
+            ShanoirEventType.IMPORT_DATASET_EVENT,
+            ShanoirEventType.COPY_DATASET_EVENT,
+            ShanoirEventType.EXECUTION_MONITORING_EVENT,
+            ShanoirEventType.CHECK_QUALITY_EVENT,
+            ShanoirEventType.SOLR_INDEX_ALL_EVENT,
+            ShanoirEventType.DOWNLOAD_STATISTICS_EVENT,
+            ShanoirEventType.DELETE_EXAMINATION_EVENT,
+            ShanoirEventType.DELETE_DATASET_EVENT);
+         // Order by last update date
+        Comparator<ShanoirEventLight> comparator = new Comparator<ShanoirEventLight>() {
+            @Override
+            public int compare(ShanoirEventLight event1, ShanoirEventLight event2) {
+                return event1.getLastUpdate().before(event2.getLastUpdate()) ? 1 : -1;
+            }
+        };
+        taskList.sort(comparator);
+        return new ResponseEntity<>(taskList, HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<ShanoirEvent> getTaskDetails(
-			@Parameter(name = "id of the task", required = true) @PathVariable("taskId") Long taskId) {
-		ShanoirEvent event = taskService.findById(taskId);
-		if (event == null) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		} else {
-			return new ResponseEntity<>(event, HttpStatus.OK);
-		}
-	}
+    @Override
+    public ResponseEntity<ShanoirEvent> getTaskDetails(
+            @Parameter(name = "id of the task", required = true) @PathVariable("taskId") Long taskId) {
+        ShanoirEvent event = taskService.findById(taskId);
+        if (event == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<>(event, HttpStatus.OK);
+        }
+    }
 
-	@Override
+    @Override
     public ResponseEntity<SseEmitter> updateTasks() throws IOException {
-	long userId = KeycloakUtil.getTokenUserId();
+    long userId = KeycloakUtil.getTokenUserId();
         UserSseEmitter emitter = new UserSseEmitter(userId);
         emitters.add(emitter);
         emitter.onCompletion(() -> emitters.remove(emitter));

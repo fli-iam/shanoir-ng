@@ -27,37 +27,37 @@ import jakarta.persistence.ManyToOne;
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
 public class UserPersonalCommentSubject extends HalEntity {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 153755891423362269L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = 153755891423362269L;
 
-	/** The subject. */
-	@ManyToOne
-	private Subject subject;
+    /** The subject. */
+    @ManyToOne
+    private Subject subject;
 
-	/** The comment. */
-	private String comment;
+    /** The comment. */
+    private String comment;
 
-	/** The user. */
-//	@ManyToOne
-//	@JoinColumn(name = "user")
-//	private User user;
+    /** The user. */
+//    @ManyToOne
+//    @JoinColumn(name = "user")
+//    private User user;
 
-	public Subject getSubject() {
-		return subject;
-	}
+    public Subject getSubject() {
+        return subject;
+    }
 
-	public void setSubject(Subject subject) {
-		this.subject = subject;
-	}
+    public void setSubject(Subject subject) {
+        this.subject = subject;
+    }
 
-	public String getComment() {
-		return comment;
-	}
+    public String getComment() {
+        return comment;
+    }
 
-	public void setComment(String comment) {
-		this.comment = comment;
-	}
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
 
 }

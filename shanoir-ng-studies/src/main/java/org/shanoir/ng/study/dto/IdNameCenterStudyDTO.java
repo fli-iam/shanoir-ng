@@ -29,54 +29,54 @@ import org.shanoir.ng.tag.model.TagDTO;
  *
  */
 public class IdNameCenterStudyDTO extends IdName {
-	
-	private List<StudyCenterDTO> studyCenterList;
-	
-	private List<TagDTO> tags;
+    
+    private List<StudyCenterDTO> studyCenterList;
+    
+    private List<TagDTO> tags;
 
-	private Profile profile;
+    private Profile profile;
 
-	/**
-	 * Simple constructor.
-	 */
-	public IdNameCenterStudyDTO() {
-	}
+    /**
+     * Simple constructor.
+     */
+    public IdNameCenterStudyDTO() {
+    }
 
-	/**
-	 * Constructor.
-	 */
-	public IdNameCenterStudyDTO(final Long id, final String name) {
-		super(id, name);
-		this.setStudyCenterList(new ArrayList<>());
-	}
+    /**
+     * Constructor.
+     */
+    public IdNameCenterStudyDTO(final Long id, final String name) {
+        super(id, name);
+        this.setStudyCenterList(new ArrayList<>());
+    }
 
-	/**
-	 * @return the studyCenterList
-	 */
-	public List<StudyCenterDTO> getStudyCenterList() {
-		return studyCenterList;
-	}
+    /**
+     * @return the studyCenterList
+     */
+    public List<StudyCenterDTO> getStudyCenterList() {
+        return studyCenterList;
+    }
 
-	/**
-	 * @param studyCenterList the studyCenterList to set
-	 */
-	public void setStudyCenterList(List<StudyCenterDTO> studyCenterList) {
-		this.studyCenterList = studyCenterList;
-	}
+    /**
+     * @param studyCenterList the studyCenterList to set
+     */
+    public void setStudyCenterList(List<StudyCenterDTO> studyCenterList) {
+        this.studyCenterList = studyCenterList;
+    }
 
-	public List<TagDTO> getTags() {
-		return tags;
-	}
+    public List<TagDTO> getTags() {
+        return tags;
+    }
 
-	public void setTags(List<TagDTO> tags) {
-		this.tags = tags;
-	}
+    public void setTags(List<TagDTO> tags) {
+        this.tags = tags;
+    }
 
-	public Profile getProfile() {
-		return profile;
-	}
+    public Profile getProfile() {
+        return profile;
+    }
 
-	public void setProfile(Profile profile) {
-		this.profile = profile;
-	}
+    public void setProfile(Profile profile) {
+        this.profile = profile;
+    }
 }

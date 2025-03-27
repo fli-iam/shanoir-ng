@@ -53,58 +53,58 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @ActiveProfiles("test")
 public class ManufacturerApiControllerTest {
 
-	private static final String REQUEST_PATH = "/manufacturers";
-	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+    private static final String REQUEST_PATH = "/manufacturers";
+    private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
-	@Autowired
-	private MockMvc mvc;
+    @Autowired
+    private MockMvc mvc;
 
-	@MockBean
-	private ManufacturerService manufacturerServiceMock;
-	
-	@MockBean
-	private ManufacturerUniqueConstraintManager uniqueConstraintManager;
+    @MockBean
+    private ManufacturerService manufacturerServiceMock;
+    
+    @MockBean
+    private ManufacturerUniqueConstraintManager uniqueConstraintManager;
 
-	@BeforeEach
-	public void setup() {
-		Manufacturer manuf = new Manufacturer();
-		manuf.setId(1L);
-		given(manufacturerServiceMock.findAll()).willReturn(Arrays.asList(manuf));
-		given(manufacturerServiceMock.findById(1L)).willReturn(Optional.of(manuf));
-		given(manufacturerServiceMock.create(Mockito.mock(Manufacturer.class))).willReturn(manuf);
-		given(uniqueConstraintManager.validate(Mockito.any(Manufacturer.class))).willReturn(new FieldErrorMap());
-	}
+    @BeforeEach
+    public void setup() {
+        Manufacturer manuf = new Manufacturer();
+        manuf.setId(1L);
+        given(manufacturerServiceMock.findAll()).willReturn(Arrays.asList(manuf));
+        given(manufacturerServiceMock.findById(1L)).willReturn(Optional.of(manuf));
+        given(manufacturerServiceMock.create(Mockito.mock(Manufacturer.class))).willReturn(manuf);
+        given(uniqueConstraintManager.validate(Mockito.any(Manufacturer.class))).willReturn(new FieldErrorMap());
+    }
 
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void findManufacturerByIdTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void findManufacturerByIdTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void findManufacturersTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void findManufacturersTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void saveNewManufacturerTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createManufacturer())))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void saveNewManufacturerTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createManufacturer())))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void updateManufacturerTest() throws Exception {
-		Manufacturer manuf = ModelsUtil.createManufacturer();
-		manuf.setId(1L);
-		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(manuf)))
-				.andExpect(status().isNoContent());
-	}
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void updateManufacturerTest() throws Exception {
+        Manufacturer manuf = ModelsUtil.createManufacturer();
+        manuf.setId(1L);
+        mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(manuf)))
+                .andExpect(status().isNoContent());
+    }
 
 }

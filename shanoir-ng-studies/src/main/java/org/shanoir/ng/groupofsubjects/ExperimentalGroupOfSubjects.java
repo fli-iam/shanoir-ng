@@ -39,30 +39,30 @@ import jakarta.validation.constraints.NotNull;
 @JsonIdentityInfo(scope=ExperimentalGroupOfSubjects.class , generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
 public class ExperimentalGroupOfSubjects extends GroupOfSubjects {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -554912356059391766L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = -554912356059391766L;
 
-	/** Study. */
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "study_id")
-	@NotNull
-	private Study study;
+    /** Study. */
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "study_id")
+    @NotNull
+    private Study study;
 
-	/**
-	 * @return the study
-	 */
-	public Study getStudy() {
-		return study;
-	}
+    /**
+     * @return the study
+     */
+    public Study getStudy() {
+        return study;
+    }
 
-	/**
-	 * @param study
-	 *            the study to set
-	 */
-	public void setStudy(Study study) {
-		this.study = study;
-	}
+    /**
+     * @param study
+     *            the study to set
+     */
+    public void setStudy(Study study) {
+        this.study = study;
+    }
 
 }

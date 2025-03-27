@@ -32,22 +32,22 @@ import jakarta.persistence.Query;
 @Component
 public class SubjectRepositoryImpl implements SubjectRepositoryCustom {
 
-	@PersistenceContext
-	private EntityManager em;
+    @PersistenceContext
+    private EntityManager em;
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<Subject> findBy(String fieldName, Object value) {
-		final StringBuilder sqlQuery = new StringBuilder();
-		sqlQuery.append("SELECT s FROM Subject s WHERE s.").append(fieldName).append(" LIKE :value");
-		return em.createQuery(sqlQuery.toString()).setParameter("value", value).getResultList();
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Subject> findBy(String fieldName, Object value) {
+        final StringBuilder sqlQuery = new StringBuilder();
+        sqlQuery.append("SELECT s FROM Subject s WHERE s.").append(fieldName).append(" LIKE :value");
+        return em.createQuery(sqlQuery.toString()).setParameter("value", value).getResultList();
+    }
 
-	@Override
-	public Subject findSubjectWithSubjectStudyById(Long id) {
-		Query q = em.createQuery("SELECT s FROM Subject s LEFT JOIN FETCH s.subjectStudyList where s.id=:id",Subject.class);
-		q.setParameter("id", id);
-		return (Subject) q.getSingleResult();
-	}
+    @Override
+    public Subject findSubjectWithSubjectStudyById(Long id) {
+        Query q = em.createQuery("SELECT s FROM Subject s LEFT JOIN FETCH s.subjectStudyList where s.id=:id",Subject.class);
+        q.setParameter("id", id);
+        return (Subject) q.getSingleResult();
+    }
 
 }

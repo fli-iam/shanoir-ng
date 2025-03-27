@@ -42,56 +42,56 @@ import jakarta.validation.constraints.NotNull;
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 public class GroupOfSubjects extends HalEntity {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -5939672730246920099L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = -5939672730246920099L;
 
-	/** Group name. */
-	@Unique
-	@NotNull
-	private String groupName;
+    /** Group name. */
+    @Unique
+    @NotNull
+    private String groupName;
 
-	/** Relations between the subjects and the experimental group*. */
-	@OneToMany(mappedBy = "groupOfSubjects", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-	private Set<SubjectGroupOfSubjects> subjectGroupOfSubjectsList;
+    /** Relations between the subjects and the experimental group*. */
+    @OneToMany(mappedBy = "groupOfSubjects", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<SubjectGroupOfSubjects> subjectGroupOfSubjectsList;
 
-	/**
-	 * Init HATEOAS links
-	 */
-	@PostLoad
-	public void initLinks() {
-		this.addLink(Links.REL_SELF, "groupofsubjects/" + getId());
-	}
+    /**
+     * Init HATEOAS links
+     */
+    @PostLoad
+    public void initLinks() {
+        this.addLink(Links.REL_SELF, "groupofsubjects/" + getId());
+    }
 
-	/**
-	 * @return the groupName
-	 */
-	public String getGroupName() {
-		return groupName;
-	}
+    /**
+     * @return the groupName
+     */
+    public String getGroupName() {
+        return groupName;
+    }
 
-	/**
-	 * @param groupName
-	 *            the groupName to set
-	 */
-	public void setGroupName(String groupName) {
-		this.groupName = groupName;
-	}
+    /**
+     * @param groupName
+     *            the groupName to set
+     */
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
 
-	/**
-	 * @return the subjectGroupOfSubjectsList
-	 */
-	public Set<SubjectGroupOfSubjects> getSubjectGroupOfSubjectsList() {
-		return subjectGroupOfSubjectsList;
-	}
+    /**
+     * @return the subjectGroupOfSubjectsList
+     */
+    public Set<SubjectGroupOfSubjects> getSubjectGroupOfSubjectsList() {
+        return subjectGroupOfSubjectsList;
+    }
 
-	/**
-	 * @param subjectGroupOfSubjectsList
-	 *            the subjectGroupOfSubjectsList to set
-	 */
-	public void setSubjectGroupOfSubjectsList(Set<SubjectGroupOfSubjects> subjectGroupOfSubjectsList) {
-		this.subjectGroupOfSubjectsList = subjectGroupOfSubjectsList;
-	}
+    /**
+     * @param subjectGroupOfSubjectsList
+     *            the subjectGroupOfSubjectsList to set
+     */
+    public void setSubjectGroupOfSubjectsList(Set<SubjectGroupOfSubjects> subjectGroupOfSubjectsList) {
+        this.subjectGroupOfSubjectsList = subjectGroupOfSubjectsList;
+    }
 
 }

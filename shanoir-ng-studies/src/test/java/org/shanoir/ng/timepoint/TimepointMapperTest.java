@@ -34,31 +34,31 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class TimepointMapperTest {
 
-	private static final Long TIMEPOINT_ID = 1L;
+    private static final Long TIMEPOINT_ID = 1L;
 
-	@Autowired
-	private TimepointMapper timepointMapper;
+    @Autowired
+    private TimepointMapper timepointMapper;
 
-	@Test
-	public void timepointsToTimepointDTOsTest() {
-		final List<TimepointDTO> subjectStudyDTOs = timepointMapper
-				.timepointsToTimepointDTOs(Arrays.asList(createTimepoint()));
-		Assertions.assertNotNull(subjectStudyDTOs);
-		Assertions.assertTrue(subjectStudyDTOs.size() == 1);
-		Assertions.assertTrue(subjectStudyDTOs.get(0).getId().equals(TIMEPOINT_ID));
-	}
+    @Test
+    public void timepointsToTimepointDTOsTest() {
+        final List<TimepointDTO> subjectStudyDTOs = timepointMapper
+                .timepointsToTimepointDTOs(Arrays.asList(createTimepoint()));
+        Assertions.assertNotNull(subjectStudyDTOs);
+        Assertions.assertTrue(subjectStudyDTOs.size() == 1);
+        Assertions.assertTrue(subjectStudyDTOs.get(0).getId().equals(TIMEPOINT_ID));
+    }
 
-	@Test
-	public void timepointToTimepointDTOTest() {
-		final TimepointDTO timepointDTO = timepointMapper.timepointToTimepointDTO(createTimepoint());
-		Assertions.assertNotNull(timepointDTO);
-		Assertions.assertTrue(timepointDTO.getId().equals(TIMEPOINT_ID));
-	}
+    @Test
+    public void timepointToTimepointDTOTest() {
+        final TimepointDTO timepointDTO = timepointMapper.timepointToTimepointDTO(createTimepoint());
+        Assertions.assertNotNull(timepointDTO);
+        Assertions.assertTrue(timepointDTO.getId().equals(TIMEPOINT_ID));
+    }
 
-	private Timepoint createTimepoint() {
-		final Timepoint timepoint = new Timepoint();
-		timepoint.setId(TIMEPOINT_ID);
-		return timepoint;
-	}
+    private Timepoint createTimepoint() {
+        final Timepoint timepoint = new Timepoint();
+        timepoint.setId(TIMEPOINT_ID);
+        return timepoint;
+    }
 
 }

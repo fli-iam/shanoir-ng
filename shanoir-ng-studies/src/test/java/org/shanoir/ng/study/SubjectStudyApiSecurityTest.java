@@ -54,106 +54,106 @@ import org.springframework.validation.BindingResult;
 @ActiveProfiles("test")
 public class SubjectStudyApiSecurityTest {
 
-	private static final long LOGGED_USER_ID = 2L;
-	private static final String LOGGED_USER_USERNAME = "logged";
-	private static final long ENTITY_ID = 1L;
-	
-	@Autowired
-	private SubjectStudyApi api;
-	
-	@MockBean
-	private StudyRepository repository;
-	
-	@Test
-	@WithAnonymousUser
-	public void testAsAnonymous() throws ShanoirException, RestServiceException {
-		given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_ADMINISTRATE)));
-		SubjectStudy subjectStudy = buildSubjectStudyMock(ENTITY_ID, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_ADMINISTRATE);
-		BindingResult bindingResult = new BeanPropertyBindingResult(subjectStudy, "subjectStudy");
-		assertAccessDenied(api::updateSubjectStudy, ENTITY_ID, subjectStudy, bindingResult);
-	}
-	
-	@Test
-	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
-	public void testAsUnauthorizedUser() throws ShanoirException, RestServiceException {
-		given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_SEE_ALL)));
-		SubjectStudy subjectStudy = buildSubjectStudyMock(ENTITY_ID);
-		BindingResult bindingResult = new BeanPropertyBindingResult(subjectStudy, "subjectStudy");
-		assertAccessDenied(api::updateSubjectStudy, ENTITY_ID, subjectStudy, bindingResult);
-	}
-	
-	@Test
-	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
-	public void testAsAuthorizedUser() throws ShanoirException, RestServiceException {
-		given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L, StudyUserRight.CAN_IMPORT)));
-		SubjectStudy subjectStudy = buildSubjectStudyMock(ENTITY_ID, StudyUserRight.CAN_IMPORT);
-		BindingResult bindingResult = new BeanPropertyBindingResult(subjectStudy, "subjectStudy");
-		assertAccessAuthorized(api::updateSubjectStudy, ENTITY_ID, subjectStudy, bindingResult);
-	}
-	
-	@Test
-	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
-	public void testAsUnauthorizedExpert() throws ShanoirException, RestServiceException {
-		given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L)));
-		SubjectStudy subjectStudy = buildSubjectStudyMock(ENTITY_ID);
-		BindingResult bindingResult = new BeanPropertyBindingResult(subjectStudy, "subjectStudy");
-		assertAccessDenied(api::updateSubjectStudy, ENTITY_ID, subjectStudy, bindingResult);
-	}
-	
-	@Test
-	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
-	public void testAsAuthorizedExpert() throws ShanoirException, RestServiceException {
-		given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L, StudyUserRight.CAN_ADMINISTRATE)));
-		SubjectStudy subjectStudy = buildSubjectStudyMock(ENTITY_ID, StudyUserRight.CAN_ADMINISTRATE);
-		BindingResult bindingResult = new BeanPropertyBindingResult(subjectStudy, "subjectStudy");
-		assertAccessAuthorized(api::updateSubjectStudy, ENTITY_ID, subjectStudy, bindingResult);
-	}
-	
-	@Test
-	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
-	public void testAsUnauthorizedAdmin() throws ShanoirException, RestServiceException {
-		SubjectStudy subjectStudy = buildSubjectStudyMock(ENTITY_ID);
-		BindingResult bindingResult = new BeanPropertyBindingResult(subjectStudy, "subjectStudy");
-		assertAccessAuthorized(api::updateSubjectStudy, ENTITY_ID, subjectStudy, bindingResult);
-	}
-	
-	@Test
-	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
-	public void testAsAuthorizedAdmin() throws ShanoirException, RestServiceException {
-		SubjectStudy subjectStudy = buildSubjectStudyMock(ENTITY_ID, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_SEE_ALL);
-		BindingResult bindingResult = new BeanPropertyBindingResult(subjectStudy, "subjectStudy");
-		assertAccessAuthorized(api::updateSubjectStudy, ENTITY_ID, subjectStudy, bindingResult);
-	}
-	
-	
+    private static final long LOGGED_USER_ID = 2L;
+    private static final String LOGGED_USER_USERNAME = "logged";
+    private static final long ENTITY_ID = 1L;
+    
+    @Autowired
+    private SubjectStudyApi api;
+    
+    @MockBean
+    private StudyRepository repository;
+    
+    @Test
+    @WithAnonymousUser
+    public void testAsAnonymous() throws ShanoirException, RestServiceException {
+        given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_ADMINISTRATE)));
+        SubjectStudy subjectStudy = buildSubjectStudyMock(ENTITY_ID, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_ADMINISTRATE);
+        BindingResult bindingResult = new BeanPropertyBindingResult(subjectStudy, "subjectStudy");
+        assertAccessDenied(api::updateSubjectStudy, ENTITY_ID, subjectStudy, bindingResult);
+    }
+    
+    @Test
+    @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
+    public void testAsUnauthorizedUser() throws ShanoirException, RestServiceException {
+        given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_SEE_ALL)));
+        SubjectStudy subjectStudy = buildSubjectStudyMock(ENTITY_ID);
+        BindingResult bindingResult = new BeanPropertyBindingResult(subjectStudy, "subjectStudy");
+        assertAccessDenied(api::updateSubjectStudy, ENTITY_ID, subjectStudy, bindingResult);
+    }
+    
+    @Test
+    @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
+    public void testAsAuthorizedUser() throws ShanoirException, RestServiceException {
+        given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L, StudyUserRight.CAN_IMPORT)));
+        SubjectStudy subjectStudy = buildSubjectStudyMock(ENTITY_ID, StudyUserRight.CAN_IMPORT);
+        BindingResult bindingResult = new BeanPropertyBindingResult(subjectStudy, "subjectStudy");
+        assertAccessAuthorized(api::updateSubjectStudy, ENTITY_ID, subjectStudy, bindingResult);
+    }
+    
+    @Test
+    @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
+    public void testAsUnauthorizedExpert() throws ShanoirException, RestServiceException {
+        given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L)));
+        SubjectStudy subjectStudy = buildSubjectStudyMock(ENTITY_ID);
+        BindingResult bindingResult = new BeanPropertyBindingResult(subjectStudy, "subjectStudy");
+        assertAccessDenied(api::updateSubjectStudy, ENTITY_ID, subjectStudy, bindingResult);
+    }
+    
+    @Test
+    @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
+    public void testAsAuthorizedExpert() throws ShanoirException, RestServiceException {
+        given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L, StudyUserRight.CAN_ADMINISTRATE)));
+        SubjectStudy subjectStudy = buildSubjectStudyMock(ENTITY_ID, StudyUserRight.CAN_ADMINISTRATE);
+        BindingResult bindingResult = new BeanPropertyBindingResult(subjectStudy, "subjectStudy");
+        assertAccessAuthorized(api::updateSubjectStudy, ENTITY_ID, subjectStudy, bindingResult);
+    }
+    
+    @Test
+    @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
+    public void testAsUnauthorizedAdmin() throws ShanoirException, RestServiceException {
+        SubjectStudy subjectStudy = buildSubjectStudyMock(ENTITY_ID);
+        BindingResult bindingResult = new BeanPropertyBindingResult(subjectStudy, "subjectStudy");
+        assertAccessAuthorized(api::updateSubjectStudy, ENTITY_ID, subjectStudy, bindingResult);
+    }
+    
+    @Test
+    @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
+    public void testAsAuthorizedAdmin() throws ShanoirException, RestServiceException {
+        SubjectStudy subjectStudy = buildSubjectStudyMock(ENTITY_ID, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_SEE_ALL);
+        BindingResult bindingResult = new BeanPropertyBindingResult(subjectStudy, "subjectStudy");
+        assertAccessAuthorized(api::updateSubjectStudy, ENTITY_ID, subjectStudy, bindingResult);
+    }
+    
+    
 
-	private SubjectStudy buildSubjectStudyMock(Long id, StudyUserRight... rights) {
-		Study study = buildStudyMock(1L, rights);
+    private SubjectStudy buildSubjectStudyMock(Long id, StudyUserRight... rights) {
+        Study study = buildStudyMock(1L, rights);
 
-		Subject subject = ModelsUtil.createSubject();
-		subject.setId(1L);
-		
-		SubjectStudy subjectStudy = new SubjectStudy();
-		subjectStudy.setId(id);
-		subjectStudy.setStudy(study);
-		subjectStudy.setSubject(subject);
-		
-		return subjectStudy;
-	}
-	
-	private Study buildStudyMock(Long id, StudyUserRight... rights) {
-		Study study = ModelsUtil.createStudy();
-		study.setId(id);
-		List<StudyUser> studyUserList = new ArrayList<>();
-		for (StudyUserRight right : rights) {
-			StudyUser studyUser = new StudyUser();
-			studyUser.setUserId(LOGGED_USER_ID);
-			studyUser.setStudy(study);
-			studyUser.setStudyUserRights(Arrays.asList(right));
-			studyUserList.add(studyUser);
-		}
-		study.setStudyUserList(studyUserList);
-		return study;
-	}
+        Subject subject = ModelsUtil.createSubject();
+        subject.setId(1L);
+        
+        SubjectStudy subjectStudy = new SubjectStudy();
+        subjectStudy.setId(id);
+        subjectStudy.setStudy(study);
+        subjectStudy.setSubject(subject);
+        
+        return subjectStudy;
+    }
+    
+    private Study buildStudyMock(Long id, StudyUserRight... rights) {
+        Study study = ModelsUtil.createStudy();
+        study.setId(id);
+        List<StudyUser> studyUserList = new ArrayList<>();
+        for (StudyUserRight right : rights) {
+            StudyUser studyUser = new StudyUser();
+            studyUser.setUserId(LOGGED_USER_ID);
+            studyUser.setStudy(study);
+            studyUser.setStudyUserRights(Arrays.asList(right));
+            studyUserList.add(studyUser);
+        }
+        study.setStudyUserList(studyUserList);
+        return study;
+    }
 
 }

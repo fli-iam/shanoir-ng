@@ -49,183 +49,183 @@ import jakarta.validation.constraints.NotBlank;
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
 public class StudyUser extends AbstractEntity implements StudyUserInterface {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 5813071870148636187L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = 5813071870148636187L;
 
-	/** Inform an user about changes on study_user: creation */
-	private boolean receiveStudyUserReport;
+    /** Inform an user about changes on study_user: creation */
+    private boolean receiveStudyUserReport;
 
-	/** Advice the user when new import done in the study. */
-	private boolean receiveNewImportReport;
-	
-	/**
-	 * With the introduction of a Data User Agreement form, a study
-	 * responsible can add an user to a study, but his StudyUser is
-	 * not confirmed as long, as the user has not validated the DUA.
-	 * The default is true, in case no DUA is existing.
-	 */
-	private boolean confirmed = true;
+    /** Advice the user when new import done in the study. */
+    private boolean receiveNewImportReport;
+    
+    /**
+     * With the introduction of a Data User Agreement form, a study
+     * responsible can add an user to a study, but his StudyUser is
+     * not confirmed as long, as the user has not validated the DUA.
+     * The default is true, in case no DUA is existing.
+     */
+    private boolean confirmed = true;
 
-	/** Study id. */
-	@ManyToOne
-	@JsonIgnore
-	private Study study;
-		
-	/** User id. */
-	private Long userId;
+    /** Study id. */
+    @ManyToOne
+    @JsonIgnore
+    private Study study;
+        
+    /** User id. */
+    private Long userId;
 
-	/** Type of the relationship. */
-	@ElementCollection(fetch = FetchType.EAGER)
-	@Fetch(FetchMode.JOIN)
-	@CollectionTable(name="study_user_study_user_rights", joinColumns=@JoinColumn(name="study_user_id"))
-	private List<Integer> studyUserRights;
-	
-	/** User name. Duplicate: master record in ms users. */
-	@NotBlank
-	private String userName;
+    /** Type of the relationship. */
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Fetch(FetchMode.JOIN)
+    @CollectionTable(name="study_user_study_user_rights", joinColumns=@JoinColumn(name="study_user_id"))
+    private List<Integer> studyUserRights;
+    
+    /** User name. Duplicate: master record in ms users. */
+    @NotBlank
+    private String userName;
 
-	@ManyToMany(fetch = FetchType.EAGER)
-	@Fetch(FetchMode.JOIN)
-	@JoinTable(name = "study_user_center", joinColumns = @JoinColumn(name = "study_user_id"), inverseJoinColumns = @JoinColumn(name = "center_id"))
-	private List<Center> centers;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @Fetch(FetchMode.JOIN)
+    @JoinTable(name = "study_user_center", joinColumns = @JoinColumn(name = "study_user_id"), inverseJoinColumns = @JoinColumn(name = "center_id"))
+    private List<Center> centers;
 
-	/**
-	 * @return the receiveStudyUserReport
-	 */
-	@Override
-	public boolean isReceiveStudyUserReport() {
-		return receiveStudyUserReport;
-	}
+    /**
+     * @return the receiveStudyUserReport
+     */
+    @Override
+    public boolean isReceiveStudyUserReport() {
+        return receiveStudyUserReport;
+    }
 
-	/**
-	 * @param receiveStudyUserReport
-	 *            the receiveStudyUserReport to set
-	 */
-	@Override
-	public void setReceiveStudyUserReport(boolean receiveStudyUserReport) {
-		this.receiveStudyUserReport = receiveStudyUserReport;
-	}
+    /**
+     * @param receiveStudyUserReport
+     *            the receiveStudyUserReport to set
+     */
+    @Override
+    public void setReceiveStudyUserReport(boolean receiveStudyUserReport) {
+        this.receiveStudyUserReport = receiveStudyUserReport;
+    }
 
-	/**
-	 * @return the receiveNewImportReport
-	 */
-	@Override
-	public boolean isReceiveNewImportReport() {
-		return receiveNewImportReport;
-	}
+    /**
+     * @return the receiveNewImportReport
+     */
+    @Override
+    public boolean isReceiveNewImportReport() {
+        return receiveNewImportReport;
+    }
 
-	/**
-	 * @param receiveNewImportReport
-	 *            the receiveNewImportReport to set
-	 */
-	@Override
-	public void setReceiveNewImportReport(boolean receiveNewImportReport) {
-		this.receiveNewImportReport = receiveNewImportReport;
-	}
+    /**
+     * @param receiveNewImportReport
+     *            the receiveNewImportReport to set
+     */
+    @Override
+    public void setReceiveNewImportReport(boolean receiveNewImportReport) {
+        this.receiveNewImportReport = receiveNewImportReport;
+    }
 
-	public boolean isConfirmed() {
-		return confirmed;
-	}
+    public boolean isConfirmed() {
+        return confirmed;
+    }
 
-	public void setConfirmed(boolean confirmed) {
-		this.confirmed = confirmed;
-	}
+    public void setConfirmed(boolean confirmed) {
+        this.confirmed = confirmed;
+    }
 
-	/**
-	 * @return the studyId
-	 */
-	@Override
-	@JsonInclude
-	@Transient
-	public Long getStudyId() {
-		return study.getId();
-	}
+    /**
+     * @return the studyId
+     */
+    @Override
+    @JsonInclude
+    @Transient
+    public Long getStudyId() {
+        return study.getId();
+    }
 
-	public Study getStudy() {
-		return study;
-	}
+    public Study getStudy() {
+        return study;
+    }
 
-	public void setStudy(Study study) {
-		this.study = study;
-	}
+    public void setStudy(Study study) {
+        this.study = study;
+    }
 
-	/**
-	 * @return the studyUserRight
-	 */
-	@Override
-	public List<StudyUserRight> getStudyUserRights() {
-		List<StudyUserRight> list = new ArrayList<>();
-		for (Integer id : studyUserRights) {
-			list.add(StudyUserRight.getType(id));
-		}
-		return list;
-	}
+    /**
+     * @return the studyUserRight
+     */
+    @Override
+    public List<StudyUserRight> getStudyUserRights() {
+        List<StudyUserRight> list = new ArrayList<>();
+        for (Integer id : studyUserRights) {
+            list.add(StudyUserRight.getType(id));
+        }
+        return list;
+    }
 
-	/**
-	 * @param studyUserRight the studyUserRight to set
-	 */
-	@Override
-	public void setStudyUserRights(List<StudyUserRight> studyUserRights) {
-		this.studyUserRights = new ArrayList<>();
-		if (studyUserRights != null) {
-			for (StudyUserRight sur : studyUserRights)  {
-				this.studyUserRights.add(sur.getId());
-			}
-		}
-	}
+    /**
+     * @param studyUserRight the studyUserRight to set
+     */
+    @Override
+    public void setStudyUserRights(List<StudyUserRight> studyUserRights) {
+        this.studyUserRights = new ArrayList<>();
+        if (studyUserRights != null) {
+            for (StudyUserRight sur : studyUserRights)  {
+                this.studyUserRights.add(sur.getId());
+            }
+        }
+    }
 
-	/**
-	 * @return the userId
-	 */
-	@Override
-	public Long getUserId() {
-		return userId;
-	}
+    /**
+     * @return the userId
+     */
+    @Override
+    public Long getUserId() {
+        return userId;
+    }
 
-	/**
-	 * @param userId
-	 *            the userId to set
-	 */
-	@Override
-	public void setUserId(Long userId) {
-		this.userId = userId;
-	}
+    /**
+     * @param userId
+     *            the userId to set
+     */
+    @Override
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
-	@Override
-	public String getUserName() {
-		return userName;
-	}
+    @Override
+    public String getUserName() {
+        return userName;
+    }
 
-	@Override
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
+    @Override
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
 
-	@JsonIgnore
-	public List<Center> getCenters() {
-		return centers;
-	}
+    @JsonIgnore
+    public List<Center> getCenters() {
+        return centers;
+    }
 
-	public List<Long> getCenterIds() {
-		if (CollectionUtils.isEmpty(this.centers)) {
-			return Collections.emptyList();
-		}
-		return centers.stream().map(center -> center.getId()).collect(Collectors.toList());
-	}
+    public List<Long> getCenterIds() {
+        if (CollectionUtils.isEmpty(this.centers)) {
+            return Collections.emptyList();
+        }
+        return centers.stream().map(center -> center.getId()).collect(Collectors.toList());
+    }
 
-	@JsonIgnore
-	public void setCenters(List<Center> centers) {
-		this.centers = centers;
-	}
-	
-	public void setCenterIds(List<Long> ids) {
-		centers = ids.stream().map(id -> {
-			Center center = new Center();
-			center.setId(id);
-			return center;
-		}).collect(Collectors.toList());
-	}
+    @JsonIgnore
+    public void setCenters(List<Center> centers) {
+        this.centers = centers;
+    }
+    
+    public void setCenterIds(List<Long> ids) {
+        centers = ids.stream().map(id -> {
+            Center center = new Center();
+            center.setId(id);
+            return center;
+        }).collect(Collectors.toList());
+    }
 
 }

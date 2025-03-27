@@ -41,21 +41,21 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "subjectStudy")
 @RequestMapping("/subjectStudy")
 public interface SubjectStudyApi {
-	
-	@Operation(summary = "", description = "Updates subject study")
-	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "subject study updated"),
-			@ApiResponse(responseCode = "401", description = "unauthorized"),
-			@ApiResponse(responseCode = "403", description = "forbidden"),
-			@ApiResponse(responseCode = "422", description = "bad parameters"),
-			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@PutMapping(value = "/{subjectStudyId}", produces = { "application/json" }, consumes = {
-			"application/json" })
-	@PreAuthorize("(hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER')"
-			+ "  and (@studySecurityService.hasRightOnStudy(#subjectStudy.getStudy(), 'CAN_IMPORT')"
-			+ " or @studySecurityService.hasRightOnStudy(#subjectStudy.getStudy(), 'CAN_ADMINISTRATE') )"
-			+ "  )) and @controlerSecurityService.idMatches(#subjectStudyId, #subjectStudy)")
-	ResponseEntity<Void> updateSubjectStudy(
-			@Parameter(description = "id of the subject study", required = true) @PathVariable("subjectStudyId") Long subjectStudyId,
-			@Parameter(description = "subject study to update", required = true) @RequestBody SubjectStudy subjectStudy,
-			final BindingResult result) throws RestServiceException;
+    
+    @Operation(summary = "", description = "Updates subject study")
+    @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "subject study updated"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "422", description = "bad parameters"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @PutMapping(value = "/{subjectStudyId}", produces = { "application/json" }, consumes = {
+            "application/json" })
+    @PreAuthorize("(hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER')"
+            + "  and (@studySecurityService.hasRightOnStudy(#subjectStudy.getStudy(), 'CAN_IMPORT')"
+            + " or @studySecurityService.hasRightOnStudy(#subjectStudy.getStudy(), 'CAN_ADMINISTRATE') )"
+            + "  )) and @controlerSecurityService.idMatches(#subjectStudyId, #subjectStudy)")
+    ResponseEntity<Void> updateSubjectStudy(
+            @Parameter(description = "id of the subject study", required = true) @PathVariable("subjectStudyId") Long subjectStudyId,
+            @Parameter(description = "subject study to update", required = true) @RequestBody SubjectStudy subjectStudy,
+            final BindingResult result) throws RestServiceException;
 }

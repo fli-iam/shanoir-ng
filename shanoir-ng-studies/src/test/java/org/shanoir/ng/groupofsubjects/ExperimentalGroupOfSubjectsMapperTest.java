@@ -36,32 +36,32 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class ExperimentalGroupOfSubjectsMapperTest {
 
-	private static final Long GROUP_OD_SUBJECTS_ID = 1L;
+    private static final Long GROUP_OD_SUBJECTS_ID = 1L;
 
-	@Autowired
-	private ExperimentalGroupOfSubjectsMapper experimentalGroupOfSubjectsMapper;
+    @Autowired
+    private ExperimentalGroupOfSubjectsMapper experimentalGroupOfSubjectsMapper;
 
-	@Test
-	public void experimentalGroupOfSubjectsToIdNameDTOsTest() {
-		final List<IdName> subjectStudyDTOs = experimentalGroupOfSubjectsMapper
-				.experimentalGroupOfSubjectsToIdNameDTOs(Arrays.asList(createExperimentalGroupOfSubjects()));
-		Assertions.assertNotNull(subjectStudyDTOs);
-		Assertions.assertTrue(subjectStudyDTOs.size() == 1);
-		Assertions.assertTrue(subjectStudyDTOs.get(0).getId().equals(GROUP_OD_SUBJECTS_ID));
-	}
+    @Test
+    public void experimentalGroupOfSubjectsToIdNameDTOsTest() {
+        final List<IdName> subjectStudyDTOs = experimentalGroupOfSubjectsMapper
+                .experimentalGroupOfSubjectsToIdNameDTOs(Arrays.asList(createExperimentalGroupOfSubjects()));
+        Assertions.assertNotNull(subjectStudyDTOs);
+        Assertions.assertTrue(subjectStudyDTOs.size() == 1);
+        Assertions.assertTrue(subjectStudyDTOs.get(0).getId().equals(GROUP_OD_SUBJECTS_ID));
+    }
 
-	@Test
-	public void experimentalGroupOfSubjectsToIdNameDTOTest() {
-		final IdName subjectStudyDTO = experimentalGroupOfSubjectsMapper
-				.experimentalGroupOfSubjectsToIdNameDTO(createExperimentalGroupOfSubjects());
-		Assertions.assertNotNull(subjectStudyDTO);
-		Assertions.assertTrue(subjectStudyDTO.getId().equals(GROUP_OD_SUBJECTS_ID));
-	}
+    @Test
+    public void experimentalGroupOfSubjectsToIdNameDTOTest() {
+        final IdName subjectStudyDTO = experimentalGroupOfSubjectsMapper
+                .experimentalGroupOfSubjectsToIdNameDTO(createExperimentalGroupOfSubjects());
+        Assertions.assertNotNull(subjectStudyDTO);
+        Assertions.assertTrue(subjectStudyDTO.getId().equals(GROUP_OD_SUBJECTS_ID));
+    }
 
-	private ExperimentalGroupOfSubjects createExperimentalGroupOfSubjects() {
-		final ExperimentalGroupOfSubjects groupOfSubjects = new ExperimentalGroupOfSubjects();
-		groupOfSubjects.setId(GROUP_OD_SUBJECTS_ID);
-		return groupOfSubjects;
-	}
+    private ExperimentalGroupOfSubjects createExperimentalGroupOfSubjects() {
+        final ExperimentalGroupOfSubjects groupOfSubjects = new ExperimentalGroupOfSubjects();
+        groupOfSubjects.setId(GROUP_OD_SUBJECTS_ID);
+        return groupOfSubjects;
+    }
 
 }

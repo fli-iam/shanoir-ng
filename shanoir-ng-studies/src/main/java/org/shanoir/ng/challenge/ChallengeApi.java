@@ -17,14 +17,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/challenges")
 public interface ChallengeApi {
 
-	
-	@Operation(summary = "", description = "Returns id and name for all available challenges")
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "found challenges"),
-			@ApiResponse(responseCode = "204", description = "no challenges found"),
-			@ApiResponse(responseCode = "401", description = "unauthorized"),
-			@ApiResponse(responseCode = "403", description = "forbidden"),
-			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
-	ResponseEntity<List<IdName>> findChallenges() throws RestServiceException;
+    
+    @Operation(summary = "", description = "Returns id and name for all available challenges")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "found challenges"),
+            @ApiResponse(responseCode = "204", description = "no challenges found"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
+    ResponseEntity<List<IdName>> findChallenges() throws RestServiceException;
 }

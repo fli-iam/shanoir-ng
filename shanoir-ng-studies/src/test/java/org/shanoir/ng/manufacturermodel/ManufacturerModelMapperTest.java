@@ -35,22 +35,22 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class ManufacturerModelMapperTest {
 
-	private static final String MANUFACTURER_MODEL_NAME = "test";
+    private static final String MANUFACTURER_MODEL_NAME = "test";
 
-	@Autowired
-	private ManufacturerModelMapper manufacturerModelMapper;
+    @Autowired
+    private ManufacturerModelMapper manufacturerModelMapper;
 
-	@Test
-	public void centersToCenterDTOsTest() {
-		final ManufacturerModelDTO manufacturerModelDTO = manufacturerModelMapper.manufacturerModelToManufacturerModelDTO(createManufacturerModel());
-		Assertions.assertNotNull(manufacturerModelDTO);
-		Assertions.assertTrue(manufacturerModelDTO.getName().equals(MANUFACTURER_MODEL_NAME));
-	}
+    @Test
+    public void centersToCenterDTOsTest() {
+        final ManufacturerModelDTO manufacturerModelDTO = manufacturerModelMapper.manufacturerModelToManufacturerModelDTO(createManufacturerModel());
+        Assertions.assertNotNull(manufacturerModelDTO);
+        Assertions.assertTrue(manufacturerModelDTO.getName().equals(MANUFACTURER_MODEL_NAME));
+    }
 
-	private ManufacturerModel createManufacturerModel() {
-		final ManufacturerModel center = new ManufacturerModel();
-		center.setName(MANUFACTURER_MODEL_NAME);
-		return center;
-	}
+    private ManufacturerModel createManufacturerModel() {
+        final ManufacturerModel center = new ManufacturerModel();
+        center.setName(MANUFACTURER_MODEL_NAME);
+        return center;
+    }
 
 }

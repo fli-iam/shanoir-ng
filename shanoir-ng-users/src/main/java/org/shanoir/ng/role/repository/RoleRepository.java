@@ -26,13 +26,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RoleRepository extends CrudRepository<Role, Long>, RoleRepositoryCustom {
 
-	/**
-	 * Find role by its name.
-	 *
-	 * @param name
-	 *            name.
-	 * @return a role or null/
-	 */
-	Role findByName(String name);
+    /**
+     * Find role by its name.
+     *
+     * @param name
+     *            name.
+     * @return a role or null/
+     */
+    Role findByName(String name);
 
 }

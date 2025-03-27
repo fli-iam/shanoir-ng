@@ -39,45 +39,45 @@ import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class SubjectStudyApiController implements SubjectStudyApi {
-	
-	@Autowired
-	private SubjectStudyService subjectStudyService;
+    
+    @Autowired
+    private SubjectStudyService subjectStudyService;
 
-	@Autowired
-	private SubjectService subjectService;
+    @Autowired
+    private SubjectService subjectService;
 
-	@Autowired
-	private SubjectMapper subjectMapper;
+    @Autowired
+    private SubjectMapper subjectMapper;
 
-	private static final Logger LOG = LoggerFactory.getLogger(SubjectStudyApiController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SubjectStudyApiController.class);
 
-	@Override
-	public ResponseEntity<Void> updateSubjectStudy(
-			@Parameter(description = "id of the subject study", required = true) @PathVariable("subjectStudyId") Long subjectStudyId,
-			@Parameter(description = "subject study to update", required = true) @RequestBody SubjectStudy subjectStudy,
-			final BindingResult result) throws RestServiceException {
+    @Override
+    public ResponseEntity<Void> updateSubjectStudy(
+            @Parameter(description = "id of the subject study", required = true) @PathVariable("subjectStudyId") Long subjectStudyId,
+            @Parameter(description = "subject study to update", required = true) @RequestBody SubjectStudy subjectStudy,
+            final BindingResult result) throws RestServiceException {
 
-		final FieldErrorMap errors = new FieldErrorMap(result);
-		if (!errors.isEmpty()) {
-			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
-			throw new RestServiceException(error);
-		}
+        final FieldErrorMap errors = new FieldErrorMap(result);
+        if (!errors.isEmpty()) {
+            ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
+            throw new RestServiceException(error);
+        }
 
-		try {
-			subjectStudyService.update(subjectStudy);
+        try {
+            subjectStudyService.update(subjectStudy);
 
-			Subject subject = subjectService.findById(subjectStudy.getSubject().getId());
-			
-			// Update datasets side
-			subjectService.updateSubjectName(subjectMapper.subjectToSubjectDTO(subject));
-			
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		} catch (MicroServiceCommunicationException e) {
-			LOG.error("Could not save subject study to dataset microservice", e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
+            Subject subject = subjectService.findById(subjectStudy.getSubject().getId());
+            
+            // Update datasets side
+            subjectService.updateSubjectName(subjectMapper.subjectToSubjectDTO(subject));
+            
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (MicroServiceCommunicationException e) {
+            LOG.error("Could not save subject study to dataset microservice", e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

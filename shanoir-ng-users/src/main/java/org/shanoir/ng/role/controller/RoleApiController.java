@@ -26,17 +26,17 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class RoleApiController implements RoleApi {
 
-	@Autowired
-	private RoleService roleService;
+    @Autowired
+    private RoleService roleService;
 
-	@Override
-	public ResponseEntity<List<Role>> findRoles() {
-		List<Role> roles = roleService.findAll();
-		if (roles.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} else {
-			return new ResponseEntity<>(roles, HttpStatus.OK);
-		}
-	}
+    @Override
+    public ResponseEntity<List<Role>> findRoles() {
+        List<Role> roles = roleService.findAll();
+        if (roles.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(roles, HttpStatus.OK);
+        }
+    }
 
 }
