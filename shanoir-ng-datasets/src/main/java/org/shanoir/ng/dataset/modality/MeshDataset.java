@@ -28,20 +28,20 @@ import jakarta.persistence.Entity;
 @Entity
 public class MeshDataset extends Dataset {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 5177847059488327065L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = 5177847059488327065L;
 
-	public MeshDataset() { }
+    public MeshDataset() { }
 
-	public MeshDataset(Dataset other) {
-		super(other);
-	}
+    public MeshDataset(Dataset other) {
+        super(other);
+    }
 
-	@Override
-	public DatasetType getType() {
-		return DatasetType.Mesh;
-	}
+    @Override
+    public DatasetType getType() {
+        return DatasetType.Mesh;
+    }
 
 }

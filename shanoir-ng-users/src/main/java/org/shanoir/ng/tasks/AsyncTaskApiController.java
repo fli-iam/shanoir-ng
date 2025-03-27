@@ -30,9 +30,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 public class AsyncTaskApiController implements AsyncTaskApi {
 
     @Autowired
-    ShanoirEventsService taskService;
+    private ShanoirEventsService taskService;
 
-    public static final List<UserSseEmitter> emitters = Collections.synchronizedList(new ArrayList<>());
+    public static final List<UserSseEmitter> EMITTERS = Collections.synchronizedList(new ArrayList<>());
 
     @Override
     public ResponseEntity<List<ShanoirEventLight>> findTasks() {
@@ -48,7 +48,7 @@ public class AsyncTaskApiController implements AsyncTaskApi {
             ShanoirEventType.DELETE_EXAMINATION_EVENT,
             ShanoirEventType.DELETE_DATASET_EVENT);
          // Order by last update date
-        Comparator<ShanoirEventLight> comparator = new Comparator<ShanoirEventLight>() {
+        Comparator<ShanoirEventLight> comparator = new Comparator<>() {
             @Override
             public int compare(ShanoirEventLight event1, ShanoirEventLight event2) {
                 return event1.getLastUpdate().before(event2.getLastUpdate()) ? 1 : -1;
@@ -73,8 +73,8 @@ public class AsyncTaskApiController implements AsyncTaskApi {
     public ResponseEntity<SseEmitter> updateTasks() throws IOException {
     long userId = KeycloakUtil.getTokenUserId();
         UserSseEmitter emitter = new UserSseEmitter(userId);
-        emitters.add(emitter);
-        emitter.onCompletion(() -> emitters.remove(emitter));
-        return new ResponseEntity<>(emitter,HttpStatus.OK);
+        EMITTERS.add(emitter);
+        emitter.onCompletion(() -> EMITTERS.remove(emitter));
+        return new ResponseEntity<>(emitter, HttpStatus.OK);
     }
 }

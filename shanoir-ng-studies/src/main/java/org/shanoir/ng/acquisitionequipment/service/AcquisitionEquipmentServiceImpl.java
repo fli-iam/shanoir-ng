@@ -50,163 +50,163 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(AcquisitionEquipmentServiceImpl.class);
-	
-	@Autowired
-	private AcquisitionEquipmentRepository repository;
+    private static final Logger LOG = LoggerFactory.getLogger(AcquisitionEquipmentServiceImpl.class);
+    
+    @Autowired
+    private AcquisitionEquipmentRepository repository;
 
-	@Autowired
-	private CenterRepository centerRepository;
+    @Autowired
+    private CenterRepository centerRepository;
 
-	@Autowired
-	private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
-	@Autowired
-	private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-	@Override
-	public Optional<AcquisitionEquipment> findById(final Long id) {
-		return repository.findById(id);
-	}
+    @Override
+    public Optional<AcquisitionEquipment> findById(final Long id) {
+        return repository.findById(id);
+    }
 
-	protected AcquisitionEquipment updateValues(AcquisitionEquipment from, AcquisitionEquipment to) {
-		to.setCenter(from.getCenter());
-		to.setManufacturerModel(from.getManufacturerModel());
-		to.setSerialNumber(from.getSerialNumber());
-		return to;
-	}
+    protected AcquisitionEquipment updateValues(AcquisitionEquipment from, AcquisitionEquipment to) {
+        to.setCenter(from.getCenter());
+        to.setManufacturerModel(from.getManufacturerModel());
+        to.setSerialNumber(from.getSerialNumber());
+        return to;
+    }
 
-	public List<AcquisitionEquipment> findAll() {
-		return Utils.toList(repository.findAll());
-	}
+    public List<AcquisitionEquipment> findAll() {
+        return Utils.toList(repository.findAll());
+    }
 
-	public List<AcquisitionEquipment> findAllByCenterId(Long centerId) {
-		return this.repository.findByCenterId(centerId);
-	}
+    public List<AcquisitionEquipment> findAllByCenterId(Long centerId) {
+        return this.repository.findByCenterId(centerId);
+    }
 
-	public List<AcquisitionEquipment> findAllByStudyId(Long studyId) {
-		return this.repository.findByCenterStudyCenterListStudyId(studyId);
-	}
+    public List<AcquisitionEquipment> findAllByStudyId(Long studyId) {
+        return this.repository.findByCenterStudyCenterListStudyId(studyId);
+    }
 
-	public List<AcquisitionEquipment> findAllBySerialNumber(String serialNumber) {
-		return this.repository.findBySerialNumberContaining(serialNumber);
-	}
-	
-	public AcquisitionEquipment create(AcquisitionEquipment entity) {
-		AcquisitionEquipment newDbAcEq = repository.save(entity);
-		try {
-			updateName(newDbAcEq);
-		} catch (MicroServiceCommunicationException e) {
-			LOG.error("Could not send the center name creation to the other microservices !", e);
-		}
-		return newDbAcEq;
-	}
+    public List<AcquisitionEquipment> findAllBySerialNumber(String serialNumber) {
+        return this.repository.findBySerialNumberContaining(serialNumber);
+    }
+    
+    public AcquisitionEquipment create(AcquisitionEquipment entity) {
+        AcquisitionEquipment newDbAcEq = repository.save(entity);
+        try {
+            updateName(newDbAcEq);
+        } catch (MicroServiceCommunicationException e) {
+            LOG.error("Could not send the center name creation to the other microservices !", e);
+        }
+        return newDbAcEq;
+    }
 
-	private boolean updateName(AcquisitionEquipment equipment) throws MicroServiceCommunicationException{
-		try {
-			String datasetAcEqName =
-					equipment.getManufacturerModel().getManufacturer().getName() + " - "
-							+ equipment.getManufacturerModel().getName() + " "
-							+ (equipment.getManufacturerModel().getMagneticField() != null ? (equipment.getManufacturerModel().getMagneticField() + "T ") : "")
-							+ equipment.getSerialNumber() + " - " + equipment.getCenter().getName();
+    private boolean updateName(AcquisitionEquipment equipment) throws MicroServiceCommunicationException{
+        try {
+            String datasetAcEqName =
+                    equipment.getManufacturerModel().getManufacturer().getName() + " - "
+                            + equipment.getManufacturerModel().getName() + " "
+                            + (equipment.getManufacturerModel().getMagneticField() != null ? (equipment.getManufacturerModel().getMagneticField() + "T ") : "")
+                            + equipment.getSerialNumber() + " - " + equipment.getCenter().getName();
 
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_UPDATE_QUEUE,
-					objectMapper.writeValueAsString(new IdName(equipment.getId(), datasetAcEqName)));
-			return true;
-		} catch (AmqpException | JsonProcessingException e) {
-			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update acquisition equipment name.");
-		}
-	}
+            rabbitTemplate.convertAndSend(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_UPDATE_QUEUE,
+                    objectMapper.writeValueAsString(new IdName(equipment.getId(), datasetAcEqName)));
+            return true;
+        } catch (AmqpException | JsonProcessingException e) {
+            throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update acquisition equipment name.");
+        }
+    }
 
-	public AcquisitionEquipment update(final AcquisitionEquipment entity) throws EntityNotFoundException {
-		final Optional<AcquisitionEquipment> entityDbOpt = repository.findById(entity.getId());
-		final AcquisitionEquipment entityDb = entityDbOpt.orElseThrow(
-				() -> new EntityNotFoundException(entity.getClass(), entity.getId()));
-		AcquisitionEquipment updated = updateValues(entity, entityDb);
-		try {
-			updateName(updated);
-		} catch (MicroServiceCommunicationException e) {
-			LOG.error("Could not send the center name creation to the other microservices !", e);
-		}		return repository.save(entityDb);
-	}
+    public AcquisitionEquipment update(final AcquisitionEquipment entity) throws EntityNotFoundException {
+        final Optional<AcquisitionEquipment> entityDbOpt = repository.findById(entity.getId());
+        final AcquisitionEquipment entityDb = entityDbOpt.orElseThrow(
+                () -> new EntityNotFoundException(entity.getClass(), entity.getId()));
+        AcquisitionEquipment updated = updateValues(entity, entityDb);
+        try {
+            updateName(updated);
+        } catch (MicroServiceCommunicationException e) {
+            LOG.error("Could not send the center name creation to the other microservices !", e);
+        }        return repository.save(entityDb);
+    }
 
-	public void deleteById(final Long id) throws EntityNotFoundException  {
-		final Optional<AcquisitionEquipment> entity = repository.findById(id);
-		entity.orElseThrow(() -> new EntityNotFoundException("Cannot find entity with id = " + id));
-		repository.deleteById(id);
-	}
+    public void deleteById(final Long id) throws EntityNotFoundException  {
+        final Optional<AcquisitionEquipment> entity = repository.findById(id);
+        entity.orElseThrow(() -> new EntityNotFoundException("Cannot find entity with id = " + id));
+        repository.deleteById(id);
+    }
 
-	@Override
-	public List<AcquisitionEquipment> findAcquisitionEquipmentsOrCreateOneByEquipmentDicom(
-		Long centerId,
-		EquipmentDicom equipmentDicom) {
-		// trace all info from DICOM to get an overview of the possibilities in the hospitals and learn from it
-		LOG.info("findAcquisitionEquipmentsOrCreateOneByEquipmentDicom called with: " + equipmentDicom.toString());
-		if (equipmentDicom.isComplete()) { // we consider finding/creating the correct equipment is impossible without all 3 values
-			String dicomSerialNumber = equipmentDicom.getDeviceSerialNumber();
-			List<AcquisitionEquipment> equipments = findAllBySerialNumber(dicomSerialNumber);
-			if (equipments == null || equipments.isEmpty()) {
-				// second try: remove spaces and leading zeros
-				dicomSerialNumber = Utils.removeLeadingZeroes(dicomSerialNumber.trim());
-				equipments = findAllBySerialNumber(dicomSerialNumber);
-				// nothing found with device serial number from DICOM
-				if (equipments == null || equipments.isEmpty()) {
-					equipments = new ArrayList<AcquisitionEquipment>();
-					autoCreateNewAcquisitionEquipment(centerId, equipmentDicom, equipments);
-				} else {
-					matchOrRemoveEquipments(equipmentDicom, equipments);
-					if (equipments.isEmpty()) {
-						autoCreateNewAcquisitionEquipment(centerId, equipmentDicom, equipments);
-					}
-				}
-			} else {
-				matchOrRemoveEquipments(equipmentDicom, equipments);
-				if (equipments.isEmpty()) {
-					autoCreateNewAcquisitionEquipment(centerId, equipmentDicom, equipments);
-				}
-			}
-			return equipments;
-		}
-		return null;
-	}
+    @Override
+    public List<AcquisitionEquipment> findAcquisitionEquipmentsOrCreateOneByEquipmentDicom(
+        Long centerId,
+        EquipmentDicom equipmentDicom) {
+        // trace all info from DICOM to get an overview of the possibilities in the hospitals and learn from it
+        LOG.info("findAcquisitionEquipmentsOrCreateOneByEquipmentDicom called with: " + equipmentDicom.toString());
+        if (equipmentDicom.isComplete()) { // we consider finding/creating the correct equipment is impossible without all 3 values
+            String dicomSerialNumber = equipmentDicom.getDeviceSerialNumber();
+            List<AcquisitionEquipment> equipments = findAllBySerialNumber(dicomSerialNumber);
+            if (equipments == null || equipments.isEmpty()) {
+                // second try: remove spaces and leading zeros
+                dicomSerialNumber = Utils.removeLeadingZeroes(dicomSerialNumber.trim());
+                equipments = findAllBySerialNumber(dicomSerialNumber);
+                // nothing found with device serial number from DICOM
+                if (equipments == null || equipments.isEmpty()) {
+                    equipments = new ArrayList<AcquisitionEquipment>();
+                    autoCreateNewAcquisitionEquipment(centerId, equipmentDicom, equipments);
+                } else {
+                    matchOrRemoveEquipments(equipmentDicom, equipments);
+                    if (equipments.isEmpty()) {
+                        autoCreateNewAcquisitionEquipment(centerId, equipmentDicom, equipments);
+                    }
+                }
+            } else {
+                matchOrRemoveEquipments(equipmentDicom, equipments);
+                if (equipments.isEmpty()) {
+                    autoCreateNewAcquisitionEquipment(centerId, equipmentDicom, equipments);
+                }
+            }
+            return equipments;
+        }
+        return null;
+    }
 
-	private void autoCreateNewAcquisitionEquipment(Long centerId, EquipmentDicom equipmentDicom, List<AcquisitionEquipment> equipments) {
-		AcquisitionEquipment equipment = new AcquisitionEquipment();
-		Manufacturer manufacturer = new Manufacturer();
-		manufacturer.setName(equipmentDicom.getManufacturer());
-		ManufacturerModel manufacturerModel = new ManufacturerModel();
-		manufacturerModel.setName(equipmentDicom.getManufacturerModelName());
-		manufacturerModel.setManufacturer(manufacturer);
-		equipment.setManufacturerModel(manufacturerModel);
-		Optional<Center> center = centerRepository.findById(centerId);
-		equipment.setCenter(center.orElseThrow());
-		AcquisitionEquipment newDbAcEq = repository.save(equipment);
-		equipments.add(newDbAcEq);
-	}
+    private void autoCreateNewAcquisitionEquipment(Long centerId, EquipmentDicom equipmentDicom, List<AcquisitionEquipment> equipments) {
+        AcquisitionEquipment equipment = new AcquisitionEquipment();
+        Manufacturer manufacturer = new Manufacturer();
+        manufacturer.setName(equipmentDicom.getManufacturer());
+        ManufacturerModel manufacturerModel = new ManufacturerModel();
+        manufacturerModel.setName(equipmentDicom.getManufacturerModelName());
+        manufacturerModel.setManufacturer(manufacturer);
+        equipment.setManufacturerModel(manufacturerModel);
+        Optional<Center> center = centerRepository.findById(centerId);
+        equipment.setCenter(center.orElseThrow());
+        AcquisitionEquipment newDbAcEq = repository.save(equipment);
+        equipments.add(newDbAcEq);
+    }
 
-	private void matchOrRemoveEquipments(EquipmentDicom equipmentDicom, List<AcquisitionEquipment> equipments) {
-		for (Iterator<AcquisitionEquipment> iterator = equipments.iterator(); iterator.hasNext();) {
-			AcquisitionEquipment acquisitionEquipment = (AcquisitionEquipment) iterator.next();
-			ManufacturerModel manufacturerModel = acquisitionEquipment.getManufacturerModel();
-			if (manufacturerModel != null) {
-				if (equipmentDicom.getManufacturerModelName().contains(manufacturerModel.getName())) {
-					Manufacturer manufacturer = manufacturerModel.getManufacturer();
-					if (manufacturer != null) {
-						if (equipmentDicom.getManufacturer().contains(manufacturer.getName())) {
-							// keep in list, as matching equipment found with high probability
-						} else {
-							iterator.remove();
-						}
-					} else {
-						iterator.remove();
-					}
-				} else {
-					iterator.remove();
-				}
-			} else {
-				iterator.remove();
-			}
-		}
-	}
+    private void matchOrRemoveEquipments(EquipmentDicom equipmentDicom, List<AcquisitionEquipment> equipments) {
+        for (Iterator<AcquisitionEquipment> iterator = equipments.iterator(); iterator.hasNext();) {
+            AcquisitionEquipment acquisitionEquipment = (AcquisitionEquipment) iterator.next();
+            ManufacturerModel manufacturerModel = acquisitionEquipment.getManufacturerModel();
+            if (manufacturerModel != null) {
+                if (equipmentDicom.getManufacturerModelName().contains(manufacturerModel.getName())) {
+                    Manufacturer manufacturer = manufacturerModel.getManufacturer();
+                    if (manufacturer != null) {
+                        if (equipmentDicom.getManufacturer().contains(manufacturer.getName())) {
+                            // keep in list, as matching equipment found with high probability
+                        } else {
+                            iterator.remove();
+                        }
+                    } else {
+                        iterator.remove();
+                    }
+                } else {
+                    iterator.remove();
+                }
+            } else {
+                iterator.remove();
+            }
+        }
+    }
 
 }

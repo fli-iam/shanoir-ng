@@ -25,25 +25,25 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 @JsonComponent
 public class SolrPageSerializer extends StdSerializer<SolrResultPage> {
-	
-	private static final long serialVersionUID = 1L;
+    
+    private static final long serialVersionUID = 1L;
 
-	public SolrPageSerializer() {
-		super(SolrResultPage.class);
-	}
+    public SolrPageSerializer() {
+        super(SolrResultPage.class);
+    }
 
-	@Override
-	public void serialize(SolrResultPage value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-		gen.writeStartObject();
-		gen.writeNumberField("number", value.getNumber());
-		gen.writeNumberField("numberOfElements", value.getNumberOfElements());
-		gen.writeNumberField("totalElements", value.getTotalElements());
-		gen.writeNumberField("totalPages", value.getTotalPages());
-		gen.writeNumberField("size", value.getSize());
-		gen.writeObjectField("facetResultPages", value.getFacetResultPages());
-		gen.writeFieldName("content");
-		provider.defaultSerializeValue(value.getContent(), gen);
-		gen.writeEndObject();
-	}
+    @Override
+    public void serialize(SolrResultPage value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+        gen.writeStartObject();
+        gen.writeNumberField("number", value.getNumber());
+        gen.writeNumberField("numberOfElements", value.getNumberOfElements());
+        gen.writeNumberField("totalElements", value.getTotalElements());
+        gen.writeNumberField("totalPages", value.getTotalPages());
+        gen.writeNumberField("size", value.getSize());
+        gen.writeObjectField("facetResultPages", value.getFacetResultPages());
+        gen.writeFieldName("content");
+        provider.defaultSerializeValue(value.getContent(), gen);
+        gen.writeEndObject();
+    }
 
 }

@@ -22,76 +22,76 @@ package org.shanoir.ng.examination.model;
  */
 public enum UnitOfMeasure {
 
-	MS(1),
+    MS(1),
 
-	PERCENT(2),
+    PERCENT(2),
 
-	DEGREES(3),
+    DEGREES(3),
 
-	G(4),
+    G(4),
 
-	GY(5),
+    GY(5),
 
-	HZ_PX(6),
+    HZ_PX(6),
 
-	KG(7),
+    KG(7),
 
-	M(8),
+    M(8),
 
-	MG(9),
+    MG(9),
 
-	MG_ML(10),
+    MG_ML(10),
 
-	MHZ(11),
+    MHZ(11),
 
-	ML(12),
+    ML(12),
 
-	MM(13),
+    MM(13),
 
-	PX(14),
+    PX(14),
 
-	TESLA(15),
-	KEV(16),
-	SEC(17),
-	MBQ(18),
-	HZ(19);
+    TESLA(15),
+    KEV(16),
+    SEC(17),
+    MBQ(18),
+    HZ(19);
 
-	private int id;
+    private int id;
 
-	/**
-	 * Constructor.
-	 *
-	 * @param id
-	 *            id
-	 */
-	private UnitOfMeasure(final int id) {
-		this.id = id;
-	}
+    /**
+     * Constructor.
+     *
+     * @param id
+     *            id
+     */
+    private UnitOfMeasure(final int id) {
+        this.id = id;
+    }
 
-	/**
-	 * Get a unit Of measure by its id.
-	 *
-	 * @param id
-	 *            unit Of measure id.
-	 * @return unit Of measure.
-	 */
-	public static UnitOfMeasure getUnit(final Integer id) {
-		if (id == null) {
-			return null;
-		}
-		for (UnitOfMeasure measure : UnitOfMeasure.values()) {
-			if (id.equals(measure.getId())) {
-				return measure;
-			}
-		}
-		throw new IllegalArgumentException("No matching unit Of measure for id " + id);
-	}
+    /**
+     * Get a unit Of measure by its id.
+     *
+     * @param id
+     *            unit Of measure id.
+     * @return unit Of measure.
+     */
+    public static UnitOfMeasure getUnit(final Integer id) {
+        if (id == null) {
+            return null;
+        }
+        for (UnitOfMeasure measure : UnitOfMeasure.values()) {
+            if (id.equals(measure.getId())) {
+                return measure;
+            }
+        }
+        throw new IllegalArgumentException("No matching unit Of measure for id " + id);
+    }
 
-	/**
-	 * @return the id
-	 */
-	public int getId() {
-		return id;
-	}
+    /**
+     * @return the id
+     */
+    public int getId() {
+        return id;
+    }
 
 }

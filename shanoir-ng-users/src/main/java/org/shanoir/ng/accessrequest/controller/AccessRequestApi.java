@@ -105,7 +105,9 @@ public interface AccessRequestApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/{accessRequestId}", produces = { "application/json" }, consumes = {
             "application/json" })
-    ResponseEntity<AccessRequest> getByid(@Parameter(name = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId) throws RestServiceException;
+    ResponseEntity<AccessRequest> getByid(
+                @Parameter(name = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId)
+                throws RestServiceException;
 
     @Operation(summary = "", description = "Invite an user to a study")
     @ApiResponses(value = {

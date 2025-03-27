@@ -30,82 +30,82 @@ import java.util.List;
 @Entity
 public class InstrumentBasedAssessment extends AbstractEntity {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -2356266338557542044L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = -2356266338557542044L;
 
-	/** Related Examination. */
-	@ManyToOne
-	@JoinColumn(name = "examination_id", updatable = true, nullable = false)
-	@JsonIgnore
-	private Examination examination;
+    /** Related Examination. */
+    @ManyToOne
+    @JoinColumn(name = "examination_id", updatable = true, nullable = false)
+    @JsonIgnore
+    private Examination examination;
 
-	/** Instrument. */
-	@ManyToOne
-	@JoinColumn(name = "instrument_id", updatable = true, nullable = false)
-	private Instrument instrument;
+    /** Instrument. */
+    @ManyToOne
+    @JoinColumn(name = "instrument_id", updatable = true, nullable = false)
+    private Instrument instrument;
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "instrumentBasedAssessment")
-	private List<VariableAssessment> variableAssessmentList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "instrumentBasedAssessment")
+    private List<VariableAssessment> variableAssessmentList;
 
-	public InstrumentBasedAssessment() {
+    public InstrumentBasedAssessment() {
 
-	}
+    }
 
-	public InstrumentBasedAssessment(InstrumentBasedAssessment other) {
-		this.examination = other.examination;
-		this.instrument = other.instrument;
+    public InstrumentBasedAssessment(InstrumentBasedAssessment other) {
+        this.examination = other.examination;
+        this.instrument = other.instrument;
 
-		this.variableAssessmentList = new ArrayList<>(other.getVariableAssessmentList().size());
-		for (VariableAssessment var : other.getVariableAssessmentList()) {
-			this.variableAssessmentList.add(new VariableAssessment(var));
-		}
-	}
+        this.variableAssessmentList = new ArrayList<>(other.getVariableAssessmentList().size());
+        for (VariableAssessment var : other.getVariableAssessmentList()) {
+            this.variableAssessmentList.add(new VariableAssessment(var));
+        }
+    }
 
-	/**
-	 * @return the examination
-	 */
-	public Examination getExamination() {
-		return examination;
-	}
+    /**
+     * @return the examination
+     */
+    public Examination getExamination() {
+        return examination;
+    }
 
-	/**
-	 * @param examination
-	 *            the examination to set
-	 */
-	public void setExamination(Examination examination) {
-		this.examination = examination;
-	}
+    /**
+     * @param examination
+     *            the examination to set
+     */
+    public void setExamination(Examination examination) {
+        this.examination = examination;
+    }
 
-	/**
-	 * @return the instrument
-	 */
-	public Instrument getInstrument() {
-		return instrument;
-	}
+    /**
+     * @return the instrument
+     */
+    public Instrument getInstrument() {
+        return instrument;
+    }
 
-	/**
-	 * @param instrument
-	 *            the instrument to set
-	 */
-	public void setInstrument(Instrument instrument) {
-		this.instrument = instrument;
-	}
+    /**
+     * @param instrument
+     *            the instrument to set
+     */
+    public void setInstrument(Instrument instrument) {
+        this.instrument = instrument;
+    }
 
-	/**
-	 * @return the variableAssessmentList
-	 */
-	public List<VariableAssessment> getVariableAssessmentList() {
-		return variableAssessmentList;
-	}
+    /**
+     * @return the variableAssessmentList
+     */
+    public List<VariableAssessment> getVariableAssessmentList() {
+        return variableAssessmentList;
+    }
 
-	/**
-	 * @param variableAssessmentList
-	 *            the variableAssessmentList to set
-	 */
-	public void setVariableAssessmentList(List<VariableAssessment> variableAssessmentList) {
-		this.variableAssessmentList = variableAssessmentList;
-	}
+    /**
+     * @param variableAssessmentList
+     *            the variableAssessmentList to set
+     */
+    public void setVariableAssessmentList(List<VariableAssessment> variableAssessmentList) {
+        this.variableAssessmentList = variableAssessmentList;
+    }
 
 }

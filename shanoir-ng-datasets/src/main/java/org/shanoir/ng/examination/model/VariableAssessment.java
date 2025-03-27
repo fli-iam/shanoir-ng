@@ -31,84 +31,84 @@ import java.util.List;
 @Entity
 public class VariableAssessment extends AbstractEntity {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 8323867968700523066L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = 8323867968700523066L;
 
-	/** Instrument Based Assessment. */
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "instrument_based_assessment_id", nullable = false, updatable = true)
-	@JsonIgnore
-	private InstrumentBasedAssessment instrumentBasedAssessment;
+    /** Instrument Based Assessment. */
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "instrument_based_assessment_id", nullable = false, updatable = true)
+    @JsonIgnore
+    private InstrumentBasedAssessment instrumentBasedAssessment;
 
-	/** The variable. */
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "instrument_variable_id", nullable = false, updatable = true)
-	@JsonIgnore
-	private InstrumentVariable instrumentVariable;
+    /** The variable. */
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "instrument_variable_id", nullable = false, updatable = true)
+    @JsonIgnore
+    private InstrumentVariable instrumentVariable;
 
-	/** The score list. */
-	@OneToMany(mappedBy = "variableAssessment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	private List<Score> scoreList;
+    /** The score list. */
+    @OneToMany(mappedBy = "variableAssessment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Score> scoreList;
 
-	public VariableAssessment() {
+    public VariableAssessment() {
 
-	}
+    }
 
-	public VariableAssessment(VariableAssessment other) {
-		this.instrumentBasedAssessment = other.instrumentBasedAssessment;
-		this.instrumentVariable = other.instrumentVariable;
+    public VariableAssessment(VariableAssessment other) {
+        this.instrumentBasedAssessment = other.instrumentBasedAssessment;
+        this.instrumentVariable = other.instrumentVariable;
 
-		this.scoreList = new ArrayList<>(other.getScoreList().size());
-		for (Score score : other.getScoreList()) {
-			this.scoreList.add(new Score(this));
-		}
-	}
+        this.scoreList = new ArrayList<>(other.getScoreList().size());
+        for (Score score : other.getScoreList()) {
+            this.scoreList.add(new Score(this));
+        }
+    }
 
-	/**
-	 * @return the instrumentBasedAssessment
-	 */
-	public InstrumentBasedAssessment getInstrumentBasedAssessment() {
-		return instrumentBasedAssessment;
-	}
+    /**
+     * @return the instrumentBasedAssessment
+     */
+    public InstrumentBasedAssessment getInstrumentBasedAssessment() {
+        return instrumentBasedAssessment;
+    }
 
-	/**
-	 * @param instrumentBasedAssessment
-	 *            the instrumentBasedAssessment to set
-	 */
-	public void setInstrumentBasedAssessment(InstrumentBasedAssessment instrumentBasedAssessment) {
-		this.instrumentBasedAssessment = instrumentBasedAssessment;
-	}
+    /**
+     * @param instrumentBasedAssessment
+     *            the instrumentBasedAssessment to set
+     */
+    public void setInstrumentBasedAssessment(InstrumentBasedAssessment instrumentBasedAssessment) {
+        this.instrumentBasedAssessment = instrumentBasedAssessment;
+    }
 
-	/**
-	 * @return the instrumentVariable
-	 */
-	public InstrumentVariable getInstrumentVariable() {
-		return instrumentVariable;
-	}
+    /**
+     * @return the instrumentVariable
+     */
+    public InstrumentVariable getInstrumentVariable() {
+        return instrumentVariable;
+    }
 
-	/**
-	 * @param instrumentVariable
-	 *            the instrumentVariable to set
-	 */
-	public void setInstrumentVariable(InstrumentVariable instrumentVariable) {
-		this.instrumentVariable = instrumentVariable;
-	}
+    /**
+     * @param instrumentVariable
+     *            the instrumentVariable to set
+     */
+    public void setInstrumentVariable(InstrumentVariable instrumentVariable) {
+        this.instrumentVariable = instrumentVariable;
+    }
 
-	/**
-	 * @return the scoreList
-	 */
-	public List<Score> getScoreList() {
-		return scoreList;
-	}
+    /**
+     * @return the scoreList
+     */
+    public List<Score> getScoreList() {
+        return scoreList;
+    }
 
-	/**
-	 * @param scoreList
-	 *            the scoreList to set
-	 */
-	public void setScoreList(List<Score> scoreList) {
-		this.scoreList = scoreList;
-	}
+    /**
+     * @param scoreList
+     *            the scoreList to set
+     */
+    public void setScoreList(List<Score> scoreList) {
+        this.scoreList = scoreList;
+    }
 
 }

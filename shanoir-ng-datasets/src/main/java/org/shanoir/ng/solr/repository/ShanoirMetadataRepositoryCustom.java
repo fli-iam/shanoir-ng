@@ -29,16 +29,16 @@ import org.shanoir.ng.solr.model.ShanoirMetadata;
  *
  */
 public interface ShanoirMetadataRepositoryCustom {
-	/**
-	 * Find in all tables information to construct ShanoirSolrDocument.
-	 *
-	 * @return list of ShanoirSolrDocument.
-	 */
-	List<ShanoirMetadata> findAllAsSolrDoc();
+    /**
+     * Find in all tables information to construct ShanoirSolrDocument.
+     *
+     * @return list of ShanoirSolrDocument.
+     */
+    List<ShanoirMetadata> findAllAsSolrDoc();
 
-	ShanoirMetadata findOneSolrDoc(Long datasetId);
+    ShanoirMetadata findOneSolrDoc(Long datasetId);
 
-	List<ShanoirMetadata> findSolrDocs(List<Long> datasetIds);
+    List<ShanoirMetadata> findSolrDocs(List<Long> datasetIds);
 
-	Map<Long, List<String>> findAllTags(List<Long> datasetIds);
+    Map<Long, List<String>> findAllTags(List<Long> datasetIds);
 }

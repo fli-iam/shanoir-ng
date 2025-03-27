@@ -29,58 +29,58 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 public class BidsApiControllerTest {
 
-	private static final String REQUEST_PATH = "/bids";
-	
-	private static final String REQUEST_PATH_GENERATE = REQUEST_PATH + "/studyId/1/studyName/Name";
+    private static final String REQUEST_PATH = "/bids";
+    
+    private static final String REQUEST_PATH_GENERATE = REQUEST_PATH + "/studyId/1/studyName/Name";
 
-	private static final String REQUEST_PATH_EXPORT = REQUEST_PATH + "/exportBIDS/studyId/1";
+    private static final String REQUEST_PATH_EXPORT = REQUEST_PATH + "/exportBIDS/studyId/1";
 
-	@MockBean
-	BIDSService bidsService;
+    @MockBean
+    BIDSService bidsService;
 
-	@MockBean
-	BidsDeserializer bidsDeserializer;
-	
-	@MockBean
-	StudyRepository studyRepo;
+    @MockBean
+    BidsDeserializer bidsDeserializer;
+    
+    @MockBean
+    StudyRepository studyRepo;
 
-	@Autowired
-	private MockMvc mvc;
+    @Autowired
+    private MockMvc mvc;
 
-	@MockBean
-	private DicomSEGAndSRImporterService dicomSRImporterService;
+    @MockBean
+    private DicomSEGAndSRImporterService dicomSRImporterService;
 
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void testGenerateBIDSByStudyId() throws Exception {
-		// GIVEN a study with a bids folder to generate
-		
-		// WHEN we call the API to generate the folder
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_GENERATE)).andExpect(status().isOk());
-		
-		// THEN the service is called
-		Mockito.verify(bidsService).exportAsBids(1L, "Name");
-	}
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testGenerateBIDSByStudyId() throws Exception {
+        // GIVEN a study with a bids folder to generate
+        
+        // WHEN we call the API to generate the folder
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_GENERATE)).andExpect(status().isOk());
+        
+        // THEN the service is called
+        Mockito.verify(bidsService).exportAsBids(1L, "Name");
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void testExportBIDSFileNoFile() throws Exception  {
-		// GIVEN a study with a bids folder to generate
-		
-		// WHEN we call the API to generate the folder
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_EXPORT).param("filePath", "inexisting")).andExpect(status().isUnauthorized());
-		
-		// THEN the service is called
-	}
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testExportBIDSFileNoFile() throws Exception  {
+        // GIVEN a study with a bids folder to generate
+        
+        // WHEN we call the API to generate the folder
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_EXPORT).param("filePath", "inexisting")).andExpect(status().isUnauthorized());
+        
+        // THEN the service is called
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void testExportBIDSFileUnauthorized() throws Exception  {
-		// GIVEN a study with a bids folder to generate
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testExportBIDSFileUnauthorized() throws Exception  {
+        // GIVEN a study with a bids folder to generate
 
-		// WHEN we call the API to generate the folder
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_EXPORT).param("filePath", "/var/datasets-data/bids-data/stud-1_NATIVE/truc.pdf")).andExpect(status().isNoContent());
+        // WHEN we call the API to generate the folder
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_EXPORT).param("filePath", "/var/datasets-data/bids-data/stud-1_NATIVE/truc.pdf")).andExpect(status().isNoContent());
 
-		// THEN the service is called
-	}
+        // THEN the service is called
+    }
 }

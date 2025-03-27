@@ -107,9 +107,9 @@ public class EmailServiceImpl implements EmailService {
     private String shanoirServerAddress;
 
     @Autowired
-    RabbitTemplate rabbitTemplate;
+    private RabbitTemplate rabbitTemplate;
 
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d yyyy");
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("MMM d yyyy");
 
     @Override
     public void notifyAccountWillExpire(User user) {
@@ -122,7 +122,7 @@ public class EmailServiceImpl implements EmailService {
             variables.put(FIRSTNAME, user.getFirstName());
             variables.put(LASTNAME, user.getLastName());
             variables.put(SERVER_ADDRESS, shanoirServerAddress);
-            variables.put(EXPIRATION_DATE, formatter.format(user.getExpirationDate()));
+            variables.put(EXPIRATION_DATE, FORMATTER.format(user.getExpirationDate()));
             final String content = build("notifyAccountWillExpire", variables);
             messageHelper.setText(content, true);
         };
@@ -359,7 +359,7 @@ public class EmailServiceImpl implements EmailService {
             variables.put(FIRSTNAME, user.getFirstName());
             variables.put(LASTNAME, user.getLastName());
             variables.put(SERVER_ADDRESS, shanoirServerAddress);
-            variables.put(EXPIRATION_DATE, formatter.format(user.getExpirationDate()));
+            variables.put(EXPIRATION_DATE, FORMATTER.format(user.getExpirationDate()));
             final String content = build("notifyUserExtensionRequestAccepted", variables);
             messageHelper.setText(content, true);
         };
@@ -376,7 +376,7 @@ public class EmailServiceImpl implements EmailService {
             variables.put(FIRSTNAME, user.getFirstName());
             variables.put(LASTNAME, user.getLastName());
             variables.put(SERVER_ADDRESS, shanoirServerAddress);
-            variables.put(EXPIRATION_DATE, formatter.format(user.getExpirationDate()));
+            variables.put(EXPIRATION_DATE, FORMATTER.format(user.getExpirationDate()));
             final String content = build("notifyUserExtensionRequestDenied", variables);
             messageHelper.setText(content, true);
         };
@@ -480,18 +480,18 @@ public class EmailServiceImpl implements EmailService {
         if (!CollectionUtils.isEmpty(email.getRecipients())) {
             // Get the list of recipients
             List<User> studyAdmins = (List<User>) this.userRepository.findAllById(email.getRecipients());
-          
+
             for (User studyAdmin : studyAdmins) {
                 MimeMessagePreparator messagePreparator = mimeMessage -> {
                     final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
                     messageHelper.setFrom(administratorEmail);
-                    messageHelper.setCc(user!= null ? user.getEmail(): administratorEmail);
+                    messageHelper.setCc(user != null ? user.getEmail() : administratorEmail);
                     messageHelper.setTo(studyAdmin.getEmail());
                     messageHelper.setSubject("[Shanoir] Member(s) added to " + email.getStudyName());
                     final Map<String, Object> variables = new HashMap<>();
                     variables.put(FIRSTNAME, studyAdmin.getFirstName());
                     variables.put(LASTNAME, studyAdmin.getLastName());
-                    variables.put(EMAIL, user!= null ? user.getEmail(): administratorEmail);
+                    variables.put(EMAIL, user != null ? user.getEmail() : administratorEmail);
                     variables.put(STUDY_NAME, email.getStudyName());
                     variables.put(STUDY_USERS, newStudyUsers);
                     variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/edit/" + email.getStudyId());
@@ -544,7 +544,7 @@ public class EmailServiceImpl implements EmailService {
                     final Map<String, Object> variables = new HashMap<>();
                     variables.put(FIRSTNAME, studyAdmin.getFirstName());
                     variables.put(LASTNAME, studyAdmin.getLastName());
-                    variables.put(EMAIL, user!= null ? user.getEmail(): administratorEmail);
+                    variables.put(EMAIL, user != null ? user.getEmail() : administratorEmail);
                     variables.put(STUDY_NAME, createdRequest.getStudyName());
                     variables.put(MOTIVATION, createdRequest.getMotivation());
                     variables.put(USERNAME, createdRequest.getUser().getUsername());

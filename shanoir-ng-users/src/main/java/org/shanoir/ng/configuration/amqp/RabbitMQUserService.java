@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.configuration.amqp;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.events.ShanoirEvent;
 import org.shanoir.ng.events.ShanoirEventsService;
@@ -28,9 +27,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.ExchangeTypes;
-import org.springframework.amqp.rabbit.annotation.*;
+import org.springframework.amqp.rabbit.annotation.Exchange;
+import org.springframework.amqp.rabbit.annotation.Queue;
+import org.springframework.amqp.rabbit.annotation.QueueBinding;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
 public class RabbitMQUserService {
@@ -38,10 +43,10 @@ public class RabbitMQUserService {
     private static final Logger LOG = LoggerFactory.getLogger(RabbitMQUserService.class);
 
     @Autowired
-    ShanoirEventsService eventsService;
+    private ShanoirEventsService eventsService;
 
     @Autowired
-    EmailService emailService;
+    private EmailService emailService;
 
     @Autowired
     private ObjectMapper mapper;
@@ -51,7 +56,7 @@ public class RabbitMQUserService {
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(value = RabbitMQConfiguration.STUDY_USER_QUEUE_USERS, durable = "true"),
             exchange = @Exchange(value = RabbitMQConfiguration.STUDY_USER_EXCHANGE, ignoreDeclarationExceptions = "true",
-                    autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT)), containerFactory = "multipleConsumersFactory"
+                    autoDelete = "false", durable = "true", type = ExchangeTypes.FANOUT)), containerFactory = "multipleConsumersFactory"
     )
     public void receiveMessage(String commandArrStr) {
         listener.receiveStudyUsers(commandArrStr);
@@ -65,7 +70,7 @@ public class RabbitMQUserService {
             key = "*.event",
             value = @Queue(value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
             exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-                autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)), containerFactory = "singleConsumerFactory"
+            autoDelete = "false", durable = "true", type = ExchangeTypes.TOPIC)), containerFactory = "singleConsumerFactory"
     )
     public void receiveEvent(String eventAsString) throws AmqpRejectAndDontRequeueException {
         LOG.info("Receiving event: " + eventAsString);

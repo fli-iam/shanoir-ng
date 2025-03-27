@@ -19,7 +19,6 @@ import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.email.StudyInvitationEmail;
-import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.user.model.User;
 
 /**

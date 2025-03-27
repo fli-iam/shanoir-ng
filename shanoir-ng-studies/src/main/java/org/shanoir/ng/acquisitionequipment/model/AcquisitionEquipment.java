@@ -39,72 +39,72 @@ import jakarta.validation.constraints.NotNull;
  */
 @Entity
 @Table(uniqueConstraints = {
-		@UniqueConstraint(columnNames = { "manufacturer_model_id", "serialNumber" }, name = "model_number_idx") })
+        @UniqueConstraint(columnNames = { "manufacturer_model_id", "serialNumber" }, name = "model_number_idx") })
 @JsonPropertyOrder({ "_links", "id", "serialNumber" })
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 public class AcquisitionEquipment extends HalEntity {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 7137351748882747602L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = 7137351748882747602L;
 
-	@ManyToOne
-	@NotNull
-	@JoinColumn(name = "center_id")
-	private Center center;
+    @ManyToOne
+    @NotNull
+    @JoinColumn(name = "center_id")
+    private Center center;
 
-	@ManyToOne(fetch = FetchType.EAGER)
-	@Fetch(FetchMode.JOIN)
-	@NotNull
-	@JoinColumn(name = "manufacturer_model_id")
-	private ManufacturerModel manufacturerModel;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @Fetch(FetchMode.JOIN)
+    @NotNull
+    @JoinColumn(name = "manufacturer_model_id")
+    private ManufacturerModel manufacturerModel;
 
-	private String serialNumber;
+    private String serialNumber;
 
-	/**
-	 * @return the center
-	 */
-	public Center getCenter() {
-		return center;
-	}
+    /**
+     * @return the center
+     */
+    public Center getCenter() {
+        return center;
+    }
 
-	/**
-	 * @param center
-	 *            the center to set
-	 */
-	public void setCenter(Center center) {
-		this.center = center;
-	}
+    /**
+     * @param center
+     *            the center to set
+     */
+    public void setCenter(Center center) {
+        this.center = center;
+    }
 
-	/**
-	 * @return the manufacturerModel
-	 */
-	public ManufacturerModel getManufacturerModel() {
-		return manufacturerModel;
-	}
+    /**
+     * @return the manufacturerModel
+     */
+    public ManufacturerModel getManufacturerModel() {
+        return manufacturerModel;
+    }
 
-	/**
-	 * @param manufacturerModel
-	 *            the manufacturerModel to set
-	 */
-	public void setManufacturerModel(ManufacturerModel manufacturerModel) {
-		this.manufacturerModel = manufacturerModel;
-	}
+    /**
+     * @param manufacturerModel
+     *            the manufacturerModel to set
+     */
+    public void setManufacturerModel(ManufacturerModel manufacturerModel) {
+        this.manufacturerModel = manufacturerModel;
+    }
 
-	/**
-	 * @return the serialNumber
-	 */
-	public String getSerialNumber() {
-		return serialNumber;
-	}
+    /**
+     * @return the serialNumber
+     */
+    public String getSerialNumber() {
+        return serialNumber;
+    }
 
-	/**
-	 * @param serialNumber
-	 *            the serialNumber to set
-	 */
-	public void setSerialNumber(String serialNumber) {
-		this.serialNumber = serialNumber;
-	}
+    /**
+     * @param serialNumber
+     *            the serialNumber to set
+     */
+    public void setSerialNumber(String serialNumber) {
+        this.serialNumber = serialNumber;
+    }
 
 }

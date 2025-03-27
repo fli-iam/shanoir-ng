@@ -49,233 +49,233 @@ import java.util.List;
 @Inheritance(strategy = InheritanceType.JOINED)
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "type")
 @JsonSubTypes({
-	@Type(value = CtDatasetAcquisition.class, name = "Ct"),
-	@Type(value = MrDatasetAcquisition.class, name = "Mr"),
-	@Type(value = PetDatasetAcquisition.class, name = "Pet"),
-	@Type(value = GenericDatasetAcquisition.class, name = "Generic"),
-	@Type(value = EegDatasetAcquisition.class, name = "Eeg"),
-	@Type(value = BidsDatasetAcquisition.class, name = "BIDS"),
-	@Type(value = XaDatasetAcquisition.class, name = "Xa")})
+    @Type(value = CtDatasetAcquisition.class, name = "Ct"),
+    @Type(value = MrDatasetAcquisition.class, name = "Mr"),
+    @Type(value = PetDatasetAcquisition.class, name = "Pet"),
+    @Type(value = GenericDatasetAcquisition.class, name = "Generic"),
+    @Type(value = EegDatasetAcquisition.class, name = "Eeg"),
+    @Type(value = BidsDatasetAcquisition.class, name = "BIDS"),
+    @Type(value = XaDatasetAcquisition.class, name = "Xa")})
 public abstract class DatasetAcquisition extends AbstractEntity {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 5487256834701104296L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = 5487256834701104296L;
 
-	/** Related Acquisition Equipment. */
-	@NotNull
-	private Long acquisitionEquipmentId;
-	
-	/** Datasets. */
-	@JsonIgnore
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "datasetAcquisition", cascade = CascadeType.ALL)
-	private List<Dataset> datasets;
+    /** Related Acquisition Equipment. */
+    @NotNull
+    private Long acquisitionEquipmentId;
+    
+    /** Datasets. */
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "datasetAcquisition", cascade = CascadeType.ALL)
+    private List<Dataset> datasets;
 
-	/** Related Examination. */
-	@ManyToOne
-	@JoinColumn(name = "examination_id")
-	private Examination examination;
-	
-	/** Applied study card. */
-	@ManyToOne
-	@JoinColumn(name = "studycard_id")
-	private StudyCard studyCard;
-	
-	/** Used to know if the study card that was applied matches the study card's last version or anterior */
-	private Long studyCardTimestamp;
+    /** Related Examination. */
+    @ManyToOne
+    @JoinColumn(name = "examination_id")
+    private Examination examination;
+    
+    /** Applied study card. */
+    @ManyToOne
+    @JoinColumn(name = "studycard_id")
+    private StudyCard studyCard;
+    
+    /** Used to know if the study card that was applied matches the study card's last version or anterior */
+    private Long studyCardTimestamp;
 
-	/** Rank of the session in the examination protocol. */
-	private Integer rank;
+    /** Rank of the session in the examination protocol. */
+    private Integer rank;
 
-	/** Software release. */
-	private String softwareRelease;
+    /** Software release. */
+    private String softwareRelease;
 
-	/** (0020,0011) Series number from dicom tags. */
-	private Integer sortingIndex;
+    /** (0020,0011) Series number from dicom tags. */
+    private Integer sortingIndex;
 
-	/** Represents the date the acquisition was created on shanoir AND NOT the acquisition date in itself. */
-	@LocalDateAnnotations
-	private LocalDate importDate;
+    /** Represents the date the acquisition was created on shanoir AND NOT the acquisition date in itself. */
+    @LocalDateAnnotations
+    private LocalDate importDate;
 
-	/** Name of the user who did the import */
-	private String username;
+    /** Name of the user who did the import */
+    private String username;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "source_id")
-	private DatasetAcquisition source;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "source_id")
+    private DatasetAcquisition source;
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "source", cascade = CascadeType.ALL)
-	private List<DatasetAcquisition> copies;
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "source", cascade = CascadeType.ALL)
+    private List<DatasetAcquisition> copies;
 
-	public DatasetAcquisition() {
-	}
+    public DatasetAcquisition() {
+    }
 
-	public DatasetAcquisition(DatasetAcquisition other) {
-		this.acquisitionEquipmentId = other.acquisitionEquipmentId;
+    public DatasetAcquisition(DatasetAcquisition other) {
+        this.acquisitionEquipmentId = other.acquisitionEquipmentId;
 
-		this.examination = other.examination;
-		this.studyCard = null;
-		this.studyCardTimestamp = other.studyCardTimestamp;
-		this.rank = other.rank;
-		this.softwareRelease = other.softwareRelease;
-		this.sortingIndex = other.sortingIndex;
-		this.importDate = other.importDate;
-		this.username = other.username;
-		this.copies = other.copies;
-		this.source = other.source;
-	}
+        this.examination = other.examination;
+        this.studyCard = null;
+        this.studyCardTimestamp = other.studyCardTimestamp;
+        this.rank = other.rank;
+        this.softwareRelease = other.softwareRelease;
+        this.sortingIndex = other.sortingIndex;
+        this.importDate = other.importDate;
+        this.username = other.username;
+        this.copies = other.copies;
+        this.source = other.source;
+    }
 
-	/**
-	 * @return the acquisitionEquipmentId
-	 */
-	public Long getAcquisitionEquipmentId() {
-		return acquisitionEquipmentId;
-	}
+    /**
+     * @return the acquisitionEquipmentId
+     */
+    public Long getAcquisitionEquipmentId() {
+        return acquisitionEquipmentId;
+    }
 
-	/**
-	 * @param acquisitionEquipmentId
-	 *            the acquisitionEquipmentId to set
-	 */
-	public void setAcquisitionEquipmentId(Long acquisitionEquipmentId) {
-		this.acquisitionEquipmentId = acquisitionEquipmentId;
-	}
+    /**
+     * @param acquisitionEquipmentId
+     *            the acquisitionEquipmentId to set
+     */
+    public void setAcquisitionEquipmentId(Long acquisitionEquipmentId) {
+        this.acquisitionEquipmentId = acquisitionEquipmentId;
+    }
 
-	/**
-	 * @return the datasets
-	 */
-	public List<Dataset> getDatasets() {
-		return datasets;
-	}
+    /**
+     * @return the datasets
+     */
+    public List<Dataset> getDatasets() {
+        return datasets;
+    }
 
-	/**
-	 * @param datasets
-	 *            the datasets to set
-	 */
-	public void setDatasets(List<Dataset> datasets) {
-		this.datasets = datasets;
-	}
+    /**
+     * @param datasets
+     *            the datasets to set
+     */
+    public void setDatasets(List<Dataset> datasets) {
+        this.datasets = datasets;
+    }
 
-	/**
-	 * @return the examination
-	 */
-	public Examination getExamination() {
-		return examination;
-	}
+    /**
+     * @return the examination
+     */
+    public Examination getExamination() {
+        return examination;
+    }
 
-	/**
-	 * @param examination
-	 *            the examination to set
-	 */
-	public void setExamination(Examination examination) {
-		this.examination = examination;
-	}
+    /**
+     * @param examination
+     *            the examination to set
+     */
+    public void setExamination(Examination examination) {
+        this.examination = examination;
+    }
 
-	/**
-	 * @return the rank
-	 */
-	public Integer getRank() {
-		return rank;
-	}
+    /**
+     * @return the rank
+     */
+    public Integer getRank() {
+        return rank;
+    }
 
-	/**
-	 * @param rank
-	 *            the rank to set
-	 */
-	public void setRank(Integer rank) {
-		this.rank = rank;
-	}
+    /**
+     * @param rank
+     *            the rank to set
+     */
+    public void setRank(Integer rank) {
+        this.rank = rank;
+    }
 
-	/**
-	 * @return the softwareRelease
-	 */
-	public String getSoftwareRelease() {
-		return softwareRelease;
-	}
+    /**
+     * @return the softwareRelease
+     */
+    public String getSoftwareRelease() {
+        return softwareRelease;
+    }
 
-	/**
-	 * @param softwareRelease
-	 *            the softwareRelease to set
-	 */
-	public void setSoftwareRelease(String softwareRelease) {
-		this.softwareRelease = softwareRelease;
-	}
+    /**
+     * @param softwareRelease
+     *            the softwareRelease to set
+     */
+    public void setSoftwareRelease(String softwareRelease) {
+        this.softwareRelease = softwareRelease;
+    }
 
-	/**
-	 * @return the sortingIndex
-	 */
-	public Integer getSortingIndex() {
-		return sortingIndex;
-	}
+    /**
+     * @return the sortingIndex
+     */
+    public Integer getSortingIndex() {
+        return sortingIndex;
+    }
 
-	/**
-	 * @param sortingIndex
-	 *            the sortingIndex to set
-	 */
-	public void setSortingIndex(Integer sortingIndex) {
-		this.sortingIndex = sortingIndex;
-	}
-	
-	public StudyCard getStudyCard() {
-		return studyCard;
-	}
+    /**
+     * @param sortingIndex
+     *            the sortingIndex to set
+     */
+    public void setSortingIndex(Integer sortingIndex) {
+        this.sortingIndex = sortingIndex;
+    }
+    
+    public StudyCard getStudyCard() {
+        return studyCard;
+    }
 
-	public void setStudyCard(StudyCard studyCard) {
-		this.studyCard = studyCard;
-	}
+    public void setStudyCard(StudyCard studyCard) {
+        this.studyCard = studyCard;
+    }
 
-	public Long getStudyCardTimestamp() {
-		return studyCardTimestamp;
-	}
+    public Long getStudyCardTimestamp() {
+        return studyCardTimestamp;
+    }
 
-	public void setStudyCardTimestamp(Long studyCardTimestamp) {
-		this.studyCardTimestamp = studyCardTimestamp;
-	}
+    public void setStudyCardTimestamp(Long studyCardTimestamp) {
+        this.studyCardTimestamp = studyCardTimestamp;
+    }
 
-	/**
-	 * @return the creationDate
-	 */
-	public LocalDate getImportDate() {
-		return importDate;
-	}
+    /**
+     * @return the creationDate
+     */
+    public LocalDate getImportDate() {
+        return importDate;
+    }
 
-	/**
-	 * @param creationDate the creationDate to set
-	 */
-	public void setImportDate(LocalDate creationDate) {
-		this.importDate = creationDate;
-	}
+    /**
+     * @param creationDate the creationDate to set
+     */
+    public void setImportDate(LocalDate creationDate) {
+        this.importDate = creationDate;
+    }
 
-	/**
-	 * Gets the type.
-	 *
-	 * @return the type
-	 */
-	@Transient
-	public abstract String getType();
+    /**
+     * Gets the type.
+     *
+     * @return the type
+     */
+    @Transient
+    public abstract String getType();
 
-	public String getUsername() {
-		return username;
-	}
+    public String getUsername() {
+        return username;
+    }
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-	public DatasetAcquisition getSource() {
-		return source;
-	}
+    public DatasetAcquisition getSource() {
+        return source;
+    }
 
-	public void setSource(DatasetAcquisition source) {
-		this.source = source;
-	}
+    public void setSource(DatasetAcquisition source) {
+        this.source = source;
+    }
 
-	public List<DatasetAcquisition> getCopies() {
-		return copies;
-	}
+    public List<DatasetAcquisition> getCopies() {
+        return copies;
+    }
 
-	public void setCopies(List<DatasetAcquisition> copies) {
-		this.copies = copies;
-	}
+    public void setCopies(List<DatasetAcquisition> copies) {
+        this.copies = copies;
+    }
 
 }

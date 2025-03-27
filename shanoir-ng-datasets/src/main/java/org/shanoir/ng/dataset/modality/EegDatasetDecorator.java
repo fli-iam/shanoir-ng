@@ -33,35 +33,35 @@ import org.springframework.stereotype.Component;
 @Component
 public abstract class EegDatasetDecorator implements EegDatasetMapper {
 
-	@Autowired
-	private EegDatasetMapper delegate;
+    @Autowired
+    private EegDatasetMapper delegate;
 
 
-	public EegDatasetDecorator() {
-	}
+    public EegDatasetDecorator() {
+    }
 
-	@Override
-	public List<IdName> datasetsToIdNameDTOs(final List<EegDataset> datasets) {
-		final List<IdName> datasetDTOs = new ArrayList<>();
-		for (EegDataset dataset : datasets) {
-			datasetDTOs.add(datasetToIdNameDTO(dataset));
-		}
-		return datasetDTOs;
-	}
+    @Override
+    public List<IdName> datasetsToIdNameDTOs(final List<EegDataset> datasets) {
+        final List<IdName> datasetDTOs = new ArrayList<>();
+        for (EegDataset dataset : datasets) {
+            datasetDTOs.add(datasetToIdNameDTO(dataset));
+        }
+        return datasetDTOs;
+    }
 
-	@Override
-	public IdName datasetToIdNameDTO(final EegDataset dataset) {
-		return delegate.datasetToIdNameDTO(dataset);
-	}
+    @Override
+    public IdName datasetToIdNameDTO(final EegDataset dataset) {
+        return delegate.datasetToIdNameDTO(dataset);
+    }
 
-	@Override
-	public PageImpl<EegDatasetDTO> datasetToDatasetDTO(Page<EegDataset> page) {
-		org.springframework.data.domain.Page<EegDatasetDTO> mappedPage =  page.map(new Function<EegDataset, EegDatasetDTO>() {
-			public EegDatasetDTO apply(EegDataset entity) {
-				return delegate.datasetToDatasetDTO(entity);
-			}
-		});
-		return new PageImpl<>(mappedPage.getContent());
-	}
+    @Override
+    public PageImpl<EegDatasetDTO> datasetToDatasetDTO(Page<EegDataset> page) {
+        org.springframework.data.domain.Page<EegDatasetDTO> mappedPage =  page.map(new Function<EegDataset, EegDatasetDTO>() {
+            public EegDatasetDTO apply(EegDataset entity) {
+                return delegate.datasetToDatasetDTO(entity);
+            }
+        });
+        return new PageImpl<>(mappedPage.getContent());
+    }
 
 }

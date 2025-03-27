@@ -38,105 +38,105 @@ import org.shanoir.ng.dataset.model.DatasetType;
  */
 @Entity
 public class EegDataset extends Dataset {
-	
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -7618433089837302003L;
+    
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = -7618433089837302003L;
 
-	@Override
-	public DatasetType getType() {
-		return DatasetType.Eeg;
-	}
+    @Override
+    public DatasetType getType() {
+        return DatasetType.Eeg;
+    }
 
-	private float samplingFrequency;
-	
-	private int channelCount;
-	
-	private String coordinatesSystem;
+    private float samplingFrequency;
+    
+    private int channelCount;
+    
+    private String coordinatesSystem;
 
-	@LazyCollection(LazyCollectionOption.FALSE)
-	@OneToMany(mappedBy = "dataset", cascade = CascadeType.ALL)
-	private List<Channel> channels;
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(mappedBy = "dataset", cascade = CascadeType.ALL)
+    private List<Channel> channels;
 
-	@LazyCollection(LazyCollectionOption.FALSE)
-	@OneToMany(mappedBy = "dataset", cascade = CascadeType.ALL)
-	private List<Event> events;
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(mappedBy = "dataset", cascade = CascadeType.ALL)
+    private List<Event> events;
 
-	public EegDataset() { }
+    public EegDataset() { }
 
-	public EegDataset(Dataset other) {
-		super(other);
-		this.samplingFrequency = ((EegDataset) other).getSamplingFrequency();
-		this.channelCount = ((EegDataset) other).getChannelCount();
-		this.coordinatesSystem = ((EegDataset) other).getCoordinatesSystem();
-		this.channels = new ArrayList<>(((EegDataset) other).getChannels().size());
-		for (Channel ch : ((EegDataset) other).getChannels()) {
-			this.channels.add(new Channel(ch, this));
-		}
+    public EegDataset(Dataset other) {
+        super(other);
+        this.samplingFrequency = ((EegDataset) other).getSamplingFrequency();
+        this.channelCount = ((EegDataset) other).getChannelCount();
+        this.coordinatesSystem = ((EegDataset) other).getCoordinatesSystem();
+        this.channels = new ArrayList<>(((EegDataset) other).getChannels().size());
+        for (Channel ch : ((EegDataset) other).getChannels()) {
+            this.channels.add(new Channel(ch, this));
+        }
 
-		this.events = new ArrayList<>(((EegDataset) other).getEvents().size());
-		for (Event ev : ((EegDataset) other).getEvents()) {
-			this.events.add(new Event(ev, this));
-		}
-	}
+        this.events = new ArrayList<>(((EegDataset) other).getEvents().size());
+        for (Event ev : ((EegDataset) other).getEvents()) {
+            this.events.add(new Event(ev, this));
+        }
+    }
 
-	/**
-	 * @return the coordinatesSystem
-	 */
-	public String getCoordinatesSystem() {
-		return coordinatesSystem;
-	}
+    /**
+     * @return the coordinatesSystem
+     */
+    public String getCoordinatesSystem() {
+        return coordinatesSystem;
+    }
 
-	/**
-	 * @param coordinatesSystem the coordinatesSystem to set
-	 */
-	public void setCoordinatesSystem(String coordinatesSystem) {
-		this.coordinatesSystem = coordinatesSystem;
-	}
-	
-	public float getSamplingFrequency() {
-		return samplingFrequency;
-	}
+    /**
+     * @param coordinatesSystem the coordinatesSystem to set
+     */
+    public void setCoordinatesSystem(String coordinatesSystem) {
+        this.coordinatesSystem = coordinatesSystem;
+    }
+    
+    public float getSamplingFrequency() {
+        return samplingFrequency;
+    }
 
-	public void setSamplingFrequency(float samplingFrequency) {
-		this.samplingFrequency = samplingFrequency;
-	}
+    public void setSamplingFrequency(float samplingFrequency) {
+        this.samplingFrequency = samplingFrequency;
+    }
 
-	public int getChannelCount() {
-		return channelCount;
-	}
+    public int getChannelCount() {
+        return channelCount;
+    }
 
-	public void setChannelCount(int channelCount) {
-		this.channelCount = channelCount;
-	}
+    public void setChannelCount(int channelCount) {
+        this.channelCount = channelCount;
+    }
 
-	/**
-	 * @return the channelList
-	 */
-	public List<Channel> getChannels() {
-		return channels;
-	}
+    /**
+     * @return the channelList
+     */
+    public List<Channel> getChannels() {
+        return channels;
+    }
 
-	/**
-	 * @param channelList the channelList to set
-	 */
-	public void setChannels(List<Channel> channels) {
-		this.channels = channels;
-	}
+    /**
+     * @param channelList the channelList to set
+     */
+    public void setChannels(List<Channel> channels) {
+        this.channels = channels;
+    }
 
-	/**
-	 * @return the eventList
-	 */
-	public List<Event> getEvents() {
-		return events;
-	}
+    /**
+     * @return the eventList
+     */
+    public List<Event> getEvents() {
+        return events;
+    }
 
-	/**
-	 * @param eventList the eventList to set
-	 */
-	public void setEvents(List<Event> events) {
-		this.events = events;
-	}
-	
+    /**
+     * @param eventList the eventList to set
+     */
+    public void setEvents(List<Event> events) {
+        this.events = events;
+    }
+    
 }

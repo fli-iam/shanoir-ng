@@ -38,35 +38,35 @@ import static org.mockito.BDDMockito.given;
 @ActiveProfiles("test")
 public class StudyUserProcessCommandTest {
 
-	@Autowired
-	StudyUserUpdateService service;
-	
-	@MockBean
-	StudyUserRightsRepository studyUserRepository;
+    @Autowired
+    StudyUserUpdateService service;
+    
+    @MockBean
+    StudyUserRightsRepository studyUserRepository;
 
-	@MockBean
-	private StudyInstanceUIDHandler studyInstanceUIDHandler;
-	@Test
+    @MockBean
+    private StudyInstanceUIDHandler studyInstanceUIDHandler;
+    @Test
     public void processCommandsTest() {
-		given(studyUserRepository.findAllById(Mockito.anyList())).willReturn(new ArrayList<>());
-		List<StudyUserCommand> commands = new ArrayList<>();
-		commands.add(new StudyUserCommand(CommandType.DELETE, 1L));
-		commands.add(new StudyUserCommand(CommandType.CREATE, makeSU()));
-		service.processCommands(commands);
+        given(studyUserRepository.findAllById(Mockito.anyList())).willReturn(new ArrayList<>());
+        List<StudyUserCommand> commands = new ArrayList<>();
+        commands.add(new StudyUserCommand(CommandType.DELETE, 1L));
+        commands.add(new StudyUserCommand(CommandType.CREATE, makeSU()));
+        service.processCommands(commands);
     }
-	
-	private StudyUser makeSU() {
-		StudyUser su = new StudyUser();
-		su.setId(2L);
-		su.setUserId(1L);
-		su.setStudyId(1L);
-		su.setUserName("Jeannot");
-		List<StudyUserRight> rights = new ArrayList<>();
-		rights.add(StudyUserRight.CAN_ADMINISTRATE);
-		rights.add(StudyUserRight.CAN_IMPORT);
-		rights.add(StudyUserRight.CAN_DOWNLOAD);
-		rights.add(StudyUserRight.CAN_SEE_ALL);
-		su.setStudyUserRights(rights);
-		return su;
-	}
+    
+    private StudyUser makeSU() {
+        StudyUser su = new StudyUser();
+        su.setId(2L);
+        su.setUserId(1L);
+        su.setStudyId(1L);
+        su.setUserName("Jeannot");
+        List<StudyUserRight> rights = new ArrayList<>();
+        rights.add(StudyUserRight.CAN_ADMINISTRATE);
+        rights.add(StudyUserRight.CAN_IMPORT);
+        rights.add(StudyUserRight.CAN_DOWNLOAD);
+        rights.add(StudyUserRight.CAN_SEE_ALL);
+        su.setStudyUserRights(rights);
+        return su;
+    }
 }

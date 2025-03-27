@@ -47,11 +47,14 @@ public class ExtensionRequestApiController extends AbstractUserRequestApiControl
                     findByEmailForExtension(requestInfo.getEmail())
                     .orElseThrow(() -> new EntityNotFoundException(requestInfo.getEmail()));
             // Check that the user is well disabled or that at least the first notification email was sent, see #923
-            if (userToExtend.isEnabled() && (userToExtend.isFirstExpirationNotificationSent() == null || !userToExtend.isFirstExpirationNotificationSent().booleanValue())) {
-                throw new ShanoirException("This user is not disabled, please enter an email of a disabled account. If you forgot your password, please return to login page and follow the adapted link.");
+            if (userToExtend.isEnabled()
+                    && (userToExtend.isFirstExpirationNotificationSent() == null || !userToExtend.isFirstExpirationNotificationSent())) {
+                throw new ShanoirException("This user is not disabled, please enter an email of a disabled account. "
+                    + "If you forgot your password, please return to login page and follow the adapted link.");
             }
-            if (userToExtend.isExtensionRequestDemand().booleanValue()) {
-                throw new ShanoirException("An extension has already been requested for this user, please be patient of contact an administrator to accept the extension request.");
+            if (userToExtend.isExtensionRequestDemand()) {
+                throw new ShanoirException("An extension has already been requested for this user, "
+                    + "please be patient of contact an administrator to accept the extension request.");
             }
             LOG.info("Resetting password after extension request for user {}", userToExtend.getUsername());
 

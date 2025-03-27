@@ -31,201 +31,201 @@ import java.util.List;
 @Inheritance(strategy = InheritanceType.JOINED)
 public class InstrumentVariable extends AbstractEntity {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 2742726263888793970L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = 2742726263888793970L;
 
-	/** Is age-dependent variable. */
-	private boolean ageDependent;
+    /** Is age-dependent variable. */
+    private boolean ageDependent;
 
-	/** Is cultural skill-dependent variable. */
-	private boolean culturalSkillDependent;
+    /** Is cultural skill-dependent variable. */
+    private boolean culturalSkillDependent;
 
-	/** Instrument. */
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "instrument_id", nullable = false, updatable = true)
-	@JsonIgnore
-	private Instrument instrument;
+    /** Instrument. */
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "instrument_id", nullable = false, updatable = true)
+    @JsonIgnore
+    private Instrument instrument;
 
-	/** The domain explored by the variable. */
-	@NotNull
-	private Integer domain;
+    /** The domain explored by the variable. */
+    @NotNull
+    private Integer domain;
 
-	/** Is main variable. */
-	private boolean main;
+    /** Is main variable. */
+    private boolean main;
 
-	/** The name. */
-	@NotNull
-	private String name;
+    /** The name. */
+    @NotNull
+    private String name;
 
-	/** The quality measured by the variable. */
-	@NotNull
-	private Integer quality;
+    /** The quality measured by the variable. */
+    @NotNull
+    private Integer quality;
 
-	/** Is standardized variable. */
-	private boolean standardized;
+    /** Is standardized variable. */
+    private boolean standardized;
 
-	/** Is sex-dependent variable. */
-	private boolean sexDependent;
+    /** Is sex-dependent variable. */
+    private boolean sexDependent;
 
-	/** The Variable Assessment list. */
-	@OneToMany(mappedBy = "instrumentVariable", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	@JsonIgnore
-	private List<VariableAssessment> variableAssessments;
+    /** The Variable Assessment list. */
+    @OneToMany(mappedBy = "instrumentVariable", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<VariableAssessment> variableAssessments;
 
-	/**
-	 * @return the ageDependent
-	 */
-	public boolean isAgeDependent() {
-		return ageDependent;
-	}
+    /**
+     * @return the ageDependent
+     */
+    public boolean isAgeDependent() {
+        return ageDependent;
+    }
 
-	/**
-	 * @param ageDependent
-	 *            the ageDependent to set
-	 */
-	public void setAgeDependent(boolean ageDependent) {
-		this.ageDependent = ageDependent;
-	}
+    /**
+     * @param ageDependent
+     *            the ageDependent to set
+     */
+    public void setAgeDependent(boolean ageDependent) {
+        this.ageDependent = ageDependent;
+    }
 
-	/**
-	 * @return the culturalSkillDependent
-	 */
-	public boolean isCulturalSkillDependent() {
-		return culturalSkillDependent;
-	}
+    /**
+     * @return the culturalSkillDependent
+     */
+    public boolean isCulturalSkillDependent() {
+        return culturalSkillDependent;
+    }
 
-	/**
-	 * @param culturalSkillDependent
-	 *            the culturalSkillDependent to set
-	 */
-	public void setCulturalSkillDependent(boolean culturalSkillDependent) {
-		this.culturalSkillDependent = culturalSkillDependent;
-	}
+    /**
+     * @param culturalSkillDependent
+     *            the culturalSkillDependent to set
+     */
+    public void setCulturalSkillDependent(boolean culturalSkillDependent) {
+        this.culturalSkillDependent = culturalSkillDependent;
+    }
 
-	/**
-	 * @return the instrument
-	 */
-	public Instrument getInstrument() {
-		return instrument;
-	}
+    /**
+     * @return the instrument
+     */
+    public Instrument getInstrument() {
+        return instrument;
+    }
 
-	/**
-	 * @param instrument
-	 *            the instrument to set
-	 */
-	public void setInstrument(Instrument instrument) {
-		this.instrument = instrument;
-	}
+    /**
+     * @param instrument
+     *            the instrument to set
+     */
+    public void setInstrument(Instrument instrument) {
+        this.instrument = instrument;
+    }
 
-	/**
-	 * @return the domain
-	 */
-	public Domain getDomain() {
-		return Domain.getDomain(domain);
-	}
+    /**
+     * @return the domain
+     */
+    public Domain getDomain() {
+        return Domain.getDomain(domain);
+    }
 
-	/**
-	 * @param domain
-	 *            the domain to set
-	 */
-	public void setDomain(Domain domain) {
-		if (domain != null) {
-			this.domain = domain.getId();
-		}
-	}
+    /**
+     * @param domain
+     *            the domain to set
+     */
+    public void setDomain(Domain domain) {
+        if (domain != null) {
+            this.domain = domain.getId();
+        }
+    }
 
-	/**
-	 * @return the main
-	 */
-	public boolean isMain() {
-		return main;
-	}
+    /**
+     * @return the main
+     */
+    public boolean isMain() {
+        return main;
+    }
 
-	/**
-	 * @param main
-	 *            the main to set
-	 */
-	public void setMain(boolean main) {
-		this.main = main;
-	}
+    /**
+     * @param main
+     *            the main to set
+     */
+    public void setMain(boolean main) {
+        this.main = main;
+    }
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * @param name
-	 *            the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * @param name
+     *            the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	/**
-	 * @return the quality
-	 */
-	public Quality getQuality() {
-		return Quality.getQuality(quality);
-	}
+    /**
+     * @return the quality
+     */
+    public Quality getQuality() {
+        return Quality.getQuality(quality);
+    }
 
-	/**
-	 * @param quality
-	 *            the quality to set
-	 */
-	public void setQuality(Quality quality) {
-		if (quality != null) {
-			this.quality = quality.getId();
-		}
-	}
+    /**
+     * @param quality
+     *            the quality to set
+     */
+    public void setQuality(Quality quality) {
+        if (quality != null) {
+            this.quality = quality.getId();
+        }
+    }
 
-	/**
-	 * @return the standardized
-	 */
-	public boolean isStandardized() {
-		return standardized;
-	}
+    /**
+     * @return the standardized
+     */
+    public boolean isStandardized() {
+        return standardized;
+    }
 
-	/**
-	 * @param standardized
-	 *            the standardized to set
-	 */
-	public void setStandardized(boolean standardized) {
-		this.standardized = standardized;
-	}
+    /**
+     * @param standardized
+     *            the standardized to set
+     */
+    public void setStandardized(boolean standardized) {
+        this.standardized = standardized;
+    }
 
-	/**
-	 * @return the sexDependent
-	 */
-	public boolean isSexDependent() {
-		return sexDependent;
-	}
+    /**
+     * @return the sexDependent
+     */
+    public boolean isSexDependent() {
+        return sexDependent;
+    }
 
-	/**
-	 * @param sexDependent
-	 *            the sexDependent to set
-	 */
-	public void setSexDependent(boolean sexDependent) {
-		this.sexDependent = sexDependent;
-	}
+    /**
+     * @param sexDependent
+     *            the sexDependent to set
+     */
+    public void setSexDependent(boolean sexDependent) {
+        this.sexDependent = sexDependent;
+    }
 
-	/**
-	 * @return the variableAssessments
-	 */
-	public List<VariableAssessment> getVariableAssessmentList() {
-		return variableAssessments;
-	}
+    /**
+     * @return the variableAssessments
+     */
+    public List<VariableAssessment> getVariableAssessmentList() {
+        return variableAssessments;
+    }
 
-	/**
-	 * @param variableAssessments
-	 *            the variableAssessments to set
-	 */
-	public void setVariableAssessmentList(List<VariableAssessment> variableAssessments) {
-		this.variableAssessments = variableAssessments;
-	}
+    /**
+     * @param variableAssessments
+     *            the variableAssessments to set
+     */
+    public void setVariableAssessmentList(List<VariableAssessment> variableAssessments) {
+        this.variableAssessments = variableAssessments;
+    }
 
 }

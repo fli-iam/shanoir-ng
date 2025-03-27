@@ -36,78 +36,78 @@ import org.springframework.data.domain.Page;
 @DecoratedWith(MrDatasetDecorator.class)
 public interface MrDatasetMapper {
 
-	
-	/**
-	 * Map list of @Dataset to list of @IdNameDTO.
-	 *
-	 * @param datasets
-	 *            list of datasets.
-	 * @return list of datasets DTO.
-	 */
-	List<IdName> datasetsToIdNameDTOs(List<MrDataset> datasets);
+    
+    /**
+     * Map list of @Dataset to list of @IdNameDTO.
+     *
+     * @param datasets
+     *            list of datasets.
+     * @return list of datasets DTO.
+     */
+    List<IdName> datasetsToIdNameDTOs(List<MrDataset> datasets);
 
-	/**
-	 * Map a @Dataset to a @DatasetDTO.
-	 *
-	 * @param datasets
-	 *            dataset.
-	 * @return dataset DTO.
-	 */
-	@Named(value = "standard")
-	@Mappings({ @Mapping(target = "source", ignore = true), @Mapping(target = "copies", ignore = true) })
-	MrDatasetDTO datasetToDatasetDTO(MrDataset dataset);
-	
-	/**
-	 * Map a @Dataset to a @DatasetDTO.
-	 *
-	 * @param datasets
-	 *            dataset.
-	 * @return dataset DTO.
-	 */
-	@Named(value = "withProcessings")
-	@Mapping(target = "copies", expression = "java(mapCopiesFromDataset(dataset.getCopies()))")
-	@Mapping(target = "source", expression = "java(mapSourceFromDataset(dataset.getSource()))")
-	MrDatasetWithDependenciesDTO datasetToDatasetAndProcessingsDTO(MrDataset dataset);
-	
-	/**
-	 * Map a @Dataset to a @DatasetDTO.
-	 *
-	 * @param datasets
-	 *            dataset.
-	 * @return dataset DTO.
-	 */
-	@IterableMapping(qualifiedByName = "standard")
-	List<MrDatasetDTO> datasetToDatasetDTO(List<MrDataset> datasets);
+    /**
+     * Map a @Dataset to a @DatasetDTO.
+     *
+     * @param datasets
+     *            dataset.
+     * @return dataset DTO.
+     */
+    @Named(value = "standard")
+    @Mappings({ @Mapping(target = "source", ignore = true), @Mapping(target = "copies", ignore = true) })
+    MrDatasetDTO datasetToDatasetDTO(MrDataset dataset);
+    
+    /**
+     * Map a @Dataset to a @DatasetDTO.
+     *
+     * @param datasets
+     *            dataset.
+     * @return dataset DTO.
+     */
+    @Named(value = "withProcessings")
+    @Mapping(target = "copies", expression = "java(mapCopiesFromDataset(dataset.getCopies()))")
+    @Mapping(target = "source", expression = "java(mapSourceFromDataset(dataset.getSource()))")
+    MrDatasetWithDependenciesDTO datasetToDatasetAndProcessingsDTO(MrDataset dataset);
+    
+    /**
+     * Map a @Dataset to a @DatasetDTO.
+     *
+     * @param datasets
+     *            dataset.
+     * @return dataset DTO.
+     */
+    @IterableMapping(qualifiedByName = "standard")
+    List<MrDatasetDTO> datasetToDatasetDTO(List<MrDataset> datasets);
 
-	/**
-	 * Map a @Dataset to a @DatasetDTO.
-	 *
-	 * @param datasets
-	 *            dataset.
-	 * @return dataset DTO.
-	 */
-	@IterableMapping(qualifiedByName = "standard")
-	PageImpl<MrDatasetDTO> datasetToDatasetDTO(Page<MrDataset> page);
+    /**
+     * Map a @Dataset to a @DatasetDTO.
+     *
+     * @param datasets
+     *            dataset.
+     * @return dataset DTO.
+     */
+    @IterableMapping(qualifiedByName = "standard")
+    PageImpl<MrDatasetDTO> datasetToDatasetDTO(Page<MrDataset> page);
 
-	/**
-	 * Map a @Dataset to a @IdNameDTO.
-	 *
-	 * @param dataset
-	 *            dataset to map.
-	 * @return dataset DTO.
-	 */
-	IdName datasetToIdNameDTO(MrDataset dataset);
+    /**
+     * Map a @Dataset to a @IdNameDTO.
+     *
+     * @param dataset
+     *            dataset to map.
+     * @return dataset DTO.
+     */
+    IdName datasetToIdNameDTO(MrDataset dataset);
 
-	default List<Long> mapCopiesFromDataset(List<Dataset> copies) {
-		if (copies == null) {
-			return null;
-		}
-		return copies.stream()
-				.map(Dataset::getId)
-				.collect(Collectors.toList());
-	}
+    default List<Long> mapCopiesFromDataset(List<Dataset> copies) {
+        if (copies == null) {
+            return null;
+        }
+        return copies.stream()
+                .map(Dataset::getId)
+                .collect(Collectors.toList());
+    }
 
-	default Long mapSourceFromDataset(Dataset source) {
-		return source != null ? source.getId() : null;
-	}
+    default Long mapSourceFromDataset(Dataset source) {
+        return source != null ? source.getId() : null;
+    }
 }

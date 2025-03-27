@@ -1,8 +1,9 @@
 package org.shanoir.ng.accessrequest.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.v3.oas.annotations.Parameter;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.email.EmailService;
@@ -21,8 +22,6 @@ import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.service.UserService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,9 +34,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.swagger.v3.oas.annotations.Parameter;
 
 /**
  * Api for access request, to make a demand on
@@ -50,28 +50,28 @@ public class AccessRequestApiController implements AccessRequestApi {
     private static final String ROLE_ADMIN = "ROLE_ADMIN";
 
     @Autowired
-    ShanoirEventService eventService;
+    private ShanoirEventService eventService;
 
     @Autowired
-    AccessRequestService accessRequestService;
+    private AccessRequestService accessRequestService;
 
     @Autowired
-    EmailService emailService;
+    private EmailService emailService;
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @Autowired
-    RabbitTemplate rabbitTemplate;
+    private RabbitTemplate rabbitTemplate;
 
     @Autowired
-    ObjectMapper mapper;
+    private ObjectMapper mapper;
 
     @Autowired
-    StudyUserRightsRepository studyUserRightsRepository;
+    private StudyUserRightsRepository studyUserRightsRepository;
 
-    private static final Logger LOG = LoggerFactory.getLogger(AccessRequestApiController.class);
 
+    @Override
     public ResponseEntity<AccessRequest> saveNewAccessRequest(
             @Parameter(name = "access request to create", required = true) @RequestBody AccessRequest request,
             BindingResult result) throws RestServiceException {
@@ -114,7 +114,7 @@ public class AccessRequestApiController implements AccessRequestApi {
         // Send notification to study admin
         emailService.notifyStudyManagerAccessRequest(createdRequest);
 
-        return new ResponseEntity<AccessRequest>(createdRequest, HttpStatus.OK);
+        return new ResponseEntity<>(createdRequest, HttpStatus.OK);
     }
 
     @Override
@@ -123,10 +123,10 @@ public class AccessRequestApiController implements AccessRequestApi {
         List<AccessRequest> accessRequests = this.accessRequestService.findByUserId(KeycloakUtil.getTokenUserId());
 
         if (CollectionUtils.isEmpty(accessRequests)) {
-            return new ResponseEntity<List<AccessRequest>>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
-        return new ResponseEntity<List<AccessRequest>>(accessRequests, HttpStatus.OK);
+        return new ResponseEntity<>(accessRequests, HttpStatus.OK);
     }
 
     @Override
@@ -142,26 +142,27 @@ public class AccessRequestApiController implements AccessRequestApi {
         }
 
         if (CollectionUtils.isEmpty(studiesId)) {
-            return new ResponseEntity<List<AccessRequest>>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
         // Get all access requests
         List<AccessRequest> accessRequests = this.accessRequestService.findByStudyIdAndStatus(studiesId, AccessRequest.ON_DEMAND);
 
         if (CollectionUtils.isEmpty(accessRequests)) {
-            return new ResponseEntity<List<AccessRequest>>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
-        return new ResponseEntity<List<AccessRequest>>(accessRequests, HttpStatus.OK);
+        return new ResponseEntity<>(accessRequests, HttpStatus.OK);
     }
 
+    @Override
     public ResponseEntity<Void> resolveNewAccessRequest(
             @Parameter(name = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId,
             @Parameter(name = "Accept or refuse the request", required = true) @RequestBody boolean validation,
             BindingResult result) throws RestServiceException, AccountNotOnDemandException, EntityNotFoundException, JsonProcessingException, AmqpException {
         AccessRequest resolvedRequest = accessRequestService.findById(accessRequestId).orElse(null);
         if (resolvedRequest == null) {
-            return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         if (validation) {
             resolvedRequest.setStatus(AccessRequest.APPROVED);
@@ -195,15 +196,19 @@ public class AccessRequestApiController implements AccessRequestApi {
             }
         }
 
-        return new ResponseEntity<Void>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    public ResponseEntity<AccessRequest> getByid(@Parameter(name = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId) throws RestServiceException {
+    @Override
+    public ResponseEntity<AccessRequest> getByid(
+            @Parameter(name = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId)
+            throws RestServiceException {
         AccessRequest acceReq = this.accessRequestService.findById(accessRequestId).get();
-        return new ResponseEntity<AccessRequest>(acceReq, HttpStatus.OK);
+        return new ResponseEntity<>(acceReq, HttpStatus.OK);
     }
 
-    public     ResponseEntity<AccessRequest> inviteUserToStudy(
+    @Override
+    public ResponseEntity<AccessRequest> inviteUserToStudy(
             @Parameter(name = "Study the user is invited in", required = true)
                 @RequestParam(value = "studyId", required = true) Long studyId,
             @Parameter(name = "Study name the user is invited in", required = true)
@@ -246,7 +251,7 @@ public class AccessRequestApiController implements AccessRequestApi {
             request.setStudyName(studyName);
             request.setMotivation("From study manager");
             request.setStatus(AccessRequest.APPROVED);
-            return new ResponseEntity<AccessRequest>(request, HttpStatus.OK);
+            return new ResponseEntity<>(request, HttpStatus.OK);
         } else {
             // Otherwise, send a mail to the new user if we have a mail in entry
             if (isEmail) {
@@ -257,19 +262,21 @@ public class AccessRequestApiController implements AccessRequestApi {
                 mail.setInvitationIssuer(issuer);
                 mail.setFunction(function);
                 this.emailService.inviteToStudy(mail);
-                return new ResponseEntity<AccessRequest>(HttpStatus.NO_CONTENT);
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             } else {
-                return new ResponseEntity<AccessRequest>(HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
 
         }
-
     }
 
+    @Override
     public ResponseEntity<List<AccessRequest>> findAllByStudyId(
             @Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId
             ) throws RestServiceException {
 
-        return new ResponseEntity<List<AccessRequest>>(this.accessRequestService.findByStudyIdAndStatus(Collections.singletonList(studyId), AccessRequest.ON_DEMAND), HttpStatus.OK);
+        return new ResponseEntity<>(
+            this.accessRequestService.findByStudyIdAndStatus(Collections.singletonList(studyId), AccessRequest.ON_DEMAND),
+            HttpStatus.OK);
     }
 }

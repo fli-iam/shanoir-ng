@@ -28,22 +28,22 @@ import org.shanoir.ng.dataset.model.DatasetType;
 @Entity
 public class PetDataset extends Dataset {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -209384115208882224L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = -209384115208882224L;
 
-	public PetDataset() {
+    public PetDataset() {
 
-	}
+    }
 
-	public PetDataset(Dataset other) {
-		super(other);
-	}
+    public PetDataset(Dataset other) {
+        super(other);
+    }
 
-	@Override
-	public DatasetType getType() {
-		return DatasetType.Pet;
-	}
+    @Override
+    public DatasetType getType() {
+        return DatasetType.Pet;
+    }
 
 }

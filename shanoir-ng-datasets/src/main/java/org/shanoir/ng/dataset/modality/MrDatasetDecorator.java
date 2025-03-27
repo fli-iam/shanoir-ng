@@ -33,35 +33,35 @@ import org.springframework.stereotype.Component;
 @Component
 public abstract class MrDatasetDecorator implements MrDatasetMapper {
 
-	@Autowired
-	private MrDatasetMapper delegate;
+    @Autowired
+    private MrDatasetMapper delegate;
 
 
-	public MrDatasetDecorator() {
-	}
+    public MrDatasetDecorator() {
+    }
 
-	@Override
-	public List<IdName> datasetsToIdNameDTOs(final List<MrDataset> datasets) {
-		final List<IdName> datasetDTOs = new ArrayList<>();
-		for (MrDataset dataset : datasets) {
-			datasetDTOs.add(datasetToIdNameDTO(dataset));
-		}
-		return datasetDTOs;
-	}
+    @Override
+    public List<IdName> datasetsToIdNameDTOs(final List<MrDataset> datasets) {
+        final List<IdName> datasetDTOs = new ArrayList<>();
+        for (MrDataset dataset : datasets) {
+            datasetDTOs.add(datasetToIdNameDTO(dataset));
+        }
+        return datasetDTOs;
+    }
 
-	@Override
-	public IdName datasetToIdNameDTO(final MrDataset dataset) {
-		return delegate.datasetToIdNameDTO(dataset);
-	}
+    @Override
+    public IdName datasetToIdNameDTO(final MrDataset dataset) {
+        return delegate.datasetToIdNameDTO(dataset);
+    }
 
-	@Override
-	public PageImpl<MrDatasetDTO> datasetToDatasetDTO(Page<MrDataset> page) {
-		org.springframework.data.domain.Page<MrDatasetDTO> mappedPage =  page.map(new Function<MrDataset, MrDatasetDTO>() {
-			public MrDatasetDTO apply(MrDataset entity) {
-				return delegate.datasetToDatasetDTO(entity);
-			}
-		});
-		return new PageImpl<>(mappedPage.getContent());
-	}
+    @Override
+    public PageImpl<MrDatasetDTO> datasetToDatasetDTO(Page<MrDataset> page) {
+        org.springframework.data.domain.Page<MrDatasetDTO> mappedPage =  page.map(new Function<MrDataset, MrDatasetDTO>() {
+            public MrDatasetDTO apply(MrDataset entity) {
+                return delegate.datasetToDatasetDTO(entity);
+            }
+        });
+        return new PageImpl<>(mappedPage.getContent());
+    }
 
 }

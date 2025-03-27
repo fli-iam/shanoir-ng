@@ -29,36 +29,36 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
 @Entity
 public class XaProtocol extends AbstractEntity {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 3100284961389018913L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = 3100284961389018913L;
 
-	@JsonIgnore
-	@OneToOne(cascade = CascadeType.ALL, mappedBy = "xaProtocol")
-	private XaDatasetAcquisition xaDatasetAcquisition;
+    @JsonIgnore
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "xaProtocol")
+    private XaDatasetAcquisition xaDatasetAcquisition;
 
-	public XaProtocol() {
+    public XaProtocol() {
 
-	}
+    }
 
-	public XaProtocol(XaDatasetAcquisition acq) {
-		this.xaDatasetAcquisition = acq;
-	}
+    public XaProtocol(XaDatasetAcquisition acq) {
+        this.xaDatasetAcquisition = acq;
+    }
 
-	/**
-	 * @return the xaDatasetAcquisition
-	 */
-	public XaDatasetAcquisition getXaDatasetAcquisition() {
-		return xaDatasetAcquisition;
-	}
+    /**
+     * @return the xaDatasetAcquisition
+     */
+    public XaDatasetAcquisition getXaDatasetAcquisition() {
+        return xaDatasetAcquisition;
+    }
 
-	/**
-	 * @param xaDatasetAcquisition
-	 *            the xaDatasetAcquisition to set
-	 */
-	public void setXaDatasetAcquisition(XaDatasetAcquisition xaDatasetAcquisition) {
-		this.xaDatasetAcquisition = xaDatasetAcquisition;
-	}
+    /**
+     * @param xaDatasetAcquisition
+     *            the xaDatasetAcquisition to set
+     */
+    public void setXaDatasetAcquisition(XaDatasetAcquisition xaDatasetAcquisition) {
+        this.xaDatasetAcquisition = xaDatasetAcquisition;
+    }
 
 }

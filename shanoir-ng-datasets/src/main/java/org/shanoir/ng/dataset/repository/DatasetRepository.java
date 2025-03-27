@@ -28,60 +28,60 @@ import java.util.List;
 
 public interface DatasetRepository extends PagingAndSortingRepository<Dataset, Long>, CrudRepository<Dataset, Long> {
 
-	@Query(value="SELECT COUNT(*) FROM dataset as ds " +
-			"INNER JOIN dataset_acquisition as acq ON ds.dataset_acquisition_id=acq.id " +
-			"INNER JOIN examination as ex ON acq.examination_id=ex.id " +
-			"WHERE ds.source_id=:datasetParentId AND ex.study_id=:studyId", nativeQuery = true)
-	Long countDatasetsBySourceIdAndStudyId(Long datasetParentId, Long studyId);
+    @Query(value="SELECT COUNT(*) FROM dataset as ds " +
+            "INNER JOIN dataset_acquisition as acq ON ds.dataset_acquisition_id=acq.id " +
+            "INNER JOIN examination as ex ON acq.examination_id=ex.id " +
+            "WHERE ds.source_id=:datasetParentId AND ex.study_id=:studyId", nativeQuery = true)
+    Long countDatasetsBySourceIdAndStudyId(Long datasetParentId, Long studyId);
 
-	List<Dataset> findBySourceId(Long sourceDatasetId);
+    List<Dataset> findBySourceId(Long sourceDatasetId);
 
-	List<Dataset> findBySourceIdIn(List<Long> sourceDatasetId);
+    List<Dataset> findBySourceIdIn(List<Long> sourceDatasetId);
 
-	Page<Dataset> findByDatasetAcquisitionExaminationStudy_IdIn(Iterable<Long> studyIds, Pageable pageable);
+    Page<Dataset> findByDatasetAcquisitionExaminationStudy_IdIn(Iterable<Long> studyIds, Pageable pageable);
 
-	Iterable<Dataset> findByDatasetAcquisitionExaminationStudy_IdIn(Iterable<Long> studyIds, Sort sort);
+    Iterable<Dataset> findByDatasetAcquisitionExaminationStudy_IdIn(Iterable<Long> studyIds, Sort sort);
 
-	Iterable<Dataset> findByDatasetAcquisition_Examination_Study_Id(Long studyId);
+    Iterable<Dataset> findByDatasetAcquisition_Examination_Study_Id(Long studyId);
 
-	int countByDatasetAcquisition_Examination_Study_Id(Long studyId);
+    int countByDatasetAcquisition_Examination_Study_Id(Long studyId);
 
-	@Query(value = "SELECT ds.id FROM dataset ds " +
-			"INNER JOIN dataset_acquisition acq ON ds.dataset_acquisition_id = acq.id " +
-			"INNER JOIN examination ex ON acq.examination_id = ex.id " +
-			"WHERE ex.study_id = ?1", nativeQuery = true)
-	List<Long> findIdsByStudyId(Long studyId);
+    @Query(value = "SELECT ds.id FROM dataset ds " +
+            "INNER JOIN dataset_acquisition acq ON ds.dataset_acquisition_id = acq.id " +
+            "INNER JOIN examination ex ON acq.examination_id = ex.id " +
+            "WHERE ex.study_id = ?1", nativeQuery = true)
+    List<Long> findIdsByStudyId(Long studyId);
 
-	@Query(value = "SELECT ds.id FROM dataset ds " +
-			"WHERE ds.subject_id IN (?1)", nativeQuery = true)
-	List<Long> findIdsBySubjectIdIn(List<Long> subjectIds);
+    @Query(value = "SELECT ds.id FROM dataset ds " +
+            "WHERE ds.subject_id IN (?1)", nativeQuery = true)
+    List<Long> findIdsBySubjectIdIn(List<Long> subjectIds);
 
-	Iterable<Dataset> findByDatasetAcquisitionId(Long acquisitionId);
-	
-	Iterable<Dataset> findBydatasetAcquisitionStudyCardId(Long studycardId);
+    Iterable<Dataset> findByDatasetAcquisitionId(Long acquisitionId);
+    
+    Iterable<Dataset> findBydatasetAcquisitionStudyCardId(Long studycardId);
 
-	Iterable<Dataset> findByDatasetAcquisitionStudyCardIdAndDatasetAcquisitionExaminationStudy_IdIn(Long studycardId, List<Long> studyIds);
+    Iterable<Dataset> findByDatasetAcquisitionStudyCardIdAndDatasetAcquisitionExaminationStudy_IdIn(Long studycardId, List<Long> studyIds);
 
-	void deleteByIdIn(List<Long> ids);
+    void deleteByIdIn(List<Long> ids);
 
-	Iterable<Dataset> findByDatasetAcquisitionExaminationId(Long examId);
+    Iterable<Dataset> findByDatasetAcquisitionExaminationId(Long examId);
 
-	@Query("SELECT expr.datasetExpressionFormat, SUM(expr.size) FROM DatasetExpression expr " +
-			"WHERE expr.dataset.datasetAcquisition.examination.study.id = :studyId AND expr.size IS NOT NULL " +
-			"GROUP BY expr.datasetExpressionFormat")
-	List<Object[]> findExpressionSizesByStudyIdGroupByFormat(Long studyId);
+    @Query("SELECT expr.datasetExpressionFormat, SUM(expr.size) FROM DatasetExpression expr " +
+            "WHERE expr.dataset.datasetAcquisition.examination.study.id = :studyId AND expr.size IS NOT NULL " +
+            "GROUP BY expr.datasetExpressionFormat")
+    List<Object[]> findExpressionSizesByStudyIdGroupByFormat(Long studyId);
 
-	@Query("SELECT expr.dataset.datasetAcquisition.examination.study.id, expr.datasetExpressionFormat, SUM(expr.size) FROM DatasetExpression expr " +
-			"WHERE expr.dataset.datasetAcquisition.examination.study.id in (:studyIds) AND expr.size IS NOT NULL " +
-			"GROUP BY expr.dataset.datasetAcquisition.examination.study.id, expr.datasetExpressionFormat")
-	List<Object[]> findExpressionSizesTotalByStudyIdGroupByFormat(List<Long> studyIds);
+    @Query("SELECT expr.dataset.datasetAcquisition.examination.study.id, expr.datasetExpressionFormat, SUM(expr.size) FROM DatasetExpression expr " +
+            "WHERE expr.dataset.datasetAcquisition.examination.study.id in (:studyIds) AND expr.size IS NOT NULL " +
+            "GROUP BY expr.dataset.datasetAcquisition.examination.study.id, expr.datasetExpressionFormat")
+    List<Object[]> findExpressionSizesTotalByStudyIdGroupByFormat(List<Long> studyIds);
 
     List<Dataset> deleteByDatasetProcessingId(Long id);
 
-	boolean existsByTagsContains(StudyTag tag);
+    boolean existsByTagsContains(StudyTag tag);
 
-	@Query(value="SELECT ds.id FROM dataset as ds " +
-			"INNER JOIN input_of_dataset_processing as input ON ds.id=input.dataset_id " +
-			"WHERE input.processing_id = :processingId or ds.dataset_processing_id = :processingId", nativeQuery = true)
-	List<Dataset> findDatasetsByProcessingId(Long processingId);
+    @Query(value="SELECT ds.id FROM dataset as ds " +
+            "INNER JOIN input_of_dataset_processing as input ON ds.id=input.dataset_id " +
+            "WHERE input.processing_id = :processingId or ds.dataset_processing_id = :processingId", nativeQuery = true)
+    List<Dataset> findDatasetsByProcessingId(Long processingId);
 }

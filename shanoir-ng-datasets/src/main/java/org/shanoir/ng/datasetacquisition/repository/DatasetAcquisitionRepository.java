@@ -31,18 +31,18 @@ import java.util.List;
  */
 public interface DatasetAcquisitionRepository extends PagingAndSortingRepository<DatasetAcquisition, Long>, CrudRepository<DatasetAcquisition, Long>, DatasetAcquisitionRepositoryCustom  {
 
-	List<DatasetAcquisition> findByStudyCardId(Long studyCardId);
+    List<DatasetAcquisition> findByStudyCardId(Long studyCardId);
 
-	Page<DatasetAcquisition> findByStudyCardId(Long studyCardId, Pageable pageable);
-	
-	List<DatasetAcquisition> findByExaminationId(Long id);
-	
-	List<DatasetAcquisition> findDistinctByDatasetsIdIn(Long[] datasetIds);
+    Page<DatasetAcquisition> findByStudyCardId(Long studyCardId, Pageable pageable);
+    
+    List<DatasetAcquisition> findByExaminationId(Long id);
+    
+    List<DatasetAcquisition> findDistinctByDatasetsIdIn(Long[] datasetIds);
 
     boolean existsByStudyCard_Id(Long studyCardId);
 
-	List<DatasetAcquisition> findBySourceId(Long sourceId);
-	DatasetAcquisition findBySourceIdAndExaminationStudy_Id(Long sourceId, Long studyId);
+    List<DatasetAcquisition> findBySourceId(Long sourceId);
+    DatasetAcquisition findBySourceIdAndExaminationStudy_Id(Long sourceId, Long studyId);
 }
 
 

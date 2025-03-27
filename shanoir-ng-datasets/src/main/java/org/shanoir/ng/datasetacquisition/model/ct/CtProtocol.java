@@ -29,36 +29,36 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
 @Entity
 public class CtProtocol extends AbstractEntity {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 5062475142212117502L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = 5062475142212117502L;
 
-	@JsonIgnore
-	@OneToOne(cascade = CascadeType.ALL, mappedBy = "ctProtocol")
-	private CtDatasetAcquisition ctDatasetAcquisition;
+    @JsonIgnore
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "ctProtocol")
+    private CtDatasetAcquisition ctDatasetAcquisition;
 
-	public CtProtocol() {
+    public CtProtocol() {
 
-	}
+    }
 
-	public CtProtocol(CtDatasetAcquisition acq) {
-		this.ctDatasetAcquisition = acq;
-	}
+    public CtProtocol(CtDatasetAcquisition acq) {
+        this.ctDatasetAcquisition = acq;
+    }
 
-	/**
-	 * @return the ctDatasetAcquisition
-	 */
-	public CtDatasetAcquisition getCtDatasetAcquisition() {
-		return ctDatasetAcquisition;
-	}
+    /**
+     * @return the ctDatasetAcquisition
+     */
+    public CtDatasetAcquisition getCtDatasetAcquisition() {
+        return ctDatasetAcquisition;
+    }
 
-	/**
-	 * @param ctDatasetAcquisition
-	 *            the ctDatasetAcquisition to set
-	 */
-	public void setCtDatasetAcquisition(CtDatasetAcquisition ctDatasetAcquisition) {
-		this.ctDatasetAcquisition = ctDatasetAcquisition;
-	}
+    /**
+     * @param ctDatasetAcquisition
+     *            the ctDatasetAcquisition to set
+     */
+    public void setCtDatasetAcquisition(CtDatasetAcquisition ctDatasetAcquisition) {
+        this.ctDatasetAcquisition = ctDatasetAcquisition;
+    }
 
 }

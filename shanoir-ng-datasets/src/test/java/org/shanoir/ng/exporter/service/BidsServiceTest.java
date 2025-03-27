@@ -48,108 +48,108 @@ import static org.mockito.BDDMockito.given;
 @ActiveProfiles("test")
 public class BidsServiceTest {
 
-	@Mock
-	private ExaminationService examService;
+    @Mock
+    private ExaminationService examService;
 
-	@Mock
-	private SubjectStudyRepository subjectStudyRepository;
+    @Mock
+    private SubjectStudyRepository subjectStudyRepository;
 
-	@Mock
-	DatasetSecurityService datasetSecurityService;
+    @Mock
+    DatasetSecurityService datasetSecurityService;
 
-	@InjectMocks
-	@Spy
-	private BIDSServiceImpl service = new BIDSServiceImpl();
-	
-	@Mock
-	private ObjectMapper objectMapper;
-	
-	String studyName = "STUDY";
+    @InjectMocks
+    @Spy
+    private BIDSServiceImpl service = new BIDSServiceImpl();
+    
+    @Mock
+    private ObjectMapper objectMapper;
+    
+    String studyName = "STUDY";
 
-	Examination exam = ModelsUtil.createExamination();
-	Subject subject = new Subject();
-	
-	public static String tempFolderPath;
+    Examination exam = ModelsUtil.createExamination();
+    Subject subject = new Subject();
+    
+    public static String tempFolderPath;
 
-	@BeforeEach
-	public void setUp() throws IOException {
+    @BeforeEach
+    public void setUp() throws IOException {
         String property = "java.io.tmpdir";
         tempFolderPath = System.getProperty(property) + "/tmpTest/";
         File tempFile = new File(tempFolderPath);
         tempFile.mkdirs();
 
         File file = new File(tempFolderPath);
-		file.mkdirs();
-	    System.setProperty("bidsStorageDir", tempFolderPath);
-		ReflectionTestUtils.setField(service, "bidsStorageDir", tempFolderPath);
+        file.mkdirs();
+        System.setProperty("bidsStorageDir", tempFolderPath);
+        ReflectionTestUtils.setField(service, "bidsStorageDir", tempFolderPath);
 
-		exam.setId(Long.valueOf("13851681"));
-		// Create a full study with some data and everything
-		subject.setId(Long.valueOf("123"));
-		subject.setName("name");
+        exam.setId(Long.valueOf("13851681"));
+        // Create a full study with some data and everything
+        subject.setId(Long.valueOf("123"));
+        subject.setName("name");
 
-		Dataset ds = new MrDataset();
-		ds.setId(Long.valueOf("1684"));
+        Dataset ds = new MrDataset();
+        ds.setId(Long.valueOf("1684"));
 
-		DatasetAcquisition dsa = new MrDatasetAcquisition();
-		dsa.setExamination(exam);
-		dsa.setDatasets(Collections.singletonList(ds));
+        DatasetAcquisition dsa = new MrDatasetAcquisition();
+        dsa.setExamination(exam);
+        dsa.setDatasets(Collections.singletonList(ds));
 
-		ds.setDatasetAcquisition(dsa);
+        ds.setDatasetAcquisition(dsa);
 
-		exam.setDatasetAcquisitions(Collections.singletonList(dsa));
-		
-		// Create some dataFile and register it to be copied
-		File dataFile = new File(tempFolderPath + "test.test");
-		dataFile.createNewFile();
+        exam.setDatasetAcquisitions(Collections.singletonList(dsa));
+        
+        // Create some dataFile and register it to be copied
+        File dataFile = new File(tempFolderPath + "test.test");
+        dataFile.createNewFile();
 
-		DatasetExpression dsExpr = new DatasetExpression();
-		DatasetFile dsFile = new DatasetFile();
-		dsFile.setDatasetExpression(dsExpr);
-		dsFile.setPacs(false);
-		dsFile.setPath("file://" + dataFile.getAbsolutePath());
-		dsExpr.setDatasetFiles(Collections.singletonList(dsFile));
+        DatasetExpression dsExpr = new DatasetExpression();
+        DatasetFile dsFile = new DatasetFile();
+        dsFile.setDatasetExpression(dsExpr);
+        dsFile.setPacs(false);
+        dsFile.setPath("file://" + dataFile.getAbsolutePath());
+        dsExpr.setDatasetFiles(Collections.singletonList(dsFile));
 
-		ds.setDatasetExpressions(Collections.singletonList(dsExpr));
-	}
+        ds.setDatasetExpressions(Collections.singletonList(dsExpr));
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 1, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void testExportAsBids() throws IOException, InterruptedException {
-		//GIVEN a study full of data
+    @Test
+    @WithMockKeycloakUser(id = 1, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testExportAsBids() throws IOException, InterruptedException {
+        //GIVEN a study full of data
 
-		// Mock on rest template to get the list of subjects
-		List<SubjectStudy> subjectStudies = new ArrayList<>();
-		SubjectStudy susu = new SubjectStudy();
-		susu.setSubject(this.subject);
-		subjectStudies.add(	susu);
-		given(subjectStudyRepository.findByStudy_Id(exam.getStudyId())).willReturn(subjectStudies);
-		
-		// Mock on examination service to get the list of subject
-		given(examService.findBySubjectId(subject.getId())).willReturn(Collections.singletonList(exam));
+        // Mock on rest template to get the list of subjects
+        List<SubjectStudy> subjectStudies = new ArrayList<>();
+        SubjectStudy susu = new SubjectStudy();
+        susu.setSubject(this.subject);
+        subjectStudies.add(    susu);
+        given(subjectStudyRepository.findByStudy_Id(exam.getStudyId())).willReturn(subjectStudies);
+        
+        // Mock on examination service to get the list of subject
+        given(examService.findBySubjectId(subject.getId())).willReturn(Collections.singletonList(exam));
 
-		// WHEN we export the data
-		service.exportAsBids(exam.getStudyId(), studyName);
-		
-		// THEN the bids folder is generated with study - subject - exam - data
-		File studyFile = new File(tempFolderPath + "stud-" + exam.getStudyId() + "" + studyName);
-		assertTrue(studyFile.exists());
+        // WHEN we export the data
+        service.exportAsBids(exam.getStudyId(), studyName);
+        
+        // THEN the bids folder is generated with study - subject - exam - data
+        File studyFile = new File(tempFolderPath + "stud-" + exam.getStudyId() + "" + studyName);
+        assertTrue(studyFile.exists());
 
-		File subjectFile = new File(studyFile.getAbsolutePath() + "/sub-1" + subject.getName());
-		assertTrue(subjectFile.exists());
+        File subjectFile = new File(studyFile.getAbsolutePath() + "/sub-1" + subject.getName());
+        assertTrue(subjectFile.exists());
 
-		File examFile = new File(subjectFile.getAbsolutePath() + "/ses-" + exam.getId());
-		// No exam files as there is only one datasetAcquisition
-		assertFalse(examFile.exists());
-	}
+        File examFile = new File(subjectFile.getAbsolutePath() + "/ses-" + exam.getId());
+        // No exam files as there is only one datasetAcquisition
+        assertFalse(examFile.exists());
+    }
 
-	@AfterEach
-	public void tearDown() {
-		// delete files
+    @AfterEach
+    public void tearDown() {
+        // delete files
         File tempFile = new File(tempFolderPath);
         if (tempFile.exists()) {
-        	FileUtils.deleteQuietly(tempFile);
+            FileUtils.deleteQuietly(tempFile);
         }
-	}
+    }
 }
 

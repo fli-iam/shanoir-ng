@@ -38,86 +38,86 @@ import java.util.List;
  */
 public interface SolrService {
 
-	/**
-	 * Index a document to the existing index
-	 * @param document the document to index
-	 */
-	@PreAuthorize("hasRole('ADMIN')")
-	void addToIndex(ShanoirSolrDocument document) throws SolrServerException, IOException;
+    /**
+     * Index a document to the existing index
+     * @param document the document to index
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    void addToIndex(ShanoirSolrDocument document) throws SolrServerException, IOException;
 
-	/**
-	 * Index documents to the existing index
-	 * @param documents the documents to index
-	 */
-	void addAllToIndex(List<ShanoirSolrDocument> documents) throws SolrServerException, IOException;
+    /**
+     * Index documents to the existing index
+     * @param documents the documents to index
+     */
+    void addAllToIndex(List<ShanoirSolrDocument> documents) throws SolrServerException, IOException;
 
-	/**
-	 * Index all datasets (beginning with the creation of a new index)
-	 */
-	void indexAll() throws SolrServerException, IOException;
+    /**
+     * Index all datasets (beginning with the creation of a new index)
+     */
+    void indexAll() throws SolrServerException, IOException;
 
-	/**
-	 * Index dataset to the existing index from its id
-	 * @param datasetId the dataset id relative to dataset to index
-	 */
-	void indexDataset(Long datasetId);
+    /**
+     * Index dataset to the existing index from its id
+     * @param datasetId the dataset id relative to dataset to index
+     */
+    void indexDataset(Long datasetId);
 
-	/**
-	 * Index datasets to the existing index from their ids
-	 * @param datasetIds the dataset ids relative to the datasets to index
-	 */
-	void indexDatasets(List<Long> datasetIds);
+    /**
+     * Index datasets to the existing index from their ids
+     * @param datasetIds the dataset ids relative to the datasets to index
+     */
+    void indexDatasets(List<Long> datasetIds);
 
-	/**
-	 * Remove from index the dataset relative to the id
-	 * @param datasetId the dataset id relative to the dataset to remove from index
-	 */
-	void deleteFromIndex(Long datasetId) throws SolrServerException, IOException;
+    /**
+     * Remove from index the dataset relative to the id
+     * @param datasetId the dataset id relative to the dataset to remove from index
+     */
+    void deleteFromIndex(Long datasetId) throws SolrServerException, IOException;
 
-	/**
-	 * Remove from index the datasets relative to the ids
-	 * @param datasetIds the dataset ids relative to the datasets to remove from index
-	 */
-	void deleteFromIndex(List<Long> datasetIds) throws SolrServerException, IOException;
+    /**
+     * Remove from index the datasets relative to the ids
+     * @param datasetIds the dataset ids relative to the datasets to remove from index
+     */
+    void deleteFromIndex(List<Long> datasetIds) throws SolrServerException, IOException;
 
-	/**
-	 * Generate a list of results according to filters (the left side bar filters)
-	 * @param query the initial query according to user role and rights
-	 * @param pageable the left side bar filters
-	 * @return a solr result page object that gathers the results
-	 */
-	SolrResultPage<ShanoirSolrDocument> facetSearch(ShanoirSolrQuery query, Pageable pageable) throws RestServiceException;
+    /**
+     * Generate a list of results according to filters (the left side bar filters)
+     * @param query the initial query according to user role and rights
+     * @param pageable the left side bar filters
+     * @return a solr result page object that gathers the results
+     */
+    SolrResultPage<ShanoirSolrDocument> facetSearch(ShanoirSolrQuery query, Pageable pageable) throws RestServiceException;
 
-	/**
-	 * Generate a list of results according to a query (the top bar query)
-	 * @param datasetIds I'm not sure what are those ids
-	 * @param pageable the top bar query
-	 * @return a page gathering the filtered results
-	 */
-	Page<ShanoirSolrDocument> getByIdIn(List<Long> datasetIds, Pageable pageable) throws RestServiceException;
+    /**
+     * Generate a list of results according to a query (the top bar query)
+     * @param datasetIds I'm not sure what are those ids
+     * @param pageable the top bar query
+     * @return a page gathering the filtered results
+     */
+    Page<ShanoirSolrDocument> getByIdIn(List<Long> datasetIds, Pageable pageable) throws RestServiceException;
 
-	/**
-	 * Update a list of datasets in Solr.
-	 * @param datasetIds the list of dataset IDs to update
-	 */
-	void updateDatasets(List<Long> datasetIds) throws SolrServerException, IOException;
+    /**
+     * Update a list of datasets in Solr.
+     * @param datasetIds the list of dataset IDs to update
+     */
+    void updateDatasets(List<Long> datasetIds) throws SolrServerException, IOException;
 
-	/**
-	 * Update a list of datasets in Solr asynchronously.
-	 * @param datasetIds the list of dataset IDs to update
-	 */
-	void updateDatasetsAsync(List<Long> datasetIds) throws SolrServerException, IOException;
+    /**
+     * Update a list of datasets in Solr asynchronously.
+     * @param datasetIds the list of dataset IDs to update
+     */
+    void updateDatasetsAsync(List<Long> datasetIds) throws SolrServerException, IOException;
 
-	/**
-	 * Update datasets relative to a list of subjects in Solr asynchronously.
-	 * @param subjectIds the list of subjects IDs to update
-	 */
-	void updateSubjectsAsync(List<Long> subjectIds) throws SolrServerException, IOException;
+    /**
+     * Update datasets relative to a list of subjects in Solr asynchronously.
+     * @param subjectIds the list of subjects IDs to update
+     */
+    void updateSubjectsAsync(List<Long> subjectIds) throws SolrServerException, IOException;
 
-	/**
-	 * Update datasets relative to a study in Solr asynchronously.
-	 * @param studyId the list of subjects IDs to update
-	 */
-	void updateStudyAsync(Long studyId) throws SolrServerException, IOException;
+    /**
+     * Update datasets relative to a study in Solr asynchronously.
+     * @param studyId the list of subjects IDs to update
+     */
+    void updateStudyAsync(Long studyId) throws SolrServerException, IOException;
 
 }

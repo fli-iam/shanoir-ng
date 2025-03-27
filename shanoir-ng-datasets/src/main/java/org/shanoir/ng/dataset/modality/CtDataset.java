@@ -28,29 +28,29 @@ import org.shanoir.ng.dataset.model.DatasetType;
 @Entity
 public class CtDataset extends Dataset {
 
-//	private String pixelData;
-//	
-//	private String patientExamination;
-//	
-//	private String imageFlavor;
-//	
-//	private String derivedPixelContrast;
+//    private String pixelData;
+//    
+//    private String patientExamination;
+//    
+//    private String imageFlavor;
+//    
+//    private String derivedPixelContrast;
 
-	public CtDataset() {
-	}
+    public CtDataset() {
+    }
 
-	public CtDataset(Dataset other) {
-		super(other);
-	}
+    public CtDataset(Dataset other) {
+        super(other);
+    }
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -1035190618348031062L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = -1035190618348031062L;
 
-	@Override
-	public DatasetType getType() {
-		return DatasetType.Ct;
-	}
+    @Override
+    public DatasetType getType() {
+        return DatasetType.Ct;
+    }
 
 }

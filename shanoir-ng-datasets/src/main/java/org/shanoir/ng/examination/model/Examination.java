@@ -97,7 +97,7 @@ public class Examination extends HalEntity {
     private Long investigatorId;
 
     /** Notes about this examination. */
-	@JdbcTypeCode(Types.LONGVARCHAR)
+    @JdbcTypeCode(Types.LONGVARCHAR)
     private String note;
 
     /** Study. */

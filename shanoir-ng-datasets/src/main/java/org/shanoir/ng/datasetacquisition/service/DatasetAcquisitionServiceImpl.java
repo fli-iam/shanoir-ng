@@ -135,11 +135,11 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
     @Override
     public Collection<DatasetAcquisition> createAll(Collection<DatasetAcquisition> acquisitions) {
-    	Iterable<DatasetAcquisition> result = this.repository.saveAll(acquisitions);
-    	for (DatasetAcquisition acquisition: result) {
+        Iterable<DatasetAcquisition> result = this.repository.saveAll(acquisitions);
+        for (DatasetAcquisition acquisition: result) {
             shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, acquisition.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, acquisition.getExamination().getStudyId()));
-    	}
-    	return StreamSupport.stream(result.spliterator(), false).collect(Collectors.toList());
+        }
+        return StreamSupport.stream(result.spliterator(), false).collect(Collectors.toList());
     }
 
     @Override

@@ -31,42 +31,42 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 @JsonTypeName("Mr")
 public class MrDatasetAcquisition extends DatasetAcquisition {
 
-	public static final String datasetAcquisitionType = "Mr";
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 2532815427171578710L;
+    public static final String datasetAcquisitionType = "Mr";
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = 2532815427171578710L;
 
-	/** MR protocol. */
-	@OneToOne(cascade = CascadeType.ALL)
-	private MrProtocol mrProtocol;
+    /** MR protocol. */
+    @OneToOne(cascade = CascadeType.ALL)
+    private MrProtocol mrProtocol;
 
-	public MrDatasetAcquisition() {
-	}
+    public MrDatasetAcquisition() {
+    }
 
-	public MrDatasetAcquisition(DatasetAcquisition acq, MrDataset mrDs) {
-		super(acq);
-		this.mrProtocol = new MrProtocol(((MrDatasetAcquisition) acq).getMrProtocol(), mrDs);
-	}
+    public MrDatasetAcquisition(DatasetAcquisition acq, MrDataset mrDs) {
+        super(acq);
+        this.mrProtocol = new MrProtocol(((MrDatasetAcquisition) acq).getMrProtocol(), mrDs);
+    }
 
-	/**
-	 * @return the mrProtocol
-	 */
-	public MrProtocol getMrProtocol() {
-		return mrProtocol;
-	}
+    /**
+     * @return the mrProtocol
+     */
+    public MrProtocol getMrProtocol() {
+        return mrProtocol;
+    }
 
-	/**
-	 * @param mrProtocol
-	 *            the mrProtocol to set
-	 */
-	public void setMrProtocol(MrProtocol mrProtocol) {
-		this.mrProtocol = mrProtocol;
-	}
+    /**
+     * @param mrProtocol
+     *            the mrProtocol to set
+     */
+    public void setMrProtocol(MrProtocol mrProtocol) {
+        this.mrProtocol = mrProtocol;
+    }
 
-	@Override
-	public String getType() {
-		return "Mr";
-	}
+    @Override
+    public String getType() {
+        return "Mr";
+    }
 
 }
