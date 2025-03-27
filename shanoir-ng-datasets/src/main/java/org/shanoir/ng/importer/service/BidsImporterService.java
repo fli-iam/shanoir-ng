@@ -270,7 +270,7 @@ public class BidsImporterService {
 			dsFile.setPacs(false);
 			dsFile.setPath(importedFileFinalLocation.toUri().toString().replaceAll(" ", "%20"));
 			files.add(dsFile);
-			if(equipmentId == 0L && importedFile.getName().endsWith(".json") && Files.size(Path.of(importedFile.getPath())) < 1000000) {
+			if (equipmentId == 0L && importedFile.getName().endsWith(".json") && Files.size(Path.of(importedFile.getPath())) < 1000000) {
 				// Check equipment in json file
 				//JSONParser json = new JSONParser(new FileReader(importedFile));
 				// LinkedHashMap jsonObject = (LinkedHashMap) json.parse();

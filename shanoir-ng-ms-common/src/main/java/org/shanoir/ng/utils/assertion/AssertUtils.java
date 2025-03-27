@@ -116,7 +116,8 @@ public abstract class AssertUtils {
         } catch (Exception e) { }
     }
 
-    public static <T, U, V, W> void assertAccessAuthorized(AccessCheckedFunction4Arg<T, U, V, W> function, T arg1, U arg2, V arg3, W arg4) throws ShanoirException {
+    public static <T, U, V, W> void assertAccessAuthorized(AccessCheckedFunction4Arg<T, U, V, W> function,
+            T arg1, U arg2, V arg3, W arg4) throws ShanoirException {
         try {
             try {
                 function.apply(arg1, arg2, arg3, arg4);

@@ -135,7 +135,7 @@ public class CenterApiController implements CenterApi {
                     break;
                 }
             }
-            if(!centerInStudy) {
+            if (!centerInStudy) {
                 StudyCenter studyCenter = new StudyCenter();
                 Study study = studyService.findById(studyId);
                 studyCenter.setStudy(study);

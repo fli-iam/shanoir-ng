@@ -53,7 +53,7 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
             for (String line : lastLines) {
                 List<String> lineParts = new ArrayList<>(Arrays.asList(line.split(",")));
 
-                if(Long.parseLong(lineParts.get(1)) == executionMonitoring.getId()) {
+                if (Long.parseLong(lineParts.get(1)) == executionMonitoring.getId()) {
                     lineParts.set(1, newProcessing.getId().toString());
                     lineParts.add(newProcessing.getOutputDatasets().stream().anyMatch(file -> Objects.equals("error.yaml", file.getName())) ? "true" : "false");
                     lineParts.add(newProcessing.getOutputDatasets().stream().anyMatch(file -> Objects.equals("results.yaml", file.getName())) ? "true" : "false");
@@ -181,7 +181,7 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
      */
     private void createTrackingFile(File trackingFile) throws IOException {
         new File(trackingFilePrefixe).mkdirs();
-        if(trackingFile.createNewFile()) {
+        if (trackingFile.createNewFile()) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(trackingFile));) {
                 String headers = "Date (HH:mm dd/MM/yyyy),Processing_id,Exam_id,Dataset_id,Dataset_name,Sent_to_VIP,Error_file,Result_file";
                 writer.write(headers);

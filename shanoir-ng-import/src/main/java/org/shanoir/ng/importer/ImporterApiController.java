@@ -442,7 +442,7 @@ public class ImporterApiController implements ImporterApi {
 			//    - Save files
 			File destinationImageFile = new File(userImportDir.getAbsolutePath(), imageFileName);
 			imageFile.transferTo(destinationImageFile);
-			if(headerFile != null) {
+			if (headerFile != null) {
 				File destinationHeaderFile = new File(userImportDir.getAbsolutePath(), headerFileName);
 				headerFile.transferTo(destinationHeaderFile);
 

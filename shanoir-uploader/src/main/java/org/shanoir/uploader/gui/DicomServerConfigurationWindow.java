@@ -175,7 +175,7 @@ public class DicomServerConfigurationWindow extends JFrame {
 		frame.pack();
 
 		// center the frame
-		// frame.setLocationRelativeTo( null );
+		// frame.setLocationRelativeTo(null );
 		Point center = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint();
 		int windowWidth = 750;
 		int windowHeight = 560;

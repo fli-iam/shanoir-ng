@@ -136,7 +136,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
 
         for(DatasetProcessing processing : processings) {
             processing.getInputDatasets().removeIf(ds -> ds.getId().equals(datasetId));
-            if(processing.getInputDatasets().isEmpty()) {
+            if (processing.getInputDatasets().isEmpty()) {
                 // If processing is no more linked to a dataset, delete it
                 toDelete.add(processing);
             }else{
@@ -159,11 +159,11 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
 
     @Override
     public void validateDatasetProcessing(DatasetProcessing processing) throws RestServiceException {
-        if(processing.getStudyId() == null) {
+        if (processing.getStudyId() == null) {
             ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Processing must be linked to a study.", null);
             throw new RestServiceException(error);
         }
-        if(processing.getInputDatasets() == null || processing.getInputDatasets().isEmpty()) {
+        if (processing.getInputDatasets() == null || processing.getInputDatasets().isEmpty()) {
             ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "There must be at least one input dataset.", null);
             throw new RestServiceException(error);
         }

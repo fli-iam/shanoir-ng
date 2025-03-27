@@ -103,7 +103,7 @@ public class ShanoirEventsService {
 	 * Deletes everyday events older than 1 year.
 	 */
 	@Scheduled(fixedDelay = DateUtils.MILLIS_PER_DAY)
-	private void deletePeriodically( ) {
+	private void deletePeriodically() {
 		Date now = new Date();
 		Long nowMinusOneYear = now.getTime() - DateUtils.MILLIS_PER_DAY * 361;
 		repository.deleteByLastUpdateBefore(new Date(nowMinusOneYear));
@@ -139,7 +139,7 @@ public class ShanoirEventsService {
     }
 
 	@Scheduled(fixedDelay = 30000)
-	private void keepConnectionAlive( ) {
+	private void keepConnectionAlive() {
         List<SseEmitter> sseEmitterListToRemove = new ArrayList<>();
         AsyncTaskApiController.emitters.forEach((SseEmitter emitter) -> {
             try {

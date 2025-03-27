@@ -519,7 +519,7 @@ public class DatasetSecurityService {
 
 	private static Long getStudyIdFromDataset(Dataset dataset) {
 		Long studyId;
-		if(dataset.getDatasetProcessing() != null) {
+		if (dataset.getDatasetProcessing() != null) {
 			studyId = dataset.getDatasetProcessing().getStudyId();
 		}else if (dataset.getDatasetAcquisition() != null
 				&& dataset.getDatasetAcquisition().getExamination() != null
@@ -1142,7 +1142,7 @@ public class DatasetSecurityService {
 			if (exam.getStudyId() == null) {
 				return false;
 			}
-			if(!this.hasRightOnStudyCenter(exam.getCenterId(), exam.getStudyId(), rightStr)) {
+			if (!this.hasRightOnStudyCenter(exam.getCenterId(), exam.getStudyId(), rightStr)) {
 				return false;
 			}
 		}

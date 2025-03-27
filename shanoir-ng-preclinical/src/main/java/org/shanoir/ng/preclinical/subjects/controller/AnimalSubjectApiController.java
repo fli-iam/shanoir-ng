@@ -112,7 +112,7 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
     private SubjectDto createSubject(SubjectDto dto) throws ShanoirException, RestServiceException {
 
-        if(subjectService.isSubjectNameAlreadyUsed(dto.getName())) {
+        if (subjectService.isSubjectNameAlreadyUsed(dto.getName())) {
             FieldErrorMap errorMap = new FieldErrorMap();
             List<FieldError> errors = new ArrayList();
             errors.add(new FieldError("unique", "The given value is already taken for this field, choose another", dto.getName()));
@@ -185,7 +185,7 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
         Long id = subjectService.getIdBySubjectId(subjectId);
 
-        if(id == null) {
+        if (id == null) {
             throw new RestServiceException(new ErrorModel(HttpStatus.NOT_FOUND.value(), "No animal subject found for this subject id", null));
         }
 

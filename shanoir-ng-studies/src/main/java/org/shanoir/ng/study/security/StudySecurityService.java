@@ -122,7 +122,7 @@ public class StudySecurityService {
 		List<Long> invalidStudyIds = new ArrayList<>();
 
 		for(Long id : studyIds) {
-			 if(!this.hasRightOnStudy(id, rightStr)) {
+			 if (!this.hasRightOnStudy(id, rightStr)) {
 				 invalidStudyIds.add(id);
 			 }
 		}
@@ -341,7 +341,7 @@ public class StudySecurityService {
 
 			ListIterator<SubjectStudyDTO> iter = subjectDto.getSubjectStudyList().listIterator();
 			while(iter.hasNext()) {
-				if(toRemove.contains(iter.next().getId())) {
+				if (toRemove.contains(iter.next().getId())) {
 					iter.remove();
 				}
 			}

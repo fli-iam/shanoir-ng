@@ -133,7 +133,7 @@ public class DatasetDownloaderServiceImpl {
 				manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, datasetFilePath, format, withManifest, filesByAcquisitionId, converterId);
 
 			}
-			if(!filesByAcquisitionId.isEmpty()) {
+			if (!filesByAcquisitionId.isEmpty()) {
 				DatasetFileUtils.writeManifestForExport(zipOutputStream, filesByAcquisitionId);
 			}
 
@@ -277,7 +277,7 @@ public class DatasetDownloaderServiceImpl {
 
 	protected String getSubjectName(Dataset dataset) {
 		String subjectName = "unknownSubject";
-		if(dataset.getSubjectId() != null) {
+		if (dataset.getSubjectId() != null) {
 			Optional<Subject> subjectOpt = subjectRepository.findById(dataset.getSubjectId());
 			if (subjectOpt.isPresent()) {
 				subjectName = subjectOpt.get().getName();

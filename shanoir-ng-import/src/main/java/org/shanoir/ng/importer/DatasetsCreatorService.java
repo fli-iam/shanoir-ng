@@ -41,7 +41,7 @@ public class DatasetsCreatorService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	public void createDatasets(Patient patient, File workFolder, ImportJob importJob) throws ShanoirException {
 		File seriesFolderFile = new File(workFolder.getAbsolutePath() + File.separator + SERIES);
-		if(!seriesFolderFile.exists()) {
+		if (!seriesFolderFile.exists()) {
 			seriesFolderFile.mkdirs();
 		} else {
 			throw new ShanoirException("Error while creating series folder: folder already exists.");
@@ -220,7 +220,7 @@ public class DatasetsCreatorService {
 	private File createSerieIDFolderAndMoveFiles(File workFolder, File seriesFolderFile, Serie serie) throws ShanoirException {
 		String serieID = serie.getSeriesInstanceUID();
 		File serieIDFolderFile = new File(seriesFolderFile.getAbsolutePath() + File.separator + serieID);
-		if(!serieIDFolderFile.exists()) {
+		if (!serieIDFolderFile.exists()) {
 			serieIDFolderFile.mkdirs();
 		} else {
 			throw new ShanoirException("Error while creating serie id folder: folder already exists. serieId: " + serieID);

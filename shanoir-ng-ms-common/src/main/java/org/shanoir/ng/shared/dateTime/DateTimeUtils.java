@@ -28,7 +28,9 @@ import java.util.Date;
  * @author yyao
  *
  */
-public class DateTimeUtils {
+public final class DateTimeUtils {
+
+    private DateTimeUtils() { }
 
     public static LocalDate dateToLocalDate(Date date) {
         if (date == null) return null;

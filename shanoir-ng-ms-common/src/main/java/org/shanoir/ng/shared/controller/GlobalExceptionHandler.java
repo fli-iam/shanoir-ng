@@ -60,7 +60,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<ErrorModel> handleException(final Exception e) {
 
-        if(e.getCause() instanceof RestServiceException) {
+        if (e.getCause() instanceof RestServiceException) {
             return this.handleRestServiceException((RestServiceException) e.getCause());
         }
 

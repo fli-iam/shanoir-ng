@@ -189,12 +189,12 @@ public class ImportUtils {
 		Serie firstSerie = selectedSeries.iterator().next();
 		MRI mriInformation = new MRI();
 		InstitutionDicom institutionDicom = firstSerie.getInstitution();
-		if(institutionDicom != null) {
+		if (institutionDicom != null) {
 			mriInformation.setInstitutionName(institutionDicom.getInstitutionName());
 			mriInformation.setInstitutionAddress(institutionDicom.getInstitutionAddress());
 		}
 		EquipmentDicom equipmentDicom = firstSerie.getEquipment();
-		if(equipmentDicom != null) {
+		if (equipmentDicom != null) {
 			mriInformation.setManufacturer(equipmentDicom.getManufacturer());
 			mriInformation.setManufacturersModelName(equipmentDicom.getManufacturerModelName());
 			mriInformation.setDeviceSerialNumber(equipmentDicom.getDeviceSerialNumber());
@@ -362,7 +362,7 @@ public class ImportUtils {
 		List<String> allFileNames = null;
 		if (isFromPACS) {
 			allFileNames = dicomServerClient.retrieveDicomFiles(progressBar, downloadOrCopyReport, studyInstanceUID, selectedSeries, uploadFolder);
-			if(allFileNames != null && !allFileNames.isEmpty()) {
+			if (allFileNames != null && !allFileNames.isEmpty()) {
 				logger.info(uploadFolder.getName() + ": " + allFileNames.size() + " DICOM files downloaded from PACS.");
 			} else {
 				logger.info(uploadFolder.getName() + ": error with download from PACS.");
@@ -370,7 +370,7 @@ public class ImportUtils {
 			}
 		} else {
 			allFileNames = copyFilesToUploadFolder(progressBar, downloadOrCopyReport, dicomFileAnalyzer, selectedSeries, uploadFolder, filePathDicomDir);
-			if(allFileNames != null) {
+			if (allFileNames != null) {
 				logger.info(uploadFolder.getName() + ": " + allFileNames.size() + " DICOM files copied from CD/DVD/local file system.");
 			} else {
 				logger.error("Error while copying file from CD/DVD/local file system.");
@@ -427,7 +427,7 @@ public class ImportUtils {
 				logger.error(e.getMessage(), e);
 				return null;
 			}
-			if(addSubjectStudy(study, subjectREST, subjectStudyIdentifier, subjectType, isPhysicallyInvolved)) {
+			if (addSubjectStudy(study, subjectREST, subjectStudyIdentifier, subjectType, isPhysicallyInvolved)) {
 				// create subject with subject-study filled to avoid access denied exception because of rights check
 				Long centerId = studyCard.getAcquisitionEquipment().getCenter().getId();
 				subjectREST = ShUpOnloadConfig.getShanoirUploaderServiceClient().createSubject(subjectREST, ShUpConfig.isModeSubjectCommonNameManual(), centerId);
@@ -613,7 +613,7 @@ public class ImportUtils {
 	 */
 	public static AcquisitionEquipment findEquipmentInAllEquipments(List<AcquisitionEquipment> acquisitionEquipments, String manufacturerModelName, String deviceSerialNumber) {
 		for (AcquisitionEquipment acquisitionEquipment : acquisitionEquipments) {
-			if(checkEquipment(acquisitionEquipment, manufacturerModelName, deviceSerialNumber)) {
+			if (checkEquipment(acquisitionEquipment, manufacturerModelName, deviceSerialNumber)) {
 				return acquisitionEquipment;
 			}
 		}

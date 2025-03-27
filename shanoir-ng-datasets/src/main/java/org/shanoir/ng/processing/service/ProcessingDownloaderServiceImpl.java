@@ -83,7 +83,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
                 manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, processingFilePath  + "/output", format, withManifest, filesByAcquisitionId, converterId);
             }
         }
-        if(!filesByAcquisitionId.isEmpty()) {
+        if (!filesByAcquisitionId.isEmpty()) {
             DatasetFileUtils.writeManifestForExport(zipOutputStream, filesByAcquisitionId);
         }
 
@@ -100,14 +100,14 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
     public void massiveDownloadByExaminations(List<Examination> examinationList, String processingComment, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
         List<Long> processingIdsList = datasetProcessingRepository.findAllIdsByExaminationIds(examinationList.stream().map(Examination::getId).toList());
         List<DatasetProcessing> processingList = datasetProcessingService.findAllById(processingIdsList);
-        if(!Objects.isNull(processingComment)) {
+        if (!Objects.isNull(processingComment)) {
             processingList = processingList.stream().filter(it -> Objects.equals(it.getComment(), processingComment)).toList();
         };
         massiveDownload(processingList, resultOnly, format, response, withManifest, converterId);
     }
 
     private void manageResultOnly(List<DatasetProcessing> processingList, boolean resultOnly) {
-        if(resultOnly) {
+        if (resultOnly) {
             processingList.forEach(it -> {it.setOutputDatasets(it.getOutputDatasets().stream().filter(file -> Objects.equals(file.getName(), "result.yaml")).toList()); it.setInputDatasets(new ArrayList<>());});
         }
     }

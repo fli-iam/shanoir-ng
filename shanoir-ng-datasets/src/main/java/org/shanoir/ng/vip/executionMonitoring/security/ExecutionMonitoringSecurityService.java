@@ -46,7 +46,7 @@ public class ExecutionMonitoringSecurityService {
     }
 
     private boolean hasRightOnExecutionMonitoring(ExecutionMonitoring executionMonitoring, String rightStr) {
-        if(executionMonitoring.getStudyId() == null) {
+        if (executionMonitoring.getStudyId() == null) {
             throw new IllegalArgumentException("Study id cannot be null here.");
         }
         return studyRightsService.hasRightOnStudy(executionMonitoring.getStudyId(), rightStr);

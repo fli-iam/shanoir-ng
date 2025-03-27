@@ -22,7 +22,7 @@ public class SelectProfileConfigurationState implements State {
 	private SelectProfilePanelActionListener selectProfilePanelActionListener;
 
 	public void load(StartupStateContext context) {
-		if(ShUpConfig.profileSelected == null) {
+		if (ShUpConfig.profileSelected == null) {
 			context.setState(selectProfileManualConfigurationState);
 			context.nextState();
 		} else {

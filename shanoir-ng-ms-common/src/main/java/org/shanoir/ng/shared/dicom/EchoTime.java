@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.shared.dicom;
 
+import java.util.Objects;
+
 public class EchoTime {
 
     /**
@@ -53,5 +55,12 @@ public class EchoTime {
         result = prime * result + echoNumber;
         result = prime * result + echoTime.hashCode();
         return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof EchoTime
+            && Objects.equals(((EchoTime) obj).getEchoNumber(), getEchoNumber())
+            && Objects.equals(((EchoTime) obj).getEchoTime(), getEchoTime());
     }
 }

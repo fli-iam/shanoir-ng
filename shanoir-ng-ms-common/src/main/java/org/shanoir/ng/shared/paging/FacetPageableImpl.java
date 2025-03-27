@@ -21,7 +21,9 @@ public class FacetPageableImpl implements FacetPageable {
 
     private int pageNumber = 1;
 
-    private int pageSize = 20;
+    private static final int DEFAULT_PAGE_SIZE = 20;
+
+    private int pageSize = DEFAULT_PAGE_SIZE;
 
     private String filter = null;
 

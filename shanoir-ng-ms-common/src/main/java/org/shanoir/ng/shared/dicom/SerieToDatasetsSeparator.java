@@ -33,15 +33,16 @@ import org.slf4j.LoggerFactory;
 public class SerieToDatasetsSeparator {
 
     private static final Logger LOG = LoggerFactory.getLogger(SerieToDatasetsSeparator.class);
+    private static final double ORIENTATION_DELTA_TOLERANCE = 0.0001;
 
     /** corresponding dicom tag. */
-    protected int acquisitionNumber = 0;
+    private int acquisitionNumber = 0;
 
     /** corresponding dicom tag. */
-    protected Set<EchoTime> echoTime = null;
+    private Set<EchoTime> echoTime = null;
 
     /** corresponding dicom tag. */
-    protected double[] imageOrientationPatient = null;
+    private double[] imageOrientationPatient = null;
 
     /**
      * Constructor with fields.
@@ -119,14 +120,15 @@ public class SerieToDatasetsSeparator {
             return otherImageOrientationPatient == null;
         }
         if (otherImageOrientationPatient == null) {
-            return imageOrientationPatient == null;
+            return false;
         }
         for (int i = 0; i < imageOrientationPatient.length; i++) {
             double diff = imageOrientationPatient[i] - otherImageOrientationPatient[i];
             if (diff != 0) {
-                if (Math.abs(diff) < 0.0001) {
+                if (Math.abs(diff) < ORIENTATION_DELTA_TOLERANCE) {
                     LOG.debug(
-                            "Attention! The image orientation is not strictly parallel. Found {} != {}. However, we tolerate this difference.", otherImageOrientationPatient[i], imageOrientationPatient[i]);
+                            "Attention! The image orientation is not strictly parallel. Found {} != {}. However, we tolerate this difference.",
+                            otherImageOrientationPatient[i], imageOrientationPatient[i]);
                 } else {
                     return false;
                 }

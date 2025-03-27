@@ -57,7 +57,7 @@ public class RabbitMQPreclinicalService {
 
             AnimalSubject animalSubject = animalSubjectService.getBySubjectId(subjectId);
 
-            if(animalSubject == null) {
+            if (animalSubject == null) {
                 return;
             }
             Long id = animalSubject.getId();

@@ -252,7 +252,7 @@ public class ShanoirUploaderServiceClient {
 			postBody.append("&password=").append(URLEncoder.encode(password, "UTF-8"));
 			postBody.append("&scope=offline_access");
 			try (CloseableHttpResponse response = httpService.post(keycloakURL, postBody.toString(), true);) {
-				if(response == null) {
+				if (response == null) {
 					logger.error("Error while asking authentification token from: " + keycloakURL);
 					return null;
 				}
@@ -437,7 +437,7 @@ public class ShanoirUploaderServiceClient {
 					List<Subject> subjects = Util.getMappedList(response, Subject.class);
 					for(Subject subject : subjects) {
 						List<Long> ids = findDatasetIdsBySubjectIdStudyId(subject.getId(), studyId);
-						if(ids != null) {
+						if (ids != null) {
 							datasetIds.addAll(ids);
 						}
 					}

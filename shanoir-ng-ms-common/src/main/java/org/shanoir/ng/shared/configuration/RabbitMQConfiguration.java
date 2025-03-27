@@ -40,11 +40,14 @@ public class RabbitMQConfiguration {
 
     @Bean(name = "multipleConsumersFactory")
     public SimpleRabbitListenerContainerFactory multipleConsumersFactory() {
+        final int maxConsumers = 100;
+        final int concurrentConsumers = 10;
+        final long minInterval = 100L;
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
-        factory.setMaxConcurrentConsumers(100);
-        factory.setConcurrentConsumers(10);
-        factory.setStartConsumerMinInterval(100L);
+        factory.setMaxConcurrentConsumers(maxConsumers);
+        factory.setConcurrentConsumers(concurrentConsumers);
+        factory.setStartConsumerMinInterval(minInterval);
         factory.setConsecutiveActiveTrigger(1);
         factory.setAutoStartup(true);
         factory.setPrefetchCount(1);
@@ -183,10 +186,10 @@ public class RabbitMQConfiguration {
     public static final String ACQUISITION_EQUIPMENT_CODE_QUEUE = "acquisition-equipment-code-queue";
 
     /** Queue to get the study card from a equipment code. */
-    public static final String IMPORT_STUDY_CARD_QUEUE="import-study-card-queue";
+    public static final String IMPORT_STUDY_CARD_QUEUE = "import-study-card-queue";
 
     /** Queue to get an equipment id from a code. */
-    public static final String EQUIPMENT_FROM_CODE_QUEUE="equipment-from-code-queue";
+    public static final String EQUIPMENT_FROM_CODE_QUEUE = "equipment-from-code-queue";
 
     /** Queue to create a study_user when subscribing to a study */
     public static final String STUDY_SUBSCRIPTION_QUEUE = "study-subscription-queue";
@@ -296,7 +299,9 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
-    public static Queue studyDatasetTypeQueue() { return new Queue(STUDY_DATASET_TYPE, true); }
+    public static Queue studyDatasetTypeQueue() {
+        return new Queue(STUDY_DATASET_TYPE, true);
+    }
 
     @Bean
     public static Queue datasetSubjectStudyQueue() {

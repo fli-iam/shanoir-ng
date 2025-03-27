@@ -44,10 +44,10 @@ public class JSONUtils {
                 String name = names1.getString(i);
                 Object valueThis = o1.get(name);
                 Object valueOther = o2.get(name);
-                if(valueThis == valueOther) {
+                if (valueThis == valueOther) {
                     continue;
                 }
-                if(valueThis == null) {
+                if (valueThis == null) {
                     return false;
                 }
                 if (valueThis instanceof JSONObject) {
@@ -91,10 +91,10 @@ public class JSONUtils {
         for (int i = 0; i < len; i += 1) {
             Object valueThis = o1.get(i);
             Object valueOther = o2.get(i);
-            if(valueThis == valueOther) {
+            if (valueThis == valueOther) {
                 continue;
             }
-            if(valueThis == null) {
+            if (valueThis == null) {
                 return false;
             }
             if (valueThis instanceof JSONObject) {
@@ -138,7 +138,7 @@ public class JSONUtils {
         }
         // if the classes are the same and implement Comparable
         // then use the built in compare first.
-        if(l.getClass().equals(r.getClass()) && l instanceof Comparable) {
+        if (l.getClass().equals(r.getClass()) && l instanceof Comparable) {
             @SuppressWarnings({ "rawtypes", "unchecked" })
             int compareTo = ((Comparable)l).compareTo(r);
             return compareTo==0;

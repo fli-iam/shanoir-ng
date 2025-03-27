@@ -126,7 +126,7 @@ public class ImportFinishActionListener implements ActionListener {
 				subjectREST, importJob.getSubject(), subjectName, category, languageHemDom, manualHemDom,
 				subjectStudy, subjectType, useExistingSubjectInStudy, isPhysicallyInvolved, subjectStudyIdentifier,
 				study, studyCard);
-			if(subjectREST == null) {
+			if (subjectREST == null) {
 				JOptionPane.showMessageDialog(mainWindow.frame,
 					mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.subjectcreator.createSubjectFromShup"),
 				"Error", JOptionPane.ERROR_MESSAGE);

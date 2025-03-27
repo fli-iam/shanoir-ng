@@ -186,7 +186,7 @@ public class ImporterService {
                     qualityResult = qualityService.retrieveQualityCardResult(importJob);
                     if (!qualityResult.isEmpty()) {
                         LOG.info("Retrieving Quality Control result from ShanoirUploader.");
-                        if(subjectStudy != null) {
+                        if (subjectStudy != null) {
                             subjectStudy.setQualityTag(qualityResult.get(0).getTagSet());
                             qualityResult.addUpdatedSubjectStudy(subjectStudy);
                         }
@@ -213,7 +213,7 @@ public class ImporterService {
                             datasetAcquisitionService.deleteById(acquisition.getId(), null);
                         }
                         // revert quality tag
-                        if(subjectStudy != null) {
+                        if (subjectStudy != null) {
                             subjectStudy.setQualityTag(tagSave);
                             subjectStudyService.update(qualityResult.getUpdatedSubjectStudies());
                         }

@@ -150,7 +150,7 @@ public class SolrServiceImpl implements SolrService {
 
 	protected void indexDataPartition(ShanoirEvent event, List<ShanoirMetadata> documents, Map<Long, List<String>> tags, int indexedSize) throws SolrServerException, IOException {
 		indexDocumentsInSolr(documents, tags);
-		if(Objects.equals(1f, event.getProgress())) {
+		if (Objects.equals(1f, event.getProgress())) {
 			eventService.publishSuccessEvent(event, "Indexed [" + indexedSize + "] datasets.");
 		} else {
 			eventService.publishEvent(event, "Indexing [" + indexedSize + "] datasets...", event.getProgress());
@@ -247,7 +247,7 @@ public class SolrServiceImpl implements SolrService {
 			doc.setTags(tags.get(shanoirMetadata.getDatasetId()));
 			solrDocuments.add(doc);
 		}
-		if(!solrDocuments.isEmpty()) {
+		if (!solrDocuments.isEmpty()) {
 			solrJWrapper.addAllToIndex(solrDocuments);
 		}
 	}

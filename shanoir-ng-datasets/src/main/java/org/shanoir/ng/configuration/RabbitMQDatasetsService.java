@@ -178,7 +178,7 @@ public class RabbitMQDatasetsService {
 
 			List<String> errors = studyService.validate(updated, current);
 
-			if(!errors.isEmpty()) {
+			if (!errors.isEmpty()) {
 				return errors.get(0);
 			}
 
@@ -271,7 +271,7 @@ public class RabbitMQDatasetsService {
 					if (newOne.getId() == null) throw new IllegalStateException("The entity should must have an id ! Received string : \"" + receivedStr + "\"");
 					T entity = repository.save(newOne);
 					return entity;
-				} catch ( SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException e) {
+				} catch (SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException e) {
 					throw new AmqpRejectAndDontRequeueException("Cannot instanciate " + clazz.getSimpleName() + " class through reflection. It is a programming error.", e);
 				}
 			}

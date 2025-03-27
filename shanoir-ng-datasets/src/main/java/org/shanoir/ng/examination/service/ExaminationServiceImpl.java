@@ -344,7 +344,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 		for(Examination exam : exams) {
 			for(String path : exam.getExtraDataFilePathList()) {
 				File f = new File(this.getExtraDataFilePath(exam.getId(), path));
-				if(f.exists()) {
+				if (f.exists()) {
 					size += f.length();
 				}
 			}

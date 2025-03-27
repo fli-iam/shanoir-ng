@@ -391,7 +391,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 
 		List<ShanoirMetadata> result = this.findSolr(clause);
 
-		if(result.isEmpty()) {
+		if (result.isEmpty()) {
 			return null;
 		}
 		
@@ -464,7 +464,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 
 		String clause = "";
 
-		if(datasetIds != null && !datasetIds.isEmpty()) {
+		if (datasetIds != null && !datasetIds.isEmpty()) {
 			String ids = datasetIds.stream().map(Object::toString).collect(Collectors.joining(","));
 			clause = " AND d.id IN (" + ids + ")";
 		}

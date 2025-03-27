@@ -72,13 +72,13 @@ public class DicomTreeCellRenderer extends DefaultTreeCellRenderer {
         DicomTreeNode treeNode = (DicomTreeNode) value;
         setText(treeNode.getDisplayString());
         setToolTipText(treeNode.getDisplayString());
-        if(value instanceof Media) {
+        if (value instanceof Media) {
         	setIcon(mediaIcon);
-        } else if(value instanceof PatientTreeNode) {
+        } else if (value instanceof PatientTreeNode) {
         	setIcon(patientIcon);
-        } else if(value instanceof StudyTreeNode) {
+        } else if (value instanceof StudyTreeNode) {
         	setIcon(studyIcon);
-        } else if(value instanceof SerieTreeNode) {
+        } else if (value instanceof SerieTreeNode) {
         	setIcon(serieIcon);
         }
         return this;

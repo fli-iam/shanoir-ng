@@ -36,7 +36,7 @@ public class ProcessingResourceServiceImpl implements ProcessingResourceService 
 
     public List<ParameterResourceDTO> createProcessingResources(ExecutionMonitoring processing, List<DatasetParameterDTO> datasetParameters) throws EntityNotFoundException {
 
-        if(datasetParameters ==  null || datasetParameters.isEmpty()) {
+        if (datasetParameters ==  null || datasetParameters.isEmpty()) {
             return new ArrayList<>();
         }
 

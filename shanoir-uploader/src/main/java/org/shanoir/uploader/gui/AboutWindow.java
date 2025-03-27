@@ -110,7 +110,7 @@ public class AboutWindow extends JFrame {
 		frame.pack();
 
 		// center the frame
-		// frame.setLocationRelativeTo( null );
+		// frame.setLocationRelativeTo(null );
 		Point center = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint();
 		int windowWidth = 300;
 		int windowHeight = 369;

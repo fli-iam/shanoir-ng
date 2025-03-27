@@ -88,7 +88,7 @@ public class ExaminationServiceSecurityTest {
 	public void setup() {
 		given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(false);
 		given(rightsService.hasRightOnStudies(Mockito.any(), Mockito.anyString())).willReturn(new HashSet<Long>());
-		given(rightsRepository.findByUserIdAndStudyId(Mockito.anyLong(), Mockito.anyLong())).willReturn( new StudyUser());
+		given(rightsRepository.findByUserIdAndStudyId(Mockito.anyLong(), Mockito.anyLong())).willReturn(new StudyUser());
 	}
 	
 	@Test

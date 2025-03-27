@@ -34,7 +34,8 @@ public class ControlerSecurityService {
      * @throws IllegalArgumentException
      * @throws InvocationTargetException
      */
-    public boolean idMatches(Long id, Object entity) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    public boolean idMatches(Long id, Object entity)
+            throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         if (id == null) throw new IllegalArgumentException("id cannot be null");
         if (entity == null) throw new IllegalArgumentException("entity cannot be null");
         Method getId = entity.getClass().getMethod("getId");

@@ -163,7 +163,7 @@ public class RabbitMQSubjectService {
 
 			// If it exists, update subject study list
 			if (existingSubject != null) {
-				if(existingSubject.getSubjectStudyList() == null) {
+				if (existingSubject.getSubjectStudyList() == null) {
 					existingSubject.setSubjectStudyList(new ArrayList<>());
 				}
 				if (!studyListContains(existingSubject.getSubjectStudyList(), studyId)) {

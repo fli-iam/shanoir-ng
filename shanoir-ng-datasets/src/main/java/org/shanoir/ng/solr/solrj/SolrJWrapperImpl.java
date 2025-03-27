@@ -408,7 +408,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 			solrDoc.setAcquisitionEquipmentName((String) document.getFirstValue("acquisitionEquipmentName"));
 			solrDoc.setSubjectName((String) document.getFirstValue("subjectName"));
 			solrDoc.setSubjectId((Long) document.getFirstValue("subjectId"));
-			solrDoc.setSortingIndex( (Integer) document.getFirstValue("sortingIndex"));
+			solrDoc.setSortingIndex((Integer) document.getFirstValue("sortingIndex"));
 			if (document.getFieldValues("tags") != null) {
 				solrDoc.setTags(document.getFieldValues("tags").stream()
 						.map(object -> Objects.toString(object, null))

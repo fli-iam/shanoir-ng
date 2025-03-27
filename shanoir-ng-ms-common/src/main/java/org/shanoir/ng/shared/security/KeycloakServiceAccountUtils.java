@@ -31,7 +31,7 @@ public class KeycloakServiceAccountUtils {
      * Logger
      */
     private static final Logger LOG = LoggerFactory.getLogger(KeycloakServiceAccountUtils.class);
-    private final String GRANT_TYPE="client_credentials";
+    private static final String GRANT_TYPE = "client_credentials";
 
     @Value("${service-account.token.uri:'https://shanoir-ng-nginx/auth'}")
     private String serverUrl;
@@ -61,14 +61,14 @@ public class KeycloakServiceAccountUtils {
 
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(map, headers);
 
-        try{
+        try {
             ResponseEntity<AccessTokenResponse> response = this.restTemplate.exchange(this.serverUrl, HttpMethod.POST, entity, AccessTokenResponse.class);
             return response.getBody();
         } catch (HttpStatusCodeException e) {
             // in case of error with a response payload.
             LOG.error("Unexpected error while retrieving access token.", e);
             throw new SecurityException("Unexpected error while retrieving access token.", e);
-        }catch (RestClientException e) {
+        } catch (RestClientException e) {
             // in case of an error but no response payload;
             LOG.error("No response payload for service account token request", e);
             throw new SecurityException("No response payload for service account token request", e);

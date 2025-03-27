@@ -20,7 +20,9 @@ package org.shanoir.ng.shared.exception;
  * @author msimon
  *
  */
-public class ErrorModelCode {
+public final class ErrorModelCode {
+
+    private ErrorModelCode() { }
 
     /** Bad request */
     public static final Integer BAD_REQUEST = 10;

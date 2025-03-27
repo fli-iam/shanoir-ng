@@ -108,8 +108,8 @@ public class EDFWriter
         }
 
         /**
-         * Convert data signals from two dimensions format ( {channels} {time, samples} ) to one
-         * dimension format ( channels {samples for each channel} grouped by time )
+         * Convert data signals from two dimensions format ({channels} {time, samples} ) to one
+         * dimension format (channels {samples for each channel} grouped by time )
          *
          * @param digitalValues         The signals data in two dimensions format
          * @param header                The header of edf format

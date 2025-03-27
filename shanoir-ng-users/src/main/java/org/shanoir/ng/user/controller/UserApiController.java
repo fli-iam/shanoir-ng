@@ -151,7 +151,7 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		/* Save user in db. */
 		try {
 			User createdUser = getUserService().create(user);
-			if(vipEnabled) {
+			if (vipEnabled) {
 				getVipUserService().createVIPAccountRequest(createdUser);
 			}
 			return new ResponseEntity<>(createdUser, HttpStatus.OK);

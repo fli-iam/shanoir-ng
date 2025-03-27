@@ -390,7 +390,7 @@ public class BIDSServiceImpl implements BIDSService {
 
 	private String getSessionLabel(Examination examination) {
 		String label = "" + examination.getId();
-		if(!StringUtils.isBlank(examination.getComment())) {
+		if (!StringUtils.isBlank(examination.getComment())) {
 			label += examination.getComment();
 		}
 
@@ -594,7 +594,7 @@ public class BIDSServiceImpl implements BIDSService {
 
 	private void deleteIfExists(String filePath) {
 		File file = new File(filePath);
-		if(file.exists()) {
+		if (file.exists()) {
 			file.delete();
 		}
 	}

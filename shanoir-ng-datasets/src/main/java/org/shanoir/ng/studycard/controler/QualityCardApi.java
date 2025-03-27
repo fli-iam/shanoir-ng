@@ -105,7 +105,7 @@ public interface QualityCardApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/{qualityCardId}", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.PUT)
-	@PreAuthorize("hasRole('ADMIN') or ( hasRole('EXPERT') and #qualityCardId == #qualityCard.getId() and @datasetSecurityService.hasUpdateRightOnQualityCard(#qualityCard, 'CAN_ADMINISTRATE'))")
+	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and #qualityCardId == #qualityCard.getId() and @datasetSecurityService.hasUpdateRightOnQualityCard(#qualityCard, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> updateQualityCard(
 			 @Parameter(description = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId,
 			 @Parameter(description = "quality card to update", required = true) @RequestBody QualityCard qualityCard,

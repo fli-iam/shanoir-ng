@@ -44,6 +44,8 @@ public final class KeycloakUtil {
 
     public static final String USER_ID_TOKEN_ATT = "userId";
 
+    private KeycloakUtil() { }
+
     /**
      * Get current user roles from Keycloak token.
      *
@@ -55,7 +57,7 @@ public final class KeycloakUtil {
         if (jwt == null) {
             throw new TokenNotFoundException("JwtAuthenticationToken not found");
         }
-        return jwt.getAuthorities().stream().map( a -> a.toString()).collect(Collectors.toSet());
+        return jwt.getAuthorities().stream().map(a -> a.toString()).collect(Collectors.toSet());
     }
 
     /**
@@ -88,7 +90,7 @@ public final class KeycloakUtil {
                 }
                 return userRoles;
             }
-            return getJwtAuthenticationToken().getAuthorities().stream().map( a -> a.toString()).collect(Collectors.toSet());
+            return getJwtAuthenticationToken().getAuthorities().stream().map(a -> a.toString()).collect(Collectors.toSet());
         }
     }
 

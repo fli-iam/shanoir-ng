@@ -18,7 +18,7 @@ import org.springframework.data.domain.Pageable;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-@JsonDeserialize(as=FacetPageableImpl.class)
+@JsonDeserialize(as = FacetPageableImpl.class)
 public interface FacetPageable extends Pageable {
 
     /**
@@ -49,5 +49,4 @@ public interface FacetPageable extends Pageable {
         }
 
     }
-
 }

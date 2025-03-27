@@ -450,7 +450,7 @@ public class DatasetServiceImpl implements DatasetService {
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
-		if(dataset.getDatasetAcquisition() != null && dataset.getDatasetAcquisition().getExamination() != null) {
+		if (dataset.getDatasetAcquisition() != null && dataset.getDatasetAcquisition().getExamination() != null) {
 			return dataset.getDatasetAcquisition().getExamination().getStudyId();
 		}
 		return null;
@@ -465,7 +465,7 @@ public class DatasetServiceImpl implements DatasetService {
 	@Override
 	public Examination getExamination(Dataset dataset) {
 		DatasetAcquisition acquisition = this.getAcquisition(dataset);
-		if(acquisition != null) {
+		if (acquisition != null) {
 			return acquisition.getExamination();
 		}
 		return null;
@@ -473,13 +473,13 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Override
 	public DatasetAcquisition getAcquisition(Dataset dataset) {
-		if(dataset.getDatasetAcquisition() != null) {
+		if (dataset.getDatasetAcquisition() != null) {
 			return dataset.getDatasetAcquisition();
 		}
-		if(dataset.getDatasetProcessing().getInputDatasets() != null) {
+		if (dataset.getDatasetProcessing().getInputDatasets() != null) {
 			for(Dataset ds : dataset.getDatasetProcessing().getInputDatasets()) {
 				DatasetAcquisition acq = this.getAcquisition(ds);
-				if(acq != null) {
+				if (acq != null) {
 					return acq;
 				}
 			}

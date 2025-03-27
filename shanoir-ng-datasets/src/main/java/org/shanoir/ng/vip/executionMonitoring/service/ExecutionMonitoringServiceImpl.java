@@ -113,10 +113,10 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
 
         while (!stop.get()) {
 
-            try{
+            try {
                 VipExecutionDTO dto = executionService.getExecutionAsServiceAccount(attempts, identifier).block();
 
-                if(dto == null) {
+                if (dto == null) {
                     attempts++;
                     continue;
                 }else{
@@ -174,7 +174,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
     private ShanoirEvent initShanoirEvent(ExecutionMonitoring processing, ShanoirEvent event, String execLabel) {
         String startMsg = execLabel + " : " + ExecutionStatus.RUNNING.getRestLabel();
 
-        if(event == null) {
+        if (event == null) {
             event = new ShanoirEvent(
                     ShanoirEventType.EXECUTION_MONITORING_EVENT,
                     processing.getId().toString(),

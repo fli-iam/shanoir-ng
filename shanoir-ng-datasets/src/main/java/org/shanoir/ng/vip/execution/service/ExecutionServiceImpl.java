@@ -145,7 +145,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     public Mono<VipExecutionDTO> getExecutionAsServiceAccount(int attempts, String identifier) throws ResultHandlerException, SecurityException {
 
-        if(attempts >= 3) {
+        if (attempts >= 3) {
             throw new ResultHandlerException("Failed to get execution details from VIP in [" + attempts + "] attempts", null);
         }
 

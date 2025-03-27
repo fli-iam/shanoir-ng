@@ -78,7 +78,7 @@ public class StowRSMultipartRelatedRequestFilter extends GenericFilterBean {
     			for (int i = 0; i < count; i++) {
     				BodyPart bodyPart = multipart.getBodyPart(i);
     				if (bodyPart.isMimeType(CONTENT_TYPE_DICOM)) {
-    					if(!dicomSRImporterService.importDicomSEGAndSR(bodyPart.getInputStream())) {
+    					if (!dicomSRImporterService.importDicomSEGAndSR(bodyPart.getInputStream())) {
     						throw new ServletException("Error in importDicomSEGAndSR.");
     					}
     				} else {

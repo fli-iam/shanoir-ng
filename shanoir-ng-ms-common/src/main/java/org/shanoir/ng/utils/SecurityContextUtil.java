@@ -34,6 +34,10 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
  */
 public abstract class SecurityContextUtil {
 
+    private static final long PRINCIPAL_USER_ID = 92233720L;
+
+    private static final int TOKEN_LIFESPAN = 300;
+
     /**
      * Clear the authentication
      */
@@ -47,11 +51,11 @@ public abstract class SecurityContextUtil {
      * @param role "ROLE_ADMIN" or "ROLE_EXPERT" or ...
      */
     public static void initAuthenticationContext(String role) {
-        List<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
+        List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
         GrantedAuthority grantedAuth = new SimpleGrantedAuthority(role);
         grantedAuthorities.add(grantedAuth);
-        Map<String, Object> claims = Map.of("preferred_username", "shanoir", "userId", 92233720L, "realm_access", grantedAuthorities);
-        Jwt jwt = new Jwt("mock-token-value", Instant.now(), Instant.now().plusSeconds(300), Map.of("header", "mock"), claims);
+        Map<String, Object> claims = Map.of("preferred_username", "shanoir", "userId", PRINCIPAL_USER_ID, "realm_access", grantedAuthorities);
+        Jwt jwt = new Jwt("mock-token-value", Instant.now(), Instant.now().plusSeconds(TOKEN_LIFESPAN), Map.of("header", "mock"), claims);
         Authentication authentication = new JwtAuthenticationToken(jwt, grantedAuthorities);
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }

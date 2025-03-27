@@ -87,11 +87,11 @@ public class DefaultHandler extends OutputHandler {
 
             List<Dataset> inputDatasets = getInputDatasets(resultJson, parent.getName());
 
-            if(inputDatasets.isEmpty()) {
+            if (inputDatasets.isEmpty()) {
                 throw new ResultHandlerException("No input datasets found.", null);
             }
 
-            if(outputFiles.isEmpty()) {
+            if (outputFiles.isEmpty()) {
                 throw new ResultHandlerException("No processable file found in Tar result.", null);
             }
 
@@ -183,7 +183,7 @@ public class DefaultHandler extends OutputHandler {
             }
             processedDataset.setProcessedDatasetName(datasetName);
 
-            if(!inputDatasets.isEmpty()) {
+            if (!inputDatasets.isEmpty()) {
                 Long studyId = datasetService.getStudyId(inputDatasets.get(0));
                 Study study = studyRepository.findById(studyId)
                         .orElseThrow(() -> new NotFoundException("Study [" + studyId + "] not found."));

@@ -350,7 +350,7 @@ public class StudyServiceImpl implements StudyService {
 			List<Subject> removed = new ArrayList<Subject>();
 
 			for (SubjectStudy subjectStudyDb : studyDb.getSubjectStudyList()) {
-				if(!updatedIds.contains(subjectStudyDb.getId())) {
+				if (!updatedIds.contains(subjectStudyDb.getId())) {
 					Subject sub = subjectStudyDb.getSubject();
 					removed.add(sub);
 
@@ -824,7 +824,7 @@ public class StudyServiceImpl implements StudyService {
 		StudyStorageVolumeDTO dto;
 		try {
 			String dtoAsString = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_DATASETS_DETAILED_STORAGE_VOLUME, studyId);
-			if(dtoAsString != null && !dtoAsString.isEmpty()) {
+			if (dtoAsString != null && !dtoAsString.isEmpty()) {
 				dto = objectMapper.readValue(dtoAsString, StudyStorageVolumeDTO.class);
 			}else{
 				dto = new StudyStorageVolumeDTO();
@@ -845,7 +845,7 @@ public class StudyServiceImpl implements StudyService {
 		Map<Long, StudyStorageVolumeDTO> detailedStorageVolumes;
 		try {
 			String resultAsString = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_DATASETS_TOTAL_STORAGE_VOLUME, studyIds);
-			if(resultAsString != null && !resultAsString.isEmpty()) {
+			if (resultAsString != null && !resultAsString.isEmpty()) {
 				detailedStorageVolumes = objectMapper.readValue(resultAsString,  new TypeReference<HashMap<Long, StudyStorageVolumeDTO>>() { });
 			}else{
 				return new HashMap<>();
@@ -855,8 +855,8 @@ public class StudyServiceImpl implements StudyService {
 			return null;
 		}
 
-		this.studyRepository.findAllById(studyIds).forEach( study -> {
-					if(!detailedStorageVolumes.containsKey(study.getId())) {
+		this.studyRepository.findAllById(studyIds).forEach(study -> {
+					if (!detailedStorageVolumes.containsKey(study.getId())) {
 						return;
 					}
 					Long filesSize = this.getStudyFilesSize(study);
@@ -885,7 +885,7 @@ public class StudyServiceImpl implements StudyService {
 
 		for (String path : paths) {
 			File f = new File(this.getStudyFilePath(study.getId(), path));
-			if(f.exists()) {
+			if (f.exists()) {
 				size += f.length();
 			}
 		}

@@ -54,7 +54,7 @@ public class SubjectStudy {
 	
 	/** Tags associated to the subject. */
     @ManyToMany
-    @JoinTable( name = "subject_study_tag", joinColumns = @JoinColumn( name = "subject_study_id" ))
+    @JoinTable(name = "subject_study_tag", joinColumns = @JoinColumn(name = "subject_study_id" ))
 	private List<Tag> tags;
 
     private Integer qualityTag;

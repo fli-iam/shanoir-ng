@@ -50,8 +50,8 @@ public interface SubjectStudyApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PutMapping(value = "/{subjectStudyId}", produces = { "application/json" }, consumes = {
 			"application/json" })
-	@PreAuthorize("( hasRole('ADMIN') or ( hasAnyRole('EXPERT', 'USER')"
-			+ "  and ( @studySecurityService.hasRightOnStudy(#subjectStudy.getStudy(), 'CAN_IMPORT')"
+	@PreAuthorize("(hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER')"
+			+ "  and (@studySecurityService.hasRightOnStudy(#subjectStudy.getStudy(), 'CAN_IMPORT')"
 			+ " or @studySecurityService.hasRightOnStudy(#subjectStudy.getStudy(), 'CAN_ADMINISTRATE') )"
 			+ "  )) and @controlerSecurityService.idMatches(#subjectStudyId, #subjectStudy)")
 	ResponseEntity<Void> updateSubjectStudy(
