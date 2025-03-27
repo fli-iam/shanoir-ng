@@ -207,12 +207,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.1.0</version>
+				<version>3.6.0</version>
 				<configuration>
 					<configLocation>checkstyle.xml</configLocation>
-					<failOnViolation>false</failOnViolation>
+					<!-- <failOnViolation>false</failOnViolation>
 					<consoleOutput>true</consoleOutput>
-					<excludes>**/anonymization/**/*</excludes>
+					<excludes>**/anonymization/**/*</excludes> -->
 				</configuration>
 				<executions>
 					<execution>
