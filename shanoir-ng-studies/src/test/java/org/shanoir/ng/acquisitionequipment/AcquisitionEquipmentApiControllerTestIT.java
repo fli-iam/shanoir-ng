@@ -45,7 +45,7 @@
 //@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 //@ActiveProfiles("dev")
 //public class AcquisitionEquipmentApiControllerTestIT extends KeycloakControllerTestIT {
-//    
+//
 //    private static final String REQUEST_PATH = "/acquisitionequipments";
 //    private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 //
@@ -81,7 +81,7 @@
 //                String.class);
 //        assertEquals(HttpStatus.OK, response.getStatusCode());
 //    }
-//    
+//
 //    @Test
 //    public void saveNewAcquisitionEquipmentProtected() {
 //        final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new AcquisitionEquipment(), String.class);
@@ -90,7 +90,7 @@
 //
 //    @Test
 //    public void saveNewAcquisitionEquipmentWithLogin() throws ClientProtocolException, IOException {
-//        
+//    
 //        final AcquisitionEquipment equipment = createAcquisitionEquipment();
 //        equipment.setSerialNumber("test2");
 //        final HttpEntity<AcquisitionEquipment> entity = new HttpEntity<AcquisitionEquipment>(equipment, getHeadersWithToken(true));
@@ -98,7 +98,7 @@
 //        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity,
 //                String.class);
 //        assertEquals(HttpStatus.OK, response.getStatusCode());
-//        
+//    
 //        // Get acquisition equipment id
 //        String equipmentId = response.getBody().split("\"id\":")[1].split(",")[0];
 //
@@ -111,7 +111,7 @@
 //    @Test
 //    public void updateNewAcquisitionEquipmentProtected() {
 //        final HttpEntity<AcquisitionEquipment> entity = new HttpEntity<AcquisitionEquipment>(ModelsUtil.createAcquisitionEquipment());
-//        
+//    
 //        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 //                String.class);
 //        assertEquals(HttpStatus.FOUND, response.getStatusCode());

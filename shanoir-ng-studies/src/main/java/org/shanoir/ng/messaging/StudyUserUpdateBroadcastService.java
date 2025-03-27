@@ -29,15 +29,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class StudyUserUpdateBroadcastService {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(StudyUserUpdateBroadcastService.class);
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
-    
+
     @Autowired
     private ObjectMapper objectMapper;
-    
+
     public void broadcast(Iterable<StudyUserCommand> commands) throws MicroServiceCommunicationException {
         try {
             String str = objectMapper.writeValueAsString(commands);

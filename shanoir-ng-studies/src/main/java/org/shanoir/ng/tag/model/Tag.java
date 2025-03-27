@@ -30,7 +30,7 @@ public class Tag extends HalEntity {
     @ManyToOne
     @JoinColumn(name = "study_id")
     private Study study;
-    
+
     @JsonIgnore
     @OneToMany(mappedBy = "tag", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -87,7 +87,7 @@ public class Tag extends HalEntity {
             this.subjectStudyTags.clear();
             if (subjectStudyTags != null) {
                 this.subjectStudyTags.addAll(subjectStudyTags);
-            }            
+            }        
         } else {
             this.subjectStudyTags = subjectStudyTags;
         }

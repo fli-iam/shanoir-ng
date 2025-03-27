@@ -56,7 +56,7 @@ public class ScheduledTasks {
     @Scheduled(cron = "0 0 8 * * ?")
     public void checkExpirationDate() {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-        
+    
         // Get list of users who have to receive first expiration notification
         List<User> usersToNotify = userService.getUsersToReceiveFirstExpirationNotification();
         for (User userToNotify : usersToNotify) {
@@ -85,7 +85,7 @@ public class ScheduledTasks {
         for (User userToExpire : usersToNotify) {
             keycloakClient.updateUser(userToExpire);
         }
-        
+    
         SecurityContextUtil.clearAuthentication();
     }
 

@@ -9,13 +9,13 @@ import jakarta.persistence.ManyToOne;
 
 
 public class SubjectStudyTagPk implements Serializable {
-    
+
     private static final long serialVersionUID = -7148798110941644158L;
-    
+
     @ManyToOne
     @JoinColumn(name = "tag_id", insertable = false, updatable = false, nullable = false)
     private Tag tag;
-    
+
     @ManyToOne
     @JoinColumn(name = "subject_study_id", insertable = false, updatable = false, nullable = false)
     private SubjectStudy subjectStudy;

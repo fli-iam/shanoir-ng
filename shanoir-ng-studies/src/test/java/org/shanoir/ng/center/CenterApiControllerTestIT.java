@@ -43,7 +43,7 @@
 //@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 //@ActiveProfiles("dev")
 //public class CenterApiControllerTestIT extends KeycloakControllerTestIT {
-//    
+//
 //    private static final String REQUEST_PATH = "/centers";
 //    private static final String REQUEST_PATH_FOR_NAMES = REQUEST_PATH + "/names";
 //    private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
@@ -80,7 +80,7 @@
 //                String.class);
 //        assertEquals(HttpStatus.OK, response.getStatusCode());
 //    }
-//    
+//
 //    @Test
 //    public void findCentersWithBadRole() {
 //        // test with guest role
@@ -124,7 +124,7 @@
 //
 //    @Test
 //    public void saveNewCenterWithLogin() throws ClientProtocolException, IOException {
-//        
+//    
 //        final Center center = ModelsUtil.createCenter();
 //        center.setName("tt");
 //        final HttpEntity<Center> entity = new HttpEntity<Center>(center, getHeadersWithToken(true));
@@ -132,7 +132,7 @@
 //        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity,
 //                String.class);
 //        assertEquals(HttpStatus.OK, response.getStatusCode());
-//        
+//    
 //        // Get center id
 //        String centerId = response.getBody().split("\"id\":")[1].split(",")[0];
 //
@@ -145,7 +145,7 @@
 //    @Test
 //    public void updateNewCenterProtected() {
 //        final HttpEntity<Center> entity = new HttpEntity<Center>(ModelsUtil.createCenter());
-//        
+//    
 //        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 //                String.class);
 //        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());

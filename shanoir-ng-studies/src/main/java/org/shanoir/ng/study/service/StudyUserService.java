@@ -35,7 +35,7 @@ public interface StudyUserService {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     Map<Long, List<StudyUserRight>> getRights();
-    
+
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     boolean hasOneStudyToImport();
 

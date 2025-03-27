@@ -42,9 +42,9 @@ public class SubjectStudyDTO {
     private SubjectType subjectType;
 
     private boolean physicallyInvolved;
-    
+
     private List<TagDTO> tags;
-    
+
     private QualityTag qualityTag;
 
     public Long getId() {
@@ -138,7 +138,7 @@ public class SubjectStudyDTO {
     public void setTags(List<TagDTO> tags) {
         this.tags = tags;
     }
-    
+
 
     public QualityTag getQualityTag() {
         return qualityTag;

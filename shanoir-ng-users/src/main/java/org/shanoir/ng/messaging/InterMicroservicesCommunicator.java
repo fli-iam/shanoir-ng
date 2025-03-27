@@ -38,10 +38,10 @@ public class InterMicroservicesCommunicator {
      * Logger
      */
     private static final Logger LOG = LoggerFactory.getLogger(InterMicroservicesCommunicator.class);
-    
+
     @Autowired
     private RabbitTemplate rabbitTemplate;
-    
+
     @EventListener
     public void handleUserDeleteEvent(UserDeleteEvent event) {
         try {
@@ -52,5 +52,5 @@ public class InterMicroservicesCommunicator {
             LOG.error("Error while sending message to RabbitMQ", e);
         }
     }
-    
+
 }

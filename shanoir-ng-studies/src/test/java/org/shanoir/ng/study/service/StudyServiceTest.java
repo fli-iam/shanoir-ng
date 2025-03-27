@@ -87,19 +87,19 @@ public class StudyServiceTest {
 
     @Mock
     private StudyUserRepository studyUserRepository;
-    
+
     @Mock
     private StudyCenterRepository studyCenterRepository;
 
     @Mock
     private StudyUserUpdateBroadcastService studyUserCom;
-    
+
     @Mock
     private DataUserAgreementService dataUserAgreementService;
-    
+
     @Mock
     private StudyMapper studyMapperMock;
-    
+
     @Mock
     private ObjectMapper objectMapper;
 
@@ -180,7 +180,7 @@ public class StudyServiceTest {
         updatedStudy.setId(1L);
         given(studyRepository.save(Mockito.any(Study.class))).willReturn(updatedStudy);
         given(studyService.updateStudyName(Mockito.any(StudyDTO.class))).willReturn("");
-        
+    
         final Study returnedStudy = studyService.update(updatedStudy);
         Assertions.assertNotNull(returnedStudy);
         Assertions.assertTrue(UPDATED_STUDY_NAME.equals(returnedStudy.getName()));
@@ -191,7 +191,7 @@ public class StudyServiceTest {
         assertFalse(protocol.exists());
         //Mockito.verify(studyRepository, Mockito.times(3)).save(Mockito.any(Study.class));
     }
-    
+
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
     public void updateStudyUsersTest() throws ShanoirException {
@@ -199,12 +199,12 @@ public class StudyServiceTest {
         existing.setStudyUserList(new ArrayList<StudyUser>());
         existing.getStudyUserList().add(createStudyUsers(1L, 1L, existing, true, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));
         existing.getStudyUserList().add(createStudyUsers(2L, 2L, existing, true, StudyUserRight.CAN_ADMINISTRATE));
-        
+    
         Study updated = createStudy();
         updated.setStudyUserList(new ArrayList<StudyUser>());
         updated.getStudyUserList().add(createStudyUsers(1L, 1L, updated, true, StudyUserRight.CAN_DOWNLOAD));
         updated.getStudyUserList().add(createStudyUsers(null, 3L, updated, true, StudyUserRight.CAN_SEE_ALL));
-        
+    
         given(studyRepository.findById(STUDY_ID)).willReturn(Optional.of(existing));
         given(studyUserRepository.findById(1L)).willReturn(Optional.of(existing.getStudyUserList().get(0)));
         given(studyUserRepository.findById(2L)).willReturn(Optional.of(existing.getStudyUserList().get(1)));
@@ -227,21 +227,21 @@ public class StudyServiceTest {
         StudyUser suToBeDeleted = createStudyUsers(2L, 2L, existing, true, StudyUserRight.CAN_ADMINISTRATE);
 
         existing.getStudyUserList().add(suToBeDeleted);
-        
+    
         Study updated = createStudy();
         updated.setStudyUserList(new ArrayList<StudyUser>());
         updated.getStudyUserList().add(createStudyUsers(1L, 1L, updated, false, StudyUserRight.CAN_DOWNLOAD));
         StudyUser suToBeAdded = createStudyUsers(null, 3L, updated, false, StudyUserRight.CAN_SEE_ALL);
 
         updated.getStudyUserList().add(suToBeAdded);
-                
+            
         given(studyUserRepository.saveAll(Mockito.any(List.class))).willReturn(Collections.singletonList(suToBeAdded));
         given(studyUserRepository.findById(2L)).willReturn(Optional.of(suToBeDeleted));
 
         studyService.updateStudyUsers(existing, updated);
-        
+    
         Mockito.verify(dataUserAgreementService).deleteIncompleteDataUserAgreementForUserInStudy(existing, 2L);
-        
+    
         for (StudyUser su : updated.getStudyUserList()) {
             // all are now confirmed
             assertTrue(su.isConfirmed());
@@ -267,14 +267,14 @@ public class StudyServiceTest {
         existing.setStudyUserList(new ArrayList<StudyUser>());
         existing.getStudyUserList().add(createStudyUsers(1L, 1L, existing, true, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));
         existing.getStudyUserList().add(createStudyUsers(2L, 2L, existing, true, StudyUserRight.CAN_ADMINISTRATE));
-        
+    
         Study updated = createStudy();
         updated.setDataUserAgreementPaths(Collections.singletonList("truc"));
         updated.setStudyUserList(new ArrayList<StudyUser>());
         updated.getStudyUserList().add(createStudyUsers(1L, 1L, updated, true, StudyUserRight.CAN_DOWNLOAD));
         StudyUser suToBeAdded = createStudyUsers(null, 3L, updated, true, StudyUserRight.CAN_SEE_ALL);
         updated.getStudyUserList().add(suToBeAdded);
-        
+    
         given(studyUserRepository.saveAll(Mockito.any(List.class))).willReturn(Collections.singletonList(suToBeAdded));
 
         studyService.updateStudyUsers(existing, updated);
@@ -304,7 +304,7 @@ public class StudyServiceTest {
         study.setSubjectStudyList(new ArrayList<>());
         return study;
     }
-    
+
     private StudyUser createStudyUsers(Long suId, Long userId, Study study, boolean confirmed, StudyUserRight... rights) {
         StudyUser studyUser = new StudyUser();
         studyUser.setId(suId);
@@ -318,5 +318,5 @@ public class StudyServiceTest {
         studyUser.setStudyUserRights(studyUserRights);
         return studyUser;
     }
-    
+
 }

@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  */
 public class DatasetDescription {
-    
+
     /** REQUIRED. Name of the dataset. */
     @JsonProperty("Name")
     private String name;
@@ -38,23 +38,23 @@ public class DatasetDescription {
     /** OPTIONAL. List of individuals who contributed to the creation/curation of the dataset. */
     @JsonProperty("Authors")
     private List<String> authors;
-    
+
     /** OPTIONAL. Text acknowledging contributions of individuals or institutions beyond those listed in Authors or Funding. */
     @JsonProperty("Acknowledgements")
     private String acknowledgements;
-    
+
     /** OPTIONAL. Text containing instructions on how researchers using this dataset should acknowledge the original authors. This field can also be used to define a publication that should be cited in publications that use the dataset. */
     @JsonProperty("HowToAcknowledge")
     private String howToAcknowledge;
-    
+
     /** OPTIONAL. List of sources of funding (grant numbers) */
     @JsonProperty("Funding")
     private String funding;
-    
+
     /** OPTIONAL. List of references to publication that contain information on the dataset, or links. */
     @JsonProperty("ReferencesAndLinks")
     private String referencesAndLinks;
-    
+
     /** OPTIONAL. The Document Object Identifier of the dataset (not the corresponding paper). */
     @JsonProperty("datasetDOI")
     private String datasetDOI;

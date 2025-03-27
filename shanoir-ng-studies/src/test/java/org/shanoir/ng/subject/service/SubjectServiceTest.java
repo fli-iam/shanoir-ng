@@ -75,17 +75,17 @@ public class SubjectServiceTest {
 
     @Mock
     private RabbitTemplate rabbitTemplate;
-    
+
     @Mock
     private SubjectMapper subjectMapperMock;
 
     @InjectMocks
     private SubjectServiceImpl subjectService;
-    
+
     @Mock
     private ObjectMapper objectMapper;
 
-    
+
     @Mock
     private StudyExaminationRepository studyExaminationRepository;
 

@@ -59,7 +59,7 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 
     /** Advice the user when new import done in the study. */
     private boolean receiveNewImportReport;
-    
+
     /**
      * With the introduction of a Data User Agreement form, a study
      * responsible can add an user to a study, but his StudyUser is
@@ -72,7 +72,7 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
     @ManyToOne
     @JsonIgnore
     private Study study;
-        
+    
     /** User id. */
     private Long userId;
 
@@ -81,7 +81,7 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
     @Fetch(FetchMode.JOIN)
     @CollectionTable(name="study_user_study_user_rights", joinColumns=@JoinColumn(name="study_user_id"))
     private List<Integer> studyUserRights;
-    
+
     /** User name. Duplicate: master record in ms users. */
     @NotBlank
     private String userName;
@@ -219,7 +219,7 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
     public void setCenters(List<Center> centers) {
         this.centers = centers;
     }
-    
+
     public void setCenterIds(List<Long> ids) {
         centers = ids.stream().map(id -> {
             Center center = new Center();

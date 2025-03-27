@@ -31,7 +31,7 @@ public interface RoleService {
      * @return a list of roles
      */
     List<Role> findAll();
-    
+
     /**
      * Find role by its name.
      *

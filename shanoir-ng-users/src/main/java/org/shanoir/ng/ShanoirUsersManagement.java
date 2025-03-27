@@ -112,19 +112,19 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 
     @Value("${service-account.user.email}")
     private String vipSrvEmail;
-    
+
     private Keycloak keycloak = null;
-    
+
     @Autowired
     private UserRepository userRepository;
-    
+
     @Autowired
     private EmailService emailService;
 
     @Autowired
     StudyRightsService commService;
     private static final String ROLE_ADMIN = "ROLE_ADMIN";
-    
+
     @Override
     public void run(final ApplicationArguments args) throws Exception {
 

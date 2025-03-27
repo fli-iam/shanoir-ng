@@ -78,7 +78,7 @@ public interface StudyApi {
     @RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<StudyDTO>> findStudies();
-    
+
     @Operation(summary = "", description = "If exists, returns the studies that the user is allowed to see")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found studies"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -230,7 +230,7 @@ public interface StudyApi {
     ResponseEntity<List<org.shanoir.ng.tag.model.Tag>> tags(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId)
             throws RestServiceException;
-    
+
     @Operation(summary = "", description = "Get my rights")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "here are your rights"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -278,7 +278,7 @@ public interface StudyApi {
     void downloadProtocolFile(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
-    
+
     @Operation(summary = "", description = "If one or more exist, return a list of data user agreements (DUAs) waiting for the given user id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "found duas"),
@@ -290,7 +290,7 @@ public interface StudyApi {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<DataUserAgreement>> getDataUserAgreements()
             throws RestServiceException, IOException;
-    
+
     @Operation(summary = "", description = "Updates a data user agreement (DUA)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "dua updated"),
@@ -390,5 +390,5 @@ public interface StudyApi {
     @PreAuthorize("hasRole('ADMIN') or hasRole('EXPERT')")
     ResponseEntity<List<StudyStatisticsDTO>> getStudyStatistics(
         @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws RestServiceException, IOException;
-    
+
 }

@@ -71,7 +71,7 @@ public interface AccessRequestApi {
     @GetMapping(value = "byAdmin", produces = { "application/json" }, consumes = {
             "application/json" })
     ResponseEntity<List<AccessRequest>> findAllByAdminId() throws RestServiceException;
-    
+
     @Operation(summary = "byUser", description = "Find all the access request by the given user")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "resolved access request"),

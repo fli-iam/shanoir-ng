@@ -43,20 +43,20 @@ public class ManufacturerSecurityTest {
     private static final long LOGGED_USER_ID = 2L;
     private static final String LOGGED_USER_USERNAME = "logged";
     private static final long ENTITY_ID = 1L;
-    
+
     private Manufacturer mockNew;
     private Manufacturer mockExisting;
-    
+
     @Autowired
     private ManufacturerService service;
-    
+
     @BeforeEach
     public void setup() {
         mockNew = ModelsUtil.createManufacturer();
         mockExisting = ModelsUtil.createManufacturer();
         mockExisting.setId(ENTITY_ID);
     }
-    
+
     @Test
     @WithAnonymousUser
     public void testAsAnonymous() throws ShanoirException {
@@ -87,7 +87,7 @@ public class ManufacturerSecurityTest {
         assertAccessAuthorized(service::update, mockExisting);
         assertAccessAuthorized(service::deleteById, ENTITY_ID);
     }
-    
+
     @Test
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
     public void testAsAdmin() throws ShanoirException {

@@ -66,7 +66,7 @@ public class CenterApiControllerTest {
     private static final String REQUEST_PATH = "/centers";
     private static final String REQUEST_PATH_FOR_NAMES = REQUEST_PATH + "/names";
     private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
-    
+
     @Autowired
     private MockMvc mvc;
 
@@ -78,16 +78,16 @@ public class CenterApiControllerTest {
 
     @MockBean
     private StudyService studyServiceMock;
-    
+
     @MockBean
     private CenterFieldEditionSecurityManager fieldEditionSecurityManager;
-    
+
     @MockBean
     private CenterUniqueConstraintManager uniqueConstraintManager;
 
     @MockBean
     private ShanoirEventService eventService;
-    
+
     @MockBean(name = "controlerSecurityService")
     private ControlerSecurityService controlerSecurityService;
 
@@ -143,7 +143,7 @@ public class CenterApiControllerTest {
         mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_FOR_NAMES).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
-    
+
     @Test
     @WithMockUser
     public void findCentersNamesByStudyIdTest() throws Exception {

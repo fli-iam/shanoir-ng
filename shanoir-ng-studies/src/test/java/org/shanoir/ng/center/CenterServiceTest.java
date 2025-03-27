@@ -65,7 +65,7 @@ public class CenterServiceTest {
 
     @InjectMocks
     private CenterServiceImpl centerService;
-    
+
     @Mock
     private ObjectMapper objectMapper;
 
@@ -83,7 +83,7 @@ public class CenterServiceTest {
             centerService.deleteById(2L);
         });
     }
-    
+
     @Test
     public void deleteByIdTest() throws EntityNotFoundException {
         centerService.deleteById(CENTER_ID);

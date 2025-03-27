@@ -75,7 +75,7 @@ public class ShanoirEventsService {
         }
         List<ShanoirEvent> dbEvents = Utils.toList(repository.findByUserIdAndEventTypeInAndLastUpdateYoungerThan7Days(userId, list));
         List<ShanoirEventLight> events = new ArrayList<>();
-        cleanEvents(dbEvents);        
+        cleanEvents(dbEvents);    
         for (ShanoirEvent event : dbEvents) {
             events.add(event.toLightEvent());
         }

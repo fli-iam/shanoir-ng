@@ -41,7 +41,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "subjectStudy")
 @RequestMapping("/subjectStudy")
 public interface SubjectStudyApi {
-    
+
     @Operation(summary = "", description = "Updates subject study")
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "subject study updated"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),

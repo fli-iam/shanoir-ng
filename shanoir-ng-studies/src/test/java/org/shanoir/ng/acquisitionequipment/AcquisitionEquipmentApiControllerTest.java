@@ -71,7 +71,7 @@ public class AcquisitionEquipmentApiControllerTest {
 
     @MockBean
     private ShanoirEventService eventService;
-    
+
     @MockBean(name = "controlerSecurityService")
     private ControlerSecurityService controlerSecurityService;
 
@@ -100,7 +100,7 @@ public class AcquisitionEquipmentApiControllerTest {
         mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
     }
-    
+
     @Test
     @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
     public void deleteAcquisitionEquipmentUnknownTest() throws Exception {

@@ -74,7 +74,7 @@ public abstract class StudyDecorator implements StudyMapper {
     public StudyDTO studyToStudyDTO(final Study study) {
         return convertStudyToStudyDTO(study, true);
     }
-    
+
     @Override
     public IdNameCenterStudyDTO studyToExtendedIdNameDTO (final Study study) {
         final IdNameCenterStudyDTO simpleStudyDTO = delegate.studyToExtendedIdNameDTO(study);
@@ -83,7 +83,7 @@ public abstract class StudyDecorator implements StudyMapper {
         simpleStudyDTO.setProfile(study.getProfile());
         return simpleStudyDTO;
     }
-    
+
     @Override
     public List<IdNameCenterStudyDTO> studiesToSimpleStudyDTOs (final List<Study> studies) {
         List<IdNameCenterStudyDTO> simpleStudyDTOs = new ArrayList<>();
@@ -112,7 +112,7 @@ public abstract class StudyDecorator implements StudyMapper {
             studyDTO.setExperimentalGroupsOfSubjects(experimentalGroupOfSubjectsMapper
                     .experimentalGroupOfSubjectsToIdNameDTOs(study.getExperimentalGroupsOfSubjects()));
             if (study.getTags() != null) {
-                studyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));                
+                studyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));            
             }
         }
         return studyDTO;

@@ -28,7 +28,7 @@ import org.springframework.data.repository.query.Param;
  * @author msimon
  */
 public interface StudyExaminationRepository extends CrudRepository<StudyExamination, Long> {
-    
+
     public Iterable<StudyExamination> findByCenterId(Long centerId);
 
     public void deleteBySubject(Subject subject);
@@ -36,7 +36,7 @@ public interface StudyExaminationRepository extends CrudRepository<StudyExaminat
     @Modifying
     @Query("DELETE FROM StudyExamination se WHERE se.subject.id = :subjectId")
     public void deleteBySubjectId(Long subjectId);
-    
+
     int countByStudyId(@Param("studyId") Long studyId);
 
     @Query("SELECT s.study.id, COUNT(s) FROM StudyExamination s GROUP BY s.study")

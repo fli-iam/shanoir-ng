@@ -23,7 +23,7 @@ public interface DataUserAgreementRepository extends CrudRepository<DataUserAgre
     List<DataUserAgreement> findByUserIdAndTimestampOfAcceptedIsNull(Long userId);
 
     DataUserAgreement findByUserIdAndStudy_IdAndTimestampOfAcceptedIsNull(Long userId, Long studyId);
-    
+
     List<DataUserAgreement> findByStudyId(Long studyId);
 
 }

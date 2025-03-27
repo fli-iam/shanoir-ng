@@ -30,7 +30,7 @@ import org.shanoir.ng.study.model.Study;
  */
 
 public class UtilsTest {
-    
+
     @Test
     public void testCopyList() throws ShanoirException {
 

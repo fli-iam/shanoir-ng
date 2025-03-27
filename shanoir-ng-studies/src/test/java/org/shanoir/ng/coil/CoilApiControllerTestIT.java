@@ -43,7 +43,7 @@
 //@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 //@ActiveProfiles("dev")
 //public class CoilApiControllerTestIT extends KeycloakControllerTestIT {
-//    
+//
 //    private static final String REQUEST_PATH = "/coils";
 //    private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 //
@@ -79,7 +79,7 @@
 //                String.class);
 //        assertEquals(HttpStatus.OK, response.getStatusCode());
 //    }
-//    
+//
 //    @Test
 //    public void findCoilsWithBadRole() {
 //        // test with guest role
@@ -98,7 +98,7 @@
 //
 //    @Test
 //    public void saveNewCoilWithLogin() throws ClientProtocolException, IOException {
-//        
+//    
 //        final Coil coil = ModelsUtil.createCoil();
 //        coil.setName("tt");
 //        final HttpEntity<Coil> entity = new HttpEntity<Coil>(coil, getHeadersWithToken(true));
@@ -106,7 +106,7 @@
 //        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity,
 //                String.class);
 //        assertEquals(HttpStatus.OK, response.getStatusCode());
-//        
+//    
 //        // Get coil id
 //        String coilId = response.getBody().split("\"id\":")[1].split(",")[0];
 //
@@ -119,7 +119,7 @@
 //    @Test
 //    public void updateNewCoilProtected() {
 //        final HttpEntity<Coil> entity = new HttpEntity<Coil>(ModelsUtil.createCoil());
-//        
+//    
 //        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 //                String.class);
 //        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());

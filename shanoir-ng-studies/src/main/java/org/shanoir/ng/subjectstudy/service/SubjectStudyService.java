@@ -24,7 +24,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
  *
  */
 public interface SubjectStudyService {
-    
+
     /**
      * Find subject study by its id.
      *
@@ -34,7 +34,7 @@ public interface SubjectStudyService {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     @PostAuthorize("@studySecurityService.hasRightOnTrustedStudy(returnObject.getStudy(), 'CAN_SEE_ALL')")
     SubjectStudy findById(Long id);
-    
+
     /**
      * Update subject study.
      *

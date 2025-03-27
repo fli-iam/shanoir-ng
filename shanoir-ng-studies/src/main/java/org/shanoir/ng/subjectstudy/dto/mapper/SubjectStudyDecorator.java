@@ -33,7 +33,7 @@ public class SubjectStudyDecorator implements SubjectStudyMapper {
 
     @Autowired
     private SubjectStudyMapper delegate;
-    
+
     @Autowired
     private TagMapper tagMapper;
 

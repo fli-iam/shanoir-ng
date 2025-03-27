@@ -57,7 +57,7 @@ public class StudyDTO {
     private int nbSubjects;
 
     private List<String> protocolFilePaths;
-    
+
     private List<String> dataUserAgreementPaths;
 
     private List<TagDTO> tags;
@@ -422,7 +422,7 @@ public class StudyDTO {
     public void setDataUserAgreementPaths(List<String> dataUserAgreementPaths) {
         this.dataUserAgreementPaths = dataUserAgreementPaths;
     }
-    
+
     public boolean isChallenge() {
         return challenge;
     }

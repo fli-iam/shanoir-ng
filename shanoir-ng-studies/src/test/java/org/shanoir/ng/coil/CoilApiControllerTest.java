@@ -72,7 +72,7 @@ public class CoilApiControllerTest {
 
     @MockBean
     private ShanoirEventService eventService;
-    
+
     @MockBean(name = "controlerSecurityService")
     private ControlerSecurityService controlerSecurityService;
 

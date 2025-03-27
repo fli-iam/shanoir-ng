@@ -106,21 +106,21 @@ public class StudyRepositoryTest {
 
         assertEquals("StudyTest", studyFound.getName());
     }
-    
+
     @Test
     public void testRights() {
         Study studyFound = studyRepository.findById(1L).orElseThrow();
         assertEquals(2, studyFound.getStudyUserList().size());
         assertEquals(2, studyFound.getStudyUserList().get(1).getStudyUserRights().size());
     }
-    
+
 //    @Test
 //    public void testUpdateStudyUsers() {
 //        int indexToDelete = 1;
 //        Study studyFound = studyRepository.findById(1L);
 //        assertEquals(2, studyFound.getStudyUserList().size());
 //        Long deletedId = studyFound.getStudyUserList().get(indexToDelete).getId();
-//        
+//    
 //        assertNotNull(studyUserRepository.findById(deletedId));
 //        studyFound.getStudyUserList().remove(indexToDelete);
 //        studyRepository.save(studyFound);

@@ -62,7 +62,7 @@ public final class ModelsUtil {
 
     // User data
     public static final Long USER_ID = 1L;
-    
+
     /**
      * Create a center.
      *
@@ -148,7 +148,7 @@ public final class ModelsUtil {
         study.setSubjectStudyList(new ArrayList<>());
         return study;
     }
-    
+
     public static Study createStudy(Long id) {
         Study study = createStudy();
         study.setId(1L);

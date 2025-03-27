@@ -43,7 +43,7 @@ public interface SubjectStudyRepository extends CrudRepository<SubjectStudy, Lon
     SubjectStudy findByStudyIdAndSubjectId(Long studyId, Long subjectId);
 
     long countBySubject(Subject subject);
-    
+
     int countByStudyId(@Param("studyId") Long studyId);
 
     @Query("SELECT s.study.id, COUNT(s) FROM SubjectStudy s GROUP BY s.study.id")

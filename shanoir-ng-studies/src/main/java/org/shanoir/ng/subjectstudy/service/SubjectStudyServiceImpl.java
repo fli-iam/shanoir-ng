@@ -45,7 +45,7 @@ public class SubjectStudyServiceImpl implements SubjectStudyService {
         subjectStudyRepository.save(subjectStudyDb);
         return subjectStudyDb;
     }
-    
+
     /*
      * Update some values of subject study to save them in database.
      *

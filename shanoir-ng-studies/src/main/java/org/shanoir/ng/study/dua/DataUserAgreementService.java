@@ -27,22 +27,22 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class DataUserAgreementService {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(DataUserAgreementService.class);
 
     @Autowired
     private DataUserAgreementRepository repository;
-    
+
     @Autowired
     private StudyUserRepository repositoryStudyUser;
-    
+
     @Autowired
     private StudyUserUpdateBroadcastService studyUserCom;
-    
+
     public List<DataUserAgreement> getDataUserAgreementsByUserId(Long userId) {
         return repository.findByUserIdAndTimestampOfAcceptedIsNull(userId);
     }
-    
+
     public void acceptDataUserAgreement(Long duaId) throws ShanoirException {
         DataUserAgreement dataUserAgreement = repository.findById(duaId).orElseThrow();
         dataUserAgreement.setTimestampOfAccepted(new Date());
@@ -62,7 +62,7 @@ public class DataUserAgreementService {
             LOG.error("Could not transmit study-user update info through RabbitMQ");
         }
     }
-    
+
     public void createDataUserAgreementsForStudy(Study study) {
         List<StudyUser> studyUserList = study.getStudyUserList();
         for (StudyUser studyUser : studyUserList) {
@@ -72,14 +72,14 @@ public class DataUserAgreementService {
             repository.save(dataUserAgreement);
         }
     }
-    
+
     public DataUserAgreement createDataUserAgreementForUserInStudy(Study study, Long userId) {
         DataUserAgreement dataUserAgreement = new DataUserAgreement();
         dataUserAgreement.setStudy(study);
         dataUserAgreement.setUserId(userId);
         return repository.save(dataUserAgreement);
     }
-    
+
     public void deleteIncompleteDataUserAgreementForUserInStudy(Study study, Long userId) {
         DataUserAgreement dataUserAgreement = repository.findByUserIdAndStudy_IdAndTimestampOfAcceptedIsNull(userId, study.getId());
         if (dataUserAgreement != null) {

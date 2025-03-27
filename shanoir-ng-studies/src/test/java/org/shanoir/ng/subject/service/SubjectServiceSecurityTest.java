@@ -56,29 +56,29 @@ public class SubjectServiceSecurityTest {
     private static final long LOGGED_USER_ID = 2L;
     private static final String LOGGED_USER_USERNAME = "logged";
     private static final long ENTITY_ID = 1L;
-    
+
     private Subject mockNew;
     private Subject mockExisting;
-    
+
     @Autowired
     private SubjectService service;
-    
+
     @MockBean
     private SubjectRepository repository;
-    
+
     @MockBean
     private StudyRepository studyRepository;
-    
+
     @MockBean
     private StudyUserRepository studyUserRepository;
-    
+
     @BeforeEach
     public void setup() {
         mockNew = ModelsUtil.createSubject();
         mockExisting = ModelsUtil.createSubject();
         mockExisting.setId(ENTITY_ID);
     }
-    
+
     @Test
     @WithAnonymousUser
     public void testAsAnonymous() throws ShanoirException {
@@ -86,37 +86,37 @@ public class SubjectServiceSecurityTest {
         studiesMock.add(buildStudyMock(1L));
         assertAccessDenied(service::findAll);
         assertAccessDenied(service::findAllSubjectsOfStudyId, 1L);
-        
+    
         assertAccessDenied(service::findByData, "data");
         assertAccessDenied(service::findById, ENTITY_ID);
         assertAccessDenied(service::findByIdentifierInStudiesWithRights, "identifier", studiesMock);
         assertAccessDenied(service::findByIdWithSubjectStudies, ENTITY_ID);
         assertAccessDenied(service::findSubjectFromCenterCode, "centerCode");
-        
+    
         assertAccessDenied(service::create, mockNew);
         assertAccessDenied(service::update, mockExisting);
         assertAccessDenied(service::deleteById, ENTITY_ID);
     }
-    
+
     @Test
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
     public void testReadByUser() throws ShanoirException {
         testRead();
     }
-    
+
     @Test
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
     public void testCreateAsUser() throws ShanoirException {
         testCreate();
     }
-    
+
     @Test
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
     public void testEditAsUser() throws ShanoirException {
         assertAccessDenied(service::update, mockExisting);
         assertAccessDenied(service::deleteById, ENTITY_ID);
     }
-    
+
     @Test
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
     public void testReadByExpert() throws ShanoirException {
@@ -128,7 +128,7 @@ public class SubjectServiceSecurityTest {
     public void testCreateAsExpert() throws ShanoirException {
         testCreate();
     }
-    
+
     @Test
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
     public void testEditAsExpert() throws ShanoirException {
@@ -139,18 +139,18 @@ public class SubjectServiceSecurityTest {
         given(studyRepository.findAllById(Arrays.asList(new Long[]{1L}))).willReturn(studiesMock);
         given(studyUserRepository.findByStudy_Id(1L)).willReturn(studiesMock.get(0).getStudyUserList());
         assertAccessAuthorized(service::update, subjectMock1);
-        
+    
         Subject subjectMock2 = buildSubjectMock(ENTITY_ID);
         addStudyToMock(subjectMock2, 1L, StudyUserRight.CAN_SEE_ALL);
         given(repository.findById(ENTITY_ID)).willReturn(Optional.of(subjectMock2));
         assertAccessDenied(service::deleteById, ENTITY_ID);
-        
+    
         Subject subjectMock3 = buildSubjectMock(ENTITY_ID);
         addStudyToMock(subjectMock3, 1L, StudyUserRight.CAN_ADMINISTRATE);
         given(repository.findById(ENTITY_ID)).willReturn(Optional.of(subjectMock3));
         assertAccessAuthorized(service::deleteById, ENTITY_ID);
     }
-    
+
     @Test
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
     public void testAsAdmin() throws ShanoirException {
@@ -167,10 +167,10 @@ public class SubjectServiceSecurityTest {
         assertAccessAuthorized(service::update, mockExisting);
         assertAccessAuthorized(service::deleteById, ENTITY_ID);
     }
-    
+
     private void testRead() throws ShanoirException {
         final String NAME = "data";
-        
+    
         Subject subjectMockNoRights = buildSubjectMock(1L);
         given(repository.findByName(NAME)).willReturn(subjectMockNoRights);
         given(repository.findById(1L)).willReturn(Optional.of(subjectMockNoRights));
@@ -180,7 +180,7 @@ public class SubjectServiceSecurityTest {
         assertAccessDenied(service::findById, 1L);
         assertAccessDenied(service::findByIdWithSubjectStudies, 1L);
         assertAccessDenied(service::findSubjectFromCenterCode, "centerCode");
-        
+    
         Subject subjectMockWrongRights = buildSubjectMock(1L);
         addStudyToMock(subjectMockWrongRights, 100L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT);
         given(repository.findByName(NAME)).willReturn(subjectMockWrongRights);
@@ -191,7 +191,7 @@ public class SubjectServiceSecurityTest {
         assertAccessDenied(service::findById, 1L);
         assertAccessDenied(service::findByIdWithSubjectStudies, 1L);
         assertAccessDenied(service::findSubjectFromCenterCode, "centerCode");
-        
+    
         Subject subjectMockRightRights = buildSubjectMock(1L);
         addStudyToMock(subjectMockRightRights, 100L, StudyUserRight.CAN_SEE_ALL);
         given(repository.findByName(NAME)).willReturn(subjectMockRightRights);
@@ -206,11 +206,11 @@ public class SubjectServiceSecurityTest {
 
     private void testCreate() throws ShanoirException {
         List<Study> studiesMock;
-        
+    
         // Create subject without subject <-> study
         Subject newSubjectMock = buildSubjectMock(null);
         assertAccessDenied(service::create, newSubjectMock);
-        
+    
         // Create subject
         studiesMock = new ArrayList<>();
         studiesMock.add(buildStudyMock(9L));
@@ -218,7 +218,7 @@ public class SubjectServiceSecurityTest {
         newSubjectMock = buildSubjectMock(null);
         addStudyToMock(newSubjectMock, 9L);
         assertAccessDenied(service::create, newSubjectMock);
-        
+    
         // Create subject linked to a study where I can admin, download, see all but not import.
         studiesMock = new ArrayList<>();
         studiesMock.add(buildStudyMock(10L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_SEE_ALL));
@@ -226,7 +226,7 @@ public class SubjectServiceSecurityTest {
         newSubjectMock = buildSubjectMock(null);
         addStudyToMock(newSubjectMock, 10L);
         assertAccessDenied(service::create, newSubjectMock);
-        
+    
         // Create subject linked to a study where I can import and also to a study where I can't.
         studiesMock = new ArrayList<>();
         studiesMock.add(buildStudyMock(11L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_SEE_ALL));
@@ -237,7 +237,7 @@ public class SubjectServiceSecurityTest {
         addStudyToMock(newSubjectMock, 11L);
         addStudyToMock(newSubjectMock, 12L);
         assertAccessDenied(service::create, newSubjectMock);
-        
+    
         // Create subject linked to a study where I can import
         studiesMock = new ArrayList<>();
         studiesMock.add(buildStudyMock(13L, StudyUserRight.CAN_IMPORT));
@@ -247,7 +247,7 @@ public class SubjectServiceSecurityTest {
         addStudyToMock(newSubjectMock, 13L);
         assertAccessAuthorized(service::create, newSubjectMock);
     }
-    
+
     private Study buildStudyMock(Long id, StudyUserRight... rights) {
         Study study = ModelsUtil.createStudy();
         study.setId(id);
@@ -263,20 +263,20 @@ public class SubjectServiceSecurityTest {
         study.setStudyUserList(studyUserList);
         return study;
     }
-    
+
     private Subject buildSubjectMock(Long id) {
         Subject subject = ModelsUtil.createSubject();
         subject.setId(id);
         return subject;
     }
-    
+
     private void addStudyToMock(Subject mock, Long id, StudyUserRight... rights) {
         Study study = buildStudyMock(id, rights);
-        
+    
         SubjectStudy subjectStudy = new SubjectStudy();
         subjectStudy.setSubject(mock);
         subjectStudy.setStudy(study);
-        
+    
         if (study.getSubjectStudyList() == null) {
             study.setSubjectStudyList(new ArrayList<SubjectStudy>());
         }

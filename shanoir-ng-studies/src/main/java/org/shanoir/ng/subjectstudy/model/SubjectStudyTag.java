@@ -38,7 +38,7 @@ public class SubjectStudyTag {
     @ManyToOne
     @JoinColumn(name = "tag_id", insertable = false, updatable = false, nullable = false)
     private Tag tag;
-    
+
     @Id
     @ManyToOne
     @JoinColumn(name = "subject_study_id", insertable = false, updatable = false, nullable = false)

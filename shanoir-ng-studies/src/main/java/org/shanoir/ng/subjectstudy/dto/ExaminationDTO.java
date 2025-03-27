@@ -20,7 +20,7 @@ import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 
 
 public class ExaminationDTO {
-    
+
     private Long id;
 
     private Long centerId;
@@ -149,7 +149,7 @@ public class ExaminationDTO {
     public void setSubjectWeight(Double subjectWeight) {
         this.subjectWeight = subjectWeight;
     }
-    
-    
+
+
 
 }

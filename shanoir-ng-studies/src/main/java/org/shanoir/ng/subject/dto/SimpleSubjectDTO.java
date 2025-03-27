@@ -28,7 +28,7 @@ import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
  *
  */
 public class SimpleSubjectDTO {
-    
+
     private Long id;
 
     private String name;

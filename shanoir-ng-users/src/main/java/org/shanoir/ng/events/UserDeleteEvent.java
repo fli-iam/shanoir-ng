@@ -25,5 +25,5 @@ public class UserDeleteEvent {
     public Long getUserId() {
         return userId;
     }
-    
+
 }

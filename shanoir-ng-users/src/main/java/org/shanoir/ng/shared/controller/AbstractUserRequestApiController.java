@@ -43,13 +43,13 @@ public abstract class AbstractUserRequestApiController {
 
     @Autowired(required = false)
     private VIPUserService vipUserService;
-    
+
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private UserFieldEditionSecurityManager fieldEditionSecurityManager;
-    
+
     @Autowired
     private UserUniqueConstraintManager uniqueConstraintManager;
 
@@ -101,7 +101,7 @@ public abstract class AbstractUserRequestApiController {
 
         user.setUsername(username);
     }
-    
+
     protected void validate(User user, BindingResult result) throws RestServiceException {
         final FieldErrorMap errors = new FieldErrorMap()
                 .add(fieldEditionSecurityManager.validate(user))
@@ -112,7 +112,7 @@ public abstract class AbstractUserRequestApiController {
             throw new RestServiceException(error);
         }
     }
-    
+
     protected void validateIgnoreBlankUsername(User user, BindingResult result) throws RestServiceException {
         final FieldErrorMap errors = new UsersFieldErrorMap()
                 .checkBindingIgnoreBlankUsername(result)
@@ -121,7 +121,7 @@ public abstract class AbstractUserRequestApiController {
         if (!errors.isEmpty()) {
             throw new RestServiceException(
                 new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
-        }    
+        }
     }
 
 }

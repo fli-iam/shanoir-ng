@@ -71,7 +71,7 @@ import org.springframework.util.CollectionUtils;
  */
 @Service
 public class SolrServiceImpl implements SolrService {
-    
+
     @Autowired
     private SolrJWrapper solrJWrapper;
 

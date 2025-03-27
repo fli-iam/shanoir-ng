@@ -22,7 +22,7 @@ package org.shanoir.ng.study.dto;
  *
  */
 public class NIfTIConverterDTO {
-    
+
     private Long id;
 
     private String name;

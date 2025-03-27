@@ -75,7 +75,7 @@ public class SubjectApiControllerTest {
 
     @MockBean
     private SubjectService subjectServiceMock;
-    
+
     @MockBean
     private StudyService studyService;
 
@@ -153,11 +153,11 @@ public class SubjectApiControllerTest {
         subject2.setName("BB");
         subject2.setId(1L);
         subject2.setSubjectStudy(new SubjectStudyDTO());
-        
+    
         List<SimpleSubjectDTO> list = new ArrayList<SimpleSubjectDTO>();
         list.add(subject2);
         list.add(subject);
-        
+    
         given(subjectServiceMock.findAllSubjectsOfStudyId(1L)).willReturn(list);
 
         mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/1/allSubjects").param("preclinical", "null").accept(MediaType.APPLICATION_JSON)
@@ -178,13 +178,13 @@ public class SubjectApiControllerTest {
         subject2.setId(1L);
         subject2.setSubjectStudy(new SubjectStudyDTO());
 
-        
+    
         List<SimpleSubjectDTO> list = new ArrayList<SimpleSubjectDTO>();
         list.add(subject2);
         list.add(subject);
-        
+    
         given(subjectServiceMock.findAllSubjectsOfStudyId(1L)).willReturn(list);
-        
+    
         mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/1/allSubjects").param("preclinical", "null").accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(subject)))
                 .andExpect(status().isOk());

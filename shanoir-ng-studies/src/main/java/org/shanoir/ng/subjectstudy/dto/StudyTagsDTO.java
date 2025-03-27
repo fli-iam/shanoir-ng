@@ -26,7 +26,7 @@ import org.shanoir.ng.tag.model.TagDTO;
  *
  */
 public class StudyTagsDTO extends IdName {
-    
+
     private List<TagDTO> tags;
 
     /**

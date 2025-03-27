@@ -26,7 +26,7 @@ public enum Sex {
      * Other.
      */
     O(0),
-    
+
     /**
      * Male.
      */

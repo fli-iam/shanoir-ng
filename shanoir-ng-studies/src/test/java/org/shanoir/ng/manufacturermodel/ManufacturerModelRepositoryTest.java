@@ -38,10 +38,10 @@ public class ManufacturerModelRepositoryTest {
 
     private static final Long MANUFACTURER_MODEL_TEST_1_ID = 1L;
     private static final String MANUFACTURER_MODEL_TEST_1_NAME = "DISCOVERY MR750";
-    
+
     @Autowired
     private ManufacturerModelRepository repository;
-    
+
     @Test
     public void findAllTest() throws Exception {
         Iterable<ManufacturerModel> manufacturerModelsDb = repository.findAll();
@@ -54,12 +54,12 @@ public class ManufacturerModelRepositoryTest {
         }
         assertThat(nbManufacturerModels).isEqualTo(3);
     }
-    
+
     @Test
     public void findByIdTest() throws Exception {
         ManufacturerModel manufacturerModelDb = repository.findById(MANUFACTURER_MODEL_TEST_1_ID).orElseThrow();
         assertThat(manufacturerModelDb).isNotNull();
         assertThat(manufacturerModelDb.getName()).isEqualTo(MANUFACTURER_MODEL_TEST_1_NAME);
     }
-    
+
 }

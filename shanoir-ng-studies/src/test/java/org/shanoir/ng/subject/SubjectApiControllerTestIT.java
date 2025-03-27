@@ -43,7 +43,7 @@
 //@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 //@ActiveProfiles("dev")
 //public class SubjectApiControllerTestIT extends KeycloakControllerTestIT {
-//    
+//
 //    private static final String REQUEST_PATH = "/subject";
 //    private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
 //    private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
@@ -99,7 +99,7 @@
 //    @Test
 //    public void updateNewSubjectProtected() {
 //        final HttpEntity<Subject> entity = new HttpEntity<Subject>(ModelsUtil.createSubject());
-//        
+//    
 //        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 //                String.class);
 //        assertEquals(HttpStatus.FOUND, response.getStatusCode());

@@ -79,7 +79,7 @@ public class AccessRequestApiController implements AccessRequestApi {
         User user = userService.findById(KeycloakUtil.getTokenUserId());
         request.setUser(user);
         request.setStatus(AccessRequest.ON_DEMAND);
-        
+    
         // Sanity check: user already has a pending access request
         List<AccessRequest> accessRequests = this.accessRequestService.findByUserIdAndStudyId(user.getId(), request.getStudyId());
         if (!CollectionUtils.isEmpty(accessRequests)) {
@@ -128,7 +128,7 @@ public class AccessRequestApiController implements AccessRequestApi {
 
         return new ResponseEntity<List<AccessRequest>>(accessRequests, HttpStatus.OK);
     }
-    
+
     @Override
     public ResponseEntity<List<AccessRequest>> findAllByAdminId() throws RestServiceException {
         // Get all studies I administrate
@@ -269,7 +269,7 @@ public class AccessRequestApiController implements AccessRequestApi {
     public ResponseEntity<List<AccessRequest>> findAllByStudyId(
             @Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId
             ) throws RestServiceException {
-        
+    
         return new ResponseEntity<List<AccessRequest>>(this.accessRequestService.findByStudyIdAndStatus(Collections.singletonList(studyId), AccessRequest.ON_DEMAND), HttpStatus.OK);
     }
 }

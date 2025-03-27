@@ -52,7 +52,7 @@ public interface StudyMapper {
         @Mapping(target = "storageVolume", ignore = true), @Mapping(target = "dataUserAgreementPaths", ignore = true),
         @Mapping(target = "protocolFilePaths", ignore = true), @Mapping(target = "timepoints", ignore = true)})
     StudyDTO studyToStudyDTO(Study study);
-    
+
     @Named("studies.detailed")
     @IterableMapping(qualifiedByName = "study.detailed")
     List<StudyDTO> studiesToStudyDTOsDetailed(List<Study> studies);

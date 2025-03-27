@@ -3,7 +3,7 @@ package org.shanoir.ng.tag.model;
 public class TagDTO{
 
     private Long id;
-    
+
     private String name;
 
     private String color;

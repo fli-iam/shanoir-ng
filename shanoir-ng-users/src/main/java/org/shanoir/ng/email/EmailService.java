@@ -130,7 +130,7 @@ public interface EmailService {
 
     /** Invites an user to join a study. */
     void inviteToStudy(StudyInvitationEmail mail);
-    
+
     /**
      * This method notifies a study manager that a user asked an access to a study.
      * @param createdRequest the access request object

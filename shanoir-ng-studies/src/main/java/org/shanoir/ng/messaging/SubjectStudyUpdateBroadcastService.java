@@ -33,15 +33,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class SubjectStudyUpdateBroadcastService {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(SubjectStudyUpdateBroadcastService.class);
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
-    
+
     @Autowired
     private ObjectMapper objectMapper;
-    
+
     public void send(List<SubjectStudy> subjectStudies) throws MicroServiceCommunicationException {
         try {
             String str = objectMapper.writeValueAsString(toDTO(subjectStudies));

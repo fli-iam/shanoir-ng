@@ -21,7 +21,7 @@ package org.shanoir.ng.study.dto;
  *
  */
 public enum DatasetExpressionFormat {
-    
+
     // Analyze
     ANALYZE(1),
 
@@ -78,10 +78,10 @@ public enum DatasetExpressionFormat {
 
     // EEG
     EEG(19),
-    
+
     // BIDS
     BIDS(20);
-    
+
     private int id;
 
     /**

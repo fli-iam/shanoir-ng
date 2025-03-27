@@ -17,7 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/challenges")
 public interface ChallengeApi {
 
-    
+
     @Operation(summary = "", description = "Returns id and name for all available challenges")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "found challenges"),

@@ -96,7 +96,7 @@ public class StudyApiControllerTest {
 
     @MockBean
     private StudyUserService studyUserServiceMock;
-    
+
     @MockBean
     private DataUserAgreementService dataUserAgreementServiceMock;
 
@@ -117,15 +117,15 @@ public class StudyApiControllerTest {
 
     @TempDir
     public static File tempFolder;
-    
+
     public static String tempFolderPath;
-    
+
     @BeforeAll
     public static void beforeAll() {
         tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
         System.setProperty("studies-data", tempFolderPath);
     }
-    
+
     @BeforeEach
     public void setup() throws AccessDeniedException, EntityNotFoundException, MicroServiceCommunicationException {
         given(studyMapperMock.studiesToStudyDTOs(Mockito.anyList()))

@@ -60,7 +60,7 @@ public class ManufacturerModelApiControllerTest {
 
     @MockBean
     private ManufacturerModelService manufacturerModelServiceMock;
-    
+
     @MockBean(name = "controlerSecurityService")
     private ControlerSecurityService controlerSecurityService;
 

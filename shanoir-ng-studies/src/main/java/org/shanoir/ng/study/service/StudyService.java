@@ -60,7 +60,7 @@ public interface StudyService {
     @PostAuthorize("@studySecurityService.hasRightOnTrustedStudy(returnObject, 'CAN_SEE_ALL') or @studySecurityService.hasRightOnTrustedStudy(returnObject, 'CAN_ADMINISTRATE')")
     Study findById(Long id);
 
-    
+
     /**
      * Get all the studies
      *
@@ -69,7 +69,7 @@ public interface StudyService {
     @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
     @PostFilter("@studySecurityService.hasRightOnTrustedStudy(filterObject, 'CAN_SEE_ALL')")
     List<Study> findAll();
-    
+
 
     /**
      * Get all the challenges
@@ -89,7 +89,7 @@ public interface StudyService {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')  and @studySecurityService.studyUsersStudyNull(#study)")
     Study create(Study study) throws MicroServiceCommunicationException;
 
-    
+
     /**
      * Update a study
      *

@@ -115,7 +115,7 @@ public class Study extends HalEntity {
     @CollectionTable(name = "protocol_file_path")
     @Column(name = "path")
     private List<String> protocolFilePaths;
-    
+
     /** List of data user agreement form directly attached to the study. */
     @ElementCollection(fetch = FetchType.EAGER)
     @Fetch(FetchMode.JOIN)
@@ -148,14 +148,14 @@ public class Study extends HalEntity {
     /** List of the examinations related to this study. */
     @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<StudyExamination> examinations;
-    
+
     @Transient
     private int nbExaminations;
 
     /** Relations between the subjects and the studies. */
     @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SubjectStudy> subjectStudyList;
-    
+
     @Transient
     private int nbSubjects;
 
@@ -173,7 +173,7 @@ public class Study extends HalEntity {
     private StudyCardPolicy studyCardPolicy;
 
     private boolean challenge;
-    
+
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Tag> tags;
 

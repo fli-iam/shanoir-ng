@@ -52,10 +52,10 @@ public class StudyUserServiceImpl implements StudyUserService {
 
     @Autowired
     private StudyUserUpdateBroadcastService studyUserUpdateBroadcastService;
-    
+
     @Autowired
     private ObjectMapper mapper;
-    
+
     @Override
     public List<StudyUserRight> getRightsForStudy(Long studyId) {
         Long userId = KeycloakUtil.getTokenUserId();
@@ -66,7 +66,7 @@ public class StudyUserServiceImpl implements StudyUserService {
             return new ArrayList<>();
         }
     }
-    
+
     @Override
     public Map<Long, List<StudyUserRight>> getRights() {
         Long userId = KeycloakUtil.getTokenUserId();

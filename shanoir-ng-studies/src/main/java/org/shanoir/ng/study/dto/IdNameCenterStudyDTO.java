@@ -29,9 +29,9 @@ import org.shanoir.ng.tag.model.TagDTO;
  *
  */
 public class IdNameCenterStudyDTO extends IdName {
-    
+
     private List<StudyCenterDTO> studyCenterList;
-    
+
     private List<TagDTO> tags;
 
     private Profile profile;

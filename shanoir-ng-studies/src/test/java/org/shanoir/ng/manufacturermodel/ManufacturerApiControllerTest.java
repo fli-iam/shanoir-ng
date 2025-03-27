@@ -61,7 +61,7 @@ public class ManufacturerApiControllerTest {
 
     @MockBean
     private ManufacturerService manufacturerServiceMock;
-    
+
     @MockBean
     private ManufacturerUniqueConstraintManager uniqueConstraintManager;
 

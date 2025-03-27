@@ -73,7 +73,7 @@ public class CoilServiceTest {
             coilService.deleteById(2L);
         });
     }
-    
+
     @Test
     public void deleteByIdTest() throws EntityNotFoundException {
         coilService.deleteById(COIL_ID);

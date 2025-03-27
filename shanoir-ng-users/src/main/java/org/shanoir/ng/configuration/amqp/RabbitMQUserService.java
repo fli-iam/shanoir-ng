@@ -42,7 +42,7 @@ public class RabbitMQUserService {
 
     @Autowired
     EmailService emailService;
-    
+
     @Autowired
     private ObjectMapper mapper;
 
@@ -94,7 +94,7 @@ public class RabbitMQUserService {
             throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event.", e);
         }
     }
-    
+
     /**
      * Receives an import end event as a json object, thus send a mail to study manager to notice him
      * that the import failed
@@ -113,7 +113,7 @@ public class RabbitMQUserService {
             throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event.", e);
         }
     }
-    
+
     /**
      * Receives an study user report as a json object, thus send a mail to study manager to notice him
      * @param commandArrStr the task as a json string.

@@ -43,10 +43,10 @@ public class CenterRepositoryTest {
 
     private static final String CENTER_TEST_1_NAME = "CHU Rennes";
     private static final Long CENTER_TEST_1_ID = 1L;
-    
+
     @Autowired
     private CenterRepository repository;
-    
+
     @Test
     public void findAllTest() throws Exception {
         Iterable<Center> centersDb = repository.findAll();
@@ -59,14 +59,14 @@ public class CenterRepositoryTest {
         }
         assertThat(nbCenters).isEqualTo(2);
     }
-    
+
     @Test
     public void findByNameTest() throws Exception {
         Optional<Center> centerDb = repository.findByName(CENTER_TEST_1_NAME);
         assertNotNull(centerDb.get());
         assertThat(centerDb.get().getId()).isEqualTo(CENTER_TEST_1_ID);
     }
-    
+
     @Test
     public void findIdsAndNamesTest() throws Exception {
         List<IdName> centersDb = repository.findIdsAndNames();
@@ -79,12 +79,12 @@ public class CenterRepositoryTest {
         Center centerDb = repository.findById(CENTER_TEST_1_ID).orElse(null);
         assertThat(centerDb.getName()).isEqualTo(CENTER_TEST_1_NAME);
     }
-    
+
     @Test
     public void findNamesByStudyIdTest() throws Exception {
         List<IdName> centersDb = repository.findIdsAndNames(1L);
         assertNotNull(centersDb);
         assertThat(centersDb.size()).isEqualTo(2);
     }
-    
+
 }

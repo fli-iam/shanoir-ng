@@ -55,23 +55,23 @@ public class CenterSecurityTest {
     private static final long LOGGED_USER_ID = 2L;
     private static final String LOGGED_USER_USERNAME = "logged";
     private static final long ENTITY_ID = 1L;
-    
+
     private Center mockNew;
     private Center mockExisting;
-    
+
     @Autowired
     private CenterService service;
-    
+
     @MockBean
     private CenterRepository repository;
-    
+
     @BeforeEach
     public void setup() {
         mockNew = ModelsUtil.createCenter();
         mockExisting = ModelsUtil.createCenter();
         mockExisting.setId(ENTITY_ID);
     }
-    
+
     @Test
     @WithAnonymousUser
     public void testAsAnonymous() throws ShanoirException {
@@ -111,7 +111,7 @@ public class CenterSecurityTest {
         assertAccessAuthorized(service::deleteById, ENTITY_ID);
         assertAccessAuthorized(service::deleteByIdCheckDependencies, ENTITY_ID);
     }
-    
+
     @Test
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
     public void testAsAdmin() throws ShanoirException {
@@ -125,7 +125,7 @@ public class CenterSecurityTest {
         assertAccessAuthorized(service::deleteById, ENTITY_ID);
         assertAccessAuthorized(service::deleteByIdCheckDependencies, ENTITY_ID);
     }
-    
+
     @Test
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
     public void testDependenciesCheckAcq() throws EntityNotFoundException, UndeletableDependenciesException {
@@ -140,7 +140,7 @@ public class CenterSecurityTest {
             service.deleteByIdCheckDependencies(ID);
         });
     }
-    
+
     @Test
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
     public void testDependenciesCheckStuCenter() throws EntityNotFoundException, UndeletableDependenciesException {

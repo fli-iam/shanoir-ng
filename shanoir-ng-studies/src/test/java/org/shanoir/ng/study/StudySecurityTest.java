@@ -56,26 +56,26 @@ public class StudySecurityTest {
     private static final long LOGGED_USER_ID = 2L;
     private static final String LOGGED_USER_USERNAME = "logged";
     private static final long ENTITY_ID = 1L;
-    
+
     private Study mockNew;
     private Study mockExisting;
-    
+
     @Autowired
     private StudyService service;
-    
+
     @MockBean
     private StudyRepository repository;
 
     @MockBean
     private StudyUserRepository studyUserRepository;
-    
+
     @BeforeEach
     public void setup() {
         mockNew = ModelsUtil.createStudy();
         mockExisting = ModelsUtil.createStudy();
         mockExisting.setId(ENTITY_ID);
     }
-    
+
     @Test
     @WithAnonymousUser
     public void testAsAnonymous() throws ShanoirException {
@@ -93,21 +93,21 @@ public class StudySecurityTest {
         assertAccessDenied(service::update, mockExisting);
         assertAccessDenied(service::deleteById, ENTITY_ID);
     }
-    
+
     @Test
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
     public void testFindByIdAsUserThatCanSee() throws ShanoirException {
-        
+    
         given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L)));
         assertAccessDenied(service::findById, 1L);
-        
+    
         given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT)));
         assertAccessDenied(service::findById, 1L);
-        
+    
         given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL)));
         assertAccessAuthorized(service::findById, 1L);
     }
-    
+
     @Test
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
     public void testFindAllAsUserThatCanSee() throws ShanoirException {
@@ -118,7 +118,7 @@ public class StudySecurityTest {
         given(studyUserRepository.findByStudy_Id(1L)).willReturn(buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL).getStudyUserList());
         given(studyUserRepository.findByStudy_Id(2L)).willReturn(buildStudyMock(2L, StudyUserRight.CAN_SEE_ALL).getStudyUserList());
         assertEquals(2, service.findAll().size());
-        
+    
         given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(new Study[]
                 { buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL), buildStudyMock(2L, StudyUserRight.CAN_DOWNLOAD) } ));
         given(studyUserRepository.findByStudy_Id(1L)).willReturn(buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL).getStudyUserList());
@@ -134,23 +134,23 @@ public class StudySecurityTest {
         assertAccessAuthorized(service::findAll);
         assertAccessAuthorized(service::create, mockNew);
         assertAccessAuthorized(service::create, mockExisting);
-        
+    
         Study mockOne = buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT);
         given(repository.findById(1L)).willReturn(Optional.of(mockOne));
         assertAccessDenied(service::update, mockOne);
         assertAccessDenied(service::deleteById, 1L);
-        
+    
         Study mockTwo = buildStudyMock(2L, StudyUserRight.CAN_ADMINISTRATE);
         given(repository.findById(2L)).willReturn(Optional.of(mockTwo));
         assertAccessAuthorized(service::update, mockTwo);
         assertAccessAuthorized(service::deleteById, 2L);
-        
+    
         Study mockThree = buildStudyMock(3L);
         given(repository.findById(3L)).willReturn(Optional.of(mockThree));
         assertAccessDenied(service::update, mockThree);
         assertAccessDenied(service::deleteById, 3L);
     }
-    
+
     @Test
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
     public void testAsAdmin() throws ShanoirException {
@@ -162,7 +162,7 @@ public class StudySecurityTest {
         assertAccessAuthorized(service::update, mockExisting);
         assertAccessAuthorized(service::deleteById, ENTITY_ID);
     }
-    
+
     @Test
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
     public void findAllTestAdmin() {
@@ -174,7 +174,7 @@ public class StudySecurityTest {
         Assertions.assertTrue(all.size() > 0);
         Assertions.assertNotNull(all.get(0).getStudyCenterList());
     }
-    
+
     @Test
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
     public void findAllTestUser() {
@@ -193,7 +193,7 @@ public class StudySecurityTest {
         Assertions.assertTrue(all.size() > 0);
         Assertions.assertNotNull(all.get(0).getStudyCenterList());
     }
-    
+
     private Study buildStudyMock(Long id, StudyUserRight... rights) {
         Study study = ModelsUtil.createStudy();
         study.setId(id);

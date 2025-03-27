@@ -241,7 +241,7 @@ public class StudySecurityService {
         if (subjectDTOs == null || subjectDTOs.isEmpty()) return true;
         List<Long> subjectIds = new ArrayList<>();
         for (SimpleSubjectDTO dto : subjectDTOs) {
-            subjectIds.add(dto.getId());    
+            subjectIds.add(dto.getId());
         }
         List<Subject> subjects = Utils.toList(subjectRepository.findAllById(subjectIds));
         if (subjects == null || subjects.isEmpty()) {
@@ -508,7 +508,7 @@ public class StudySecurityService {
         }
         return nbStudies == ids.size();
     }
-    
+
     /**
      * Verify that DUA accepting user is the DUA user only.
      * @param duaId

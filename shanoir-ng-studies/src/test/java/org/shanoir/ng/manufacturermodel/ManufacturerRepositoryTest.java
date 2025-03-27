@@ -38,10 +38,10 @@ public class ManufacturerRepositoryTest {
 
     private static final Long MANUFACTURER_TEST_1_ID = 1L;
     private static final String MANUFACTURER_TEST_1_NAME = "GE Healthcare";
-    
+
     @Autowired
     private ManufacturerRepository repository;
-    
+
     @Test
     public void findAllTest() throws Exception {
         Iterable<Manufacturer> manufacturersDb = repository.findAll();
@@ -54,12 +54,12 @@ public class ManufacturerRepositoryTest {
         }
         assertThat(nbManufacturers).isEqualTo(3);
     }
-    
+
     @Test
     public void findByIdTest() throws Exception {
         Manufacturer manufacturerDb = repository.findById(MANUFACTURER_TEST_1_ID).orElseThrow();
         assertThat(manufacturerDb).isNotNull();
         assertThat(manufacturerDb.getName()).isEqualTo(MANUFACTURER_TEST_1_NAME);
     }
-    
+
 }

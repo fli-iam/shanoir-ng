@@ -32,7 +32,7 @@ import org.shanoir.ng.tag.model.StudyTagDTO;
 public class StudyLightDTO {
 
     private boolean downloadableByDefault;
-    
+
     private boolean challenge;
 
     @LocalDateAnnotations
@@ -60,7 +60,7 @@ public class StudyLightDTO {
     private List<StudyTagDTO> studyTags;
 
     private List<String> protocolFilePaths;
-    
+
     private List<String> dataUserAgreementPaths;
 
     private Profile profile;

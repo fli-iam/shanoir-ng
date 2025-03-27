@@ -75,7 +75,7 @@ public class SubjectStudy extends AbstractEntity {
     /** Tags associated to the subject. */
     @OneToMany(mappedBy = "subjectStudy", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SubjectStudyTag> subjectStudyTags;
-    
+
     /** StudyCard tags associated to the subject. */
     private Integer qualityTag;
 
@@ -86,15 +86,15 @@ public class SubjectStudy extends AbstractEntity {
         if (getSubjectStudyTags() == null) return null;
         return getSubjectStudyTags().stream().map((subjectStudyTag) -> subjectStudyTag.getTag()).collect(Collectors.toList());
     }
-    
+
     public List<SubjectStudyTag> getSubjectStudyTags() {
         return subjectStudyTags;
     }
-    
+
     public QualityTag getQualityTag() {
         return QualityTag.get(qualityTag);
     }
-    
+
     public void setQualityTag(QualityTag tag) {
         this.qualityTag = tag != null ? tag.getId() : null;
     }
@@ -102,7 +102,7 @@ public class SubjectStudy extends AbstractEntity {
     public void setSubjectStudyTags(List<SubjectStudyTag> subjectStudyTags) {
         this.subjectStudyTags = subjectStudyTags;
     }
-    
+
     /**
      * @return the physicallyInvolved
      */
