@@ -12,6 +12,7 @@ public class ShanoirEvent {
     public static final int ERROR = -1;
     public static final int SUCCESS = 1;
     public static final int IN_PROGRESS = 2;
+    private static final int OBJECT_ID_MAX_SIZE = 255;
 
     private Long id;
 
@@ -111,8 +112,8 @@ public class ShanoirEvent {
      * @param objectId the objectId to set
      */
     public final void setObjectId(String objectId) {
-        if (objectId != null && objectId.length() > 255) {
-            this.objectId = objectId.substring(0, 250) + "...";
+        if (objectId != null && objectId.length() > OBJECT_ID_MAX_SIZE) {
+            this.objectId = objectId.substring(0, OBJECT_ID_MAX_SIZE - 5) + "...";
         } else {
             this.objectId = objectId;
         }
