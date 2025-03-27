@@ -16,6 +16,7 @@ package org.shanoir.ng.importer.vip.controler;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Date;
 
@@ -76,13 +77,14 @@ public class ExecutionResultApiController implements ExecutionResultApi {
             @Parameter(name = "") @Valid @RequestBody String body)
             throws RestServiceException, JsonProcessingException {
 
+        LOG.info("Starting VIP output download.");
+
         JsonFactory jsonFactory = JsonFactory.builder()
                 .streamReadConstraints(StreamReadConstraints.builder().maxStringLength(Integer.MAX_VALUE).build())
                         .build();
 
         ObjectMapper objectMapper = JsonMapper.builder(jsonFactory).build();
         UploadData received = objectMapper.readValue(body, UploadData.class);
-
         String importPath = getImportPathFromRequest(httpServletRequest);
 
         Path path = new Path();
@@ -93,6 +95,7 @@ public class ExecutionResultApiController implements ExecutionResultApi {
             File resultDir = resultFile.getParentFile();
 
             if (!resultDir.exists()) {
+                LOG.info("Creating directory {}", resultDir.getAbsolutePath());
                 resultDir.mkdirs();
             }
 
@@ -105,7 +108,6 @@ public class ExecutionResultApiController implements ExecutionResultApi {
             long size = Files.walk(resultDir.toPath()).mapToLong(p -> p.toFile().length()).sum();
             path.setSize(size);
             path.setLastModificationDate(new Date().getTime());
-
         } catch (IOException e) {
             LOG.error("I/O error while uploading [{}]", importPath, e);
             throw new RestServiceException(
@@ -133,7 +135,7 @@ public class ExecutionResultApiController implements ExecutionResultApi {
      */
     private String getImportPathFromRequest(HttpServletRequest request) {
         String decodedUri = UriUtils.decode(request.getRequestURI(), "UTF-8");
-        return importDir + File.separator + VIP_UPLOAD_FOLDER + File.separator + decodedUri.replace(PATH_PREFIX, "");
+        return importDir + File.separator + VIP_UPLOAD_FOLDER + File.separator + decodedUri.replace(PATH_PREFIX, "") + ".tgz";
     }
 
 }

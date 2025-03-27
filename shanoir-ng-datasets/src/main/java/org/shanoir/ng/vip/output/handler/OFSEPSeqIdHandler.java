@@ -142,12 +142,11 @@ public class OFSEPSeqIdHandler extends OutputHandler {
                     LOG.warn("Series list is empty in result file [{}].", file.getAbsolutePath());
                     return;
                 }
-
                 processSeries(series, processing);
-
             } catch (Exception e) {
                 LOG.error("An error occured while extracting result from result archive.", e);
             }
+            return;
         }
         LOG.error("Expected result file [" + parentFolder.getAbsolutePath() + "/" + PIPELINE_OUTPUT + "] is not present.");
     }
@@ -227,7 +226,6 @@ public class OFSEPSeqIdHandler extends OutputHandler {
      * Process all series / acquisitions found in output JSON
      */
     private void processSeries(JSONArray series, ExecutionMonitoring execution) throws JSONException, PacsException, EntityNotFoundException, CheckedIllegalClassException, SolrServerException, IOException {
-
         for (int i = 0; i < series.length(); i++) {
 
             JSONObject serie = series.getJSONObject(i);
@@ -264,9 +262,9 @@ public class OFSEPSeqIdHandler extends OutputHandler {
                 addDatasetTags(ds, properties);
                 properties.addAll(getDatasetPropertiesFromDicom(attributes, ds, execution));
                 datasetPropertyService.createAll(properties);
-
             }
         }
+        LOG.info("Output.json processed for execution {}", execution.getId()    );
     }
 
     /**
