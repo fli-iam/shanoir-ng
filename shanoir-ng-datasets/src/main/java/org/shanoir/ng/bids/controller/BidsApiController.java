@@ -63,22 +63,22 @@ public class BidsApiController implements BidsApi {
 
 	@Override
 	public ResponseEntity<Void> generateBIDSByStudyId(
-    		@Parameter(description = "id of the study", required=true) @PathVariable("studyId") Long studyId,
-    		@Parameter(description = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException {
+    		@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+    		@Parameter(description = "name of the study", required = true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException {
 		bidsService.exportAsBids(studyId, studyName);
 		return ResponseEntity.ok().build();
 	}
 
     public ResponseEntity<BidsElement> refreshBIDSByStudyId(
-    		@Parameter(description = "id of the study", required=true) @PathVariable("studyId") Long studyId,
-    		@Parameter(description = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException {
+    		@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+    		@Parameter(description = "name of the study", required = true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException {
     	this.bidsService.deleteBidsFolder(studyId, studyName);
     	return this.getBIDSStructureByStudyId(studyId);
     }
 
 	@Override
     public void exportBIDSFile(
-    		@Parameter(description = "Id of the study", required=true) @PathVariable("studyId") Long studyId,
+    		@Parameter(description = "Id of the study", required = true) @PathVariable("studyId") Long studyId,
     		@Parameter(description = "file path") @Valid @RequestParam(value = "filePath", required = true) String filePath,
 			HttpServletResponse response) throws RestServiceException, IOException {
 		// Check filePath too

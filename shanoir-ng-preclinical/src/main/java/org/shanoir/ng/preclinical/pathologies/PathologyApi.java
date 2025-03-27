@@ -56,7 +56,7 @@ public interface PathologyApi {
         @ApiResponse(responseCode = "500", description = "Unexpected Error") })
     @DeleteMapping(value = "/{id}",
         produces = { "application/json" })
-    ResponseEntity<Void> deletePathology(@Parameter(name = "pathology id",required=true ) @PathVariable("id") Long id);
+    ResponseEntity<Void> deletePathology(@Parameter(name = "pathology id",required = true ) @PathVariable("id") Long id);
 
 
     @Operation(summary = "Get Pathology", description = "")
@@ -66,7 +66,7 @@ public interface PathologyApi {
         @ApiResponse(responseCode = "500", description = "Unexpected error") })
     @GetMapping(value = "/{id}",
         produces = { "application/json" })
-    ResponseEntity<Pathology> getPathologyById(@Parameter(name = "Pathology id",required=true ) @PathVariable("id") Long id);
+    ResponseEntity<Pathology> getPathologyById(@Parameter(name = "Pathology id",required = true ) @PathVariable("id") Long id);
 
 
     @Operation(summary = "List all pathologies", description = "")
@@ -87,8 +87,8 @@ public interface PathologyApi {
     @PutMapping(value = "/{id}",
         produces = { "application/json" },
         consumes = { "application/json" })
-    ResponseEntity<Void> updatePathology(@Parameter(name = "ID of pathology that needs to be updated",required=true ) @PathVariable("id") Long id,
-        @Parameter(name = "Pathology object that needs to be updated" ,required=true ) @RequestBody Pathology pathology,
+    ResponseEntity<Void> updatePathology(@Parameter(name = "ID of pathology that needs to be updated",required = true ) @PathVariable("id") Long id,
+        @Parameter(name = "Pathology object that needs to be updated" ,required = true ) @RequestBody Pathology pathology,
         final BindingResult result) throws RestServiceException;
 
 }

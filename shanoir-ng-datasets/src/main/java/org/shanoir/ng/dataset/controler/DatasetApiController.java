@@ -176,7 +176,7 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public ResponseEntity<Void> deleteDatasets(
-			@Parameter(description = "ids of the datasets", required=true) @Valid
+			@Parameter(description = "ids of the datasets", required = true) @Valid
 			@RequestBody List<Long> datasetIds)
 			throws RestServiceException {
 		try {
@@ -385,7 +385,7 @@ public class DatasetApiController implements DatasetApi {
 		}
 	}
 	
-	public ResponseEntity<Void> createProcessedDataset(@Parameter(description = "ProcessedDataset to create" ,required=true )  @Valid @RequestBody ProcessedDatasetImportJob importJob) throws IOException, Exception {
+	public ResponseEntity<Void> createProcessedDataset(@Parameter(description = "ProcessedDataset to create" ,required = true )  @Valid @RequestBody ProcessedDatasetImportJob importJob) throws IOException, Exception {
 		importerService.createProcessedDataset(importJob);
 		File originalNiftiName = new File(importJob.getProcessedDatasetFilePath());
 		importerService.cleanTempFiles(originalNiftiName.getParent());
@@ -394,7 +394,7 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public void massiveDownloadByDatasetIds(
-			@Parameter(description = "ids of the datasets", required=true) @Valid
+			@Parameter(description = "ids of the datasets", required = true) @Valid
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
 			@Parameter(description = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
 			@RequestParam(value = "format", required = false, defaultValue=DCM) String format,
@@ -421,7 +421,7 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public void massiveDownloadByStudyId(
-			@Parameter(description = "id of the study", required=true) @Valid
+			@Parameter(description = "id of the study", required = true) @Valid
 			@RequestParam(value = "studyId", required = true) Long studyId,
 			@Parameter(description = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
 			@RequestParam(value = "format", required = false, defaultValue=DCM) String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException {
@@ -444,7 +444,7 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public void massiveDownloadByExaminationId(
-			@Parameter(description = "id of the examination", required=true) @Valid
+			@Parameter(description = "id of the examination", required = true) @Valid
 			@RequestParam(value = "examinationId", required = true) Long examinationId,
 			@Parameter(description = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
 			@RequestParam(value = "format", required = false, defaultValue=DCM) String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException {
@@ -468,7 +468,7 @@ public class DatasetApiController implements DatasetApi {
 
     @Override
 	public void massiveDownloadByAcquisitionId(
-			@Parameter(description = "id of the acquisition", required=true) @Valid
+			@Parameter(description = "id of the acquisition", required = true) @Valid
 			@RequestParam(value = "acquisitionId", required = true) Long acquisitionId,
 			@Parameter(description = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
 			@RequestParam(value = "format", required = false, defaultValue="dcm") String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException {
@@ -560,13 +560,13 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public ResponseEntity<String> downloadStatistics(
-			@Parameter(description = "Study name including regular expression", required=false) @Valid
+			@Parameter(description = "Study name including regular expression", required = false) @Valid
 			@RequestParam(value = "studyNameInRegExp", required = false) String studyNameInRegExp,
-			@Parameter(description = "Study name excluding regular expression", required=false) @Valid
+			@Parameter(description = "Study name excluding regular expression", required = false) @Valid
 			@RequestParam(value = "studyNameOutRegExp", required = false) String studyNameOutRegExp,
-			@Parameter(description = "Subject name including regular expression", required=false) @Valid
+			@Parameter(description = "Subject name including regular expression", required = false) @Valid
 			@RequestParam(value = "subjectNameInRegExp", required = false) String subjectNameInRegExp,
-			@Parameter(description = "Subject name excluding regular expression", required=false) @Valid
+			@Parameter(description = "Subject name excluding regular expression", required = false) @Valid
 			@RequestParam(value = "subjectNameOutRegExp", required = false) String subjectNameOutRegExp
 			) throws IOException {
 

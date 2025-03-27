@@ -14,7 +14,7 @@ import jakarta.persistence.Table;
 public class ShanoirEvent extends ShanoirEventLight {
 
     @Column(columnDefinition = "LONGTEXT")
-    protected String report;
+    private String report;
 
     public ShanoirEvent() {
         // Default empty constructor for json deserializer.

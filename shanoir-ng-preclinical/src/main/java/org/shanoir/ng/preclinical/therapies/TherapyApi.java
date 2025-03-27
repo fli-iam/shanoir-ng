@@ -56,7 +56,7 @@ public interface TherapyApi {
         @ApiResponse(responseCode = "500", description = "Unexpected Error") })
     @DeleteMapping(value = "/{id}",
         produces = { "application/json" })
-    ResponseEntity<Void> deleteTherapy(@Parameter(name = "therapy id",required=true ) @PathVariable("id") Long id);
+    ResponseEntity<Void> deleteTherapy(@Parameter(name = "therapy id",required = true ) @PathVariable("id") Long id);
 
 
     @Operation(summary = "Get Therapy by id", description = "")
@@ -66,7 +66,7 @@ public interface TherapyApi {
         @ApiResponse(responseCode = "500", description = "Unexpected error") })
     @GetMapping(value = "/{id}",
         produces = { "application/json" })
-    ResponseEntity<Therapy> getTherapyById(@Parameter(name = "Therapy id",required=true ) @PathVariable("id") Long id);
+    ResponseEntity<Therapy> getTherapyById(@Parameter(name = "Therapy id",required = true ) @PathVariable("id") Long id);
 
 
     @Operation(summary = "Get Therapy by type", description = "")
@@ -75,7 +75,7 @@ public interface TherapyApi {
             @ApiResponse(responseCode = "500", description = "Unexpected error") })
     @GetMapping(value = "/type/{type}",
         produces = { "application/json" })
-    ResponseEntity<List<Therapy>> getTherapyByType(@Parameter(name = "Therapy type",required=true ) @PathVariable("type") String type) throws RestServiceException ;
+    ResponseEntity<List<Therapy>> getTherapyByType(@Parameter(name = "Therapy type",required = true ) @PathVariable("type") String type) throws RestServiceException ;
 
 
     @Operation(summary = "List all therapies", description = "")
@@ -96,8 +96,8 @@ public interface TherapyApi {
     @PutMapping(value = "/{id}",
         produces = { "application/json" },
         consumes = { "application/json" })
-    ResponseEntity<Void> updateTherapy(@Parameter(name = "ID of therapy that needs to be updated",required=true ) @PathVariable("id") Long id,
-        @Parameter(name = "Therapy object that needs to be updated" ,required=true ) @RequestBody Therapy therapy,
+    ResponseEntity<Void> updateTherapy(@Parameter(name = "ID of therapy that needs to be updated",required = true ) @PathVariable("id") Long id,
+        @Parameter(name = "Therapy object that needs to be updated" ,required = true ) @RequestBody Therapy therapy,
         final BindingResult result) throws RestServiceException;
 
 }

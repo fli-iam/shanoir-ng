@@ -85,7 +85,7 @@ public class ShanoirEventRepositoryImpl implements ShanoirEventRepositoryCustom 
                     queryStr += "e." + order.getProperty();
                 }
                 queryStr += " " + order.getDirection() + " ";
-                isort ++;
+                isort++;
             }
             queryStr += ", e.creationDate desc";
         }

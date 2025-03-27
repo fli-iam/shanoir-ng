@@ -175,7 +175,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
 	@Override
 	public void massiveDownloadByProcessingIds(
-			@Parameter(description = "ids of processing", required=true) @Valid
+			@Parameter(description = "ids of processing", required = true) @Valid
 			@RequestBody List<Long> processingIds,
 			@Parameter(description = "outputs to extract") @Valid
 			@RequestParam(value = "resultOnly") boolean resultOnly,
@@ -200,7 +200,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
 	@Override
 	public void massiveDownloadProcessingByExaminationIds(
-			@Parameter(description = "ids of examination", required=true) @Valid
+			@Parameter(description = "ids of examination", required = true) @Valid
 			@RequestBody List<Long> examinationIds,
 			@Parameter(description = "comment of the desired processings") @Valid
 			@RequestParam(value = "processingComment", required = false) String processingComment,

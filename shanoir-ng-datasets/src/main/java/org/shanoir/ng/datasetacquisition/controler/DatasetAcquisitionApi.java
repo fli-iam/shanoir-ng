@@ -50,7 +50,7 @@ public interface DatasetAcquisitionApi {
         consumes = { "application/json" },
         method = RequestMethod.POST)
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#importJob.getExaminationId(), 'CAN_IMPORT'))")
-    ResponseEntity<Void> createNewDatasetAcquisition(@Parameter(description = "DatasetAcquisition to create" ,required=true ) @Valid @RequestBody ImportJob importJob) throws RestServiceException;
+    ResponseEntity<Void> createNewDatasetAcquisition(@Parameter(description = "DatasetAcquisition to create" ,required = true ) @Valid @RequestBody ImportJob importJob) throws RestServiceException;
 
 	@Operation(summary = "", description = "If exists, returns the dataset acquisitions corresponding to the given study card")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found dataset acquisitions"),

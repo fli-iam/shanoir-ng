@@ -440,7 +440,7 @@ public class BrainVisionReader {
 					channelToGet.setLowCutoff("DC".equals(tmp[4]) ? 0 : Integer.parseInt(tmp[4]));
 					channelToGet.setHighCutoff("DC".equals(tmp[5]) ? 0 : Integer.parseInt(tmp[5]));
 					channelToGet.setNotch("Off".equals(tmp[6]) ? 0 : Integer.parseInt(tmp[6]));
-					channelIndex ++;
+					channelIndex++;
 				}
 				else if (zeile.startsWith("[Coordinates]")) {
 					hasPosition = true;

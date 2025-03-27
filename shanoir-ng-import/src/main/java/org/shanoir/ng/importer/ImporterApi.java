@@ -139,7 +139,7 @@ public interface ImporterApi {
         @ApiResponse(responseCode = "500", description = "unexpected error") })
     @PostMapping(value = "/start_import_job/", consumes = { "application/json" }, produces = { "application/json" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT'))")
-    ResponseEntity<Void> startImportJob(@Parameter(name = "ImportJob", required=true) @RequestBody ImportJob importJob) throws RestServiceException;
+    ResponseEntity<Void> startImportJob(@Parameter(name = "ImportJob", required = true) @RequestBody ImportJob importJob) throws RestServiceException;
 
     @Operation(summary = "Start analysis of EEG job", description = "Start analysis eeg job")
     @ApiResponses(value = {
@@ -150,7 +150,7 @@ public interface ImporterApi {
         produces = { "application/json" },
         consumes = { "application/json" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
-    ResponseEntity<EegImportJob> analyzeEegZipFile(@Parameter(name = "EegImportJob", required=true) @RequestBody EegImportJob importJob) throws RestServiceException;
+    ResponseEntity<EegImportJob> analyzeEegZipFile(@Parameter(name = "EegImportJob", required = true) @RequestBody EegImportJob importJob) throws RestServiceException;
 
     @Operation(summary = "Start import EEG job", description = "Start import eeg job")
     @ApiResponses(value = {
@@ -161,7 +161,7 @@ public interface ImporterApi {
         produces = { "application/json" },
         consumes = { "application/json" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT'))")
-    ResponseEntity<Void> startImportEEGJob(@Parameter(name = "EegImportJob", required=true) @RequestBody EegImportJob importJob) throws RestServiceException;
+    ResponseEntity<Void> startImportEEGJob(@Parameter(name = "EegImportJob", required = true) @RequestBody EegImportJob importJob) throws RestServiceException;
 
     @Operation(summary = "ImportFromPACS: Query PACS", description = "ImportFromPACS: Query PACS")
     @ApiResponses(value = {
@@ -172,7 +172,7 @@ public interface ImporterApi {
         produces = { "application/json" },
         consumes = { "application/json" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT') and @importSecurityService.canImportFromPACS())")
-    ResponseEntity<ImportJob> queryPACS(@Parameter(name = "DicomQuery", required=true) @RequestBody DicomQuery dicomQuery) throws RestServiceException;
+    ResponseEntity<ImportJob> queryPACS(@Parameter(name = "DicomQuery", required = true) @RequestBody DicomQuery dicomQuery) throws RestServiceException;
 
     @Operation(summary = "Get dicom image", description = "Get dicom image")
     @ApiResponses(value = {
@@ -181,6 +181,6 @@ public interface ImporterApi {
         @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/get_dicom/", produces = { "application/dicom" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
-    ResponseEntity<ByteArrayResource> getDicomImage(@Parameter(name = "path", required=true) @RequestParam(value = "path", required = true) String path) throws RestServiceException, IOException;
+    ResponseEntity<ByteArrayResource> getDicomImage(@Parameter(name = "path", required = true) @RequestParam(value = "path", required = true) String path) throws RestServiceException, IOException;
 
 }

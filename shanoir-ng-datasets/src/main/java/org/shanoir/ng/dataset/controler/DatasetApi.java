@@ -67,7 +67,7 @@ public interface DatasetApi {
 	@DeleteMapping(value = "/delete", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> deleteDatasets(
-			@Parameter(description = "ids of the datasets", required=true) @Valid
+			@Parameter(description = "ids of the datasets", required = true) @Valid
     		@RequestBody(required = true) List<Long> datasetIds)
 			throws RestServiceException;
 
@@ -80,7 +80,7 @@ public interface DatasetApi {
 	@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping(value = "/deleteNiftis", produces = { "application/json" })
 	ResponseEntity<Void> deleteNiftisFromStudy(
-			@Parameter(description = "Id of the study from which we want to delete the niftis", required=true) @Valid
+			@Parameter(description = "Id of the study from which we want to delete the niftis", required = true) @Valid
 			@RequestBody(required = true) long studyId);
 
 	@Operation(summary = "", description = "If exists, returns the dataset corresponding to the given id")
@@ -212,7 +212,7 @@ public interface DatasetApi {
     @GetMapping(value = "/download/{datasetId}")
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_DOWNLOAD'))")
     void downloadDatasetById(
-    		@Parameter(description = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId,
+    		@Parameter(description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
     		@Parameter(description = "Dowloading nifti, decide the nifti converter id") Long converterId,
     		@Parameter(description = "Decide if you want to download dicom (dcm) or nifti (nii) files.")
     		@Valid @RequestParam(value = "format", required = false, defaultValue="dcm") String format,
@@ -229,7 +229,7 @@ public interface DatasetApi {
     @GetMapping(value = "/dicom-metadata/{datasetId}")
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_DOWNLOAD'))")
     ResponseEntity<String> getDicomMetadataByDatasetId(
-    		@Parameter(description = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId) throws MalformedURLException, IOException, MessagingException;
+    		@Parameter(description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId) throws MalformedURLException, IOException, MessagingException;
 
 	@Operation(summary = "", description = "Creates a processed dataset")
 	@ApiResponses(value = {
@@ -243,7 +243,7 @@ public interface DatasetApi {
 		consumes = { "application/json" },
 		method = RequestMethod.POST)
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT'))")
-	ResponseEntity<Void> createProcessedDataset(@Parameter(description = "co to create" ,required=true )  @Valid @RequestBody ProcessedDatasetImportJob importJob) throws RestServiceException, IOException, Exception;
+	ResponseEntity<Void> createProcessedDataset(@Parameter(description = "co to create" ,required = true )  @Valid @RequestBody ProcessedDatasetImportJob importJob) throws RestServiceException, IOException, Exception;
 	
     @Operation(summary = "massiveDownloadDatasetsByIds", description = "If exists, returns a zip file of the datasets corresponding to the given ids")
     @ApiResponses(value = {
@@ -255,7 +255,7 @@ public interface DatasetApi {
     @PostMapping(value = "/massiveDownload")
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_DOWNLOAD'))")
     void massiveDownloadByDatasetIds(
-    		@Parameter(description = "ids of the datasets", required=true) @Valid
+    		@Parameter(description = "ids of the datasets", required = true) @Valid
     		@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
     		@Parameter(description = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
     		@RequestParam(value = "format", required = false, defaultValue="dcm") String format,
@@ -273,7 +273,7 @@ public interface DatasetApi {
     @GetMapping(value = "/massiveDownloadByStudy")
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_DOWNLOAD'))")
     void massiveDownloadByStudyId(
-    		@Parameter(description = "id of the study", required=true) @Valid
+    		@Parameter(description = "id of the study", required = true) @Valid
     		@RequestParam(value = "studyId", required = true) Long studyId,
     		@Parameter(description = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
     		@RequestParam(value = "format", required = false, defaultValue="dcm") String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException;
@@ -288,7 +288,7 @@ public interface DatasetApi {
 	@GetMapping(value = "/massiveDownloadByExamination")
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_DOWNLOAD'))")
 	void massiveDownloadByExaminationId(
-			@Parameter(description = "id of the examination", required=true) @Valid
+			@Parameter(description = "id of the examination", required = true) @Valid
 			@RequestParam(value = "examinationId", required = true) Long examinationId,
 			@Parameter(description = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
 			@RequestParam(value = "format", required = false, defaultValue="dcm") String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException;
@@ -303,7 +303,7 @@ public interface DatasetApi {
 	@GetMapping(value = "/massiveDownloadByAcquisition")
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDatasetAcquisition(#acquisitionId, 'CAN_DOWNLOAD'))")
 	void massiveDownloadByAcquisitionId(
-			@Parameter(description = "id of the acquisition", required=true) @Valid
+			@Parameter(description = "id of the acquisition", required = true) @Valid
 			@RequestParam(value = "acquisitionId", required = true) Long acquisitionId,
 			@Parameter(description = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
 			@RequestParam(value = "format", required = false, defaultValue="dcm") String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException;
@@ -318,13 +318,13 @@ public interface DatasetApi {
 	@GetMapping(value = "/downloadStatistics")
 	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<String> downloadStatistics(
-			@Parameter(description = "Study name including regular expression", required=false) @Valid
+			@Parameter(description = "Study name including regular expression", required = false) @Valid
 			@RequestParam(value = "studyNameInRegExp", required = false) String studyNameInRegExp,
-			@Parameter(description = "Study name excluding regular expression", required=false) @Valid
+			@Parameter(description = "Study name excluding regular expression", required = false) @Valid
 			@RequestParam(value = "studyNameOutRegExp", required = false) String studyNameOutRegExp,
-			@Parameter(description = "Subject name including regular expression", required=false) @Valid
+			@Parameter(description = "Subject name including regular expression", required = false) @Valid
 			@RequestParam(value = "subjectNameInRegExp", required = false) String subjectNameInRegExp,
-			@Parameter(description = "Subject name excluding regular expression", required=false) @Valid
+			@Parameter(description = "Subject name excluding regular expression", required = false) @Valid
 			@RequestParam(value = "subjectNameOutRegExp", required = false) String subjectNameOutRegExp) throws RestServiceException, IOException, InterruptedException;
 
 	@Operation(summary = "downloadStatistics", description = "Download statistics for event")

@@ -10,7 +10,6 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.tasks.AsyncTaskApiController;
 import org.shanoir.ng.tasks.UserSseEmitter;
-import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -32,12 +31,10 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class ShanoirEventsService {
 
     @Autowired
-    ShanoirEventRepository repository;
-    @Autowired
-    ShanoirEventRepositoryCustom repositoryCustom;
+    private ShanoirEventRepository repository;
 
     @Autowired
-    UserRepository userRepository;
+    private ShanoirEventRepositoryCustom repositoryCustom;
 
     private static final Logger LOG = LoggerFactory.getLogger(ShanoirEventsService.class);
 
@@ -75,7 +72,7 @@ public class ShanoirEventsService {
         }
         List<ShanoirEvent> dbEvents = Utils.toList(repository.findByUserIdAndEventTypeInAndLastUpdateYoungerThan7Days(userId, list));
         List<ShanoirEventLight> events = new ArrayList<>();
-        cleanEvents(dbEvents);    
+        cleanEvents(dbEvents);
         for (ShanoirEvent event : dbEvents) {
             events.add(event.toLightEvent());
         }
@@ -158,7 +155,7 @@ public class ShanoirEventsService {
         return repository.findByIdAndUserId(taskId, userId);
     }
 
-    public Page<ShanoirEvent> findByStudyId(final Pageable pageable,Long studyId, String searchStr, String searchField) {
+    public Page<ShanoirEvent> findByStudyId(final Pageable pageable, Long studyId, String searchStr, String searchField) {
         Page<ShanoirEvent> events = repositoryCustom.findByStudyIdOrderByCreationDateDescAndSearch(pageable, studyId, searchStr, searchField);
         return events;
     }

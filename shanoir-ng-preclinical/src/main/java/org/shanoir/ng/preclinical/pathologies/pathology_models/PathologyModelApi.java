@@ -59,7 +59,7 @@ public interface PathologyModelApi {
         @ApiResponse(responseCode = "500", description = "Unexpected Error") })
     @DeleteMapping(value = "/pathology/model/{id}",
         produces = { "application/json" })
-    ResponseEntity<Void> deletePathologyModel(@Parameter(name = "pathology model id",required=true ) @PathVariable("id") Long id);
+    ResponseEntity<Void> deletePathologyModel(@Parameter(name = "pathology model id",required = true ) @PathVariable("id") Long id);
 
 
     @Operation(summary = "Get Pathology model", description = "")
@@ -69,7 +69,7 @@ public interface PathologyModelApi {
         @ApiResponse(responseCode = "500", description = "Unexpected error") })
     @GetMapping(value = "/pathology/model/{id}",
         produces = { "application/json" })
-    ResponseEntity<PathologyModel> getPathologyModelById(@Parameter(name = "Pathology model id",required=true ) @PathVariable("id") Long id);
+    ResponseEntity<PathologyModel> getPathologyModelById(@Parameter(name = "Pathology model id",required = true ) @PathVariable("id") Long id);
 
 
     @Operation(summary = "List all pathologies models", description = "")
@@ -86,7 +86,7 @@ public interface PathologyModelApi {
         @ApiResponse(responseCode = "500", description = "Unexpected error") })
     @GetMapping(value = "/pathology/{id}/model/all",
         produces = { "application/json" })
-    ResponseEntity<List<PathologyModel>> getPathologyModelsByPathology(@Parameter(name = "ID of pathology",required=true ) @PathVariable("id") Long id);
+    ResponseEntity<List<PathologyModel>> getPathologyModelsByPathology(@Parameter(name = "ID of pathology",required = true ) @PathVariable("id") Long id);
 
 
     @Operation(summary = "Update an existing pathology model", description = "")
@@ -98,8 +98,8 @@ public interface PathologyModelApi {
     @PutMapping(value = "/pathology/model/{id}",
         produces = { "application/json" },
         consumes = { "application/json" })
-    ResponseEntity<Void> updatePathologyModel(@Parameter(name = "ID of pathology model that needs to be updated",required=true ) @PathVariable("id") Long id,
-        @Parameter(name = "Pathology model object that needs to be updated" ,required=true ) @RequestBody PathologyModel model,
+    ResponseEntity<Void> updatePathologyModel(@Parameter(name = "ID of pathology model that needs to be updated",required = true ) @PathVariable("id") Long id,
+        @Parameter(name = "Pathology model object that needs to be updated" ,required = true ) @RequestBody PathologyModel model,
         final BindingResult result) throws RestServiceException;
 
     @Operation(summary = "Upload model specifications", description = "")
@@ -110,7 +110,7 @@ public interface PathologyModelApi {
     @PostMapping(value = "/pathology/model/upload/specs/{id}",
         produces = { "application/json" },
         consumes = { MediaType.MULTIPART_FORM_DATA_VALUE, "application/json" })
-    ResponseEntity<PathologyModel> uploadModelSpecifications(@Parameter(name = "Pathology model id",required=true ) @PathVariable("id") Long id,
+    ResponseEntity<PathologyModel> uploadModelSpecifications(@Parameter(name = "Pathology model id",required = true ) @PathVariable("id") Long id,
             @RequestParam("files") MultipartFile[] uploadfiles) throws RestServiceException;
 
     @Operation(summary = "Download model specifications file file", description = "")
@@ -120,7 +120,7 @@ public interface PathologyModelApi {
         @ApiResponse(responseCode = "500", description = "Unexpected Error") })
     @GetMapping(value = "/pathology/model/download/specs/{id}",
         produces = { MediaType.APPLICATION_OCTET_STREAM_VALUE,"application/json" })
-    ResponseEntity<Resource> downloadModelSpecifications(@Parameter(name = "pathology model id",required=true ) @PathVariable("id") Long id) throws RestServiceException;
+    ResponseEntity<Resource> downloadModelSpecifications(@Parameter(name = "pathology model id",required = true ) @PathVariable("id") Long id) throws RestServiceException;
 
 
 }

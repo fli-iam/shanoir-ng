@@ -344,7 +344,7 @@ public class ImporterApiController implements ImporterApi {
 	}
 
 	@Override
-	public ResponseEntity<EegImportJob> analyzeEegZipFile(@Parameter(name = "EegImportJob", required=true) @RequestBody EegImportJob importJob) throws RestServiceException {
+	public ResponseEntity<EegImportJob> analyzeEegZipFile(@Parameter(name = "EegImportJob", required = true) @RequestBody EegImportJob importJob) throws RestServiceException {
 		try {
 			List<EegDataset> datasets = new ArrayList<>();
 
@@ -668,7 +668,7 @@ public class ImporterApiController implements ImporterApi {
 	 * @throws RestServiceException
 	 */
 	@Override
-	public ResponseEntity<ByteArrayResource> getDicomImage(@Parameter(name = "path", required=true)  @RequestParam(value = "path", required = true) String path)
+	public ResponseEntity<ByteArrayResource> getDicomImage(@Parameter(name = "path", required = true)  @RequestParam(value = "path", required = true) String path)
 			throws RestServiceException, IOException {
 
 		final File userImportDir = ImportUtils.getUserImportDir(importDir);

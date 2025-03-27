@@ -33,7 +33,7 @@ public class DataUserAgreement extends AbstractEntity {
     private Long userId;
 
     @CreationTimestamp
-    @Column(updatable=false)
+    @Column(updatable = false)
     private Date timestampOfNew;
 
     private Date timestampOfAccepted;
