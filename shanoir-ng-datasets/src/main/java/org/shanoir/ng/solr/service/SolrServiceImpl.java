@@ -20,13 +20,18 @@
 package org.shanoir.ng.solr.service;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.ListUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
-import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -35,7 +40,6 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.Center;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.repository.CenterRepository;
-import org.shanoir.ng.shared.repository.SubjectStudyRepository;
 import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.solr.model.ShanoirMetadata;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
@@ -49,7 +53,6 @@ import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -79,13 +82,7 @@ public class SolrServiceImpl implements SolrService {
 	private StudyUserRightsRepository rightsRepository;
 
 	@Autowired
-	private SubjectStudyRepository subjectStudyRepo;
-
-	@Autowired
 	private CenterRepository centerRepository;
-
-	@Autowired
-	private ExaminationRepository examRepository;
 
 	@Autowired
 	private DatasetRepository dsRepository;
@@ -115,8 +112,6 @@ public class SolrServiceImpl implements SolrService {
 		solrJWrapper.deleteAll();
 	}
 
-
-	@Override
 	@Async
 	@Transactional
 	public void indexAll() {
@@ -129,70 +124,10 @@ public class SolrServiceImpl implements SolrService {
 			cleanOldIndex(event);
 			fetchDatasToIndex(event, documents, tags);
 			indexDatas(event, documents, tags);
-		} catch (SolrServerException | IOException ignored) {
+		} catch (SolrServerException | IOException e) {
+			LOG.error("Solr indexation failed", e);
         }
     }
-
-	protected void indexDatas(ShanoirEvent event, List<ShanoirMetadata> documents, Map<Long, List<String>> tags) {
-		try {
-			int totalData = documents.size();
-			int indexedData = 0;
-			for (List<ShanoirMetadata> partition : ListUtils.partition(documents, 100000)) {
-				indexedData += partition.size();
-				event.setProgress((float) Math.floor(30F + ((indexedData / (float) totalData) * 70F)) / 100F);
-				indexDataPartition(event, partition, tags, indexedData);
-			}
-		} catch (Exception e) {
-			LOG.error("Error indexing datasets into Solr.", e);
-			eventService.publishErrorEvent(event, "Error indexing datasets into Solr : " + e.getMessage());
-		}
-	}
-
-	protected void indexDataPartition(ShanoirEvent event, List<ShanoirMetadata> documents, Map<Long, List<String>> tags, int indexedSize) throws SolrServerException, IOException {
-		indexDocumentsInSolr(documents, tags);
-		if (Objects.equals(1f, event.getProgress())) {
-			eventService.publishSuccessEvent(event, "Indexed [" + indexedSize + "] datasets.");
-		} else {
-			eventService.publishEvent(event, "Indexing [" + indexedSize + "] datasets...", event.getProgress());
-		}
-	}
-
-	protected void fetchDatasToIndex(ShanoirEvent event, List<ShanoirMetadata> documents, Map<Long, List<String>> tags) {
-		try {
-			documents.addAll(shanoirMetadataRepository.findAllAsSolrDoc());
-			eventService.publishEvent(event, "Fetching data to index...", 0.2f);
-			tags.putAll(shanoirMetadataRepository.findAllTags(null));
-			eventService.publishEvent(event, "Fetching data to index...", 0.3f);
-		} catch(Exception e) {
-			LOG.error("Error while fetching data to index.", e);
-			eventService.publishErrorEvent(event, "Error while fetching data to index : " + e.getMessage());
-			throw e;
-		}
-	}
-
-	protected void cleanOldIndex(ShanoirEvent event) throws SolrServerException, IOException {
-		try {
-			deleteAll();
-		} catch (SolrServerException | IOException e) {
-			LOG.error("Error while cleaning Solr index.", e);
-			eventService.publishErrorEvent(event, "Error while cleaning Solr index : " + e.getMessage());
-			throw e;
-		}
-		eventService.publishEvent(event, "Fetching data to index...", 0.1f);
-	}
-
-	@Transactional
-    protected ShanoirEvent beginIndexationProcess() {
-		ShanoirEvent event = new ShanoirEvent(
-				ShanoirEventType.SOLR_INDEX_ALL_EVENT,
-				null,
-				KeycloakUtil.getTokenUserId(),
-				"Cleaning Solr index...",
-				ShanoirEvent.IN_PROGRESS,
-				0f);
-		eventService.publishEvent(event);
-		return event;
-	}
 
     @Async
     @Transactional
@@ -218,52 +153,31 @@ public class SolrServiceImpl implements SolrService {
     }
 
 	@Transactional
-	@Override
-	public void indexDatasets(List<Long> datasetIds) throws SolrServerException, IOException {
-		// Get all associated datasets and index them to solr
-		List<ShanoirMetadata> metadatas = shanoirMetadataRepository.findSolrDocs(datasetIds);
-		Map<Long, List<String>> tags = shanoirMetadataRepository.findAllTags(datasetIds);
-		this.indexDocumentsInSolr(metadatas, tags);
+	public void indexDatasets(List<Long> datasetIds){
+		try {
+			List<ShanoirMetadata> metadatas = shanoirMetadataRepository.findSolrDocs(datasetIds);
+			Map<Long, List<String>> tags = shanoirMetadataRepository.findAllTags(datasetIds);
+			this.indexDocumentsInSolr(metadatas, tags);
+		} catch (Exception e) {
+			LOG.error("Solr indexation failed", e);
+		}
 	}
 
-	@Override
 	@Transactional(isolation = Isolation.READ_UNCOMMITTED,  propagation = Propagation.REQUIRES_NEW)
-	public void indexDataset(Long datasetId) throws SolrServerException, IOException {
-		ShanoirMetadata shanoirMetadata = shanoirMetadataRepository.findOneSolrDoc(datasetId);
-		if (shanoirMetadata == null) throw new IllegalStateException("shanoir metadata with id " +  datasetId + " query failed to return any result");
-		ShanoirSolrDocument doc = getShanoirSolrDocument(shanoirMetadata);
-		Map<Long, List<String>> tags = shanoirMetadataRepository.findAllTags(Collections.singletonList(datasetId));
-		doc.setTags(tags.get(datasetId));
-		solrJWrapper.addToIndex(doc);
-	}
-
-	private void indexDocumentsInSolr(List<ShanoirMetadata> metadatas, Map<Long, List<String>> tags) throws SolrServerException, IOException {
-		Iterator<ShanoirMetadata> docIt = metadatas.iterator();
-		List<ShanoirSolrDocument> solrDocuments = new ArrayList<>();
-
-		while (docIt.hasNext()) {
-			ShanoirMetadata shanoirMetadata = docIt.next();
-			ShanoirSolrDocument doc = this.getShanoirSolrDocument(shanoirMetadata);
-			doc.setTags(tags.get(shanoirMetadata.getDatasetId()));
-			solrDocuments.add(doc);
+	public void indexDataset(Long datasetId){
+		try {
+			ShanoirMetadata shanoirMetadata = shanoirMetadataRepository.findOneSolrDoc(datasetId);
+			if (shanoirMetadata == null) throw new IllegalStateException("shanoir metadata with id " +  datasetId + " query failed to return any result");
+			ShanoirSolrDocument doc = getShanoirSolrDocument(shanoirMetadata);
+			Map<Long, List<String>> tags = shanoirMetadataRepository.findAllTags(Collections.singletonList(datasetId));
+			doc.setTags(tags.get(datasetId));
+			solrJWrapper.addToIndex(doc);
+		} catch (Exception e) {
+			LOG.error("Solr indexation failed", e);
 		}
-		if (!solrDocuments.isEmpty()) {
-			solrJWrapper.addAllToIndex(solrDocuments);
-		}
-	}
-
-	private ShanoirSolrDocument getShanoirSolrDocument(ShanoirMetadata shanoirMetadata) {
-		return new ShanoirSolrDocument(String.valueOf(shanoirMetadata.getDatasetId()), shanoirMetadata.getDatasetId(), shanoirMetadata.getDatasetName(),
-				shanoirMetadata.getDatasetType(), shanoirMetadata.getDatasetNature(), DateTimeUtils.localDateToDate(shanoirMetadata.getDatasetCreationDate()),
-				shanoirMetadata.getExaminationId(), shanoirMetadata.getExaminationComment(), DateTimeUtils.localDateToDate(shanoirMetadata.getExaminationDate()), shanoirMetadata.getAcquisitionEquipmentName(),
-				shanoirMetadata.getSubjectName(), SubjectType.getType(shanoirMetadata.getSubjectType()) != null ? SubjectType.getType(shanoirMetadata.getSubjectType()).name() : null, shanoirMetadata.getSubjectId(),
-				shanoirMetadata.getStudyName(), shanoirMetadata.getStudyId(), shanoirMetadata.getCenterName(),
-				shanoirMetadata.getCenterId(), shanoirMetadata.getSliceThickness(), shanoirMetadata.getPixelBandwidth(), shanoirMetadata.getMagneticFieldStrength(),
-				shanoirMetadata.isProcessed(), DateTimeUtils.localDateToDate(shanoirMetadata.getImportDate()), shanoirMetadata.getUsername(), shanoirMetadata.getSortingIndex());
 	}
 
 	@Transactional
-	@Override
 	public SolrResultPage<ShanoirSolrDocument> facetSearch(ShanoirSolrQuery query, Pageable pageable) throws RestServiceException {
 		SolrResultPage<ShanoirSolrDocument> result;
 		pageable = prepareTextFields(pageable);
@@ -276,6 +190,64 @@ public class SolrServiceImpl implements SolrService {
 		return result;
 	}
 
+	public Page<ShanoirSolrDocument> getByIdIn(List<Long> datasetIds, Pageable pageable) throws RestServiceException {
+		if (datasetIds.isEmpty()) {
+			return new PageImpl<>();
+		}
+		Page<ShanoirSolrDocument> result;
+		pageable = prepareTextFields(pageable);
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			result = solrJWrapper.findByDatasetIdIn(datasetIds, pageable);
+		} else {
+			Map<Long, List<String>> studiesCenter = getStudiesCenter();
+			result = solrJWrapper.findByStudyIdInAndDatasetIdIn(studiesCenter, datasetIds, pageable);
+		}
+		return result;
+	}
+
+	public void updateDatasets(List<Long> datasetIds) throws SolrServerException, IOException {
+		if (CollectionUtils.isEmpty(datasetIds)) {
+			return;
+		}
+		this.deleteFromIndex(datasetIds);
+		this.indexDatasets(datasetIds);
+	}
+
+	@Async
+	public void updateDatasetsAsync(List<Long> datasetIds) throws SolrServerException, IOException {
+		this.updateDatasets(datasetIds);
+	}
+
+	@Async
+	@Transactional
+	public void updateSubjectsAsync(List<Long> subjectIds) throws SolrServerException, IOException {
+		List<Long> ids = this.dsRepository.findIdsBySubjectIdIn(subjectIds);
+		this.updateDatasets(ids);
+	}
+
+	@Async
+	public void updateStudyAsync(Long studyId) throws SolrServerException, IOException {
+		List<Long> ids = this.dsRepository.findIdsByStudyId(studyId);
+		this.updateDatasets(ids);
+	}
+
+	@Transactional
+	protected ShanoirEvent beginIndexationProcess() {
+		ShanoirEvent event = new ShanoirEvent(
+				ShanoirEventType.SOLR_INDEX_ALL_EVENT,
+				null,
+				KeycloakUtil.getTokenUserId(),
+				"Cleaning Solr index...",
+				ShanoirEvent.IN_PROGRESS,
+				0f);
+		eventService.publishEvent(event);
+		return event;
+	}
+
+	/**
+	 * Get all study centers relative to the current user
+	 * @return a map with all study relative to the current user and their associated centers
+	 */
 	private Map<Long, List<String>> getStudiesCenter() {
 		List<StudyUser> studyUsers = Utils.toList(rightsRepository.findByUserId(KeycloakUtil.getTokenUserId()));
 		Map<Long, List<String>> studiesCenter = new HashMap<>();
@@ -287,12 +259,23 @@ public class SolrServiceImpl implements SolrService {
 		}
 		return studiesCenter;
 	}
-	
+
+	/**
+	 * Get the name of a center if present in a list
+	 * @param centers all allowed centers
+	 * @param id the id of a specific center
+	 * @return the name of the center
+	 */
 	private String findCenterName(List<Center> centers, Long id) {
 		List<Center> filteredCenters = centers.stream().filter(centerToFilter -> centerToFilter.getId().equals(id)).collect(Collectors.toList());
 		return filteredCenters.size() > 0 ? filteredCenters.get(0).getName() : null;
 	}
 
+	/**
+	 * Prepare the pageable object according to the filters
+	 * @param pageable pageable object to prepare
+	 * @return the prepared pageable
+	 */
 	private Pageable prepareTextFields(Pageable pageable) {
 		for (Sort.Order order : pageable.getSort()) {
 			if (order.getProperty().equals("studyName") || order.getProperty().equals("subjectName")
@@ -311,54 +294,109 @@ public class SolrServiceImpl implements SolrService {
 		return pageable;
 	}
 
-	@Override
-	public Page<ShanoirSolrDocument> getByIdIn(List<Long> datasetIds, Pageable pageable) throws RestServiceException {
-		if (datasetIds.isEmpty()) {
-			return new PageImpl<>();
+	/**
+	 * Index data to the existing index and manage shanoir event
+	 * @param event the Shanoir event relative to the indexation
+	 * @param documents the documents to index
+	 * @param tags the tags relative to the documents to index
+	 */
+	private void indexDatas(ShanoirEvent event, List<ShanoirMetadata> documents, Map<Long, List<String>> tags) {
+		try {
+			int totalData = documents.size();
+			int indexedData = 0;
+			for (List<ShanoirMetadata> partition : ListUtils.partition(documents, 100000)) {
+				indexedData += partition.size();
+				event.setProgress((float) Math.floor(30F + ((indexedData / (float) totalData) * 70F)) / 100F);
+				indexDataPartition(event, partition, tags, indexedData);
+			}
+		} catch (Exception e) {
+			LOG.error("Error indexing datasets into Solr.", e);
+			eventService.publishErrorEvent(event, "Error indexing datasets into Solr : " + e.getMessage());
 		}
-		Page<ShanoirSolrDocument> result;
-		pageable = prepareTextFields(pageable);
-		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			result = solrJWrapper.findByDatasetIdIn(datasetIds, pageable);
-		} else {
-			Map<Long, List<String>> studiesCenter = getStudiesCenter();
-			result = solrJWrapper.findByStudyIdInAndDatasetIdIn(studiesCenter, datasetIds, pageable);
-		}
-		return result;
 	}
 
 	/**
-	 * Updates a list of datasets in Solr.
-	 * @param datasetIds the list of dataset IDs to update
+	 * Index data to the existing index by partition and manage shanoir event
+	 * @param event the Shanoir event relative to the indexation
+	 * @param documents the documents to index
+	 * @param tags the tags relative to the documents to index
+	 * @param indexedSize the documents already indexed
 	 */
-	@Override
-	public void updateDatasets(List<Long> datasetIds) throws SolrServerException, IOException {
-		if (CollectionUtils.isEmpty(datasetIds)) {
-			return;
+	private void indexDataPartition(ShanoirEvent event, List<ShanoirMetadata> documents, Map<Long, List<String>> tags, int indexedSize) throws SolrServerException, IOException {
+		indexDocumentsInSolr(documents, tags);
+		if(Objects.equals(1f, event.getProgress())){
+			eventService.publishSuccessEvent(event, "Indexed [" + indexedSize + "] datasets.");
+		} else {
+			eventService.publishEvent(event, "Indexing [" + indexedSize + "] datasets...", event.getProgress());
 		}
-		this.deleteFromIndex(datasetIds);
-		this.indexDatasets(datasetIds);		
 	}
 
-	@Override
-	@Async
-	public void updateDatasetsAsync(List<Long> datasetIds) throws SolrServerException, IOException {
-		this.updateDatasets(datasetIds);
+	/**
+	 * Get all datasets and tags and put them in lists
+	 * @param event the Shanoir event relative to the indexation
+	 * @param documents the list in which are stored all datasets fetched for indexation
+	 * @param tags the list in which are stored all tags fetched for iddexation
+	 */
+	private void fetchDatasToIndex(ShanoirEvent event, List<ShanoirMetadata> documents, Map<Long, List<String>> tags) {
+		try {
+			documents.addAll(shanoirMetadataRepository.findAllAsSolrDoc());
+			eventService.publishEvent(event, "Fetching data to index...", 0.2f);
+			tags.putAll(shanoirMetadataRepository.findAllTags(null));
+			eventService.publishEvent(event, "Fetching data to index...", 0.3f);
+		} catch(Exception e){
+			LOG.error("Error while fetching data to index.", e);
+			eventService.publishErrorEvent(event, "Error while fetching data to index : " + e.getMessage());
+			throw e;
+		}
 	}
 
-	@Override
-	@Async
-	@Transactional
-	public void updateSubjectsAsync(List<Long> subjectIds) throws SolrServerException, IOException {
-		List<Long> ids = this.dsRepository.findIdsBySubjectIdIn(subjectIds);
-		this.updateDatasets(ids);
+	/**
+	 * Remove the existing index
+	 * @param event the Shanoir event relative to the indexation removal
+	 */
+	private void cleanOldIndex(ShanoirEvent event) throws SolrServerException, IOException {
+		try {
+			deleteAll();
+		} catch (SolrServerException | IOException e) {
+			LOG.error("Error while cleaning Solr index.", e);
+			eventService.publishErrorEvent(event, "Error while cleaning Solr index : " + e.getMessage());
+			throw e;
+		}
+		eventService.publishEvent(event, "Fetching data to index...", 0.1f);
 	}
 
-	@Override
-	@Async
-	public void updateStudyAsync(Long studyId) throws SolrServerException, IOException {
-		List<Long> ids = this.dsRepository.findIdsByStudyId(studyId);
-		this.updateDatasets(ids);
+	/**
+	 * Index documents with their tags
+	 * @param metadatas the documents to index
+	 * @param tags the tags relative to the documents to index
+	 */
+	private void indexDocumentsInSolr(List<ShanoirMetadata> metadatas, Map<Long, List<String>> tags) throws SolrServerException, IOException {
+		Iterator<ShanoirMetadata> docIt = metadatas.iterator();
+		List<ShanoirSolrDocument> solrDocuments = new ArrayList<>();
+
+		while (docIt.hasNext()) {
+			ShanoirMetadata shanoirMetadata = docIt.next();
+			ShanoirSolrDocument doc = this.getShanoirSolrDocument(shanoirMetadata);
+			doc.setTags(tags.get(shanoirMetadata.getDatasetId()));
+			solrDocuments.add(doc);
+		}
+		if(!solrDocuments.isEmpty()){
+			solrJWrapper.addAllToIndex(solrDocuments);
+		}
 	}
 
+	/**
+	 * Create a ShanoirSolrDocument object from a ShanoirMetadata object
+	 * @param shanoirMetadata the documents to transform
+	 * @return the constructed ShanoirSolrDocument
+	 */
+	private ShanoirSolrDocument getShanoirSolrDocument(ShanoirMetadata shanoirMetadata) {
+		return new ShanoirSolrDocument(String.valueOf(shanoirMetadata.getDatasetId()), shanoirMetadata.getDatasetId(), shanoirMetadata.getDatasetName(),
+				shanoirMetadata.getDatasetType(), shanoirMetadata.getDatasetNature(), DateTimeUtils.localDateToDate(shanoirMetadata.getDatasetCreationDate()),
+				shanoirMetadata.getExaminationId(), shanoirMetadata.getExaminationComment(), DateTimeUtils.localDateToDate(shanoirMetadata.getExaminationDate()), shanoirMetadata.getAcquisitionEquipmentName(),
+				shanoirMetadata.getSubjectName(), SubjectType.getType(shanoirMetadata.getSubjectType()) != null ? SubjectType.getType(shanoirMetadata.getSubjectType()).name() : null, shanoirMetadata.getSubjectId(),
+				shanoirMetadata.getStudyName(), shanoirMetadata.getStudyId(), shanoirMetadata.getCenterName(),
+				shanoirMetadata.getCenterId(), shanoirMetadata.getSliceThickness(), shanoirMetadata.getPixelBandwidth(), shanoirMetadata.getMagneticFieldStrength(),
+				shanoirMetadata.isProcessed(), DateTimeUtils.localDateToDate(shanoirMetadata.getImportDate()), shanoirMetadata.getUsername(), shanoirMetadata.getSortingIndex());
+	}
 }

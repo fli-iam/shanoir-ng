@@ -28,44 +28,44 @@ import java.util.Date;
  * @author yyao
  *
  */
-public final class DateTimeUtils {
+public class DateTimeUtils {
 
-    private DateTimeUtils() { }
-
-    public static LocalDate dateToLocalDate(Date date) {
-        if (date == null) return null;
-        else return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-    }
-
-    public static Date localDateToDate(LocalDate localDate) {
-        if (localDate == null) return null;
-        // Here we use UTC, otherwise the date can be "changed" if the system is not in UTC
-        else return Date.from(localDate.atStartOfDay().atZone(ZoneId.of("UTC")).toInstant());
-    }
-
-    public static LocalDateTime dateToLocalDateTime(Date date) {
-        if (date == null) return null;
-        else return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
-    }
-
-    public static LocalDate pacsStringToLocalDate(String yyyyMMdd) {
-        if (yyyyMMdd != null && !yyyyMMdd.isEmpty()) {
-            final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMdd");
-            LocalDate localDate = LocalDate.parse(yyyyMMdd, dtf);
-            return localDate;
-        } else {
-            return null;
-        }
-    }
-
-    public static String localDateToSolrString(LocalDate localDate) {
-        if (localDate == null) return null;
-        else {
-            LocalDateTime ldt = localDate.atTime(0, 0, 0);
-            ZonedDateTime zdt = ldt.atZone(ZoneId.systemDefault());
-            final DateTimeFormatter dtf = DateTimeFormatter.ISO_INSTANT;
-            return zdt.format(dtf);
-        }
-    }
+	public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+	
+	public static LocalDate dateToLocalDate(Date date) {
+		if (date == null) return null;
+		else return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+	}
+	
+	public static Date localDateToDate(LocalDate localDate) {
+		if (localDate == null) return null;
+		// Here we use UTC, otherwise the date can be "changed" if the system is not in UTC
+		else return Date.from(localDate.atStartOfDay().atZone(ZoneId.of("UTC")).toInstant());
+	}
+	
+	public static LocalDateTime dateToLocalDateTime(Date date) {
+		if (date == null) return null;
+		else return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+	}
+	
+	public static LocalDate pacsStringToLocalDate(String yyyyMMdd) {
+		if (yyyyMMdd != null && !yyyyMMdd.isEmpty()) {
+			final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMdd");
+			LocalDate localDate = LocalDate.parse(yyyyMMdd, dtf);
+			return localDate;
+		} else {
+			return null;
+		}	
+	}
+	
+	public static String localDateToSolrString(LocalDate localDate) {
+		if (localDate == null) return null;
+		else {
+			LocalDateTime ldt = localDate.atTime(0, 0, 0);
+			ZonedDateTime zdt = ldt.atZone(ZoneId.systemDefault());
+			final DateTimeFormatter dtf = DateTimeFormatter.ISO_INSTANT;
+			return zdt.format(dtf);
+		}
+	}
 
 }

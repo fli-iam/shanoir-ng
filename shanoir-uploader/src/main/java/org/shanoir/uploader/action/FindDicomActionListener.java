@@ -45,6 +45,8 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 
 	private static final String DICOMDIR = "DICOMDIR";
 
+	private static final String WILDCARD = "*";
+
 	private MainWindow mainWindow;
 
 	private JFileChooser fileChooser;
@@ -152,7 +154,7 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 						}
 					}
 				} else {
-					lastName = patientName + "*";
+					lastName = patientName + WILDCARD;
 				}
 
 				// for Request, the Patient Name must be of the form:
@@ -172,10 +174,17 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 					if (mainWindow.sRB.isSelected()) {
 						studyRootQuery = true;
 					}
+
+				// We allow query on a single word from study description
+				String studyDescription = mainWindow.studyDescriptionTF.getText();
+				if (!studyDescription.isEmpty()) {
+					studyDescription = WILDCARD.concat(studyDescription.replace(" ", WILDCARD).concat(WILDCARD));
+				}
+
 					List<Patient> patients = dicomServerClient.queryDicomServer(
 							studyRootQuery,
 							modality, patientNameFinal, mainWindow.patientIDTF.getText(),
-							mainWindow.studyDescriptionTF.getText(),
+							studyDescription,
 							mainWindow.birthDate, mainWindow.studyDate);
 					fillMediaWithPatients(media, patients);
 

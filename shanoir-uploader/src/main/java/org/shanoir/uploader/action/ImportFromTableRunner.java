@@ -24,6 +24,7 @@ import javax.swing.SwingWorker;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
+import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.PatientVerification;
@@ -31,6 +32,7 @@ import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.ng.shared.dataset.DatasetModalityType;
+import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
@@ -68,6 +70,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 	private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 	private ShanoirUploaderServiceClient shanoirUploaderServiceClientNG;
 	private DownloadOrCopyActionListener dOCAL;
+	private ImportFromTableCSVWriter csvWriter;
 
 	public ImportFromTableRunner(Map<String, ImportJob> importJobs, ResourceBundle ressourceBundle, ImportFromTableWindow importFromTableWindow, IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG, DownloadOrCopyActionListener dOCAL) {
 		this.importJobs = importJobs;
@@ -112,6 +115,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 
 		boolean resultAllJobs = true;
 		int i = 1;
+		csvWriter = new ImportFromTableCSVWriter();
 		logger.info("\r\n**********************************\r\n"
 			+ "Starting Excel mass import...\r\n"
 			+ "**********************************");
@@ -127,7 +131,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				logger.info("\r\n------------------------------------------------------\r\n"
 					+ "Starting importJob " + importJobIdentifier + "\r\n"
 					+ "------------------------------------------------------");
-				boolean resultOneJob = importData(importJob, study, acquisitionEquipments);
+				boolean resultOneJob = importData(importJob, study, acquisitionEquipments, csvWriter);
 				resultAllJobs = resultOneJob && resultAllJobs;
 				logger.info("\r\n------------------------------------------------------\r\n"
 					+ "Finished importJob " + importJobIdentifier + ", success?: " + resultOneJob + "\r\n"
@@ -155,17 +159,30 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		return null;
 	}
 
-	private boolean importData(ImportJob importJob, org.shanoir.uploader.model.rest.Study studyREST, List<AcquisitionEquipment> acquisitionEquipments) throws UnsupportedEncodingException, NoSuchAlgorithmException, PseudonymusException {
+	private boolean importData(ImportJob importJob, org.shanoir.uploader.model.rest.Study studyREST, List<AcquisitionEquipment> acquisitionEquipments, ImportFromTableCSVWriter csvWriter) throws UnsupportedEncodingException, NoSuchAlgorithmException, PseudonymusException {
+		PatientVerification patientVerification = importJob.getPatientVerification();
+		String[] line = {
+			patientVerification.getFirstName(),
+			patientVerification.getLastName(),
+			patientVerification.getBirthName(),
+			patientVerification.getBirthDate(),
+			"false",
+			importJob.getDicomQuery().getStudyDate(),
+			"false"
+		};
 		if (!queryPacs(importJob)) {
+			line[6] = "Not in DICOM server";
+			csvWriter.addExaminationLine(false, line);
 			return false;
 		}
 		LocalDate minDate = determineMinDate(importJob);
 		if (!selectPatientStudyAndSeries(importJob, minDate)) {
+			line[6] = "No DICOM study or series selected in DICOM server";
+			csvWriter.addExaminationLine(false, line);
 			return false;
 		}
 		logger.info("DICOM Patient selected: " + importJob.getPatient().toString());
 		logger.info("DICOM Study selected: " + importJob.getStudy().toString());
-		PatientVerification patientVerification = importJob.getPatientVerification();
 		Patient newPatient = ImportUtils.adjustPatientWithPatientVerification(
 			importJob.getPatient(),
 			patientVerification.getFirstName(),
@@ -330,6 +347,8 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		}
 
 		if (studyCard == null) {
+			line[6] = "Error with study card";
+			csvWriter.addExaminationLine(false, line);
 			this.importFromTableWindow.error.setText(resourceBundle.getString("shanoir.uploader.import.table.error.studycard"));
 			uploadJob.setUploadState(UploadState.ERROR);
 			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.studycard"));
@@ -386,6 +405,8 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			HemisphericDominance.Left.toString(), HemisphericDominance.Left.toString(),
 			null, SubjectType.PATIENT, false, false, subjectStudyIdentifier, studyREST, studyCard);
 		if (subjectREST == null) {
+				line[6] = "Error with subject";
+				csvWriter.addExaminationLine(false, line);
 				uploadJob.setUploadState(UploadState.ERROR);
 				importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.subject"));
 				logger.error(importJob.getErrorMessage());
@@ -394,6 +415,8 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		importJob.setSubjectName(subjectREST.getName());
 
 		logger.info("6.1 Search existing examinations for subject: a) same date: user has to finish import b) new date: create examination.");
+		line[4] = importJob.getSubjectName();
+		line[5] = studyDate.format(DateTimeUtils.FORMATTER);
 		try {
 			List<Examination> examinations = shanoirUploaderServiceClientNG.findExaminationsBySubjectId(subjectREST.getId());
 			if (examinations != null && !examinations.isEmpty()) {
@@ -409,11 +432,14 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
                         .toLocalDate();
 					if (examinationLocalDate.equals(studyDate)) {
 						logger.info("Import job only downloaded, manual user decision needed: existing examination with the same date.");
+						csvWriter.addExaminationLine(false, line);
 						return false;
 					}
 				}
 			}
 		} catch (Exception e) {
+			line[6] = e.getMessage();
+			csvWriter.addExaminationLine(false, line);
 			logger.error(e.getMessage(), e);
 			return false;
 		}
@@ -429,6 +455,8 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		if (examinationId == null) {
 			uploadJob.setUploadState(UploadState.ERROR);
 			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.examination"));
+			line[6] = resourceBundle.getString("shanoir.uploader.import.table.error.examination");
+			csvWriter.addExaminationLine(false, line);
 			logger.error(importJob.getErrorMessage());
 			return false;
 		}
@@ -444,6 +472,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		while (importThread.isAlive()) {
 			// wait for import thread to finish
 		}
+		csvWriter.addExaminationLine(true, line);
 		return true;
 	}
 	
@@ -492,7 +521,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 	private boolean selectPatientStudyAndSeries(ImportJob importJob, LocalDate minDate) {
 		logger.info("2. Select patient, study and series");
 		List<Serie> selectedSeries = new ArrayList<>();
-		Map<Study, List<Serie>> selectedSeriesByStudy = new HashMap<>();
+		Map<String, List<Serie>> selectedSeriesByStudy = new HashMap<>();
 		boolean foundPatient = false;
 		LocalDate currentDate = LocalDate.now();
 		for (Patient patient : importJob.getPatients()) {
@@ -511,12 +540,11 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				if (!searchField(study.getStudyDescription(), importJob.getDicomQuery().getStudyFilter())) {
 					continue;
 				}
-				Study dicomStudy = study;
-				importJob.setStudy(dicomStudy);
-				selectedSeriesByStudy.put(dicomStudy, new ArrayList<>());
+				importJob.setStudy(study);
+				selectedSeriesByStudy.put(study.getStudyInstanceUID(), new ArrayList<>());
 				for (Serie serie : study.getSeries()) {
 					if (searchField(serie.getSeriesDescription(), importJob.getDicomQuery().getSerieFilter())) {
-						selectedSeriesByStudy.get(dicomStudy).add(serie);
+						selectedSeriesByStudy.get(study.getStudyInstanceUID()).add(serie);
 						foundPatient = true;
 						currentDate = studyDate;
 					}
@@ -527,7 +555,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.missing.data"));
 			return false;
 		}
-		selectedSeries = selectedSeriesByStudy.get(importJob.getStudy());
+		selectedSeries = selectedSeriesByStudy.get(importJob.getStudy().getStudyInstanceUID());
 		if (selectedSeries == null || selectedSeries.isEmpty()) {
 			logger.error("No series found for DICOM study: " + importJob.getStudy().toString());
 			importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.missing.data"));

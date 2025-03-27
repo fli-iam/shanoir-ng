@@ -282,7 +282,11 @@ public class OFSEPSeqIdHandler extends OutputHandler {
             acquisitionService.update(acq);
         }
 
-        solrService.updateDatasets(Arrays.asList(ds.getId()));
+        try {
+            solrService.updateDatasets(Arrays.asList(ds.getId()));
+        }catch (Exception e){
+            LOG.error("Solr update failed for dataset {}", ds.getId(), e);
+        }
     }
 
     /**

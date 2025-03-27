@@ -330,11 +330,13 @@ public class MainWindow extends JFrame {
 		// "Patient" Radio Button
 		pRB = new JRadioButton("Patient");
 		pRB.setSelected(true);
+		pRB.setToolTipText(resourceBundle.getString("shanoir.uploader.patientQueryLevel.tooltip"));
 		queryLevelRG.add(pRB);
 		queryRadioPanel.add(pRB);
 
 		// "Study" Radio Button
 		sRB = new JRadioButton(resourceBundle.getString("shanoir.uploader.queryLevelStudy"));
+		sRB.setToolTipText(resourceBundle.getString("shanoir.uploader.studyQueryLevel.tooltip"));
 		queryLevelRG.add(sRB);
 		queryRadioPanel.add(sRB);
 
@@ -504,6 +506,7 @@ public class MainWindow extends JFrame {
 		gbc_studyDescriptionTF.gridwidth = 6;
 		gbc_studyDescriptionTF.gridx = 1;
 		gbc_studyDescriptionTF.gridy = 5;
+		studyDescriptionTF.setToolTipText(resourceBundle.getString("shanoir.uploader.studyDescription.tooltip"));
 		queryPanel.add(studyDescriptionTF, gbc_studyDescriptionTF);
 		studyDescriptionTF.setColumns(15);
 		studyDescriptionTF.setText("");
@@ -599,7 +602,8 @@ public class MainWindow extends JFrame {
 		
 		String[] modalityList = { "MR", "CT", "PT", "NM", "XA", "None" };
 		JComboBox<String> modalityCB = new JComboBox<String>(modalityList);
-		modalityCB.setSelectedIndex(0);
+		// We set by default the modality to None because some PACS do not support modality at Patient or even Study root query
+		modalityCB.setSelectedIndex(modalityList.length - 1);
 		GridBagConstraints gBC_modality = new GridBagConstraints();
 		gBC_modality.anchor = GridBagConstraints.WEST;
 		gBC_modality.insets = new Insets(5, 5, 0, 0);

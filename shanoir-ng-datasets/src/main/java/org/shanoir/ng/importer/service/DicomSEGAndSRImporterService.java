@@ -302,12 +302,7 @@ public class DicomSEGAndSRImporterService {
 		createMetadata(datasetAttributes, dataset.getOriginMetadata().getDatasetModalityType(), newMsOrSegDataset);
 		createDatasetExpression(datasetAttributes, newMsOrSegDataset);
 		Dataset createdDataset = datasetService.create(newMsOrSegDataset);
-		try {
-			solrService.indexDataset(createdDataset.getId());
-		} catch(Exception e) {
-			LOG.error(e.getMessage(), e);
-			LOG.error("DICOM SEG or SR not indexed into Solr.");
-		}
+		solrService.indexDataset(createdDataset.getId());
 	}
 
 	/**

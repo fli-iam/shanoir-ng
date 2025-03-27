@@ -184,7 +184,11 @@ public class RabbitMQDatasetsService {
 
 			studyService.updateStudy(updated, current);
 			
-			solrService.updateStudyAsync(current.getId());
+			try {
+				solrService.updateStudyAsync(current.getId());
+			}catch (Exception e){
+				LOG.error("Solr update failed for study {}", current.getId(), e);
+			}
 
 		} catch (Exception ex) {
 			LOG.error("An error occured while processing study update", ex);
@@ -231,7 +235,11 @@ public class RabbitMQDatasetsService {
 			// Update solr references
 			List<Long> subjectIdList = new ArrayList<Long>();
 			subjectIdList.add(su.getId());
-			solrService.updateSubjectsAsync(subjectIdList);
+			try {
+				solrService.updateSubjectsAsync(subjectIdList);
+			}catch (Exception e){
+				LOG.error("Solr update failed for subjects {}", subjectIdList, e);
+			}
 
 			return true;
 		} catch (Exception e) {
