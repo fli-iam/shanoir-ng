@@ -142,7 +142,8 @@ public interface UserApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @RequestMapping(value = "/{userId}", produces = { "application/json" }, consumes = {
             "application/json" }, method = RequestMethod.PUT)
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT') and @isMeSecurityService.isMe(#userId)) and @controlerSecurityService.idMatches(#userId, #user)")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT') and @isMeSecurityService.isMe(#userId))"
+        + "and @controlerSecurityService.idMatches(#userId, #user)")
     ResponseEntity<Void> updateUser(
             @Parameter(name = "id of the user", required = true) @PathVariable("userId") Long userId,
             @Parameter(name = "user to update", required = true) @RequestBody User user, BindingResult result)

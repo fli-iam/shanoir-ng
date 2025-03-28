@@ -132,8 +132,8 @@ public class UserApiController extends AbstractUserRequestApiController implemen
         user.setCreationDate(LocalDate.now()); // Set creation date on creation, which is now
         validateIgnoreBlankUsername(user, result);
 
-        if (user.getAccountRequestInfo() != null &&
-                (user.getAccountRequestInfo().getStudyId() != null)) {
+        if (user.getAccountRequestInfo() != null
+                && (user.getAccountRequestInfo().getStudyId() != null)) {
 
             if (user.getAccountRequestInfo().getStudyId() != null) {
                 // Directly create an access request for the given study

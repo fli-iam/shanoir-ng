@@ -58,14 +58,7 @@ public class UserPrivacySecurityService {
                     }
                 }
             }
-
-
-
-
-
-
         }
-
         return true;
     }
 }

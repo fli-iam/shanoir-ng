@@ -122,7 +122,8 @@ public class ShanoirUsersManagement implements ApplicationRunner {
     private EmailService emailService;
 
     @Autowired
-    StudyRightsService commService;
+    private StudyRightsService commService;
+
     private static final String ROLE_ADMIN = "ROLE_ADMIN";
 
     @Override

@@ -21,7 +21,8 @@ public class VIPUser {
     public VIPUser() {
     }
 
-    public VIPUser(String firstName, String lastName, String email, String institution, String password, VIPUserLevel level, CountryCode countryCode, String comments, String[] accountTypes) {
+    public VIPUser(String firstName, String lastName, String email, String institution, String password, VIPUserLevel level, CountryCode countryCode,
+            String comments, String[] accountTypes) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
