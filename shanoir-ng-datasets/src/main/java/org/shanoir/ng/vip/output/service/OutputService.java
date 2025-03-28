@@ -57,12 +57,12 @@ public class OutputService {
      */
     public void process(ExecutionMonitoring monitoring) throws ResultHandlerException, EntityNotFoundException {
         //final File userImportDir = new File(this.importDir + File.separator + monitoring.getResultsLocation());
-        String userImportPath = this.importDir + File.separator + monitoring.getResultsLocation();
+        String userImportPath = importDir + File.separator + monitoring.getResultsLocation();
         File userImportDir = new File(userImportPath.substring(0, userImportPath.lastIndexOf("/") + 1));
 
-        for (File archive : this.getArchivesToProcess(userImportDir)) {
+        for (File archive : getArchivesToProcess(userImportDir)) {
             File cacheFolder = new File(userImportDir.getAbsolutePath() + File.separator + FilenameUtils.getBaseName(archive.getName()));
-            List<File> outputFiles = this.extractTarIntoCache(archive, cacheFolder);
+            List<File> outputFiles = extractTarIntoCache(archive, cacheFolder);
 
             for (OutputHandler outputHandler : outputHandlers) {
                 if (outputHandler.canProcess(monitoring)) {
@@ -70,13 +70,21 @@ public class OutputService {
                     outputHandler.manageTarGzResult(outputFiles, userImportDir, monitoring);
                 }
             }
-            this.deleteCache(cacheFolder);
+            deleteTemporaryDirectory(cacheFolder);
         }
 
         // Remove processed datasets from current execution monitoring
         monitoring.setInputDatasets(Collections.emptyList());
         datasetProcessingService.update(monitoring);
         processingResourceRepository.deleteByProcessingId(monitoring.getId());
+    }
+
+    private void deleteTemporaryDirectory(File userImportDir) {
+        try {
+            FileUtils.deleteDirectory(userImportDir);
+        } catch (IOException e) {
+            LOG.error("I/O error while deleting cache dir [{}]", userImportDir.getAbsolutePath());
+        }
     }
 
     private List<File> getArchivesToProcess(File userImportDir) throws ResultHandlerException {
@@ -122,13 +130,5 @@ public class OutputService {
             throw new ResultHandlerException("No processable file found in result archive [" + archive.getAbsolutePath() + "]", null);
         }
         return outputFiles;
-    }
-
-    private void deleteCache(File cacheFolder) {
-        try {
-            FileUtils.deleteDirectory(cacheFolder);
-        } catch (IOException e) {
-            LOG.error("I/O error while deleting cache dir [{}]", cacheFolder.getAbsolutePath());
-        }
     }
 }
