@@ -112,7 +112,7 @@ public class ShanoirEventsService {
      */
     public void sendSseEventsToUI(ShanoirEvent notification) {
         List<UserSseEmitter> sseEmitterListToRemove = new ArrayList<>();
-        AsyncTaskApiController.emitters.forEach((UserSseEmitter emitter) -> {
+        AsyncTaskApiController.EMITTERS.forEach((UserSseEmitter emitter) -> {
             // ! IMPORTANT filter on user id
             if (notification.getUserId() != null && notification.getUserId().equals(emitter.getUserId())) {
                 if (notification.getLastUpdate() == null) {
@@ -132,13 +132,13 @@ public class ShanoirEventsService {
                 }
             }
         });
-        AsyncTaskApiController.emitters.removeAll(sseEmitterListToRemove);
+        AsyncTaskApiController.EMITTERS.removeAll(sseEmitterListToRemove);
     }
 
     @Scheduled(fixedDelay = 30000)
     private void keepConnectionAlive() {
         List<SseEmitter> sseEmitterListToRemove = new ArrayList<>();
-        AsyncTaskApiController.emitters.forEach((SseEmitter emitter) -> {
+        AsyncTaskApiController.EMITTERS.forEach((SseEmitter emitter) -> {
             try {
                 emitter.send("{}", MediaType.APPLICATION_JSON);
             } catch (Exception e) {
@@ -147,7 +147,7 @@ public class ShanoirEventsService {
                 sseEmitterListToRemove.add(emitter);
             }
         });
-        AsyncTaskApiController.emitters.removeAll(sseEmitterListToRemove);
+        AsyncTaskApiController.EMITTERS.removeAll(sseEmitterListToRemove);
     }
 
     public ShanoirEvent findById(Long taskId) {

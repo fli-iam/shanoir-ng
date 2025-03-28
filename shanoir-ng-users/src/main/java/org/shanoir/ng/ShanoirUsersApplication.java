@@ -24,10 +24,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  */
 @SpringBootApplication
 @EnableScheduling
-public final class ShanoirUsersApplication {
-
-    private ShanoirUsersApplication() {
-    }
+@SuppressWarnings("checkstyle:hideutilityclassconstructor")
+public class ShanoirUsersApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(ShanoirUsersApplication.class, args);

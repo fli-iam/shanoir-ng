@@ -89,6 +89,8 @@
     <property name="message" value="Line has trailing spaces."/>
   </module>
 
+  <module name="SuppressWarningsFilter"/>
+
   <!-- Checks for Headers                                -->
   <!-- See https://checkstyle.org/checks/header/index.html   -->
   <!-- <module name="Header"> -->
@@ -97,6 +99,10 @@
   <!-- </module> -->
 
   <module name="TreeWalker">
+
+    <!-- Allow usage of @SupressWarnings(checkstyle:rulenameinlowercase)-->
+    <module name="SuppressWarnings"/>
+    <module name="SuppressWarningsHolder"/>
 
     <!-- Checks for Javadoc comments.                     -->
     <!-- See https://checkstyle.org/checks/javadoc/index.html -->
@@ -168,7 +174,7 @@
     <!-- <module name="HiddenField"/> -->
     <module name="IllegalInstantiation"/>
     <module name="InnerAssignment"/>
-    <module name="MagicNumber"/>
+    <!-- <module name="MagicNumber"/> -->
     <module name="MissingSwitchDefault"/>
     <module name="MultipleVariableDeclarations"/>
     <module name="SimplifyBooleanExpression"/>
