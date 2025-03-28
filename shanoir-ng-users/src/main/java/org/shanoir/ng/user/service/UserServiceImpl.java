@@ -83,7 +83,7 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private AccessRequestRepository accessRequestRepository;
-    
+
     @Autowired
     ApplicationEventPublisher publisher;
 
@@ -98,7 +98,7 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     AccessRequestService accessRequestService;
-    
+
     @Override
     public User confirmAccountRequest(final User user) throws EntityNotFoundException, AccountNotOnDemandException {
         final User userDb = userRepository.findById(user.getId()).orElse(null);
@@ -134,7 +134,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteById(final Long id) throws EntityNotFoundException {
         final User user = (User) userRepository.findById(id).orElse(null);
-        
+
         if (user == null) {
             throw new EntityNotFoundException(User.class, id);
         }
@@ -144,7 +144,7 @@ public class UserServiceImpl implements UserService {
         }
         userRepository.deleteById(id);
         publisher.publishEvent(new UserDeleteEvent(id));
-        
+
         try {
             ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DELETE_USER_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS);
             eventService.publishEvent(event);
@@ -173,7 +173,7 @@ public class UserServiceImpl implements UserService {
             for (AccessRequest request : requests) {
                 this.accessRequestService.deleteById(request.getId());
             }
-            
+
             userRepository.deleteById(userId);
             keycloakClient.deleteUser(user.getKeycloakId());
             // Send emails
@@ -222,7 +222,7 @@ public class UserServiceImpl implements UserService {
     public Optional<User> findByUsernameForInvitation(final String username) {
         return userRepository.findByUsername(username);
     }
-    
+
     @Override
     public List<User> getUsersToReceiveFirstExpirationNotification() {
         final LocalDate expirationDate = LocalDate.now().plusMonths(1);
@@ -263,7 +263,7 @@ public class UserServiceImpl implements UserService {
         if (!PasswordUtils.checkPasswordPolicy(newPassword)) {
             throw new PasswordPolicyException();
         }
-        
+
         User savedUser = userRepository.save(user);
         final String keycloakUserId = keycloakClient.createUserWithPassword(user, newPassword);
         savedUser.setKeycloakId(keycloakUserId); // Save keycloak id
@@ -285,7 +285,7 @@ public class UserServiceImpl implements UserService {
 
         accountRequestInfoRepository.save(user.getAccountRequestInfo()); // Save account request info
         User savedUser = userRepository.save(user);
-        
+
         // Here, create a new access request
         AccessRequest accessRequest = new AccessRequest();
         accessRequest.setStatus(AccessRequest.ON_DEMAND);
@@ -301,9 +301,9 @@ public class UserServiceImpl implements UserService {
             + " created an account to join your study"
             + (accessRequest.getMotivation() != null ? " with motivation text: " + accessRequest.getMotivation() : "")
             + ". Associated email: " + user.getEmail());
-        
+
         accessRequestRepository.save(accessRequest);
-        
+
         emailService.notifyStudyManagerAccessRequest(accessRequest);
 
         final String keycloakUserId = keycloakClient.createUserWithPassword(user, newPassword);
@@ -336,7 +336,7 @@ public class UserServiceImpl implements UserService {
 
         return updateUserOnAllSystems(userDb, user);
     }
-    
+
     @Override
     public void updateExpirationNotification(final User user, final boolean firstNotification) {
         if (firstNotification) {

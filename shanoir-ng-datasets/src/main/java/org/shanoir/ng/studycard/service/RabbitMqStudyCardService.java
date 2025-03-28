@@ -41,7 +41,7 @@ public class RabbitMqStudyCardService {
 
     @Autowired
     private ObjectMapper mapper;
-    
+
     @RabbitListener(queues = RabbitMQConfiguration.FIND_STUDY_CARD_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
     @Transactional

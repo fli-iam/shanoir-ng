@@ -70,13 +70,13 @@ public class RabbitMQSubjectService {
 
     @Autowired
     private ShanoirEventService eventService;
-    
+
     @Autowired
     private ObjectMapper mapper;
 
     @Autowired
     private SubjectUniqueConstraintManager uniqueConstraintManager;
-    
+
     /**
      * This methods returns a list of subjects for a given study ID
      * @param studyId the study ID
@@ -155,7 +155,7 @@ public class RabbitMQSubjectService {
             Subject subject = mapper.readValue(subjectAsString, Subject.class);
 
             Long studyId = subject.getSubjectStudyList().get(0).getStudy().getId();
-            
+
             Study study = studyRepository.findById(studyId).get();
 
             // Check subject existence by name

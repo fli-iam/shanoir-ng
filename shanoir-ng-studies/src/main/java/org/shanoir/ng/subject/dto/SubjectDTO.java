@@ -50,7 +50,7 @@ public class SubjectDTO {
     private Sex sex;
 
     private List<SubjectStudyDTO> subjectStudyList;
-    
+
     private boolean preclinical;
 
     /**

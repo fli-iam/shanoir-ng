@@ -28,7 +28,7 @@ import java.util.Map;
  *
  */
 public class ShanoirSolrQuery {
-    
+
     private Collection<String> studyName;
 
     private Collection<Long> studyId;
@@ -46,13 +46,13 @@ public class ShanoirSolrQuery {
     private Collection<String> examinationComment;
 
     private Collection<String> acquisitionEquipmentName;
-    
+
     private    Collection<String> datasetName;
-    
+
     private    Collection<String> centerName;
 
     private Collection<Long> centerId;
-    
+
     private    Collection<String> tags;
 
     private LocalDate datasetStartDate;
@@ -62,27 +62,27 @@ public class ShanoirSolrQuery {
     private LocalDate importStartDate;
 
     private LocalDate importEndDate;
-    
+
     private    Collection<String> datasetType;
-    
+
     private Collection<String> datasetNature;
-    
+
     private String searchText;
-    
+
     private boolean expertMode;
-    
+
     private Range<Float> sliceThickness;
-    
+
     private Range<Float> pixelBandwidth;
-    
+
     private Range<Float> magneticFieldStrength;
 
     private Collection<Boolean> processed;
 
     private Collection<String> username;
-    
+
     private Map<String, FacetPageable> facetPaging;
-    
+
     /**
      * @return the studyName
      */
@@ -268,7 +268,7 @@ public class ShanoirSolrQuery {
     public boolean isExpertMode() {
         return expertMode;
     }
-    
+
     public boolean getExpertMode() {
         return isExpertMode();
     }

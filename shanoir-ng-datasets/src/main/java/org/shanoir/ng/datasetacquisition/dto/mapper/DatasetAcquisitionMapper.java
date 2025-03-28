@@ -36,10 +36,10 @@ import org.springframework.data.domain.Page;
 @MapperConfig(mappingInheritanceStrategy=MappingInheritanceStrategy.AUTO_INHERIT_FROM_CONFIG)
 public interface DatasetAcquisitionMapper {
 
-    
+
     List<DatasetAcquisitionDTO> datasetAcquisitionsToDatasetAcquisitionDTOs(
             List<DatasetAcquisition> datasetAcquisitions);
-    
+
     public PageImpl<DatasetAcquisitionDTO> datasetAcquisitionsToDatasetAcquisitionDTOs(Page<DatasetAcquisition> page);
 
 
@@ -47,9 +47,9 @@ public interface DatasetAcquisitionMapper {
     @Mapping(target = "source", expression = "java(mapSourceFromDatasetAcquisition(datasetAcquisition.getSource()))")
     DatasetAcquisitionDTO datasetAcquisitionToDatasetAcquisitionDTO(
             DatasetAcquisition datasetAcquisition);
-    
+
     DatasetAcquisition datasetAcquisitionDTOToDatasetAcquisition(DatasetAcquisitionDTO datasetAcquisition);
-    
+
     @ObjectFactory
     default DatasetAcquisition createDatasetAcquisition(DatasetAcquisitionDTO dto) {
         if (dto.getType().equals("Mr")) return new MrDatasetAcquisition();

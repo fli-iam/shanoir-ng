@@ -75,7 +75,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     public Optional<DatasetProcessing> findByComment(String comment) {
         return repository.findByComment(comment);
     }
-    
+
     @Override
     public Optional<DatasetProcessing> findById(final Long id) {
         return repository.findById(id);

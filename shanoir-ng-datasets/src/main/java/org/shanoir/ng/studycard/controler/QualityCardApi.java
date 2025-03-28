@@ -60,7 +60,7 @@ public interface QualityCardApi {
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.hasRightOnStudy(returnObject.getBody().getStudyId(), 'CAN_SEE_ALL')")
     ResponseEntity<QualityCard> findQualityCardById(
              @Parameter(description = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId);
-    
+
     @Operation(summary = "", description = "If exists, returns the quality cards corresponding to the given study id")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found quality cards"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -72,7 +72,7 @@ public interface QualityCardApi {
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
     ResponseEntity<List<QualityCard>> findQualityCardByStudyId(
              @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
-    
+
     @Operation(summary = "", description = "Returns all the quality Cards")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found quality cards"),
             @ApiResponse(responseCode = "204", description = "no quality card found"),
@@ -96,7 +96,7 @@ public interface QualityCardApi {
     ResponseEntity<QualityCard> saveNewQualityCard(
              @Parameter(description = "Quality Card to create", required = true) @RequestBody QualityCard QualityCard,
             final BindingResult result) throws RestServiceException;
-    
+
     @Operation(summary = "", description = "Updates a quality card")
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "quality card updated"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -123,7 +123,7 @@ public interface QualityCardApi {
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnQualityCard(#qualityCardId, 'CAN_ADMINISTRATE'))")
     ResponseEntity<QualityCardResult> applyQualityCardOnStudy(
          @Parameter(description = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException;
-    
+
     @Operation(summary = "", description = "Test a quality card on a study for quality control")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "applied a quality card on its study for quality control"),

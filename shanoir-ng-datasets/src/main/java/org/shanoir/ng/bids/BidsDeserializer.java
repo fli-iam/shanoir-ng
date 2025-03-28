@@ -21,7 +21,7 @@ import org.springframework.util.CollectionUtils;
  */
 @Component
 public class BidsDeserializer {
-    
+
     @Value("${bids-data-folder}")
     private String bidsStorageDir;
 

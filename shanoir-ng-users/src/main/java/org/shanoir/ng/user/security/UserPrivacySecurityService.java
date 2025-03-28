@@ -30,13 +30,13 @@ import org.springframework.util.StringUtils;
 
 @Service
 public class UserPrivacySecurityService {
-        
+
     public boolean filterPersonnalData(List<User> users) {
-        
+
         final Collection<String> connectedUserRoles = KeycloakUtil.getConnectedUserRoles();
-        
+
         for (User user : users) {
-            
+
             for (final Field field : User.class.getDeclaredFields()) {
                 if (field.isAnnotationPresent(VisibleOnlyBy.class)) {
                     final VisibleOnlyBy annotation = field.getAnnotation(VisibleOnlyBy.class);
@@ -54,18 +54,18 @@ public class UserPrivacySecurityService {
                                             + setterName + " for accessing " + user.getClass().getName() + "."
                                             + field.getName());
                         }
-                        
+
                     }
                 }
             }
-            
-            
-            
-            
-            
-            
+
+
+
+
+
+
         }
-        
+
         return true;
     }
 }

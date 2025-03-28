@@ -37,7 +37,7 @@ import java.util.List;
 
 @Tag(name = "datasetacquisition", description = "the datasetacquisition API")
 public interface DatasetAcquisitionApi {
-    
+
     @Operation(summary = "", description = "Creates new dataset acquisition")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204", description = "created Dataset Acquitistion"),
@@ -63,7 +63,7 @@ public interface DatasetAcquisitionApi {
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
     ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findByStudyCard(
             @Parameter(description = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId);
-    
+
     @Operation(summary = "", description = "Deletes a datasetAcquisition")
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "datasetAcquisition deleted"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -87,7 +87,7 @@ public interface DatasetAcquisitionApi {
     @PostAuthorize("hasRole('ADMIN') or returnObject == null or returnObject.getBody() == null or @datasetSecurityService.hasRightOnTrustedExaminationDTO(returnObject.getBody().getExamination(), 'CAN_SEE_ALL')")
     ResponseEntity<DatasetAcquisitionDTO> findDatasetAcquisitionById(
             @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId);
-    
+
     @Operation(summary = "", description = "If exists, returns the datasetAcquisitions corresponding to the given examination id")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found datasetAcquisition"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -99,7 +99,7 @@ public interface DatasetAcquisitionApi {
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationDatasetAcquisitionDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
     ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findDatasetAcquisitionByExaminationId(
             @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId);
-        
+
     @Operation(summary = "", description = "If exists, returns the datasetAcquisitions corresponding to the given dataset ids")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found datasetAcquisition"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -111,7 +111,7 @@ public interface DatasetAcquisitionApi {
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
     ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findDatasetAcquisitionByDatasetIds(
             @Parameter(description = "ids of the datasets", required = true) @RequestBody Long[] datasetIds);
-    
+
     @Operation(summary = "", description = "Returns a dataset acquisitions page")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found dataset acquisitions"),
             @ApiResponse(responseCode = "204", description = "no user found"),

@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(using = MetadataFieldDeserializer.class)
 public interface MetadataFieldInterface<T> {
-    
+
     /**
      * Update object's metadata field with the updated value.
      *
@@ -38,11 +38,11 @@ public interface MetadataFieldInterface<T> {
      * @throws CheckedIllegalClassException if object class is incompatible with this field
      */
     String get(T object) throws CheckedIllegalClassException;
-    
+
     /**
      * Get the enum object id
      *
      * @return id
      */
-    public int getId();    
+    public int getId();
 }

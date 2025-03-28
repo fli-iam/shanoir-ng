@@ -28,17 +28,17 @@ public interface CardService<T extends Card> {
     void deleteById(Long id) throws EntityNotFoundException, MicroServiceCommunicationException;
 
     T save(T card) throws MicroServiceCommunicationException;
-    
+
     T update(T card) throws EntityNotFoundException, MicroServiceCommunicationException;
-    
+
     List<T> findAll();
-    
+
     T findById(Long id);
-    
+
     T findByName(String name);
 
     List<T> search(List<Long> studyIdList);
-    
+
     List<T> findByStudy (Long studyId);
 
 }

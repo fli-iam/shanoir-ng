@@ -46,7 +46,7 @@ public class EchoTime extends AbstractEntity {
     @JoinColumn(name = "mr_dataset_id")
     @JsonIgnore
     private MrDataset mrDataset;
-    
+
     /**
      * The echo number. Comes from dicom tag (0018,0086) VR=IS, VM=1-n Echo
      * Number(s).
@@ -99,8 +99,8 @@ public class EchoTime extends AbstractEntity {
     public void setEchoTimeValue(Double echoTimeValue) {
         this.echoTimeValue = echoTimeValue;
     }
-    
-    
+
+
     public void setMrDataset(MrDataset mrDataset) {
         this.mrDataset = mrDataset;
     }
@@ -113,16 +113,16 @@ public class EchoTime extends AbstractEntity {
       public boolean equals(Object v) {
             boolean retVal = false;
             boolean retVal1 = false;
-    
+
             if (v instanceof EchoTime) {
                 EchoTime echoTime = (EchoTime) v;
                 retVal = echoTime.getEchoNumber() == this.echoNumber;
                 retVal1 = echoTime.getEchoTimeValue() == this.echoTimeValue;
             }
-    
+
          return retVal && retVal1;
       }
-    
+
         @Override
         public int hashCode() {
             int hash = 7;

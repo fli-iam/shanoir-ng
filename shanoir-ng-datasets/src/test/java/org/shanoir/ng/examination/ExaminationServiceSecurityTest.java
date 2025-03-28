@@ -66,19 +66,19 @@ public class ExaminationServiceSecurityTest {
     private static final long LOGGED_USER_ID = 2L;
     private static final String LOGGED_USER_USERNAME = "logged";
     private static final long ENTITY_ID = 1L;
-    
+
     @Autowired
     private ExaminationService service;
-    
+
     @MockBean
     private ExaminationRepository examinationRepository;
-    
+
     @MockBean
     private StudyUserRightsRepository rightsRepository;
-    
+
     @MockBean
     StudyRepository studyRepository;
-    
+
     @MockBean
     StudyRightsService rightsService;
 
@@ -90,7 +90,7 @@ public class ExaminationServiceSecurityTest {
         given(rightsService.hasRightOnStudies(Mockito.any(), Mockito.anyString())).willReturn(new HashSet<Long>());
         given(rightsRepository.findByUserIdAndStudyId(Mockito.anyLong(), Mockito.anyLong())).willReturn(new StudyUser());
     }
-    
+
     @Test
     @WithAnonymousUser
     public void testAsAnonymous() throws ShanoirException {
@@ -110,7 +110,7 @@ public class ExaminationServiceSecurityTest {
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
     public void testAsUser() throws ShanoirException {
         setCenterRightsContext();
-        
+
         testUpdate();
         testFindOne();
         testFindPage();
@@ -119,12 +119,12 @@ public class ExaminationServiceSecurityTest {
         testCreate();
         testDelete("ROLE_USER");
     }
-    
+
     @Test
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
     public void testAsExpert() throws ShanoirException {
         setCenterRightsContext();
-        
+
         testUpdate();
         testFindOne();
         testFindPage();
@@ -145,21 +145,21 @@ public class ExaminationServiceSecurityTest {
         assertAccessAuthorized(service::update, mockExam(1L));
         assertAccessAuthorized(service::deleteById, ENTITY_ID, null);
     }
-    
-    
+
+
     private void testFindOne() throws ShanoirException {
         assertAccessAuthorized(service::findById, 1L);
         assertAccessDenied(service::findById, 2L);
         assertAccessDenied(service::findById, 3L);
         assertAccessDenied(service::findById, 4L);
     }
-    
-    
+
+
     private void testFindPage() throws ShanoirException {
         assertAccessAuthorized(service::findPage, PageRequest.of(0, 10), false, "", "");
         assertThat(service.findPage(PageRequest.of(0, 10), false, "", "")).hasSize(1);
     }
-    
+
     private void testFindBySubjectId() throws ShanoirException {
         assertAccessAuthorized(service::findBySubjectId, 1L);
         List<Examination> examList2 = service.findBySubjectId(1L);
@@ -169,7 +169,7 @@ public class ExaminationServiceSecurityTest {
         assertThat(service.findBySubjectId(2L)).isNullOrEmpty();
         assertThat(service.findBySubjectId(4L)).isNullOrEmpty();
     }
-    
+
     private void testFindBySubjectIdStudyId() throws ShanoirException {
         assertAccessAuthorized(service::findBySubjectIdStudyId, 1L, 1L);
         try {
@@ -182,7 +182,7 @@ public class ExaminationServiceSecurityTest {
         assertThat(examList1.size()).isEqualTo(1);
         assertThat(examList1.get(0).getId()).isEqualTo(1L);
     }
-    
+
     private void testCreate() throws ShanoirException {
         given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
         given(rightsService.hasRightOnStudy(2L, "CAN_IMPORT")).willReturn(false);
@@ -199,9 +199,9 @@ public class ExaminationServiceSecurityTest {
         given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
         given(rightsService.hasRightOnStudy(2L, "CAN_IMPORT")).willReturn(false);
     }
-    
+
     private void testDelete(String role) throws ShanoirException {
-        if (role.equals("ROLE_USER")) {            
+        if (role.equals("ROLE_USER")) {
             assertAccessDenied(service::deleteById, 1L, null);
         } else if (role.equals("ROLE_EXPERT")) {
             assertAccessDenied(service::deleteById, 1L, null);
@@ -239,21 +239,21 @@ public class ExaminationServiceSecurityTest {
         exam4.setStudy(new Study()); //back to study 4
         exam4.getStudy().setId(4L);
     }
-    
-    
+
+
     private Examination mockExam(Long id) {
         Examination exam = ModelsUtil.createExamination();
         exam.setId(id);
         return exam;
     }
-    
+
     private Examination mockExam(Long id, Long centerId, Long studyId) {
         Examination exam = mockExam(id);
         exam.setCenterId(centerId);
         exam.setStudy(mockStudy(studyId));
         return exam;
     }
-    
+
     private Study mockStudy(Long id) {
         Study study = new Study();
         study.setId(id);
@@ -263,7 +263,7 @@ public class ExaminationServiceSecurityTest {
         study.setTags(new ArrayList<>());
         return study;
     }
-    
+
     private Examination mockExamination(Long studyId, Long subjectId, Long centerId) {
         Examination exam = new Examination();
         exam.setExaminationDate(LocalDate.now());
@@ -272,14 +272,14 @@ public class ExaminationServiceSecurityTest {
         exam.setSubject(new Subject(subjectId, ""));
         return exam;
     }
-    
+
     private Examination mockExamination(Long id, Long studyId, Long subjectId, Long centerId) {
         Examination exam = mockExamination(studyId, subjectId, centerId);
         exam.setId(id);
         return exam;
     }
 
-    
+
     private void setCenterRightsContext() {
         /**
          * -> study 1 [CAN_SEE_ALL]
@@ -297,7 +297,7 @@ public class ExaminationServiceSecurityTest {
          *         -> center 4
          *             -> exam 4
          */
-        
+
         // has right on study 1
         given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
         // has right on [study 1, center 1]
@@ -307,20 +307,20 @@ public class ExaminationServiceSecurityTest {
         // does not have right on [study 1, center 3]
         given(rightsService.hasRightOnCenter(1L, 3L)).willReturn(false);
         given(rightsService.hasRightOnCenter(studyIds1, 3L)).willReturn(false);
-        
+
         // has right on study 2
         given(rightsService.hasRightOnStudy(2L, "CAN_SEE_ALL")).willReturn(true);
         // does not have right on [study 2, center 2]
         given(rightsService.hasRightOnCenter(2L, 2L)).willReturn(false);
         Set<Long> studyIds2 = new HashSet<Long>(); studyIds2.add(2L);
         given(rightsService.hasRightOnCenter(studyIds2, 2L)).willReturn(false);
-        
+
         // does not have right on study 4
         given(rightsService.hasRightOnStudy(4L, "CAN_SEE_ALL")).willReturn(false);
-        
+
         // has rights on studies 1 & 2
         given(rightsService.hasRightOnStudies(Mockito.anySet(), Mockito.anyString())).willReturn(new HashSet<>(Arrays.asList(new Long[]{1L, 2L})));
-        
+
         // exam 1 is in center 1
         Examination exam1 = mockExam(1L, 1L, 1L);
         given(examinationRepository.findById(1L)).willReturn(Optional.of(exam1));
@@ -343,7 +343,7 @@ public class ExaminationServiceSecurityTest {
         given(examinationRepository.findBySubjectIdAndStudy_Id(4L, 4L)).willReturn(Utils.toList(exam4));
         given(examinationRepository.findBySubjectId(4L)).willReturn(Utils.toList(exam4));
         //given(examinationRepository.findByPreclinicalAndStudyIdIn(Mockito.anyBoolean(), Mockito.anyList(), Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new Examination[]{exam1})));
-        
+
         given(examinationRepository.findPageByStudyCenterOrStudyIdIn(Mockito.<Pair<Long, Long>>anyList(), Mockito.<Long>anySet(), Mockito.any(Pageable.class), Mockito.anyBoolean())).willReturn(new PageImpl<>(Arrays.asList(new Examination[]{}), PageRequest.of(0, 10), 0));
         List<Pair<Long, Long>> studyCenterIds = new ArrayList<>();
         studyCenterIds.add(Pair.of(1L, 1L));
@@ -354,8 +354,8 @@ public class ExaminationServiceSecurityTest {
         su1.setStudyId(1L);
         su1.setCenterIds(Arrays.asList(new Long[]{1L}));
         given(rightsRepository.findByUserIdAndRight(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(new StudyUser[]{su1}));
-        
-        
+
+
         // study 1
         Study study1 = mockStudy(1L);
         given(studyRepository.findById(1L)).willReturn(Optional.of(study1));

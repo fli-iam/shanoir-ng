@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 @DiscriminatorValue("AcqMetadataCondOnAcq")
 @JsonTypeName("AcqMetadataCondOnAcq")
 public class AcqMetadataCondOnAcq extends StudyCardMetadataCondition<DatasetAcquisition> {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(AcqMetadataCondOnAcq.class);
 
     @Override

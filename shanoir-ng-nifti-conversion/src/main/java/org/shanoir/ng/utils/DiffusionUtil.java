@@ -37,7 +37,7 @@ import org.w3c.dom.NodeList;
 public final class DiffusionUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(DiffusionUtil.class);
-    
+
     /**
      * Convert the B values to a string representation.
      *

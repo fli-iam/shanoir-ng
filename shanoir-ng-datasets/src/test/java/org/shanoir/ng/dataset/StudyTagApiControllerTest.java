@@ -96,7 +96,7 @@ public class StudyTagApiControllerTest {
 
     @MockBean
     private DatasetService datasetServiceMock;
-    
+
     @MockBean
     private CreateStatisticsService createStatisticsService;
 
@@ -120,13 +120,13 @@ public class StudyTagApiControllerTest {
 
     @MockBean
     private WADODownloaderService downloader;
-    
+
     @MockBean(name = "datasetSecurityService")
     private DatasetSecurityService datasetSecurityService;
-    
+
     @MockBean(name = "controlerSecurityService")
     private ControlerSecurityService controlerSecurityService;
-    
+
     @TempDir
     private File tempDir;
 
@@ -141,19 +141,19 @@ public class StudyTagApiControllerTest {
 
     @MockBean
     private ShanoirEventService eventService;
-    
+
     @MockBean
     private StudyRepository studyRepo;
 
     @MockBean
     private RabbitTemplate rabbitTemplate;
-    
+
     @MockBean
     private ImporterService importerService;
-    
+
     @MockBean
     private DicomSEGAndSRImporterService dicomSRImporterService;
-    
+
     @MockBean
     @Qualifier("datasetDownloaderServiceImpl")
     private DatasetDownloaderServiceImpl datasetDownloaderService;

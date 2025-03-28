@@ -152,7 +152,7 @@ public class DicomServerClient implements IDicomServerClient {
                         + " DICOM files for DICOM study/exam " + studyInstanceUID + ": " + " has failed.\n\n"
                         + e.getMessage(), e);
                 return null;
-            }                
+            }
         }
         return retrievedDicomFiles;
     }
@@ -172,7 +172,7 @@ public class DicomServerClient implements IDicomServerClient {
         // it only once in QueryPACSService.
         queryPACSService.queryCMOVEs(studyInstanceUID, selectedSeries, progressBar);
     }
-    
+
     private void readAndCopyDicomFilesToUploadFolder(String studyInstanceUID, List<Serie> selectedSeries, final File uploadFolder,
             final List<String> retrievedDicomFiles, StringBuilder downloadOrCopyReport) throws IOException {
         for (Serie serie : selectedSeries) {
@@ -192,7 +192,7 @@ public class DicomServerClient implements IDicomServerClient {
                         Attributes attributes = dIS.readDataset();
                         if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes)) {
                             Instance instance = new Instance(attributes);
-                            instances.add(instance);                        
+                            instances.add(instance);
                             File destSerieFolder = new File(uploadFolder.getAbsolutePath() + File.separator + seriesInstanceUID);
                             if (!destSerieFolder.exists())
                                 destSerieFolder.mkdirs();
@@ -246,7 +246,7 @@ public class DicomServerClient implements IDicomServerClient {
             }
         }
     }
-    
+
     private void deleteFolderDownloadFromDicomServer(String studyInstanceUID, List<Serie> selectedSeries) throws IOException {
         if (selectedSeries != null && !selectedSeries.isEmpty()) {
             File studyFolder = new File(workFolder + File.separator + studyInstanceUID);

@@ -60,15 +60,15 @@ public class BidsServiceTest {
     @InjectMocks
     @Spy
     private BIDSServiceImpl service = new BIDSServiceImpl();
-    
+
     @Mock
     private ObjectMapper objectMapper;
-    
+
     String studyName = "STUDY";
 
     Examination exam = ModelsUtil.createExamination();
     Subject subject = new Subject();
-    
+
     public static String tempFolderPath;
 
     @BeforeEach
@@ -98,7 +98,7 @@ public class BidsServiceTest {
         ds.setDatasetAcquisition(dsa);
 
         exam.setDatasetAcquisitions(Collections.singletonList(dsa));
-        
+
         // Create some dataFile and register it to be copied
         File dataFile = new File(tempFolderPath + "test.test");
         dataFile.createNewFile();
@@ -124,13 +124,13 @@ public class BidsServiceTest {
         susu.setSubject(this.subject);
         subjectStudies.add(    susu);
         given(subjectStudyRepository.findByStudy_Id(exam.getStudyId())).willReturn(subjectStudies);
-        
+
         // Mock on examination service to get the list of subject
         given(examService.findBySubjectId(subject.getId())).willReturn(Collections.singletonList(exam));
 
         // WHEN we export the data
         service.exportAsBids(exam.getStudyId(), studyName);
-        
+
         // THEN the bids folder is generated with study - subject - exam - data
         File studyFile = new File(tempFolderPath + "stud-" + exam.getStudyId() + "" + studyName);
         assertTrue(studyFile.exists());

@@ -31,26 +31,26 @@ import java.util.List;
  *
  */
 public class ShanoirSolrDocument {
-    
+
     /** An id of type string and distinct from datasetId is preferable for Solr **/
     @Id
     @Field
     private String id;
-    
+
     @Field
     private    Long datasetId;
-    
+
     @Field
     private    String datasetName;
-    
+
     // DatasetModalityType: MR, CT, PET etc..
     @Field
     private    String datasetType;
-    
+
     // T1, T2, Diff, etc..
     @Field
     private String datasetNature;
-    
+
     @Field
     private Date datasetCreationDate;
 
@@ -80,10 +80,10 @@ public class ShanoirSolrDocument {
 
     @Field
     private String studyName;
-    
+
     @Field
     private Long studyId;
-    
+
     @Field
     private String centerName;
 
@@ -92,13 +92,13 @@ public class ShanoirSolrDocument {
 
     @Field
     private Double sliceThickness;
-    
+
     @Field
     private Double pixelBandwidth;
-    
+
     @Field
     private Double magneticFieldStrength;
-    
+
     @Field
     private List<String> tags;
 
@@ -111,9 +111,9 @@ public class ShanoirSolrDocument {
     @Field
     private String username;
 
-    public ShanoirSolrDocument () {        
+    public ShanoirSolrDocument () {
     }
-    
+
     public ShanoirSolrDocument (String id, Long datasetId, String datasetName, String datasetType, String datasetNature,
             Date datasetCreationDate, Long examinationId, String examinationComment, Date examinationDate, String acquisitionEquipmentName,
             String subjectName, String subjectType, Long subjectId, String studyName, Long studyId, String centerName, Long centerId, Double sliceThickness,
@@ -147,7 +147,7 @@ public class ShanoirSolrDocument {
     public String getId() {
         return this.id;
     }
-    
+
     public void setId(String id) {
         this.id = id;
     }
@@ -301,7 +301,7 @@ public class ShanoirSolrDocument {
     public void setStudyName(String studyName) {
         this.studyName = studyName;
     }
-    
+
     /**
      * @return the studyId
      */
@@ -347,7 +347,7 @@ public class ShanoirSolrDocument {
     public void setMagneticFieldStrength(Double magneticFieldStrength) {
         this.magneticFieldStrength = magneticFieldStrength;
     }
-    
+
     public List<String> getTags() {
         return tags;
     }

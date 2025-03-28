@@ -49,11 +49,11 @@ public class ExaminationDTO {
     private IdName subject;
 
     private Double subjectWeight;
-    
+
     private boolean preclinical;
 
     private List<String> extraDataFilePathList;
-    
+
     /**
      * @return the id
      */
@@ -159,7 +159,7 @@ public class ExaminationDTO {
     public void setSubjectWeight(final Double subjectWeight) {
         this.subjectWeight = subjectWeight;
     }
-    
+
     public boolean isPreclinical() {
         return preclinical;
     }

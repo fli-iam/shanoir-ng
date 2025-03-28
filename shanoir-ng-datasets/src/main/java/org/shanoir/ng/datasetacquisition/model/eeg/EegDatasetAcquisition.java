@@ -25,5 +25,5 @@ public class EegDatasetAcquisition extends DatasetAcquisition{
         return "Eeg";
     }
 
-    
+
 }

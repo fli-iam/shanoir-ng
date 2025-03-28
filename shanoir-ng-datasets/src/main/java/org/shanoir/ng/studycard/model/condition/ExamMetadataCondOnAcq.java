@@ -34,7 +34,7 @@ import java.util.List;
 @DiscriminatorValue("ExamMetadataCondOnAcq")
 @JsonTypeName("ExamMetadataCondOnAcq")
 public class ExamMetadataCondOnAcq extends StudyCardMetadataCondition<DatasetAcquisition> {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(ExamMetadataCondOnAcq.class);
 
     @Override
@@ -50,7 +50,7 @@ public class ExamMetadataCondOnAcq extends StudyCardMetadataCondition<DatasetAcq
     public boolean fulfilled(List<DatasetAcquisition> acquisitions) {
         return fulfilled(acquisitions, null);
     }
-    
+
     public boolean fulfilled(List<DatasetAcquisition> acquisitions, StringBuffer errorMsg) {
         if (acquisitions == null) throw new IllegalArgumentException("datasets can not be null");
         DatasetAcquisitionMetadataField field = this.getShanoirField();

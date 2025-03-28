@@ -43,16 +43,16 @@ public class DatasetAcquisitionApiControllerTest {
 
     @MockBean
     private DicomSEGAndSRImporterService dicomSRImporterService;
-    
+
     @MockBean
     private DatasetAcquisitionService datasetAcquisitionService;
-    
+
     @MockBean
     private DatasetAcquisitionMapper dsAcqMapper;
-    
+
     @MockBean
     private ExaminationDatasetAcquisitionMapper examDsAcqMapper;
-    
+
     @MockBean
     private DatasetAcquisitionDatasetsMapper dsAcqDsMapper;
 
@@ -67,7 +67,7 @@ public class DatasetAcquisitionApiControllerTest {
     private MockMvc mvc;
 
     private Gson gson;
-    
+
     @BeforeEach
     public void setup() throws ShanoirException {
         gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
@@ -76,9 +76,9 @@ public class DatasetAcquisitionApiControllerTest {
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void testStartImportEEGJob() throws Exception {
-        
+
         ArgumentCaptor<EegImportJob> captor = ArgumentCaptor.forClass(EegImportJob.class);
-        
+
         EegImportJob importJob = new EegImportJob();
         EegDatasetDTO dataset = new EegDatasetDTO();
         importJob.setDatasets(Collections.singletonList(dataset));
@@ -90,11 +90,11 @@ public class DatasetAcquisitionApiControllerTest {
 //                .accept(MediaType.APPLICATION_JSON)
 //                .contentType(MediaType.APPLICATION_JSON)
 //                .content(gson.toJson(importJob))).andExpect(status().isOk());
-//        
+//
 //        // Check calls
 //        verify(importerService).createEegDataset(captor.capture());
 //        assertEquals(((EegImportJob)captor.getValue()).getDatasets().get(0).getName(), dataset.getName());
-//        
+//
 //        verify(importerService).cleanTempFiles(eq(importJob.getWorkFolder()));
     }
 }

@@ -43,7 +43,7 @@
 //@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 //@ActiveProfiles("test")
 //public class StudyCardApiControllerTestIT extends KeycloakControllerTestIT {
-//    
+//
 //    private static final String REQUEST_PATH = "/studycards";
 //    private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 //
@@ -97,7 +97,7 @@
 //    @Test
 //    public void updateNewTemplateProtected() {
 //        final HttpEntity<StudyCard> entity = new HttpEntity<StudyCard>(ModelsUtil.createStudyCard());
-//        
+//
 //        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 //                String.class);
 //        assertEquals(HttpStatus.FOUND, response.getStatusCode());

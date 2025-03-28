@@ -26,7 +26,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  */
 public class Patient {
-    
+
     @JsonProperty("subject")
     private Subject subject;
 
@@ -83,7 +83,7 @@ public class Patient {
         return patientBirthDate;
     }
 
-    public void setPatientBirthDate(LocalDate patientBirthDate) {    
+    public void setPatientBirthDate(LocalDate patientBirthDate) {
         this.patientBirthDate = patientBirthDate;
     }
 

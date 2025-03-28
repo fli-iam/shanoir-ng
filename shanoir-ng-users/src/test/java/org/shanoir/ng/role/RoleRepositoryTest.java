@@ -37,20 +37,20 @@ public class RoleRepositoryTest {
 
     private static final Long ROLE_TEST_1_ID = 1L;
     private static final String ROLE_TEST_1_NAME = "ROLE_ADMIN";
-    
+
     @Autowired
     private RoleRepository repository;
-    
+
     @Test
     public void findOneTest() throws Exception {
         final Role roleDb = repository.findById(ROLE_TEST_1_ID).orElse(null);
         assertThat(roleDb.getName()).isEqualTo(ROLE_TEST_1_NAME);
     }
-    
+
     @Test
     public void getAllNamesTest() throws Exception {
         final List<String> rolesName = repository.getAllNames();
         assertThat(rolesName.size()).isEqualTo(3);
     }
-    
+
 }

@@ -34,7 +34,7 @@ import java.io.IOException;
  */
 @Service
 public class DatasetExpressionContext implements DatasetExpressionStrategy {
-    
+
     @Autowired
     private DicomDatasetExpressionStrategy dicomDatasetExpressionStrategy;
 

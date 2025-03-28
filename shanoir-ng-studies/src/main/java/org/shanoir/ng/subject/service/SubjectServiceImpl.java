@@ -76,31 +76,31 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Autowired
     private SubjectStudyRepository subjectStudyRepository;
-    
+
     @Autowired
     private StudyRepository studyRepository;
-    
+
     @Autowired
     private SubjectStudyDecorator subjectStudyMapper;
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
-    
+
     @Autowired
     private StudyUserRepository studyUserRepository;
 
     @Autowired
     private SubjectMapper subjectMapper;
-    
+
     @Autowired
     private ObjectMapper objectMapper;
 
     @Autowired
     private StudyExaminationRepository studyExaminationRepository;
-    
+
     @Autowired
     private ShanoirEventService eventService;
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(SubjectServiceImpl.class);
 
     @Override
@@ -179,7 +179,7 @@ public class SubjectServiceImpl implements SubjectService {
     public Subject findByIdWithSubjectStudies(final Long id) {
         return subjectRepository.findSubjectWithSubjectStudyById(id);
     }
-    
+
     @Override
     public Subject create(final Subject subject) {
         if (subject.getSubjectStudyList() != null) {
@@ -195,7 +195,7 @@ public class SubjectServiceImpl implements SubjectService {
         }
         return subjectDb;
     }
-    
+
     @Override
     public Subject createAutoIncrement(final Subject subject, final Long centerId) {
         if (subject.getSubjectStudyList() != null) {
@@ -272,7 +272,7 @@ public class SubjectServiceImpl implements SubjectService {
         }
         return subjectDb;
     }
-    
+
     public boolean updateSubjectName(SubjectDTO subject) throws MicroServiceCommunicationException{
         try {
             rabbitTemplate.
@@ -325,7 +325,7 @@ public class SubjectServiceImpl implements SubjectService {
         }
         return simpleSubjectDTOList;
     }
-    
+
     @Override
     public List<SimpleSubjectDTO> findAllSubjectsOfStudyId(final Long studyId) {
         return findAllSubjectsOfStudyAndPreclinical(studyId, null);

@@ -41,17 +41,17 @@ public class DatasetDTO {
     private Long studyId;
 
     private Long subjectId;
-    
+
     private Long centerId;
 
     private DatasetMetadataDTO updatedMetadata;
-    
+
     private String name;
-    
+
     private String type;
 
     private boolean inPacs;
-    
+
     private List<StudyTagDTO> tags;
 
     private Long source;

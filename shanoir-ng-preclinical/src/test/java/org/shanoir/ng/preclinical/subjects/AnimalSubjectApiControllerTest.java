@@ -89,7 +89,7 @@ public class AnimalSubjectApiControllerTest {
 
     @MockBean
     private ShanoirEventService eventService;
-    
+
     @MockBean
     private AnimalSubjectUniqueValidator uniqueValidator;
 

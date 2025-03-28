@@ -41,13 +41,13 @@ public class ImportFinishActionListener implements ActionListener {
     private static final Logger logger = LoggerFactory.getLogger(ImportFinishActionListener.class);
 
     private MainWindow mainWindow;
-    
+
     private UploadJob uploadJob;
-    
+
     private File uploadFolder;
-    
+
     private Subject subjectREST;
-    
+
     private ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBILNG;
 
     public ImportFinishActionListener(final MainWindow mainWindow, UploadJob uploadJob, File uploadFolder, Subject subjectREST,
@@ -95,7 +95,7 @@ public class ImportFinishActionListener implements ActionListener {
                 }
             }
         }
-        
+
         // block further action
         ((JButton) event.getSource()).setEnabled(false);
         mainWindow.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -135,7 +135,7 @@ public class ImportFinishActionListener implements ActionListener {
                 return;
             }
         }
-        
+
         Long examinationId = null;
         // If the user wants to create a new examination
         if (mainWindow.importDialog.mrExaminationNewExamCB.isSelected()) {
@@ -159,13 +159,13 @@ public class ImportFinishActionListener implements ActionListener {
             examinationId = examinationDTO.getId();
             logger.info("Examination used on server with ID: " + examinationId);
         }
-                
+
         /**
          * 3. Fill importJob, check quality if needed, start pseudo and prepare upload
          */
         ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examinationId,
             (Study) mainWindow.importDialog.studyCB.getSelectedItem(), (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem());
-        
+
         // Quality Check if the Study selected has Quality Cards to be checked at import
         try {
             QualityCardResult qualityControlResult = QualityUtils.checkQualityAtImport(importJob, mainWindow.isFromPACS);
@@ -190,7 +190,7 @@ public class ImportFinishActionListener implements ActionListener {
                         //Set qualityTag to the importJob in order to update subjectStudy qualityTag on server side
                         importJob.setQualityTag(qualityControlResult.getUpdatedSubjectStudies().get(0).getQualityTag());
                     }
-                }                
+                }
             }
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
@@ -211,7 +211,7 @@ public class ImportFinishActionListener implements ActionListener {
         mainWindow.importDialog.mrExaminationExamExecutiveLabel.setVisible(true);
         mainWindow.importDialog.mrExaminationExamExecutiveCB.setVisible(true);
         mainWindow.setCursor(null); // turn off the wait cursor
-        ((JButton) event.getSource()).setEnabled(true);    
+        ((JButton) event.getSource()).setEnabled(true);
     }
 
 }

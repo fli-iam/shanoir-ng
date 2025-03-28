@@ -37,7 +37,7 @@ public class ReadyState implements State {
 
     @Autowired
     private UploadServiceJob uploadServiceJob;
-    
+
     public void load(StartupStateContext context) {
         ShUpStartupDialog shUpStartupDialog = context.getShUpStartupDialog();
         shUpStartupDialog.setVisible(false);
@@ -83,7 +83,7 @@ public class ReadyState implements State {
         logger.info("JFrame successfully initialized.");
         return frame;
     }
-    
+
     /**
      * Walk trough all folders within the work folder and update the upload
      * percentage upload percentage < 100 % must be 0%
@@ -121,5 +121,5 @@ public class ReadyState implements State {
             }
         }
     }
-    
+
 }

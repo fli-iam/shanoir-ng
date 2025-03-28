@@ -44,7 +44,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @Controller
 public class UserApiController extends AbstractUserRequestApiController implements UserApi {
-    
+
     @Value("${vip.enabled}")
     private boolean vipEnabled;
 
@@ -56,7 +56,7 @@ public class UserApiController extends AbstractUserRequestApiController implemen
         try {
             getUserService().deleteById(userId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-            
+
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -65,12 +65,12 @@ public class UserApiController extends AbstractUserRequestApiController implemen
     @Override
     public ResponseEntity<Void> confirmAccountRequest(@PathVariable("userId") final Long userId,
             @RequestBody final User user, final BindingResult result) throws RestServiceException {
-        
+
         try {
             validate(user, result);
             getUserService().confirmAccountRequest(user);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-            
+
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (AccountNotOnDemandException e) {
@@ -78,13 +78,13 @@ public class UserApiController extends AbstractUserRequestApiController implemen
         }
     }
 
-    
+
     @Override
     public ResponseEntity<Void> denyAccountRequest(@PathVariable("userId") final Long userId) throws RestServiceException {
         try {
             getUserService().denyAccountRequest(userId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-            
+
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (AccountNotOnDemandException e) {
@@ -92,7 +92,7 @@ public class UserApiController extends AbstractUserRequestApiController implemen
         }
     }
 
-    
+
     @Override
     public ResponseEntity<User> findUserById(@PathVariable("userId") final Long userId) {
         final User user = getUserService().findById(userId);
@@ -110,8 +110,8 @@ public class UserApiController extends AbstractUserRequestApiController implemen
         }
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
-    
-    
+
+
     @Override
     public ResponseEntity<List<User>> findAccountRequests() {
         final List<User> users = getUserService().findAccountRequests();
@@ -120,21 +120,21 @@ public class UserApiController extends AbstractUserRequestApiController implemen
         }
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
-    
-    
+
+
     @Override
     public ResponseEntity<User> saveNewUser(@RequestBody @Valid final User user, final BindingResult result) throws RestServiceException {
         /* Generate a username. */
         if (user.getUsername() == null && user.getFirstName() != null && user.getLastName() != null) {
             generateUsername(user);
         }
-        
+
         user.setCreationDate(LocalDate.now()); // Set creation date on creation, which is now
         validateIgnoreBlankUsername(user, result);
-        
+
         if (user.getAccountRequestInfo() != null &&
                 (user.getAccountRequestInfo().getStudyId() != null)) {
-            
+
             if (user.getAccountRequestInfo().getStudyId() != null) {
                 // Directly create an access request for the given study
                 AccessRequest request = new AccessRequest();
@@ -144,7 +144,7 @@ public class UserApiController extends AbstractUserRequestApiController implemen
                 request.setStatus(AccessRequest.ON_DEMAND);
                 request.setMotivation("A study admin invited this user to your study, please confirm its access to the study: " + user.getUsername());
                 // So that when the user account request is accepted, it directly has access to the data
-                accessRequestService.createAllowed(request);                        
+                accessRequestService.createAllowed(request);
             }
         }
 
@@ -182,7 +182,7 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 
         try {
             validate(user, result);
-            
+
             /* Update user in db. */
             getUserService().update(user);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);

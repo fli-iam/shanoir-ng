@@ -17,12 +17,12 @@ package org.shanoir.ng.datasetacquisition.dto;
 import java.util.List;
 
 public class SimpleDatasetAcquisitionDTO {
-    
+
     private Long id;
 
     private List<Long> datasetIds;
 
-    
+
     public Long getId() {
         return id;
     }

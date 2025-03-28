@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 public class FileUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(FileUtil.class);
-    
+
     /**
      * This method receives a directory name as a string
      * and checks if there already exists a file like this.
@@ -36,7 +36,7 @@ public class FileUtil {
             }
         }
     }
-    
+
     /**
      * Use this method for calculating the file size.
      * @param size
@@ -48,7 +48,7 @@ public class FileUtil {
         int digitGroups = (int) (Math.log10(size)/Math.log10(1024));
         return new DecimalFormat("#,##0.#").format(size/Math.pow(1024, digitGroups)) + " " + units[digitGroups];
     }
-    
+
     /**
      * Java NIO file copying to improve the performance of file copying.
      * In general this solution requires only 2/3 of the time of standard

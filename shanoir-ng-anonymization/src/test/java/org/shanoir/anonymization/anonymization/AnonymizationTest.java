@@ -70,7 +70,7 @@ public class AnonymizationTest {
         long temps = chrono2 - chrono;
         System.out.println("Spended time to anonymize file = " + temps + " ms");
     }
-    
+
     private static void printDICOMFile(final File dicomFile) {
         DicomInputStream din = null;
         try {

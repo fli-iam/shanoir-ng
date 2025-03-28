@@ -22,9 +22,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class PacsConfigurationState implements State {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(PacsConfigurationState.class);
-    
+
     public ShUpOnloadConfig shUpOnloadConfig = ShUpOnloadConfig.getInstance();
 
     @Autowired
@@ -32,7 +32,7 @@ public class PacsConfigurationState implements State {
 
     @Autowired
     private PacsManualConfigurationState pacsManualConfigurationState;
-    
+
     public void load(StartupStateContext context) {
         initDicomServerClient();
         /**

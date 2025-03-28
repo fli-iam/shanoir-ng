@@ -5,13 +5,13 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class MetadataDTO {
-    
+
     @JsonProperty("SOPInstanceUID")
     private String sopInstanceUID;
-    
+
     @JsonProperty("SeriesInstanceUID")
     private String seriesInstanceUID;
-    
+
     @JsonProperty("SeriesDate")
     private String seriesDate;
 
@@ -23,52 +23,52 @@ public class MetadataDTO {
 
     @JsonProperty("SOPClassUID")
     private String sopClassUID;
-    
+
     @JsonProperty("Modality")
     private String modality;
-    
+
     @JsonProperty("Columns")
     private Integer columns;
-    
+
     @JsonProperty("Rows")
     private Integer rows;
-    
+
     @JsonProperty("FrameOfReferenceUID")
     private String frameOfReferenceUID;
 
     @JsonProperty("PhotometricInterpretation")
     private String photometricInterpretation;
-    
+
     @JsonProperty("BitsAllocated")
     private Integer bitsAllocated;
-    
+
     @JsonProperty("BitsStored")
     private Integer bitsStored;
 
     @JsonProperty("PixelRepresentation")
     private Integer pixelRepresentation;
-    
+
     @JsonProperty("SamplesPerPixel")
     private Integer samplesPerPixel;
-    
+
     @JsonProperty("PixelSpacing")
     private List<Float> pixelSpacing;
-        
+
     @JsonProperty("HighBit")
     private Integer highBit;
-    
+
     @JsonProperty("ImageOrientationPatient")
     private List<Integer> imageOrientationPatient;
-    
+
     @JsonProperty("ImagePositionPatient")
     private List<Integer> imagePositionPatient;
-    
+
     @JsonProperty("ImageType")
     private List<String> imageType;
-    
+
     @JsonProperty("WindowCenter")
     private Integer windowCenter;
-    
+
     @JsonProperty("WindowWidth")
     private Integer windowWidth;
 

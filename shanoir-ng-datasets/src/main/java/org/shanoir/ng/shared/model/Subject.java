@@ -31,14 +31,14 @@ public class Subject extends IdName {
     /** Relations beetween the subjects and the studies. */
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "subject", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<SubjectStudy> subjectStudyList;
-    
+
     @Id
     protected Long id;
-    
+
     protected String name;
-    
+
     public Subject() { }
-    
+
     /**
      * @param id
      * @param name

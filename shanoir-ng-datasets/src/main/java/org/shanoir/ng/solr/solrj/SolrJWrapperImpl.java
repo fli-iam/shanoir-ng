@@ -125,7 +125,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 
     @Autowired
     private SolrClient solrClient;
-    
+
     public void addToIndex (final ShanoirSolrDocument document) throws SolrServerException, IOException {
         solrClient.addBean(document);
         solrClient.commit();
@@ -153,7 +153,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 
     public SolrResultPage<ShanoirSolrDocument> findByFacetCriteriaForAdmin(ShanoirSolrQuery facet, Pageable pageable) throws RestServiceException {
         if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-            return getSearchResultsWithFacetsForAdmin(facet, pageable);            
+            return getSearchResultsWithFacetsForAdmin(facet, pageable);
         } else {
             throw new IllegalStateException("This method cannot be called by a non-admin user");
         }
@@ -164,7 +164,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
         if (studyIds == null || studyIds.isEmpty()) {
             return new SolrResultPage<>(new ArrayList<>());
         } else {
-            return getSearchResultsWithFacets(facet, pageable, studyIds);            
+            return getSearchResultsWithFacets(facet, pageable, studyIds);
         }
 
     }
@@ -222,7 +222,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
         /* add sorting */
         if (pageable.getSort() != null) {
             for (Sort.Order order : pageable.getSort()) {
-                query.addSort(order.getProperty(), order.getDirection().equals(Direction.ASC) ? ORDER.asc : ORDER.desc);                
+                query.addSort(order.getProperty(), order.getDirection().equals(Direction.ASC) ? ORDER.asc : ORDER.desc);
             }
         }
         /* add paging */
@@ -230,7 +230,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
         query.setStart(pageable.getPageNumber() * pageable.getPageSize());
 
         /* results with all the columns */
-        for (String fieldStr : DOCUMENT_FACET_LIST) {            
+        for (String fieldStr : DOCUMENT_FACET_LIST) {
             query.addField(fieldStr);
         }
     }
@@ -284,7 +284,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
             for (Long longValue : values) {
                 valueStr.add(longValue.toString());
             }
-            addFilterQuery(query, fieldName, valueStr);            
+            addFilterQuery(query, fieldName, valueStr);
         }
     }
 
@@ -293,8 +293,8 @@ public class SolrJWrapperImpl implements SolrJWrapper {
             String rangeQueryStr = fieldName + ":["
                     + (range.getLowerBound() != null ? ClientUtils.escapeQueryChars(range.getLowerBound().toString()) : "*")
                     + " TO "
-                    + (range.getUpperBound() != null ? ClientUtils.escapeQueryChars(range.getUpperBound().toString()) : "*")     
-                    + "]";    
+                    + (range.getUpperBound() != null ? ClientUtils.escapeQueryChars(range.getUpperBound().toString()) : "*")
+                    + "]";
             query.addFilterQuery(rangeQueryStr);
         }
     }
@@ -305,8 +305,8 @@ public class SolrJWrapperImpl implements SolrJWrapper {
             String rangeQueryStr = fieldName + ":["
                     + (range.getLowerBound() != null ? ClientUtils.escapeQueryChars(range.getLowerBound().plusDays(1).atStartOfDay().format(formatter)) : "*")
                     + " TO "
-                    + (range.getUpperBound() != null ? ClientUtils.escapeQueryChars(range.getUpperBound().plusDays(1).atStartOfDay().format(formatter)) : "*")     
-                    + "]";    
+                    + (range.getUpperBound() != null ? ClientUtils.escapeQueryChars(range.getUpperBound().plusDays(1).atStartOfDay().format(formatter)) : "*")
+                    + "]";
             query.addFilterQuery(rangeQueryStr);
         }
     }
@@ -339,7 +339,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
         /* add sorting */
         if (pageable.getSort() != null) {
             for (Sort.Order order : pageable.getSort()) {
-                query.addSort(order.getProperty(), order.getDirection().equals(Direction.ASC) ? ORDER.asc : ORDER.desc);                
+                query.addSort(order.getProperty(), order.getDirection().equals(Direction.ASC) ? ORDER.asc : ORDER.desc);
             }
         }
 
@@ -348,7 +348,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
         query.setStart(pageable.getPageNumber() * pageable.getPageSize());
 
         /* results with all the columns */
-        for (String fieldStr : DOCUMENT_FACET_LIST) {            
+        for (String fieldStr : DOCUMENT_FACET_LIST) {
             query.addField(fieldStr);
         }
 
@@ -436,7 +436,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
                     page.addFacetResultPage(facetPage, new SimpleField(facetField.getName()));
                 }
 
-            }            
+            }
         }
         return page;
     }
@@ -463,7 +463,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 
     private void addSearchInAllClause(SolrQuery query, String searchStr) {
         if (searchStr != null && !searchStr.isEmpty()) {
-            String[] searchTerms = searchStr.trim().split(" ");        
+            String[] searchTerms = searchStr.trim().split(" ");
             for (String term : searchTerms) {
                 term = ClientUtils.escapeQueryChars(term);
                 List<String> termInFieldFormattedStrList = new ArrayList<>();
@@ -492,7 +492,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
             for (String facetName : TEXTUAL_FACET_LIST) {
                 if (shanoirQuery.getFacetPaging().containsKey(facetName)) {
                     query.addFacetField("{!ex=" + facetName + "}"  + facetName); // needed ?
-                    FacetPageable facetPageable = shanoirQuery.getFacetPaging().get(facetName);    
+                    FacetPageable facetPageable = shanoirQuery.getFacetPaging().get(facetName);
                     query.set("f." + facetName + "." + FacetParams.FACET_LIMIT, facetPageable.getPageSize());
                     query.set("f." + facetName + "." + FacetParams.FACET_OFFSET, (facetPageable.getPageNumber() - 1) * facetPageable.getPageSize());
                     query.set("f." + facetName + ".numTerms", true);

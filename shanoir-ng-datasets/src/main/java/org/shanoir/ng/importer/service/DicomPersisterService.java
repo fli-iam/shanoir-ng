@@ -97,7 +97,7 @@ public class DicomPersisterService {
                         } else {
                             dimseService.sendDicomFilesToPacs(parentFile);
                         }
-                        lastParentFile = parentFile;    
+                        lastParentFile = parentFile;
                     }
                 }
             }

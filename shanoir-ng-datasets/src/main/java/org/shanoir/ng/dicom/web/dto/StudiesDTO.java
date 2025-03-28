@@ -16,5 +16,5 @@ public class StudiesDTO {
     public void setStudies(List<StudyDTO> studies) {
         this.studies = studies;
     }
-    
+
 }

@@ -48,7 +48,7 @@ public abstract class ExaminationDecorator implements ExaminationMapper {
         final ExaminationDTO examinationDTO = delegate.examinationToExaminationDTO(examination);
         return examinationDTO;
     }
-    
+
     @Override
     public Examination examinationDTOToExamination(ExaminationDTO examinationDTO) {
         Examination examination = delegate.examinationDTOToExamination(examinationDTO);

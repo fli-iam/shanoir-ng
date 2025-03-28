@@ -74,13 +74,13 @@ public class UserServiceSecurityTest {
 
     @MockBean
     private UserRepository userRepository;
-    
+
     @MockBean
     private ApplicationEventPublisher publisher;
 
     @Autowired
     private UserService userService;
-    
+
     private User mockUser;
     private User mockNewUser;
     private User mockAccountReqUser;
@@ -94,7 +94,7 @@ public class UserServiceSecurityTest {
         mockAccountReqUser.setAccountRequestDemand(true);
         mockAccountReqUser.setRole(null);
         mockMe = ModelsUtil.createAdmin(LOGGED_USER_ID);
-        
+
         given(userRepository.findById(USER_ID)).willReturn(Optional.of(mockUser));
         given(userRepository.findById(LOGGED_USER_ID)).willReturn(Optional.of(mockMe));
         given(userRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createUser()));
@@ -112,8 +112,8 @@ public class UserServiceSecurityTest {
 //        given(roleRepository.findByName(Mockito.anyString())).willReturn(ModelsUtil.createUserRole());
 //        given(keycloakClient.createUserWithPassword(Mockito.any(User.class), Mockito.anyString())).willReturn(RandomStringUtils.randomAlphanumeric(10));
     }
-    
-    
+
+
     @Test
     @WithAnonymousUser
     public void testAsAnonymous() throws ShanoirException {
@@ -129,7 +129,7 @@ public class UserServiceSecurityTest {
         assertAccessDenied(userService::getUsersToReceiveSecondExpirationNotification);
         assertAccessAuthorized(userService::requestExtension, USER_ID, new ExtensionRequestInfo());
         assertAccessDenied(userService::create, mockNewUser);
-        
+
         assertAccessAuthorized(userService::createAccountRequest, mockAccountReqUser);
         User mockBadAccountReqUser = ModelsUtil.createUser(666L);
         mockBadAccountReqUser.setAccountRequestDemand(true);
@@ -141,7 +141,7 @@ public class UserServiceSecurityTest {
         mockBadAccountReqUser.setAccountRequestDemand(true);
         mockBadAccountReqUser.setRole(ModelsUtil.createAdminRole());
         assertAccessDenied(userService::createAccountRequest, mockBadAccountReqUser);
-        
+
         assertAccessDenied(userService::findByIds, Arrays.asList(USER_ID));
         assertAccessDenied(userService::update, mockUser);
         assertAccessDenied(userService::updateExpirationNotification, mockUser, true);
@@ -202,7 +202,7 @@ public class UserServiceSecurityTest {
         assertAccessDenied(userService::updateExpirationNotification, mockUser, true);
         assertAccessAuthorized(userService::updateLastLogin, USER_USERNAME);
     }
-    
+
     @Test
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
     public void testAsAdmin() throws ShanoirException {

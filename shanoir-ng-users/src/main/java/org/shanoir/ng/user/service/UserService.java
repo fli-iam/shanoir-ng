@@ -76,7 +76,7 @@ public interface UserService {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     @PostAuthorize("hasRole('ADMIN') or @userPrivacySecurityService.filterPersonnalData(returnObject)")
     List<User> findAll();
-    
+
     /**
      * Get all the users on account request
      *
@@ -111,7 +111,7 @@ public interface UserService {
      */
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT') and @isMeSecurityService.isMe(#username))")
     Optional<User> findByUsername(String username);
-    
+
     /**
      * Find user by its username.
      *
@@ -165,7 +165,7 @@ public interface UserService {
      */
     @PreAuthorize("hasRole('ADMIN') and #user.getId() == null")
     User create(User user) throws PasswordPolicyException, SecurityException;
-    
+
     /**
      * Create a new account request.
      *

@@ -71,7 +71,7 @@ public class Serie {
 
     @JsonProperty("equipment")
     private EquipmentDicom equipment;
-    
+
     @JsonProperty("institution")
     private InstitutionDicom institution;
 

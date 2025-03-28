@@ -43,7 +43,7 @@
 //@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 //@ActiveProfiles("test")
 //public class DatasetApiControllerTestIT extends KeycloakControllerTestIT {
-//    
+//
 //    private static final String REQUEST_PATH = "/datasets";
 //    private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 //
@@ -68,7 +68,7 @@
 //    @Test
 //    public void updateNewDatasetProtected() {
 //        final HttpEntity<Dataset> entity = new HttpEntity<>(ModelsUtil.createMrDataset());
-//        
+//
 //        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 //                String.class);
 //        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());

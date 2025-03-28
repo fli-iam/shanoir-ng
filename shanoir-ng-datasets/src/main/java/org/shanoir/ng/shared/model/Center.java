@@ -25,10 +25,10 @@ import org.shanoir.ng.shared.core.model.IdName;
 @Entity
 @Table(name = "center")
 public class Center extends IdName {
-    
+
     @Id
     private Long id;
-    
+
     private String name;
 
     /**

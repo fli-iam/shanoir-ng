@@ -13,6 +13,6 @@ public class JTextFieldMandatory extends JTextField {
     public void setValueSet(boolean valueSet) {
         this.valueSet = valueSet;
     }
-    
-    
+
+
 }

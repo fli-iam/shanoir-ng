@@ -43,7 +43,7 @@ public class Subject {
 
     @JsonProperty("subjectStudyList")
     private List<SubjectStudy> subjectStudyList;
-    
+
     public long getId() {
         return id;
     }

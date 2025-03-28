@@ -17,10 +17,10 @@ public class EegDataSetDescription {
 
     @JsonProperty("SamplingFrequency")
     private String samplingFrequency;
-    
+
     @JsonProperty("PowerLineFrequency")
     private String powerLineFrequency = "50";
-    
+
     @JsonProperty("SoftwareFilters")
     private String softwareFilters = "n/a";
 

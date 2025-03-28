@@ -32,7 +32,7 @@ public class SpectDataset extends Dataset {
      * UID
      */
     private static final long serialVersionUID = -4934855853599640771L;
-    
+
     /** Spect Dataset Nature. */
     private Integer spectDatasetNature;
 

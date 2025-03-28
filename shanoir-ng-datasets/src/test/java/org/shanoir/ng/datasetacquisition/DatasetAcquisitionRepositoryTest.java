@@ -49,7 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class DatasetAcquisitionRepositoryTest {
-    
+
     @Autowired
     private DatasetAcquisitionRepository repository;
 
@@ -63,18 +63,18 @@ public class DatasetAcquisitionRepositoryTest {
         assertEquals("Pet", list.get(1).getType());
         assertEquals("Ct", list.get(2).getType());
     }
-    
+
     @Test
     public void findPageByStudyCenterOrStudyIdInTest() throws Exception {
         List<Pair<Long, Long>> studyCentersList = new ArrayList<>();
         studyCentersList.add(Pair.of(1L, 1L));
         Set<Long> studyIds = new HashSet<>();
         studyIds.add(3L);
-        
+
         List<Order> orders = new ArrayList<Order>();
         orders.add(new Order(Direction.ASC, "acquisitionEquipmentId"));
         Pageable pageable = PageRequest.of(0, 10, Sort.by(orders));
-        
+
         Page<DatasetAcquisition> pageDB = repository.findPageByStudyCenterOrStudyIdIn(studyCentersList, studyIds, pageable);
         assertEquals(2, pageDB.getNumberOfElements());
     }

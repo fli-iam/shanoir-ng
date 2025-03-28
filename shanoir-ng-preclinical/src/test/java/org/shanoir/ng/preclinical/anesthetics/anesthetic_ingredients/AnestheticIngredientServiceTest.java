@@ -48,7 +48,7 @@ public class AnestheticIngredientServiceTest {
 
     private static final Long INGREDIENT_ID = 1L;
     private static final Double UPDATED_INGREDIENT_CONCENTRATION = 2.0;
-    
+
 
     @Mock
     private AnestheticIngredientRepository ingredientsRepository;
@@ -58,9 +58,9 @@ public class AnestheticIngredientServiceTest {
 
     @InjectMocks
     private AnestheticIngredientServiceImpl ingredientsService;
-    
-            
-    
+
+
+
     @BeforeEach
     public void setup() {
         given(ingredientsRepository.findAll()).willReturn(Arrays.asList(AnestheticModelUtil.createAnestheticIngredient()));
@@ -93,7 +93,7 @@ public class AnestheticIngredientServiceTest {
 
         Mockito.verify(ingredientsRepository, Mockito.times(1)).findById(Mockito.anyLong());
     }
-    
+
     @Test
     public void findByAnestheticTest() {
         final List<AnestheticIngredient> ingredients = ingredientsService.findByAnesthetic(AnestheticModelUtil.createAnestheticGas());
@@ -102,8 +102,8 @@ public class AnestheticIngredientServiceTest {
 
         Mockito.verify(ingredientsRepository, Mockito.times(1)).findByAnesthetic(AnestheticModelUtil.createAnestheticGas());
     }
-    
-    
+
+
 
     @Test
     public void saveTest() throws ShanoirException {
@@ -138,5 +138,5 @@ public class AnestheticIngredientServiceTest {
         ingredient.setConcentration(UPDATED_INGREDIENT_CONCENTRATION);
         return ingredient;
     }
-    
+
 }

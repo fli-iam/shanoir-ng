@@ -21,15 +21,15 @@ import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.studycard.model.StudyCard;
 
 public class DatasetAcquisitionDTO {
-    
+
     private Long id;
 
     private Long acquisitionEquipmentId;
 
     private ExaminationDTO examination;
-    
+
     private StudyCard studyCard;
-    
+
     private Long studyCardTimestamp;
 
     private Integer rank;
@@ -37,7 +37,7 @@ public class DatasetAcquisitionDTO {
     private String softwareRelease;
 
     private Integer sortingIndex;
-    
+
     private String type;
 
     private Object protocol;

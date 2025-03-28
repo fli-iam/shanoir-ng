@@ -170,7 +170,7 @@ public class DicomServerConfigurationWindow extends JFrame {
                 cmoveLabel.getFont().getSize());
         cmoveLabel.setFont(cmoveLabelFont);
         addItem(configurationPanel, cmoveLabel, 0, 12, 3, GridBagConstraints.WEST);
-        
+
         // Size the frame.
         frame.pack();
 

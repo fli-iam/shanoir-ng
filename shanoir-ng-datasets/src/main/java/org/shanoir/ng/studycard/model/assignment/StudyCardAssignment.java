@@ -40,7 +40,7 @@ public abstract class StudyCardAssignment<T> extends AbstractEntity implements S
     /** The dataset field to update. */
     @NotNull
     protected Long field;
-    
+
     /** The value to set. */
     @NotNull
     private String value;

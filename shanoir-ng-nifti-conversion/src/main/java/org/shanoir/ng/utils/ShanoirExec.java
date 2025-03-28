@@ -188,7 +188,7 @@ public class ShanoirExec {
         LOG.debug("dcm2niiExec : End");
         return result;
     }
-    
+
     /**
      * Exec the mcverter command to convert Dicom files to Nifti files.
      *
@@ -267,7 +267,7 @@ public class ShanoirExec {
     public String exec(final String[] cmd) {
         return exec(cmd, null);
     }
-    
+
     /**
      * Execute the command line given in argument.
      *

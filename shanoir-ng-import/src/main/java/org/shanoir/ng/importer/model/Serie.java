@@ -34,7 +34,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author mkain
  */
 public class Serie implements Cloneable {
-    
+
     @JsonProperty("selected")
     private boolean selected;
 
@@ -46,7 +46,7 @@ public class Serie implements Cloneable {
 
     @JsonProperty("errorMessage")
     private String errorMessage;
-    
+
     @JsonProperty("seriesInstanceUID")
     private String seriesInstanceUID;
 
@@ -77,7 +77,7 @@ public class Serie implements Cloneable {
 
     @JsonProperty("equipment")
     private EquipmentDicom equipment;
-    
+
     @JsonProperty("institution")
     private InstitutionDicom institution;
 
@@ -339,7 +339,7 @@ public class Serie implements Cloneable {
     public void setSequenceName(String sequenceName) {
         this.sequenceName = sequenceName;
     }
-    
+
     public String toString() {
         StringBuffer sB = new StringBuffer();
         sB.append("[");

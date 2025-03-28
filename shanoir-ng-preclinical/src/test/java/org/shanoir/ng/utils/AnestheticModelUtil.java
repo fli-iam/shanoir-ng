@@ -36,11 +36,11 @@ public final class AnestheticModelUtil {
     public static final String ANESTHETIC_3_NAME = "Injection Iso. 5%";
     // Ingredient data
     public static final Long INGREDIENT_ID = 1L;
-    
+
     // Examination anesthetic data
     public static final Long EXAM_ANESTHETIC_ID = 1L;
     public static final Long EXAM_ID = 1L;
-    
+
     /**
      * Create an anesthetic.
      *
@@ -60,7 +60,7 @@ public final class AnestheticModelUtil {
         anesthetic.setAnestheticType(AnestheticType.INJECTION);
         return anesthetic;
     }
-    
+
     /**
      * Create an anesthetic ingredient.
      *
@@ -73,7 +73,7 @@ public final class AnestheticModelUtil {
         ingredient.setAnesthetic(createAnestheticGas());
         return ingredient;
     }
-    
+
     /**
      * Create an examination anesthetic
      *
@@ -86,6 +86,6 @@ public final class AnestheticModelUtil {
         examAnesthetic.setAnesthetic(createAnestheticGas());
         return examAnesthetic;
     }
-    
-    
+
+
 }

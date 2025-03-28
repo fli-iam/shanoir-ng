@@ -106,7 +106,7 @@ public class LoginConfigurationPanel extends JPanel {
         shanoirStartupGBC.gridx = 2;
         shanoirStartupGBC.gridy = 3;
         container.add(connectLater, shanoirStartupGBC);
-        
+
         loginPanelActionListener.configure(this, sSC);
         connect.addActionListener(loginPanelActionListener);
         connectLater.addActionListener(loginPanelActionListener);

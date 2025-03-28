@@ -65,9 +65,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
  *
  */
 public class ImportUtils {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(ImportUtils.class);
-    
+
     private static ObjectMapper objectMapper = new ObjectMapper();
 
     static {
@@ -75,7 +75,7 @@ public class ImportUtils {
             .registerModule(new Jdk8Module())
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
-    
+
     /**
      * Adds a subjectStudy to a given subject with the given study
      * and in case subject is already in study, nothing is made.
@@ -448,7 +448,7 @@ public class ImportUtils {
         }
         return subjectREST;
     }
-    
+
     private static org.shanoir.uploader.model.rest.Subject fillSubjectREST(Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom) throws ParseException {
         org.shanoir.uploader.model.rest.Subject subjectREST = new org.shanoir.uploader.model.rest.Subject();
         subjectREST.setIdentifier(subject.getIdentifier());
@@ -523,7 +523,7 @@ public class ImportUtils {
         }
         if (birthDateString != null && !birthDateString.isEmpty()) {
             LocalDate birthDate = Util.convertStringToLocalDate(birthDateString);
-            patient.setPatientBirthDate(birthDate);    
+            patient.setPatientBirthDate(birthDate);
         }
         return patient;
     }
@@ -561,7 +561,7 @@ public class ImportUtils {
                 return true;
             }
         }
-        return false;        
+        return false;
     }
 
     public static StudyCard createStudyCard(Study studyREST, AcquisitionEquipment equipment, ImportJob importJob) {

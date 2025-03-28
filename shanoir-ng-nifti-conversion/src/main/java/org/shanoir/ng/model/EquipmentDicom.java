@@ -27,7 +27,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  */
 public class EquipmentDicom {
-    
+
     @JsonProperty("manufacturer")
     private String manufacturer;
 
@@ -36,7 +36,7 @@ public class EquipmentDicom {
 
     @JsonProperty("deviceSerialNumber")
     private String deviceSerialNumber;
-    
+
     // Keep this empty constructor to avoid Jackson deserialization exceptions
     public EquipmentDicom() { }
 
@@ -69,7 +69,7 @@ public class EquipmentDicom {
     public void setDeviceSerialNumber(String deviceSerialNumber) {
         this.deviceSerialNumber = deviceSerialNumber;
     }
-    
+
     @JsonIgnore
     public boolean isComplete() {
         return StringUtils.isNotEmpty(this.manufacturer)

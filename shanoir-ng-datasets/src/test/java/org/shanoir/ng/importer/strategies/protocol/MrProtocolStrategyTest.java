@@ -37,17 +37,17 @@ public class MrProtocolStrategyTest {
 
     /** Logger. */
     private static final Logger LOG = LoggerFactory.getLogger(MrProtocolStrategy.class);
-    
+
     @InjectMocks
     private MrProtocolStrategy mrProtocolStrategy;
 
     @MockBean
     private StudyInstanceUIDHandler studyInstanceUIDHandler;
-    
+
     @BeforeEach
     public void setup() {
     }
-    
+
     @Test
     public void testGenerateMrProtocolForSerieNotEnhancedMR() throws IOException {
         Attributes attributes = getAttributesFromFile("/1.3.12.2.1107.5.2.43.166066.2018042412210060639615964");
@@ -57,7 +57,7 @@ public class MrProtocolStrategyTest {
         MrProtocol mrProtocol = mrProtocolStrategy.generateProtocolForSerie(acqAttributes, serie);
         Assertions.assertTrue(mrProtocol.getNumberOfAverages().equals(1));
         Assertions.assertTrue(mrProtocol.getFilters().equals("77"));
-    }    
+    }
 
 //    @Test
 //    public void testGenerateMrProtocolForSerieEnhancedMR() throws IOException {
@@ -114,7 +114,7 @@ public class MrProtocolStrategyTest {
             return f1.getName().compareTo(f2.getName());
         }
     }
-    
+
     private Attributes getAttributesFromFile(String fileNameInClassPath) throws IOException {
         File dicomFile = new File(this.getClass().getResource(fileNameInClassPath).getFile());
         DicomInputStream dIS = new DicomInputStream(dicomFile);
@@ -139,7 +139,7 @@ public class MrProtocolStrategyTest {
         serie.setProtocolName(attributes.getString(Tag.ProtocolName));
         return serie;
     }
-    
+
     private int getFrameCount(final Attributes attributes) {
         if (attributes != null) {
             Attributes pffgs = attributes.getNestedDataset(Tag.PerFrameFunctionalGroupsSequence);

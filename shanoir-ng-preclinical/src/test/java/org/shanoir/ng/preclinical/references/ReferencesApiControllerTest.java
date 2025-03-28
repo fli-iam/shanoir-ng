@@ -71,7 +71,7 @@ public class ReferencesApiControllerTest {
 
     @MockBean
     private ShanoirEventService eventService;
-    
+
     @MockBean
     private ReferenceUniqueValidator uniqueValidator;
 

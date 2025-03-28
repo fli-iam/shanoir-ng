@@ -23,7 +23,7 @@ public interface StudyCardAssignmentInterface<T> {
     void setValue(String value);
 
     MetadataFieldInterface<T> getField();
-    
+
     void setField(MetadataFieldInterface<T> field);
 
     void apply(T object);

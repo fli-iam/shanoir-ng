@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CtProtocolStrategy {
 
-    public CtProtocol generateProtocolForSerie(AcquisitionAttributes<String> attributes, Serie serie) {        
+    public CtProtocol generateProtocolForSerie(AcquisitionAttributes<String> attributes, Serie serie) {
         CtProtocol protocol = new CtProtocol();
         return protocol;
     }

@@ -43,19 +43,19 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 
     @Value("${dcm4chee-arc.protocol}")
     private String dcm4cheeProtocol;
-    
+
     @Value("${dcm4chee-arc.host}")
     private String dcm4cheeHost;
 
     @Value("${dcm4chee-arc.port.web}")
     private String dcm4cheePortWeb;
-    
+
     @Value("${dcm4chee-arc.dicom.web}")
     private boolean dicomWeb;
-    
+
     @Value("${dcm4chee-arc.dicom.wado.uri}")
     private String dicomWADOURI;
-    
+
     @Value("${dcm4chee-arc.dicom.web.rs}")
     private String dicomWebRS;
 

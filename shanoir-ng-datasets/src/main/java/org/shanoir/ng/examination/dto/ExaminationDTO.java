@@ -48,7 +48,7 @@ public class ExaminationDTO {
     private Double subjectWeight;
 
     private UnitOfMeasure weightUnitOfMeasure;
-    
+
     private boolean preclinical;
 
     private List<InstrumentBasedAssessment> instrumentBasedAssessmentList;
@@ -133,7 +133,7 @@ public class ExaminationDTO {
     public void setSubjectWeight(final Double subjectWeight) {
         this.subjectWeight = subjectWeight;
     }
-    
+
     public boolean isPreclinical() {
         return preclinical;
     }
@@ -157,7 +157,7 @@ public class ExaminationDTO {
     public void setStudyId(Long studyId) {
         this.studyId = studyId;
     }
-    
+
     public List<InstrumentBasedAssessment> getInstrumentBasedAssessmentList() {
         return instrumentBasedAssessmentList;
     }

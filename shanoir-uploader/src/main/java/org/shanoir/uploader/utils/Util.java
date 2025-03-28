@@ -76,11 +76,11 @@ public final class Util {
 
     /** Time pattern for file system. */
     public static String TIME_PATTERN_FILE_SYSTEM = "yyyy_MM_dd_HH_mm_ss_SSS";
-    
+
     public static ObjectMapper objectMapper = new ObjectMapper();
-    
+
     public static ObjectWriter objectWriter;
-    
+
     static {
         objectMapper
             .registerModule(new JavaTimeModule())
@@ -601,10 +601,10 @@ public final class Util {
         DateTimeFormatter pattern = DateTimeFormatter.ofPattern(DATE_PATTERN);
         return localDate.format(pattern);
     }
-    
+
     public static LocalDate convertStringToLocalDate(final String date) {
         DateTimeFormatter pattern = DateTimeFormatter.ofPattern(DATE_PATTERN);
         return LocalDate.parse(date, pattern);
-    }    
+    }
 
 }

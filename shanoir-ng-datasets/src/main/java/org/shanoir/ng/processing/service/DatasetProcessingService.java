@@ -42,7 +42,7 @@ public interface DatasetProcessingService {
      */
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     Optional<DatasetProcessing> findByComment(String comment);
-    
+
     /**
      * Save an entity.
      *

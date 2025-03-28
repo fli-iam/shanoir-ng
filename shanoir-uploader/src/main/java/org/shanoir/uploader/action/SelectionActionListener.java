@@ -166,7 +166,7 @@ public class SelectionActionListener implements TreeSelectionListener {
         Patient patient = patientTreeNode.getPatient();
         Study study = studyTreeNode.getStudy();
         LocalDate studyDate = study.getStudyDate();
-        if (studyDate == null) {            
+        if (studyDate == null) {
             logger.error("Study date could not be used for import, study: " + study.getStudyDescription());
             if (mainWindow != null) {
                 JOptionPane.showMessageDialog(mainWindow.frame,
@@ -203,7 +203,7 @@ public class SelectionActionListener implements TreeSelectionListener {
             }
         }
     }
-    
+
     public Map<String, ImportJob> getImportJobs() {
         return importJobs;
     }

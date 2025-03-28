@@ -66,7 +66,7 @@ public abstract class DatasetAcquisition extends AbstractEntity {
     /** Related Acquisition Equipment. */
     @NotNull
     private Long acquisitionEquipmentId;
-    
+
     /** Datasets. */
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "datasetAcquisition", cascade = CascadeType.ALL)
@@ -76,12 +76,12 @@ public abstract class DatasetAcquisition extends AbstractEntity {
     @ManyToOne
     @JoinColumn(name = "examination_id")
     private Examination examination;
-    
+
     /** Applied study card. */
     @ManyToOne
     @JoinColumn(name = "studycard_id")
     private StudyCard studyCard;
-    
+
     /** Used to know if the study card that was applied matches the study card's last version or anterior */
     private Long studyCardTimestamp;
 
@@ -215,7 +215,7 @@ public abstract class DatasetAcquisition extends AbstractEntity {
     public void setSortingIndex(Integer sortingIndex) {
         this.sortingIndex = sortingIndex;
     }
-    
+
     public StudyCard getStudyCard() {
         return studyCard;
     }

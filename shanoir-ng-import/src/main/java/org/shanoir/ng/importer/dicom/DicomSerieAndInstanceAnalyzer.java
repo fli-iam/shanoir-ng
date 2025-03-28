@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class DicomSerieAndInstanceAnalyzer {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(DicomSerieAndInstanceAnalyzer.class);
 
     private static final String RTPLAN = "RTPLAN";
@@ -31,9 +31,9 @@ public class DicomSerieAndInstanceAnalyzer {
     private static final String DOUBLE_EQUAL = "==";
 
     private static final String SEMI_COLON = ";";
-    
+
     private static final String isSpectroscopy = "seriesDescription==*CSI*;seriesDescription==*csi*;seriesDescription==*SPECTRO*;seriesDescription==*spectro*;";
-    
+
     /**
      * By default raw data storage and sub-types are ignored.
      *
@@ -68,7 +68,7 @@ public class DicomSerieAndInstanceAnalyzer {
         }
         return false;
     }
-    
+
     /**
      * Ignore all series, that are not medical imaging.
      * @param serie
@@ -81,19 +81,19 @@ public class DicomSerieAndInstanceAnalyzer {
 
     public static void checkSerieIsSpectroscopy(Serie serie) {
         final String sopClassUID = serie.getSopClassUID();
-        final String seriesDescription = serie.getSeriesDescription();    
+        final String seriesDescription = serie.getSeriesDescription();
         boolean isSpectroscopy = checkSerieIsSpectroscopy(sopClassUID, seriesDescription);
         serie.setIsSpectroscopy(isSpectroscopy);
     }
 
     public static Serie checkSerieIsSpectroscopy(Serie serie, Attributes attributes) {
         final String sopClassUID = attributes.getString(Tag.SOPClassUID);
-        final String seriesDescription = attributes.getString(Tag.SeriesDescription);        
+        final String seriesDescription = attributes.getString(Tag.SeriesDescription);
         boolean isSpectroscopy = checkSerieIsSpectroscopy(sopClassUID, seriesDescription);
         serie.setIsSpectroscopy(isSpectroscopy);
         return serie;
     }
-    
+
     /**
      * This method uses the SOPClassUID and the properties string isspectroscopy to check if a serie
      * contains spectroscopy. UID.MRSpectroscopyStorage is Enhanced MR already, Private Siemens CSA
@@ -147,7 +147,7 @@ public class DicomSerieAndInstanceAnalyzer {
             LOG.debug("SOPClassUID not found to detect Enhanced DICOM.");
         }
     }
-    
+
     /**
      * Checks for multi-frame dicom serie. Requires Enhanced DICOM check done before.
      *
@@ -163,7 +163,7 @@ public class DicomSerieAndInstanceAnalyzer {
             }
             serie.setSequenceName(attributes.getString(Tag.PulseSequenceName));
         } else {
-            serie.setSequenceName(attributes.getString(Tag.SequenceName));            
+            serie.setSequenceName(attributes.getString(Tag.SequenceName));
         }
         serie.setMultiFrameCount(frameCount);
         if (frameCount > 1) {

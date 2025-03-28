@@ -68,7 +68,7 @@ import jakarta.annotation.PostConstruct;
 
 @Service
 public class QueryPACSService {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(QueryPACSService.class);
 
     @Value("${shanoir.import.pacs.query.aet.calling.name}")
@@ -76,31 +76,31 @@ public class QueryPACSService {
 
     @Value("${shanoir.import.pacs.query.aet.calling.host}")
     private String callingHost;
-    
+
     @Value("${shanoir.import.pacs.query.aet.calling.port}")
     private Integer callingPort;
-    
+
     @Value("${shanoir.import.pacs.query.aet.called.name}")
     private String calledName;
 
     @Value("${shanoir.import.pacs.query.aet.called.host}")
     private String calledHost;
-    
+
     @Value("${shanoir.import.pacs.query.aet.called.port}")
     private Integer calledPort;
-    
+
     @Value("${shanoir.import.pacs.query.maxPatients}")
     private Integer maxPatientsFromPACS;
-    
+
     private DicomNode calling;
-    
+
     private DicomNode called;
-    
+
     @Value("${shanoir.import.pacs.store.aet.called.name}")
     private String calledNameSCP;
-    
+
     public QueryPACSService() { } // for ShUp usage
-    
+
     /**
      * Used within microservice MS Import on the server, via PostConstruct.
      */
@@ -112,7 +112,7 @@ public class QueryPACSService {
         LOG.info("Query: DicomNodes initialized via CDI: calling ({}, {}, {}) and called ({}, {}, {})",
                 callingName, callingHost, callingPort, calledName, calledHost, calledPort);
     }
-    
+
     /**
      * Do configuration of QueryPACSService from outside. Used by ShanoirUploader.
      *
@@ -128,7 +128,7 @@ public class QueryPACSService {
         LOG.info("Query: DicomNodes initialized via method call (ShUp): calling ({}, {}, {}) and called ({}, {}, {})",
                 calling.getAet(), calling.getHostname(), calling.getPort(), called.getAet(), called.getHostname(), called.getPort());
     }
-    
+
     private Association connectAssociation(DicomNode calling, DicomNode called, boolean cfind) throws Exception {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
@@ -178,7 +178,7 @@ public class QueryPACSService {
         association.getDevice().getScheduledExecutor().shutdown();
         LOG.info("releaseAssociation finished between calling {} and called {}", calling.getAet(), called.getAet());
     }
-    
+
     public ImportJob queryCFIND(DicomQuery dicomQuery) throws Exception {
         LOG.debug("--------------------");
         LOG.debug("--- START C-FIND ---");
@@ -270,7 +270,7 @@ public class QueryPACSService {
         LOG.info("--- END C-MOVES ----");
         LOG.info("--------------------");
     }
-    
+
     public void queryCMOVE(String studyInstanceUID, Serie serie) throws Exception {
         LOG.info("--------------------");
         LOG.info("--- START C-MOVE ---");
@@ -295,7 +295,7 @@ public class QueryPACSService {
         LOG.info("Calling DICOM server, C-MOVE for serie: {} of study: {}", serie.getSeriesDescription(), studyInstanceUID);
         queryCMove(association, params);
     }
-    
+
     public boolean queryECHO(String calledAET, String hostName, int port, String callingAET) {
         LOG.info("DICOM ECHO: Starting with configuration {}, {}, {} <- {}", calledAET, hostName, port, callingAET);
         try {
@@ -428,7 +428,7 @@ public class QueryPACSService {
         String dicomResponseStudyDate = studyAttr.getString(Tag.StudyDate);
         querySeries(association, study, modality, dicomResponseStudyDate);
     }
-    
+
     /**
      * This method returns a created DicomParam given tag and value.
      * @param tag
@@ -536,10 +536,10 @@ public class QueryPACSService {
         }
         synchronized (series) {
             LOG.info("Serie found in DICOM server: " + serie.toString());
-            series.add(serie);            
+            series.add(serie);
         }
     }
-    
+
     /**
      * This method queries for instances/images, creates them and adds them to series.
      *
@@ -566,7 +566,7 @@ public class QueryPACSService {
                 if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(i)) {
                     synchronized (instances) {
                         LOG.debug("Adding instance: " + instance.toString());
-                        instances.add(instance);                        
+                        instances.add(instance);
                     }
                 }
             });

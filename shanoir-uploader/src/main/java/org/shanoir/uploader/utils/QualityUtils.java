@@ -50,7 +50,7 @@ public class QualityUtils {
         SubjectStudy subjectStudy = new SubjectStudy();
         final File importJobDir = new File(importJob.getWorkFolder());
         List<QualityCard> qualityCards = new ArrayList<>();
-        
+
         // Call Shanoir server to get all quality cards for the selected study
         try {
             qualityCards = ShUpOnloadConfig.getShanoirUploaderServiceClient().findQualityCardsByStudyId(importJob.getStudyId());
@@ -64,7 +64,7 @@ public class QualityUtils {
             logger.info("Quality Control At Import - No quality cards found for study " + importJob.getStudyId());
             return qualityCardResult;
         }
-        
+
         // Convert instances to images with parameter isFromShUpQualityControl set to true to keep absolute filepath for the images
         imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob.getPatients(), importJobDir.getAbsolutePath(), isImportFromPACS, null, true);
 
@@ -100,7 +100,7 @@ public class QualityUtils {
             logger.error("Error while checking quality at import for examination " + importJob.getExaminationId() + " : " + e.getMessage());
             throw e;
         }
-        
+
         return qualityCardResult;
     }
 

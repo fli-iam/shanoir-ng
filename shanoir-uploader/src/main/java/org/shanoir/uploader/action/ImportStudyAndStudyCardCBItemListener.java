@@ -26,21 +26,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(ImportStudyAndStudyCardCBItemListener.class);
 
     private MainWindow mainWindow;
-    
+
     private Subject subject;
-    
+
     private SubjectStudy subjectStudy;
-    
+
     private List<Examination> examinationsOfSubject;
-    
+
     private Date studyDate;
 
     private ImportStudyCardFilterDocumentListener importStudyCardDocumentListener;
-    
+
     private ShanoirUploaderServiceClient serviceClient;
 
     public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, Subject subject, Date studyDate, ImportStudyCardFilterDocumentListener importStudyCardDocumentListener, ShanoirUploaderServiceClient serviceClient) {
@@ -60,7 +60,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
                 // Profile Neurinfo
                 if (ShUpConfig.isModeSubjectCommonNameManual()) {
                     updateExistingSubjects(study);
-                    this.subject = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();    
+                    this.subject = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
                     // for OFSEP this is done in ImportDialogOpener as subject found before, if
                     updateImportDialogForExistingSubject(this.subject, mainWindow.importDialog);
                 }
@@ -88,8 +88,8 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
                 updateImportDialogForExistingSubject(this.subject, mainWindow.importDialog);
                 updateSubjectStudy(study, subject);
                 examinationsOfSubject = updateExaminations(subject);
-                filterExistingExamsForSelectedStudy(study);            
-            }        
+                filterExistingExamsForSelectedStudy(study);
+            }
         } // ignore otherwise
     }
 
@@ -105,7 +105,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
             } else {
                 importDialog.subjectLanguageHemisphericDominanceCB.setSelectedItem("");
             }
-            importDialog.subjectManualHemisphericDominanceCB.setEnabled(false);        
+            importDialog.subjectManualHemisphericDominanceCB.setEnabled(false);
             if (subject.getManualHemisphericDominance() != null) {
                 importDialog.subjectManualHemisphericDominanceCB.setSelectedItem(subject.getManualHemisphericDominance().getName());
             } else {
@@ -237,7 +237,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
             importDialog.subjectIsPhysicallyInvolvedCB.setSelected(subjectStudy.isPhysicallyInvolved());
             importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(false);
             importDialog.subjectTypeCB.setSelectedItem(subjectStudy.getSubjectType());
-            importDialog.subjectTypeCB.setEnabled(false);    
+            importDialog.subjectTypeCB.setEnabled(false);
         } else {
             // subject is not in study, enable editing and display defaults
             if (ShUpConfig.isModeSubjectStudyIdentifier()) {
@@ -260,5 +260,5 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
     public void setSubjectStudy(SubjectStudy subjectStudy) {
         this.subjectStudy = subjectStudy;
     }
-    
+
 }

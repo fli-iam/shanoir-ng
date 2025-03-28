@@ -73,28 +73,28 @@ public class StudyCardApiControllerTest {
 
     @MockBean
     private StudyCardService studyCardServiceMock;
-    
+
     @MockBean
     private QualityCardService qualityCardServiceMock;
-    
+
     @MockBean
     private CardsProcessingService studyCardProcessingServiceMock;
-    
+
     @MockBean
     private DatasetAcquisitionService datasetAcquisitionServiceMock;
-    
+
     @MockBean
     private WADODownloaderService downloaderMock;
-    
+
     @MockBean
     private FindByRepository<StudyCard> findByRepositoryMock;
-    
+
     @MockBean(name = "datasetSecurityService")
     private DatasetSecurityService datasetSecurityService;
 
     @MockBean
     private DicomSEGAndSRImporterService dicomSRImporterService;
-    
+
     @MockBean
     private SolrService solrService;
 

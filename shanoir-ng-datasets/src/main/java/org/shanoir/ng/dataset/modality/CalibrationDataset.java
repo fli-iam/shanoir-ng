@@ -27,7 +27,7 @@ import org.shanoir.ng.dataset.model.DatasetType;
  */
 @Entity
 public class CalibrationDataset extends Dataset {
-    
+
     /**
      * UID
      */

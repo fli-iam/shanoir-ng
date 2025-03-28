@@ -62,7 +62,7 @@ public class HttpService {
     private static ServiceConfiguration serviceConfiguration = ServiceConfiguration.getInstance();
 
     private static final String DEV_LOCAL = "https://shanoir-ng-nginx";
-    
+
     private static final String CONTENT_TYPE_MULTIPART = "multipart/related";
 
     private static final String CONTENT_TYPE_DICOM = "application/dicom";
@@ -70,7 +70,7 @@ public class HttpService {
     private static final String BOUNDARY = "--import_dicom_shanoir--";
 
     private CloseableHttpClient httpClient;
-    
+
     private HttpClientContext context;
 
     public HttpService(String serverURL) {
@@ -80,7 +80,7 @@ public class HttpService {
             logger.error(e.getMessage(), e);
         }
     }
-    
+
     public void closeHttpClient() {
         try {
             httpClient.close();
@@ -112,7 +112,7 @@ public class HttpService {
             StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
             httpPost.setEntity(requestEntity);
             CloseableHttpResponse response = httpClient.execute(httpPost, context);
-            return response;                
+            return response;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw e;
@@ -150,7 +150,7 @@ public class HttpService {
             throw e;
         }
     }
-    
+
     public CloseableHttpResponse postFileMultipartRelated(String url, File file) throws Exception {
         try {
             MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setBoundary(BOUNDARY);
@@ -293,7 +293,7 @@ public class HttpService {
             logger.info("CloseableHttpClient created with proxyHost: "
                     + proxyHost.getHostName() + ":" + proxyHost.getPort()
                     + " and credentialsProvider: " + credentialsProvider.toString() + ".");
-            return httpClient;            
+            return httpClient;
         } else {
             if (proxyHost != null) {
                 final DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxyHost);
@@ -306,7 +306,7 @@ public class HttpService {
                 logger.info("CloseableHttpClient created with proxyHost: "
                         + proxyHost.getHostName() + ":" + proxyHost.getPort()
                         + " and without a credentialsProvider.");
-                return httpClient;            
+                return httpClient;
             } else {
                 final CloseableHttpClient httpClient = HttpClients.custom()
                         .setConnectionManager(connectionManager)
@@ -314,8 +314,8 @@ public class HttpService {
                         .build();
                 logger.info("CloseableHttpClient created without proxyHost"
                         + " and without a credentialsProvider.");
-                return httpClient;            
-            }        
+                return httpClient;
+            }
         }
     }
 

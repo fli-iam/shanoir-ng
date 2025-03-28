@@ -38,7 +38,7 @@ import org.shanoir.ng.dataset.model.DatasetType;
  */
 @Entity
 public class EegDataset extends Dataset {
-    
+
     /**
      * UID
      */
@@ -50,9 +50,9 @@ public class EegDataset extends Dataset {
     }
 
     private float samplingFrequency;
-    
+
     private int channelCount;
-    
+
     private String coordinatesSystem;
 
     @LazyCollection(LazyCollectionOption.FALSE)
@@ -94,7 +94,7 @@ public class EegDataset extends Dataset {
     public void setCoordinatesSystem(String coordinatesSystem) {
         this.coordinatesSystem = coordinatesSystem;
     }
-    
+
     public float getSamplingFrequency() {
         return samplingFrequency;
     }
@@ -138,5 +138,5 @@ public class EegDataset extends Dataset {
     public void setEvents(List<Event> events) {
         this.events = events;
     }
-    
+
 }

@@ -55,7 +55,7 @@ public interface DatasetMapper {
      */
     @Named(value = "standard")
     DatasetDTO datasetToDatasetDTO(Dataset dataset);
-    
+
     /**
      * Map a @Dataset to a @DatasetDTO.
      *
@@ -67,7 +67,7 @@ public interface DatasetMapper {
     @Mapping(target = "copies", expression = "java(mapCopiesFromDataset(dataset.getCopies()))")
     @Mapping(target = "source", expression = "java(mapSourceFromDataset(dataset.getSource()))")
     DatasetWithDependenciesDTO datasetToDatasetWithParentsAndProcessingsDTO(Dataset dataset);
-    
+
     /**
      * Map a @Dataset list to a @DatasetDTO list.
      *
@@ -88,7 +88,7 @@ public interface DatasetMapper {
      */
     @IterableMapping(qualifiedByName = "standard")
     public PageImpl<DatasetDTO> datasetToDatasetDTO(Page<Dataset> page);
-    
+
     /**
      * Map a @Dataset to a @IdNameDTO.
      *

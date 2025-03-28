@@ -65,7 +65,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class DicomSEGAndSRImporterService {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(DicomSEGAndSRImporterService.class);
 
     private static final String IMAGING_MEASUREMENT_REPORT = "Imaging Measurement Report";
@@ -79,31 +79,31 @@ public class DicomSEGAndSRImporterService {
 
     @Autowired
     private SolrService solrService;
-    
+
     @Autowired
     private DatasetService datasetService;
-    
+
     @Autowired
     private SubjectRepository subjectRepository;
-    
+
     @Autowired
     private DICOMWebService dicomWebService;
-    
+
     @Autowired
     private StudyInstanceUIDHandler studyInstanceUIDHandler;
-    
+
     @Value("${dcm4chee-arc.protocol}")
     private String dcm4cheeProtocol;
-    
+
     @Value("${dcm4chee-arc.host}")
     private String dcm4cheeHost;
 
     @Value("${dcm4chee-arc.port.web}")
     private String dcm4cheePortWeb;
-    
+
     @Value("${dcm4chee-arc.dicom.web.rs}")
     private String dicomWebRS;
-    
+
     @Transactional
     public boolean importDicomSEGAndSR(InputStream inputStream) {
         // DicomInputStream consumes the input stream to read the data
@@ -118,7 +118,7 @@ public class DicomSEGAndSRImporterService {
                 Dataset dataset = findDataset(examination, datasetAttributes);
                 if (dataset == null) {
                     LOG.error("Error: importDicomSEGAndSR: source dataset could not be found.");
-                    return false;    
+                    return false;
                 }
                 createDataset(modality, examination, dataset, datasetAttributes);
                 sendToPacs(metaInformationAttributes, datasetAttributes);
@@ -236,7 +236,7 @@ public class DicomSEGAndSRImporterService {
         }
         return findDatasetByUIDs(examination, studyInstanceUID, seriesInstanceUID, sOPInstanceUID);
     }
-    
+
     /**
      * Find origin dataset using the 3 UIDs in dataset_file.path attribute.
      *
@@ -273,10 +273,10 @@ public class DicomSEGAndSRImporterService {
                 }
             }
         }
-        LOG.error("Error: dataset could not be found with UIDs from DICOM SEG or SR.");    
+        LOG.error("Error: dataset could not be found with UIDs from DICOM SEG or SR.");
         return null;
     }
-    
+
     /**
      * Create the dataset in the database.
      *
@@ -324,7 +324,7 @@ public class DicomSEGAndSRImporterService {
             originMetadata.setName(reportName);
         }
         originMetadata.setDatasetModalityType(modalityType);
-        originMetadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);        
+        originMetadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);
         dataset.setOriginMetadata(originMetadata);
         dataset.setUpdatedMetadata(originMetadata);
         Sequence contentSequence = datasetAttributes.getSequence(Tag.ContentSequence);
@@ -389,7 +389,7 @@ public class DicomSEGAndSRImporterService {
         expression.setCreationDate(LocalDateTime.now());
         expression.setDatasetExpressionFormat(DatasetExpressionFormat.DICOM);
         expression.setDataset(dataset);
-        dataset.setDatasetExpressions(Collections.singletonList(expression));        
+        dataset.setDatasetExpressions(Collections.singletonList(expression));
         List<DatasetFile> files = createDatasetFiles(datasetAttributes, expression);
         expression.setDatasetFiles(files);
     }
@@ -443,7 +443,7 @@ public class DicomSEGAndSRImporterService {
         try(DicomOutputStream dOS = new DicomOutputStream(bAOS, metaInformationAttributes.getString(Tag.TransferSyntaxUID))) {
             dOS.writeDataset(metaInformationAttributes, datasetAttributes);
             try(InputStream finalInputStream = new ByteArrayInputStream(bAOS.toByteArray())) {
-                dicomWebService.sendDicomInputStreamToPacs(finalInputStream);                
+                dicomWebService.sendDicomInputStreamToPacs(finalInputStream);
             }
         }
     }

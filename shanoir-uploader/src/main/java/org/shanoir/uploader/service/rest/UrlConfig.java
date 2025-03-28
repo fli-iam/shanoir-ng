@@ -20,16 +20,16 @@ public class UrlConfig {
     private String urlStudy;
 
     private String urlStudyCard;
-    
+
     private String urlGetSubject;
-    
+
     private String urlGetSubjectByIdentifier;
-    
+
     private String urlPostSubject;
-    
+
     private String urlStudyWithStudyCard;
-    
-    
+
+
     public String getUrlStudyWithStudyCard() {
         return urlStudyWithStudyCard;
     }

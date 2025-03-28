@@ -85,7 +85,7 @@ public class UserServiceTest {
 
     @MockBean
     private UserRepository userRepository;
-    
+
     @MockBean
     private ApplicationEventPublisher publisher;
 
@@ -94,7 +94,7 @@ public class UserServiceTest {
 
     @MockBean
     private AccessRequestRepository accessRequestRepository;
-    
+
     @MockBean
     private AccessRequestService accessRequestService;
 
@@ -190,7 +190,7 @@ public class UserServiceTest {
     public void denyAccountRequestNoDemandTest() throws EntityNotFoundException, AccountNotOnDemandException {
         assertThrows(AccountNotOnDemandException.class, () -> {
             given(userRepository.findById(USER_ID)).willReturn(Optional.of(ModelsUtil.createUser()));
-            userService.denyAccountRequest(USER_ID);    
+            userService.denyAccountRequest(USER_ID);
             Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
             Mockito.verify(userRepository, Mockito.times(0)).deleteById(USER_ID);
         });

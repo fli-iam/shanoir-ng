@@ -64,7 +64,7 @@ public interface StudyCardApi {
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.hasRightOnStudy(returnObject.getBody().getStudyId(), 'CAN_SEE_ALL')")
     ResponseEntity<StudyCard> findStudyCardById(
             @Parameter(description = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId);
-    
+
     @Operation(summary = "", description = "If exists, returns the study cards corresponding to the given study id")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found study cards"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -76,7 +76,7 @@ public interface StudyCardApi {
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
     ResponseEntity<List<StudyCard>> findStudyCardByStudyId(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
-        
+
     @Operation(summary = "", description = "If exists, returns the study cards corresponding to the given equipment id")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found study cards"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -88,7 +88,7 @@ public interface StudyCardApi {
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
     ResponseEntity<List<StudyCard>> findStudyCardByAcqEqId(
             @Parameter(description = "id of the acquisition equipment", required = true) @PathVariable("acqEqId") Long acqEqId);
-    
+
     @Operation(summary = "", description = "Returns all the study Cards")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found study cards"),
             @ApiResponse(responseCode = "204", description = "no study card found"),
@@ -99,7 +99,7 @@ public interface StudyCardApi {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
     ResponseEntity<List<StudyCard>> findStudyCards();
-    
+
     @Operation(summary = "", description = "Saves a new study card")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "created study card"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -112,7 +112,7 @@ public interface StudyCardApi {
     ResponseEntity<StudyCard> saveNewStudyCard(
             @Parameter(description = "study Card to create", required = true) @RequestBody StudyCard studyCard,
             final BindingResult result) throws RestServiceException;
-        
+
     // Attention: used by ShanoirUploader!
     @Operation(summary = "", description = "If exists, returns searched study cards")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found study cards"),
@@ -125,8 +125,8 @@ public interface StudyCardApi {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.filterCardList(returnObject.getBody(), 'CAN_SEE_ALL') )")
     ResponseEntity<List<StudyCard>> searchStudyCards(
-            @Parameter(description = "study ids", required = true) @RequestBody IdList studyIds);    
-    
+            @Parameter(description = "study ids", required = true) @RequestBody IdList studyIds);
+
     @Operation(summary = "", description = "Updates a study card")
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "study card updated"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -147,7 +147,7 @@ public interface StudyCardApi {
     @RequestMapping(value = "/dicomTags", produces = { "application/json" }, method = RequestMethod.GET)
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<DicomTag>> findDicomTags() throws RestServiceException;
-    
+
     @Operation(summary = "", description = "Apply a study card")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "apply a study card to the given acquisitions"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),

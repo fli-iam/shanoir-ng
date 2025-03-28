@@ -46,11 +46,11 @@ import java.util.regex.Pattern;
  */
 @Component
 public class StudyInstanceUIDHandler {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(StudyInstanceUIDHandler.class);
 
     private static final String WADO_URI_STUDY_UID_SERIES_UID = "studyUID=(.*?)\\&seriesUID";
-    
+
     private static final String WADO_RS_STUDY_UID_SERIES_UID = "/studies/(.*?)/series/";
 
     private static final String DICOM_TAG_STUDY_INSTANCE_UID = "0020000D";
@@ -66,14 +66,14 @@ public class StudyInstanceUIDHandler {
     private static final String STUDIES = "/studies/";
 
     private static final String SERIES = "/series/";
-    
+
     public static final String PREFIX = UIDGeneration.ROOT + ".";
 
     @Autowired
     private ExaminationService examinationService;
 
     private ConcurrentHashMap<String, String> examinationUIDToStudyInstanceUIDCache;
-    
+
     @PostConstruct
     public void init() {
         examinationUIDToStudyInstanceUIDCache = new ConcurrentHashMap<String, String>(1000);
@@ -103,7 +103,7 @@ public class StudyInstanceUIDHandler {
                 for (int i = 0; i < studyInstanceUIDArray.size(); i++) {
                     studyInstanceUIDArray.remove(i);
                     studyInstanceUIDArray.insert(i,  examinationUID);
-                }                
+                }
             }
             // find attribute: RetrieveURL
             JsonNode retrieveURLNode = root.get(DICOM_TAG_RETRIEVE_URL);
@@ -121,7 +121,7 @@ public class StudyInstanceUIDHandler {
                         retrieveURLArray.remove(i);
                         retrieveURLArray.insert(i, retrieveURL);
                     }
-                }                
+                }
             }
         } else if (root.isArray()) {
             ArrayNode arrayNode = (ArrayNode) root;
@@ -156,7 +156,7 @@ public class StudyInstanceUIDHandler {
         }
         return studyInstanceUID;
     }
-    
+
     /**
      * This method walks down the information model in Shanoir to read the StudyInstanceUID
      * from the table dataset_file.path, that contains the WADO link.

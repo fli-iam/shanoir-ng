@@ -69,13 +69,13 @@ public class ExaminationServiceTest {
 
     @InjectMocks
     private ExaminationServiceImpl examinationService;
-    
+
     @MockBean
     private StudyRightsService rightsService;
 
     @Mock
     private ShanoirEventService eventService;
-    
+
     @Mock
     private SubjectRepository subjectService;
 

@@ -25,36 +25,36 @@ import org.shanoir.ng.shared.model.DiffusionGradient;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Dataset {
-    
+
     @JsonProperty("name")
     private String name;
-    
+
     private List<ExpressionFormat> expressionFormats;
-    
+
     @JsonProperty("diffusionGradients")
     private List<DiffusionGradient> diffusionGradients;
 
     @JsonProperty("repetitionTimes")
     public Set<Double> repetitionTimes;
-    
+
     @JsonProperty("inversionTimes")
     public Set<Double> inversionTimes;
 
     @JsonProperty("echoTimes")
     public Set<EchoTime> echoTimes;
-    
+
     @JsonProperty("flipAngles")
     public Set<String> flipAngles;
-    
+
     @JsonProperty("bValues")
     private List<Double> bValues;
-    
+
     @JsonProperty("bVectors")
     private List<Double> bVectors;
 
     @JsonProperty("firstImageSOPInstanceUID")
     private String firstImageSOPInstanceUID;
-    
+
     public String getName() {
         return name;
     }
@@ -70,7 +70,7 @@ public class Dataset {
     public void setExpressionFormats(List<ExpressionFormat> expressionFormats) {
         this.expressionFormats = expressionFormats;
     }
-    
+
     public List<Double> getbValues() {
         return bValues;
     }
@@ -86,7 +86,7 @@ public class Dataset {
     public void setbVectors(List<Double> bVectors) {
         this.bVectors = bVectors;
     }
-    
+
     public List<DiffusionGradient> getDiffusionGradients() {
         if (diffusionGradients == null) {
             diffusionGradients = new ArrayList<>();
@@ -97,7 +97,7 @@ public class Dataset {
     public void setDiffusionGradients(List<DiffusionGradient> diffusionGradients) {
         this.diffusionGradients = diffusionGradients;
     }
-    
+
     public Set<Double> getRepetitionTimes() {
         if (repetitionTimes == null) {
             this.repetitionTimes = new HashSet<>();

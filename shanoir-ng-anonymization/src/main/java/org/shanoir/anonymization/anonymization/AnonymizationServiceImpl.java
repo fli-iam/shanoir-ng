@@ -51,9 +51,9 @@ public class AnonymizationServiceImpl implements AnonymizationService {
     private static final String CURVE_DATA_TAGS = "0x50xxxxxx";
     private static final String OVERLAY_COMMENTS_TAGS = "0x60xx4000";
     private static final String OVERLAY_DATA_TAGS = "0x60xx3000";
-    
+
     private Random rand = new Random();
-    
+
     private static Map<String, List<String>> tagsToDeleteForManufacturer;
 
     @Override
@@ -115,7 +115,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
         }
         logInfos("End anonymization", startTime);
     }
-    
+
     private void logInfos(final String methodName, long startTime) {
         long stopTime = System.currentTimeMillis();
         long elapsedTime = stopTime - startTime;
@@ -164,7 +164,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
         DicomOutputStream dos = null;
         try {
             din = new DicomInputStream(dicomFile);
-            
+
             /**
              * DICOM "header"/meta-information fields: read tags
              */
@@ -178,7 +178,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
             }
             final String mediaStorageSOPInstanceUIDGenerated = metaInformationAttributes
                     .getString(Tag.MediaStorageSOPInstanceUID);
-            
+
             /**
              * MK: Read entire dataset with PixelData. Attention: do NOT change here to only
              * readDatasetUntilPixelData(), as the modified DICOM image will MISS the PixelData!
@@ -186,7 +186,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
              * the entire dataset here (I made the mistake already twice...).
              */
             Attributes datasetAttributes = din.readDataset();
-            
+
             // temporarily keep the patient credentials in memory to search in private tags
             String patientNameAttr = datasetAttributes.getString(Tag.PatientName);
             String[] patientNameArrayAttr = null;

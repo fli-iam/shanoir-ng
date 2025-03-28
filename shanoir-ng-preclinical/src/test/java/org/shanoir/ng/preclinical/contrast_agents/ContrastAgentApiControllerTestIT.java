@@ -43,7 +43,7 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("dev")
 public class ContrastAgentApiControllerTestIT extends KeycloakControllerTestIT {
-    
+
     private static final String REQUEST_PATH = "/contrastagent";
     private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
@@ -98,7 +98,7 @@ public class ContrastAgentApiControllerTestIT extends KeycloakControllerTestIT {
     @Test
     public void updateNewContrastAgentProtected() {
         final HttpEntity<ContrastAgent> entity = new HttpEntity<ContrastAgent>(ContrastAgentModelUtil.createContrastAgentGado());
-        
+
         final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
                 String.class);
         assertEquals(HttpStatus.FOUND, response.getStatusCode());

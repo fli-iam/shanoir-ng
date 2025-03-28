@@ -50,7 +50,7 @@ public class AccountRequestApiSecurityTest {
 
     @Autowired
     private AccountRequestApi accountRequestApi;
-    
+
     private User mockAccountReqUser;
 
     @BeforeEach
@@ -60,7 +60,7 @@ public class AccountRequestApiSecurityTest {
         mockAccountReqUser.setRole(null);
         mockBindingResult = new BeanPropertyBindingResult(mockAccountReqUser, "accountRequest");
     }
-    
+
     @Test
     @WithAnonymousUser
     public void testAsAnonymous() throws ShanoirException {

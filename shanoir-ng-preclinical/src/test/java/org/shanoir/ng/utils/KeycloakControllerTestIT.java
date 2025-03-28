@@ -43,7 +43,7 @@ public abstract class KeycloakControllerTestIT {
 
     private String login;
     private String password;
-    
+
     /*
      * Obtain headers for Keycloack authentication (administrator or guest).
      *

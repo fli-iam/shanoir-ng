@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class Pseudonymizer {
-    
+
     private static final String DEBUG = "DEBUG";
 
     private static final Logger logger = LoggerFactory.getLogger(Pseudonymizer.class);
@@ -41,7 +41,7 @@ public class Pseudonymizer {
     private static final String PSEUDONYMUS_SHANOIR_EXE = "PseudonymusShanoir.exe";
 
     private static final int SHA256_LENGTH = 64;
-    
+
     private static final String I386 = "i386";
     private static final String X86 = "x86";
     private static final String X86_64 = "x86_64";
@@ -93,7 +93,7 @@ public class Pseudonymizer {
         logger.info("Pseudonymizer: pseudonymus exe path: " + pseudonymusExePath);
         logger.info("Pseudonymizer: initialization finished.");
     }
-    
+
     /**
      * UTILISATION DE PSEUDONYMUS Le format des dates est bien celui que tu as
      * indiqué : JJ/MM/AAAA. Pour ce qui concerne le lancement de la fonction
@@ -146,7 +146,7 @@ public class Pseudonymizer {
         pseudonymusHashValues.setFirstNameHash2(firstNameHash2);
         pseudonymusHashValues.setFirstNameHash3(firstNameHash3);
         pseudonymusHashValues.setBirthDateHash(birthDateHash);
-        
+
         /**
          * Log all created hash values into su.log file.
          */
@@ -203,7 +203,7 @@ public class Pseudonymizer {
         logger.debug("pseudonymusExec : End");
         return result;
     }
-    
+
     /**
      * Execute the command line given in argument. This method has been duplicated
      * here and is not used anymore from shanoir.jar - ShanoirExec, as it added an
@@ -272,5 +272,5 @@ public class Pseudonymizer {
         logger.debug("exec : return result " + result);
         return result;
     }
-    
+
 }

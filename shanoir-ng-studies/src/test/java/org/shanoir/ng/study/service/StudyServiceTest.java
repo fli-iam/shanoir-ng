@@ -234,7 +234,7 @@ public class StudyServiceTest {
         StudyUser suToBeAdded = createStudyUsers(null, 3L, updated, false, StudyUserRight.CAN_SEE_ALL);
 
         updated.getStudyUserList().add(suToBeAdded);
-      
+
         given(studyUserRepository.saveAll(Mockito.any(List.class))).willReturn(Collections.singletonList(suToBeAdded));
         given(studyUserRepository.findById(2L)).willReturn(Optional.of(suToBeDeleted));
 

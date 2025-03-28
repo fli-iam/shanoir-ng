@@ -52,7 +52,7 @@ import java.io.IOException;
  */
 @Component
 public class StowRSMultipartRelatedRequestFilter extends GenericFilterBean {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(StowRSMultipartRelatedRequestFilter.class);
 
     private static final String CONTENT_TYPE_DICOM = "application/dicom";
@@ -61,7 +61,7 @@ public class StowRSMultipartRelatedRequestFilter extends GenericFilterBean {
 
     @Autowired
     private DicomSEGAndSRImporterService dicomSRImporterService;
-    
+
     @Override
     public void doFilter(
       ServletRequest request,

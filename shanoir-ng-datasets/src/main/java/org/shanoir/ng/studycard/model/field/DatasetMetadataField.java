@@ -38,7 +38,7 @@ public enum DatasetMetadataField implements MetadataFieldInterface<Dataset> {
             }
             else return null;
         }
-        
+
         @Override
         public void update(Dataset dataset, String updatedValue) {
             DatasetModalityType type = DatasetModalityType.valueOf(updatedValue);
@@ -56,12 +56,12 @@ public enum DatasetMetadataField implements MetadataFieldInterface<Dataset> {
             }
             return null;
         }
-        
+
         @Override
         public void update(Dataset dataset, String updatedValue) {
             ExploredEntity exploredEntity = ExploredEntity.valueOf(updatedValue);
             if (dataset.getUpdatedMetadata() == null) dataset.setUpdatedMetadata(new DatasetMetadata());
-            dataset.getUpdatedMetadata().setExploredEntity(exploredEntity);            
+            dataset.getUpdatedMetadata().setExploredEntity(exploredEntity);
         }
     },
     NAME(10) {
@@ -74,11 +74,11 @@ public enum DatasetMetadataField implements MetadataFieldInterface<Dataset> {
             }
             return null;
         }
-        
+
         @Override
         public void update(Dataset dataset, String updatedValue) {
             if (dataset.getUpdatedMetadata() == null) dataset.setUpdatedMetadata(new DatasetMetadata());
-            dataset.getUpdatedMetadata().setName(updatedValue);            
+            dataset.getUpdatedMetadata().setName(updatedValue);
         }
     },
     COMMENT(11) {
@@ -91,11 +91,11 @@ public enum DatasetMetadataField implements MetadataFieldInterface<Dataset> {
             }
             return null;
         }
-        
+
         @Override
         public void update(Dataset dataset, String updatedValue) {
             if (dataset.getUpdatedMetadata() == null) dataset.setUpdatedMetadata(new DatasetMetadata());
-            dataset.getUpdatedMetadata().setComment(updatedValue);            
+            dataset.getUpdatedMetadata().setComment(updatedValue);
         }
     },
     MR_DATASET_NATURE(14) {
@@ -104,51 +104,51 @@ public enum DatasetMetadataField implements MetadataFieldInterface<Dataset> {
             if (dataset instanceof MrDataset) {
                 MrDataset mrDataset = (MrDataset) dataset;
                 if (mrDataset.getUpdatedMrMetadata() != null && mrDataset.getUpdatedMrMetadata().getMrDatasetNature() != null) {
-                    return mrDataset.getUpdatedMrMetadata().getMrDatasetNature().name();    
+                    return mrDataset.getUpdatedMrMetadata().getMrDatasetNature().name();
                 } else if (mrDataset.getOriginMrMetadata() != null && mrDataset.getOriginMrMetadata().getMrDatasetNature() != null) {
                     return mrDataset.getOriginMrMetadata().getMrDatasetNature().name();
-                }        
+                }
                 return null;
             } else {
                 throw new CheckedIllegalClassException(MrDataset.class, dataset);
             }
         }
-        
+
         @Override
         public void update(Dataset dataset, String updatedValue) throws CheckedIllegalClassException {
             MrDatasetNature nature = MrDatasetNature.valueOf(updatedValue);
             if (dataset instanceof MrDataset) {
                 MrDataset mrDataset = (MrDataset) dataset;
                 if (mrDataset.getUpdatedMrMetadata() == null) mrDataset.setUpdatedMrMetadata(new MrDatasetMetadata());
-                mrDataset.getUpdatedMrMetadata().setMrDatasetNature(nature);            
+                mrDataset.getUpdatedMrMetadata().setMrDatasetNature(nature);
             } else {
                 throw new CheckedIllegalClassException(MrDataset.class, dataset);
             }
         }
     };
-    
+
     private int id;
-    
+
     private DatasetMetadataField(int id) {
         this.id = id;
     }
-    
+
     public static DatasetMetadataField getEnum(int id) {
         for (DatasetMetadataField field : DatasetMetadataField.values()) {
             if (field.getId() == id) return field;
         }
         return null;
     }
-    
+
     @Override
     public int getId() {
         return id;
     }
-    
+
     public static boolean has(int id) {
         return getEnum(id) != null;
     }
-    
+
     public static boolean has(String name) {
         return getEnum(name) != null;
     }

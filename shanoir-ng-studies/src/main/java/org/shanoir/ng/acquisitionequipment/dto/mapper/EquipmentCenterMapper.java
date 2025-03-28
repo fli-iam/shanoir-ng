@@ -36,8 +36,8 @@ import org.shanoir.ng.studycenter.StudyCenterMapper;
 public interface EquipmentCenterMapper {
 
     List<CenterDTO> centersToCenterDTO(List<Center> centers);
-    
 
-    CenterDTO centerToCenterDTO(Center center);    
-    
+
+    CenterDTO centerToCenterDTO(Center center);
+
 }

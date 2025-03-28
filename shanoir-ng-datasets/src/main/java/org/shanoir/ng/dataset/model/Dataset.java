@@ -131,7 +131,7 @@ public abstract class Dataset extends AbstractEntity {
 
     /** The study for which this dataset has been imported. Don't use it, use getStudyId() instead. */
     private Long importedStudyId;
-    
+
     /** Study. */
     private Long studyId;
 
@@ -381,7 +381,7 @@ public abstract class Dataset extends AbstractEntity {
         }
         return getDatasetAcquisition().getExamination().getStudyId();
     }
-    
+
     /**
      * @return the centerId
      */

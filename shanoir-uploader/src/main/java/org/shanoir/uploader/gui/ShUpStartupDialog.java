@@ -53,11 +53,11 @@ public class ShUpStartupDialog extends JFrame {
 
     @Autowired
     public SelectProfileConfigurationPanel selectProfilePanel;
-    
+
     public JPanel logPanel;
-    
+
     public JPanel additionalPanel = null; // handle the additional panel that can be info, proxy or login panel
-    
+
     private static JTextPane startupText;
 
     public JTextArea startupTextArea;
@@ -121,7 +121,7 @@ public class ShUpStartupDialog extends JFrame {
     private void initLoginPanel(StartupStateContext sSC) {
         loginPanel.configure(sSC);
     }
-    
+
     private void initSelectProfileManualConfigurationPanel(StartupStateContext sSC) {
         selectProfilePanel.configure(sSC);
     }

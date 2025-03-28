@@ -6,7 +6,7 @@ import javax.swing.ComboBoxModel;
 import javax.swing.JComboBox;
 
 public class JComboBoxMandatory<E> extends JComboBox {
-    
+
     public JComboBoxMandatory() {
         super();
     }
@@ -32,5 +32,5 @@ public class JComboBoxMandatory<E> extends JComboBox {
     public void setValueSet(boolean valueSet) {
         this.valueSet = valueSet;
     }
-    
+
 }

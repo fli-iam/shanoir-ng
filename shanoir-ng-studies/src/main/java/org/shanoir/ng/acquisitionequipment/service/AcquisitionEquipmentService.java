@@ -39,7 +39,7 @@ public interface AcquisitionEquipmentService {
      */
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     Optional<AcquisitionEquipment> findById(Long id);
-    
+
     /**
      * Get all entities.
      *
@@ -67,7 +67,7 @@ public interface AcquisitionEquipmentService {
      */
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     AcquisitionEquipment update(AcquisitionEquipment entity) throws EntityNotFoundException;
-    
+
     /**
      * Delete an entity.
      *
@@ -76,13 +76,13 @@ public interface AcquisitionEquipmentService {
      */
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     void deleteById(Long id) throws EntityNotFoundException;
-    
+
     List<AcquisitionEquipment> findAllByCenterId(Long centerId);
-    
+
     List<AcquisitionEquipment> findAllByStudyId(Long studyId);
-    
+
     List<AcquisitionEquipment> findAllBySerialNumber(String serialNumber);
-    
+
     List<AcquisitionEquipment> findAcquisitionEquipmentsOrCreateOneByEquipmentDicom(Long centerId, EquipmentDicom equipmentDicom);
-    
+
 }

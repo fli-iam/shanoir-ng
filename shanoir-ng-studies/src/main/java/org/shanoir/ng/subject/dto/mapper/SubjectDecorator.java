@@ -13,7 +13,7 @@ public class SubjectDecorator implements SubjectMapper {
 
     @Autowired
     private SubjectMapper delegate;
-    
+
     @Override
     public PageImpl<SubjectDTO> subjectsToSubjectDTOs(Page<Subject> page) {
         Page<SubjectDTO> mappedPage = page.map(new Function<Subject, SubjectDTO>() {
@@ -28,7 +28,7 @@ public class SubjectDecorator implements SubjectMapper {
     public SubjectDTO subjectToSubjectDTONoStudies(Subject subject) {
         return delegate.subjectToSubjectDTONoStudies(subject);
     }
-    
+
     @Override
     public SubjectDTO subjectToSubjectDTO(Subject subject) {
         return delegate.subjectToSubjectDTO(subject);

@@ -23,9 +23,9 @@ import org.shanoir.uploader.dicom.query.StudyTreeNode;
  *
  */
 public class DicomTreeCellRenderer extends DefaultTreeCellRenderer {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(DicomTreeCellRenderer.class);
-    
+
     private Icon mediaIcon;
     private Icon patientIcon;
     private Icon studyIcon;

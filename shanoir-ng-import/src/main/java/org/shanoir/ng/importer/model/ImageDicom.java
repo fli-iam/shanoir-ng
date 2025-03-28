@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  */
 public class ImageDicom {
-    
+
     @JsonProperty("imageId")
     private Integer imageId = null;
 

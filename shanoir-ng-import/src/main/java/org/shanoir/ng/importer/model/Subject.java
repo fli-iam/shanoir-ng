@@ -48,7 +48,7 @@ public class Subject {
     private List<SubjectStudy> subjectStudyList;
 
     private PseudonymusHashValues pseudonymusHashValues;
-    
+
     public Long getId() {
         return id;
     }

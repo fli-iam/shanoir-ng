@@ -22,27 +22,27 @@ import jakarta.xml.bind.annotation.XmlType;
 public class UploadJob {
 
     private String patientID;
-    
+
     private String patientBirthDate;
-    
+
     private String patientSex;
-    
+
     private String subjectIdentifier;
-    
+
     private String studyInstanceUID;
-    
+
     private String studyDescription;
 
     private String studyDate;
-    
+
     private String uploadDate;
-    
+
     private UploadState uploadState;
-    
+
     private Collection<SerieTreeNode> series;
-    
+
     private MRI mriInformation;
-    
+
     private String birthNameHash1;
 
     private String birthNameHash2;
@@ -76,7 +76,7 @@ public class UploadJob {
     public Collection<SerieTreeNode> getSeries() {
         return series;
     }
-    
+
     public SerieTreeNode getSerie(final String id) {
         for (Iterator iterator = series.iterator(); iterator.hasNext();) {
             SerieTreeNode serie = (SerieTreeNode) iterator.next();
@@ -122,7 +122,7 @@ public class UploadJob {
     public void setPatientSex(String patientSex) {
         this.patientSex = patientSex;
     }
-    
+
     public String getSubjectIdentifier() {
         return subjectIdentifier;
     }
@@ -154,12 +154,12 @@ public class UploadJob {
     public void setStudyDate(String studyDate) {
         this.studyDate = studyDate;
     }
-    
+
     @XmlElement
     public MRI getMriInformation() {
         return this.mriInformation;
     }
-    
+
     public void setMriInformation(MRI mriInformation) {
         this.mriInformation = mriInformation;
     }
@@ -243,5 +243,5 @@ public class UploadJob {
     public void setBirthDateHash(String birthDateHash) {
         this.birthDateHash = birthDateHash;
     }
-    
+
 }

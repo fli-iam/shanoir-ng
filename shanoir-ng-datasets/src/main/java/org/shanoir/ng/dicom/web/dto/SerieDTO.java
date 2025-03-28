@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  */
 public class SerieDTO {
-    
+
     /**
      * SERIE: 3 attributes; the string ".2." is chosen randomly by MK, it could be any other number
      * to separate the UIDs of the study, of the serie UIDs, 2==serie

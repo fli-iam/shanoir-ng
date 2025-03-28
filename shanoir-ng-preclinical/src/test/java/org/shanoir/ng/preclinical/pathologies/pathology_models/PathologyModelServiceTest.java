@@ -56,14 +56,14 @@ public class PathologyModelServiceTest {
 
     @InjectMocks
     private PathologyModelServiceImpl modelsService;
-    
+
     @InjectMocks
     private PathologyServiceImpl pathosService;
-    
+
     @Mock
     private PathologyRepository pathosRepository;
-    
-    
+
+
     @BeforeEach
     public void setup() {
         given(modelsRepository.findAll()).willReturn(Arrays.asList(PathologyModelUtil.createPathologyModel()));
@@ -96,7 +96,7 @@ public class PathologyModelServiceTest {
 
         Mockito.verify(modelsRepository, Mockito.times(1)).findById(Mockito.anyLong());
     }
-    
+
     @Test
     public void findByPathologyTest() {
         final List<PathologyModel> models = modelsService.findByPathology(PathologyModelUtil.createPathology());
@@ -137,5 +137,5 @@ public class PathologyModelServiceTest {
         model.setName(UPDATED_MODEL_DATA);
         return model;
     }
-    
+
 }

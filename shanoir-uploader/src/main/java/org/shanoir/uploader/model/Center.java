@@ -12,7 +12,7 @@ public class Center implements Comparable<Center> {
 
     public Center() {
     }
-    
+
     public Center(Long id, String name) {
         this.id = id;
         this.name = name;

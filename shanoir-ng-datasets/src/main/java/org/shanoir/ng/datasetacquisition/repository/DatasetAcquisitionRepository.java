@@ -34,9 +34,9 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
     List<DatasetAcquisition> findByStudyCardId(Long studyCardId);
 
     Page<DatasetAcquisition> findByStudyCardId(Long studyCardId, Pageable pageable);
-    
+
     List<DatasetAcquisition> findByExaminationId(Long id);
-    
+
     List<DatasetAcquisition> findDistinctByDatasetsIdIn(Long[] datasetIds);
 
     boolean existsByStudyCard_Id(Long studyCardId);

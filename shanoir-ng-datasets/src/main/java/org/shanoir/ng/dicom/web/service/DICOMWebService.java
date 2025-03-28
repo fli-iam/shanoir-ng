@@ -53,7 +53,7 @@ public class DICOMWebService {
     private static final Logger LOG = LoggerFactory.getLogger(DICOMWebService.class);
 
     private static final String CONTENT_TYPE_MULTIPART = "multipart/related";
-    
+
     private static final String RELATED = "related";
 
     private static final String CONTENT_TYPE_DICOM = "application/dicom";
@@ -78,19 +78,19 @@ public class DICOMWebService {
 
     @Value("${dcm4chee-arc.port.web}")
     private String dcm4cheePort;
-    
+
     @Value("${dcm4chee-arc.dicom.web.rs}")
     private String dicomWebRS;
-    
+
     @Value("${dcm4chee-arc.dicom.web.rs.upload}")
     private String dicomWebRSUpload;
-    
+
     @Value("${dcm4chee-arc.dicom.web.http.client.max.total}")
     private int dicomWebHttpClientMaxTotal;
 
     @Value("${dcm4chee-arc.dicom.web.http.client.max.per.route}")
     private int dicomWebHttpClientMaxPerRoute;
-    
+
     @Autowired
     private WADOURLHandler wadoURLHandler;
 
@@ -117,7 +117,7 @@ public class DICOMWebService {
                 if (entity != null) {
                     return EntityUtils.toString(entity, "UTF-8");
                 } else {
-                    LOG.error("DICOMWeb: findStudy: empty response entity for studyInstanceUID: " + studyInstanceUID);                    
+                    LOG.error("DICOMWeb: findStudy: empty response entity for studyInstanceUID: " + studyInstanceUID);
                 }
             }
         } catch (Exception e) {
@@ -148,7 +148,7 @@ public class DICOMWebService {
                 if (entity != null) {
                     return  EntityUtils.toString(entity, "UTF-8");
                 } else {
-                    LOG.error("DICOMWeb: findSeriesOfStudy: empty response entity for studyInstanceUID: " + studyInstanceUID);        
+                    LOG.error("DICOMWeb: findSeriesOfStudy: empty response entity for studyInstanceUID: " + studyInstanceUID);
                 }
             }
         } catch (Exception e) {
@@ -167,7 +167,7 @@ public class DICOMWebService {
                 if (entity != null) {
                     return EntityUtils.toString(entity, "UTF-8");
                 } else {
-                    LOG.error("DICOMWeb: findSerieMetadataOfStudy: empty response entity.");                
+                    LOG.error("DICOMWeb: findSerieMetadataOfStudy: empty response entity.");
                 }
             }
         } catch (Exception e) {
@@ -189,10 +189,10 @@ public class DICOMWebService {
                     HttpHeaders responseHeaders = new HttpHeaders();
                     if (!entity.isChunked() && entity.getContentLength() >= 0) {
                         responseHeaders.setContentLength(entity.getContentLength());
-                    }                    
+                    }
                     return new ResponseEntity(byteArrayResource, responseHeaders, HttpStatus.OK);
                 } else {
-                    LOG.error("DICOMWeb: findFrameOfStudyOfSerieOfInstance: empty response entity.");                
+                    LOG.error("DICOMWeb: findFrameOfStudyOfSerieOfInstance: empty response entity.");
                 }
             }
         } catch (Exception e) {
@@ -200,7 +200,7 @@ public class DICOMWebService {
         }
         return null;
     }
-    
+
     public ResponseEntity findInstance(String studyInstanceUID, String serieInstanceUID, String sopInstanceUID) {
         try {
             String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/instances/" + sopInstanceUID;
@@ -215,7 +215,7 @@ public class DICOMWebService {
                     }
                     return new ResponseEntity(byteArrayResource, responseHeaders, HttpStatus.OK);
                 } else {
-                    LOG.error("DICOMWeb: findInstance: empty response entity.");                
+                    LOG.error("DICOMWeb: findInstance: empty response entity.");
                 }
             }
         } catch (Exception e) {
@@ -363,5 +363,5 @@ public class DICOMWebService {
             throw new ShanoirException(e.getMessage());
         }
     }
-    
+
 }

@@ -53,26 +53,26 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 
     @Autowired
     DicomProcessing dicomProcessing;
-    
+
     @Autowired
     DatasetExpressionContext datasetExpressionContext;
-    
+
     @Autowired
     private EchoTimeMapper echoTimeMapper;
-    
+
     @Autowired
     private RepetitionTimeMapper repetitionTimeMapper;
 
     @Autowired
     private InversionTimeMapper inversionTimeMapper;
-    
+
     @Autowired
     private FlipAngleMapper flipAngleMapper;
-    
+
     @Override
     public DatasetsWrapper<MrDataset> generateDatasetsForSerie(AcquisitionAttributes<String> serieAttributes, Serie serie,
             ImportJob importJob) throws Exception {
-        
+
         DatasetsWrapper<MrDataset> datasetWrapper = new DatasetsWrapper<>();
         /**
          * retrieve number of dataset in current serie if Number of dataset > 1 then
@@ -153,7 +153,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
             refCardinalityOfRelatedSubjects = CardinalityOfRelatedSubjects.MULTIPLE_SUBJECTS_DATASET;
         }
         mrDataset.getOriginMetadata().setCardinalityOfRelatedSubjects(refCardinalityOfRelatedSubjects);
-        
+
         if (dataset.getEchoTimes() != null) {
             List<EchoTime> listEchoTime = new ArrayList<>(dataset.getEchoTimes());
             mrDataset.getEchoTime().addAll(echoTimeMapper.EchoTimeDTOListToEchoTimeList(listEchoTime));
@@ -161,7 +161,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
                 et.setMrDataset(mrDataset);
             }
         }
-        
+
         if (dataset.getRepetitionTimes() != null) {
             List<Double> listRepetitionTime = new ArrayList<>(dataset.getRepetitionTimes());
             mrDataset.getRepetitionTime().addAll(repetitionTimeMapper.RepetitionTimeDTOListToRepetitionTimeList(listRepetitionTime));
@@ -169,7 +169,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
                 rt.setMrDataset(mrDataset);
             }
         }
-        
+
         if (dataset.getInversionTimes() != null) {
             List<Double> listInversionTime = new ArrayList<>(dataset.getInversionTimes());
             mrDataset.getInversionTime().addAll(inversionTimeMapper.InversionTimeDTOListToInversionTimeList(listInversionTime));
@@ -177,7 +177,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
                 rt.setMrDataset(mrDataset);
             }
         }
-        
+
         if (dataset.getFlipAngles() != null) {
             List<String> listFlipAngle = new ArrayList<>(dataset.getFlipAngles());
             mrDataset.getFlipAngle().addAll(flipAngleMapper.FlipAngleDTOListToFlipAngleList(listFlipAngle));
@@ -185,7 +185,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
                 rt.setMrDataset(mrDataset);
             }
         }
-        
+
         if (serie.getIsSpectroscopy()) {
             MrDatasetMetadata mrDatasetMetadata = new MrDatasetMetadata();
             int rows = dicomAttributes.getInt(Tag.Rows, 0);
@@ -197,7 +197,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
             }
             mrDataset.setOriginMrMetadata(mrDatasetMetadata);
         }
-        
+
         if (serie.getIsEnhanced()) { // there is no "enhanced mr spectroscopy"
             MrDatasetMetadata mrDatasetMetadata = new MrDatasetMetadata();
             String[] imageTypeArray = dicomAttributes.getStrings(Tag.ImageType);
@@ -255,12 +255,12 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
             datasetExpression.setDataset(mrDataset);
             mrDataset.getDatasetExpressions().add(datasetExpression);
         }
-        
+
         DatasetMetadata originalDM = mrDataset.getOriginMetadata();
         mrDataset.setUpdatedMetadata(originalDM);
         MrDatasetMetadata originalMDM = mrDataset.getOriginMrMetadata();
         mrDataset.setUpdatedMrMetadata(originalMDM);
-        
+
         return mrDataset;
     }
 

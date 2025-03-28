@@ -67,12 +67,12 @@ public class SubjectStudyApiController implements SubjectStudyApi {
             subjectStudyService.update(subjectStudy);
 
             Subject subject = subjectService.findById(subjectStudy.getSubject().getId());
-  
+
             // Update datasets side
             subjectService.updateSubjectName(subjectMapper.subjectToSubjectDTO(subject));
-  
+
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-  
+
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (MicroServiceCommunicationException e) {

@@ -49,7 +49,7 @@ public class ProcessedDatasetImportJob implements Serializable {
     private DatasetProcessing datasetProcessing;
 
     private ShanoirEvent shanoirEvent;
-    
+
     public String getProcessedDatasetFilePath() {
         return processedDatasetFilePath;
     }
@@ -101,7 +101,7 @@ public class ProcessedDatasetImportJob implements Serializable {
     public ProcessedDatasetType getProcessedDatasetType() {
         return this.processedDatasetType;
     }
-    
+
     public void setProcessedDatasetType(ProcessedDatasetType processedDatasetType) {
         this.processedDatasetType = processedDatasetType;
     }

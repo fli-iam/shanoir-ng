@@ -89,12 +89,12 @@ public class DatasetExpression extends AbstractEntity {
     /** Store temporarily the last image acquisition time until all images are processed */
     @Transient
     private LocalDateTime lastImageAcquisitionTime;
-    
+
     /**
      * The converter version used for NIFTI conversion Must keep here so even if
      * the converter is modified We keep the real version
      */
-    
+
     private String niftiConverterVersion;
 
     /**

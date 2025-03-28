@@ -42,7 +42,7 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("dev")
 public class PathologyModelApiControllerTestIT extends KeycloakControllerTestIT {
-    
+
     private static final String REQUEST_PATH = "/pathology/model";
     private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
@@ -97,7 +97,7 @@ public class PathologyModelApiControllerTestIT extends KeycloakControllerTestIT 
     @Test
     public void updateNewPathologyModelProtected() {
         final HttpEntity<PathologyModel> entity = new HttpEntity<PathologyModel>(PathologyModelUtil.createPathologyModel());
-        
+
         final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
                 String.class);
         assertEquals(HttpStatus.FOUND, response.getStatusCode());

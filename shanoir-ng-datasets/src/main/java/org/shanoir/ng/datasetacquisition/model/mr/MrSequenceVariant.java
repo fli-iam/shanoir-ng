@@ -35,24 +35,24 @@ public enum MrSequenceVariant {
 
     // time reversed steady state
     TRSS(4),
-    
+
     // spoiled
     SP(5),
-    
+
     // MAG prepared
     MP(6),
-    
+
     // oversampling phase
     OSP(7),
-    
+
     // no sequence variant
     NONE(8),
-    
+
     // Cannot parse correctly
     UNKNOWN(9);
-    
+
     private static final String TOF = "TOF";
-    
+
     private int id;
 
     /**
@@ -82,7 +82,7 @@ public enum MrSequenceVariant {
         }
         return UNKNOWN;
     }
-    
+
     /**
      * Get an Sequence Variant by its name.
      *
@@ -99,7 +99,7 @@ public enum MrSequenceVariant {
         }
         return EnumUtils.isValidEnum(MrSequenceVariant.class, type) ? MrSequenceVariant.valueOf(type): UNKNOWN;
     }
-    
+
     /**
      * @return the id
      */

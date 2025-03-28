@@ -38,7 +38,7 @@ public enum SubjectType {
     PHANTOM(3, "Phantom");
 
     private int id;
-    
+
     private String name;
 
     /**

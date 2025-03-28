@@ -97,7 +97,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
     @Override
     public ResponseEntity<DatasetProcessingDTO> findDatasetProcessingById(
             @Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
-        
+
         final Optional<DatasetProcessing> datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
         if (!datasetProcessing.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -137,7 +137,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
         /* set authenticated username */
         datasetProcessing.setUsername(KeycloakUtil.getTokenUserName());
-        
+
         /* Validation */
         validate(result);
         datasetProcessingService.validateDatasetProcessing(datasetProcessing);
@@ -159,7 +159,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
         try {
             datasetProcessingService.update(datasetProcessing);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        
+
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

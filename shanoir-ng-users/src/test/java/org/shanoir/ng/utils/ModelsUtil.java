@@ -32,20 +32,20 @@ public final class ModelsUtil {
     public static final Long ADMIN_ROLE_ID = 1L;
     public static final String ADMIN_ROLE_DISPLAY_NAME = "admin";
     public static final String ADMIN_ROLE_NAME = "ROLE_ADMIN";
-    
+
     public static final Long EXPERT_ROLE_ID = 3L;
     public static final String EXPERT_ROLE_DISPLAY_NAME = "expert";
     public static final String EXPERT_ROLE_NAME = "ROLE_EXPERT";
-    
+
     public static final Long USER_ROLE_ID = 2L;
     public static final String USER_ROLE_DISPLAY_NAME = "user";
     public static final String USER_ROLE_NAME = "ROLE_USER";
-    
+
     // User data
     public static final String USER_EMAIL = "toto@to.to";
     public static final String USER_FIRSTNAME = "Toto";
     public static final String USER_LASTNAME = "Toto";
-    
+
     // Login/password
     public static final String NEW_USER_LOGIN = "user";
     public static final Long USER_ID = 1L;
@@ -53,7 +53,7 @@ public final class ModelsUtil {
     public static final String USER_PASSWORD = "D0-483351E2-30";
     public static final String USER_LOGIN_GUEST = "wopa";
     public static final String USER_PASSWORD_GUEST = "1117DC-36DE-34";
-    
+
     /**
      * Create a role 'admin'.
      *
@@ -66,7 +66,7 @@ public final class ModelsUtil {
         role.setName(ADMIN_ROLE_NAME);
         return role;
     }
-    
+
     /**
      * Create a role 'expert'.
      *
@@ -79,7 +79,7 @@ public final class ModelsUtil {
         role.setName(EXPERT_ROLE_NAME);
         return role;
     }
-    
+
     /**
      * Create a role 'user'.
      *
@@ -92,7 +92,7 @@ public final class ModelsUtil {
         role.setName(USER_ROLE_NAME);
         return role;
     }
-    
+
     /**
      * Create a user.
      *
@@ -101,7 +101,7 @@ public final class ModelsUtil {
     public static User createAdmin() {
         return createUser(createAdminRole(), null);
     }
-    
+
     /**
      * Create a user.
      *
@@ -110,7 +110,7 @@ public final class ModelsUtil {
     public static User createAdmin(Long id) {
         return createUser(createAdminRole(), id);
     }
-    
+
     /**
      * Create a user.
      *
@@ -119,7 +119,7 @@ public final class ModelsUtil {
     public static User createUser() {
         return createUser(createUserRole(), null);
     }
-    
+
     /**
      * Create a user.
      *
@@ -128,7 +128,7 @@ public final class ModelsUtil {
     public static User createUser(Long id) {
         return createUser(createUserRole(), id);
     }
-    
+
     /**
      * Create a user.
      *
@@ -137,7 +137,7 @@ public final class ModelsUtil {
     public static User createExpert() {
         return createUser(createExpertRole(), null);
     }
-    
+
     /**
      * Create a user.
      *
@@ -146,7 +146,7 @@ public final class ModelsUtil {
     public static User createExpert(Long id) {
         return createUser(createExpertRole(), id);
     }
-    
+
     /**
      * Create a user with a defined role.
      *
@@ -166,5 +166,5 @@ public final class ModelsUtil {
         user.setId(id);
         return user;
     }
-    
+
 }

@@ -55,15 +55,15 @@ import jakarta.mail.internet.MimeMessage;
 public class EmailServiceTest {
 
     private static final String NEW_PASSWORD = "testPwd";
-    
+
     @Autowired
     private EmailService emailService;
-    
+
     private GreenMail greenMail;
-    
+
     @MockBean
     private UserRepository userRepositoryMock;
-    
+
     @BeforeEach
     void setup() {
         ServerSetup setup = new ServerSetup(3025, "localhost", "smtp");
@@ -76,7 +76,7 @@ public class EmailServiceTest {
     void stopMailServer() {
         greenMail.stop();
     }
-    
+
     @Test
     public void notifyAccountWillExpireTest() throws Exception {
         emailService.notifyAccountWillExpire(ModelsUtil.createUser());
@@ -120,7 +120,7 @@ public class EmailServiceTest {
         emailService.notifyUserResetPassword(ModelsUtil.createUser(), NEW_PASSWORD);
         assertReceivedMessageContains("[Shanoir] Réinitialisation du mot de passe", NEW_PASSWORD);
     }
-    
+
     @Test
     public void testNotifyStudyManagerDataImported() throws IOException, MessagingException {
         // GIVEN a list of administrators to contact

@@ -33,9 +33,9 @@ public class DicomServerConfigurationListener implements ActionListener {
     private static final Logger logger = LoggerFactory.getLogger(DicomServerConfigurationListener.class);
 
     DicomServerConfigurationWindow dicomWindow;
-    
+
     private IDicomServerClient dicomServerClient;
-    
+
     public DicomServerConfigurationListener(DicomServerConfigurationWindow dicomWindow, final IDicomServerClient dicomServerClient) {
         this.dicomWindow = dicomWindow;
         this.dicomServerClient = dicomServerClient;

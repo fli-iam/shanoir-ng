@@ -17,7 +17,7 @@ import jakarta.persistence.Query;
 
 @Component
 public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
-    
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -25,15 +25,15 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
     @Override
     public Page<Examination> findPageByStudyCenterOrStudyIdIn(Iterable<Pair<Long, Long>> studyCenterIds,
             Iterable<Long> studyIds, Pageable pageable, Boolean preclinical) {
-        
+
         Pair<List<Examination>, Long> pair = find(studyCenterIds, studyIds, pageable, preclinical, null, null, null);
         return new PageImpl<Examination>(pair.getFirst(), pageable, pair.getSecond());
     }
-    
+
     @Override
     public Page<Examination> findPageByStudyCenterOrStudyIdIn(Iterable<Pair<Long, Long>> studyCenterIds,
             Iterable<Long> studyIds, Pageable pageable) {
-        
+
         Pair<List<Examination>, Long> pair = find(studyCenterIds, studyIds, pageable, null, null, null, null);
         return new PageImpl<Examination>(pair.getFirst(), pageable, pair.getSecond());
     }
@@ -59,7 +59,7 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
         Pair<List<Examination>, Long> pair = find(studyCenterIds, studyIds, null, null, null, null, null);
         return pair.getFirst();
     }
-    
+
     @SuppressWarnings("unchecked")
     private Pair<List<Examination>, Long> find(Iterable<Pair<Long, Long>> studyCenterIds,
             Iterable<Long> studyIds, Pageable pageable, Boolean preclinical, String subjectName, String searchStr, String searchField) {
@@ -114,9 +114,9 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
             i += 2;
         }
         queryEndStr += ") ";
-        
+
         String queryStr = "select ex " + queryEndStr;
-        
+
         if (pageable != null && pageable.getSort() != null && pageable.getSort().isSorted()) {
             queryStr += "order by ";
             int isort = 0;
@@ -148,7 +148,7 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
             query.setParameter(i + 1, studyCenter.getSecond());
             i += 2;
         }
-        
+
         Long total = null;
         if (pageable != null) {
             String queryCountStr = "select count(ex) " + queryEndStr;
@@ -176,5 +176,5 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
 
         return Pair.of(query.getResultList(), total);
     }
-    
+
 }

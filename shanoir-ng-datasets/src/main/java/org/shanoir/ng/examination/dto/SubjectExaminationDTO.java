@@ -36,11 +36,11 @@ public class SubjectExaminationDTO {
     private LocalDate examinationDate;
 
     private Long id;
-    
+
     private List<String> extraDataFilePathList;
-    
+
     private Long centerId;
-    
+
     private Long studyId;
 
     private boolean preclinical;
@@ -104,7 +104,7 @@ public class SubjectExaminationDTO {
     public void setId(Long id) {
         this.id = id;
     }
-    
+
     public List<String> getExtraDataFilePathList() {
         return extraDataFilePathList;
     }

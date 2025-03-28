@@ -29,9 +29,9 @@ import org.shanoir.ng.shared.quality.QualityTag;
 public class ImportJob implements Serializable {
 
     public static final String RANK_PROPERTY = "rank";
-    
+
     public static final String INDEX_PROPERTY = "index";
-    
+
     private static final long serialVersionUID = 8804929608059674037L;
 
     private long timestamp;

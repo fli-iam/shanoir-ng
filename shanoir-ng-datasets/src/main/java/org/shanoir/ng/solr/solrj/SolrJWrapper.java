@@ -39,23 +39,23 @@ import java.util.Map;
  *
  */
 public interface SolrJWrapper {
-    
+
     void addToIndex(ShanoirSolrDocument document) throws SolrServerException, IOException;
-    
+
     void addAllToIndex(List<ShanoirSolrDocument> documents) throws SolrServerException, IOException;
-    
+
     void deleteFromIndex(Long datasetId) throws SolrServerException, IOException;
 
     void deleteFromIndex(List<Long> datasetIds) throws SolrServerException, IOException;
-    
+
     void deleteAll() throws SolrServerException, IOException;
 
     public Page<ShanoirSolrDocument> findByDatasetIdIn(Collection<Long> datasetIds, Pageable pageable) throws RestServiceException;
 
     public Page<ShanoirSolrDocument> findByStudyIdInAndDatasetIdIn(Map<Long, List<String>> studiesCenter, Collection<Long> datasetIds, Pageable pageable) throws RestServiceException;
-    
+
     public SolrResultPage<ShanoirSolrDocument> findByFacetCriteriaForAdmin(ShanoirSolrQuery facet, Pageable pageable) throws RestServiceException;
-    
+
     public SolrResultPage<ShanoirSolrDocument> findByStudyIdInAndFacetCriteria(Map<Long, List<String>> studiesCenter, ShanoirSolrQuery query, Pageable pageable) throws RestServiceException;
 
 }

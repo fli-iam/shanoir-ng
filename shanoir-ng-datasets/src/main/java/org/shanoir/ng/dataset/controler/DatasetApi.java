@@ -57,7 +57,7 @@ public interface DatasetApi {
     ResponseEntity<Void> deleteDataset(
             @Parameter(description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId)
             throws RestServiceException, EntityNotFoundException;
-    
+
     @Operation(summary = "", description = "Deletes several datasets")
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "datasets deleted"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -107,7 +107,7 @@ public interface DatasetApi {
             @Parameter(description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
             @Parameter(description = "dataset to update", required = true) @Valid @RequestBody Dataset dataset,
             BindingResult result) throws RestServiceException;
-    
+
     @Operation(summary = "", description = "Returns a datasets page")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found datasets"),
             @ApiResponse(responseCode = "204", description = "no user found"),
@@ -129,7 +129,7 @@ public interface DatasetApi {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and  @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL'))")
     ResponseEntity<List<DatasetDTO>> findDatasetsByExaminationId(@Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId);
 
-    
+
     @Operation(summary = "", description = "Returns a dataset list")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found datasets"),
             @ApiResponse(responseCode = "204", description = "no user found"),
@@ -149,7 +149,7 @@ public interface DatasetApi {
     @GetMapping(value = "/studycard/{studycardId}", produces = { "application/json" })
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
     ResponseEntity<List<DatasetDTO>> findDatasetsByStudycardId(@Parameter(description = "id of the studycard", required = true) @PathVariable("studycardId") Long studycardId);
-    
+
     @Operation(summary = "", description = "Returns the list of dataset id by study id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "found datasets"),
@@ -244,7 +244,7 @@ public interface DatasetApi {
         method = RequestMethod.POST)
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT'))")
     ResponseEntity<Void> createProcessedDataset(@Parameter(description = "co to create" ,required = true )  @Valid @RequestBody ProcessedDatasetImportJob importJob) throws RestServiceException, IOException, Exception;
-    
+
     @Operation(summary = "massiveDownloadDatasetsByIds", description = "If exists, returns a zip file of the datasets corresponding to the given ids")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "zip file"),

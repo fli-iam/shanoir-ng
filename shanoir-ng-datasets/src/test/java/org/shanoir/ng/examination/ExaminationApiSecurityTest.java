@@ -65,23 +65,23 @@ import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 @SpringBootTest
 @ActiveProfiles("test")
 public class ExaminationApiSecurityTest {
-    
+
     private static final long LOGGED_USER_ID = 2L;
     private static final String LOGGED_USER_USERNAME = "logged";
     private BindingResult mockBindingResult;
-    
+
     @Autowired
     private ExaminationApi api;
-    
+
     @MockBean
     StudyRightsService rightsService;
-    
+
     @MockBean
     ExaminationRepository examinationRepository;
-    
+
     @MockBean
     StudyRepository studyRepository;
-    
+
     @MockBean
     StudyUserRightsRepository studyUserRightsRepository;
 
@@ -92,7 +92,7 @@ public class ExaminationApiSecurityTest {
     public void setup() {
         mockBindingResult = new BeanPropertyBindingResult(mockExam(1L), "examination");
     }
-    
+
     @Test
     @WithAnonymousUser
     public void testAsAnonymous() throws ShanoirException, RestServiceException {
@@ -107,13 +107,13 @@ public class ExaminationApiSecurityTest {
         assertAccessDenied(api::saveNewExamination, new ExaminationDTO(), mockBindingResult);
         assertAccessDenied(api::updateExamination, 1L, mockExaminationDTO(1L), mockBindingResult);
     }
-    
+
     @Test
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
     public void testAsUser() throws ShanoirException, RestServiceException {
         testAll("ROLE_USER");
     }
-    
+
     @Test
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
     public void testAsExpert() throws ShanoirException, RestServiceException {
@@ -131,8 +131,8 @@ public class ExaminationApiSecurityTest {
         assertAccessAuthorized(api::saveNewExamination, new ExaminationDTO(), mockBindingResult);
         assertAccessAuthorized(api::updateExamination, 1L, mockExaminationDTO(1L), mockBindingResult);
     }
-    
-    
+
+
     private void testAll(String role) throws ShanoirException, RestServiceException {
         /**
          * -> study 1 [CAN_SEE_ALL]
@@ -150,7 +150,7 @@ public class ExaminationApiSecurityTest {
          *         -> center 4
          *             -> exam 4
          */
-        
+
         // has right on study 1
         given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
         // has right on [study 1, center 1]
@@ -160,20 +160,20 @@ public class ExaminationApiSecurityTest {
         // does not have right on [study 1, center 3]
         given(rightsService.hasRightOnCenter(1L, 3L)).willReturn(false);
         given(rightsService.hasRightOnCenter(studyIds1, 3L)).willReturn(false);
-        
+
         // has right on study 2
         given(rightsService.hasRightOnStudy(2L, "CAN_SEE_ALL")).willReturn(true);
         // does not have right on [study 2, center 2]
         given(rightsService.hasRightOnCenter(2L, 2L)).willReturn(false);
         Set<Long> studyIds2 = new HashSet<Long>(); studyIds2.add(2L);
         given(rightsService.hasRightOnCenter(studyIds2, 2L)).willReturn(false);
-        
+
         // does not have right on study 4
         given(rightsService.hasRightOnStudy(4L, "CAN_SEE_ALL")).willReturn(false);
-        
+
         // has rights on studies 1 & 2
         given(rightsService.hasRightOnStudies(Mockito.anySet(), Mockito.anyString())).willReturn(new HashSet<>(Arrays.asList(new Long[]{1L, 2L})));
-        
+
         // exam 1 is in center 1
         Examination exam1 = mockExam(1L, 1L, 1L);
         given(examinationRepository.findById(1L)).willReturn(Optional.of(exam1));
@@ -203,7 +203,7 @@ public class ExaminationApiSecurityTest {
         given(examinationRepository.findPageByStudyCenterOrStudyIdIn(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(new PageImpl<>(Arrays.asList(new Examination[]{exam1})));
         given(examinationRepository.findPageByStudyCenterOrStudyIdInAndSubjectName(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).willReturn(new PageImpl<>(Arrays.asList(new Examination[]{exam1})));
         given(examinationRepository.findAllByStudyCenterOrStudyIdIn(Mockito.any(), Mockito.any())).willReturn(Arrays.asList(new Examination[]{exam1}));
-        
+
         // study 1
         Study study1 = mockStudy(1L);
         given(studyRepository.findById(1L)).willReturn(Optional.of(study1));
@@ -213,9 +213,9 @@ public class ExaminationApiSecurityTest {
         // study 4
         Study study4 = mockStudy(4L);
         given(studyRepository.findById(2L)).willReturn(Optional.of(study4));
-        
+
         // deleteExamination(Long)
-        if (role.equals("ROLE_USER")) {            
+        if (role.equals("ROLE_USER")) {
             assertAccessDenied(api::deleteExamination, 1L);
         } else if (role.equals("ROLE_EXPERT")) {
             assertAccessDenied(api::deleteExamination, 1L);
@@ -226,21 +226,21 @@ public class ExaminationApiSecurityTest {
         assertAccessDenied(api::deleteExamination, 2L);
         assertAccessDenied(api::deleteExamination, 3L);
         assertAccessDenied(api::deleteExamination, 4L);
-        
+
         // findExaminationById(Long)
         assertAccessAuthorized(api::findExaminationById, 1L);
         assertAccessDenied(api::findExaminationById, 2L);
         assertAccessDenied(api::findExaminationById, 3L);
         assertAccessDenied(api::findExaminationById, 4L);
-        
+
         // findExaminations(Pageable)
         assertAccessAuthorized(api::findExaminations, PageRequest.of(0, 10), "", "");
         assertThat(api.findExaminations(PageRequest.of(0, 10), "", "").getBody()).hasSize(1);
-        
+
         // findPreclinicalExaminations(Boolean, Pageable)
         assertAccessAuthorized(api::findPreclinicalExaminations, true, PageRequest.of(0, 10));
         assertAccessAuthorized(api::findPreclinicalExaminations, false, PageRequest.of(0, 10));
-        
+
         // findExaminationsBySubjectIdStudyId(Long, Long)
         assertAccessAuthorized((subjectId, studyId) -> api.findExaminationsBySubjectIdStudyId(subjectId, studyId), 1L, 1L);
         try {
@@ -253,7 +253,7 @@ public class ExaminationApiSecurityTest {
         List<SubjectExaminationDTO> examList1 = api.findExaminationsBySubjectIdStudyId(1L,  1L).getBody();
         assertThat(examList1.size()).isEqualTo(1);
         assertThat(examList1.get(0).getId()).isEqualTo(1L);
-        
+
         // findExaminationsBySubjectId(Long)
         assertAccessAuthorized(api::findExaminationsBySubjectId, 1L);
         List<ExaminationDTO> examList2 = api.findExaminationsBySubjectId(1L).getBody();
@@ -262,7 +262,7 @@ public class ExaminationApiSecurityTest {
         assertAccessAuthorized(api::findExaminationsBySubjectId, 2L);
         assertThat(api.findExaminationsBySubjectId(2L).getBody()).isNull();
         assertThat(api.findExaminationsBySubjectId(4L).getBody()).isNull();
-        
+
         // saveNewExamination(ExaminationDTO, BindingResult)
         assertAccessDenied(api::saveNewExamination, mockExaminationDTO(null, 1L, 1L, 1L), mockBindingResult);
         given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(true);
@@ -276,7 +276,7 @@ public class ExaminationApiSecurityTest {
         assertAccessAuthorized(api::saveNewExamination, mockExaminationDTO(null, 1L, 2L, 1L), mockBindingResult);
         given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
         given(rightsService.hasRightOnStudy(2L, "CAN_IMPORT")).willReturn(false);
-        
+
         // updateExamination(Long, ExaminationDTO, BindingResult)
         assertAccessDenied(api::updateExamination, 1L, examDTO1, mockBindingResult);
         assertAccessDenied(api::updateExamination, 2L, examDTO2, mockBindingResult);
@@ -293,7 +293,7 @@ public class ExaminationApiSecurityTest {
         examDTO4.setStudyId(1L); // try to move exam to my study
         assertAccessDenied(api::updateExamination, 4L, examDTO4, mockBindingResult);
         examDTO4.setStudyId(4L); //back to study 4
-        
+
         // addExtraData(Long, MultipartFile)
         given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
         given(rightsService.hasRightOnStudy(2L, "CAN_IMPORT")).willReturn(false);
@@ -307,7 +307,7 @@ public class ExaminationApiSecurityTest {
         assertAccessDenied(api::addExtraData, 2L, new MockMultipartFile("data", "filename.zip", "application/zip", "some xml".getBytes()));
         assertAccessDenied(api::addExtraData, 3L, new MockMultipartFile("data", "filename.zip", "application/zip", "some xml".getBytes()));
         assertAccessDenied(api::addExtraData, 4L, new MockMultipartFile("data", "filename.zip", "application/zip", "some xml".getBytes()));
-        
+
         // downloadExtraData(Long, String, HttpServletResponse)
         given(rightsService.hasRightOnStudy(1L, "CAN_DOWNLOAD")).willReturn(true);
         given(rightsService.hasRightOnStudy(2L, "CAN_DOWNLOAD")).willReturn(true);
@@ -316,26 +316,26 @@ public class ExaminationApiSecurityTest {
         assertAccessDenied(api::downloadExtraData, 3L, "test", new MockHttpServletResponse());
         assertAccessDenied(api::downloadExtraData, 4L, "test", new MockHttpServletResponse());
     }
-    
+
     private Examination mockExam(Long id) {
         Examination exam = ModelsUtil.createExamination();
         exam.setId(id);
         return exam;
     }
-    
+
     private Examination mockExam(Long id, Long centerId, Long studyId) {
         Examination exam = mockExam(id);
         exam.setCenterId(centerId);
         exam.setStudy(mockStudy(studyId));
         return exam;
     }
-    
+
     private ExaminationDTO mockExaminationDTO(Long id) {
         ExaminationDTO exam = new ExaminationDTO();
         exam.setId(id);
         return exam;
     }
-    
+
     private Study mockStudy(Long id) {
         Study study = new Study();
         study.setId(id);
@@ -345,7 +345,7 @@ public class ExaminationApiSecurityTest {
         study.setTags(new ArrayList<>());
         return study;
     }
-    
+
     private ExaminationDTO mockExaminationDTO(Long studyId, Long subjectId, Long centerId) {
         ExaminationDTO dto = new ExaminationDTO();
         dto.setExaminationDate(LocalDate.now());
@@ -354,7 +354,7 @@ public class ExaminationApiSecurityTest {
         dto.setSubject(new SubjectDTO(subjectId, ""));
         return dto;
     }
-    
+
     private ExaminationDTO mockExaminationDTO(Long id, Long studyId, Long subjectId, Long centerId) {
         ExaminationDTO dto = mockExaminationDTO(studyId, subjectId, centerId);
         dto.setId(id);

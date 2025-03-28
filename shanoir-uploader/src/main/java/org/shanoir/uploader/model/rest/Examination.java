@@ -26,7 +26,7 @@ public class Examination {
     private Double subjectWeight;
 
     private boolean preclinical;
-    
+
     public Examination() {
         super();
     }
@@ -113,7 +113,7 @@ public class Examination {
     public void setPreclinical(boolean preclinical) {
         this.preclinical = preclinical;
     }
-    
+
     public String toString() {
         final String examinationDate = ShUpConfig.formatter.format(this.getExaminationDate());
         return examinationDate + ", " + this.getComment() + " (id = " + this.getId() + ")";

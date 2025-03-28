@@ -19,7 +19,7 @@ import java.util.List;
 public class StudyCardApply {
 
     private Long studyCardId;
-    
+
     private List<Long> datasetAcquisitionIds;
 
     public Long getStudyCardId() {
@@ -37,5 +37,5 @@ public class StudyCardApply {
     public void setDatasetAcquisitionIds(List<Long> datasetAcquisitionIds) {
         this.datasetAcquisitionIds = datasetAcquisitionIds;
     }
-    
+
 }

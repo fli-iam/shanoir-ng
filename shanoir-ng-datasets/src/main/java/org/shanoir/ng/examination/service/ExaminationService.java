@@ -59,7 +59,7 @@ public interface ExaminationService {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationList(returnObject, 'CAN_SEE_ALL')")
     List<Examination> findAll();
-    
+
     /**
      * Get a paginated list of examinations reachable by connected user.
      *
@@ -69,7 +69,7 @@ public interface ExaminationService {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationPage(returnObject, 'CAN_SEE_ALL')")
     Page<Examination> findPage(final Pageable pageable, boolean preclinical, String searchStr, String searchField);
-    
+
     /**
      * Get a paginated list of examinations reachable by connected user.
      *
@@ -79,7 +79,7 @@ public interface ExaminationService {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationPage(returnObject, 'CAN_SEE_ALL')")
     Page<Examination> findPage(final Pageable pageable, String patientName);
-    
+
     /**
      * Find examination by its id.
      *
@@ -138,7 +138,7 @@ public interface ExaminationService {
      */
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudyCenter(#examination.getCenterId(), #examination.getStudyId(), 'CAN_IMPORT'))")
     Examination save(Examination examination);
-    
+
     /**
      * Update an examination.
      *

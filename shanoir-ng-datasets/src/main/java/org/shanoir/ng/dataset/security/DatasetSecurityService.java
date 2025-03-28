@@ -48,33 +48,33 @@ import java.util.*;
 
 @Service
 public class DatasetSecurityService {
-    
+
     private static final String ROLE_ADMIN = "ROLE_ADMIN";
-    
+
     @Autowired
     DatasetRepository datasetRepository;
-    
+
     @Autowired
     DatasetAcquisitionRepository datasetAcquisitionRepository;
-    
+
     @Autowired
     StudyCardRepository studyCardRepository;
-    
+
     @Autowired
     QualityCardRepository qualityCardRepository;
-    
+
     @Autowired
     ExaminationRepository examinationRepository;
-    
+
     @Autowired
     SubjectRepository subjectRepository;
-    
+
     @Autowired
     StudyRightsService commService;
 
     @Autowired
     StudyRepository studyRepository;
-    
+
     @Autowired
     private StudyInstanceUIDHandler studyInstanceUIDHandler;
 
@@ -361,10 +361,10 @@ public class DatasetSecurityService {
             if (dataset.getDatasetAcquisition().getExamination().getStudyId() == null) {
                 return true;
             } else {
-                return hasRightOnStudy(dataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr);                
+                return hasRightOnStudy(dataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr);
             }
         } else {
-            return hasRightOnStudyCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), dataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr);            
+            return hasRightOnStudyCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), dataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr);
         }
     }
 
@@ -407,8 +407,8 @@ public class DatasetSecurityService {
         if (datasetAcquisitions == null || datasetAcquisitions.isEmpty()) {
             return true;
         }
-        
-        // Also check for centers        
+
+        // Also check for centers
         for (DatasetAcquisition acq : datasetAcquisitions) {
             if (!this.hasRightOnStudyCenter(acq.getExamination().getCenterId(), acq.getExamination().getStudyId(), rightStr)) {
                 return false;
@@ -464,7 +464,7 @@ public class DatasetSecurityService {
         if (datasetIds == null || datasetIds.isEmpty()) {
             return true;
         }
-        
+
         Iterable<Dataset> datasets = datasetRepository.findAllById(datasetIds);
 
         return hasRigthOnDatasets(datasets, rightStr);
@@ -716,8 +716,8 @@ public class DatasetSecurityService {
         Set<Long> studyIds = new HashSet<>();
         page.forEach((Dataset dataset) -> studyIds.add(dataset.getStudyId()));
         Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr); //
-        
-        // Also check for centers        
+
+        // Also check for centers
         for (Dataset dataset : page) {
             if (!checkedIds.contains(dataset.getStudyId())) {
                 return false;
@@ -741,8 +741,8 @@ public class DatasetSecurityService {
         Set<Long> studyIds = new HashSet<>();
         page.forEach((DatasetDTO dataset) -> studyIds.add(dataset.getStudyId()));
         Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr); //
-        
-        // Also check for centers        
+
+        // Also check for centers
         for (DatasetDTO dataset : page) {
             if (!checkedIds.contains(dataset.getStudyId())) {
                 return false;

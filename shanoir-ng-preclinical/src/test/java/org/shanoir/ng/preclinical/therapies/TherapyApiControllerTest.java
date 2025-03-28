@@ -74,14 +74,14 @@ public class TherapyApiControllerTest {
 
     @MockBean
     private ShanoirEventService eventService;
-    
+
     @MockBean
     private TherapyUniqueValidator uniqueValidator;
-    
+
     @MockBean
     private TherapyEditableByManager editableOnlyValidator;
 
-    
+
 
     @BeforeEach
     public void setup() throws ShanoirException {

@@ -46,7 +46,7 @@ public enum CoilType {
      * EXTREMITY.
      */
     EXTREMITY(5),
-    
+
     /**
      * VOLUME.
      */

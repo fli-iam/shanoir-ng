@@ -124,5 +124,5 @@ public class DicomDirToModelService {
         }
         series.add(serie);
     }
-    
+
 }

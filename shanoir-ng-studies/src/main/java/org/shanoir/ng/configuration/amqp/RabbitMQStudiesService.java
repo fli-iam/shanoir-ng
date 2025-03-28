@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
 
 @Service
 public class RabbitMQStudiesService {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(RabbitMQStudiesService.class);
 
     private static final String RABBIT_MQ_ERROR = "Something went wrong deserializing the object.";
@@ -48,10 +48,10 @@ public class RabbitMQStudiesService {
 
     @Autowired
     private SubjectStudyRepository subjectStudyRepository;
-    
+
     @Autowired
     private DataUserAgreementService dataUserAgreementService;
-    
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -78,7 +78,7 @@ public class RabbitMQStudiesService {
             String message = event.getMessage();
             Pattern pat = Pattern.compile("centerId:(\\d+);subjectId:(\\d+)");
             Matcher mat = pat.matcher(message);
-            
+
             Long centerId = null;
             Long subjectId = null;
             if (mat.matches()) {
@@ -153,14 +153,14 @@ public class RabbitMQStudiesService {
             Long studyId = Long.valueOf(event.getObjectId());
             // Get the study
             Study studyToUpdate = studyRepo.findById(studyId).orElseThrow();
-            
+
             for (StudyUser su : studyToUpdate.getStudyUserList()) {
                 if (su.getUserId().equals(userId)) {
                     // user already exists on study
                     return true;
                 }
             }
-            
+
             // Create a new StudyUser
             StudyUser subscription = new StudyUser();
             subscription.setStudy(studyToUpdate);
@@ -184,7 +184,7 @@ public class RabbitMQStudiesService {
             return false;
         }
     }
-    
+
     @Transactional
     @RabbitListener(queues = RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG, containerFactory = "singleConsumerFactory")
     @RabbitHandler
@@ -205,7 +205,7 @@ public class RabbitMQStudiesService {
                 subjectStudy.setQualityTag(dtoMap.get(subjectStudy.getId()).getTag());
             }
             // save
-            subjectStudyRepository.saveAll(dbList);            
+            subjectStudyRepository.saveAll(dbList);
         } catch (Exception e) {
             throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
         }

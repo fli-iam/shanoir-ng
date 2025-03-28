@@ -26,7 +26,7 @@ import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 public class ProxyConfigurationState implements State {
 
     private static final Logger logger = LoggerFactory.getLogger(ProxyConfigurationState.class);
-        
+
     @Autowired
     private SelectProfileConfigurationState selectProfileConfigurationState;
 

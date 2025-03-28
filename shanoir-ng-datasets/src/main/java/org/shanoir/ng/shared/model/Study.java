@@ -35,13 +35,13 @@ public class Study extends IdName {
 
     @Id
     protected Long id;
-    
+
     protected String name;
-    
+
     @ManyToMany
     @JoinTable(name = "related_datasets", joinColumns = @JoinColumn(name = "study_id"), inverseJoinColumns = @JoinColumn(name = "dataset_id"))
     private List<Dataset> relatedDatasets;
-    
+
     /**
      * Linked tags.
      */
@@ -51,14 +51,14 @@ public class Study extends IdName {
     /** Relations between the subjects and the studies. */
     @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SubjectStudy> subjectStudyList;
-    
+
     /** Relations between the subjects and the studies. */
     @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Examination> examinations;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<StudyTag> studyTags;
-    
+
 
     /**
      * @return the tags
@@ -112,7 +112,7 @@ public class Study extends IdName {
     public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
         this.subjectStudyList = subjectStudyList;
     }
-    
+
     @Override
     public Long getId() {
         return id;

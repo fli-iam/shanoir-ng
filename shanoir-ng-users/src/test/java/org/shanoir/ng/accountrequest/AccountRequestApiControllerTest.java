@@ -59,13 +59,13 @@ public class AccountRequestApiControllerTest {
 
     @MockBean
     private UserService userServiceMock;
-    
+
     @MockBean
     private UserRepository userRepositoryMock;
-    
+
     @MockBean
     private UserFieldEditionSecurityManager fieldEditionSecurityManager;
-    
+
     @MockBean
     private UserUniqueConstraintManager uniqueConstraintManager;
 
@@ -91,7 +91,7 @@ public class AccountRequestApiControllerTest {
         info.setInstitution("institution");
         info.setStudyId(1L);
         user.setAccountRequestInfo(info);
-        
+
         given(userServiceMock.createAccountRequest(Mockito.mock(User.class))).willReturn(new User());
 
         mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
@@ -113,7 +113,7 @@ public class AccountRequestApiControllerTest {
         user.setAccountRequestInfo(info);
 
         given(userServiceMock.createAccountRequest(Mockito.any(User.class))).willReturn(user);
-        
+
         mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
                 .andExpect(status().isNoContent());

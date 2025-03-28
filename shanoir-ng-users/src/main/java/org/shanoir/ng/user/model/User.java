@@ -77,7 +77,7 @@ public class User extends HalEntity implements UserDetails {
     @Column(unique = true)
     @Unique
     private String email;
-    
+
     @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
     @EditableOnlyBy(roles = { "ROLE_ADMIN" })
     @LocalDateAnnotations
@@ -90,11 +90,11 @@ public class User extends HalEntity implements UserDetails {
     @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
     @NotNull
     private Boolean extensionRequestDemand = Boolean.FALSE;
-    
+
     @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
     @NotNull
     private Boolean firstExpirationNotificationSent = Boolean.FALSE;
-    
+
     @NotBlank
     private String firstName;
 
@@ -111,7 +111,7 @@ public class User extends HalEntity implements UserDetails {
     @NotNull
     @EditableOnlyBy(roles = { "ROLE_ADMIN" })
     private Role role;
-    
+
     @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
     @NotNull
     private Boolean secondExpirationNotificationSent = Boolean.FALSE;
@@ -241,7 +241,7 @@ public class User extends HalEntity implements UserDetails {
     public Boolean isExtensionRequestDemand() {
         return extensionRequestDemand;
     }
-    
+
     /**
      * @param extensionRequestDemand
      *            the extensionRequestDemand to set
@@ -249,7 +249,7 @@ public class User extends HalEntity implements UserDetails {
     public void setExtensionRequestDemand(Boolean extensionRequestDemand) {
         this.extensionRequestDemand = extensionRequestDemand;
     }
-    
+
     /**
      * @return the firstExpirationNotificationSent
      */

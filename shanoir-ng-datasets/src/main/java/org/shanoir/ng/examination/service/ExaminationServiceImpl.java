@@ -80,7 +80,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 
     @Autowired
     private ExaminationRepository examinationRepository;
-    
+
     @Autowired
     private SecurityService securityService;
 
@@ -119,7 +119,7 @@ public class ExaminationServiceImpl implements ExaminationService {
             throw new EntityNotFoundException(Examination.class, id);
         }
         Examination examination = examinationOpt.get();
-        
+
         List<Examination> childExam = examinationRepository.findBySourceId(id);
         if (!CollectionUtils.isEmpty(childExam)) {
             throw new RestServiceException(
@@ -195,7 +195,7 @@ public class ExaminationServiceImpl implements ExaminationService {
             return examinationRepository.findAllByStudyCenterOrStudyIdIn(studyCenters, unrestrictedStudies);
         }
     }
-    
+
     @Override
     public Page<Examination> findPage(final Pageable pageable, boolean preclinical, String searchStr, String searchField) {
         if (searchStr != null && searchStr.length() >= 1) {

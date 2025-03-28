@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 @JsonComponent
 public class SolrPageSerializer extends StdSerializer<SolrResultPage> {
-    
+
     private static final long serialVersionUID = 1L;
 
     public SolrPageSerializer() {

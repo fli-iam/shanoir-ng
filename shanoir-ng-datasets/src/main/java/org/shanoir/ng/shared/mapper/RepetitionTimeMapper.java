@@ -31,7 +31,7 @@ import org.shanoir.ng.shared.model.RepetitionTime;
 @Mapper(componentModel = "spring",unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface RepetitionTimeMapper {
 
-    
+
     List<RepetitionTime> RepetitionTimeDTOListToRepetitionTimeList(
             List<Double> repetitionTimeDTOList);
 

@@ -26,13 +26,13 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class PetProtocolStrategy {
-    
+
     /** Logger. */
     private static final Logger LOG = LoggerFactory.getLogger(PetProtocolStrategy.class);
-    
-    public PetProtocol generateProtocolForSerie(Attributes attributes) {        
+
+    public PetProtocol generateProtocolForSerie(Attributes attributes) {
         PetProtocol petProtocol = new PetProtocol();
-        
+
         /** (0028, 0010) Rows */
         final Integer dimensionX = attributes.getInt(Tag.Rows, 0);
         LOG.debug("extractMetadata : dimensionX=" + dimensionX);
@@ -42,12 +42,12 @@ public class PetProtocolStrategy {
         final Integer dimensionY = attributes.getInt(Tag.Columns, 0);
         LOG.debug("extractMetadata : dimensionY=" + dimensionY);
         petProtocol.setDimensionY(dimensionY);
-        
+
         /** (0054, 0081) Number of Slices */
         final Integer numberOfSlices = attributes.getInt(Tag.NumberOfSlices, 0);
         LOG.debug("extractMetadata : numberOfSlices=" + numberOfSlices);
         petProtocol.setNumberOfSlices(numberOfSlices);
-        
+
         /**
          * (0028, 0030) Pixel Spacing in X and Y direction in mm.
          * The unit of measure of voxel size X, must be in mm.
@@ -61,7 +61,7 @@ public class PetProtocolStrategy {
             petProtocol.setVoxelSizeX(voxelSizeX);
             petProtocol.setVoxelSizeY(voxelSizeY);
         }
-        
+
         /**
          * (0018, 0050) Slice Thickness in mm.
          * The unit of measure of voxel size Z, must be in mm.
@@ -69,7 +69,7 @@ public class PetProtocolStrategy {
         final Double voxelSizeZ = attributes.getDouble(Tag.SliceThickness, 0);
         LOG.debug("extractMetadata : voxelSizeZ=" + voxelSizeZ);
         petProtocol.setVoxelSizeZ(voxelSizeZ);
-        
+
         /** (0054, 1101) Attenuation Correction Method */
         final String attenuationCorrectionMethod = attributes.getString(Tag.AttenuationCorrectionMethod);
         LOG.debug("extractMetadata : attenuationCorrectionMethod=" + attenuationCorrectionMethod);
@@ -89,7 +89,7 @@ public class PetProtocolStrategy {
         final Integer decayFactor = attributes.getInt(Tag.DecayFactor, 0);
         LOG.debug("extractMetadata : decayFactor=" + decayFactor);
         petProtocol.setDecayFactor(decayFactor);
-        
+
         /** (0054,1322) Dose calibration factor */
         final Integer doseCalibrationFactor = attributes.getInt(Tag.DoseCalibrationFactor, 0);
         LOG.debug("extractMetadata : doseCalibrationFactor=" + doseCalibrationFactor);
@@ -115,12 +115,12 @@ public class PetProtocolStrategy {
         final String numberOfIterations = attributes.getString(Tag.NumberOfIterations);
         LOG.debug("extractMetadata : numberOfIterations=" + numberOfIterations);
         petProtocol.setNumberOfIterations(numberOfIterations);
-        
+
         /** (0018,9740) number of subsets */
         final String numberOfSubsets = attributes.getString(Tag.NumberOfSubsets);
         LOG.debug("extractMetadata : numberOfSubsets=" + numberOfSubsets);
         petProtocol.setNumberOfSubsets(numberOfSubsets);
-        
+
         /**
          * (0018,1075) Radionuclide Half Life in sec.
          * The unit of measure of the radionuclide half life must be in sec.
@@ -176,7 +176,7 @@ public class PetProtocolStrategy {
         final String units = attributes.getString(Tag.Units);
         LOG.debug("extractMetadata : units=" + units);
         petProtocol.setUnits(units);
-        
+
         return petProtocol;
     }
 

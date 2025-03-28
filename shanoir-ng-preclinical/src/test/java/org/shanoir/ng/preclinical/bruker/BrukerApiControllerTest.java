@@ -68,9 +68,9 @@ public class BrukerApiControllerTest {
 
     @TempDir
     public File tempFolder;
-    
+
     public static String tempFolderPath;
-    
+
     @BeforeEach
     public void beforeClass() {
         tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";

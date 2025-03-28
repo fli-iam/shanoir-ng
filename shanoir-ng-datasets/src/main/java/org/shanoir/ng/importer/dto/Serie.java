@@ -73,7 +73,7 @@ public class Serie {
 
     @JsonProperty("isEnhanced")
     private Boolean isEnhanced;
-    
+
     @JsonProperty("isSpectroscopy")
     private Boolean isSpectroscopy;
 
@@ -248,5 +248,5 @@ public class Serie {
 
     public void setIsSpectroscopy(Boolean isSpectroscopy) {
         this.isSpectroscopy = isSpectroscopy;
-    }    
+    }
 }

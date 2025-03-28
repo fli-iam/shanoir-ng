@@ -54,8 +54,8 @@ public class TherapyServiceTest {
 
     @InjectMocks
     private TherapyServiceImpl therapiesService;
-    
-    
+
+
     @BeforeEach
     public void setup() {
         given(therapiesRepository.findAll()).willReturn(Arrays.asList(TherapyModelUtil.createTherapyBrain()));
@@ -89,7 +89,7 @@ public class TherapyServiceTest {
 
         Mockito.verify(therapiesRepository, Mockito.times(1)).findById(Mockito.anyLong());
     }
-    
+
     @Test
     public void findByNameTest() {
         final Therapy therapy = therapiesService.findByName(TherapyModelUtil.THERAPY_NAME_BRAIN);
@@ -98,7 +98,7 @@ public class TherapyServiceTest {
 
         Mockito.verify(therapiesRepository, Mockito.times(1)).findByName(TherapyModelUtil.THERAPY_NAME_BRAIN);
     }
-    
+
     @Test
     public void findByTherapyTypeTest() {
         final List<Therapy> therapies = therapiesService.findByTherapyType(TherapyType.SURGERY);

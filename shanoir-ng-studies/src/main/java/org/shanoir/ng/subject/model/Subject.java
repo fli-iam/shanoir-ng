@@ -86,7 +86,7 @@ public class Subject extends HalEntity {
     @Column(nullable = false)
     @ColumnDefault("false")
     private boolean preclinical;
-    
+
     /**
      * The category of the subject (phantom, human alive, human cadaver, etc.).
      */

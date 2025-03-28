@@ -38,7 +38,7 @@ public class ExaminationAttributes<T> {
     private ConcurrentMap<T, Optional<AcquisitionAttributes<T>>> acquisitionMap = new ConcurrentHashMap<>();
 
     private WADOURLHandler wadoURLHandler;
-    
+
     public ExaminationAttributes(WADOURLHandler wadoURLHandler) {
         this.wadoURLHandler = wadoURLHandler;
     }

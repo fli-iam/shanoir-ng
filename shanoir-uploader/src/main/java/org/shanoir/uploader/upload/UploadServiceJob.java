@@ -170,13 +170,13 @@ public class UploadServiceJob {
              * Read import-job.json and start job on server
              */
             ImportJob importJob = ImportUtils.readImportJob(folder);
-            setTempDirIdAndStartImport(tempDirId, importJob);    
+            setTempDirIdAndStartImport(tempDirId, importJob);
             currentNominativeDataController.updateNominativeDataPercentage(folder,
                     UploadState.FINISHED_UPLOAD.toString());
             uploadJob.setUploadState(UploadState.FINISHED_UPLOAD);
             uploadJob.setUploadDate(Util.formatTimePattern(new Date()));
             uploadJobManager.writeUploadJob(uploadJob);
-            
+
             // Clean all DICOM files after successful import to server
             for (Iterator<File> iterator = allFiles.iterator(); iterator.hasNext();) {
                 File file = (File) iterator.next();

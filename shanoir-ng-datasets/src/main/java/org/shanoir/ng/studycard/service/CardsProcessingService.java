@@ -53,9 +53,9 @@ import org.springframework.web.client.RestClientException;
 
 @Service
 public class CardsProcessingService {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(CardsProcessingService.class);
-    
+
     @Autowired
     private StudyService studyService;
 
@@ -93,7 +93,7 @@ public class CardsProcessingService {
         if (changeInAtLeastOneAcquisition) { // no need to update, if nothing happened
             datasetAcquisitionService.update(acquisitions);
         }
-    }    
+    }
 
     /**
      * Study cards for quality control: apply on entire exam.
@@ -199,7 +199,7 @@ public class CardsProcessingService {
                     subjectStudyService.update(result.getUpdatedSubjectStudies());
                 } catch (EntityNotFoundException e) {
                     throw new IllegalStateException("Could not update subject-studies", e);
-                }    
+                }
             }
             event.setProgress(1f);
             event.setStatus(1);

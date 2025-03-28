@@ -1,7 +1,7 @@
 package org.shanoir.uploader.model.dto;
 
 public class SubjectStudyDTO {
-    
+
     private Long id;
 
     private Long StudyId;
@@ -11,7 +11,7 @@ public class SubjectStudyDTO {
     private String subjectStudyIdentifier;
 
     private String subjectType;
-    
+
     public SubjectStudyDTO(Long id, Long studyId, boolean physicallyInvolved, String subjectStudyIdentifier,
             String subjectType) {
         super();

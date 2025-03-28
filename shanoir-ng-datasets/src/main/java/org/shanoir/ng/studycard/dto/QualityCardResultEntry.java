@@ -25,14 +25,14 @@ import org.shanoir.ng.shared.quality.QualityTag;
 public class QualityCardResultEntry {
 
     private String subjectName;
-    
+
     @LocalDateAnnotations
     private LocalDate examinationDate;
-    
+
     private String examinationComment;
-    
+
     private String message;
-    
+
     private QualityTag tagSet;
 
     private boolean failedValid = false; // if tag VALID was to put but conditions failed

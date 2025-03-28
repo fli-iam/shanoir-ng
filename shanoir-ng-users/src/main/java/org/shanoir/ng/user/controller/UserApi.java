@@ -109,7 +109,7 @@ public interface UserApi {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     @PostAuthorize("hasRole('ADMIN') or @userPrivacySecurityService.filterPersonnalData(returnObject.getBody())")
     ResponseEntity<List<User>> findAccountRequests();
-    
+
     @Operation(summary = "", description = "Saves a new user")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "created user"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),

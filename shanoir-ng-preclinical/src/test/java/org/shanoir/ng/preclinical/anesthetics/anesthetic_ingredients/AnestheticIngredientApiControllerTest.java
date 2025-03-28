@@ -78,10 +78,10 @@ public class AnestheticIngredientApiControllerTest {
     private AnestheticIngredientService ingredientsServiceMock;
     @MockBean
     private AnestheticService anestheticsServiceMock;
-    
+
     @MockBean
     private AnestheticIngredientUniqueValidator uniqueValidator;
-    
+
     @MockBean
     private AnestheticIngredientEditableByManager editableOnlyValidator;
 

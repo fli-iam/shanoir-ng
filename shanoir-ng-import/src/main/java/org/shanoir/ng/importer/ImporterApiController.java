@@ -613,7 +613,7 @@ public class ImporterApiController implements ImporterApi {
             ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS, 0f, importJob.getStudyId());
             importJob.setShanoirEvent(event);
             Integer integg = (Integer) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.IMPORT_EEG_QUEUE,  objectMapper.writeValueAsString(importJob));
-            return new ResponseEntity<Void>(HttpStatusCode.valueOf(integg.intValue()));            
+            return new ResponseEntity<Void>(HttpStatusCode.valueOf(integg.intValue()));
         } catch (Exception e) {
             LOG.error("Error during EEG import", e);
             return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -803,9 +803,9 @@ public class ImporterApiController implements ImporterApi {
                 eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, examId.toString(), KeycloakUtil.getTokenUserId(), "centerId:" + centerId + ";subjectId:" + examination.getSubject().getId(), ShanoirEvent.SUCCESS, examination.getStudyId()));
 
                 // STEP 4.3 Complete importJob with subject / study /examination
-                
+
                 String anonymizationProfile = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_ANONYMISATION_PROFILE_QUEUE, studyId);
-                
+
                 job.setSubjectName(subjectName);
                 job.setExaminationId(examId);
                 job.setFromDicomZip(true);

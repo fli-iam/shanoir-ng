@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class IsMeSecurityService {
-        
+
     public boolean isMe(Long id) {
         if (id == null) throw new IllegalArgumentException("id cannot be null");
         else if (isAnonymousConnected()) return false;

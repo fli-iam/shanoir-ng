@@ -30,9 +30,9 @@ public class ExaminationDatasetAcquisitionDTO extends IdName {
     private String type;
 
     private List<DatasetWithProcessingsDTO> datasets;
-    
+
     private Long studyId;
-    
+
     private Long examinationId;
 
     private Integer sortingIndex;

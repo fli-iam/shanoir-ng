@@ -24,13 +24,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  */
 public class InstitutionDicom {
-    
+
     @JsonProperty("institutionName")
     private String institutionName;
 
     @JsonProperty("institutionAddress")
     private String institutionAddress;
-    
+
     public String getInstitutionName() {
         return institutionName;
     }

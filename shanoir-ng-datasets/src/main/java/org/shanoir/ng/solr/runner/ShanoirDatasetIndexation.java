@@ -42,7 +42,7 @@ public class ShanoirDatasetIndexation implements ApplicationRunner {
 
         SolrQuery q = new SolrQuery("*:*");
         q.setRows(0);  // don't actually request any data
-    
+
     long deadline = System.currentTimeMillis() + MAX_WAIT_TIME_MS;
 
         try {

@@ -27,7 +27,7 @@ import org.shanoir.ng.preclinical.extra_data.physiological_data.PhysiologicalDat
  */
 public final class ExtraDataModelUtil {
 
-    
+
     public static final Long EXAMINATION_ID = 1L;
     public static final Long EXTRADATA_ID = 1L;
     public static final String EXTRADATA_TYPE = "Extra data";
@@ -37,7 +37,7 @@ public final class ExtraDataModelUtil {
     public static final String BLOODGASDATA_TYPE = "Blood gas data";
     public static final String EXTRADATA_FILEPATH = "/home/sloury/Documents/FLI-IAM/SHANOIR_NG/upload/";
     public static final String EXTRADATA_FILENAME = "extradata.txt";
-    
+
     /**
      * Create an extrdata.
      *
@@ -74,5 +74,5 @@ public final class ExtraDataModelUtil {
         extradata.setFilepath(EXTRADATA_FILEPATH);
         return extradata;
     }
-        
+
 }

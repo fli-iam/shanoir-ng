@@ -36,7 +36,7 @@ import org.springframework.util.CollectionUtils;
 public class DicomProcessing {
 
     private static UIDGeneration uidGenerator = new UIDGeneration();
-    
+
     @Autowired
     private static WADOURLHandler wadoURLHandler;
 

@@ -36,14 +36,14 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class PetDatasetStragegy implements DatasetStrategy<PetDataset> {
-    
+
     @Autowired
     DatasetExpressionContext datasetExpressionContext;
 
     @Override
     public DatasetsWrapper<PetDataset> generateDatasetsForSerie(AcquisitionAttributes<String> dicomAttributes, Serie serie,
             ImportJob importJob) throws Exception {
-        
+
         DatasetsWrapper<PetDataset> datasetWrapper = new DatasetsWrapper<>();
         /**
          * retrieve number of dataset in current serie if Number of dataset > 1 then
@@ -99,7 +99,7 @@ public class PetDatasetStragegy implements DatasetStrategy<PetDataset> {
             refCardinalityOfRelatedSubjects = CardinalityOfRelatedSubjects.MULTIPLE_SUBJECTS_DATASET;
         }
         petDataset.getOriginMetadata().setCardinalityOfRelatedSubjects(refCardinalityOfRelatedSubjects);
-        
+
         /**
          *  The part below will generate automatically the datasetExpression according to :
          *   -  type found in the importJob.serie.datasets.dataset.expressionFormat.type
@@ -113,10 +113,10 @@ public class PetDatasetStragegy implements DatasetStrategy<PetDataset> {
             datasetExpression.setDataset(petDataset);
             petDataset.getDatasetExpressions().add(datasetExpression);
         }
-        
+
         DatasetMetadata originalDM = petDataset.getOriginMetadata();
         petDataset.setUpdatedMetadata(originalDM);
-        
+
         return petDataset;
     }
 

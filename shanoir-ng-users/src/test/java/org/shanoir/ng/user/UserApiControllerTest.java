@@ -78,13 +78,13 @@ public class UserApiControllerTest {
 
     @Autowired
     private MockMvc mvc;
-    
+
     @MockBean
     private UserService userService;
-    
+
     @MockBean
     private FindByRepository<User> findByRepositoryMock;
-    
+
     @MockBean
     private UserRepository userRepository;
 
@@ -99,7 +99,7 @@ public class UserApiControllerTest {
 
     @MockBean
     private VIPUserService vipUserService;
-    
+
     @BeforeAll
     public static void beforeClass() {
         System.setProperty("vip.enabled", "false");
@@ -166,7 +166,7 @@ public class UserApiControllerTest {
                 .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createUser(1L))))
                 .andExpect(status().isNoContent());
     }
-    
+
     @Test
     @WithMockKeycloakUser(authorities = { "ROLE_USER" }, id = 0)
     public void fieldAccessTest() throws Exception {

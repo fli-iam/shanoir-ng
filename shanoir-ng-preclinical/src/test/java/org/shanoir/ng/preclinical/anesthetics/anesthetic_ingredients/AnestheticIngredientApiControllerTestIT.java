@@ -43,7 +43,7 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("dev")
 public class AnestheticIngredientApiControllerTestIT extends KeycloakControllerTestIT {
-    
+
     private static final String REQUEST_PATH_ANESTHETIC = "/anesthetic";
     private static final String ANESTHETIC_ID = "/1";
     private static final String REQUEST_PATH_INGREDIENT = "/ingredient";
@@ -102,7 +102,7 @@ public class AnestheticIngredientApiControllerTestIT extends KeycloakControllerT
     @Test
     public void updateNewAnestheticIngredientProtected() {
         final HttpEntity<AnestheticIngredient> entity = new HttpEntity<AnestheticIngredient>(AnestheticModelUtil.createAnestheticIngredient());
-        
+
         final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
                 String.class);
         assertEquals(HttpStatus.FOUND, response.getStatusCode());

@@ -22,7 +22,7 @@ import org.shanoir.ng.importer.dto.Serie;
 import java.io.IOException;
 
 public interface DatasetExpressionStrategy {
-    
+
     DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob, ExpressionFormat expressionFormat) throws IOException;
 
 }

@@ -46,7 +46,7 @@ public enum ImagedObjectCategory {
      * Living animal
      */
     LIVING_ANIMAL(5, "Living animal"),
-    
+
     /**
      * Animal cadaver
      */

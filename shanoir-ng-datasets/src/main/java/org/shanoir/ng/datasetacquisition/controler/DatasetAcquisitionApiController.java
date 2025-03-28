@@ -71,10 +71,10 @@ import jakarta.validation.Valid;
 public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetAcquisitionApiController.class);
-    
+
     @Autowired
     private DatasetAcquisitionService datasetAcquisitionService;
-    
+
     @Autowired
     private ImporterService importerService;
 
@@ -83,13 +83,13 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
     @Autowired
     private ObjectMapper objectMapper;
-    
+
     @Autowired
     private DatasetAcquisitionMapper dsAcqMapper;
-    
+
     @Autowired
     private DatasetAcquisitionDatasetsMapper dsAcqDsMapper;
-    
+
     @Autowired
     private ExaminationDatasetAcquisitionMapper examDsAcqMapper;
 
@@ -119,7 +119,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 
         EegImportJob importJob = objectMapper.readValue(importJobAsString.getBody(), EegImportJob.class);
-        
+
         eegImporterService.createEegDataset(importJob);
         importerService.cleanTempFiles(importJob.getWorkFolder());
         return HttpStatus.OK.value();
@@ -143,7 +143,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
             importerService.cleanTempFiles(importJob.getWorkFolder());
         }
     }
-    
+
     private void createAllDatasetAcquisitions(ImportJob importJob, Long userId) throws Exception {
         LOG.info("Start dataset acquisition creation of importJob: {} for user {}", importJob.getWorkFolder(), userId);
         long startTime = System.currentTimeMillis();
@@ -152,7 +152,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
         long duration = endTime - startTime;
         LOG.info("Creation of dataset acquisition required " + duration + " millis.");
     }
-    
+
     @Override
     public ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findByStudyCard(
               Long studyCardId) {
@@ -166,7 +166,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
     @Override
     public ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findDatasetAcquisitionByExaminationId(Long examinationId) {
-        
+
         List<DatasetAcquisition> daList = datasetAcquisitionService.findByExamination(examinationId);
         daList.sort(new Comparator<DatasetAcquisition>() {
 
@@ -182,13 +182,13 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
             return new ResponseEntity<>(examDsAcqMapper.datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(daList), HttpStatus.OK);
         }
     }
-    
+
     @Override
     public ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findDatasetAcquisitionByDatasetIds(
             @Parameter(description = "ids of the datasets", required = true) @RequestBody Long[] datasetIds) {
-        
+
         List<DatasetAcquisition> daList = datasetAcquisitionService.findByDatasetId(datasetIds);
-        
+
         daList.sort(new Comparator<DatasetAcquisition>() {
             @Override
             public int compare(DatasetAcquisition o1, DatasetAcquisition o2) {
@@ -203,14 +203,14 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
             return new ResponseEntity<>(dsAcqDsMapper.datasetAcquisitionsToDatasetAcquisitionDatasetsDTOs(daList), HttpStatus.OK);
         }
     }
-    
+
     @Override
     public ResponseEntity<Void> deleteDatasetAcquisition(
               Long datasetAcquisitionId)
             throws RestServiceException {
         try {
             Long studyId = datasetAcquisitionService.findById(datasetAcquisitionId).getExamination().getStudyId();
-            
+
             datasetAcquisitionService.deleteById(datasetAcquisitionId, null);
 
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
@@ -227,7 +227,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
     @Override
     public ResponseEntity<DatasetAcquisitionDTO> findDatasetAcquisitionById(
               Long datasetAcquisitionId) {
-        
+
         final DatasetAcquisition datasetAcquisition = datasetAcquisitionService.findById(datasetAcquisitionId);
         if (datasetAcquisition == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -243,8 +243,8 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
         }
         return new ResponseEntity<>(dsAcqMapper.datasetAcquisitionsToDatasetAcquisitionDTOs(datasetAcquisitions), HttpStatus.OK);
     }
-    
-    
+
+
 
     @Override
     public ResponseEntity<Void> updateDatasetAcquisition(
@@ -256,13 +256,13 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
         try {
             datasetAcquisitionService.update(dsAcqMapper.datasetAcquisitionDTOToDatasetAcquisition(datasetAcquisition));
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        
+
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-    
-    
+
+
     private void validate(BindingResult result) throws RestServiceException {
         final FieldErrorMap errors = new FieldErrorMap(result);
         if (!errors.isEmpty()) {

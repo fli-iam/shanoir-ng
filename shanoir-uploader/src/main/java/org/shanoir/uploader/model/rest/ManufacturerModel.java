@@ -1,9 +1,9 @@
 package org.shanoir.uploader.model.rest;
 
 public class ManufacturerModel {
-    
+
     private Long id;
-    
+
     private String datasetModalityType;
 
     private Double magneticField;

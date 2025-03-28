@@ -302,7 +302,7 @@ public class DatasetApiController implements DatasetApi {
     @Override
     public ResponseEntity<List<DatasetDTO>> findDatasetByStudyId(
             Long studyId) {
-        
+
         final List<Examination> examinations = examinationService.findByStudyId(studyId);
         if (examinations.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -322,7 +322,7 @@ public class DatasetApiController implements DatasetApi {
     @Override
     public ResponseEntity<Integer> findNbDatasetByStudyId(
             Long studyId) {
-        
+
         final int nbDatasets = datasetService.countByStudyId(studyId);
         return new ResponseEntity<Integer>(nbDatasets, HttpStatus.OK);
     }
@@ -356,7 +356,7 @@ public class DatasetApiController implements DatasetApi {
         }
         return datasets;
     }
-    
+
     @Override
     public void downloadDatasetById(
             final Long datasetId,
@@ -381,10 +381,10 @@ public class DatasetApiController implements DatasetApi {
         if (pathURLs.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            return new ResponseEntity<>(downloader.downloadDicomMetadataForURL(pathURLs.get(0)), HttpStatus.OK);            
+            return new ResponseEntity<>(downloader.downloadDicomMetadataForURL(pathURLs.get(0)), HttpStatus.OK);
         }
     }
-    
+
     public ResponseEntity<Void> createProcessedDataset(@Parameter(description = "ProcessedDataset to create" ,required = true )  @Valid @RequestBody ProcessedDatasetImportJob importJob) throws IOException, Exception {
         importerService.createProcessedDataset(importJob);
         File originalNiftiName = new File(importJob.getProcessedDatasetFilePath());
@@ -472,7 +472,7 @@ public class DatasetApiController implements DatasetApi {
             @RequestParam(value = "acquisitionId", required = true) Long acquisitionId,
             @Parameter(description = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
             @RequestParam(value = "format", required = false, defaultValue="dcm") String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException {
-        
+
         // STEP 0: Check data integrity
         if (acquisitionId == null) {
             throw new RestServiceException(

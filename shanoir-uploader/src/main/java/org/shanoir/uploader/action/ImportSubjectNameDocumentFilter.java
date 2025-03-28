@@ -52,9 +52,9 @@ public class ImportSubjectNameDocumentFilter implements DocumentListener {
             // Clear subject information for new information
             mainWindow.importDialog.subjectTextField.setValueSet(false);
             mainWindow.importDialog.subjectImageObjectCategoryCB.setEnabled(true);
-            mainWindow.importDialog.subjectImageObjectCategoryCB.setSelectedItem(ImagedObjectCategory.LIVING_HUMAN_BEING);            
+            mainWindow.importDialog.subjectImageObjectCategoryCB.setSelectedItem(ImagedObjectCategory.LIVING_HUMAN_BEING);
             mainWindow.importDialog.subjectLanguageHemisphericDominanceCB.setEnabled(true);
-            mainWindow.importDialog.subjectLanguageHemisphericDominanceCB.setSelectedItem("");            
+            mainWindow.importDialog.subjectLanguageHemisphericDominanceCB.setSelectedItem("");
             mainWindow.importDialog.subjectManualHemisphericDominanceCB.setEnabled(true);
             mainWindow.importDialog.subjectManualHemisphericDominanceCB.setSelectedItem("");
             mainWindow.importDialog.subjectPersonalCommentTextArea.setText("");

@@ -53,7 +53,7 @@ public interface SubjectStudyMapper {
             @Mapping(target = "subject.name", source = "subject.name"),
             @Mapping(target = "subjectPreclinical", source = "subject.preclinical"),
             @Mapping(target = "study.id", source = "study.id"),
-            @Mapping(target = "study.name", source = "study.name"),    
+            @Mapping(target = "study.name", source = "study.name"),
             @Mapping(target = "subjectStudyIdentifier", ignore = true) })
     SubjectStudyDTO subjectStudyToSubjectStudyDTO(SubjectStudy subjectStudy);
 

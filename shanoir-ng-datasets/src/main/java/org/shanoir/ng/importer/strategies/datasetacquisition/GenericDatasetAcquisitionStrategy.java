@@ -23,11 +23,11 @@ import org.springframework.stereotype.Component;
 public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy {
     /** Logger. */
     private static final Logger LOG = LoggerFactory.getLogger(GenericDatasetAcquisitionStrategy.class);
-    
+
     @Autowired
     private DatasetStrategy<GenericDataset> datasetStrategy;
-    
-    
+
+
     @Override
     public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
         GenericDatasetAcquisition datasetAcquisition = new GenericDatasetAcquisition();
@@ -42,7 +42,7 @@ public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStra
             dataset.setDatasetAcquisition(datasetAcquisition);
             genericizedList.add(dataset);
         }
-        datasetAcquisition.setDatasets(genericizedList);        
+        datasetAcquisition.setDatasets(genericizedList);
         return datasetAcquisition;
     }
 }

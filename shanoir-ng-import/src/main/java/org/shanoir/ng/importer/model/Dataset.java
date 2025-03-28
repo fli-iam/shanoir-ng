@@ -24,30 +24,30 @@ import org.shanoir.ng.shared.dicom.EchoTime;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Dataset {
-    
+
     @JsonProperty("name")
     private String name;
-    
+
     private List<ExpressionFormat> expressionFormats = new ArrayList<>();
 
     @JsonProperty("diffusionGradients")
     private List<DiffusionGradient> diffusionGradients;
-    
+
     @JsonProperty("repetitionTimes")
     public Set<Double> repetitionTimes;
-    
+
     @JsonProperty("inversionTimes")
     public Set<Double> inversionTimes;
 
     @JsonProperty("echoTimes")
     public Set<EchoTime> echoTimes;
-    
+
     @JsonProperty("flipAngles")
     public Set<Double> flipAngles;
 
     @JsonProperty("firstImageSOPInstanceUID")
     private String firstImageSOPInstanceUID;
-    
+
     public String getName() {
         return name;
     }

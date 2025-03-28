@@ -32,7 +32,7 @@ public class Cardinality {
         String strCopy = new String(str);
         if ("n".equals(str)) {
             isMultiplier = true;
-            number = 1;    
+            number = 1;
         } else {
             if (strCopy.contains("n")) {
                 isMultiplier = true;

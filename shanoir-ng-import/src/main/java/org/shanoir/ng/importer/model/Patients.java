@@ -19,7 +19,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Patients {
-    
+
     @JsonProperty("patients")
     private List<Patient> patients;
 
@@ -30,5 +30,5 @@ public class Patients {
     public void setPatients(List<Patient> patients) {
         this.patients = patients;
     }
-    
+
 }

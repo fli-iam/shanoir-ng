@@ -262,7 +262,7 @@ public class ImportUtils {
      * @throws IOException
      */
     private static void extractFile(ZipEntry zipIn, ZipFile zipFile, String filePath) throws IOException {
-        
+
         try (InputStream in = zipFile.getInputStream(zipIn);
                 BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath))) {
                     byte[] bytesIn = new byte[BUFFER_SIZE];
@@ -375,7 +375,7 @@ public class ImportUtils {
         }
         return n;
     }
-    
+
     public static String readableFileSize(long size) {
         if (size <= 0)
             return "0";
@@ -425,7 +425,7 @@ public class ImportUtils {
         examination.setComment(comment);
 
         examination.setExaminationDate(examDate);
-        
+
         return examination;
     }
 

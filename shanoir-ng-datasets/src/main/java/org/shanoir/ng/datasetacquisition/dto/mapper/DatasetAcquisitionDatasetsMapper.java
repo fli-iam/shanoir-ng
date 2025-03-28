@@ -39,7 +39,7 @@ import org.springframework.data.domain.Page;
 @DecoratedWith(DatasetAcquisitionDatasetsDecorator.class)
 @MapperConfig(mappingInheritanceStrategy=MappingInheritanceStrategy.AUTO_INHERIT_FROM_CONFIG)
 public interface DatasetAcquisitionDatasetsMapper {
-    
+
     List<DatasetAcquisitionDatasetsDTO> datasetAcquisitionsToDatasetAcquisitionDatasetsDTOs(
             List<DatasetAcquisition> datasetAcquisitions);
 
@@ -51,7 +51,7 @@ public interface DatasetAcquisitionDatasetsMapper {
 
     @Mappings({ @Mapping(target = "source", ignore = true), @Mapping(target = "copies", ignore = true) })
     DatasetAcquisition datasetAcquisitionDatasetsDTOToDatasetAcquisition(DatasetAcquisitionDatasetsDTO dto);
-    
+
     @ObjectFactory
     default DatasetAcquisition createDatasetAcquisition(DatasetAcquisitionDatasetsDTO dto) {
         if (dto.getType().equals("Mr")) return new MrDatasetAcquisition();
@@ -63,7 +63,7 @@ public interface DatasetAcquisitionDatasetsMapper {
         else if (dto.getType().equals("Generic")) return new GenericDatasetAcquisition();
         else throw new IllegalStateException("Cannot map from a dataset acquisition dto that don't provide a valid type. Given type = " + dto.getType());
     }
-    
+
     @ObjectFactory
     default Dataset createDataset(DatasetDTO dto) {
         Dataset ds = DatasetUtils.buildDatasetFromType(dto.getType());

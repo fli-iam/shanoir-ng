@@ -38,9 +38,9 @@ public class SerieTreeNode implements DicomTreeNode {
     private StudyTreeNode parent;
 
     private Serie serie;
-    
+
     private List<String> fileNames;
-    
+
     // constructor for JAXB
     public SerieTreeNode() {
         this.serie = new Serie();
@@ -63,7 +63,7 @@ public class SerieTreeNode implements DicomTreeNode {
     public SerieTreeNode(final Serie serie) {
         this.serie = serie;
     }
-    
+
     public Serie getSerie() {
         return this.serie;
     }
@@ -72,7 +72,7 @@ public class SerieTreeNode implements DicomTreeNode {
     public String getId() {
         return this.serie.getSeriesInstanceUID();
     }
-    
+
     public void setId(String seriesInstanceUID) {
         this.serie.setSeriesInstanceUID(seriesInstanceUID);
     }
@@ -81,29 +81,29 @@ public class SerieTreeNode implements DicomTreeNode {
     public String getModality() {
         return this.serie.getModality();
     }
-    
+
     public void setModality(String modality) {
         this.serie.setModality(modality);
     }
-    
+
     @XmlElement
     public String getProtocol() {
         return this.serie.getProtocolName();
     }
-    
+
     public void setProtocol(String protocolName) {
         this.serie.setProtocolName(protocolName);
     }
-    
+
     @XmlElement
     public String getDescription() {
         return this.serie.getSeriesDescription();
     }
-    
+
     public void setDescription(String seriesDescription) {
         this.serie.setSeriesDescription(seriesDescription);
     }
-    
+
     @XmlElement
     public String getSeriesDate() {
         if (this.serie.getSeriesDate() != null) {
@@ -111,16 +111,16 @@ public class SerieTreeNode implements DicomTreeNode {
         }
         return "";
     }
-    
+
     @XmlElement
     public String getSeriesNumber() {
         return this.serie.getSeriesNumber();
     }
-    
+
     public void setSeriesNumber(String seriesNumber) {
         this.serie.setSeriesNumber(seriesNumber);
     }
-    
+
     @XmlElement
     public String getImagesCount() {
         if (this.serie.getImagesNumber() != null) {
@@ -183,14 +183,14 @@ public class SerieTreeNode implements DicomTreeNode {
             String stationName = equipment.getStationName();
             if (stationName != null && !"".equals(stationName)) {
                 result += " [ " + stationName + " , ";
-            }            
+            }
         }
         InstitutionDicom institution = this.serie.getInstitution();
         if (institution != null) {
             String institutionName = institution.getInstitutionName();
             if (institutionName != null && !"".equals(institutionName)) {
                 result += institutionName + " ] ";
-            }            
+            }
         }
         return result;
     }
@@ -285,13 +285,13 @@ public class SerieTreeNode implements DicomTreeNode {
     public StudyTreeNode getParent() {
         return this.parent;
     }
-    
+
     @XmlElementWrapper(name="fileNames")
     @XmlElement(name="fileName")
     public List<String> getFileNames() {
         return fileNames;
     }
-    
+
     public void setFileNames(List<String> fileNames) {
         this.fileNames = fileNames;
     }

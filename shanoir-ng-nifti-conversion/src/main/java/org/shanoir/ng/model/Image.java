@@ -29,16 +29,16 @@ public class Image {
 
     @JsonProperty("echoTimes")
     public Set<EchoTime> echoTimes;
-    
+
     @JsonProperty("repetitionTime")
     public Double repetitionTime;
-    
+
     @JsonProperty("inversionTime")
     public Double inversionTime;
 
     @JsonProperty("flipAngle")
     public String flipAngle;
-    
+
     @JsonProperty("imageOrientationPatient")
     public List<Double> imageOrientationPatient;
 

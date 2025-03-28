@@ -37,7 +37,7 @@ public class SecurityService {
 
     @Autowired
     StudyRepository studyRepository;
-    
+
     /**
      * Get study center rights for the current user as two separate variable.
      *

@@ -36,13 +36,13 @@ public class DatasetUtils {
             }
         }
     }
-    
-    
+
+
     public static Dataset buildDatasetFromType(String type) {
-        
+
         DatasetMetadata originMetadata = new DatasetMetadata();
         Dataset dataset = null;
-            
+
         switch(type) {
             case DatasetType.Names.Generic:
                 dataset = new CalibrationDataset();
@@ -115,7 +115,7 @@ public class DatasetUtils {
 
     public static Dataset copyDatasetFromDataset(Dataset d) {
         DatasetType type = d.getType();
-    
+
         return switch (type) {
             case Calibration -> new CalibrationDataset(d);
             case Ct -> new CtDataset(d);
@@ -134,5 +134,5 @@ public class DatasetUtils {
             default -> new GenericDataset(d);
         };
     }
-    
+
 }

@@ -3,15 +3,15 @@ package org.shanoir.uploader.model.dto;
 public class StudyCardOnStudyResultDTO {
 
     private String subjectName;
-    
+
     private String examinationDate;
-    
+
     private String examinationComment;
-    
+
     private String resultExaminationLevel;
-    
+
     private String resultAcquisitionLevel;
-    
+
     private String resultDatasetLevel;
 
     public String getSubjectName() {
@@ -61,5 +61,5 @@ public class StudyCardOnStudyResultDTO {
     public void setResultDatasetLevel(String resultDatasetLevel) {
         this.resultDatasetLevel = resultDatasetLevel;
     }
-    
+
 }

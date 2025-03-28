@@ -47,10 +47,10 @@ public class ImportJob implements Serializable {
     private Long studyId;
 
     private String studyCardName;
-    
+
     // todo: remove this later, when front end uses StudyCards
     private Long acquisitionEquipmentId;
-    
+
     private String anonymisationProfileToUse;
 
     private String archive;
@@ -209,6 +209,6 @@ public class ImportJob implements Serializable {
     public void setCenterId(Long centerId) {
         this.centerId = centerId;
     }
-    
+
 }
 

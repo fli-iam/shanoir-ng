@@ -42,7 +42,7 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("dev")
 public class TherapyApiControllerTestIT extends KeycloakControllerTestIT {
-    
+
     private static final String REQUEST_PATH = "/therapy";
     private static final String REQUEST_PATH_ALL = REQUEST_PATH ;
     private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
@@ -80,7 +80,7 @@ public class TherapyApiControllerTestIT extends KeycloakControllerTestIT {
                 String.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
-    
+
     @Test
     public void findTherapiesByTypeProtected() {
         final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_TYPE, String.class);
@@ -114,7 +114,7 @@ public class TherapyApiControllerTestIT extends KeycloakControllerTestIT {
     @Test
     public void updateNewTherapyProtected() {
         final HttpEntity<Therapy> entity = new HttpEntity<Therapy>(TherapyModelUtil.createTherapyBrain());
-        
+
         final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
                 String.class);
         assertEquals(HttpStatus.FOUND, response.getStatusCode());

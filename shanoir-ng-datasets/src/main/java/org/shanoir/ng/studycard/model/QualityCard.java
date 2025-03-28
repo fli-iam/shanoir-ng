@@ -58,10 +58,10 @@ public class QualityCard extends HalEntity implements Card {
 
     /** The study for which is defined the study card. */
     private Long studyId;
-    
+
     @NotNull
     private boolean toCheckAtImport;
-    
+
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name="quality_card_id")
     private List<QualityExaminationRule> rules;
@@ -97,7 +97,7 @@ public class QualityCard extends HalEntity implements Card {
     public void setRules(List<QualityExaminationRule> rules) {
         this.rules = rules;
     }
-    
+
     /**
     * Application during import, when dicoms are present in tmp directory.
     * @param examination

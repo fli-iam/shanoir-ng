@@ -188,7 +188,7 @@ public interface ExaminationApi {
             @Parameter(description = "name of the subject", required = true) @PathVariable("subjectName") String subjectName,
             @Parameter(description = "id of the center", required = true) @PathVariable("centerId") Long centerId,
             @Parameter(description = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException;
-    
+
     @Operation(summary = "", description = "Download extra data from an examination", tags = {})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "examination updated"),

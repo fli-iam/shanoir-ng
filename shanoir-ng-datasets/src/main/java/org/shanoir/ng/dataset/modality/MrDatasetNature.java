@@ -72,19 +72,19 @@ public enum MrDatasetNature {
 
     // Apparent diffusion coefficient mr dataset
     APPARENT_DIFFUSION_COEFFICIENT_MR_DATASET(17),
-    
+
     // Flair mr dataset
     FLAIR_MR_DATASET(18),
-    
+
     // Flair dce mr dataset
     FLAIR_DCE_MR_DATASET(19),
-    
+
     // Perfusion weighted mr dataset
     PERFUSION_WEIGHTED_MR_DATASET(20),
-    
+
     // Susceptibility weighted angiography mr dataset
     SUSCEPTIBILITY_WEIGHTED_ANGIOGRAPHY_MR_DATASET(21),
-    
+
     // Susceptibility weighted mr dataset
     SUSCEPTIBILITY_WEIGHTED_MR_DATASET(22);
 

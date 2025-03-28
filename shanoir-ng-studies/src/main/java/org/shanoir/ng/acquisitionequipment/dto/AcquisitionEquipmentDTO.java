@@ -30,7 +30,7 @@ public class AcquisitionEquipmentDTO {
     private ManufacturerModel manufacturerModel;
 
     private String serialNumber;
-    
+
     private Boolean compatible = false;
 
     /**

@@ -38,7 +38,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
  *
  */
 public interface SubjectService {
-    
+
     /**
      * Get all the subjects.
      *
@@ -47,7 +47,7 @@ public interface SubjectService {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(filterObject, 'CAN_SEE_ALL')")
     List<Subject> findAll();
-    
+
     /**
      * Get all the subjects.
      *
@@ -58,7 +58,7 @@ public interface SubjectService {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     List<IdName> findNames(List<Long> subjectIds);
-    
+
     /**
      * Get all the subjects of a study
      *
@@ -68,7 +68,7 @@ public interface SubjectService {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnSubjectsForOneStudy(returnObject, 'CAN_SEE_ALL')")
     public List<SimpleSubjectDTO> findAllSubjectsOfStudyId(final Long studyId);
-    
+
     /**
      * Get all the subjects of a study
      *
@@ -79,7 +79,7 @@ public interface SubjectService {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnSubjectsForOneStudy(returnObject, 'CAN_SEE_ALL')")
     List<SimpleSubjectDTO> findAllSubjectsOfStudyAndPreclinical(Long studyId, Boolean preclinical);
-    
+
     /**
      * Find subject by data.
      *
@@ -114,7 +114,7 @@ public interface SubjectService {
      */
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     Subject findByIdentifierInStudiesWithRights(String identifier, List<Study> studies);
-    
+
     /**
      * Find a subject by its subject-study relationship id.
      *
@@ -133,7 +133,7 @@ public interface SubjectService {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(returnObject, 'CAN_SEE_ALL')")
     Subject findSubjectFromCenterCode(String centerCode);
-    
+
     /**
      * Save a subject.
      *
@@ -142,7 +142,7 @@ public interface SubjectService {
      */
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
     Subject create(Subject subject);
-    
+
     /**
      * Save a subject and auto-increment the common name on using the centerId.
      *
@@ -151,7 +151,7 @@ public interface SubjectService {
      */
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
     Subject createAutoIncrement(Subject subject, Long centerId);
-    
+
     /**
      * Update a subject.
      *

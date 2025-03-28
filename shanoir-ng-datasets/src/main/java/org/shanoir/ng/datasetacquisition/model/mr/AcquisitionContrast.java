@@ -32,31 +32,31 @@ public enum AcquisitionContrast {
     T2STAR(3),
 
     T2_STAR(3),
-    
+
     // Spin density
     SPIN_DENSITY(4),
-    
+
     // Diffusion
     DIFFUSION(5),
-    
+
     FLOW_ENCODED(6),
-    
+
     FLUID_ATTENUATED(7),
-    
+
     PERFUSION(8),
-    
+
     PROTON_DENSITY(9),
-    
+
     STIR(10),
-    
+
     TAGGING(11),
-    
+
     TOF(12),
-    
+
     UNKNOWN(13),
-    
+
     MIXED(14),
-    
+
     SPECTROSCOPY(15);
 
     private int id;
@@ -89,7 +89,7 @@ public enum AcquisitionContrast {
         }
         throw new IllegalArgumentException("No matching acquisition contrast for id " + id);
     }
-    
+
     /**
      * Get an acquisition contrast by its name.
      *
@@ -107,7 +107,7 @@ public enum AcquisitionContrast {
             return AcquisitionContrast.UNKNOWN;
         }
     }
-    
+
     /**
      * @return the id
      */

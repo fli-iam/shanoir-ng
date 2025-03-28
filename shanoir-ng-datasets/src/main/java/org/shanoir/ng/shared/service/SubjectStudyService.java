@@ -26,7 +26,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
  *
  */
 public interface SubjectStudyService {
-    
+
     /**
      * Update subject study.
      *

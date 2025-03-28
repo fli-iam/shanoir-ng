@@ -22,7 +22,7 @@ import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 
 
 public class EegDatasetWithDependenciesDTO extends EegDatasetWithProcessingsDTO implements DatasetWithDependenciesDTOInterface {
-    
+
     private DatasetAcquisitionDTO datasetAcquisition;
 
     private DatasetProcessingDTO datasetProcessing;

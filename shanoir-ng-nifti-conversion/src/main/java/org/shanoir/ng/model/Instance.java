@@ -28,7 +28,7 @@ public class Instance {
 
     @JsonProperty("sopInstanceUID")
     private String sopInstanceUID;
-    
+
     @JsonProperty("instanceNumber")
     private String instanceNumber;
 
@@ -78,5 +78,5 @@ public class Instance {
     public void setSopInstanceUID(String sopInstanceUID) {
         this.sopInstanceUID = sopInstanceUID;
     }
-    
+
 }

@@ -26,7 +26,7 @@ public class CoilDTO {
     private IdName center;
 
     private CoilType coilType;
-    
+
     private Long id;
 
     private IdName manufacturerModel;
@@ -43,7 +43,7 @@ public class CoilDTO {
     public CoilDTO() {
         // This default constructor is empty
     }
-    
+
     /**
      * @return the center
      */

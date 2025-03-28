@@ -64,7 +64,7 @@ public class SecurityConfiguration {
     protected SessionAuthenticationStrategy sessionAuthenticationStrategy() {
         return new NullAuthenticatedSessionStrategy();
     }
-    
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http

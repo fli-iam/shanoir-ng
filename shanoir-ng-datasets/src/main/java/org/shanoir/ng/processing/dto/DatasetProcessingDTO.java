@@ -41,7 +41,7 @@ public class DatasetProcessingDTO {
     private List<DatasetDTO> inputDatasets;
 
     private LocalDate processingDate;
-    
+
     private Long studyId;
 
     private Long parentId;
@@ -69,7 +69,7 @@ public class DatasetProcessingDTO {
     public void setDatasetProcessingType(DatasetProcessingType datasetProcessingType) {
         this.datasetProcessingType = datasetProcessingType;
     }
-    
+
     public List<DatasetDTO> getInputDatasets() {
         return inputDatasets;
     }

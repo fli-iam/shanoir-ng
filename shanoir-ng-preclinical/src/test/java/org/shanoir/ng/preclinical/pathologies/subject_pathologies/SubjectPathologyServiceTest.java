@@ -85,7 +85,7 @@ public class SubjectPathologyServiceTest {
 
     @Test
     public void deleteByAnimalSubjectTest() throws ShanoirException {
-        
+
         given(spathosRepository.findByAnimalSubject(Mockito.any(AnimalSubject.class))).willReturn(Arrays.asList(PathologyModelUtil.createSubjectPathology()));
 
         spathosService.deleteByAnimalSubject(AnimalSubjectModelUtil.createAnimalSubject());

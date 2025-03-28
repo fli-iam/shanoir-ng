@@ -33,7 +33,7 @@ public enum HemisphericDominance {
     Right(2, "Right");
 
     private int id;
-    
+
     private String name;
 
     /**

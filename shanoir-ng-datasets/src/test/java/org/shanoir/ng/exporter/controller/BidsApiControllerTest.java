@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class BidsApiControllerTest {
 
     private static final String REQUEST_PATH = "/bids";
-    
+
     private static final String REQUEST_PATH_GENERATE = REQUEST_PATH + "/studyId/1/studyName/Name";
 
     private static final String REQUEST_PATH_EXPORT = REQUEST_PATH + "/exportBIDS/studyId/1";
@@ -40,7 +40,7 @@ public class BidsApiControllerTest {
 
     @MockBean
     BidsDeserializer bidsDeserializer;
-    
+
     @MockBean
     StudyRepository studyRepo;
 
@@ -54,10 +54,10 @@ public class BidsApiControllerTest {
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void testGenerateBIDSByStudyId() throws Exception {
         // GIVEN a study with a bids folder to generate
-        
+
         // WHEN we call the API to generate the folder
         mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_GENERATE)).andExpect(status().isOk());
-        
+
         // THEN the service is called
         Mockito.verify(bidsService).exportAsBids(1L, "Name");
     }
@@ -66,10 +66,10 @@ public class BidsApiControllerTest {
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void testExportBIDSFileNoFile() throws Exception  {
         // GIVEN a study with a bids folder to generate
-        
+
         // WHEN we call the API to generate the folder
         mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_EXPORT).param("filePath", "inexisting")).andExpect(status().isUnauthorized());
-        
+
         // THEN the service is called
     }
 

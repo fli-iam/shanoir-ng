@@ -46,10 +46,10 @@ public class UserRepositoryTest {
     private static final String USER_TEST_1_EMAIL = "admin@shanoir.fr";
     private static final Long USER_TEST_1_ID = 1L;
     private static final String USER_TEST_1_USERNAME = "admin";
-    
+
     @Autowired
     private UserRepository repository;
-    
+
     @Test
     public void findAllTest() throws Exception {
         Iterable<User> usersDb = repository.findAll();
@@ -62,27 +62,27 @@ public class UserRepositoryTest {
         }
         assertThat(nbUsers).isEqualTo(7);
     }
-    
+
     @Test
     public void findAdminEmailsTest() throws Exception {
         List<String> emails = repository.findAdminEmails();
         assertNotNull(emails);
         assertTrue(!emails.isEmpty());
     }
-    
+
     @Test
     public void findByEmailTest() throws Exception {
         Optional<User> userDb = repository.findByEmail(USER_TEST_1_EMAIL);
         assertTrue(userDb.isPresent());
         assertThat(userDb.get().getUsername()).isEqualTo(USER_TEST_1_USERNAME);
     }
-    
+
     @Test
     public void findOneTest() throws Exception {
         User userDb = repository.findById(USER_TEST_1_ID).orElse(null);
         assertThat(userDb.getUsername()).isEqualTo(USER_TEST_1_USERNAME);
     }
-    
+
     @Test
     public void findByExpirationDateLessThanAndFirstExpirationNotificationSentFalseTest() throws Exception {
         // 15/06/2017
@@ -91,7 +91,7 @@ public class UserRepositoryTest {
         assertThat(usersDb.size()).isEqualTo(1);
         assertThat(usersDb.get(0).getId()).isEqualTo(5L);
     }
-    
+
     @Test
     public void findByExpirationDateLessThanAndSecondExpirationNotificationSentFalseTest() throws Exception {
         // 01/01/2017
@@ -100,14 +100,14 @@ public class UserRepositoryTest {
         assertThat(usersDb.size()).isEqualTo(1);
         assertThat(usersDb.get(0).getId()).isEqualTo(4L);
     }
-    
+
     @Test
     public void findByIdInTest() throws Exception {
         List<User> usersDb = repository.findByIdIn(Arrays.asList(USER_TEST_1_ID));
         assertNotNull(usersDb);
         assertThat(usersDb.get(0).getId()).isEqualTo(USER_TEST_1_ID);
     }
-    
+
     @Test
     public void findByUsernameTest() throws Exception {
         Optional<User> userDb = repository.findByUsername(USER_TEST_1_USERNAME);

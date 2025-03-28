@@ -23,7 +23,7 @@ import org.shanoir.uploader.dicom.DicomTreeNode;
 public class StudyTreeNode implements DicomTreeNode {
 
     private PatientTreeNode parent;
-    
+
     private Study study;
 
     /** List of children. */
@@ -94,7 +94,7 @@ public class StudyTreeNode implements DicomTreeNode {
     public String getDisplayString() {
         return  study.toTreeString();
     }
-    
+
     public LocalDate getStudyDate() {
         return study.getStudyDate();
     }
@@ -187,7 +187,7 @@ public class StudyTreeNode implements DicomTreeNode {
         String result = "[Study :" + this.study.getStudyDescription() + "]\n";
         return result;
     }
-    
+
     /**
      * Initialize serie from DicomObject.
      * @param dicomObject
@@ -205,5 +205,5 @@ public class StudyTreeNode implements DicomTreeNode {
     public PatientTreeNode getParent() {
         return this.parent;
     }
-    
+
 }

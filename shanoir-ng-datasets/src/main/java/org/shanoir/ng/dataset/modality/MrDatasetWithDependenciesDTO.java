@@ -22,7 +22,7 @@ import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 
 
 public class MrDatasetWithDependenciesDTO extends MrDatasetWithProcessingsDTO implements DatasetWithDependenciesDTOInterface {
-    
+
     private DatasetProcessingDTO datasetProcessing;
 
     private DatasetAcquisitionDTO datasetAcquisition;

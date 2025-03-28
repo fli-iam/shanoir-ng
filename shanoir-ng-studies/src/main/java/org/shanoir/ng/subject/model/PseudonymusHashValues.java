@@ -33,7 +33,7 @@ import jakarta.persistence.Table;
 @JsonPropertyOrder({ "_links", "id", "birthNameHash1", "birthNameHash2", "birthNameHash3","lastNameHash1","lastNameHash2","lastNameHash3","firstNameHash1","firstNameHash2","firstNameHash3","birthDateHash", "subject" })
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 public class PseudonymusHashValues  extends HalEntity implements Serializable {
-    
+
     /**
      * UID
      */
@@ -44,7 +44,7 @@ public class PseudonymusHashValues  extends HalEntity implements Serializable {
     @JsonIgnore
     @JoinColumn(name = "id", referencedColumnName = "id", unique = true, nullable = false, updatable = true)
     private Subject subject;
-    
+
     private String birthNameHash1;
 
     private String birthNameHash2;
@@ -64,7 +64,7 @@ public class PseudonymusHashValues  extends HalEntity implements Serializable {
     private String firstNameHash3;
 
     private String birthDateHash;
-    
+
 
     /*
      * (non-Javadoc)
@@ -164,7 +164,7 @@ public class PseudonymusHashValues  extends HalEntity implements Serializable {
             }
         } else if (!birthDateHash.equals(other.birthDateHash)) {
             return false;
-        }        
+        }
         return true;
     }
 
@@ -189,7 +189,7 @@ public class PseudonymusHashValues  extends HalEntity implements Serializable {
         result = prime * result + ((birthDateHash == null) ? 0 : birthDateHash.hashCode());
         return result;
     }
-    
+
     public Subject getSubject() {
         return subject;
     }

@@ -48,7 +48,7 @@ import org.shanoir.ng.shared.quality.QualityTag;
 public class ImportJob implements Serializable {
 
     private static final long serialVersionUID = 8804929608059674037L;
-    
+
     private long timestamp;
 
     /* DicomQuery, that has been used to extract the DICOM study = ImportJob */
@@ -84,9 +84,9 @@ public class ImportJob implements Serializable {
     private Long studyCardId;
 
     private String studyCardName;
-    
+
     private Long acquisitionEquipmentId;
-    
+
     // subject: use already existing
     private String subjectName;
 

@@ -45,7 +45,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 public class RoleApiControllerTest {
 
     private static final String REQUEST_PATH = "/roles";
-    
+
     @Autowired
     private MockMvc mvc;
 

@@ -72,7 +72,7 @@ public class SubjectStudyServiceImpl implements SubjectStudyService {
                 this.send(subjectStudyTagDTOs, RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG);
         return Utils.toList(subjectStudiesDb);
     }
-    
+
     /*
      * Update some values of subject study to save them in database.
      *

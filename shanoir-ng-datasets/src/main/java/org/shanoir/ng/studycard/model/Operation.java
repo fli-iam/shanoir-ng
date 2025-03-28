@@ -58,7 +58,7 @@ public enum Operation {
         DicomTagType.Long}),
     DOES_NOT_END_WITH(10, new DicomTagType[] {
         DicomTagType.String}),
-    PRESENT(11, new DicomTagType[] {        
+    PRESENT(11, new DicomTagType[] {
         DicomTagType.String,
         DicomTagType.Date,
         DicomTagType.Double,
@@ -78,10 +78,10 @@ public enum Operation {
         DicomTagType.Integer,
         DicomTagType.Long,
         DicomTagType.Binary});
-    
+
     private int id;
     private DicomTagType[] dicomTypeCompatibilities;
-    
+
     private Operation(final int id, DicomTagType[] dicomTypeCompatibilities) {
         this.id = id;
         this.dicomTypeCompatibilities = dicomTypeCompatibilities;

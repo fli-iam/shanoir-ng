@@ -44,12 +44,12 @@ import io.swagger.v3.oas.annotations.Parameter;
 public class QualityCardApiController implements QualityCardApi {
 
     private static final String MICROSERVICE_COMMUNICATION_ERROR = "Microservice communication error";
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(QualityCardApiController.class);
-    
+
     @Autowired
     private QualityCardService qualityCardService;
-    
+
     @Autowired
     private QualityCardUniqueConstraintManager uniqueConstraintManager;
 
@@ -79,7 +79,7 @@ public class QualityCardApiController implements QualityCardApi {
         }
         return new ResponseEntity<>(qualityCard, HttpStatus.OK);
     }
-    
+
 
     @Override
     public ResponseEntity<List<QualityCard>> findQualityCardByStudyId(
@@ -153,7 +153,7 @@ public class QualityCardApiController implements QualityCardApi {
     @Override
     public ResponseEntity<QualityCardResult> applyQualityCardOnStudy(
              Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException {
-        
+
         final QualityCard qualityCard = qualityCardService.findById(qualityCardId);
         if (qualityCard == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -162,7 +162,7 @@ public class QualityCardApiController implements QualityCardApi {
         QualityCardResult results = cardProcessingService.applyQualityCardOnStudy(qualityCard, true);
         return new ResponseEntity<>(results, HttpStatus.OK);
     }
-    
+
     @Override
     public ResponseEntity<QualityCardResult> testQualityCardOnStudy(
              Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException {

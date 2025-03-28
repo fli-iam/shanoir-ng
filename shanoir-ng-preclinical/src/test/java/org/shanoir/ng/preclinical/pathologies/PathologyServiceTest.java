@@ -85,8 +85,8 @@ public class PathologyServiceTest {
 
         Mockito.verify(pathologiesRepository, Mockito.times(1)).findById(Mockito.anyLong());
     }
-    
-    
+
+
 
     @Test
     public void saveTest() throws ShanoirException {
@@ -103,7 +103,7 @@ public class PathologyServiceTest {
 
         Mockito.verify(pathologiesRepository, Mockito.times(1)).save(Mockito.any(Pathology.class));
     }
-    
+
     /*
     @Test
     public void findByNameTest() {

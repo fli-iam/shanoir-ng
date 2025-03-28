@@ -51,7 +51,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AcquisitionEquipmentServiceImpl.class);
-    
+
     @Autowired
     private AcquisitionEquipmentRepository repository;
 
@@ -91,7 +91,7 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
     public List<AcquisitionEquipment> findAllBySerialNumber(String serialNumber) {
         return this.repository.findBySerialNumberContaining(serialNumber);
     }
-    
+
     public AcquisitionEquipment create(AcquisitionEquipment entity) {
         AcquisitionEquipment newDbAcEq = repository.save(entity);
         try {

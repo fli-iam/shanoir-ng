@@ -35,7 +35,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 public class ZipFileImportTest extends AbstractTest {
 
     private static final Logger logger = LoggerFactory.getLogger(ZipFileImportTest.class);
-    
+
     private static final String PROFILE_NEURINFO = "Profile Neurinfo";
 
     private static final String IN_PROGRESS = "IN_PROGRESS";
@@ -55,7 +55,7 @@ public class ZipFileImportTest extends AbstractTest {
             }
         }
     }
-    
+
     private org.shanoir.uploader.model.rest.Study createStudyAndCenterAndStudyCard() {
         org.shanoir.uploader.model.rest.Study study = new org.shanoir.uploader.model.rest.Study();
         final String randomStudyName = "Study-Name-" + UUID.randomUUID().toString();
@@ -167,7 +167,7 @@ public class ZipFileImportTest extends AbstractTest {
             }
         }
     }
-    
+
     private ImportJob step1UploadDicom(final String fileName) {
         try {
             URL resource = getClass().getClassLoader().getResource(fileName);

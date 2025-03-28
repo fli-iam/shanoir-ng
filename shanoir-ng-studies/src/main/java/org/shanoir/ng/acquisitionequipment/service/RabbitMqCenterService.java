@@ -44,7 +44,7 @@ public class RabbitMqCenterService {
 
     @Autowired
     private ObjectMapper mapper;
-    
+
     @RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPMENT_CENTER_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
     @Transactional

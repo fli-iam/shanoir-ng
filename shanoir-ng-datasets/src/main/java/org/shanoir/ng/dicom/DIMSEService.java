@@ -37,7 +37,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class DIMSEService {
-    
+
     /** Logger. */
     private static final Logger LOG = LoggerFactory.getLogger(DIMSEService.class);
 
@@ -53,7 +53,7 @@ public class DIMSEService {
 
     @Value("${dcm4chee-arc.dicom.c-store.aet.called}")
     private String dcm4cheeCStoreAETCalled;
-    
+
     public void sendDicomFilesToPacs(File directoryWithDicomFiles) throws Exception {
         if (directoryWithDicomFiles != null && directoryWithDicomFiles.exists()
                 && directoryWithDicomFiles.isDirectory()) {

@@ -30,35 +30,35 @@ public class MicroserviceRequestsService {
      * Search request part.
      */
     public static final String SEARCH = "/search";
-    
+
     public static final String CENTERID = "/centerid";
-    
+
     public static final String SUBJECT = "/subject/";
-    
+
     public static final String STUDY = "/study/";
-    
+
     public static final String SUBJECT_NAME = "/subjectName/";
-    
+
     public static final String STUDY_NAME = "/studyName/";
-    
+
     public static final String STUDY_ID = "/studyId/";
-    
+
     @Value("${ms.url.shanoir-ng-studycards}")
     private String studycardsMsUrl;
-    
+
     @Value("${ms.url.shanoir-ng-examinations}")
     private String examinationsMsUrl;
 
     @Value("${ms.url.shanoir-ng-bids}")
     private String bidsMsUrl;
-    
+
     /**
      * @return the studycardsMsUrl
      */
     public String getStudycardsMsUrl() {
         return studycardsMsUrl;
     }
-    
+
     public String getExaminationMsUrl() {
         return examinationsMsUrl;
     }
@@ -69,5 +69,5 @@ public class MicroserviceRequestsService {
     public String getBidsMsUrl() {
         return bidsMsUrl;
     }
-    
+
 }

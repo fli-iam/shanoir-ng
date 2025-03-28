@@ -37,14 +37,14 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
 
     @Autowired
     DicomProcessing dicomProcessing;
-    
+
     @Autowired
     DatasetExpressionContext datasetExpressionContext;
-    
+
     @Override
     public DatasetsWrapper<CtDataset> generateDatasetsForSerie(AcquisitionAttributes<String> dicomAttributes, Serie serie,
             ImportJob importJob) throws Exception {
-        
+
         DatasetsWrapper<CtDataset> datasetWrapper = new DatasetsWrapper<>();
         /**
          * retrieve number of dataset in current serie if Number of dataset > 1 then
@@ -114,10 +114,10 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
             datasetExpression.setDataset(ctDataset);
             ctDataset.getDatasetExpressions().add(datasetExpression);
         }
-        
+
         DatasetMetadata originalDM = ctDataset.getOriginMetadata();
         ctDataset.setUpdatedMetadata(originalDM);
-        
+
         return ctDataset;
     }
 

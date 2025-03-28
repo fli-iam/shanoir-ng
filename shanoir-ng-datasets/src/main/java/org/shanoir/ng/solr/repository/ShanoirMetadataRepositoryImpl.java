@@ -373,7 +373,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 
     @PersistenceContext
     private EntityManager em;
-    
+
     @Override
     public List<ShanoirMetadata> findAllAsSolrDoc() {
         return this.findSolr("");
@@ -394,12 +394,12 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
         if (result.isEmpty()) {
             return null;
         }
-        
+
         if (result.size() > 1) {
             LOG.error("Solr query returned multiple result for dataset [{}]. Please check database consistency.", datasetId);
             return null;
         }
-        
+
         return result.get(0);
     }
 

@@ -19,7 +19,7 @@ import org.shanoir.uploader.utils.PropertiesUtil;
 
 @Component
 public class SelectProfilePanelActionListener implements ActionListener {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(SelectProfilePanelActionListener.class);
 
     private SelectProfileConfigurationPanel selectProfilePanel;
@@ -35,7 +35,7 @@ public class SelectProfilePanelActionListener implements ActionListener {
         String selectedProfile = (String) selectProfilePanel.selectProfileCB.getSelectedItem();
         ShUpConfig.profileSelected = selectedProfile;
         configureSelectedProfile(selectedProfile);
-        
+
         // If the "Remember profile" box is ticked, we store the selected profile in basic.properties
         // to avoid displaying the Profile selection the next time the application starts
         if (selectProfilePanel.rbRememberProfile.isSelected()) {
@@ -64,7 +64,7 @@ public class SelectProfilePanelActionListener implements ActionListener {
         File profilePropertiesFile = new File(ShUpConfig.profileDirectory, ShUpConfig.PROFILE_PROPERTIES);
         PropertiesUtil.loadPropertiesFromFile(ShUpConfig.profileProperties, profilePropertiesFile);
         logger.info("Profile " + selectedProfile + " successfully initialized.");
-        
+
         File keycloakJson = new File(ShUpConfig.profileDirectory, ShUpConfig.KEYCLOAK_JSON);
         if (keycloakJson.exists()) {
             ShUpConfig.keycloakJson = keycloakJson;
@@ -91,7 +91,7 @@ public class SelectProfilePanelActionListener implements ActionListener {
                 } catch (IOException ex) {
                     logger.error(ex.getMessage(), ex);
                 }
-                ShUpConfig.basicProperties.put(ShUpConfig.MODE_PSEUDONYMUS_KEY_FILE, keyProperties.get(ShUpConfig.MODE_PSEUDONYMUS_KEY_FILE));                
+                ShUpConfig.basicProperties.put(ShUpConfig.MODE_PSEUDONYMUS_KEY_FILE, keyProperties.get(ShUpConfig.MODE_PSEUDONYMUS_KEY_FILE));
             } else {
                 logger.error("Missing pseudonymus key file.");
                 return;

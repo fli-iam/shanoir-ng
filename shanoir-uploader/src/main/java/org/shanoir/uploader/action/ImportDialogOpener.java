@@ -82,7 +82,7 @@ public class ImportDialogOpener {
         }
         importDialog.setVisible(true);
     }
-    
+
     /**
      * @param uploadJob
      */
@@ -190,7 +190,7 @@ public class ImportDialogOpener {
                 if (firstStudy.getStudyCards() != null && !firstStudy.getStudyCards().isEmpty()) {
                     StudyCard firstStudyCard = firstStudy.getStudyCards().get(0);
                     // this selectItem adds centers to the newly-create-exam
-                    importDialog.studyCardCB.setSelectedItem(firstStudyCard);                    
+                    importDialog.studyCardCB.setSelectedItem(firstStudyCard);
                 }
             }
         }
@@ -212,7 +212,7 @@ public class ImportDialogOpener {
          */
         // Insert ImageObjectCategory objects
         for (int i = 0; i < ImagedObjectCategory.values().length; i++) {
-            importDialog.subjectImageObjectCategoryCB.addItem(ImagedObjectCategory.values()[i]);                    
+            importDialog.subjectImageObjectCategoryCB.addItem(ImagedObjectCategory.values()[i]);
         }
         // Insert String here, as the model does not contain "", the unknown, not selected hemdom
         importDialog.subjectLanguageHemisphericDominanceCB.addItem("");
@@ -259,9 +259,9 @@ public class ImportDialogOpener {
             }
             importDialog.subjectTextField.setValueSet(false);
             importDialog.subjectImageObjectCategoryCB.setEnabled(true);
-            importDialog.subjectImageObjectCategoryCB.setSelectedItem(ImagedObjectCategory.LIVING_HUMAN_BEING);            
+            importDialog.subjectImageObjectCategoryCB.setSelectedItem(ImagedObjectCategory.LIVING_HUMAN_BEING);
             importDialog.subjectLanguageHemisphericDominanceCB.setEnabled(true);
-            importDialog.subjectLanguageHemisphericDominanceCB.setSelectedItem("");            
+            importDialog.subjectLanguageHemisphericDominanceCB.setSelectedItem("");
             importDialog.subjectManualHemisphericDominanceCB.setEnabled(true);
             importDialog.subjectManualHemisphericDominanceCB.setSelectedItem("");
             importDialog.subjectPersonalCommentTextArea.setText("");

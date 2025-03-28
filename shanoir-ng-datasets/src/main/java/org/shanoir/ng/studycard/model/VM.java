@@ -41,19 +41,19 @@ public class VM {
             this.max = new Cardinality(split[1]);
         }
     }
-    
+
     public int getMin() {
         return min;
     }
-    
+
     public void setMin(int min) {
         this.min = min;
     }
-    
+
     public Cardinality getMax() {
         return max;
     }
-    
+
     public void setMax(Cardinality max) {
         this.max = max;
     }
@@ -62,7 +62,7 @@ public class VM {
     public String toString() {
         return getMin() + "-" + getMax().toString();
     }
-    
+
     public static VM of(int tag) {
         if (Tag.OffendingElement == tag) return new VM("1-n");
         if (Tag.AttributeIdentifierList == tag) return new VM("1-n");

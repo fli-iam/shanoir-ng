@@ -22,13 +22,13 @@ import java.util.List;
 public class SubjectDTO {
 
     private List<SubjectStudyDTO> subjectStudyList;
-    
+
     protected Long id;
-    
+
     protected String name;
-    
+
     public SubjectDTO() { };
-    
+
     /**
      * @param id
      * @param name

@@ -75,7 +75,7 @@ public class QualityExaminationRule extends AbstractEntity {
     public void setConditions(List<StudyCardCondition> conditions) {
         this.conditions = conditions;
     }
-        
+
     public boolean isOrConditions() {
         return orConditions;
     }
@@ -85,20 +85,20 @@ public class QualityExaminationRule extends AbstractEntity {
     }
 
     public void apply(Examination examination, QualityCardResult result, WADODownloaderService downloader) {
-        apply(examination, null, result, downloader);    
+        apply(examination, null, result, downloader);
     }
 
     public void apply(ExaminationData examination, QualityCardResult result, WADODownloaderService downloader) {
         apply(examination, null, result, downloader);
     }
-    
+
     public void apply(Examination examination, ExaminationAttributes<?> examinationDicomAttributes, QualityCardResult result, WADODownloaderService downloader) {
         ExaminationData examData = new ExaminationData(examination);
         if (examData.getSubjectStudy() == null) {
             Logger log = LoggerFactory.getLogger(QualityExaminationRule.class);
             log.warn("No subject study in exam " + examination.getId());
         } else {
-            apply(examData, examinationDicomAttributes, result, downloader);    
+            apply(examData, examinationDicomAttributes, result, downloader);
         }
     }
 

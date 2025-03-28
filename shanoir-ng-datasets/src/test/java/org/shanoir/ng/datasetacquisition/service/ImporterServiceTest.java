@@ -68,7 +68,7 @@ public class ImporterServiceTest {
     @InjectMocks
     @Spy
     ImporterService service = new ImporterService();
-    
+
     @Mock
     private ExaminationService examinationService;
 
@@ -77,7 +77,7 @@ public class ImporterServiceTest {
 
     @Mock
     private DatasetAcquisitionContext datasetAcquisitionContext;
-    
+
     @Mock
     private DatasetAcquisitionService datasetAcquisitionService;
 
@@ -89,7 +89,7 @@ public class ImporterServiceTest {
 
     @Mock
     private ShanoirEventService taskService;
-    
+
     @Mock
     StudyUserRightsRepository studyUserRightRepo;
 
@@ -150,7 +150,7 @@ public class ImporterServiceTest {
         studies.add(study);
         patient.setStudies(studies);
         patients.add(patient);
-        
+
         ImportJob importJob = new ImportJob();
         importJob.setPatients(patients );
         importJob.setArchive("/tmp/bruker/convert/brucker/blabla.zip");
@@ -184,7 +184,7 @@ public class ImporterServiceTest {
         qualityResult.add(entry);
 
         //DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob, dicomAttributes);
-        
+
         try (MockedStatic<DicomProcessing> dicomProcessingMock = Mockito.mockStatic(DicomProcessing.class)) {
             dicomProcessingMock
                 .when(() -> DicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced()))
@@ -200,17 +200,17 @@ public class ImporterServiceTest {
             // WHEN we treat this importjob
             assertNotNull(qualityResult);
             service.createAllDatasetAcquisition(importJob, 1L);
-        
+
             ArgumentCaptor<ShanoirEvent> argument = ArgumentCaptor.forClass(ShanoirEvent.class);
             Mockito.verify(taskService, Mockito.times(4)).publishEvent(argument.capture());
-        
+
             List<ShanoirEvent> values = argument.getAllValues();
             ShanoirEvent task = values.get(0);
             assertTrue(task.getStatus() == 1);
             // NOTE: This test is important as we use the message to send an mail to study admin further.
             // PLEASE do not change sucess message OR change it accordingly in emailServiceImpl.
             assertEquals("[studyName (n°1)] Successfully created datasets for subject [subjectName] in examination [2]", task.getMessage());
-        
+
             // THEN datasets are created
             // Check what we save at the end
             verify(datasetAcquisitionService).createAll(any());
@@ -218,7 +218,7 @@ public class ImporterServiceTest {
             verify(dicomPersisterService).persistAllForSerie(any());
 
             assertNotNull(datasetAcq);
-        
+
             // AN archive is not referenced in the examination (file not existing)
             List<String> extradata = datasetAcq.getExamination().getExtraDataFilePathList();
             assertNull(extradata);

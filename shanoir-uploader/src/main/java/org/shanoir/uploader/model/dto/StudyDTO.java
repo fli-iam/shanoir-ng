@@ -5,13 +5,13 @@ import java.util.List;
 public class StudyDTO {
 
     private Long id;
-    
+
     private String name;
-    
+
     private List<StudyCardDTO> studyCards;
-    
+
     private List<CenterDTO> centers;
-    
+
     public StudyDTO(Long id, String name, List<StudyCardDTO> studyCards, List<CenterDTO> centers) {
         super();
         this.id = id;
@@ -23,7 +23,7 @@ public class StudyDTO {
     public Long getId() {
         return id;
     }
-    
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -31,11 +31,11 @@ public class StudyDTO {
     public String getName() {
         return name;
     }
-    
+
     public void setName(String name) {
         this.name = name;
     }
-    
+
     public List<StudyCardDTO> getStudyCards() {
         return studyCards;
     }
@@ -51,5 +51,5 @@ public class StudyDTO {
     public void setCenters(List<CenterDTO> centers) {
         this.centers = centers;
     }
-    
+
 }

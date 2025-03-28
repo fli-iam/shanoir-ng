@@ -22,10 +22,10 @@ public class DatasetFile {
 
     @JsonProperty("path")
     private String path;
-    
+
     @JsonProperty("acquisitionNumber")
     private int acquisitionNumber;
-    
+
     @JsonProperty("imageOrientationPatient")
     private List<Double> imageOrientationPatient;
 

@@ -23,21 +23,21 @@ import org.slf4j.LoggerFactory;
 public class ImportFinishRunnable implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(ImportFinishRunnable.class);
-    
+
     public static final String IMPORT_JOB_JSON = "import-job.json";
 
     private static final String ANONYMIZATION_PROFILE = "anonymization.profile";
 
     private UploadJob uploadJob;
-    
+
     private File uploadFolder;
-    
+
     private ImportJob importJob;
-    
+
     private String subjectName;
 
     private Anonymizer anonymizer = new Anonymizer();
-    
+
     public ImportFinishRunnable(final UploadJob uploadJob, final File uploadFolder, final ImportJob importJob, final String subjectName) {
         this.uploadJob = uploadJob;
         this.uploadFolder = uploadFolder;
@@ -45,7 +45,7 @@ public class ImportFinishRunnable implements Runnable {
         this.subjectName = subjectName;
     }
 
-    public void run() {        
+    public void run() {
         /**
          * Anonymize the DICOM files
          */
@@ -68,7 +68,7 @@ public class ImportFinishRunnable implements Runnable {
             } catch (IOException e) {
                 logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
             }
-            
+
             /**
              * Write the UploadJob and schedule upload
              * We keep UploadJob here to start the upload and handle errors without

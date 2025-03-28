@@ -108,7 +108,7 @@ public class SubjectPathologyApiControllerTest {
                 .willReturn(Arrays.asList(new SubjectPathology()));
         given(subPathosServiceMock.findById(1L)).willReturn(new SubjectPathology());
         given(subPathosServiceMock.save(Mockito.mock(SubjectPathology.class))).willReturn(new SubjectPathology());
-        
+
 
         given(uniqueValidator.validate(Mockito.any(SubjectPathology.class))).willReturn(new FieldErrorMap());
         given(editableOnlyValidator.validate(Mockito.any(SubjectPathology.class))).willReturn(new FieldErrorMap());

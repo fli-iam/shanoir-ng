@@ -33,15 +33,15 @@ public enum MrScanningSequence {
 
     // Echo Planar
     EP(4),
-    
+
     // Research Mode
     RM(5),
 
     // Unknown, for the moment it is a test
     S(6),
-    
+
     FFE(7);
-    
+
     private int id;
 
     /**
@@ -72,7 +72,7 @@ public enum MrScanningSequence {
         }
         throw new IllegalArgumentException("No matching scanning sequence for id " + id);
     }
-    
+
     /**
      * Get a Scanning Sequence by its name.
      *
@@ -86,7 +86,7 @@ public enum MrScanningSequence {
         }
         return MrScanningSequence.valueOf(type);
     }
-    
+
     /**
      * @return the id
      */

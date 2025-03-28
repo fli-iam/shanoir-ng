@@ -81,10 +81,10 @@ public class ExaminationAnestheticApiControllerTest {
 
     @MockBean
     private ExaminationAnestheticUniqueValidator uniqueValidator;
-    
+
     @MockBean
     private ExaminationAnestheticEditableByManager editableOnlyValidator;
-    
+
     @BeforeEach
     public void setup() throws ShanoirException {
         gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();

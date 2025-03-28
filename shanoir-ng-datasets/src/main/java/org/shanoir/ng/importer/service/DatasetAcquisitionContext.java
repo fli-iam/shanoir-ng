@@ -37,22 +37,22 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class DatasetAcquisitionContext implements DatasetAcquisitionStrategy {
-    
+
     @Autowired
     private MrDatasetAcquisitionStrategy mrDatasetAcquisitionStrategy;
-    
+
     @Autowired
     private CtDatasetAcquisitionStrategy ctDatasetAcquisitionStrategy;
-    
+
     @Autowired
     private PetDatasetAcquisitionStrategy petDatasetAcquisitionStrategy;
 
     @Autowired
     private XaDatasetAcquisitionStrategy xaDatasetAcquisitionStrategy;
-    
+
     @Autowired
     private GenericDatasetAcquisitionStrategy genericDatasetAcquisitionStrategy;
-    
+
     // add other strategies for other modalities here
 
     @Override
@@ -70,8 +70,8 @@ public class DatasetAcquisitionContext implements DatasetAcquisitionStrategy {
         }else {
             // By default we just create a generic dataset acquisition
             datasetAcquisitionStrategy = genericDatasetAcquisitionStrategy;
-        }        
+        }
         return datasetAcquisitionStrategy.generateDatasetAcquisitionForSerie(serie, rank, importJob, dicomAttributes);
     }
-    
+
 }

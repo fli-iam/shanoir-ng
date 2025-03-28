@@ -9,7 +9,7 @@ import org.shanoir.ng.dataset.model.DatasetType;
 public class BidsDataset extends Dataset {
 
     private static final long serialVersionUID = 7476089535424633518L;
-    
+
     /** BIDS data type. */
     private String bidsDataType;
 

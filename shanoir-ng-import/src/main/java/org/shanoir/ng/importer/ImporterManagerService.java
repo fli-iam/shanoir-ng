@@ -71,7 +71,7 @@ public class ImporterManagerService {
     private static Logger LOG = LoggerFactory.getLogger(ImporterManagerService.class);
 
     private static final SecureRandom RANDOM = new SecureRandom();
-    
+
     /**
      * For the moment Spring is not used here to autowire, as we try to keep the
      * anonymization project as simple as it is, without Spring annotations, to
@@ -79,34 +79,34 @@ public class ImporterManagerService {
      * Maybe to change and think about deeper afterwards.
      */
     private static final AnonymizationServiceImpl ANONYMIZER = new AnonymizationServiceImpl();
-    
+
     @Autowired
     private QueryPACSService queryPACSService;
-    
+
     @Autowired
     private DicomStoreSCPServer dicomStoreSCPServer;
-    
+
     @Autowired
     private ImagesCreatorAndDicomFileAnalyzerService imagesCreatorAndDicomFileAnalyzer;
-        
+
     @Autowired
     private RabbitTemplate rabbitTemplate;
-    
+
     @Autowired
     private ObjectMapper objectMapper;
 
     @Autowired
     private ShanoirEventService eventService;
-    
+
     @Autowired
     private DatasetsCreatorService datasetsCreatorService;
-    
+
     @Autowired
     StudyUserRightsRepository studyUserRightRepo;
 
     @Value("${shanoir.import.directory}")
     private String importDir;
-    
+
     @Async
     public void manageImportJob(final ImportJob importJob) {
         ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), importJob.getUserId(), "Starting import configuration", ShanoirEvent.IN_PROGRESS, 0f, importJob.getStudyId());
@@ -151,7 +151,7 @@ public class ImporterManagerService {
             // So two possibilities to remove series: 1. call, via the info from the dicomdir or the info from the pacs
             // 2. call, via analysis of dicom files itself and their content
             cleanSeries(importJob);
-                        
+
             event.setProgress(0.25F);
             eventService.publishEvent(event);
 
@@ -204,7 +204,7 @@ public class ImporterManagerService {
             }
         }
     }
-    
+
     private void pseudonymize(final ImportJob importJob, ShanoirEvent event, final File importJobDir, Patient patient)
             throws FileNotFoundException, ShanoirException {
         if (importJob.getAnonymisationProfileToUse() == null || !importJob.getAnonymisationProfileToUse().isEmpty()) {
@@ -262,7 +262,7 @@ public class ImporterManagerService {
             LOG.error("Could not send email for this import. ", e);
         }
     }
-    
+
     /**
      * This method creates a random number named work folder to work within during the import.
      *
@@ -279,7 +279,7 @@ public class ImporterManagerService {
         }
         return importJobDir;
     }
-    
+
     /**
      * This method creates a random long number.
      *
@@ -393,5 +393,5 @@ public class ImporterManagerService {
             }
         }
     }
-    
+
 }

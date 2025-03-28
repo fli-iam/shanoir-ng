@@ -212,7 +212,7 @@ public class StudyServiceSecurityTest {
         studyUser.setUserName(LOGGED_USER_USERNAME);
         studyUser.setStudy(study);
         studyUser.setStudyUserRights(Arrays.asList(rights));
-        studyUserList.add(studyUser);  
+        studyUserList.add(studyUser);
         study.setStudyUserList(studyUserList);
         return study;
     }

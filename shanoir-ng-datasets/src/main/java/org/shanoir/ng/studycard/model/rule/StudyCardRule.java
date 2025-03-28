@@ -51,16 +51,16 @@ public abstract class StudyCardRule<T> extends AbstractEntity {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name="rule_id")
     private List<StudyCardAssignment<?>> assignments;
-    
+
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     // there is a join table because a rule_id fk would lead to an ambiguity and bugs
     // because it could refer to a study card or quality card rule
     @JoinTable(name="study_card_condition_join", joinColumns = {@JoinColumn(name = "study_card_rule_id")}, inverseJoinColumns = {@JoinColumn(name = "condition_id")})
     private List<StudyCardCondition> conditions;
-    
+
     @NotNull
     private boolean orConditions;
-    
+
     public List<StudyCardAssignment<?>> getAssignments() {
         return assignments;
     }
@@ -77,7 +77,7 @@ public abstract class StudyCardRule<T> extends AbstractEntity {
         this.conditions = conditions;
     }
 
-        
+
     public boolean isOrConditions() {
         return orConditions;
     }

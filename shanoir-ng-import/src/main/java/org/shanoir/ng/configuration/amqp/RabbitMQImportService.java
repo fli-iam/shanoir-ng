@@ -29,10 +29,10 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class RabbitMQImportService {
-    
+
     @Autowired
     private RabbitMqStudyUserService listener;
-    
+
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(value = RabbitMQConfiguration.STUDY_USER_QUEUE_IMPORT, durable = "true"),
             exchange = @Exchange(value = RabbitMQConfiguration.STUDY_USER_EXCHANGE, ignoreDeclarationExceptions = "true",

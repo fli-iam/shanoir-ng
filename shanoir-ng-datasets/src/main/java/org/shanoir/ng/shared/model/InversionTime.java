@@ -44,7 +44,7 @@ public class InversionTime extends AbstractEntity {
     @JoinColumn(name = "mr_dataset_id")
     @JsonIgnore
     private MrDataset mrDataset;
-    
+
     /**
      * Comes from the dicom tag (0018,0082) VR=DS, VM=1 Inversion Time. The unit
      * of measure must be in millisec.

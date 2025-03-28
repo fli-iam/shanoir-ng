@@ -29,11 +29,11 @@ import org.shanoir.ng.dataset.model.DatasetType;
 public class CtDataset extends Dataset {
 
 //    private String pixelData;
-//    
+//
 //    private String patientExamination;
-//    
+//
 //    private String imageFlavor;
-//    
+//
 //    private String derivedPixelContrast;
 
     public CtDataset() {

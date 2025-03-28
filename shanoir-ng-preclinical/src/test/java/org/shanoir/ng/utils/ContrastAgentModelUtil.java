@@ -29,7 +29,7 @@ public final class ContrastAgentModelUtil {
     public static final Long AGENT_GADO_ID = 1L;
     public static final String AGENT_GADO_MANUFACTURED_NAME = "Gadolinium";
     public static final String AGENT_GADO_REFERENCE_NAME = "Gadolinium";
-    
+
     /**
      * Create a contrast agent.
      *
@@ -42,6 +42,6 @@ public final class ContrastAgentModelUtil {
         agent.setManufacturedName(AGENT_GADO_MANUFACTURED_NAME);
         return agent;
     }
-    
-    
+
+
 }

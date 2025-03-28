@@ -17,6 +17,6 @@ package org.shanoir.ng.studycard.model;
 public enum ShanoirFieldType {
 
     String, Long, Float, Double, Integer, Date;
-    
+
 }
 

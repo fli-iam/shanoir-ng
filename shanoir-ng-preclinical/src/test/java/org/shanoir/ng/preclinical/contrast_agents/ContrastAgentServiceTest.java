@@ -59,11 +59,11 @@ public class ContrastAgentServiceTest {
 
     @InjectMocks
     private ContrastAgentServiceImpl agentsService;
-    
+
     private RefsServiceImpl refsService;
-    
-        
-    
+
+
+
     @BeforeEach
     public void setup() {
         given(agentsRepository.findAll()).willReturn(Arrays.asList(ContrastAgentModelUtil.createContrastAgentGado()));
@@ -95,7 +95,7 @@ public class ContrastAgentServiceTest {
 
         Mockito.verify(agentsRepository, Mockito.times(1)).findById(Mockito.anyLong());
     }
-    
+
     @Test
     public void findByNameTest() {
         final ContrastAgent agent = agentsService.findById(AGENT_ID);
@@ -104,8 +104,8 @@ public class ContrastAgentServiceTest {
 
         Mockito.verify(agentsRepository, Mockito.times(1)).findById(Mockito.anyLong());
     }
-    
-    
+
+
 
     @Test
     public void saveTest() throws ShanoirException {
@@ -139,5 +139,5 @@ public class ContrastAgentServiceTest {
         agent.setManufacturedName(UPDATED_AGENT_DATA);
         return agent;
     }
-    
+
 }

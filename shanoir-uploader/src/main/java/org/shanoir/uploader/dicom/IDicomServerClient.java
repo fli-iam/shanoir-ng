@@ -16,7 +16,7 @@ public interface IDicomServerClient {
      * @return
      */
     public boolean echoDicomServer();
-    
+
     public boolean echoDicomServer(String calledAET, String hostName, int port, String callingAET);
 
     /**
@@ -39,7 +39,7 @@ public interface IDicomServerClient {
      * @param selectedSeries
      */
     public List<String> retrieveDicomFiles(final JProgressBar progressBar, StringBuilder downloadOrCopyReport, String studyInstanceUID, List<Serie> selectedSeries, final File tempFolderForUpload);
-    
+
     /**
      * This method returns the work folder.
      * @return

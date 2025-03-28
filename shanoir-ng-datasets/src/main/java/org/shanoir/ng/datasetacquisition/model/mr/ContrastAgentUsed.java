@@ -39,10 +39,10 @@ public enum ContrastAgentUsed {
 
     // Gadovist
     GADOVIST(7),
-    
+
     // Clariscan
     CLARISCAN(8),
-    
+
     // Dotarem
     DOTAREM(9);
 
@@ -76,7 +76,7 @@ public enum ContrastAgentUsed {
         }
         throw new IllegalArgumentException("No matching contrast agent used for id " + id);
     }
-    
+
     /**
      * Get an contrast agent Id by its name.
      *
@@ -90,7 +90,7 @@ public enum ContrastAgentUsed {
         }
         return ContrastAgentUsed.valueOf(type);
     }
-    
+
 
     /**
      * @return the id

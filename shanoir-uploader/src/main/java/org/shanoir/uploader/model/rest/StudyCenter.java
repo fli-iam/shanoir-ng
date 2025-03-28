@@ -1,9 +1,9 @@
 package org.shanoir.uploader.model.rest;
 
 public class StudyCenter {
-    
+
     private Center center;
-    
+
     private Study study;
 
     public Center getCenter() {

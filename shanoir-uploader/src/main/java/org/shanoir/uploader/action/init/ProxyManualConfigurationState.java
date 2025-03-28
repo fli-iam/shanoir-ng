@@ -16,9 +16,9 @@ import org.shanoir.uploader.gui.ShUpStartupDialog;
  */
 @Component
 public class ProxyManualConfigurationState implements State {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(ProxyManualConfigurationState.class);
-    
+
     @Autowired
     private ProxyConfigurationState proxyConfigurationState;
 

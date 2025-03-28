@@ -50,7 +50,7 @@ public class RabbitMqExaminationService {
 
     @Autowired
     ExaminationService examinationService;
-    
+
     @Autowired
     ShanoirEventService eventService;
 
@@ -63,7 +63,7 @@ public class RabbitMqExaminationService {
     public Long createExamination(Message message) {
         try {
             Examination exam = mapper.readValue(message.getBody(), Examination.class);
-            
+
             Subject subj = exam.getSubject();
             Optional<Subject> dbSubject = subjectRepository.findById(subj.getId());
             if (!dbSubject.isPresent()) {
@@ -76,7 +76,7 @@ public class RabbitMqExaminationService {
             throw new AmqpRejectAndDontRequeueException(e);
         }
     }
-    
+
     @RabbitListener(queues = RabbitMQConfiguration.EXAMINATION_EXTRA_DATA_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
     @Transactional

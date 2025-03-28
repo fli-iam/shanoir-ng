@@ -26,10 +26,10 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "acquisition_equipment")
 public class AcquisitionEquipment extends IdName {
-    
+
     @Id
     private Long id;
-    
+
     private String name;
 
     /**

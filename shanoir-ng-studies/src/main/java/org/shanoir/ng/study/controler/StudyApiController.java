@@ -134,7 +134,7 @@ public class StudyApiController implements StudyApi {
                 // Error => should not be able to do this see #793
                 return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
             }
-  
+
             List<DataUserAgreement> duas = dataUserAgreementService.findDUAByStudyId(studyId);
             if (!CollectionUtils.isEmpty(duas)) {
                 this.dataUserAgreementService.deleteAll(duas);

@@ -86,7 +86,7 @@ public interface UserRepository extends CrudRepository<User, Long> {
      * @return list of users.
      */
     List<User> findByIdIn(List<Long> userIdList);
-    
+
     /**
      * Find user by its username
      *
@@ -96,7 +96,7 @@ public interface UserRepository extends CrudRepository<User, Long> {
     Optional<User> findByUsername(String username);
 
     Optional<User> findById(Long userId);
-    
+
     /**
      * Find users on account request
      */

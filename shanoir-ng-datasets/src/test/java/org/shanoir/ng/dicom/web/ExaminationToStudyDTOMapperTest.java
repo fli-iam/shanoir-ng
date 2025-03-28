@@ -33,11 +33,11 @@ import java.util.ArrayList;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class ExaminationToStudyDTOMapperTest {
-    
+
     private static final Long EXAMINATION_ID = 1L;
 
     private static final String EXAMINATION_COMMENT = "ExaminationComment";
-    
+
     private static final String DATE_STR = "2018-01-01";
 
     private static final long SUBJECT_ID = 1L;

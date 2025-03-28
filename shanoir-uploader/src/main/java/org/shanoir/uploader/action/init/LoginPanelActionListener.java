@@ -14,7 +14,7 @@ import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 
 @Component
 public class LoginPanelActionListener implements ActionListener {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(LoginPanelActionListener.class);
 
     private LoginConfigurationPanel loginPanel;
@@ -36,7 +36,7 @@ public class LoginPanelActionListener implements ActionListener {
         if (e.getSource().equals(loginPanel.connect)) {
             String username = this.loginPanel.loginText.getText();
             String password = String.valueOf(this.loginPanel.passwordText.getPassword());
-            login(username, password);    
+            login(username, password);
         } else if (e.getSource().equals(loginPanel.connectLater)) {
             logger.info("Connect later, no username.");
             ShUpConfig.username = "anonymous";

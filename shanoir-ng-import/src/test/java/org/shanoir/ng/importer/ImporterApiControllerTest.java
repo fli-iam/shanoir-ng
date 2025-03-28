@@ -69,7 +69,7 @@ public class ImporterApiControllerTest {
     private static final String START_EEG_JOB_PATH = "/importer/start_import_eeg_job/";
 
     private static final String GET_DICOM = "/importer/get_dicom/";
-    
+
     @Autowired
     private MockMvc mvc;
 
@@ -93,7 +93,7 @@ public class ImporterApiControllerTest {
 
     @MockBean
     private DicomDirGeneratorService dicomDirGeneratorService;
-    
+
     @MockBean
     private ShanoirEventService shanoirEventService;
 
@@ -145,7 +145,7 @@ public class ImporterApiControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(JacksonUtils.serialize(importJob)));
-        
+
         // Just check that the name is well transmitted and that the call is made
         verify(rabbitTemplate).convertSendAndReceive(Mockito.any(String.class), captor.capture());
 
@@ -156,7 +156,7 @@ public class ImporterApiControllerTest {
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void testGetDicomImageNoPath() throws Exception {
-        
+
         mvc.perform(MockMvcRequestBuilders.get(GET_DICOM)
                 .param("path", ""))
         .andExpect(status().is(200));

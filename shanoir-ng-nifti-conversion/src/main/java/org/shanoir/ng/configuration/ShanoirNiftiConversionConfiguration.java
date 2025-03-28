@@ -43,5 +43,5 @@ public class ShanoirNiftiConversionConfiguration {
         executor.initialize();
         return executor;
     }
-    
+
 }

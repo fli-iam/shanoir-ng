@@ -24,7 +24,7 @@ import java.util.ArrayList;
  *
  */
 public interface AnonymizationService {
-    
+
     /**
      * Anonymize a list of DICOM files according to the basic profile recommendations
      *
@@ -54,7 +54,7 @@ public interface AnonymizationService {
      */
     void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientFirstName,
             String patientLastName, String patientID) throws Exception;
-    
+
     void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientName, String patientID) throws Exception;
-    
+
 }

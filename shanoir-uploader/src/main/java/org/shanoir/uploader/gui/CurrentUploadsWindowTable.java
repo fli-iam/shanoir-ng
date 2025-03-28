@@ -60,7 +60,7 @@ public class CurrentUploadsWindowTable implements Observer {
                 return false;
             }
         });
-        
+
         initTable();
         frame.scrollPaneUpload.getViewport().add(table);
     }

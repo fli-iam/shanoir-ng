@@ -84,7 +84,7 @@ public class ExaminationApiControllerTest {
 
     @TempDir
     public File tempFolder;
-    
+
     public String tempFolderPath;
 
     @MockBean
@@ -108,10 +108,10 @@ public class ExaminationApiControllerTest {
 
     @MockBean
     private ExaminationService examinationServiceMock;
-    
+
     @MockBean
     private SubjectRepository subjectRepository;
-    
+
     @MockBean
     private CenterRepository centerRepository;
 
@@ -129,10 +129,10 @@ public class ExaminationApiControllerTest {
 
     @MockBean
     private RabbitTemplate rabbitTemplate;
-    
+
     @MockBean
     ExaminationRepository examRepo;
-    
+
     @Autowired
     ObjectMapper objectMapper;
 
@@ -153,7 +153,7 @@ public class ExaminationApiControllerTest {
 
         mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
-        
+
         // Test event here
     }
 
@@ -180,7 +180,7 @@ public class ExaminationApiControllerTest {
             // Test events
             ArgumentCaptor<ShanoirEvent> eventCatcher = ArgumentCaptor.forClass(ShanoirEvent.class);
             Mockito.verify(eventService).publishEvent(eventCatcher.capture());
-            
+
             ShanoirEvent event = eventCatcher.getValue();
             assertNotNull(event);
             assertEquals(exam.getStudyId().toString(), String.valueOf(event.getStudyId()));
@@ -227,11 +227,11 @@ public class ExaminationApiControllerTest {
         mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(ModelsUtil.createExamination())))
         .andExpect(status().isOk());
-        
+
         // Check event here to verify that the message is well set to event
         ArgumentCaptor<ShanoirEvent> eventCatcher = ArgumentCaptor.forClass(ShanoirEvent.class);
         Mockito.verify(eventService).publishEvent(eventCatcher.capture());
-        
+
         ShanoirEvent event = eventCatcher.getValue();
         assertNotNull(event);
         assertEquals(exam.getStudyId(), event.getStudyId());

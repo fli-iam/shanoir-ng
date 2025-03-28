@@ -102,13 +102,13 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
                 if (longUpdatedValue != null) {
                     MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
                     if (mrDsAcq.getMrProtocol().getUpdatedMetadata() == null) mrDsAcq.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
-                    mrDsAcq.getMrProtocol().getUpdatedMetadata().setTransmittingCoilId(longUpdatedValue);            
+                    mrDsAcq.getMrProtocol().getUpdatedMetadata().setTransmittingCoilId(longUpdatedValue);
                 }
             } else {
                 throw new CheckedIllegalClassException(MrDatasetAcquisition.class, datasetAcquisition);
             }
         }
-        
+
     },
     RECEIVING_COIL(5) {
         @Override
@@ -155,7 +155,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
                 throw new CheckedIllegalClassException(MrDatasetAcquisition.class, datasetAcquisition);
             }
         }
-        
+
         @Override
         public void update(DatasetAcquisition datasetAcquisition, String updatedValue) throws CheckedIllegalClassException {
             if (datasetAcquisition instanceof MrDatasetAcquisition) {
@@ -181,7 +181,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
                 throw new CheckedIllegalClassException(MrDatasetAcquisition.class, datasetAcquisition);
             }
         }
-        
+
         @Override
         public void update(DatasetAcquisition datasetAcquisition, String updatedValue) throws CheckedIllegalClassException {
             if (datasetAcquisition instanceof MrDatasetAcquisition) {
@@ -207,7 +207,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
                 throw new CheckedIllegalClassException(MrDatasetAcquisition.class, datasetAcquisition);
             }
         }
-        
+
         @Override
         public void update(DatasetAcquisition datasetAcquisition, String updatedValue) throws CheckedIllegalClassException {
             if (datasetAcquisition instanceof MrDatasetAcquisition) {
@@ -235,7 +235,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
                 throw new CheckedIllegalClassException(MrDatasetAcquisition.class, datasetAcquisition);
             }
         }
-        
+
         @Override
         public void update(DatasetAcquisition datasetAcquisition, String updatedValue) throws CheckedIllegalClassException {
             if (datasetAcquisition instanceof MrDatasetAcquisition) {
@@ -262,7 +262,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
                 throw new CheckedIllegalClassException(MrDatasetAcquisition.class, datasetAcquisition);
             }
         }
-        
+
         @Override
         public void update(DatasetAcquisition datasetAcquisition, String updatedValue) throws CheckedIllegalClassException {
             if (datasetAcquisition instanceof MrDatasetAcquisition) {
@@ -288,7 +288,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
                 throw new CheckedIllegalClassException(MrDatasetAcquisition.class, datasetAcquisition);
             }
         }
-        
+
         @Override
         public void update(DatasetAcquisition datasetAcquisition, String updatedValue) throws CheckedIllegalClassException {
             BidsDataType dataType = BidsDataType.valueOf(updatedValue);
@@ -301,20 +301,20 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
             }
         }
     };
-    
+
     private int id;
-    
+
     private DatasetAcquisitionMetadataField(int id) {
         this.id = id;
     }
-    
+
     public static DatasetAcquisitionMetadataField getEnum(int id) {
         for (DatasetAcquisitionMetadataField field : DatasetAcquisitionMetadataField.values()) {
             if (field.getId() == id) return field;
         }
         return null;
     }
-    
+
     @Override
     public int getId() {
         return id;

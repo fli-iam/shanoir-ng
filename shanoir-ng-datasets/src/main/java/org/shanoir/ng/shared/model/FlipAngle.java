@@ -44,7 +44,7 @@ public class FlipAngle extends AbstractEntity {
     @JoinColumn(name = "mr_dataset_id")
     @JsonIgnore
     private MrDataset mrDataset;
-    
+
     /**
      * Comes from the dicom tag (0018,1314) VR=DS, VM=1 Flip Angle. The unit of
      * measure must be in degrees.

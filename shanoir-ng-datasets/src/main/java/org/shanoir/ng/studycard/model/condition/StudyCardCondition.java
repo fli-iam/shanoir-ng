@@ -51,15 +51,15 @@ import jakarta.validation.constraints.NotNull;
     @JsonSubTypes.Type(value = AcqMetadataCondOnDatasets.class, name = "AcqMetadataCondOnDatasets"),
     @JsonSubTypes.Type(value = AcqMetadataCondOnAcq.class, name = "AcqMetadataCondOnAcq")})
 public abstract class StudyCardCondition extends AbstractEntity {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(StudyCardCondition.class);
 
     public static String LIST_SEPERATOR = ",";
-    
+
     @ElementCollection
     @Column(name = "value")
     private List<String> values;
-    
+
     @NotNull
     private int operation;
 

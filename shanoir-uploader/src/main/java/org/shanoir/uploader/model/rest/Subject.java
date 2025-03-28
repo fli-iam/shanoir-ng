@@ -39,13 +39,13 @@ public class Subject {
     private HemisphericDominance manualHemisphericDominance;
 
     private ImagedObjectCategory imagedObjectCategory;
-    
+
     private Sex sex;
 
     private List<SubjectStudy> subjectStudyList;
 
     private SubjectStudy subjectStudy;
-    
+
     private PseudonymusHashValues pseudonymusHashValues;
 
     private boolean preclinical;

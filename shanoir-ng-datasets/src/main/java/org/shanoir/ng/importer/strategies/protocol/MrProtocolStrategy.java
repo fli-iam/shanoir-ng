@@ -57,7 +57,7 @@ public class MrProtocolStrategy {
             MultiframeExtractor emf = new MultiframeExtractor();
             attributes = emf.extract(attributes, 0);
         }
-        
+
         MrProtocol mrProtocol = new MrProtocol();
         MrProtocolMetadata mrProtocolMetadata = createOriginMrProtocolMetadata(attributes, serie);
         mrProtocol.setOriginMetadata(mrProtocolMetadata);
@@ -219,7 +219,7 @@ public class MrProtocolStrategy {
 
         Field[] fieldArrayMrProtocol = mrProtocol.getClass().getDeclaredFields();
         Field[] fieldArrayMrProtocolMetadata = new MrProtocolMetadata().getClass().getDeclaredFields();
-        
+
         SortedSet<Field> fields = new TreeSet<>(new FieldComparator());
         fields.addAll(Arrays.asList(concat(fieldArrayMrProtocol, fieldArrayMrProtocolMetadata)));
 
@@ -261,7 +261,7 @@ public class MrProtocolStrategy {
         Collections.addAll(both, second);
         return both.toArray(new Field[both.size()]);
     }
-    
+
     private static class FieldComparator implements Comparator<Field> {
         @Override
         public int compare(Field f1, Field f2) {

@@ -54,7 +54,7 @@ public class ExaminationAnestheticServiceTest {
 
     @InjectMocks
     private ExaminationAnestheticServiceImpl examAnestheticsService;
-    
+
     @BeforeEach
     public void setup() {
         given(examAnestheticRepository.findAll()).willReturn(Arrays.asList(AnestheticModelUtil.createExaminationAnesthetic()));
@@ -84,10 +84,10 @@ public class ExaminationAnestheticServiceTest {
         final ExaminationAnesthetic examAnesthetic = examAnestheticsService.findById(EXAM_ANESTHETIC_ID);
         Assertions.assertNotNull(examAnesthetic);
         Assertions.assertTrue(AnestheticModelUtil.ANESTHETIC_NAME.equals(examAnesthetic.getAnesthetic().getName()));
-        
+
         Mockito.verify(examAnestheticRepository, Mockito.times(1)).findById(Mockito.anyLong());
     }
-    
+
     @Test
     public void findByExaminationIdTest() {
         final List<ExaminationAnesthetic> examAnesthetics = examAnestheticsService.findByExaminationId(1L);
@@ -129,5 +129,5 @@ public class ExaminationAnestheticServiceTest {
         examAnesthetic.setAnesthetic(AnestheticModelUtil.createAnestheticInjection());
         return examAnesthetic;
     }
-    
+
 }

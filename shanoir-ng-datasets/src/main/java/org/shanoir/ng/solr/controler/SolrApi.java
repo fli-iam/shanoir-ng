@@ -48,7 +48,7 @@ import java.util.List;
 @Tag(name = "solr", description = "the Solr API")
 @RequestMapping("/solr")
 public interface SolrApi {
-    
+
     @Operation(summary = "", description = "Index all data to Solr")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204", description = "indexed data"),
@@ -78,5 +78,5 @@ public interface SolrApi {
         @ApiResponse(responseCode = "500", description = "unexpected error") })
     @RequestMapping(value = "/byIds", consumes = {"application/json" }, produces = { "application/json" }, method = RequestMethod.POST)
     ResponseEntity<Page<ShanoirSolrDocument>> findByIdIn(@Parameter(description = "dataset ids", required = true) @Valid @RequestBody List<Long> datasetIds, Pageable pageable) throws RestServiceException;
-    
+
 }

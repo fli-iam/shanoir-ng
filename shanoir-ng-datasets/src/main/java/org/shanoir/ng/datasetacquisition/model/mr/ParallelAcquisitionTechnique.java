@@ -36,7 +36,7 @@ public enum ParallelAcquisitionTechnique {
 
     // GRAPPA
     GRAPPA(4),
-    
+
     // mSENSE
     M_SENSE(5),
 
@@ -44,7 +44,7 @@ public enum ParallelAcquisitionTechnique {
     MBSENSE(5),
 
     CSENSE(6),
-    
+
     OTHER(7);
 
     private int id;
@@ -101,7 +101,7 @@ public enum ParallelAcquisitionTechnique {
             return null;
         }
     }
-    
+
     /**
      * @return the id
      */

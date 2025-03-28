@@ -30,10 +30,10 @@ public class Image {
 
     @JsonProperty("echoTimes")
     public List<EchoTime> echoTimes;
-    
+
     @JsonProperty("repetitionTime")
     public Double repetitionTime;
-    
+
     @JsonProperty("inversionTime")
     public Double inversionTime;
 
@@ -67,7 +67,7 @@ public class Image {
 
     public void setImageOrientationPatient(List<Double> imageOrientationPatient) {
         this.imageOrientationPatient = imageOrientationPatient;
-        
+
     }
     public List<EchoTime> getEchoTimes() {
         return echoTimes;

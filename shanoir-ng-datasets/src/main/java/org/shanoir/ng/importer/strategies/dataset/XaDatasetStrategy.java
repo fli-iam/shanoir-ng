@@ -37,14 +37,14 @@ public class XaDatasetStrategy implements DatasetStrategy<XaDataset> {
 
     @Autowired
     DicomProcessing dicomProcessing;
-    
+
     @Autowired
     DatasetExpressionContext datasetExpressionContext;
-    
+
     @Override
     public DatasetsWrapper<XaDataset> generateDatasetsForSerie(AcquisitionAttributes<String> dicomAttributes, Serie serie,
             ImportJob importJob) throws Exception {
-        
+
         DatasetsWrapper<XaDataset> datasetWrapper = new DatasetsWrapper<>();
         /**
          * retrieve number of dataset in current serie if Number of dataset > 1 then
@@ -114,10 +114,10 @@ public class XaDatasetStrategy implements DatasetStrategy<XaDataset> {
             datasetExpression.setDataset(xaDataset);
             xaDataset.getDatasetExpressions().add(datasetExpression);
         }
-        
+
         DatasetMetadata originalDM = xaDataset.getOriginMetadata();
         xaDataset.setUpdatedMetadata(originalDM);
-        
+
         return xaDataset;
     }
 

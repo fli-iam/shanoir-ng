@@ -132,7 +132,7 @@ public interface SubjectApi {
             @Parameter(description = "subject to create", required = true) @RequestBody Subject subject,
             @Parameter(description = "request param centerId as flag for auto-increment common name", required = false) @RequestParam(required = false) Long centerId,
             final BindingResult result) throws RestServiceException;
-    
+
     // Attention: this method is used by ShanoirUploader!!!
     @Operation(summary = "", description = "Updates a subject")
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "subject updated"),

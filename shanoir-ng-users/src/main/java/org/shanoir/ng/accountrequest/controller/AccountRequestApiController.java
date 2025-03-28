@@ -39,7 +39,7 @@ public class AccountRequestApiController extends AbstractUserRequestApiControlle
     public ResponseEntity<Void> saveNewAccountRequest(
             @Parameter(name = "user to create from account request", required = true) @RequestBody final User user,
             final BindingResult result) throws RestServiceException {
-        
+
         /* Now we generate a username for the new user creation */
         if (user.getUsername() == null && user.getFirstName() != null && user.getLastName() != null) {
             generateUsername(user);
@@ -49,7 +49,7 @@ public class AccountRequestApiController extends AbstractUserRequestApiControlle
         user.setAccountRequestDemand(true);
 
         validate(user, result);
-        
+
         user.setCreationDate(LocalDate.now()); // Set creation date on creation.
 
         /* Save user in db. */
@@ -70,6 +70,6 @@ public class AccountRequestApiController extends AbstractUserRequestApiControlle
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-    
+
 
 }

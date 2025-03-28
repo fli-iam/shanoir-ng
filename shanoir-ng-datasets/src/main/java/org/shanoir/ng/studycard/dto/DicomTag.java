@@ -18,9 +18,9 @@ import org.shanoir.ng.studycard.model.DicomTagType;
 import org.shanoir.ng.studycard.model.VM;
 
 public class DicomTag {
-    
+
     private int code;
-    
+
     private String label;
 
     private DicomTagType type;

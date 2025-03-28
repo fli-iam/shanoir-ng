@@ -49,7 +49,7 @@ public class ScheduledTasksTest {
 
         // WHEN we check expiration dates
         scheduledTasks.checkExpirationDate();
-        
+
         // THEN user3 is updated in keycloak database
         Mockito.verify(keycloakClient).updateUser(user3);
     }
@@ -66,7 +66,7 @@ public class ScheduledTasksTest {
 
         // WHEN we check expiration dates
         scheduledTasks.checkExpirationDate();
-        
+
         // THEN first expiration warning is sent to user1
         Mockito.verify(userService).updateExpirationNotification(user1, true);
         Mockito.verify(emailService).notifyAccountWillExpire(user1);
@@ -84,10 +84,10 @@ public class ScheduledTasksTest {
 
         // WHEN we check expiration dates
         scheduledTasks.checkExpirationDate();
-        
+
         // THEN second expiration warning is sent to user2
         Mockito.verify(userService).updateExpirationNotification(user2, false);
         Mockito.verify(emailService).notifyAccountWillExpire(user2);
-        
+
     }
 }

@@ -292,15 +292,15 @@ public class BIDSServiceImpl implements BIDSService {
                 buffer.append("session_id").append(TABULATION)
                 .append("acq_time").append(TABULATION)
                 .append(NEW_LINE);
-                
+
                 for (Examination examination : examinationList) {
                     String sessionLabel = this.getSessionLabel(examination);
-            
+
                     buffer.append(sessionLabel).append(TABULATION)
                     .append(examination.getExaminationDate()).append(TABULATION)
                     .append(NEW_LINE);
                 }
-                
+
                 Files.write(Paths.get(sessionFile.getAbsolutePath()), buffer.toString().getBytes());
             }
             // Iterate over examinations to export them as BIDS
@@ -353,7 +353,7 @@ public class BIDSServiceImpl implements BIDSService {
             }
         }
 
-        // Iterate over acquisitions/datasets        
+        // Iterate over acquisitions/datasets
         for (DatasetAcquisition acq : examination.getDatasetAcquisitions()) {
             List<Dataset> datasets = acq.getDatasets();
             if (CollectionUtils.isEmpty(datasets)) {
@@ -415,7 +415,7 @@ public class BIDSServiceImpl implements BIDSService {
         }
         String subjectNameUpdated = this.formatLabel(subjectName);
         String datasetFilePrefix = workDir.getName().contains(SESSION_PREFIX) ? workDir.getParentFile().getName() + "_" + workDir.getName() : workDir.getName();
-        
+
         dataFolder = createSpecificDataFolder(dataset, workDir, dataFolder, subjectNameUpdated, studyName);
 
         // Copy dataset files in the directory AS hard link to avoid duplicating files
@@ -482,7 +482,7 @@ public class BIDSServiceImpl implements BIDSService {
             URL url =  iterator.next();
             File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
             String fileName = datasetFilePrefix + "_";
-            
+
             String nature = null;
 
             if (dataset instanceof MrDataset) {
@@ -672,9 +672,9 @@ public class BIDSServiceImpl implements BIDSService {
      */
     private void exportSpecificEegFiles(final EegDataset dataset, final String subjectName, final String sessionId, final String studyName, final String runId, File dataFolder) throws IOException {
         // Create _eeg.json
-        
+
         String datasetFilePrefix = dataFolder.getParentFile().getName().contains(SESSION_PREFIX) ? dataFolder.getParentFile().getParentFile().getName() + "_" + dataFolder.getParentFile().getName() : dataFolder.getParentFile().getName();
-        
+
         String fileName = TASK + studyName + "_eeg.json";
         String destFile = dataFolder.getAbsolutePath() + File.separator + datasetFilePrefix + "_" + fileName;
 

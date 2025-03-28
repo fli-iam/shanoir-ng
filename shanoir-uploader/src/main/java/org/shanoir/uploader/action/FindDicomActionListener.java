@@ -54,7 +54,7 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
     private IDicomServerClient dicomServerClient;
 
     private String filePathDicomDir;
-    
+
     private DicomDirGeneratorService dicomDirGeneratorService = new DicomDirGeneratorService();
 
     public FindDicomActionListener(final MainWindow mainWindow,
@@ -142,7 +142,7 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
                 String lastName = "";
                 String firstName1 = "";
                 String firstName2 = "";
-        
+
                 // Use regular expression to split by either "," or ", "
                 String[] nameParts = patientName.split(",\\s*");
                 if (nameParts.length > 1) {

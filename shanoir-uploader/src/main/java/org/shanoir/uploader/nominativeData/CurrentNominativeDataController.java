@@ -99,7 +99,7 @@ public class CurrentNominativeDataController {
                     String uploadState = (String) cuw.table.getModel().getValueAt(row, cuw.uploadStateColumn);
                     if (uploadState.equals(cuw.finishedUploadState)
                             || uploadState.equals(cuw.readyUploadState)) {
-                        showDeleteConfirmationDialog(workFolderFilePath, cuw, row);                    
+                        showDeleteConfirmationDialog(workFolderFilePath, cuw, row);
                     }
                 // start the import or try reimporting an exam with status "ERROR"
                 } else if (col == cuw.importColumn && row != -1) {

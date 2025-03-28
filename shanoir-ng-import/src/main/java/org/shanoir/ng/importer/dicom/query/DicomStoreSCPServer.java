@@ -47,23 +47,23 @@ public class DicomStoreSCPServer {
      * We store in a folder with the SeriesInstanceUID and the file name of the SOPInstanceUID.
      */
     private static final String STORAGE_PATTERN = "/{0020000E}/{00080018}";
-    
+
     public static final String DICOM_FILE_SUFFIX = ".dcm";
 
     private static final Logger LOG = LoggerFactory.getLogger(DicomStoreSCPServer.class);
-    
+
     @Value("${shanoir.import.pacs.store.aet.called.name}")
     private String calledName;
 
     @Value("${shanoir.import.pacs.store.aet.called.host}")
     private String calledHost;
-    
+
     @Value("${shanoir.import.pacs.store.aet.called.port}")
     private Integer calledPort;
-    
+
     @Value("${shanoir.import.pacs.store.folder}")
     private String storageDirPath;
-    
+
     @PostConstruct
     private void initServer() {
         DicomNode scpNode = new DicomNode(calledName, calledHost, calledPort);
@@ -96,5 +96,5 @@ public class DicomStoreSCPServer {
     public void setStorageDirPath(String storageDirPath) {
         this.storageDirPath = storageDirPath;
     }
-    
+
 }

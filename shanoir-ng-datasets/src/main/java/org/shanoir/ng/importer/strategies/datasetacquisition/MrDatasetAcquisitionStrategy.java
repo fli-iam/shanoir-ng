@@ -53,13 +53,13 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy {
-    
+
     /** Logger. */
     private static final Logger LOG = LoggerFactory.getLogger(MrDatasetAcquisitionStrategy.class);
-    
+
     @Autowired
     private MrProtocolStrategy mrProtocolStrategy;
-    
+
     @Autowired
     private DatasetStrategy<MrDataset> mrDatasetStrategy;
 
@@ -78,7 +78,7 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
         //TODO: To be completed by an expert
         dataTypeMapping = Collections.unmodifiableMap(aMap);
     }
-    
+
     @Override
     public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
         MrDatasetAcquisition mrDatasetAcquisition = new MrDatasetAcquisition();
@@ -91,7 +91,7 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
         mrDatasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
         MrProtocol mrProtocol = mrProtocolStrategy.generateProtocolForSerie(dicomAttributes, serie);
         mrDatasetAcquisition.setMrProtocol(mrProtocol);
-    
+
         DatasetsWrapper<MrDataset> datasetsWrapper = mrDatasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
         List<Dataset> genericizedList = new ArrayList<>();
         for (Dataset dataset : datasetsWrapper.getDatasets()) {
@@ -99,7 +99,7 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
             genericizedList.add(dataset);
         }
         mrDatasetAcquisition.setDatasets(genericizedList);
-        
+
         // total acquisition time
         if (mrDatasetAcquisition.getMrProtocol().getAcquisitionDuration() == null) {
             Double totalAcquisitionTime = null;
@@ -113,7 +113,7 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
         }
 
         // Can be overridden by study cards
-        String imageType = dicomAttributes.getFirstDatasetAttributes().getString(Tag.ImageType, 2);        
+        String imageType = dicomAttributes.getFirstDatasetAttributes().getString(Tag.ImageType, 2);
         if (imageType != null && dataTypeMapping.get(imageType) != null) {
             if (mrDatasetAcquisition.getMrProtocol().getUpdatedMetadata() == null) {
                 mrDatasetAcquisition.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());

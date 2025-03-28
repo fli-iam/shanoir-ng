@@ -21,11 +21,11 @@ import org.shanoir.uploader.gui.ShUpStartupDialog;
  */
 @Component
 public class StartupStateContext {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(StartupStateContext.class);
 
     private State state;
-    
+
     private ShUpStartupDialog shUpStartupDialog;
 
     @Autowired
@@ -43,7 +43,7 @@ public class StartupStateContext {
         logger.info("ShanoirUploader startup state changed to:  " + state.toString());
         this.state = state;
     }
-    
+
     public void nextState() {
         try {
             getState().load(this);
@@ -55,7 +55,7 @@ public class StartupStateContext {
     public ShUpStartupDialog getShUpStartupDialog() {
         return shUpStartupDialog;
     }
-    
+
     public void setShUpStartupDialog(ShUpStartupDialog shUpStartupDialog) {
         this.shUpStartupDialog = shUpStartupDialog;
     }

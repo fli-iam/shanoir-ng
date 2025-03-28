@@ -22,13 +22,13 @@ public class DatasetFile {
 
     @JsonProperty("path")
     private String path;
-    
+
     @JsonProperty("acquisitionNumber")
     private String acquisitionNumber;
-    
+
     @JsonProperty("echoNumbers")
     private List<Integer> echoNumbers;
-    
+
     @JsonProperty("imageOrientationPatient")
     private List<Double> imageOrientationPatient;
 

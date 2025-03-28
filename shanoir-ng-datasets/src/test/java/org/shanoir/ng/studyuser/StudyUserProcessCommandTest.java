@@ -40,7 +40,7 @@ public class StudyUserProcessCommandTest {
 
     @Autowired
     StudyUserUpdateService service;
-    
+
     @MockBean
     StudyUserRightsRepository studyUserRepository;
 
@@ -54,7 +54,7 @@ public class StudyUserProcessCommandTest {
         commands.add(new StudyUserCommand(CommandType.CREATE, makeSU()));
         service.processCommands(commands);
     }
-    
+
     private StudyUser makeSU() {
         StudyUser su = new StudyUser();
         su.setId(2L);

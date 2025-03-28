@@ -25,11 +25,11 @@ import org.shanoir.ng.shared.core.model.IdName;
 public class StudyCenterDTO {
 
     private Long id;
-    
+
     private IdName center;
-    
+
     private IdName study;
-    
+
     private String subjectNamePrefix;
 
     /** Investigator. */

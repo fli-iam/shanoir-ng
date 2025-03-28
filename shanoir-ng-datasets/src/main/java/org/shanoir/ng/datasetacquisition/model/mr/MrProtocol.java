@@ -177,7 +177,7 @@ public class MrProtocol extends AbstractEntity {
      * The unit of measure of the slice thickness must be in mm.
      */
     private Double sliceThickness;
-    
+
     /**
      * Functional only. From (0020,0110) Time delta between Images in a dynamic
      * or functional set of Images. The unit of measure of the temporal
@@ -630,7 +630,7 @@ public class MrProtocol extends AbstractEntity {
     public void setUpdatedMetadata(MrProtocolSCMetadata updatedMetadata) {
         this.updatedMetadata = updatedMetadata;
     }
-    
+
     public Double getMagneticFieldStrength() {
         return magneticFieldStrength;
     }

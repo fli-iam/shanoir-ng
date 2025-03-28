@@ -65,10 +65,10 @@ public class PathologyApiControllerTest {
 
     @MockBean
     private PathologyService pathologyServiceMock;
-    
+
     @MockBean
     private PathologyUniqueValidator uniqueValidator;
-    
+
     @MockBean
     private PathologyEditableByManager editableOnlyValidator;
 

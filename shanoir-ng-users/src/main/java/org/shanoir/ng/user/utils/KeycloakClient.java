@@ -67,7 +67,7 @@ public class KeycloakClient {
 
     @Value("${SHANOIR_KEYCLOAK_PASSWORD}")
     private String kcAdminClientPassword;
-    
+
     @Value("${kc.admin.client.realm.users}")
     private String keycloakRealm;
 
@@ -139,10 +139,10 @@ public class KeycloakClient {
 
         final UserResource userResource = keycloak.realm(keycloakRealm).users().get(keycloakId);
         userResource.resetPassword(credential);
-        
+
         return newPassword;
     }
-    
+
     /**
      * Create a user with a password.
      *
@@ -154,7 +154,7 @@ public class KeycloakClient {
     public String createUserWithPassword(final User user) throws SecurityException {
         return createUserWithPassword(user, user.getPassword());
     }
-    
+
 
     /**
      * Delete a user.

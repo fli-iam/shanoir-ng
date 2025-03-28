@@ -47,10 +47,10 @@ public class Patient {
 
     @JsonProperty("patientSex")
     private String patientSex;
-    
+
     @JsonProperty("patientIdentityRemoved")
     private boolean patientIdentityRemoved;
-    
+
     @JsonProperty("deIdentificationMethod")
     private String deIdentificationMethod;
 

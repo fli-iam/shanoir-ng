@@ -44,18 +44,18 @@ public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy
 
     /** Logger. */
     private static final Logger LOG = LoggerFactory.getLogger(PetDatasetAcquisitionStrategy.class);
-    
+
     @Autowired
     private PetProtocolStrategy protocolStrategy;
-    
+
     @Autowired
     private DatasetStrategy<PetDataset> datasetStrategy;
-    
-    
+
+
     @Override
     public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes)
             throws Exception {
-        
+
         PetDatasetAcquisition datasetAcquisition = new PetDatasetAcquisition();
         LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}", serie.getSequenceName(), serie.getProtocolName(), rank);
 
@@ -66,10 +66,10 @@ public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy
 
         datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
         datasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
-        
+
         PetProtocol protocol = protocolStrategy.generateProtocolForSerie(dicomAttributes.getFirstDatasetAttributes());
         datasetAcquisition.setPetProtocol(protocol);
-    
+
         // TODO ATO add Compatibility check between study card Equipment and dicomEquipment if not done at front level.
         DatasetsWrapper<PetDataset> datasetsWrapper = datasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
         List<Dataset> genericizedList = new ArrayList<>();
@@ -77,7 +77,7 @@ public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy
             dataset.setDatasetAcquisition(datasetAcquisition);
             genericizedList.add(dataset);
         }
-        datasetAcquisition.setDatasets(genericizedList);        
+        datasetAcquisition.setDatasets(genericizedList);
         return datasetAcquisition;
     }
 }

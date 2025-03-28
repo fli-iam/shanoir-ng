@@ -19,7 +19,7 @@ public interface Card {
     public Long getId();
 
     public Long getStudyId();
-    
+
     public String getName();
 
 }

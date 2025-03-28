@@ -42,7 +42,7 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("dev")
 public class SubjectPathologyApiControllerTestIT extends KeycloakControllerTestIT {
-    
+
     private static final String REQUEST_PATH_SUBJECT = "/subject";
     private static final String SUBJECT_ID = "/1";
     private static final String REQUEST_PATH_PATHOLOGY = "/pathology";
@@ -51,8 +51,8 @@ public class SubjectPathologyApiControllerTestIT extends KeycloakControllerTestI
     private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
     private static final String REQUEST_PATH_SUBJECT_BY_PATHO = REQUEST_PATH_SUBJECT+ "/all" + REQUEST_PATH_PATHOLOGY + "/1";
     private static final String REQUEST_PATH_PATHO_BY_SUBJECT = REQUEST_PATH_SUBJECT+ SUBJECT_ID + REQUEST_PATH_PATHOLOGY + "/all";
-    
-    
+
+
     @Autowired
     private TestRestTemplate restTemplate;
 
@@ -85,7 +85,7 @@ public class SubjectPathologyApiControllerTestIT extends KeycloakControllerTestI
                 String.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
-    
+
     @Test
     public void findSubjectPathologiesProtected() {
         final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_ALL, String.class);
@@ -100,7 +100,7 @@ public class SubjectPathologyApiControllerTestIT extends KeycloakControllerTestI
                 String.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
-    
+
     @Test
     public void findSubjectsByPathologyProtected() {
         final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_SUBJECT_BY_PATHO, String.class);
@@ -115,7 +115,7 @@ public class SubjectPathologyApiControllerTestIT extends KeycloakControllerTestI
                 String.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
-    
+
     @Test
     public void findPathologiesBySubjectProtected() {
         final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_PATHO_BY_SUBJECT, String.class);
@@ -149,7 +149,7 @@ public class SubjectPathologyApiControllerTestIT extends KeycloakControllerTestI
     @Test
     public void updateNewSubjectPathologyProtected() {
         final HttpEntity<SubjectPathology> entity = new HttpEntity<SubjectPathology>(PathologyModelUtil.createSubjectPathology());
-        
+
         final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
                 String.class);
         assertEquals(HttpStatus.FOUND, response.getStatusCode());

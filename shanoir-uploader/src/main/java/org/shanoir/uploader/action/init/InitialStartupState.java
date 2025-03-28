@@ -47,7 +47,7 @@ import org.springframework.stereotype.Component;
 public class InitialStartupState implements State {
 
     private static final Logger logger = LoggerFactory.getLogger(InitialStartupState.class);
-    
+
     private static final String SU_V6_0_3 = ".su_v6.0.3";
 
     private static final String SU_V6_0_4 = ".su_v6.0.4";
@@ -121,7 +121,7 @@ public class InitialStartupState implements State {
             // do nothing in case of existing
             logger.info("Start migrating properties: property not copied, because of existing already.");
         } else {
-            Util.copyFileUsingStream(propertiesSrc, propertiesDest);            
+            Util.copyFileUsingStream(propertiesSrc, propertiesDest);
         }
     }
 
@@ -167,7 +167,7 @@ public class InitialStartupState implements State {
             profiles = profilesStr.split(",");
             logger.info("Profiles migration finished...");
         }
-        
+
         for (int i = 0; i < profiles.length; i++) {
             logger.info("Checking profile folder: " + profiles[i]);
             File profileDir = new File(ShUpConfig.shanoirUploaderFolder, ShUpConfig.PROFILE_DIR + profiles[i]);
@@ -185,7 +185,7 @@ public class InitialStartupState implements State {
                 Util.copyFileFromJar(ShUpConfig.PROFILE_DIR + profiles[i] + "/" + ShUpConfig.MODE_PSEUDONYMUS_KEY_FILE, keyFile);
                 // copy keycloak.json, if existing
                 File keycloakFile = new File(profileDir, ShUpConfig.KEYCLOAK_JSON);
-                Util.copyFileFromJar(ShUpConfig.PROFILE_DIR + profiles[i] + "/" + ShUpConfig.KEYCLOAK_JSON, keycloakFile);            
+                Util.copyFileFromJar(ShUpConfig.PROFILE_DIR + profiles[i] + "/" + ShUpConfig.KEYCLOAK_JSON, keycloakFile);
             }
         }
         ShUpConfig.profiles = profiles;
@@ -196,7 +196,7 @@ public class InitialStartupState implements State {
         shUpStartupDialog.setVisible(true);
         context.setShUpStartupDialog(shUpStartupDialog);
     }
-    
+
     private void initPropertiesFiles() throws FileNotFoundException, IOException {
         initProperties(ShUpConfig.BASIC_PROPERTIES, ShUpConfig.basicProperties);
         logger.info("basic.properties successfully initialized.");
@@ -220,7 +220,7 @@ public class InitialStartupState implements State {
         initProperties(ShUpConfig.DICOM_SERVER_PROPERTIES,
                 ShUpConfig.dicomServerProperties);
         logger.info("dicom_server.properties successfully initialized.");
-        
+
         initProperties(ShUpConfig.ENDPOINT_PROPERTIES,
                 ShUpConfig.endpointProperties);
         logger.info("endpoint.properties successfully initialized.");
@@ -242,7 +242,7 @@ public class InitialStartupState implements State {
             return knum;
         }
     }
-    
+
     /**
      * Reads properties from .su folder into memory, or copies property file if not existing.
      */
@@ -260,7 +260,7 @@ public class InitialStartupState implements State {
         }
         PropertiesUtil.loadPropertiesFromFile(properties, propertiesFile);
     }
-    
+
     private void initLanguage() {
         String language = ShUpConfig.languageProperties.getProperty("shanoir.uploader.language");
         if (language != null && language.equals(ShUpConfig.FRENCH_LANGUAGE)) {
@@ -277,7 +277,7 @@ public class InitialStartupState implements State {
             ShUpConfig.profileSelected = profile;
         }
     }
-    
+
     private void initCredentials() throws FileNotFoundException, IOException {
         String username = ShUpConfig.basicProperties.getProperty(ShUpConfig.USERNAME);
         String password = ShUpConfig.basicProperties.getProperty(ShUpConfig.PASSWORD);

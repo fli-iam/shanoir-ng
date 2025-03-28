@@ -192,7 +192,7 @@ public class ImporterService {
                         }
                     }
                 }
-                                                
+                  
                 // Has quality check passed ?
                 if (qualityResult != null && !qualityResult.isEmpty() && qualityResult.hasError()) {
                     throw new QualityException(examination, qualityResult);
@@ -265,7 +265,7 @@ public class ImporterService {
             event.setReport(e.getQualityResult().toString());
             event.setProgress(-1f);
             eventService.publishEvent(event);
-            LOG.warn(msg, e);    
+            LOG.warn(msg, e);
             // Send mail
             mailService.sendFailureMail(importJob, userId, msg);
             throw new ShanoirException(msg, e);
@@ -368,7 +368,7 @@ public class ImporterService {
 
     public DatasetAcquisition createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
         if (checkSerieForDicomImages(serie)) {
-            DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob, dicomAttributes);            
+            DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob, dicomAttributes);
             datasetAcquisition.setExamination(examination);
             if (datasetAcquisition.getAcquisitionEquipmentId() == null) {
                 datasetAcquisition.setAcquisitionEquipmentId(importJob.getAcquisitionEquipmentId());

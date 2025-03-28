@@ -32,10 +32,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ComponentScan
 public class SolrConfig {
-    
+
     @Value("${solr.host}")
     private String solrHost;
-    
+
     @Bean
     public HttpSolrClient solrClient() {
         return new HttpSolrClient.Builder(solrHost)

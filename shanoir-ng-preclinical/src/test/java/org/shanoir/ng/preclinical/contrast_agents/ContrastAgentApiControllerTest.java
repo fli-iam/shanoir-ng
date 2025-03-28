@@ -76,10 +76,10 @@ public class ContrastAgentApiControllerTest {
 
     @MockBean
     private RefsService referencesServiceMock;
-    
+
     @MockBean
     private ContrastAgentUniqueValidator uniqueValidator;
-    
+
     @MockBean
     private ContrastAgentEditableByManager editableOnlyValidator;
 

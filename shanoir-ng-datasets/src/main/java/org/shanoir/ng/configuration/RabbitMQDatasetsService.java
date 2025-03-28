@@ -66,7 +66,7 @@ import java.util.*;
  */
 @Component
 public class RabbitMQDatasetsService {
-    
+
     private static final String RABBIT_MQ_ERROR = "Something went wrong deserializing the event.";
 
     @Autowired
@@ -107,7 +107,7 @@ public class RabbitMQDatasetsService {
 
     @Autowired
     private ExaminationRepository examinationRepository;
-    
+
     @Autowired
     private StudyCardRepository studyCardRepository;
 
@@ -146,7 +146,7 @@ public class RabbitMQDatasetsService {
             List<SubjectStudy> subjectStudies = new ArrayList<>();
             for (int i = 0; i < dtos.length ; i++) {
                 subjectStudies.add(dtoToSubjectStudy(dtos[i]));
-            }            
+            }
             subjectStudyRepository.saveAll(subjectStudies);
         } catch (Exception e) {
             LOG.error("Error during copy of dataset : ", e);
@@ -183,7 +183,7 @@ public class RabbitMQDatasetsService {
             }
 
             studyService.updateStudy(updated, current);
-            
+
             try {
                 solrService.updateStudyAsync(current.getId());
             }catch (Exception e){
@@ -201,12 +201,12 @@ public class RabbitMQDatasetsService {
     @Transactional
     @RabbitListener(queues = RabbitMQConfiguration.SUBJECT_NAME_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
     @RabbitHandler
-    public boolean receiveSubjectNameUpdate(final String subjectStr) {        
+    public boolean receiveSubjectNameUpdate(final String subjectStr) {
         Subject su = receiveAndUpdateIdNameEntity(subjectStr, Subject.class, subjectRepository);
         try {
             if (su != null && su.getId() == null) throw new IllegalStateException("The subject should must have an id !");
             Subject received = objectMapper.readValue(subjectStr, Subject.class);
-    
+
             // SUBJECT_STUDY
             if (su.getSubjectStudyList() != null) {
                 su.getSubjectStudyList().clear();
@@ -221,7 +221,7 @@ public class RabbitMQDatasetsService {
             }
             if (su.getId() == null) throw new IllegalStateException("The entity should must have an id ! Received string : \"" + subjectStr + "\"");
             subjectRepository.save(su);
-            
+
             // Update BIDS
             Set<Long> studyIds = new HashSet<>();
 
@@ -260,7 +260,7 @@ public class RabbitMQDatasetsService {
     public void receiveCenterNameUpdate(final String centerStr) {
         receiveAndUpdateIdNameEntity(centerStr, Center.class, centerRepository);
     }
-    
+
     private <T extends IdName> T receiveAndUpdateIdNameEntity(final String receivedStr, final Class<T> clazz, final CrudRepository<T, Long> repository) {
         IdName received = new IdName();
         try {
@@ -340,15 +340,15 @@ public class RabbitMQDatasetsService {
                 examinationService.deleteById(exam.getId(), null);
                 studyIds.add(exam.getStudyId());
             }
-            
+
             // Update BIDS folder
             for (Study stud : studyRepository.findAllById(studyIds)) {
                 bidsService.deleteBidsFolder(stud.getId(), stud.getName());
             }
-            
+
             // Delete subject from datasets database
             subjectRepository.deleteById(subjectId);
-            
+
         } catch (Exception e) {
             LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
             throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage(), e);

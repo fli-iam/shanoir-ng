@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class XaProtocolStrategy {
 
-    public XaProtocol generateProtocolForSerie(AcquisitionAttributes<String> attributes, Serie serie) {        
+    public XaProtocol generateProtocolForSerie(AcquisitionAttributes<String> attributes, Serie serie) {
         XaProtocol protocol = new XaProtocol();
         return protocol;
     }

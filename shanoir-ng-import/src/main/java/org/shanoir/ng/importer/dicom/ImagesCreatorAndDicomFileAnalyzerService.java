@@ -71,7 +71,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
     private static final String SLASH = "/";
 
     private static final String SUFFIX_DCM = ".dcm";
-    
+
     private static final String UNKNOWN = "unknown";
 
     private static final String YES = "YES";
@@ -111,7 +111,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
                             try {
                                 getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, serie, patient, isImportFromPACS);
                             } catch (Exception e) {
-                                handleError(event, nbSeries, cpt, serie, e);                        
+                                handleError(event, nbSeries, cpt, serie, e);
                             }
                         }
                     }
@@ -228,7 +228,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
                     "instanceFilePath: missing file: " + instanceFilePath);
         }
     }
-    
+
     /**
      * This method opens the connection to each dcm file and reads its attributes
      * and extracts meta-data from the dicom, that will be used later.
@@ -260,7 +260,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
                 } else {
                     relativeFilePath = dicomFile.getAbsolutePath();
                 }
-                
+
                 image.setPath(relativeFilePath);
                 addImageSeparateDatasetsInfo(image, attributes);
                 images.add(image);
@@ -272,7 +272,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
             throw e;
         }
     }
-    
+
     /**
      * This method reads the first dicom file of a serie to complete missing informations.
      *
@@ -365,7 +365,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
             serie.setEquipment(new EquipmentDicom(manufacturer, manufacturerModelName, deviceSerialNumber, stationName, magneticFieldStrength));
         }
     }
-    
+
     private String getOrSetToUnknown(Attributes attributes, int tag, String defaultValue) {
         String value = attributes.getString(tag);
         return (value == null || value.isEmpty()) ? defaultValue : value;

@@ -41,12 +41,12 @@ public enum ImagedObjectCategory {
      * Anatomical piece
      */
     ANATOMICAL_PIECE(4),
-    
+
     /**
      * Living animal
      */
     LIVING_ANIMAL(5),
-    
+
     /**
      * Animal cadaver
      */

@@ -51,7 +51,7 @@ public class SubjectStudy {
     @JoinColumn(name = "subject_id", updatable = true, insertable = true)
     @NotNull
     private Subject subject;
-    
+
     /** Tags associated to the subject. */
     @ManyToMany
     @JoinTable(name = "subject_study_tag", joinColumns = @JoinColumn(name = "subject_study_id" ))
@@ -120,7 +120,7 @@ public class SubjectStudy {
     public void setId(Long id) {
         this.id = id;
     }
-    
+
     public QualityTag getQualityTag() {
         return QualityTag.get(qualityTag);
     }

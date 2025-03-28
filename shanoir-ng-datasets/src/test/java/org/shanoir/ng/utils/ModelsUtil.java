@@ -55,7 +55,7 @@ public final class ModelsUtil {
     // Study card data
     public static final String STUDY_CARD_NAME = "name";
     public static final Boolean STUDY_CARD_DISABLED = false;
-    
+
     /**
      * Create a CT dataset.
      *
@@ -118,7 +118,7 @@ public final class ModelsUtil {
         examination.setDatasetAcquisitions(Collections.emptyList());
         return examination;
     }
-    
+
     /**
      * Create an examination.
      *
@@ -129,7 +129,7 @@ public final class ModelsUtil {
         examination.setId(id);
         return examination;
     }
-    
+
     /**
      * Create an examination.
      *
@@ -161,7 +161,7 @@ public final class ModelsUtil {
         studyCard.setStudyId(1L);
         return studyCard;
     }
-    
+
     /*
      * Create an origin metadata for dataset.
      *

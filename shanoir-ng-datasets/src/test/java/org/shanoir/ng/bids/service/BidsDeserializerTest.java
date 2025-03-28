@@ -40,7 +40,7 @@ public class BidsDeserializerTest {
         FileUtils.write(dataFile, "blabla", Charsets.UTF_8);
 
         BidsFolder studyElement = new BidsFolder(folder.getAbsolutePath());
-        
+
         // WHEN we deserialize it
         BidsElement result = deserializer.deserializeElement(studyElement);
 
@@ -48,7 +48,7 @@ public class BidsDeserializerTest {
         // base
         assertNotNull(result);
         assertEquals(result.getPath(), folder.getAbsolutePath());
-        
+
         // readme
         BidsFile readme;
         BidsFolder subj;
@@ -78,5 +78,5 @@ public class BidsDeserializerTest {
         assertNotNull(readme);
         assertEquals(data.getPath(), dataFile.getAbsolutePath());
     }
-    
+
 }

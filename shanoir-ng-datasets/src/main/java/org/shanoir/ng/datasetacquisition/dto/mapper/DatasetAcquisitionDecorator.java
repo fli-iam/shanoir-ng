@@ -39,7 +39,7 @@ public abstract class DatasetAcquisitionDecorator implements DatasetAcquisitionM
     @Autowired
     private DatasetAcquisitionMapper delegate;
 
-    
+
     @Override
     public List<DatasetAcquisitionDTO> datasetAcquisitionsToDatasetAcquisitionDTOs(
             final List<DatasetAcquisition> datasetAcquisitions) {
@@ -52,7 +52,7 @@ public abstract class DatasetAcquisitionDecorator implements DatasetAcquisitionM
         }
         return datasetAcquisitionDTOs;
     }
-    
+
     @Override
     public PageImpl<DatasetAcquisitionDTO> datasetAcquisitionsToDatasetAcquisitionDTOs(Page<DatasetAcquisition> page) {
         Page<DatasetAcquisitionDTO> mappedPage = page.map(new Function<DatasetAcquisition, DatasetAcquisitionDTO>() {
@@ -74,7 +74,7 @@ public abstract class DatasetAcquisitionDecorator implements DatasetAcquisitionM
         setType(datasetAcquisitionDTO, datasetAcquisition);
         return datasetAcquisitionDTO;
     }
-    
+
     private void setType(DatasetAcquisitionDTO datasetAcquisitionDTO, DatasetAcquisition datasetAcquisition) {
         if (datasetAcquisition.getType().equals("Mr")) {
             datasetAcquisitionDTO.setProtocol(((MrDatasetAcquisition)datasetAcquisition).getMrProtocol());

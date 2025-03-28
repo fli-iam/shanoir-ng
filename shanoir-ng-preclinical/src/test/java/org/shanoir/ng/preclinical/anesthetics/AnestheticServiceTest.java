@@ -57,7 +57,7 @@ public class AnestheticServiceTest {
 
     @InjectMocks
     private AnestheticServiceImpl anestheticsService;
-    
+
     @BeforeEach
     public void setup() {
         given(anestheticRepository.findAll()).willReturn(Arrays.asList(AnestheticModelUtil.createAnestheticGas()));
@@ -90,7 +90,7 @@ public class AnestheticServiceTest {
 
         Mockito.verify(anestheticRepository, Mockito.times(1)).findById(Mockito.anyLong());
     }
-    
+
     @Test
     public void findByAnestheticTypeTest() {
         final List<Anesthetic> anesthetics = anestheticsService.findAllByAnestheticType(AnestheticType.GAS);
@@ -99,7 +99,7 @@ public class AnestheticServiceTest {
 
         Mockito.verify(anestheticRepository, Mockito.times(1)).findAllByAnestheticType(AnestheticType.GAS);
     }
-    
+
     @Test
     public void saveTest() throws ShanoirException {
         anestheticsService.save(createAnesthetic());
@@ -124,5 +124,5 @@ public class AnestheticServiceTest {
         anesthetic.setAnestheticType(AnestheticType.INJECTION);
         return anesthetic;
     }
-    
+
 }

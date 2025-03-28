@@ -68,7 +68,7 @@ public class DICOMJsonApiControllerTest {
 
     @MockBean
     private ExaminationService examinationServiceMock;
-    
+
     @MockBean
     private DicomSEGAndSRImporterService dicomSRImporterService;
 

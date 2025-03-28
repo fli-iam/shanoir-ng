@@ -101,7 +101,7 @@ public class ProxyConfigurationPanel extends JPanel {
             }
         };
         enableProxyCB.addActionListener(actionListener);
-        
+
         secureSslProxyLabel = new JLabel(ShUpConfig.resourceBundle.getString("shanoir.uploader.proxy.ssl"));
         secureSslProxyLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         shanoirStartupGBC.weightx = 0.2;

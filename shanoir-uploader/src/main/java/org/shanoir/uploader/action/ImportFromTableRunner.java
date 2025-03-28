@@ -273,7 +273,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
                 studyCard = ImportUtils.createStudyCard(studyREST, equipment, importJob);
                 studyCards.add(studyCard); // add in memory to avoid loading from server
             // No equipment found: create one
-            } else {                
+            } else {
                 String institutionName = uploadJob.getMriInformation().getInstitutionName();
                 if (institutionName == null || institutionName.isBlank()) {
                     uploadJob.setUploadState(UploadState.ERROR);
@@ -398,7 +398,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
                 return false;
-            }    
+            }
         }
         subjectREST = ImportUtils.manageSubject(subjectREST,
             subject, importJob.getSubjectName(), ImagedObjectCategory.LIVING_HUMAN_BEING,
@@ -475,7 +475,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
         csvWriter.addExaminationLine(true, line);
         return true;
     }
-    
+
     private boolean queryPacs(ImportJob importJob) {
         logger.info("1. Query PACS with DicomQuery: " + importJob.getDicomQuery().toString());
         List<Patient> patients;
@@ -499,7 +499,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
         importJob.setPatients(patients);
         return true;
     }
-    
+
     private LocalDate determineMinDate(ImportJob importJob) {
         LocalDate minDate;
         if (!StringUtils.isBlank(importJob.getDicomQuery().getMinStudyDateFilter())) {
@@ -517,7 +517,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
         }
         return minDate;
     }
-    
+
     private boolean selectPatientStudyAndSeries(ImportJob importJob, LocalDate minDate) {
         logger.info("2. Select patient, study and series");
         List<Serie> selectedSeries = new ArrayList<>();

@@ -40,10 +40,10 @@ public class DownloadOrCopyActionListener implements ActionListener {
     private ResourceBundle resourceBundle;
     private Pseudonymizer pseudonymizer;
     private IdentifierCalculator identifierCalculator;
-    
+
     // Introduced here to inject into DownloadOrCopyRunnable
     private IDicomServerClient dicomServerClient;
-    
+
     private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 
     public DownloadOrCopyActionListener(final MainWindow mainWindow, final Pseudonymizer pseudonymizer, final IDicomServerClient dicomServerClient, final ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer) {
@@ -118,7 +118,7 @@ public class DownloadOrCopyActionListener implements ActionListener {
                 }
             }
         }
-        
+
         /**
          * 3. Download from PACS or copy from CD/DVD and write upload-job.xml + nominative-data-job.xml
          */
@@ -126,11 +126,11 @@ public class DownloadOrCopyActionListener implements ActionListener {
         Runnable runnable = new DownloadOrCopyRunnable(mainWindow.isFromPACS, false, mainWindow.frame, mainWindow.downloadProgressBar, dicomServerClient, dicomFileAnalyzer,  filePathDicomDir, importJobs);
         Thread thread = new Thread(runnable);
         thread.start();
-        
+
         // clear previous selection, but keep tree open in the tab
         mainWindow.isDicomObjectSelected = false;
         mainWindow.dicomTree.getSelectionModel().clearSelection();
-    
+
         JOptionPane.showMessageDialog(mainWindow.frame,
                 resourceBundle.getString("shanoir.uploader.downloadOrCopy.confirmation.message"),
                 resourceBundle.getString("shanoir.uploader.downloadOrCopy.confirmation.title"),

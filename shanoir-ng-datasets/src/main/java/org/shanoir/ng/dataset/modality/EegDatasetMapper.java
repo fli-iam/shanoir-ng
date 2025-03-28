@@ -39,7 +39,7 @@ import org.springframework.data.domain.Page;
 @DecoratedWith(EegDatasetDecorator.class)
 public interface EegDatasetMapper {
 
-    
+
     /**
      * Map list of @Dataset to list of @IdNameDTO.
      *

@@ -30,7 +30,7 @@ import org.weasis.dicom.tool.DicomListener;
 public class DcmRcvManager {
 
     private static final Logger logger = LoggerFactory.getLogger(DcmRcvManager.class);
-    
+
     private static final String PRIVATE_SIEMENS_CSA_NON_IMAGE_STORAGE = "1.3.12.2.1107.5.9.1";
 
     private static final String SOP_CLASSES_PROPERTIES = "/sop-classes.properties";
@@ -43,9 +43,9 @@ public class DcmRcvManager {
      * to search in the pacs and download another exam.
      */
     private static final String STORAGE_PATTERN = "{0020000D}" + File.separator + "{0020000E}" + File.separator + "{00080018}";
-    
+
     public static final String DICOM_FILE_SUFFIX = ".dcm";
-    
+
     public void configureAndStartSCPServer(final ConfigBean configBean, final String workFolderPath) throws MalformedURLException {
         logger.info("DICOM SCP server (mini-pacs) configured locally with params:"
                 + " AET title: " + configBean.getLocalDicomServerAETCalling()
@@ -63,7 +63,7 @@ public class DcmRcvManager {
         ListenerParams lParams = new ListenerParams(params, true, STORAGE_PATTERN + DICOM_FILE_SUFFIX, sOPClassesPropertiesFileURL);
         startSCPServer(workFolderPath, scpNode, lParams);
     }
-    
+
     /**
      * Start, when running up ShanoirUploader only one internal mini-pacs,
      * that is listening all time: to allow c-moves (DICOM push) all the
@@ -84,7 +84,7 @@ public class DcmRcvManager {
             logger.info("Transfer syntaxes for PrivateSiemensCSANonImageStorage (OT): {}", Arrays.toString(ts));
         } catch (Exception e) {
             logger.error("DICOM SCP server (mini-pacs): error (not started): " + e.getMessage(), e);
-        }        
+        }
     }
-    
+
 }

@@ -21,9 +21,9 @@ import org.slf4j.LoggerFactory;
 public class Encryption {
 
     private static final Logger logger = LoggerFactory.getLogger(Encryption.class);
-    
+
     private BlowfishAlgorithm blow;
-    
+
     public Encryption(String key) {
         this.blow = new BlowfishAlgorithm(key);
     }

@@ -94,16 +94,16 @@ public class ExtraDataApiControllerTest {
 
     @MockBean
     private ExtraDataService<PhysiologicalData> physioDataService;
-    
+
     @MockBean
     private ExtraDataService<BloodGasData> bloodGasDataService;
 
     @MockBean
     private ExtraDataUniqueConstraintManager uniqueConstraintManager;
-    
+
     @MockBean
     private PhysioDataUniqueConstraintManager physioConstraintManager;
-    
+
     @MockBean
     private BloogGasUniqueConstraintManager bloodGasConstraintManager;
 
@@ -131,7 +131,7 @@ public class ExtraDataApiControllerTest {
         given(extraDataServiceMock.findById(1L)).willReturn(extraData);
         given(extraDataServiceMock.save(Mockito.mock(ExaminationExtraData.class)))
                 .willReturn(new ExaminationExtraData());
-        
+
         given(this.bloodGasConstraintManager.validate(Mockito.any(BloodGasData.class))).willReturn(new FieldErrorMap());
         given(this.physioConstraintManager.validate(Mockito.any(PhysiologicalData.class))).willReturn(new FieldErrorMap());
         given(this.uniqueConstraintManager.validate(Mockito.any(ExaminationExtraData.class))).willReturn(new FieldErrorMap());

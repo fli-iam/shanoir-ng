@@ -19,7 +19,7 @@ import java.util.List;
 public class ExpressionFormat {
 
     private String type;
-    
+
     private List<DatasetFile> datasetFiles;
 
     public String getType() {

@@ -42,11 +42,11 @@ public class StudyDTO {
     // == ExaminationComment, not mandatory by DICOMweb standard
     @JsonProperty("StudyDescription")
     private String studyDescription;
-    
+
     // == ExaminationDate, dicom format 20010108
     @JsonProperty("StudyDate")
     private String studyDate;
-    
+
     // == not stored today, return always 000000
     @JsonProperty("StudyTime")
     private String studyTime;
@@ -61,19 +61,19 @@ public class StudyDTO {
     // subject.name == common name
     @JsonProperty("PatientName")
     private String patientName;
-    
+
     // == subject.id
     @JsonProperty("PatientID")
     private String patientID;
-    
+
     // == subject.birthDate 19800101
     @JsonProperty("PatientBirthDate")
     private String patientBirthDate;
-    
+
     // == subject.sex, can be empty
     @JsonProperty("PatientSex")
     private String patientSex;
-    
+
     /**
      * try if OHIF viewer works without 4 required items below:
         ModalitiesInStudy

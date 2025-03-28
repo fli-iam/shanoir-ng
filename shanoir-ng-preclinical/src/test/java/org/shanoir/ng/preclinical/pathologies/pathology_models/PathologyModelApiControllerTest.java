@@ -76,19 +76,19 @@ public class PathologyModelApiControllerTest {
 
     @MockBean
     private PathologyService pathologyServiceMock;
-    
+
     @MockBean
     private ShanoirEventService eventService;
-    
+
     @MockBean
     private PathologyModelUniqueValidator uniqueValidator;
-    
+
     @MockBean
     private PathologyModelEditableByManager editableOnlyValidator;
 
     @TempDir
     public File tempFolder;
-    
+
     @BeforeEach
     public void setup() throws ShanoirException {
         File tmpFolder = new File(tempFolder, "/tmp/");
@@ -106,7 +106,7 @@ public class PathologyModelApiControllerTest {
         PathologyModel patho = new PathologyModel();
         patho.setId(Long.valueOf(123));
         given(modelServiceMock.save(Mockito.any(PathologyModel.class))).willReturn(patho);
-        
+
         given(uniqueValidator.validate(Mockito.any(PathologyModel.class))).willReturn(new FieldErrorMap());
         given(editableOnlyValidator.validate(Mockito.any(PathologyModel.class))).willReturn(new FieldErrorMap());
     }

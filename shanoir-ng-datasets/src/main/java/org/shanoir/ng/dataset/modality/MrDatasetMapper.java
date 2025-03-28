@@ -36,7 +36,7 @@ import org.springframework.data.domain.Page;
 @DecoratedWith(MrDatasetDecorator.class)
 public interface MrDatasetMapper {
 
-    
+
     /**
      * Map list of @Dataset to list of @IdNameDTO.
      *
@@ -56,7 +56,7 @@ public interface MrDatasetMapper {
     @Named(value = "standard")
     @Mappings({ @Mapping(target = "source", ignore = true), @Mapping(target = "copies", ignore = true) })
     MrDatasetDTO datasetToDatasetDTO(MrDataset dataset);
-    
+
     /**
      * Map a @Dataset to a @DatasetDTO.
      *
@@ -68,7 +68,7 @@ public interface MrDatasetMapper {
     @Mapping(target = "copies", expression = "java(mapCopiesFromDataset(dataset.getCopies()))")
     @Mapping(target = "source", expression = "java(mapSourceFromDataset(dataset.getSource()))")
     MrDatasetWithDependenciesDTO datasetToDatasetAndProcessingsDTO(MrDataset dataset);
-    
+
     /**
      * Map a @Dataset to a @DatasetDTO.
      *
