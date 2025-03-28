@@ -64,42 +64,42 @@
 //
 //public class RoleApiControllerITTest extends KeycloakControllerTestIT {
 //
-//	private static final String REQUEST_PATH = "/roles";
-//	
-//	@Autowired
+//    private static final String REQUEST_PATH = "/roles";
+//    
+//    @Autowired
 //    private TestRestTemplate restTemplate;
 //
 //
 //    @Before
-//	public void setup() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException  {
-//    	
-////    	SSLContext sslContext = SSLContext.getInstance("SSL");
-////		sslContext.init(null, new TrustManager[] { new TestTrustManager() }, new java.security.SecureRandom());
-////    	SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
-////    	CloseableHttpClient httpClient = HttpClients.custom()
-////    	        .setSSLSocketFactory(csf)
-////    	        .build();
-////    	HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
-////    	
-////    	restTemplate = new RestTemplate(requestFactory);
+//    public void setup() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException  {
+//        
+////        SSLContext sslContext = SSLContext.getInstance("SSL");
+////        sslContext.init(null, new TrustManager[] { new TestTrustManager() }, new java.security.SecureRandom());
+////        SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
+////        CloseableHttpClient httpClient = HttpClients.custom()
+////                .setSSLSocketFactory(csf)
+////                .build();
+////        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
+////        
+////        restTemplate = new RestTemplate(requestFactory);
 //    }
 //
 //
-//	@Test
-//	public void findRolesWithLogin() throws GeneralSecurityException {
-//		HttpEntity<String> entity = new HttpEntity<String>(null, getHeadersWithToken(true));
-//		
-//		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.GET, entity, String.class);
-//		//final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH, String.class);
-//		assertEquals(HttpStatus.OK, response.getStatusCode());
-//	}
+//    @Test
+//    public void findRolesWithLogin() throws GeneralSecurityException {
+//        HttpEntity<String> entity = new HttpEntity<String>(null, getHeadersWithToken(true));
+//        
+//        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.GET, entity, String.class);
+//        //final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH, String.class);
+//        assertEquals(HttpStatus.OK, response.getStatusCode());
+//    }
 //
-//	@Test
-//	public void findRolesWithBadRole() throws GeneralSecurityException {
-//		HttpEntity<String> entity = new HttpEntity<String>(null, getHeadersWithToken(false));
-//		
-//		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.GET, entity, String.class);
-//		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-//	}
-//	
+//    @Test
+//    public void findRolesWithBadRole() throws GeneralSecurityException {
+//        HttpEntity<String> entity = new HttpEntity<String>(null, getHeadersWithToken(false));
+//        
+//        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.GET, entity, String.class);
+//        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+//    }
+//    
 //}

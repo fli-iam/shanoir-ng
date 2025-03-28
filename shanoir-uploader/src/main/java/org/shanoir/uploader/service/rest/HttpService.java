@@ -57,266 +57,266 @@ import org.shanoir.uploader.ShUpOnloadConfig;
  */
 public class HttpService {
 
-	private static final Logger logger = LoggerFactory.getLogger(HttpService.class);
+    private static final Logger logger = LoggerFactory.getLogger(HttpService.class);
 
-	private static ServiceConfiguration serviceConfiguration = ServiceConfiguration.getInstance();
+    private static ServiceConfiguration serviceConfiguration = ServiceConfiguration.getInstance();
 
-	private static final String DEV_LOCAL = "https://shanoir-ng-nginx";
-	
-	private static final String CONTENT_TYPE_MULTIPART = "multipart/related";
+    private static final String DEV_LOCAL = "https://shanoir-ng-nginx";
+    
+    private static final String CONTENT_TYPE_MULTIPART = "multipart/related";
 
-	private static final String CONTENT_TYPE_DICOM = "application/dicom";
+    private static final String CONTENT_TYPE_DICOM = "application/dicom";
 
-	private static final String BOUNDARY = "--import_dicom_shanoir--";
+    private static final String BOUNDARY = "--import_dicom_shanoir--";
 
-	private CloseableHttpClient httpClient;
-	
-	private HttpClientContext context;
+    private CloseableHttpClient httpClient;
+    
+    private HttpClientContext context;
 
-	public HttpService(String serverURL) {
-		try {
-			httpClient = buildHttpClient(serverURL);
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-		}
-	}
-	
-	public void closeHttpClient() {
-		try {
-			httpClient.close();
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-		}
-	}
+    public HttpService(String serverURL) {
+        try {
+            httpClient = buildHttpClient(serverURL);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+    }
+    
+    public void closeHttpClient() {
+        try {
+            httpClient.close();
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+        }
+    }
 
-	public CloseableHttpResponse get(String url) throws Exception {
-		try {
-			HttpGet httpGet = new HttpGet(url);
-			httpGet.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
-			CloseableHttpResponse response = httpClient.execute(httpGet, context);
-			return response;
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			throw e;
-		}
-	}
+    public CloseableHttpResponse get(String url) throws Exception {
+        try {
+            HttpGet httpGet = new HttpGet(url);
+            httpGet.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+            CloseableHttpResponse response = httpClient.execute(httpGet, context);
+            return response;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            throw e;
+        }
+    }
 
-	public CloseableHttpResponse post(String url, String json, boolean isLoginPost) throws Exception {
-		try {
-			HttpPost httpPost = new HttpPost(url);
-			if (isLoginPost) {
-				httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
-			} else {
-				httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
-			}
-			StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
-			httpPost.setEntity(requestEntity);
-			CloseableHttpResponse response = httpClient.execute(httpPost, context);
-			return response;				
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			throw e;
-		}
-	}
+    public CloseableHttpResponse post(String url, String json, boolean isLoginPost) throws Exception {
+        try {
+            HttpPost httpPost = new HttpPost(url);
+            if (isLoginPost) {
+                httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+            } else {
+                httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+            }
+            StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
+            httpPost.setEntity(requestEntity);
+            CloseableHttpResponse response = httpClient.execute(httpPost, context);
+            return response;                
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            throw e;
+        }
+    }
 
-	public CloseableHttpResponse postFile(String url, String tempDirId, File file) throws Exception {
-		try {
-			HttpPost httpPost = new HttpPost(url + "/" + tempDirId);
-			httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
-			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-			builder.addBinaryBody("file", file, ContentType.create("application/octet-stream"), file.getName());
-			HttpEntity entity = builder.build();
-			httpPost.setEntity(entity);
-			CloseableHttpResponse response = httpClient.execute(httpPost, context);
-			return response;
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			throw e;
-		}
-	}
+    public CloseableHttpResponse postFile(String url, String tempDirId, File file) throws Exception {
+        try {
+            HttpPost httpPost = new HttpPost(url + "/" + tempDirId);
+            httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+            MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+            builder.addBinaryBody("file", file, ContentType.create("application/octet-stream"), file.getName());
+            HttpEntity entity = builder.build();
+            httpPost.setEntity(entity);
+            CloseableHttpResponse response = httpClient.execute(httpPost, context);
+            return response;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            throw e;
+        }
+    }
 
-	public CloseableHttpResponse postFile(String url, File file) throws Exception {
-		try {
-			HttpPost httpPost = new HttpPost(url);
-			httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
-			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-			builder.addBinaryBody("file", file, ContentType.create("application/octet-stream"), file.getName());
-			HttpEntity entity = builder.build();
-			httpPost.setEntity(entity);
-			CloseableHttpResponse response = httpClient.execute(httpPost, context);
-			return response;
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			throw e;
-		}
-	}
-	
-	public CloseableHttpResponse postFileMultipartRelated(String url, File file) throws Exception {
-		try {
-			MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setBoundary(BOUNDARY);
-			multipartEntityBuilder.addBinaryBody("dcm_upload", file, ContentType.create(CONTENT_TYPE_DICOM), "filename");
-			HttpEntity entity = multipartEntityBuilder.build();
-			HttpPost httpPost = new HttpPost(url);
-			httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
-			httpPost.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_MULTIPART+";type="+CONTENT_TYPE_DICOM+";boundary="+BOUNDARY);
-			httpPost.setEntity(entity);
-			CloseableHttpResponse response = httpClient.execute(httpPost, context);
-			return response;
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			throw e;
-		}
-	}
+    public CloseableHttpResponse postFile(String url, File file) throws Exception {
+        try {
+            HttpPost httpPost = new HttpPost(url);
+            httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+            MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+            builder.addBinaryBody("file", file, ContentType.create("application/octet-stream"), file.getName());
+            HttpEntity entity = builder.build();
+            httpPost.setEntity(entity);
+            CloseableHttpResponse response = httpClient.execute(httpPost, context);
+            return response;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+    
+    public CloseableHttpResponse postFileMultipartRelated(String url, File file) throws Exception {
+        try {
+            MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setBoundary(BOUNDARY);
+            multipartEntityBuilder.addBinaryBody("dcm_upload", file, ContentType.create(CONTENT_TYPE_DICOM), "filename");
+            HttpEntity entity = multipartEntityBuilder.build();
+            HttpPost httpPost = new HttpPost(url);
+            httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+            httpPost.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_MULTIPART+";type="+CONTENT_TYPE_DICOM+";boundary="+BOUNDARY);
+            httpPost.setEntity(entity);
+            CloseableHttpResponse response = httpClient.execute(httpPost, context);
+            return response;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            throw e;
+        }
+    }
 
-	public CloseableHttpResponse put(String url, String json) throws Exception {
-		try {
-			HttpPut httpPut = new HttpPut(url);
-			httpPut.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
-			StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
-			httpPut.setEntity(requestEntity);
-			CloseableHttpResponse response = httpClient.execute(httpPut, context);
-			return response;
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			throw e;
-		}
-	}
+    public CloseableHttpResponse put(String url, String json) throws Exception {
+        try {
+            HttpPut httpPut = new HttpPut(url);
+            httpPut.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+            StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
+            httpPut.setEntity(requestEntity);
+            CloseableHttpResponse response = httpClient.execute(httpPut, context);
+            return response;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            throw e;
+        }
+    }
 
-	private CloseableHttpClient buildHttpClient(String url) throws Exception {
-		SSLContext sslContextDev = null;
-		if (url.equals(DEV_LOCAL)) {
-			// Create special SSLContext for local development server
-			sslContextDev = SSLContexts.custom()
-					.loadTrustMaterial(new TrustStrategy() {
-						@Override
-						public boolean isTrusted(final X509Certificate[] chain, final String authType)
-								throws CertificateException {
-							return true;
-						}
-			}).build();
-			logger.info("buildHttpClient: sslContextDev build.");
-		}
-		// In case of proxy: generate credentials provider with correct host
-		HttpHost proxyHost = null;
-		BasicCredentialsProvider credentialsProvider = null;
-		if (serviceConfiguration.isProxyEnabled()) {
-			// Host and port are given
-			if (serviceConfiguration.getProxyHost() != null && serviceConfiguration.getProxyPort() != null) {
-				proxyHost = new HttpHost(serviceConfiguration.getProxyHost(),
-						Integer.valueOf(serviceConfiguration.getProxyPort()));
-				// user and password are additionally set
-				if (serviceConfiguration.getProxyUser() != null && serviceConfiguration.getProxyPassword() != null) {
-					credentialsProvider = new BasicCredentialsProvider();
-					credentialsProvider.setCredentials(new AuthScope(proxyHost),
-							new UsernamePasswordCredentials(serviceConfiguration.getProxyUser(),
-									serviceConfiguration.getProxyPassword().toCharArray()));
-					logger.info("buildHttpClient: credentialsProvider build.");
-					createHttpClientContext(proxyHost, credentialsProvider);
-				}
-				logger.info("buildHttpClient: proxyHost (host+port) build.");
-			// Only host is configured, so do not set port
-			} else if (serviceConfiguration.getProxyHost() != null) {
-				proxyHost = new HttpHost(serviceConfiguration.getProxyHost());
-				// user and password are additionally set
-				if (serviceConfiguration.getProxyUser() != null && serviceConfiguration.getProxyPassword() != null) {
-					credentialsProvider = new BasicCredentialsProvider();
-					credentialsProvider.setCredentials(new AuthScope(proxyHost),
-							new UsernamePasswordCredentials(serviceConfiguration.getProxyUser(),
-									serviceConfiguration.getProxyPassword().toCharArray()));
-					logger.info("buildHttpClient: credentialsProvider build.");
-					createHttpClientContext(proxyHost, credentialsProvider);
-				}
-				logger.info("buildHttpClient: proxyHost (host) build.");
-			} else {
-				throw new Exception("Proxy enabled, but no host set or only port does not work.");
-			}
-		}
-		return buildHttpClient(sslContextDev, proxyHost, credentialsProvider);
-	}
+    private CloseableHttpClient buildHttpClient(String url) throws Exception {
+        SSLContext sslContextDev = null;
+        if (url.equals(DEV_LOCAL)) {
+            // Create special SSLContext for local development server
+            sslContextDev = SSLContexts.custom()
+                    .loadTrustMaterial(new TrustStrategy() {
+                        @Override
+                        public boolean isTrusted(final X509Certificate[] chain, final String authType)
+                                throws CertificateException {
+                            return true;
+                        }
+            }).build();
+            logger.info("buildHttpClient: sslContextDev build.");
+        }
+        // In case of proxy: generate credentials provider with correct host
+        HttpHost proxyHost = null;
+        BasicCredentialsProvider credentialsProvider = null;
+        if (serviceConfiguration.isProxyEnabled()) {
+            // Host and port are given
+            if (serviceConfiguration.getProxyHost() != null && serviceConfiguration.getProxyPort() != null) {
+                proxyHost = new HttpHost(serviceConfiguration.getProxyHost(),
+                        Integer.valueOf(serviceConfiguration.getProxyPort()));
+                // user and password are additionally set
+                if (serviceConfiguration.getProxyUser() != null && serviceConfiguration.getProxyPassword() != null) {
+                    credentialsProvider = new BasicCredentialsProvider();
+                    credentialsProvider.setCredentials(new AuthScope(proxyHost),
+                            new UsernamePasswordCredentials(serviceConfiguration.getProxyUser(),
+                                    serviceConfiguration.getProxyPassword().toCharArray()));
+                    logger.info("buildHttpClient: credentialsProvider build.");
+                    createHttpClientContext(proxyHost, credentialsProvider);
+                }
+                logger.info("buildHttpClient: proxyHost (host+port) build.");
+            // Only host is configured, so do not set port
+            } else if (serviceConfiguration.getProxyHost() != null) {
+                proxyHost = new HttpHost(serviceConfiguration.getProxyHost());
+                // user and password are additionally set
+                if (serviceConfiguration.getProxyUser() != null && serviceConfiguration.getProxyPassword() != null) {
+                    credentialsProvider = new BasicCredentialsProvider();
+                    credentialsProvider.setCredentials(new AuthScope(proxyHost),
+                            new UsernamePasswordCredentials(serviceConfiguration.getProxyUser(),
+                                    serviceConfiguration.getProxyPassword().toCharArray()));
+                    logger.info("buildHttpClient: credentialsProvider build.");
+                    createHttpClientContext(proxyHost, credentialsProvider);
+                }
+                logger.info("buildHttpClient: proxyHost (host) build.");
+            } else {
+                throw new Exception("Proxy enabled, but no host set or only port does not work.");
+            }
+        }
+        return buildHttpClient(sslContextDev, proxyHost, credentialsProvider);
+    }
 
-	/**
-	 * Create and assign a HttpContext necessary only for proxy authentication.
-	 *
-	 * @param proxyHost
-	 * @param credentialsProvider
-	 */
-	private void createHttpClientContext(HttpHost proxyHost, BasicCredentialsProvider credentialsProvider) {
-		AuthCache authCache = new BasicAuthCache();
-		BasicScheme basicAuth = new BasicScheme();
-		authCache.put(proxyHost, basicAuth);
-		HttpClientContext context = HttpClientContext.create();
-		context.setCredentialsProvider(credentialsProvider);
-		context.setAuthCache(authCache);
-		this.context = context;
-		logger.info("createHttpClientContext: context created and assigned.");
-	}
+    /**
+     * Create and assign a HttpContext necessary only for proxy authentication.
+     *
+     * @param proxyHost
+     * @param credentialsProvider
+     */
+    private void createHttpClientContext(HttpHost proxyHost, BasicCredentialsProvider credentialsProvider) {
+        AuthCache authCache = new BasicAuthCache();
+        BasicScheme basicAuth = new BasicScheme();
+        authCache.put(proxyHost, basicAuth);
+        HttpClientContext context = HttpClientContext.create();
+        context.setCredentialsProvider(credentialsProvider);
+        context.setAuthCache(authCache);
+        this.context = context;
+        logger.info("createHttpClientContext: context created and assigned.");
+    }
 
-	/**
-	 * This method builds a CloseableHttpClient depending if a special SSLContext
-	 * for development or production is required, and if credentials should be used
-	 * for the proxy.
-	 *
-	 * @param sslContextDev
-	 * @param credentialsProvider
-	 * @return
-	 * @throws IOException
-	 */
-	private CloseableHttpClient buildHttpClient(final SSLContext sslContextDev, final HttpHost proxyHost, final BasicCredentialsProvider credentialsProvider) throws IOException {
-		final SSLConnectionSocketFactory sslSocketFactory;
-		if (sslContextDev != null) {
-			sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
-					.setSslContext(sslContextDev)
-					.setTlsVersions(TLS.V_1_2)
-					.build();
-			logger.info("DEV SSLSocketFactory used.");
-		} else {
-			sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
-					.setHostnameVerifier(new CustomHostnameVerifier())
-					.setTlsVersions(TLS.V_1_2)
-					.build();
-			logger.info("Standard SSLSocketFactory used with CustomHostnameVerifier.");
-		}
-		final HttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
-					.setMaxConnTotal(500)
-					.setMaxConnPerRoute(500)
-					.setSSLSocketFactory(sslSocketFactory)
-					.build();
-		if (proxyHost != null && credentialsProvider != null) {
-			final DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxyHost);
-			final CloseableHttpClient httpClient = HttpClients.custom()
-					.setConnectionManager(connectionManager)
-					.setConnectionManagerShared(true)
-					.setRoutePlanner(routePlanner)
-					.setDefaultCredentialsProvider(credentialsProvider)
-					.setProxy(proxyHost)
-					.build();
-			logger.info("CloseableHttpClient created with proxyHost: "
-					+ proxyHost.getHostName() + ":" + proxyHost.getPort()
-					+ " and credentialsProvider: " + credentialsProvider.toString() + ".");
-			return httpClient;			
-		} else {
-			if (proxyHost != null) {
-				final DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxyHost);
-				final CloseableHttpClient httpClient = HttpClients.custom()
-						.setConnectionManager(connectionManager)
-						.setConnectionManagerShared(true)
-						.setRoutePlanner(routePlanner)
-						.setProxy(proxyHost)
-						.build();
-				logger.info("CloseableHttpClient created with proxyHost: "
-						+ proxyHost.getHostName() + ":" + proxyHost.getPort()
-						+ " and without a credentialsProvider.");
-				return httpClient;			
-			} else {
-				final CloseableHttpClient httpClient = HttpClients.custom()
-						.setConnectionManager(connectionManager)
-						.setConnectionManagerShared(true)
-						.build();
-				logger.info("CloseableHttpClient created without proxyHost"
-						+ " and without a credentialsProvider.");
-				return httpClient;			
-			}		
-		}
-	}
+    /**
+     * This method builds a CloseableHttpClient depending if a special SSLContext
+     * for development or production is required, and if credentials should be used
+     * for the proxy.
+     *
+     * @param sslContextDev
+     * @param credentialsProvider
+     * @return
+     * @throws IOException
+     */
+    private CloseableHttpClient buildHttpClient(final SSLContext sslContextDev, final HttpHost proxyHost, final BasicCredentialsProvider credentialsProvider) throws IOException {
+        final SSLConnectionSocketFactory sslSocketFactory;
+        if (sslContextDev != null) {
+            sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
+                    .setSslContext(sslContextDev)
+                    .setTlsVersions(TLS.V_1_2)
+                    .build();
+            logger.info("DEV SSLSocketFactory used.");
+        } else {
+            sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
+                    .setHostnameVerifier(new CustomHostnameVerifier())
+                    .setTlsVersions(TLS.V_1_2)
+                    .build();
+            logger.info("Standard SSLSocketFactory used with CustomHostnameVerifier.");
+        }
+        final HttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
+                    .setMaxConnTotal(500)
+                    .setMaxConnPerRoute(500)
+                    .setSSLSocketFactory(sslSocketFactory)
+                    .build();
+        if (proxyHost != null && credentialsProvider != null) {
+            final DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxyHost);
+            final CloseableHttpClient httpClient = HttpClients.custom()
+                    .setConnectionManager(connectionManager)
+                    .setConnectionManagerShared(true)
+                    .setRoutePlanner(routePlanner)
+                    .setDefaultCredentialsProvider(credentialsProvider)
+                    .setProxy(proxyHost)
+                    .build();
+            logger.info("CloseableHttpClient created with proxyHost: "
+                    + proxyHost.getHostName() + ":" + proxyHost.getPort()
+                    + " and credentialsProvider: " + credentialsProvider.toString() + ".");
+            return httpClient;            
+        } else {
+            if (proxyHost != null) {
+                final DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxyHost);
+                final CloseableHttpClient httpClient = HttpClients.custom()
+                        .setConnectionManager(connectionManager)
+                        .setConnectionManagerShared(true)
+                        .setRoutePlanner(routePlanner)
+                        .setProxy(proxyHost)
+                        .build();
+                logger.info("CloseableHttpClient created with proxyHost: "
+                        + proxyHost.getHostName() + ":" + proxyHost.getPort()
+                        + " and without a credentialsProvider.");
+                return httpClient;            
+            } else {
+                final CloseableHttpClient httpClient = HttpClients.custom()
+                        .setConnectionManager(connectionManager)
+                        .setConnectionManagerShared(true)
+                        .build();
+                logger.info("CloseableHttpClient created without proxyHost"
+                        + " and without a credentialsProvider.");
+                return httpClient;            
+            }        
+        }
+    }
 
 }

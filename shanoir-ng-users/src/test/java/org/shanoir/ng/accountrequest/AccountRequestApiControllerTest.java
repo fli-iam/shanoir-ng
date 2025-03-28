@@ -52,72 +52,72 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @AutoConfigureMockMvc(addFilters = false)
 public class AccountRequestApiControllerTest {
 
-	private static final String REQUEST_PATH = "/accountrequest";
+    private static final String REQUEST_PATH = "/accountrequest";
 
-	@Autowired
-	private MockMvc mvc;
+    @Autowired
+    private MockMvc mvc;
 
-	@MockBean
-	private UserService userServiceMock;
-	
-	@MockBean
-	private UserRepository userRepositoryMock;
-	
-	@MockBean
-	private UserFieldEditionSecurityManager fieldEditionSecurityManager;
-	
-	@MockBean
-	private UserUniqueConstraintManager uniqueConstraintManager;
+    @MockBean
+    private UserService userServiceMock;
+    
+    @MockBean
+    private UserRepository userRepositoryMock;
+    
+    @MockBean
+    private UserFieldEditionSecurityManager fieldEditionSecurityManager;
+    
+    @MockBean
+    private UserUniqueConstraintManager uniqueConstraintManager;
 
-	@BeforeAll
-	public static void beforeAll() {
-	    System.setProperty("vip.enabled", "false");
-	}
+    @BeforeAll
+    public static void beforeAll() {
+        System.setProperty("vip.enabled", "false");
+    }
 
-	@BeforeEach
-	public void setup() throws SecurityException {
-		given(fieldEditionSecurityManager.validate(Mockito.any(User.class))).willReturn(new FieldErrorMap());
-		given(uniqueConstraintManager.validate(Mockito.any(User.class))).willReturn(new FieldErrorMap());
-	}
+    @BeforeEach
+    public void setup() throws SecurityException {
+        given(fieldEditionSecurityManager.validate(Mockito.any(User.class))).willReturn(new FieldErrorMap());
+        given(uniqueConstraintManager.validate(Mockito.any(User.class))).willReturn(new FieldErrorMap());
+    }
 
-	@Test
-	public void saveNewAccountRequestTest() throws Exception {
-		final User user = ModelsUtil.createUser(null);
-		user.setEmail("test@te.st");
-		user.setUsername("test");
-		final AccountRequestInfo info = new AccountRequestInfo();
-		info.setContact("contact");
-		info.setFunction("function");
-		info.setInstitution("institution");
-		info.setStudyId(1L);
-		user.setAccountRequestInfo(info);
-		
-		given(userServiceMock.createAccountRequest(Mockito.mock(User.class))).willReturn(new User());
+    @Test
+    public void saveNewAccountRequestTest() throws Exception {
+        final User user = ModelsUtil.createUser(null);
+        user.setEmail("test@te.st");
+        user.setUsername("test");
+        final AccountRequestInfo info = new AccountRequestInfo();
+        info.setContact("contact");
+        info.setFunction("function");
+        info.setInstitution("institution");
+        info.setStudyId(1L);
+        user.setAccountRequestInfo(info);
+        
+        given(userServiceMock.createAccountRequest(Mockito.mock(User.class))).willReturn(new User());
 
-		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
-				.andExpect(status().isNoContent());
-	}
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
+                .andExpect(status().isNoContent());
+    }
 
-	@Test
-	public void saveNewAccountRequestChallengeTest() throws Exception {
-		final User user = ModelsUtil.createUser(null);
-		user.setEmail("test@te.st");
-		user.setUsername("test");
-		user.setId(2L);
-		final AccountRequestInfo info = new AccountRequestInfo();
-		info.setContact("contact");
-		info.setFunction("function");
-		info.setInstitution("institution");
-		info.setStudyId(1L);
-		user.setAccountRequestInfo(info);
+    @Test
+    public void saveNewAccountRequestChallengeTest() throws Exception {
+        final User user = ModelsUtil.createUser(null);
+        user.setEmail("test@te.st");
+        user.setUsername("test");
+        user.setId(2L);
+        final AccountRequestInfo info = new AccountRequestInfo();
+        info.setContact("contact");
+        info.setFunction("function");
+        info.setInstitution("institution");
+        info.setStudyId(1L);
+        user.setAccountRequestInfo(info);
 
-		given(userServiceMock.createAccountRequest(Mockito.any(User.class))).willReturn(user);
-		
-		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
-				.andExpect(status().isNoContent());
+        given(userServiceMock.createAccountRequest(Mockito.any(User.class))).willReturn(user);
+        
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
+                .andExpect(status().isNoContent());
 
-	}
+    }
 
 }

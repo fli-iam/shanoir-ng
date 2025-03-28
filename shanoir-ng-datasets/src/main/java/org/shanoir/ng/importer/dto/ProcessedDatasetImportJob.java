@@ -26,115 +26,115 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
  */
 public class ProcessedDatasetImportJob implements Serializable {
 
-	private static final long serialVersionUID = 8804929608059674037L;
+    private static final long serialVersionUID = 8804929608059674037L;
 
-	private Long studyId;
+    private Long studyId;
 
-	private String studyName;
+    private String studyName;
 
-	private Long subjectId;
+    private Long subjectId;
 
-	private String subjectName;
+    private String subjectName;
 
-	private String datasetType;
+    private String datasetType;
 
-	private String processedDatasetFilePath;
+    private String processedDatasetFilePath;
 
-	private ProcessedDatasetType processedDatasetType;
+    private ProcessedDatasetType processedDatasetType;
 
-	private String processedDatasetName;
+    private String processedDatasetName;
 
-	private String processedDatasetComment;
+    private String processedDatasetComment;
 
-	private DatasetProcessing datasetProcessing;
+    private DatasetProcessing datasetProcessing;
 
-	private ShanoirEvent shanoirEvent;
-	
-	public String getProcessedDatasetFilePath() {
-		return processedDatasetFilePath;
-	}
+    private ShanoirEvent shanoirEvent;
+    
+    public String getProcessedDatasetFilePath() {
+        return processedDatasetFilePath;
+    }
 
-	public void setProcessedDatasetFilePath(String processedDatasetFilePath) {
-		this.processedDatasetFilePath = processedDatasetFilePath;
-	}
+    public void setProcessedDatasetFilePath(String processedDatasetFilePath) {
+        this.processedDatasetFilePath = processedDatasetFilePath;
+    }
 
-	public Long getStudyId() {
-		return studyId;
-	}
+    public Long getStudyId() {
+        return studyId;
+    }
 
-	public void setStudyId(final Long studyId) {
-		this.studyId = studyId;
-	}
+    public void setStudyId(final Long studyId) {
+        this.studyId = studyId;
+    }
 
-	public String getStudyName() {
-		return studyName;
-	}
+    public String getStudyName() {
+        return studyName;
+    }
 
-	public void setStudyName(String studyName) {
-		this.studyName = studyName;
-	}
+    public void setStudyName(String studyName) {
+        this.studyName = studyName;
+    }
 
-	public Long getSubjectId() {
-		return subjectId;
-	}
+    public Long getSubjectId() {
+        return subjectId;
+    }
 
-	public void setSubjectId(final Long subjectId) {
-		this.subjectId = subjectId;
-	}
+    public void setSubjectId(final Long subjectId) {
+        this.subjectId = subjectId;
+    }
 
-	public String getSubjectName() {
-		return subjectName;
-	}
+    public String getSubjectName() {
+        return subjectName;
+    }
 
-	public void setSubjectName(String subjectName) {
-		this.subjectName = subjectName;
-	}
+    public void setSubjectName(String subjectName) {
+        this.subjectName = subjectName;
+    }
 
-	public String getDatasetType() {
-		return this.datasetType;
-	}
+    public String getDatasetType() {
+        return this.datasetType;
+    }
 
-	public void setDatasetType(String datasetType) {
-		this.datasetType = datasetType;
-	}
+    public void setDatasetType(String datasetType) {
+        this.datasetType = datasetType;
+    }
 
-	public ProcessedDatasetType getProcessedDatasetType() {
-		return this.processedDatasetType;
-	}
-	
-	public void setProcessedDatasetType(ProcessedDatasetType processedDatasetType) {
-		this.processedDatasetType = processedDatasetType;
-	}
+    public ProcessedDatasetType getProcessedDatasetType() {
+        return this.processedDatasetType;
+    }
+    
+    public void setProcessedDatasetType(ProcessedDatasetType processedDatasetType) {
+        this.processedDatasetType = processedDatasetType;
+    }
 
-	public String getProcessedDatasetName() {
-		return this.processedDatasetName;
-	}
+    public String getProcessedDatasetName() {
+        return this.processedDatasetName;
+    }
 
-	public void setProcessedDatasetName(String processedDatasetName) {
-		this.processedDatasetName = processedDatasetName;
-	}
+    public void setProcessedDatasetName(String processedDatasetName) {
+        this.processedDatasetName = processedDatasetName;
+    }
 
-	public String getProcessedDatasetComment() {
-		return this.processedDatasetComment;
-	}
+    public String getProcessedDatasetComment() {
+        return this.processedDatasetComment;
+    }
 
-	public void setProcessedDatasetComment(String processedDatasetComment) {
-		this.processedDatasetComment = processedDatasetComment;
-	}
+    public void setProcessedDatasetComment(String processedDatasetComment) {
+        this.processedDatasetComment = processedDatasetComment;
+    }
 
-	public DatasetProcessing getDatasetProcessing() {
-		return this.datasetProcessing;
-	}
+    public DatasetProcessing getDatasetProcessing() {
+        return this.datasetProcessing;
+    }
 
-	public void setDatasetProcessing(DatasetProcessing datasetProcessing) {
-		this.datasetProcessing = datasetProcessing;
-	}
+    public void setDatasetProcessing(DatasetProcessing datasetProcessing) {
+        this.datasetProcessing = datasetProcessing;
+    }
 
-	public ShanoirEvent getShanoirEvent() {
-		return shanoirEvent;
-	}
+    public ShanoirEvent getShanoirEvent() {
+        return shanoirEvent;
+    }
 
-	public void setShanoirEvent(ShanoirEvent shanoirEvent) {
-		this.shanoirEvent = shanoirEvent;
-	}
+    public void setShanoirEvent(ShanoirEvent shanoirEvent) {
+        this.shanoirEvent = shanoirEvent;
+    }
 }

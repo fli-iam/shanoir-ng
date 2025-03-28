@@ -28,73 +28,73 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class Instance implements Cloneable {
 
-	@JsonProperty("sopInstanceUID")
-	private String sopInstanceUID;
+    @JsonProperty("sopInstanceUID")
+    private String sopInstanceUID;
 
-	@JsonProperty("instanceNumber")
-	private String instanceNumber;
+    @JsonProperty("instanceNumber")
+    private String instanceNumber;
 
-	@JsonProperty("referencedSOPClassUIDInFile")
-	private String referencedSOPClassUIDInFile;
+    @JsonProperty("referencedSOPClassUIDInFile")
+    private String referencedSOPClassUIDInFile;
 
-	@JsonProperty("referencedFileID")
-	private String[] referencedFileID;
+    @JsonProperty("referencedFileID")
+    private String[] referencedFileID;
 
-	public Instance() {
-	}
+    public Instance() {
+    }
 
-	public Instance(Attributes attributes) {
-		sopInstanceUID = attributes.getString(Tag.SOPInstanceUID);
-		// try to remove confusing spaces, in case DICOM server sends them wrongly
-		if (sopInstanceUID != null)
-			sopInstanceUID = sopInstanceUID.trim();
-		instanceNumber = attributes.getString(Tag.InstanceNumber);
-		referencedSOPClassUIDInFile = attributes.getString(Tag.ReferencedSOPClassUIDInFile);
-		referencedFileID = attributes.getStrings(Tag.ReferencedFileID);
-	}
+    public Instance(Attributes attributes) {
+        sopInstanceUID = attributes.getString(Tag.SOPInstanceUID);
+        // try to remove confusing spaces, in case DICOM server sends them wrongly
+        if (sopInstanceUID != null)
+            sopInstanceUID = sopInstanceUID.trim();
+        instanceNumber = attributes.getString(Tag.InstanceNumber);
+        referencedSOPClassUIDInFile = attributes.getString(Tag.ReferencedSOPClassUIDInFile);
+        referencedFileID = attributes.getStrings(Tag.ReferencedFileID);
+    }
 
-	@Override
-	protected Object clone() throws CloneNotSupportedException {
-		return super.clone();
-	}
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 
-	public String getInstanceNumber() {
-		return instanceNumber;
-	}
+    public String getInstanceNumber() {
+        return instanceNumber;
+    }
 
-	public String getReferencedSOPClassUIDInFile() {
-		return referencedSOPClassUIDInFile;
-	}
+    public String getReferencedSOPClassUIDInFile() {
+        return referencedSOPClassUIDInFile;
+    }
 
-	public String[] getReferencedFileID() {
-		return referencedFileID;
-	}
+    public String[] getReferencedFileID() {
+        return referencedFileID;
+    }
 
-	public void setInstanceNumber(String instanceNumber) {
-		this.instanceNumber = instanceNumber;
-	}
+    public void setInstanceNumber(String instanceNumber) {
+        this.instanceNumber = instanceNumber;
+    }
 
-	public void setReferencedSOPClassUIDInFile(String referencedSOPClassUIDInFile) {
-		this.referencedSOPClassUIDInFile = referencedSOPClassUIDInFile;
-	}
+    public void setReferencedSOPClassUIDInFile(String referencedSOPClassUIDInFile) {
+        this.referencedSOPClassUIDInFile = referencedSOPClassUIDInFile;
+    }
 
-	public void setReferencedFileID(String[] referencedFileID) {
-		this.referencedFileID = referencedFileID;
-	}
+    public void setReferencedFileID(String[] referencedFileID) {
+        this.referencedFileID = referencedFileID;
+    }
 
-	public String getSopInstanceUID() {
-		return sopInstanceUID;
-	}
+    public String getSopInstanceUID() {
+        return sopInstanceUID;
+    }
 
-	public void setSopInstanceUID(String sopInstanceUID) {
-		this.sopInstanceUID = sopInstanceUID;
-	}
+    public void setSopInstanceUID(String sopInstanceUID) {
+        this.sopInstanceUID = sopInstanceUID;
+    }
 
-	@Override
-	public String toString() {
-		return "Instance [sopInstanceUID=" + sopInstanceUID + ", instanceNumber=" + instanceNumber
-				+ ", referencedSOPClassUIDInFile=" + referencedSOPClassUIDInFile + ", referencedFileID="
-				+ Arrays.toString(referencedFileID) + "]";
-	}
+    @Override
+    public String toString() {
+        return "Instance [sopInstanceUID=" + sopInstanceUID + ", instanceNumber=" + instanceNumber
+                + ", referencedSOPClassUIDInFile=" + referencedSOPClassUIDInFile + ", referencedFileID="
+                + Arrays.toString(referencedFileID) + "]";
+    }
 
 }

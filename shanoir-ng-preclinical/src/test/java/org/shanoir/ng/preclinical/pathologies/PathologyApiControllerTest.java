@@ -54,70 +54,70 @@ import com.google.gson.GsonBuilder;
 @ActiveProfiles("test")
 public class PathologyApiControllerTest {
 
-	private static final String REQUEST_PATH = "/pathology";
-	private static final String REQUEST_PATH_ALL = REQUEST_PATH;
-	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+    private static final String REQUEST_PATH = "/pathology";
+    private static final String REQUEST_PATH_ALL = REQUEST_PATH;
+    private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
-	private Gson gson;
+    private Gson gson;
 
-	@Autowired
-	private MockMvc mvc;
+    @Autowired
+    private MockMvc mvc;
 
-	@MockBean
-	private PathologyService pathologyServiceMock;
-	
-	@MockBean
-	private PathologyUniqueValidator uniqueValidator;
-	
-	@MockBean
-	private PathologyEditableByManager editableOnlyValidator;
+    @MockBean
+    private PathologyService pathologyServiceMock;
+    
+    @MockBean
+    private PathologyUniqueValidator uniqueValidator;
+    
+    @MockBean
+    private PathologyEditableByManager editableOnlyValidator;
 
 
-	@BeforeEach
-	public void setup() throws ShanoirException {
-		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
+    @BeforeEach
+    public void setup() throws ShanoirException {
+        gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
-		doNothing().when(pathologyServiceMock).deleteById(1L);
-		given(pathologyServiceMock.findAll()).willReturn(Arrays.asList(new Pathology()));
-		given(pathologyServiceMock.findById(1L)).willReturn(new Pathology());
-		given(pathologyServiceMock.save(Mockito.mock(Pathology.class))).willReturn(new Pathology());
-		given(uniqueValidator.validate(Mockito.any(Pathology.class))).willReturn(new FieldErrorMap());
-		given(editableOnlyValidator.validate(Mockito.any(Pathology.class))).willReturn(new FieldErrorMap());
-	}
+        doNothing().when(pathologyServiceMock).deleteById(1L);
+        given(pathologyServiceMock.findAll()).willReturn(Arrays.asList(new Pathology()));
+        given(pathologyServiceMock.findById(1L)).willReturn(new Pathology());
+        given(pathologyServiceMock.save(Mockito.mock(Pathology.class))).willReturn(new Pathology());
+        given(uniqueValidator.validate(Mockito.any(Pathology.class))).willReturn(new FieldErrorMap());
+        given(editableOnlyValidator.validate(Mockito.any(Pathology.class))).willReturn(new FieldErrorMap());
+    }
 
-	@Test
-	@WithMockUser(authorities = { "adminRole" })
-	public void deletePathologyTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser(authorities = { "adminRole" })
+    public void deletePathologyTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	public void findPathologyByIdTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    public void findPathologyByIdTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	public void findPathologiesTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_ALL).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    public void findPathologiesTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_ALL).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser
-	public void saveNewPathologyTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(PathologyModelUtil.createPathology())))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser
+    public void saveNewPathologyTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(gson.toJson(PathologyModelUtil.createPathology())))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser
-	public void updatePathologyTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(PathologyModelUtil.createPathology())))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser
+    public void updatePathologyTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(gson.toJson(PathologyModelUtil.createPathology())))
+                .andExpect(status().isOk());
+    }
 
 }

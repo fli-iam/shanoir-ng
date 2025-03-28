@@ -65,197 +65,197 @@ public class DatasetDownloaderServiceTest {
 
     @Qualifier("datasetDownloaderServiceImpl")
     @Autowired
-	DatasetDownloaderServiceImpl datasetDownloaderService;
+    DatasetDownloaderServiceImpl datasetDownloaderService;
 
-	@MockBean
-	private DatasetService datasetServiceMock;
+    @MockBean
+    private DatasetService datasetServiceMock;
 
-	@MockBean
-	private DatasetMapper datasetMapperMock;
+    @MockBean
+    private DatasetMapper datasetMapperMock;
 
-	@MockBean
-	private MrDatasetMapper mrDatasetMapperMock;
+    @MockBean
+    private MrDatasetMapper mrDatasetMapperMock;
 
-	@MockBean
-	private ExaminationService examinationService;
+    @MockBean
+    private ExaminationService examinationService;
 
-	@MockBean
-	private WADODownloaderService downloader;
-	
-	@MockBean(name = "datasetSecurityService")
-	private DatasetSecurityService datasetSecurityService;
-	
-	@MockBean(name = "controlerSecurityService")
-	private ControlerSecurityService controlerSecurityService;
-	
+    @MockBean
+    private WADODownloaderService downloader;
+    
+    @MockBean(name = "datasetSecurityService")
+    private DatasetSecurityService datasetSecurityService;
+    
+    @MockBean(name = "controlerSecurityService")
+    private ControlerSecurityService controlerSecurityService;
+    
     @TempDir
     public File tempDir;
 
-	@MockBean
-	private EegDatasetMapper eegDatasetMapper;
+    @MockBean
+    private EegDatasetMapper eegDatasetMapper;
 
-	@MockBean
-	private BIDSServiceImpl bidsService;
+    @MockBean
+    private BIDSServiceImpl bidsService;
 
-	@MockBean
-	private SubjectRepository subjectRepository;
+    @MockBean
+    private SubjectRepository subjectRepository;
 
-	@MockBean
-	private ShanoirEventService eventService;
-	
-	@MockBean
-	private StudyRepository studyRepo;
-	
-	@MockBean
-	private ImporterService importerService;
-	
-	@MockBean
-	private DicomSEGAndSRImporterService dicomSRImporterService;
+    @MockBean
+    private ShanoirEventService eventService;
+    
+    @MockBean
+    private StudyRepository studyRepo;
+    
+    @MockBean
+    private ImporterService importerService;
+    
+    @MockBean
+    private DicomSEGAndSRImporterService dicomSRImporterService;
 
-	private Subject subject = new Subject(3L, "name");
-	private Study study = new Study(1L, "studyName");
+    private Subject subject = new Subject(3L, "name");
+    private Study study = new Study(1L, "studyName");
 
-	private DatasetAcquisition dsAcq = new MrDatasetAcquisition();
-	private DatasetMetadata updatedMetadata = new DatasetMetadata();
-	private Examination exam = new Examination();
+    private DatasetAcquisition dsAcq = new MrDatasetAcquisition();
+    private DatasetMetadata updatedMetadata = new DatasetMetadata();
+    private Examination exam = new Examination();
 
-	@BeforeEach
-	public void setup() throws ShanoirException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, SolrServerException, IOException, RestServiceException {
-		doNothing().when(datasetServiceMock).deleteById(1L);
-		given(datasetServiceMock.findById(1L)).willReturn(new MrDataset());
-		given(datasetServiceMock.create(Mockito.mock(MrDataset.class))).willReturn(new MrDataset());
-		given(studyRepo.findById(Mockito.anyLong())).willReturn(Optional.of(study));
-		given(controlerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(Dataset.class))).willReturn(true);
-		dsAcq.setRank(2);
-		dsAcq.setSortingIndex(2);
-		exam.setId(1L);
-		exam.setStudy(new Study());
-		exam.getStudy().setId(1L);
-		dsAcq.setExamination(exam);
-		updatedMetadata.setComment("comment");
-		updatedMetadata.setName("test 1");
-	}
+    @BeforeEach
+    public void setup() throws ShanoirException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, SolrServerException, IOException, RestServiceException {
+        doNothing().when(datasetServiceMock).deleteById(1L);
+        given(datasetServiceMock.findById(1L)).willReturn(new MrDataset());
+        given(datasetServiceMock.create(Mockito.mock(MrDataset.class))).willReturn(new MrDataset());
+        given(studyRepo.findById(Mockito.anyLong())).willReturn(Optional.of(study));
+        given(controlerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(Dataset.class))).willReturn(true);
+        dsAcq.setRank(2);
+        dsAcq.setSortingIndex(2);
+        exam.setId(1L);
+        exam.setStudy(new Study());
+        exam.getStudy().setId(1L);
+        dsAcq.setExamination(exam);
+        updatedMetadata.setComment("comment");
+        updatedMetadata.setName("test 1");
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void testMassiveDownloadByStudyWrongFormat() throws Exception {
-		// Create a file with some text
-		File datasetFile = new File(tempDir, "test.nii");
-		datasetFile.createNewFile();
-		FileUtils.write(datasetFile, "test");
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testMassiveDownloadByStudyWrongFormat() throws Exception {
+        // Create a file with some text
+        File datasetFile = new File(tempDir, "test.nii");
+        datasetFile.createNewFile();
+        FileUtils.write(datasetFile, "test");
 
-		// Link it to datasetExpression in a dataset in a study
-		Dataset dataset = new MrDataset();
-		dataset.setSubjectId(3L);
-		given(subjectRepository.findById(3L)).willReturn(Optional.of(subject));
-		dataset.setDatasetAcquisition(dsAcq);
-		dataset.setUpdatedMetadata(updatedMetadata);
+        // Link it to datasetExpression in a dataset in a study
+        Dataset dataset = new MrDataset();
+        dataset.setSubjectId(3L);
+        given(subjectRepository.findById(3L)).willReturn(Optional.of(subject));
+        dataset.setDatasetAcquisition(dsAcq);
+        dataset.setUpdatedMetadata(updatedMetadata);
 
-		DatasetExpression expr = new DatasetExpression();
-		expr.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-		DatasetFile dsFile = new DatasetFile();
-		dsFile.setPath(datasetFile.getAbsolutePath());
-		expr.setDatasetFiles(Collections.singletonList(dsFile));
-		List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
-		dataset.setDatasetExpressions(datasetExpressions);
+        DatasetExpression expr = new DatasetExpression();
+        expr.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+        DatasetFile dsFile = new DatasetFile();
+        dsFile.setPath(datasetFile.getAbsolutePath());
+        expr.setDatasetFiles(Collections.singletonList(dsFile));
+        List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
+        dataset.setDatasetExpressions(datasetExpressions);
 
-		// GIVEN a study with some datasets to export in nii format
-		Mockito.when(datasetServiceMock.findByStudyId(1L)).thenReturn(Collections.singletonList(dataset));
-		HttpServletResponse response =  new MockHttpServletResponse();
+        // GIVEN a study with some datasets to export in nii format
+        Mockito.when(datasetServiceMock.findByStudyId(1L)).thenReturn(Collections.singletonList(dataset));
+        HttpServletResponse response =  new MockHttpServletResponse();
 
-		// WHEN we export all the datasets
-		try {
-			this.datasetDownloaderService.massiveDownload("otherWRONG", Collections.singletonList(dataset), response, false, null);
-		} catch (RestServiceException e) {
-			assertEquals("Unexpected error while downloading dataset files",
-					e.getErrorModel().getMessage());
-		}
-		// THEN we expect a failure
-	}
+        // WHEN we export all the datasets
+        try {
+            this.datasetDownloaderService.massiveDownload("otherWRONG", Collections.singletonList(dataset), response, false, null);
+        } catch (RestServiceException e) {
+            assertEquals("Unexpected error while downloading dataset files",
+                    e.getErrorModel().getMessage());
+        }
+        // THEN we expect a failure
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void testMassiveDownloadByExaminationIdNifti() throws Exception {
-		// GIVEN a study with some datasets to export in nii format
-		// Create a file with some text
-		File datasetFile = new File(tempDir, "test.nii");
-		datasetFile.createNewFile();
-		FileUtils.write(datasetFile, "test");
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testMassiveDownloadByExaminationIdNifti() throws Exception {
+        // GIVEN a study with some datasets to export in nii format
+        // Create a file with some text
+        File datasetFile = new File(tempDir, "test.nii");
+        datasetFile.createNewFile();
+        FileUtils.write(datasetFile, "test");
 
-		// Link it to datasetExpression in a dataset in a study
-		Dataset dataset = new MrDataset();
-		dataset.setId(1L);
-		dataset.setDownloadable(true);
-		dataset.setSubjectId(3L);
-		given(subjectRepository.findById(3L)).willReturn(Optional.of(subject));
-		dataset.setDatasetAcquisition(dsAcq);
-		dataset.setUpdatedMetadata(updatedMetadata);
+        // Link it to datasetExpression in a dataset in a study
+        Dataset dataset = new MrDataset();
+        dataset.setId(1L);
+        dataset.setDownloadable(true);
+        dataset.setSubjectId(3L);
+        given(subjectRepository.findById(3L)).willReturn(Optional.of(subject));
+        dataset.setDatasetAcquisition(dsAcq);
+        dataset.setUpdatedMetadata(updatedMetadata);
 
-		DatasetExpression expr = new DatasetExpression();
-		expr.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-		DatasetFile dsFile = new DatasetFile();
-		dsFile.setPath("file:///" + datasetFile.getAbsolutePath());
-		expr.setDatasetFiles(Collections.singletonList(dsFile));
-		List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
-		dataset.setDatasetExpressions(datasetExpressions);
+        DatasetExpression expr = new DatasetExpression();
+        expr.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+        DatasetFile dsFile = new DatasetFile();
+        dsFile.setPath("file:///" + datasetFile.getAbsolutePath());
+        expr.setDatasetFiles(Collections.singletonList(dsFile));
+        List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
+        dataset.setDatasetExpressions(datasetExpressions);
 
-		HttpServletResponse response =  new MockHttpServletResponse();
+        HttpServletResponse response =  new MockHttpServletResponse();
 
-		// WHEN we export all the datasets
-		this.datasetDownloaderService.massiveDownload("nii", Collections.singletonList(dataset), response, false, null);
+        // WHEN we export all the datasets
+        this.datasetDownloaderService.massiveDownload("nii", Collections.singletonList(dataset), response, false, null);
 
-		assertEquals(response.getContentType(), "application/zip");
-		// THEN all datasets are exported
+        assertEquals(response.getContentType(), "application/zip");
+        // THEN all datasets are exported
 
-		ArgumentCaptor<ShanoirEvent> eventCatcher = ArgumentCaptor.forClass(ShanoirEvent.class);
-		Mockito.verify(eventService, times(1)).publishEvent(eventCatcher.capture());
+        ArgumentCaptor<ShanoirEvent> eventCatcher = ArgumentCaptor.forClass(ShanoirEvent.class);
+        Mockito.verify(eventService, times(1)).publishEvent(eventCatcher.capture());
 
-		ShanoirEvent event = eventCatcher.getValue();
-		assertNotNull(event);
-		assertEquals(dataset.getId().toString()  + "." + "nii", event.getMessage());
-		assertEquals(dataset.getId().toString(), event.getObjectId());
-		assertEquals(ShanoirEventType.DOWNLOAD_DATASET_EVENT, event.getEventType());
-	}
+        ShanoirEvent event = eventCatcher.getValue();
+        assertNotNull(event);
+        assertEquals(dataset.getId().toString()  + "." + "nii", event.getMessage());
+        assertEquals(dataset.getId().toString(), event.getObjectId());
+        assertEquals(ShanoirEventType.DOWNLOAD_DATASET_EVENT, event.getEventType());
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void testMassiveDownloadByDatasetsId() throws Exception {
-		// GIVEN a list of datasets to export
-		// Create a file with some text
-		File datasetFile = new File(tempDir, "test.nii");
-		datasetFile.createNewFile();
-		FileUtils.write(datasetFile, "test");
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testMassiveDownloadByDatasetsId() throws Exception {
+        // GIVEN a list of datasets to export
+        // Create a file with some text
+        File datasetFile = new File(tempDir, "test.nii");
+        datasetFile.createNewFile();
+        FileUtils.write(datasetFile, "test");
 
-		// Link it to datasetExpression in a dataset in a study
-		Dataset dataset = new MrDataset();
-		dataset.setDownloadable(true);
-		dataset.setId(1L);
-		dataset.setSubjectId(3L);
-		given(subjectRepository.findById(3L)).willReturn(Optional.of(subject));
-		dataset.setDatasetAcquisition(dsAcq);
-		dataset.setUpdatedMetadata(updatedMetadata);
+        // Link it to datasetExpression in a dataset in a study
+        Dataset dataset = new MrDataset();
+        dataset.setDownloadable(true);
+        dataset.setId(1L);
+        dataset.setSubjectId(3L);
+        given(subjectRepository.findById(3L)).willReturn(Optional.of(subject));
+        dataset.setDatasetAcquisition(dsAcq);
+        dataset.setUpdatedMetadata(updatedMetadata);
 
-		DatasetExpression expr = new DatasetExpression();
-		expr.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-		DatasetFile dsFile = new DatasetFile();
-		dsFile.setPath("file:///" + datasetFile.getAbsolutePath());
-		expr.setDatasetFiles(Collections.singletonList(dsFile));
-		List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
-		dataset.setDatasetExpressions(datasetExpressions);
-	
-		HttpServletResponse response =  new MockHttpServletResponse();
-		this.datasetDownloaderService.massiveDownload("nii", Collections.singletonList(dataset), response, false, null);
+        DatasetExpression expr = new DatasetExpression();
+        expr.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+        DatasetFile dsFile = new DatasetFile();
+        dsFile.setPath("file:///" + datasetFile.getAbsolutePath());
+        expr.setDatasetFiles(Collections.singletonList(dsFile));
+        List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
+        dataset.setDatasetExpressions(datasetExpressions);
+    
+        HttpServletResponse response =  new MockHttpServletResponse();
+        this.datasetDownloaderService.massiveDownload("nii", Collections.singletonList(dataset), response, false, null);
 
-		// THEN all datasets are exported
-		
-		ArgumentCaptor<ShanoirEvent> eventCatcher = ArgumentCaptor.forClass(ShanoirEvent.class);
-		Mockito.verify(eventService, times(1)).publishEvent(eventCatcher.capture());
-		
-		ShanoirEvent event = eventCatcher.getValue();
-		assertNotNull(event);
-		assertEquals(dataset.getId().toString() + ".nii", event.getMessage());
-		assertEquals(dataset.getId().toString(), event.getObjectId());
-		assertEquals(ShanoirEventType.DOWNLOAD_DATASET_EVENT, event.getEventType());
-	}
+        // THEN all datasets are exported
+        
+        ArgumentCaptor<ShanoirEvent> eventCatcher = ArgumentCaptor.forClass(ShanoirEvent.class);
+        Mockito.verify(eventService, times(1)).publishEvent(eventCatcher.capture());
+        
+        ShanoirEvent event = eventCatcher.getValue();
+        assertNotNull(event);
+        assertEquals(dataset.getId().toString() + ".nii", event.getMessage());
+        assertEquals(dataset.getId().toString(), event.getObjectId());
+        assertEquals(ShanoirEventType.DOWNLOAD_DATASET_EVENT, event.getEventType());
+    }
 
 }

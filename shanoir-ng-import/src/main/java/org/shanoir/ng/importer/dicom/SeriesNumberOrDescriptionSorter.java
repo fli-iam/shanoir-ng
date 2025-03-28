@@ -19,30 +19,30 @@ import org.shanoir.ng.importer.model.Serie;
  */
 public class SeriesNumberOrDescriptionSorter implements Comparator<Serie> {
 
-	@Override
-	public int compare(Serie s1, Serie s2) {
-		String s1SeriesNumber = s1.getSeriesNumber();
-		String s2SeriesNumber = s2.getSeriesNumber();
-		try {
-			int s1SeriesNumberInt = Integer.parseInt(s1SeriesNumber);
-			int s2SeriesNumberInt = Integer.parseInt(s2SeriesNumber);
-			if (s1SeriesNumberInt == s2SeriesNumberInt) {
-				return 0;
-			} else {
-				if (s1SeriesNumberInt < s2SeriesNumberInt) {
-					return -1;
-				} else {
-					return 1;
-				}
-			}
-		} catch(NumberFormatException e) {
-			String s1SeriesDescription = s1.getSeriesDescription();
-			String s2SeriesDescription = s2.getSeriesDescription();
-			if (s1SeriesDescription == null || s2SeriesDescription == null) {
-				return 0;
-			}
-			return s1SeriesDescription.compareToIgnoreCase(s2SeriesDescription);
-		}
-	}
+    @Override
+    public int compare(Serie s1, Serie s2) {
+        String s1SeriesNumber = s1.getSeriesNumber();
+        String s2SeriesNumber = s2.getSeriesNumber();
+        try {
+            int s1SeriesNumberInt = Integer.parseInt(s1SeriesNumber);
+            int s2SeriesNumberInt = Integer.parseInt(s2SeriesNumber);
+            if (s1SeriesNumberInt == s2SeriesNumberInt) {
+                return 0;
+            } else {
+                if (s1SeriesNumberInt < s2SeriesNumberInt) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            }
+        } catch(NumberFormatException e) {
+            String s1SeriesDescription = s1.getSeriesDescription();
+            String s2SeriesDescription = s2.getSeriesDescription();
+            if (s1SeriesDescription == null || s2SeriesDescription == null) {
+                return 0;
+            }
+            return s1SeriesDescription.compareToIgnoreCase(s2SeriesDescription);
+        }
+    }
 
 }

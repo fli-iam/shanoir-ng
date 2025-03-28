@@ -67,281 +67,281 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class UserServiceTest {
 
-	private static final long USER_ID = 1L;
-	private static final String UPDATED_USER_FIRSTNAME = "test";
-	private static final String USER_USERNAME = "name";
+    private static final long USER_ID = 1L;
+    private static final String UPDATED_USER_FIRSTNAME = "test";
+    private static final String USER_USERNAME = "name";
 
-	@MockBean
-	private AccountRequestInfoRepository accountRequestInfoRepository;
+    @MockBean
+    private AccountRequestInfoRepository accountRequestInfoRepository;
 
-	@MockBean
-	private EmailService emailService;
+    @MockBean
+    private EmailService emailService;
 
-	@MockBean
-	private KeycloakClient keycloakClient;
+    @MockBean
+    private KeycloakClient keycloakClient;
 
-	@MockBean
-	private RoleRepository roleRepository;
+    @MockBean
+    private RoleRepository roleRepository;
 
-	@MockBean
-	private UserRepository userRepository;
-	
-	@MockBean
+    @MockBean
+    private UserRepository userRepository;
+    
+    @MockBean
     private ApplicationEventPublisher publisher;
 
-	@Autowired
-	private UserService userService;
+    @Autowired
+    private UserService userService;
 
-	@MockBean
-	private AccessRequestRepository accessRequestRepository;
-	
-	@MockBean
-	private AccessRequestService accessRequestService;
+    @MockBean
+    private AccessRequestRepository accessRequestRepository;
+    
+    @MockBean
+    private AccessRequestService accessRequestService;
 
-	@BeforeEach
-	public void setup() throws SecurityException {
-		given(userRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createUser()));
-		given(userRepository.findByUsername(Mockito.anyString())).willReturn(Optional.of(ModelsUtil.createUser()));
-		given(userRepository.findByIdIn(Mockito.anyList()))
-				.willReturn(Arrays.asList(createUser()));
-		given(userRepository.findById(USER_ID)).willReturn(Optional.of(ModelsUtil.createUser(USER_ID)));
-		given(userRepository
-				.findByExpirationDateLessThanAndFirstExpirationNotificationSentFalse(Mockito.any(LocalDate.class)))
-						.willReturn(Arrays.asList(ModelsUtil.createUser()));
-		given(userRepository
-				.findByExpirationDateLessThanAndSecondExpirationNotificationSentFalse(Mockito.any(LocalDate.class)))
-						.willReturn(Arrays.asList(ModelsUtil.createUser()));
-		given(userRepository.save(Mockito.any(User.class))).willReturn(ModelsUtil.createUser());
-		given(roleRepository.findByName(Mockito.anyString())).willReturn(ModelsUtil.createUserRole());
-		given(keycloakClient.createUserWithPassword(Mockito.any(User.class), Mockito.anyString())).willReturn(RandomStringUtils.randomAlphanumeric(10));
-	}
+    @BeforeEach
+    public void setup() throws SecurityException {
+        given(userRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createUser()));
+        given(userRepository.findByUsername(Mockito.anyString())).willReturn(Optional.of(ModelsUtil.createUser()));
+        given(userRepository.findByIdIn(Mockito.anyList()))
+                .willReturn(Arrays.asList(createUser()));
+        given(userRepository.findById(USER_ID)).willReturn(Optional.of(ModelsUtil.createUser(USER_ID)));
+        given(userRepository
+                .findByExpirationDateLessThanAndFirstExpirationNotificationSentFalse(Mockito.any(LocalDate.class)))
+                        .willReturn(Arrays.asList(ModelsUtil.createUser()));
+        given(userRepository
+                .findByExpirationDateLessThanAndSecondExpirationNotificationSentFalse(Mockito.any(LocalDate.class)))
+                        .willReturn(Arrays.asList(ModelsUtil.createUser()));
+        given(userRepository.save(Mockito.any(User.class))).willReturn(ModelsUtil.createUser());
+        given(roleRepository.findByName(Mockito.anyString())).willReturn(ModelsUtil.createUserRole());
+        given(keycloakClient.createUserWithPassword(Mockito.any(User.class), Mockito.anyString())).willReturn(RandomStringUtils.randomAlphanumeric(10));
+    }
 
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void confirmAccountRequestTest() throws AccountNotOnDemandException, EntityNotFoundException  {
-		final User user = ModelsUtil.createUser();
-		user.setAccountRequestDemand(true);
-		given(userRepository.findById(USER_ID)).willReturn(Optional.of(user));
-		final User updatedUser = userService.confirmAccountRequest(createUser());
-		Assert.assertNotNull(updatedUser);
-		Assert.assertTrue(UPDATED_USER_FIRSTNAME.equals(updatedUser.getFirstName()));
-		Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong());
-		user.setAccountRequestDemand(false);
-		Mockito.verify(userRepository, Mockito.times(1)).save(user);
-	}
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void confirmAccountRequestTest() throws AccountNotOnDemandException, EntityNotFoundException  {
+        final User user = ModelsUtil.createUser();
+        user.setAccountRequestDemand(true);
+        given(userRepository.findById(USER_ID)).willReturn(Optional.of(user));
+        final User updatedUser = userService.confirmAccountRequest(createUser());
+        Assert.assertNotNull(updatedUser);
+        Assert.assertTrue(UPDATED_USER_FIRSTNAME.equals(updatedUser.getFirstName()));
+        Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong());
+        user.setAccountRequestDemand(false);
+        Mockito.verify(userRepository, Mockito.times(1)).save(user);
+    }
 
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void confirmAccountRequestBadUserIdTest() throws AccountNotOnDemandException, EntityNotFoundException {
-		assertThrows(EntityNotFoundException.class, () -> {
-			given(userRepository.findById(USER_ID).orElse(null)).willReturn(null);
-			userService.confirmAccountRequest(new User());
-			Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
-			Mockito.verify(userRepository, Mockito.times(0)).save(Mockito.any(User.class));
-		});
-	}
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void confirmAccountRequestBadUserIdTest() throws AccountNotOnDemandException, EntityNotFoundException {
+        assertThrows(EntityNotFoundException.class, () -> {
+            given(userRepository.findById(USER_ID).orElse(null)).willReturn(null);
+            userService.confirmAccountRequest(new User());
+            Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+            Mockito.verify(userRepository, Mockito.times(0)).save(Mockito.any(User.class));
+        });
+    }
 
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void confirmAccountRequestNoDemandTest() throws AccountNotOnDemandException, EntityNotFoundException {
-		assertThrows(ShanoirUsersException.class, () -> {
-			User user = ModelsUtil.createUser(USER_ID);
-			given(userRepository.findById(USER_ID)).willReturn(Optional.of(user));
-			userService.confirmAccountRequest(user);
-			Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
-			Mockito.verify(userRepository, Mockito.times(0)).save(Mockito.any(User.class));
-		});
-	}
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void confirmAccountRequestNoDemandTest() throws AccountNotOnDemandException, EntityNotFoundException {
+        assertThrows(ShanoirUsersException.class, () -> {
+            User user = ModelsUtil.createUser(USER_ID);
+            given(userRepository.findById(USER_ID)).willReturn(Optional.of(user));
+            userService.confirmAccountRequest(user);
+            Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+            Mockito.verify(userRepository, Mockito.times(0)).save(Mockito.any(User.class));
+        });
+    }
 
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void denyAccountRequestTest() throws AccountNotOnDemandException, EntityNotFoundException {
-		final User user = ModelsUtil.createUser();
-		user.setAccountRequestDemand(true);
-		given(userRepository.findById(USER_ID)).willReturn(Optional.of(user));
-		userService.denyAccountRequest(USER_ID);
-		Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong());
-		Mockito.verify(userRepository, Mockito.times(1)).deleteById(USER_ID);
-	}
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void denyAccountRequestTest() throws AccountNotOnDemandException, EntityNotFoundException {
+        final User user = ModelsUtil.createUser();
+        user.setAccountRequestDemand(true);
+        given(userRepository.findById(USER_ID)).willReturn(Optional.of(user));
+        userService.denyAccountRequest(USER_ID);
+        Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong());
+        Mockito.verify(userRepository, Mockito.times(1)).deleteById(USER_ID);
+    }
 
-	/**
-	 * MK: change to NullPointerException: userRepository is a MockBean, even inside the userService.
-	 * MockBeans return null for findById, but should return an Optional, that can be tested in case,
-	 * e.g. with orElse() or get(). As null is not an Optional, an NPE is thrown inside confirmAccountRequest.
-	 * As I do not want to change the userServiceImpl for the sake of the test case, I changed the test case.
-	 * A newer version of Mockito should return an Optional in case of a null for this scenario.
-	 * @throws NullPointerException
-	 * @throws AccountNotOnDemandException
-	 * @throws EntityNotFoundException
-	 */
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void denyAccountRequestBadUserIdTest() {
-		assertThrows(NullPointerException.class, () -> {
-			given(userRepository.findById(USER_ID)).willReturn(null);
-			userService.denyAccountRequest(USER_ID);
-			Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
-			Mockito.verify(userRepository, Mockito.times(0)).deleteById(USER_ID);
-		});
-	}
+    /**
+     * MK: change to NullPointerException: userRepository is a MockBean, even inside the userService.
+     * MockBeans return null for findById, but should return an Optional, that can be tested in case,
+     * e.g. with orElse() or get(). As null is not an Optional, an NPE is thrown inside confirmAccountRequest.
+     * As I do not want to change the userServiceImpl for the sake of the test case, I changed the test case.
+     * A newer version of Mockito should return an Optional in case of a null for this scenario.
+     * @throws NullPointerException
+     * @throws AccountNotOnDemandException
+     * @throws EntityNotFoundException
+     */
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void denyAccountRequestBadUserIdTest() {
+        assertThrows(NullPointerException.class, () -> {
+            given(userRepository.findById(USER_ID)).willReturn(null);
+            userService.denyAccountRequest(USER_ID);
+            Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+            Mockito.verify(userRepository, Mockito.times(0)).deleteById(USER_ID);
+        });
+    }
 
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void denyAccountRequestNoDemandTest() throws EntityNotFoundException, AccountNotOnDemandException {
-		assertThrows(AccountNotOnDemandException.class, () -> {
-			given(userRepository.findById(USER_ID)).willReturn(Optional.of(ModelsUtil.createUser()));
-			userService.denyAccountRequest(USER_ID);	
-			Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
-			Mockito.verify(userRepository, Mockito.times(0)).deleteById(USER_ID);
-		});
-	}
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void denyAccountRequestNoDemandTest() throws EntityNotFoundException, AccountNotOnDemandException {
+        assertThrows(AccountNotOnDemandException.class, () -> {
+            given(userRepository.findById(USER_ID)).willReturn(Optional.of(ModelsUtil.createUser()));
+            userService.denyAccountRequest(USER_ID);    
+            Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+            Mockito.verify(userRepository, Mockito.times(0)).deleteById(USER_ID);
+        });
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 2L, authorities = { "ROLE_ADMIN" })
-	public void deleteByIdTest() throws EntityNotFoundException, ForbiddenException {
-		AccessRequest request = new AccessRequest();
-		request.setId(1L);
-		Mockito.when(accessRequestService.findByUserId(Mockito.anyLong())).thenReturn(Collections.singletonList(request));
-		userService.deleteById(USER_ID);
-		Mockito.verify(accessRequestService, Mockito.times(1)).deleteById(Mockito.anyLong());
-		Mockito.verify(userRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
-	}
+    @Test
+    @WithMockKeycloakUser(id = 2L, authorities = { "ROLE_ADMIN" })
+    public void deleteByIdTest() throws EntityNotFoundException, ForbiddenException {
+        AccessRequest request = new AccessRequest();
+        request.setId(1L);
+        Mockito.when(accessRequestService.findByUserId(Mockito.anyLong())).thenReturn(Collections.singletonList(request));
+        userService.deleteById(USER_ID);
+        Mockito.verify(accessRequestService, Mockito.times(1)).deleteById(Mockito.anyLong());
+        Mockito.verify(userRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = USER_ID, authorities = { "ROLE_ADMIN" })
-	public void deleteByIdByUserWithSameIdTest() throws EntityNotFoundException, ForbiddenException {
-		assertThrows(AccessDeniedException.class, () -> {
-			userService.deleteById(USER_ID);
-			Mockito.verify(userRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
-		});
-	}
+    @Test
+    @WithMockKeycloakUser(id = USER_ID, authorities = { "ROLE_ADMIN" })
+    public void deleteByIdByUserWithSameIdTest() throws EntityNotFoundException, ForbiddenException {
+        assertThrows(AccessDeniedException.class, () -> {
+            userService.deleteById(USER_ID);
+            Mockito.verify(userRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
+        });
+    }
 
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void findAllTest() {
-		final List<User> users = userService.findAll();
-		Assert.assertNotNull(users);
-		Assert.assertTrue(users.size() == 1);
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void findAllTest() {
+        final List<User> users = userService.findAll();
+        Assert.assertNotNull(users);
+        Assert.assertTrue(users.size() == 1);
 
-		Mockito.verify(userRepository, Mockito.times(1)).findAll();
-	}
+        Mockito.verify(userRepository, Mockito.times(1)).findAll();
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = USER_ID, authorities = { "ROLE_USER" })
-	public void findByIdTest() {
-		final User user = userService.findById(USER_ID);
-		Assert.assertNotNull(user);
-		Assert.assertTrue(ModelsUtil.USER_FIRSTNAME.equals(user.getFirstName()));
+    @Test
+    @WithMockKeycloakUser(id = USER_ID, authorities = { "ROLE_USER" })
+    public void findByIdTest() {
+        final User user = userService.findById(USER_ID);
+        Assert.assertNotNull(user);
+        Assert.assertTrue(ModelsUtil.USER_FIRSTNAME.equals(user.getFirstName()));
 
-		Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong());
-	}
+        Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong());
+    }
 
-	@Test
-	@WithMockUser(authorities = { "ROLE_USER" })
-	public void findByIdsTest() {
-		final List<IdName> users = userService.findByIds(Arrays.asList(USER_ID));
-		Assert.assertNotNull(users);
-		Assert.assertTrue(USER_USERNAME.equals(users.get(0).getName()));
+    @Test
+    @WithMockUser(authorities = { "ROLE_USER" })
+    public void findByIdsTest() {
+        final List<IdName> users = userService.findByIds(Arrays.asList(USER_ID));
+        Assert.assertNotNull(users);
+        Assert.assertTrue(USER_USERNAME.equals(users.get(0).getName()));
 
-		Mockito.verify(userRepository, Mockito.times(1)).findByIdIn(Arrays.asList(USER_ID));
-	}
+        Mockito.verify(userRepository, Mockito.times(1)).findByIdIn(Arrays.asList(USER_ID));
+    }
 
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void getUsersToReceiveFirstExpirationNotificationTest() {
-		final List<User> users = userService.getUsersToReceiveFirstExpirationNotification();
-		Assert.assertNotNull(users);
-		Assert.assertTrue(users.size() == 1);
-		Assert.assertTrue(ModelsUtil.USER_FIRSTNAME.equals(users.get(0).getFirstName()));
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void getUsersToReceiveFirstExpirationNotificationTest() {
+        final List<User> users = userService.getUsersToReceiveFirstExpirationNotification();
+        Assert.assertNotNull(users);
+        Assert.assertTrue(users.size() == 1);
+        Assert.assertTrue(ModelsUtil.USER_FIRSTNAME.equals(users.get(0).getFirstName()));
 
-		Mockito.verify(userRepository, Mockito.times(1))
-				.findByExpirationDateLessThanAndFirstExpirationNotificationSentFalse(Mockito.any(LocalDate.class));
-	}
+        Mockito.verify(userRepository, Mockito.times(1))
+                .findByExpirationDateLessThanAndFirstExpirationNotificationSentFalse(Mockito.any(LocalDate.class));
+    }
 
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void getUsersToReceiveSecondExpirationNotificationTest() {
-		final List<User> users = userService.getUsersToReceiveSecondExpirationNotification();
-		Assert.assertNotNull(users);
-		Assert.assertTrue(users.size() == 1);
-		Assert.assertTrue(ModelsUtil.USER_FIRSTNAME.equals(users.get(0).getFirstName()));
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void getUsersToReceiveSecondExpirationNotificationTest() {
+        final List<User> users = userService.getUsersToReceiveSecondExpirationNotification();
+        Assert.assertNotNull(users);
+        Assert.assertTrue(users.size() == 1);
+        Assert.assertTrue(ModelsUtil.USER_FIRSTNAME.equals(users.get(0).getFirstName()));
 
-		Mockito.verify(userRepository, Mockito.times(1))
-				.findByExpirationDateLessThanAndSecondExpirationNotificationSentFalse(Mockito.any(LocalDate.class));
-	}
+        Mockito.verify(userRepository, Mockito.times(1))
+                .findByExpirationDateLessThanAndSecondExpirationNotificationSentFalse(Mockito.any(LocalDate.class));
+    }
 
-	@Test
-	public void requestExtensionTest() throws EntityNotFoundException {
-		ExtensionRequestInfo requestInfo = new ExtensionRequestInfo();
-		requestInfo.setExtensionDate(LocalDate.now());
-		requestInfo.setExtensionMotivation("motivation");
-		userService.requestExtension(USER_ID, requestInfo);
+    @Test
+    public void requestExtensionTest() throws EntityNotFoundException {
+        ExtensionRequestInfo requestInfo = new ExtensionRequestInfo();
+        requestInfo.setExtensionDate(LocalDate.now());
+        requestInfo.setExtensionMotivation("motivation");
+        userService.requestExtension(USER_ID, requestInfo);
 
-		Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any(User.class));
-		Mockito.verify(emailService, Mockito.times(1)).notifyAdminAccountExtensionRequest(Mockito.any(User.class));
-	}
+        Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any(User.class));
+        Mockito.verify(emailService, Mockito.times(1)).notifyAdminAccountExtensionRequest(Mockito.any(User.class));
+    }
 
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void saveTest() throws SecurityException  {
-		User newUser = createUser();
-		newUser.setId(null);
-		userService.create(newUser);
-		Mockito.verify(userRepository, Mockito.times(2)).save(Mockito.any(User.class));
-		Mockito.verify(accountRequestInfoRepository, Mockito.times(0)).save(Mockito.any(AccountRequestInfo.class));
-	}
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void saveTest() throws SecurityException  {
+        User newUser = createUser();
+        newUser.setId(null);
+        userService.create(newUser);
+        Mockito.verify(userRepository, Mockito.times(2)).save(Mockito.any(User.class));
+        Mockito.verify(accountRequestInfoRepository, Mockito.times(0)).save(Mockito.any(AccountRequestInfo.class));
+    }
 
-	@Test
-	@WithAnonymousUser
-	public void saveWithAccountRequestTest() throws SecurityException {
-		final User user = createUser();
-		final AccountRequestInfo accountRequestInfo = new AccountRequestInfo();
-		accountRequestInfo.setContact("contact");
-		accountRequestInfo.setFunction("function");
-		accountRequestInfo.setInstitution("institution");
-		accountRequestInfo.setStudyId(1L);
-		user.setAccountRequestDemand(true);
-		user.setAccountRequestInfo(accountRequestInfo);
-		user.setId(null);
-		user.setRole(null);
-		userService.createAccountRequest(user);
+    @Test
+    @WithAnonymousUser
+    public void saveWithAccountRequestTest() throws SecurityException {
+        final User user = createUser();
+        final AccountRequestInfo accountRequestInfo = new AccountRequestInfo();
+        accountRequestInfo.setContact("contact");
+        accountRequestInfo.setFunction("function");
+        accountRequestInfo.setInstitution("institution");
+        accountRequestInfo.setStudyId(1L);
+        user.setAccountRequestDemand(true);
+        user.setAccountRequestInfo(accountRequestInfo);
+        user.setId(null);
+        user.setRole(null);
+        userService.createAccountRequest(user);
 
-		Mockito.verify(accountRequestInfoRepository, Mockito.times(1)).save(accountRequestInfo);
-		Mockito.verify(userRepository, Mockito.times(2)).save(Mockito.any(User.class));
-	}
+        Mockito.verify(accountRequestInfoRepository, Mockito.times(1)).save(accountRequestInfo);
+        Mockito.verify(userRepository, Mockito.times(2)).save(Mockito.any(User.class));
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = USER_ID, authorities = { "ROLE_USER" })
-	public void updateTest() throws EntityNotFoundException {
-		final User updatedUser = userService.update(createUser());
-		Assert.assertNotNull(updatedUser);
-		Assert.assertTrue(UPDATED_USER_FIRSTNAME.equals(updatedUser.getFirstName()));
+    @Test
+    @WithMockKeycloakUser(id = USER_ID, authorities = { "ROLE_USER" })
+    public void updateTest() throws EntityNotFoundException {
+        final User updatedUser = userService.update(createUser());
+        Assert.assertNotNull(updatedUser);
+        Assert.assertTrue(UPDATED_USER_FIRSTNAME.equals(updatedUser.getFirstName()));
 
-		Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any(User.class));
-	}
+        Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any(User.class));
+    }
 
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void updateExpirationNotificationTrue() throws ShanoirUsersException {
-		userService.updateExpirationNotification(createUser(), true);
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void updateExpirationNotificationTrue() throws ShanoirUsersException {
+        userService.updateExpirationNotification(createUser(), true);
 
-		Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any(User.class));
-	}
+        Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any(User.class));
+    }
 
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void updateExpirationNotificationFalse() throws ShanoirUsersException {
-		userService.updateExpirationNotification(createUser(), false);
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void updateExpirationNotificationFalse() throws ShanoirUsersException {
+        userService.updateExpirationNotification(createUser(), false);
 
-		Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any(User.class));
-	}
+        Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any(User.class));
+    }
 
-	private User createUser() {
-		final User user = new User();
-		user.setId(USER_ID);
-		user.setFirstName(UPDATED_USER_FIRSTNAME);
-		user.setUsername(USER_USERNAME);
-		return user;
-	}
+    private User createUser() {
+        final User user = new User();
+        user.setId(USER_ID);
+        user.setFirstName(UPDATED_USER_FIRSTNAME);
+        user.setUsername(USER_USERNAME);
+        return user;
+    }
 
 }

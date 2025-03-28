@@ -39,36 +39,36 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(classes = ShanoirPreclinicalApplication.class)
 public class PathologyRepositoryTest {
 
-	private static final String PATHOLOGY_TEST_1_DATA = "Stroke";
-	private static final Long PATHOLOGY_TEST_1_ID = 1L;
+    private static final String PATHOLOGY_TEST_1_DATA = "Stroke";
+    private static final Long PATHOLOGY_TEST_1_ID = 1L;
 
-	@Autowired
-	private PathologyRepository repository;
+    @Autowired
+    private PathologyRepository repository;
 
-	@Test
-	public void findAllTest() throws Exception {
-		Iterable<Pathology> pathologiesDb = repository.findAll();
-		assertThat(pathologiesDb).isNotNull();
-		int nbTemplates = 0;
-		Iterator<Pathology> pathologiesIt = pathologiesDb.iterator();
-		while (pathologiesIt.hasNext()) {
-			pathologiesIt.next();
-			nbTemplates++;
-		}
-		assertThat(nbTemplates).isEqualTo(4);
-	}
+    @Test
+    public void findAllTest() throws Exception {
+        Iterable<Pathology> pathologiesDb = repository.findAll();
+        assertThat(pathologiesDb).isNotNull();
+        int nbTemplates = 0;
+        Iterator<Pathology> pathologiesIt = pathologiesDb.iterator();
+        while (pathologiesIt.hasNext()) {
+            pathologiesIt.next();
+            nbTemplates++;
+        }
+        assertThat(nbTemplates).isEqualTo(4);
+    }
 
-	@Test
-	public void findByNameTest() throws Exception {
-		Optional<Pathology> pathologyDb = repository.findByName(PATHOLOGY_TEST_1_DATA);
-		assertTrue(pathologyDb.isPresent());
-		assertThat(pathologyDb.get().getId()).isEqualTo(PATHOLOGY_TEST_1_ID);
-	}
+    @Test
+    public void findByNameTest() throws Exception {
+        Optional<Pathology> pathologyDb = repository.findByName(PATHOLOGY_TEST_1_DATA);
+        assertTrue(pathologyDb.isPresent());
+        assertThat(pathologyDb.get().getId()).isEqualTo(PATHOLOGY_TEST_1_ID);
+    }
 
-	@Test
-	public void findOneTest() throws Exception {
-		Pathology pathologyDb = repository.findById(PATHOLOGY_TEST_1_ID).orElse(null);
-		assertThat(pathologyDb.getName()).isEqualTo(PATHOLOGY_TEST_1_DATA);
-	}
+    @Test
+    public void findOneTest() throws Exception {
+        Pathology pathologyDb = repository.findById(PATHOLOGY_TEST_1_ID).orElse(null);
+        assertThat(pathologyDb.getName()).isEqualTo(PATHOLOGY_TEST_1_DATA);
+    }
 
 }

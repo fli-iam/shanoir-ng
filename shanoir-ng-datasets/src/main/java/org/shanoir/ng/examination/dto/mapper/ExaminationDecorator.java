@@ -30,31 +30,31 @@ import org.springframework.data.domain.Page;
  */
 public abstract class ExaminationDecorator implements ExaminationMapper {
 
-	@Autowired
-	private ExaminationMapper delegate;
+    @Autowired
+    private ExaminationMapper delegate;
 
-	@Override
-	public PageImpl<ExaminationDTO> examinationsToExaminationDTOs(Page<Examination> page) {
-		Page<ExaminationDTO> mappedPage = page.map(new Function<Examination, ExaminationDTO>() {
-			public ExaminationDTO apply(Examination entity) {
-				return examinationToExaminationDTO(entity);
-			}
-		});
-		return new PageImpl<>(mappedPage);
-	}
+    @Override
+    public PageImpl<ExaminationDTO> examinationsToExaminationDTOs(Page<Examination> page) {
+        Page<ExaminationDTO> mappedPage = page.map(new Function<Examination, ExaminationDTO>() {
+            public ExaminationDTO apply(Examination entity) {
+                return examinationToExaminationDTO(entity);
+            }
+        });
+        return new PageImpl<>(mappedPage);
+    }
 
-	@Override
-	public ExaminationDTO examinationToExaminationDTO(Examination examination) {
-		final ExaminationDTO examinationDTO = delegate.examinationToExaminationDTO(examination);
-		return examinationDTO;
-	}
-	
-	@Override
-	public Examination examinationDTOToExamination(ExaminationDTO examinationDTO) {
-	    Examination examination = delegate.examinationDTOToExamination(examinationDTO);
-	    examination.setStudy(new Study());
-	    examination.getStudy().setId(examinationDTO.getStudyId());
-	    return examination;
-	}
+    @Override
+    public ExaminationDTO examinationToExaminationDTO(Examination examination) {
+        final ExaminationDTO examinationDTO = delegate.examinationToExaminationDTO(examination);
+        return examinationDTO;
+    }
+    
+    @Override
+    public Examination examinationDTOToExamination(ExaminationDTO examinationDTO) {
+        Examination examination = delegate.examinationDTOToExamination(examinationDTO);
+        examination.setStudy(new Study());
+        examination.getStudy().setId(examinationDTO.getStudyId());
+        return examination;
+    }
 
 }

@@ -47,39 +47,39 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class CtDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy {
-	
-	/** Logger. */
-	private static final Logger LOG = LoggerFactory.getLogger(CtDatasetAcquisitionStrategy.class);
-	
-	@Autowired
-	private CtProtocolStrategy protocolStrategy;
-	
-	@Autowired
-	private DatasetStrategy<CtDataset> datasetStrategy;
-	
-	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
-		CtDatasetAcquisition datasetAcquisition = new CtDatasetAcquisition();
-		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}",serie.getSequenceName(), serie.getProtocolName(), rank);
-		
-		datasetAcquisition.setImportDate(LocalDate.now());
-		datasetAcquisition.setUsername(importJob.getUsername());
-		datasetAcquisition.setRank(rank);
-		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
-		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
-		datasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
-	
-		CtProtocol protocol = protocolStrategy.generateProtocolForSerie(dicomAttributes, serie);
-		datasetAcquisition.setCtProtocol(protocol);
-	
-		// TODO ATO add Compatibility check between study card Equipment and dicomEquipment if not done at front level.
-		DatasetsWrapper<CtDataset> datasetsWrapper = datasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
-		List<Dataset> genericizedList = new ArrayList<>();
-		for (Dataset dataset : datasetsWrapper.getDatasets()) {
-			dataset.setDatasetAcquisition(datasetAcquisition);
-			genericizedList.add(dataset);
-		}
-		datasetAcquisition.setDatasets(genericizedList);
-		return datasetAcquisition;
-	}
+    
+    /** Logger. */
+    private static final Logger LOG = LoggerFactory.getLogger(CtDatasetAcquisitionStrategy.class);
+    
+    @Autowired
+    private CtProtocolStrategy protocolStrategy;
+    
+    @Autowired
+    private DatasetStrategy<CtDataset> datasetStrategy;
+    
+    @Override
+    public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes<String> dicomAttributes) throws Exception {
+        CtDatasetAcquisition datasetAcquisition = new CtDatasetAcquisition();
+        LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}",serie.getSequenceName(), serie.getProtocolName(), rank);
+        
+        datasetAcquisition.setImportDate(LocalDate.now());
+        datasetAcquisition.setUsername(importJob.getUsername());
+        datasetAcquisition.setRank(rank);
+        importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
+        datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
+        datasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
+    
+        CtProtocol protocol = protocolStrategy.generateProtocolForSerie(dicomAttributes, serie);
+        datasetAcquisition.setCtProtocol(protocol);
+    
+        // TODO ATO add Compatibility check between study card Equipment and dicomEquipment if not done at front level.
+        DatasetsWrapper<CtDataset> datasetsWrapper = datasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
+        List<Dataset> genericizedList = new ArrayList<>();
+        for (Dataset dataset : datasetsWrapper.getDatasets()) {
+            dataset.setDatasetAcquisition(datasetAcquisition);
+            genericizedList.add(dataset);
+        }
+        datasetAcquisition.setDatasets(genericizedList);
+        return datasetAcquisition;
+    }
 }

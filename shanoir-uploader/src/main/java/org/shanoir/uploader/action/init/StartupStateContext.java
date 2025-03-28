@@ -13,7 +13,7 @@ import org.shanoir.uploader.gui.ShUpStartupDialog;
  * action link to the current state.
  *
  * This class has 2 observers :
- * 	- ShanoirStartupController
+ *     - ShanoirStartupController
  *  - ShanoirStartupDialog
  *
  * @author atouboul
@@ -21,43 +21,43 @@ import org.shanoir.uploader.gui.ShUpStartupDialog;
  */
 @Component
 public class StartupStateContext {
-	
-	private static final Logger logger = LoggerFactory.getLogger(StartupStateContext.class);
+    
+    private static final Logger logger = LoggerFactory.getLogger(StartupStateContext.class);
 
-	private State state;
-	
-	private ShUpStartupDialog shUpStartupDialog;
+    private State state;
+    
+    private ShUpStartupDialog shUpStartupDialog;
 
-	@Autowired
-	private InitialStartupState initialStartupState;
+    @Autowired
+    private InitialStartupState initialStartupState;
 
-	public void configure() {
-		setState(initialStartupState);
-	}
+    public void configure() {
+        setState(initialStartupState);
+    }
 
-	public State getState() {
-		return state;
-	}
+    public State getState() {
+        return state;
+    }
 
-	public void setState(State state) {
-		logger.info("ShanoirUploader startup state changed to:  " + state.toString());
-		this.state = state;
-	}
-	
-	public void nextState() {
-		try {
-			getState().load(this);
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-		}
-	}
+    public void setState(State state) {
+        logger.info("ShanoirUploader startup state changed to:  " + state.toString());
+        this.state = state;
+    }
+    
+    public void nextState() {
+        try {
+            getState().load(this);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+    }
 
-	public ShUpStartupDialog getShUpStartupDialog() {
-		return shUpStartupDialog;
-	}
-	
-	public void setShUpStartupDialog(ShUpStartupDialog shUpStartupDialog) {
-		this.shUpStartupDialog = shUpStartupDialog;
-	}
+    public ShUpStartupDialog getShUpStartupDialog() {
+        return shUpStartupDialog;
+    }
+    
+    public void setShUpStartupDialog(ShUpStartupDialog shUpStartupDialog) {
+        this.shUpStartupDialog = shUpStartupDialog;
+    }
 
 }

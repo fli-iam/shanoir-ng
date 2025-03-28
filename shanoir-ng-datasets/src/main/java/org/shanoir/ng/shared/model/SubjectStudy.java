@@ -37,91 +37,91 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SubjectStudy {
 
-	@Id
-	private Long id;
+    @Id
+    private Long id;
 
-	/** Study. */
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "study_id")
-	@NotNull
-	private Study study;
+    /** Study. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "study_id")
+    @NotNull
+    private Study study;
 
-	/** Subject. */
-	@ManyToOne
-	@JoinColumn(name = "subject_id", updatable = true, insertable = true)
-	@NotNull
-	private Subject subject;
-	
-	/** Tags associated to the subject. */
+    /** Subject. */
+    @ManyToOne
+    @JoinColumn(name = "subject_id", updatable = true, insertable = true)
+    @NotNull
+    private Subject subject;
+    
+    /** Tags associated to the subject. */
     @ManyToMany
     @JoinTable(name = "subject_study_tag", joinColumns = @JoinColumn(name = "subject_study_id" ))
-	private List<Tag> tags;
+    private List<Tag> tags;
 
     private Integer qualityTag;
 
-	/** Subject type. */
-	private Integer subjectType;
+    /** Subject type. */
+    private Integer subjectType;
 
 
-	/**
-	 * @return the study
-	 */
-	public Study getStudy() {
-		return study;
-	}
+    /**
+     * @return the study
+     */
+    public Study getStudy() {
+        return study;
+    }
 
-	/**
-	 * @param study
-	 *            the study to set
-	 */
-	public void setStudy(Study study) {
-		this.study = study;
-	}
+    /**
+     * @param study
+     *            the study to set
+     */
+    public void setStudy(Study study) {
+        this.study = study;
+    }
 
-	/**
-	 * @return the subject
-	 */
-	public Subject getSubject() {
-		return subject;
-	}
+    /**
+     * @return the subject
+     */
+    public Subject getSubject() {
+        return subject;
+    }
 
-	/**
-	 * @param subject
-	 *            the subject to set
-	 */
-	public void setSubject(Subject subject) {
-		this.subject = subject;
-	}
+    /**
+     * @param subject
+     *            the subject to set
+     */
+    public void setSubject(Subject subject) {
+        this.subject = subject;
+    }
 
-	/**
-	 * @return the tags
-	 */
-	public List<Tag> getTags() {
-		return tags;
-	}
+    /**
+     * @return the tags
+     */
+    public List<Tag> getTags() {
+        return tags;
+    }
 
-	/**
-	 * @param tags the tags to set
-	 */
-	public void setTags(List<Tag> tags) {
-		this.tags = tags;
-	}
+    /**
+     * @param tags the tags to set
+     */
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
+    }
 
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
 
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
-	
-	public QualityTag getQualityTag() {
+    /**
+     * @param id the id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
+    
+    public QualityTag getQualityTag() {
         return QualityTag.get(qualityTag);
     }
 
@@ -129,22 +129,22 @@ public class SubjectStudy {
         this.qualityTag = tag != null ? tag.getId() : null;
     }
 
-	/**
-	 * @return the subjectType
-	 */
-	public SubjectType getSubjectType() {
-		return SubjectType.getType(subjectType);
-	}
+    /**
+     * @return the subjectType
+     */
+    public SubjectType getSubjectType() {
+        return SubjectType.getType(subjectType);
+    }
 
-	/**
-	 * @param subjectType
-	 *            the subjectType to set
-	 */
-	public void setSubjectType(SubjectType subjectType) {
-		if (subjectType == null) {
-			this.subjectType = null;
-		} else {
-			this.subjectType = subjectType.getId();
-		}
-	}
+    /**
+     * @param subjectType
+     *            the subjectType to set
+     */
+    public void setSubjectType(SubjectType subjectType) {
+        if (subjectType == null) {
+            this.subjectType = null;
+        } else {
+            this.subjectType = subjectType.getId();
+        }
+    }
 }

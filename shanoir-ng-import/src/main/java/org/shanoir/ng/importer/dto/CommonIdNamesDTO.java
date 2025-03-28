@@ -24,68 +24,68 @@ import org.shanoir.ng.shared.core.model.IdName;
  */
 public class CommonIdNamesDTO {
 
-	private IdName center;
-	private IdName study;
-	private IdName subject;
-	private IdName equipement;
+    private IdName center;
+    private IdName study;
+    private IdName subject;
+    private IdName equipement;
 
-	/**
-	 * @return the center
-	 */
-	public IdName getCenter() {
-		return center;
-	}
+    /**
+     * @return the center
+     */
+    public IdName getCenter() {
+        return center;
+    }
 
-	/**
-	 * @param center
-	 *            the center to set
-	 */
-	public void setCenter(IdName center) {
-		this.center = center;
-	}
+    /**
+     * @param center
+     *            the center to set
+     */
+    public void setCenter(IdName center) {
+        this.center = center;
+    }
 
-	/**
-	 * @return the study
-	 */
-	public IdName getStudy() {
-		return study;
-	}
+    /**
+     * @return the study
+     */
+    public IdName getStudy() {
+        return study;
+    }
 
-	/**
-	 * @param study
-	 *            the study to set
-	 */
-	public void setStudy(IdName study) {
-		this.study = study;
-	}
+    /**
+     * @param study
+     *            the study to set
+     */
+    public void setStudy(IdName study) {
+        this.study = study;
+    }
 
-	/**
-	 * @return the subject
-	 */
-	public IdName getSubject() {
-		return subject;
-	}
+    /**
+     * @return the subject
+     */
+    public IdName getSubject() {
+        return subject;
+    }
 
-	/**
-	 * @param subject
-	 *            the subject to set
-	 */
-	public void setSubject(IdName subject) {
-		this.subject = subject;
-	}
+    /**
+     * @param subject
+     *            the subject to set
+     */
+    public void setSubject(IdName subject) {
+        this.subject = subject;
+    }
 
-	/**
-	 * @return the equipement
-	 */
-	public IdName getEquipement() {
-		return equipement;
-	}
+    /**
+     * @return the equipement
+     */
+    public IdName getEquipement() {
+        return equipement;
+    }
 
-	/**
-	 * @param equipement the equipement to set
-	 */
-	public void setEquipement(IdName equipement) {
-		this.equipement = equipement;
-	}
+    /**
+     * @param equipement the equipement to set
+     */
+    public void setEquipement(IdName equipement) {
+        this.equipement = equipement;
+    }
 
 }

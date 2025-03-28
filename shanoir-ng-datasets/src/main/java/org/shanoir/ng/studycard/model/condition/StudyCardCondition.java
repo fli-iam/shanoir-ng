@@ -51,17 +51,17 @@ import jakarta.validation.constraints.NotNull;
     @JsonSubTypes.Type(value = AcqMetadataCondOnDatasets.class, name = "AcqMetadataCondOnDatasets"),
     @JsonSubTypes.Type(value = AcqMetadataCondOnAcq.class, name = "AcqMetadataCondOnAcq")})
 public abstract class StudyCardCondition extends AbstractEntity {
-	
-	private static final Logger LOG = LoggerFactory.getLogger(StudyCardCondition.class);
+    
+    private static final Logger LOG = LoggerFactory.getLogger(StudyCardCondition.class);
 
     public static String LIST_SEPERATOR = ",";
-	
-	@ElementCollection
-	@Column(name = "value")
-	private List<String> values;
-	
-	@NotNull
-	private int operation;
+    
+    @ElementCollection
+    @Column(name = "value")
+    private List<String> values;
+    
+    @NotNull
+    private int operation;
 
     @NotNull
     private int cardinality;
@@ -86,13 +86,13 @@ public abstract class StudyCardCondition extends AbstractEntity {
         else return nbOk >= getCardinality(); // n
     }
 
-	public Operation getOperation() {
-		return Operation.getType(operation);
-	}
+    public Operation getOperation() {
+        return Operation.getType(operation);
+    }
 
-	public void setOperation(Operation operation) {
-		this.operation = operation.getId();
-	}
+    public void setOperation(Operation operation) {
+        this.operation = operation.getId();
+    }
 
     public List<String> getValues() {
         return values;

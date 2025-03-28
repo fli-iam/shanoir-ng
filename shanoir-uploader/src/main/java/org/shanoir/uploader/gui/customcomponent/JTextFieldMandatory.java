@@ -4,15 +4,15 @@ import javax.swing.JTextField;
 
 public class JTextFieldMandatory extends JTextField {
 
-	private boolean valueSet;
+    private boolean valueSet;
 
-	public boolean isValueSet() {
-		return valueSet;
-	}
+    public boolean isValueSet() {
+        return valueSet;
+    }
 
-	public void setValueSet(boolean valueSet) {
-		this.valueSet = valueSet;
-	}
-	
-	
+    public void setValueSet(boolean valueSet) {
+        this.valueSet = valueSet;
+    }
+    
+    
 }

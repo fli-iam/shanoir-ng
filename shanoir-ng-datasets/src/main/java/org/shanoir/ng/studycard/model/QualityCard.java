@@ -50,55 +50,55 @@ import jakarta.validation.constraints.NotNull;
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
 public class QualityCard extends HalEntity implements Card {
 
-	/** The name of the study card. */
+    /** The name of the study card. */
     @NotBlank
-	@Column(unique = true)
-	@Unique
-	private String name;
+    @Column(unique = true)
+    @Unique
+    private String name;
 
-	/** The study for which is defined the study card. */
-	private Long studyId;
-	
-	@NotNull
-	private boolean toCheckAtImport;
-	
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn(name="quality_card_id")
-	private List<QualityExaminationRule> rules;
+    /** The study for which is defined the study card. */
+    private Long studyId;
+    
+    @NotNull
+    private boolean toCheckAtImport;
+    
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name="quality_card_id")
+    private List<QualityExaminationRule> rules;
 
-	/**
-	 * Init HATEOAS links
-	 */
-	@PostLoad
-	public void initLinks() {
-		this.addLink(Links.REL_SELF, "studycard/" + getId());
-	}
+    /**
+     * Init HATEOAS links
+     */
+    @PostLoad
+    public void initLinks() {
+        this.addLink(Links.REL_SELF, "studycard/" + getId());
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public Long getStudyId() {
-		return studyId;
-	}
+    public Long getStudyId() {
+        return studyId;
+    }
 
-	public void setStudyId(Long studyId) {
-		this.studyId = studyId;
-	}
+    public void setStudyId(Long studyId) {
+        this.studyId = studyId;
+    }
 
-	public List<QualityExaminationRule> getRules() {
-		return rules;
-	}
+    public List<QualityExaminationRule> getRules() {
+        return rules;
+    }
 
-	public void setRules(List<QualityExaminationRule> rules) {
-		this.rules = rules;
-	}
-	
-	/**
+    public void setRules(List<QualityExaminationRule> rules) {
+        this.rules = rules;
+    }
+    
+    /**
     * Application during import, when dicoms are present in tmp directory.
     * @param examination
     * @param studyCard
@@ -114,7 +114,7 @@ public class QualityCard extends HalEntity implements Card {
         return result;
     }
 
-	/**
+    /**
     * Application during import, when dicoms are present in tmp directory.
     * @param examination
     * @param studyCard
@@ -130,7 +130,7 @@ public class QualityCard extends HalEntity implements Card {
         return result;
     }
 
-	/**
+    /**
     * Application during import, when dicoms are present in tmp directory.
     * @param examination
     * @param studyCard
@@ -145,7 +145,7 @@ public class QualityCard extends HalEntity implements Card {
         return result;
     }
 
-	/**
+    /**
     * Application during import, when dicoms are present in tmp directory.
     * @param examination
     * @param studyCard
@@ -169,13 +169,13 @@ public class QualityCard extends HalEntity implements Card {
     }
 
     public boolean hasDicomConditions() {
-		if (getRules() != null) {
-			for (QualityExaminationRule rule : getRules()) {
-				if (rule.hasDicomConditions()) {
-					return true;
-				}
-			}
-		}
+        if (getRules() != null) {
+            for (QualityExaminationRule rule : getRules()) {
+                if (rule.hasDicomConditions()) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 }

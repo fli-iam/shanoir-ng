@@ -31,15 +31,15 @@ import jakarta.ws.rs.core.Context;
 @RequestMapping("/last_login_date")
 public interface LastLoginDateApi {
 
-	@Operation(summary = "", description = "Updates login date for an user")
-	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "login date updated"),
-			@ApiResponse(responseCode = "401", description = "unauthorized"),
-			@ApiResponse(responseCode = "403", description = "forbidden"),
-			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
-			"application/json" }, method = RequestMethod.POST)
-	ResponseEntity<Void> lastLoginDate(
-			@Parameter(name = "username of user for last login date update", required = true) @RequestBody String username,
-		    @Context HttpServletRequest httpRequest);
+    @Operation(summary = "", description = "Updates login date for an user")
+    @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "login date updated"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @RequestMapping(value = "", produces = { "application/json" }, consumes = {
+            "application/json" }, method = RequestMethod.POST)
+    ResponseEntity<Void> lastLoginDate(
+            @Parameter(name = "username of user for last login date update", required = true) @RequestBody String username,
+            @Context HttpServletRequest httpRequest);
 
 }

@@ -57,91 +57,91 @@ import com.google.gson.GsonBuilder;
 @ActiveProfiles("test")
 public class ExaminationAnestheticApiControllerTest {
 
-	private static final String REQUEST_PATH_EXAMINATION = "/examination";
-	private static final String EXAMINATION_ID = "/1";
-	private static final String REQUEST_PATH_ANESTHETIC = "/anesthetic";
-	private static final String REQUEST_PATH = REQUEST_PATH_EXAMINATION + EXAMINATION_ID + REQUEST_PATH_ANESTHETIC;
-	private static final String REQUEST_PATH_ALL = REQUEST_PATH + "/all";
-	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
-	private static final String REQUEST_PATH_EXAMINATION_BY_ANESTHETIC = REQUEST_PATH_EXAMINATION + "/all"
-			+ REQUEST_PATH_ANESTHETIC + "/1";
+    private static final String REQUEST_PATH_EXAMINATION = "/examination";
+    private static final String EXAMINATION_ID = "/1";
+    private static final String REQUEST_PATH_ANESTHETIC = "/anesthetic";
+    private static final String REQUEST_PATH = REQUEST_PATH_EXAMINATION + EXAMINATION_ID + REQUEST_PATH_ANESTHETIC;
+    private static final String REQUEST_PATH_ALL = REQUEST_PATH + "/all";
+    private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+    private static final String REQUEST_PATH_EXAMINATION_BY_ANESTHETIC = REQUEST_PATH_EXAMINATION + "/all"
+            + REQUEST_PATH_ANESTHETIC + "/1";
 
-	private Gson gson;
+    private Gson gson;
 
-	@Autowired
-	private MockMvc mvc;
+    @Autowired
+    private MockMvc mvc;
 
-	@MockBean
-	private ExaminationAnestheticService examAnestheticServiceMock;
-	@MockBean
-	private AnestheticService anestheticsServiceMock;
+    @MockBean
+    private ExaminationAnestheticService examAnestheticServiceMock;
+    @MockBean
+    private AnestheticService anestheticsServiceMock;
 
-	@MockBean
-	private RefsService referencesServiceMock;
+    @MockBean
+    private RefsService referencesServiceMock;
 
-	@MockBean
-	private ExaminationAnestheticUniqueValidator uniqueValidator;
-	
-	@MockBean
-	private ExaminationAnestheticEditableByManager editableOnlyValidator;
-	
-	@BeforeEach
-	public void setup() throws ShanoirException {
-		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
+    @MockBean
+    private ExaminationAnestheticUniqueValidator uniqueValidator;
+    
+    @MockBean
+    private ExaminationAnestheticEditableByManager editableOnlyValidator;
+    
+    @BeforeEach
+    public void setup() throws ShanoirException {
+        gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
-		doNothing().when(examAnestheticServiceMock).deleteById(1L);
-		given(anestheticsServiceMock.findById(1L)).willReturn(new Anesthetic());
-		given(examAnestheticServiceMock.findAll()).willReturn(Arrays.asList(new ExaminationAnesthetic()));
-		given(examAnestheticServiceMock.findByExaminationId(1L)).willReturn(Arrays.asList(new ExaminationAnesthetic()));
-		given(examAnestheticServiceMock.findById(1L)).willReturn(new ExaminationAnesthetic());
-		given(examAnestheticServiceMock.save(Mockito.mock(ExaminationAnesthetic.class)))
-				.willReturn(new ExaminationAnesthetic());
-		given(examAnestheticServiceMock.findByAnesthetic(new Anesthetic()))
-				.willReturn(Arrays.asList(new ExaminationAnesthetic()));
-		given(uniqueValidator.validate(Mockito.any(ExaminationAnesthetic.class))).willReturn(new FieldErrorMap());
-		given(editableOnlyValidator.validate(Mockito.any(ExaminationAnesthetic.class))).willReturn(new FieldErrorMap());
-	}
+        doNothing().when(examAnestheticServiceMock).deleteById(1L);
+        given(anestheticsServiceMock.findById(1L)).willReturn(new Anesthetic());
+        given(examAnestheticServiceMock.findAll()).willReturn(Arrays.asList(new ExaminationAnesthetic()));
+        given(examAnestheticServiceMock.findByExaminationId(1L)).willReturn(Arrays.asList(new ExaminationAnesthetic()));
+        given(examAnestheticServiceMock.findById(1L)).willReturn(new ExaminationAnesthetic());
+        given(examAnestheticServiceMock.save(Mockito.mock(ExaminationAnesthetic.class)))
+                .willReturn(new ExaminationAnesthetic());
+        given(examAnestheticServiceMock.findByAnesthetic(new Anesthetic()))
+                .willReturn(Arrays.asList(new ExaminationAnesthetic()));
+        given(uniqueValidator.validate(Mockito.any(ExaminationAnesthetic.class))).willReturn(new FieldErrorMap());
+        given(editableOnlyValidator.validate(Mockito.any(ExaminationAnesthetic.class))).willReturn(new FieldErrorMap());
+    }
 
-	@Test
-	@WithMockUser(authorities = { "adminRole" })
-	public void deleteExaminationAnestheticTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser(authorities = { "adminRole" })
+    public void deleteExaminationAnestheticTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	public void findExaminationAnestheticByIdTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    public void findExaminationAnestheticByIdTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	public void findExaminationAnestheticsTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_ALL).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    public void findExaminationAnestheticsTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_ALL).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser
-	public void saveNewExaminationAnestheticTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(gson.toJson(AnestheticModelUtil.createExaminationAnesthetic()))).andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser
+    public void saveNewExaminationAnestheticTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(gson.toJson(AnestheticModelUtil.createExaminationAnesthetic()))).andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser
-	public void updateExaminationAnestheticTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(gson.toJson(AnestheticModelUtil.createExaminationAnesthetic()))).andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser
+    public void updateExaminationAnestheticTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(gson.toJson(AnestheticModelUtil.createExaminationAnesthetic()))).andExpect(status().isOk());
+    }
 
-	@Test
-	public void findExaminationsByAnestheticTest() throws Exception {
-		mvc.perform(
-				MockMvcRequestBuilders.get(REQUEST_PATH_EXAMINATION_BY_ANESTHETIC).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    public void findExaminationsByAnestheticTest() throws Exception {
+        mvc.perform(
+                MockMvcRequestBuilders.get(REQUEST_PATH_EXAMINATION_BY_ANESTHETIC).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
 }

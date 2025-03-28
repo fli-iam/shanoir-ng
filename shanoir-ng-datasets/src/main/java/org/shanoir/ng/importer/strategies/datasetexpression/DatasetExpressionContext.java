@@ -34,30 +34,30 @@ import java.io.IOException;
  */
 @Service
 public class DatasetExpressionContext implements DatasetExpressionStrategy {
-	
-	@Autowired
-	private DicomDatasetExpressionStrategy dicomDatasetExpressionStrategy;
+    
+    @Autowired
+    private DicomDatasetExpressionStrategy dicomDatasetExpressionStrategy;
 
-	private DatasetExpressionStrategy datasetExpressionStrategy;
+    private DatasetExpressionStrategy datasetExpressionStrategy;
 
-	/**
-	 * 1) Call first with the given modality to choose the right strategy.
-	 * @param modality
-	 */
-	public void setDatasetExpressionStrategy(String format) {
-		if ("dcm".equals(format)) {
-			this.datasetExpressionStrategy = dicomDatasetExpressionStrategy;
-		}
-		// else... add other format strategies here
-	}
+    /**
+     * 1) Call first with the given modality to choose the right strategy.
+     * @param modality
+     */
+    public void setDatasetExpressionStrategy(String format) {
+        if ("dcm".equals(format)) {
+            this.datasetExpressionStrategy = dicomDatasetExpressionStrategy;
+        }
+        // else... add other format strategies here
+    }
 
-	@Override
-	public DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob,
-			ExpressionFormat expressionFormat) throws IOException {
-		if (datasetExpressionStrategy != null) {
-			return datasetExpressionStrategy.generateDatasetExpression(serie, importJob, expressionFormat);
-		}
-		return null;
-	}
+    @Override
+    public DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob,
+            ExpressionFormat expressionFormat) throws IOException {
+        if (datasetExpressionStrategy != null) {
+            return datasetExpressionStrategy.generateDatasetExpression(serie, importJob, expressionFormat);
+        }
+        return null;
+    }
 
 }

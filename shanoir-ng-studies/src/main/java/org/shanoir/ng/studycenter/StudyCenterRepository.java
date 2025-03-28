@@ -25,6 +25,6 @@ import org.springframework.data.repository.CrudRepository;
  */
 public interface StudyCenterRepository extends CrudRepository<StudyCenter, Long> {
 
-	List<StudyCenter> findByStudy_Id(Long studyId);
-	
+    List<StudyCenter> findByStudy_Id(Long studyId);
+    
 }

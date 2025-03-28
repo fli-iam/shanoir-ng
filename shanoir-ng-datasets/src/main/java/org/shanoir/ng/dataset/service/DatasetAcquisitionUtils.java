@@ -18,35 +18,35 @@ import java.util.Iterator;
 import java.util.List;
 
 public class DatasetAcquisitionUtils {
-	public static DatasetAcquisition copyDatasetAcquisitionFromDatasetAcquisition(DatasetAcquisition other) {
+    public static DatasetAcquisition copyDatasetAcquisitionFromDatasetAcquisition(DatasetAcquisition other) {
 
-		String type = other.getType();
-		DatasetAcquisition acq = null;
-			
-		switch(type) {
-			case CtDatasetAcquisition.datasetAcquisitionType:
-				acq = new CtDatasetAcquisition(other);
-				break;
-			case MrDatasetAcquisition.datasetAcquisitionType:
-				acq = new MrDatasetAcquisition();
-				break;
-			case PetDatasetAcquisition.datasetAcquisitionType:
-				acq = new PetDatasetAcquisition(other);
-				break;
-			case EegDatasetAcquisition.datasetAcquisitionType:
-				acq = new EegDatasetAcquisition(other);
-				break;
-			case BidsDatasetAcquisition.datasetAcquisitionType:
-				acq = new BidsDatasetAcquisition(other);
-				break;
-			case XaDatasetAcquisition.datasetAcquisitionType:
-				acq = new XaDatasetAcquisition(other);
-				break;
-			default:
-				acq = new GenericDatasetAcquisition(other);
-				break;
-		}
-		return acq;
-	}
-	
+        String type = other.getType();
+        DatasetAcquisition acq = null;
+            
+        switch(type) {
+            case CtDatasetAcquisition.datasetAcquisitionType:
+                acq = new CtDatasetAcquisition(other);
+                break;
+            case MrDatasetAcquisition.datasetAcquisitionType:
+                acq = new MrDatasetAcquisition();
+                break;
+            case PetDatasetAcquisition.datasetAcquisitionType:
+                acq = new PetDatasetAcquisition(other);
+                break;
+            case EegDatasetAcquisition.datasetAcquisitionType:
+                acq = new EegDatasetAcquisition(other);
+                break;
+            case BidsDatasetAcquisition.datasetAcquisitionType:
+                acq = new BidsDatasetAcquisition(other);
+                break;
+            case XaDatasetAcquisition.datasetAcquisitionType:
+                acq = new XaDatasetAcquisition(other);
+                break;
+            default:
+                acq = new GenericDatasetAcquisition(other);
+                break;
+        }
+        return acq;
+    }
+    
 }

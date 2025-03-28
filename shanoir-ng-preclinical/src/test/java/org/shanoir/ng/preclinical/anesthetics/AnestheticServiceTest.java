@@ -46,83 +46,83 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class AnestheticServiceTest {
 
-	private static final Long ANESTHETIC_ID = 1L;
-	private static final String UPDATED_ANESTHETIC_DATA = "Injection 2%";
+    private static final Long ANESTHETIC_ID = 1L;
+    private static final String UPDATED_ANESTHETIC_DATA = "Injection 2%";
 
-	@Mock
-	private AnestheticRepository anestheticRepository;
+    @Mock
+    private AnestheticRepository anestheticRepository;
 
-	@Mock
-	private RabbitTemplate rabbitTemplate;
+    @Mock
+    private RabbitTemplate rabbitTemplate;
 
-	@InjectMocks
-	private AnestheticServiceImpl anestheticsService;
-	
-	@BeforeEach
-	public void setup() {
-		given(anestheticRepository.findAll()).willReturn(Arrays.asList(AnestheticModelUtil.createAnestheticGas()));
-		given(anestheticRepository.findAllByAnestheticType(AnestheticType.GAS)).willReturn(Arrays.asList(AnestheticModelUtil.createAnestheticGas()));
-		given(anestheticRepository.findById(ANESTHETIC_ID)).willReturn(Optional.of(AnestheticModelUtil.createAnestheticGas()));
-		given(anestheticRepository.save(Mockito.any(Anesthetic.class))).willReturn(AnestheticModelUtil.createAnestheticGas());
-	}
+    @InjectMocks
+    private AnestheticServiceImpl anestheticsService;
+    
+    @BeforeEach
+    public void setup() {
+        given(anestheticRepository.findAll()).willReturn(Arrays.asList(AnestheticModelUtil.createAnestheticGas()));
+        given(anestheticRepository.findAllByAnestheticType(AnestheticType.GAS)).willReturn(Arrays.asList(AnestheticModelUtil.createAnestheticGas()));
+        given(anestheticRepository.findById(ANESTHETIC_ID)).willReturn(Optional.of(AnestheticModelUtil.createAnestheticGas()));
+        given(anestheticRepository.save(Mockito.any(Anesthetic.class))).willReturn(AnestheticModelUtil.createAnestheticGas());
+    }
 
-	@Test
-	public void deleteByIdTest() throws ShanoirException {
-		anestheticsService.deleteById(ANESTHETIC_ID);
+    @Test
+    public void deleteByIdTest() throws ShanoirException {
+        anestheticsService.deleteById(ANESTHETIC_ID);
 
-		Mockito.verify(anestheticRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
-	}
+        Mockito.verify(anestheticRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
+    }
 
-	@Test
-	public void findAllTest() {
-		final List<Anesthetic> anesthetics = anestheticsService.findAll();
-		Assertions.assertNotNull(anesthetics);
-		Assertions.assertTrue(anesthetics.size() == 1);
+    @Test
+    public void findAllTest() {
+        final List<Anesthetic> anesthetics = anestheticsService.findAll();
+        Assertions.assertNotNull(anesthetics);
+        Assertions.assertTrue(anesthetics.size() == 1);
 
-		Mockito.verify(anestheticRepository, Mockito.times(1)).findAll();
-	}
+        Mockito.verify(anestheticRepository, Mockito.times(1)).findAll();
+    }
 
-	@Test
-	public void findByIdTest() {
-		final Anesthetic anesthetic = anestheticsService.findById(ANESTHETIC_ID);
-		Assertions.assertNotNull(anesthetic);
-		Assertions.assertTrue(AnestheticModelUtil.ANESTHETIC_NAME.equals(anesthetic.getName()));
+    @Test
+    public void findByIdTest() {
+        final Anesthetic anesthetic = anestheticsService.findById(ANESTHETIC_ID);
+        Assertions.assertNotNull(anesthetic);
+        Assertions.assertTrue(AnestheticModelUtil.ANESTHETIC_NAME.equals(anesthetic.getName()));
 
-		Mockito.verify(anestheticRepository, Mockito.times(1)).findById(Mockito.anyLong());
-	}
-	
-	@Test
-	public void findByAnestheticTypeTest() {
-		final List<Anesthetic> anesthetics = anestheticsService.findAllByAnestheticType(AnestheticType.GAS);
-		Assertions.assertNotNull(anesthetics);
-		Assertions.assertTrue(anesthetics.size() == 1);
+        Mockito.verify(anestheticRepository, Mockito.times(1)).findById(Mockito.anyLong());
+    }
+    
+    @Test
+    public void findByAnestheticTypeTest() {
+        final List<Anesthetic> anesthetics = anestheticsService.findAllByAnestheticType(AnestheticType.GAS);
+        Assertions.assertNotNull(anesthetics);
+        Assertions.assertTrue(anesthetics.size() == 1);
 
-		Mockito.verify(anestheticRepository, Mockito.times(1)).findAllByAnestheticType(AnestheticType.GAS);
-	}
-	
-	@Test
-	public void saveTest() throws ShanoirException {
-		anestheticsService.save(createAnesthetic());
+        Mockito.verify(anestheticRepository, Mockito.times(1)).findAllByAnestheticType(AnestheticType.GAS);
+    }
+    
+    @Test
+    public void saveTest() throws ShanoirException {
+        anestheticsService.save(createAnesthetic());
 
-		Mockito.verify(anestheticRepository, Mockito.times(1)).save(Mockito.any(Anesthetic.class));
-	}
+        Mockito.verify(anestheticRepository, Mockito.times(1)).save(Mockito.any(Anesthetic.class));
+    }
 
-	@Test
-	public void updateTest() throws ShanoirException {
-		final Anesthetic updatedAnesthetic = anestheticsService.update(createAnesthetic());
-		Assertions.assertNotNull(updatedAnesthetic);
-		Assertions.assertTrue(UPDATED_ANESTHETIC_DATA.equals(updatedAnesthetic.getName()));
-		Assertions.assertTrue(AnestheticType.INJECTION.equals(updatedAnesthetic.getAnestheticType()));
+    @Test
+    public void updateTest() throws ShanoirException {
+        final Anesthetic updatedAnesthetic = anestheticsService.update(createAnesthetic());
+        Assertions.assertNotNull(updatedAnesthetic);
+        Assertions.assertTrue(UPDATED_ANESTHETIC_DATA.equals(updatedAnesthetic.getName()));
+        Assertions.assertTrue(AnestheticType.INJECTION.equals(updatedAnesthetic.getAnestheticType()));
 
-		Mockito.verify(anestheticRepository, Mockito.times(1)).save(Mockito.any(Anesthetic.class));
-	}
+        Mockito.verify(anestheticRepository, Mockito.times(1)).save(Mockito.any(Anesthetic.class));
+    }
 
-	private Anesthetic createAnesthetic() {
-		final Anesthetic anesthetic = new Anesthetic();
-		anesthetic.setId(ANESTHETIC_ID);
-		anesthetic.setName(UPDATED_ANESTHETIC_DATA);
-		anesthetic.setAnestheticType(AnestheticType.INJECTION);
-		return anesthetic;
-	}
-	
+    private Anesthetic createAnesthetic() {
+        final Anesthetic anesthetic = new Anesthetic();
+        anesthetic.setId(ANESTHETIC_ID);
+        anesthetic.setName(UPDATED_ANESTHETIC_DATA);
+        anesthetic.setAnestheticType(AnestheticType.INJECTION);
+        return anesthetic;
+    }
+    
 }

@@ -28,225 +28,225 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class Serie {
 
-	@JsonProperty("selected")
-	private Boolean selected = null;
+    @JsonProperty("selected")
+    private Boolean selected = null;
 
-	@JsonProperty("seriesInstanceUID")
-	private String seriesInstanceUID = null;
+    @JsonProperty("seriesInstanceUID")
+    private String seriesInstanceUID = null;
 
-	@JsonProperty("modality")
-	private String modality = null;
+    @JsonProperty("modality")
+    private String modality = null;
 
-	@JsonProperty("protocolName")
-	private String protocolName = null;
+    @JsonProperty("protocolName")
+    private String protocolName = null;
 
-	@JsonProperty("seriesDescription")
-	private String seriesDescription = null;
+    @JsonProperty("seriesDescription")
+    private String seriesDescription = null;
 
-	@JsonProperty("seriesDate")
-	@LocalDateAnnotations
-	private LocalDate seriesDate = null;
+    @JsonProperty("seriesDate")
+    @LocalDateAnnotations
+    private LocalDate seriesDate = null;
 
-	@JsonProperty("seriesNumber")
-	private Integer seriesNumber = null;
+    @JsonProperty("seriesNumber")
+    private Integer seriesNumber = null;
 
-	@JsonProperty("sequenceName")
-	private String sequenceName;
+    @JsonProperty("sequenceName")
+    private String sequenceName;
 
-	@JsonProperty("numberOfSeriesRelatedInstances")
-	private Integer numberOfSeriesRelatedInstances = null;
+    @JsonProperty("numberOfSeriesRelatedInstances")
+    private Integer numberOfSeriesRelatedInstances = null;
 
-	@JsonProperty("sopClassUID")
-	private String sopClassUID = null;
+    @JsonProperty("sopClassUID")
+    private String sopClassUID = null;
 
-	@JsonProperty("equipment")
-	private EquipmentDicom equipment = null;
+    @JsonProperty("equipment")
+    private EquipmentDicom equipment = null;
 
-	@JsonProperty("isCompressed")
-	private Boolean isCompressed = null;
+    @JsonProperty("isCompressed")
+    private Boolean isCompressed = null;
 
-	@JsonProperty("isMultiFrame")
-	private Boolean isMultiFrame = null;
+    @JsonProperty("isMultiFrame")
+    private Boolean isMultiFrame = null;
 
-	@JsonProperty("multiFrameCount")
-	private Integer multiFrameCount;
+    @JsonProperty("multiFrameCount")
+    private Integer multiFrameCount;
 
-	@JsonProperty("isEnhanced")
-	private Boolean isEnhanced;
-	
-	@JsonProperty("isSpectroscopy")
-	private Boolean isSpectroscopy;
+    @JsonProperty("isEnhanced")
+    private Boolean isEnhanced;
+    
+    @JsonProperty("isSpectroscopy")
+    private Boolean isSpectroscopy;
 
-	@JsonProperty("images")
-	private List<Image> images = null;
+    @JsonProperty("images")
+    private List<Image> images = null;
 
-	@JsonProperty("imagesNumber")
-	private Integer imagesNumber = null;
+    @JsonProperty("imagesNumber")
+    private Integer imagesNumber = null;
 
-	@JsonProperty("datasets")
-	private List<Dataset> datasets = null;
+    @JsonProperty("datasets")
+    private List<Dataset> datasets = null;
 
-	public Boolean getSelected() {
-		return selected;
-	}
+    public Boolean getSelected() {
+        return selected;
+    }
 
-	public void setSelected(Boolean selected) {
-		this.selected = selected;
-	}
+    public void setSelected(Boolean selected) {
+        this.selected = selected;
+    }
 
-	public String getSeriesInstanceUID() {
-		return seriesInstanceUID;
-	}
+    public String getSeriesInstanceUID() {
+        return seriesInstanceUID;
+    }
 
-	public void setSeriesInstanceUID(String seriesInstanceUID) {
-		this.seriesInstanceUID = seriesInstanceUID;
-	}
+    public void setSeriesInstanceUID(String seriesInstanceUID) {
+        this.seriesInstanceUID = seriesInstanceUID;
+    }
 
-	public String getModality() {
-		return modality;
-	}
+    public String getModality() {
+        return modality;
+    }
 
-	public void setModality(String modality) {
-		this.modality = modality;
-	}
+    public void setModality(String modality) {
+        this.modality = modality;
+    }
 
-	public String getProtocolName() {
-		return protocolName;
-	}
+    public String getProtocolName() {
+        return protocolName;
+    }
 
-	public void setProtocolName(String protocolName) {
-		this.protocolName = protocolName;
-	}
+    public void setProtocolName(String protocolName) {
+        this.protocolName = protocolName;
+    }
 
-	public String getSeriesDescription() {
-		return seriesDescription;
-	}
+    public String getSeriesDescription() {
+        return seriesDescription;
+    }
 
-	public void setSeriesDescription(String seriesDescription) {
-		this.seriesDescription = seriesDescription;
-	}
+    public void setSeriesDescription(String seriesDescription) {
+        this.seriesDescription = seriesDescription;
+    }
 
-	public LocalDate getSeriesDate() {
-		return seriesDate;
-	}
+    public LocalDate getSeriesDate() {
+        return seriesDate;
+    }
 
-	public void setSeriesDate(LocalDate seriesDate) {
-		this.seriesDate = seriesDate;
-	}
+    public void setSeriesDate(LocalDate seriesDate) {
+        this.seriesDate = seriesDate;
+    }
 
-	public Integer getSeriesNumber() {
-		return seriesNumber;
-	}
+    public Integer getSeriesNumber() {
+        return seriesNumber;
+    }
 
-	public void setSeriesNumber(Integer seriesNumber) {
-		this.seriesNumber = seriesNumber;
-	}
+    public void setSeriesNumber(Integer seriesNumber) {
+        this.seriesNumber = seriesNumber;
+    }
 
-	public Integer getNumberOfSeriesRelatedInstances() {
-		return numberOfSeriesRelatedInstances;
-	}
+    public Integer getNumberOfSeriesRelatedInstances() {
+        return numberOfSeriesRelatedInstances;
+    }
 
-	public void setNumberOfSeriesRelatedInstances(Integer numberOfSeriesRelatedInstances) {
-		this.numberOfSeriesRelatedInstances = numberOfSeriesRelatedInstances;
-	}
+    public void setNumberOfSeriesRelatedInstances(Integer numberOfSeriesRelatedInstances) {
+        this.numberOfSeriesRelatedInstances = numberOfSeriesRelatedInstances;
+    }
 
-	public String getSopClassUID() {
-		return sopClassUID;
-	}
+    public String getSopClassUID() {
+        return sopClassUID;
+    }
 
-	public void setSopClassUID(String sopClassUID) {
-		this.sopClassUID = sopClassUID;
-	}
+    public void setSopClassUID(String sopClassUID) {
+        this.sopClassUID = sopClassUID;
+    }
 
-	public EquipmentDicom getEquipment() {
-		return equipment;
-	}
+    public EquipmentDicom getEquipment() {
+        return equipment;
+    }
 
-	public void setEquipment(EquipmentDicom equipment) {
-		this.equipment = equipment;
-	}
+    public void setEquipment(EquipmentDicom equipment) {
+        this.equipment = equipment;
+    }
 
-	public Boolean getIsCompressed() {
-		return isCompressed;
-	}
+    public Boolean getIsCompressed() {
+        return isCompressed;
+    }
 
-	public void setIsCompressed(Boolean isCompressed) {
-		this.isCompressed = isCompressed;
-	}
+    public void setIsCompressed(Boolean isCompressed) {
+        this.isCompressed = isCompressed;
+    }
 
-	public Boolean getIsMultiFrame() {
-		return isMultiFrame;
-	}
+    public Boolean getIsMultiFrame() {
+        return isMultiFrame;
+    }
 
-	public void setIsMultiFrame(Boolean isMultiFrame) {
-		this.isMultiFrame = isMultiFrame;
-	}
+    public void setIsMultiFrame(Boolean isMultiFrame) {
+        this.isMultiFrame = isMultiFrame;
+    }
 
-	public List<Image> getImages() {
-		return images;
-	}
+    public List<Image> getImages() {
+        return images;
+    }
 
-	public void setImages(List<Image> images) {
-		this.images = images;
-	}
+    public void setImages(List<Image> images) {
+        this.images = images;
+    }
 
-	public Integer getImagesNumber() {
-		return imagesNumber;
-	}
+    public Integer getImagesNumber() {
+        return imagesNumber;
+    }
 
-	public void setImagesNumber(Integer imagesNumber) {
-		this.imagesNumber = imagesNumber;
-	}
+    public void setImagesNumber(Integer imagesNumber) {
+        this.imagesNumber = imagesNumber;
+    }
 
-	public List<Dataset> getDatasets() {
-		return datasets;
-	}
+    public List<Dataset> getDatasets() {
+        return datasets;
+    }
 
-	public void setDatasets(List<Dataset> datasets) {
-		this.datasets = datasets;
-	}
+    public void setDatasets(List<Dataset> datasets) {
+        this.datasets = datasets;
+    }
 
-	public Integer getMultiFrameCount() {
-		return multiFrameCount;
-	}
+    public Integer getMultiFrameCount() {
+        return multiFrameCount;
+    }
 
-	public void setMultiFrameCount(Integer multiFrameCount) {
-		this.multiFrameCount = multiFrameCount;
-	}
+    public void setMultiFrameCount(Integer multiFrameCount) {
+        this.multiFrameCount = multiFrameCount;
+    }
 
-	public String getSequenceName() {
-		return sequenceName;
-	}
+    public String getSequenceName() {
+        return sequenceName;
+    }
 
-	public void setSequenceName(String sequenceName) {
-		this.sequenceName = sequenceName;
-	}
+    public void setSequenceName(String sequenceName) {
+        this.sequenceName = sequenceName;
+    }
 
-	public DatasetFile getFirstDatasetFileForCurrentSerie() {
-		if (getDatasets() == null
-			|| getDatasets().get(0) == null
-			|| getDatasets().get(0).getExpressionFormats() == null
-			|| getDatasets().get(0).getExpressionFormats().get(0) == null
-			|| getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles() == null
-			|| getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles().get(0) == null) {
-			return null;
-		}
-		return getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles().get(0);
-	}
+    public DatasetFile getFirstDatasetFileForCurrentSerie() {
+        if (getDatasets() == null
+            || getDatasets().get(0) == null
+            || getDatasets().get(0).getExpressionFormats() == null
+            || getDatasets().get(0).getExpressionFormats().get(0) == null
+            || getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles() == null
+            || getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles().get(0) == null) {
+            return null;
+        }
+        return getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles().get(0);
+    }
 
-	public Boolean getIsEnhanced() {
-		return isEnhanced;
-	}
+    public Boolean getIsEnhanced() {
+        return isEnhanced;
+    }
 
-	public void setIsEnhanced(Boolean isEnhanced) {
-		this.isEnhanced = isEnhanced;
-	}
+    public void setIsEnhanced(Boolean isEnhanced) {
+        this.isEnhanced = isEnhanced;
+    }
 
-	public Boolean getIsSpectroscopy() {
-		return isSpectroscopy;
-	}
+    public Boolean getIsSpectroscopy() {
+        return isSpectroscopy;
+    }
 
-	public void setIsSpectroscopy(Boolean isSpectroscopy) {
-		this.isSpectroscopy = isSpectroscopy;
-	}	
+    public void setIsSpectroscopy(Boolean isSpectroscopy) {
+        this.isSpectroscopy = isSpectroscopy;
+    }    
 }

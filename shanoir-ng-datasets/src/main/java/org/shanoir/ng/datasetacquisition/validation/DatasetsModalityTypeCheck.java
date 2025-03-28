@@ -34,19 +34,19 @@ import java.lang.annotation.Target;
 @Constraint(validatedBy = DatasetsModalityTypeCheckValidator.class)
 public @interface DatasetsModalityTypeCheck {
 
-	/**
-	 * Message.
-	 */
-	String message() default "Some datasets have not same modality type than acquisition.";
+    /**
+     * Message.
+     */
+    String message() default "Some datasets have not same modality type than acquisition.";
 
-	/**
-	 * Groups.
-	 */
-	Class<?>[] groups() default {};
+    /**
+     * Groups.
+     */
+    Class<?>[] groups() default {};
 
-	/**
-	 * Payload.
-	 */
-	Class<? extends Payload>[] payload() default {};
+    /**
+     * Payload.
+     */
+    Class<? extends Payload>[] payload() default {};
 
 }

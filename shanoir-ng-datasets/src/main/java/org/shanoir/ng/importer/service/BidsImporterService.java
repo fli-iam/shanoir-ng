@@ -62,248 +62,248 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class BidsImporterService {
 
-	private static final String SUBJECT_PREFIX = "sub-";
+    private static final String SUBJECT_PREFIX = "sub-";
 
-	private static final String SESSION_PREFIX = "ses-";
+    private static final String SESSION_PREFIX = "ses-";
 
-	@Autowired
-	private ShanoirEventService eventService;
+    @Autowired
+    private ShanoirEventService eventService;
 
-	@Autowired
-	private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-	@Autowired
-	private ExaminationRepository examinationRepository;
+    @Autowired
+    private ExaminationRepository examinationRepository;
 
-	@Autowired
-	private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
-	@Autowired
-	private DatasetAcquisitionRepository datasetAcquisitionRepository;
-	
-	@Value("${datasets-data}")
-	private String niftiStorageDir;
+    @Autowired
+    private DatasetAcquisitionRepository datasetAcquisitionRepository;
+    
+    @Value("${datasets-data}")
+    private String niftiStorageDir;
 
-	private static final Logger LOG = LoggerFactory.getLogger(BidsImporterService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BidsImporterService.class);
 
-	/**
-	 * Create BIDS dataset.
-	 * @param importJob the import job
-	 * @param userId the user id
-	 * @throws IOException
-	 * @throws JsonMappingException
-	 * @throws JsonParseException
-	 */
-	@RabbitListener(queues = RabbitMQConfiguration.IMPORTER_BIDS_DATASET_QUEUE, containerFactory = "multipleConsumersFactory")
-	@RabbitHandler
-	@Transactional
-	public void createAllBidsDatasetAcquisition(Message importJobStr) throws AmqpRejectAndDontRequeueException {
-		ShanoirEvent event = null;
-		try {
-			SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-			ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
-			Long userId = importJob.getUserId();
-			event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), userId, "Starting import...", ShanoirEvent.IN_PROGRESS, importJob.getStudyId());
-			eventService.publishEvent(event);
-			File workfolder = new File(importJob.getWorkFolder());
+    /**
+     * Create BIDS dataset.
+     * @param importJob the import job
+     * @param userId the user id
+     * @throws IOException
+     * @throws JsonMappingException
+     * @throws JsonParseException
+     */
+    @RabbitListener(queues = RabbitMQConfiguration.IMPORTER_BIDS_DATASET_QUEUE, containerFactory = "multipleConsumersFactory")
+    @RabbitHandler
+    @Transactional
+    public void createAllBidsDatasetAcquisition(Message importJobStr) throws AmqpRejectAndDontRequeueException {
+        ShanoirEvent event = null;
+        try {
+            SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+            ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
+            Long userId = importJob.getUserId();
+            event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), userId, "Starting import...", ShanoirEvent.IN_PROGRESS, importJob.getStudyId());
+            eventService.publishEvent(event);
+            File workfolder = new File(importJob.getWorkFolder());
 
-			// Check data type according to data type
-			switch (workfolder.getName()) {
-			case "anat":
-				importDataset(importJob, BidsDataType.ANAT, DatasetModalityType.MR_DATASET, event);
-				break;
-			case "func":
-				importDataset(importJob, BidsDataType.FUNC, DatasetModalityType.MR_DATASET, event);
-				break;
-			case "dwi":
-				importDataset(importJob, BidsDataType.DWI, DatasetModalityType.MR_DATASET, event);
-				break;
-			case "fmap":
-				importDataset(importJob, BidsDataType.FMAP, DatasetModalityType.MR_DATASET, event);
-				break;
-			case "perf":
-				importDataset(importJob, BidsDataType.PERF, DatasetModalityType.MR_DATASET, event);
-				break;
-			case "meg":
-				importDataset(importJob, BidsDataType.MEG, DatasetModalityType.MEG_DATASET, event);
-				break;
-			case "ieeg":
-				importDataset(importJob, BidsDataType.IEEG, DatasetModalityType.IEEG_DATASET, event);
-				break;
-			case "eeg":
-				importDataset(importJob, BidsDataType.EEG, DatasetModalityType.EEG_DATASET, event);
-				break;
-			case "ct":
-				importDataset(importJob, BidsDataType.CT, DatasetModalityType.CT_DATASET, event);
-				break;
-			case "beh":
-				importDataset(importJob, BidsDataType.BEH, DatasetModalityType.BEH_DATASET, event);
-				break;
-			case "pet":
-				importDataset(importJob, BidsDataType.PET, DatasetModalityType.PET_DATASET, event);
-				break;
-			case "micr":
-				importDataset(importJob, BidsDataType.MICR, DatasetModalityType.MICR_DATASET, event);
-				break;
-			case "nirs":
-				importDataset(importJob, BidsDataType.NIRS, DatasetModalityType.NIRS_DATASET, event);
-				break;
-			case "xa":
-				importDataset(importJob, BidsDataType.XA, DatasetModalityType.XA_DATASET, event);
-				break;
-			default:
-				if (event != null) {
-					String msg = "The data type folder is not recognized (given: " + workfolder.getName() + "). Please update your BIDS archive following the rules.";
-					LOG.error(msg);
-					event.setStatus(ShanoirEvent.ERROR);
-					event.setMessage(msg);
-					event.setProgress(-1f);
-					eventService.publishEvent(event);
-				}
-				break;
-			}
-		} catch (Exception e) {
-			LOG.error("An unexpected exception occured during the import of a BIDS dataset.", e);
-			if (event != null) {
-				event.setStatus(ShanoirEvent.ERROR);
-				event.setMessage("An unexpected error occured, please contact an administrator.");
-				event.setProgress(-1f);
-				eventService.publishEvent(event);
-			}
+            // Check data type according to data type
+            switch (workfolder.getName()) {
+            case "anat":
+                importDataset(importJob, BidsDataType.ANAT, DatasetModalityType.MR_DATASET, event);
+                break;
+            case "func":
+                importDataset(importJob, BidsDataType.FUNC, DatasetModalityType.MR_DATASET, event);
+                break;
+            case "dwi":
+                importDataset(importJob, BidsDataType.DWI, DatasetModalityType.MR_DATASET, event);
+                break;
+            case "fmap":
+                importDataset(importJob, BidsDataType.FMAP, DatasetModalityType.MR_DATASET, event);
+                break;
+            case "perf":
+                importDataset(importJob, BidsDataType.PERF, DatasetModalityType.MR_DATASET, event);
+                break;
+            case "meg":
+                importDataset(importJob, BidsDataType.MEG, DatasetModalityType.MEG_DATASET, event);
+                break;
+            case "ieeg":
+                importDataset(importJob, BidsDataType.IEEG, DatasetModalityType.IEEG_DATASET, event);
+                break;
+            case "eeg":
+                importDataset(importJob, BidsDataType.EEG, DatasetModalityType.EEG_DATASET, event);
+                break;
+            case "ct":
+                importDataset(importJob, BidsDataType.CT, DatasetModalityType.CT_DATASET, event);
+                break;
+            case "beh":
+                importDataset(importJob, BidsDataType.BEH, DatasetModalityType.BEH_DATASET, event);
+                break;
+            case "pet":
+                importDataset(importJob, BidsDataType.PET, DatasetModalityType.PET_DATASET, event);
+                break;
+            case "micr":
+                importDataset(importJob, BidsDataType.MICR, DatasetModalityType.MICR_DATASET, event);
+                break;
+            case "nirs":
+                importDataset(importJob, BidsDataType.NIRS, DatasetModalityType.NIRS_DATASET, event);
+                break;
+            case "xa":
+                importDataset(importJob, BidsDataType.XA, DatasetModalityType.XA_DATASET, event);
+                break;
+            default:
+                if (event != null) {
+                    String msg = "The data type folder is not recognized (given: " + workfolder.getName() + "). Please update your BIDS archive following the rules.";
+                    LOG.error(msg);
+                    event.setStatus(ShanoirEvent.ERROR);
+                    event.setMessage(msg);
+                    event.setProgress(-1f);
+                    eventService.publishEvent(event);
+                }
+                break;
+            }
+        } catch (Exception e) {
+            LOG.error("An unexpected exception occured during the import of a BIDS dataset.", e);
+            if (event != null) {
+                event.setStatus(ShanoirEvent.ERROR);
+                event.setMessage("An unexpected error occured, please contact an administrator.");
+                event.setProgress(-1f);
+                eventService.publishEvent(event);
+            }
 
-			throw new AmqpRejectAndDontRequeueException(e);
-		}
-	}
+            throw new AmqpRejectAndDontRequeueException(e);
+        }
+    }
 
-	/**
-	 * Import some nifti datasets
-	 * @param bidsDataType
-	 * @param modalityType
-	 * @param event
-	 * @param workfolder the work folder we are working in
-	 * @throws IOException
-	 * @throws ParseException
-	 * @throws JSONException
-	 */
-	private void importDataset(ImportJob importJob, BidsDataType bidsDataType, DatasetModalityType modalityType, ShanoirEvent event) throws IOException, ParseException, JSONException {
+    /**
+     * Import some nifti datasets
+     * @param bidsDataType
+     * @param modalityType
+     * @param event
+     * @param workfolder the work folder we are working in
+     * @throws IOException
+     * @throws ParseException
+     * @throws JSONException
+     */
+    private void importDataset(ImportJob importJob, BidsDataType bidsDataType, DatasetModalityType modalityType, ShanoirEvent event) throws IOException, ParseException, JSONException {
 
-		DatasetAcquisition datasetAcquisition = new BidsDatasetAcquisition();
+        DatasetAcquisition datasetAcquisition = new BidsDatasetAcquisition();
 
-		// Get examination
-		Examination examination = examinationRepository.findById(importJob.getExaminationId()).get();
-		datasetAcquisition.setExamination(examination);
+        // Get examination
+        Examination examination = examinationRepository.findById(importJob.getExaminationId()).get();
+        datasetAcquisition.setExamination(examination);
 
-		Set<Dataset> datasets = new HashSet<>();
-		float progress = 0f;
+        Set<Dataset> datasets = new HashSet<>();
+        float progress = 0f;
 
-		File[] filesToImport = new File(importJob.getWorkFolder()).listFiles(new FilenameFilter() {
-			public boolean accept(File arg0, String name) {
-				return !name.startsWith(".DS_Store") && !name.startsWith("__MAC") && !name.startsWith("._") && !name.startsWith(".AppleDouble");
-			}});
-		
-		Map<String, BidsDataset> datasetsByName = new HashMap<>();
-		
-		Map<String, Integer> equipments = objectMapper.readValue((String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.ACQUISITION_EQUIPMENT_CODE_QUEUE, "all"), Map.class);
-		Long equipmentId = 0L;
+        File[] filesToImport = new File(importJob.getWorkFolder()).listFiles(new FilenameFilter() {
+            public boolean accept(File arg0, String name) {
+                return !name.startsWith(".DS_Store") && !name.startsWith("__MAC") && !name.startsWith("._") && !name.startsWith(".AppleDouble");
+            }});
+        
+        Map<String, BidsDataset> datasetsByName = new HashMap<>();
+        
+        Map<String, Integer> equipments = objectMapper.readValue((String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.ACQUISITION_EQUIPMENT_CODE_QUEUE, "all"), Map.class);
+        Long equipmentId = 0L;
 
-		for (File importedFile : filesToImport) {
-			progress += 1f / filesToImport.length;
-			event.setMessage("Bids dataset for examination " + importJob.getExaminationId());
-			event.setProgress(progress);
-			eventService.publishEvent(event);
+        for (File importedFile : filesToImport) {
+            progress += 1f / filesToImport.length;
+            event.setMessage("Bids dataset for examination " + importJob.getExaminationId());
+            event.setProgress(progress);
+            eventService.publishEvent(event);
 
-			String name = importedFile.getName().replaceAll("\\.", "_");
+            String name = importedFile.getName().replaceAll("\\.", "_");
 
-			// Parse name to get acquisition / session / run / task
-			
-			BidsDataset datasetToCreate;
-			DatasetExpression expression;
+            // Parse name to get acquisition / session / run / task
+            
+            BidsDataset datasetToCreate;
+            DatasetExpression expression;
 
-			if (datasetsByName.get(name) != null) {
-				datasetToCreate = datasetsByName.get(name);
-				expression = datasetToCreate.getDatasetExpressions().get(0);
-			} else {
-				// Create the dataset with informations from job
-				datasetToCreate = new BidsDataset();
-				datasetToCreate.setSubjectId(examination.getSubject() != null ? examination.getSubject().getId() : null);
-				datasetToCreate.setCreationDate(LocalDate.now());
-				datasetToCreate.setDatasetAcquisition(datasetAcquisition);
+            if (datasetsByName.get(name) != null) {
+                datasetToCreate = datasetsByName.get(name);
+                expression = datasetToCreate.getDatasetExpressions().get(0);
+            } else {
+                // Create the dataset with informations from job
+                datasetToCreate = new BidsDataset();
+                datasetToCreate.setSubjectId(examination.getSubject() != null ? examination.getSubject().getId() : null);
+                datasetToCreate.setCreationDate(LocalDate.now());
+                datasetToCreate.setDatasetAcquisition(datasetAcquisition);
 
-				// Metadata
-				DatasetMetadata originMetadata = new DatasetMetadata();
-				originMetadata.setName(name);
-				originMetadata.setDatasetModalityType(modalityType);
-				originMetadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);
-				
-				datasetToCreate.setOriginMetadata(originMetadata);
-				datasetToCreate.setUpdatedMetadata(originMetadata);
-				datasetToCreate.setBidsDataType(bidsDataType.getFolderName());
-				
-				// DatasetExpression with list of files
-				expression = new DatasetExpression();
-				expression.setCreationDate(LocalDateTime.now());
-				expression.setDatasetExpressionFormat(DatasetExpressionFormat.BIDS);
-				expression.setDataset(datasetToCreate);
-				expression.setDatasetFiles(new ArrayList<>());
-				datasetToCreate.setDatasetExpressions(Collections.singletonList(expression));
-			}
+                // Metadata
+                DatasetMetadata originMetadata = new DatasetMetadata();
+                originMetadata.setName(name);
+                originMetadata.setDatasetModalityType(modalityType);
+                originMetadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);
+                
+                datasetToCreate.setOriginMetadata(originMetadata);
+                datasetToCreate.setUpdatedMetadata(originMetadata);
+                datasetToCreate.setBidsDataType(bidsDataType.getFolderName());
+                
+                // DatasetExpression with list of files
+                expression = new DatasetExpression();
+                expression.setCreationDate(LocalDateTime.now());
+                expression.setDatasetExpressionFormat(DatasetExpressionFormat.BIDS);
+                expression.setDataset(datasetToCreate);
+                expression.setDatasetFiles(new ArrayList<>());
+                datasetToCreate.setDatasetExpressions(Collections.singletonList(expression));
+            }
 
-			List<DatasetFile> files = expression.getDatasetFiles();
+            List<DatasetFile> files = expression.getDatasetFiles();
 
-			// Copy the data to "BIDS" folder
-			final String subLabel = SUBJECT_PREFIX + importJob.getSubjectName();
-			final String sesLabel = SESSION_PREFIX + importJob.getExaminationId();
+            // Copy the data to "BIDS" folder
+            final String subLabel = SUBJECT_PREFIX + importJob.getSubjectName();
+            final String sesLabel = SESSION_PREFIX + importJob.getExaminationId();
 
-			final File outDir = new File(niftiStorageDir + File.separator + subLabel + File.separator + sesLabel + File.separator + bidsDataType.getFolderName());
-			outDir.mkdirs();
+            final File outDir = new File(niftiStorageDir + File.separator + subLabel + File.separator + sesLabel + File.separator + bidsDataType.getFolderName());
+            outDir.mkdirs();
 
-			// remove old subject and session names from files names
-			String filename = importedFile.getName()
-					.replaceFirst("sub-[^_]+_", "")
-					.replaceFirst("ses-[^_]+_", "");
+            // remove old subject and session names from files names
+            String filename = importedFile.getName()
+                    .replaceFirst("sub-[^_]+_", "")
+                    .replaceFirst("ses-[^_]+_", "");
 
-			String outPath = outDir.getAbsolutePath() + File.separator + filename;
-			Path importedFileFinalLocation = Files.copy(importedFile.toPath(), Paths.get(outPath), StandardCopyOption.REPLACE_EXISTING);
+            String outPath = outDir.getAbsolutePath() + File.separator + filename;
+            Path importedFileFinalLocation = Files.copy(importedFile.toPath(), Paths.get(outPath), StandardCopyOption.REPLACE_EXISTING);
 
-			DatasetFile dsFile = new DatasetFile();
-			dsFile.setDatasetExpression(expression);
-			dsFile.setPacs(false);
-			dsFile.setPath(importedFileFinalLocation.toUri().toString().replaceAll(" ", "%20"));
-			files.add(dsFile);
-			if (equipmentId == 0L && importedFile.getName().endsWith(".json") && Files.size(Path.of(importedFile.getPath())) < 1000000) {
-				// Check equipment in json file
-				//JSONParser json = new JSONParser(new FileReader(importedFile));
-				// LinkedHashMap jsonObject = (LinkedHashMap) json.parse();
-				ObjectMapper jsonMapper = new ObjectMapper();
-				// Parse JSON file into a LinkedHashMap
-				LinkedHashMap<String, Object> jsonObject = jsonMapper.readValue(importedFile, LinkedHashMap.class);
-				if (jsonObject.get("DeviceSerialNumber") != null) {
-					String code = (String) jsonObject.get("DeviceSerialNumber");
-					equipmentId = equipments.get(code) != null ? Long.valueOf(equipments.get(code)) : 0L;
-				}
-			}
-			
-			expression.setDatasetFiles(files);
-			expression.setSize(Files.size(importedFileFinalLocation));
-			datasets.add(datasetToCreate);
-			datasetsByName.put(name, datasetToCreate);
-		}
+            DatasetFile dsFile = new DatasetFile();
+            dsFile.setDatasetExpression(expression);
+            dsFile.setPacs(false);
+            dsFile.setPath(importedFileFinalLocation.toUri().toString().replaceAll(" ", "%20"));
+            files.add(dsFile);
+            if (equipmentId == 0L && importedFile.getName().endsWith(".json") && Files.size(Path.of(importedFile.getPath())) < 1000000) {
+                // Check equipment in json file
+                //JSONParser json = new JSONParser(new FileReader(importedFile));
+                // LinkedHashMap jsonObject = (LinkedHashMap) json.parse();
+                ObjectMapper jsonMapper = new ObjectMapper();
+                // Parse JSON file into a LinkedHashMap
+                LinkedHashMap<String, Object> jsonObject = jsonMapper.readValue(importedFile, LinkedHashMap.class);
+                if (jsonObject.get("DeviceSerialNumber") != null) {
+                    String code = (String) jsonObject.get("DeviceSerialNumber");
+                    equipmentId = equipments.get(code) != null ? Long.valueOf(equipments.get(code)) : 0L;
+                }
+            }
+            
+            expression.setDatasetFiles(files);
+            expression.setSize(Files.size(importedFileFinalLocation));
+            datasets.add(datasetToCreate);
+            datasetsByName.put(name, datasetToCreate);
+        }
 
-		datasetAcquisition.setDatasets(new ArrayList<>(datasets));
-		datasetAcquisition.setAcquisitionEquipmentId(equipmentId);
-		datasetAcquisition.setImportDate(LocalDateTime.now().toLocalDate());
-		datasetAcquisition.setUsername(importJob.getUsername());
+        datasetAcquisition.setDatasets(new ArrayList<>(datasets));
+        datasetAcquisition.setAcquisitionEquipmentId(equipmentId);
+        datasetAcquisition.setImportDate(LocalDateTime.now().toLocalDate());
+        datasetAcquisition.setUsername(importJob.getUsername());
 
 
-		datasetAcquisitionRepository.save(datasetAcquisition);
-		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, datasetAcquisition.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, examination.getStudyId()));
-		
-		event.setStatus(ShanoirEvent.SUCCESS);
+        datasetAcquisitionRepository.save(datasetAcquisition);
+        eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, datasetAcquisition.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, examination.getStudyId()));
+        
+        event.setStatus(ShanoirEvent.SUCCESS);
 
-		event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")]"
-				+" Successfully created datasets for subject [" + importJob.getSubjectName()
-				+ "] in examination [" + examination.getId() + "]");
-		event.setProgress(1f);
-		eventService.publishEvent(event);
-	}
+        event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")]"
+                +" Successfully created datasets for subject [" + importJob.getSubjectName()
+                + "] in examination [" + examination.getId() + "]");
+        event.setProgress(1f);
+        eventService.publishEvent(event);
+    }
 }

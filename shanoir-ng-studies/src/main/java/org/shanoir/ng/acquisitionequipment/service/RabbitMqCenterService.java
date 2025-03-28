@@ -74,24 +74,24 @@ public class RabbitMqCenterService {
                 }
             }
             return mapper.writeValueAsString(easMap);
-		} catch (Exception e) {
-			throw new AmqpRejectAndDontRequeueException(e);
-		}
-	}
+        } catch (Exception e) {
+            throw new AmqpRejectAndDontRequeueException(e);
+        }
+    }
 
-	@RabbitListener(queues = RabbitMQConfiguration.EQUIPMENT_FROM_CODE_QUEUE, containerFactory = "multipleConsumersFactory")
-	@RabbitHandler
-	@Transactional
-	public Long getEquipmentFromCode(String message) {
-		try {
-			List<AcquisitionEquipment> equipList = acquisitionEquipmentService.findBySerialNumberContaining(message);
-			if (equipList == null || equipList.isEmpty()) {
-				return null;
-			}
-			return equipList.get(0).getId();
-		} catch (Exception e) {
-			return null;
-		}
-	}
+    @RabbitListener(queues = RabbitMQConfiguration.EQUIPMENT_FROM_CODE_QUEUE, containerFactory = "multipleConsumersFactory")
+    @RabbitHandler
+    @Transactional
+    public Long getEquipmentFromCode(String message) {
+        try {
+            List<AcquisitionEquipment> equipList = acquisitionEquipmentService.findBySerialNumberContaining(message);
+            if (equipList == null || equipList.isEmpty()) {
+                return null;
+            }
+            return equipList.get(0).getId();
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
 }

@@ -18,13 +18,13 @@ import org.shanoir.ng.studycard.model.field.MetadataFieldInterface;
 
 public interface StudyCardAssignmentInterface<T> {
 
-	String getValue();
+    String getValue();
 
-	void setValue(String value);
+    void setValue(String value);
 
-	MetadataFieldInterface<T> getField();
-	
-	void setField(MetadataFieldInterface<T> field);
+    MetadataFieldInterface<T> getField();
+    
+    void setField(MetadataFieldInterface<T> field);
 
     void apply(T object);
 }

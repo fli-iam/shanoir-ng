@@ -48,12 +48,12 @@ import jakarta.persistence.Entity;
 @DiscriminatorValue("StudyCardDICOMConditionOnDatasets")
 @JsonTypeName("StudyCardDICOMConditionOnDatasets")
 public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
-	
+    
     private static final Logger LOG = LoggerFactory.getLogger(StudyCardDICOMConditionOnDatasets.class);
 
-	private int dicomTag;
-	
-	public Integer getDicomTag() {
+    private int dicomTag;
+    
+    public Integer getDicomTag() {
         return dicomTag;
     }
 

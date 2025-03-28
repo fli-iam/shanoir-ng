@@ -42,126 +42,126 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("dev")
 public class SubjectPathologyApiControllerTestIT extends KeycloakControllerTestIT {
-	
-	private static final String REQUEST_PATH_SUBJECT = "/subject";
-	private static final String SUBJECT_ID = "/1";
-	private static final String REQUEST_PATH_PATHOLOGY = "/pathology";
-	private static final String REQUEST_PATH = REQUEST_PATH_SUBJECT + SUBJECT_ID + REQUEST_PATH_PATHOLOGY;
-	private static final String REQUEST_PATH_ALL = REQUEST_PATH + "/all";
-	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
-	private static final String REQUEST_PATH_SUBJECT_BY_PATHO = REQUEST_PATH_SUBJECT+ "/all" + REQUEST_PATH_PATHOLOGY + "/1";
-	private static final String REQUEST_PATH_PATHO_BY_SUBJECT = REQUEST_PATH_SUBJECT+ SUBJECT_ID + REQUEST_PATH_PATHOLOGY + "/all";
-	
-	
-	@Autowired
-	private TestRestTemplate restTemplate;
+    
+    private static final String REQUEST_PATH_SUBJECT = "/subject";
+    private static final String SUBJECT_ID = "/1";
+    private static final String REQUEST_PATH_PATHOLOGY = "/pathology";
+    private static final String REQUEST_PATH = REQUEST_PATH_SUBJECT + SUBJECT_ID + REQUEST_PATH_PATHOLOGY;
+    private static final String REQUEST_PATH_ALL = REQUEST_PATH + "/all";
+    private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+    private static final String REQUEST_PATH_SUBJECT_BY_PATHO = REQUEST_PATH_SUBJECT+ "/all" + REQUEST_PATH_PATHOLOGY + "/1";
+    private static final String REQUEST_PATH_PATHO_BY_SUBJECT = REQUEST_PATH_SUBJECT+ SUBJECT_ID + REQUEST_PATH_PATHOLOGY + "/all";
+    
+    
+    @Autowired
+    private TestRestTemplate restTemplate;
 
-	@Test
-	public void findSubjectPathologyByIdProtected() {
-		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_WITH_ID, String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
-	}
+    @Test
+    public void findSubjectPathologyByIdProtected() {
+        final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_WITH_ID, String.class);
+        assertEquals(HttpStatus.FOUND, response.getStatusCode());
+    }
 
-	@Test
-	public void findSubjectPathologyByIdWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
+    @Test
+    public void findSubjectPathologyByIdWithLogin() throws ClientProtocolException, IOException {
+        final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 
-		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.GET, entity,
-				String.class);
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-	}
+        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.GET, entity,
+                String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
 
-	@Test
-	public void findSubjectPathologyProtected() {
-		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH, String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
-	}
+    @Test
+    public void findSubjectPathologyProtected() {
+        final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH, String.class);
+        assertEquals(HttpStatus.FOUND, response.getStatusCode());
+    }
 
-	@Test
-	public void findSubjectPathologyWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
+    @Test
+    public void findSubjectPathologyWithLogin() throws ClientProtocolException, IOException {
+        final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 
-		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.GET, entity,
-				String.class);
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-	}
-	
-	@Test
-	public void findSubjectPathologiesProtected() {
-		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_ALL, String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
-	}
+        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.GET, entity,
+                String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+    
+    @Test
+    public void findSubjectPathologiesProtected() {
+        final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_ALL, String.class);
+        assertEquals(HttpStatus.FOUND, response.getStatusCode());
+    }
 
-	@Test
-	public void findSubjectPathologiesWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
+    @Test
+    public void findSubjectPathologiesWithLogin() throws ClientProtocolException, IOException {
+        final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 
-		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_ALL, HttpMethod.GET, entity,
-				String.class);
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-	}
-	
-	@Test
-	public void findSubjectsByPathologyProtected() {
-		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_SUBJECT_BY_PATHO, String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
-	}
+        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_ALL, HttpMethod.GET, entity,
+                String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+    
+    @Test
+    public void findSubjectsByPathologyProtected() {
+        final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_SUBJECT_BY_PATHO, String.class);
+        assertEquals(HttpStatus.FOUND, response.getStatusCode());
+    }
 
-	@Test
-	public void findSubjectsByPathologyWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
+    @Test
+    public void findSubjectsByPathologyWithLogin() throws ClientProtocolException, IOException {
+        final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 
-		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_SUBJECT_BY_PATHO, HttpMethod.GET, entity,
-				String.class);
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-	}
-	
-	@Test
-	public void findPathologiesBySubjectProtected() {
-		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_PATHO_BY_SUBJECT, String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
-	}
+        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_SUBJECT_BY_PATHO, HttpMethod.GET, entity,
+                String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+    
+    @Test
+    public void findPathologiesBySubjectProtected() {
+        final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_PATHO_BY_SUBJECT, String.class);
+        assertEquals(HttpStatus.FOUND, response.getStatusCode());
+    }
 
-	@Test
-	public void findPathologiesBySubjectWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
+    @Test
+    public void findPathologiesBySubjectWithLogin() throws ClientProtocolException, IOException {
+        final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 
-		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_PATHO_BY_SUBJECT, HttpMethod.GET, entity,
-				String.class);
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-	}
+        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_PATHO_BY_SUBJECT, HttpMethod.GET, entity,
+                String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
 
-	@Test
-	public void saveNewSubjectPathologyProtected() {
-		final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new SubjectPathology(), String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
-	}
+    @Test
+    public void saveNewSubjectPathologyProtected() {
+        final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new SubjectPathology(), String.class);
+        assertEquals(HttpStatus.FOUND, response.getStatusCode());
+    }
 
-	@Test
-	public void saveNewSubjectPathologyWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<SubjectPathology> entity = new HttpEntity<SubjectPathology>(PathologyModelUtil.createSubjectPathology(), getHeadersWithToken(true));
+    @Test
+    public void saveNewSubjectPathologyWithLogin() throws ClientProtocolException, IOException {
+        final HttpEntity<SubjectPathology> entity = new HttpEntity<SubjectPathology>(PathologyModelUtil.createSubjectPathology(), getHeadersWithToken(true));
 
-		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity,
-				String.class);
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-	}
+        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity,
+                String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
 
-	@Test
-	public void updateNewSubjectPathologyProtected() {
-		final HttpEntity<SubjectPathology> entity = new HttpEntity<SubjectPathology>(PathologyModelUtil.createSubjectPathology());
-		
-		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
-				String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
-	}
+    @Test
+    public void updateNewSubjectPathologyProtected() {
+        final HttpEntity<SubjectPathology> entity = new HttpEntity<SubjectPathology>(PathologyModelUtil.createSubjectPathology());
+        
+        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
+                String.class);
+        assertEquals(HttpStatus.FOUND, response.getStatusCode());
+    }
 
-	@Test
-	public void updateNewSubjectPathologyWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<SubjectPathology> entity = new HttpEntity<SubjectPathology>(PathologyModelUtil.createSubjectPathology(), getHeadersWithToken(true));
+    @Test
+    public void updateNewSubjectPathologyWithLogin() throws ClientProtocolException, IOException {
+        final HttpEntity<SubjectPathology> entity = new HttpEntity<SubjectPathology>(PathologyModelUtil.createSubjectPathology(), getHeadersWithToken(true));
 
-		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
-				String.class);
-		assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-	}
+        final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
+                String.class);
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    }
 
 }

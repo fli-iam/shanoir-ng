@@ -18,51 +18,51 @@ import org.shanoir.ng.studycard.model.DicomTagType;
 import org.shanoir.ng.studycard.model.VM;
 
 public class DicomTag {
-	
-	private int code;
-	
-	private String label;
+    
+    private int code;
+    
+    private String label;
 
-	private DicomTagType type;
+    private DicomTagType type;
 
-	private VM vm;
+    private VM vm;
 
-	public DicomTag(int code, String label, DicomTagType type, VM vm) {
-		this.code = code;
-		this.label = label;
-		this.type = type;
-		this.vm = vm;
-	}
+    public DicomTag(int code, String label, DicomTagType type, VM vm) {
+        this.code = code;
+        this.label = label;
+        this.type = type;
+        this.vm = vm;
+    }
 
-	public int getCode() {
-		return code;
-	}
+    public int getCode() {
+        return code;
+    }
 
-	public void setCode(int code) {
-		this.code = code;
-	}
+    public void setCode(int code) {
+        this.code = code;
+    }
 
-	public String getLabel() {
-		return label;
-	}
+    public String getLabel() {
+        return label;
+    }
 
-	public void setLabel(String label) {
-		this.label = label;
-	}
+    public void setLabel(String label) {
+        this.label = label;
+    }
 
-	public DicomTagType getType() {
-		return type;
-	}
+    public DicomTagType getType() {
+        return type;
+    }
 
-	public void setType(DicomTagType type) {
-		this.type = type;
-	}
+    public void setType(DicomTagType type) {
+        this.type = type;
+    }
 
-	public VM getVm() {
-		return vm;
-	}
+    public VM getVm() {
+        return vm;
+    }
 
-	public void setVm(VM vm) {
-		this.vm = vm;
-	}
+    public void setVm(VM vm) {
+        this.vm = vm;
+    }
 }

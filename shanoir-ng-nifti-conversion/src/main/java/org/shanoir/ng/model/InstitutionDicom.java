@@ -24,26 +24,26 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  */
 public class InstitutionDicom {
-	
-	@JsonProperty("institutionName")
-	private String institutionName;
+    
+    @JsonProperty("institutionName")
+    private String institutionName;
 
-	@JsonProperty("institutionAddress")
-	private String institutionAddress;
-	
-	public String getInstitutionName() {
-		return institutionName;
-	}
+    @JsonProperty("institutionAddress")
+    private String institutionAddress;
+    
+    public String getInstitutionName() {
+        return institutionName;
+    }
 
-	public void setInstitutionName(String institutionName) {
-		this.institutionName = institutionName;
-	}
+    public void setInstitutionName(String institutionName) {
+        this.institutionName = institutionName;
+    }
 
-	public String getInstitutionAddress() {
-		return institutionAddress;
-	}
+    public String getInstitutionAddress() {
+        return institutionAddress;
+    }
 
-	public void setInstitutionAddress(String institutionAddress) {
-		this.institutionAddress = institutionAddress;
-	}
+    public void setInstitutionAddress(String institutionAddress) {
+        this.institutionAddress = institutionAddress;
+    }
 }

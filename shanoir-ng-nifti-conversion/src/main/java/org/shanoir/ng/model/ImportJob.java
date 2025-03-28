@@ -26,7 +26,7 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
  */
 public class ImportJob implements Serializable {
 
-	private static final long serialVersionUID = 8804929608059674037L;
+    private static final long serialVersionUID = 8804929608059674037L;
 
     private boolean fromDicomZip;
 
@@ -34,7 +34,7 @@ public class ImportJob implements Serializable {
 
     private boolean fromPacs;
 
-	private String workFolder;
+    private String workFolder;
 
     private List<Patient> patients;
 
@@ -46,169 +46,169 @@ public class ImportJob implements Serializable {
 
     private Long studyId;
 
-	private String studyCardName;
-	
-	// todo: remove this later, when front end uses StudyCards
+    private String studyCardName;
+    
+    // todo: remove this later, when front end uses StudyCards
     private Long acquisitionEquipmentId;
-	
-	private String anonymisationProfileToUse;
+    
+    private String anonymisationProfileToUse;
 
     private String archive;
 
-	private String subjectName;
+    private String subjectName;
 
-	private String studyName;
+    private String studyName;
 
-	private ShanoirEvent shanoirEvent;
+    private ShanoirEvent shanoirEvent;
 
-	private Long userId;
+    private Long userId;
 
-	private Long centerId;
+    private Long centerId;
 
-	public String getArchive() {
-		return archive;
-	}
+    public String getArchive() {
+        return archive;
+    }
 
-	public void setArchive(final String archive) {
-		this.archive = archive;
-	}
+    public void setArchive(final String archive) {
+        this.archive = archive;
+    }
 
-	public boolean isFromDicomZip() {
-		return fromDicomZip;
-	}
+    public boolean isFromDicomZip() {
+        return fromDicomZip;
+    }
 
-	public void setFromDicomZip(final boolean fromDicomZip) {
-		this.fromDicomZip = fromDicomZip;
-	}
+    public void setFromDicomZip(final boolean fromDicomZip) {
+        this.fromDicomZip = fromDicomZip;
+    }
 
-	public boolean isFromShanoirUploader() {
-		return fromShanoirUploader;
-	}
+    public boolean isFromShanoirUploader() {
+        return fromShanoirUploader;
+    }
 
-	public void setFromShanoirUploader(final boolean fromShanoirUploader) {
-		this.fromShanoirUploader = fromShanoirUploader;
-	}
+    public void setFromShanoirUploader(final boolean fromShanoirUploader) {
+        this.fromShanoirUploader = fromShanoirUploader;
+    }
 
-	public boolean isFromPacs() {
-		return fromPacs;
-	}
+    public boolean isFromPacs() {
+        return fromPacs;
+    }
 
-	public void setFromPacs(final boolean fromPacs) {
-		this.fromPacs = fromPacs;
-	}
+    public void setFromPacs(final boolean fromPacs) {
+        this.fromPacs = fromPacs;
+    }
 
-	public List<Patient> getPatients() {
-		return patients;
-	}
+    public List<Patient> getPatients() {
+        return patients;
+    }
 
-	public void setPatients(final List<Patient> patients) {
-		this.patients = patients;
-	}
+    public void setPatients(final List<Patient> patients) {
+        this.patients = patients;
+    }
 
-	public Long getExaminationId() {
-		return examinationId;
-	}
+    public Long getExaminationId() {
+        return examinationId;
+    }
 
-	public void setExaminationId(final Long examinationId) {
-		this.examinationId = examinationId;
-	}
+    public void setExaminationId(final Long examinationId) {
+        this.examinationId = examinationId;
+    }
 
     public String getWorkFolder() {
-		return workFolder;
-	}
+        return workFolder;
+    }
 
-	public void setWorkFolder(String workFolder) {
-		this.workFolder = workFolder;
-	}
+    public void setWorkFolder(String workFolder) {
+        this.workFolder = workFolder;
+    }
 
-	public Long getStudyId() {
-		return studyId;
-	}
+    public Long getStudyId() {
+        return studyId;
+    }
 
-	public void setStudyId(final Long studyId) {
-		this.studyId = studyId;
-	}
+    public void setStudyId(final Long studyId) {
+        this.studyId = studyId;
+    }
 
-	public String getStudyCardName() {
-		return studyCardName;
-	}
+    public String getStudyCardName() {
+        return studyCardName;
+    }
 
-	public void setStudyCardName(String studyCardName) {
-		this.studyCardName = studyCardName;
-	}
+    public void setStudyCardName(String studyCardName) {
+        this.studyCardName = studyCardName;
+    }
 
-	public Long getAcquisitionEquipmentId() {
-		return acquisitionEquipmentId;
-	}
+    public Long getAcquisitionEquipmentId() {
+        return acquisitionEquipmentId;
+    }
 
-	public void setAcquisitionEquipmentId(final Long acquisitionEquipmentId) {
-		this.acquisitionEquipmentId = acquisitionEquipmentId;
+    public void setAcquisitionEquipmentId(final Long acquisitionEquipmentId) {
+        this.acquisitionEquipmentId = acquisitionEquipmentId;
 
-	}
+    }
 
-	public Long getStudyCardId() {
-		return studyCardId;
-	}
+    public Long getStudyCardId() {
+        return studyCardId;
+    }
 
-	public void setStudyCardId(Long studyCardId) {
-		this.studyCardId = studyCardId;
-	}
+    public void setStudyCardId(Long studyCardId) {
+        this.studyCardId = studyCardId;
+    }
 
-	public Long getConverterId() {
-		return converterId;
-	}
+    public Long getConverterId() {
+        return converterId;
+    }
 
-	public void setConverterId(Long converterId) {
-		this.converterId = converterId;
-	}
+    public void setConverterId(Long converterId) {
+        this.converterId = converterId;
+    }
 
     public String getAnonymisationProfileToUse() {
-		return anonymisationProfileToUse;
-	}
+        return anonymisationProfileToUse;
+    }
 
-	public void setAnonymisationProfileToUse(String anonymisationProfileToUse) {
-		this.anonymisationProfileToUse = anonymisationProfileToUse;
-	}
+    public void setAnonymisationProfileToUse(String anonymisationProfileToUse) {
+        this.anonymisationProfileToUse = anonymisationProfileToUse;
+    }
 
-	public String getSubjectName() {
-		return subjectName;
-	}
+    public String getSubjectName() {
+        return subjectName;
+    }
 
-	public void setSubjectName(String subjectName) {
-		this.subjectName = subjectName;
-	}
+    public void setSubjectName(String subjectName) {
+        this.subjectName = subjectName;
+    }
 
-	public String getStudyName() {
-		return studyName;
-	}
+    public String getStudyName() {
+        return studyName;
+    }
 
-	public void setStudyName(String studyName) {
-		this.studyName = studyName;
-	}
+    public void setStudyName(String studyName) {
+        this.studyName = studyName;
+    }
 
-	public ShanoirEvent getShanoirEvent() {
-		return shanoirEvent;
-	}
+    public ShanoirEvent getShanoirEvent() {
+        return shanoirEvent;
+    }
 
-	public void setShanoirEvent(ShanoirEvent shanoirEvent) {
-		this.shanoirEvent = shanoirEvent;
-	}
+    public void setShanoirEvent(ShanoirEvent shanoirEvent) {
+        this.shanoirEvent = shanoirEvent;
+    }
 
-	public Long getUserId() {
-		return userId;
-	}
+    public Long getUserId() {
+        return userId;
+    }
 
-	public void setUserId(Long userId) {
-		this.userId = userId;
-	}
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
-	public Long getCenterId() {
-		return centerId;
-	}
+    public Long getCenterId() {
+        return centerId;
+    }
 
-	public void setCenterId(Long centerId) {
-		this.centerId = centerId;
-	}
-	
+    public void setCenterId(Long centerId) {
+        this.centerId = centerId;
+    }
+    
 }
 

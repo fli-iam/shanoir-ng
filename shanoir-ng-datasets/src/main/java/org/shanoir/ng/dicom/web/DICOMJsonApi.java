@@ -43,16 +43,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/dicomjson")
 public interface DICOMJsonApi {
 
-	@Operation(summary = "", description = "Returns all studies")
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "found studies"),
-			@ApiResponse(responseCode = "204", description = "no examination found"),
-			@ApiResponse(responseCode = "401", description = "unauthorized"),
-			@ApiResponse(responseCode = "403", description = "forbidden"),
-			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@GetMapping(value = "/studies", produces = { "application/dicom+json" })
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationDTOPage(returnObject.getBody(), 'CAN_SEE_ALL')")
-	ResponseEntity<StudiesDTO> findStudies();
+    @Operation(summary = "", description = "Returns all studies")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "found studies"),
+            @ApiResponse(responseCode = "204", description = "no examination found"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @GetMapping(value = "/studies", produces = { "application/dicom+json" })
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationDTOPage(returnObject.getBody(), 'CAN_SEE_ALL')")
+    ResponseEntity<StudiesDTO> findStudies();
 
 }

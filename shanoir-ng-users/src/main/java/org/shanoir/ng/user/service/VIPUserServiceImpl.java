@@ -32,7 +32,7 @@ import org.springframework.web.client.RestTemplate;
 public class VIPUserServiceImpl implements VIPUserService{
     private static final String INRIA_ADMIN_GENERATED = "inria_admin_generated";
 
-	/**
+    /**
      * Logger
      */
     private static final Logger LOG = LoggerFactory.getLogger(VIPUserServiceImpl.class);
@@ -77,13 +77,13 @@ public class VIPUserServiceImpl implements VIPUserService{
         try {
             ResponseEntity<Void> response = restTemplate.exchange(this.vip_uri, HttpMethod.POST, entity, Void.class);
             if (response.getStatusCode() != HttpStatus.OK) {
-            	LOG.error("Could not communicate with VIP instance to create user. Http response: ", response.getStatusCode());
+                LOG.error("Could not communicate with VIP instance to create user. Http response: ", response.getStatusCode());
             }
             return user;
         } catch (Exception e) {
             // Do not fail when an error occures
-        	LOG.error("Could not communicate with VIP instance to create user", e);
-        	return user;
+            LOG.error("Could not communicate with VIP instance to create user", e);
+            return user;
         }
     }
 }

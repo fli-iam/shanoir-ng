@@ -21,13 +21,13 @@ import org.shanoir.ng.studycenter.StudyCenterDTO;
 
 public class CenterDTO extends IdName {
 
-	private List<StudyCenterDTO> studyCenterList;
+    private List<StudyCenterDTO> studyCenterList;
 
-	public List<StudyCenterDTO> getStudyCenterList() {
-		return studyCenterList;
-	}
+    public List<StudyCenterDTO> getStudyCenterList() {
+        return studyCenterList;
+    }
 
-	public void setStudyCenterList(List<StudyCenterDTO> studyCenterList) {
-		this.studyCenterList = studyCenterList;
-	}
+    public void setStudyCenterList(List<StudyCenterDTO> studyCenterList) {
+        this.studyCenterList = studyCenterList;
+    }
 }

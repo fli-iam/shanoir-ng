@@ -56,87 +56,87 @@ import com.google.gson.GsonBuilder;
 @AutoConfigureMockMvc(addFilters = false)
 public class TherapyApiControllerTest {
 
-	private static final String REQUEST_PATH = "/therapy";
-	private static final String REQUEST_PATH_ALL = REQUEST_PATH ;
-	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
-	private static final String REQUEST_PATH_TYPE = REQUEST_PATH + "/type/Drug";
+    private static final String REQUEST_PATH = "/therapy";
+    private static final String REQUEST_PATH_ALL = REQUEST_PATH ;
+    private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+    private static final String REQUEST_PATH_TYPE = REQUEST_PATH + "/type/Drug";
 
-	private Gson gson;
+    private Gson gson;
 
-	@Autowired
-	private MockMvc mvc;
+    @Autowired
+    private MockMvc mvc;
 
-	@MockBean
-	private TherapyService therapyServiceMock;
+    @MockBean
+    private TherapyService therapyServiceMock;
 
-	@MockBean
-	private RefsService refsServiceMock;
+    @MockBean
+    private RefsService refsServiceMock;
 
-	@MockBean
-	private ShanoirEventService eventService;
-	
-	@MockBean
-	private TherapyUniqueValidator uniqueValidator;
-	
-	@MockBean
-	private TherapyEditableByManager editableOnlyValidator;
+    @MockBean
+    private ShanoirEventService eventService;
+    
+    @MockBean
+    private TherapyUniqueValidator uniqueValidator;
+    
+    @MockBean
+    private TherapyEditableByManager editableOnlyValidator;
 
-	
+    
 
-	@BeforeEach
-	public void setup() throws ShanoirException {
-		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
+    @BeforeEach
+    public void setup() throws ShanoirException {
+        gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
-		doNothing().when(therapyServiceMock).deleteById(1L);
-		given(therapyServiceMock.findAll()).willReturn(Arrays.asList(new Therapy()));
-		given(therapyServiceMock.findById(1L)).willReturn(new Therapy());
-		given(therapyServiceMock.findByTherapyType(TherapyType.DRUG)).willReturn(Arrays.asList(new Therapy()));
-		Therapy therapy = new Therapy();
-		therapy.setId(Long.valueOf(123));
-		given(therapyServiceMock.save(Mockito.any(Therapy.class))).willReturn(therapy );
-		given(uniqueValidator.validate(Mockito.any(Therapy.class))).willReturn(new FieldErrorMap());
-		given(editableOnlyValidator.validate(Mockito.any(Therapy.class))).willReturn(new FieldErrorMap());
-	}
+        doNothing().when(therapyServiceMock).deleteById(1L);
+        given(therapyServiceMock.findAll()).willReturn(Arrays.asList(new Therapy()));
+        given(therapyServiceMock.findById(1L)).willReturn(new Therapy());
+        given(therapyServiceMock.findByTherapyType(TherapyType.DRUG)).willReturn(Arrays.asList(new Therapy()));
+        Therapy therapy = new Therapy();
+        therapy.setId(Long.valueOf(123));
+        given(therapyServiceMock.save(Mockito.any(Therapy.class))).willReturn(therapy );
+        given(uniqueValidator.validate(Mockito.any(Therapy.class))).willReturn(new FieldErrorMap());
+        given(editableOnlyValidator.validate(Mockito.any(Therapy.class))).willReturn(new FieldErrorMap());
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void deleteTherapyTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void deleteTherapyTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	public void findTherapyByIdTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    public void findTherapyByIdTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	public void findTherapiesTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_ALL).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    public void findTherapiesTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_ALL).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	public void findTherapiesByTypeTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_TYPE).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    public void findTherapiesByTypeTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_TYPE).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void saveNewTherapyTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(TherapyModelUtil.createTherapyBrain())))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void saveNewTherapyTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(gson.toJson(TherapyModelUtil.createTherapyBrain())))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void updateTherapyTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(TherapyModelUtil.createTherapyBrain())))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void updateTherapyTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(gson.toJson(TherapyModelUtil.createTherapyBrain())))
+                .andExpect(status().isOk());
+    }
 
 }

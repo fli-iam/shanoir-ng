@@ -57,44 +57,44 @@ import org.springframework.web.client.RestTemplate;
 @ActiveProfiles("test")
 public class BrukerApiControllerTest {
 
-	private static final String REQUEST_PATH = "/bruker";
-	private static final String REQUEST_PATH_UPLOAD_BRUKER = REQUEST_PATH + "/upload";
+    private static final String REQUEST_PATH = "/bruker";
+    private static final String REQUEST_PATH_UPLOAD_BRUKER = REQUEST_PATH + "/upload";
 
-	@Autowired
-	private MockMvc mvc;
+    @Autowired
+    private MockMvc mvc;
 
-	@MockBean
-	RabbitTemplate rabbitTemplate;
+    @MockBean
+    RabbitTemplate rabbitTemplate;
 
-	@TempDir
-	public File tempFolder;
-	
-	public static String tempFolderPath;
-	
-	@BeforeEach
-	public void beforeClass() {
-		tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
-	    System.setProperty("preclinical.uploadBrukerFolder", tempFolderPath);
-	}
+    @TempDir
+    public File tempFolder;
+    
+    public static String tempFolderPath;
+    
+    @BeforeEach
+    public void beforeClass() {
+        tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
+        System.setProperty("preclinical.uploadBrukerFolder", tempFolderPath);
+    }
 
-	@Test
-	@WithMockUser
-	public void uploadBrukerFileTest() throws Exception {
-		String r = "test";
-		given(rabbitTemplate.convertSendAndReceive(Mockito.eq(RabbitMQConfiguration.BRUKER_CONVERSION_QUEUE), Mockito.anyString())).willReturn(true);
+    @Test
+    @WithMockUser
+    public void uploadBrukerFileTest() throws Exception {
+        String r = "test";
+        given(rabbitTemplate.convertSendAndReceive(Mockito.eq(RabbitMQConfiguration.BRUKER_CONVERSION_QUEUE), Mockito.anyString())).willReturn(true);
 
-		MockMultipartFile firstFile = new MockMultipartFile("files", "2dseq", "text/plain", "some xml".getBytes());
-		mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH_UPLOAD_BRUKER).file(firstFile))
-				.andExpect(status().isOk());
-	}
+        MockMultipartFile firstFile = new MockMultipartFile("files", "2dseq", "text/plain", "some xml".getBytes());
+        mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH_UPLOAD_BRUKER).file(firstFile))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser
-	public void uploadBrukerFileNotValidTest() throws Exception {
-		MockMultipartFile firstFile = new MockMultipartFile("files", "filename.txt", "text/plain",
-				"some xml".getBytes());
-		mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH_UPLOAD_BRUKER).file(firstFile))
-				.andExpect(status().isNotAcceptable());
-	}
+    @Test
+    @WithMockUser
+    public void uploadBrukerFileNotValidTest() throws Exception {
+        MockMultipartFile firstFile = new MockMultipartFile("files", "filename.txt", "text/plain",
+                "some xml".getBytes());
+        mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH_UPLOAD_BRUKER).file(firstFile))
+                .andExpect(status().isNotAcceptable());
+    }
 
 }

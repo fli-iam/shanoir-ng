@@ -16,25 +16,25 @@ import javax.swing.JFormattedTextField.AbstractFormatter;
 
 public class DateLabelFormatter extends AbstractFormatter {
 
-	private String datePattern = "dd/MM/yyyy";
+    private String datePattern = "dd/MM/yyyy";
 
-	private SimpleDateFormat dateFormatter = new SimpleDateFormat(datePattern);
+    private SimpleDateFormat dateFormatter = new SimpleDateFormat(datePattern);
 
-	public Object stringToValue(String text) throws ParseException {
-		return dateFormatter.parseObject(text);
-	}
+    public Object stringToValue(String text) throws ParseException {
+        return dateFormatter.parseObject(text);
+    }
 
-	public String valueToString(Object value) throws ParseException {
-		if (value != null) {
-			if (value instanceof Calendar) {
-				Calendar cal = (Calendar) value;
-				return dateFormatter.format(cal.getTime());
-			}
-			if (value instanceof Date) {
-				return dateFormatter.format(value);
-			}
-		}
-		return "";
-	}
+    public String valueToString(Object value) throws ParseException {
+        if (value != null) {
+            if (value instanceof Calendar) {
+                Calendar cal = (Calendar) value;
+                return dateFormatter.format(cal.getTime());
+            }
+            if (value instanceof Date) {
+                return dateFormatter.format(value);
+            }
+        }
+        return "";
+    }
 
 }

@@ -36,54 +36,54 @@ import org.springframework.data.domain.Page;
  */
 public abstract class DatasetAcquisitionDecorator implements DatasetAcquisitionMapper {
 
-	@Autowired
-	private DatasetAcquisitionMapper delegate;
+    @Autowired
+    private DatasetAcquisitionMapper delegate;
 
-	
-	@Override
-	public List<DatasetAcquisitionDTO> datasetAcquisitionsToDatasetAcquisitionDTOs(
-			final List<DatasetAcquisition> datasetAcquisitions) {
-		if (datasetAcquisitions == null) {
-			return null;
-		}
-		final List<DatasetAcquisitionDTO> datasetAcquisitionDTOs = new ArrayList<>();
-		for (DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
-			datasetAcquisitionDTOs.add(datasetAcquisitionToDatasetAcquisitionDTO(datasetAcquisition));
-		}
-		return datasetAcquisitionDTOs;
-	}
-	
-	@Override
-	public PageImpl<DatasetAcquisitionDTO> datasetAcquisitionsToDatasetAcquisitionDTOs(Page<DatasetAcquisition> page) {
-		Page<DatasetAcquisitionDTO> mappedPage = page.map(new Function<DatasetAcquisition, DatasetAcquisitionDTO>() {
-			public DatasetAcquisitionDTO apply(DatasetAcquisition entity) {
-				return datasetAcquisitionToDatasetAcquisitionDTO(entity);
-			}
-		});
-		return new PageImpl<>(mappedPage);
-	}
-
-	@Override
-	public DatasetAcquisitionDTO datasetAcquisitionToDatasetAcquisitionDTO(
-			final DatasetAcquisition datasetAcquisition) {
-		if (datasetAcquisition == null) {
-			return null;
-		}
-		final DatasetAcquisitionDTO datasetAcquisitionDTO = delegate
-				.datasetAcquisitionToDatasetAcquisitionDTO(datasetAcquisition);
-        setType(datasetAcquisitionDTO, datasetAcquisition);
-		return datasetAcquisitionDTO;
-	}
-	
-	private void setType(DatasetAcquisitionDTO datasetAcquisitionDTO, DatasetAcquisition datasetAcquisition) {
-		if (datasetAcquisition.getType().equals("Mr")) {
-        	datasetAcquisitionDTO.setProtocol(((MrDatasetAcquisition)datasetAcquisition).getMrProtocol());
-        } else if (datasetAcquisition.getType().equals("Pet")) {
-        	datasetAcquisitionDTO.setProtocol(((PetDatasetAcquisition)datasetAcquisition).getPetProtocol());
-        } else if (datasetAcquisition.getType().equals("Ct")) {
-        	datasetAcquisitionDTO.setProtocol(((CtDatasetAcquisition)datasetAcquisition).getCtProtocol());
-        } else if (datasetAcquisition.getType().equals("Xa")) {
-        	datasetAcquisitionDTO.setProtocol(((XaDatasetAcquisition)datasetAcquisition).getXaProtocol());
+    
+    @Override
+    public List<DatasetAcquisitionDTO> datasetAcquisitionsToDatasetAcquisitionDTOs(
+            final List<DatasetAcquisition> datasetAcquisitions) {
+        if (datasetAcquisitions == null) {
+            return null;
         }
-	}
+        final List<DatasetAcquisitionDTO> datasetAcquisitionDTOs = new ArrayList<>();
+        for (DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
+            datasetAcquisitionDTOs.add(datasetAcquisitionToDatasetAcquisitionDTO(datasetAcquisition));
+        }
+        return datasetAcquisitionDTOs;
+    }
+    
+    @Override
+    public PageImpl<DatasetAcquisitionDTO> datasetAcquisitionsToDatasetAcquisitionDTOs(Page<DatasetAcquisition> page) {
+        Page<DatasetAcquisitionDTO> mappedPage = page.map(new Function<DatasetAcquisition, DatasetAcquisitionDTO>() {
+            public DatasetAcquisitionDTO apply(DatasetAcquisition entity) {
+                return datasetAcquisitionToDatasetAcquisitionDTO(entity);
+            }
+        });
+        return new PageImpl<>(mappedPage);
+    }
+
+    @Override
+    public DatasetAcquisitionDTO datasetAcquisitionToDatasetAcquisitionDTO(
+            final DatasetAcquisition datasetAcquisition) {
+        if (datasetAcquisition == null) {
+            return null;
+        }
+        final DatasetAcquisitionDTO datasetAcquisitionDTO = delegate
+                .datasetAcquisitionToDatasetAcquisitionDTO(datasetAcquisition);
+        setType(datasetAcquisitionDTO, datasetAcquisition);
+        return datasetAcquisitionDTO;
+    }
+    
+    private void setType(DatasetAcquisitionDTO datasetAcquisitionDTO, DatasetAcquisition datasetAcquisition) {
+        if (datasetAcquisition.getType().equals("Mr")) {
+            datasetAcquisitionDTO.setProtocol(((MrDatasetAcquisition)datasetAcquisition).getMrProtocol());
+        } else if (datasetAcquisition.getType().equals("Pet")) {
+            datasetAcquisitionDTO.setProtocol(((PetDatasetAcquisition)datasetAcquisition).getPetProtocol());
+        } else if (datasetAcquisition.getType().equals("Ct")) {
+            datasetAcquisitionDTO.setProtocol(((CtDatasetAcquisition)datasetAcquisition).getCtProtocol());
+        } else if (datasetAcquisition.getType().equals("Xa")) {
+            datasetAcquisitionDTO.setProtocol(((XaDatasetAcquisition)datasetAcquisition).getXaProtocol());
+        }
+    }
 }

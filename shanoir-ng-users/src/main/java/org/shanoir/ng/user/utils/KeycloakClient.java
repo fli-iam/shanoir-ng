@@ -48,182 +48,182 @@ import org.springframework.stereotype.Component;
 @Component
 public class KeycloakClient {
 
-	/**
-	 * Logger
-	 */
-	private static final Logger LOG = LoggerFactory.getLogger(KeycloakClient.class);
+    /**
+     * Logger
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(KeycloakClient.class);
 
-	@Value("${kc.admin.client.server.url}")
-	private String kcAdminClientServerUrl;
+    @Value("${kc.admin.client.server.url}")
+    private String kcAdminClientServerUrl;
 
-	@Value("${kc.admin.client.realm}")
-	private String kcAdminClientRealm;
+    @Value("${kc.admin.client.realm}")
+    private String kcAdminClientRealm;
 
-	@Value("${kc.admin.client.client.id}")
-	private String kcAdminClientClientId;
+    @Value("${kc.admin.client.client.id}")
+    private String kcAdminClientClientId;
 
-	@Value("${SHANOIR_KEYCLOAK_USER}")
-	private String kcAdminClientUsername;
+    @Value("${SHANOIR_KEYCLOAK_USER}")
+    private String kcAdminClientUsername;
 
-	@Value("${SHANOIR_KEYCLOAK_PASSWORD}")
-	private String kcAdminClientPassword;
-	
-	@Value("${kc.admin.client.realm.users}")
-	private String keycloakRealm;
+    @Value("${SHANOIR_KEYCLOAK_PASSWORD}")
+    private String kcAdminClientPassword;
+    
+    @Value("${kc.admin.client.realm.users}")
+    private String keycloakRealm;
 
-	private Keycloak keycloak;
+    private Keycloak keycloak;
 
-	@Autowired
-	private RoleRepository roleRepository;
+    @Autowired
+    private RoleRepository roleRepository;
 
-	protected Keycloak getKeycloak() {
-		if (keycloak == null) {
-			keycloak = Keycloak.getInstance(kcAdminClientServerUrl, kcAdminClientRealm,
-					kcAdminClientUsername, kcAdminClientPassword, kcAdminClientClientId);
-		}
-		return keycloak;
-	}
+    protected Keycloak getKeycloak() {
+        if (keycloak == null) {
+            keycloak = Keycloak.getInstance(kcAdminClientServerUrl, kcAdminClientRealm,
+                    kcAdminClientUsername, kcAdminClientPassword, kcAdminClientClientId);
+        }
+        return keycloak;
+    }
 
-	/**
-	 * Create a user with a password.
-	 *
-	 * @param user
-	 *            user to create.
-	 * @param password
-	 *            user password.
-	 * @return keycloak user id.
-	 * @throws SecurityException
-	 */
-	public String createUserWithPassword(final User user, final String password) throws SecurityException {
-		try {
-			final String keycloakId = KeycloakShanoirUtil
-					.getCreatedUserId(getKeycloak().realm(keycloakRealm).users().create(getUserRepresentation(user)));
+    /**
+     * Create a user with a password.
+     *
+     * @param user
+     *            user to create.
+     * @param password
+     *            user password.
+     * @return keycloak user id.
+     * @throws SecurityException
+     */
+    public String createUserWithPassword(final User user, final String password) throws SecurityException {
+        try {
+            final String keycloakId = KeycloakShanoirUtil
+                    .getCreatedUserId(getKeycloak().realm(keycloakRealm).users().create(getUserRepresentation(user)));
 
-			final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(keycloakId);
-			// Reset user password
-			final CredentialRepresentation credential = new CredentialRepresentation();
-			credential.setType(CredentialRepresentation.PASSWORD);
-			credential.setValue(password);
-			credential.setTemporary(Boolean.TRUE);
-			userResource.resetPassword(credential);
+            final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(keycloakId);
+            // Reset user password
+            final CredentialRepresentation credential = new CredentialRepresentation();
+            credential.setType(CredentialRepresentation.PASSWORD);
+            credential.setValue(password);
+            credential.setTemporary(Boolean.TRUE);
+            userResource.resetPassword(credential);
 
-			// Get user role
-			Optional<Role> roleOpt = roleRepository.findById(user.getRole().getId());
-			if (roleOpt.isPresent()) {
-				final String userRoleName = roleOpt.get().getName();
-				// Add realm role
-				userResource.roles().realmLevel().add(Arrays
-						.asList(getKeycloak().realm(keycloakRealm).roles().get(userRoleName).toRepresentation()));
-				return keycloakId;
-			} else {
-				throw new NoSuchElementException("Role not found in roleRepository.");
-			}
-		} catch (Exception e) {
-			throw new SecurityException("Could not register the new user into Keycloak.", e);
-		}
-	}
+            // Get user role
+            Optional<Role> roleOpt = roleRepository.findById(user.getRole().getId());
+            if (roleOpt.isPresent()) {
+                final String userRoleName = roleOpt.get().getName();
+                // Add realm role
+                userResource.roles().realmLevel().add(Arrays
+                        .asList(getKeycloak().realm(keycloakRealm).roles().get(userRoleName).toRepresentation()));
+                return keycloakId;
+            } else {
+                throw new NoSuchElementException("Role not found in roleRepository.");
+            }
+        } catch (Exception e) {
+            throw new SecurityException("Could not register the new user into Keycloak.", e);
+        }
+    }
 
-	/**
-	 * This methods resets the password of th given user and sets a temporary password.
-	 * @param keycloakId the keycloak ID of the user to update.
-	 * @return the password newly created
-	 */
-	public String resetPassword(String keycloakId) {
-		// Create new temporary password
-		String newPassword = PasswordUtils.generatePassword();
+    /**
+     * This methods resets the password of th given user and sets a temporary password.
+     * @param keycloakId the keycloak ID of the user to update.
+     * @return the password newly created
+     */
+    public String resetPassword(String keycloakId) {
+        // Create new temporary password
+        String newPassword = PasswordUtils.generatePassword();
 
-		final CredentialRepresentation credential = new CredentialRepresentation();
-		credential.setType(CredentialRepresentation.PASSWORD);
-		credential.setTemporary(Boolean.TRUE);
-		credential.setValue(newPassword);
+        final CredentialRepresentation credential = new CredentialRepresentation();
+        credential.setType(CredentialRepresentation.PASSWORD);
+        credential.setTemporary(Boolean.TRUE);
+        credential.setValue(newPassword);
 
-		final UserResource userResource = keycloak.realm(keycloakRealm).users().get(keycloakId);
-		userResource.resetPassword(credential);
-		
-		return newPassword;
-	}
-	
-	/**
-	 * Create a user with a password.
-	 *
-	 * @param user
-	 *            user to create.
-	 * @return keycloak user id.
-	 * @throws SecurityException
-	 */
-	public String createUserWithPassword(final User user) throws SecurityException {
-		return createUserWithPassword(user, user.getPassword());
-	}
-	
+        final UserResource userResource = keycloak.realm(keycloakRealm).users().get(keycloakId);
+        userResource.resetPassword(credential);
+        
+        return newPassword;
+    }
+    
+    /**
+     * Create a user with a password.
+     *
+     * @param user
+     *            user to create.
+     * @return keycloak user id.
+     * @throws SecurityException
+     */
+    public String createUserWithPassword(final User user) throws SecurityException {
+        return createUserWithPassword(user, user.getPassword());
+    }
+    
 
-	/**
-	 * Delete a user.
-	 *
-	 * @param username
-	 *            user name.
-	 */
-	public void deleteUser(final String keycloakId) {
-		try {
-			getKeycloak().realm(keycloakRealm).users().delete(keycloakId);
-		} catch (Exception e) {
-			LOG.error("Error while deleting user with keycloak id " + keycloakId + " on Keycloak server", e);
-		}
-	}
+    /**
+     * Delete a user.
+     *
+     * @param username
+     *            user name.
+     */
+    public void deleteUser(final String keycloakId) {
+        try {
+            getKeycloak().realm(keycloakRealm).users().delete(keycloakId);
+        } catch (Exception e) {
+            LOG.error("Error while deleting user with keycloak id " + keycloakId + " on Keycloak server", e);
+        }
+    }
 
-	/**
-	 * Update a user.
-	 *
-	 * @param user
-	 *            user to update.
-	 */
-	public void updateUser(final User user) {
-		try {
-			final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(user.getKeycloakId());
-			userResource.update(getUserRepresentation(user));
+    /**
+     * Update a user.
+     *
+     * @param user
+     *            user to update.
+     */
+    public void updateUser(final User user) {
+        try {
+            final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(user.getKeycloakId());
+            userResource.update(getUserRepresentation(user));
 
-			// Remove old realm role
-			final List<String> roleNames = roleRepository.getAllNames();
-			final List<RoleRepresentation> roleRepresentations = new ArrayList<>(
-					userResource.roles().realmLevel().listAll());
-			for (RoleRepresentation roleRepresentation : roleRepresentations) {
-				if (roleNames.contains(roleRepresentation.getName())) {
-					userResource.roles().realmLevel().remove(Arrays.asList(roleRepresentation));
-				}
-			}
-			// Get user role
-			final String userRoleName = roleRepository.findById(user.getRole().getId()).orElse(null).getName();
-			// Add realm role
-			userResource.roles().realmLevel().add(Arrays
-					.asList(getKeycloak().realm(keycloakRealm).roles().get(userRoleName).toRepresentation()));
-		} catch (Exception e) {
-			LOG.error("Error while updating user with keycloak id " + user.getKeycloakId() + " on Keycloak server", e);
-		}
-	}
+            // Remove old realm role
+            final List<String> roleNames = roleRepository.getAllNames();
+            final List<RoleRepresentation> roleRepresentations = new ArrayList<>(
+                    userResource.roles().realmLevel().listAll());
+            for (RoleRepresentation roleRepresentation : roleRepresentations) {
+                if (roleNames.contains(roleRepresentation.getName())) {
+                    userResource.roles().realmLevel().remove(Arrays.asList(roleRepresentation));
+                }
+            }
+            // Get user role
+            final String userRoleName = roleRepository.findById(user.getRole().getId()).orElse(null).getName();
+            // Add realm role
+            userResource.roles().realmLevel().add(Arrays
+                    .asList(getKeycloak().realm(keycloakRealm).roles().get(userRoleName).toRepresentation()));
+        } catch (Exception e) {
+            LOG.error("Error while updating user with keycloak id " + user.getKeycloakId() + " on Keycloak server", e);
+        }
+    }
 
-	/*
-	 * Parse user to keycloak user representation.
-	 *
-	 * @param user user.
-	 *
-	 * @return keycloak user representation.
-	 */
-	private UserRepresentation getUserRepresentation(final User user) {
-		final Map<String, List<String>> attributes = new HashMap<>();
-		attributes.put("userId", Arrays.asList(user.getId().toString()));
-		attributes.put("canImportFromPACS", Arrays.asList("" + user.isCanAccessToDicomAssociation()));
-		if (user.getExpirationDate() != null) {
-			attributes.put("expirationDate", Arrays.asList("" + user.getExpirationDate()));
-		}
+    /*
+     * Parse user to keycloak user representation.
+     *
+     * @param user user.
+     *
+     * @return keycloak user representation.
+     */
+    private UserRepresentation getUserRepresentation(final User user) {
+        final Map<String, List<String>> attributes = new HashMap<>();
+        attributes.put("userId", Arrays.asList(user.getId().toString()));
+        attributes.put("canImportFromPACS", Arrays.asList("" + user.isCanAccessToDicomAssociation()));
+        if (user.getExpirationDate() != null) {
+            attributes.put("expirationDate", Arrays.asList("" + user.getExpirationDate()));
+        }
 
-		final UserRepresentation userRepresentation = new UserRepresentation();
-		userRepresentation.setAttributes(attributes);
-		userRepresentation.setEmail(user.getEmail());
-		userRepresentation.setEnabled(user.isEnabled() && (user.isAccountRequestDemand() == null || !user.isAccountRequestDemand()));
-		userRepresentation.setFirstName(user.getFirstName());
-		userRepresentation.setLastName(user.getLastName());
-		userRepresentation.setUsername(user.getUsername());
+        final UserRepresentation userRepresentation = new UserRepresentation();
+        userRepresentation.setAttributes(attributes);
+        userRepresentation.setEmail(user.getEmail());
+        userRepresentation.setEnabled(user.isEnabled() && (user.isAccountRequestDemand() == null || !user.isAccountRequestDemand()));
+        userRepresentation.setFirstName(user.getFirstName());
+        userRepresentation.setLastName(user.getLastName());
+        userRepresentation.setUsername(user.getUsername());
 
-		return userRepresentation;
-	}
+        return userRepresentation;
+    }
 
 }

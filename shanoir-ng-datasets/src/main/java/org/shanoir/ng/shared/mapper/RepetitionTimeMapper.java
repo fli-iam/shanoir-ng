@@ -31,13 +31,13 @@ import org.shanoir.ng.shared.model.RepetitionTime;
 @Mapper(componentModel = "spring",unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface RepetitionTimeMapper {
 
-	
-	List<RepetitionTime> RepetitionTimeDTOListToRepetitionTimeList(
-			List<Double> repetitionTimeDTOList);
+    
+    List<RepetitionTime> RepetitionTimeDTOListToRepetitionTimeList(
+            List<Double> repetitionTimeDTOList);
 
 
-	@Mapping(target = "repetitionTimeValue", source = "repetitionTime")
-	RepetitionTime RepetitionTimeDTOToRepetitionTime(
-			Double repetitionTime);
+    @Mapping(target = "repetitionTimeValue", source = "repetitionTime")
+    RepetitionTime RepetitionTimeDTOToRepetitionTime(
+            Double repetitionTime);
 
 }

@@ -31,37 +31,37 @@ import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
  *
  */
 public class DatasetsModalityTypeCheckValidator
-		implements ConstraintValidator<DatasetsModalityTypeCheck, DatasetAcquisition> {
+        implements ConstraintValidator<DatasetsModalityTypeCheck, DatasetAcquisition> {
 
-	@Override
-	public void initialize(final DatasetsModalityTypeCheck constraintAnnotation) {
-		// This default initializer is empty
-	}
+    @Override
+    public void initialize(final DatasetsModalityTypeCheck constraintAnnotation) {
+        // This default initializer is empty
+    }
 
-	@Override
-	public boolean isValid(final DatasetAcquisition datasetAcquisition, final ConstraintValidatorContext context) {
-		if (datasetAcquisition.getDatasets() != null && !datasetAcquisition.getDatasets().isEmpty()) {
-			if (datasetAcquisition instanceof MrDatasetAcquisition) {
-				for (Dataset dataset : datasetAcquisition.getDatasets()) {
-					if (!(dataset.getType().equals(DatasetType.Mr))) {
-						return false;
-					}
-				}
-			} else if (datasetAcquisition instanceof PetDatasetAcquisition) {
-				for (Dataset dataset : datasetAcquisition.getDatasets()) {
-					if (!(dataset.getType().equals(DatasetType.Pet))) {
-						return false;
-					}
-				}
-			} else if (datasetAcquisition instanceof CtDatasetAcquisition) {
-				for (Dataset dataset : datasetAcquisition.getDatasets()) {
-					if (!(dataset.getType().equals(DatasetType.Ct))) {
-						return false;
-					}
-				}
-			}
-		}
-		return true;
-	}
+    @Override
+    public boolean isValid(final DatasetAcquisition datasetAcquisition, final ConstraintValidatorContext context) {
+        if (datasetAcquisition.getDatasets() != null && !datasetAcquisition.getDatasets().isEmpty()) {
+            if (datasetAcquisition instanceof MrDatasetAcquisition) {
+                for (Dataset dataset : datasetAcquisition.getDatasets()) {
+                    if (!(dataset.getType().equals(DatasetType.Mr))) {
+                        return false;
+                    }
+                }
+            } else if (datasetAcquisition instanceof PetDatasetAcquisition) {
+                for (Dataset dataset : datasetAcquisition.getDatasets()) {
+                    if (!(dataset.getType().equals(DatasetType.Pet))) {
+                        return false;
+                    }
+                }
+            } else if (datasetAcquisition instanceof CtDatasetAcquisition) {
+                for (Dataset dataset : datasetAcquisition.getDatasets()) {
+                    if (!(dataset.getType().equals(DatasetType.Ct))) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
 
 }

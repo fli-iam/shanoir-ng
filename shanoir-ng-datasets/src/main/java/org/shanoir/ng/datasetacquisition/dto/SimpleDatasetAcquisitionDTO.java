@@ -17,25 +17,25 @@ package org.shanoir.ng.datasetacquisition.dto;
 import java.util.List;
 
 public class SimpleDatasetAcquisitionDTO {
-	
-	private Long id;
+    
+    private Long id;
 
-	private List<Long> datasetIds;
+    private List<Long> datasetIds;
 
-	
-	public Long getId() {
-		return id;
-	}
+    
+    public Long getId() {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public List<Long> getDatasetIds() {
-		return datasetIds;
-	}
+    public List<Long> getDatasetIds() {
+        return datasetIds;
+    }
 
-	public void setDatasetIds(List<Long> datasetIds) {
-		this.datasetIds = datasetIds;
-	}
+    public void setDatasetIds(List<Long> datasetIds) {
+        this.datasetIds = datasetIds;
+    }
 }

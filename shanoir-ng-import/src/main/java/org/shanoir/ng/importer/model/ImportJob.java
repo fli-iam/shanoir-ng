@@ -47,74 +47,74 @@ import org.shanoir.ng.shared.quality.QualityTag;
  */
 public class ImportJob implements Serializable {
 
-	private static final long serialVersionUID = 8804929608059674037L;
-	
-	private long timestamp;
+    private static final long serialVersionUID = 8804929608059674037L;
+    
+    private long timestamp;
 
-	/* DicomQuery, that has been used to extract the DICOM study = ImportJob */
-	private DicomQuery dicomQuery;
+    /* DicomQuery, that has been used to extract the DICOM study = ImportJob */
+    private DicomQuery dicomQuery;
 
-	private boolean fromDicomZip;
+    private boolean fromDicomZip;
 
     private boolean fromShanoirUploader;
 
     private boolean fromPacs;
 
-	private String workFolder;
+    private String workFolder;
 
-	// @todo: remove this list here later
+    // @todo: remove this list here later
     private List<Patient> patients;
 
-	// DICOM patient for this import job
-	private Patient patient;
+    // DICOM patient for this import job
+    private Patient patient;
 
-	private PatientVerification patientVerification;
+    private PatientVerification patientVerification;
 
-	// DICOM study for this import job
-	private Study study;
+    // DICOM study for this import job
+    private Study study;
 
-	// series to import with this import job
-	private Set<Serie> selectedSeries;
+    // series to import with this import job
+    private Set<Serie> selectedSeries;
 
-	// Shanoir study
+    // Shanoir study
     private Long studyId;
 
-	private String studyName;
+    private String studyName;
 
     private Long studyCardId;
 
-	private String studyCardName;
-	
+    private String studyCardName;
+    
     private Long acquisitionEquipmentId;
-	
-	// subject: use already existing
-	private String subjectName;
+    
+    // subject: use already existing
+    private String subjectName;
 
-	// subject: create new subject in ms studies based on these values
-	private Subject subject;
+    // subject: create new subject in ms studies based on these values
+    private Subject subject;
 
-	// examination: use already existing
+    // examination: use already existing
     private Long examinationId;
 
-	private String examinationComment;
+    private String examinationComment;
 
-	private String anonymisationProfileToUse;
+    private String anonymisationProfileToUse;
 
     private String archive;
 
-	private ShanoirEvent shanoirEvent;
+    private ShanoirEvent shanoirEvent;
 
-	private Long userId;
+    private Long userId;
 
-	private String username;
+    private String username;
 
-	private Long centerId;
+    private Long centerId;
 
-	private String errorMessage;
+    private String errorMessage;
 
-	private QualityTag qualityTag;
+    private QualityTag qualityTag;
 
-	public long getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 
@@ -123,264 +123,264 @@ public class ImportJob implements Serializable {
     }
 
     public String getArchive() {
-		return archive;
-	}
+        return archive;
+    }
 
-	public void setArchive(final String archive) {
-		this.archive = archive;
-	}
+    public void setArchive(final String archive) {
+        this.archive = archive;
+    }
 
-	public boolean isFromDicomZip() {
-		return fromDicomZip;
-	}
+    public boolean isFromDicomZip() {
+        return fromDicomZip;
+    }
 
-	public void setFromDicomZip(final boolean fromDicomZip) {
-		this.fromDicomZip = fromDicomZip;
-	}
+    public void setFromDicomZip(final boolean fromDicomZip) {
+        this.fromDicomZip = fromDicomZip;
+    }
 
-	public boolean isFromShanoirUploader() {
-		return fromShanoirUploader;
-	}
+    public boolean isFromShanoirUploader() {
+        return fromShanoirUploader;
+    }
 
-	public void setFromShanoirUploader(final boolean fromShanoirUploader) {
-		this.fromShanoirUploader = fromShanoirUploader;
-	}
+    public void setFromShanoirUploader(final boolean fromShanoirUploader) {
+        this.fromShanoirUploader = fromShanoirUploader;
+    }
 
-	public boolean isFromPacs() {
-		return fromPacs;
-	}
+    public boolean isFromPacs() {
+        return fromPacs;
+    }
 
-	public void setFromPacs(final boolean fromPacs) {
-		this.fromPacs = fromPacs;
-	}
+    public void setFromPacs(final boolean fromPacs) {
+        this.fromPacs = fromPacs;
+    }
 
-	public List<Patient> getPatients() {
-		return patients;
-	}
+    public List<Patient> getPatients() {
+        return patients;
+    }
 
-	public void setPatients(final List<Patient> patients) {
-		this.patients = patients;
-	}
+    public void setPatients(final List<Patient> patients) {
+        this.patients = patients;
+    }
 
-	public Long getExaminationId() {
-		return examinationId;
-	}
+    public Long getExaminationId() {
+        return examinationId;
+    }
 
-	public void setExaminationId(final Long examinationId) {
-		this.examinationId = examinationId;
-	}
+    public void setExaminationId(final Long examinationId) {
+        this.examinationId = examinationId;
+    }
 
     public String getWorkFolder() {
-		return workFolder;
-	}
+        return workFolder;
+    }
 
-	public void setWorkFolder(String workFolder) {
-		this.workFolder = workFolder;
-	}
+    public void setWorkFolder(String workFolder) {
+        this.workFolder = workFolder;
+    }
 
-	public Long getStudyId() {
-		return studyId;
-	}
+    public Long getStudyId() {
+        return studyId;
+    }
 
-	public void setStudyId(final Long studyId) {
-		this.studyId = studyId;
-	}
+    public void setStudyId(final Long studyId) {
+        this.studyId = studyId;
+    }
 
-	public String getStudyCardName() {
-		return studyCardName;
-	}
+    public String getStudyCardName() {
+        return studyCardName;
+    }
 
-	public void setStudyCardName(String studyCardName) {
-		this.studyCardName = studyCardName;
-	}
+    public void setStudyCardName(String studyCardName) {
+        this.studyCardName = studyCardName;
+    }
 
-	public Long getAcquisitionEquipmentId() {
-		return acquisitionEquipmentId;
-	}
+    public Long getAcquisitionEquipmentId() {
+        return acquisitionEquipmentId;
+    }
 
-	public void setAcquisitionEquipmentId(final Long acquisitionEquipmentId) {
-		this.acquisitionEquipmentId = acquisitionEquipmentId;
-	}
+    public void setAcquisitionEquipmentId(final Long acquisitionEquipmentId) {
+        this.acquisitionEquipmentId = acquisitionEquipmentId;
+    }
 
-	public Long getStudyCardId() {
-		return studyCardId;
-	}
+    public Long getStudyCardId() {
+        return studyCardId;
+    }
 
-	public void setStudyCardId(Long studyCardId) {
-		this.studyCardId = studyCardId;
-	}
+    public void setStudyCardId(Long studyCardId) {
+        this.studyCardId = studyCardId;
+    }
 
     public String getAnonymisationProfileToUse() {
-		return anonymisationProfileToUse;
-	}
+        return anonymisationProfileToUse;
+    }
 
-	public void setAnonymisationProfileToUse(String anonymisationProfileToUse) {
-		this.anonymisationProfileToUse = anonymisationProfileToUse;
-	}
+    public void setAnonymisationProfileToUse(String anonymisationProfileToUse) {
+        this.anonymisationProfileToUse = anonymisationProfileToUse;
+    }
 
-	public String getSubjectName() {
-		return subjectName;
-	}
+    public String getSubjectName() {
+        return subjectName;
+    }
 
-	public void setSubjectName(String subjectName) {
-		this.subjectName = subjectName;
-	}
+    public void setSubjectName(String subjectName) {
+        this.subjectName = subjectName;
+    }
 
-	public String getStudyName() {
-		return studyName;
-	}
+    public String getStudyName() {
+        return studyName;
+    }
 
-	public void setStudyName(String studyName) {
-		this.studyName = studyName;
-	}
+    public void setStudyName(String studyName) {
+        this.studyName = studyName;
+    }
 
-	public ShanoirEvent getShanoirEvent() {
-		return shanoirEvent;
-	}
+    public ShanoirEvent getShanoirEvent() {
+        return shanoirEvent;
+    }
 
-	public void setShanoirEvent(ShanoirEvent shanoirEvent) {
-		this.shanoirEvent = shanoirEvent;
-	}
+    public void setShanoirEvent(ShanoirEvent shanoirEvent) {
+        this.shanoirEvent = shanoirEvent;
+    }
 
-	public Long getUserId() {
-		return userId;
-	}
+    public Long getUserId() {
+        return userId;
+    }
 
-	public void setUserId(Long userId) {
-		this.userId = userId;
-	}
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
-	public String getUsername() {
-		return username;
-	}
+    public String getUsername() {
+        return username;
+    }
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-	@Override
-	public String toString() {
-		String importType;
-		if (fromDicomZip) {
-			importType = "ZIP";
-		} else if (fromShanoirUploader) {
-			importType = "SHUP";
-		} else if (fromPacs) {
-			importType = "PACS";
-		} else {
-			importType = "UNSUPPORTED";
-		}
-		int numberOfSeries = 0;
-		StringBuffer seriesNames = new StringBuffer();
-		seriesNames.append("[");
-		String modality = "unknown";
-		boolean enhanced = false;
-		if (CollectionUtils.isNotEmpty(patients)) {
-			Patient patient = patients.get(0);
-			if (CollectionUtils.isNotEmpty(patient.getStudies())) {
-				Study study = patient.getStudies().get(0);
-				List<Serie> series = study.getSeries();
-				if (CollectionUtils.isNotEmpty(series)) {
-					numberOfSeries = series.size(); // only selected series remain at the stage of the logging call
-					Serie serie = study.getSeries().get(0);
-					modality = serie.getModality();
-					enhanced = serie.getIsEnhanced();
-					for (Iterator iterator = series.iterator(); iterator.hasNext();) {
-						serie = (Serie) iterator.next();
-						if (iterator.hasNext()) {
-							seriesNames.append(serie.getSequenceName() + ",");
-						} else {
-							seriesNames.append(serie.getSequenceName() + "]");
-						}
-					}
-				}
-			}
-		}
-		return 	"userId=" + userId + ",studyName=" + studyName + ",studyCardId=" + studyCardId + ",type=" + importType +
-				",workFolder=" + workFolder + ",pseudoProfile=" + anonymisationProfileToUse + ",modality=" + modality + ",enhanced=" + enhanced +
-				",subjectName=" + subjectName + ",examId=" + examinationId + ",numberOfSeries=" + numberOfSeries +
-				",seriesNames=" + seriesNames.toString();
-	}
+    @Override
+    public String toString() {
+        String importType;
+        if (fromDicomZip) {
+            importType = "ZIP";
+        } else if (fromShanoirUploader) {
+            importType = "SHUP";
+        } else if (fromPacs) {
+            importType = "PACS";
+        } else {
+            importType = "UNSUPPORTED";
+        }
+        int numberOfSeries = 0;
+        StringBuffer seriesNames = new StringBuffer();
+        seriesNames.append("[");
+        String modality = "unknown";
+        boolean enhanced = false;
+        if (CollectionUtils.isNotEmpty(patients)) {
+            Patient patient = patients.get(0);
+            if (CollectionUtils.isNotEmpty(patient.getStudies())) {
+                Study study = patient.getStudies().get(0);
+                List<Serie> series = study.getSeries();
+                if (CollectionUtils.isNotEmpty(series)) {
+                    numberOfSeries = series.size(); // only selected series remain at the stage of the logging call
+                    Serie serie = study.getSeries().get(0);
+                    modality = serie.getModality();
+                    enhanced = serie.getIsEnhanced();
+                    for (Iterator iterator = series.iterator(); iterator.hasNext();) {
+                        serie = (Serie) iterator.next();
+                        if (iterator.hasNext()) {
+                            seriesNames.append(serie.getSequenceName() + ",");
+                        } else {
+                            seriesNames.append(serie.getSequenceName() + "]");
+                        }
+                    }
+                }
+            }
+        }
+        return     "userId=" + userId + ",studyName=" + studyName + ",studyCardId=" + studyCardId + ",type=" + importType +
+                ",workFolder=" + workFolder + ",pseudoProfile=" + anonymisationProfileToUse + ",modality=" + modality + ",enhanced=" + enhanced +
+                ",subjectName=" + subjectName + ",examId=" + examinationId + ",numberOfSeries=" + numberOfSeries +
+                ",seriesNames=" + seriesNames.toString();
+    }
 
-	public Long getCenterId() {
-		return centerId;
-	}
+    public Long getCenterId() {
+        return centerId;
+    }
 
-	public void setCenterId(Long centerId) {
-		this.centerId = centerId;
-	}
+    public void setCenterId(Long centerId) {
+        this.centerId = centerId;
+    }
 
-	public Subject getSubject() {
-		return subject;
-	}
+    public Subject getSubject() {
+        return subject;
+    }
 
-	public void setSubject(Subject subject) {
-		this.subject = subject;
-	}
+    public void setSubject(Subject subject) {
+        this.subject = subject;
+    }
 
-	public Study getStudy() {
-		return study;
-	}
+    public Study getStudy() {
+        return study;
+    }
 
-	public void setStudy(Study study) {
-		this.study = study;
-	}
+    public void setStudy(Study study) {
+        this.study = study;
+    }
 
-	public Patient getPatient() {
-		return patient;
-	}
+    public Patient getPatient() {
+        return patient;
+    }
 
-	public void setPatient(Patient patient) {
-		this.patient = patient;
-	}
+    public void setPatient(Patient patient) {
+        this.patient = patient;
+    }
 
-	public Set<Serie> getSelectedSeries() {
-		return selectedSeries;
-	}
+    public Set<Serie> getSelectedSeries() {
+        return selectedSeries;
+    }
 
-	public void setSelectedSeries(Set<Serie> selectedSeries) {
-		this.selectedSeries = selectedSeries;
-	}
+    public void setSelectedSeries(Set<Serie> selectedSeries) {
+        this.selectedSeries = selectedSeries;
+    }
 
     public DicomQuery getDicomQuery() {
-		return dicomQuery;
-	}
+        return dicomQuery;
+    }
 
-	public void setDicomQuery(DicomQuery dicomQuery) {
-		this.dicomQuery = dicomQuery;
-	}
+    public void setDicomQuery(DicomQuery dicomQuery) {
+        this.dicomQuery = dicomQuery;
+    }
 
-	public String getErrorMessage() {
-		return errorMessage;
-	}
+    public String getErrorMessage() {
+        return errorMessage;
+    }
 
-	public void setErrorMessage(String errorMessage) {
-		this.errorMessage = errorMessage;
-	}
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
 
-	public String getExaminationComment() {
-		return examinationComment;
-	}
+    public String getExaminationComment() {
+        return examinationComment;
+    }
 
-	public void setExaminationComment(String examinationComment) {
-		this.examinationComment = examinationComment;
-	}
+    public void setExaminationComment(String examinationComment) {
+        this.examinationComment = examinationComment;
+    }
 
-	public PatientVerification getPatientVerification() {
-		return patientVerification;
-	}
+    public PatientVerification getPatientVerification() {
+        return patientVerification;
+    }
 
-	public void setPatientVerification(PatientVerification patientVerification) {
-		this.patientVerification = patientVerification;
-	}
+    public void setPatientVerification(PatientVerification patientVerification) {
+        this.patientVerification = patientVerification;
+    }
 
-	public QualityTag getQualityTag() {
-		return qualityTag;
-	}
+    public QualityTag getQualityTag() {
+        return qualityTag;
+    }
 
-	public void setQualityTag(QualityTag qualityTag) {
-		this.qualityTag = qualityTag;
-	}
+    public void setQualityTag(QualityTag qualityTag) {
+        this.qualityTag = qualityTag;
+    }
 
 }
 

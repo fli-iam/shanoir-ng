@@ -31,13 +31,13 @@ import org.shanoir.ng.shared.model.FlipAngle;
 @Mapper(componentModel = "spring",unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface FlipAngleMapper {
 
-	
-	List<FlipAngle> FlipAngleDTOListToFlipAngleList(
-			List<String> flipAngleDTOList);
+    
+    List<FlipAngle> FlipAngleDTOListToFlipAngleList(
+            List<String> flipAngleDTOList);
 
 
-	@Mapping(target = "flipAngleValue", source = "flipAngle")
-	FlipAngle FlipAngleDTOToFlipAngle(
-			String flipAngle);
+    @Mapping(target = "flipAngleValue", source = "flipAngle")
+    FlipAngle FlipAngleDTOToFlipAngle(
+            String flipAngle);
 
 }

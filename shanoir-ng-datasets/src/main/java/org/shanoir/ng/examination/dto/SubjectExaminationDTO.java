@@ -28,112 +28,112 @@ import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
  */
 public class SubjectExaminationDTO {
 
-	private String comment;
+    private String comment;
 
-	private List<ExaminationDatasetAcquisitionDTO> datasetAcquisitions;
+    private List<ExaminationDatasetAcquisitionDTO> datasetAcquisitions;
 
-	@LocalDateAnnotations
-	private LocalDate examinationDate;
+    @LocalDateAnnotations
+    private LocalDate examinationDate;
 
-	private Long id;
-	
-	private List<String> extraDataFilePathList;
-	
-	private Long centerId;
-	
-	private Long studyId;
+    private Long id;
+    
+    private List<String> extraDataFilePathList;
+    
+    private Long centerId;
+    
+    private Long studyId;
 
-	private boolean preclinical;
+    private boolean preclinical;
 
-	/**
-	 * @return the comment
-	 */
-	public String getComment() {
-		return comment;
-	}
+    /**
+     * @return the comment
+     */
+    public String getComment() {
+        return comment;
+    }
 
-	/**
-	 * @param comment
-	 *            the comment to set
-	 */
-	public void setComment(String comment) {
-		this.comment = comment;
-	}
+    /**
+     * @param comment
+     *            the comment to set
+     */
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
 
-	/**
-	 * @return the datasetAcquisitions
-	 */
-	public List<ExaminationDatasetAcquisitionDTO> getDatasetAcquisitions() {
-		return datasetAcquisitions;
-	}
+    /**
+     * @return the datasetAcquisitions
+     */
+    public List<ExaminationDatasetAcquisitionDTO> getDatasetAcquisitions() {
+        return datasetAcquisitions;
+    }
 
-	/**
-	 * @param datasetAcquisitions
-	 *            the datasetAcquisitions to set
-	 */
-	public void setDatasetAcquisitions(List<ExaminationDatasetAcquisitionDTO> datasetAcquisitions) {
-		this.datasetAcquisitions = datasetAcquisitions;
-	}
+    /**
+     * @param datasetAcquisitions
+     *            the datasetAcquisitions to set
+     */
+    public void setDatasetAcquisitions(List<ExaminationDatasetAcquisitionDTO> datasetAcquisitions) {
+        this.datasetAcquisitions = datasetAcquisitions;
+    }
 
-	/**
-	 * @return the examinationDate
-	 */
-	public LocalDate getExaminationDate() {
-		return examinationDate;
-	}
+    /**
+     * @return the examinationDate
+     */
+    public LocalDate getExaminationDate() {
+        return examinationDate;
+    }
 
-	/**
-	 * @param examinationDate
-	 *            the examinationDate to set
-	 */
-	public void setExaminationDate(LocalDate examinationDate) {
-		this.examinationDate = examinationDate;
-	}
+    /**
+     * @param examinationDate
+     *            the examinationDate to set
+     */
+    public void setExaminationDate(LocalDate examinationDate) {
+        this.examinationDate = examinationDate;
+    }
 
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
 
-	/**
-	 * @param id
-	 *            the id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
-	
-	public List<String> getExtraDataFilePathList() {
-		return extraDataFilePathList;
-	}
+    /**
+     * @param id
+     *            the id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
+    
+    public List<String> getExtraDataFilePathList() {
+        return extraDataFilePathList;
+    }
 
-	public void setExtraDataFilePathList(final List<String> extraDataFilePathList) {
-		this.extraDataFilePathList = extraDataFilePathList;
-	}
+    public void setExtraDataFilePathList(final List<String> extraDataFilePathList) {
+        this.extraDataFilePathList = extraDataFilePathList;
+    }
 
-	public Long getCenterId() {
-		return centerId;
-	}
+    public Long getCenterId() {
+        return centerId;
+    }
 
-	public void setCenterId(Long centerId) {
-		this.centerId = centerId;
-	}
+    public void setCenterId(Long centerId) {
+        this.centerId = centerId;
+    }
 
-	public Long getStudyId() {
-		return studyId;
-	}
+    public Long getStudyId() {
+        return studyId;
+    }
 
-	public void setStudyId(Long studyId) {
-		this.studyId = studyId;
-	}
+    public void setStudyId(Long studyId) {
+        this.studyId = studyId;
+    }
 
-	public boolean getPreclinical() {
-		return preclinical;
-	}
+    public boolean getPreclinical() {
+        return preclinical;
+    }
 
-	public void setPreclinical(boolean preclinical) {
-		this.preclinical = preclinical;
-	}
+    public void setPreclinical(boolean preclinical) {
+        this.preclinical = preclinical;
+    }
 }

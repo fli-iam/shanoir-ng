@@ -43,71 +43,71 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(classes = ShanoirPreclinicalApplication.class)
 public class SubjectPathologyRepositoryTest {
 
-	private static final Long SPATHO_TEST_1_ID = 1L;
-	private static final String PATHOLOGY_TEST_1_DATA = "Stroke";
-	private static final String MODEL_TEST_1_DATA = "U836";
-	private static final String LOCATION_TEST_1_DATA = "Brain";
-	private static final String SUBJECT_TEST_1_DATA = "Rat";
+    private static final Long SPATHO_TEST_1_ID = 1L;
+    private static final String PATHOLOGY_TEST_1_DATA = "Stroke";
+    private static final String MODEL_TEST_1_DATA = "U836";
+    private static final String LOCATION_TEST_1_DATA = "Brain";
+    private static final String SUBJECT_TEST_1_DATA = "Rat";
 
-	@Autowired
-	private SubjectPathologyRepository repository;
+    @Autowired
+    private SubjectPathologyRepository repository;
 
-	@Autowired
-	private AnimalSubjectRepository subjectRepository;
+    @Autowired
+    private AnimalSubjectRepository subjectRepository;
 
-	@Test
-	public void findAllTest() throws Exception {
-		Iterable<SubjectPathology> spathosDb = repository.findAll();
-		assertThat(spathosDb).isNotNull();
-		int nbTemplates = 0;
-		Iterator<SubjectPathology> spathosIt = spathosDb.iterator();
-		while (spathosIt.hasNext()) {
-			spathosIt.next();
-			nbTemplates++;
-		}
-		assertThat(nbTemplates).isEqualTo(3);
-	}
+    @Test
+    public void findAllTest() throws Exception {
+        Iterable<SubjectPathology> spathosDb = repository.findAll();
+        assertThat(spathosDb).isNotNull();
+        int nbTemplates = 0;
+        Iterator<SubjectPathology> spathosIt = spathosDb.iterator();
+        while (spathosIt.hasNext()) {
+            spathosIt.next();
+            nbTemplates++;
+        }
+        assertThat(nbTemplates).isEqualTo(3);
+    }
 
-	@Test
-	public void findByLocationTest() throws Exception {
-		List<SubjectPathology> spathoDb = repository.findAllByLocation(ReferenceModelUtil.createReferenceLocation());
-		assertNotNull(spathoDb);
-		assertThat(spathoDb.size()).isEqualTo(3);
-		assertThat(spathoDb.get(0).getId()).isEqualTo(SPATHO_TEST_1_ID);
-		assertThat(spathoDb.get(0).getLocation().getValue()).isEqualTo(LOCATION_TEST_1_DATA);
-	}
+    @Test
+    public void findByLocationTest() throws Exception {
+        List<SubjectPathology> spathoDb = repository.findAllByLocation(ReferenceModelUtil.createReferenceLocation());
+        assertNotNull(spathoDb);
+        assertThat(spathoDb.size()).isEqualTo(3);
+        assertThat(spathoDb.get(0).getId()).isEqualTo(SPATHO_TEST_1_ID);
+        assertThat(spathoDb.get(0).getLocation().getValue()).isEqualTo(LOCATION_TEST_1_DATA);
+    }
 
-	@Test
-	public void findBySubjectTest() throws Exception {
-		List<SubjectPathology> spathoDb = repository.findByAnimalSubject(AnimalSubjectModelUtil.createAnimalSubject());
-		assertNotNull(spathoDb);
-		assertThat(spathoDb.size()).isEqualTo(1);
-		assertThat(spathoDb.get(0).getId()).isEqualTo(SPATHO_TEST_1_ID);
-		assertThat(spathoDb.get(0).getAnimalSubject().getSpecie().getValue()).isEqualTo(SUBJECT_TEST_1_DATA);
-	}
+    @Test
+    public void findBySubjectTest() throws Exception {
+        List<SubjectPathology> spathoDb = repository.findByAnimalSubject(AnimalSubjectModelUtil.createAnimalSubject());
+        assertNotNull(spathoDb);
+        assertThat(spathoDb.size()).isEqualTo(1);
+        assertThat(spathoDb.get(0).getId()).isEqualTo(SPATHO_TEST_1_ID);
+        assertThat(spathoDb.get(0).getAnimalSubject().getSpecie().getValue()).isEqualTo(SUBJECT_TEST_1_DATA);
+    }
 
-	@Test
-	public void findByPathologyTest() throws Exception {
-		List<SubjectPathology> spathoDb = repository.findAllByPathology(PathologyModelUtil.createPathology());
-		assertNotNull(spathoDb);
-		assertThat(spathoDb.size()).isEqualTo(1);
-		assertThat(spathoDb.get(0).getId()).isEqualTo(SPATHO_TEST_1_ID);
-		assertThat(spathoDb.get(0).getPathology().getName()).isEqualTo(PATHOLOGY_TEST_1_DATA);
-	}
+    @Test
+    public void findByPathologyTest() throws Exception {
+        List<SubjectPathology> spathoDb = repository.findAllByPathology(PathologyModelUtil.createPathology());
+        assertNotNull(spathoDb);
+        assertThat(spathoDb.size()).isEqualTo(1);
+        assertThat(spathoDb.get(0).getId()).isEqualTo(SPATHO_TEST_1_ID);
+        assertThat(spathoDb.get(0).getPathology().getName()).isEqualTo(PATHOLOGY_TEST_1_DATA);
+    }
 
-	@Test
-	public void findByPathologyModelTest() throws Exception {
-		List<SubjectPathology> spathoDb = repository.findAllByPathologyModel(PathologyModelUtil.createPathologyModel());
-		assertNotNull(spathoDb);
-		assertThat(spathoDb.size()).isEqualTo(1);
-		assertThat(spathoDb.get(0).getId()).isEqualTo(SPATHO_TEST_1_ID);
-		assertThat(spathoDb.get(0).getPathologyModel().getName()).isEqualTo(MODEL_TEST_1_DATA);
-	}
+    @Test
+    public void findByPathologyModelTest() throws Exception {
+        List<SubjectPathology> spathoDb = repository.findAllByPathologyModel(PathologyModelUtil.createPathologyModel());
+        assertNotNull(spathoDb);
+        assertThat(spathoDb.size()).isEqualTo(1);
+        assertThat(spathoDb.get(0).getId()).isEqualTo(SPATHO_TEST_1_ID);
+        assertThat(spathoDb.get(0).getPathologyModel().getName()).isEqualTo(MODEL_TEST_1_DATA);
+    }
 
-	@Test
-	public void findOneTest() throws Exception {
-		SubjectPathology spathoDb = repository.findById(SPATHO_TEST_1_ID).orElse(null);
-		assertThat(spathoDb.getLocation().getValue()).isEqualTo(LOCATION_TEST_1_DATA);
-	}
+    @Test
+    public void findOneTest() throws Exception {
+        SubjectPathology spathoDb = repository.findById(SPATHO_TEST_1_ID).orElse(null);
+        assertThat(spathoDb.getLocation().getValue()).isEqualTo(LOCATION_TEST_1_DATA);
+    }
 
 }

@@ -55,58 +55,58 @@ import java.util.stream.Collectors;
 @EnableMethodSecurity
 public class SecurityConfiguration {
 
-	@Value("${front.server.url}")
-	private String frontServerUrl;
+    @Value("${front.server.url}")
+    private String frontServerUrl;
 
-	@Autowired
-	private MDCFilter mdcFilter;
+    @Autowired
+    private MDCFilter mdcFilter;
 
-	@Autowired
-	private StowRSMultipartRelatedRequestFilter multipartRelatedRequestFilter;
+    @Autowired
+    private StowRSMultipartRelatedRequestFilter multipartRelatedRequestFilter;
 
-	/**
-	 * Defines the session authentication strategy.
-	 */
-	@Bean
-	protected SessionAuthenticationStrategy sessionAuthenticationStrategy() {
-		return new NullAuthenticatedSessionStrategy();
-	}
+    /**
+     * Defines the session authentication strategy.
+     */
+    @Bean
+    protected SessionAuthenticationStrategy sessionAuthenticationStrategy() {
+        return new NullAuthenticatedSessionStrategy();
+    }
 
-	@Bean
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http
-			.sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-			.csrf(AbstractHttpConfigurer::disable)
-			.addFilterAfter(mdcFilter, FilterSecurityInterceptor.class)
-			.addFilterAfter(multipartRelatedRequestFilter, FilterSecurityInterceptor.class)
-			.authorizeHttpRequests(
-				matcher -> matcher.requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/api-docs/**")
-					.permitAll()
-				.anyRequest()
-					.authenticated()
-			)
-			.oauth2ResourceServer(oauth2Configurer -> oauth2Configurer.jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwt -> {
+        http
+            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .csrf(AbstractHttpConfigurer::disable)
+            .addFilterAfter(mdcFilter, FilterSecurityInterceptor.class)
+            .addFilterAfter(multipartRelatedRequestFilter, FilterSecurityInterceptor.class)
+            .authorizeHttpRequests(
+                matcher -> matcher.requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/api-docs/**")
+                    .permitAll()
+                .anyRequest()
+                    .authenticated()
+            )
+            .oauth2ResourceServer(oauth2Configurer -> oauth2Configurer.jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwt -> {
                 Map<String, Collection<String>> realmAccess = jwt.getClaim("realm_access"); // manage Keycloak specific JWT structure here
                 Collection<String> roles = realmAccess.get("roles");
                 var grantedAuthorities = roles.stream()
                         .map(role -> new SimpleGrantedAuthority(role))
                         .collect(Collectors.toList());
                 return new JwtAuthenticationToken(jwt, grantedAuthorities);
-			})));
-		return http.build();
-	}
+            })));
+        return http.build();
+    }
 
-	@Bean
-	public FilterRegistrationBean shanoirCorsFilter() {
-		final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		final CorsConfiguration config = new CorsConfiguration();
-		config.setAllowCredentials(true);
-		config.addAllowedOrigin(frontServerUrl);
-		config.addAllowedHeader("*");
-		config.addAllowedMethod("*");
-		source.registerCorsConfiguration("/**", config);
-		final FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
-		bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
-		return bean;
-	}
+    @Bean
+    public FilterRegistrationBean shanoirCorsFilter() {
+        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        final CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.addAllowedOrigin(frontServerUrl);
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("*");
+        source.registerCorsConfiguration("/**", config);
+        final FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
+        bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        return bean;
+    }
 }

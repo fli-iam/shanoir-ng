@@ -8,67 +8,67 @@ import org.slf4j.LoggerFactory;
 
 public class DeleteDirectory {
 
-	private static final Logger logger = LoggerFactory.getLogger(DeleteDirectory.class);
+    private static final Logger logger = LoggerFactory.getLogger(DeleteDirectory.class);
 
-	public void delete(String filePath) {
+    public void delete(String filePath) {
 
-		File directory = new File(filePath);
+        File directory = new File(filePath);
 
-		// make sure directory exists
-		if (!directory.exists()) {
+        // make sure directory exists
+        if (!directory.exists()) {
 
-			logger.debug("Directory does not exist.");
-			System.exit(0);
+            logger.debug("Directory does not exist.");
+            System.exit(0);
 
-		} else {
+        } else {
 
-			try {
+            try {
 
-				delete(directory);
+                delete(directory);
 
-			} catch (IOException e) {
-				logger.error(e.toString());
-				System.exit(0);
-			}
-		}
+            } catch (IOException e) {
+                logger.error(e.toString());
+                System.exit(0);
+            }
+        }
 
-		logger.info(" End delete process .");
-	}
+        logger.info(" End delete process .");
+    }
 
-	public static void delete(File file) throws IOException {
+    public static void delete(File file) throws IOException {
 
-		if (file.isDirectory()) {
+        if (file.isDirectory()) {
 
-			// directory is empty, then delete it
-			if (file.list().length == 0) {
+            // directory is empty, then delete it
+            if (file.list().length == 0) {
 
-				file.delete();
-				logger.info("Directory is deleted : " + file.getAbsolutePath());
+                file.delete();
+                logger.info("Directory is deleted : " + file.getAbsolutePath());
 
-			} else {
+            } else {
 
-				// list all the directory contents
-				String files[] = file.list();
+                // list all the directory contents
+                String files[] = file.list();
 
-				for (String temp : files) {
-					// construct the file structure
-					File fileDelete = new File(file, temp);
+                for (String temp : files) {
+                    // construct the file structure
+                    File fileDelete = new File(file, temp);
 
-					// recursive delete
-					delete(fileDelete);
-				}
+                    // recursive delete
+                    delete(fileDelete);
+                }
 
-				// check the directory again, if empty then delete it
-				if (file.list().length == 0) {
-					file.delete();
-					logger.info("Directory is deleted : " + file.getAbsolutePath());
-				}
-			}
+                // check the directory again, if empty then delete it
+                if (file.list().length == 0) {
+                    file.delete();
+                    logger.info("Directory is deleted : " + file.getAbsolutePath());
+                }
+            }
 
-		} else {
-			// if file, then delete it
-			file.delete();
-			logger.debug("File is deleted : " + file.getAbsolutePath());
-		}
-	}
+        } else {
+            // if file, then delete it
+            file.delete();
+            logger.debug("File is deleted : " + file.getAbsolutePath());
+        }
+    }
 }

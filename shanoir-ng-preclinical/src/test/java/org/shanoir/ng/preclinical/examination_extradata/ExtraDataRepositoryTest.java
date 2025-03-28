@@ -42,39 +42,39 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(classes = ShanoirPreclinicalApplication.class)
 public class ExtraDataRepositoryTest {
 
-	private static final Long EXTRADATA_TEST_1_ID = 1L;
-	private static final Long EXAMINATION_ID = 1L;
+    private static final Long EXTRADATA_TEST_1_ID = 1L;
+    private static final Long EXAMINATION_ID = 1L;
 
-	@Autowired
-	private ExtraDataBaseRepository<ExaminationExtraData> repository;
+    @Autowired
+    private ExtraDataBaseRepository<ExaminationExtraData> repository;
 
-	@Test
-	public void findAllTest() throws Exception {
-		Iterable<ExaminationExtraData> extradataDb = repository.findAll();
-		assertThat(extradataDb).isNotNull();
-		int nbTemplates = 0;
-		Iterator<ExaminationExtraData> extradataIt = extradataDb.iterator();
-		while (extradataIt.hasNext()) {
-			extradataIt.next();
-			nbTemplates++;
-		}
-		assertThat(nbTemplates).isEqualTo(3);
-	}
+    @Test
+    public void findAllTest() throws Exception {
+        Iterable<ExaminationExtraData> extradataDb = repository.findAll();
+        assertThat(extradataDb).isNotNull();
+        int nbTemplates = 0;
+        Iterator<ExaminationExtraData> extradataIt = extradataDb.iterator();
+        while (extradataIt.hasNext()) {
+            extradataIt.next();
+            nbTemplates++;
+        }
+        assertThat(nbTemplates).isEqualTo(3);
+    }
 
-	@Test
-	@SuppressWarnings("unchecked")
-	public void findAllByExaminationIdTest() throws Exception {
-		List<ExaminationExtraData> extradataDb = repository.findAllByExaminationId(EXAMINATION_ID);
-		assertNotNull(extradataDb);
-		assertThat(extradataDb.size()).isEqualTo(3);
-		assertThat(extradataDb.get(0).getId()).isEqualTo(EXTRADATA_TEST_1_ID);
-	}
+    @Test
+    @SuppressWarnings("unchecked")
+    public void findAllByExaminationIdTest() throws Exception {
+        List<ExaminationExtraData> extradataDb = repository.findAllByExaminationId(EXAMINATION_ID);
+        assertNotNull(extradataDb);
+        assertThat(extradataDb.size()).isEqualTo(3);
+        assertThat(extradataDb.get(0).getId()).isEqualTo(EXTRADATA_TEST_1_ID);
+    }
 
-	@Test
-	public void findOneTest() throws Exception {
-		ExaminationExtraData extradataDb = repository.findById(EXTRADATA_TEST_1_ID).orElse(null);
-		assertThat(extradataDb.getExaminationId()).isEqualTo(EXAMINATION_ID);
-		assertThat(extradataDb.getFilename()).isEqualTo(ExtraDataModelUtil.EXTRADATA_FILENAME);
-	}
+    @Test
+    public void findOneTest() throws Exception {
+        ExaminationExtraData extradataDb = repository.findById(EXTRADATA_TEST_1_ID).orElse(null);
+        assertThat(extradataDb.getExaminationId()).isEqualTo(EXAMINATION_ID);
+        assertThat(extradataDb.getFilename()).isEqualTo(ExtraDataModelUtil.EXTRADATA_FILENAME);
+    }
 
 }

@@ -21,43 +21,43 @@ package org.shanoir.ng.shared.util;
  */
 public final class ShanoirConstants {
 
-	/**
-	 * The Enum DICOM_RETURNED_TYPES.
-	 */
-	public enum DICOM_RETURNED_TYPES {
+    /**
+     * The Enum DICOM_RETURNED_TYPES.
+     */
+    public enum DICOM_RETURNED_TYPES {
 
-		/** The BYT e_ ARRAY. */
-		BYTE_ARRAY,
-		/** The DATE. */
-		DATE,
-		/** The DAT e_ ARRAY. */
-		DATE_ARRAY,
-		/** The DAT e_ RANGE. */
-		DATE_RANGE,
-		/** The DOUBLE. */
-		DOUBLE,
-		/** The DOUBL e_ ARRAY. */
-		DOUBLE_ARRAY,
-		/** The FLOAT. */
-		FLOAT,
-		/** The FLOA t_ ARRAY. */
-		FLOAT_ARRAY,
-		/** The INT. */
-		INT,
-		/** The IN t_ ARRAY. */
-		INT_ARRAY,
-		/** The SHOR t_ ARRAY. */
-		SHORT_ARRAY,
-		/** The STRING. */
-		STRING,
-		/** The STRIN g_ ARRAY. */
-		STRING_ARRAY
-	}
+        /** The BYT e_ ARRAY. */
+        BYTE_ARRAY,
+        /** The DATE. */
+        DATE,
+        /** The DAT e_ ARRAY. */
+        DATE_ARRAY,
+        /** The DAT e_ RANGE. */
+        DATE_RANGE,
+        /** The DOUBLE. */
+        DOUBLE,
+        /** The DOUBL e_ ARRAY. */
+        DOUBLE_ARRAY,
+        /** The FLOAT. */
+        FLOAT,
+        /** The FLOA t_ ARRAY. */
+        FLOAT_ARRAY,
+        /** The INT. */
+        INT,
+        /** The IN t_ ARRAY. */
+        INT_ARRAY,
+        /** The SHOR t_ ARRAY. */
+        SHORT_ARRAY,
+        /** The STRING. */
+        STRING,
+        /** The STRIN g_ ARRAY. */
+        STRING_ARRAY
+    }
 
-	/**
-	 * Hiding the constructor.
-	 */
-	private ShanoirConstants() {
+    /**
+     * Hiding the constructor.
+     */
+    private ShanoirConstants() {
 
-	}
+    }
 }

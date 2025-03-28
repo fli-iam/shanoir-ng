@@ -47,8 +47,8 @@ import java.util.Optional;
 @Service
 public class DatasetProcessingServiceImpl implements DatasetProcessingService {
 
-	@Autowired
-	private DatasetProcessingRepository repository;
+    @Autowired
+    private DatasetProcessingRepository repository;
 
     @Autowired
     private ProcessingResourceRepository processingResourceRepository;
@@ -63,19 +63,19 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     private SolrService solrService;
 
     protected DatasetProcessing updateValues(final DatasetProcessing from, final DatasetProcessing to) {
-		to.setDatasetProcessingType(from.getDatasetProcessingType());
-		to.setComment(from.getComment());
-		to.setInputDatasets(from.getInputDatasets());
-		to.setOutputDatasets(from.getOutputDatasets());
-		to.setProcessingDate(from.getProcessingDate());
-		to.setStudyId(from.getStudyId());
-		return to;
-	}
+        to.setDatasetProcessingType(from.getDatasetProcessingType());
+        to.setComment(from.getComment());
+        to.setInputDatasets(from.getInputDatasets());
+        to.setOutputDatasets(from.getOutputDatasets());
+        to.setProcessingDate(from.getProcessingDate());
+        to.setStudyId(from.getStudyId());
+        return to;
+    }
 
-	public Optional<DatasetProcessing> findByComment(String comment) {
-		return repository.findByComment(comment);
-	}
-	
+    public Optional<DatasetProcessing> findByComment(String comment) {
+        return repository.findByComment(comment);
+    }
+    
     @Override
     public Optional<DatasetProcessing> findById(final Long id) {
         return repository.findById(id);

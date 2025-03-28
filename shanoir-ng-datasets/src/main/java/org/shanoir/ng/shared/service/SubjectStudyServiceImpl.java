@@ -42,23 +42,23 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 @Service
 public class SubjectStudyServiceImpl implements SubjectStudyService {
 
-	@Autowired
-	private SubjectStudyRepository subjectStudyRepository;
+    @Autowired
+    private SubjectStudyRepository subjectStudyRepository;
 
-	@Autowired
+    @Autowired
     private RabbitTemplate rabbitTemplate;
 
-	@Autowired
-	private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-	@Override
-	public List<SubjectStudy> update(final Iterable<SubjectStudy> subjectStudies) throws EntityNotFoundException, MicroServiceCommunicationException {
+    @Override
+    public List<SubjectStudy> update(final Iterable<SubjectStudy> subjectStudies) throws EntityNotFoundException, MicroServiceCommunicationException {
         if (subjectStudies == null) return null;
-		Set<Long> ids = new HashSet<>();
-	    for (SubjectStudy subjectStudy : subjectStudies) {
-	        ids.add(subjectStudy.getId());
-	    }
-		final Iterable<SubjectStudy> subjectStudiesDb = subjectStudyRepository.findAllById(ids);
+        Set<Long> ids = new HashSet<>();
+        for (SubjectStudy subjectStudy : subjectStudies) {
+            ids.add(subjectStudy.getId());
+        }
+        final Iterable<SubjectStudy> subjectStudiesDb = subjectStudyRepository.findAllById(ids);
         for (SubjectStudy subjectStudy : subjectStudies) {
             for (SubjectStudy subjectStudyDb : subjectStudiesDb) {
                 if (subjectStudyDb.getId().equals(subjectStudy.getId())) {
@@ -67,13 +67,13 @@ public class SubjectStudyServiceImpl implements SubjectStudyService {
                 }
             }
         }
-		subjectStudyRepository.saveAll(subjectStudiesDb);
+        subjectStudyRepository.saveAll(subjectStudiesDb);
         List<SubjectStudyQualityTagDTO> subjectStudyTagDTOs = getSubjectStudyTagDTOs(Utils.toList(subjectStudiesDb));
-			    this.send(subjectStudyTagDTOs, RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG);
-		return Utils.toList(subjectStudiesDb);
-	}
-	
-	/*
+                this.send(subjectStudyTagDTOs, RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG);
+        return Utils.toList(subjectStudiesDb);
+    }
+    
+    /*
      * Update some values of subject study to save them in database.
      *
      * @param subjectStudyDb subjectStudy found in database.
@@ -106,11 +106,11 @@ public class SubjectStudyServiceImpl implements SubjectStudyService {
         return subjectStudyRepository.findByStudy_IdAndSubjectId(studyId, subjectId);
     }
 
-	private void send(Object obj, String queue) throws MicroServiceCommunicationException {
-	    try {
-	        rabbitTemplate.convertAndSend(queue, objectMapper.writeValueAsString(obj));
-	    } catch (AmqpException | JsonProcessingException e) {
-	        throw new MicroServiceCommunicationException("Error while communicating with MS studies to send study card tags.", e);
-	    }
-	}
+    private void send(Object obj, String queue) throws MicroServiceCommunicationException {
+        try {
+            rabbitTemplate.convertAndSend(queue, objectMapper.writeValueAsString(obj));
+        } catch (AmqpException | JsonProcessingException e) {
+            throw new MicroServiceCommunicationException("Error while communicating with MS studies to send study card tags.", e);
+        }
+    }
 }

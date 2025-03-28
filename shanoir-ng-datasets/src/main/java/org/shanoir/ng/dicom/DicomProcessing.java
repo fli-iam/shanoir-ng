@@ -35,70 +35,70 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class DicomProcessing {
 
-	private static UIDGeneration uidGenerator = new UIDGeneration();
-	
-	@Autowired
-	private static WADOURLHandler wadoURLHandler;
+    private static UIDGeneration uidGenerator = new UIDGeneration();
+    
+    @Autowired
+    private static WADOURLHandler wadoURLHandler;
 
-	public static Attributes getDicomObjectAttributes(DatasetFile image, Boolean isEnhancedMR) throws IOException {
-		File dicomFile = new File(image.getPath());
-		try (DicomInputStream dIS = new DicomInputStream(dicomFile)) {
-			Attributes datasetAttributes;
-			if (isEnhancedMR != null && isEnhancedMR) {
-				// In case of Enhanced MR, we need to the pixel data in order to use Dcm4chee emf extract method.
-				datasetAttributes = dIS.readDataset(-1);
-			} else {
-				// Else we do not load the picture in Ram for faster performance.
-				datasetAttributes = dIS.readDataset(Tag.PixelData);
-			}
-			return datasetAttributes;
-		}
-	}
+    public static Attributes getDicomObjectAttributes(DatasetFile image, Boolean isEnhancedMR) throws IOException {
+        File dicomFile = new File(image.getPath());
+        try (DicomInputStream dIS = new DicomInputStream(dicomFile)) {
+            Attributes datasetAttributes;
+            if (isEnhancedMR != null && isEnhancedMR) {
+                // In case of Enhanced MR, we need to the pixel data in order to use Dcm4chee emf extract method.
+                datasetAttributes = dIS.readDataset(-1);
+            } else {
+                // Else we do not load the picture in Ram for faster performance.
+                datasetAttributes = dIS.readDataset(Tag.PixelData);
+            }
+            return datasetAttributes;
+        }
+    }
 
     public ExaminationAttributes<String> getDicomExaminationAttributes(Study study, Boolean isEnhanced) throws ShanoirException {
-		ExaminationAttributes<String> attributes = new ExaminationAttributes<>(wadoURLHandler);
-		if (study != null) {
-			for (Serie serie : study.getSeries()) {
-				attributes.addAcquisitionAttributes(serie.getSeriesInstanceUID(), getDicomAcquisitionAttributes(serie, isEnhanced));
-			}
-		}
-		return attributes;
+        ExaminationAttributes<String> attributes = new ExaminationAttributes<>(wadoURLHandler);
+        if (study != null) {
+            for (Serie serie : study.getSeries()) {
+                attributes.addAcquisitionAttributes(serie.getSeriesInstanceUID(), getDicomAcquisitionAttributes(serie, isEnhanced));
+            }
+        }
+        return attributes;
     }
 
-	public static ExaminationAttributes<String> getDicomExaminationAttributes(Study study) throws ShanoirException {
-		ExaminationAttributes<String> attributes = new ExaminationAttributes<>(wadoURLHandler);
-		if (study != null) {
-			for (Serie serie : study.getSeries()) {
-				attributes.addAcquisitionAttributes(serie.getSeriesInstanceUID(), getDicomAcquisitionAttributes(serie));
-			}
-		}
-		return attributes;
+    public static ExaminationAttributes<String> getDicomExaminationAttributes(Study study) throws ShanoirException {
+        ExaminationAttributes<String> attributes = new ExaminationAttributes<>(wadoURLHandler);
+        if (study != null) {
+            for (Serie serie : study.getSeries()) {
+                attributes.addAcquisitionAttributes(serie.getSeriesInstanceUID(), getDicomAcquisitionAttributes(serie));
+            }
+        }
+        return attributes;
     }
 
-	public static AcquisitionAttributes<String> getDicomAcquisitionAttributes(Serie serie, Boolean isEnhanced) throws ShanoirException {
-		AcquisitionAttributes<String> attributes = new AcquisitionAttributes<>();
-		String sopUID = null;
-		if (!CollectionUtils.isEmpty(serie.getImages())) {
-			sopUID = serie.getImages().get(0).getSOPInstanceUID();
-		} else {
-			sopUID = uidGenerator.getNewUID();
-		}
-		// In case of Quality Check during Import from ShUp, Serie does not have any Dataset and conditions are applied on DICOM metadata only.
-		if (!CollectionUtils.isEmpty(serie.getDatasets())) {
-			for (Dataset dataset : serie.getDatasets()) {
-				try {
-					dataset.setFirstImageSOPInstanceUID(sopUID);
-					attributes.addDatasetAttributes(dataset.getFirstImageSOPInstanceUID(), getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), isEnhanced));
-				} catch (IOException e) {
-					throw new ShanoirException("Could not read dicom metadata from file for serie " + serie.getSopClassUID(), e);
-				}
-			}
-		}
-		return attributes;
-	}
+    public static AcquisitionAttributes<String> getDicomAcquisitionAttributes(Serie serie, Boolean isEnhanced) throws ShanoirException {
+        AcquisitionAttributes<String> attributes = new AcquisitionAttributes<>();
+        String sopUID = null;
+        if (!CollectionUtils.isEmpty(serie.getImages())) {
+            sopUID = serie.getImages().get(0).getSOPInstanceUID();
+        } else {
+            sopUID = uidGenerator.getNewUID();
+        }
+        // In case of Quality Check during Import from ShUp, Serie does not have any Dataset and conditions are applied on DICOM metadata only.
+        if (!CollectionUtils.isEmpty(serie.getDatasets())) {
+            for (Dataset dataset : serie.getDatasets()) {
+                try {
+                    dataset.setFirstImageSOPInstanceUID(sopUID);
+                    attributes.addDatasetAttributes(dataset.getFirstImageSOPInstanceUID(), getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), isEnhanced));
+                } catch (IOException e) {
+                    throw new ShanoirException("Could not read dicom metadata from file for serie " + serie.getSopClassUID(), e);
+                }
+            }
+        }
+        return attributes;
+    }
 
-	public static AcquisitionAttributes<String> getDicomAcquisitionAttributes(Serie serie) throws ShanoirException {
-		return getDicomAcquisitionAttributes(serie, serie.getIsEnhanced());
-	}
+    public static AcquisitionAttributes<String> getDicomAcquisitionAttributes(Serie serie) throws ShanoirException {
+        return getDicomAcquisitionAttributes(serie, serie.getIsEnhanced());
+    }
 
 }

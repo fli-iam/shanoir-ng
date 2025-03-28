@@ -30,37 +30,37 @@ import java.util.List;
 @Mapper(componentModel = "spring", uses = { DatasetProcessingMapper.class, DatasetMapper.class })
 public interface ExecutionMonitoringMapper {
 
-	/**
-	 * Map a @ExecutionMonitoring to a @ExecutionMonitoringDTO.
-	 *
-	 * @param processing
-	 *            dataset.
-	 * @return dataset DTO.
-	 */
-	@Mapping(target = "parametersResources", ignore = true)
-	ExecutionMonitoringDTO executionMonitoringToExecutionMonitoringDTO(ExecutionMonitoring processing);
+    /**
+     * Map a @ExecutionMonitoring to a @ExecutionMonitoringDTO.
+     *
+     * @param processing
+     *            dataset.
+     * @return dataset DTO.
+     */
+    @Mapping(target = "parametersResources", ignore = true)
+    ExecutionMonitoringDTO executionMonitoringToExecutionMonitoringDTO(ExecutionMonitoring processing);
 
-	/**
-	 * Map list of @ExecutionMonitoring to list of @ExecutionMonitoringDTO.
-	 *
-	 * @param datasetProcessings processings
-	 *            list of dataset processings.
-	 * @return list of dataset processings DTO.
-	 */
-	List<ExecutionMonitoringDTO> executionMonitoringsToExecutionMonitoringDTOs(List<ExecutionMonitoring> datasetProcessings);
+    /**
+     * Map list of @ExecutionMonitoring to list of @ExecutionMonitoringDTO.
+     *
+     * @param datasetProcessings processings
+     *            list of dataset processings.
+     * @return list of dataset processings DTO.
+     */
+    List<ExecutionMonitoringDTO> executionMonitoringsToExecutionMonitoringDTOs(List<ExecutionMonitoring> datasetProcessings);
 
-	/**
-	 * Map @ExecutionMonitoringDTO to @ExecutionMonitoring
-	 *
-	 * @param dto
-	 * @return
-	 */
-	ExecutionMonitoring executionMonitoringDTOToExecutionMonitoring(ExecutionMonitoringDTO dto);
+    /**
+     * Map @ExecutionMonitoringDTO to @ExecutionMonitoring
+     *
+     * @param dto
+     * @return
+     */
+    ExecutionMonitoring executionMonitoringDTOToExecutionMonitoring(ExecutionMonitoringDTO dto);
 
-	@ObjectFactory
-	default Dataset createDataset(DatasetDTO dto) {
-		return DatasetUtils.buildDatasetFromType(dto.getType());
-	}
+    @ObjectFactory
+    default Dataset createDataset(DatasetDTO dto) {
+        return DatasetUtils.buildDatasetFromType(dto.getType());
+    }
 
 
 }

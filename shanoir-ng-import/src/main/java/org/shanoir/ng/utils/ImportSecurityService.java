@@ -20,52 +20,52 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ImportSecurityService {
-	
-	private static final String ROLE_ADMIN = "ROLE_ADMIN";
-	
-	@Autowired
-	StudyRightsService rightsService;
-		
-	
-	/**
-	 * Check that the connected user has the given right for the given study.
-	 *
-	 * @param studyId the study id
-	 * @param rightStr the right
-	 * @return true or false
-	 */
+    
+    private static final String ROLE_ADMIN = "ROLE_ADMIN";
+    
+    @Autowired
+    StudyRightsService rightsService;
+        
+    
+    /**
+     * Check that the connected user has the given right for the given study.
+     *
+     * @param studyId the study id
+     * @param rightStr the right
+     * @return true or false
+     */
     public boolean hasRightOnStudy(Long studyId, String rightStr) {
-    	if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
-			return true;
-		} else if (studyId == null) {
-			return false;
-		} else {
-			return rightsService.hasRightOnStudy(studyId, rightStr);
-		}
+        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+            return true;
+        } else if (studyId == null) {
+            return false;
+        } else {
+            return rightsService.hasRightOnStudy(studyId, rightStr);
+        }
     }
 
     /**
-	 * Check that the connected user has the given right for at least one study.
-	 *
-	 * @param rightStr the right
-	 * @return true or false
-	 */
+     * Check that the connected user has the given right for at least one study.
+     *
+     * @param rightStr the right
+     * @return true or false
+     */
     public boolean hasRightOnOneStudy(String rightStr) {
-    	if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
-			return true;
-		}
+        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+            return true;
+        }
         return rightsService.hasRightOnAtLeastOneStudy(rightStr);
     }
 
     /**
-	 * Know if connected user can import from PACS
-	 *
-	 * @return a boolean
-	 */
+     * Know if connected user can import from PACS
+     *
+     * @return a boolean
+     */
     public boolean canImportFromPACS() {
-    	if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
-			return true;
-		}
-    	return KeycloakUtil.canImportFromPACS();
+        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+            return true;
+        }
+        return KeycloakUtil.canImportFromPACS();
     }
 }

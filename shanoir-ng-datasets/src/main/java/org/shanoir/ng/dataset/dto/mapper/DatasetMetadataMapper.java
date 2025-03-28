@@ -27,14 +27,14 @@ import org.shanoir.ng.dataset.model.DatasetMetadata;
 @Mapper(componentModel = "spring")
 public interface DatasetMetadataMapper {
 
-	/**
-	 * Map a @DatasetMetadata to a @DatasetMetadataDTO.
-	 *
-	 * @param datasets
-	 *            dataset.
-	 * @return dataset DTO.
-	 */
-	DatasetMetadataDTO datasetMetadataToDatasetMetadataDTO(DatasetMetadata dataset);
+    /**
+     * Map a @DatasetMetadata to a @DatasetMetadataDTO.
+     *
+     * @param datasets
+     *            dataset.
+     * @return dataset DTO.
+     */
+    DatasetMetadataDTO datasetMetadataToDatasetMetadataDTO(DatasetMetadata dataset);
 
 
 }

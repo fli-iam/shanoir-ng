@@ -23,23 +23,23 @@ import org.shanoir.uploader.dicom.query.StudyTreeNode;
  *
  */
 public class DicomTreeCellRenderer extends DefaultTreeCellRenderer {
-	
-	private static final Logger logger = LoggerFactory.getLogger(DicomTreeCellRenderer.class);
-	
-	private Icon mediaIcon;
+    
+    private static final Logger logger = LoggerFactory.getLogger(DicomTreeCellRenderer.class);
+    
+    private Icon mediaIcon;
     private Icon patientIcon;
     private Icon studyIcon;
     private Icon serieIcon;
 
     public DicomTreeCellRenderer() {
-    	ImageIcon mediaIcon = createImageIcon("/images/media.16x16.png");
-    	ImageIcon patientIcon = createImageIcon("/images/subject.16x16.png");
-    	ImageIcon studyIcon = createImageIcon("/images/study.dicom.16x16.png");
-    	ImageIcon serieIcon = createImageIcon("/images/serie.16x16.png");
-    	this.mediaIcon = mediaIcon;
-    	this.patientIcon = patientIcon;
-    	this.studyIcon = studyIcon;
-    	this.serieIcon = serieIcon;
+        ImageIcon mediaIcon = createImageIcon("/images/media.16x16.png");
+        ImageIcon patientIcon = createImageIcon("/images/subject.16x16.png");
+        ImageIcon studyIcon = createImageIcon("/images/study.dicom.16x16.png");
+        ImageIcon serieIcon = createImageIcon("/images/serie.16x16.png");
+        this.mediaIcon = mediaIcon;
+        this.patientIcon = patientIcon;
+        this.studyIcon = studyIcon;
+        this.serieIcon = serieIcon;
     }
 
     /** Returns an ImageIcon, or null if the path was invalid. */
@@ -73,13 +73,13 @@ public class DicomTreeCellRenderer extends DefaultTreeCellRenderer {
         setText(treeNode.getDisplayString());
         setToolTipText(treeNode.getDisplayString());
         if (value instanceof Media) {
-        	setIcon(mediaIcon);
+            setIcon(mediaIcon);
         } else if (value instanceof PatientTreeNode) {
-        	setIcon(patientIcon);
+            setIcon(patientIcon);
         } else if (value instanceof StudyTreeNode) {
-        	setIcon(studyIcon);
+            setIcon(studyIcon);
         } else if (value instanceof SerieTreeNode) {
-        	setIcon(serieIcon);
+            setIcon(serieIcon);
         }
         return this;
     }

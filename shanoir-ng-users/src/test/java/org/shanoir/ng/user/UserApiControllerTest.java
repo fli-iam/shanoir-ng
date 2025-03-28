@@ -66,119 +66,119 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  *
  */
 @WebMvcTest(controllers = {UserApiController.class, ControlerSecurityService.class, UserPrivacySecurityService.class,
-		IsMeSecurityService.class, UserFieldEditionSecurityManager.class, UserUniqueConstraintManager.class, UserRepository.class,
-		AccessRequestService.class})
+        IsMeSecurityService.class, UserFieldEditionSecurityManager.class, UserUniqueConstraintManager.class, UserRepository.class,
+        AccessRequestService.class})
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class UserApiControllerTest {
 
-	private static final String REQUEST_PATH = "/users";
-	private static final String REQUEST_PATH_SEARCH = REQUEST_PATH + "/search";
-	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+    private static final String REQUEST_PATH = "/users";
+    private static final String REQUEST_PATH_SEARCH = REQUEST_PATH + "/search";
+    private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
-	@Autowired
-	private MockMvc mvc;
-	
-	@MockBean
-	private UserService userService;
-	
-	@MockBean
-	private FindByRepository<User> findByRepositoryMock;
-	
-	@MockBean
-	private UserRepository userRepository;
+    @Autowired
+    private MockMvc mvc;
+    
+    @MockBean
+    private UserService userService;
+    
+    @MockBean
+    private FindByRepository<User> findByRepositoryMock;
+    
+    @MockBean
+    private UserRepository userRepository;
 
-	@MockBean
-	private RabbitTemplate rabbitTemplate;
+    @MockBean
+    private RabbitTemplate rabbitTemplate;
 
-	@MockBean
-	private AccessRequestService accessRequestService;
+    @MockBean
+    private AccessRequestService accessRequestService;
 
-	@MockBean
-	private ShanoirEventService eventService;
+    @MockBean
+    private ShanoirEventService eventService;
 
-	@MockBean
-	private VIPUserService vipUserService;
-	
-	@BeforeAll
-	public static void beforeClass() {
-	    System.setProperty("vip.enabled", "false");
-	}
+    @MockBean
+    private VIPUserService vipUserService;
+    
+    @BeforeAll
+    public static void beforeClass() {
+        System.setProperty("vip.enabled", "false");
+    }
 
-	@BeforeEach
-	public void setup() throws EntityNotFoundException, AccountNotOnDemandException, SecurityException  {
-		User mockUser = ModelsUtil.createUser(1L);
-		given(userService.confirmAccountRequest(Mockito.any(User.class))).willReturn(mockUser);
-		doNothing().when(userService).deleteById(1L);
-		doNothing().when(userService).denyAccountRequest(Mockito.anyLong());
-		given(userService.findAll()).willReturn(Arrays.asList(mockUser));
-		given(userService.findById(1L)).willReturn(mockUser);
-		given(userService.findByIds(Arrays.asList(1L))).willReturn(Arrays.asList(new IdName()));
-		given(userService.create(Mockito.mock(User.class))).willReturn(new User());
-		given(findByRepositoryMock.findBy(Mockito.anyString(), Mockito.any(), (Class) Mockito.any())).willReturn(Arrays.asList(mockUser));
-		given(userRepository.findById(1L)).willReturn(Optional.of(mockUser));
-	}
+    @BeforeEach
+    public void setup() throws EntityNotFoundException, AccountNotOnDemandException, SecurityException  {
+        User mockUser = ModelsUtil.createUser(1L);
+        given(userService.confirmAccountRequest(Mockito.any(User.class))).willReturn(mockUser);
+        doNothing().when(userService).deleteById(1L);
+        doNothing().when(userService).denyAccountRequest(Mockito.anyLong());
+        given(userService.findAll()).willReturn(Arrays.asList(mockUser));
+        given(userService.findById(1L)).willReturn(mockUser);
+        given(userService.findByIds(Arrays.asList(1L))).willReturn(Arrays.asList(new IdName()));
+        given(userService.create(Mockito.mock(User.class))).willReturn(new User());
+        given(findByRepositoryMock.findBy(Mockito.anyString(), Mockito.any(), (Class) Mockito.any())).willReturn(Arrays.asList(mockUser));
+        given(userRepository.findById(1L)).willReturn(Optional.of(mockUser));
+    }
 
-	@Test
-	@WithMockKeycloakUser(authorities = { "ROLE_ADMIN" }, id = 0)
-	public void deleteUserTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isNoContent());
-	}
+    @Test
+    @WithMockKeycloakUser(authorities = { "ROLE_ADMIN" }, id = 0)
+    public void deleteUserTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+    }
 
-	@Test
-	@WithMockKeycloakUser(authorities = { "ROLE_ADMIN" }, id = 0)
-	public void findUserByIdTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockKeycloakUser(authorities = { "ROLE_ADMIN" }, id = 0)
+    public void findUserByIdTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser(authorities = { "ROLE_EXPERT" })
-	public void findUsersTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser(authorities = { "ROLE_EXPERT" })
+    public void findUsersTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void saveNewUserTest() throws Exception {
-		given(findByRepositoryMock.findBy(Mockito.anyString(), Mockito.any(), Mockito.any())).willReturn(new ArrayList<User>());
-		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createUser())))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void saveNewUserTest() throws Exception {
+        given(findByRepositoryMock.findBy(Mockito.anyString(), Mockito.any(), Mockito.any())).willReturn(new ArrayList<User>());
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createUser())))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser(authorities = { "ROLE_USER" })
-	public void searchUsersTest() throws Exception {
-		final IdList list = new IdList();
-		list.getIdList().add(1L);
-		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH_SEARCH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(list)))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser(authorities = { "ROLE_USER" })
+    public void searchUsersTest() throws Exception {
+        final IdList list = new IdList();
+        list.getIdList().add(1L);
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH_SEARCH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(list)))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void updateUserTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createUser(1L))))
-				.andExpect(status().isNoContent());
-	}
-	
-	@Test
-	@WithMockKeycloakUser(authorities = { "ROLE_USER" }, id = 0)
-	public void fieldAccessTest() throws Exception {
-		User user = ModelsUtil.createAdmin(1L);
-		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
-				.andExpect(status().isUnprocessableEntity());
-		user = ModelsUtil.createUser(1L);
-		user.setExpirationDate(LocalDate.now().plusYears(100));
-		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
-				.andExpect(status().isUnprocessableEntity());
-	}
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void updateUserTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createUser(1L))))
+                .andExpect(status().isNoContent());
+    }
+    
+    @Test
+    @WithMockKeycloakUser(authorities = { "ROLE_USER" }, id = 0)
+    public void fieldAccessTest() throws Exception {
+        User user = ModelsUtil.createAdmin(1L);
+        mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
+                .andExpect(status().isUnprocessableEntity());
+        user = ModelsUtil.createUser(1L);
+        user.setExpirationDate(LocalDate.now().plusYears(100));
+        mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
+                .andExpect(status().isUnprocessableEntity());
+    }
 
 }

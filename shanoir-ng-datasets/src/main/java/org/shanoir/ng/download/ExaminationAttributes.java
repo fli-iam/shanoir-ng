@@ -35,17 +35,17 @@ import org.shanoir.ng.examination.model.Examination;
  */
 public class ExaminationAttributes<T> {
 
-	private ConcurrentMap<T, Optional<AcquisitionAttributes<T>>> acquisitionMap = new ConcurrentHashMap<>();
+    private ConcurrentMap<T, Optional<AcquisitionAttributes<T>>> acquisitionMap = new ConcurrentHashMap<>();
 
-	private WADOURLHandler wadoURLHandler;
-	
+    private WADOURLHandler wadoURLHandler;
+    
     public ExaminationAttributes(WADOURLHandler wadoURLHandler) {
-    	this.wadoURLHandler = wadoURLHandler;
+        this.wadoURLHandler = wadoURLHandler;
     }
 
     public AcquisitionAttributes<T> getAcquisitionAttributes(T id) {
-		return acquisitionMap.get(id).orElse(null);
-	}
+        return acquisitionMap.get(id).orElse(null);
+    }
 
     public Attributes getDatasetAttributes(T acquisitionId, T datasetId) {
         if (acquisitionMap.containsKey(acquisitionId)) {
@@ -55,7 +55,7 @@ public class ExaminationAttributes<T> {
                 return null;
             }
         } else return null;
-	}
+    }
 
     public List<Attributes> getAllDatasetAttributes() {
         List<Attributes> res = new ArrayList<>();
@@ -67,14 +67,14 @@ public class ExaminationAttributes<T> {
             }
         }
         return res;
-	}
+    }
 
-	public void addDatasetAttributes(T acquisitionId, T datasetId, Attributes attributes) {
-		if (!acquisitionMap.containsKey(acquisitionId)) {
+    public void addDatasetAttributes(T acquisitionId, T datasetId, Attributes attributes) {
+        if (!acquisitionMap.containsKey(acquisitionId)) {
             acquisitionMap.put(acquisitionId, Optional.of(new AcquisitionAttributes<T>()));
         }
         acquisitionMap.get(acquisitionId).get().addDatasetAttributes(datasetId, attributes);
-	}
+    }
 
     public void addDatasetAttributes(ExaminationAttributes<Long> examinationAttributes, Examination examination, Attributes singleImageAttributes) {
         String sopUID = singleImageAttributes.getString(Tag.SOPInstanceUID);

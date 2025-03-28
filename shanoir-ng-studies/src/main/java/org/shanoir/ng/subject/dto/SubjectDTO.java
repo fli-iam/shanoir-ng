@@ -30,160 +30,160 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 
 public class SubjectDTO {
 
-	private Long id;
+    private Long id;
 
-	private String name;
+    private String name;
 
-	private String identifier;
+    private String identifier;
 
-	@JsonSerialize(using = LocalDateSerializer.class)
-	@JsonDeserialize(using = LocalDateDeserializer.class)
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-	private LocalDate birthDate;
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate birthDate;
 
-	private HemisphericDominance languageHemisphericDominance;
+    private HemisphericDominance languageHemisphericDominance;
 
-	private HemisphericDominance manualHemisphericDominance;
+    private HemisphericDominance manualHemisphericDominance;
 
-	private ImagedObjectCategory imagedObjectCategory;
+    private ImagedObjectCategory imagedObjectCategory;
 
-	private Sex sex;
+    private Sex sex;
 
-	private List<SubjectStudyDTO> subjectStudyList;
-	
-	private boolean preclinical;
+    private List<SubjectStudyDTO> subjectStudyList;
+    
+    private boolean preclinical;
 
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
 
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
+    /**
+     * @param id the id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * @param name the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	/**
-	 * @return the identifier
-	 */
-	public String getIdentifier() {
-		return identifier;
-	}
+    /**
+     * @return the identifier
+     */
+    public String getIdentifier() {
+        return identifier;
+    }
 
-	/**
-	 * @param identifier the identifier to set
-	 */
-	public void setIdentifier(String identifier) {
-		this.identifier = identifier;
-	}
+    /**
+     * @param identifier the identifier to set
+     */
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
 
-	/**
-	 * @return the birthDate
-	 */
-	public LocalDate getBirthDate() {
-		return birthDate;
-	}
+    /**
+     * @return the birthDate
+     */
+    public LocalDate getBirthDate() {
+        return birthDate;
+    }
 
-	/**
-	 * @param birthDate the birthDate to set
-	 */
-	public void setBirthDate(LocalDate birthDate) {
-		this.birthDate = birthDate;
-	}
+    /**
+     * @param birthDate the birthDate to set
+     */
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
+    }
 
-	/**
-	 * @return the languageHemisphericDominance
-	 */
-	public HemisphericDominance getLanguageHemisphericDominance() {
-		return languageHemisphericDominance;
-	}
+    /**
+     * @return the languageHemisphericDominance
+     */
+    public HemisphericDominance getLanguageHemisphericDominance() {
+        return languageHemisphericDominance;
+    }
 
-	/**
-	 * @param languageHemisphericDominance the languageHemisphericDominance to set
-	 */
-	public void setLanguageHemisphericDominance(HemisphericDominance languageHemisphericDominance) {
-		this.languageHemisphericDominance = languageHemisphericDominance;
-	}
+    /**
+     * @param languageHemisphericDominance the languageHemisphericDominance to set
+     */
+    public void setLanguageHemisphericDominance(HemisphericDominance languageHemisphericDominance) {
+        this.languageHemisphericDominance = languageHemisphericDominance;
+    }
 
-	/**
-	 * @return the manualHemisphericDominance
-	 */
-	public HemisphericDominance getManualHemisphericDominance() {
-		return manualHemisphericDominance;
-	}
+    /**
+     * @return the manualHemisphericDominance
+     */
+    public HemisphericDominance getManualHemisphericDominance() {
+        return manualHemisphericDominance;
+    }
 
-	/**
-	 * @param manualHemisphericDominance the manualHemisphericDominance to set
-	 */
-	public void setManualHemisphericDominance(HemisphericDominance manualHemisphericDominance) {
-		this.manualHemisphericDominance = manualHemisphericDominance;
-	}
+    /**
+     * @param manualHemisphericDominance the manualHemisphericDominance to set
+     */
+    public void setManualHemisphericDominance(HemisphericDominance manualHemisphericDominance) {
+        this.manualHemisphericDominance = manualHemisphericDominance;
+    }
 
-	/**
-	 * @return the imagedObjectCategory
-	 */
-	public ImagedObjectCategory getImagedObjectCategory() {
-		return imagedObjectCategory;
-	}
+    /**
+     * @return the imagedObjectCategory
+     */
+    public ImagedObjectCategory getImagedObjectCategory() {
+        return imagedObjectCategory;
+    }
 
-	/**
-	 * @param imagedObjectCategory the imagedObjectCategory to set
-	 */
-	public void setImagedObjectCategory(ImagedObjectCategory imagedObjectCategory) {
-		this.imagedObjectCategory = imagedObjectCategory;
-	}
+    /**
+     * @param imagedObjectCategory the imagedObjectCategory to set
+     */
+    public void setImagedObjectCategory(ImagedObjectCategory imagedObjectCategory) {
+        this.imagedObjectCategory = imagedObjectCategory;
+    }
 
-	/**
-	 * @return the sex
-	 */
-	public Sex getSex() {
-		return sex;
-	}
+    /**
+     * @return the sex
+     */
+    public Sex getSex() {
+        return sex;
+    }
 
-	/**
-	 * @param sex the sex to set
-	 */
-	public void setSex(Sex sex) {
-		this.sex = sex;
-	}
+    /**
+     * @param sex the sex to set
+     */
+    public void setSex(Sex sex) {
+        this.sex = sex;
+    }
 
-	/**
-	 * @return the subjectStudyList
-	 */
-	public List<SubjectStudyDTO> getSubjectStudyList() {
-		return subjectStudyList;
-	}
+    /**
+     * @return the subjectStudyList
+     */
+    public List<SubjectStudyDTO> getSubjectStudyList() {
+        return subjectStudyList;
+    }
 
-	/**
-	 * @param subjectStudyList the subjectStudyList to set
-	 */
-	public void setSubjectStudyList(List<SubjectStudyDTO> subjectStudyList) {
-		this.subjectStudyList = subjectStudyList;
-	}
+    /**
+     * @param subjectStudyList the subjectStudyList to set
+     */
+    public void setSubjectStudyList(List<SubjectStudyDTO> subjectStudyList) {
+        this.subjectStudyList = subjectStudyList;
+    }
 
-	public boolean isPreclinical() {
-		return preclinical;
-	}
+    public boolean isPreclinical() {
+        return preclinical;
+    }
 
-	public void setPreclinical(boolean preclinical) {
-		this.preclinical = preclinical;
-	}
+    public void setPreclinical(boolean preclinical) {
+        this.preclinical = preclinical;
+    }
 }

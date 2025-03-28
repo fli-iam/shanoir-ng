@@ -47,10 +47,10 @@ public class RoleServiceTest {
     @InjectMocks
     private RoleServiceImpl roleService;
 
-	@BeforeEach
-	public void setup() {
-		given(roleRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createUserRole()));
-	}
+    @BeforeEach
+    public void setup() {
+        given(roleRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createUserRole()));
+    }
 
     @Test
     public void findAllTest() {

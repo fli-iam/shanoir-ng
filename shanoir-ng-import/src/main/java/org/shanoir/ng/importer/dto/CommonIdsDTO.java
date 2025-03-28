@@ -22,78 +22,78 @@ package org.shanoir.ng.importer.dto;
  */
 public class CommonIdsDTO {
 
-	private Long centerId;
+    private Long centerId;
 
-	private Long studyId;
+    private Long studyId;
 
-	private Long subjectId;
+    private Long subjectId;
 
-	private Long equipementId;
+    private Long equipementId;
 
-	public CommonIdsDTO(Long centerId, Long studyId, Long subjectId, Long equipementId) {
-		super();
-		this.centerId = centerId;
-		this.studyId = studyId;
-		this.subjectId = subjectId;
-		this.equipementId = equipementId;
-	}
+    public CommonIdsDTO(Long centerId, Long studyId, Long subjectId, Long equipementId) {
+        super();
+        this.centerId = centerId;
+        this.studyId = studyId;
+        this.subjectId = subjectId;
+        this.equipementId = equipementId;
+    }
 
-	/**
-	 * @return the centerId
-	 */
-	public Long getCenterId() {
-		return centerId;
-	}
+    /**
+     * @return the centerId
+     */
+    public Long getCenterId() {
+        return centerId;
+    }
 
-	/**
-	 * @param centerId
-	 *            the centerId to set
-	 */
-	public void setCenterId(Long centerId) {
-		this.centerId = centerId;
-	}
+    /**
+     * @param centerId
+     *            the centerId to set
+     */
+    public void setCenterId(Long centerId) {
+        this.centerId = centerId;
+    }
 
-	/**
-	 * @return the studyId
-	 */
-	public Long getStudyId() {
-		return studyId;
-	}
+    /**
+     * @return the studyId
+     */
+    public Long getStudyId() {
+        return studyId;
+    }
 
-	/**
-	 * @param studyId
-	 *            the studyId to set
-	 */
-	public void setStudyId(Long studyId) {
-		this.studyId = studyId;
-	}
+    /**
+     * @param studyId
+     *            the studyId to set
+     */
+    public void setStudyId(Long studyId) {
+        this.studyId = studyId;
+    }
 
-	/**
-	 * @return the subjectId
-	 */
-	public Long getSubjectId() {
-		return subjectId;
-	}
+    /**
+     * @return the subjectId
+     */
+    public Long getSubjectId() {
+        return subjectId;
+    }
 
-	/**
-	 * @param subjectId
-	 *            the subjectId to set
-	 */
-	public void setSubjectId(Long subjectId) {
-		this.subjectId = subjectId;
-	}
+    /**
+     * @param subjectId
+     *            the subjectId to set
+     */
+    public void setSubjectId(Long subjectId) {
+        this.subjectId = subjectId;
+    }
 
-	/**
-	 * @return the equipementId
-	 */
-	public Long getEquipementId() {
-		return equipementId;
-	}
+    /**
+     * @return the equipementId
+     */
+    public Long getEquipementId() {
+        return equipementId;
+    }
 
-	/**
-	 * @param equipementId the equipementId to set
-	 */
-	public void setEquipementId(Long equipementId) {
-		this.equipementId = equipementId;
-	}
+    /**
+     * @param equipementId the equipementId to set
+     */
+    public void setEquipementId(Long equipementId) {
+        this.equipementId = equipementId;
+    }
 }

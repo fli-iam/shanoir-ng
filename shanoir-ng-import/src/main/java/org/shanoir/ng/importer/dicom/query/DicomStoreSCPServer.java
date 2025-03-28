@@ -42,36 +42,36 @@ import jakarta.annotation.PostConstruct;
 @Service
 public class DicomStoreSCPServer {
 
-	/**
-	 * In the brackets '{ggggeeee}' the dicom attribute value is used to be replaced.
-	 * We store in a folder with the SeriesInstanceUID and the file name of the SOPInstanceUID.
-	 */
-	private static final String STORAGE_PATTERN = "/{0020000E}/{00080018}";
-	
-	public static final String DICOM_FILE_SUFFIX = ".dcm";
+    /**
+     * In the brackets '{ggggeeee}' the dicom attribute value is used to be replaced.
+     * We store in a folder with the SeriesInstanceUID and the file name of the SOPInstanceUID.
+     */
+    private static final String STORAGE_PATTERN = "/{0020000E}/{00080018}";
+    
+    public static final String DICOM_FILE_SUFFIX = ".dcm";
 
-	private static final Logger LOG = LoggerFactory.getLogger(DicomStoreSCPServer.class);
-	
-	@Value("${shanoir.import.pacs.store.aet.called.name}")
-	private String calledName;
+    private static final Logger LOG = LoggerFactory.getLogger(DicomStoreSCPServer.class);
+    
+    @Value("${shanoir.import.pacs.store.aet.called.name}")
+    private String calledName;
 
-	@Value("${shanoir.import.pacs.store.aet.called.host}")
-	private String calledHost;
-	
-	@Value("${shanoir.import.pacs.store.aet.called.port}")
-	private Integer calledPort;
-	
-	@Value("${shanoir.import.pacs.store.folder}")
-	private String storageDirPath;
-	
-	@PostConstruct
-	private void initServer() {
+    @Value("${shanoir.import.pacs.store.aet.called.host}")
+    private String calledHost;
+    
+    @Value("${shanoir.import.pacs.store.aet.called.port}")
+    private Integer calledPort;
+    
+    @Value("${shanoir.import.pacs.store.folder}")
+    private String storageDirPath;
+    
+    @PostConstruct
+    private void initServer() {
         DicomNode scpNode = new DicomNode(calledName, calledHost, calledPort);
         File storageDir = new File(storageDirPath);
         if (!storageDir.exists()) {
-        		storageDir.mkdirs();
+                storageDir.mkdirs();
         }
-		AdvancedParams params = new AdvancedParams();
+        AdvancedParams params = new AdvancedParams();
         ConnectOptions connectOptions = new ConnectOptions();
         connectOptions.setConnectTimeout(3000);
         connectOptions.setAcceptTimeout(5000);
@@ -81,20 +81,20 @@ public class DicomStoreSCPServer {
         params.setConnectOptions(connectOptions);
         ListenerParams lparams = new ListenerParams(params, true, STORAGE_PATTERN + DICOM_FILE_SUFFIX, null, null);
         try {
-        		DicomListener listener = new DicomListener(storageDir);
+                DicomListener listener = new DicomListener(storageDir);
             listener.start(scpNode, lparams);
         } catch (Exception e) {
            LOG.error(e.getMessage(), e);
         }
         LOG.info("DicomStoreSCPServer successfully initialized: {}, {}, {}, {}", calledName, calledHost, calledPort, storageDirPath);
-	}
+    }
 
-	public String getStorageDirPath() {
-		return storageDirPath;
-	}
+    public String getStorageDirPath() {
+        return storageDirPath;
+    }
 
-	public void setStorageDirPath(String storageDirPath) {
-		this.storageDirPath = storageDirPath;
-	}
-	
+    public void setStorageDirPath(String storageDirPath) {
+        this.storageDirPath = storageDirPath;
+    }
+    
 }

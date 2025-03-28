@@ -46,147 +46,147 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class SubjectPathologyServiceTest {
 
-	private static final Long SPATHO_ID = 1L;
-	private static final String UPDATED_PATHO_NAME = "Cancer";
-	private static final Long LOCATION_ID = 2L;
+    private static final Long SPATHO_ID = 1L;
+    private static final String UPDATED_PATHO_NAME = "Cancer";
+    private static final Long LOCATION_ID = 2L;
 
-	@Mock
-	private SubjectPathologyRepository spathosRepository;
+    @Mock
+    private SubjectPathologyRepository spathosRepository;
 
-	@Mock
-	private RefsRepository refsRepository;
+    @Mock
+    private RefsRepository refsRepository;
 
-	@Mock
-	private RabbitTemplate rabbitTemplate;
+    @Mock
+    private RabbitTemplate rabbitTemplate;
 
-	@InjectMocks
-	private SubjectPathologyServiceImpl spathosService;
+    @InjectMocks
+    private SubjectPathologyServiceImpl spathosService;
 
-	@BeforeEach
-	public void setup() {
-		given(spathosRepository.findAll()).willReturn(Arrays.asList(PathologyModelUtil.createSubjectPathology()));
-		given(spathosRepository.findAllByLocation(ReferenceModelUtil.createReferenceLocation()))
-				.willReturn(Arrays.asList(PathologyModelUtil.createSubjectPathology()));
-		given(spathosRepository.findAllByPathologyModel(PathologyModelUtil.createPathologyModel()))
-				.willReturn(Arrays.asList(PathologyModelUtil.createSubjectPathology()));
-		given(spathosRepository.findAllByPathology(PathologyModelUtil.createPathology()))
-				.willReturn(Arrays.asList(PathologyModelUtil.createSubjectPathology()));
-		given(spathosRepository.findById(SPATHO_ID)).willReturn(Optional.of(PathologyModelUtil.createSubjectPathology()));
-		given(spathosRepository.save(Mockito.any(SubjectPathology.class)))
-				.willReturn(PathologyModelUtil.createSubjectPathology());
-	}
+    @BeforeEach
+    public void setup() {
+        given(spathosRepository.findAll()).willReturn(Arrays.asList(PathologyModelUtil.createSubjectPathology()));
+        given(spathosRepository.findAllByLocation(ReferenceModelUtil.createReferenceLocation()))
+                .willReturn(Arrays.asList(PathologyModelUtil.createSubjectPathology()));
+        given(spathosRepository.findAllByPathologyModel(PathologyModelUtil.createPathologyModel()))
+                .willReturn(Arrays.asList(PathologyModelUtil.createSubjectPathology()));
+        given(spathosRepository.findAllByPathology(PathologyModelUtil.createPathology()))
+                .willReturn(Arrays.asList(PathologyModelUtil.createSubjectPathology()));
+        given(spathosRepository.findById(SPATHO_ID)).willReturn(Optional.of(PathologyModelUtil.createSubjectPathology()));
+        given(spathosRepository.save(Mockito.any(SubjectPathology.class)))
+                .willReturn(PathologyModelUtil.createSubjectPathology());
+    }
 
-	@Test
-	public void deleteByIdTest() throws ShanoirException {
-		spathosService.deleteById(SPATHO_ID);
+    @Test
+    public void deleteByIdTest() throws ShanoirException {
+        spathosService.deleteById(SPATHO_ID);
 
-		Mockito.verify(spathosRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
-	}
+        Mockito.verify(spathosRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
+    }
 
-	@Test
-	public void deleteByAnimalSubjectTest() throws ShanoirException {
-		
-		given(spathosRepository.findByAnimalSubject(Mockito.any(AnimalSubject.class))).willReturn(Arrays.asList(PathologyModelUtil.createSubjectPathology()));
+    @Test
+    public void deleteByAnimalSubjectTest() throws ShanoirException {
+        
+        given(spathosRepository.findByAnimalSubject(Mockito.any(AnimalSubject.class))).willReturn(Arrays.asList(PathologyModelUtil.createSubjectPathology()));
 
-		spathosService.deleteByAnimalSubject(AnimalSubjectModelUtil.createAnimalSubject());
+        spathosService.deleteByAnimalSubject(AnimalSubjectModelUtil.createAnimalSubject());
 
-		Mockito.verify(spathosRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
-	}
+        Mockito.verify(spathosRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
+    }
 
-	@Test
-	public void findAllTest() {
-		final List<SubjectPathology> spathos = spathosService.findAll();
-		Assertions.assertNotNull(spathos);
-		Assertions.assertTrue(spathos.size() == 1);
+    @Test
+    public void findAllTest() {
+        final List<SubjectPathology> spathos = spathosService.findAll();
+        Assertions.assertNotNull(spathos);
+        Assertions.assertTrue(spathos.size() == 1);
 
-		Mockito.verify(spathosRepository, Mockito.times(1)).findAll();
-	}
+        Mockito.verify(spathosRepository, Mockito.times(1)).findAll();
+    }
 
-	/* THIS ONE WONT PASS DONT KNOW WHY... */
-	/*
-	 * @Test public void findAllBySubjectTest() { final List<SubjectPathology>
-	 * spathos = spathosService.findBySubject(SubjectModelUtil.createSubject());
-	 * Assertions.assertNotNull(spathos); Assertions.assertTrue(spathos.size() == 1);
-	 *
-	 * Mockito.verify(spathosRepository,
-	 * Mockito.times(1)).findBySubject(SubjectModelUtil.createSubject()); }
-	 */
-	@Test
-	public void findAllByPathologyTest() {
-		final List<SubjectPathology> spathos = spathosService.findAllByPathology(PathologyModelUtil.createPathology());
-		Assertions.assertNotNull(spathos);
-		Assertions.assertTrue(spathos.size() == 1);
+    /* THIS ONE WONT PASS DONT KNOW WHY... */
+    /*
+     * @Test public void findAllBySubjectTest() { final List<SubjectPathology>
+     * spathos = spathosService.findBySubject(SubjectModelUtil.createSubject());
+     * Assertions.assertNotNull(spathos); Assertions.assertTrue(spathos.size() == 1);
+     *
+     * Mockito.verify(spathosRepository,
+     * Mockito.times(1)).findBySubject(SubjectModelUtil.createSubject()); }
+     */
+    @Test
+    public void findAllByPathologyTest() {
+        final List<SubjectPathology> spathos = spathosService.findAllByPathology(PathologyModelUtil.createPathology());
+        Assertions.assertNotNull(spathos);
+        Assertions.assertTrue(spathos.size() == 1);
 
-		Mockito.verify(spathosRepository, Mockito.times(1)).findAllByPathology(PathologyModelUtil.createPathology());
-	}
+        Mockito.verify(spathosRepository, Mockito.times(1)).findAllByPathology(PathologyModelUtil.createPathology());
+    }
 
-	@Test
-	public void findAllByPathologyModelTest() {
-		final List<SubjectPathology> spathos = spathosService
-				.findAllByPathologyModel(PathologyModelUtil.createPathologyModel());
-		Assertions.assertNotNull(spathos);
-		Assertions.assertTrue(spathos.size() == 1);
+    @Test
+    public void findAllByPathologyModelTest() {
+        final List<SubjectPathology> spathos = spathosService
+                .findAllByPathologyModel(PathologyModelUtil.createPathologyModel());
+        Assertions.assertNotNull(spathos);
+        Assertions.assertTrue(spathos.size() == 1);
 
-		Mockito.verify(spathosRepository, Mockito.times(1))
-				.findAllByPathologyModel(PathologyModelUtil.createPathologyModel());
-	}
+        Mockito.verify(spathosRepository, Mockito.times(1))
+                .findAllByPathologyModel(PathologyModelUtil.createPathologyModel());
+    }
 
-	@Test
-	public void findAllByLocationTest() {
-		final List<SubjectPathology> spathos = spathosService
-				.findAllByLocation(ReferenceModelUtil.createReferenceLocation());
-		Assertions.assertNotNull(spathos);
-		Assertions.assertTrue(spathos.size() == 1);
+    @Test
+    public void findAllByLocationTest() {
+        final List<SubjectPathology> spathos = spathosService
+                .findAllByLocation(ReferenceModelUtil.createReferenceLocation());
+        Assertions.assertNotNull(spathos);
+        Assertions.assertTrue(spathos.size() == 1);
 
-		Mockito.verify(spathosRepository, Mockito.times(1))
-				.findAllByLocation(ReferenceModelUtil.createReferenceLocation());
-	}
+        Mockito.verify(spathosRepository, Mockito.times(1))
+                .findAllByLocation(ReferenceModelUtil.createReferenceLocation());
+    }
 
-	@Test
-	public void findByIdTest() {
-		final SubjectPathology spatho = spathosService.findById(SPATHO_ID);
-		Assertions.assertNotNull(spatho);
-		Assertions.assertTrue(PathologyModelUtil.MODEL_NAME.equals(spatho.getPathologyModel().getName()));
-		Assertions.assertTrue(PathologyModelUtil.PATHOLOGY_NAME.equals(spatho.getPathology().getName()));
-		Assertions.assertTrue(ReferenceModelUtil.REFERENCE_LOCATION_VALUE.equals(spatho.getLocation().getValue()));
-		Assertions.assertTrue(AnimalSubjectModelUtil.ID.equals(spatho.getAnimalSubject().getId()));
-		Mockito.verify(spathosRepository, Mockito.times(1)).findById(Mockito.anyLong());
-	}
+    @Test
+    public void findByIdTest() {
+        final SubjectPathology spatho = spathosService.findById(SPATHO_ID);
+        Assertions.assertNotNull(spatho);
+        Assertions.assertTrue(PathologyModelUtil.MODEL_NAME.equals(spatho.getPathologyModel().getName()));
+        Assertions.assertTrue(PathologyModelUtil.PATHOLOGY_NAME.equals(spatho.getPathology().getName()));
+        Assertions.assertTrue(ReferenceModelUtil.REFERENCE_LOCATION_VALUE.equals(spatho.getLocation().getValue()));
+        Assertions.assertTrue(AnimalSubjectModelUtil.ID.equals(spatho.getAnimalSubject().getId()));
+        Mockito.verify(spathosRepository, Mockito.times(1)).findById(Mockito.anyLong());
+    }
 
-	@Test
-	public void saveTest() throws ShanoirException {
-		spathosService.save(createSubjectPathology());
+    @Test
+    public void saveTest() throws ShanoirException {
+        spathosService.save(createSubjectPathology());
 
-		Mockito.verify(spathosRepository, Mockito.times(1)).save(Mockito.any(SubjectPathology.class));
-	}
+        Mockito.verify(spathosRepository, Mockito.times(1)).save(Mockito.any(SubjectPathology.class));
+    }
 
-	@Test
-	public void updateTest() throws ShanoirException {
-		final SubjectPathology updatedSpatho = spathosService.update(createSubjectPathology());
-		Assertions.assertNotNull(updatedSpatho);
-		Assertions.assertTrue(UPDATED_PATHO_NAME.equals(updatedSpatho.getPathology().getName()));
+    @Test
+    public void updateTest() throws ShanoirException {
+        final SubjectPathology updatedSpatho = spathosService.update(createSubjectPathology());
+        Assertions.assertNotNull(updatedSpatho);
+        Assertions.assertTrue(UPDATED_PATHO_NAME.equals(updatedSpatho.getPathology().getName()));
 
-		Mockito.verify(spathosRepository, Mockito.times(1)).save(Mockito.any(SubjectPathology.class));
-	}
+        Mockito.verify(spathosRepository, Mockito.times(1)).save(Mockito.any(SubjectPathology.class));
+    }
 
-	/*
-	 * @Test public void updateFromShanoirOldTest() throws
-	 * ShanoirException {
-	 * pathologiesService.updateFromShanoirOld(createPathology());
-	 *
-	 * Mockito.verify(pathologiesRepository,
-	 * Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
-	 * Mockito.verify(pathologiesRepository,
-	 * Mockito.times(1)).save(Mockito.any(Pathology.class)); }
-	 */
-	private SubjectPathology createSubjectPathology() {
-		final SubjectPathology spatho = new SubjectPathology();
-		spatho.setId(SPATHO_ID);
-		spatho.setLocation(ReferenceModelUtil.createReferenceLocation());
-		spatho.setPathology(PathologyModelUtil.createPathologyCancer());
-		spatho.setPathologyModel(PathologyModelUtil.createPathologyModel());
-		spatho.setAnimalSubject(AnimalSubjectModelUtil.createAnimalSubject());
-		return spatho;
-	}
+    /*
+     * @Test public void updateFromShanoirOldTest() throws
+     * ShanoirException {
+     * pathologiesService.updateFromShanoirOld(createPathology());
+     *
+     * Mockito.verify(pathologiesRepository,
+     * Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+     * Mockito.verify(pathologiesRepository,
+     * Mockito.times(1)).save(Mockito.any(Pathology.class)); }
+     */
+    private SubjectPathology createSubjectPathology() {
+        final SubjectPathology spatho = new SubjectPathology();
+        spatho.setId(SPATHO_ID);
+        spatho.setLocation(ReferenceModelUtil.createReferenceLocation());
+        spatho.setPathology(PathologyModelUtil.createPathologyCancer());
+        spatho.setPathologyModel(PathologyModelUtil.createPathologyModel());
+        spatho.setAnimalSubject(AnimalSubjectModelUtil.createAnimalSubject());
+        return spatho;
+    }
 
 }

@@ -23,90 +23,90 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Image {
 
-	@JsonProperty("path")
-	public String path;
+    @JsonProperty("path")
+    public String path;
 
-	@JsonProperty("acquisitionNumber")
-	public int acquisitionNumber;
+    @JsonProperty("acquisitionNumber")
+    public int acquisitionNumber;
 
-	@JsonProperty("echoTimes")
-	public Set<EchoTime> echoTimes;
-	
-	@JsonProperty("repetitionTime")
-	public Double repetitionTime;
-	
-	@JsonProperty("inversionTime")
-	public Double inversionTime;
+    @JsonProperty("echoTimes")
+    public Set<EchoTime> echoTimes;
+    
+    @JsonProperty("repetitionTime")
+    public Double repetitionTime;
+    
+    @JsonProperty("inversionTime")
+    public Double inversionTime;
 
-	@JsonProperty("flipAngle")
-	public String flipAngle;
-	
-	@JsonProperty("imageOrientationPatient")
-	public List<Double> imageOrientationPatient;
+    @JsonProperty("flipAngle")
+    public String flipAngle;
+    
+    @JsonProperty("imageOrientationPatient")
+    public List<Double> imageOrientationPatient;
 
-	public String SOPInstanceUID;
+    public String SOPInstanceUID;
 
-	public String getPath() {
-		return path;
-	}
+    public String getPath() {
+        return path;
+    }
 
-	public void setPath(String path) {
-		this.path = path;
-	}
+    public void setPath(String path) {
+        this.path = path;
+    }
 
-	public int getAcquisitionNumber() {
-		return acquisitionNumber;
-	}
+    public int getAcquisitionNumber() {
+        return acquisitionNumber;
+    }
 
-	public void setAcquisitionNumber(int acquisitionNumber) {
-		this.acquisitionNumber = acquisitionNumber;
-	}
+    public void setAcquisitionNumber(int acquisitionNumber) {
+        this.acquisitionNumber = acquisitionNumber;
+    }
 
-	public List<Double> getImageOrientationPatient() {
-		return imageOrientationPatient;
-	}
+    public List<Double> getImageOrientationPatient() {
+        return imageOrientationPatient;
+    }
 
-	public Set<EchoTime> getEchoTimes() {
-		return echoTimes;
-	}
+    public Set<EchoTime> getEchoTimes() {
+        return echoTimes;
+    }
 
-	public void setEchoTimes(Set<EchoTime> echoTimes) {
-		this.echoTimes = echoTimes;
-	}
+    public void setEchoTimes(Set<EchoTime> echoTimes) {
+        this.echoTimes = echoTimes;
+    }
 
-	public void setImageOrientationPatient(List<Double> imageOrientationPatient) {
-		this.imageOrientationPatient = imageOrientationPatient;
-	}
+    public void setImageOrientationPatient(List<Double> imageOrientationPatient) {
+        this.imageOrientationPatient = imageOrientationPatient;
+    }
 
-	public Double getRepetitionTime() {
-		return repetitionTime;
-	}
+    public Double getRepetitionTime() {
+        return repetitionTime;
+    }
 
-	public void setRepetitionTime(Double repetitionTime) {
-		this.repetitionTime = repetitionTime;
-	}
+    public void setRepetitionTime(Double repetitionTime) {
+        this.repetitionTime = repetitionTime;
+    }
 
-	public Double getInversionTime() {
-		return inversionTime;
-	}
+    public Double getInversionTime() {
+        return inversionTime;
+    }
 
-	public void setInversionTime(Double inversionTime) {
-		this.inversionTime = inversionTime;
-	}
+    public void setInversionTime(Double inversionTime) {
+        this.inversionTime = inversionTime;
+    }
 
-	public String getFlipAngle() {
-		return flipAngle;
-	}
+    public String getFlipAngle() {
+        return flipAngle;
+    }
 
-	public void setFlipAngle(String flipAngle) {
-		this.flipAngle = flipAngle;
-	}
+    public void setFlipAngle(String flipAngle) {
+        this.flipAngle = flipAngle;
+    }
 
-	public String getSOPInstanceUID() {
-		return SOPInstanceUID;
-	}
+    public String getSOPInstanceUID() {
+        return SOPInstanceUID;
+    }
 
-	public void setSOPInstanceUID(String sOPInstanceUID) {
-		SOPInstanceUID = sOPInstanceUID;
-	}
+    public void setSOPInstanceUID(String sOPInstanceUID) {
+        SOPInstanceUID = sOPInstanceUID;
+    }
 }

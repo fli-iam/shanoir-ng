@@ -38,121 +38,121 @@ import org.springframework.stereotype.Component;
 @Component
 public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy {
 
-	/** Logger. */
-	private static final Logger LOG = LoggerFactory.getLogger(DicomDatasetExpressionStrategy.class);
+    /** Logger. */
+    private static final Logger LOG = LoggerFactory.getLogger(DicomDatasetExpressionStrategy.class);
 
-	@Value("${dcm4chee-arc.protocol}")
-	private String dcm4cheeProtocol;
-	
-	@Value("${dcm4chee-arc.host}")
-	private String dcm4cheeHost;
+    @Value("${dcm4chee-arc.protocol}")
+    private String dcm4cheeProtocol;
+    
+    @Value("${dcm4chee-arc.host}")
+    private String dcm4cheeHost;
 
-	@Value("${dcm4chee-arc.port.web}")
-	private String dcm4cheePortWeb;
-	
-	@Value("${dcm4chee-arc.dicom.web}")
-	private boolean dicomWeb;
-	
-	@Value("${dcm4chee-arc.dicom.wado.uri}")
-	private String dicomWADOURI;
-	
-	@Value("${dcm4chee-arc.dicom.web.rs}")
-	private String dicomWebRS;
+    @Value("${dcm4chee-arc.port.web}")
+    private String dcm4cheePortWeb;
+    
+    @Value("${dcm4chee-arc.dicom.web}")
+    private boolean dicomWeb;
+    
+    @Value("${dcm4chee-arc.dicom.wado.uri}")
+    private String dicomWADOURI;
+    
+    @Value("${dcm4chee-arc.dicom.web.rs}")
+    private String dicomWebRS;
 
-	@Override
-	public DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob, ExpressionFormat expressionFormat) throws IOException {
-		DatasetExpression pacsDatasetExpression = new DatasetExpression();
-		pacsDatasetExpression.setCreationDate(LocalDateTime.now());
-		pacsDatasetExpression.setDatasetExpressionFormat(DatasetExpressionFormat.DICOM);
+    @Override
+    public DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob, ExpressionFormat expressionFormat) throws IOException {
+        DatasetExpression pacsDatasetExpression = new DatasetExpression();
+        pacsDatasetExpression.setCreationDate(LocalDateTime.now());
+        pacsDatasetExpression.setDatasetExpressionFormat(DatasetExpressionFormat.DICOM);
 
-		if (Boolean.TRUE.equals(serie.getIsMultiFrame())) {
-			pacsDatasetExpression.setMultiFrame(true);
-			pacsDatasetExpression.setFrameCount(serie.getMultiFrameCount());
-		}
+        if (Boolean.TRUE.equals(serie.getIsMultiFrame())) {
+            pacsDatasetExpression.setMultiFrame(true);
+            pacsDatasetExpression.setFrameCount(serie.getMultiFrameCount());
+        }
 
-		if (expressionFormat == null || !expressionFormat.getType().equals("dcm")) {
-			return pacsDatasetExpression;
-		}
+        if (expressionFormat == null || !expressionFormat.getType().equals("dcm")) {
+            return pacsDatasetExpression;
+        }
 
-		long filesSize = 0L;
+        long filesSize = 0L;
 
-		for (org.shanoir.ng.importer.dto.DatasetFile datasetFile : expressionFormat.getDatasetFiles()) {
-			LocalDateTime contentTime;
-			LocalDateTime acquisitionTime;
-			Attributes dicomAttributes;
+        for (org.shanoir.ng.importer.dto.DatasetFile datasetFile : expressionFormat.getDatasetFiles()) {
+            LocalDateTime contentTime;
+            LocalDateTime acquisitionTime;
+            Attributes dicomAttributes;
 
-			try {
-				dicomAttributes = DicomProcessing.getDicomObjectAttributes(datasetFile, serie.getIsEnhanced());
-			} catch (IOException e) {
-				LOG.error("Error while reading DICOM attributes from file.", e);
-				throw e;
-			}
+            try {
+                dicomAttributes = DicomProcessing.getDicomObjectAttributes(datasetFile, serie.getIsEnhanced());
+            } catch (IOException e) {
+                LOG.error("Error while reading DICOM attributes from file.", e);
+                throw e;
+            }
 
-			DatasetFile pacsDatasetFile = new DatasetFile();
-			pacsDatasetFile.setPacs(true);
+            DatasetFile pacsDatasetFile = new DatasetFile();
+            pacsDatasetFile.setPacs(true);
 
-			filesSize += Files.size(Paths.get(datasetFile.getPath()));
+            filesSize += Files.size(Paths.get(datasetFile.getPath()));
 
-			final String studyInstanceUID = dicomAttributes.getString(Tag.StudyInstanceUID);
-			final String seriesInstanceUID = dicomAttributes.getString(Tag.SeriesInstanceUID);
-			final String sOPInstanceUID = dicomAttributes.getString(Tag.SOPInstanceUID);
-			final StringBuilder wadoStrBuf = new StringBuilder();
+            final String studyInstanceUID = dicomAttributes.getString(Tag.StudyInstanceUID);
+            final String seriesInstanceUID = dicomAttributes.getString(Tag.SeriesInstanceUID);
+            final String sOPInstanceUID = dicomAttributes.getString(Tag.SOPInstanceUID);
+            final StringBuilder wadoStrBuf = new StringBuilder();
 
-			wadoStrBuf.append(dcm4cheeProtocol).append(dcm4cheeHost).append(":").append(dcm4cheePortWeb);
-			// Use WADO-RS if true, WADO-URI if otherwise
-			if (dicomWeb) {
-				wadoStrBuf.append(dicomWebRS)
-						.append("/")
-						.append(studyInstanceUID)
-						.append("/series/")
-						.append(seriesInstanceUID)
-						.append("/instances/")
-						.append(sOPInstanceUID);
-			} else {
-				wadoStrBuf.append(dicomWADOURI)
-						.append("?requestType=WADO&studyUID=")
-						.append(studyInstanceUID).append("&seriesUID=")
-						.append(seriesInstanceUID).append("&objectUID=")
-						.append(sOPInstanceUID)
-						.append("&contentType=application/dicom");
-			}
+            wadoStrBuf.append(dcm4cheeProtocol).append(dcm4cheeHost).append(":").append(dcm4cheePortWeb);
+            // Use WADO-RS if true, WADO-URI if otherwise
+            if (dicomWeb) {
+                wadoStrBuf.append(dicomWebRS)
+                        .append("/")
+                        .append(studyInstanceUID)
+                        .append("/series/")
+                        .append(seriesInstanceUID)
+                        .append("/instances/")
+                        .append(sOPInstanceUID);
+            } else {
+                wadoStrBuf.append(dicomWADOURI)
+                        .append("?requestType=WADO&studyUID=")
+                        .append(studyInstanceUID).append("&seriesUID=")
+                        .append(seriesInstanceUID).append("&objectUID=")
+                        .append(sOPInstanceUID)
+                        .append("&contentType=application/dicom");
+            }
 
-			URL wadoURL = new URL(wadoStrBuf.toString());
-			pacsDatasetFile.setPath(wadoURL.toString());
+            URL wadoURL = new URL(wadoStrBuf.toString());
+            pacsDatasetFile.setPath(wadoURL.toString());
 
-			pacsDatasetExpression.getDatasetFiles().add(pacsDatasetFile);
-			pacsDatasetFile.setDatasetExpression(pacsDatasetExpression);
+            pacsDatasetExpression.getDatasetFiles().add(pacsDatasetFile);
+            pacsDatasetFile.setDatasetExpression(pacsDatasetExpression);
 
-			// calculate the acquisition duration for this acquisition
-			acquisitionTime = DateTimeUtils.dateToLocalDateTime(dicomAttributes.getDate(Tag.AcquisitionTime));
-			contentTime = DateTimeUtils.dateToLocalDateTime(dicomAttributes.getDate(Tag.ContentTime));
+            // calculate the acquisition duration for this acquisition
+            acquisitionTime = DateTimeUtils.dateToLocalDateTime(dicomAttributes.getDate(Tag.AcquisitionTime));
+            contentTime = DateTimeUtils.dateToLocalDateTime(dicomAttributes.getDate(Tag.ContentTime));
 
-			this.setAcquistionDuration(pacsDatasetExpression, acquisitionTime);
+            this.setAcquistionDuration(pacsDatasetExpression, acquisitionTime);
 
-			this.setAcquistionDuration(pacsDatasetExpression, contentTime);
-		}
+            this.setAcquistionDuration(pacsDatasetExpression, contentTime);
+        }
 
-		pacsDatasetExpression.setSize(filesSize);
-		return pacsDatasetExpression;
-	}
+        pacsDatasetExpression.setSize(filesSize);
+        return pacsDatasetExpression;
+    }
 
-	private void setAcquistionDuration(DatasetExpression pacsDatasetExpression, LocalDateTime time) {
+    private void setAcquistionDuration(DatasetExpression pacsDatasetExpression, LocalDateTime time) {
 
-		if (time == null) {
-			return;
-		}
+        if (time == null) {
+            return;
+        }
 
-		if (pacsDatasetExpression.getLastImageAcquisitionTime() == null) {
-			pacsDatasetExpression.setLastImageAcquisitionTime(time);
-		}
-		if (pacsDatasetExpression.getFirstImageAcquisitionTime() == null) {
-			pacsDatasetExpression.setFirstImageAcquisitionTime(time);
-		}
-		if (time.isAfter(pacsDatasetExpression.getLastImageAcquisitionTime())) {
-			pacsDatasetExpression.setLastImageAcquisitionTime(time);
-		} else if (time.isBefore(pacsDatasetExpression.getFirstImageAcquisitionTime())) {
-			pacsDatasetExpression.setFirstImageAcquisitionTime(time);
-		}
-	}
+        if (pacsDatasetExpression.getLastImageAcquisitionTime() == null) {
+            pacsDatasetExpression.setLastImageAcquisitionTime(time);
+        }
+        if (pacsDatasetExpression.getFirstImageAcquisitionTime() == null) {
+            pacsDatasetExpression.setFirstImageAcquisitionTime(time);
+        }
+        if (time.isAfter(pacsDatasetExpression.getLastImageAcquisitionTime())) {
+            pacsDatasetExpression.setLastImageAcquisitionTime(time);
+        } else if (time.isBefore(pacsDatasetExpression.getFirstImageAcquisitionTime())) {
+            pacsDatasetExpression.setFirstImageAcquisitionTime(time);
+        }
+    }
 
 }

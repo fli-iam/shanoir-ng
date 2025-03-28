@@ -19,38 +19,38 @@ import java.util.Optional;
 
 public interface ExecutionMonitoringService {
 
-	/**
-	 * Create execution monitoring
-	 *
-	 * @param execution
-	 * @param inputDatasets
-	 * @return the created execution monitoring
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-	ExecutionMonitoring createExecutionMonitoring(ExecutionCandidateDTO execution, List<Dataset> inputDatasets) throws RestServiceException;
+    /**
+     * Create execution monitoring
+     *
+     * @param execution
+     * @param inputDatasets
+     * @return the created execution monitoring
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+    ExecutionMonitoring createExecutionMonitoring(ExecutionCandidateDTO execution, List<Dataset> inputDatasets) throws RestServiceException;
 
-	/**
-	 * Update an execution monitoring.
-	 *
-	 * @param executionMonitoring the entity to update.
-	 * @return updated execution monitoring.
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-	ExecutionMonitoring update(ExecutionMonitoring executionMonitoring) throws EntityNotFoundException;
+    /**
+     * Update an execution monitoring.
+     *
+     * @param executionMonitoring the entity to update.
+     * @return updated execution monitoring.
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+    ExecutionMonitoring update(ExecutionMonitoring executionMonitoring) throws EntityNotFoundException;
 
-	/**
-	 * Find all allowed execution monitoring
-	 *
-	 * @return list of all allowed executing monitoring for the current user.
-	 */
+    /**
+     * Find all allowed execution monitoring
+     *
+     * @return list of all allowed executing monitoring for the current user.
+     */
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     List<ExecutionMonitoring> findAllAllowed();
 
-	/**
-	 * Async job that monitor the state of the VIP execution and process its outcome
-	 *
-	 * @param processing
-	 * @param event
-	 */
-	void startMonitoringJob(ExecutionMonitoring processing, ShanoirEvent event) throws EntityNotFoundException, SecurityException;
+    /**
+     * Async job that monitor the state of the VIP execution and process its outcome
+     *
+     * @param processing
+     * @param event
+     */
+    void startMonitoringJob(ExecutionMonitoring processing, ShanoirEvent event) throws EntityNotFoundException, SecurityException;
 }

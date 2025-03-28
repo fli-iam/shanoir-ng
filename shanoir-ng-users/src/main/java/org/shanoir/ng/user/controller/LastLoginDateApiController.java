@@ -30,22 +30,22 @@ import jakarta.ws.rs.core.Context;
 @Controller
 public class LastLoginDateApiController extends AbstractUserRequestApiController implements LastLoginDateApi {
 
-	/**
-	 * Logger
-	 */
-	private static final Logger LOG = LoggerFactory.getLogger(LastLoginDateApiController.class);
+    /**
+     * Logger
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(LastLoginDateApiController.class);
 
-	public ResponseEntity<Void> lastLoginDate(
-			@Parameter(name = "username of user for last login date update", required = true) @RequestBody final String username,
-			@Context final HttpServletRequest httpRequest) {
-		try {
-			// Update user login date
-			getUserService().updateLastLogin(username);
-		} catch (EntityNotFoundException e) {
-			LOG.error(e.getMessage(), e);
-			return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
-	}
+    public ResponseEntity<Void> lastLoginDate(
+            @Parameter(name = "username of user for last login date update", required = true) @RequestBody final String username,
+            @Context final HttpServletRequest httpRequest) {
+        try {
+            // Update user login date
+            getUserService().updateLastLogin(username);
+        } catch (EntityNotFoundException e) {
+            LOG.error(e.getMessage(), e);
+            return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+    }
 
 }

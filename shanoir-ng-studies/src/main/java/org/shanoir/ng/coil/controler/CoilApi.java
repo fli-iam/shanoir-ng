@@ -41,75 +41,75 @@ import jakarta.validation.Valid;
 @RequestMapping("/coils")
 public interface CoilApi {
 
-	@Operation(summary = "", description = "Deletes a coil")
-	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "coil deleted"),
-			@ApiResponse(responseCode = "401", description = "unauthorized"),
-			@ApiResponse(responseCode = "403", description = "forbidden"),
-			@ApiResponse(responseCode = "404", description = "no coil found"),
-			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@DeleteMapping(value = "/{coilId}", produces = { "application/json" })
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-	ResponseEntity<Void> deleteCoil(
-			@Parameter(description = "id of the coil", required = true) @PathVariable("coilId") Long coilId)
-			throws RestServiceException;
+    @Operation(summary = "", description = "Deletes a coil")
+    @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "coil deleted"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no coil found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @DeleteMapping(value = "/{coilId}", produces = { "application/json" })
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+    ResponseEntity<Void> deleteCoil(
+            @Parameter(description = "id of the coil", required = true) @PathVariable("coilId") Long coilId)
+            throws RestServiceException;
 
-	@Operation(summary = "", description = "If exists, returns the coil corresponding to the given id")
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found coil"),
-			@ApiResponse(responseCode = "401", description = "unauthorized"),
-			@ApiResponse(responseCode = "403", description = "forbidden"),
-			@ApiResponse(responseCode = "404", description = "no coil found"),
-			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@GetMapping(value = "/{coilId}", produces = { "application/json" })
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<CoilDTO> findCoilById(
-			@Parameter(description = "id of the coil", required = true) @PathVariable("coilId") Long coilId);
+    @Operation(summary = "", description = "If exists, returns the coil corresponding to the given id")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found coil"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no coil found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @GetMapping(value = "/{coilId}", produces = { "application/json" })
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    ResponseEntity<CoilDTO> findCoilById(
+            @Parameter(description = "id of the coil", required = true) @PathVariable("coilId") Long coilId);
 
-	@Operation(summary = "", description = "If exists, returns all the coil corresponding to the given center id")
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found coil"),
-			@ApiResponse(responseCode = "401", description = "unauthorized"),
-			@ApiResponse(responseCode = "403", description = "forbidden"),
-			@ApiResponse(responseCode = "204", description = "no coil found"),
-			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@GetMapping(value = "/byCenter/{centerId}", produces = { "application/json" })
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<List<CoilDTO>> findCoilsByCenterId(
-			@Parameter(name = "id of the center", required = true) @PathVariable("centerId") Long centerId);
+    @Operation(summary = "", description = "If exists, returns all the coil corresponding to the given center id")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found coil"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "204", description = "no coil found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @GetMapping(value = "/byCenter/{centerId}", produces = { "application/json" })
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    ResponseEntity<List<CoilDTO>> findCoilsByCenterId(
+            @Parameter(name = "id of the center", required = true) @PathVariable("centerId") Long centerId);
 
-	@Operation(summary = "", description = "Returns all the coils")
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "found coils"),
-			@ApiResponse(responseCode = "204", description = "no coil found"),
-			@ApiResponse(responseCode = "401", description = "unauthorized"),
-			@ApiResponse(responseCode = "403", description = "forbidden"),
-			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@GetMapping(value = "", produces = { "application/json" })
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<List<CoilDTO>> findCoils();
+    @Operation(summary = "", description = "Returns all the coils")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "found coils"),
+            @ApiResponse(responseCode = "204", description = "no coil found"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @GetMapping(value = "", produces = { "application/json" })
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    ResponseEntity<List<CoilDTO>> findCoils();
 
-	@Operation(summary = "", description = "Saves a new coil")
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "created coil"),
-			@ApiResponse(responseCode = "401", description = "unauthorized"),
-			@ApiResponse(responseCode = "403", description = "forbidden"),
-			@ApiResponse(responseCode = "422", description = "bad parameters"),
-			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@PostMapping(value = "", produces = { "application/json" }, consumes = {
-			"application/json" })
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-	ResponseEntity<CoilDTO> saveNewCoil(@Parameter(description = "coil to create", required = true) @Valid @RequestBody Coil coil,
-			BindingResult result) throws RestServiceException;
+    @Operation(summary = "", description = "Saves a new coil")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "created coil"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "422", description = "bad parameters"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @PostMapping(value = "", produces = { "application/json" }, consumes = {
+            "application/json" })
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+    ResponseEntity<CoilDTO> saveNewCoil(@Parameter(description = "coil to create", required = true) @Valid @RequestBody Coil coil,
+            BindingResult result) throws RestServiceException;
 
-	@Operation(summary = "", description = "Updates a coil")
-	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "coil updated"),
-			@ApiResponse(responseCode = "401", description = "unauthorized"),
-			@ApiResponse(responseCode = "403", description = "forbidden"),
-			@ApiResponse(responseCode = "422", description = "bad parameters"),
-			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@PutMapping(value = "/{coilId}", produces = { "application/json" }, consumes = {
-			"application/json" })
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controlerSecurityService.idMatches(#coilId, #coil)")
-	ResponseEntity<Void> updateCoil(
-			@Parameter(description = "id of the coil", required = true) @PathVariable("coilId") Long coilId,
-			@Parameter(description = "coil to update", required = true) @Valid @RequestBody Coil coil, BindingResult result)
-			throws RestServiceException;
+    @Operation(summary = "", description = "Updates a coil")
+    @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "coil updated"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "422", description = "bad parameters"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @PutMapping(value = "/{coilId}", produces = { "application/json" }, consumes = {
+            "application/json" })
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controlerSecurityService.idMatches(#coilId, #coil)")
+    ResponseEntity<Void> updateCoil(
+            @Parameter(description = "id of the coil", required = true) @PathVariable("coilId") Long coilId,
+            @Parameter(description = "coil to update", required = true) @Valid @RequestBody Coil coil, BindingResult result)
+            throws RestServiceException;
 
 }

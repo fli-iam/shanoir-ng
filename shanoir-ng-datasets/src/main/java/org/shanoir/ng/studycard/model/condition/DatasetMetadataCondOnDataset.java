@@ -31,10 +31,10 @@ import org.slf4j.LoggerFactory;
 @DiscriminatorValue("DatasetMetadataCondOnDataset")
 @JsonTypeName("DatasetMetadataCondOnDataset")
 public class DatasetMetadataCondOnDataset extends StudyCardMetadataCondition<Dataset> {
-	
-	private static final Logger LOG = LoggerFactory.getLogger(DatasetMetadataCondOnDataset.class);
-	
-	@Override
+    
+    private static final Logger LOG = LoggerFactory.getLogger(DatasetMetadataCondOnDataset.class);
+    
+    @Override
     public DatasetMetadataField getShanoirField() {
         return DatasetMetadataField.getEnum(shanoirField);
     }
@@ -43,7 +43,7 @@ public class DatasetMetadataCondOnDataset extends StudyCardMetadataCondition<Dat
     public void setShanoirField(MetadataFieldInterface<Dataset>  field) {
         shanoirField = field.getId();
     }
-	
+    
     public boolean fulfilled(Dataset dataset) {
         if (dataset == null) throw new IllegalArgumentException("dataset can not be null");
         DatasetMetadataField field = this.getShanoirField();

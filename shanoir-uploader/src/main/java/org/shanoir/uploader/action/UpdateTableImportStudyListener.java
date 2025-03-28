@@ -45,19 +45,19 @@ public class UpdateTableImportStudyListener implements ItemListener {
             List<StudyCard> studyCards = ImportUtils.getAllStudyCards(studies);
             for (Study study : studies) {
                 if (studyCards != null) {
-					List<StudyCard> studyCardsStudy = new ArrayList<StudyCard>();
-					for (Iterator<StudyCard> itStudyCards = studyCards.iterator(); itStudyCards.hasNext();) {
-						StudyCard studyCard = (StudyCard) itStudyCards.next();
-						// filter all study cards related to the selected study
-						if (study.getId().equals(studyCard.getStudyId())) {
-							studyCardsStudy.add(studyCard);
+                    List<StudyCard> studyCardsStudy = new ArrayList<StudyCard>();
+                    for (Iterator<StudyCard> itStudyCards = studyCards.iterator(); itStudyCards.hasNext();) {
+                        StudyCard studyCard = (StudyCard) itStudyCards.next();
+                        // filter all study cards related to the selected study
+                        if (study.getId().equals(studyCard.getStudyId())) {
+                            studyCardsStudy.add(studyCard);
                         }
                     }
-					study.setStudyCards(studyCardsStudy);
+                    study.setStudyCards(studyCardsStudy);
                     study.setCompatible(Boolean.FALSE);
-				}
+                }
                 window.studyCB.addItem(study);
-			}
+            }
             window.studyCB.setSelectedItem(studies.get(0));
         } catch (Exception e) {
             logger.error("Could not correctly retrieve studies and study cards: ", e);

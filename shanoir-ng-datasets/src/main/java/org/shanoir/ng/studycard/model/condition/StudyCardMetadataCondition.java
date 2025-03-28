@@ -19,9 +19,9 @@ import org.shanoir.ng.studycard.model.field.MetadataFieldInterface;
 
 @Entity
 public abstract class StudyCardMetadataCondition<T> extends StudyCardCondition {
-	
-	protected int shanoirField;
-	
+    
+    protected int shanoirField;
+    
     abstract MetadataFieldInterface<T> getShanoirField();
 
     abstract void setShanoirField(MetadataFieldInterface<T> field);

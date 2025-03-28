@@ -16,18 +16,18 @@ import org.shanoir.uploader.gui.ShUpStartupDialog;
  */
 @Component
 public class ProxyManualConfigurationState implements State {
-	
-	private static final Logger logger = LoggerFactory.getLogger(ProxyManualConfigurationState.class);
-	
-	@Autowired
-	private ProxyConfigurationState proxyConfigurationState;
+    
+    private static final Logger logger = LoggerFactory.getLogger(ProxyManualConfigurationState.class);
+    
+    @Autowired
+    private ProxyConfigurationState proxyConfigurationState;
 
-	public void load(StartupStateContext context) {
-		ShUpStartupDialog shUpStartupDialog = context.getShUpStartupDialog();
-		shUpStartupDialog.showProxyForm();
-		// set the next state here, what means that in the ProxyPanelActionListener
-		// only nextState will have to be called without knowing what is the next state
-		context.setState(proxyConfigurationState);
-	}
+    public void load(StartupStateContext context) {
+        ShUpStartupDialog shUpStartupDialog = context.getShUpStartupDialog();
+        shUpStartupDialog.showProxyForm();
+        // set the next state here, what means that in the ProxyPanelActionListener
+        // only nextState will have to be called without knowing what is the next state
+        context.setState(proxyConfigurationState);
+    }
 
 }

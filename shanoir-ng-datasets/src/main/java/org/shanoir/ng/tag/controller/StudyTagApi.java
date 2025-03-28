@@ -34,31 +34,31 @@ import java.util.List;
 @RequestMapping("/studytag")
 public interface StudyTagApi {
 
-	@Operation(summary = "addStudyTagsToDataset", description = "Add study tags to a dataset")
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "dataset associated to study tags"),
-			@ApiResponse(responseCode = "401", description = "unauthorized"),
-			@ApiResponse(responseCode = "403", description = "forbidden"),
-			@ApiResponse(responseCode = "404", description = "dataset does not exists"),
-			@ApiResponse(responseCode = "422", description = "bad parameters"),
-			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@PutMapping(value = "/addStudyTagsToDataset")
-	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_IMPORT'))")
-	ResponseEntity<Void> addStudyTagsToDataset(
-			@Parameter(description = "id of the dataset", required = true) @RequestParam(value = "datasetId") Long datasetId,
-			@Parameter(description = "study tag ids", required = true) @RequestParam(value = "studyTagIds") List<Long> studyTagIds)
-			throws RestServiceException, EntityNotFoundException, SolrServerException, IOException;
+    @Operation(summary = "addStudyTagsToDataset", description = "Add study tags to a dataset")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "dataset associated to study tags"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "dataset does not exists"),
+            @ApiResponse(responseCode = "422", description = "bad parameters"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @PutMapping(value = "/addStudyTagsToDataset")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_IMPORT'))")
+    ResponseEntity<Void> addStudyTagsToDataset(
+            @Parameter(description = "id of the dataset", required = true) @RequestParam(value = "datasetId") Long datasetId,
+            @Parameter(description = "study tag ids", required = true) @RequestParam(value = "studyTagIds") List<Long> studyTagIds)
+            throws RestServiceException, EntityNotFoundException, SolrServerException, IOException;
 
-	@Operation(summary = "removeStudyTagsFromDataset", description = "Add study tags to a dataset")
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "dataset associated to study tags"),
-			@ApiResponse(responseCode = "401", description = "unauthorized"),
-			@ApiResponse(responseCode = "403", description = "forbidden"),
-			@ApiResponse(responseCode = "404", description = "dataset does not exists"),
-			@ApiResponse(responseCode = "422", description = "bad parameters"),
-			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@PutMapping(value = "/removeStudyTagsFromDataset")
-	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_IMPORT'))")
-	ResponseEntity<Void> removeStudyTagsFromDataset(
-			@Parameter(description = "id of the dataset", required = true) @RequestParam(value = "datasetId") Long datasetId,
-			@Parameter(description = "study tag ids", required = true) @RequestParam(value = "studyTagIds") List<Long> studyTagIds)
-			throws RestServiceException, EntityNotFoundException, SolrServerException, IOException;
+    @Operation(summary = "removeStudyTagsFromDataset", description = "Add study tags to a dataset")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "dataset associated to study tags"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "dataset does not exists"),
+            @ApiResponse(responseCode = "422", description = "bad parameters"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @PutMapping(value = "/removeStudyTagsFromDataset")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_IMPORT'))")
+    ResponseEntity<Void> removeStudyTagsFromDataset(
+            @Parameter(description = "id of the dataset", required = true) @RequestParam(value = "datasetId") Long datasetId,
+            @Parameter(description = "study tag ids", required = true) @RequestParam(value = "studyTagIds") List<Long> studyTagIds)
+            throws RestServiceException, EntityNotFoundException, SolrServerException, IOException;
 }

@@ -21,50 +21,50 @@ import java.util.List;
  */
 public class SubjectDTO {
 
-	private List<SubjectStudyDTO> subjectStudyList;
-	
-	protected Long id;
-	
-	protected String name;
-	
-	public SubjectDTO() { };
-	
-	/**
-	 * @param id
-	 * @param name
-	 */
-	public SubjectDTO (Long id, String name) {
-		this.setId(id);
-		this.setName(name);
-	}
+    private List<SubjectStudyDTO> subjectStudyList;
+    
+    protected Long id;
+    
+    protected String name;
+    
+    public SubjectDTO() { };
+    
+    /**
+     * @param id
+     * @param name
+     */
+    public SubjectDTO (Long id, String name) {
+        this.setId(id);
+        this.setName(name);
+    }
 
-	/**
-	 * @return the subjectStudyList
-	 */
-	public List<SubjectStudyDTO> getSubjectStudyList() {
-		return subjectStudyList;
-	}
+    /**
+     * @return the subjectStudyList
+     */
+    public List<SubjectStudyDTO> getSubjectStudyList() {
+        return subjectStudyList;
+    }
 
-	/**
-	 * @param subjectStudyList the subjectStudyList to set
-	 */
-	public void setSubjectStudyList(List<SubjectStudyDTO> subjectStudyList) {
-		this.subjectStudyList = subjectStudyList;
-	}
+    /**
+     * @param subjectStudyList the subjectStudyList to set
+     */
+    public void setSubjectStudyList(List<SubjectStudyDTO> subjectStudyList) {
+        this.subjectStudyList = subjectStudyList;
+    }
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 }

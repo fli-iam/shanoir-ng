@@ -35,10 +35,10 @@ import java.util.List;
 @DiscriminatorValue("ExamMetadataCondOnDatasets")
 @JsonTypeName("ExamMetadataCondOnDatasets")
 public class ExamMetadataCondOnDatasets extends StudyCardMetadataCondition<Dataset> {
-	
-	private static final Logger LOG = LoggerFactory.getLogger(ExamMetadataCondOnDatasets.class);
+    
+    private static final Logger LOG = LoggerFactory.getLogger(ExamMetadataCondOnDatasets.class);
 
-	@Override
+    @Override
     public DatasetMetadataField getShanoirField() {
         return DatasetMetadataField.getEnum(shanoirField);
     }
@@ -47,7 +47,7 @@ public class ExamMetadataCondOnDatasets extends StudyCardMetadataCondition<Datas
     public void setShanoirField(MetadataFieldInterface<Dataset> field) {
         shanoirField = field.getId();
     }
-	
+    
     public boolean fulfilled(List<DatasetAcquisition> acquisitions) {
         return fulfilled(acquisitions, null);
     }

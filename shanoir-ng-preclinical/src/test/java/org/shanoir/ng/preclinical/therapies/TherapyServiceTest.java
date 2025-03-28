@@ -42,104 +42,104 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class TherapyServiceTest {
 
-	private static final Long THERAPY_ID = 1L;
-	private static final String UPDATED_THERAPY_DATA = "Chimiotherapy";
-	private static final String UPDATED_THERAPY_TYPE_DATA = "Drug";
+    private static final Long THERAPY_ID = 1L;
+    private static final String UPDATED_THERAPY_DATA = "Chimiotherapy";
+    private static final String UPDATED_THERAPY_TYPE_DATA = "Drug";
 
-	@Mock
-	private TherapyRepository therapiesRepository;
+    @Mock
+    private TherapyRepository therapiesRepository;
 
-	@Mock
-	private RabbitTemplate rabbitTemplate;
+    @Mock
+    private RabbitTemplate rabbitTemplate;
 
-	@InjectMocks
-	private TherapyServiceImpl therapiesService;
-	
-	
-	@BeforeEach
-	public void setup() {
-		given(therapiesRepository.findAll()).willReturn(Arrays.asList(TherapyModelUtil.createTherapyBrain()));
-		given(therapiesRepository.findByTherapyType(TherapyType.SURGERY)).willReturn(Arrays.asList(TherapyModelUtil.createTherapyBrain()));
-		given(therapiesRepository.findByName(TherapyModelUtil.THERAPY_NAME_BRAIN)).willReturn(Optional.of(TherapyModelUtil.createTherapyBrain()));
-		given(therapiesRepository.findById(THERAPY_ID)).willReturn(Optional.of(TherapyModelUtil.createTherapyBrain()));
-		given(therapiesRepository.save(Mockito.any(Therapy.class))).willReturn(TherapyModelUtil.createTherapyBrain());
-	}
+    @InjectMocks
+    private TherapyServiceImpl therapiesService;
+    
+    
+    @BeforeEach
+    public void setup() {
+        given(therapiesRepository.findAll()).willReturn(Arrays.asList(TherapyModelUtil.createTherapyBrain()));
+        given(therapiesRepository.findByTherapyType(TherapyType.SURGERY)).willReturn(Arrays.asList(TherapyModelUtil.createTherapyBrain()));
+        given(therapiesRepository.findByName(TherapyModelUtil.THERAPY_NAME_BRAIN)).willReturn(Optional.of(TherapyModelUtil.createTherapyBrain()));
+        given(therapiesRepository.findById(THERAPY_ID)).willReturn(Optional.of(TherapyModelUtil.createTherapyBrain()));
+        given(therapiesRepository.save(Mockito.any(Therapy.class))).willReturn(TherapyModelUtil.createTherapyBrain());
+    }
 
-	@Test
-	public void deleteByIdTest() throws ShanoirException {
-		therapiesService.deleteById(THERAPY_ID);
+    @Test
+    public void deleteByIdTest() throws ShanoirException {
+        therapiesService.deleteById(THERAPY_ID);
 
-		Mockito.verify(therapiesRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
-	}
+        Mockito.verify(therapiesRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
+    }
 
-	@Test
-	public void findAllTest() {
-		final List<Therapy> therapies = therapiesService.findAll();
-		Assertions.assertNotNull(therapies);
-		Assertions.assertTrue(therapies.size() == 1);
+    @Test
+    public void findAllTest() {
+        final List<Therapy> therapies = therapiesService.findAll();
+        Assertions.assertNotNull(therapies);
+        Assertions.assertTrue(therapies.size() == 1);
 
-		Mockito.verify(therapiesRepository, Mockito.times(1)).findAll();
-	}
+        Mockito.verify(therapiesRepository, Mockito.times(1)).findAll();
+    }
 
-	@Test
-	public void findByIdTest() {
-		final Therapy therapy = therapiesService.findById(THERAPY_ID);
-		Assertions.assertNotNull(therapy);
-		Assertions.assertTrue(TherapyModelUtil.THERAPY_NAME_BRAIN.equals(therapy.getName()));
+    @Test
+    public void findByIdTest() {
+        final Therapy therapy = therapiesService.findById(THERAPY_ID);
+        Assertions.assertNotNull(therapy);
+        Assertions.assertTrue(TherapyModelUtil.THERAPY_NAME_BRAIN.equals(therapy.getName()));
 
-		Mockito.verify(therapiesRepository, Mockito.times(1)).findById(Mockito.anyLong());
-	}
-	
-	@Test
-	public void findByNameTest() {
-		final Therapy therapy = therapiesService.findByName(TherapyModelUtil.THERAPY_NAME_BRAIN);
-		Assertions.assertNotNull(therapy);
-		Assertions.assertTrue(THERAPY_ID.equals(therapy.getId()));
+        Mockito.verify(therapiesRepository, Mockito.times(1)).findById(Mockito.anyLong());
+    }
+    
+    @Test
+    public void findByNameTest() {
+        final Therapy therapy = therapiesService.findByName(TherapyModelUtil.THERAPY_NAME_BRAIN);
+        Assertions.assertNotNull(therapy);
+        Assertions.assertTrue(THERAPY_ID.equals(therapy.getId()));
 
-		Mockito.verify(therapiesRepository, Mockito.times(1)).findByName(TherapyModelUtil.THERAPY_NAME_BRAIN);
-	}
-	
-	@Test
-	public void findByTherapyTypeTest() {
-		final List<Therapy> therapies = therapiesService.findByTherapyType(TherapyType.SURGERY);
-		Assertions.assertNotNull(therapies);
-		Assertions.assertTrue(therapies.size() == 1);
+        Mockito.verify(therapiesRepository, Mockito.times(1)).findByName(TherapyModelUtil.THERAPY_NAME_BRAIN);
+    }
+    
+    @Test
+    public void findByTherapyTypeTest() {
+        final List<Therapy> therapies = therapiesService.findByTherapyType(TherapyType.SURGERY);
+        Assertions.assertNotNull(therapies);
+        Assertions.assertTrue(therapies.size() == 1);
 
-		Mockito.verify(therapiesRepository, Mockito.times(1)).findByTherapyType(TherapyType.SURGERY);
-	}
+        Mockito.verify(therapiesRepository, Mockito.times(1)).findByTherapyType(TherapyType.SURGERY);
+    }
 
-	@Test
-	public void saveTest() throws ShanoirException {
-		therapiesService.save(createTherapy());
+    @Test
+    public void saveTest() throws ShanoirException {
+        therapiesService.save(createTherapy());
 
-		Mockito.verify(therapiesRepository, Mockito.times(1)).save(Mockito.any(Therapy.class));
-	}
+        Mockito.verify(therapiesRepository, Mockito.times(1)).save(Mockito.any(Therapy.class));
+    }
 
-	@Test
-	public void updateTest() throws ShanoirException {
-		final Therapy updatedTherapy = therapiesService.update(createTherapy());
-		Assertions.assertNotNull(updatedTherapy);
-		Assertions.assertTrue(UPDATED_THERAPY_DATA.equals(updatedTherapy.getName()));
-		Assertions.assertTrue(UPDATED_THERAPY_TYPE_DATA.equals(updatedTherapy.getTherapyType().getValue()));
+    @Test
+    public void updateTest() throws ShanoirException {
+        final Therapy updatedTherapy = therapiesService.update(createTherapy());
+        Assertions.assertNotNull(updatedTherapy);
+        Assertions.assertTrue(UPDATED_THERAPY_DATA.equals(updatedTherapy.getName()));
+        Assertions.assertTrue(UPDATED_THERAPY_TYPE_DATA.equals(updatedTherapy.getTherapyType().getValue()));
 
-		Mockito.verify(therapiesRepository, Mockito.times(1)).save(Mockito.any(Therapy.class));
-	}
+        Mockito.verify(therapiesRepository, Mockito.times(1)).save(Mockito.any(Therapy.class));
+    }
 
 /*
-	@Test
-	public void updateFromShanoirOldTest() throws ShanoirException {
-		pathologiesService.updateFromShanoirOld(createPathology());
+    @Test
+    public void updateFromShanoirOldTest() throws ShanoirException {
+        pathologiesService.updateFromShanoirOld(createPathology());
 
-		Mockito.verify(pathologiesRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
-		Mockito.verify(pathologiesRepository, Mockito.times(1)).save(Mockito.any(Pathology.class));
-	}
+        Mockito.verify(pathologiesRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+        Mockito.verify(pathologiesRepository, Mockito.times(1)).save(Mockito.any(Pathology.class));
+    }
 */
-	private Therapy createTherapy() {
-		final Therapy therapy = new Therapy();
-		therapy.setId(THERAPY_ID);
-		therapy.setName(UPDATED_THERAPY_DATA);
-		therapy.setTherapyType(TherapyType.DRUG);
-		return therapy;
-	}
+    private Therapy createTherapy() {
+        final Therapy therapy = new Therapy();
+        therapy.setId(THERAPY_ID);
+        therapy.setName(UPDATED_THERAPY_DATA);
+        therapy.setTherapyType(TherapyType.DRUG);
+        return therapy;
+    }
 
 }

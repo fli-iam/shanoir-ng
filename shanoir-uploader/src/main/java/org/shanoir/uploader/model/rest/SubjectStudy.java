@@ -34,106 +34,106 @@ import java.util.List;
  */
 public class SubjectStudy {
 
-	private Long id;
+    private Long id;
 
-	private IdName subject;
+    private IdName subject;
 
-	private IdName study;
+    private IdName study;
 
-	private String subjectStudyIdentifier;
+    private String subjectStudyIdentifier;
 
-	private SubjectType subjectType;
+    private SubjectType subjectType;
 
-	private boolean physicallyInvolved;
+    private boolean physicallyInvolved;
 
-	private List<Tag> tags;
+    private List<Tag> tags;
 
-	private List<Tag> subjectStudyTags;
+    private List<Tag> subjectStudyTags;
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public IdName getSubject() {
-		return subject;
-	}
+    public IdName getSubject() {
+        return subject;
+    }
 
-	public void setSubject(IdName subject) {
-		this.subject = subject;
-	}
+    public void setSubject(IdName subject) {
+        this.subject = subject;
+    }
 
-	public IdName getStudy() {
-		return study;
-	}
+    public IdName getStudy() {
+        return study;
+    }
 
-	public void setStudy(IdName study) {
-		this.study = study;
-	}
+    public void setStudy(IdName study) {
+        this.study = study;
+    }
 
-	/**
-	 * @return the subjectStudyIdentifier
-	 */
-	public String getSubjectStudyIdentifier() {
-		return subjectStudyIdentifier;
-	}
+    /**
+     * @return the subjectStudyIdentifier
+     */
+    public String getSubjectStudyIdentifier() {
+        return subjectStudyIdentifier;
+    }
 
-	/**
-	 * @param subjectStudyIdentifier
-	 *            the subjectStudyIdentifier to set
-	 */
-	public void setSubjectStudyIdentifier(String subjectStudyIdentifier) {
-		this.subjectStudyIdentifier = subjectStudyIdentifier;
-	}
+    /**
+     * @param subjectStudyIdentifier
+     *            the subjectStudyIdentifier to set
+     */
+    public void setSubjectStudyIdentifier(String subjectStudyIdentifier) {
+        this.subjectStudyIdentifier = subjectStudyIdentifier;
+    }
 
-	/**
-	 * @return the subjectType
-	 */
-	public SubjectType getSubjectType() {
-		return subjectType;
-	}
+    /**
+     * @return the subjectType
+     */
+    public SubjectType getSubjectType() {
+        return subjectType;
+    }
 
-	/**
-	 * @param subjectType
-	 *            the subjectType to set
-	 */
-	public void setSubjectType(SubjectType subjectType) {
-		this.subjectType = subjectType;
-	}
+    /**
+     * @param subjectType
+     *            the subjectType to set
+     */
+    public void setSubjectType(SubjectType subjectType) {
+        this.subjectType = subjectType;
+    }
 
-	/**
-	 * @return the physicallyInvolved
-	 */
-	public boolean isPhysicallyInvolved() {
-		return physicallyInvolved;
-	}
+    /**
+     * @return the physicallyInvolved
+     */
+    public boolean isPhysicallyInvolved() {
+        return physicallyInvolved;
+    }
 
-	/**
-	 * @param physicallyInvolved
-	 *            the physicallyInvolved to set
-	 */
-	public void setPhysicallyInvolved(boolean physicallyInvolved) {
-		this.physicallyInvolved = physicallyInvolved;
-	}
+    /**
+     * @param physicallyInvolved
+     *            the physicallyInvolved to set
+     */
+    public void setPhysicallyInvolved(boolean physicallyInvolved) {
+        this.physicallyInvolved = physicallyInvolved;
+    }
 
-	public List<Tag> getTags() {
-		return tags;
-	}
+    public List<Tag> getTags() {
+        return tags;
+    }
 
-	public void setTags(List<Tag> tags) {
-		this.tags = tags;
-		this.subjectStudyTags = tags;
-	}
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
+        this.subjectStudyTags = tags;
+    }
 
-	public List<Tag> getSubjectStudyTags() {
-		return subjectStudyTags;
-	}
+    public List<Tag> getSubjectStudyTags() {
+        return subjectStudyTags;
+    }
 
-	public void setSubjectStudyTags(List<Tag> subjectStudyTags) {
-		this.subjectStudyTags = subjectStudyTags;
-	}
+    public void setSubjectStudyTags(List<Tag> subjectStudyTags) {
+        this.subjectStudyTags = subjectStudyTags;
+    }
 
 }

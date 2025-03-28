@@ -20,25 +20,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  */
 public class DatasetDescription {
-	
-	@JsonProperty("Name")
-	private String name;
-	
-	@JsonProperty("BIDSVersion")
-	private String BIDSVersion = "1.6.1";
-	
-	@JsonProperty("DatasetType")
-	private String DatasetType = "raw";
-		
+    
+    @JsonProperty("Name")
+    private String name;
+    
+    @JsonProperty("BIDSVersion")
+    private String BIDSVersion = "1.6.1";
+    
+    @JsonProperty("DatasetType")
+    private String DatasetType = "raw";
+        
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
-	
-	
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    
 
 }

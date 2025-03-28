@@ -20,14 +20,14 @@ public class PropertiesUtil {
     private static final Logger logger = LoggerFactory.getLogger(PropertiesUtil.class);
 
     public static void loadPropertiesFromFile(final Properties properties, final File propertiesFile) {
-		try {
-			final FileInputStream fIS = new FileInputStream(propertiesFile);
-			properties.load(fIS);
-			fIS.close();
-		} catch (FileNotFoundException e) {
-			logger.error(e.getMessage(), e);
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-		}
-	}
+        try {
+            final FileInputStream fIS = new FileInputStream(propertiesFile);
+            properties.load(fIS);
+            fIS.close();
+        } catch (FileNotFoundException e) {
+            logger.error(e.getMessage(), e);
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+        }
+    }
 }

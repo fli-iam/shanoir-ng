@@ -34,22 +34,22 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
         @JsonSubTypes.Type(value = DatasetAcquisitionAssignment.class, name = "DatasetAcquisition") })
 public abstract class StudyCardAssignment<T> extends AbstractEntity implements StudyCardAssignmentInterface<T> {
 
-	/** UID */
-	private static final long serialVersionUID = 6708188853533591193L;
+    /** UID */
+    private static final long serialVersionUID = 6708188853533591193L;
 
-	/** The dataset field to update. */
-	@NotNull
+    /** The dataset field to update. */
+    @NotNull
     protected Long field;
-	
-	/** The value to set. */
-	@NotNull
-	private String value;
+    
+    /** The value to set. */
+    @NotNull
+    private String value;
 
-	public String getValue() {
-		return value;
-	}
+    public String getValue() {
+        return value;
+    }
 
-	public void setValue(String value) {
-		this.value = value;
-	}
+    public void setValue(String value) {
+        this.value = value;
+    }
 }

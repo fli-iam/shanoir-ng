@@ -34,54 +34,54 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
 @Entity
 public class RepetitionTime extends AbstractEntity {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -2253233141136120628L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = -2253233141136120628L;
 
 
-	/** MR dataset. */
-	@ManyToOne
-	@JoinColumn(name = "mr_dataset_id")
-	@JsonIgnore
-	private MrDataset mrDataset;
-	
-	/**
-	 * Comes from the dicom tag (0018,0080) VR=DS, VM=1 Repetition Time. The
-	 * unit of measure must be in millisec.
-	 */
-	@NotNull
-	private Double repetitionTimeValue;
+    /** MR dataset. */
+    @ManyToOne
+    @JoinColumn(name = "mr_dataset_id")
+    @JsonIgnore
+    private MrDataset mrDataset;
+    
+    /**
+     * Comes from the dicom tag (0018,0080) VR=DS, VM=1 Repetition Time. The
+     * unit of measure must be in millisec.
+     */
+    @NotNull
+    private Double repetitionTimeValue;
 
-	public RepetitionTime() {
+    public RepetitionTime() {
 
-	}
+    }
 
-	public RepetitionTime(RepetitionTime rt, MrDataset mr) {
-		this.mrDataset = mr;
-		this.repetitionTimeValue = rt.getRepetitionTimeValue();
-	}
+    public RepetitionTime(RepetitionTime rt, MrDataset mr) {
+        this.mrDataset = mr;
+        this.repetitionTimeValue = rt.getRepetitionTimeValue();
+    }
 
-	/**
-	 * @return the repetitionTimeValue
-	 */
-	public Double getRepetitionTimeValue() {
-		return repetitionTimeValue;
-	}
+    /**
+     * @return the repetitionTimeValue
+     */
+    public Double getRepetitionTimeValue() {
+        return repetitionTimeValue;
+    }
 
-	/**
-	 * @param repetitionTimeValue the repetitionTimeValue to set
-	 */
-	public void setRepetitionTimeValue(Double repetitionTimeValue) {
-		this.repetitionTimeValue = repetitionTimeValue;
-	}
+    /**
+     * @param repetitionTimeValue the repetitionTimeValue to set
+     */
+    public void setRepetitionTimeValue(Double repetitionTimeValue) {
+        this.repetitionTimeValue = repetitionTimeValue;
+    }
 
-	public MrDataset getMrDataset() {
-		return mrDataset;
-	}
+    public MrDataset getMrDataset() {
+        return mrDataset;
+    }
 
-	public void setMrDataset(MrDataset mrDataset) {
-		this.mrDataset = mrDataset;
-	}
+    public void setMrDataset(MrDataset mrDataset) {
+        this.mrDataset = mrDataset;
+    }
 
 }

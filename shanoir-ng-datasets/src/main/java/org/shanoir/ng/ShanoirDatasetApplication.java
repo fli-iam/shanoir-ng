@@ -36,21 +36,21 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableSpringDataWebSupport
 @EnableScheduling
 @OpenAPIDefinition(
-		info = @Info(title = "Shanoir datasets API", version = "1.0"),
-		servers = @Server(url = "/shanoir-ng/datasets", description = "Datasets"),
-		security = { @SecurityRequirement(name = "BearerAuth"), @SecurityRequirement(name = "OAuth2Auth") }
+        info = @Info(title = "Shanoir datasets API", version = "1.0"),
+        servers = @Server(url = "/shanoir-ng/datasets", description = "Datasets"),
+        security = { @SecurityRequirement(name = "BearerAuth"), @SecurityRequirement(name = "OAuth2Auth") }
 )
 
 public class ShanoirDatasetApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ShanoirDatasetApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(ShanoirDatasetApplication.class, args);
+    }
 
-	@Bean
-	public Module jacksonPageWithJsonViewModule() {
-		SimpleModule module = new SimpleModule("jackson-page-with-jsonview", Version.unknownVersion());
-		module.addSerializer(PageImpl.class, new PageSerializer());
-		return module;
-	}
+    @Bean
+    public Module jacksonPageWithJsonViewModule() {
+        SimpleModule module = new SimpleModule("jackson-page-with-jsonview", Version.unknownVersion());
+        module.addSerializer(PageImpl.class, new PageSerializer());
+        return module;
+    }
 }

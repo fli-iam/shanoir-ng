@@ -38,189 +38,189 @@ import org.springframework.stereotype.Service;
 @Service
 public interface UserService {
 
-	/**
-	 * Confirm an account request and updates user.
-	 *
-	 * @param user the user to update.
-	 * @return the updated user.
-	 * @throws EntityNotFoundException if this user id doesn't exist in the database.
-	 * @throws AccountNotOnDemandException if this account is not currently on demand.
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-	User confirmAccountRequest(User user) throws EntityNotFoundException, AccountNotOnDemandException;
+    /**
+     * Confirm an account request and updates user.
+     *
+     * @param user the user to update.
+     * @return the updated user.
+     * @throws EntityNotFoundException if this user id doesn't exist in the database.
+     * @throws AccountNotOnDemandException if this account is not currently on demand.
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+    User confirmAccountRequest(User user) throws EntityNotFoundException, AccountNotOnDemandException;
 
-	/**
-	 * Delete a user
-	 *
-	 * @param id the user id.
-	 * @throws EntityNotFoundException if this user id doesn't exist in the database.
-	 */
-	@PreAuthorize("hasRole('ADMIN') and !@isMeSecurityService.isMe(#id)")
-	void deleteById(Long id) throws EntityNotFoundException;
+    /**
+     * Delete a user
+     *
+     * @param id the user id.
+     * @throws EntityNotFoundException if this user id doesn't exist in the database.
+     */
+    @PreAuthorize("hasRole('ADMIN') and !@isMeSecurityService.isMe(#id)")
+    void deleteById(Long id) throws EntityNotFoundException;
 
-	/**
-	 * Deny an account request.
-	 *
-	 * @param userId the user id.
-	 * @throws EntityNotFoundException if this user id doesn't exist in the database.
-	 * @throws AccountNotOnDemandException if this account is not currently on demand.
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-	void denyAccountRequest(Long userId) throws EntityNotFoundException, AccountNotOnDemandException;
+    /**
+     * Deny an account request.
+     *
+     * @param userId the user id.
+     * @throws EntityNotFoundException if this user id doesn't exist in the database.
+     * @throws AccountNotOnDemandException if this account is not currently on demand.
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+    void denyAccountRequest(Long userId) throws EntityNotFoundException, AccountNotOnDemandException;
 
-	/**
-	 * Get all the users
-	 *
-	 * @return a list of users
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-	@PostAuthorize("hasRole('ADMIN') or @userPrivacySecurityService.filterPersonnalData(returnObject)")
-	List<User> findAll();
-	
-	/**
-	 * Get all the users on account request
-	 *
-	 * @return a list of users
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-	@PostAuthorize("hasRole('ADMIN') or @userPrivacySecurityService.filterPersonnalData(returnObject)")
-	List<User> findAccountRequests();
+    /**
+     * Get all the users
+     *
+     * @return a list of users
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+    @PostAuthorize("hasRole('ADMIN') or @userPrivacySecurityService.filterPersonnalData(returnObject)")
+    List<User> findAll();
+    
+    /**
+     * Get all the users on account request
+     *
+     * @return a list of users
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+    @PostAuthorize("hasRole('ADMIN') or @userPrivacySecurityService.filterPersonnalData(returnObject)")
+    List<User> findAccountRequests();
 
-	/**
-	 * Find user by its email.
-	 *
-	 * @param email email.
-	 * @return optionally a user.
-	 */
-	@PreAuthorize("hasRole('ADMIN') || hasRole('EXPERT')")
-	Optional<User> findByEmail(String email);
+    /**
+     * Find user by its email.
+     *
+     * @param email email.
+     * @return optionally a user.
+     */
+    @PreAuthorize("hasRole('ADMIN') || hasRole('EXPERT')")
+    Optional<User> findByEmail(String email);
 
-	/**
-	 * Find user by its email.
-	 *
-	 * @param email email.
-	 * @return optionally a user.
-	 */
-	Optional<User> findByEmailForExtension(String email);
+    /**
+     * Find user by its email.
+     *
+     * @param email email.
+     * @return optionally a user.
+     */
+    Optional<User> findByEmailForExtension(String email);
 
-	/**
-	 * Find user by its username.
-	 *
-	 * @param username the username.
-	 * @return a user or null.
-	 */
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT') and @isMeSecurityService.isMe(#username))")
-	Optional<User> findByUsername(String username);
-	
-	/**
-	 * Find user by its username.
-	 *
-	 * @param username the username.
-	 * @return a user or null.
-	 */
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT'))")
-	Optional<User> findByUsernameForInvitation(String username);
+    /**
+     * Find user by its username.
+     *
+     * @param username the username.
+     * @return a user or null.
+     */
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT') and @isMeSecurityService.isMe(#username))")
+    Optional<User> findByUsername(String username);
+    
+    /**
+     * Find user by its username.
+     *
+     * @param username the username.
+     * @return a user or null.
+     */
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT'))")
+    Optional<User> findByUsernameForInvitation(String username);
 
-	/**
-	 * Find users that will soon expire and have not yet received the first notification.
-	 *
-	 * @return a list of users.
-	 */
-	@PreAuthorize("hasRole('ADMIN')")
-	List<User> getUsersToReceiveFirstExpirationNotification();
+    /**
+     * Find users that will soon expire and have not yet received the first notification.
+     *
+     * @return a list of users.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    List<User> getUsersToReceiveFirstExpirationNotification();
 
-	/**
-	 * Find users that will soon expire and have not yet received the second notification.
-	 *
-	 * @return a list of users.
-	 */
-	@PreAuthorize("hasRole('ADMIN')")
-	List<User> getUsersToReceiveSecondExpirationNotification();
+    /**
+     * Find users that will soon expire and have not yet received the second notification.
+     *
+     * @return a list of users.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    List<User> getUsersToReceiveSecondExpirationNotification();
 
-	/**
-	 * Find users that are now expired.
-	 *
-	 * @return a list of users.
-	 */
-	@PreAuthorize("hasRole('ADMIN')")
-	List<User> getExpiredUsers();
+    /**
+     * Find users that are now expired.
+     *
+     * @return a list of users.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    List<User> getExpiredUsers();
 
-	/**
-	 * Request a date extension for an user.
-	 *
-	 * @param userId the user id.
-	 * @param requestInfo the request info.
-	 * @throws EntityNotFoundException if this user id doesn't exist in the database.
-	 */
-	void requestExtension(Long userId, ExtensionRequestInfo requestInfo) throws EntityNotFoundException;
+    /**
+     * Request a date extension for an user.
+     *
+     * @param userId the user id.
+     * @param requestInfo the request info.
+     * @throws EntityNotFoundException if this user id doesn't exist in the database.
+     */
+    void requestExtension(Long userId, ExtensionRequestInfo requestInfo) throws EntityNotFoundException;
 
-	/**
-	 * Save a new user.
-	 *
-	 * @param user the user to create.
-	 * @return the created user with its fresh id.
-	 * @throws PasswordPolicyException if the given password doesn't meet the security requirements.
-	 * @throws SecurityException if the new user could not be register into Keycloak.
-	 * In this case the user is not saved in the database either.
-	 */
-	@PreAuthorize("hasRole('ADMIN') and #user.getId() == null")
-	User create(User user) throws PasswordPolicyException, SecurityException;
-	
-	/**
-	 * Create a new account request.
-	 *
-	 * @param user the user to create.
-	 * @return the created user with its fresh id.
-	 * @throws PasswordPolicyException if the given password doesn't meet the security requirements.
-	 * @throws SecurityException if the new user could not be register into Keycloak.
-	 * In this case the user is not saved in the database either.
-	 */
-	@PreAuthorize("#user.getId() == null && #user.getRole() == null && #user.isAccountRequestDemand() != null && #user.isAccountRequestDemand()")
-	User createAccountRequest(User user) throws PasswordPolicyException, SecurityException;
+    /**
+     * Save a new user.
+     *
+     * @param user the user to create.
+     * @return the created user with its fresh id.
+     * @throws PasswordPolicyException if the given password doesn't meet the security requirements.
+     * @throws SecurityException if the new user could not be register into Keycloak.
+     * In this case the user is not saved in the database either.
+     */
+    @PreAuthorize("hasRole('ADMIN') and #user.getId() == null")
+    User create(User user) throws PasswordPolicyException, SecurityException;
+    
+    /**
+     * Create a new account request.
+     *
+     * @param user the user to create.
+     * @return the created user with its fresh id.
+     * @throws PasswordPolicyException if the given password doesn't meet the security requirements.
+     * @throws SecurityException if the new user could not be register into Keycloak.
+     * In this case the user is not saved in the database either.
+     */
+    @PreAuthorize("#user.getId() == null && #user.getRole() == null && #user.isAccountRequestDemand() != null && #user.isAccountRequestDemand()")
+    User createAccountRequest(User user) throws PasswordPolicyException, SecurityException;
 
-	/**
-	 * Search users by their id.
-	 *
-	 * @param userIds as list of user ids.
-	 * @return list of users with id and username.
-	 */
-	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
-	List<IdName> findByIds(List<Long> userIdList);
+    /**
+     * Search users by their id.
+     *
+     * @param userIds as list of user ids.
+     * @return list of users with id and username.
+     */
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
+    List<IdName> findByIds(List<Long> userIdList);
 
-	/**
-	 * Update a user.
-	 *
-	 * @param user the user to update.
-	 * @return updated user.
-	 * @throws EntityNotFoundException if this user id doesn't exist in the database.
-	 */
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT') and @isMeSecurityService.isMe(#user))")
-	User update(User user) throws EntityNotFoundException;
+    /**
+     * Update a user.
+     *
+     * @param user the user to update.
+     * @return updated user.
+     * @throws EntityNotFoundException if this user id doesn't exist in the database.
+     */
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT') and @isMeSecurityService.isMe(#user))")
+    User update(User user) throws EntityNotFoundException;
 
-	/**
-	 * Update expiration notification for an user.
-	 *
-	 * @param user the user to update.
-	 * @param firstNotification is it first notification?
-	 */
-	@PreAuthorize("hasRole('ADMIN')")
-	void updateExpirationNotification(User user, boolean firstNotification);
+    /**
+     * Update expiration notification for an user.
+     *
+     * @param user the user to update.
+     * @param firstNotification is it first notification?
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    void updateExpirationNotification(User user, boolean firstNotification);
 
-	/**
-	 * Update last login date.
-	 *
-	 * @param username username.
-	 * @throws EntityNotFoundException if this user id doesn't exist in the database.
-	 */
-	void updateLastLogin(String username) throws EntityNotFoundException;
+    /**
+     * Update last login date.
+     *
+     * @param username username.
+     * @throws EntityNotFoundException if this user id doesn't exist in the database.
+     */
+    void updateLastLogin(String username) throws EntityNotFoundException;
 
-	/**
-	 * Find a user by it's id
-	 *
-	 * @param id the id
-	 * @return the user
-	 */
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT') and @isMeSecurityService.isMe(#id))")
-	User findById(Long id);
+    /**
+     * Find a user by it's id
+     *
+     * @param id the id
+     * @return the user
+     */
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT') and @isMeSecurityService.isMe(#id))")
+    User findById(Long id);
 
 }

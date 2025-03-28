@@ -26,7 +26,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  */
 public class Patient {
-	
+    
     @JsonProperty("subject")
     private Subject subject;
 
@@ -36,8 +36,8 @@ public class Patient {
     @JsonProperty("patientName")
     private String patientName;
 
-	@JsonProperty("patientBirthName")
-	private String patientBirthName;
+    @JsonProperty("patientBirthName")
+    private String patientBirthName;
 
     @JsonProperty("patientBirthDate")
     @LocalDateAnnotations
@@ -52,71 +52,71 @@ public class Patient {
     @JsonProperty("frontExperimentalGroupOfSubjectId")
     private Long frontExperimentalGroupOfSubjectId;
 
-	// Keep this empty constructor to avoid Jackson deserialization exceptions
-	public Patient() { }
+    // Keep this empty constructor to avoid Jackson deserialization exceptions
+    public Patient() { }
 
-	public String getPatientID() {
-		return patientID;
-	}
+    public String getPatientID() {
+        return patientID;
+    }
 
-	public void setPatientID(String patientID) {
-		this.patientID = patientID;
-	}
+    public void setPatientID(String patientID) {
+        this.patientID = patientID;
+    }
 
-	public String getPatientName() {
-		return patientName;
-	}
+    public String getPatientName() {
+        return patientName;
+    }
 
-	public void setPatientName(String patientName) {
-		this.patientName = patientName;
-	}
+    public void setPatientName(String patientName) {
+        this.patientName = patientName;
+    }
 
-	public String getPatientBirthName() {
-		return patientBirthName;
-	}
+    public String getPatientBirthName() {
+        return patientBirthName;
+    }
 
-	public void setPatientBirthName(String patientBirthName) {
-		this.patientBirthName = patientBirthName;
-	}
+    public void setPatientBirthName(String patientBirthName) {
+        this.patientBirthName = patientBirthName;
+    }
 
-	public LocalDate getPatientBirthDate() {
-		return patientBirthDate;
-	}
+    public LocalDate getPatientBirthDate() {
+        return patientBirthDate;
+    }
 
-	public void setPatientBirthDate(LocalDate patientBirthDate) {	
-		this.patientBirthDate = patientBirthDate;
-	}
+    public void setPatientBirthDate(LocalDate patientBirthDate) {    
+        this.patientBirthDate = patientBirthDate;
+    }
 
-	public String getPatientSex() {
-		return patientSex;
-	}
+    public String getPatientSex() {
+        return patientSex;
+    }
 
-	public void setPatientSex(String patientSex) {
-		this.patientSex = patientSex;
-	}
+    public void setPatientSex(String patientSex) {
+        this.patientSex = patientSex;
+    }
 
-	public List<Study> getStudies() {
-		return studies;
-	}
+    public List<Study> getStudies() {
+        return studies;
+    }
 
-	public void setStudies(List<Study> studies) {
-		this.studies = studies;
-	}
+    public void setStudies(List<Study> studies) {
+        this.studies = studies;
+    }
 
-	public Subject getSubject() {
-		return subject;
-	}
+    public Subject getSubject() {
+        return subject;
+    }
 
-	public void setSubject(Subject subject) {
-		this.subject = subject;
-	}
+    public void setSubject(Subject subject) {
+        this.subject = subject;
+    }
 
-	public Long getFrontExperimentalGroupOfSubjectId() {
-		return frontExperimentalGroupOfSubjectId;
-	}
+    public Long getFrontExperimentalGroupOfSubjectId() {
+        return frontExperimentalGroupOfSubjectId;
+    }
 
-	public void setFrontExperimentalGroupOfSubjectId(Long frontExperimentalGroupOfSubjectId) {
-		this.frontExperimentalGroupOfSubjectId = frontExperimentalGroupOfSubjectId;
-	}
+    public void setFrontExperimentalGroupOfSubjectId(Long frontExperimentalGroupOfSubjectId) {
+        this.frontExperimentalGroupOfSubjectId = frontExperimentalGroupOfSubjectId;
+    }
 
 }

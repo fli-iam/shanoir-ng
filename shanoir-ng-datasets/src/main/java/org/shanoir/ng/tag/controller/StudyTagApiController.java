@@ -35,31 +35,31 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class StudyTagApiController implements StudyTagApi {
 
-	private static final Logger LOG = LoggerFactory.getLogger(StudyTagApiController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StudyTagApiController.class);
 
-	@Autowired
-	private DatasetService datasetService;
+    @Autowired
+    private DatasetService datasetService;
 
-	@Autowired
-	private StudyTagService studyTagService;
+    @Autowired
+    private StudyTagService studyTagService;
 
-	@Override
-	public ResponseEntity<Void> addStudyTagsToDataset(Long datasetId, List<Long> studyTagIds) throws EntityNotFoundException, SolrServerException, IOException {
-		Dataset ds = datasetService.findById(datasetId);
-		if (Objects.isNull(ds)) {throw new EntityNotFoundException(Dataset.class, datasetId);}
+    @Override
+    public ResponseEntity<Void> addStudyTagsToDataset(Long datasetId, List<Long> studyTagIds) throws EntityNotFoundException, SolrServerException, IOException {
+        Dataset ds = datasetService.findById(datasetId);
+        if (Objects.isNull(ds)) {throw new EntityNotFoundException(Dataset.class, datasetId);}
 
-		studyTagService.addStudyTagsToDataset(ds, studyTagIds);
+        studyTagService.addStudyTagsToDataset(ds, studyTagIds);
 
-		return new ResponseEntity<>(HttpStatus.OK);
-	}
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<Void> removeStudyTagsFromDataset(Long datasetId, List<Long> studyTagIds) throws EntityNotFoundException, SolrServerException, IOException {
-		Dataset ds = datasetService.findById(datasetId);
-		if (Objects.isNull(ds)) {throw new EntityNotFoundException(Dataset.class, datasetId);}
+    @Override
+    public ResponseEntity<Void> removeStudyTagsFromDataset(Long datasetId, List<Long> studyTagIds) throws EntityNotFoundException, SolrServerException, IOException {
+        Dataset ds = datasetService.findById(datasetId);
+        if (Objects.isNull(ds)) {throw new EntityNotFoundException(Dataset.class, datasetId);}
 
-		studyTagService.removeStudyTagsFromDataset(ds, studyTagIds);
+        studyTagService.removeStudyTagsFromDataset(ds, studyTagIds);
 
-		return new ResponseEntity<>(HttpStatus.OK);
-	}
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

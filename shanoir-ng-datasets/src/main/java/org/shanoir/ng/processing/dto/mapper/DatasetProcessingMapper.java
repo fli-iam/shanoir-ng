@@ -31,24 +31,24 @@ import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 @DecoratedWith(DatasetProcessingDecorator.class)
 public interface DatasetProcessingMapper {
 
-	/**
-	 * Map a @DatasetMetadata to a @DatasetMetadataDTO.
-	 *
-	 * @param processing
-	 *            dataset.
-	 * @return dataset DTO.
-	 */
-	DatasetProcessingDTO datasetProcessingToDatasetProcessingDTO(DatasetProcessing processing);
+    /**
+     * Map a @DatasetMetadata to a @DatasetMetadataDTO.
+     *
+     * @param processing
+     *            dataset.
+     * @return dataset DTO.
+     */
+    DatasetProcessingDTO datasetProcessingToDatasetProcessingDTO(DatasetProcessing processing);
 
-	/**
-	 * Map list of @DatasetProcessing to list of @DatasetProcessingDTO.
-	 *
-	 * @param datasetProcessings processings
-	 *            list of dataset processings.
-	 * @return list of dataset processings DTO.
-	 */
-	List<DatasetProcessingDTO> datasetProcessingsToDatasetProcessingDTOs(List<DatasetProcessing> datasetProcessings);
+    /**
+     * Map list of @DatasetProcessing to list of @DatasetProcessingDTO.
+     *
+     * @param datasetProcessings processings
+     *            list of dataset processings.
+     * @return list of dataset processings DTO.
+     */
+    List<DatasetProcessingDTO> datasetProcessingsToDatasetProcessingDTOs(List<DatasetProcessing> datasetProcessings);
 
-	@Mappings({ @Mapping(target = "source", ignore = true), @Mapping(target = "copies", ignore = true) })
-	DatasetWithProcessingsDTO datasetToDatasetWithProcessingsDTO(Dataset dataset);
+    @Mappings({ @Mapping(target = "source", ignore = true), @Mapping(target = "copies", ignore = true) })
+    DatasetWithProcessingsDTO datasetToDatasetWithProcessingsDTO(Dataset dataset);
 }

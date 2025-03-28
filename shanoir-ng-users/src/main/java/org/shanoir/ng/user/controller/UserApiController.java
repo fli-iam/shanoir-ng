@@ -44,152 +44,152 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @Controller
 public class UserApiController extends AbstractUserRequestApiController implements UserApi {
-	
-	@Value("${vip.enabled}")
-	private boolean vipEnabled;
+    
+    @Value("${vip.enabled}")
+    private boolean vipEnabled;
 
-	@Autowired
-	private AccessRequestService accessRequestService;
+    @Autowired
+    private AccessRequestService accessRequestService;
 
-	@Override
-	public ResponseEntity<Void> deleteUser(@PathVariable("userId") final Long userId) throws ForbiddenException {
-		try {
-			getUserService().deleteById(userId);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-	}
+    @Override
+    public ResponseEntity<Void> deleteUser(@PathVariable("userId") final Long userId) throws ForbiddenException {
+        try {
+            getUserService().deleteById(userId);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 
-	@Override
-	public ResponseEntity<Void> confirmAccountRequest(@PathVariable("userId") final Long userId,
-			@RequestBody final User user, final BindingResult result) throws RestServiceException {
-		
-		try {
-			validate(user, result);
-			getUserService().confirmAccountRequest(user);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		} catch (AccountNotOnDemandException e) {
-			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage()));
-		}
-	}
+    @Override
+    public ResponseEntity<Void> confirmAccountRequest(@PathVariable("userId") final Long userId,
+            @RequestBody final User user, final BindingResult result) throws RestServiceException {
+        
+        try {
+            validate(user, result);
+            getUserService().confirmAccountRequest(user);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (AccountNotOnDemandException e) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage()));
+        }
+    }
 
-	
-	@Override
-	public ResponseEntity<Void> denyAccountRequest(@PathVariable("userId") final Long userId) throws RestServiceException {
-		try {
-			getUserService().denyAccountRequest(userId);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		} catch (AccountNotOnDemandException e) {
-			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage()));
-		}
-	}
+    
+    @Override
+    public ResponseEntity<Void> denyAccountRequest(@PathVariable("userId") final Long userId) throws RestServiceException {
+        try {
+            getUserService().denyAccountRequest(userId);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (AccountNotOnDemandException e) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage()));
+        }
+    }
 
-	
-	@Override
-	public ResponseEntity<User> findUserById(@PathVariable("userId") final Long userId) {
-		final User user = getUserService().findById(userId);
-		if (user == null) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-		return new ResponseEntity<>(user, HttpStatus.OK);
-	}
+    
+    @Override
+    public ResponseEntity<User> findUserById(@PathVariable("userId") final Long userId) {
+        final User user = getUserService().findById(userId);
+        if (user == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<List<User>> findUsers() {
-		final List<User> users = getUserService().findAll();
-		if (users.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<>(users, HttpStatus.OK);
-	}
-	
-	
-	@Override
-	public ResponseEntity<List<User>> findAccountRequests() {
-		final List<User> users = getUserService().findAccountRequests();
-		if (users.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<>(users, HttpStatus.OK);
-	}
-	
-	
-	@Override
-	public ResponseEntity<User> saveNewUser(@RequestBody @Valid final User user, final BindingResult result) throws RestServiceException {
-		/* Generate a username. */
-		if (user.getUsername() == null && user.getFirstName() != null && user.getLastName() != null) {
-			generateUsername(user);
-		}
-		
-		user.setCreationDate(LocalDate.now()); // Set creation date on creation, which is now
-		validateIgnoreBlankUsername(user, result);
-		
-		if (user.getAccountRequestInfo() != null &&
-				(user.getAccountRequestInfo().getStudyId() != null)) {
-			
-			if (user.getAccountRequestInfo().getStudyId() != null) {
-				// Directly create an access request for the given study
-				AccessRequest request = new AccessRequest();
-				request.setUser(user);
-				request.setStudyId(user.getAccountRequestInfo().getStudyId());
-				request.setStudyName(user.getAccountRequestInfo().getStudyName());
-				request.setStatus(AccessRequest.ON_DEMAND);
-				request.setMotivation("A study admin invited this user to your study, please confirm its access to the study: " + user.getUsername());
-				// So that when the user account request is accepted, it directly has access to the data
-				accessRequestService.createAllowed(request);						
-			}
-		}
+    @Override
+    public ResponseEntity<List<User>> findUsers() {
+        final List<User> users = getUserService().findAll();
+        if (users.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(users, HttpStatus.OK);
+    }
+    
+    
+    @Override
+    public ResponseEntity<List<User>> findAccountRequests() {
+        final List<User> users = getUserService().findAccountRequests();
+        if (users.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(users, HttpStatus.OK);
+    }
+    
+    
+    @Override
+    public ResponseEntity<User> saveNewUser(@RequestBody @Valid final User user, final BindingResult result) throws RestServiceException {
+        /* Generate a username. */
+        if (user.getUsername() == null && user.getFirstName() != null && user.getLastName() != null) {
+            generateUsername(user);
+        }
+        
+        user.setCreationDate(LocalDate.now()); // Set creation date on creation, which is now
+        validateIgnoreBlankUsername(user, result);
+        
+        if (user.getAccountRequestInfo() != null &&
+                (user.getAccountRequestInfo().getStudyId() != null)) {
+            
+            if (user.getAccountRequestInfo().getStudyId() != null) {
+                // Directly create an access request for the given study
+                AccessRequest request = new AccessRequest();
+                request.setUser(user);
+                request.setStudyId(user.getAccountRequestInfo().getStudyId());
+                request.setStudyName(user.getAccountRequestInfo().getStudyName());
+                request.setStatus(AccessRequest.ON_DEMAND);
+                request.setMotivation("A study admin invited this user to your study, please confirm its access to the study: " + user.getUsername());
+                // So that when the user account request is accepted, it directly has access to the data
+                accessRequestService.createAllowed(request);                        
+            }
+        }
 
-		/* Save user in db. */
-		try {
-			User createdUser = getUserService().create(user);
-			if (vipEnabled) {
-				getVipUserService().createVIPAccountRequest(createdUser);
-			}
-			return new ResponseEntity<>(createdUser, HttpStatus.OK);
-		} catch (PasswordPolicyException e) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while generating the new password"));
-		} catch (SecurityException e) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while registering the user in Keycloak"));
-		} catch (MicroServiceCommunicationException e) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while communicating with VIP"));
-		}
-	}
+        /* Save user in db. */
+        try {
+            User createdUser = getUserService().create(user);
+            if (vipEnabled) {
+                getVipUserService().createVIPAccountRequest(createdUser);
+            }
+            return new ResponseEntity<>(createdUser, HttpStatus.OK);
+        } catch (PasswordPolicyException e) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while generating the new password"));
+        } catch (SecurityException e) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while registering the user in Keycloak"));
+        } catch (MicroServiceCommunicationException e) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while communicating with VIP"));
+        }
+    }
 
-	@Override
-	public ResponseEntity<List<IdName>> searchUsers(@RequestBody final IdList userIds) {
-		final List<IdName> users = getUserService().findByIds(userIds.getIdList());
-		if (users.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<>(users, HttpStatus.OK);
-	}
+    @Override
+    public ResponseEntity<List<IdName>> searchUsers(@RequestBody final IdList userIds) {
+        final List<IdName> users = getUserService().findByIds(userIds.getIdList());
+        if (users.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(users, HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<Void> updateUser(@PathVariable("userId") final Long userId,
-			@RequestBody @Valid final User user, final BindingResult result) throws RestServiceException {
+    @Override
+    public ResponseEntity<Void> updateUser(@PathVariable("userId") final Long userId,
+            @RequestBody @Valid final User user, final BindingResult result) throws RestServiceException {
 
-		try {
-			validate(user, result);
-			
-			/* Update user in db. */
-			getUserService().update(user);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        try {
+            validate(user, result);
+            
+            /* Update user in db. */
+            getUserService().update(user);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
-		} catch (final EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-	}
+        } catch (final EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 
 }

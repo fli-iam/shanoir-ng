@@ -26,82 +26,82 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class Subject {
 
-	@JsonProperty("id")
-	private long id;
+    @JsonProperty("id")
+    private long id;
 
-	@JsonProperty("name")
-	private String name;
+    @JsonProperty("name")
+    private String name;
 
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-	private LocalDate birthDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate birthDate;
 
-	@JsonProperty("sex")
-	private String sex;
+    @JsonProperty("sex")
+    private String sex;
 
-	@JsonProperty("imagedObjectCategory")
-	private Integer imagedObjectCategory;
+    @JsonProperty("imagedObjectCategory")
+    private Integer imagedObjectCategory;
 
-	@JsonProperty("subjectStudyList")
-	private List<SubjectStudy> subjectStudyList;
-	
-	public long getId() {
-		return id;
-	}
+    @JsonProperty("subjectStudyList")
+    private List<SubjectStudy> subjectStudyList;
+    
+    public long getId() {
+        return id;
+    }
 
-	public void setId(long id) {
-		this.id = id;
-	}
+    public void setId(long id) {
+        this.id = id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public LocalDate getBirthDate() {
-		return birthDate;
-	}
+    public LocalDate getBirthDate() {
+        return birthDate;
+    }
 
-	public void setBirthDate(LocalDate birthDate) {
-		this.birthDate = birthDate;
-	}
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
+    }
 
-	/**
-	 * @return the sex
-	 */
-	public String getSex() {
-		return sex;
-	}
+    /**
+     * @return the sex
+     */
+    public String getSex() {
+        return sex;
+    }
 
-	/**
-	 * @param sex the sex to set
-	 */
-	public void setSex(String sex) {
-		this.sex = sex;
-	}
+    /**
+     * @param sex the sex to set
+     */
+    public void setSex(String sex) {
+        this.sex = sex;
+    }
 
-	/**
-	 * @return the imagedObjectCategory
-	 */
-	public Integer getImagedObjectCategory() {
-		return imagedObjectCategory;
-	}
+    /**
+     * @return the imagedObjectCategory
+     */
+    public Integer getImagedObjectCategory() {
+        return imagedObjectCategory;
+    }
 
-	/**
-	 * @param imagedObjectCategory the imagedObjectCategory to set
-	 */
-	public void setImagedObjectCategory(Integer imagedObjectCategory) {
-		this.imagedObjectCategory = imagedObjectCategory;
-	}
+    /**
+     * @param imagedObjectCategory the imagedObjectCategory to set
+     */
+    public void setImagedObjectCategory(Integer imagedObjectCategory) {
+        this.imagedObjectCategory = imagedObjectCategory;
+    }
 
-	public List<SubjectStudy> getSubjectStudyList() {
-		return subjectStudyList;
-	}
+    public List<SubjectStudy> getSubjectStudyList() {
+        return subjectStudyList;
+    }
 
-	public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
-		this.subjectStudyList = subjectStudyList;
-	}
+    public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
+        this.subjectStudyList = subjectStudyList;
+    }
 
 }

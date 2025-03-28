@@ -31,75 +31,75 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserRepository extends CrudRepository<User, Long> {
 
-	/**
-	 * Find all users for a role.
-	 *
-	 * @param roleName
-	 *            role name.
-	 * @return list of users.
-	 */
-	@Query("select email from User u where u.role.name='ROLE_ADMIN'")
-	List<String> findAdminEmails();
+    /**
+     * Find all users for a role.
+     *
+     * @param roleName
+     *            role name.
+     * @return list of users.
+     */
+    @Query("select email from User u where u.role.name='ROLE_ADMIN'")
+    List<String> findAdminEmails();
 
-	/**
-	 * Find user by its email address
-	 *
-	 * @param email
-	 * @return a user or null
-	 */
-	Optional<User> findByEmail(String email);
+    /**
+     * Find user by its email address
+     *
+     * @param email
+     * @return a user or null
+     */
+    Optional<User> findByEmail(String email);
 
-	/**
-	 * Find users who have account that will soon expire and have not received
-	 * first notification.
-	 *
-	 * @param expirationDate
-	 *            expiration date to check.
-	 * @return list of users.
-	 */
-	List<User> findByExpirationDateLessThanAndFirstExpirationNotificationSentFalse(LocalDate expirationDate);
+    /**
+     * Find users who have account that will soon expire and have not received
+     * first notification.
+     *
+     * @param expirationDate
+     *            expiration date to check.
+     * @return list of users.
+     */
+    List<User> findByExpirationDateLessThanAndFirstExpirationNotificationSentFalse(LocalDate expirationDate);
 
-	/**
-	 * Find users who have account that will soon expire and have not received
-	 * second notification.
-	 *
-	 * @param expirationDate
-	 *            expiration date to check.
-	 * @return list of users.
-	 */
-	List<User> findByExpirationDateLessThanAndSecondExpirationNotificationSentFalse(LocalDate expirationDate);
+    /**
+     * Find users who have account that will soon expire and have not received
+     * second notification.
+     *
+     * @param expirationDate
+     *            expiration date to check.
+     * @return list of users.
+     */
+    List<User> findByExpirationDateLessThanAndSecondExpirationNotificationSentFalse(LocalDate expirationDate);
 
-	/**
-	 * Find users who have account that expire today
-	 *
-	 * @param expirationDate expiration date to check.
-	 * @param expirationDateLessOneWeek {@link Expiration} date minus one week.
-	 * @return list of expired users of less than one week.
-	 */
-	List<User> findByExpirationDateLessThanEqualAndExpirationDateGreaterThan(LocalDate expirationDate, LocalDate expirationDateLessOneWeek);
+    /**
+     * Find users who have account that expire today
+     *
+     * @param expirationDate expiration date to check.
+     * @param expirationDateLessOneWeek {@link Expiration} date minus one week.
+     * @return list of expired users of less than one week.
+     */
+    List<User> findByExpirationDateLessThanEqualAndExpirationDateGreaterThan(LocalDate expirationDate, LocalDate expirationDateLessOneWeek);
 
-	/**
-	 * Find users by their id.
-	 *
-	 * @param userIdList
-	 *            list of user ids.
-	 * @return list of users.
-	 */
-	List<User> findByIdIn(List<Long> userIdList);
-	
-	/**
-	 * Find user by its username
-	 *
-	 * @param id
-	 * @return a user or null
-	 */
-	Optional<User> findByUsername(String username);
+    /**
+     * Find users by their id.
+     *
+     * @param userIdList
+     *            list of user ids.
+     * @return list of users.
+     */
+    List<User> findByIdIn(List<Long> userIdList);
+    
+    /**
+     * Find user by its username
+     *
+     * @param id
+     * @return a user or null
+     */
+    Optional<User> findByUsername(String username);
 
-	Optional<User> findById(Long userId);
-	
-	/**
-	 * Find users on account request
-	 */
-	List<User> findByAccountRequestDemandTrueOrExtensionRequestDemandTrue();
+    Optional<User> findById(Long userId);
+    
+    /**
+     * Find users on account request
+     */
+    List<User> findByAccountRequestDemandTrueOrExtensionRequestDemandTrue();
 
 }

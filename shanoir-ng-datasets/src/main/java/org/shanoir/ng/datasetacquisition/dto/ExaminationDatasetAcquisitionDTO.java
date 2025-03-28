@@ -27,59 +27,59 @@ import java.util.List;
  */
 public class ExaminationDatasetAcquisitionDTO extends IdName {
 
-	private String type;
+    private String type;
 
-	private List<DatasetWithProcessingsDTO> datasets;
-	
-	private Long studyId;
-	
-	private Long examinationId;
+    private List<DatasetWithProcessingsDTO> datasets;
+    
+    private Long studyId;
+    
+    private Long examinationId;
 
-	private Integer sortingIndex;
+    private Integer sortingIndex;
 
-	public String getType() {
-		return type;
-	}
+    public String getType() {
+        return type;
+    }
 
-	public void setType(String type) {
-		this.type = type;
-	}
+    public void setType(String type) {
+        this.type = type;
+    }
 
-	/**
-	 * @return the datasets
-	 */
-	public List<DatasetWithProcessingsDTO> getDatasets() {
-		return datasets;
-	}
+    /**
+     * @return the datasets
+     */
+    public List<DatasetWithProcessingsDTO> getDatasets() {
+        return datasets;
+    }
 
-	/**
-	 * @param datasets the datasets to set
-	 */
-	public void setDatasets(List<DatasetWithProcessingsDTO> datasets) {
-		this.datasets = datasets;
-	}
+    /**
+     * @param datasets the datasets to set
+     */
+    public void setDatasets(List<DatasetWithProcessingsDTO> datasets) {
+        this.datasets = datasets;
+    }
 
-	public Long getStudyId() {
-		return studyId;
-	}
+    public Long getStudyId() {
+        return studyId;
+    }
 
-	public void setStudyId(Long studyId) {
-		this.studyId = studyId;
-	}
+    public void setStudyId(Long studyId) {
+        this.studyId = studyId;
+    }
 
-	public Integer getSortingIndex() {
-		return sortingIndex;
-	}
+    public Integer getSortingIndex() {
+        return sortingIndex;
+    }
 
-	public void setSortingIndex(Integer sortingIndex) {
-		this.sortingIndex = sortingIndex;
-	}
+    public void setSortingIndex(Integer sortingIndex) {
+        this.sortingIndex = sortingIndex;
+    }
 
-	public Long getExaminationId() {
-		return examinationId;
-	}
+    public Long getExaminationId() {
+        return examinationId;
+    }
 
-	public void setExaminationId(Long examinationId) {
-		this.examinationId = examinationId;
-	}
+    public void setExaminationId(Long examinationId) {
+        this.examinationId = examinationId;
+    }
 }

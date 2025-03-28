@@ -21,145 +21,145 @@ import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.studycard.model.StudyCard;
 
 public class DatasetAcquisitionDTO {
-	
-	private Long id;
+    
+    private Long id;
 
-	private Long acquisitionEquipmentId;
+    private Long acquisitionEquipmentId;
 
-	private ExaminationDTO examination;
-	
-	private StudyCard studyCard;
-	
-	private Long studyCardTimestamp;
+    private ExaminationDTO examination;
+    
+    private StudyCard studyCard;
+    
+    private Long studyCardTimestamp;
 
-	private Integer rank;
+    private Integer rank;
 
-	private String softwareRelease;
+    private String softwareRelease;
 
-	private Integer sortingIndex;
-	
-	private String type;
+    private Integer sortingIndex;
+    
+    private String type;
 
-	private Object protocol;
+    private Object protocol;
 
-	private LocalDate importDate;
+    private LocalDate importDate;
 
-	private String username;
+    private String username;
 
-	private Long source;
+    private Long source;
 
-	private List<Long> copies;
+    private List<Long> copies;
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public Long getAcquisitionEquipmentId() {
-		return acquisitionEquipmentId;
-	}
+    public Long getAcquisitionEquipmentId() {
+        return acquisitionEquipmentId;
+    }
 
-	public void setAcquisitionEquipmentId(Long acquisitionEquipmentId) {
-		this.acquisitionEquipmentId = acquisitionEquipmentId;
-	}
+    public void setAcquisitionEquipmentId(Long acquisitionEquipmentId) {
+        this.acquisitionEquipmentId = acquisitionEquipmentId;
+    }
 
-	public ExaminationDTO getExamination() {
-		return examination;
-	}
+    public ExaminationDTO getExamination() {
+        return examination;
+    }
 
-	public void setExamination(ExaminationDTO examination) {
-		this.examination = examination;
-	}
+    public void setExamination(ExaminationDTO examination) {
+        this.examination = examination;
+    }
 
-	public StudyCard getStudyCard() {
-		return studyCard;
-	}
+    public StudyCard getStudyCard() {
+        return studyCard;
+    }
 
-	public void setStudyCard(StudyCard studyCard) {
-		this.studyCard = studyCard;
-	}
+    public void setStudyCard(StudyCard studyCard) {
+        this.studyCard = studyCard;
+    }
 
-	public Long getStudyCardTimestamp() {
-		return studyCardTimestamp;
-	}
+    public Long getStudyCardTimestamp() {
+        return studyCardTimestamp;
+    }
 
-	public void setStudyCardTimestamp(Long studyCardTimestamp) {
-		this.studyCardTimestamp = studyCardTimestamp;
-	}
+    public void setStudyCardTimestamp(Long studyCardTimestamp) {
+        this.studyCardTimestamp = studyCardTimestamp;
+    }
 
-	public Integer getRank() {
-		return rank;
-	}
+    public Integer getRank() {
+        return rank;
+    }
 
-	public void setRank(Integer rank) {
-		this.rank = rank;
-	}
+    public void setRank(Integer rank) {
+        this.rank = rank;
+    }
 
-	public String getSoftwareRelease() {
-		return softwareRelease;
-	}
+    public String getSoftwareRelease() {
+        return softwareRelease;
+    }
 
-	public void setSoftwareRelease(String softwareRelease) {
-		this.softwareRelease = softwareRelease;
-	}
+    public void setSoftwareRelease(String softwareRelease) {
+        this.softwareRelease = softwareRelease;
+    }
 
-	public Integer getSortingIndex() {
-		return sortingIndex;
-	}
+    public Integer getSortingIndex() {
+        return sortingIndex;
+    }
 
-	public void setSortingIndex(Integer sortingIndex) {
-		this.sortingIndex = sortingIndex;
-	}
+    public void setSortingIndex(Integer sortingIndex) {
+        this.sortingIndex = sortingIndex;
+    }
 
-	public String getType() {
-		return type;
-	}
+    public String getType() {
+        return type;
+    }
 
-	public void setType(String type) {
-		this.type = type;
-	}
+    public void setType(String type) {
+        this.type = type;
+    }
 
-	public Object getProtocol() {
-		return protocol;
-	}
+    public Object getProtocol() {
+        return protocol;
+    }
 
-	public void setProtocol(Object protocol) {
-		this.protocol = protocol;
-	}
+    public void setProtocol(Object protocol) {
+        this.protocol = protocol;
+    }
 
-	public LocalDate getImportDate() {
-		return importDate;
-	}
+    public LocalDate getImportDate() {
+        return importDate;
+    }
 
-	public void setImportDate(LocalDate importDate) {
-		this.importDate = importDate;
-	}
+    public void setImportDate(LocalDate importDate) {
+        this.importDate = importDate;
+    }
 
-	public String getUsername() {
-		return username;
-	}
+    public String getUsername() {
+        return username;
+    }
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-	public Long getSource() {
-		return source;
-	}
+    public Long getSource() {
+        return source;
+    }
 
-	public void setSource(Long source) {
-		this.source = source;
-	}
+    public void setSource(Long source) {
+        this.source = source;
+    }
 
-	public List<Long> getCopies() {
-		return copies;
-	}
+    public List<Long> getCopies() {
+        return copies;
+    }
 
-	public void setCopies(List<Long> copies) {
-		this.copies = copies;
-	}
+    public void setCopies(List<Long> copies) {
+        this.copies = copies;
+    }
 
 }

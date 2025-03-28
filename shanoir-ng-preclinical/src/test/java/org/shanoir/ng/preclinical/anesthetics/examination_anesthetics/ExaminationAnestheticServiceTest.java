@@ -42,92 +42,92 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class ExaminationAnestheticServiceTest {
 
-	private static final Long EXAM_ANESTHETIC_ID = 1L;
-	private static final Long EXAMINATION_ID = 1L;
-	private static final Long UPDATED_EXAM_ANESTHETIC_ANESTHETIC_ID = 3L;
+    private static final Long EXAM_ANESTHETIC_ID = 1L;
+    private static final Long EXAMINATION_ID = 1L;
+    private static final Long UPDATED_EXAM_ANESTHETIC_ANESTHETIC_ID = 3L;
 
-	@Mock
-	private ExaminationAnestheticRepository examAnestheticRepository;
+    @Mock
+    private ExaminationAnestheticRepository examAnestheticRepository;
 
-	@Mock
-	private RabbitTemplate rabbitTemplate;
+    @Mock
+    private RabbitTemplate rabbitTemplate;
 
-	@InjectMocks
-	private ExaminationAnestheticServiceImpl examAnestheticsService;
-	
-	@BeforeEach
-	public void setup() {
-		given(examAnestheticRepository.findAll()).willReturn(Arrays.asList(AnestheticModelUtil.createExaminationAnesthetic()));
-		given(examAnestheticRepository.findByExaminationId(1L)).willReturn(Arrays.asList(AnestheticModelUtil.createExaminationAnesthetic()));
-		given(examAnestheticRepository.findById(EXAM_ANESTHETIC_ID)).willReturn(Optional.of(AnestheticModelUtil.createExaminationAnesthetic()));
-		given(examAnestheticRepository.save(Mockito.any(ExaminationAnesthetic.class))).willReturn(AnestheticModelUtil.createExaminationAnesthetic());
-	}
+    @InjectMocks
+    private ExaminationAnestheticServiceImpl examAnestheticsService;
+    
+    @BeforeEach
+    public void setup() {
+        given(examAnestheticRepository.findAll()).willReturn(Arrays.asList(AnestheticModelUtil.createExaminationAnesthetic()));
+        given(examAnestheticRepository.findByExaminationId(1L)).willReturn(Arrays.asList(AnestheticModelUtil.createExaminationAnesthetic()));
+        given(examAnestheticRepository.findById(EXAM_ANESTHETIC_ID)).willReturn(Optional.of(AnestheticModelUtil.createExaminationAnesthetic()));
+        given(examAnestheticRepository.save(Mockito.any(ExaminationAnesthetic.class))).willReturn(AnestheticModelUtil.createExaminationAnesthetic());
+    }
 
-	@Test
-	public void deleteByIdTest() throws ShanoirException {
-		examAnestheticsService.deleteById(EXAM_ANESTHETIC_ID);
+    @Test
+    public void deleteByIdTest() throws ShanoirException {
+        examAnestheticsService.deleteById(EXAM_ANESTHETIC_ID);
 
-		Mockito.verify(examAnestheticRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
-	}
+        Mockito.verify(examAnestheticRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
+    }
 
-	@Test
-	public void findAllTest() {
-		final List<ExaminationAnesthetic> examAnesthetics = examAnestheticsService.findAll();
-		Assertions.assertNotNull(examAnesthetics);
-		Assertions.assertTrue(examAnesthetics.size() == 1);
+    @Test
+    public void findAllTest() {
+        final List<ExaminationAnesthetic> examAnesthetics = examAnestheticsService.findAll();
+        Assertions.assertNotNull(examAnesthetics);
+        Assertions.assertTrue(examAnesthetics.size() == 1);
 
-		Mockito.verify(examAnestheticRepository, Mockito.times(1)).findAll();
-	}
+        Mockito.verify(examAnestheticRepository, Mockito.times(1)).findAll();
+    }
 
-	@Test
-	public void findByIdTest() {
-		final ExaminationAnesthetic examAnesthetic = examAnestheticsService.findById(EXAM_ANESTHETIC_ID);
-		Assertions.assertNotNull(examAnesthetic);
-		Assertions.assertTrue(AnestheticModelUtil.ANESTHETIC_NAME.equals(examAnesthetic.getAnesthetic().getName()));
-		
-		Mockito.verify(examAnestheticRepository, Mockito.times(1)).findById(Mockito.anyLong());
-	}
-	
-	@Test
-	public void findByExaminationIdTest() {
-		final List<ExaminationAnesthetic> examAnesthetics = examAnestheticsService.findByExaminationId(1L);
-		Assertions.assertNotNull(examAnesthetics);
-		Assertions.assertTrue(examAnesthetics.size() == 1);
+    @Test
+    public void findByIdTest() {
+        final ExaminationAnesthetic examAnesthetic = examAnestheticsService.findById(EXAM_ANESTHETIC_ID);
+        Assertions.assertNotNull(examAnesthetic);
+        Assertions.assertTrue(AnestheticModelUtil.ANESTHETIC_NAME.equals(examAnesthetic.getAnesthetic().getName()));
+        
+        Mockito.verify(examAnestheticRepository, Mockito.times(1)).findById(Mockito.anyLong());
+    }
+    
+    @Test
+    public void findByExaminationIdTest() {
+        final List<ExaminationAnesthetic> examAnesthetics = examAnestheticsService.findByExaminationId(1L);
+        Assertions.assertNotNull(examAnesthetics);
+        Assertions.assertTrue(examAnesthetics.size() == 1);
 
-		Mockito.verify(examAnestheticRepository, Mockito.times(1)).findByExaminationId(1L);
-	}
+        Mockito.verify(examAnestheticRepository, Mockito.times(1)).findByExaminationId(1L);
+    }
 
-	@Test
-	public void saveTest() throws ShanoirException {
-		examAnestheticsService.save(createExaminationAnesthetic());
+    @Test
+    public void saveTest() throws ShanoirException {
+        examAnestheticsService.save(createExaminationAnesthetic());
 
-		Mockito.verify(examAnestheticRepository, Mockito.times(1)).save(Mockito.any(ExaminationAnesthetic.class));
-	}
+        Mockito.verify(examAnestheticRepository, Mockito.times(1)).save(Mockito.any(ExaminationAnesthetic.class));
+    }
 
-	@Test
-	public void updateTest() throws ShanoirException {
-		final ExaminationAnesthetic updatedExamAnesthetic = examAnestheticsService.update(createExaminationAnesthetic());
-		Assertions.assertNotNull(updatedExamAnesthetic);
-		Assertions.assertTrue(UPDATED_EXAM_ANESTHETIC_ANESTHETIC_ID.equals(updatedExamAnesthetic.getAnesthetic().getId()));
+    @Test
+    public void updateTest() throws ShanoirException {
+        final ExaminationAnesthetic updatedExamAnesthetic = examAnestheticsService.update(createExaminationAnesthetic());
+        Assertions.assertNotNull(updatedExamAnesthetic);
+        Assertions.assertTrue(UPDATED_EXAM_ANESTHETIC_ANESTHETIC_ID.equals(updatedExamAnesthetic.getAnesthetic().getId()));
 
-		Mockito.verify(examAnestheticRepository, Mockito.times(1)).save(Mockito.any(ExaminationAnesthetic.class));
-	}
+        Mockito.verify(examAnestheticRepository, Mockito.times(1)).save(Mockito.any(ExaminationAnesthetic.class));
+    }
 
 /*
-	@Test
-	public void updateFromShanoirOldTest() throws ShanoirException {
-		pathologiesService.updateFromShanoirOld(createPathology());
+    @Test
+    public void updateFromShanoirOldTest() throws ShanoirException {
+        pathologiesService.updateFromShanoirOld(createPathology());
 
-		Mockito.verify(pathologiesRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
-		Mockito.verify(pathologiesRepository, Mockito.times(1)).save(Mockito.any(Pathology.class));
-	}
+        Mockito.verify(pathologiesRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+        Mockito.verify(pathologiesRepository, Mockito.times(1)).save(Mockito.any(Pathology.class));
+    }
 */
-	private ExaminationAnesthetic createExaminationAnesthetic() {
-		final ExaminationAnesthetic examAnesthetic = new ExaminationAnesthetic();
-		examAnesthetic.setId(EXAM_ANESTHETIC_ID);
-		//examAnesthetic.setExaminationId(EXAMINATION_ID);
-		examAnesthetic.setAnesthetic(AnestheticModelUtil.createAnestheticInjection());
-		return examAnesthetic;
-	}
-	
+    private ExaminationAnesthetic createExaminationAnesthetic() {
+        final ExaminationAnesthetic examAnesthetic = new ExaminationAnesthetic();
+        examAnesthetic.setId(EXAM_ANESTHETIC_ID);
+        //examAnesthetic.setExaminationId(EXAMINATION_ID);
+        examAnesthetic.setAnesthetic(AnestheticModelUtil.createAnestheticInjection());
+        return examAnesthetic;
+    }
+    
 }

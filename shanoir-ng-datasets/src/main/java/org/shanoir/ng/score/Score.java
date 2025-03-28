@@ -32,38 +32,38 @@ import org.shanoir.ng.shared.hateoas.Links;
 @Inheritance(strategy = InheritanceType.JOINED)
 public class Score extends HalEntity {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 5995692961509079060L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = 5995692961509079060L;
 
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "variable_assessment_id", nullable = false, updatable = true)
-	@JsonIgnore
-	private VariableAssessment variableAssessment;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "variable_assessment_id", nullable = false, updatable = true)
+    @JsonIgnore
+    private VariableAssessment variableAssessment;
 
-	public Score() {
+    public Score() {
 
-	}
+    }
 
-	public Score(VariableAssessment va) {
-		this.variableAssessment = va;
-	}
+    public Score(VariableAssessment va) {
+        this.variableAssessment = va;
+    }
 
-	/**
-	 * Init HATEOAS links
-	 */
-	@PostLoad
-	public void initLinks() {
-		this.addLink(Links.REL_SELF, "score/" + getId());
-	}
+    /**
+     * Init HATEOAS links
+     */
+    @PostLoad
+    public void initLinks() {
+        this.addLink(Links.REL_SELF, "score/" + getId());
+    }
 
-	public VariableAssessment getVariableAssessment() {
-		return variableAssessment;
-	}
+    public VariableAssessment getVariableAssessment() {
+        return variableAssessment;
+    }
 
-	public void setVariableAssessment(VariableAssessment variableAssessment) {
-		this.variableAssessment = variableAssessment;
-	}
+    public void setVariableAssessment(VariableAssessment variableAssessment) {
+        this.variableAssessment = variableAssessment;
+    }
 
 }

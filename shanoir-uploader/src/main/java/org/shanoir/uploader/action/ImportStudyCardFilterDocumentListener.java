@@ -20,32 +20,32 @@ public class ImportStudyCardFilterDocumentListener implements DocumentListener {
     }
 
     @Override
- 	public void insertUpdate(DocumentEvent e) {
- 		filter();
- 	}
+     public void insertUpdate(DocumentEvent e) {
+         filter();
+     }
 
- 	@Override
- 	public void removeUpdate(DocumentEvent e) {
- 		filter();
- 	}
+     @Override
+     public void removeUpdate(DocumentEvent e) {
+         filter();
+     }
 
- 	@Override
- 	public void changedUpdate(DocumentEvent e) {
+     @Override
+     public void changedUpdate(DocumentEvent e) {
 
 
- 	}
+     }
 
- 	private void filter() {
- 		mainWindow.importDialog.studyCardCB.removeAllItems();
- 		String filter = mainWindow.importDialog.studyCardFilterTextField.getText();
- 		for (StudyCard studyCard : defaultStudyCards) {
+     private void filter() {
+         mainWindow.importDialog.studyCardCB.removeAllItems();
+         String filter = mainWindow.importDialog.studyCardFilterTextField.getText();
+         for (StudyCard studyCard : defaultStudyCards) {
              if (studyCard.toString().toLowerCase().contains(filter.toLowerCase())) {
-             	mainWindow.importDialog.studyCardCB.addItem(studyCard);
+                 mainWindow.importDialog.studyCardCB.addItem(studyCard);
              }
          }
- 	}
+     }
 
- 	public void addDefaultStudyCard(StudyCard defaultStudyCard) {
+     public void addDefaultStudyCard(StudyCard defaultStudyCard) {
         this.defaultStudyCards.add(defaultStudyCard);
     }
 

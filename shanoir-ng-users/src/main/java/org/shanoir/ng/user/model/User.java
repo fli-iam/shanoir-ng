@@ -53,373 +53,373 @@ import jakarta.validation.constraints.NotNull;
 @ExtensionWithMotivation
 public class User extends HalEntity implements UserDetails {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -5277815428510293236L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = -5277815428510293236L;
 
-	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-	private Boolean accountRequestDemand;
+    @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+    private Boolean accountRequestDemand;
 
-	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-	@OneToOne(orphanRemoval = true)
-	private AccountRequestInfo accountRequestInfo;
+    @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+    @OneToOne(orphanRemoval = true)
+    private AccountRequestInfo accountRequestInfo;
 
-	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-	private Boolean canAccessToDicomAssociation;
+    @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+    private Boolean canAccessToDicomAssociation;
 
-	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-	@LocalDateAnnotations
-	private LocalDate creationDate;
+    @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+    @LocalDateAnnotations
+    private LocalDate creationDate;
 
-	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-	@NotBlank
-	@Column(unique = true)
-	@Unique
-	private String email;
-	
-	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-	@EditableOnlyBy(roles = { "ROLE_ADMIN" })
-	@LocalDateAnnotations
-	private LocalDate expirationDate;
+    @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+    @NotBlank
+    @Column(unique = true)
+    @Unique
+    private String email;
+    
+    @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+    @EditableOnlyBy(roles = { "ROLE_ADMIN" })
+    @LocalDateAnnotations
+    private LocalDate expirationDate;
 
-	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-	@Embedded
-	private ExtensionRequestInfo extensionRequestInfo;
+    @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+    @Embedded
+    private ExtensionRequestInfo extensionRequestInfo;
 
-	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-	@NotNull
-	private Boolean extensionRequestDemand = Boolean.FALSE;
-	
-	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-	@NotNull
-	private Boolean firstExpirationNotificationSent = Boolean.FALSE;
-	
-	@NotBlank
-	private String firstName;
+    @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+    @NotNull
+    private Boolean extensionRequestDemand = Boolean.FALSE;
+    
+    @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+    @NotNull
+    private Boolean firstExpirationNotificationSent = Boolean.FALSE;
+    
+    @NotBlank
+    private String firstName;
 
-	private String keycloakId;
+    private String keycloakId;
 
-	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-	@LocalDateAnnotations
-	private LocalDate lastLogin;
+    @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+    @LocalDateAnnotations
+    private LocalDate lastLogin;
 
-	@NotNull
-	private String lastName;
+    @NotNull
+    private String lastName;
 
-	@ManyToOne
-	@NotNull
-	@EditableOnlyBy(roles = { "ROLE_ADMIN" })
-	private Role role;
-	
-	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-	@NotNull
-	private Boolean secondExpirationNotificationSent = Boolean.FALSE;
+    @ManyToOne
+    @NotNull
+    @EditableOnlyBy(roles = { "ROLE_ADMIN" })
+    private Role role;
+    
+    @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+    @NotNull
+    private Boolean secondExpirationNotificationSent = Boolean.FALSE;
 
-	@NotBlank
-	@Column(unique = true)
-	@Unique
-	private String username;
+    @NotBlank
+    @Column(unique = true)
+    @Unique
+    private String username;
 
-	private String teamName;
+    private String teamName;
 
-	/**
-	 * Init HATEOAS links
-	 */
-	@PostLoad
-	public void initLinks() {
-		this.addLink(Links.REL_SELF, "user/" + getId());
-	}
+    /**
+     * Init HATEOAS links
+     */
+    @PostLoad
+    public void initLinks() {
+        this.addLink(Links.REL_SELF, "user/" + getId());
+    }
 
-	/**
-	 * @return the accountRequestDemand
-	 */
-	public Boolean isAccountRequestDemand() {
-		return accountRequestDemand;
-	}
+    /**
+     * @return the accountRequestDemand
+     */
+    public Boolean isAccountRequestDemand() {
+        return accountRequestDemand;
+    }
 
-	/**
-	 * @param accountRequestDemand
-	 *            the accountRequestDemand to set
-	 */
-	public void setAccountRequestDemand(final Boolean accountRequestDemand) {
-		this.accountRequestDemand = accountRequestDemand;
-	}
+    /**
+     * @param accountRequestDemand
+     *            the accountRequestDemand to set
+     */
+    public void setAccountRequestDemand(final Boolean accountRequestDemand) {
+        this.accountRequestDemand = accountRequestDemand;
+    }
 
-	/**
-	 * @return the accountRequestInfo
-	 */
-	public AccountRequestInfo getAccountRequestInfo() {
-		return accountRequestInfo;
-	}
+    /**
+     * @return the accountRequestInfo
+     */
+    public AccountRequestInfo getAccountRequestInfo() {
+        return accountRequestInfo;
+    }
 
-	/**
-	 * @param accountRequestInfo
-	 *            the accountRequestInfo to set
-	 */
-	public void setAccountRequestInfo(final AccountRequestInfo accountRequestInfo) {
-		this.accountRequestInfo = accountRequestInfo;
-	}
+    /**
+     * @param accountRequestInfo
+     *            the accountRequestInfo to set
+     */
+    public void setAccountRequestInfo(final AccountRequestInfo accountRequestInfo) {
+        this.accountRequestInfo = accountRequestInfo;
+    }
 
-	/**
-	 * @return the canAccessToDicomAssociation
-	 */
-	public Boolean isCanAccessToDicomAssociation() {
-		return canAccessToDicomAssociation;
-	}
+    /**
+     * @return the canAccessToDicomAssociation
+     */
+    public Boolean isCanAccessToDicomAssociation() {
+        return canAccessToDicomAssociation;
+    }
 
-	/**
-	 * @param canAccessToDicomAssociation
-	 *            the canAccessToDicomAssociation to set
-	 */
-	public void setCanAccessToDicomAssociation(final Boolean canAccessToDicomAssociation) {
-		this.canAccessToDicomAssociation = canAccessToDicomAssociation;
-	}
+    /**
+     * @param canAccessToDicomAssociation
+     *            the canAccessToDicomAssociation to set
+     */
+    public void setCanAccessToDicomAssociation(final Boolean canAccessToDicomAssociation) {
+        this.canAccessToDicomAssociation = canAccessToDicomAssociation;
+    }
 
-	/**
-	 * @return the creationDate
-	 */
-	public LocalDate getCreationDate() {
-		return creationDate;
-	}
+    /**
+     * @return the creationDate
+     */
+    public LocalDate getCreationDate() {
+        return creationDate;
+    }
 
-	/**
-	 * @param creationDate
-	 *            the creationDate to set
-	 */
-	public void setCreationDate(final LocalDate creationDate) {
-		this.creationDate = creationDate;
-	}
+    /**
+     * @param creationDate
+     *            the creationDate to set
+     */
+    public void setCreationDate(final LocalDate creationDate) {
+        this.creationDate = creationDate;
+    }
 
-	/**
-	 * @return the email
-	 */
-	public String getEmail() {
-		return email;
-	}
+    /**
+     * @return the email
+     */
+    public String getEmail() {
+        return email;
+    }
 
-	/**
-	 * @param email
-	 *            the email to set
-	 */
-	public void setEmail(final String email) {
-		this.email = email;
-	}
+    /**
+     * @param email
+     *            the email to set
+     */
+    public void setEmail(final String email) {
+        this.email = email;
+    }
 
-	/**
-	 * @return the expirationDate
-	 */
-	public LocalDate getExpirationDate() {
-		return expirationDate;
-	}
+    /**
+     * @return the expirationDate
+     */
+    public LocalDate getExpirationDate() {
+        return expirationDate;
+    }
 
-	/**
-	 * @param expirationDate
-	 *            the expirationDate to set
-	 */
-	public void setExpirationDate(final LocalDate expirationDate) {
-		this.expirationDate = expirationDate;
-	}
+    /**
+     * @param expirationDate
+     *            the expirationDate to set
+     */
+    public void setExpirationDate(final LocalDate expirationDate) {
+        this.expirationDate = expirationDate;
+    }
 
-	/**
-	 * @return the extensionRequestInfo
-	 */
-	public ExtensionRequestInfo getExtensionRequestInfo() {
-		return extensionRequestInfo;
-	}
+    /**
+     * @return the extensionRequestInfo
+     */
+    public ExtensionRequestInfo getExtensionRequestInfo() {
+        return extensionRequestInfo;
+    }
 
-	/**
-	 * @param extensionRequestInfo the extensionRequestInfo to set
-	 */
-	public void setExtensionRequestInfo(ExtensionRequestInfo extensionRequestInfo) {
-		this.extensionRequestInfo = extensionRequestInfo;
-	}
+    /**
+     * @param extensionRequestInfo the extensionRequestInfo to set
+     */
+    public void setExtensionRequestInfo(ExtensionRequestInfo extensionRequestInfo) {
+        this.extensionRequestInfo = extensionRequestInfo;
+    }
 
-	/**
-	 * @return the extensionRequestDemand
-	 */
-	public Boolean isExtensionRequestDemand() {
-		return extensionRequestDemand;
-	}
-	
-	/**
-	 * @param extensionRequestDemand
-	 *            the extensionRequestDemand to set
-	 */
-	public void setExtensionRequestDemand(Boolean extensionRequestDemand) {
-		this.extensionRequestDemand = extensionRequestDemand;
-	}
-	
-	/**
-	 * @return the firstExpirationNotificationSent
-	 */
-	public Boolean isFirstExpirationNotificationSent() {
-		return firstExpirationNotificationSent;
-	}
+    /**
+     * @return the extensionRequestDemand
+     */
+    public Boolean isExtensionRequestDemand() {
+        return extensionRequestDemand;
+    }
+    
+    /**
+     * @param extensionRequestDemand
+     *            the extensionRequestDemand to set
+     */
+    public void setExtensionRequestDemand(Boolean extensionRequestDemand) {
+        this.extensionRequestDemand = extensionRequestDemand;
+    }
+    
+    /**
+     * @return the firstExpirationNotificationSent
+     */
+    public Boolean isFirstExpirationNotificationSent() {
+        return firstExpirationNotificationSent;
+    }
 
-	/**
-	 * @param firstExpirationNotificationSent
-	 *            the firstExpirationNotificationSent to set
-	 */
-	public void setFirstExpirationNotificationSent(final Boolean firstExpirationNotificationSent) {
-		this.firstExpirationNotificationSent = firstExpirationNotificationSent;
-	}
+    /**
+     * @param firstExpirationNotificationSent
+     *            the firstExpirationNotificationSent to set
+     */
+    public void setFirstExpirationNotificationSent(final Boolean firstExpirationNotificationSent) {
+        this.firstExpirationNotificationSent = firstExpirationNotificationSent;
+    }
 
-	/**
-	 * @return the firstName
-	 */
-	public String getFirstName() {
-		return firstName;
-	}
+    /**
+     * @return the firstName
+     */
+    public String getFirstName() {
+        return firstName;
+    }
 
-	/**
-	 * @param firstName
-	 *            the firstName to set
-	 */
-	public void setFirstName(final String firstName) {
-		this.firstName = firstName;
-	}
+    /**
+     * @param firstName
+     *            the firstName to set
+     */
+    public void setFirstName(final String firstName) {
+        this.firstName = firstName;
+    }
 
-	/**
-	 * @return the keycloakId
-	 */
-	@JsonIgnore
-	public String getKeycloakId() {
-		return keycloakId;
-	}
+    /**
+     * @return the keycloakId
+     */
+    @JsonIgnore
+    public String getKeycloakId() {
+        return keycloakId;
+    }
 
-	/**
-	 * @param keycloakId
-	 *            the keycloakId to set
-	 */
-	public void setKeycloakId(String keycloakId) {
-		this.keycloakId = keycloakId;
-	}
+    /**
+     * @param keycloakId
+     *            the keycloakId to set
+     */
+    public void setKeycloakId(String keycloakId) {
+        this.keycloakId = keycloakId;
+    }
 
-	/**
-	 * @return the lastLogin
-	 */
-	public LocalDate getLastLogin() {
-		return lastLogin;
-	}
+    /**
+     * @return the lastLogin
+     */
+    public LocalDate getLastLogin() {
+        return lastLogin;
+    }
 
-	/**
-	 * @param lastLogin
-	 *            the lastLogin to set
-	 */
-	public void setLastLogin(final LocalDate lastLogin) {
-		this.lastLogin = lastLogin;
-	}
+    /**
+     * @param lastLogin
+     *            the lastLogin to set
+     */
+    public void setLastLogin(final LocalDate lastLogin) {
+        this.lastLogin = lastLogin;
+    }
 
-	/**
-	 * @return the lastName
-	 */
-	public String getLastName() {
-		return lastName;
-	}
+    /**
+     * @return the lastName
+     */
+    public String getLastName() {
+        return lastName;
+    }
 
-	/**
-	 * @param lastName
-	 *            the lastName to set
-	 */
-	public void setLastName(final String lastName) {
-		this.lastName = lastName;
-	}
+    /**
+     * @param lastName
+     *            the lastName to set
+     */
+    public void setLastName(final String lastName) {
+        this.lastName = lastName;
+    }
 
-	/**
-	 * @return the role
-	 */
-	public Role getRole() {
-		return role;
-	}
+    /**
+     * @return the role
+     */
+    public Role getRole() {
+        return role;
+    }
 
-	/**
-	 * @param role
-	 *            the role to set
-	 */
-	public void setRole(final Role role) {
-		this.role = role;
-	}
+    /**
+     * @param role
+     *            the role to set
+     */
+    public void setRole(final Role role) {
+        this.role = role;
+    }
 
-	/**
-	 * @return the secondExpirationNotificationSent
-	 */
-	public Boolean isSecondExpirationNotificationSent() {
-		return secondExpirationNotificationSent;
-	}
+    /**
+     * @return the secondExpirationNotificationSent
+     */
+    public Boolean isSecondExpirationNotificationSent() {
+        return secondExpirationNotificationSent;
+    }
 
-	/**
-	 * @param secondExpirationNotificationSent
-	 *            the secondExpirationNotificationSent to set
-	 */
-	public void setSecondExpirationNotificationSent(final Boolean secondExpirationNotificationSent) {
-		this.secondExpirationNotificationSent = secondExpirationNotificationSent;
-	}
+    /**
+     * @param secondExpirationNotificationSent
+     *            the secondExpirationNotificationSent to set
+     */
+    public void setSecondExpirationNotificationSent(final Boolean secondExpirationNotificationSent) {
+        this.secondExpirationNotificationSent = secondExpirationNotificationSent;
+    }
 
-	/**
-	 * @return the teamName
-	 */
-	public String getTeamName() {
-		return teamName;
-	}
+    /**
+     * @return the teamName
+     */
+    public String getTeamName() {
+        return teamName;
+    }
 
-	/**
-	 * @param teamName
-	 *            the teamName to set
-	 */
-	public void setTeamName(final String teamName) {
-		this.teamName = teamName;
-	}
+    /**
+     * @param teamName
+     *            the teamName to set
+     */
+    public void setTeamName(final String teamName) {
+        this.teamName = teamName;
+    }
 
-	/**
-	 * @return the username
-	 */
-	public String getUsername() {
-		return username;
-	}
+    /**
+     * @return the username
+     */
+    public String getUsername() {
+        return username;
+    }
 
-	/**
-	 * @param username
-	 *            the username to set
-	 */
-	public void setUsername(final String username) {
-		this.username = username;
-	}
+    /**
+     * @param username
+     *            the username to set
+     */
+    public void setUsername(final String username) {
+        this.username = username;
+    }
 
-	@Override
-	@JsonIgnore
-	public Collection<GrantedAuthority> getAuthorities() {
-		return Arrays.asList(role);
-	}
+    @Override
+    @JsonIgnore
+    public Collection<GrantedAuthority> getAuthorities() {
+        return Arrays.asList(role);
+    }
 
-	@Override
-	@JsonIgnore
-	public String getPassword() {
-		return null;
-	}
+    @Override
+    @JsonIgnore
+    public String getPassword() {
+        return null;
+    }
 
-	@Override
-	@JsonIgnore
-	public boolean isAccountNonExpired() {
-		return true;
-	}
+    @Override
+    @JsonIgnore
+    public boolean isAccountNonExpired() {
+        return true;
+    }
 
-	@Override
-	@JsonIgnore
-	public boolean isAccountNonLocked() {
-		return true;
-	}
+    @Override
+    @JsonIgnore
+    public boolean isAccountNonLocked() {
+        return true;
+    }
 
-	@Override
-	@JsonIgnore
-	public boolean isCredentialsNonExpired() {
-		return true;
-	}
+    @Override
+    @JsonIgnore
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
 
-	@Override
-	@JsonIgnore
-	public boolean isEnabled() {
-		return expirationDate == null || expirationDate.isAfter(LocalDate.now());
-	}
+    @Override
+    @JsonIgnore
+    public boolean isEnabled() {
+        return expirationDate == null || expirationDate.isAfter(LocalDate.now());
+    }
 
 }

@@ -51,8 +51,8 @@ public interface BidsImporterApi {
         consumes = { "multipart/form-data" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<ImportJob> importAsBids(@Parameter(name = "file detail") @RequestPart("file") MultipartFile bidsZipFile,
-    		@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-    		@Parameter(name = "name of the study", required = true) @PathVariable("studyName") String studyName,
-    		@Parameter(name = "id of the center", required = true) @PathVariable("centerId") Long centerId) throws RestServiceException, ShanoirException, IOException;
+            @Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+            @Parameter(name = "name of the study", required = true) @PathVariable("studyName") String studyName,
+            @Parameter(name = "id of the center", required = true) @PathVariable("centerId") Long centerId) throws RestServiceException, ShanoirException, IOException;
 
 }

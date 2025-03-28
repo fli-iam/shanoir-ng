@@ -42,92 +42,92 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class PathologyServiceTest {
 
-	private static final Long PATHOLOGY_ID = 1L;
-	private static final String UPDATED_PATHOLOGY_DATA = "Alzheimer";
+    private static final Long PATHOLOGY_ID = 1L;
+    private static final String UPDATED_PATHOLOGY_DATA = "Alzheimer";
 
-	@Mock
-	private PathologyRepository pathologiesRepository;
+    @Mock
+    private PathologyRepository pathologiesRepository;
 
-	@Mock
-	private RabbitTemplate rabbitTemplate;
+    @Mock
+    private RabbitTemplate rabbitTemplate;
 
-	@InjectMocks
-	private PathologyServiceImpl pathologiesService;
+    @InjectMocks
+    private PathologyServiceImpl pathologiesService;
 
-	@BeforeEach
-	public void setup() {
-		given(pathologiesRepository.findAll()).willReturn(Arrays.asList(PathologyModelUtil.createPathology()));
-		given(pathologiesRepository.findById(PATHOLOGY_ID)).willReturn(Optional.of(PathologyModelUtil.createPathology()));
-		given(pathologiesRepository.save(Mockito.any(Pathology.class))).willReturn(PathologyModelUtil.createPathology());
-	}
+    @BeforeEach
+    public void setup() {
+        given(pathologiesRepository.findAll()).willReturn(Arrays.asList(PathologyModelUtil.createPathology()));
+        given(pathologiesRepository.findById(PATHOLOGY_ID)).willReturn(Optional.of(PathologyModelUtil.createPathology()));
+        given(pathologiesRepository.save(Mockito.any(Pathology.class))).willReturn(PathologyModelUtil.createPathology());
+    }
 
-	@Test
-	public void deleteByIdTest() throws ShanoirException {
-		pathologiesService.deleteById(PATHOLOGY_ID);
+    @Test
+    public void deleteByIdTest() throws ShanoirException {
+        pathologiesService.deleteById(PATHOLOGY_ID);
 
-		Mockito.verify(pathologiesRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
-	}
+        Mockito.verify(pathologiesRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
+    }
 
-	@Test
-	public void findAllTest() {
-		final List<Pathology> pathologies = pathologiesService.findAll();
-		Assertions.assertNotNull(pathologies);
-		Assertions.assertTrue(pathologies.size() == 1);
+    @Test
+    public void findAllTest() {
+        final List<Pathology> pathologies = pathologiesService.findAll();
+        Assertions.assertNotNull(pathologies);
+        Assertions.assertTrue(pathologies.size() == 1);
 
-		Mockito.verify(pathologiesRepository, Mockito.times(1)).findAll();
-	}
+        Mockito.verify(pathologiesRepository, Mockito.times(1)).findAll();
+    }
 
-	@Test
-	public void findByIdTest() {
-		final Pathology pathology = pathologiesService.findById(PATHOLOGY_ID);
-		Assertions.assertNotNull(pathology);
-		Assertions.assertTrue(PathologyModelUtil.PATHOLOGY_NAME.equals(pathology.getName()));
+    @Test
+    public void findByIdTest() {
+        final Pathology pathology = pathologiesService.findById(PATHOLOGY_ID);
+        Assertions.assertNotNull(pathology);
+        Assertions.assertTrue(PathologyModelUtil.PATHOLOGY_NAME.equals(pathology.getName()));
 
-		Mockito.verify(pathologiesRepository, Mockito.times(1)).findById(Mockito.anyLong());
-	}
-	
-	
+        Mockito.verify(pathologiesRepository, Mockito.times(1)).findById(Mockito.anyLong());
+    }
+    
+    
 
-	@Test
-	public void saveTest() throws ShanoirException {
-		pathologiesService.save(createPathology());
+    @Test
+    public void saveTest() throws ShanoirException {
+        pathologiesService.save(createPathology());
 
-		Mockito.verify(pathologiesRepository, Mockito.times(1)).save(Mockito.any(Pathology.class));
-	}
+        Mockito.verify(pathologiesRepository, Mockito.times(1)).save(Mockito.any(Pathology.class));
+    }
 
-	@Test
-	public void updateTest() throws ShanoirException {
-		final Pathology updatedPathology = pathologiesService.update(createPathology());
-		Assertions.assertNotNull(updatedPathology);
-		Assertions.assertTrue(UPDATED_PATHOLOGY_DATA.equals(updatedPathology.getName()));
+    @Test
+    public void updateTest() throws ShanoirException {
+        final Pathology updatedPathology = pathologiesService.update(createPathology());
+        Assertions.assertNotNull(updatedPathology);
+        Assertions.assertTrue(UPDATED_PATHOLOGY_DATA.equals(updatedPathology.getName()));
 
-		Mockito.verify(pathologiesRepository, Mockito.times(1)).save(Mockito.any(Pathology.class));
-	}
-	
-	/*
-	@Test
-	public void findByNameTest() {
-		final Pathology pathology = pathologiesService.findByName(UPDATED_PATHOLOGY_DATA);
-		Assertions.assertNotNull(pathology);
-		Assertions.assertTrue(PathologyModelUtil.PATHOLOGY_NAME.equals(pathology.getName()));
+        Mockito.verify(pathologiesRepository, Mockito.times(1)).save(Mockito.any(Pathology.class));
+    }
+    
+    /*
+    @Test
+    public void findByNameTest() {
+        final Pathology pathology = pathologiesService.findByName(UPDATED_PATHOLOGY_DATA);
+        Assertions.assertNotNull(pathology);
+        Assertions.assertTrue(PathologyModelUtil.PATHOLOGY_NAME.equals(pathology.getName()));
 
-		Mockito.verify(pathologiesRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
-	}
+        Mockito.verify(pathologiesRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+    }
 */
 /*
-	@Test
-	public void updateFromShanoirOldTest() throws ShanoirException {
-		pathologiesService.updateFromShanoirOld(createPathology());
+    @Test
+    public void updateFromShanoirOldTest() throws ShanoirException {
+        pathologiesService.updateFromShanoirOld(createPathology());
 
-		Mockito.verify(pathologiesRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
-		Mockito.verify(pathologiesRepository, Mockito.times(1)).save(Mockito.any(Pathology.class));
-	}
+        Mockito.verify(pathologiesRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+        Mockito.verify(pathologiesRepository, Mockito.times(1)).save(Mockito.any(Pathology.class));
+    }
 */
-	private Pathology createPathology() {
-		final Pathology pathology = new Pathology();
-		pathology.setId(PATHOLOGY_ID);
-		pathology.setName(UPDATED_PATHOLOGY_DATA);
-		return pathology;
-	}
+    private Pathology createPathology() {
+        final Pathology pathology = new Pathology();
+        pathology.setId(PATHOLOGY_ID);
+        pathology.setName(UPDATED_PATHOLOGY_DATA);
+        return pathology;
+    }
 
 }

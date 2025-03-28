@@ -31,13 +31,13 @@ import org.shanoir.ng.shared.model.InversionTime;
 @Mapper(componentModel = "spring",unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface InversionTimeMapper {
 
-	
-	List<InversionTime> InversionTimeDTOListToInversionTimeList(
-			List<Double> inversionTimeDTOList);
+    
+    List<InversionTime> InversionTimeDTOListToInversionTimeList(
+            List<Double> inversionTimeDTOList);
 
 
-	@Mapping(target = "inversionTimeValue", source = "inversionTime")
-	InversionTime InversionTimeDTOToInversionTime(
-			Double inversionTime);
+    @Mapping(target = "inversionTimeValue", source = "inversionTime")
+    InversionTime InversionTimeDTOToInversionTime(
+            Double inversionTime);
 
 }

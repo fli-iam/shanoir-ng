@@ -28,7 +28,7 @@ import org.springframework.data.repository.query.Param;
  */
 public interface StudyRepository extends CrudRepository<Study, Long> {
 
-	@Query(value="select rd.study_id from related_datasets rd where dataset_id = ?1",
-			nativeQuery = true)
-	List<BigInteger> findByDatasetId(Long datasetId);
+    @Query(value="select rd.study_id from related_datasets rd where dataset_id = ?1",
+            nativeQuery = true)
+    List<BigInteger> findByDatasetId(Long datasetId);
 }

@@ -42,53 +42,53 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(classes = ShanoirPreclinicalApplication.class)
 public class SubjectTherapyRepositoryTest {
 
-	private static final Long STHERAPY_TEST_CHIMIO_ID = 1L;
-	private static final String SUBJECT_TEST_SPECIE_DATA = "rat";
-	private static final String THERAPY_TEST_CHIMIO_DATA = "Chimiotherapy";
-	private static final Double THERAPY_DOSE_TEST_1_DATA = 2.0;
+    private static final Long STHERAPY_TEST_CHIMIO_ID = 1L;
+    private static final String SUBJECT_TEST_SPECIE_DATA = "rat";
+    private static final String THERAPY_TEST_CHIMIO_DATA = "Chimiotherapy";
+    private static final Double THERAPY_DOSE_TEST_1_DATA = 2.0;
 
-	@Autowired
-	private SubjectTherapyRepository repository;
+    @Autowired
+    private SubjectTherapyRepository repository;
 
-	@Autowired
-	private AnimalSubjectRepository subjectRepository;
+    @Autowired
+    private AnimalSubjectRepository subjectRepository;
 
-	@Test
-	public void findAllTest() throws Exception {
-		Iterable<SubjectTherapy> stherapiesDb = repository.findAll();
-		assertThat(stherapiesDb).isNotNull();
-		int nbTemplates = 0;
-		Iterator<SubjectTherapy> stherapiesIt = stherapiesDb.iterator();
-		while (stherapiesIt.hasNext()) {
-			stherapiesIt.next();
-			nbTemplates++;
-		}
-		assertThat(nbTemplates).isEqualTo(3);
-	}
+    @Test
+    public void findAllTest() throws Exception {
+        Iterable<SubjectTherapy> stherapiesDb = repository.findAll();
+        assertThat(stherapiesDb).isNotNull();
+        int nbTemplates = 0;
+        Iterator<SubjectTherapy> stherapiesIt = stherapiesDb.iterator();
+        while (stherapiesIt.hasNext()) {
+            stherapiesIt.next();
+            nbTemplates++;
+        }
+        assertThat(nbTemplates).isEqualTo(3);
+    }
 
-	@Test
-	public void findBySubjectTest() throws Exception {
-		List<SubjectTherapy> stherapyDb = repository.findByAnimalSubject(AnimalSubjectModelUtil.createAnimalSubject());
-		assertNotNull(stherapyDb);
-		assertThat(stherapyDb.size()).isEqualTo(2);
-		assertThat(stherapyDb.get(0).getId()).isEqualTo(STHERAPY_TEST_CHIMIO_ID);
-	}
+    @Test
+    public void findBySubjectTest() throws Exception {
+        List<SubjectTherapy> stherapyDb = repository.findByAnimalSubject(AnimalSubjectModelUtil.createAnimalSubject());
+        assertNotNull(stherapyDb);
+        assertThat(stherapyDb.size()).isEqualTo(2);
+        assertThat(stherapyDb.get(0).getId()).isEqualTo(STHERAPY_TEST_CHIMIO_ID);
+    }
 
-	@Test
-	public void findByTherapyTest() throws Exception {
-		List<SubjectTherapy> stherapyDb = repository.findByTherapy(TherapyModelUtil.createTherapyChimio());
-		assertNotNull(stherapyDb);
-		assertThat(stherapyDb.size()).isEqualTo(2);
-		assertThat(stherapyDb.get(0).getId()).isEqualTo(STHERAPY_TEST_CHIMIO_ID);
-		assertThat(stherapyDb.get(0).getTherapy().getName()).isEqualTo(THERAPY_TEST_CHIMIO_DATA);
-		assertThat(stherapyDb.get(0).getDose()).isEqualTo(THERAPY_DOSE_TEST_1_DATA);
-	}
+    @Test
+    public void findByTherapyTest() throws Exception {
+        List<SubjectTherapy> stherapyDb = repository.findByTherapy(TherapyModelUtil.createTherapyChimio());
+        assertNotNull(stherapyDb);
+        assertThat(stherapyDb.size()).isEqualTo(2);
+        assertThat(stherapyDb.get(0).getId()).isEqualTo(STHERAPY_TEST_CHIMIO_ID);
+        assertThat(stherapyDb.get(0).getTherapy().getName()).isEqualTo(THERAPY_TEST_CHIMIO_DATA);
+        assertThat(stherapyDb.get(0).getDose()).isEqualTo(THERAPY_DOSE_TEST_1_DATA);
+    }
 
-	@Test
-	public void findOneTest() throws Exception {
-		SubjectTherapy stherapyDb = repository.findById(STHERAPY_TEST_CHIMIO_ID).orElse(null);
-		assertThat(stherapyDb.getTherapy().getName()).isEqualTo(THERAPY_TEST_CHIMIO_DATA);
-		assertThat(stherapyDb.getDose()).isEqualTo(THERAPY_DOSE_TEST_1_DATA);
-	}
+    @Test
+    public void findOneTest() throws Exception {
+        SubjectTherapy stherapyDb = repository.findById(STHERAPY_TEST_CHIMIO_ID).orElse(null);
+        assertThat(stherapyDb.getTherapy().getName()).isEqualTo(THERAPY_TEST_CHIMIO_DATA);
+        assertThat(stherapyDb.getDose()).isEqualTo(THERAPY_DOSE_TEST_1_DATA);
+    }
 
 }

@@ -36,29 +36,29 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 @DecoratedWith(ExaminationDatasetAcquisitionDecorator.class)
 public interface ExaminationDatasetAcquisitionMapper {
 
-	/**
-	 * Map list of @DatasetAcquisition to list
-	 * of @ExaminationDatasetAcquisitionDTO.
-	 *
-	 * @param datasetAcquisitions
-	 *            list of dataset acquisitions.
-	 * @return list of dataset acquisitions DTO.
-	 */
-	List<ExaminationDatasetAcquisitionDTO> datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(
-			List<DatasetAcquisition> datasetAcquisitions);
+    /**
+     * Map list of @DatasetAcquisition to list
+     * of @ExaminationDatasetAcquisitionDTO.
+     *
+     * @param datasetAcquisitions
+     *            list of dataset acquisitions.
+     * @return list of dataset acquisitions DTO.
+     */
+    List<ExaminationDatasetAcquisitionDTO> datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(
+            List<DatasetAcquisition> datasetAcquisitions);
 
-	/**
-	 * Map a @DatasetAcquisition to a @ExaminationDatasetAcquisitionDTO.
-	 *
-	 * @param datasetAcquisition
-	 *            dataset acquisition to map.
-	 * @return dataset acquisition DTO.
-	 */
-	@Mappings({ @Mapping(target = "name", ignore = true) })
-	ExaminationDatasetAcquisitionDTO datasetAcquisitionToExaminationDatasetAcquisitionDTO(
-			DatasetAcquisition datasetAcquisition);
+    /**
+     * Map a @DatasetAcquisition to a @ExaminationDatasetAcquisitionDTO.
+     *
+     * @param datasetAcquisition
+     *            dataset acquisition to map.
+     * @return dataset acquisition DTO.
+     */
+    @Mappings({ @Mapping(target = "name", ignore = true) })
+    ExaminationDatasetAcquisitionDTO datasetAcquisitionToExaminationDatasetAcquisitionDTO(
+            DatasetAcquisition datasetAcquisition);
 
-	@Mappings({ @Mapping(target = "source", ignore = true), @Mapping(target = "copies", ignore = true) })
-	DatasetWithProcessingsDTO datasetToDatasetWithProcessingsDTO(Dataset dataset);
+    @Mappings({ @Mapping(target = "source", ignore = true), @Mapping(target = "copies", ignore = true) })
+    DatasetWithProcessingsDTO datasetToDatasetWithProcessingsDTO(Dataset dataset);
 
 }

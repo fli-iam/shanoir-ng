@@ -28,57 +28,57 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Subject extends IdName {
 
-	/** Relations beetween the subjects and the studies. */
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "subject", fetch = FetchType.LAZY, orphanRemoval = true)
-	private List<SubjectStudy> subjectStudyList;
-	
-	@Id
-	protected Long id;
-	
-	protected String name;
-	
-	public Subject() { }
-	
-	/**
-	 * @param id
-	 * @param name
-	 */
-	public Subject (Long id, String name) {
-		this.setId(id);
-		this.setName(name);
-	}
+    /** Relations beetween the subjects and the studies. */
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "subject", fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<SubjectStudy> subjectStudyList;
+    
+    @Id
+    protected Long id;
+    
+    protected String name;
+    
+    public Subject() { }
+    
+    /**
+     * @param id
+     * @param name
+     */
+    public Subject (Long id, String name) {
+        this.setId(id);
+        this.setName(name);
+    }
 
-	/**
-	 * @return the subjectStudyList
-	 */
-	public List<SubjectStudy> getSubjectStudyList() {
-		return subjectStudyList;
-	}
+    /**
+     * @return the subjectStudyList
+     */
+    public List<SubjectStudy> getSubjectStudyList() {
+        return subjectStudyList;
+    }
 
-	/**
-	 * @param subjectStudyList the subjectStudyList to set
-	 */
-	public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
-		this.subjectStudyList = subjectStudyList;
-	}
+    /**
+     * @param subjectStudyList the subjectStudyList to set
+     */
+    public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
+        this.subjectStudyList = subjectStudyList;
+    }
 
-	@Override
-	public Long getId() {
-		return id;
-	}
+    @Override
+    public Long getId() {
+        return id;
+    }
 
-	@Override
-	public void setId(Long id) {
-		this.id = id;
-	}
+    @Override
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	@Override
-	public String getName() {
-		return name;
-	}
+    @Override
+    public String getName() {
+        return name;
+    }
 
-	@Override
-	public void setName(String name) {
-		this.name = name;
-	}
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
 }
