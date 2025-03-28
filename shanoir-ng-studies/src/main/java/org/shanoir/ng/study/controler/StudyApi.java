@@ -133,7 +133,7 @@ public interface StudyApi {
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "Fetch detailed storage volume of study")
             @Valid
-            @RequestParam(value = "withStorageVolume", required = false, defaultValue="false") boolean withStorageVolume);
+            @RequestParam(value = "withStorageVolume", required = false, defaultValue = "false") boolean withStorageVolume);
 
     @Operation(summary = "", description = "Saves a new study")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "created study"),

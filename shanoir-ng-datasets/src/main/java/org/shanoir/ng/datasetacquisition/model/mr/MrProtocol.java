@@ -14,15 +14,20 @@
 
 package org.shanoir.ng.datasetacquisition.model.mr;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.model.DiffusionGradient;
-import org.shanoir.ng.shared.model.InversionTime;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 
 /**
  * MR protocol.

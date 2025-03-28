@@ -68,7 +68,7 @@ public class StudyCard extends HalEntity implements Card {
     private Long studyId;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name="study_card_id")
+    @JoinColumn(name = "study_card_id")
     private List<StudyCardRule<?>> rules;
 
     private Long lastEditTimestamp;

@@ -32,19 +32,19 @@ import java.time.LocalDate;
  */
 @Entity
 @SqlResultSetMapping(name = "SolrResult", classes = {@ConstructorResult(targetClass = ShanoirMetadata.class,
-        columns = {@ColumnResult(name="datasetId", type = Long.class), @ColumnResult(name="datasetName", type = String.class),
-                @ColumnResult(name="datasetType", type = Integer.class), @ColumnResult(name="datasetNature", type = Integer.class),
-                @ColumnResult(name="datasetCreationDate", type = LocalDate.class),
-                @ColumnResult(name="examinationId", type = Long.class), @ColumnResult(name="examinationComment", type = String.class),
-                @ColumnResult(name="examinationDate", type = LocalDate.class), @ColumnResult(name="acquisitionEquipmentName", type = String.class),
-                @ColumnResult(name="subjectName", type = String.class), @ColumnResult(name="subjectType", type = Integer.class),
-                @ColumnResult(name="subjectId", type = Long.class),
-                @ColumnResult(name="studyName", type = String.class), @ColumnResult(name="studyId", type = Long.class),
-                @ColumnResult(name="centerName", type = String.class), @ColumnResult(name="centerId", type = Long.class),
-                @ColumnResult(name="sliceThickness", type = Double.class), @ColumnResult(name="pixelBandwidth", type = Double.class),
-                @ColumnResult(name="magneticFieldStrength", type = Double.class),
-                @ColumnResult(name="processed", type = Boolean.class), @ColumnResult(name="importDate", type = LocalDate.class),
-                @ColumnResult(name="username", type = String.class), @ColumnResult(name="sortingIndex", type = Integer.class)
+        columns = {@ColumnResult(name = "datasetId", type = Long.class), @ColumnResult(name = "datasetName", type = String.class),
+                @ColumnResult(name = "datasetType", type = Integer.class), @ColumnResult(name = "datasetNature", type = Integer.class),
+                @ColumnResult(name = "datasetCreationDate", type = LocalDate.class),
+                @ColumnResult(name = "examinationId", type = Long.class), @ColumnResult(name = "examinationComment", type = String.class),
+                @ColumnResult(name = "examinationDate", type = LocalDate.class), @ColumnResult(name = "acquisitionEquipmentName", type = String.class),
+                @ColumnResult(name = "subjectName", type = String.class), @ColumnResult(name = "subjectType", type = Integer.class),
+                @ColumnResult(name = "subjectId", type = Long.class),
+                @ColumnResult(name = "studyName", type = String.class), @ColumnResult(name = "studyId", type = Long.class),
+                @ColumnResult(name = "centerName", type = String.class), @ColumnResult(name = "centerId", type = Long.class),
+                @ColumnResult(name = "sliceThickness", type = Double.class), @ColumnResult(name = "pixelBandwidth", type = Double.class),
+                @ColumnResult(name = "magneticFieldStrength", type = Double.class),
+                @ColumnResult(name = "processed", type = Boolean.class), @ColumnResult(name = "importDate", type = LocalDate.class),
+                @ColumnResult(name = "username", type = String.class), @ColumnResult(name = "sortingIndex", type = Integer.class)
         })
 })
 

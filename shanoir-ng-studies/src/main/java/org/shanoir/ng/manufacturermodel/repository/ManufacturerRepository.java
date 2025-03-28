@@ -15,10 +15,7 @@
 package org.shanoir.ng.manufacturermodel.repository;
 
 import org.shanoir.ng.manufacturermodel.model.Manufacturer;
-import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.springframework.data.repository.CrudRepository;
-
-import java.util.List;
 
 /**
  * Implementation of custom repository for centers.

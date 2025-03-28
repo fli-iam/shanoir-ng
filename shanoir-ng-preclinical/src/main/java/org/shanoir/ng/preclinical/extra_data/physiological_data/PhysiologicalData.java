@@ -111,7 +111,7 @@ public class PhysiologicalData extends ExaminationExtraData   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(getExaminationId(), getFilename(),getFilepath(),hasHeartRate, hasRespiratoryRate, hasSao2, hasTemperature);
+    return Objects.hash(getExaminationId(), getFilename(), getFilepath(), hasHeartRate, hasRespiratoryRate, hasSao2, hasTemperature);
   }
 
 @Override

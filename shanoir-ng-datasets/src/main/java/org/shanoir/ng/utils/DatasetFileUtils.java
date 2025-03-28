@@ -146,7 +146,7 @@ public class DatasetFileUtils {
         }
 
         JsonFactory jsonFactory = new JsonFactory();
-        jsonFactory.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET,false);
+        jsonFactory.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
 
         ZipEntry zipEntry = new ZipEntry(INPUT);
         zipEntry.setTime(System.currentTimeMillis());

@@ -20,7 +20,6 @@ import java.util.Optional;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.UndeletableDependenciesException;
 import org.springframework.security.access.prepost.PreAuthorize;
 

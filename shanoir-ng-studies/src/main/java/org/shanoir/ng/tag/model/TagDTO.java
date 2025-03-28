@@ -1,6 +1,6 @@
 package org.shanoir.ng.tag.model;
 
-public class TagDTO{
+public class TagDTO {
 
     private Long id;
 

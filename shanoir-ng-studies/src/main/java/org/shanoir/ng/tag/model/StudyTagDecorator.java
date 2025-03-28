@@ -11,10 +11,14 @@ public class StudyTagDecorator implements StudyTagMapper {
     private StudyTagMapper delegate;
 
     @Override
-    public StudyTagDTO studyTagToStudyTagDTO(StudyTag studyTag) { return delegate.studyTagToStudyTagDTO(studyTag); }
+    public StudyTagDTO studyTagToStudyTagDTO(StudyTag studyTag) {
+        return delegate.studyTagToStudyTagDTO(studyTag);
+    }
 
     @Override
-    public StudyTag studyTagDTOToStudyTag(StudyTagDTO studyTagDTO) { return delegate.studyTagDTOToStudyTag(studyTagDTO); }
+    public StudyTag studyTagDTOToStudyTag(StudyTagDTO studyTagDTO) {
+        return delegate.studyTagDTOToStudyTag(studyTagDTO);
+    }
 
     @Override
     public List<StudyTag> studyTagDTOListToStudyTagList(List<StudyTagDTO> studyTagDTOs) {

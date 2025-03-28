@@ -14,12 +14,8 @@
 
 package org.shanoir.ng.datasetacquisition.controler;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
+import java.util.List;
+
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDatasetsDTO;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
@@ -31,9 +27,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
-import java.util.List;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @Tag(name = "datasetacquisition", description = "the datasetacquisition API")
 public interface DatasetAcquisitionApi {
@@ -50,7 +55,7 @@ public interface DatasetAcquisitionApi {
         consumes = { "application/json" },
         method = RequestMethod.POST)
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#importJob.getExaminationId(), 'CAN_IMPORT'))")
-    ResponseEntity<Void> createNewDatasetAcquisition(@Parameter(description = "DatasetAcquisition to create" ,required = true ) @Valid @RequestBody ImportJob importJob) throws RestServiceException;
+    ResponseEntity<Void> createNewDatasetAcquisition(@Parameter(description = "DatasetAcquisition to create", required = true ) @Valid @RequestBody ImportJob importJob) throws RestServiceException;
 
     @Operation(summary = "", description = "If exists, returns the dataset acquisitions corresponding to the given study card")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found dataset acquisitions"),

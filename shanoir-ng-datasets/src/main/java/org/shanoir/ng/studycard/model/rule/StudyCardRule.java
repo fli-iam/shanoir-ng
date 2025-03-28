@@ -41,7 +41,7 @@ import jakarta.validation.constraints.NotNull;
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
-@DiscriminatorColumn(name="scope", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorColumn(name = "scope", discriminatorType = DiscriminatorType.STRING)
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "scope")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = DatasetRule.class, name = "Dataset"),
@@ -49,13 +49,13 @@ import jakarta.validation.constraints.NotNull;
 public abstract class StudyCardRule<T> extends AbstractEntity {
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name="rule_id")
+    @JoinColumn(name = "rule_id")
     private List<StudyCardAssignment<?>> assignments;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     // there is a join table because a rule_id fk would lead to an ambiguity and bugs
     // because it could refer to a study card or quality card rule
-    @JoinTable(name="study_card_condition_join", joinColumns = {@JoinColumn(name = "study_card_rule_id")}, inverseJoinColumns = {@JoinColumn(name = "condition_id")})
+    @JoinTable(name = "study_card_condition_join", joinColumns = {@JoinColumn(name = "study_card_rule_id")}, inverseJoinColumns = {@JoinColumn(name = "condition_id")})
     private List<StudyCardCondition> conditions;
 
     @NotNull

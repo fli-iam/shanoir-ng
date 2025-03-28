@@ -188,7 +188,7 @@ public class CenterServiceImpl implements CenterService {
         return centerRepository.findByName(name);
     }
 
-    private boolean updateName(IdName idName) throws MicroServiceCommunicationException{
+    private boolean updateName(IdName idName) throws MicroServiceCommunicationException {
         try {
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.CENTER_NAME_UPDATE_QUEUE,
                     objectMapper.writeValueAsString(idName));
@@ -198,7 +198,7 @@ public class CenterServiceImpl implements CenterService {
         }
     }
 
-    public void deleteById(final Long id) throws EntityNotFoundException  {
+    public void deleteById(final Long id) throws EntityNotFoundException {
         final Optional<Center> entity = centerRepository.findById(id);
         entity.orElseThrow(() -> new EntityNotFoundException("Cannot find entity with id = " + id));
         centerRepository.deleteById(id);

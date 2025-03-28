@@ -77,7 +77,7 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
      * Create a new line for the execution input
      */
     private void createTrackingLine(ExecutionMonitoring executionMonitoring, File trackingFile) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(trackingFile,true));) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(trackingFile, true));) {
 
             String newLine;
 

@@ -56,7 +56,7 @@ public interface AnestheticApi {
         @ApiResponse(responseCode = "500", description = "Unexpected Error") })
     @DeleteMapping(value = "/{id}",
         produces = { "application/json" })
-    ResponseEntity<Void> deleteAnesthetic(@Parameter(name = "Anesthetic id",required = true ) @PathVariable("id") Long id);
+    ResponseEntity<Void> deleteAnesthetic(@Parameter(name = "Anesthetic id", required = true ) @PathVariable("id") Long id);
 
 
     @Operation(summary = "Get Anesthetic by id", description = "")
@@ -66,7 +66,7 @@ public interface AnestheticApi {
         @ApiResponse(responseCode = "500", description = "Unexpected error") })
     @GetMapping(value = "/{id}",
         produces = { "application/json" })
-    ResponseEntity<Anesthetic> getAnestheticById(@Parameter(name = "Anesthetic id",required = true ) @PathVariable("id") Long id);
+    ResponseEntity<Anesthetic> getAnestheticById(@Parameter(name = "Anesthetic id", required = true ) @PathVariable("id") Long id);
 
 
     @Operation(summary = "List all anesthetics", description = "")
@@ -83,7 +83,7 @@ public interface AnestheticApi {
         @ApiResponse(responseCode = "500", description = "Unexpected error") })
     @GetMapping(value = "/type/{type}",
         produces = { "application/json" })
-    ResponseEntity<List<Anesthetic>> getAnestheticsByType(@Parameter(name = "Anesthetic type ",required = true ) @PathVariable("type") String type);
+    ResponseEntity<List<Anesthetic>> getAnestheticsByType(@Parameter(name = "Anesthetic type ", required = true ) @PathVariable("type") String type);
 
 
     @Operation(summary = "Update an existing anesthetic", description = "")
@@ -95,8 +95,8 @@ public interface AnestheticApi {
     @PutMapping(value = "/{id}",
         produces = { "application/json" },
         consumes = { "application/json" })
-    ResponseEntity<Void> updateAnesthetic(@Parameter(name = "ID of Anesthetic that needs to be updated",required = true ) @PathVariable("id") Long id,
-        @Parameter(name = "Anesthetic object that needs to be updated" ,required = true ) @RequestBody Anesthetic anesthetic,
+    ResponseEntity<Void> updateAnesthetic(@Parameter(name = "ID of Anesthetic that needs to be updated", required = true ) @PathVariable("id") Long id,
+        @Parameter(name = "Anesthetic object that needs to be updated", required = true ) @RequestBody Anesthetic anesthetic,
         final BindingResult result) throws RestServiceException;
 
 }

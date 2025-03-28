@@ -119,12 +119,12 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
                 if (dto == null) {
                     attempts++;
                     continue;
-                }else{
+                } else {
                     attempts = 1;
                 }
                 switch (dto.getStatus()) {
                     case FINISHED -> processFinishedJob(processing, event, dto.getEndDate());
-                    case UNKNOWN,EXECUTION_FAILED,KILLED -> processKilledJob(processing, event, dto);
+                    case UNKNOWN, EXECUTION_FAILED, KILLED -> processKilledJob(processing, event, dto);
                     case RUNNING -> {
                         try {
                             Thread.sleep(sleepTime); // sleep/stop a thread for 20 seconds
@@ -182,7 +182,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
                     startMsg,
                     ShanoirEvent.IN_PROGRESS,
                     DEFAULT_PROGRESS);
-        }else{
+        } else {
             event.setMessage(startMsg);
             event.setStatus(ShanoirEvent.IN_PROGRESS);
             event.setProgress(DEFAULT_PROGRESS);

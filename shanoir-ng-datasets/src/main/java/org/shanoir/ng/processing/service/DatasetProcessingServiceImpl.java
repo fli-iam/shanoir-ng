@@ -139,7 +139,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
             if (processing.getInputDatasets().isEmpty()) {
                 // If processing is no more linked to a dataset, delete it
                 toDelete.add(processing);
-            }else{
+            } else {
                 toUpdate.add(processing);
             }
         }

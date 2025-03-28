@@ -14,6 +14,15 @@
 
 package org.shanoir.ng.dataset.security;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
@@ -42,9 +51,6 @@ import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
-import java.math.BigInteger;
-import java.util.*;
 
 @Service
 public class DatasetSecurityService {
@@ -521,11 +527,11 @@ public class DatasetSecurityService {
         Long studyId;
         if (dataset.getDatasetProcessing() != null) {
             studyId = dataset.getDatasetProcessing().getStudyId();
-        }else if (dataset.getDatasetAcquisition() != null
+        } else if (dataset.getDatasetAcquisition() != null
                 && dataset.getDatasetAcquisition().getExamination() != null
                 && dataset.getDatasetAcquisition().getExamination().getStudyId() != null) {
             studyId = dataset.getDatasetAcquisition().getExamination().getStudyId();
-        }else{
+        } else {
             throw new IllegalStateException("Cannot check dataset n°" + dataset.getId() + " rights, this dataset has neither examination nor processing parent !");
         }
         return studyId;

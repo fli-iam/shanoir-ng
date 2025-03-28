@@ -826,7 +826,7 @@ public class StudyServiceImpl implements StudyService {
             String dtoAsString = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_DATASETS_DETAILED_STORAGE_VOLUME, studyId);
             if (dtoAsString != null && !dtoAsString.isEmpty()) {
                 dto = objectMapper.readValue(dtoAsString, StudyStorageVolumeDTO.class);
-            }else{
+            } else {
                 dto = new StudyStorageVolumeDTO();
             }
         } catch (AmqpException | JsonProcessingException e) {
@@ -847,7 +847,7 @@ public class StudyServiceImpl implements StudyService {
             String resultAsString = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_DATASETS_TOTAL_STORAGE_VOLUME, studyIds);
             if (resultAsString != null && !resultAsString.isEmpty()) {
                 detailedStorageVolumes = objectMapper.readValue(resultAsString,  new TypeReference<HashMap<Long, StudyStorageVolumeDTO>>() { });
-            }else{
+            } else {
                 return new HashMap<>();
             }
         } catch (AmqpException | JsonProcessingException e) {

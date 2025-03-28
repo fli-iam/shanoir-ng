@@ -230,7 +230,7 @@ public class ContrastAgent extends HalEntity   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, manufacturedName,concentration,dose);
+    return Objects.hash(name, manufacturedName, concentration, dose);
   }
 
   @Override

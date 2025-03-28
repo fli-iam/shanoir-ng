@@ -725,7 +725,7 @@ public class ShanoirUploaderServiceClient {
         try (CloseableHttpResponse response = httpService.get(this.serviceURLManufacturers)) {
             int code = response.getCode();
             if (code == HttpStatus.SC_OK) {
-                List<Manufacturer> manufacturers = Util.getMappedList(response,Manufacturer.class);
+                List<Manufacturer> manufacturers = Util.getMappedList(response, Manufacturer.class);
                 return manufacturers;
             } else {
                 logger.error("Could not find manufacturers (status code: " + code + ", message: "

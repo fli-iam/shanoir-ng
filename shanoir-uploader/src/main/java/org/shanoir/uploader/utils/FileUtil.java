@@ -69,7 +69,7 @@ public class FileUtil {
             destination = new FileOutputStream(destFile).getChannel();
             destination.transferFrom(source, 0, source.size());
         } catch (FileNotFoundException e) {
-            logger.error("File " +sourceFile.getAbsolutePath()+" not found",e);
+            logger.error("File " + sourceFile.getAbsolutePath() + " not found", e);
         } catch (IOException e) {
             logger.error("IO Exception" , e);
         } finally {

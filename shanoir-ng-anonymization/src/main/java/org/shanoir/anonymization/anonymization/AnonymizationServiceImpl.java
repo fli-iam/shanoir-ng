@@ -209,7 +209,8 @@ public class AnonymizationServiceImpl implements AnonymizationService {
                     String value = datasetAttributes.getString(tagInt);
                     // only act below in case of K: keep, if X: delete for private tags, no need
                     if (value != null && !value.isEmpty() && action.equals("K")) {
-                        action = checkForPHIInPrivateTags(patientNameArrayAttr, patientIDAttr, patientBirthNameAttr, patientBirthDateAttr, tagInt, value, action);
+                        action = checkForPHIInPrivateTags(patientNameArrayAttr, patientIDAttr, patientBirthNameAttr,
+                                patientBirthDateAttr, tagInt, value, action);
                         action = handleTagsToDeleteForManufacturer(datasetAttributes, tagString, action);
                     }
                     anonymizeTag(tagInt, action, datasetAttributes);
@@ -340,9 +341,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
         String value = getFinalValueForTag(action);
         if (value == null) {
             attributes.remove(tagInt);
-        } else if ("KEEP".equals(value)) {
-            // do nothing
-        } else {
+        } else if (!"KEEP".equals(value)) {
             anonymizeTagAccordingToVR(attributes, tagInt, value);
         }
     }
@@ -413,6 +412,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
      * @param value
      *            : the new value of the tag after anonymization
      */
+    @SuppressWarnings("checkstyle:rightcurly")
     private void anonymizeTagAccordingToVR(Attributes attributes, int tag, String value) {
         VR vr = attributes.getVR(tag);
         if (vr == null) {
@@ -484,6 +484,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
         // VR.OD = Other Double String
     }
 
+    @SuppressWarnings("checkstyle:parametername")
     private void anonymizeUID(int tagInt, Attributes attributes, Map<String, String> UIDs) {
         String value;
         if (UIDs != null && UIDs.size() != 0

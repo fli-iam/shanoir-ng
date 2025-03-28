@@ -29,8 +29,9 @@ import jakarta.persistence.Table;
 
 
 @Entity
-@Table(name="pseudonymus_hash_values")
-@JsonPropertyOrder({ "_links", "id", "birthNameHash1", "birthNameHash2", "birthNameHash3","lastNameHash1","lastNameHash2","lastNameHash3","firstNameHash1","firstNameHash2","firstNameHash3","birthDateHash", "subject" })
+@Table(name = "pseudonymus_hash_values")
+@JsonPropertyOrder({ "_links", "id", "birthNameHash1", "birthNameHash2", "birthNameHash3", "lastNameHash1", "lastNameHash2", "lastNameHash3", 
+    "firstNameHash1", "firstNameHash2", "firstNameHash3", "birthDateHash", "subject"})
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 public class PseudonymusHashValues  extends HalEntity implements Serializable {
 

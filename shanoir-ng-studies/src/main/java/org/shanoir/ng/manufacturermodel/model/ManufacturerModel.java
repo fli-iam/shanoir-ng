@@ -43,9 +43,9 @@ import jakarta.validation.constraints.NotNull;
 @Entity
 @JsonPropertyOrder({ "_links", "id", "name" })
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
-@SqlResultSetMapping(name="ManufacturerModelNameResult", classes = {
+@SqlResultSetMapping(name = "ManufacturerModelNameResult", classes = {
         @ConstructorResult(targetClass = IdName.class,
-        columns = {@ColumnResult(name="id", type = Long.class), @ColumnResult(name="name")})
+        columns = {@ColumnResult(name = "id", type = Long.class), @ColumnResult(name = "name")})
     })
 @ManufacturerModelTypeCheck
 public class ManufacturerModel extends HalEntity {

@@ -7,7 +7,7 @@ import org.shanoir.ng.tag.model.StudyTagDTO;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring",unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface StudyTagMapper {
 
     List<StudyTagDTO> studyTagListToStudyTagDTOList(List<StudyTag> studyTags);

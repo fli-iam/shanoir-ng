@@ -35,8 +35,10 @@ public interface StudyUserRepository extends CrudRepository<StudyUser, Long> {
 
     List<StudyUser> findByUserId(Long userId);
 
+    @SuppressWarnings("checkstyle:methodname")
     StudyUser findByUserIdAndStudy_Id(Long userId, Long studyId);
 
+    @SuppressWarnings("checkstyle:methodname")
     @EntityGraph(attributePaths = "studyUserRights")
     List<StudyUser> findByStudy_Id(Long studyId);
 

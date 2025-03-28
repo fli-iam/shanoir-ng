@@ -45,7 +45,7 @@ public interface ContrastAgentApi {
     @PostMapping(value = "",
         produces = { "application/json" },
         consumes = { "application/json" })
-    ResponseEntity<ContrastAgent> createContrastAgent(@Parameter(name = "protocol id",required = true ) @PathVariable("pid") Long pid,
+    ResponseEntity<ContrastAgent> createContrastAgent(@Parameter(name = "protocol id", required = true ) @PathVariable("pid") Long pid,
             @Parameter(name = "Contrast Agent to create", required = true) @RequestBody ContrastAgent contrastagent,
     BindingResult result) throws RestServiceException;
 
@@ -57,8 +57,8 @@ public interface ContrastAgentApi {
         @ApiResponse(responseCode = "500", description = "Unexpected Error") })
     @DeleteMapping(value = "/{cid}",
         produces = { "application/json" })
-    ResponseEntity<Void> deleteContrastAgent(@Parameter(name = "protocol id",required = true ) @PathVariable("pid") Long pid,
-            @Parameter(name = "Contrast Agent id",required = true ) @PathVariable("cid") Long cid);
+    ResponseEntity<Void> deleteContrastAgent(@Parameter(name = "protocol id", required = true ) @PathVariable("pid") Long pid,
+            @Parameter(name = "Contrast Agent id", required = true ) @PathVariable("cid") Long cid);
 
 
 
@@ -69,7 +69,7 @@ public interface ContrastAgentApi {
         @ApiResponse(responseCode = "500", description = "Unexpected error") })
     @GetMapping(value = "",
         produces = { "application/json" })
-    ResponseEntity<ContrastAgent> getContrastAgentByProtocolId(@Parameter(name = "protocol id",required = true ) @PathVariable("pid") Long pid);
+    ResponseEntity<ContrastAgent> getContrastAgentByProtocolId(@Parameter(name = "protocol id", required = true ) @PathVariable("pid") Long pid);
 
     @Operation(summary = "Get Contrast Agent by id", description = "")
     @ApiResponses(value = {
@@ -78,8 +78,8 @@ public interface ContrastAgentApi {
         @ApiResponse(responseCode = "500", description = "Unexpected error") })
     @GetMapping(value = "/{cid}",
         produces = { "application/json" })
-    ResponseEntity<ContrastAgent> getContrastAgentById(@Parameter(name = "protocol id",required = true ) @PathVariable("pid") Long pid,
-            @Parameter(name = "Contrast Agent id",required = true ) @PathVariable("cid") Long cid);
+    ResponseEntity<ContrastAgent> getContrastAgentById(@Parameter(name = "protocol id", required = true ) @PathVariable("pid") Long pid,
+            @Parameter(name = "Contrast Agent id", required = true ) @PathVariable("cid") Long cid);
 
     @Operation(summary = "Get Contrast Agent by name", description = "")
     @ApiResponses(value = {
@@ -88,8 +88,8 @@ public interface ContrastAgentApi {
         @ApiResponse(responseCode = "500", description = "Unexpected error") })
     @GetMapping(value = "/name/{name}",
         produces = { "application/json" })
-    ResponseEntity<ContrastAgent> getContrastAgentByName(@Parameter(name = "protocol id",required = true ) @PathVariable("pid") Long pid,
-            @Parameter(name = "Contrast Agent id",required = true ) @PathVariable("name") String name);
+    ResponseEntity<ContrastAgent> getContrastAgentByName(@Parameter(name = "protocol id", required = true ) @PathVariable("pid") Long pid,
+            @Parameter(name = "Contrast Agent id", required = true ) @PathVariable("name") String name);
 
 
     @Operation(summary = "List all contrast agents", description = "")
@@ -98,7 +98,7 @@ public interface ContrastAgentApi {
         @ApiResponse(responseCode = "500", description = "Unexpected error") })
     @GetMapping(value = "/all",
         produces = { "application/json" })
-    ResponseEntity<List<ContrastAgent>> getContrastAgents(@Parameter(name = "protocol id",required = true ) @PathVariable("pid") Long pid);
+    ResponseEntity<List<ContrastAgent>> getContrastAgents(@Parameter(name = "protocol id", required = true ) @PathVariable("pid") Long pid);
 
 
     @Operation(summary = "Update an existing contrast agent", description = "")
@@ -110,9 +110,9 @@ public interface ContrastAgentApi {
     @PutMapping(value = "/{cid}",
         produces = { "application/json" },
         consumes = { "application/json" })
-    ResponseEntity<Void> updateContrastAgent(@Parameter(name = "protocol id",required = true ) @PathVariable("pid") Long pid,
-            @Parameter(name = "ID of contrast agent that needs to be updated",required = true ) @PathVariable("cid") Long cid,
-        @Parameter(name = "Contrast Agent object that needs to be updated" ,required = true ) @RequestBody ContrastAgent contrastagent,
+    ResponseEntity<Void> updateContrastAgent(@Parameter(name = "protocol id", required = true ) @PathVariable("pid") Long pid,
+            @Parameter(name = "ID of contrast agent that needs to be updated", required = true ) @PathVariable("cid") Long cid,
+        @Parameter(name = "Contrast Agent object that needs to be updated", required = true ) @RequestBody ContrastAgent contrastagent,
         final BindingResult result) throws RestServiceException;
 
 }

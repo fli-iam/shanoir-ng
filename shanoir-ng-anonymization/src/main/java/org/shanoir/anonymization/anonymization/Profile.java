@@ -26,5 +26,4 @@ public class Profile {
     public void setAnonymizationMap(Map<String, String> anonymizationMap) {
         this.anonymizationMap = anonymizationMap;
     }
-
 }

@@ -36,7 +36,7 @@ import jakarta.validation.constraints.NotNull;
 @Entity
 @DiscriminatorValue("EXPERIMENTAL")
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
-@JsonIdentityInfo(scope=ExperimentalGroupOfSubjects.class , generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
+@JsonIdentityInfo(scope = ExperimentalGroupOfSubjects.class , generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class ExperimentalGroupOfSubjects extends GroupOfSubjects {
 
     /**

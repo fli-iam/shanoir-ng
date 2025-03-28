@@ -38,7 +38,7 @@ import jakarta.validation.constraints.NotNull;
  *
  */
 @Entity
-@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
+@Inheritance(strategy= InheritanceType.SINGLE_TABLE)
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 public class GroupOfSubjects extends HalEntity {
 

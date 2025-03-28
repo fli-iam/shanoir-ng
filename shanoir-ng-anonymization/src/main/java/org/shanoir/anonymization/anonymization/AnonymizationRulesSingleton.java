@@ -30,14 +30,14 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AnonymizationRulesSingleton {
+public final class AnonymizationRulesSingleton {
 
     /**
      * Logger
      */
     private static final Logger LOG = LoggerFactory.getLogger(AnonymizationRulesSingleton.class);
 
-    private static final AnonymizationRulesSingleton instance = new AnonymizationRulesSingleton();
+    private static final AnonymizationRulesSingleton INSTANCE = new AnonymizationRulesSingleton();
 
     private static final String ANONYMIZATION_FILE_PATH = "anonymization.xlsx";
 
@@ -136,7 +136,7 @@ public class AnonymizationRulesSingleton {
     }
 
     public static AnonymizationRulesSingleton getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     public Map<String, Profile> getProfiles() {

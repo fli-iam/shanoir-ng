@@ -17,7 +17,12 @@ package org.shanoir.ng.datasetacquisition.dto.mapper;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.mapstruct.*;
+import org.mapstruct.DecoratedWith;
+import org.mapstruct.Mapper;
+import org.mapstruct.MapperConfig;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingInheritanceStrategy;
+import org.mapstruct.ObjectFactory;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
@@ -33,7 +38,7 @@ import org.springframework.data.domain.Page;
 
 @Mapper(componentModel = "spring", uses = { ExaminationMapper.class })
 @DecoratedWith(DatasetAcquisitionDecorator.class)
-@MapperConfig(mappingInheritanceStrategy=MappingInheritanceStrategy.AUTO_INHERIT_FROM_CONFIG)
+@MapperConfig(mappingInheritancestrategy= MappingInheritanceStrategy.AUTO_INHERIT_FROM_CONFIG)
 public interface DatasetAcquisitionMapper {
 
 

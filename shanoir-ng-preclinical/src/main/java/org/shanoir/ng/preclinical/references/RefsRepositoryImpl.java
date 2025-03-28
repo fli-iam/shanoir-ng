@@ -41,7 +41,7 @@ public class RefsRepositoryImpl implements RefsRepositoryCustom{
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<Reference> findByCategoryAndType(String category,String reftype) {
+    public List<Reference> findByCategoryAndType(String category, String reftype) {
         return em.createQuery(
                 "SELECT r FROM Reference r WHERE r.category LIKE :category AND r.reftype LIKE :reftype")
                 .setParameter(CATEGORY2, category)

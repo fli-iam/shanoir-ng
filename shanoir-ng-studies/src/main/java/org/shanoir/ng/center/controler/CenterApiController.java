@@ -82,7 +82,8 @@ public class CenterApiController implements CenterApi {
                 throw new EntityNotFoundException("Cannot update unknown center");
             }
             centerService.deleteByIdCheckDependencies(centerId);
-            eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_CENTER_EVENT, centerId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+            eventService.publishEvent(new ShanoirEvent(
+                ShanoirEventType.DELETE_CENTER_EVENT, centerId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -144,7 +145,8 @@ public class CenterApiController implements CenterApi {
                 try {
                     /* Update center in db. */
                     centerService.update(center);
-                    eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_CENTER_EVENT, center.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+                    eventService.publishEvent(new ShanoirEvent(
+                        ShanoirEventType.UPDATE_CENTER_EVENT, center.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
                 } catch (EntityNotFoundException e) {
                     return new ResponseEntity<>(HttpStatus.NOT_FOUND);
                 }
@@ -167,7 +169,7 @@ public class CenterApiController implements CenterApi {
 
     @Override
     @Transactional
-    public ResponseEntity<List<CenterDTO>> findCentersByStudy (
+    public ResponseEntity<List<CenterDTO>> findCentersByStudy(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
         final List<Center> centers = centerService.findByStudy(studyId);
         if (centers.isEmpty()) {
@@ -206,7 +208,8 @@ public class CenterApiController implements CenterApi {
         validate(center, result);
         /* Save center in db. */
         final Center createdCenter = centerService.create(center);
-        eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_CENTER_EVENT, createdCenter.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+        eventService.publishEvent(
+            new ShanoirEvent(ShanoirEventType.CREATE_CENTER_EVENT, createdCenter.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
         return new ResponseEntity<>(centerMapper.centerToCenterDTOFlat(createdCenter), HttpStatus.OK);
     }
 
@@ -224,7 +227,8 @@ public class CenterApiController implements CenterApi {
 
             /* Update center in db. */
             centerService.update(center);
-            eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_CENTER_EVENT, centerId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+            eventService.publishEvent(
+                new ShanoirEvent(ShanoirEventType.UPDATE_CENTER_EVENT, centerId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
         } catch (EntityNotFoundException e) {

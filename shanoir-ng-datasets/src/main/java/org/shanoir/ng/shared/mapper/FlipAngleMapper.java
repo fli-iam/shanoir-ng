@@ -28,7 +28,7 @@ import org.shanoir.ng.shared.model.FlipAngle;
  *
  */
 
-@Mapper(componentModel = "spring",unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface FlipAngleMapper {
 
 

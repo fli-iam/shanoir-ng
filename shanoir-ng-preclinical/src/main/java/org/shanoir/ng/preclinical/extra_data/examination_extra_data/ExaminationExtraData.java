@@ -119,7 +119,7 @@ public class ExaminationExtraData extends HalEntity {
 
   @Override
   public int hashCode() {
-    return Objects.hash(examinationId, filename,filepath,extradatatype);
+    return Objects.hash(examinationId, filename, filepath, extradatatype);
   }
 
   @Override

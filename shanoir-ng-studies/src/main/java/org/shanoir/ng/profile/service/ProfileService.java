@@ -19,7 +19,6 @@ import java.util.Optional;
 
 import org.shanoir.ng.profile.model.Profile;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**

@@ -58,7 +58,7 @@ public class RoleServiceTest {
         Assert.assertNotNull(roles);
         Assert.assertTrue(roles.size() == 1);
 
-        Mockito.verify(roleRepository,Mockito.times(1)).findAll();
+        Mockito.verify(roleRepository, Mockito.times(1)).findAll();
     }
 
 }

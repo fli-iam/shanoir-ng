@@ -48,9 +48,9 @@ import jakarta.validation.constraints.Pattern;
 @Entity
 @JsonPropertyOrder({ "_links", "id", "name" })
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
-@SqlResultSetMapping(name="centerNameResult", classes = {
+@SqlResultSetMapping(name = "centerNameResult", classes = {
         @ConstructorResult(targetClass = IdName.class,
-        columns = {@ColumnResult(name="id", type = Long.class), @ColumnResult(name="name")})
+        columns = {@ColumnResult(name = "id", type = Long.class), @ColumnResult(name = "name")})
     })
 public class Center extends HalEntity {
 

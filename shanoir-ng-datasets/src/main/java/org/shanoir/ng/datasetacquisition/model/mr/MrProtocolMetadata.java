@@ -14,14 +14,18 @@
 
 package org.shanoir.ng.datasetacquisition.model.mr;
 
-import jakarta.persistence.*;
-import org.shanoir.ng.dataset.modality.MrDataset;
-import org.shanoir.ng.shared.core.model.AbstractEntity;
-import org.shanoir.ng.shared.model.EchoTime;
-import org.shanoir.ng.shared.model.FlipAngle;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.shanoir.ng.shared.core.model.AbstractEntity;
+
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.DiscriminatorType;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
 
 /**
  * MR protocol.
@@ -31,7 +35,7 @@ import java.util.List;
  */
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name="dtype",
+@DiscriminatorColumn(name = "dtype",
         discriminatorType = DiscriminatorType.INTEGER)
 @DiscriminatorValue("1")
 public class MrProtocolMetadata extends AbstractEntity {

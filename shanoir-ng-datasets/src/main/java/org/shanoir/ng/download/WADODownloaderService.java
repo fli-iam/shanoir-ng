@@ -361,7 +361,7 @@ public class WADODownloaderService {
         HttpEntity<String> entity = new HttpEntity<>(headers);
         LOG.debug("Download metadata from pacs, url : " + url);
         ResponseEntity<String> response = restTemplate.exchange(url,
-                HttpMethod.GET, entity,String.class, "1");
+                HttpMethod.GET, entity, String.class, "1");
         if (response.getStatusCode() == HttpStatus.OK) {
             return response.getBody();
         } else {

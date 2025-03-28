@@ -40,11 +40,13 @@ public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepos
     List<Study> findAll();
 
     //@EntityGraph(attributePaths = { "profile", "tags" })
+    @SuppressWarnings("checkstyle:methodname")
     @Query("SELECT s FROM Study s JOIN FETCH s.studyUserList su WHERE su.study.id = s.id AND su.userId = :userId and :studyUserRightId in elements(su.studyUserRights) AND su.confirmed = :confirmed")
     List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(Long userId, Integer studyUserRightId, boolean confirmed);
 
     List<Study> findByChallengeTrue();
 
+    @SuppressWarnings("checkstyle:methodname")
     List<Study> findByStudyUserList_UserIdOrderByNameAsc(Long userId);
 
     @EntityGraph(attributePaths = "tags")

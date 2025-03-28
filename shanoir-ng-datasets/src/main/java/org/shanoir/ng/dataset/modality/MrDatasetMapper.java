@@ -17,8 +17,12 @@ package org.shanoir.ng.dataset.modality;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.mapstruct.*;
-import org.shanoir.ng.dataset.dto.DatasetDTO;
+import org.mapstruct.DecoratedWith;
+import org.mapstruct.IterableMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
+import org.mapstruct.Named;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMetadataMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;

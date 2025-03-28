@@ -286,8 +286,8 @@ public class SerieTreeNode implements DicomTreeNode {
         return this.parent;
     }
 
-    @XmlElementWrapper(name="fileNames")
-    @XmlElement(name="fileName")
+    @XmlElementWrapper(name = "fileNames")
+    @XmlElement(name = "fileName")
     public List<String> getFileNames() {
         return fileNames;
     }
