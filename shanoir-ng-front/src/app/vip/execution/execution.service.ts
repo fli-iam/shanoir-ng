@@ -16,10 +16,9 @@ import {Injectable} from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import {Observable} from "rxjs";
 import * as AppUtils from "../../utils/app.utils";
-import {Execution} from "../models/execution";
 import {ExecutionCandidateDto} from "../models/execution-candidate.dto";
 import {IdName} from "../../shared/models/id-name.model";
-import {Id} from "../../shared/models/id.model";
+import {ExecutionTemplate} from "../models/execution-template";
 
 @Injectable()
 export class ExecutionService {
@@ -41,6 +40,14 @@ export class ExecutionService {
     }
     return this.httpClient.post<IdName>(`${this.executionUrl}/`,execution).toPromise();
   }
+
+    /**
+     * Get all automatic executions linked to a study
+     * @param study_id the study id we want the automatic executions from
+     */
+    public getAutomaticExecutions(study_id: number): Promise<ExecutionTemplate[]> {
+        return this.httpClient.get<ExecutionTemplate[]>(`${this.executionUrl}/automatic/` + study_id).toPromise();
+    }
 
   /**
    * Get stderr of an execution
