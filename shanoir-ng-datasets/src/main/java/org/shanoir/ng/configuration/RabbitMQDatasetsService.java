@@ -43,6 +43,7 @@ import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -327,9 +328,25 @@ public class RabbitMQDatasetsService {
 	@Transactional
 	public void deleteSubject(String subjectIdAsString) throws AmqpRejectAndDontRequeueException {
 		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+		ShanoirEvent event = null;
+
 		try {
-			Long subjectId = Long.valueOf(subjectIdAsString);
+			Long subjectId = Long.valueOf(subjectIdAsString.split("_")[0]);
+			Long userId = Long.valueOf(subjectIdAsString.split("_")[1]);
 			Set<Long> studyIds = new HashSet<>();
+
+			String subjectName = subjectRepository.findById(subjectId).get().getName();
+
+			float progress = 0f;
+			event = new ShanoirEvent(
+					ShanoirEventType.DELETE_SUBJECT_EVENT,
+					subjectIdAsString,
+					userId,
+					"Delete of subject " + subjectName,
+					ShanoirEvent.IN_PROGRESS,
+					0f,
+					null);
+			eventService.publishEvent(event);
 
 			// Inverse order to remove copied examination before its source (if copied)
 			List<Examination> listExam = examinationRepository.findBySubjectId(subjectId);
@@ -339,6 +356,12 @@ public class RabbitMQDatasetsService {
 			for (Examination exam : listExam) {
 				examinationService.deleteById(exam.getId(), null);
 				studyIds.add(exam.getStudyId());
+
+				// update job for frontend
+				progress += 1f / listExam.size();
+				event.setProgress(progress);
+				event.setMessage("Delete of subject " + subjectName + ". Examination " + exam.getId() + " deleted.");
+				eventService.publishEvent(event);
 			}
 			
 			// Update BIDS folder
@@ -348,8 +371,18 @@ public class RabbitMQDatasetsService {
 			
 			// Delete subject from datasets database
 			subjectRepository.deleteById(subjectId);
-			
+
+			event.setProgress(1f);
+			event.setMessage("Delete of subject " + subjectName + " complete.");
+			event.setStatus(ShanoirEvent.SUCCESS);
+			eventService.publishEvent(event);
 		} catch (Exception e) {
+			if (event != null) {
+				event.setStatus(ShanoirEvent.ERROR);
+				event.setMessage("Error during the deletion of subject " + subjectIdAsString);
+				eventService.publishEvent(event);
+			}
+
 			LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage(), e);
 		}

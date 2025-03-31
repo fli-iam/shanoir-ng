@@ -111,13 +111,28 @@ public class SubjectServiceImpl implements SubjectService {
 			throw new EntityNotFoundException(Subject.class, id);
 		}
 
+		List<SubjectStudy> subjectStudyList = subjectStudyRepository.findBySubjectId(id);
+		for (SubjectStudy subjectStudy : subjectStudyList) {
+			Study study = subjectStudy.getStudy();
+
+			eventService.publishEvent(
+					new ShanoirEvent(
+							ShanoirEventType.REMOVE_SUBJECT_FROM_STUDY_EVENT,
+							subjectStudy.getId().toString(),
+							KeycloakUtil.getTokenUserId(),
+							"Subject " + subject.get().getName() + " (id: " + subject.get().getId() + ") removed from study " + study.getName() + " (id: " + study.getId() + ")",
+							ShanoirEvent.SUCCESS,
+							study.getId())
+			);
+		}
+
 		// Delete all associated study_examination
 		studyExaminationRepository.deleteBySubjectId(id);
 		subjectRepository.deleteById(id);
 		if (subject.get().isPreclinical())
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_ANIMAL_SUBJECT_QUEUE, id.toString());
 
-		rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, id.toString());
+		rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, id + "_" + KeycloakUtil.getTokenUserId());
 
 	}
 

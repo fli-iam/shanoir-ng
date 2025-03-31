@@ -42,6 +42,8 @@ public interface SubjectStudyRepository extends CrudRepository<SubjectStudy, Lon
 
 	SubjectStudy findByStudyIdAndSubjectId(Long studyId, Long subjectId);
 
+    List<SubjectStudy> findBySubjectId(Long subjectId);
+
 	long countBySubject(Subject subject);
 	
     int countByStudyId(@Param("studyId") Long studyId);
