@@ -153,6 +153,7 @@ export const BACKEND_API_PRECLINICAL_MS_URL: string = BACKEND_API_URL + '/precli
 export const BACKEND_API_VIP_URL: string = BACKEND_API_DATASET_MS_URL + '/vip';
 export const BACKEND_API_VIP_EXEC_URL : string = BACKEND_API_VIP_URL + "/execution";
 export const BACKEND_API_VIP_PIPE_URL : string = BACKEND_API_VIP_URL + "/pipeline";
+export const BACKEND_API_VIP_EXEC_TEMPLATE_URL : string = BACKEND_API_DATASET_MS_URL + "/execution-template";
 
 export const BACKEND_API_VIP_EXEC_MONITORING_URL: string = BACKEND_API_DATASET_MS_URL + '/execution-monitoring';
 
