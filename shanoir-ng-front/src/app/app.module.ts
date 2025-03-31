@@ -278,8 +278,11 @@ import { CtProtocol } from './dataset-acquisitions/modality/ct/ct-protocol.model
 import { CtProtocolComponent } from './dataset-acquisitions/modality/ct/ct-protocol.component';
 import { XaProtocolComponent } from './dataset-acquisitions/modality/xa/xa-protocol.component';
 import { MetadataNodeComponent } from './datasets/tree/metadata-node.component';
+import { ExecutionTemplateListComponent } from "./vip/execution-template/execution-template-list.component";
+import { ExecutionTemplateComponent } from "./vip/execution-template/execution-template.component";
+import { ExecutionTemplateService } from "./vip/execution-template/execution-template.service";
 
-@NgModule({ 
+@NgModule({
     declarations: [
         AccountRequestComponent,
         AccountRequestInfoComponent,
@@ -458,9 +461,11 @@ import { MetadataNodeComponent } from './datasets/tree/metadata-node.component';
         StudyTreeComponent,
         CoilNodeComponent,
         DoubleAwesomeComponent,
-        MetadataNodeComponent
+        MetadataNodeComponent,
+        ExecutionTemplateListComponent,
+        ExecutionTemplateComponent
     ],
-    bootstrap: [AppComponent], 
+    bootstrap: [AppComponent],
     imports: [
         BrowserModule,
         BrowserAnimationsModule,
@@ -472,7 +477,11 @@ import { MetadataNodeComponent } from './datasets/tree/metadata-node.component';
         PreclinicalRoutingModule,
         RouterModule,
         ClipboardModule
-    ], 
+    ],
+    exports: [
+        TableComponent,
+        FormFooterComponent
+    ],
     providers: [
         AcquisitionEquipmentService,
         AuthAdminGuard,
@@ -560,9 +569,10 @@ import { MetadataNodeComponent } from './datasets/tree/metadata-node.component';
         SessionService,
         ShanoirEventService,
         TreeService,
+        ExecutionTemplateService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true },
         provideHttpClient(withInterceptorsFromDi())
-    ] 
+    ]
 })
 export class AppModule {
 
