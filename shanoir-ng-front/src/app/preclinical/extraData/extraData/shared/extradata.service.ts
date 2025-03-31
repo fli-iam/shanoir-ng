@@ -39,7 +39,6 @@ export class ExtraDataService extends EntityService<ExtraData>{
     }
   
     getExtraData(id:string): Promise<ExtraData> {
-        console.log('prout')
         return this.http.get<ExtraData>(PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL+"/"+id)
             .toPromise()
             .then((entity) => this.toRealObject(entity));
