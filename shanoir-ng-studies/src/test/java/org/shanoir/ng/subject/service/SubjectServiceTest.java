@@ -47,6 +47,7 @@ import org.shanoir.ng.subject.model.Sex;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.model.UserPersonalCommentSubject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
+import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -72,6 +73,9 @@ public class SubjectServiceTest {
 
 	@Mock
 	private SubjectRepository subjectRepository;
+
+	@Mock
+	private SubjectStudyRepository subjectStudyRepository;
 
 	@Mock
 	private RabbitTemplate rabbitTemplate;
