@@ -56,9 +56,7 @@ public class OutputService {
      * @throws ResultHandlerException
      */
     public void process(ExecutionMonitoring monitoring) throws ResultHandlerException, EntityNotFoundException {
-        //final File userImportDir = new File(this.importDir + File.separator + monitoring.getResultsLocation());
-        String userImportPath = importDir + File.separator + monitoring.getResultsLocation();
-        File userImportDir = new File(userImportPath.substring(0, userImportPath.lastIndexOf("/") + 1));
+        File userImportDir = new File(this.importDir + File.separator + monitoring.getResultsLocation());
 
         for (File archive : getArchivesToProcess(userImportDir)) {
             File cacheFolder = new File(userImportDir.getAbsolutePath() + File.separator + FilenameUtils.getBaseName(archive.getName()));

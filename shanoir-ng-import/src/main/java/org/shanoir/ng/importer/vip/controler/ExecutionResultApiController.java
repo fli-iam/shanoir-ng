@@ -135,7 +135,6 @@ public class ExecutionResultApiController implements ExecutionResultApi {
      */
     private String getImportPathFromRequest(HttpServletRequest request) {
         String decodedUri = UriUtils.decode(request.getRequestURI(), "UTF-8");
-        return importDir + File.separator + VIP_UPLOAD_FOLDER + File.separator + decodedUri.replace(PATH_PREFIX, "") + ".tgz";
+        return importDir + File.separator + VIP_UPLOAD_FOLDER + File.separator + decodedUri.replace(PATH_PREFIX, "");
     }
-
 }
