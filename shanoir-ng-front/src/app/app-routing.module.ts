@@ -96,6 +96,8 @@ import { AccessRequestListComponent } from './users/access-request/access-reques
 import { QualityCardListComponent } from './study-cards/quality-card-list/quality-card-list.component';
 import { QualityCardComponent } from './study-cards/quality-card/quality-card.component';
 import { TaskStatusComponent } from './async-tasks/status/task-status.component';
+import { ExecutionTemplateListComponent } from "./vip/execution-template/execution-template-list.component";
+import { ExecutionTemplateComponent } from "./vip/execution-template/execution-template.component";
 
 let routes: Routes = [
     {
@@ -127,6 +129,9 @@ let routes: Routes = [
     }, {
         path: 'execution-monitoring',
         component: ExecutionMonitoringsComponent
+    }, {
+        path: 'execution-template-list',
+        component: ExecutionTemplateListComponent
     }, {
         path: 'pipelines',
         component: PipelinesComponent
@@ -827,7 +832,23 @@ let routes: Routes = [
     {
         path: 'access-request/list',
         component: AccessRequestListComponent
+    },
+    {
+        path: 'execution-template/create',
+        component: ExecutionTemplateComponent,
+        data: { mode: 'create' },
+    },
+    {
+        path: 'execution-template/edit/:id',
+        component: ExecutionTemplateComponent,
+        data: { mode: 'edit' },
+    },
+    {
+        path: 'execution-template/details/:id',
+        component: ExecutionTemplateComponent,
+        data: { mode: 'view' },
     }
+
 ];
 
 @NgModule({
