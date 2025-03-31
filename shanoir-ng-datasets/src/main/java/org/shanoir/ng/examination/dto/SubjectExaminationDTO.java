@@ -45,6 +45,8 @@ public class SubjectExaminationDTO {
 
 	private boolean preclinical;
 
+	private String studyInstanceUID;
+
 	/**
 	 * @return the comment
 	 */
@@ -136,4 +138,13 @@ public class SubjectExaminationDTO {
 	public void setPreclinical(boolean preclinical) {
 		this.preclinical = preclinical;
 	}
+
+	public String getStudyInstanceUID() {
+		return studyInstanceUID;
+	}
+
+	public void setStudyInstanceUID(String studyInstanceUID) {
+		this.studyInstanceUID = studyInstanceUID;
+	}
+
 }

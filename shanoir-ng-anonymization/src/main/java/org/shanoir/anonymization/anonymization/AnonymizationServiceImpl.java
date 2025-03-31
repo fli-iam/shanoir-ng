@@ -74,7 +74,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		for (int i = 0; i < dicomFiles.size(); ++i) {
 			final File file = dicomFiles.get(i);
 			// Perform the anonymization
-			performAnonymization(file, anonymizationMap, false, "", "", seriesInstanceUIDs, frameOfReferenceUIDs, studyInstanceUIDs, studyIds);
+			performAnonymization(file, anonymizationMap, false, "", "", null, seriesInstanceUIDs, frameOfReferenceUIDs, studyInstanceUIDs, studyIds);
 			current++;
 			final int currentPercent = current * 100 / totalAmount;
 			LOG.debug("anonymize : anonymization current percent= {} %", currentPercent);
@@ -84,16 +84,17 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
 	@Override
 	public void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientLastName,
-			String patientFirstName, String patientID) throws Exception {
+			String patientFirstName, String patientID, String studyInstanceUID) throws Exception {
 		String patientName = patientLastName + "^" + patientFirstName + "^^^";
-		anonymizeForShanoir(dicomFiles, profile, patientName, patientID);
+		anonymizeForShanoir(dicomFiles, profile, patientName, patientID, studyInstanceUID);
 	}
 
 	@Override
-	public void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientName, String patientID) throws Exception {
+	public void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientName, String patientID, String studyInstanceUID) throws Exception {
 		long startTime = System.currentTimeMillis();
 		final int totalAmount = dicomFiles.size();
 		LOG.info("Start anonymization, for {} DICOM files.", totalAmount);
+		LOG.info("StudyInstanceUID used from ImportJob: " + studyInstanceUID);
 		Map<String, Profile> profiles = AnonymizationRulesSingleton.getInstance().getProfiles();
 		Map<String, String> anonymizationMap = profiles.get(profile).getAnonymizationMap();
 		tagsToDeleteForManufacturer = AnonymizationRulesSingleton.getInstance().getTagsToDeleteForManufacturer();
@@ -108,7 +109,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		for (int i = 0; i < dicomFiles.size(); ++i) {
 			final File file = dicomFiles.get(i);
 			// Perform the anonymization
-			performAnonymization(file, anonymizationMap, true, patientName, patientID, seriesInstanceUIDs, frameOfReferenceUIDs, studyInstanceUIDs, studyIds);
+			performAnonymization(file, anonymizationMap, true, patientName, patientID, studyInstanceUID, seriesInstanceUIDs, frameOfReferenceUIDs, studyInstanceUIDs, studyIds);
 			current++;
 			final int currentPercent = current * 100 / totalAmount;
 			LOG.debug("anonymize : anonymization current percent= {} %", currentPercent);
@@ -158,7 +159,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	 * @throws Exception
 	 */
 	public void performAnonymization(final File dicomFile, Map<String, String> anonymizationMap, boolean isShanoirAnonymization,
-			String patientName, String patientID, Map<String, String> seriesInstanceUIDs, Map<String, String> frameOfReferenceUIDs,
+			String patientName, String patientID, String studyInstanceUID, Map<String, String> seriesInstanceUIDs, Map<String, String> frameOfReferenceUIDs,
 			Map<String, String> studyInstanceUIDs, Map<String, String> studyIds) throws Exception {
 		DicomInputStream din = null;
 		DicomOutputStream dos = null;
@@ -197,6 +198,12 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 			String patientBirthNameAttr = datasetAttributes.getString(Tag.PatientBirthName);
 			// temporarily keep the patient birth date for isShanoirAnonymization
 			String patientBirthDateAttr = datasetAttributes.getString(Tag.PatientBirthDate);
+
+			String studyInstanceUIDVendor = datasetAttributes.getString(Tag.StudyInstanceUID);
+			if (studyInstanceUID != null && !studyInstanceUID.isEmpty()) {
+				LOG.debug("StudyInstanceUID used from ImportJob: " + studyInstanceUID);
+				studyInstanceUIDs.put(studyInstanceUIDVendor, studyInstanceUID);
+			}
 
 			// anonymize DICOM files according to selected profile
 			for (int tagInt : datasetAttributes.tags()) {
