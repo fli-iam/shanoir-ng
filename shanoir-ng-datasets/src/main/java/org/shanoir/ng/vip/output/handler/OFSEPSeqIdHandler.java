@@ -258,13 +258,15 @@ public class OFSEPSeqIdHandler extends OutputHandler {
                     throw e;
                 }
 
+                LOG.info("Dataset {} updated", ds.getId());
+
                 List<DatasetProperty> properties = getDatasetPropertiesFromVolume(ds, vol, execution);
                 addDatasetTags(ds, properties);
                 properties.addAll(getDatasetPropertiesFromDicom(attributes, ds, execution));
                 datasetPropertyService.createAll(properties);
             }
         }
-        LOG.info("Output.json processed for execution {}", execution.getId()    );
+        LOG.info("Output.json processed for execution {}", execution.getId());
     }
 
     /**
