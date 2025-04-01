@@ -114,6 +114,7 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
             'unzip': [false],
             'subjectFolders': [true],
             'examinationFolders': [true],
+            'acquisitionFolders': [false],
             'datasetFolders': [false]
         });
         if (this.winOs) {
@@ -131,6 +132,7 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
         setup.unzip = this.form.get('unzip').value;
         setup.subjectFolders = this.form.get('subjectFolders').value;
         setup.examinationFolders = this.form.get('examinationFolders').value;
+        setup.acquisitionFolders = this.form.get('acquisitionFolders').value;
         setup.datasetFolders = this.form.get('datasetFolders').value;
         setup.converter = (this.form.get('format').value == 'nii') ? this.form.get('converter')?.value : null;
         if (this.form.get('shortPath')) setup.shortPath = this.form.get('shortPath').value;
