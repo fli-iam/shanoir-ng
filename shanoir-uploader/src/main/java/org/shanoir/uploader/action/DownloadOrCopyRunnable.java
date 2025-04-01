@@ -2,7 +2,6 @@ package org.shanoir.uploader.action;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +23,6 @@ import org.shanoir.uploader.upload.UploadJob;
 import org.shanoir.uploader.upload.UploadJobManager;
 import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.ImportUtils;
-import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,8 +41,6 @@ import org.slf4j.LoggerFactory;
 public class DownloadOrCopyRunnable implements Runnable {
 
 	private static final Logger logger = LoggerFactory.getLogger(DownloadOrCopyRunnable.class);
-
-	public static final String IMPORT_JOB_JSON = "import-job.json";
 
 	private boolean isFromPACS;
 
@@ -142,18 +138,9 @@ public class DownloadOrCopyRunnable implements Runnable {
 							+ ", " + importJob.getStudy().getStudyDate() + " of patient: "
 							+ importJob.getPatient().getPatientName());
 
-			/**
-			 * Write import-job.json to disk and remove unnecessary DICOM information before
-			 */
-			importJob.setPatient(null);
-			importJob.setStudy(null);
-			try {
-				File importJobJson = new File(uploadFolder, IMPORT_JOB_JSON);
-				importJobJson.createNewFile();
-				Util.objectMapper.writeValue(importJobJson, importJob);
-			} catch (IOException e) {
-				logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
-			}
+			
+			ImportUtils.writeImportJobJson(importJob, uploadFolder);
+			
 			downloadOrCopyReportSummary.append(downloadOrCopyReportPerStudy.toString() + "\n\n");
 		}
 		if (isTableImport) {
@@ -176,5 +163,4 @@ public class DownloadOrCopyRunnable implements Runnable {
 				JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
-
 }

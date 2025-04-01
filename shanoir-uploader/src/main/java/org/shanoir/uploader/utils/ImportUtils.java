@@ -70,6 +70,8 @@ public class ImportUtils {
 	
 	private static ObjectMapper objectMapper = new ObjectMapper();
 
+	public static final String IMPORT_JOB_JSON = "import-job.json";
+
 	static {
 		objectMapper.registerModule(new JavaTimeModule())
 			.registerModule(new Jdk8Module())
@@ -337,6 +339,21 @@ public class ImportUtils {
 				+ "(" + uploadJob.getMriInformation().getDeviceSerialNumber() + ")");
 		dataUploadJob.setUploadPercentage("");
 		dataUploadJob.setUploadState(UploadState.READY);
+	}
+
+	/**
+	* Write import-job.json to disk and remove unnecessary DICOM information before
+	*/
+	public static void writeImportJobJson(ImportJob importJob, File uploadFolder) {
+		importJob.setPatient(null);
+		importJob.setStudy(null);
+		try {
+			File importJobJson = new File(uploadFolder, IMPORT_JOB_JSON);
+			importJobJson.createNewFile();
+			Util.objectMapper.writeValue(importJobJson, importJob);
+		} catch (IOException e) {
+			logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
+		}
 	}
 
 	/**

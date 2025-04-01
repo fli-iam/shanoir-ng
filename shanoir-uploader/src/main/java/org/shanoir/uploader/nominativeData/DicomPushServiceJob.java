@@ -44,7 +44,13 @@ public class DicomPushServiceJob {
 
 	private DownloadOrCopyActionListener dOCAL;
 
-	private Set<Serie> incomingSeries = new HashSet<>();
+	private final Set<Serie> incomingSeries = new HashSet<>();
+
+	private final long JOB_RATE = 300000; // 5 minutes
+
+	private final String regex = "^[0-9.]+$";
+
+	private final File workFolder = ShUpOnloadConfig.getWorkFolder();
 
 	
 	public void setDownloadOrCopyActionListener(DownloadOrCopyActionListener dOCAL) {
@@ -52,13 +58,12 @@ public class DicomPushServiceJob {
 	}
 
 
-    @Scheduled(fixedRate = 30000)
+    @Scheduled(fixedRate = JOB_RATE)
 	public void execute() {
 		// We check if the username is set (= login was successful), if not we do nothing
 		if (ShUpConfig.username != null) {
 			logger.info("Monitoring of incoming 'DICOM PUSHED' examinations started...");
 			// new File(ShUpConfig.shanoirUploaderFolder.getAbsolutePath() + File.separator + ShUpConfig.WORK_FOLDER);
-			File workFolder = ShUpOnloadConfig.getWorkFolder();
 			monitorPushedExaminations(workFolder);
 			logger.info("Monitoring of incoming 'DICOM PUSHED' examinations ended...");
 		}
@@ -74,7 +79,7 @@ public class DicomPushServiceJob {
 			// We browse the content of the workfolder
 			for (File dir : folders) {
 				// If there is a directory then its a DICOM study, shanoiruploader xml upload files will be at that level
-				if (dir.isDirectory()) {
+				if (dir.isDirectory() && dir.getName().matches(regex)) {
 					File[] xmlFiles = dir.listFiles(new FilenameFilter() {
 						@Override
 						public boolean accept(File folder, String name) {
@@ -82,120 +87,101 @@ public class DicomPushServiceJob {
 						}
 					});
 					if (xmlFiles.length == 0) {
+						incomingSeries.clear();
 						if (isExamComplete(dir)) {
 							logger.info("Complete exam found in folder {}.", dir.getName());
-							//this.currentNominativeDataController.processFolder(dir);
-							// if (nominativeDataUploadJobManager != null) {
-							// 	final NominativeDataUploadJob nominativeDataUploadJob = nominativeDataUploadJobManager.readUploadDataJob();
-							// 	if (nominativeDataUploadJob.getUploadState().equals(UploadState.START)) {
-							// 		nominativeDataUploadJob.setUploadState(UploadState.READY);
-							// 		nominativeDataUploadJobManager.writeUploadDataJob(nominativeDataUploadJob);
-							// 	}
-							// }
-						}
-						
+						}	
 					}
 				}
 			}
-		// Map<String, NominativeDataUploadJob> currentUploads = new LinkedHashMap<String, NominativeDataUploadJob>();
-		// for (File f : folders) {
-		// 	NominativeDataUploadJob nominativeDataUploadJob = processFolder(f);
-		// 	if (nominativeDataUploadJob != null){
-		// 		currentUploads.put(f.getAbsolutePath(), nominativeDataUploadJob);
-		// 	}	
-		// }
-		// currentNominativeDataModel.setCurrentUploads(currentUploads);
 		}
 	}
 
 	private boolean isExamComplete(File folder) {
-		List<Attributes> dicomAttributesList = new ArrayList<>();
-		incomingSeries.clear();
-		// We check for subdirectories in case DICOM series are stored in subdirectories
+		// We check for DICOM Series subdirectories
 		File[] subdirectories = folder.listFiles(f -> f.isDirectory());
 		if (subdirectories != null && subdirectories.length > 0) {
+			// We create the dicomAttributes at this level to be able to create the patient and study for all the series
+			Attributes dicomAttributes = new Attributes();
+			// We create a map to store the SeriesInstanceUID for a list of instance numbers as value
+			Map<String, List<Integer>> seriesMap = new HashMap<>();
 			for (File subdirectory : subdirectories) {
-				if (!isExamComplete(subdirectory)) {
-					return false;
-				}
-			}
-			// TODO : copy all .dcm files from subdirectories into upload folder ?
-			return true;
-		}
-		// We create a map to store the SeriesInstanceUID for a list of instance numbers as value
-		Map<String, List<Integer>> seriesMap = new HashMap<>();
+                File[] dicomFiles = subdirectory.listFiles((dir, name) -> name.toLowerCase().endsWith(".dcm"));
 
-        File[] dicomFiles = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".dcm"));
+        		if (dicomFiles == null || dicomFiles.length == 0) {
+            		logger.debug("No DICOM files found in {}", folder.getName());
+					continue;
+        		}
 
-        if (dicomFiles == null || dicomFiles.length == 0) {
-            logger.debug("No DICOM files found in {}", folder.getName());
-            return false;
-        }
-
-        String studyUID = null;
-		String seriesUID = null;
-		Attributes dicomAttributes = null;
+        		String studyUID = null;
+				String seriesUID = null;
+				dicomAttributes.clear();
 		
-        for (File file : dicomFiles) {
-            try (DicomInputStream dis = new DicomInputStream(file)) {
-                dicomAttributes = dis.readDataset();
+        		for (File file : dicomFiles) {
+            		try (DicomInputStream dis = new DicomInputStream(file)) {
+                		dicomAttributes = dis.readDataset();
 
-                String currentStudyUID = dicomAttributes.getString(Tag.StudyInstanceUID);
-                String currentSeriesUID = dicomAttributes.getString(Tag.SeriesInstanceUID);
-                Integer instanceNumber = dicomAttributes.getInt(Tag.InstanceNumber, 0);
+                		String currentStudyUID = dicomAttributes.getString(Tag.StudyInstanceUID);
+                		String currentSeriesUID = dicomAttributes.getString(Tag.SeriesInstanceUID);
+                		Integer instanceNumber = dicomAttributes.getInt(Tag.InstanceNumber, 0);
 
-                if (studyUID == null) {
-					// We define the studyInstanceUID
-                    studyUID = currentStudyUID;
-                } else if (!studyUID.equals(currentStudyUID)) {
-                    logger.debug("Warning: DICOM files from different studies found in the same folder.");
-                    return false;
-                }
+                		if (studyUID == null) {
+							// We define the studyInstanceUID
+                    		studyUID = currentStudyUID;
+                		} else if (!studyUID.equals(currentStudyUID)) {
+                    		logger.debug("Warning: DICOM files from different studies found in the same folder.");
+                    		return false;
+                		}
 
-				if (seriesUID == null) {
-					seriesUID = currentSeriesUID;
-					dicomAttributesList.add(dicomAttributes);
-				// if we have multiple series in the same folder, 
-				// we store dicomAttributes to create multiple series for the importJob
-				} else if (!seriesUID.equals(currentSeriesUID)) {
-					dicomAttributesList.add(dicomAttributes);
-				}
+						// We create a new Serie from the first dicom file
+						if (seriesUID == null) {
+						seriesUID = currentSeriesUID;
+						Serie serie = new Serie(dicomAttributes);
+						incomingSeries.add(serie);
+						// if we have multiple series in the same folder (is it possible ?), 
+						} else if (!seriesUID.equals(currentSeriesUID)) {
+							logger.debug("Warning: DICOM files from different series found in the same folder.");
+							return false;
+						}
 
-                // We store the instance number for each serie
-                seriesMap.computeIfAbsent(seriesUID, k -> new ArrayList<>()).add(instanceNumber);
+                		// We store the instance number for each serie
+                		seriesMap.computeIfAbsent(seriesUID, k -> new ArrayList<>()).add(instanceNumber);
 
-            } catch (IOException e) {
-                logger.error("Error reading DICOM file: {}", file.getName());
-            }
-        }
-
-        // We check if each serie is complete
-        for (Map.Entry<String, List<Integer>> entry : seriesMap.entrySet()) {
-            List<Integer> instances = entry.getValue();
-            Collections.sort(instances);
-            int expectedSize = instances.get(instances.size() - 1);
-
-            if (instances.size() < expectedSize) {
-                logger.debug("DICOM serie {} is incomplete.", entry.getKey());
-                return false;
-            }
-
-			// We create the series from the dicomAttributesList
-			for (Attributes attributes : dicomAttributesList) {
-				Serie serie = new Serie(attributes);
-				incomingSeries.add(serie);
+            		} catch (IOException e) {
+                		logger.error("Error reading DICOM file: {}", file.getName());
+            		}
+        		}
 			}
-        }
+			// We check if every serie is complete
+			for (Map.Entry<String, List<Integer>> entry : seriesMap.entrySet()) {
+				List<Integer> instances = entry.getValue();
+				Collections.sort(instances);
+				int expectedSize = instances.get(instances.size() - 1);
 
-        logger.debug("DICOM study {} is complete.", studyUID); // not true in case we browse every subdirectories
-		prepareUploadJob(dicomAttributes);
-        return true;
+				if (instances.size() < expectedSize) {
+					logger.debug("DICOM serie {} is incomplete.", entry.getKey());
+					return false;
+				}		
+			}
+			logger.debug("DICOM study {} is complete.", folder.getName());
+			// We use the last instance of the last Serie folder to create the patient and study
+			Patient patient = new Patient(dicomAttributes);
+			Study study = new Study(dicomAttributes);
+			prepareUploadJob(patient, study, incomingSeries);
+		} else {
+			logger.debug("No DICOM series folder found in study folder {}", folder.getName());
+			return false;
+		}
+		return true;
 	}
-
-	// TODO : factorize this method with the one in DownloadOrCopyActionListener ?
-	private void prepareUploadJob(Attributes dicomAttributes) {
-		Patient patient = new Patient(dicomAttributes);
-		Study study = new Study(dicomAttributes);
+	/**
+	 * Prepare the upload job for the DICOM push identified complete examination
+	 * @param patient
+	 * @param study
+	 * @param completeSeries
+	 * @param folder
+	 */
+	private void prepareUploadJob(Patient patient, Study study, Set<Serie> completeSeries) {
 		ImportJob importJob = ImportUtils.createNewImportJob(patient, study);
 		try {
 			importJob.setSubject(dOCAL.createSubjectFromPatient(patient));
@@ -209,21 +195,29 @@ public class DicomPushServiceJob {
 				logger.error(e.getMessage(), e);
 				return;
 				}
-		importJob.setSelectedSeries(incomingSeries);
+		importJob.setSelectedSeries(completeSeries);
+
+		// TODO : factorize the upload job creation with DownloadOrCopyRunnable ?
 		UploadJob uploadJob = new UploadJob();
-		
-		// TODO : setselectedSeries from Study ?
-		// List<Serie> series = study.getSeries();
-		// 				for (Serie serie : series) {
-		// 					if (!serie.isIgnored() && !serie.isErroneous()) {
-		// 						importJob.getSelectedSeries().add((Serie)serie.clone());
-		// 					}
-		// 				}
 		ImportUtils.initUploadJob(importJob, uploadJob);
-		ImportUtils.createUploadFolder(ShUpOnloadConfig.getWorkFolder(), importJob.getSubject().getIdentifier());
+		File uploadFolder = ImportUtils.createUploadFolder(workFolder, importJob.getSubject().getIdentifier());
+		UploadJobManager uploadJobManager = new UploadJobManager(uploadFolder.getAbsolutePath());
+		uploadJobManager.writeUploadJob(uploadJob);
+
+		NominativeDataUploadJob dataJob = new NominativeDataUploadJob();
+		ImportUtils.initDataUploadJob(importJob, uploadJob, dataJob);
+		
+		NominativeDataUploadJobManager uploadDataJobManager = new NominativeDataUploadJobManager(
+					uploadFolder.getAbsolutePath());
+		uploadDataJobManager.writeUploadDataJob(dataJob);
+		ShUpOnloadConfig.getCurrentNominativeDataController().addNewNominativeData(uploadFolder, dataJob);
+		logger.info(uploadFolder.getName() + ": finished for DICOM Pushed study: " + importJob.getStudy().getStudyDescription()
+							+ ", " + importJob.getStudy().getStudyDate() + " of patient: "
+							+ importJob.getPatient().getPatientName());
+
+		ImportUtils.writeImportJobJson(importJob, uploadFolder);
+		
 		//TODO : copy content of all DICOM files in the upload folder
-		// UploadJobManager uploadJobManager = new UploadJobManager(uploadFolder.getAbsolutePath());
-		// uploadJobManager.writeUploadJob(uploadJob);
 	}
     
 }
