@@ -43,8 +43,10 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExecutionServiceImpl.class);
 
-    @Value("${shanoir-vip-host}")
-    private String SHANOIR_URI_SCHEME;
+    @Value("${vip.shanoir-vip-host}")
+    private String SHANOIR_URI_SCHEME_LOCAL;
+
+    public static String SHANOIR_URI_SCHEME;
 
     private final String vipExecutionUri = "/executions";
 
@@ -77,7 +79,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     @PostConstruct
     public void init() {
         this.webClient = WebClient.create(vipUrl);
-        SHANOIR_URI_SCHEME = SHANOIR_URI_SCHEME + ":/";
+        SHANOIR_URI_SCHEME = SHANOIR_URI_SCHEME_LOCAL + ":/";
     }
 
     public IdName createExecution(ExecutionCandidateDTO candidate, List<Dataset> inputDatasets) throws SecurityException, EntityNotFoundException, RestServiceException {
