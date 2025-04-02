@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -247,7 +248,7 @@ public class QueryPACSService {
 		LOG.debug("------------------------------");
 	}
 
-	public void queryCMOVEs(String studyInstanceUID, List<Serie> selectedSeries, JProgressBar progressBar) throws Exception {
+	public void queryCMOVEs(String studyInstanceUID, Set<Serie> selectedSeries, JProgressBar progressBar) throws Exception {
 		LOG.info("--------------------");
 		LOG.info("--- START C-MOVES --");
 		LOG.info("--------------------");

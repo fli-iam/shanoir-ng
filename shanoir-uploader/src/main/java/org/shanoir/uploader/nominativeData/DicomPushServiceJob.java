@@ -26,11 +26,11 @@ import org.shanoir.uploader.action.DownloadOrCopyActionListener;
 import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.upload.UploadJob;
 import org.shanoir.uploader.upload.UploadJobManager;
+import org.shanoir.uploader.utils.FileUtil;
 import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -38,15 +38,12 @@ import org.springframework.stereotype.Service;
 public class DicomPushServiceJob {
 
 	private static final Logger logger = LoggerFactory.getLogger(CurrentNominativeDataController.class);
-	
-	@Autowired
-	private CurrentNominativeDataController currentNominativeDataController;
 
 	private DownloadOrCopyActionListener dOCAL;
 
 	private final Set<Serie> incomingSeries = new HashSet<>();
 
-	private final long JOB_RATE = 300000; // 5 minutes
+	private final long JOB_RATE = 3600000; // 1 hour
 
 	private final String regex = "^[0-9.]+$";
 
@@ -167,7 +164,11 @@ public class DicomPushServiceJob {
 			// We use the last instance of the last Serie folder to create the patient and study
 			Patient patient = new Patient(dicomAttributes);
 			Study study = new Study(dicomAttributes);
-			prepareUploadJob(patient, study, incomingSeries);
+			try {
+				prepareUploadJob(patient, study, incomingSeries);
+			} catch (IOException e) {
+				logger.error(e.getMessage(), e);
+			}
 		} else {
 			logger.debug("No DICOM series folder found in study folder {}", folder.getName());
 			return false;
@@ -181,7 +182,7 @@ public class DicomPushServiceJob {
 	 * @param completeSeries
 	 * @param folder
 	 */
-	private void prepareUploadJob(Patient patient, Study study, Set<Serie> completeSeries) {
+	private void prepareUploadJob(Patient patient, Study study, Set<Serie> completeSeries) throws IOException {
 		ImportJob importJob = ImportUtils.createNewImportJob(patient, study);
 		try {
 			importJob.setSubject(dOCAL.createSubjectFromPatient(patient));
@@ -195,12 +196,24 @@ public class DicomPushServiceJob {
 				logger.error(e.getMessage(), e);
 				return;
 				}
+
+		File uploadFolder = ImportUtils.createUploadFolder(workFolder, importJob.getSubject().getIdentifier());
+		importJob.setWorkFolder(uploadFolder.getAbsolutePath());
+
+		List<String> retrievedDicomFiles = new ArrayList<String>();
+		StringBuilder downloadOrCopyReportPerStudy = new StringBuilder();
+		FileUtil.readAndCopyDicomFilesToUploadFolder(workFolder, study.getStudyInstanceUID(), completeSeries, uploadFolder, retrievedDicomFiles, downloadOrCopyReportPerStudy);
+
+		// We delete the study folder
+		FileUtil.deleteFolderDownloadFromDicomServer(workFolder, study.getStudyInstanceUID(), completeSeries);
+
+		// We set the selected series after the copy of the DICOM files to have the instances set to each serie
 		importJob.setSelectedSeries(completeSeries);
 
-		// TODO : factorize the upload job creation with DownloadOrCopyRunnable ?
+		// Creation of the uploadJob (need selected series from importJob)
 		UploadJob uploadJob = new UploadJob();
 		ImportUtils.initUploadJob(importJob, uploadJob);
-		File uploadFolder = ImportUtils.createUploadFolder(workFolder, importJob.getSubject().getIdentifier());
+
 		UploadJobManager uploadJobManager = new UploadJobManager(uploadFolder.getAbsolutePath());
 		uploadJobManager.writeUploadJob(uploadJob);
 
@@ -216,8 +229,6 @@ public class DicomPushServiceJob {
 							+ importJob.getPatient().getPatientName());
 
 		ImportUtils.writeImportJobJson(importJob, uploadFolder);
-		
-		//TODO : copy content of all DICOM files in the upload folder
 	}
     
 }
