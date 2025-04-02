@@ -246,8 +246,13 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 	}
 
 	@Override
-	public void downloadPipelineDatas(List<Long> dataIds, String dataType, String pipelineIdentifier, HttpServletResponse response) throws IOException {
+	public void downloadPipelineDatas(List<Long> dataIds, String dataType, String pipelineIdentifier, HttpServletResponse response) throws IOException, RestServiceException {
 		List<Long> processingIds = new ArrayList<>();
+		if(Objects.equals("", pipelineIdentifier) && (dataIds.isEmpty() || Objects.equals("", dataType))){
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.BAD_REQUEST.value(), "Filter at least on <dataType, ids> pair or on a pipelineIdentifier."));
+		}
+
 		if(dataIds.isEmpty() || Objects.equals("", dataType)){
 			processingIds = processingRepository.findAllIdsByPipelineIdentifier(pipelineIdentifier);
 		} else {
