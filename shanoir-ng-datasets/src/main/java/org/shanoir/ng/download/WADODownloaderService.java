@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
+import java.lang.management.ManagementFactory;
 import java.net.URL;
 import java.nio.file.Files;
 import java.time.format.DateTimeFormatter;
@@ -35,15 +36,19 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.json.JSONReader;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.dataset.service.DatasetUtils;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.dicom.WADOURLHandler;
 import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.utils.DatasetFileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -282,13 +287,18 @@ public class WADODownloaderService {
 	}
 
 	public Attributes getDicomAttributesForDataset(Dataset dataset) throws PacsException {
-		List<URL> urls = new ArrayList<>();
 		try {
-			DatasetUtils.getDatasetFilePathURLs(dataset, urls, DatasetExpressionFormat.DICOM);
-			if (!urls.isEmpty()) {
-				String jsonMetadataStr = downloadDicomMetadataForURL(urls.get(0));
-				JsonParser parser = Json.createParser(new StringReader(jsonMetadataStr));
-				Attributes dicomAttributes = new JSONReader(parser).readDataset(null);
+			URL firstUrl = DatasetFileUtils.getDatasetFirstFilePathURLs(dataset, DatasetExpressionFormat.DICOM);
+			if (firstUrl != null) {
+				String jsonMetadataStr = downloadDicomMetadataForURL(firstUrl);
+				Attributes dicomAttributes;
+				try (
+					StringReader strReader = new StringReader(jsonMetadataStr);
+					JsonParser parser = Json.createParser(strReader)
+				) {
+					JSONReader reader = new JSONReader(parser);
+					dicomAttributes = reader.readDataset(null);
+				}
 				if (dicomAttributes != null) {
 					return dicomAttributes;
 				} else {
@@ -303,7 +313,7 @@ public class WADODownloaderService {
 		return null;
 	}
 
-	public AcquisitionAttributes<Long> getDicomAttributesForAcquisition(DatasetAcquisition acquisition) throws PacsException {
+	public AcquisitionAttributes<Long> getDicomAttributesForAcquisition(DatasetAcquisition acquisition, Set<Integer> tagsInUse) throws PacsException {
 		long ts = new Date().getTime();
 		List<Dataset> datasets = new ArrayList<>();
 		if (acquisition.getDatasets() != null) {
@@ -311,7 +321,7 @@ public class WADODownloaderService {
 				datasets.add(dataset);
 			}
 		}
-		AcquisitionAttributes<Long> dAcquisitionAttributes = new AcquisitionAttributes<>();
+		AcquisitionAttributes<Long> dAcquisitionAttributes = new AcquisitionAttributes<>(tagsInUse);
 		// remove this ?
 		datasets.forEach(
 			dataset -> {
@@ -359,7 +369,7 @@ public class WADODownloaderService {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_DICOM_JSON);
 		HttpEntity<String> entity = new HttpEntity<>(headers);
-		LOG.debug("Download metadata from pacs, url : " + url);
+		LOG.info("Download metadata from pacs, url : " + url);
 		ResponseEntity<String> response = restTemplate.exchange(url,
 				HttpMethod.GET, entity,String.class, "1");
 		if (response.getStatusCode() == HttpStatus.OK) {

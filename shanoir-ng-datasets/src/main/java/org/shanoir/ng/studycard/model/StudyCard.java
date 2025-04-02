@@ -14,8 +14,12 @@
 
 package org.shanoir.ng.studycard.model;
 
+import java.util.HashSet;
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import jakarta.persistence.*;
+
 import org.dcm4che3.data.Attributes;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
@@ -30,6 +34,7 @@ import org.shanoir.ng.studycard.model.rule.DatasetRule;
 import org.shanoir.ng.studycard.model.rule.StudyCardRule;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Study card.
@@ -172,6 +177,14 @@ public class StudyCard extends HalEntity implements Card {
         acquisition.setStudyCard(this);
         acquisition.setStudyCardTimestamp(this.getLastEditTimestamp());
         return changeInAtLeastOneAcquisition;
+    }
+
+    public Set<Integer> getDicomTagsInUse() {
+        Set<Integer> tagsInUse = new HashSet<>();
+        for (StudyCardRule rule : getRules()) {
+            tagsInUse.addAll(rule.getConditionsDICOMtags());
+        }
+        return tagsInUse;
     }
    
 }
