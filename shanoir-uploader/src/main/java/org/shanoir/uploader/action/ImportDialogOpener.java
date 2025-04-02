@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.io.File;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -161,6 +163,7 @@ public class ImportDialogOpener {
 		importDialog.studyCardCB.removeAllItems();
 		if (studiesWithStudyCards != null && !studiesWithStudyCards.isEmpty()) {
 			boolean firstCompatibleStudyFound = false;
+			studiesWithStudyCards.sort(Comparator.comparing(Study::getName));
 			for (Study study : studiesWithStudyCards) {
 				importDialog.studyCB.addItem(study);
 				if (study.getCompatible() != null
@@ -241,6 +244,7 @@ public class ImportDialogOpener {
 				importDialog.subjectTextField.setBackground(Color.WHITE);
 				importDialog.subjectTextField.setEnabled(true);
 				importDialog.subjectTextField.setEditable(true);
+				importDialog.existingSubjectsCB.setEditable(true);
 			// Profile OFSEP: display, that subject will be created automatically
 			} else if (ShUpConfig.isModeSubjectCommonNameAutoIncrement()) {
 				importDialog.subjectTextField

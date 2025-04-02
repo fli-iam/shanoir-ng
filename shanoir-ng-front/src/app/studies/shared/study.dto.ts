@@ -374,6 +374,7 @@ export class StudyLight {
   description: string;
   license: string;
   studyTags: Tag[];
+  profile: Profile;
 }
 
 
