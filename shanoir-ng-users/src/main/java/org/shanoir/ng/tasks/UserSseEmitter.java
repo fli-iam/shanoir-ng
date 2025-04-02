@@ -28,4 +28,5 @@ public class UserSseEmitter extends SseEmitter {
 	public long getUserId() {
 		return userId;
 	}
+
 }

@@ -29,6 +29,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @RequestMapping("/tasks")
 @CrossOrigin(exposedHeaders = "Access-Control-Allow-Origin")
 public interface AsyncTaskApi {
+
 	@Operation(summary = "", description = "If exists, returns the tasks that the user is allowed to see")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found tasks"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -57,4 +58,5 @@ public interface AsyncTaskApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/updateTasks")
 	ResponseEntity<SseEmitter> updateTasks() throws IOException;
+
 }
