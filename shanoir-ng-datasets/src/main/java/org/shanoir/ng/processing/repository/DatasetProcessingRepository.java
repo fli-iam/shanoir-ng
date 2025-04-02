@@ -87,7 +87,7 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
 			"INNER JOIN dataset_acquisition as acquisition ON acquisition.id=dataset.dataset_acquisition_id " +
 			"INNER JOIN examination as examination ON examination.id = acquisition.examination_id " +
 			"WHERE examination.study_id IN (:studyIds)", nativeQuery = true)
-	List<Long>findAllIdsByStudyIds(List<Long> studyIds);
+	List<Long> findAllIdsByStudyIds(List<Long> studyIds);
 
 	/**
 	 * Find all processings that are linked to given acquisitions
@@ -99,7 +99,7 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
 			"INNER JOIN input_of_dataset_processing as input ON processing.id=input.processing_id " +
 			"INNER JOIN dataset as dataset ON dataset.id=input.dataset_id " +
 			"WHERE dataset.dataset_acquisition_id IN (:acquisitionIds)", nativeQuery = true)
-	List<Long>findAllIdsByAcquisitionIds(List<Long> acquisitionIds);
+	List<Long> findAllIdsByAcquisitionIds(List<Long> acquisitionIds);
 
 	/**
 	 * Find all processings that are linked to given subjects
@@ -113,10 +113,10 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
 			"INNER JOIN dataset_acquisition as acquisition ON acquisition.id=dataset.dataset_acquisition_id " +
 			"INNER JOIN examination as examination ON examination.id = acquisition.examination_id " +
 			"WHERE examination.subject_id IN (:subjectIds)", nativeQuery = true)
-	List<Long>findAllIdsBySubjectIds(List<Long> subjectIds);
+	List<Long> findAllIdsBySubjectIds(List<Long> subjectIds);
 
 	/**
-	 * Filter all processing according to a specific pipelineIdentifier
+	 * Filter all processing according to a specific pipelineIdentifier ain a list of processing ids
 	 *
 	 * @param processingIds list of processing to filter
 	 * @param pipelineIdentifier pipelineIdentifier to filter
@@ -125,5 +125,15 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
 	@Query(value="SELECT DISTINCT processing.id FROM dataset_processing as processing " +
 			"WHERE processing.comment LIKE :pipelineIdentifier " +
 			"AND processing.id IN (:processingIds)", nativeQuery = true)
-	List<Long>filterIdsByIdentifier(List<Long> processingIds, String pipelineIdentifier);
+	List<Long> filterIdsByIdentifier(List<Long> processingIds, String pipelineIdentifier);
+
+	/**
+	 * Filter all processing according to a specific pipelineIdentifier
+	 *
+	 * @param pipelineIdentifier pipelineIdentifier to filter
+	 * @return list of processing ids
+	 */
+	@Query(value="SELECT DISTINCT processing.id FROM dataset_processing as processing " +
+			"WHERE processing.comment LIKE :pipelineIdentifier ", nativeQuery = true)
+	List<Long> findAllIdsByPipelineIdentifier(String pipelineIdentifier);
 }

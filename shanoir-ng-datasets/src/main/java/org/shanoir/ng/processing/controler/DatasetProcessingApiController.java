@@ -248,24 +248,28 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 	@Override
 	public void downloadPipelineDatas(List<Long> dataIds, String dataType, String pipelineIdentifier, HttpServletResponse response) throws IOException {
 		List<Long> processingIds = new ArrayList<>();
-		switch (dataType) {
-			case "study":
-				processingIds = processingRepository.findAllIdsByStudyIds(dataIds);
-				break;
-			case "subject":
-				processingIds = processingRepository.findAllIdsBySubjectIds(dataIds);
-				break;
-			case "examination":
-				processingIds = processingRepository.findAllIdsByExaminationIds(dataIds);
-				break;
-			case "acquisition":
-				processingIds = processingRepository.findAllIdsByAcquisitionIds(dataIds);
-				break;
-			case "dataset":
-				processingIds = processingRepository.findAllIdsByInputDatasets_Ids(dataIds);
-				break;
+		if(dataIds.isEmpty() || Objects.equals("", dataType)){
+			processingIds = processingRepository.findAllIdsByPipelineIdentifier(pipelineIdentifier);
+		} else {
+			switch (dataType) {
+				case "study":
+					processingIds = processingRepository.findAllIdsByStudyIds(dataIds);
+					break;
+				case "subject":
+					processingIds = processingRepository.findAllIdsBySubjectIds(dataIds);
+					break;
+				case "examination":
+					processingIds = processingRepository.findAllIdsByExaminationIds(dataIds);
+					break;
+				case "acquisition":
+					processingIds = processingRepository.findAllIdsByAcquisitionIds(dataIds);
+					break;
+				case "dataset":
+					processingIds = processingRepository.findAllIdsByInputDatasets_Ids(dataIds);
+					break;
+			}
+			processingIds = processingRepository.filterIdsByIdentifier(processingIds, pipelineIdentifier);
 		}
-		processingIds = processingRepository.filterIdsByIdentifier(processingIds, pipelineIdentifier);
 		if(!processingIds.isEmpty()) {
 			processingDownloaderService.downloadPipelineDatas(processingIds, pipelineIdentifier, response);
 		}
