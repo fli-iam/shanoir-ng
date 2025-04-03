@@ -14,19 +14,17 @@
 
 package org.shanoir.ng.dataset.repository;
 
+import java.util.List;
+
+import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-//import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
-
-import java.util.List;
-
-import org.shanoir.ng.dataset.dto.DatasetLight;
 
 public interface DatasetRepository extends PagingAndSortingRepository<Dataset, Long>, CrudRepository<Dataset, Long> {
 
@@ -87,9 +85,15 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 			"WHERE input.processing_id = :processingId or ds.dataset_processing_id = :processingId", nativeQuery = true)
 	List<Dataset> findDatasetsByProcessingId(Long processingId);
 
-	@Query(value="SELECT new org.shanoir.ng.dataset.dto.DatasetLight(ds.id, dm.name, TYPE(ds), "
-	        + "CASE WHEN (SELECT COUNT(p) FROM DatasetProcessing p JOIN p.inputDatasets d WHERE d.id = ds.id) > 0 THEN true ELSE false END) "
-			+ "FROM Dataset ds "
-			+ "JOIN ds.originMetadata dm")
-	List<DatasetLight> findAllLightById(List<Long> ids);
+	@Query("SELECT new org.shanoir.ng.dataset.dto.DatasetLight( " 
+			+ "ds.id, dm.name, TYPE(ds), " 
+			+ "ds.datasetAcquisition.examination.study.id, "  
+			+ "(CASE WHEN EXISTS (SELECT 1 FROM DatasetProcessing p JOIN p.inputDatasets d WHERE d.id = ds.id) THEN true ELSE false END)) " 
+			+ "FROM Dataset ds " 
+			+ "JOIN ds.originMetadata dm " 
+			+ "LEFT JOIN ds.datasetAcquisition da "  
+			+ "LEFT JOIN da.examination e "  
+			+ "LEFT JOIN e.study s " 
+			+ "WHERE ds.id IN :ids")
+List<DatasetLight> findAllLightById(List<Long> ids);
 }

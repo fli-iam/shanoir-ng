@@ -29,12 +29,15 @@ public class DatasetLight {
 
 	private boolean hasProcessings;
 
+	private Long studyId;
 
-    public DatasetLight(Long id, String name, Class<? extends Dataset> type, boolean hasProcessings) throws NoSuchMethodException, InstantiationException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+
+    public DatasetLight(Long id, String name, Class<? extends Dataset> type, Long studyId, boolean hasProcessings) throws NoSuchMethodException, InstantiationException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         this.hasProcessings = hasProcessings;
         this.id = id;
         this.name = name;
         this.type = type.getDeclaredConstructor().newInstance().getType().name();
+		this.studyId = studyId;
     }
 
 	public Long getId() {
@@ -69,4 +72,11 @@ public class DatasetLight {
         this.hasProcessings = hasProcessings;
     }
 
+    public Long getStudyId() {
+        return studyId;
+    }
+
+    public void setStudyId(Long studyId) {
+        this.studyId = studyId;
+    }
 }
