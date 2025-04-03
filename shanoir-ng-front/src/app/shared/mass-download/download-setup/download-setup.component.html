@@ -4,7 +4,7 @@
         <div *ngIf="loading">
             <i *ngIf="loading" class="fas fa-cog fa-spin"></i> Retrieving download informations...
         </div>
-        <fieldset class="body" disabled="loading">
+        <fieldset class="body" [disabled]="loading">
             <ol>
                 <li *ngIf="hasDicom">
                     <label>Dataset files format</label>
