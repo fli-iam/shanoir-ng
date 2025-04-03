@@ -146,9 +146,10 @@ public class ShanoirEventsService {
 	}
 
 	/**
-	 * Attention: while the keep alive loop is running, all 30 seconds and
+	 * Attention: while the keep alive loop is running all 30 seconds and
 	 * sends an empty message to each browser-tab, a new user can log in and
-	 * manipulate the emitters list.
+	 * manipulate the emitters list, that is why we need to be careful with
+	 * the thread-safety.
 	 */
 	@Scheduled(fixedDelay = 30000)
 	private void keepConnectionAlive() {
@@ -157,11 +158,12 @@ public class ShanoirEventsService {
 			SseEmitter emitter = iterator.next();
 			try {
 				emitter.send("{}", MediaType.APPLICATION_JSON);
-			} catch (Exception e) {
 				emitter.complete();
+			} catch (Exception e) {
 				iterator.remove();
 			}
 		}
+		LOG.info("Connected userIds (one emitter by browser tab): " + AsyncTaskApiController.emitters.toString());
 	}
 
 	public ShanoirEvent findById(Long taskId) {
