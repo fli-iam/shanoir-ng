@@ -26,6 +26,8 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 
 import java.util.List;
 
+import org.shanoir.ng.dataset.dto.DatasetLight;
+
 public interface DatasetRepository extends PagingAndSortingRepository<Dataset, Long>, CrudRepository<Dataset, Long> {
 
 	@Query(value="SELECT COUNT(*) FROM dataset as ds " +
@@ -84,4 +86,10 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 			"INNER JOIN input_of_dataset_processing as input ON ds.id=input.dataset_id " +
 			"WHERE input.processing_id = :processingId or ds.dataset_processing_id = :processingId", nativeQuery = true)
 	List<Dataset> findDatasetsByProcessingId(Long processingId);
+
+	@Query(value="SELECT new org.shanoir.ng.dataset.dto.DatasetLight(ds.id, dm.name, TYPE(ds), "
+	        + "CASE WHEN (SELECT COUNT(p) FROM DatasetProcessing p JOIN p.inputDatasets d WHERE d.id = ds.id) > 0 THEN true ELSE false END) "
+			+ "FROM Dataset ds "
+			+ "JOIN ds.originMetadata dm")
+	List<DatasetLight> findAllLightById(List<Long> ids);
 }
