@@ -65,7 +65,7 @@ public interface DatasetApi {
 			@ApiResponse(responseCode = "404", description = "no dataset found"),
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@DeleteMapping(value = "/delete", produces = { "application/json" })
-	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_ADMINISTRATE'))")
+	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDatasets(#datasetIds, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> deleteDatasets(
 			@Parameter(description = "ids of the datasets", required=true) @Valid
     		@RequestBody(required = true) List<Long> datasetIds)
@@ -253,7 +253,7 @@ public interface DatasetApi {
         @ApiResponse(responseCode = "404", description = "no dataset found"),
         @ApiResponse(responseCode = "500", description = "unexpected error") })
     @PostMapping(value = "/massiveDownload")
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_DOWNLOAD'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDatasets(#datasetIds, 'CAN_DOWNLOAD'))")
     void massiveDownloadByDatasetIds(
     		@Parameter(description = "ids of the datasets", required=true) @Valid
     		@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
@@ -348,7 +348,7 @@ public interface DatasetApi {
 			@ApiResponse(responseCode = "404", description = "no study found"),
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PostMapping(value = "/allById", produces = { "application/json" })
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_SEE_ALL'))")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDatasets(#datasetIds, 'CAN_SEE_ALL'))")
 	ResponseEntity<List<DatasetWithDependenciesDTOInterface>> findDatasetsByIds(
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds);
 }

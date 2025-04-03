@@ -61,7 +61,7 @@ public interface DatasetService {
 	 * @param ids dataset ids.
 	 * @throws EntityNotFoundException
 	 */
-	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnEveryDataset(#ids, 'CAN_ADMINISTRATE'))")
+	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDatasets(#ids, 'CAN_ADMINISTRATE'))")
 	void deleteByIdIn(List<Long> ids) throws ShanoirException, SolrServerException, IOException, RestServiceException;
 
 	/**
