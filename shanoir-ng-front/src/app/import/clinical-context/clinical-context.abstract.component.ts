@@ -375,31 +375,31 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     public onSelectStudy(): Promise<void> {
         this.loading++;
         this.computeIsAdminOfStudy(this.study?.id);
-        this.getStudyCardPolicy(this.study).then(policy => {
+        return this.getStudyCardPolicy(this.study).then(policy => {
             this.study.studyCardPolicy = policy;
-        });
-
-        this.studycard = this.center = this.acquisitionEquipment = this.subject = this.examination = null;
-        let studycardsOrCentersPromise: Promise<void>;
-        if (this.useStudyCard) {
-            studycardsOrCentersPromise = this.getStudyCardOptions(this.study).then(options => {
-                this.studycardOptions = options;
-                return this.selectDefaultStudyCard(options);
+            this.studycard = this.center = this.acquisitionEquipment = this.subject = this.examination = null;
+            let studycardsOrCentersPromise: Promise<void>;
+            if (this.useStudyCard) {
+                studycardsOrCentersPromise = this.getStudyCardOptions(this.study).then(options => {
+                    this.studycardOptions = options;
+                    return this.selectDefaultStudyCard(options);
+                });
+            } else {
+                studycardsOrCentersPromise = this.getCenterOptions(this.study).then(options => {
+                    this.centerOptions = options;
+                    return this.selectDefaultCenter(options);
+                });
+                this.getEquipmentOptions(this.center);
+            }
+            let subjectsPromise: Promise<void> = this.getSubjectList(this.study?.id).then(subjects => {
+                this.subjects = subjects ? subjects : [];
             });
-        } else {
-            studycardsOrCentersPromise = this.getCenterOptions(this.study).then(options => {
-                this.centerOptions = options;
-                return this.selectDefaultCenter(options);
+            let tagsPromise: Promise<void> = this.studyService.getTagsFromStudyId(this.study?.id).then(tags => {
+                this.study.tags = tags ? tags : [];
             });
-        }
-        let subjectsPromise: Promise<void> = this.getSubjectList(this.study?.id).then(subjects => {
-            this.subjects = subjects ? subjects : [];
+            return Promise.all([studycardsOrCentersPromise, subjectsPromise]).finally(() => this.loading--)
+                .then(() => this.onContextChange());
         });
-        let tagsPromise: Promise<void> = this.studyService.getTagsFromStudyId(this.study?.id).then(tags => {
-            this.study.tags = tags ? tags : [];
-        });
-        return Promise.all([studycardsOrCentersPromise, subjectsPromise]).finally(() => this.loading--)
-            .then(() => this.onContextChange());
     }
 
     public onSelectStudyCard(): Promise<any> {
