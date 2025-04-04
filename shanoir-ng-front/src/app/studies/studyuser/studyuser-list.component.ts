@@ -17,7 +17,7 @@ import { Center } from '../../centers/shared/center.model';
 
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
-import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
+import {  Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
@@ -66,6 +66,8 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     pannelStudyUser: StudyUser;
     StudyUserRight = StudyUserRight;
     isAdmin: boolean;
+    isExpert: boolean;
+    isStudyAdmin: boolean;
     invitationMail: string;
     invitationFunction: string;
 
@@ -75,10 +77,13 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     constructor(private keycloakService: KeycloakService,
                 private accessRequestService: AccessRequestService) {
         this.isAdmin = keycloakService.isUserAdmin();
+        this.isExpert = keycloakService.isUserExpert();
         this.consoleService = ServiceLocator.injector.get(ConsoleService);
     }
 
     ngOnChanges(changes: SimpleChanges): void {
+        Promise.resolve(this.hasStudyAdminRight()).then(result => {this.isStudyAdmin = result});
+
         if (changes.studies && this.studies) {
             this.studyOptions = this.studies.map(study => {
                 let option: Option<Study> = new Option<Study>(study, study.name);
@@ -131,6 +136,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
             // { headerName: 'First Name', field: 'user.firstName' },
             // { headerName: 'Last Name', field: 'user.lastName' },
             // { headerName: 'Email', field: 'user.email', width: '200%' },
+            { headerName: 'Role', field: 'user.role.displayName', width: '80px', defaultSortCol: true},
             { headerName: 'Confirmed', field: 'confirmed', type: 'boolean', editable: false, width: '54px', disableSorting: true},
             // { headerName: 'Centers', type: 'boolean', editable: false, width: '54px', disableSorting: true,
             //     cellRenderer: (params: any) => !params.data.centers || params.data.centers.length == 0},
@@ -151,9 +157,6 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         ];
         if (deleteButton) {
             this.columnDefs.push({ headerName: '', type: 'button', awesome: 'fa-regular fa-trash-can', action: this.removeStudyUser, editable: (su: StudyUser) => !this.disableEdit(su)});
-        }
-        if(this.keycloakService.isUserAdminOrExpert()){
-            this.columnDefs.splice(1, 0, { headerName: 'Role', field: 'user.role.displayName', width: '80px', defaultSortCol: true});
         }
     }
 
@@ -314,5 +317,13 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
 
     protected getLoggedUserId(): number {
         return this.keycloakService.getUserId();
+    }
+
+    public async hasStudyAdminRight(): Promise<boolean> {
+        if (this.keycloakService.isUserAdmin()) return true;
+        if (!this.study?.studyUserList) return false;
+        let studyUser: StudyUser = this.study.studyUserList.filter(su => su.userId == KeycloakService.auth.userId)[0];
+        if (!studyUser) return false;
+        return studyUser.studyUserRights && studyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE);
     }
  }
