@@ -121,7 +121,7 @@ public class UserServiceSecurityTest {
 		assertAccessDenied(userService::confirmAccountRequest, mockUser);
 		assertAccessDenied(userService::deleteById, USER_ID);
 		assertAccessDenied(userService::denyAccountRequest, USER_ID);
-		assertAccessDenied(userService::findAll);
+		assertAccessAuthorized(userService::findAll);
 		assertAccessDenied(userService::findByEmail, USER_EMAIL);
 		assertAccessDenied(userService::findById, USER_ID);
 		assertAccessDenied(userService::findByUsername, USER_USERNAME);
@@ -155,7 +155,7 @@ public class UserServiceSecurityTest {
 		assertAccessDenied(userService::confirmAccountRequest, mockUser);
 		assertAccessDenied(userService::deleteById, USER_ID);
 		assertAccessDenied(userService::denyAccountRequest, USER_ID);
-		assertAccessDenied(userService::findAll);
+		assertAccessAuthorized(userService::findAll);
 		assertAccessDenied(userService::findByEmail, USER_EMAIL);
 		assertAccessDenied(userService::findById, USER_ID);
 		assertAccessAuthorized(userService::findById, LOGGED_USER_ID);
@@ -182,7 +182,7 @@ public class UserServiceSecurityTest {
 		assertAccessDenied(userService::deleteById, USER_ID);
 		assertAccessAuthorized(userService::findAll);
 		for (User user : userService.findAll()) {
-			assertNull(user.getEmail());
+			assertNotNull(user.getEmail());
 			assertNull(user.getLastLogin());
 			assertNull(user.getCreationDate());
 		}

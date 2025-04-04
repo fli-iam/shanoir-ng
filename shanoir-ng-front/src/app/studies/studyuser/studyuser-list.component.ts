@@ -66,6 +66,8 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     pannelStudyUser: StudyUser;
     StudyUserRight = StudyUserRight;
     isAdmin: boolean;
+    isExpert: boolean;
+    isStudyAdmin: boolean;
     invitationMail: string;
     invitationFunction: string;
     newUser: User[] = [];
@@ -76,10 +78,13 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     constructor(private keycloakService: KeycloakService,
                 private accessRequestService: AccessRequestService) {
         this.isAdmin = keycloakService.isUserAdmin();
+        this.isExpert = keycloakService.isUserExpert();
         this.consoleService = ServiceLocator.injector.get(ConsoleService);
     }
 
     ngOnChanges(changes: SimpleChanges): void {
+        Promise.resolve(this.hasStudyAdminRight()).then(result => {this.isStudyAdmin = result});
+
         if (changes.studies && this.studies) {
             this.studyOptions = this.studies.map(study => {
                 let option: Option<Study> = new Option<Study>(study, study.name);
@@ -152,9 +157,6 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         ];
         if (deleteButton) {
             this.columnDefs.push({ headerName: '', type: 'button', awesome: 'fa-regular fa-trash-can', action: this.removeStudyUser, editable: (su: StudyUser) => !this.disableEdit(su)});
-        }
-        if(this.keycloakService.isUserAdminOrExpert()){
-            this.columnDefs.splice(1, 0, { headerName: 'Role', field: 'user.role.displayName', width: '80px', defaultSortCol: true});
         }
     }
 
@@ -308,7 +310,6 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
             this.studyUserList.unshift(studyUser);
             this.pannelStudyUser = studyUser;
         }
-        this.newUser.unshift(this.studyUserList.at(0).user)
         this.browserPaging.setItems(this.studyUserList);
         this.table.refresh();
         this.onChangeCallback(this.studyUserList);
@@ -321,5 +322,13 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
 
     protected save(){
         this.newUser = [];
+    }
+
+    public async hasStudyAdminRight(): Promise<boolean> {
+        if (this.keycloakService.isUserAdmin()) return true;
+        if (!this.study?.studyUserList) return false;
+        let studyUser: StudyUser = this.study.studyUserList.filter(su => su.userId == KeycloakService.auth.userId)[0];
+        if (!studyUser) return false;
+        return studyUser.studyUserRights && studyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE);
     }
  }
