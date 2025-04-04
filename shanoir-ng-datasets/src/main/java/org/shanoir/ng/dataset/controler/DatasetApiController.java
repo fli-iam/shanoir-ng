@@ -3,12 +3,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -21,7 +21,6 @@ import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
@@ -31,7 +30,6 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.CreateStatisticsService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
@@ -145,10 +143,6 @@ public class DatasetApiController implements DatasetApi {
 	@Autowired
 	private ObjectMapper objectMapper;
 
-	@Autowired
-	private DatasetRepository datasetRepository;
-
-
 	/** Number of downloadable datasets. */
 	private static final int DATASET_LIMIT = 500;
 
@@ -197,7 +191,7 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public ResponseEntity<Void> deleteNiftisFromStudy(long studyId) {
-		this.datasetService.deleteNiftis(studyId);
+		datasetService.deleteNiftis(studyId);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
@@ -302,7 +296,7 @@ public class DatasetApiController implements DatasetApi {
 	@Override
 	public ResponseEntity<List<DatasetDTO>> findDatasetByStudyId(
 			Long studyId) {
-		
+
 		final List<Examination> examinations = examinationService.findByStudyId(studyId);
 		if (examinations.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -322,7 +316,7 @@ public class DatasetApiController implements DatasetApi {
 	@Override
 	public ResponseEntity<Integer> findNbDatasetByStudyId(
 			Long studyId) {
-		
+
 		final int nbDatasets = datasetService.countByStudyId(studyId);
 		return new ResponseEntity<Integer>(nbDatasets, HttpStatus.OK);
 	}
@@ -356,7 +350,7 @@ public class DatasetApiController implements DatasetApi {
 		}
 		return datasets;
 	}
-	
+
 	@Override
 	public void downloadDatasetById(
 			final Long datasetId,
@@ -381,10 +375,10 @@ public class DatasetApiController implements DatasetApi {
 		if (pathURLs.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} else {
-			return new ResponseEntity<>(downloader.downloadDicomMetadataForURL(pathURLs.get(0)), HttpStatus.OK);			
+			return new ResponseEntity<>(downloader.downloadDicomMetadataForURL(pathURLs.get(0)), HttpStatus.OK);
 		}
 	}
-	
+
 	public ResponseEntity<Void> createProcessedDataset(@Parameter(description = "ProcessedDataset to create" ,required=true )  @Valid @RequestBody ProcessedDatasetImportJob importJob) throws IOException, Exception {
 		importerService.createProcessedDataset(importJob);
 		File originalNiftiName = new File(importJob.getProcessedDatasetFilePath());
@@ -472,7 +466,7 @@ public class DatasetApiController implements DatasetApi {
 			@RequestParam(value = "acquisitionId", required = true) Long acquisitionId,
 			@Parameter(description = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
 			@RequestParam(value = "format", required = false, defaultValue="dcm") String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException {
-		
+
 		// STEP 0: Check data integrity
 		if (acquisitionId == null) {
 			throw new RestServiceException(
@@ -515,7 +509,7 @@ public class DatasetApiController implements DatasetApi {
 
 	/**
 	 * Validate a dataset
-	 * 
+	 *
 	 * @param result
 	 * @throws RestServiceException
 	 */
