@@ -1,9 +1,10 @@
 package org.shanoir.ng.tasks;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.shanoir.ng.events.ShanoirEvent;
 import org.shanoir.ng.events.ShanoirEventLight;
@@ -33,7 +34,7 @@ public class AsyncTaskApiController implements AsyncTaskApi {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AsyncTaskApiController.class);
 
-	public static final List<UserSseEmitter> emitters = new CopyOnWriteArrayList<>();
+	public static final List<UserSseEmitter> emitters = new ArrayList<UserSseEmitter>();
 
 	@Autowired
 	ShanoirEventsService eventsService;
@@ -75,15 +76,18 @@ public class AsyncTaskApiController implements AsyncTaskApi {
 
 	/**
 	 * As an user in his browser can open multiple tabs, it is wanted
-	 * that multiple emitters exist for the same userId.
+	 * that multiple emitters exist with the same userId.
 	 */
 	@Override
 	public ResponseEntity<SseEmitter> updateTasks() throws IOException {
-		long userId = KeycloakUtil.getTokenUserId();
-		UserSseEmitter emitter = new UserSseEmitter(userId);
-		emitters.add(emitter);
-		LOG.info("New SseEmitter added for user " + KeycloakUtil.getTokenUserName());
-		emitter.onCompletion(() -> emitters.remove(emitter));
+		UserSseEmitter emitter = new UserSseEmitter(KeycloakUtil.getTokenUserId());
+		// multi-threaded: new users can open tabs or connect with a new tab,
+		// as Collections.synchronizedList() does not protect the iteration,
+		// we require usage of synchronized() here, see keepConnectionAlive
+		synchronized(emitters) {
+			emitters.add(emitter);
+		}
+		LOG.info("UserSseEmitter added for user " + KeycloakUtil.getTokenUserName());
 		return new ResponseEntity<>(emitter, HttpStatus.OK);
 	}
 

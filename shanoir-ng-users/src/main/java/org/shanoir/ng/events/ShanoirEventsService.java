@@ -116,33 +116,30 @@ public class ShanoirEventsService {
 	}
 
 	/**
-	 * Sends an event using an emitter
+	 * Sends an event using an emitter.
 	 * 
 	 * @param notification the event to send
 	 */
 	public void sendSseEventsToUI(ShanoirEvent notification) {
-		List<UserSseEmitter> sseEmitterListToRemove = new ArrayList<>();
-		AsyncTaskApiController.emitters.forEach((UserSseEmitter emitter) -> {
-			// ! IMPORTANT filter on user id
-			if (notification.getUserId() != null && notification.getUserId().equals(emitter.getUserId())) {
-				if (notification.getLastUpdate() == null) {
-					notification.setLastUpdate(new Date());
-				}
-				try {
-					emitter.send(notification, MediaType.APPLICATION_JSON);
-				} catch (IOException e2) {
-					emitter.complete();
-					sseEmitterListToRemove.add(emitter);
-					LOG.error("Error while send task to UI ", e2);
-				} catch (Exception e) {
-					emitter.complete();
-					sseEmitterListToRemove.add(emitter);
-					LOG.error("Error while send task to UI ", e);
-					throw e;
+		List<UserSseEmitter> emitters = AsyncTaskApiController.emitters;
+		synchronized (emitters) {
+			Iterator<UserSseEmitter> iterator = emitters.iterator();
+			while (iterator.hasNext()) {
+				UserSseEmitter userSseEmitter = iterator.next();
+				// ! IMPORTANT filter on user id
+				if (notification.getUserId() != null && notification.getUserId().equals(userSseEmitter.getUserId())) {
+					if (notification.getLastUpdate() == null) {
+						notification.setLastUpdate(new Date());
+					}
+					try {
+						userSseEmitter.send(notification, MediaType.APPLICATION_JSON);
+					} catch (Exception e) {
+						LOG.error("sendSseEventsToUI: error while sending data for user {}", userSseEmitter.getUserId());
+						iterator.remove();
+					}
 				}
 			}
-		});
-		AsyncTaskApiController.emitters.removeAll(sseEmitterListToRemove);
+		}
 	}
 
 	/**
@@ -153,17 +150,20 @@ public class ShanoirEventsService {
 	 */
 	@Scheduled(fixedDelay = 30000)
 	private void keepConnectionAlive() {
-		Iterator<UserSseEmitter> iterator = AsyncTaskApiController.emitters.iterator();
-		while (iterator.hasNext()) {
-			SseEmitter emitter = iterator.next();
-			try {
-				emitter.send("{}", MediaType.APPLICATION_JSON);
-				emitter.complete();
-			} catch (Exception e) {
-				iterator.remove();
+		List<UserSseEmitter> emitters = AsyncTaskApiController.emitters;
+		synchronized (emitters) {
+			Iterator<UserSseEmitter> iterator = emitters.iterator();
+			while (iterator.hasNext()) {
+				UserSseEmitter userSseEmitter = iterator.next();
+				try {
+					userSseEmitter.send("{}", MediaType.APPLICATION_JSON);
+				} catch (Exception e) {
+					LOG.error("Keep-Alive-SSE: error while sending data for user {}", userSseEmitter.getUserId());
+					iterator.remove();
+				}
 			}
 		}
-		LOG.info("Connected userIds (one emitter by browser tab): " + AsyncTaskApiController.emitters.toString());
+		LOG.info("Keep-Alive-SSE: {} userIds: {}", emitters.size(), emitters.toString());
 	}
 
 	public ShanoirEvent findById(Long taskId) {
