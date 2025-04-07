@@ -35,6 +35,7 @@ export abstract class ShanoirNode {
     private openPromise: Promise<void>;
     protected readonly routeBase: string;
     getTop: () => number; // to scroll to the node
+    fake: boolean = false;
 
     constructor(
         public parent: ShanoirNode,
@@ -45,6 +46,7 @@ export abstract class ShanoirNode {
     public selected: boolean = false;
 
     open(): Promise<void> {
+        this.fake = false;
         if (!this._opened) {
             if (this.parent) {
                 this.parent.open();
@@ -53,7 +55,7 @@ export abstract class ShanoirNode {
                 // removing timeout may cause random bugs in the tree
                 this._opened = true;
             });
-            return (this.openPromise || Promise.resolve()).then(() => SuperPromise.timeoutPromise());
+            return SuperPromise.timeoutPromise().then(() => (this.openPromise || Promise.resolve()));
         } else {
             return Promise.resolve();
         }
@@ -191,7 +193,6 @@ export class MembersNode extends ShanoirNode {
 
 
 export abstract class SubjectNode extends ShanoirNode {
-
     constructor(
         public parent: ShanoirNode,
         public id: number,
