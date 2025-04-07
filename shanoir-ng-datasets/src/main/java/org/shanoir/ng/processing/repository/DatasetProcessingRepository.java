@@ -46,9 +46,10 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
 	 * @return List of dataset processing.
 	 */
 	@Query(value="SELECT DISTINCT processing.id FROM dataset_processing as processing " +
-			"INNER JOIN execution_monitoring AS monitoring ON monitoring.id = processing.id" +
-			"WHERE processing.dataset_processing_type = :type" +
-			"AND processing.comment LIKE :comment" +
+			"INNER JOIN execution_monitoring AS monitoring ON monitoring.id = processing.id " +
+			"WHERE processing.dataset_processing_type = :type " +
+			"AND processing.comment LIKE :comment " +
+			"AND monitoring.name LIKE '%post_processing' " +
 			"AND monitoring.status = 1", nativeQuery = true)
 	List<Long> findIdsByCommentAndDatasetProcessingTypeWithStatusFinished(String comment, int type);
 

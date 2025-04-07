@@ -65,11 +65,11 @@ public class DefaultHandler extends OutputHandler {
 
 
     public boolean canProcess(ExecutionMonitoring processing, boolean postProcessing) {
-        return true;
+        return !postProcessing;
     }
 
     public boolean canProcess(String pipelineIdentifier, boolean postProcessing) {
-        return true;
+        return !postProcessing;
     }
 
     public void manageTarGzResult(List<File> resultFiles, File parent, ExecutionMonitoring monitoring) throws ResultHandlerException {

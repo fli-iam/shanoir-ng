@@ -15,19 +15,9 @@
 
 package org.shanoir.ng.vip.output.controller;
 
-import io.swagger.v3.oas.annotations.Parameter;
-import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.processing.model.DatasetProcessingType;
 import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.SecurityException;
-import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
-import org.shanoir.ng.vip.execution.dto.ExecutionCandidateDTO;
-import org.shanoir.ng.vip.execution.dto.VipExecutionDTO;
-import org.shanoir.ng.vip.execution.service.ExecutionServiceImpl;
-import org.shanoir.ng.vip.executionMonitoring.model.ExecutionStatus;
 import org.shanoir.ng.vip.output.exception.ResultHandlerException;
 import org.shanoir.ng.vip.output.service.PostProcessingService;
 import org.slf4j.Logger;
@@ -36,8 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.Objects;
@@ -60,8 +48,10 @@ public class PostProcessingApiController implements PostProcessingApi {
         Integer processingTypeId = DatasetProcessingType.getIdFromString(name);
         if(Objects.nonNull(processingTypeId)) {
             try {
-                List<Long> processingIds = processingRepository.findIdsByCommentAndDatasetProcessingTypeWithStatusFinished(comment, processingTypeId);
-                processingService.launchPostProcessing(processingIds, comment);
+                List<Long> processingIds = processingRepository.findIdsByCommentAndDatasetProcessingTypeWithStatusFinished(comment + "%", processingTypeId);
+                if(!processingIds.isEmpty()) {
+                    processingService.launchPostProcessing(processingIds, comment);
+                }
                 return new ResponseEntity<>(HttpStatus.OK);
             } catch (ResultHandlerException e) {
                     LOG.error(e.getMessage(), e);
