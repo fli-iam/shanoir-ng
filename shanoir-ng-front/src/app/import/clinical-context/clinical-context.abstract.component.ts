@@ -138,12 +138,13 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         let promises: Promise<any>[] = [];
         let study = this.importDataService.contextBackup(this.stepTs).study;
         let studyCard = this.importDataService.contextBackup(this.stepTs).studyCard;
-        let useStudyCard = this.importDataService.contextBackup(this.stepTs).useStudyCard;
         let center = this.importDataService.contextBackup(this.stepTs).center;
         let acquisitionEquipment = this.importDataService.contextBackup(this.stepTs).acquisitionEquipment;
         let subject = this.importDataService.contextBackup(this.stepTs).subject;
         let examination = this.importDataService.contextBackup(this.stepTs).examination;
         this.study = study;
+        let useStudyCard = this.importDataService.contextBackup(this.stepTs).useStudyCard;
+
         let studyOption = this.studyOptions.find(s => s.value.id == study.id);
         if (studyOption) {
             this.study = studyOption.value; // in case it has been modified by an on-the-fly equipment creation
@@ -153,8 +154,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
                 this.useStudyCard = useStudyCard;
                 this.onToggleUseStudyCard();
             } else if (useStudyCard && studyCard){
-                this.studycard = studyCard;
-                promises.push(this.onSelectStudyCard().then(() => this.restoreCenter(center, acquisitionEquipment)));
+                promises.push(this.onSelectStudyCard());
             } else {
                 this.restoreCenter(center, acquisitionEquipment);
             }
@@ -346,11 +346,16 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         if (studyCard && studyCenterList) {
             this.acquisitionEquipment = null;
             let eqFound: AcquisitionEquipment;
-            let scFound: StudyCenter = studyCenterList?.find(sc => {
-                eqFound = sc.center.acquisitionEquipments.find(eq => eq.id == this.studycard.acquisitionEquipment.id);
-                return (!!eqFound);
-            })
-            this.center = scFound ? scFound.center : this.studycard?.acquisitionEquipment?.center;
+            if (this.useStudyCard) {
+                this.center = this.studycard.acquisitionEquipment.center;
+                eqFound = this.studycard.acquisitionEquipment;
+            } else {
+                let scFound: StudyCenter = studyCenterList?.find(sc => {
+                    eqFound = sc.center.acquisitionEquipments.find(eq => eq.id == this.studycard.acquisitionEquipment.id);
+                    return (!!eqFound);
+                })
+                this.center = scFound ? scFound.center : this.studycard?.acquisitionEquipment?.center;
+            }
             return this.onSelectCenter().then(() => {
                 this.acquisitionEquipment = eqFound;
             });
