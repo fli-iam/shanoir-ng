@@ -408,9 +408,9 @@ public class DatasetApiController implements DatasetApi {
 		}
 
 		// STEP 1: Retrieve all datasets all in one with only the one we can see
-		//List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
+		List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
 
-		//datasetDownloaderService.massiveDownload(format, datasets, response, false, converterId);
+		datasetDownloaderService.massiveDownload(format, datasets, response, false, converterId);
 	}
 
 	@Override
