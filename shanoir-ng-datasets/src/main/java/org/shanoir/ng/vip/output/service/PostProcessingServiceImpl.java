@@ -45,7 +45,7 @@ public class PostProcessingServiceImpl implements PostProcessingService {
      */
     private void retrieveRelevantOutputHandler(String comment) throws ResultHandlerException {
         for (OutputHandler outputHandler : outputHandlers) {
-            if (outputHandler.canProcess(comment)) {
+            if (outputHandler.canProcess(comment, true)) {
                 relevantOutputHandler = outputHandler;
             }
         }

@@ -51,7 +51,7 @@ public class OutputServiceImpl implements OutputService {
     public void process(ExecutionMonitoring monitoring) throws ResultHandlerException, EntityNotFoundException {
         OutputHandler relevantOutputHandler = null;
         for (OutputHandler outputHandler : outputHandlers) {
-            if (outputHandler.canProcess(monitoring)) {
+            if (outputHandler.canProcess(monitoring, false)) {
                 relevantOutputHandler = outputHandler;
                 break;
             }

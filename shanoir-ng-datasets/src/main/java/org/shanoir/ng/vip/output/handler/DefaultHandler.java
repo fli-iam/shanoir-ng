@@ -64,11 +64,11 @@ public class DefaultHandler extends OutputHandler {
     private static final Logger LOG = LoggerFactory.getLogger(DefaultHandler.class);
 
 
-    public boolean canProcess(ExecutionMonitoring processing) {
+    public boolean canProcess(ExecutionMonitoring processing, boolean postProcessing) {
         return true;
     }
 
-    public boolean canProcess(String pipelineIdentifier) {
+    public boolean canProcess(String pipelineIdentifier, boolean postProcessing) {
         return true;
     }
 

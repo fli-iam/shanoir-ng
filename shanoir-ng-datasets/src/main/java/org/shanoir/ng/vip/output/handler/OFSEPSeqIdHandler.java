@@ -110,15 +110,19 @@ public class OFSEPSeqIdHandler extends OutputHandler {
     private StudyService studyService;
 
 
-    public boolean canProcess(ExecutionMonitoring processing) throws ResultHandlerException {
-        return canProcess(processing.getPipelineIdentifier());
+    public boolean canProcess(ExecutionMonitoring processing, boolean postProcessing) throws ResultHandlerException {
+        return canProcess(processing.getPipelineIdentifier(), postProcessing);
     }
 
-    public boolean canProcess(String pipelineIdentifier) throws ResultHandlerException {
+    public boolean canProcess(String pipelineIdentifier, boolean postProcessing) throws ResultHandlerException {
         if(Objects.isNull(pipelineIdentifier)){
             throw new ResultHandlerException("Pipeline identifier can not be null", null);
         }
-        return pipelineIdentifier.startsWith("ofsep_sequences_identification");
+        if(postProcessing){
+            return pipelineIdentifier.startsWith("SIMS") && pipelineIdentifier.endsWith("post_processing");
+        } else {
+            return pipelineIdentifier.startsWith("SIMS") && !pipelineIdentifier.endsWith("post_processing");
+        }
     }
 
     public void manageTarGzResult(List<File> resultFiles, File parentFolder, ExecutionMonitoring processing) {
