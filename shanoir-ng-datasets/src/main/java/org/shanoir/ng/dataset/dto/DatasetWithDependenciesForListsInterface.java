@@ -14,17 +14,23 @@
 
 package org.shanoir.ng.dataset.dto;
 
+import java.util.List;
+
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
-import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
+import org.shanoir.ng.processing.dto.DatasetProcessingForListsDTO;
 
 
-public interface DatasetWithDependenciesDTOInterface {
+public interface DatasetWithDependenciesForListsInterface {
 
-	DatasetProcessingDTO getDatasetProcessing();
+    public List<DatasetProcessingForListsDTO> getProcessings();
+	
+    public void setProcessings(List<DatasetProcessingForListsDTO> processings);
 
-	void setDatasetProcessing(DatasetProcessingDTO datasetProcessing);
+    public DatasetAcquisitionDTO getDatasetAcquisition();
 
-	DatasetAcquisitionDTO getDatasetAcquisition();
+    public void setDatasetAcquisition(DatasetAcquisitionDTO datasetAcquisition);
 
-	void setDatasetAcquisition(DatasetAcquisitionDTO datasetAcquisition);
+    public DatasetProcessingForListsDTO getDatasetProcessing();
+
+    public void setDatasetProcessing(DatasetProcessingForListsDTO datasetProcessing);
 }

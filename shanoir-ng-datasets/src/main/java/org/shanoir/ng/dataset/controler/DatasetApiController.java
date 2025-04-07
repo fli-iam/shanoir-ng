@@ -16,10 +16,12 @@
 package org.shanoir.ng.dataset.controler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTOInterface;
@@ -85,6 +87,9 @@ import java.nio.file.attribute.FileTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import org.shanoir.ng.dataset.dto.DatasetWithDependenciesForListsDTO;
+import org.shanoir.ng.dataset.dto.DatasetWithDependenciesForListsInterface;
 
 
 @Controller
@@ -248,21 +253,21 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<List<DatasetWithDependenciesDTOInterface>> findDatasetsByIds(
+	public ResponseEntity<List<DatasetWithDependenciesForListsInterface>> findDatasetsByIds(
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds) {
 		List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
 		if (datasets.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 
-		List<DatasetWithDependenciesDTOInterface> dtos = new ArrayList<>();
-		for(Dataset dataset : datasets){
+		List<DatasetWithDependenciesForListsInterface> dtos = new ArrayList<>();
+		for(Dataset dataset : datasets) {
 			if (dataset instanceof MrDataset) {
-				dtos.add(mrDatasetMapper.datasetToDatasetAndProcessingsDTO((MrDataset) dataset));
+				dtos.add(mrDatasetMapper.datasetToDatasetWithDependenciesForListsDTO((MrDataset) dataset));
 			} else if (dataset instanceof EegDataset) {
-				dtos.add(eegDatasetMapper.datasetToDatasetAndProcessingsDTO((EegDataset) dataset));
+				dtos.add(eegDatasetMapper.datasetToDatasetWithDependenciesForListsDTO((EegDataset) dataset));
 			} else {
-				dtos.add(datasetMapper.datasetToDatasetWithParentsAndProcessingsDTO(dataset));
+				dtos.add(datasetMapper.datasetToDatasetWithDependenciesForListsDTO(dataset));
 			}
 		}
 

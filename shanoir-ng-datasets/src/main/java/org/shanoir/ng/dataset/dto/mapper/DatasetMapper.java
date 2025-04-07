@@ -27,6 +27,8 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.shanoir.ng.dataset.dto.DatasetWithDependenciesForListsDTO;
+
 /**
  * Mapper for datasets.
  * 
@@ -67,6 +69,8 @@ public interface DatasetMapper {
 	@Mapping(target = "copies", expression = "java(mapCopiesFromDataset(dataset.getCopies()))")
 	@Mapping(target = "source", expression = "java(mapSourceFromDataset(dataset.getSource()))")
 	DatasetWithDependenciesDTO datasetToDatasetWithParentsAndProcessingsDTO(Dataset dataset);
+
+	DatasetWithDependenciesForListsDTO datasetToDatasetWithDependenciesForListsDTO(Dataset dataset);
 	
 	/**
 	 * Map a @Dataset list to a @DatasetDTO list.

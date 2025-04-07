@@ -1,9 +1,8 @@
 package org.shanoir.ng.dataset.dto;
 
-import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
-
-import javax.xml.crypto.Data;
 import java.util.List;
+
+import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 
 public class DatasetWithProcessingsDTO extends DatasetDTO implements DatasetWithProcessingsDTOInterface {
 

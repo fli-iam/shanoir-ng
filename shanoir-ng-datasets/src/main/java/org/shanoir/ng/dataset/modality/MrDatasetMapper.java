@@ -19,9 +19,11 @@ import java.util.stream.Collectors;
 
 import org.mapstruct.*;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
+import org.shanoir.ng.dataset.dto.DatasetWithDependenciesForListsDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMetadataMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
+import org.shanoir.ng.processing.dto.mapper.DatasetProcessingMapper;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.data.domain.Page;
@@ -32,7 +34,7 @@ import org.springframework.data.domain.Page;
  * @author msimon
  *
  */
-@Mapper(componentModel = "spring", uses = { DatasetMetadataMapper.class, DatasetAcquisitionMapper.class })
+@Mapper(componentModel = "spring", uses = { DatasetMetadataMapper.class, DatasetAcquisitionMapper.class, DatasetProcessingMapper.class })
 @DecoratedWith(MrDatasetDecorator.class)
 public interface MrDatasetMapper {
 
@@ -56,7 +58,7 @@ public interface MrDatasetMapper {
 	@Named(value = "standard")
 	@Mappings({ @Mapping(target = "source", ignore = true), @Mapping(target = "copies", ignore = true) })
 	MrDatasetDTO datasetToDatasetDTO(MrDataset dataset);
-	
+
 	/**
 	 * Map a @Dataset to a @DatasetDTO.
 	 * 
@@ -68,7 +70,10 @@ public interface MrDatasetMapper {
 	@Mapping(target = "copies", expression = "java(mapCopiesFromDataset(dataset.getCopies()))")
 	@Mapping(target = "source", expression = "java(mapSourceFromDataset(dataset.getSource()))")
 	MrDatasetWithDependenciesDTO datasetToDatasetAndProcessingsDTO(MrDataset dataset);
-	
+
+
+	MrDatasetWithDependenciesForListsDTO datasetToDatasetWithDependenciesForListsDTO(MrDataset dataset);
+
 	/**
 	 * Map a @Dataset to a @DatasetDTO.
 	 * 
