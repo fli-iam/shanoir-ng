@@ -115,13 +115,9 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 			}
 		}
 
-		try {
-			mrDatasetAcquisition.setAcquisitionStartTime(LocalDateTime.of(DateTimeUtils.pacsStringToLocalDate(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate)), 
-				DateTimeUtils.stringToLocalTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime))));
-		} catch (DateTimeParseException e) {
-			LOG.warn("could not parse the acquisition date : " + dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate));
-			mrDatasetAcquisition.setAcquisitionStartTime(null);
-		}
+		LocalDateTime acquisitionStartTime = GenericDatasetAcquisitionStrategy.setAcquisitionStartTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate), 
+				dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime));
+		mrDatasetAcquisition.setAcquisitionStartTime(acquisitionStartTime);
 
 		// Can be overridden by study cards
 		String imageType = dicomAttributes.getFirstDatasetAttributes().getString(Tag.ImageType, 2);		
