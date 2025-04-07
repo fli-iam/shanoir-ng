@@ -147,6 +147,7 @@ public class ShanoirEventsService {
 	 */
 	@Scheduled(fixedDelay = 30000)
 	private void keepConnectionAlive() {
+		long start = System.currentTimeMillis();
 		List<UserSseEmitter> emitters = AsyncTaskApiController.emitters;
 		for (UserSseEmitter userSseEmitter : emitters) {
 			try {
@@ -156,7 +157,10 @@ public class ShanoirEventsService {
 				emitters.remove(userSseEmitter);
 			}
 		}
-		LOG.info("Keep-Alive-SSE: {} userIds: {}", emitters.size(), emitters.toString());
+		long end = System.currentTimeMillis();
+    	long duration = end - start;
+		LOG.info("Keep-Alive-SSE: {} userIds in {} ms: {}",
+			emitters.size(), duration, emitters.toString());
 	}
 
 	public ShanoirEvent findById(Long taskId) {
