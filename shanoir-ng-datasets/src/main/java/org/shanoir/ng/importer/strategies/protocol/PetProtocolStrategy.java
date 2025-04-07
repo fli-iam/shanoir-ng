@@ -35,7 +35,7 @@ public class PetProtocolStrategy {
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(PetProtocolStrategy.class);
 	
-	public PetProtocol generateProtocolForSerie(AcquisitionAttributes acquisitionAttributes, Serie serie) {		
+	public PetProtocol generateProtocolForSerie(AcquisitionAttributes acquisitionAttributes, Serie serie) throws IOException {		
 		PetProtocol petProtocol = new PetProtocol();  
 		Attributes attributes = acquisitionAttributes.getFirstDatasetAttributes();
 		
@@ -60,7 +60,7 @@ public class PetProtocolStrategy {
 		numberOfSlices = (numberOfSlices != -1) ? numberOfSlices : null;
 		LOG.debug("extractMetadata : numberOfSlices=" + numberOfSlices);
 		if (numberOfSlices == null) {
-			numberOfSlices = DicomProcessing.countUniqueInstances(acquisitionAttributes);
+			numberOfSlices = DicomProcessing.countUniqueInstances(serie, false);
 			LOG.debug("count nb of slices within the serie : numberOfSlices=" + numberOfSlices);
 		}
 		petProtocol.setNumberOfSlices(numberOfSlices);

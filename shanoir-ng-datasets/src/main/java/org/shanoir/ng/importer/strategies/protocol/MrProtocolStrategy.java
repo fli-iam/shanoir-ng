@@ -50,7 +50,7 @@ public class MrProtocolStrategy {
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(MrProtocolStrategy.class);
 
-	public MrProtocol generateProtocolForSerie(AcquisitionAttributes<String> acquisitionAttributes, Serie serie) {
+	public MrProtocol generateProtocolForSerie(AcquisitionAttributes<String> acquisitionAttributes, Serie serie) throws IOException {
 
 		Attributes attributes = acquisitionAttributes.getFirstDatasetAttributes();
 		// dcm4che3 does not support MultiframeExtraction for MRS
@@ -124,7 +124,7 @@ public class MrProtocolStrategy {
 		mrProtocol.setSliceThickness(sliceThickness);
 
 		/** Number of Slices */
-		Integer numberOfSlices = DicomProcessing.countUniqueInstances(acquisitionAttributes);
+		Integer numberOfSlices = DicomProcessing.countUniqueInstances(serie, false);
 		LOG.debug("count nb of slices within the serie : numberOfSlices=" + numberOfSlices);
 		mrProtocol.setNumberOfSlices(numberOfSlices);
 

@@ -1,7 +1,6 @@
 package org.shanoir.ng.importer.strategies.datasetacquisition;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,18 +48,5 @@ public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStra
 		datasetAcquisition.setDatasets(genericizedList);		
 		return datasetAcquisition;
 	}
-
-	public static LocalDateTime setAcquisitionStartTime(String acqDate, String acqTime) {
-		if (acqDate != null && acqTime != null) {
-			try {
-				return LocalDateTime.of(DateTimeUtils.pacsStringToLocalDate(acqDate), DateTimeUtils.stringToLocalTime(acqTime));
-			} catch (DateTimeParseException e) {
-				LOG.warn("could not parse the acquisition date : " + acqDate + " and time : " + acqTime);
-				return null;
-			}
-		} else {
-			LOG.warn("could not find the acquisition date and time in the DICOM attributes");
-			return null;
-		}
-	}
+	
 }

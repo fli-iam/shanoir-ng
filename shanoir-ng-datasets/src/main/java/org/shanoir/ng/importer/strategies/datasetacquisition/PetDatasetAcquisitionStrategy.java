@@ -24,6 +24,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetProtocol;
+import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
 import org.shanoir.ng.importer.dto.ImportJob;
@@ -67,7 +68,7 @@ public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy
 
 		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
 		datasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
-		LocalDateTime acquisitionStartTime = GenericDatasetAcquisitionStrategy.setAcquisitionStartTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate), 
+		LocalDateTime acquisitionStartTime = DicomProcessing.parseAcquisitionStartTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate), 
 				dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime));
 		datasetAcquisition.setAcquisitionStartTime(acquisitionStartTime);
 		PetProtocol protocol = protocolStrategy.generateProtocolForSerie(dicomAttributes, serie);

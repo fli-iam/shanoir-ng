@@ -31,7 +31,7 @@ public class CtProtocolStrategy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CtProtocolStrategy.class);
 
-	public CtProtocol generateProtocolForSerie(AcquisitionAttributes<String> acquisitionAttributes, Serie serie) {		
+	public CtProtocol generateProtocolForSerie(AcquisitionAttributes<String> acquisitionAttributes, Serie serie) throws IOException {		
 		CtProtocol protocol = new CtProtocol();
 		Attributes attributes = acquisitionAttributes.getFirstDatasetAttributes();
 
@@ -42,7 +42,7 @@ public class CtProtocolStrategy {
 		protocol.setSliceThickness(sliceThickness);
 
 		/** Number of Slices */
-		Integer numberOfSlices = DicomProcessing.countUniqueInstances(acquisitionAttributes);
+		Integer numberOfSlices = DicomProcessing.countUniqueInstances(serie, false);
 		LOG.debug("count nb of slices within the serie : numberOfSlices=" + numberOfSlices);
 		protocol.setNumberOfSlices(numberOfSlices);
 

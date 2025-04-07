@@ -31,7 +31,7 @@ public class XaProtocolStrategy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(XaProtocolStrategy.class);
 
-	public XaProtocol generateProtocolForSerie(AcquisitionAttributes<String> acquisitionAttributes, Serie serie) {		
+	public XaProtocol generateProtocolForSerie(AcquisitionAttributes<String> acquisitionAttributes, Serie serie) throws IOException {		
 		XaProtocol protocol = new XaProtocol();
 		Attributes attributes = acquisitionAttributes.getFirstDatasetAttributes();
 
@@ -42,7 +42,7 @@ public class XaProtocolStrategy {
 		protocol.setSliceThickness(sliceThickness);
 
 		/** Number of Slices */
-		Integer numberOfSlices = DicomProcessing.countUniqueInstances(acquisitionAttributes);
+		Integer numberOfSlices = DicomProcessing.countUniqueInstances(serie, false);
 		LOG.debug("count nb of slices within the serie : numberOfSlices=" + numberOfSlices);
 		protocol.setNumberOfSlices(numberOfSlices);
 		
