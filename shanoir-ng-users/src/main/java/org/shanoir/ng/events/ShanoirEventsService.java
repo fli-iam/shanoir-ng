@@ -122,21 +122,17 @@ public class ShanoirEventsService {
 	 */
 	public void sendSseEventsToUI(ShanoirEvent notification) {
 		List<UserSseEmitter> emitters = AsyncTaskApiController.emitters;
-		synchronized (emitters) {
-			Iterator<UserSseEmitter> iterator = emitters.iterator();
-			while (iterator.hasNext()) {
-				UserSseEmitter userSseEmitter = iterator.next();
-				// ! IMPORTANT filter on user id
-				if (notification.getUserId() != null && notification.getUserId().equals(userSseEmitter.getUserId())) {
-					if (notification.getLastUpdate() == null) {
-						notification.setLastUpdate(new Date());
-					}
-					try {
-						userSseEmitter.send(notification, MediaType.APPLICATION_JSON);
-					} catch (Exception e) {
-						LOG.error("sendSseEventsToUI: error while sending data for user {}", userSseEmitter.getUserId());
-						iterator.remove();
-					}
+		for (UserSseEmitter userSseEmitter : emitters) {
+			// ! IMPORTANT filter on user id
+			if (notification.getUserId() != null && notification.getUserId().equals(userSseEmitter.getUserId())) {
+				if (notification.getLastUpdate() == null) {
+					notification.setLastUpdate(new Date());
+				}
+				try {
+					userSseEmitter.send(notification, MediaType.APPLICATION_JSON);
+				} catch (Exception e) {
+					LOG.error("sendSseEventsToUI: error while sending data for user {}", userSseEmitter.getUserId());
+					emitters.remove(userSseEmitter);
 				}
 			}
 		}
@@ -146,21 +142,18 @@ public class ShanoirEventsService {
 	 * Attention: while the keep alive loop is running all 30 seconds and
 	 * sends an empty message to each browser-tab, a new user can log in and
 	 * manipulate the emitters list, that is why we need to be careful with
-	 * the thread-safety.
+	 * the thread-safety. CopyOnWriteArrayList allows to safely iterate, while
+	 * the below ArrayList is manipulated.
 	 */
 	@Scheduled(fixedDelay = 30000)
 	private void keepConnectionAlive() {
 		List<UserSseEmitter> emitters = AsyncTaskApiController.emitters;
-		synchronized (emitters) {
-			Iterator<UserSseEmitter> iterator = emitters.iterator();
-			while (iterator.hasNext()) {
-				UserSseEmitter userSseEmitter = iterator.next();
-				try {
-					userSseEmitter.send("{}", MediaType.APPLICATION_JSON);
-				} catch (Exception e) {
-					LOG.error("Keep-Alive-SSE: error while sending data for user {}", userSseEmitter.getUserId());
-					iterator.remove();
-				}
+		for (UserSseEmitter userSseEmitter : emitters) {
+			try {
+				userSseEmitter.send("{}", MediaType.APPLICATION_JSON);
+			} catch (Exception e) {
+				LOG.error("Keep-Alive-SSE: error while sending data for user {}", userSseEmitter.getUserId());
+				emitters.remove(userSseEmitter);
 			}
 		}
 		LOG.info("Keep-Alive-SSE: {} userIds: {}", emitters.size(), emitters.toString());

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.shanoir.ng.events.ShanoirEvent;
 import org.shanoir.ng.events.ShanoirEventLight;
@@ -34,7 +35,7 @@ public class AsyncTaskApiController implements AsyncTaskApi {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AsyncTaskApiController.class);
 
-	public static final List<UserSseEmitter> emitters = new ArrayList<UserSseEmitter>();
+	public static final List<UserSseEmitter> emitters = new CopyOnWriteArrayList<UserSseEmitter>();
 
 	@Autowired
 	ShanoirEventsService eventsService;
@@ -81,12 +82,7 @@ public class AsyncTaskApiController implements AsyncTaskApi {
 	@Override
 	public ResponseEntity<SseEmitter> updateTasks() throws IOException {
 		UserSseEmitter emitter = new UserSseEmitter(KeycloakUtil.getTokenUserId());
-		// multi-threaded: new users can open tabs or connect with a new tab,
-		// as Collections.synchronizedList() does not protect the iteration,
-		// we require usage of synchronized() here, see keepConnectionAlive
-		synchronized(emitters) {
-			emitters.add(emitter);
-		}
+		emitters.add(emitter);
 		LOG.info("UserSseEmitter added for user " + KeycloakUtil.getTokenUserName());
 		return new ResponseEntity<>(emitter, HttpStatus.OK);
 	}
