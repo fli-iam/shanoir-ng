@@ -16,7 +16,9 @@ package org.shanoir.ng.dataset.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.transaction.Transactional;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
@@ -66,6 +68,8 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import org.shanoir.ng.dataset.dto.DatasetLight;
 
 /**
  * Dataset service implementation.
@@ -216,6 +220,11 @@ public class DatasetServiceImpl implements DatasetService {
 	@Override
 	public List<Dataset> findByIdIn(List<Long> ids) {
 		return Utils.toList(repository.findAllById(ids));
+	}
+
+	@Override
+	public List<DatasetLight> findLightByIdIn(List<Long> ids) {
+		return Utils.toList(repository.findAllLightById(ids));
 	}
 
 	@Override
