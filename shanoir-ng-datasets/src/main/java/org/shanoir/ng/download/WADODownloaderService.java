@@ -55,8 +55,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.json.Json;
@@ -371,38 +373,53 @@ public class WADODownloaderService {
 
 	private String downloadMetadataFromPACS(final String url) throws IOException {
 		LOG.info("Download metadata from pacs, url : " + url);
-		
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_DICOM_JSON);
-		WebClient webClient = WebClient.builder().build();
+		ExchangeStrategies strategies = ExchangeStrategies.builder()
+			.codecs(configurer -> configurer
+				.defaultCodecs()
+				.maxInMemorySize(50 * 1024 * 1024) // 10 Mo
+			)
+			.build();
+		WebClient webClient = WebClient.builder()
+			.exchangeStrategies(strategies)
+			.build();
 		
-		String result = webClient.get()
-			.uri(url)
-			.headers(h -> h.addAll(headers))
-			.retrieve()
-			.onStatus(status -> status.is4xxClientError(), response -> 
-				response.bodyToMono(String.class)
-						.map(body -> new IOException("PACS metadata get did not work (4xx) : " + body))
-			)
-			.onStatus(status -> status.is5xxServerError(), response -> 
-				response.bodyToMono(String.class)
-						.map(body -> new IOException("PACS metadata get did not work (5xx) : " + body))
-			)
-			.bodyToMono(String.class)
-			.timeout(Duration.ofSeconds(20))
-			.onErrorResume(throwable -> {
-				if (throwable instanceof TimeoutException) {
-					return Mono.error(new IOException("Timeout !"));
-				} else if (throwable instanceof WebClientRequestException) {
-					return Mono.error(new IOException("Network error", throwable));
-				} else {
-					return Mono.error(new IOException("Unknown error", throwable));
-				}
-			})
-			.block();
-		return result;
+		try {
+			String result = webClient.get()
+				.uri(url)
+				.headers(h -> h.addAll(headers))
+				.retrieve()
+				.onStatus(status -> status.is4xxClientError(), response -> 
+					response.bodyToMono(String.class)
+							.flatMap(body -> Mono.error(new IOException("PACS metadata get did not work (4xx) : " + body)))
+				)
+				.onStatus(status -> status.is5xxServerError(), response -> 
+					response.bodyToMono(String.class)
+							.flatMap(body -> Mono.error(new IOException("PACS metadata get did not work (5xx) : " + body)))
+				)
+				.bodyToMono(String.class)
+				.timeout(Duration.ofSeconds(20))
+				.onErrorMap(throwable -> {
+					if (throwable instanceof TimeoutException) {
+						return new IOException("Timeout !");
+					} else if (throwable instanceof WebClientRequestException) {
+						return new IOException("Network error", throwable);
+					} else if (throwable instanceof WebClientResponseException) {
+						return new IOException("Unexpected HTTP response", throwable);
+					} else {
+						return new IOException("Unknown error", throwable);
+					}
+				})
+				.block();
+			return result;
+		} catch (Exception e) {
+			if (e.getCause() instanceof IOException) throw (IOException)e.getCause();
+			else throw e;
+		}
 	}
-
+	
 	/**
 	 * This method reads in a file in format MHTML, one representation of a multipart/related response, that is given from
 	 * a PACS server, that supports WADO-RS requests.
