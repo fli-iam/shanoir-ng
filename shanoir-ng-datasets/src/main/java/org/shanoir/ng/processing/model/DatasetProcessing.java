@@ -48,7 +48,7 @@ public class DatasetProcessing extends AbstractEntity {
 	private Integer datasetProcessingType;
 
 	/** Input datasets. */
-	@ManyToMany
+	@ManyToMany()
 	@JoinTable(name = "INPUT_OF_DATASET_PROCESSING", joinColumns = @JoinColumn(name = "PROCESSING_ID"), inverseJoinColumns = @JoinColumn(name = "DATASET_ID"))
 	private List<Dataset> inputDatasets;
 

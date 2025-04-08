@@ -122,6 +122,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 		
 		List<Examination> childExam = examinationRepository.findBySourceId(id);
 		if (!CollectionUtils.isEmpty(childExam)) {
+			LOG.error("Can't delete examination with id " + id + " because it has been copied.");
 			throw new RestServiceException(
 					new ErrorModel(
 							HttpStatus.UNPROCESSABLE_ENTITY.value(),
@@ -181,6 +182,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 			event.setProgress(-1f);
 			eventService.publishEvent(event);
 			LOG.error("Error during deletion of examination with id : " + examinationId);
+			LOG.error("Exception e : " , e);
 		}
 	}
 
