@@ -8,7 +8,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -22,11 +21,11 @@ import javax.swing.UIManager;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
+import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.UploadState;
+import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.action.DeleteDirectory;
 import org.shanoir.uploader.gui.CurrentUploadsWindowTable;
-import org.shanoir.uploader.upload.UploadJob;
-import org.shanoir.uploader.upload.UploadJobManager;
-import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +37,7 @@ public class CurrentNominativeDataController {
 
 	private CurrentNominativeDataModel currentNominativeDataModel = null;
 
-	private NominativeDataUploadJobManager nominativeDataUploadJobManager;
-
-	private UploadJobManager uploadJobManager;
+	private NominativeDataImportJobManager importJobManager;
 
 	private CurrentUploadsWindowTable cuw;
 
@@ -105,11 +102,11 @@ public class CurrentNominativeDataController {
 				} else if (col == cuw.importColumn && row != -1) {
 					String uploadState = (String) cuw.table.getModel().getValueAt(row, cuw.uploadStateColumn);
 					if (uploadState.equals(cuw.readyUploadState) || uploadState.equals(cuw.errorUploadState)) {
-						String uploadJobFilePath = (String) cuw.table.getModel().getValueAt(row, 0) + File.separator + UploadJobManager.UPLOAD_JOB_XML;
-						File uploadJobFile = new File(uploadJobFilePath);
-						uploadJobManager = new UploadJobManager(uploadJobFile);
-						UploadJob uploadJob = uploadJobManager.readUploadJob();
-						cuw.frame.getImportDialogOpener().openImportDialog(uploadJob, uploadJobFile.getParentFile());
+						String importJobFilePath = (String) cuw.table.getModel().getValueAt(row, 0) + File.separator + ShUpConfig.IMPORT_JOB_JSON;
+						File importJobFile = new File(importJobFilePath);
+						importJobManager = new NominativeDataImportJobManager(importJobFile); // Or uploadJobManager ? or dedicated importJobManager
+						ImportJob importJob = importJobManager.readImportJob();
+						cuw.frame.getImportDialogOpener().openImportDialog(importJob, importJobFile.getParentFile());
 					}
 				}
 			}
@@ -184,43 +181,41 @@ public class CurrentNominativeDataController {
 	private void processWorkFolder(File workFolder) {
 		List<File> folders = Util.listFolders(workFolder);
 		logger.info("Found " + folders.size() + " folders in workFolder.");
-		Map<String, NominativeDataUploadJob> currentUploads = new LinkedHashMap<String, NominativeDataUploadJob>();
+		Map<String, ImportJob> currentUploads = new LinkedHashMap<String, ImportJob>();
 		for (File f : folders) {
-			NominativeDataUploadJob nominativeDataUploadJob = processFolder(f);
-			if (nominativeDataUploadJob != null)
-				currentUploads.put(f.getAbsolutePath(), nominativeDataUploadJob);
+			ImportJob nominativeDataImportJob = processFolder(f);
+			if (nominativeDataImportJob != null)
+				currentUploads.put(f.getAbsolutePath(), nominativeDataImportJob);
 		}
 		currentNominativeDataModel.setCurrentUploads(currentUploads);
 	}
 
 	/**
-	 * Inspects the content of a folder. Copies the infos from one xml into the other xml, really bad.
+	 * Inspects the content of a folder. Get the upload informations from import-job.json
 	 * 
 	 * @param folder
 	 */
-	private NominativeDataUploadJob processFolder(final File folder) {
+	private ImportJob processFolder(final File folder) {
 		logger.info("Started processing folder " + folder.getName());
-		initNominativeDataUploadJobManager(folder); // NOMINATIVE_DATA_JOB_XML
-		initUploadJobManager(folder); // UPLOAD_JOB_XML
-		if (nominativeDataUploadJobManager != null) {
-			final NominativeDataUploadJob nominativeDataUploadJob = nominativeDataUploadJobManager.readUploadDataJob();
-			if (uploadJobManager != null) {
-				final UploadJob uploadJob = uploadJobManager.readUploadJob();
-				final UploadState uploadState = uploadJob.getUploadState();
-				nominativeDataUploadJob.setUploadState(uploadState);
-				String uploadPercentage = nominativeDataUploadJob.getUploadPercentage();
+		// Check if the folder contains an import-job.json file
+		initNominativeDataImportJobManager(folder);
+		if (importJobManager != null) {
+			final ImportJob importJob = importJobManager.readImportJob();
+			if (importJob != null) {
+				final UploadState uploadState = importJob.getUploadState();
+				String uploadPercentage = importJob.getUploadPercentage();
 				if (uploadPercentage == null || uploadPercentage.equals("")) {
 					uploadPercentage = "0 %";
 				}
 				if (uploadState.toString().equals("FINISHED_UPLOAD")) {
-					nominativeDataUploadJob.setUploadPercentage("FINISHED");
+					importJob.setUploadPercentage("FINISHED");
 				} else if (uploadState.toString().equals("START")
 						|| uploadState.toString().equals("START_AUTOIMPORT")) {
-					nominativeDataUploadJob.setUploadPercentage(uploadPercentage);
+							importJob.setUploadPercentage(uploadPercentage);
 				} else {
-					nominativeDataUploadJob.setUploadPercentage((String) uploadState.toString());
+					importJob.setUploadPercentage((String) uploadState.toString());
 				}
-				return nominativeDataUploadJob;
+				return importJob;
 			} else {
 				logger.error("Folder found in workFolder without upload-job.xml.");
 			}
@@ -233,28 +228,18 @@ public class CurrentNominativeDataController {
 	}
 
 	/**
-	 * Initializes an UploadJobManager and puts the other files in the list
+	 * Initializes an ImportJobManager and puts the other files in the list
 	 * dicomFiles.
 	 * 
 	 * @param folder
 	 * @param dicomFiles
 	 */
-	private void initNominativeDataUploadJobManager(final File folder) {
+	private void initNominativeDataImportJobManager(final File folder) {
 		final Collection<File> files = Util.listFiles(folder, null, false);
 		for (Iterator filesIt = files.iterator(); filesIt.hasNext();) {
 			final File file = (File) filesIt.next();
-			if (file.getName().equals(NominativeDataUploadJobManager.NOMINATIVE_DATA_JOB_XML)) {
-				nominativeDataUploadJobManager = new NominativeDataUploadJobManager(file);
-			}
-		}
-	}
-
-	private void initUploadJobManager(final File folder) {
-		final Collection<File> files = Util.listFiles(folder, null, false);
-		for (Iterator filesIt = files.iterator(); filesIt.hasNext();) {
-			final File file = (File) filesIt.next();
-			if (file.getName().equals(UploadJobManager.UPLOAD_JOB_XML)) {
-				uploadJobManager = new UploadJobManager(file);
+			if (file.getName().equals(ShUpConfig.IMPORT_JOB_JSON)) {
+				importJobManager = new NominativeDataImportJobManager(file);
 			}
 		}
 	}
@@ -266,8 +251,8 @@ public class CurrentNominativeDataController {
 		currentNominativeDataModel.updateUploadPercentage(folder.getAbsolutePath(), uploadPercentage);
 	}
 
-	public void addNewNominativeData(File folder, NominativeDataUploadJob nominativeDataUploadJob) {
-		currentNominativeDataModel.addUpload(folder.getAbsolutePath(), nominativeDataUploadJob);
+	public void addNewNominativeData(File folder, ImportJob nominativeDataImportJob) {
+		currentNominativeDataModel.addUpload(folder.getAbsolutePath(), nominativeDataImportJob);
 	}
 
 	public class Delete_Renderer extends DefaultTableCellRenderer {

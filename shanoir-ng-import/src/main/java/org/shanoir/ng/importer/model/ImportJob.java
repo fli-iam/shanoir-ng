@@ -114,6 +114,12 @@ public class ImportJob implements Serializable {
 
 	private QualityTag qualityTag;
 
+	// Used by ShanoirUploader to store the upload state
+	private UploadState uploadState;
+
+	// Used by ShanoirUploader to store the upload percentage
+	private String uploadPercentage; 
+
 	public long getTimestamp() {
         return timestamp;
     }
@@ -258,50 +264,6 @@ public class ImportJob implements Serializable {
 		this.username = username;
 	}
 
-	@Override
-	public String toString() {
-		String importType;
-		if (fromDicomZip) {
-			importType = "ZIP";
-		} else if (fromShanoirUploader) {
-			importType = "SHUP";
-		} else if (fromPacs) {
-			importType = "PACS";
-		} else {
-			importType = "UNSUPPORTED";
-		}
-		int numberOfSeries = 0;
-		StringBuffer seriesNames = new StringBuffer();
-		seriesNames.append("[");
-		String modality = "unknown";
-		boolean enhanced = false;
-		if (CollectionUtils.isNotEmpty(patients)) {
-			Patient patient = patients.get(0);
-			if (CollectionUtils.isNotEmpty(patient.getStudies())) {
-				Study study = patient.getStudies().get(0);
-				List<Serie> series = study.getSeries();
-				if (CollectionUtils.isNotEmpty(series)) {
-					numberOfSeries = series.size(); // only selected series remain at the stage of the logging call
-					Serie serie = study.getSeries().get(0);
-					modality = serie.getModality();
-					enhanced = serie.getIsEnhanced();
-					for (Iterator iterator = series.iterator(); iterator.hasNext();) {
-						serie = (Serie) iterator.next();
-						if (iterator.hasNext()) {
-							seriesNames.append(serie.getSequenceName() + ",");
-						} else {
-							seriesNames.append(serie.getSequenceName() + "]");
-						}
-					}
-				}
-			}
-		}
-		return 	"userId=" + userId + ",studyName=" + studyName + ",studyCardId=" + studyCardId + ",type=" + importType +
-				",workFolder=" + workFolder + ",pseudoProfile=" + anonymisationProfileToUse + ",modality=" + modality + ",enhanced=" + enhanced +
-				",subjectName=" + subjectName + ",examId=" + examinationId + ",numberOfSeries=" + numberOfSeries +
-				",seriesNames=" + seriesNames.toString();
-	}
-
 	public Long getCenterId() {
 		return centerId;
 	}
@@ -382,5 +344,71 @@ public class ImportJob implements Serializable {
 		this.qualityTag = qualityTag;
 	}
 
-}
+    public UploadState getUploadState() {
+        return uploadState;
+    }
 
+    public void setUploadState(UploadState uploadState) {
+        this.uploadState = uploadState;
+    }
+
+    public String getUploadPercentage() {
+        return uploadPercentage;
+    }
+
+    public void setUploadPercentage(String uploadPercentage) {
+        this.uploadPercentage = uploadPercentage;
+    }
+
+	@Override
+	public String toString() {
+		String importType;
+		if (fromDicomZip) {
+			importType = "ZIP";
+		} else if (fromShanoirUploader) {
+			importType = "SHUP";
+		} else if (fromPacs) {
+			importType = "PACS";
+		} else {
+			importType = "UNSUPPORTED";
+		}
+		int numberOfSeries = 0;
+		StringBuffer seriesNames = new StringBuffer();
+		seriesNames.append("[");
+		String modality = "unknown";
+		boolean enhanced = false;
+		if (CollectionUtils.isNotEmpty(patients)) {
+			Patient patient = patients.get(0);
+			if (CollectionUtils.isNotEmpty(patient.getStudies())) {
+				Study study = patient.getStudies().get(0);
+				List<Serie> series = study.getSeries();
+				if (CollectionUtils.isNotEmpty(series)) {
+					numberOfSeries = series.size(); // only selected series remain at the stage of the logging call
+					Serie serie = study.getSeries().get(0);
+					modality = serie.getModality();
+					enhanced = serie.getIsEnhanced();
+					for (Iterator iterator = series.iterator(); iterator.hasNext();) {
+						serie = (Serie) iterator.next();
+						if (iterator.hasNext()) {
+							seriesNames.append(serie.getSequenceName() + ",");
+						} else {
+							seriesNames.append(serie.getSequenceName() + "]");
+						}
+					}
+				}
+			}
+		}
+		return 	"userId=" + userId + ",studyName=" + studyName + ",studyCardId=" + studyCardId + ",type=" + importType +
+				",workFolder=" + workFolder + ",pseudoProfile=" + anonymisationProfileToUse + ",modality=" + modality + ",enhanced=" + enhanced +
+				",subjectName=" + subjectName + ",examId=" + examinationId + ",numberOfSeries=" + numberOfSeries +
+				",seriesNames=" + seriesNames.toString();
+	}
+
+	public Serie getFirstSelectedSerie() {
+		if (CollectionUtils.isNotEmpty(selectedSeries)) {
+			return selectedSeries.iterator().next();
+		}
+		return null;
+	}	
+
+}

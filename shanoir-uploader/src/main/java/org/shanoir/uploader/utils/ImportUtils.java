@@ -20,16 +20,12 @@ import org.shanoir.ng.importer.dicom.SeriesNumberOrDescriptionSorter;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
-import org.shanoir.ng.importer.model.PseudonymusHashValues;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Subject;
-import org.shanoir.ng.shared.dicom.EquipmentDicom;
-import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.action.ImportFinishRunnable;
 import org.shanoir.uploader.dicom.IDicomServerClient;
-import org.shanoir.uploader.dicom.MRI;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Center;
@@ -45,9 +41,6 @@ import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
-import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
-import org.shanoir.uploader.upload.UploadJob;
-import org.shanoir.uploader.upload.UploadState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,77 +125,6 @@ public class ImportUtils {
 		File uploadFolder = new File(folderName);
 		uploadFolder.mkdirs();
 		return uploadFolder;
-	}
-
-	/**
-	 * Initializes UploadJob object to be written to file system.
-	 * 
-	 * @param selectedSeries
-	 * @param dicomData
-	 * @param uploadJob
-	 */
-	public static void initUploadJob(ImportJob importJob, UploadJob uploadJob) {
-		uploadJob.setUploadState(UploadState.READY);
-		uploadJob.setUploadDate(Util.formatTimePattern(new Date()));
-		/**
-		 * Patient level
-		 */
-		// set hash of subject identifier in any case: pseudonymus mode or not
-		Subject subject = importJob.getSubject();
-		uploadJob.setSubjectIdentifier(subject.getIdentifier());
-		// set all 10 hash values for pseudonymus mode
-		if (ShUpConfig.isModePseudonymus()) {
-			PseudonymusHashValues pseudonymusHashValues = subject.getPseudonymusHashValues();
-			uploadJob.setBirthNameHash1(pseudonymusHashValues.getBirthNameHash1());
-			uploadJob.setBirthNameHash2(pseudonymusHashValues.getBirthNameHash2());
-			uploadJob.setBirthNameHash3(pseudonymusHashValues.getBirthNameHash3());
-			uploadJob.setLastNameHash1(pseudonymusHashValues.getLastNameHash1());
-			uploadJob.setLastNameHash2(pseudonymusHashValues.getLastNameHash2());
-			uploadJob.setLastNameHash3(pseudonymusHashValues.getLastNameHash3());
-			uploadJob.setFirstNameHash1(pseudonymusHashValues.getFirstNameHash1());
-			uploadJob.setFirstNameHash2(pseudonymusHashValues.getFirstNameHash2());
-			uploadJob.setFirstNameHash3(pseudonymusHashValues.getFirstNameHash3());
-			uploadJob.setBirthDateHash(pseudonymusHashValues.getBirthDateHash());
-		}
-		LocalDate birthDate = subject.getBirthDate();
-		uploadJob.setPatientBirthDate(Util.convertLocalDateToString(birthDate));
-		uploadJob.setPatientSex(subject.getSex());
-
-		/**
-		 * Study level
-		 */
-		org.shanoir.ng.importer.model.Study study = importJob.getStudy();
-		uploadJob.setStudyInstanceUID(study.getStudyInstanceUID());
-		String studyDateStr = Util.convertLocalDateToString(study.getStudyDate());
-		uploadJob.setStudyDate(studyDateStr);
-		uploadJob.setStudyDescription(study.getStudyDescription());
-
-		/**
-		 * @todo: only write importJob json to disk to read it afterwards and avoid senseless conversions
-		 * keep xml for the moment for the GUI only
-		 */
-
-		/**
-		 * Serie level
-		 */
-		List<Serie> selectedSeries = new ArrayList<>(importJob.getSelectedSeries());
-		Serie firstSerie = selectedSeries.iterator().next();
-		MRI mriInformation = new MRI();
-		InstitutionDicom institutionDicom = firstSerie.getInstitution();
-		if(institutionDicom != null) {
-			mriInformation.setInstitutionName(institutionDicom.getInstitutionName());
-			mriInformation.setInstitutionAddress(institutionDicom.getInstitutionAddress());
-		}
-		EquipmentDicom equipmentDicom = firstSerie.getEquipment();
-		if(equipmentDicom != null) {
-			mriInformation.setManufacturer(equipmentDicom.getManufacturer());
-			mriInformation.setManufacturersModelName(equipmentDicom.getManufacturerModelName());
-			mriInformation.setDeviceSerialNumber(equipmentDicom.getDeviceSerialNumber());
-			mriInformation.setStationName(equipmentDicom.getStationName());
-			mriInformation.setMagneticFieldStrength(equipmentDicom.getMagneticFieldStrength());
-		}
-		uploadJob.setMriInformation(mriInformation);
-		logger.info(mriInformation.toString());
 	}
 
 	public static ImportJob readImportJob(File uploadFolder) throws StreamReadException, DatabindException, IOException {
@@ -318,25 +240,6 @@ public class ImportUtils {
 		patient.setStudies(studiesImportJob);
 		importJob.setPatients(patients);
 		return importJob;
-	}
-
-	/**
-	 * Initializes UploadStatusServiceJob object
-	 * 
-	 */
-	public static void initDataUploadJob(final ImportJob importjob, final UploadJob uploadJob, NominativeDataUploadJob dataUploadJob) {
-		Patient patient = importjob.getPatient();
-		Subject subject = importjob.getSubject();
-		org.shanoir.ng.importer.model.Study study = importjob.getStudy();
-		dataUploadJob.setPatientName(patient.getPatientFirstName() + " " + patient.getPatientLastName());
-		dataUploadJob.setPatientPseudonymusHash(subject.getIdentifier());
-		String studyDateStr = Util.convertLocalDateToString(study.getStudyDate()); 
-		dataUploadJob.setStudyDate(studyDateStr);
-		dataUploadJob.setIPP(patient.getPatientID());
-		dataUploadJob.setMriSerialNumber(uploadJob.getMriInformation().getManufacturer()
-				+ "(" + uploadJob.getMriInformation().getDeviceSerialNumber() + ")");
-		dataUploadJob.setUploadPercentage("");
-		dataUploadJob.setUploadState(UploadState.READY);
 	}
 
 	/**

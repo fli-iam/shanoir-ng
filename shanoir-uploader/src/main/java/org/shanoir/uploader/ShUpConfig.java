@@ -76,6 +76,10 @@ public class ShUpConfig {
 
 	public static final String PASSWORD = "password";
 
+	public static final String IMPORT_JOB_JSON = "import-job.json";
+
+	public static final String ANONYMIZATION_PROFILE = "anonymization.profile";
+
 	/**
 	 * Static variables
 	 */
