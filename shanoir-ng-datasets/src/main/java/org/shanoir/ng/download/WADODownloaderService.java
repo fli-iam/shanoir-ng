@@ -19,9 +19,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
-import java.lang.management.ManagementFactory;
 import java.net.URL;
 import java.nio.file.Files;
+import java.time.Duration;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -54,6 +55,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.json.Json;
@@ -62,6 +65,7 @@ import jakarta.mail.BodyPart;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMultipart;
 import jakarta.mail.util.ByteArrayDataSource;
+import reactor.core.publisher.Mono;
 
 /**
  * This class is used to download files on using WADO URLs:
@@ -366,17 +370,37 @@ public class WADODownloaderService {
 	}
 
 	private String downloadMetadataFromPACS(final String url) throws IOException {
+		LOG.info("Download metadata from pacs, url : " + url);
+		
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_DICOM_JSON);
-		HttpEntity<String> entity = new HttpEntity<>(headers);
-		LOG.info("Download metadata from pacs, url : " + url);
-		ResponseEntity<String> response = restTemplate.exchange(url,
-				HttpMethod.GET, entity,String.class, "1");
-		if (response.getStatusCode() == HttpStatus.OK) {
-			return response.getBody();
-		} else {
-			throw new IOException("Download did not work: wrong status code received.");
-		}
+		WebClient webClient = WebClient.builder().build();
+		
+		String result = webClient.get()
+			.uri(url)
+			.headers(h -> h.addAll(headers))
+			.retrieve()
+			.onStatus(status -> status.is4xxClientError(), response -> 
+				response.bodyToMono(String.class)
+						.map(body -> new IOException("PACS metadata get did not work (4xx) : " + body))
+			)
+			.onStatus(status -> status.is5xxServerError(), response -> 
+				response.bodyToMono(String.class)
+						.map(body -> new IOException("PACS metadata get did not work (5xx) : " + body))
+			)
+			.bodyToMono(String.class)
+			.timeout(Duration.ofSeconds(20))
+			.onErrorResume(throwable -> {
+				if (throwable instanceof TimeoutException) {
+					return Mono.error(new IOException("Timeout !"));
+				} else if (throwable instanceof WebClientRequestException) {
+					return Mono.error(new IOException("Network error", throwable));
+				} else {
+					return Mono.error(new IOException("Unknown error", throwable));
+				}
+			})
+			.block();
+		return result;
 	}
 
 	/**
