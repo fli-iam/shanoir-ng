@@ -15,17 +15,27 @@
 
 package org.shanoir.ng.dataset.controler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.mail.MessagingException;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.solr.client.solrj.SolrServerException;
-import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
+import org.shanoir.ng.dataset.dto.DatasetLight;
+import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTOInterface;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetMapper;
@@ -75,21 +85,12 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileTime;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.shanoir.ng.dataset.dto.DatasetWithDependenciesForListsDTO;
-import org.shanoir.ng.dataset.dto.DatasetWithDependenciesForListsInterface;
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 
 
 @Controller
@@ -253,25 +254,13 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<List<DatasetWithDependenciesForListsInterface>> findDatasetsByIds(
+	public ResponseEntity<List<DatasetLight>> findDatasetsByIds(
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds) {
-		List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
+		List<DatasetLight> datasets = datasetService.findLightByIdIn(datasetIds);
 		if (datasets.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-
-		List<DatasetWithDependenciesForListsInterface> dtos = new ArrayList<>();
-		for(Dataset dataset : datasets) {
-			if (dataset instanceof MrDataset) {
-				dtos.add(mrDatasetMapper.datasetToDatasetWithDependenciesForListsDTO((MrDataset) dataset));
-			} else if (dataset instanceof EegDataset) {
-				dtos.add(eegDatasetMapper.datasetToDatasetWithDependenciesForListsDTO((EegDataset) dataset));
-			} else {
-				dtos.add(datasetMapper.datasetToDatasetWithDependenciesForListsDTO(dataset));
-			}
-		}
-
-		return new ResponseEntity<>(dtos, HttpStatus.OK);
+		return new ResponseEntity<>(datasets, HttpStatus.OK);
 	}
 
   @Override
