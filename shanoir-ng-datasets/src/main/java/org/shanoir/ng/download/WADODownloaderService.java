@@ -285,7 +285,7 @@ public class WADODownloaderService {
 		if (url != null) {
 			String urlStr = url.toString();
 			if (urlStr.contains(WADO_REQUEST_STUDY_WADO_URI)) urlStr = wadoURLHandler.convertWADO_URI_TO_WADO_RS(urlStr);
-			urlStr = urlStr.split(CONTENT_TYPE)[0].concat("/metadata/");
+			urlStr = urlStr.split(CONTENT_TYPE)[0].concat("/metadata?excludeprivate=false");
 			return downloadMetadataFromPACS(urlStr);
 		} else {
 			return null;
@@ -297,6 +297,7 @@ public class WADODownloaderService {
 			URL firstUrl = DatasetFileUtils.getDatasetFirstFilePathURLs(dataset, DatasetExpressionFormat.DICOM);
 			if (firstUrl != null) {
 				String jsonMetadataStr = downloadDicomMetadataForURL(firstUrl);
+				if (jsonMetadataStr == null) return null;
 				Attributes dicomAttributes;
 				try (
 					StringReader strReader = new StringReader(jsonMetadataStr);
@@ -419,7 +420,7 @@ public class WADODownloaderService {
 			else throw e;
 		}
 	}
-	
+
 	/**
 	 * This method reads in a file in format MHTML, one representation of a multipart/related response, that is given from
 	 * a PACS server, that supports WADO-RS requests.
