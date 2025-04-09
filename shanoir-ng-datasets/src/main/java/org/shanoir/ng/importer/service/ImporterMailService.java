@@ -1,7 +1,11 @@
 package org.shanoir.ng.importer.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
+
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
@@ -20,7 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class ImporterMailService {
@@ -74,7 +79,7 @@ public class ImporterMailService {
         EmailDatasetImportFailed generatedMail = new EmailDatasetImportFailed();
         generatedMail.setExaminationId(importJob.getExaminationId().toString());
         generatedMail.setStudyId(importJob.getStudyId().toString());
-        generatedMail.setStudyCardId(importJob.getStudyCardId().toString());
+        generatedMail.setStudyCardId(importJob.getStudyCardId() != null ? importJob.getStudyCardId().toString() : "");
         generatedMail.setSubjectName(importJob.getSubjectName());
         generatedMail.setStudyName(importJob.getStudyName());
         generatedMail.setUserId(userId);
