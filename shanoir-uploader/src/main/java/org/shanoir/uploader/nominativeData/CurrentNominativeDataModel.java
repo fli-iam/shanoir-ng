@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Observable;
 
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.UploadState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,8 +43,8 @@ public class CurrentNominativeDataModel extends Observable {
 
 	public void addUpload(String absolutePath, ImportJob nominativeDataImportJob) {
 		getCurrentUploads().put(absolutePath, nominativeDataImportJob);
-		if (nominativeDataImportJob.getUploadPercentage().equals("FINISHED_UPLOAD")) {
-			nominativeDataImportJob.setUploadPercentage("FINISHED");
+		if (nominativeDataImportJob.getUploadPercentage().equals(UploadState.FINISHED.toString())) { // TODO : delete this
+			nominativeDataImportJob.setUploadPercentage(UploadState.FINISHED.toString());
 		}
 		String[] msg = { "add", absolutePath };
 		setChanged();

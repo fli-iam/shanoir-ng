@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 /**
  * This class manages NominativeDataImportJob.
@@ -62,6 +63,7 @@ public class NominativeDataImportJobManager {
 	public ImportJob readImportJob() {
 		try {
         	ObjectMapper objectMapper = new ObjectMapper();
+			objectMapper.registerModule(new JavaTimeModule());
         	ImportJob importJob = objectMapper.readValue(this.nominativeDataJobFile, ImportJob.class);
         	return importJob;
     	} catch (IOException e) {
@@ -73,6 +75,7 @@ public class NominativeDataImportJobManager {
 	public void writeImportJob(ImportJob importJob) {
 		try {
 			ObjectMapper objectMapper = new ObjectMapper();
+			objectMapper.registerModule(new JavaTimeModule());
 			objectMapper.writerWithDefaultPrettyPrinter().writeValue(this.nominativeDataJobFile, importJob);
 		} catch (IOException e) {
 			logger.error("Error during import-job.json writing: {}", e.getMessage(), e);

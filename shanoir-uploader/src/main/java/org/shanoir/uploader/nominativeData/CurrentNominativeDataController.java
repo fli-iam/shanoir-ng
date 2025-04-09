@@ -7,6 +7,7 @@ import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -26,6 +27,7 @@ import org.shanoir.ng.importer.model.UploadState;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.action.DeleteDirectory;
 import org.shanoir.uploader.gui.CurrentUploadsWindowTable;
+import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +44,7 @@ public class CurrentNominativeDataController {
 	private CurrentUploadsWindowTable cuw;
 
 	@SuppressWarnings("deprecation")
-	public void configure(final File workFolderFilePath, final CurrentUploadsWindowTable cuw) {
+	public void configure(final File workFolderFilePath, final CurrentUploadsWindowTable cuw) throws IOException {
 		this.cuw = cuw;
 		this.currentNominativeDataModel = new CurrentNominativeDataModel();
 		currentNominativeDataModel.addObserver(cuw);
@@ -89,14 +91,22 @@ public class CurrentNominativeDataController {
 											"shanoir.uploader.currentUploads.Action.deleteAll.succeeded.title"),
 									JOptionPane.INFORMATION_MESSAGE);
 						}
-						processWorkFolder(workFolderFilePath);
+						try {
+							processWorkFolder(workFolderFilePath);
+						} catch (IOException e1) {
+							e1.printStackTrace();
+						}
 					}
 				// delete one import: ready (to gain disk space) or finished
 				} else if (col == cuw.deleteColumn && row != -1) {
 					String uploadState = (String) cuw.table.getModel().getValueAt(row, cuw.uploadStateColumn);
 					if (uploadState.equals(cuw.finishedUploadState)
 							|| uploadState.equals(cuw.readyUploadState)) {
-						showDeleteConfirmationDialog(workFolderFilePath, cuw, row);					
+						try {
+							showDeleteConfirmationDialog(workFolderFilePath, cuw, row);
+						} catch (IOException e1) {
+							e1.printStackTrace();
+						}					
 					}
 				// start the import or try reimporting an exam with status "ERROR"
 				} else if (col == cuw.importColumn && row != -1) {
@@ -115,9 +125,10 @@ public class CurrentNominativeDataController {
 			 * @param workFolderFilePath
 			 * @param cuw
 			 * @param row
+			 * @throws IOException 
 			 */
 			private void showDeleteConfirmationDialog(final File workFolderFilePath,
-					final CurrentUploadsWindowTable cuw, int row) {
+					final CurrentUploadsWindowTable cuw, int row) throws IOException {
 				String message = cuw.frame.resourceBundle
 						.getString("shanoir.uploader.currentUploads.Action.delete.confirmation.message")
 						+ (String) cuw.table.getModel().getValueAt(row, cuw.patientNameColumn) + "?";
@@ -177,8 +188,9 @@ public class CurrentNominativeDataController {
 	 * Walk trough all folders within the work folder.
 	 * 
 	 * @param workFolder
+	 * @throws IOException 
 	 */
-	private void processWorkFolder(File workFolder) {
+	private void processWorkFolder(File workFolder) throws IOException {
 		List<File> folders = Util.listFolders(workFolder);
 		logger.info("Found " + folders.size() + " folders in workFolder.");
 		Map<String, ImportJob> currentUploads = new LinkedHashMap<String, ImportJob>();
@@ -195,32 +207,38 @@ public class CurrentNominativeDataController {
 	 * 
 	 * @param folder
 	 */
-	private ImportJob processFolder(final File folder) {
+	private ImportJob processFolder(final File folder) throws IOException {
 		logger.info("Started processing folder " + folder.getName());
 		// Check if the folder contains an import-job.json file
 		initNominativeDataImportJobManager(folder);
 		if (importJobManager != null) {
 			final ImportJob importJob = importJobManager.readImportJob();
 			if (importJob != null) {
+				// In case of previous version importJobs 
+				// (without uploadState) we look for uploadState value from upload-job.xml file
+				if (importJob.getUploadState() == null) {
+					String uploadJobState = ImportUtils.getUploadStateFromUploadJob(folder);
+					importJob.setUploadState(UploadState.fromString(uploadJobState));
+				}
 				final UploadState uploadState = importJob.getUploadState();
 				String uploadPercentage = importJob.getUploadPercentage();
 				if (uploadPercentage == null || uploadPercentage.equals("")) {
 					uploadPercentage = "0 %";
 				}
-				if (uploadState.toString().equals("FINISHED_UPLOAD")) {
-					importJob.setUploadPercentage("FINISHED");
-				} else if (uploadState.toString().equals("START")
-						|| uploadState.toString().equals("START_AUTOIMPORT")) {
-							importJob.setUploadPercentage(uploadPercentage);
+				if (uploadState.toString().equals(UploadState.FINISHED.toString())) {
+					importJob.setUploadPercentage(UploadState.FINISHED.toString());
+				} else if (uploadState.toString().equals(UploadState.START.toString())
+					|| uploadState.toString().equals(UploadState.START_AUTOIMPORT.toString())) {
+						importJob.setUploadPercentage(uploadPercentage);
 				} else {
 					importJob.setUploadPercentage((String) uploadState.toString());
 				}
 				return importJob;
-			} else {
-				logger.error("Folder found in workFolder without upload-job.xml.");
-			}
+			} //else {
+			// 	logger.error("Folder found in workFolder without upload-job.xml.");
+			// }
 		} else {
-			logger.error("Folder found in workFolder without nominative-data-job.xml.");
+			logger.error("Folder found in workFolder without import-job.json.");
 		}
 
 		logger.info("Ended processing folder " + folder.getName() + ".");
@@ -244,9 +262,10 @@ public class CurrentNominativeDataController {
 		}
 	}
 
+	// TODO : delete this method
 	public void updateNominativeDataPercentage(File folder, String uploadPercentage) {
-		if (uploadPercentage.equals("FINISHED_UPLOAD")) {
-			uploadPercentage = "FINISHED";
+		if (uploadPercentage.equals(UploadState.FINISHED.toString())) {
+			uploadPercentage = UploadState.FINISHED.toString();
 		}
 		currentNominativeDataModel.updateUploadPercentage(folder.getAbsolutePath(), uploadPercentage);
 	}

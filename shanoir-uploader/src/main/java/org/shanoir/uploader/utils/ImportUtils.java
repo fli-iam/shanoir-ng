@@ -24,7 +24,6 @@ import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
-import org.shanoir.uploader.action.ImportFinishRunnable;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
@@ -41,6 +40,7 @@ import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
+import org.shanoir.uploader.upload.UploadJobManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -128,12 +128,12 @@ public class ImportUtils {
 	}
 
 	public static ImportJob readImportJob(File uploadFolder) throws StreamReadException, DatabindException, IOException {
-		File importJobJsonFile = new File(uploadFolder.getAbsolutePath() + File.separator + ImportFinishRunnable.IMPORT_JOB_JSON);
+		File importJobJsonFile = new File(uploadFolder.getAbsolutePath() + File.separator + ShUpConfig.IMPORT_JOB_JSON);
 		if (importJobJsonFile.exists()) {
 			ImportJob importJob = objectMapper.readValue(importJobJsonFile, ImportJob.class);
 			return importJob;
 		} else {
-			throw new IOException(ImportFinishRunnable.IMPORT_JOB_JSON + " missing in folder: " + uploadFolder.getAbsolutePath());
+			throw new IOException(ShUpConfig.IMPORT_JOB_JSON + " missing in folder: " + uploadFolder.getAbsolutePath());
 		}
 	}
 
@@ -159,6 +159,24 @@ public class ImportUtils {
 		importJob.setSelectedSeries(new LinkedHashSet<Serie>());
 		return importJob;
 	}
+
+	/**
+	 * Get the upload state from the upload-job.xml file 
+	 * in case of previous ShUp version import still in workFolder
+	 * 
+	 * @param folder
+	 * @return
+	 * @throws IOException
+	 */
+	public static String getUploadStateFromUploadJob(File folder) throws IOException {
+		final File uploadJobFile = new File(folder.getAbsolutePath() + File.separator + ShUpConfig.UPLOAD_JOB_XML);
+		if (uploadJobFile.exists()) {
+			UploadJobManager uploadJobManager = new UploadJobManager(uploadJobFile);
+			return uploadJobManager.readUploadJob().getUploadState().toString();
+		}
+		return null;
+	}
+
 
 	/**
 	 * subjectId and examinationId are created in the window of ImportDialog and are not known before.
