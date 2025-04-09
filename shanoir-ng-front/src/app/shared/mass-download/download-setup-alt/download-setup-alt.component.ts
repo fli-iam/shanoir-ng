@@ -14,7 +14,7 @@
 
 import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
+import { DatasetLight, DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
 import { DatasetType } from "../../../datasets/shared/dataset-type.model";
 import { Dataset } from "../../../datasets/shared/dataset.model";
 import { Option } from '../../select/select.component';
@@ -30,7 +30,7 @@ import { DownloadInputIds } from '../mass-download.service';
 
 export class DownloadSetupAltComponent implements OnInit {
 
-    @Output() go: EventEmitter<{format: Format, converter: number, datasets: Dataset[]}> = new EventEmitter();
+    @Output() go: EventEmitter<{format: Format, converter: number, datasets: Dataset[] | DatasetLight[]}> = new EventEmitter();
     @Output() close: EventEmitter<void> = new EventEmitter();
     @Input() inputIds: DownloadInputIds;
     form: UntypedFormGroup;
@@ -38,7 +38,7 @@ export class DownloadSetupAltComponent implements OnInit {
     loading: boolean;
     format: Format;
     converter: number;
-    datasets: Dataset[];
+    datasets: Dataset[] | DatasetLight[];
     hasDicom: boolean = false;
 
     formatOptions: Option<Format>[] = [
@@ -67,7 +67,7 @@ export class DownloadSetupAltComponent implements OnInit {
 
     ngOnInit(): void {
         if (this.inputIds) {
-            let fetchDatasets: Promise<Dataset[]>;
+            let fetchDatasets: Promise<Dataset[] | DatasetLight[]>;
             if (this.inputIds.studyId) {
                 if (this.inputIds.subjectId) {
                     fetchDatasets = this.datasetService.getByStudyIdAndSubjectId(this.inputIds.studyId, this.inputIds.subjectId);
@@ -77,9 +77,9 @@ export class DownloadSetupAltComponent implements OnInit {
             } else if (this.inputIds.examinationId) {
                 fetchDatasets = this.datasetService.getByExaminationId(this.inputIds.examinationId);
             } else if (this.inputIds.acquisitionId) {
-                fetchDatasets =this.datasetService.getByAcquisitionId(this.inputIds.acquisitionId);
+                fetchDatasets = this.datasetService.getByAcquisitionId(this.inputIds.acquisitionId);
             } else if (this.inputIds.datasetIds) {
-                fetchDatasets =this.datasetService.getByIds(new Set(this.inputIds.datasetIds));
+                fetchDatasets = this.datasetService.getByIds(new Set(this.inputIds.datasetIds));
             }
             if (fetchDatasets) {
                 this.loading = true;
@@ -123,9 +123,9 @@ export class DownloadSetupAltComponent implements OnInit {
     }
 
     // This method checks if the list of given datasets has dicom or not.
-    private hasDicomInDatasets(datasets: Dataset[]) {
+    private hasDicomInDatasets(datasets: Dataset[] | DatasetLight[]) {
         for (let dataset of datasets) {
-            if (dataset.type != DatasetType.Eeg && dataset.type != DatasetType.BIDS && dataset.datasetProcessing == null) {
+            if (dataset.type != DatasetType.Eeg && dataset.type != DatasetType.BIDS && !dataset.hasProcessings) {
                 return true;
             }
         }
