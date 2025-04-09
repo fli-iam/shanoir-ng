@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.vip.executionMonitoring.dto.ExecutionMonitoringDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,4 +41,16 @@ public interface ExecutionMonitoringApi {
         @PreAuthorize("hasAnyRole('ADMIN')")
         ResponseEntity<List<ExecutionMonitoringDTO>> getAllExecutionMonitoring();
 
+        @Operation(summary = "", description = "Return all execution monitorings")
+        @ApiResponses(value = {
+                @ApiResponse(responseCode = "200", description = "tracking file downloaded"),
+                @ApiResponse(responseCode = "401", description = "unauthorized"),
+                @ApiResponse(responseCode = "403", description = "forbidden"),
+                @ApiResponse(responseCode = "404", description = "no tracking file found"),
+                @ApiResponse(responseCode = "500", description = "unexpected error") })
+        @GetMapping(value = "/tracking-file", produces = { "application/zip" })
+        @PreAuthorize("hasAnyRole('ADMIN')")
+        ResponseEntity<Void> getTrackingFile(
+                @Parameter(description = "name of the desired pipeline tracking file", required = true) @PathVariable("pipelineName") String pipelineName,
+                HttpServletResponse response) throws RestServiceException;
 }
