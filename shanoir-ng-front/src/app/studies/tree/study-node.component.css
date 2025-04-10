@@ -1,3 +1,13 @@
 .overmenu input { height: 16px; }
 .overmenu .filter { margin-left: 10px; }
 .overmenu:has(input:focus) { visibility: visible; }
+
+.fake-node { margin-left: 22px; height: 24.5px; }
+.fake-node a { all: unset; }
+.fake-node i { margin-right: 6px; }
+.fake-node .chevron { vertical-align: -5px; cursor: pointer; }
+.fake-node .picto { color: var(--color-b); margin-right: 0px; }
+.fake-node .inner { display: inline-block; vertical-align: -4px; cursor: pointer; margin-right: 16px; }
+.fake-node .tag { border: 1px solid var(--grey); border-radius: 10px; padding: 0 5px; margin: 0 2px; font-size: 10px; display: inline-block; line-height: 18px; vertical-align: top; }
+.fake-node .tag i { margin-right: 3px; }
+.fake-node .dark { color:white }
