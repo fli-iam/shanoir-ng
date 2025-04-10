@@ -377,7 +377,8 @@ public class SubjectServiceImpl implements SubjectService {
 			List<SubjectStudy> subjectStudyList = subject.getSubjectStudyList();
 			if (subjectStudyList != null) {
 				subjectStudyList.stream().forEach(ss -> {
-					ss.setSubjectStudyTags(subjectStudyRepository.findSubjectStudyTagsByStudyIdAndSubjectId(ss.getStudy().getId(), ss.getSubject().getId()));
+					ss.getSubjectStudyTags().clear();
+					ss.getSubjectStudyTags().addAll(subjectStudyRepository.findSubjectStudyTagsByStudyIdAndSubjectId(ss.getStudy().getId(), ss.getSubject().getId()));
 					Study studyWithTags = studyRepository.findStudyWithTagsById(ss.getStudy().getId());
 					if (studyWithTags != null) {
 						ss.getStudy().setTags(studyWithTags.getTags());
