@@ -1,7 +1,5 @@
 package org.shanoir.ng.vip.executionMonitoring.service;
 
-import org.apache.commons.lang3.tuple.Triple;
-import org.junit.jupiter.api.parallel.Execution;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.processing.model.DatasetProcessingType;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
@@ -25,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
@@ -36,6 +35,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
+import static org.shanoir.ng.vip.executionMonitoring.model.ExecutionStatus.RUNNING;
 
 
 /**
@@ -72,6 +73,10 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
     @Autowired
     private OutputService outputService;
 
+    @Autowired
+    @Lazy
+    private ExecutionMonitoringServiceImpl emProxyService;
+
     public ExecutionMonitoring createExecutionMonitoring(ExecutionCandidateDTO execution, List<Dataset> inputDatasets) throws RestServiceException {
         ExecutionMonitoring executionMonitoring = new ExecutionMonitoring();
         executionMonitoring.setName(execution.getName());
@@ -79,7 +84,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
         executionMonitoring.setResultsLocation(KeycloakUtil.getTokenUserId() + "/" + formatter.format(LocalDateTime.now()));
         executionMonitoring.setTimeout(20);
         executionMonitoring.setStudyId(execution.getStudyIdentifier());
-        executionMonitoring.setStatus(ExecutionStatus.RUNNING);
+        executionMonitoring.setStatus(RUNNING);
         executionMonitoring.setComment(execution.getName());
         executionMonitoring.setDatasetProcessingType(DatasetProcessingType.valueOf(execution.getProcessingType()));
         executionMonitoring.setOutputProcessing(execution.getOutputProcessing());
@@ -105,7 +110,6 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
         return executionMonitoringSecurityService.filterExecutionMonitoringList(Utils.toList(repository.findAll()), RIGHT_STR);
     }
 
-    @Transactional
     public void startMonitoringJob(ExecutionMonitoring createdMonitoring, ShanoirEvent event) {
         Map<String, Object> monitoringMap = new HashMap<>();
         monitoringMap.put("monitoring", createdMonitoring);
@@ -117,7 +121,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
             synchronized (this) { //Allow the synchronized block to be executed only by one thread at a time. It avoids concurrency
                 if (!isRunning) {  //In case of two calling threads hitting the 1st !isRunning check condition at the same time, it may leads to 2 distinct monitoring loop if we remove this second !isRunning check, what we want to avoid
                     isRunning = true;
-                    monitoringLoop();
+                    emProxyService.monitoringLoop();
                 }
             }
         }
@@ -136,6 +140,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
 
                 if(Objects.isNull(event) || !Objects.equals(event.getStatus(),ShanoirEvent.IN_PROGRESS)){
                     emMap.put("event", initShanoirEvent(monitoring, event, execLabel));
+                    LOG.info("Monitoring of execution id: " + monitoring.getId() + ", identifier: " + monitoring.getPipelineIdentifier() + ", name: " + monitoring.getName() + " started");
                 }
 
                 try{
@@ -149,9 +154,13 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
                     }
 
                     switch (dto.getStatus()) {
-                        case FINISHED -> processFinishedJob(monitoring, event, dto.getEndDate());
-                        case UNKNOWN,EXECUTION_FAILED,KILLED -> processKilledJob(monitoring, event, dto);
+                        case FINISHED -> emProxyService.processFinishedJob(monitoring, event, dto.getEndDate());
+                        case UNKNOWN,EXECUTION_FAILED,KILLED -> emProxyService.processKilledJob(monitoring, event, dto);
                     }
+                    if(!Objects.equals(dto.getStatus(), RUNNING)){
+                        monitoringQueue.remove(emMap);
+                    }
+                    Thread.sleep(10000);
                 } catch (Exception e){
                     // Unwrap ReactiveException thrown from async method
                     Throwable ex = Exceptions.unwrap(e);
@@ -165,10 +174,11 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-                        LOG.error("Error in the monitoring loop", e);
+                    LOG.error("Error in the monitoring loop", e);
                 }
             }
         }
+        isRunning = false;
     }
 
     /**
@@ -196,7 +206,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
      * Create or update Shanoir event relative to an execution monitoring
      */
     private ShanoirEvent initShanoirEvent(ExecutionMonitoring processing, ShanoirEvent event, String execLabel) {
-        String startMsg = execLabel + " : " + ExecutionStatus.RUNNING.getRestLabel();
+        String startMsg = execLabel + " : " + RUNNING.getRestLabel();
 
         if(event == null){
             event = new ShanoirEvent(
@@ -218,13 +228,14 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
     /**
      * Manage execution monitoring with a non successfull status
      */
-    private void processKilledJob(ExecutionMonitoring processing, ShanoirEvent event, VipExecutionDTO vipExecutionDTO) throws EntityNotFoundException {
-        String execLabel = getExecLabel(processing);
+    @Transactional
+    protected void processKilledJob(ExecutionMonitoring execution, ShanoirEvent event, VipExecutionDTO vipExecutionDTO) throws EntityNotFoundException {
+        String execLabel = getExecLabel(execution);
 
-        LOG.warn("{} status is [{}]", execLabel, vipExecutionDTO.getStatus().getRestLabel());
+        LOG.info("Execution id: {}, identifier: {}, name: {} status is [{}]", execution.getId(), execution.getPipelineIdentifier(), execution.getName(), vipExecutionDTO.getStatus().getRestLabel());
 
-        processing.setStatus(vipExecutionDTO.getStatus());
-        update(processing);
+        execution.setStatus(vipExecutionDTO.getStatus());
+        update(execution);
 
         LOG.info("Execution status updated, stopping job...");
 
@@ -235,7 +246,8 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
     /**
      * Manage execution monitoring with a successfull status
      */
-    private void processFinishedJob(ExecutionMonitoring execution, ShanoirEvent event, Long endDate) throws EntityNotFoundException, ResultHandlerException {
+    @Transactional
+    protected void processFinishedJob(ExecutionMonitoring execution, ShanoirEvent event, Long endDate) throws EntityNotFoundException, ResultHandlerException {
 
         String execLabel = getExecLabel(execution);
         execution.setStatus(ExecutionStatus.FINISHED);
@@ -244,7 +256,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
 
         update(execution);
 
-        LOG.info("{} status is [{}]", execLabel, ExecutionStatus.FINISHED.getRestLabel());
+        LOG.info("Execution id: {}, identifier: {}, name: {} status is [{}]", execution.getId(), execution.getPipelineIdentifier(), execution.getName(), ExecutionStatus.FINISHED.getRestLabel());
         event.setMessage(execLabel + " : Finished. Processing imported results...");
         eventService.publishEvent(event);
 
