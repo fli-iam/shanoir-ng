@@ -16,8 +16,7 @@ import {ParameterType} from 'src/app/vip/models/parameterType';
 import {Pipeline} from 'src/app/vip/models/pipeline';
 import {ExecutionService} from 'src/app/vip/execution/execution.service';
 import {ExecutionMonitoringService} from 'src/app/vip/execution-monitorings/execution-monitoring.service';
-import {Dataset} from 'src/app/datasets/shared/dataset.model';
-import {DatasetService} from 'src/app/datasets/shared/dataset.service';
+import {DatasetLight, DatasetService} from 'src/app/datasets/shared/dataset.service';
 import {DatasetProcessingType} from 'src/app/enum/dataset-processing-type.enum';
 import {ColumnDefinition} from 'src/app/shared/components/table/column.definition.type';
 import {KeycloakService} from 'src/app/shared/keycloak/keycloak.service';
@@ -43,15 +42,15 @@ export class ExecutionComponent implements OnInit {
     protected consoleService = ServiceLocator.injector.get(ConsoleService);
     pipeline: Pipeline;
     executionForm: UntypedFormGroup;
-    selectedDatasets: Set<Dataset>;
+    private selectedDatasets: Set<DatasetLight>;
 
-    datasetsOptions: Option<Dataset>[];
+    datasetsOptions: Option<DatasetLight>[];
     token: string;
     refreshToken: string;
     parametersApplied: boolean = false;
     execution: Execution;
     columnDefs: { [key: string]: ColumnDefinition[] } = {};
-    datasetsByParam: { [key: string]: Dataset[] } = {};
+    datasetsByParam: { [key: string]: DatasetLight[] } = {};
     fileInputs = [];
     execDefaultName= "";
     exportFormat= "nii";
@@ -80,7 +79,7 @@ export class ExecutionComponent implements OnInit {
         private keycloakService: KeycloakService,
         private datasetService: DatasetService) {
             this.breadcrumbsService.nameStep('2. Executions');
-            this.selectedDatasets = new Set<Dataset>();
+            this.selectedDatasets = new Set<DatasetLight>();
             this.isSubmitted = false;
     }
 
@@ -164,16 +163,16 @@ export class ExecutionComponent implements OnInit {
 
         this.datasetsPromise.then(() => {
 
-            let availableDatasets: Dataset[] = Array.from(this.selectedDatasets);
+            let availableDatasets: DatasetLight[] = Array.from(this.selectedDatasets);
 
             this.datasetsOptions = [];
             availableDatasets.forEach(dataset => {
-                this.datasetsOptions.push(new Option<Dataset>(dataset, dataset.name + '(' + dataset.id + ')'));
+                this.datasetsOptions.push(new Option<DatasetLight>(dataset, dataset.name + '(' + dataset.id + ')'));
             });
 
             // By default, we order by alphabtical order
             // TODO: Propose another possible order (by ID?)
-            availableDatasets.sort((a: Dataset, b: Dataset) => {
+            availableDatasets.sort((a: DatasetLight, b: DatasetLight) => {
                 return a.name.localeCompare(b.name);
             })
 
@@ -185,7 +184,7 @@ export class ExecutionComponent implements OnInit {
                         let exp = this.executionForm.get(parameter.name).value?.toString() ? this.executionForm.get(parameter.name).value.toString()  : ".*";
                         let nameFilter: RegExp = new RegExp(exp);
 
-                        let paramDatasets: Dataset[] = [];
+                        let paramDatasets: DatasetLight[] = [];
 
                         availableDatasets.forEach(dataset => {
                             paramDatasets.push(dataset);
@@ -223,7 +222,7 @@ export class ExecutionComponent implements OnInit {
         let candidate = new ExecutionCandidateDto();
         candidate.name = this.cleanProcessingName(this.executionForm.get("execution_name").value);
         candidate.pipelineIdentifier = this.pipeline.identifier
-        candidate.studyIdentifier = [...this.selectedDatasets][0].study.id;  // TODO : this should be selected automatically if all datasets have the same study, if not show a select input to choose what context.
+        candidate.studyIdentifier = [...this.selectedDatasets][0].studyId;  // TODO : this should be selected automatically if all datasets have the same study, if not show a select input to choose what context.
         candidate.processingType = DatasetProcessingType.SEGMENTATION; // TODO : this should be selected by the user.
         candidate.outputProcessing = this.pipeline.outputProcessing;
         candidate.client = KeycloakService.clientId;

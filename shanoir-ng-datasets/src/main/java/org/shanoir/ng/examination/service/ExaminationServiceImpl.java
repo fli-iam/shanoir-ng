@@ -183,6 +183,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 			event.setProgress(-1f);
 			eventService.publishEvent(event);
 			LOG.error("Error during deletion of examination with id : " + examinationId);
+			LOG.error("Exception e : " , e);
 		}
 	}
 
