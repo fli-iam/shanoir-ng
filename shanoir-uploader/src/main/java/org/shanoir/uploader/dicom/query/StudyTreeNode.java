@@ -2,12 +2,8 @@ package org.shanoir.uploader.dicom.query;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map.Entry;
 
 import javax.swing.tree.TreeNode;
 
@@ -26,8 +22,7 @@ public class StudyTreeNode implements DicomTreeNode {
 	
 	private Study study;
 
-	/** List of children. */
-	private HashMap<String, DicomTreeNode> relatedSeries;
+	private List<DicomTreeNode> relatedSeries;
 
 	/** Indicates if the node has been selected. */
 	private boolean selected = false;
@@ -44,7 +39,7 @@ public class StudyTreeNode implements DicomTreeNode {
 	 */
 	public StudyTreeNode(final Study study) {
 		this.study = study;
-		this.relatedSeries = new LinkedHashMap<String, DicomTreeNode>();
+		this.relatedSeries = new ArrayList<DicomTreeNode>();
 	}
 
 	/**
@@ -55,8 +50,8 @@ public class StudyTreeNode implements DicomTreeNode {
 	 * @param serie
 	 *            serie
 	 */
-	public void addTreeNode(final String id, final DicomTreeNode serie) {
-		this.relatedSeries.put(id, (SerieTreeNode) serie);
+	public void addTreeNode(final DicomTreeNode serie) {
+		this.relatedSeries.add(serie);
 	}
 
 	/**
@@ -67,7 +62,7 @@ public class StudyTreeNode implements DicomTreeNode {
 	 *
 	 * @return the child
 	 */
-	public TreeNode getChild(final Object id) {
+	public TreeNode getChild(final int id) {
 		return (TreeNode)relatedSeries.get(id);
 	}
 
@@ -77,9 +72,7 @@ public class StudyTreeNode implements DicomTreeNode {
 	 * @see org.richfaces.model.TreeNodeImpl#getChildren()
 	 */
 	public Iterator getChildren() {
-		List<Entry<String, DicomTreeNode>> child = new ArrayList<Entry<String, DicomTreeNode>>(relatedSeries.entrySet());
-		Collections.sort(child, new SeriesComparator());
-		return child.iterator();
+		return relatedSeries.iterator();
 	}
 
 	public Study getStudy() {
@@ -106,7 +99,7 @@ public class StudyTreeNode implements DicomTreeNode {
 	 */
 	public DicomTreeNode getFirstTreeNode() {
 		if (getTreeNodes() != null && !getTreeNodes().isEmpty()) {
-			return getTreeNodes().values().iterator().next();
+			return getTreeNodes().iterator().next();
 		}
 		return null;
 	}
@@ -125,7 +118,7 @@ public class StudyTreeNode implements DicomTreeNode {
 	 *
 	 * @return Returns the relatedSeries.
 	 */
-	public HashMap<String, DicomTreeNode> getTreeNodes() {
+	public List<DicomTreeNode> getTreeNodes() {
 		return relatedSeries;
 	}
 
@@ -154,7 +147,7 @@ public class StudyTreeNode implements DicomTreeNode {
 	 *            id
 	 */
 	public void removeChild(final Object id) {
-		relatedSeries.remove((String) id);
+		relatedSeries.remove(id);
 	}
 
 	/**

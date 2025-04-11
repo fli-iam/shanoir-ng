@@ -166,10 +166,10 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
         for (Serie serie: patients.get(0).getStudies().get(0).getSeries()) {
             SerieTreeNode serieNode = new SerieTreeNode(serie);
             serieNode.setSelected(true);
-            stNode.addTreeNode(serie.getSeriesInstanceUID(), serieNode);
+            stNode.addTreeNode(serieNode);
             selectedSeriesNodes.add(serieNode);
         }
-        patNode.addTreeNode(patients.get(0).getPatientID(), stNode);
+        patNode.addTreeNode(stNode);
         String subjectIdentifier = null;
         try {
             subject = new Subject();

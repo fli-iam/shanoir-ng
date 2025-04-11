@@ -199,6 +199,7 @@ public class SubjectApiController implements SubjectApi {
 
 	// Attention: this method is used by ShanoirUploader!!!
 	@Override
+	@Transactional
 	public ResponseEntity<SubjectDTO> findSubjectByIdentifier(
 			@Parameter(description = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier) {
 		// Get all allowed studies
