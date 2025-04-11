@@ -14,6 +14,9 @@
 
 package org.shanoir.ng.shared.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.SubjectStudy;
@@ -23,9 +26,6 @@ import org.shanoir.ng.tag.model.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 @Component

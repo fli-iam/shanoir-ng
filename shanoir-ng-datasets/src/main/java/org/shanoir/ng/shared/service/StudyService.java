@@ -14,12 +14,12 @@
 
 package org.shanoir.ng.shared.service;
 
+import java.util.List;
+
 import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.model.Study;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * Study service.

@@ -14,13 +14,13 @@
 
 package org.shanoir.ng.studycard.service;
 
-import java.lang.management.ManagementFactory;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.hibernate.StatelessSession;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.AcquisitionAttributes;
@@ -41,14 +41,11 @@ import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.rule.QualityExaminationRule;
-import org.shanoir.ng.studycard.model.rule.StudyCardRule;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 
 @Service
@@ -73,6 +70,9 @@ public class CardsProcessingService {
 
     @Autowired
     private ShanoirEventService eventService;
+
+    @Autowired
+    private HibernateStatelessSessionProvider statelessSessionProvider;
 
 
 	/**
@@ -165,65 +165,67 @@ public class CardsProcessingService {
 	 * @throws MicroServiceCommunicationException 
 	 */
 	public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags, Integer start, Integer stop, Long eventId) throws MicroServiceCommunicationException {
-        long startTs = new Date().getTime();
-        if (qualityCard == null) throw new IllegalArgumentException("qualityCard can't be null");
-        ShanoirEvent event;
-        if (eventId == null) {
-            event = new ShanoirEvent(ShanoirEventType.CHECK_QUALITY_EVENT, null, KeycloakUtil.getTokenUserId(), "Quality check started on study " + qualityCard.getStudyId() , 4, qualityCard.getStudyId());
-        } else {
-            event = new ShanoirEvent(eventId, ShanoirEventType.CHECK_QUALITY_EVENT, null, KeycloakUtil.getTokenUserId(), "Quality check started on study " + qualityCard.getStudyId() , 4, qualityCard.getStudyId());
-        }   
-        eventService.publishEvent(event);
-        Study study = studyService.findById(qualityCard.getStudyId());
-        if (study == null ) throw new IllegalArgumentException("study can't be null");
-        if (!qualityCard.getStudyId().equals(study.getId())) throw new IllegalStateException("study and studycard ids don't match");
-        if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {
-            if (updateTags) { // first reset subject studies
-                event.setMessage("resetting quality subject tags");
-                eventService.publishEvent(event);
-                resetSubjectStudies(study.getSubjectStudyList());
-                try {
-                    subjectStudyService.update(study.getSubjectStudyList());
-                } catch (EntityNotFoundException e) {} // too bad
-            }
-            QualityCardResult result = new QualityCardResult();
-            int i = 0;
-            List<Examination> examinations;
-            if (start != null && stop != null) {
-                examinations = study.getExaminations().subList(start, stop < study.getExaminations().size() ? stop : study.getExaminations().size());
+        try (StatelessSession statelessSession = statelessSessionProvider.openStatelessSession()) {
+            long startTs = new Date().getTime();
+            if (qualityCard == null) throw new IllegalArgumentException("qualityCard can't be null");
+            ShanoirEvent event;
+            if (eventId == null) {
+                event = new ShanoirEvent(ShanoirEventType.CHECK_QUALITY_EVENT, null, KeycloakUtil.getTokenUserId(), "Quality check started on study " + qualityCard.getStudyId() , 4, qualityCard.getStudyId());
             } else {
-                examinations = study.getExaminations();
-            }
-            for (Examination examination : examinations) {
-                event.setStatus(2);
-                event.setProgress((float)i / examinations.size());
-                event.setMessage("checking quality for examination " + examination.getComment());
-                //event.setReport(result.toString()); // too heavy
-                eventService.publishEvent(event);
-                result.merge(applyQualityCardOnExamination(qualityCard, examination, false));
-                i++;
-            }
-            if (updateTags) { // update subject studies
-			    try {
-                    event.setMessage("setting quality subject tags");
+                event = new ShanoirEvent(eventId, ShanoirEventType.CHECK_QUALITY_EVENT, null, KeycloakUtil.getTokenUserId(), "Quality check started on study " + qualityCard.getStudyId() , 4, qualityCard.getStudyId());
+            }   
+            eventService.publishEvent(event);
+            Study study = studyService.findById(qualityCard.getStudyId());
+            if (study == null ) throw new IllegalArgumentException("study can't be null");
+            if (!qualityCard.getStudyId().equals(study.getId())) throw new IllegalStateException("study and studycard ids don't match");
+            if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {
+                if (updateTags) { // first reset subject studies
+                    event.setMessage("resetting quality subject tags");
                     eventService.publishEvent(event);
-			        subjectStudyService.update(result.getUpdatedSubjectStudies());
-			    } catch (EntityNotFoundException e) {
-                    throw new IllegalStateException("Could not update subject-studies", e);
-			    }	    
-			}
-            event.setProgress(1f);
-            event.setStatus(1);
-            event.setMessage("Quality card applied on study " + study.getName() + " in " + (new Date().getTime() - startTs) + " ms.");
-            event.setReport(result.toString());
-            eventService.publishEvent(event);
-            return result;
-        } else {
-            event.setStatus(-1);
-            event.setMessage("Quality card used with emtpy rules.");
-            event.setProgress(1f);
-            eventService.publishEvent(event);
-            throw new RestClientException("Quality card used with emtpy rules.");
+                    resetSubjectStudies(study.getSubjectStudyList());
+                    try {
+                        subjectStudyService.update(study.getSubjectStudyList());
+                    } catch (EntityNotFoundException e) {} // too bad
+                }
+                QualityCardResult result = new QualityCardResult();
+                int i = 0;
+                List<Examination> examinations;
+                if (start != null && stop != null) {
+                    examinations = study.getExaminations().subList(start, stop < study.getExaminations().size() ? stop : study.getExaminations().size());
+                } else {
+                    examinations = study.getExaminations();
+                }
+                for (Examination examination : examinations) {
+                    event.setStatus(2);
+                    event.setProgress((float)i / examinations.size());
+                    event.setMessage("checking quality for examination " + examination.getComment());
+                    //event.setReport(result.toString()); // too heavy
+                    eventService.publishEvent(event);
+                    result.merge(applyQualityCardOnExamination(qualityCard, examination, false));
+                    i++;
+                }
+                if (updateTags) { // update subject studies
+                    try {
+                        event.setMessage("setting quality subject tags");
+                        eventService.publishEvent(event);
+                        subjectStudyService.update(result.getUpdatedSubjectStudies());
+                    } catch (EntityNotFoundException e) {
+                        throw new IllegalStateException("Could not update subject-studies", e);
+                    }	    
+                }
+                event.setProgress(1f);
+                event.setStatus(1);
+                event.setMessage("Quality card applied on study " + study.getName() + " in " + (new Date().getTime() - startTs) + " ms.");
+                event.setReport(result.toString());
+                eventService.publishEvent(event);
+                return result;
+            } else {
+                event.setStatus(-1);
+                event.setMessage("Quality card used with emtpy rules.");
+                event.setProgress(1f);
+                eventService.publishEvent(event);
+                throw new RestClientException("Quality card used with emtpy rules.");
+            }
         }
 	}
 
