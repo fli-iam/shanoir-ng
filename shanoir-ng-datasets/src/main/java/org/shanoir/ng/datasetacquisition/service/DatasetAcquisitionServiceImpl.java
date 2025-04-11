@@ -274,7 +274,11 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         }
         delete(entity, event);
 
-        repository.deleteById(id);
+        try {
+            repository.deleteById(id);
+        } catch (Exception e) {
+            LOG.error("Error during deletion of DatasetAcquisition : ", e);
+        }
         shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
     }
     

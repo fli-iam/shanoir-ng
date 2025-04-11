@@ -126,7 +126,13 @@ public class DatasetServiceImpl implements DatasetService {
 		processingService.removeDatasetFromAllProcessingInput(id);
 		processingResourceRepository.deleteByDatasetId(id);
 		propertyService.deleteByDatasetId(id);
-		repository.deleteById(id);
+
+		try {
+			repository.deleteById(id);
+		} catch (Exception e) {
+			LOG.error("Error during deletion of Dataset : ", e);
+		}
+
 	}
 
 	/**
@@ -144,6 +150,7 @@ public class DatasetServiceImpl implements DatasetService {
 				.orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
 		// Do not delete entity if it is the source (or if it has copies). If getSourceId() is not null, it means it's a copy
 		if (!CollectionUtils.isEmpty(dataset.getCopies())) {
+			LOG.error("This Dataset has been copied. Delete the copy first.");
 			throw new RestServiceException(
 					new ErrorModel(
 							HttpStatus.UNPROCESSABLE_ENTITY.value(),
@@ -498,3 +505,4 @@ public class DatasetServiceImpl implements DatasetService {
 		return null;
 	}
 }
+

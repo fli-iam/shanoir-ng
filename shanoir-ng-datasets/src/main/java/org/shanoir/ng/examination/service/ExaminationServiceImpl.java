@@ -159,7 +159,11 @@ public class ExaminationServiceImpl implements ExaminationService {
 			String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUID(examination);
 			dicomWebService.rejectExaminationFromPacs(studyInstanceUID);
 
-			examinationRepository.deleteById(id);
+			try {
+				examinationRepository.deleteById(id);
+			} catch (Exception e) {
+				LOG.error("Error during deletion of Examination : ", e);
+			}
 		}
 		rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(examination.getStudyId()));
 	}
