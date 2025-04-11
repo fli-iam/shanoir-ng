@@ -23,6 +23,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.Patient;
+import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.importer.model.UploadState;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.action.DeleteDirectory;
@@ -214,6 +216,15 @@ public class CurrentNominativeDataController {
 		if (importJobManager != null) {
 			final ImportJob importJob = importJobManager.readImportJob();
 			if (importJob != null) {
+				// In case of previous ShUp version imports, Patient and Study data were stored in xml files
+				if (importJob.getPatient() == null || importJob.getStudy() == null) {
+					Patient patient = ImportUtils.getPatientFromNominativeDataJob(importJob.getWorkFolder());
+					importJob.setPatient(patient);
+					Study study = ImportUtils.getStudyFromNominativeDataJob(importJob.getWorkFolder());
+					importJob.setStudy(study);
+					// We write the json file so that we can open ImportDialog for this old import
+					importJobManager.writeImportJob(importJob);
+				}
 				// In case of previous version importJobs 
 				// (without uploadState) we look for uploadState value from upload-job.xml file
 				if (importJob.getUploadState() == null) {
@@ -238,7 +249,7 @@ public class CurrentNominativeDataController {
 			// 	logger.error("Folder found in workFolder without upload-job.xml.");
 			// }
 		} else {
-			logger.error("Folder found in workFolder without import-job.json.");
+			logger.error("Folder " + folder.getName() + " found in workFolder without import-job.json.");
 		}
 
 		logger.info("Ended processing folder " + folder.getName() + ".");

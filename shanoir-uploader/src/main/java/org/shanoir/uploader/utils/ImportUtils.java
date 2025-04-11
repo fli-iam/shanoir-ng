@@ -174,24 +174,6 @@ public class ImportUtils {
 		return null;
 	}
 
-	public static String getPatientIPPFromNominativeDataJob(String filepath) {
-		final File nominativeDataJobFile = new File(filepath + File.separator + ShUpConfig.NOMINATIVE_DATA_JOB_XML);
-		if (nominativeDataJobFile.exists()) {
-			NominativeDataUploadJobManager nominativeDataJobManager = new NominativeDataUploadJobManager(nominativeDataJobFile);
-			return nominativeDataJobManager.readUploadDataJob().getIPP();
-		}
-		return null;
-	}
-
-	public static String getStudyDateFromNominativeDataJob(String filepath) {
-		final File nominativeDataJobFile = new File(filepath + File.separator + ShUpConfig.NOMINATIVE_DATA_JOB_XML);
-		if (nominativeDataJobFile.exists()) {
-			NominativeDataUploadJobManager nominativeDataJobManager = new NominativeDataUploadJobManager(nominativeDataJobFile);
-			return nominativeDataJobManager.readUploadDataJob().getStudyDate();
-		}
-		return null;
-	}
-
 	public static String getUploadPercentageFromNominativeDataJob(String filepath) {
 		final File nominativeDataJobFile = new File(filepath + File.separator + ShUpConfig.NOMINATIVE_DATA_JOB_XML);
 		if (nominativeDataJobFile.exists()) {
@@ -201,6 +183,30 @@ public class ImportUtils {
 		return null;
 	}
 
+	public static Patient getPatientFromNominativeDataJob(String filepath) {
+		final File nominativeDataJobFile = new File(filepath + File.separator + ShUpConfig.NOMINATIVE_DATA_JOB_XML);
+		Patient patient = new Patient();
+		if (nominativeDataJobFile.exists()) {
+			NominativeDataUploadJobManager nominativeDataJobManager = new NominativeDataUploadJobManager(nominativeDataJobFile);
+			//the whole name retrieved from xml file is put in patient firstname as it is just to display it in ui
+			patient.setPatientFirstName(nominativeDataJobManager.readUploadDataJob().getPatientName());
+			patient.setPatientLastName("");
+			patient.setPatientID(nominativeDataJobManager.readUploadDataJob().getIPP());
+			return patient;
+		}
+		return patient;
+	}
+
+	public static org.shanoir.ng.importer.model.Study getStudyFromNominativeDataJob(String filepath) {
+		final File nominativeDataJobFile = new File(filepath + File.separator + ShUpConfig.NOMINATIVE_DATA_JOB_XML);
+		org.shanoir.ng.importer.model.Study study = new org.shanoir.ng.importer.model.Study();
+		if (nominativeDataJobFile.exists()) {
+			NominativeDataUploadJobManager nominativeDataJobManager = new NominativeDataUploadJobManager(nominativeDataJobFile);
+			study.setStudyDate(Util.convertStringToLocalDate(nominativeDataJobManager.readUploadDataJob().getStudyDate()));
+			return study;
+		}
+		return study;
+	}
 
 	/**
 	 * subjectId and examinationId are created in the window of ImportDialog and are not known before.

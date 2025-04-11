@@ -3,9 +3,7 @@ package org.shanoir.uploader.action;
 import java.awt.Color;
 import java.io.File;
 import java.text.ParseException;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
@@ -13,8 +11,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.uploader.ShUpConfig;
-import org.shanoir.uploader.dicom.MRI;
 import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
@@ -25,7 +23,6 @@ import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
-import org.shanoir.uploader.upload.UploadJob;
 import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
@@ -90,13 +87,14 @@ public class ImportDialogOpener {
 	 * @param uploadJob
 	 */
 	private void updateImportDialogForMRICenter(final ImportJob importJob) {
- 		String institutionName = importJob.getFirstSelectedSerie().getInstitution().getInstitutionName();
-		String institutionAddress = importJob.getFirstSelectedSerie().getInstitution().getInstitutionAddress();
-		String stationName = importJob.getFirstSelectedSerie().getEquipment().getStationName();
-		String manufacturer = importJob.getFirstSelectedSerie().getEquipment().getManufacturer();
-		String manufacturersModelName = importJob.getFirstSelectedSerie().getEquipment().getManufacturerModelName();
-		String magneticFieldStrength = importJob.getFirstSelectedSerie().getEquipment().getMagneticFieldStrength();
-		String deviceSerialNumber = importJob.getFirstSelectedSerie().getEquipment().getDeviceSerialNumber();
+		Serie firstSerie = importJob.getFirstSelectedSerie();
+ 		String institutionName = firstSerie.getInstitution().getInstitutionName();
+		String institutionAddress = firstSerie.getInstitution().getInstitutionAddress();
+		String stationName = firstSerie.getEquipment().getStationName();
+		String manufacturer = firstSerie.getEquipment().getManufacturer();
+		String manufacturersModelName = firstSerie.getEquipment().getManufacturerModelName();
+		String magneticFieldStrength = firstSerie.getEquipment().getMagneticFieldStrength();
+		String deviceSerialNumber = firstSerie.getEquipment().getDeviceSerialNumber();
 		importDialog.mriCenterText.setText(institutionName);
 		importDialog.mriCenterAddressText.setText(institutionAddress);
 		importDialog.mriStationNameText.setText(stationName);
