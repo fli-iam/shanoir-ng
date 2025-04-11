@@ -17,7 +17,8 @@ import javax.swing.table.DefaultTableModel;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.UploadState;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataModel;
-import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
+import org.shanoir.uploader.utils.ImportUtils;
+import org.shanoir.uploader.utils.Util;
 
 @SuppressWarnings("deprecation")
 public class CurrentUploadsWindowTable implements Observer {
@@ -112,6 +113,18 @@ public class CurrentUploadsWindowTable implements Observer {
 			if (entry.getValue() != null) {
 				String key = entry.getKey();
 				ImportJob nominativeDataImportJob = (ImportJob) entry.getValue();
+				// In case of previous ShUp version imports, Patient is null in import-job.json and must be recreated
+				if (nominativeDataImportJob.getPatient() == null) {
+					nominativeDataImportJob.setPatient(new org.shanoir.ng.importer.model.Patient());
+					String patientIPP = ImportUtils.getPatientIPPFromNominativeDataJob(nominativeDataImportJob.getWorkFolder());
+					nominativeDataImportJob.getPatient().setPatientID(patientIPP);
+				}
+				if (nominativeDataImportJob.getStudy() == null) {
+					nominativeDataImportJob.setStudy(new org.shanoir.ng.importer.model.Study());
+					String studyDate = ImportUtils.getStudyDateFromNominativeDataJob(nominativeDataImportJob.getWorkFolder());
+					nominativeDataImportJob.getStudy().setStudyDate(Util.convertStringToLocalDate(studyDate));
+					
+				}
 				addRow(model, key, nominativeDataImportJob);
 			}
 		}

@@ -40,6 +40,7 @@ import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
+import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
 import org.shanoir.uploader.upload.UploadJobManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -160,19 +161,42 @@ public class ImportUtils {
 		return importJob;
 	}
 
-	/**
-	 * Get the upload state from the upload-job.xml file 
-	 * in case of previous ShUp version import still in workFolder
-	 * 
-	 * @param folder
-	 * @return
-	 * @throws IOException
-	 */
+	// The following 3 methods are used to retrieve informations from the xml files 
+	// used previously to store upload jobs informations.
+	// These are supposed to be deleted in the future.
+
 	public static String getUploadStateFromUploadJob(File folder) throws IOException {
 		final File uploadJobFile = new File(folder.getAbsolutePath() + File.separator + ShUpConfig.UPLOAD_JOB_XML);
 		if (uploadJobFile.exists()) {
 			UploadJobManager uploadJobManager = new UploadJobManager(uploadJobFile);
 			return uploadJobManager.readUploadJob().getUploadState().toString();
+		}
+		return null;
+	}
+
+	public static String getPatientIPPFromNominativeDataJob(String filepath) {
+		final File nominativeDataJobFile = new File(filepath + File.separator + ShUpConfig.NOMINATIVE_DATA_JOB_XML);
+		if (nominativeDataJobFile.exists()) {
+			NominativeDataUploadJobManager nominativeDataJobManager = new NominativeDataUploadJobManager(nominativeDataJobFile);
+			return nominativeDataJobManager.readUploadDataJob().getIPP();
+		}
+		return null;
+	}
+
+	public static String getStudyDateFromNominativeDataJob(String filepath) {
+		final File nominativeDataJobFile = new File(filepath + File.separator + ShUpConfig.NOMINATIVE_DATA_JOB_XML);
+		if (nominativeDataJobFile.exists()) {
+			NominativeDataUploadJobManager nominativeDataJobManager = new NominativeDataUploadJobManager(nominativeDataJobFile);
+			return nominativeDataJobManager.readUploadDataJob().getStudyDate();
+		}
+		return null;
+	}
+
+	public static String getUploadPercentageFromNominativeDataJob(String filepath) {
+		final File nominativeDataJobFile = new File(filepath + File.separator + ShUpConfig.NOMINATIVE_DATA_JOB_XML);
+		if (nominativeDataJobFile.exists()) {
+			NominativeDataUploadJobManager nominativeDataJobManager = new NominativeDataUploadJobManager(nominativeDataJobFile);
+			return nominativeDataJobManager.readUploadDataJob().getUploadPercentage();
 		}
 		return null;
 	}

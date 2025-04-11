@@ -24,6 +24,8 @@ import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.quality.QualityTag;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * One ImportJob is related to the import of ONE DICOM STUDY,
  * which equals ONE EXAM in Shanoir. We are doing this, as one
@@ -404,6 +406,7 @@ public class ImportJob implements Serializable {
 				",seriesNames=" + seriesNames.toString();
 	}
 
+	@JsonIgnore
 	public Serie getFirstSelectedSerie() {
 		if (CollectionUtils.isNotEmpty(selectedSeries)) {
 			return selectedSeries.iterator().next();

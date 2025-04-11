@@ -80,6 +80,8 @@ public class ShUpConfig {
 
 	public static final String UPLOAD_JOB_XML = "upload-job.xml";
 
+	public static final String NOMINATIVE_DATA_JOB_XML = "nominative-data-job.xml";
+
 	public static final String ANONYMIZATION_PROFILE = "anonymization.profile";
 
 	/**
