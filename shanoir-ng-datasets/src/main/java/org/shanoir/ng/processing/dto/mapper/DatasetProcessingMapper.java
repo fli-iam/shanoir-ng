@@ -15,17 +15,19 @@
 package org.shanoir.ng.processing.dto.mapper;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
+import org.mapstruct.Named;
 import org.shanoir.ng.dataset.dto.DatasetWithProcessingsDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.examination.dto.mapper.ExaminationDecorator;
-import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
+import org.shanoir.ng.processing.dto.DatasetProcessingForListsDTO;
+import org.shanoir.ng.processing.model.DatasetProcessing;
 
 @Mapper(componentModel = "spring", uses = { DatasetMapper.class })
 @DecoratedWith(DatasetProcessingDecorator.class)
@@ -51,4 +53,26 @@ public interface DatasetProcessingMapper {
 
 	@Mappings({ @Mapping(target = "source", ignore = true), @Mapping(target = "copies", ignore = true) })
 	DatasetWithProcessingsDTO datasetToDatasetWithProcessingsDTO(Dataset dataset);
+
+
+	@Mapping(target = "parentId", expression = "java(processing.getParent() != null ? processing.getParent().getId() : null)")
+	@Mapping(target = "inputDatasetIds", source = "inputDatasets", qualifiedByName = "mapDatasetsToIdList")
+	@Mapping(target = "outputDatasetIds", source = "outputDatasets", qualifiedByName = "mapDatasetsToIdList")
+	DatasetProcessingForListsDTO datasetProcessingToDatasetProcessingForListsDTO(DatasetProcessing processing);
+
+	@Named("mapDatasetsToIdList")
+    default List<Long> mapDatasetsToIdList(List<Dataset> entities) {
+        if (entities == null) {
+            return null;
+        }
+        return entities.stream()
+			.map(this::mapDatasetToId)
+			.collect(Collectors.toList());
+    }
+
+	@Named("mapDatasetToId")
+    default Long mapDatasetToId(Dataset entity) {
+        return entity != null ? entity.getId() : null;
+    }
+
 }

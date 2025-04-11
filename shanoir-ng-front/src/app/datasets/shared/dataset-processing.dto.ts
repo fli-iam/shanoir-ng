@@ -39,10 +39,10 @@ export class DatasetProcessingDTOService {
         if (!result) result = new DatasetProcessing();
         DatasetProcessingDTOService.mapSyncFields(dto, result);
         let promises: Promise<any>[] = [];
-        if (dto.inputDatasets && dto.inputDatasets.length > 0) {
+        if (!dto.inputDatasets && dto.inputDatasetIds?.length > 0) {
             promises.push(this.datasetProcessingService.getInputDatasets(dto.id).then(inputDatasets => result.inputDatasets = inputDatasets));
         }
-        if (dto.outputDatasets && dto.outputDatasets.length > 0) {
+        if (!dto.outputDatasets && dto.outputDatasetIds.length > 0) {
             promises.push(this.datasetProcessingService.getOutputDatasets(dto.id).then(outputDatasets => result.outputDatasets = outputDatasets));
         }
         return Promise.all(promises).then(([]) => {
@@ -103,7 +103,9 @@ export class DatasetProcessingDTO {
     comment: string;
     datasetProcessingType: DatasetProcessingType;
     inputDatasets: DatasetDTO[];
+    inputDatasetIds: number[];
     outputDatasets: DatasetDTO[];
+    outputDatasetIds: number[];
 	processingDate: Date;
     studyId: number;
     parentId: number;
