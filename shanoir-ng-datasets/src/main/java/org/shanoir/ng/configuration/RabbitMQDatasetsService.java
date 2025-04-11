@@ -352,6 +352,7 @@ public class RabbitMQDatasetsService {
 			List<Examination> listExam = examinationRepository.findBySubjectId(subjectId);
 			Collections.reverse(listExam);
 
+			LOG.error("RabbitMqDataset deleteSubject id = " + subjectId);
 			// Delete associated examinations and datasets from solr repository
 			for (Examination exam : listExam) {
 				examinationService.deleteById(exam.getId(), null);

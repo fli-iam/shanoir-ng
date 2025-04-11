@@ -204,6 +204,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         // Do not delete entity if it is the source. If getSourceId() is not null, it means it's a copy
         List<DatasetAcquisition> childDsAc = repository.findBySourceId(entity.getId());
         if (!CollectionUtils.isEmpty(childDsAc)) {
+            LOG.error("This DatasetAcquisition has been copied. Delete the copy first.");
             throw new RestServiceException(
                     new ErrorModel(
                             HttpStatus.UNPROCESSABLE_ENTITY.value(),
@@ -265,6 +266,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
      * @throws RestServiceException
      */
     public void deleteByIdCascade(Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
+        LOG.error("DatasetAcquisition deleteCascade id = " + id);
         final DatasetAcquisition entity = repository.findById(id).orElse(null);
         if (entity == null) {
             throw new EntityNotFoundException("Cannot find entity with id = " + id);

@@ -114,6 +114,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 	@Override
 	public void deleteById(final Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
+		LOG.error("exam deleteById : " + id);
 		Optional<Examination> examinationOpt = examinationRepository.findById(id);
 		if (!examinationOpt.isPresent()) {
 			throw new EntityNotFoundException(Examination.class, id);
@@ -122,6 +123,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 		
 		List<Examination> childExam = examinationRepository.findBySourceId(id);
 		if (!CollectionUtils.isEmpty(childExam)) {
+			LOG.error("This examination has been copied. Delete the copy first.");
 			throw new RestServiceException(
 					new ErrorModel(
 							HttpStatus.UNPROCESSABLE_ENTITY.value(),
