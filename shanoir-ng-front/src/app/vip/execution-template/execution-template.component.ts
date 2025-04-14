@@ -18,7 +18,6 @@ import {Option} from "../../shared/select/select.component";
 @Component({
     selector: 'execution-template',
     templateUrl: './execution-template.component.html',
-    styleUrls: ['./execution-template.component.css'],
     standalone: false
 })
 @ModesAware

@@ -1,0 +1,31 @@
+<div #formContainer class="content-component detail">
+    <form *ngIf="form" [formGroup]="executionForm" class="max-content" novalidate [class.disabled]="footerState.loading">
+        <fieldset>
+            <ol>
+                <legend><br/>Execution template parameters <tool-tip>Files parameters should be set as regular expression for dataset names. Example *T2* will select all dataset whose names contains "T2".</tool-tip><br/></legend>
+                <li>
+                    <label i18n="Execution template detail|Execution comment filter">Filter <tool-tip>This is the regular expression (see: https://regex101.com/) used to decide if the execution should be applied on newly imported exam or not.
+                        It is based on examination. An empty field means that all examinations import should trigger the execution.</tool-tip></label>
+
+                    <span class="right-col" [ngSwitch]="mode">
+						<ng-template [ngSwitchCase]="'view'">
+							{{executionTemplateParameter.filter}}
+						</ng-template>
+						<ng-template ngSwitchDefault>
+							<input type="text" id="filter" formControlName="filter" [(ngModel)]="executionTemplateParameter.filter" />
+						</ng-template>
+					</span>
+                </li>
+                <li>
+                    <label>Group by <tool-tip>Selected datasets will be grouped by the chosen entity. Choose what the selected pipeline expect.</tool-tip></label>
+                    <span class="right-col">
+                                    <input id="dataset" type="radio" formControlName="groupBy" name="groupBy" [(ngModel)]="executionTemplateParameter.groupBy" value="dataset" />Dataset(s)
+                                    <input id="acquisition" type="radio" formControlName="groupBy" name="groupBy" [(ngModel)]="executionTemplateParameter.groupBy" value="acquisition" />Acquisition(s)
+                                    <input id="examination" type="radio" formControlName="groupBy" name="groupBy" [(ngModel)]="executionTemplateParameter.groupBy" value="examination" />Examination(s)
+                                    <input id="subject" type="radio" formControlName="groupBy" name="groupBy" [(ngModel)]="executionTemplateParameter.groupBy" value="subject" />Examination(s)
+                                </span>
+                </li>
+            </ol>
+        </fieldset>
+    </form>
+</div>

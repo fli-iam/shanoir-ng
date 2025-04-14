@@ -11,7 +11,6 @@ import {StudyRightsService} from "../../studies/shared/study-rights.service";
 @Component({
     selector: 'execution-template-list',
     templateUrl: './execution-template-list.component.html',
-    styleUrls: ['./execution-template-list.component.css'],
     standalone: false
 
 })

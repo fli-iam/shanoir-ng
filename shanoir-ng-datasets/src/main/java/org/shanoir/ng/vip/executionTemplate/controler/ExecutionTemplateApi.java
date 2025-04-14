@@ -23,7 +23,7 @@ import java.util.List;
  */
 
 @Tag(name = "Execution template", description = "the execution template API")
-@RequestMapping("/executiontemplate")
+@RequestMapping("/execution-template")
 public interface ExecutionTemplateApi {
 
     @Operation(summary = "Get list of existing execution templates for the given study_id", description = "Returns the list of existing execution templates for the given study id", tags = {})

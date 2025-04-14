@@ -1,6 +1,6 @@
 package org.shanoir.ng.vip.executionTemplate.model;
 
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 @Entity
@@ -12,6 +12,10 @@ public class ExecutionTemplateParameter extends AbstractEntity {
     private boolean isOptional;
     private boolean isReturnedValue;
     private String description;
+
+    @ManyToOne(fetch =  FetchType.EAGER)
+    @JoinColumn(name = "execution_template_id")
+    private ExecutionTemplate executionTemplate;
 
     public String getName() {
         return name;
@@ -60,4 +64,8 @@ public class ExecutionTemplateParameter extends AbstractEntity {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public ExecutionTemplate getExecutionTemplate() {return executionTemplate;}
+
+    public void setExecutionTemplate(ExecutionTemplate executionTemplate) {this.executionTemplate = executionTemplate;}
 }
