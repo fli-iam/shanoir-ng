@@ -154,7 +154,10 @@ public class ExecutionServiceImpl implements ExecutionService {
         }
 
         String url = vipExecutionUri + "/" + identifier + "/summary";
-        HttpHeaders headers = getServiceAccountHttpHeaders();
+        //HttpHeaders headers = getServiceAccountHttpHeaders();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("apikey", "imo804d70m73d4n54f18uhr5j0");
+        headers.remove("Authorization");
 
         return webClient.get()
                 .uri(url)
