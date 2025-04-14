@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.datasetacquisition.service;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
@@ -22,6 +23,7 @@ import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository
 import org.shanoir.ng.dicom.web.SeriesInstanceUIDHandler;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -40,10 +42,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -76,6 +80,9 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
     @Autowired
     private SeriesInstanceUIDHandler seriesInstanceUIDHandler;
+
+    @Autowired
+    private DatasetAcquisitionAsyncService datasetAcquisitionAsyncService;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetAcquisitionServiceImpl.class);
     @Override
@@ -201,7 +208,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
      * @throws IOException
      * @throws RestServiceException
      */
-    private void delete(DatasetAcquisition entity, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
+    public void delete(DatasetAcquisition entity, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
         // Do not delete entity if it is the source. If getSourceId() is not null, it means it's a copy
         List<DatasetAcquisition> childDsAc = repository.findBySourceId(entity.getId());
         if (!CollectionUtils.isEmpty(childDsAc)) {
@@ -216,7 +223,6 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
                 List<Long> datasetIds = new ArrayList<>();
                 for (Dataset ds : datasets) {
                     if (event != null) {
-                        event.setMessage("Delete examination - dataset with id : " + ds.getId());
                         float progressMax = Float.valueOf(event.getEventProperties().get("progressMax"));
                         event.setProgress(event.getProgress() + (1f / progressMax));
                         shanoirEventService.publishEvent(event);
@@ -243,17 +249,25 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     @Transactional
     public void deleteById(Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
         final DatasetAcquisition entity = repository.findById(id).orElse(null);
+
         if (entity == null) {
             throw new EntityNotFoundException("Cannot find entity with id = " + id);
         }
-        delete(entity, event);
+
+        Map<String, String> eventProperties = new HashMap<>();
+        eventProperties.put("progressMax", String.valueOf(entity.getDatasets().size()));
+        event.setEventProperties(eventProperties);
+        event.setMessage("Delete DatasetAcquisition with id : " + id);
+        shanoirEventService.publishEvent(event);
 
         String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUID(entity.getExamination());
         String seriesInstanceUID = seriesInstanceUIDHandler.findSeriesInstanceUID(entity);
+
+        datasetAcquisitionAsyncService.deleteByIdAsync(entity, event);
+
         dicomWebService.rejectAcquisitionFromPacs(studyInstanceUID, seriesInstanceUID);
 
         repository.deleteById(id);
-        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
     }
 
     /**
@@ -270,12 +284,14 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         if (entity == null) {
             throw new EntityNotFoundException("Cannot find entity with id = " + id);
         }
+        event.setMessage("Delete examination - datasetAcquisition with id : " + id);
+        shanoirEventService.publishEvent(event);
         delete(entity, event);
 
         repository.deleteById(id);
         shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
     }
-    
+
     @Override
     public boolean existsByStudyCardId(Long studyCardId) {
         return repository.existsByStudyCard_Id(studyCardId);
