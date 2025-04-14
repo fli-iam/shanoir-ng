@@ -23,6 +23,7 @@ import javax.swing.SwingWorker;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
+import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.model.ImportJob;
@@ -36,6 +37,7 @@ import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
+import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.gui.ImportFromTableWindow;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
@@ -69,17 +71,20 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 	private IDicomServerClient dicomServerClient;
 	private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 	private ShanoirUploaderServiceClient shanoirUploaderServiceClientNG;
-	private DownloadOrCopyActionListener dOCAL;
 	private ImportFromTableCSVWriter csvWriter;
 
-	public ImportFromTableRunner(Map<String, ImportJob> importJobs, ResourceBundle ressourceBundle, ImportFromTableWindow importFromTableWindow, IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG, DownloadOrCopyActionListener dOCAL) {
+	private Pseudonymizer pseudonymizer;
+	private IdentifierCalculator identifierCalculator;
+
+	public ImportFromTableRunner(Map<String, ImportJob> importJobs, ResourceBundle ressourceBundle, ImportFromTableWindow importFromTableWindow, IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG, Pseudonymizer pseudonymizer) {
 		this.importJobs = importJobs;
 		this.resourceBundle = ressourceBundle;
 		this.importFromTableWindow = importFromTableWindow;
 		this.dicomServerClient = dicomServerClient;
 		this.dicomFileAnalyzer = dicomFileAnalyzer;
 		this.shanoirUploaderServiceClientNG = shanoirUploaderServiceClientNG;
-		this.dOCAL = dOCAL;
+		this.pseudonymizer = pseudonymizer;
+		this.identifierCalculator = new IdentifierCalculator();
 	}
 
 	@Override
@@ -190,7 +195,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 			patientVerification.getBirthName(),
 			patientVerification.getBirthDate());
 		importJob.setPatient(newPatient);
-		Subject subject = dOCAL.createSubjectFromPatient(newPatient);
+		Subject subject = ImportUtils.createSubjectFromPatient(newPatient, pseudonymizer, identifierCalculator);
 		importJob.setSubject(subject);
 
 		logger.info("3. Download from PACS");
@@ -365,8 +370,8 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 		logger.info("5. Create subject or use existing one (add subject-study, if necessary)");
 		org.shanoir.uploader.model.rest.Subject subjectREST = null;
 		String subjectStudyIdentifier = null;
-		// Profile Neurinfo/dev: SHANOIR_SUBJECT_NAME column is mandatory
-		if (ShUpConfig.isModeSubjectCommonNameManual()) {
+		// Profile Neurinfo/dev: in Excel table: SHANOIR_SUBJECT_NAME column is mandatory
+		if (ShUpConfig.isModeSubjectNameManual()) {
 			try {
 				List<org.shanoir.uploader.model.rest.Subject> existingSubjects = shanoirUploaderServiceClientNG.findSubjectsByStudy(studyREST.getId());
 				if (existingSubjects != null) {
@@ -387,7 +392,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 				logger.error(importJob.getErrorMessage());
 				return false;
 			}
-		// Profile OFSEP: SHANOIR_SUBJECT_NAME column is ignored
+		// Profile OFSEP: in Excel table: SHANOIR_SUBJECT_NAME column is ignored
 		} else {
 			try {
 				subjectREST = shanoirUploaderServiceClientNG.findSubjectBySubjectIdentifier(subject.getIdentifier());
