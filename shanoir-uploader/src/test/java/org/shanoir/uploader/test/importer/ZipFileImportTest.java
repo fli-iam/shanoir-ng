@@ -43,9 +43,9 @@ public class ZipFileImportTest extends AbstractTest {
 	private static final String ACR_PHANTOM_T1_ZIP = "acr_phantom_t1.zip";
 
 	@Test
-	public void importDicomZipTest() throws Exception {
+	public void testImportWithDicomZipUpload() throws Exception {
 		org.shanoir.uploader.model.rest.Study study = createStudyAndCenterAndStudyCard();
-		for (int i = 0; i < 0; i++) {
+		for (int i = 0; i < 1; i++) {
 			ImportJob importJob = step1UploadDicom(ACR_PHANTOM_T1_ZIP);
 			if (!importJob.getPatients().isEmpty()) {
 				selectAllSeriesForImport(importJob);
@@ -53,6 +53,20 @@ public class ZipFileImportTest extends AbstractTest {
 				Examination examination = step3CreateExamination(subject);
 				step4StartImport(importJob, subject, examination, study);
 			}
+		}
+	}
+
+	@Test
+	public void testImportFromShanoirUploader() throws Exception {
+		org.shanoir.uploader.model.rest.Study study = createStudyAndCenterAndStudyCard();
+		for (int i = 0; i < 0; i++) {
+
+			// if (!importJob.getPatients().isEmpty()) {
+			// 	selectAllSeriesForImport(importJob);
+			// 	Subject subject = step2CreateSubject(importJob, study);
+			// 	Examination examination = step3CreateExamination(subject);
+			// 	step4StartImport(importJob, subject, examination, study);
+			// }
 		}
 	}
 	
