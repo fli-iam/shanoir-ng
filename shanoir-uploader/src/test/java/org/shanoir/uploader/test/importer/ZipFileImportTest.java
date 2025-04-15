@@ -138,7 +138,6 @@ public class ZipFileImportTest extends AbstractTest {
 		importJob.setStudyCardId(studyCard.getId());
 		importJob.setStudyCardName(studyCard.getName());
 		importJob.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipment().getId());
-		importJob.setSubjectName(subjectREST.getName());
 		importJob.setExaminationId(examinationId);
 		// Profile Neurinfo
 		if (ShUpConfig.isModeSubjectNameManual()) {
@@ -160,9 +159,11 @@ public class ZipFileImportTest extends AbstractTest {
 			HemisphericDominance.Left.toString(), HemisphericDominance.Left.toString(),
 			null, SubjectType.PATIENT, false, false, randomPatientName, study, study.getStudyCards().get(0));
 		subject.setImagedObjectCategory(null); // to fix server issue with incompatible mapping value
-		org.shanoir.ng.importer.model.Subject subjectImportJob = new org.shanoir.ng.importer.model.Subject();
-		subjectImportJob.setName(subjectREST.getName());
-		patient.setSubject(subjectImportJob);
+		org.shanoir.ng.importer.model.Subject subjectForImportJob = new org.shanoir.ng.importer.model.Subject();
+		subjectForImportJob.setId(subjectREST.getId());
+		subjectForImportJob.setName(subjectREST.getName());
+		patient.setSubject(subjectForImportJob);
+		importJob.setSubjectName(subjectREST.getName());
 		return subjectREST;
 	}
 
