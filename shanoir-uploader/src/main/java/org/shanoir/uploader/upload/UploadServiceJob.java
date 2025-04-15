@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.action.ImportFinishRunnable;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
@@ -176,6 +177,8 @@ public class UploadServiceJob {
 			uploadJob.setUploadState(UploadState.FINISHED_UPLOAD);
 			uploadJob.setUploadDate(Util.formatTimePattern(new Date()));
 			uploadJobManager.writeUploadJob(uploadJob);
+
+			List<Patient> patients = ImportUtils.getPatientsFromDir(folder, false);
 			
 			// Clean all DICOM files after successful import to server
 			for (Iterator<File> iterator = allFiles.iterator(); iterator.hasNext();) {

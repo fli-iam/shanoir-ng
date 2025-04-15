@@ -19,6 +19,8 @@ import javax.swing.JProgressBar;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
+import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
+import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.SeriesNumberOrDescriptionSorter;
 import org.shanoir.ng.importer.model.ImportJob;
@@ -75,6 +77,10 @@ public class ImportUtils {
 	private static final Logger logger = LoggerFactory.getLogger(ImportUtils.class);
 	
 	private static ObjectMapper objectMapper = new ObjectMapper();
+
+	private static final String DICOMDIR = "DICOMDIR";
+
+	private static DicomDirGeneratorService dicomDirGeneratorService = new DicomDirGeneratorService();
 
 	static {
 		objectMapper.registerModule(new JavaTimeModule())
@@ -687,6 +693,24 @@ public class ImportUtils {
 			subject.setBirthDate(birthDate);
 		}
 		return subject;
+	}
+
+	public static List<Patient> getPatientsFromDir(File directory, boolean deleteGeneratedDICOMDir) throws IOException {
+		boolean dicomDirGenerated = false;
+		File dicomDirFile = new File(directory, DICOMDIR);
+		if (!dicomDirFile.exists()) {
+			logger.info("No DICOMDIR found: generating one.");
+			dicomDirGeneratorService.generateDicomDirFromDirectory(dicomDirFile, directory);
+			dicomDirGenerated = true;
+			logger.info("DICOMDIR generated at path: " + dicomDirFile.getAbsolutePath());
+		}
+		final DicomDirToModelService dicomDirReader = new DicomDirToModelService();
+		List<Patient> patients = dicomDirReader.readDicomDirToPatients(dicomDirFile);
+		// clean up in case of dicomdir generated
+		if (dicomDirGenerated && deleteGeneratedDICOMDir) {
+			dicomDirFile.delete();
+		}
+		return patients;
 	}
 
 }

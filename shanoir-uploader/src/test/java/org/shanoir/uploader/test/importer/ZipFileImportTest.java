@@ -49,7 +49,7 @@ public class ZipFileImportTest extends AbstractTest {
 	public void testImportWithDicomZipUpload() throws Exception {
 		org.shanoir.uploader.model.rest.Study study = createStudyAndCenterAndStudyCard();
 		for (int i = 0; i < 1; i++) {
-			ImportJob importJob = stepUploadDicom(ACR_PHANTOM_T1_ZIP);
+			ImportJob importJob = uploadDicomZip(ACR_PHANTOM_T1_ZIP);
 			if (!importJob.getPatients().isEmpty()) {
 				selectAllSeriesForImport(importJob);
 				org.shanoir.uploader.model.rest.Subject subject = createSubject(importJob, study);
@@ -180,7 +180,7 @@ public class ZipFileImportTest extends AbstractTest {
 		}
 	}
 	
-	private ImportJob stepUploadDicom(final String fileName) {
+	private ImportJob uploadDicomZip(final String fileName) {
 		try {
 		    URL resource = getClass().getClassLoader().getResource(fileName);
 		    if (resource != null) {
