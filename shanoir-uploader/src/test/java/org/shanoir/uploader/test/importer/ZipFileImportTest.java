@@ -61,10 +61,11 @@ public class ZipFileImportTest extends AbstractTest {
 
 	private Long createExamination(org.shanoir.uploader.model.rest.Study study, ImportJob importJob,
 			org.shanoir.uploader.model.rest.Subject subject) {
-		LocalDate studyDate = importJob.getStudy().getStudyDate();
+		Study dicomStudy = importJob.getPatients().get(0).getStudies().get(0);
+		LocalDate studyDate = dicomStudy.getStudyDate();
 		Instant studyDateInstant = studyDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
 		Date studyDateDate = Date.from(studyDateInstant);
-		String examinationComment = "ExamOfSubject-"+subject.getName();
+		String examinationComment = dicomStudy.getStudyDescription();
 		Long examinationId = ImportUtils.createExamination(study, subject, studyDateDate,
 			examinationComment, study.getStudyCards().get(0).getCenterId());
 		return examinationId;
