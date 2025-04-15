@@ -504,12 +504,12 @@ public class ImportUtils {
 		return subjectREST;
 	}
 
-	public static Long createExamination(Study study, org.shanoir.uploader.model.rest.Subject subjectREST, Date examinationDate, String examinationComment, Long centerId) {
+	public static Long createExamination(Study study, org.shanoir.uploader.model.rest.Subject subjectREST, Date studyDate, String examinationComment, Long centerId) {
 		Examination examinationREST = new Examination();
 		examinationREST.setStudyId(study.getId());
 		examinationREST.setSubjectId(subjectREST.getId());
 		examinationREST.setCenterId(centerId);
-		examinationREST.setExaminationDate(examinationDate);
+		examinationREST.setExaminationDate(studyDate);
 		examinationREST.setComment(examinationComment);
 		examinationREST = ShUpOnloadConfig.getShanoirUploaderServiceClient().createExamination(examinationREST);
 		if (examinationREST == null) {

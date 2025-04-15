@@ -5,6 +5,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -18,11 +21,9 @@ import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.uploader.ShUpConfig;
-import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Center;
-import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
 import org.shanoir.uploader.model.rest.StudyCard;
@@ -51,11 +52,22 @@ public class ZipFileImportTest extends AbstractTest {
 			ImportJob importJob = stepUploadDicom(ACR_PHANTOM_T1_ZIP);
 			if (!importJob.getPatients().isEmpty()) {
 				selectAllSeriesForImport(importJob);
-				org.shanoir.uploader.model.rest.Subject subject = stepCreateSubject(importJob, study);
-				Examination examination = stepCreateExamination(subject, study);
-				stepStartImport(importJob, subject, examination, study);
+				org.shanoir.uploader.model.rest.Subject subject = createSubject(importJob, study);
+				Long examinationId = createExamination(study, importJob, subject);
+				startImport(importJob, subject, examinationId, study);
 			}
 		}
+	}
+
+	private Long createExamination(org.shanoir.uploader.model.rest.Study study, ImportJob importJob,
+			org.shanoir.uploader.model.rest.Subject subject) {
+		LocalDate studyDate = importJob.getStudy().getStudyDate();
+		Instant studyDateInstant = studyDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
+		Date studyDateDate = Date.from(studyDateInstant);
+		String examinationComment = "ExamOfSubject-"+subject.getName();
+		Long examinationId = ImportUtils.createExamination(study, subject, studyDateDate,
+			examinationComment, study.getStudyCards().get(0).getCenterId());
+		return examinationId;
 	}
 
 	@Test
@@ -117,7 +129,7 @@ public class ZipFileImportTest extends AbstractTest {
 	 * @throws JsonProcessingException
 	 * @throws Exception
 	 */
-	private void stepStartImport(ImportJob importJob, org.shanoir.uploader.model.rest.Subject subject, Examination examination, org.shanoir.uploader.model.rest.Study study)
+	private void startImport(ImportJob importJob, org.shanoir.uploader.model.rest.Subject subject, Long examinationId, org.shanoir.uploader.model.rest.Study study)
 			throws JsonProcessingException, Exception {
 		importJob.setStudyId(study.getId());
 		importJob.setStudyName(study.getName());
@@ -126,7 +138,7 @@ public class ZipFileImportTest extends AbstractTest {
 		importJob.setStudyCardName(studyCard.getName());
 		importJob.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipment().getId());
 		importJob.setSubjectName(subject.getName());
-		importJob.setExaminationId(examination.getId());
+		importJob.setExaminationId(examinationId);
 		// Profile Neurinfo
 		if (ShUpConfig.isModeSubjectNameManual()) {
 			importJob.setAnonymisationProfileToUse("Profile Neurinfo");
@@ -138,18 +150,7 @@ public class ZipFileImportTest extends AbstractTest {
 		shUpClient.startImportJob(importJobJson);
 	}
 
-	// @todo: use ImportUtils here
-	private Examination stepCreateExamination(org.shanoir.uploader.model.rest.Subject subject, org.shanoir.uploader.model.rest.Study study) {
-		Examination examination = new Examination();
-		examination.setStudyId(study.getId());
-		examination.setSubjectId(subject.getId());
-		examination.setCenterId(study.getStudyCards().get(0).getCenterId());
-		examination.setExaminationDate(new Date());
-		examination.setComment("ExamOfSubject"+subject.getName());
-		return shUpClient.createExamination(examination);
-	}
-
-	private org.shanoir.uploader.model.rest.Subject stepCreateSubject(ImportJob importJob, org.shanoir.uploader.model.rest.Study study) throws UnsupportedEncodingException, NoSuchAlgorithmException, PseudonymusException, ParseException {
+	private org.shanoir.uploader.model.rest.Subject createSubject(ImportJob importJob, org.shanoir.uploader.model.rest.Study study) throws UnsupportedEncodingException, NoSuchAlgorithmException, PseudonymusException, ParseException {
 		Patient patient = importJob.getPatients().get(0);
 		final String randomPatientName = UUID.randomUUID().toString();
 		Subject subject = ImportUtils.createSubjectFromPatient(patient, pseudonymizer, identifierCalculator);
