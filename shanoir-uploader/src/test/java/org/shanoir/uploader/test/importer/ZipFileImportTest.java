@@ -54,7 +54,7 @@ public class ZipFileImportTest extends AbstractTest {
 				selectAllSeriesForImport(importJob);
 				org.shanoir.uploader.model.rest.Subject subject = createSubject(importJob, study);
 				Long examinationId = createExamination(study, importJob, subject);
-				startImport(importJob, subject, examinationId, study);
+				startImportJob(importJob, subject, examinationId, study);
 			}
 		}
 	}
@@ -130,7 +130,7 @@ public class ZipFileImportTest extends AbstractTest {
 	 * @throws JsonProcessingException
 	 * @throws Exception
 	 */
-	private void startImport(ImportJob importJob, org.shanoir.uploader.model.rest.Subject subjectREST, Long examinationId, org.shanoir.uploader.model.rest.Study study)
+	private void startImportJob(ImportJob importJob, org.shanoir.uploader.model.rest.Subject subjectREST, Long examinationId, org.shanoir.uploader.model.rest.Study study)
 			throws JsonProcessingException, Exception {
 		importJob.setStudyId(study.getId());
 		importJob.setStudyName(study.getName());
