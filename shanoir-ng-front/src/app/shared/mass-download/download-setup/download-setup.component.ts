@@ -121,7 +121,7 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
             formGroup.addControl('shortPath', new UntypedFormControl(false));
         }
         this.subscriptions.push(formGroup.get('unzip').valueChanges.subscribe(val => {
-            formGroup.get('datasetFolders').setValue(val); 
+            formGroup.get('datasetFolders').setValue(val);
         }));
         return formGroup;
     }
@@ -153,7 +153,7 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
     // This method checks if the list of given datasets has dicom or not.
     private hasDicomInDatasets(datasets: {type: DatasetType, hasProcessings: boolean}[]) {
         for (let dataset of datasets) {
-            if (dataset.type != DatasetType.Eeg && dataset.type != DatasetType.BIDS && !dataset.hasProcessings) {
+            if (dataset.type != DatasetType.Eeg && dataset.type != DatasetType.BIDS && dataset.type != DatasetType.Generic) {
                 return true;
             }
         }
