@@ -125,7 +125,7 @@ export class DownloadSetupAltComponent implements OnInit {
     // This method checks if the list of given datasets has dicom or not.
     private hasDicomInDatasets(datasets: Dataset[] | DatasetLight[]) {
         for (let dataset of datasets) {
-            if (dataset.type != DatasetType.Eeg && dataset.type != DatasetType.BIDS && !dataset.hasProcessings) {
+            if (dataset.type != DatasetType.Eeg && dataset.type != DatasetType.BIDS && dataset.type != DatasetType.Generic) {
                 return true;
             }
         }
