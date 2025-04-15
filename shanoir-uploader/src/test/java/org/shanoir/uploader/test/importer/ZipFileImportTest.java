@@ -124,13 +124,13 @@ public class ZipFileImportTest extends AbstractTest {
 	 * via Web GUI, we add a pseudonymization profile, as the GUI does it.
 	 * 
 	 * @param importJob
-	 * @param subject
+	 * @param subjectREST
 	 * @param examination
 	 * @param study
 	 * @throws JsonProcessingException
 	 * @throws Exception
 	 */
-	private void startImport(ImportJob importJob, org.shanoir.uploader.model.rest.Subject subject, Long examinationId, org.shanoir.uploader.model.rest.Study study)
+	private void startImport(ImportJob importJob, org.shanoir.uploader.model.rest.Subject subjectREST, Long examinationId, org.shanoir.uploader.model.rest.Study study)
 			throws JsonProcessingException, Exception {
 		importJob.setStudyId(study.getId());
 		importJob.setStudyName(study.getName());
@@ -138,7 +138,7 @@ public class ZipFileImportTest extends AbstractTest {
 		importJob.setStudyCardId(studyCard.getId());
 		importJob.setStudyCardName(studyCard.getName());
 		importJob.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipment().getId());
-		importJob.setSubjectName(subject.getName());
+		importJob.setSubjectName(subjectREST.getName());
 		importJob.setExaminationId(examinationId);
 		// Profile Neurinfo
 		if (ShUpConfig.isModeSubjectNameManual()) {
@@ -161,8 +161,7 @@ public class ZipFileImportTest extends AbstractTest {
 			null, SubjectType.PATIENT, false, false, randomPatientName, study, study.getStudyCards().get(0));
 		subject.setImagedObjectCategory(null); // to fix server issue with incompatible mapping value
 		org.shanoir.ng.importer.model.Subject subjectImportJob = new org.shanoir.ng.importer.model.Subject();
-		subjectImportJob.setId(subject.getId());
-		subjectImportJob.setName(subject.getName());
+		subjectImportJob.setName(subjectREST.getName());
 		patient.setSubject(subjectImportJob);
 		return subjectREST;
 	}
