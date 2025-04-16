@@ -100,6 +100,7 @@ ms.url:
   shanoir-ng-studies: http://${SHANOIR_PREFIX}studies:9902/
 # Data folder configuration
 datasets-data: /var/datasets-data
+vip-data-folder: /var/datasets-data/vip-data
 bids-data-folder: /var/datasets-data/bids-data
 # logging configuration
 logging:
@@ -147,6 +148,7 @@ vip:
   sleep-time: 20000
   file-formats: .nii.gz, .nii
   result-file-name: input_params.json
+  shanoir-vip-host: ${HOSTNAME:local}
 
 # Service account
 service-account:
@@ -200,6 +202,7 @@ ms.url:
   shanoir-ng-studies: http://studies:9902/
 # Data folder configuration
 datasets-data: /var/datasets-data
+vip-data-folder: /var/datasets-data/vip-data
 bids-data-folder: /var/datasets-data/bids-data
 # logging configuration
 logging:

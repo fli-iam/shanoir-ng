@@ -16,7 +16,9 @@ package org.shanoir.ng.dataset.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.transaction.Transactional;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
@@ -47,7 +49,7 @@ import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
-import org.shanoir.ng.vip.resource.ProcessingResourceService;
+import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -56,18 +58,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import org.shanoir.ng.dataset.dto.DatasetLight;
 
 /**
  * Dataset service implementation.
@@ -106,13 +108,13 @@ public class DatasetServiceImpl implements DatasetService {
 	private DatasetProcessingService processingService;
 
 	@Autowired
-	private ProcessingResourceService processingResourceService;
+	private DatasetExpressionRepository datasetExpressionRepository;
 
 	@Autowired
 	private DatasetAsyncService datasetAsyncService;
 
 	@Autowired
-	DatasetExpressionRepository datasetExpressionRepository;
+	private ProcessingResourceRepository processingResourceRepository;
 
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
@@ -122,7 +124,7 @@ public class DatasetServiceImpl implements DatasetService {
 		// Remove parent processing to avoid errors
 		entity.setDatasetProcessing(null);
 		processingService.removeDatasetFromAllProcessingInput(id);
-		processingResourceService.deleteByDatasetId(id);
+		processingResourceRepository.deleteByDatasetId(id);
 		propertyService.deleteByDatasetId(id);
 		repository.deleteById(id);
 	}
@@ -218,6 +220,11 @@ public class DatasetServiceImpl implements DatasetService {
 	@Override
 	public List<Dataset> findByIdIn(List<Long> ids) {
 		return Utils.toList(repository.findAllById(ids));
+	}
+
+	@Override
+	public List<DatasetLight> findLightByIdIn(List<Long> ids) {
+		return Utils.toList(repository.findAllLightById(ids));
 	}
 
 	@Override
