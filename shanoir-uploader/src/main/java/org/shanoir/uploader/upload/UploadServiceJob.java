@@ -107,20 +107,9 @@ public class UploadServiceJob {
 		final Collection<File> files = Util.listFiles(folder, null, true);
 		for (Iterator<File> filesIt = files.iterator(); filesIt.hasNext();) {
 			final File file = (File) filesIt.next();
-			// do not transfer nominativeDataImportJob as only for display in ShUp
-			// if (file.getName().equals(ShUpConfig.IMPORT_JOB_JSON)) {
-			// 	nominativeDataImportJobManager = new NominativeDataImportJobManager(file);
-		    // remove upload-job.xml from the list of files to transfer, to guarantee later
-			// that this file is for sure transferred as the last file to avoid sync problems
-			// on the server, when auto-import starts with still missing files
-			// } else if (file.getName().equals(UploadJobManager.UPLOAD_JOB_XML)
-			// 		|| file.getName().equals(ImportFinishRunnable.IMPORT_JOB_JSON)) {
-			// 	// do not add to list
-		    // } else {
 		    if (file.getName().endsWith(DcmRcvManager.DICOM_FILE_SUFFIX)) {
 				filesToTransfer.add(file);
 			}
-			// }
 		}
 		if (importJobManager != null) {
 			final org.shanoir.ng.importer.model.UploadState uploadState = importJob.getUploadState();
