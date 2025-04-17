@@ -27,6 +27,11 @@ import org.springframework.stereotype.Service;
 /*
  * This scheduled service iterates over all import job folders within
  * the workFolder and searches for import jobs, state FINISHED.
+ * 
+ * For performance reasons, especially on the limit network bandwith
+ * in the hospital, this job only runs, when no UploadServiceJob is
+ * running.
+ * 
  * When the timestamp is older than 2 hours the DICOMWeb API of
  * the server is used to verify, that all local images have well
  * arrived on the server and that the examination is complete.

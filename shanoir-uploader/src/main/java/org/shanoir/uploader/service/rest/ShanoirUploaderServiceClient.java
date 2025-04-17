@@ -1,5 +1,6 @@
 package org.shanoir.uploader.service.rest;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -21,6 +22,8 @@ import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.net.URIBuilder;
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.io.DicomInputStream;
 import org.json.JSONObject;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
@@ -934,7 +937,7 @@ public class ShanoirUploaderServiceClient {
 			+ "/series/" +  seriesInstanceUID
 			+ "/instances/" + sopInstanceUID);
 		URL url = b.build().toURL();
-		try (CloseableHttpResponse response = httpService.get(url.toString())) {
+		try (CloseableHttpResponse response = httpService.getDicom(url.toString())) {
 			long stopTime = System.currentTimeMillis();
 			long elapsedTime = stopTime - startTime;
 			logger.info("getDicomInstance: " + elapsedTime + "ms");
@@ -942,7 +945,10 @@ public class ShanoirUploaderServiceClient {
 			if (code == HttpStatus.SC_OK) {
 				HttpEntity entity = response.getEntity();
 				if (entity != null) {
-					ByteArrayResource byteArrayResource = new ByteArrayResource(EntityUtils.toByteArray(entity));
+					byte[] dicomBytes = EntityUtils.toByteArray(entity);
+					try (DicomInputStream din = new DicomInputStream(new ByteArrayInputStream(dicomBytes))) {
+						Attributes attributes = din.readDataset();
+					}
 				}
 			} else {
 				logger.error("Error in getDicomInstance: status code: "

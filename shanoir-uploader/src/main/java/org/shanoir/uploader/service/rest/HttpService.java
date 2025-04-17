@@ -101,6 +101,19 @@ public class HttpService {
 		}
 	}
 
+	public CloseableHttpResponse getDicom(String url) throws Exception {
+		try {
+			HttpGet httpGet = new HttpGet(url);
+			httpGet.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+			httpGet.setHeader(HttpHeaders.ACCEPT, "application/dicom");
+			CloseableHttpResponse response = httpClient.execute(httpGet, context);
+			return response;
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			throw e;
+		}
+	}
+
 	public CloseableHttpResponse post(String url, String json, boolean isLoginPost) throws Exception {
 		try {
 			HttpPost httpPost = new HttpPost(url);
