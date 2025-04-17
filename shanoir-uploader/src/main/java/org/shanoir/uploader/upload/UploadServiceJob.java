@@ -174,10 +174,12 @@ public class UploadServiceJob {
 			 */
 			setTempDirIdAndStartImport(tempDirId, importJob);	
 			currentNominativeDataController.updateNominativeDataPercentage(folder,
-					org.shanoir.ng.importer.model.UploadState.FINISHED.toString());
-					importJob.setUploadState(org.shanoir.ng.importer.model.UploadState.FINISHED);
-					importJob.setTimestamp(System.currentTimeMillis());
-					nominativeDataImportJobManager.writeImportJob(importJob);
+				org.shanoir.ng.importer.model.UploadState.FINISHED.toString());
+			importJob.setUploadState(org.shanoir.ng.importer.model.UploadState.FINISHED);
+			importJob.setTimestamp(System.currentTimeMillis());
+			nominativeDataImportJobManager.writeImportJob(importJob);
+
+			//List<Patient> patients = ImportUtils.getPatientsFromDir(folder, false);
 			
 			// Clean all DICOM files after successful import to server
 			for (Iterator<File> iterator = allFiles.iterator(); iterator.hasNext();) {

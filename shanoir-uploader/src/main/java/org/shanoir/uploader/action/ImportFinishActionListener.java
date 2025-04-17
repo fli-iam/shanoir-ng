@@ -78,7 +78,7 @@ public class ImportFinishActionListener implements ActionListener {
 		 * or select an existing subject from the combo box. This is not possible for OFSEP profile.
 		 */
 		boolean useExistingSubjectInStudy = false;
-		if (ShUpConfig.isModeSubjectCommonNameManual()) {
+		if (ShUpConfig.isModeSubjectNameManual()) {
 			// minimal length for subject common name is 1, same for subject study identifier
 			// if nothing is entered, use existing subject selected
 			if (mainWindow.importDialog.existingSubjectsCB.isEnabled()) {
@@ -112,7 +112,7 @@ public class ImportFinishActionListener implements ActionListener {
 
 		// In case user selects existing subject from study, just use it
 		if (!useExistingSubjectInStudy) {
-			// common name: entered by the user in the GUI
+			// subject name: entered by the user in the GUI
 			String subjectName = mainWindow.importDialog.subjectTextField.getText();
 			ImagedObjectCategory category = (ImagedObjectCategory) mainWindow.importDialog.subjectImageObjectCategoryCB.getSelectedItem();
 			String languageHemDom = (String) mainWindow.importDialog.subjectLanguageHemisphericDominanceCB.getSelectedItem();

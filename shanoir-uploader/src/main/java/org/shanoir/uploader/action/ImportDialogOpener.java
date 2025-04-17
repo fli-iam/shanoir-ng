@@ -58,7 +58,7 @@ public class ImportDialogOpener {
 			Date studyDate = ShUpConfig.formatter.parse(Util.convertLocalDateToString(importJob.getStudy().getStudyDate()));
 			Subject subject = null;
 			// Profile OFSEP: search with identifier
-			if (ShUpConfig.isModeSubjectCommonNameAutoIncrement()) {
+			if (ShUpConfig.isModeSubjectNameAutoIncrement()) {
 				subject = getSubject(importJob);
 			} // else Profile Neurinfo: no search with identifier, user selects existing subject 
 			List<Study> studiesWithStudyCards = getStudiesWithStudyCards(importJob);
@@ -240,14 +240,14 @@ public class ImportDialogOpener {
 		// No existing subject found with identifier:
 		} else {
 			// Profile Neurinfo: enable manual edition
-			if (ShUpConfig.isModeSubjectCommonNameManual()) {
+			if (ShUpConfig.isModeSubjectNameManual()) {
 				importDialog.subjectTextField.setText("");
 				importDialog.subjectTextField.setBackground(Color.WHITE);
 				importDialog.subjectTextField.setEnabled(true);
 				importDialog.subjectTextField.setEditable(true);
 				importDialog.existingSubjectsCB.setEditable(true);
 			// Profile OFSEP: display, that subject will be created automatically
-			} else if (ShUpConfig.isModeSubjectCommonNameAutoIncrement()) {
+			} else if (ShUpConfig.isModeSubjectNameAutoIncrement()) {
 				importDialog.subjectTextField
 						.setText(resourceBundle.getString("shanoir.uploader.import.subject.autofill"));
 				importDialog.subjectTextField.setBackground(Color.LIGHT_GRAY);

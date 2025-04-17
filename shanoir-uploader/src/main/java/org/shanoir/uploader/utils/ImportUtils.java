@@ -3,8 +3,11 @@ package org.shanoir.uploader.utils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -15,17 +18,23 @@ import javax.swing.JProgressBar;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
+import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
+import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
+import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.SeriesNumberOrDescriptionSorter;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
+import org.shanoir.ng.importer.model.PseudonymusHashValues;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
+import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
+import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Center;
 import org.shanoir.uploader.model.rest.Examination;
@@ -63,6 +72,10 @@ public class ImportUtils {
 	private static final Logger logger = LoggerFactory.getLogger(ImportUtils.class);
 	
 	private static ObjectMapper objectMapper = new ObjectMapper();
+
+	private static final String DICOMDIR = "DICOMDIR";
+
+	private static DicomDirGeneratorService dicomDirGeneratorService = new DicomDirGeneratorService();
 
 	static {
 		objectMapper.registerModule(new JavaTimeModule())
@@ -370,6 +383,23 @@ public class ImportUtils {
 		return allFileNames;
 	}
 
+	/**
+	 * 
+	 * @param subjectREST
+	 * @param subject
+	 * @param subjectName
+	 * @param category
+	 * @param languageHemDom
+	 * @param manualHemDom
+	 * @param subjectStudy
+	 * @param subjectType
+	 * @param existingSubjectInStudy
+	 * @param isPhysicallyInvolved
+	 * @param subjectStudyIdentifier
+	 * @param study
+	 * @param studyCard
+	 * @return
+	 */
 	public static org.shanoir.uploader.model.rest.Subject manageSubject(org.shanoir.uploader.model.rest.Subject subjectREST, Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom, SubjectStudy subjectStudy, SubjectType subjectType, boolean existingSubjectInStudy, boolean isPhysicallyInvolved, String subjectStudyIdentifier, Study study, StudyCard studyCard) {
 		if (subjectREST == null) {
 			try {
@@ -381,7 +411,7 @@ public class ImportUtils {
 			if(addSubjectStudy(study, subjectREST, subjectStudyIdentifier, subjectType, isPhysicallyInvolved)) {
 				// create subject with subject-study filled to avoid access denied exception because of rights check
 				Long centerId = studyCard.getAcquisitionEquipment().getCenter().getId();
-				subjectREST = ShUpOnloadConfig.getShanoirUploaderServiceClient().createSubject(subjectREST, ShUpConfig.isModeSubjectCommonNameManual(), centerId);
+				subjectREST = ShUpOnloadConfig.getShanoirUploaderServiceClient().createSubject(subjectREST, ShUpConfig.isModeSubjectNameManual(), centerId);
 				if (subjectREST == null) {
 					return null;
 				} else {
@@ -400,7 +430,7 @@ public class ImportUtils {
 		return subjectREST;
 	}
 	
-	private static org.shanoir.uploader.model.rest.Subject fillSubjectREST(Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom) throws ParseException {
+	public static org.shanoir.uploader.model.rest.Subject fillSubjectREST(Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom) throws ParseException {
 		org.shanoir.uploader.model.rest.Subject subjectREST = new org.shanoir.uploader.model.rest.Subject();
 		subjectREST.setIdentifier(subject.getIdentifier());
 		subjectREST.setBirthDate(subject.getBirthDate());
@@ -414,7 +444,7 @@ public class ImportUtils {
 		if (ShUpConfig.isModePseudonymus()) {
 			subjectREST.setPseudonymusHashValues(subject.getPseudonymusHashValues());
 		}
-		if (ShUpConfig.isModeSubjectCommonNameManual()) {
+		if (ShUpConfig.isModeSubjectNameManual()) {
 			subjectREST.setName(subjectName);
 		}
 		subjectREST.setImagedObjectCategory(category);
@@ -432,12 +462,12 @@ public class ImportUtils {
 		return subjectREST;
 	}
 
-	public static Long createExamination(Study study, org.shanoir.uploader.model.rest.Subject subjectREST, Date examinationDate, String examinationComment, Long centerId) {
+	public static Long createExamination(Study study, org.shanoir.uploader.model.rest.Subject subjectREST, Date studyDate, String examinationComment, Long centerId) {
 		Examination examinationREST = new Examination();
 		examinationREST.setStudyId(study.getId());
 		examinationREST.setSubjectId(subjectREST.getId());
 		examinationREST.setCenterId(centerId);
-		examinationREST.setExaminationDate(examinationDate);
+		examinationREST.setExaminationDate(studyDate);
 		examinationREST.setComment(examinationComment);
 		examinationREST = ShUpOnloadConfig.getShanoirUploaderServiceClient().createExamination(examinationREST);
 		if (examinationREST == null) {
@@ -588,6 +618,51 @@ public class ImportUtils {
 			}
 		}
 		return null;
+	}
+
+	public static Subject createSubjectFromPatient(Patient patient, Pseudonymizer pseudonymizer, IdentifierCalculator identifierCalculator) throws PseudonymusException, UnsupportedEncodingException, NoSuchAlgorithmException {
+		Subject subject = new Subject();
+		String identifier;
+		// OFSEP mode
+		if (ShUpConfig.isModePseudonymus()) {
+			// create PseudonymusHashValues here, based on Patient info, verified by users in GUI
+			PseudonymusHashValues pseudonymusHashValues = pseudonymizer.createHashValuesWithPseudonymus(patient);
+			subject.setPseudonymusHashValues(pseudonymusHashValues);
+			identifier = identifierCalculator.calculateIdentifierWithHashs(pseudonymusHashValues.getFirstNameHash1(), pseudonymusHashValues.getBirthNameHash1(), pseudonymusHashValues.getBirthDateHash());
+		// Neurinfo mode
+		} else {
+			String birthDateString = Util.convertLocalDateToString(patient.getPatientBirthDate());
+			identifier = identifierCalculator.calculateIdentifier(patient.getPatientFirstName(), patient.getPatientLastName(), birthDateString);
+		}
+		subject.setIdentifier(identifier);
+		/**
+		 * Keep sex and set birth date in subject to 01.01.year
+		 */
+		subject.setSex(patient.getPatientSex());
+		LocalDate birthDate = patient.getPatientBirthDate();
+		if (birthDate != null) {
+			birthDate = birthDate.with(TemporalAdjusters.firstDayOfYear());
+			subject.setBirthDate(birthDate);
+		}
+		return subject;
+	}
+
+	public static List<Patient> getPatientsFromDir(File directory, boolean deleteGeneratedDICOMDir) throws IOException {
+		boolean dicomDirGenerated = false;
+		File dicomDirFile = new File(directory, DICOMDIR);
+		if (!dicomDirFile.exists()) {
+			logger.info("No DICOMDIR found: generating one.");
+			dicomDirGeneratorService.generateDicomDirFromDirectory(dicomDirFile, directory);
+			dicomDirGenerated = true;
+			logger.info("DICOMDIR generated at path: " + dicomDirFile.getAbsolutePath());
+		}
+		final DicomDirToModelService dicomDirReader = new DicomDirToModelService();
+		List<Patient> patients = dicomDirReader.readDicomDirToPatients(dicomDirFile);
+		// clean up in case of dicomdir generated
+		if (dicomDirGenerated && deleteGeneratedDICOMDir) {
+			dicomDirFile.delete();
+		}
+		return patients;
 	}
 
 }

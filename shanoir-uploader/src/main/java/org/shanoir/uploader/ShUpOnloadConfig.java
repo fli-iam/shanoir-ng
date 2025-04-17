@@ -3,6 +3,7 @@ package org.shanoir.uploader;
 import java.io.File;
 
 import org.shanoir.uploader.dicom.IDicomServerClient;
+import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 import org.shanoir.uploader.service.rest.UrlConfig;
@@ -24,6 +25,8 @@ public class ShUpOnloadConfig {
 	private static CurrentNominativeDataController currentNominativeDataController;
 
 	private static ShanoirUploaderServiceClient shanoirUploaderServiceClient;
+
+	private static Pseudonymizer pseudonymizer;
 
 	private static UrlConfig urlConfig = new UrlConfig();
 
@@ -98,6 +101,14 @@ public class ShUpOnloadConfig {
 	
 	public static void setTokenString(String tokenString) {
 		ShUpOnloadConfig.tokenString = tokenString;
+	}
+
+	public static Pseudonymizer getPseudonymizer() {
+		return pseudonymizer;
+	}
+
+	public static void setPseudonymizer(Pseudonymizer pseudonymizer) {
+		ShUpOnloadConfig.pseudonymizer = pseudonymizer;
 	}
 
 }

@@ -16,6 +16,8 @@ import javax.swing.UIManager;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
+import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
+import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.gui.CurrentUploadsWindowTable;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.gui.ShUpStartupDialog;
@@ -44,6 +46,15 @@ public class ReadyState implements State {
 		ShUpStartupDialog shUpStartupDialog = context.getShUpStartupDialog();
 		shUpStartupDialog.setVisible(false);
 		shUpStartupDialog.dispose();
+		// Init pseudonymizer
+		File pseudonymusFolder = new File(ShUpOnloadConfig.getWorkFolder().getParentFile().getAbsolutePath() + File.separator + Pseudonymizer.PSEUDONYMUS_FOLDER);
+		Pseudonymizer pseudonymizer = null;
+		try {
+			pseudonymizer = new Pseudonymizer(ShUpConfig.basicProperties.getProperty(ShUpConfig.MODE_PSEUDONYMUS_KEY_FILE), pseudonymusFolder.getAbsolutePath());
+			ShUpOnloadConfig.setPseudonymizer(pseudonymizer);
+		} catch (PseudonymusException e) {
+			logger.error(e.getMessage(), e);
+		}
 		MainWindow frame = initJFrame();
 		CurrentUploadsWindowTable cuw = CurrentUploadsWindowTable.getInstance(frame);
 		currentNominativeDataController.configure(ShUpOnloadConfig.getWorkFolder(), cuw);

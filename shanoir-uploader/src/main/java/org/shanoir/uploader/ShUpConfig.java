@@ -125,11 +125,11 @@ public class ShUpConfig {
 		return Boolean.parseBoolean(profileProperties.getProperty(MODE_PSEUDONYMUS));
 	}
 	
-	public static boolean isModeSubjectCommonNameAutoIncrement() {
+	public static boolean isModeSubjectNameAutoIncrement() {
 		return MODE_SUBJECT_COMMON_NAME_AUTO_INCREMENT.equals(profileProperties.getProperty(MODE_SUBJECT_COMMON_NAME));
 	}
 
-	public static boolean isModeSubjectCommonNameManual() {
+	public static boolean isModeSubjectNameManual() {
 		return MODE_SUBJECT_COMMON_NAME_MANUAL.equals(profileProperties.getProperty(MODE_SUBJECT_COMMON_NAME));
 	}
 
