@@ -177,15 +177,6 @@ public class UploadServiceJob {
 		}
 	}
 
-	/**
-	 * @param tempDirId
-	 * @param importJobJsonFile
-	 * @throws IOException
-	 * @throws JsonParseException
-	 * @throws JsonMappingException
-	 * @throws JsonProcessingException
-	 * @throws Exception
-	 */
 	private void setTempDirIdAndStartImport(String tempDirId, ImportJob importJob)
 			throws IOException, JsonParseException, JsonMappingException, JsonProcessingException, Exception {
 		importJob.setWorkFolder(tempDirId);
