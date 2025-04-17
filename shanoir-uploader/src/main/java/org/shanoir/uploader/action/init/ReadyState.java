@@ -4,6 +4,7 @@ import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -12,15 +13,16 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
+import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.gui.CurrentUploadsWindowTable;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.gui.ShUpStartupDialog;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
-import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
-import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
+import org.shanoir.uploader.nominativeData.NominativeDataImportJobManager;
 import org.shanoir.uploader.upload.UploadServiceJob;
+import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +40,7 @@ public class ReadyState implements State {
 	@Autowired
 	private UploadServiceJob uploadServiceJob;
 	
-	public void load(StartupStateContext context) {
+	public void load(StartupStateContext context) throws IOException {
 		ShUpStartupDialog shUpStartupDialog = context.getShUpStartupDialog();
 		shUpStartupDialog.setVisible(false);
 		shUpStartupDialog.dispose();
@@ -92,32 +94,38 @@ public class ReadyState implements State {
 		final List<File> folders = Util.listFolders(ShUpOnloadConfig.getWorkFolder());
 		logger.debug("Update Nominative DataFiles Before Closing " + folders.size() + " folders in work folder.");
 		for (Iterator foldersIt = folders.iterator(); foldersIt.hasNext();) {
-			NominativeDataUploadJobManager dataJobManager = null;
+			NominativeDataImportJobManager dataJobManager = null;
 			final File folder = (File) foldersIt.next();
 			// initDataJobManager
 			final Collection<File> files = Util.listFiles(folder, null, false);
 			for (Iterator filesIt = files.iterator(); filesIt.hasNext();) {
 				final File file = (File) filesIt.next();
 				if (file.getName().equals(
-						NominativeDataUploadJobManager.NOMINATIVE_DATA_JOB_XML)) {
+						ShUpConfig.IMPORT_JOB_JSON)) {
 					logger.debug(" Initializing data job manager before launching Jobs");
-					dataJobManager = new NominativeDataUploadJobManager(file);
+					dataJobManager = new NominativeDataImportJobManager(file);
 				}
 			}
 			if (dataJobManager != null) {
-				final NominativeDataUploadJob uploadDataJob = dataJobManager
-						.readUploadDataJob();
-				String uploadPercentage = uploadDataJob.getUploadPercentage();
+				final ImportJob importJob = dataJobManager
+						.readImportJob();
+				// in case of previous importJobs (without uploadPercentage)
+				// we look for uploadPercentage value from nominative-data-job.xml file
+				if (importJob.getUploadPercentage() == null) {
+					String percentage = ImportUtils.getUploadPercentageFromNominativeDataJob(importJob.getWorkFolder());
+					importJob.setUploadPercentage(percentage);
+				}
+				String uploadPercentage = importJob.getUploadPercentage();
 				logger.debug(" upload percentage before launching Jobs "
 						+ uploadPercentage);
 				if (!uploadPercentage.equals("100 %"))
 					uploadPercentage = "0 %";
 				logger.debug(" upload percentage initialized to "
 						+ uploadPercentage);
-				uploadDataJob.setUploadPercentage(uploadPercentage);
-				dataJobManager.writeUploadDataJob(uploadDataJob);
+						importJob.setUploadPercentage(uploadPercentage);
+				dataJobManager.writeImportJob(importJob);
 			} else {
-				logger.error("Folder found in workFolder without nominative-data-job.xml.");
+				logger.error("Folder found in workFolder without import-job.json.");
 			}
 		}
 	}

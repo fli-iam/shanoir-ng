@@ -23,7 +23,6 @@ import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
-import org.shanoir.uploader.upload.UploadJob;
 import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.QualityUtils;
@@ -42,7 +41,7 @@ public class ImportFinishActionListener implements ActionListener {
 
 	private MainWindow mainWindow;
 	
-	private UploadJob uploadJob;
+	private ImportJob importJob;
 	
 	private File uploadFolder;
 	
@@ -50,10 +49,10 @@ public class ImportFinishActionListener implements ActionListener {
 	
 	private ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBILNG;
 
-	public ImportFinishActionListener(final MainWindow mainWindow, UploadJob uploadJob, File uploadFolder, Subject subjectREST,
+	public ImportFinishActionListener(final MainWindow mainWindow, ImportJob importJob, File uploadFolder, Subject subjectREST,
 			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBILNG) {
 		this.mainWindow = mainWindow;
-		this.uploadJob = uploadJob;
+		this.importJob = importJob;
 		this.uploadFolder = uploadFolder;
 		this.subjectREST = subjectREST;
 		this.importStudyAndStudyCardCBILNG = importStudyAndStudyCardCBILNG;
@@ -199,7 +198,7 @@ public class ImportFinishActionListener implements ActionListener {
 				ShUpConfig.resourceBundle.getString("shanoir.uploader.select.error.title"), JOptionPane.ERROR_MESSAGE);
         }
 
-		Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, importJob, subjectREST.getName());
+		Runnable runnable = new ImportFinishRunnable(uploadFolder, importJob, subjectREST.getName());
 		Thread thread = new Thread(runnable);
 		thread.start();
 
