@@ -1,7 +1,6 @@
 package org.shanoir.uploader.check;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -14,9 +13,6 @@ import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.importer.model.UploadState;
 import org.shanoir.uploader.ShUpConfig;
-import org.shanoir.uploader.dicom.query.PatientTreeNode;
-import org.shanoir.uploader.dicom.query.SerieTreeNode;
-import org.shanoir.uploader.dicom.query.StudyTreeNode;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
 import org.shanoir.uploader.nominativeData.NominativeDataImportJobManager;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
