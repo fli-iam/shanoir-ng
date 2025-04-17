@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
@@ -73,7 +74,8 @@ public class ExaminationConsistencyServiceJob {
 				}
 				final org.shanoir.ng.importer.model.UploadState uploadState = importJob.getUploadState();
 				if (uploadState.equals(org.shanoir.ng.importer.model.UploadState.FINISHED)) {
-                    checkImportJob(folder);
+                    String examinationUID = StudyInstanceUIDHandler.PREFIX + importJob.getExaminationId();
+                    checkImportJob(folder, examinationUID);
 				}
 			} else {
 				logger.error("Folder found in workFolder without import-job.json.");
@@ -81,7 +83,7 @@ public class ExaminationConsistencyServiceJob {
         }
     }
 
-    private void checkImportJob(File importJobFolder) throws Exception {
+    private void checkImportJob(File importJobFolder, String examinationUID) throws Exception {
         List<Patient> patients = ImportUtils.getPatientsFromDir(importJobFolder, false);	
 		if (patients != null) {
 			for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
@@ -95,7 +97,7 @@ public class ExaminationConsistencyServiceJob {
                         List<Instance> instances = serie.getInstances();
                         for (Iterator<Instance> instancesIt = instances.iterator(); instancesIt.hasNext();) {
                             Instance instance = (Instance) instancesIt.next();
-                            shanoirUploaderServiceClient.getDicomInstance(study.getStudyInstanceUID(), serie.getSeriesInstanceUID(), instance.getSopInstanceUID());
+                            shanoirUploaderServiceClient.getDicomInstance(examinationUID, serie.getSeriesInstanceUID(), instance.getSopInstanceUID());
                         }
                     }
 				}
