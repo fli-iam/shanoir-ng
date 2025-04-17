@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -33,7 +33,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
  * @author mkain
  * 
  */
-@Component
+@Service
 public class UploadServiceJob {
 
 	private static final Logger logger = LoggerFactory.getLogger(UploadServiceJob.class);
@@ -178,21 +178,6 @@ public class UploadServiceJob {
 			importJob.setUploadState(org.shanoir.ng.importer.model.UploadState.FINISHED);
 			importJob.setTimestamp(System.currentTimeMillis());
 			nominativeDataImportJobManager.writeImportJob(importJob);
-
-			//List<Patient> patients = ImportUtils.getPatientsFromDir(folder, false);
-			
-			// Clean all DICOM files after successful import to server
-			for (Iterator<File> iterator = allFiles.iterator(); iterator.hasNext();) {
-				File file = (File) iterator.next();
-				// from-disk: delete files directly
-				if (file.getParentFile().equals(folder)) {
-					FileUtils.deleteQuietly(file);
-				// from-pacs: delete serieUID folder as well
-				} else {
-					FileUtils.deleteQuietly(file.getParentFile());
-				}
-			}
-			logger.info("All DICOM files deleted after successful upload to server.");
 
 			uploading = false;
 		} catch (Exception e) {
