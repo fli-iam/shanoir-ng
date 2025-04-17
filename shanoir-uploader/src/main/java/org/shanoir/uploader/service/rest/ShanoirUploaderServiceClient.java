@@ -15,6 +15,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpStatus;
@@ -39,6 +40,7 @@ import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -921,6 +923,32 @@ public class ShanoirUploaderServiceClient {
 						+ file.getAbsolutePath() + ", size in bytes: " + Files.size(file.toPath()) + "), status code: "
 						+ code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code"));
 				throw new Exception("Error in postDicomSR");
+			}
+		}		
+	}
+
+	public void getDicomInstance(String examinationUID, String seriesInstanceUID, String sopInstanceUID) throws Exception {
+		long startTime = System.currentTimeMillis();
+		URIBuilder b = new URIBuilder(this.serviceURLDatasetsDicomWebStudies
+			+ "/" + examinationUID
+			+ "/series/" +  seriesInstanceUID
+			+ "/instances/" + sopInstanceUID);
+		URL url = b.build().toURL();
+		try (CloseableHttpResponse response = httpService.get(url.toString())) {
+			long stopTime = System.currentTimeMillis();
+			long elapsedTime = stopTime - startTime;
+			logger.info("getDicomInstance: " + elapsedTime + "ms");
+			int code = response.getCode();
+			if (code == HttpStatus.SC_OK) {
+				HttpEntity entity = response.getEntity();
+				if (entity != null) {
+					ByteArrayResource byteArrayResource = new ByteArrayResource(EntityUtils.toByteArray(entity));
+				}
+			} else {
+				logger.error("Error in getDicomInstance: status code: "
+					+ code + ", message: "
+					+ apiResponseMessages.getOrDefault(code, "unknown status code"));
+				throw new Exception("Error in getDicomFile");
 			}
 		}		
 	}

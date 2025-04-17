@@ -7,8 +7,15 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.Instance;
+import org.shanoir.ng.importer.model.Patient;
+import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.importer.model.UploadState;
 import org.shanoir.uploader.ShUpConfig;
+import org.shanoir.uploader.dicom.query.PatientTreeNode;
+import org.shanoir.uploader.dicom.query.SerieTreeNode;
+import org.shanoir.uploader.dicom.query.StudyTreeNode;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
 import org.shanoir.uploader.nominativeData.NominativeDataImportJobManager;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
@@ -42,14 +49,14 @@ public class ExaminationConsistencyServiceJob {
 	private ShanoirUploaderServiceClient shanoirUploaderServiceClient;
 
     @Scheduled(fixedRate = 5000)
-    public void execute() throws IOException {
+    public void execute() throws Exception {
 		logger.info("ExaminationConsistencyServiceJob started...");
 		File workFolder = new File(ShUpConfig.shanoirUploaderFolder.getAbsolutePath() + File.separator + ShUpConfig.WORK_FOLDER);
 		processWorkFolder(workFolder, currentNominativeDataController);
         logger.info("ExaminationConsistencyServiceJob ended...");
 	}
 
-    private void processWorkFolder(File workFolder, CurrentNominativeDataController currentNominativeDataController) throws IOException {
+    private void processWorkFolder(File workFolder, CurrentNominativeDataController currentNominativeDataController) throws Exception {
         final List<File> folders = Util.listFolders(workFolder);
 		logger.debug("Found " + folders.size() + " folders in work folder.");
 		for (Iterator<File> foldersIt = folders.iterator(); foldersIt.hasNext();) {
@@ -66,13 +73,35 @@ public class ExaminationConsistencyServiceJob {
 				}
 				final org.shanoir.ng.importer.model.UploadState uploadState = importJob.getUploadState();
 				if (uploadState.equals(org.shanoir.ng.importer.model.UploadState.FINISHED)) {
-//					processFolderForServer(folder, importJobManager, importJob, currentNominativeDataController);
+                    checkImportJob(folder);
 				}
 			} else {
 				logger.error("Folder found in workFolder without import-job.json.");
 			}
         }
-        //List<Patient> patients = ImportUtils.getPatientsFromDir(folder, false);	
+    }
+
+    private void checkImportJob(File importJobFolder) throws Exception {
+        List<Patient> patients = ImportUtils.getPatientsFromDir(importJobFolder, false);	
+		if (patients != null) {
+			for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
+				Patient patient = (Patient) patientsIt.next();
+				List<Study> studies = patient.getStudies();
+				for (Iterator<Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
+					Study study = (Study) studiesIt.next();
+					List<Serie> series = study.getSeries();
+					for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
+						Serie serie = (Serie) seriesIt.next();
+                        List<Instance> instances = serie.getInstances();
+                        for (Iterator<Instance> instancesIt = instances.iterator(); instancesIt.hasNext();) {
+                            Instance instance = (Instance) instancesIt.next();
+                            shanoirUploaderServiceClient.getDicomInstance(study.getStudyInstanceUID(), serie.getSeriesInstanceUID(), instance.getSopInstanceUID());
+                        }
+                    }
+				}
+			}
+		}
+        //deleteAllDicomFiles(importJobFolder, null);
     }
 
     private void deleteAllDicomFiles(File importJobFolder, List<File> files) {
