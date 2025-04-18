@@ -89,7 +89,7 @@ public interface DICOMWebApi {
 			@Parameter(description = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID
 		) throws RestServiceException, JsonMappingException, JsonProcessingException;
 
-	@Operation(summary = "", description = "Returns all DICOM instances/datasets of a study and serie")
+	@Operation(summary = "", description = "Returns all DICOM instances of a study and serie")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found instances/datasets"),
 			@ApiResponse(responseCode = "204", description = "no instance/dataset found"),
@@ -118,7 +118,7 @@ public interface DICOMWebApi {
 			@Parameter(description = "sopInstanceUID", required = true) @PathVariable("sopInstanceUID") String sopInstanceUID
 		) throws RestServiceException;
 	
-	@Operation(summary = "", description = "Returns a frame of a DICOM instance/dataset, of a study and serie")
+	@Operation(summary = "", description = "Returns a frame of a DICOM instance, of a study and a serie")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found instances/datasets"),
 			@ApiResponse(responseCode = "204", description = "no instance/dataset found"),

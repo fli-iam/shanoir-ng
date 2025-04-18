@@ -176,6 +176,17 @@ public class DICOMWebService {
 		return null;
 	}
 
+	/**
+	 * This method is used by the viewer OHIF to display the actual images.
+	 * The raw pixel data are searched in dcm4chee arc light behind Shanoir
+	 * and send as byte array to OHIF.
+	 * 
+	 * @param studyInstanceUID
+	 * @param serieInstanceUID
+	 * @param sopInstanceUID
+	 * @param frame
+	 * @return
+	 */
 	public ResponseEntity findFrameOfStudyOfSerieOfInstance(String studyInstanceUID, String serieInstanceUID,
 			String sopInstanceUID, String frame) {
 		try {
@@ -201,6 +212,16 @@ public class DICOMWebService {
 		return null;
 	}
 	
+	/**
+	 * This method is not used by the viewer OHIF (normally).
+	 * ShanoirUploader is calling it to get a DICOM instance,
+	 * when running its job to check examination consistency.
+	 * 
+	 * @param studyInstanceUID
+	 * @param serieInstanceUID
+	 * @param sopInstanceUID
+	 * @return
+	 */
 	public ResponseEntity findInstance(String studyInstanceUID, String serieInstanceUID, String sopInstanceUID) {
 		try {
 			String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/instances/" + sopInstanceUID;

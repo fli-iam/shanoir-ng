@@ -105,7 +105,6 @@ public class HttpService {
 		try {
 			HttpGet httpGet = new HttpGet(url);
 			httpGet.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
-			httpGet.setHeader(HttpHeaders.ACCEPT, "application/dicom");
 			CloseableHttpResponse response = httpClient.execute(httpGet, context);
 			return response;
 		} catch (Exception e) {

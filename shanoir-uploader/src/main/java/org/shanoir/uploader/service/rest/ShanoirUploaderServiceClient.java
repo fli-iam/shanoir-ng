@@ -16,7 +16,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpStatus;
@@ -43,10 +42,13 @@ import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+
+import jakarta.mail.internet.MimeBodyPart;
+import jakarta.mail.internet.MimeMultipart;
+import jakarta.mail.util.ByteArrayDataSource;
 
 /**
  * 
@@ -945,9 +947,24 @@ public class ShanoirUploaderServiceClient {
 			if (code == HttpStatus.SC_OK) {
 				HttpEntity entity = response.getEntity();
 				if (entity != null) {
-					byte[] dicomBytes = EntityUtils.toByteArray(entity);
-					try (DicomInputStream din = new DicomInputStream(new ByteArrayInputStream(dicomBytes))) {
-						Attributes attributes = din.readDataset();
+					String contentType = entity.getContentType();
+	                byte[] rawData = EntityUtils.toByteArray(entity);
+					if (contentType != null && contentType.contains("multipart/related")) {
+						ByteArrayDataSource ds = new ByteArrayDataSource(rawData, contentType);
+						MimeMultipart multipart = new MimeMultipart(ds);
+						if (multipart.getCount() > 0) {
+							MimeBodyPart part = (MimeBodyPart) multipart.getBodyPart(0); // assuming single-part for now
+							try (DicomInputStream din = new DicomInputStream(part.getInputStream())) {
+								Attributes attributes = din.readDataset();
+							}
+						} else {
+							throw new RuntimeException("No parts found in multipart DICOM response.");
+						}
+					} else {
+						// Handle single-part DICOM
+						try (DicomInputStream din = new DicomInputStream(new ByteArrayInputStream(rawData))) {
+							Attributes attributes = din.readDataset();
+						}
 					}
 				}
 			} else {
