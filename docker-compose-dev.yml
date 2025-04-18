@@ -213,6 +213,7 @@ services:
       - "database"
       - "rabbitmq"
       - "users"
+      - "solr"
 
   preclinical:
     container_name: "${SHANOIR_PREFIX}preclinical"

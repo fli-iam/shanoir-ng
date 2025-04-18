@@ -274,6 +274,9 @@ import { StudyTreeComponent } from './studies/study/study-tree.component';
 import { TreeService } from './studies/study/tree.service';
 import { CoilNodeComponent } from './coils/coil/tree/coil-node.component';
 import { DoubleAwesomeComponent } from './shared/double-awesome/double-awesome.component';
+import { CtProtocol } from './dataset-acquisitions/modality/ct/ct-protocol.model';
+import { CtProtocolComponent } from './dataset-acquisitions/modality/ct/ct-protocol.component';
+import { XaProtocolComponent } from './dataset-acquisitions/modality/xa/xa-protocol.component';
 import { MetadataNodeComponent } from './datasets/tree/metadata-node.component';
 
 @NgModule({ 
@@ -369,7 +372,9 @@ import { MetadataNodeComponent } from './datasets/tree/metadata-node.component';
         DatasetAcquisitionListComponent,
         DatasetAcquisitionComponent,
         MrProtocolComponent,
+        CtProtocolComponent,
         PetProtocolComponent,
+        XaProtocolComponent,
         DicomTagPipe,
         AutoAdjustInputComponent,
         SolrSearchComponent,

@@ -9,7 +9,7 @@ side-menu, .side-menu { overflow-x: hidden; scrollbar-width: none; overflow: -mo
 .side-menu { width: 300px; position: fixed; top: 0; z-index: 0; }
 
 study-tree { z-index: 1; 
-    height: 100%; display: inline-block; overflow: hidden; position: relative; min-width: fit-content; margin-top: 10px; }
+    height: 100%; display: inline-block; overflow: hidden; position: relative; min-width: 285px; margin-top: 10px; }
 
 .tree-frame { border-right: 1px solid var(--grey); margin-right: 20px; }
 

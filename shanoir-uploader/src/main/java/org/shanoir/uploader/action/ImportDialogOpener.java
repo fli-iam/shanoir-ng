@@ -4,13 +4,15 @@ import java.awt.Color;
 import java.io.File;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.uploader.ShUpConfig;
-import org.shanoir.uploader.dicom.MRI;
 import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
@@ -21,8 +23,8 @@ import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
-import org.shanoir.uploader.upload.UploadJob;
 import org.shanoir.uploader.utils.ImportUtils;
+import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,27 +53,27 @@ public class ImportDialogOpener {
 		this.shanoirUploaderServiceClient = shanoirUploaderServiceClient;
 	}
 
-	public void openImportDialog(UploadJob uploadJob, File uploadFolder) {
+	public void openImportDialog(ImportJob importJob, File importFolder) {
 		try {
-			Date studyDate = ShUpConfig.formatter.parse(uploadJob.getStudyDate());
+			Date studyDate = ShUpConfig.formatter.parse(Util.convertLocalDateToString(importJob.getStudy().getStudyDate()));
 			Subject subject = null;
 			// Profile OFSEP: search with identifier
-			if (ShUpConfig.isModeSubjectCommonNameAutoIncrement()) {
-				subject = getSubject(uploadJob);
+			if (ShUpConfig.isModeSubjectNameAutoIncrement()) {
+				subject = getSubject(importJob);
 			} // else Profile Neurinfo: no search with identifier, user selects existing subject 
-			List<Study> studiesWithStudyCards = getStudiesWithStudyCards(uploadJob);
+			List<Study> studiesWithStudyCards = getStudiesWithStudyCards(importJob);
 			// init components of GUI and listeners
 			ImportStudyCardFilterDocumentListener importStudyCardFilterDocumentListener = new ImportStudyCardFilterDocumentListener(this.mainWindow);
 			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, subject, studyDate, importStudyCardFilterDocumentListener, shanoirUploaderServiceClient);
-			ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, uploadJob, uploadFolder, subject, importStudyAndStudyCardCBIL);
+			ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, importJob, importFolder, subject, importStudyAndStudyCardCBIL);
 			importDialog = new ImportDialog(this.mainWindow,
 					ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
 					importStudyAndStudyCardCBIL, importFinishAL, importStudyCardFilterDocumentListener);
 			// update import dialog with items from server
 			updateImportDialogForSubject(subject); // this has to be done after init of the dialog
-			updateImportDialogForNewExamFields(studyDate, uploadJob.getStudyDescription());
+			updateImportDialogForNewExamFields(studyDate, importJob.getStudy().getStudyDescription());
 			updateImportDialogForStudyAndStudyCard(studiesWithStudyCards);
-			updateImportDialogForMRICenter(uploadJob);
+			updateImportDialogForMRICenter(importJob);
 			importDialog.mrExaminationExamExecutiveLabel.setVisible(false);
 			importDialog.mrExaminationExamExecutiveCB.setVisible(false);
 		} catch (Exception e) {
@@ -84,15 +86,15 @@ public class ImportDialogOpener {
 	/**
 	 * @param uploadJob
 	 */
-	private void updateImportDialogForMRICenter(final UploadJob uploadJob) {
-		MRI mriInformation = uploadJob.getMriInformation();
- 		String institutionName = mriInformation.getInstitutionName();
-		String institutionAddress = mriInformation.getInstitutionAddress();
-		String stationName = mriInformation.getStationName();
-		String manufacturer = mriInformation.getManufacturer();
-		String manufacturersModelName = mriInformation.getManufacturersModelName();
-		String magneticFieldStrength = mriInformation.getMagneticFieldStrength();
-		String deviceSerialNumber = mriInformation.getDeviceSerialNumber();
+	private void updateImportDialogForMRICenter(final ImportJob importJob) {
+		Serie firstSerie = importJob.getFirstSelectedSerie();
+ 		String institutionName = firstSerie.getInstitution().getInstitutionName();
+		String institutionAddress = firstSerie.getInstitution().getInstitutionAddress();
+		String stationName = firstSerie.getEquipment().getStationName();
+		String manufacturer = firstSerie.getEquipment().getManufacturer();
+		String manufacturersModelName = firstSerie.getEquipment().getManufacturerModelName();
+		String magneticFieldStrength = firstSerie.getEquipment().getMagneticFieldStrength();
+		String deviceSerialNumber = firstSerie.getEquipment().getDeviceSerialNumber();
 		importDialog.mriCenterText.setText(institutionName);
 		importDialog.mriCenterAddressText.setText(institutionAddress);
 		importDialog.mriStationNameText.setText(stationName);
@@ -109,7 +111,7 @@ public class ImportDialogOpener {
 	 * @param equipmentDicom
 	 * @throws Exception 
 	 */
-	private List<Study> getStudiesWithStudyCards(final UploadJob uploadJob) throws Exception {
+	private List<Study> getStudiesWithStudyCards(final ImportJob importJob) throws Exception {
 		List<Study> studies = shanoirUploaderServiceClient.findStudiesNamesAndCenters();
 		if (studies != null) {
 			logger.info("getStudiesWithStudyCards: " + studies.size() + " studies found.");
@@ -135,8 +137,8 @@ public class ImportDialogOpener {
 								}
 							}
 							compatibleStudyCard = ImportUtils.flagStudyCardCompatible(
-								studyCard, uploadJob.getMriInformation().getManufacturersModelName(),
-								uploadJob.getMriInformation().getDeviceSerialNumber());
+								studyCard, importJob.getFirstSelectedSerie().getEquipment().getManufacturerModelName(),
+								importJob.getFirstSelectedSerie().getEquipment().getDeviceSerialNumber());
 						}
 					}
 					if (compatibleStudyCard) {
@@ -161,6 +163,7 @@ public class ImportDialogOpener {
 		importDialog.studyCardCB.removeAllItems();
 		if (studiesWithStudyCards != null && !studiesWithStudyCards.isEmpty()) {
 			boolean firstCompatibleStudyFound = false;
+			studiesWithStudyCards.sort(Comparator.comparing(Study::getName));
 			for (Study study : studiesWithStudyCards) {
 				importDialog.studyCB.addItem(study);
 				if (study.getCompatible() != null
@@ -194,10 +197,11 @@ public class ImportDialogOpener {
 		importDialog.studyCB.setValueSet(false);
 	}
 
-	private Subject getSubject(final UploadJob uploadJob) throws Exception {
-		if (uploadJob.getSubjectIdentifier() != null) {
+	private Subject getSubject(final ImportJob importJob) throws Exception {
+		String identifier = importJob.getSubject().getIdentifier();
+		if (identifier != null) {
 			return shanoirUploaderServiceClient
-				.findSubjectBySubjectIdentifier(uploadJob.getSubjectIdentifier());
+				.findSubjectBySubjectIdentifier(identifier);
 		}
 		return null;
 	}
@@ -236,13 +240,14 @@ public class ImportDialogOpener {
 		// No existing subject found with identifier:
 		} else {
 			// Profile Neurinfo: enable manual edition
-			if (ShUpConfig.isModeSubjectCommonNameManual()) {
+			if (ShUpConfig.isModeSubjectNameManual()) {
 				importDialog.subjectTextField.setText("");
 				importDialog.subjectTextField.setBackground(Color.WHITE);
 				importDialog.subjectTextField.setEnabled(true);
 				importDialog.subjectTextField.setEditable(true);
+				importDialog.existingSubjectsCB.setEditable(true);
 			// Profile OFSEP: display, that subject will be created automatically
-			} else if (ShUpConfig.isModeSubjectCommonNameAutoIncrement()) {
+			} else if (ShUpConfig.isModeSubjectNameAutoIncrement()) {
 				importDialog.subjectTextField
 						.setText(resourceBundle.getString("shanoir.uploader.import.subject.autofill"));
 				importDialog.subjectTextField.setBackground(Color.LIGHT_GRAY);

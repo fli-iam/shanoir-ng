@@ -213,7 +213,7 @@ public class MainWindow extends JFrame {
 		mnImportExcell.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				ImportFromTableWindow importTable = new ImportFromTableWindow(shanoirUploaderFolder, resourceBundle, scrollPaneUpload, dicomServerClient, dicomFileAnalyzer, ShUpOnloadConfig.getShanoirUploaderServiceClient(), dOCAL);
+				ImportFromTableWindow importTable = new ImportFromTableWindow(shanoirUploaderFolder, resourceBundle, scrollPaneUpload, dicomServerClient, dicomFileAnalyzer, ShUpOnloadConfig.getShanoirUploaderServiceClient(), ShUpOnloadConfig.getPseudonymizer());
 			}
 		});
 
@@ -330,11 +330,13 @@ public class MainWindow extends JFrame {
 		// "Patient" Radio Button
 		pRB = new JRadioButton("Patient");
 		pRB.setSelected(true);
+		pRB.setToolTipText(resourceBundle.getString("shanoir.uploader.patientQueryLevel.tooltip"));
 		queryLevelRG.add(pRB);
 		queryRadioPanel.add(pRB);
 
 		// "Study" Radio Button
 		sRB = new JRadioButton(resourceBundle.getString("shanoir.uploader.queryLevelStudy"));
+		sRB.setToolTipText(resourceBundle.getString("shanoir.uploader.studyQueryLevel.tooltip"));
 		queryLevelRG.add(sRB);
 		queryRadioPanel.add(sRB);
 
@@ -504,6 +506,7 @@ public class MainWindow extends JFrame {
 		gbc_studyDescriptionTF.gridwidth = 6;
 		gbc_studyDescriptionTF.gridx = 1;
 		gbc_studyDescriptionTF.gridy = 5;
+		studyDescriptionTF.setToolTipText(resourceBundle.getString("shanoir.uploader.studyDescription.tooltip"));
 		queryPanel.add(studyDescriptionTF, gbc_studyDescriptionTF);
 		studyDescriptionTF.setColumns(15);
 		studyDescriptionTF.setText("");
@@ -599,7 +602,8 @@ public class MainWindow extends JFrame {
 		
 		String[] modalityList = { "MR", "CT", "PT", "NM", "XA", "None" };
 		JComboBox<String> modalityCB = new JComboBox<String>(modalityList);
-		modalityCB.setSelectedIndex(0);
+		// We set by default the modality to None because some PACS do not support modality at Patient or even Study root query
+		modalityCB.setSelectedIndex(modalityList.length - 1);
 		GridBagConstraints gBC_modality = new GridBagConstraints();
 		gBC_modality.anchor = GridBagConstraints.WEST;
 		gBC_modality.insets = new Insets(5, 5, 0, 0);
@@ -813,18 +817,7 @@ public class MainWindow extends JFrame {
 		
 		menuBar.add(Box.createHorizontalGlue());
 		
-		/**
-		 * Init pseudonymizer and subjectIdentifierGenerator and create
-		 * DownloadOrCopyActionListener, and add AL to button.
-		 */
-		File pseudonymusFolder = new File(ShUpOnloadConfig.getWorkFolder().getParentFile().getAbsolutePath() + File.separator + Pseudonymizer.PSEUDONYMUS_FOLDER);
-		Pseudonymizer pseudonymizer = null;
-		try {
-			pseudonymizer = new Pseudonymizer(ShUpConfig.basicProperties.getProperty(ShUpConfig.MODE_PSEUDONYMUS_KEY_FILE), pseudonymusFolder.getAbsolutePath());
-		} catch (PseudonymusException e) {
-			logger.error(e.getMessage(), e);
-		}
-		dOCAL = new DownloadOrCopyActionListener(this, pseudonymizer, dicomServerClient, dicomFileAnalyzer);
+		dOCAL = new DownloadOrCopyActionListener(this, ShUpOnloadConfig.getPseudonymizer(), dicomServerClient, dicomFileAnalyzer);
 		downloadOrCopyButton.addActionListener(dOCAL);
 		downloadOrCopyButton.setEnabled(false);
 		
