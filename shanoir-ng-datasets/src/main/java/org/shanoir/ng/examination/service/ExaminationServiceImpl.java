@@ -156,7 +156,8 @@ public class ExaminationServiceImpl implements ExaminationService {
 				}
 			}
 			String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUID(examination);
-			dicomWebService.rejectExaminationFromPacs(studyInstanceUID);
+			if (examination.getSource() == null)
+				dicomWebService.rejectExaminationFromPacs(studyInstanceUID);
 
 			examinationRepository.deleteById(id);
 		}
