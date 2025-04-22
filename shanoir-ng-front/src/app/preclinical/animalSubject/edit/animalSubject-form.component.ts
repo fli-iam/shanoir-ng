@@ -218,7 +218,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                 this.references = references;
                 this.sortReferences();
             }),
-            this.loadAllStudies()            
+            this.loadAllStudies()
         ]).then();
     }
 
@@ -340,6 +340,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     }
 
     public save(): Promise<PreclinicalSubject> {
+        console.log("save this.preclinicalSubject : ", this.preclinicalSubject);
         if (this.preclinicalSubject.animalSubject.id){
             return this.updateSubject().then(() => {
                 this.onSave.next(this.preclinicalSubject);
@@ -351,7 +352,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                 this.catchSavingErrors(reason);
                 return null;
             });
-        }else{
+        } else {
             return this.addSubject().then(subject => {
                 if (subject == null) {
                     return;
@@ -375,6 +376,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 
         this.preclinicalSubject.subject.identifier = this.generateSubjectIdentifier();
 
+        console.log("add subject this.preclinicalSubject : ", this.preclinicalSubject);
         return this.animalSubjectService.createPreclinicalSubject(this.preclinicalSubject).then((preclinicalSubject) => {
             this.preclinicalSubject.id = preclinicalSubject.id;
             this.preclinicalSubject.animalSubject = preclinicalSubject.animalSubject;
