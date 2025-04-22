@@ -26,6 +26,7 @@ import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.dicom.query.StudyTreeNode;
 import org.shanoir.uploader.gui.DicomTree;
 import org.shanoir.uploader.gui.MainWindow;
+import org.shanoir.uploader.utils.ImportUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,8 +44,6 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 
 	private static final long serialVersionUID = 7126127792556196772L;
 
-	private static final String DICOMDIR = "DICOMDIR";
-
 	private static final String WILDCARD = "*";
 
 	private MainWindow mainWindow;
@@ -54,8 +53,6 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 	private IDicomServerClient dicomServerClient;
 
 	private String filePathDicomDir;
-	
-	private DicomDirGeneratorService dicomDirGeneratorService = new DicomDirGeneratorService();
 
 	public FindDicomActionListener(final MainWindow mainWindow,
 			final JFileChooser fileChooser,
@@ -87,28 +84,14 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 		if (event.getSource().getClass() == JMenuItem.class) {
 			logger.info("Opening DICOM files from CD/DVD/local file system...");
 			this.mainWindow.isFromPACS = false;
-
 			int returnVal = fileChooser.showOpenDialog(FindDicomActionListener.this);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				File selectedRootDir = fileChooser.getSelectedFile();
 				if (selectedRootDir.isDirectory()) {
 					try {
-						boolean dicomDirGenerated = false;
-						File dicomDirFile = new File(selectedRootDir, DICOMDIR);
-						if (!dicomDirFile.exists()) {
-							logger.info("No DICOMDIR found: generating one.");
-							dicomDirGeneratorService.generateDicomDirFromDirectory(dicomDirFile, selectedRootDir);
-							dicomDirGenerated = true;
-							logger.info("DICOMDIR generated at path: " + dicomDirFile.getAbsolutePath());
-						}
-						final DicomDirToModelService dicomDirReader = new DicomDirToModelService();
-						List<Patient> patients = dicomDirReader.readDicomDirToPatients(dicomDirFile);
+						List<Patient> patients = ImportUtils.getPatientsFromDir(selectedRootDir, true);
 						fillMediaWithPatients(media, patients);
 						filePathDicomDir = selectedRootDir.toString();
-						// clean up in case of dicomdir generated
-						if (dicomDirGenerated) {
-							dicomDirFile.delete();
-						}
 					} catch (Exception e) {
 						logger.error(e.getMessage(), e);
 					}
