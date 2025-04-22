@@ -20,7 +20,7 @@ public class ShUpConfig {
 	 */
 	public static final String SHANOIR_UPLOADER_VERSION = "v9.0.0";
 	
-	public static final String RELEASE_DATE = "2025-03-19";
+	public static final String RELEASE_DATE = "2025-04-02";
 	
 	public static final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 	
@@ -76,6 +76,14 @@ public class ShUpConfig {
 
 	public static final String PASSWORD = "password";
 
+	public static final String IMPORT_JOB_JSON = "import-job.json";
+
+	public static final String UPLOAD_JOB_XML = "upload-job.xml";
+
+	public static final String NOMINATIVE_DATA_JOB_XML = "nominative-data-job.xml";
+
+	public static final String ANONYMIZATION_PROFILE = "anonymization.profile";
+
 	/**
 	 * Static variables
 	 */
@@ -117,11 +125,11 @@ public class ShUpConfig {
 		return Boolean.parseBoolean(profileProperties.getProperty(MODE_PSEUDONYMUS));
 	}
 	
-	public static boolean isModeSubjectCommonNameAutoIncrement() {
+	public static boolean isModeSubjectNameAutoIncrement() {
 		return MODE_SUBJECT_COMMON_NAME_AUTO_INCREMENT.equals(profileProperties.getProperty(MODE_SUBJECT_COMMON_NAME));
 	}
 
-	public static boolean isModeSubjectCommonNameManual() {
+	public static boolean isModeSubjectNameManual() {
 		return MODE_SUBJECT_COMMON_NAME_MANUAL.equals(profileProperties.getProperty(MODE_SUBJECT_COMMON_NAME));
 	}
 

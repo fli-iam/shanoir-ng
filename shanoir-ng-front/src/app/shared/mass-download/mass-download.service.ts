@@ -20,7 +20,7 @@ import { Observable, race, Subscription } from 'rxjs';
 import { last, map, take } from 'rxjs/operators';
 import { Task, TaskState } from 'src/app/async-tasks/task.model';
 import { Dataset } from 'src/app/datasets/shared/dataset.model';
-import { DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
+import { DatasetLight, DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
 import { getSizeStr, StrictUnion } from 'src/app/utils/app.utils';
 import { ServiceLocator } from 'src/app/utils/locator.service';
 import { SuperPromise } from 'src/app/utils/super-promise';
@@ -645,5 +645,5 @@ export class DownloadSetup {
     acquisitionFolders: boolean = false;
     datasetFolders: boolean = true;
     converter: number;
-    datasets: Dataset[] = [];
+    datasets: Dataset[] | DatasetLight[] = [];
 }

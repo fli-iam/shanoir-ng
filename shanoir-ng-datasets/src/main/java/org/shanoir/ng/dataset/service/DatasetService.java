@@ -31,6 +31,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import org.shanoir.ng.dataset.dto.DatasetLight;
+
 /**
  * Dataset service.
  *
@@ -83,6 +85,15 @@ public interface DatasetService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetList(returnObject, 'CAN_SEE_ALL')")
 	List<Dataset> findByIdIn(List<Long> id);
+
+	/**
+	 * Find datasets by their ids.
+	 *
+	 * @param ids datasets ids.
+	 * @return a list if datasets or an empty list.
+	 */
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and @datasetSecurityService.hasRightOnEveryDataset(#ids, 'CAN_SEE_ALL')")
+	List<DatasetLight> findLightByIdIn(List<Long> ids);
 
 	/**
 	 * Save a dataset.
