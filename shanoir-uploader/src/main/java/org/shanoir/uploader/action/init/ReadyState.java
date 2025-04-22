@@ -75,7 +75,7 @@ public class ReadyState implements State {
 			public void windowOpened(WindowEvent e) {
 			}
 			public void windowClosing(WindowEvent e) {
-				if (uploadServiceJob.isUploading()) {
+				if (UploadServiceJob.LOCK.isLocked()) {
 					String message = "ShanoirUploader is still uploading DICOM files. Are you sure to want to close?";
 					UIManager.put("OptionPane.cancelButtonText", "Cancel");
 					UIManager.put("OptionPane.noButtonText", "No");

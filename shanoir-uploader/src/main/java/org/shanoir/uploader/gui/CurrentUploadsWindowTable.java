@@ -37,6 +37,8 @@ public class CurrentUploadsWindowTable implements Observer {
 	public String startUploadState = UploadState.START.toString();
 	public String startAutoImportUploadState = UploadState.START_AUTOIMPORT.toString();
 	public String finishedUploadState = UploadState.FINISHED.toString();
+	public String checkedUploadState = UploadState.CHECKED.toString();
+	public String checkFailUploadState = UploadState.CHECK_FAIL.toString();
 	public String errorUploadState = UploadState.ERROR.toString();
 	public int selectedRow;
 	public int rowsNb;
@@ -153,6 +155,17 @@ public class CurrentUploadsWindowTable implements Observer {
 				firstSelectedSerie.getEquipment().getManufacturer() + " (" + firstSelectedSerie.getEquipment().getDeviceSerialNumber() + ")",
 				nominativeDataImportJob.getUploadPercentage(),
 				"",
+				""
+			};
+			case CHECKED, CHECK_FAIL -> new Object[] {
+				key,
+				nominativeDataImportJob.getSubject().getIdentifier(),
+				nominativeDataImportJob.getPatient().getPatientFirstName() + " " + nominativeDataImportJob.getPatient().getPatientLastName(),
+				nominativeDataImportJob.getPatient().getPatientID(),
+				nominativeDataImportJob.getStudy().getStudyDate().format(formatter),
+				firstSelectedSerie.getEquipment().getManufacturer() + " (" + firstSelectedSerie.getEquipment().getDeviceSerialNumber() + ")",
+				nominativeDataImportJob.getUploadPercentage(),
+				"",
 				actionDelete
 			};
 			default -> new Object[] {
@@ -239,7 +252,9 @@ public class CurrentUploadsWindowTable implements Observer {
 					|| UploadState.READY.toString().compareTo(entry.getValue().getUploadPercentage()) == 0) {
 					// Do Nothing
 				} else {
-					if (entry.getValue().getUploadPercentage().equals(finishedUploadState)) {
+					if (entry.getValue().getUploadPercentage().equals(finishedUploadState)
+					|| entry.getValue().getUploadPercentage().equals(checkedUploadState)
+					|| entry.getValue().getUploadPercentage().equals(checkFailUploadState)) {
 						totalUploadPercent += 100;
 						nbFinishUpload++;
 					} else if (entry.getValue().getUploadPercentage().equals(errorUploadState)) {

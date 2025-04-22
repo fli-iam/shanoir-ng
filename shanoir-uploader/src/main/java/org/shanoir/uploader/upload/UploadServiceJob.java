@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.UploadState;
@@ -37,6 +39,8 @@ public class UploadServiceJob {
 
 	private static final Logger logger = LoggerFactory.getLogger(UploadServiceJob.class);
 
+	public static final ReentrantLock LOCK = new ReentrantLock();
+
 	@Autowired
 	private ShanoirUploaderServiceClient shanoirUploaderServiceClient;
 
@@ -45,15 +49,16 @@ public class UploadServiceJob {
 
 	private String uploadPercentage = "";
 
-	private boolean uploading;
-
 	@Scheduled(fixedRate = 5000)
-	public void execute() throws IOException {
-		logger.debug("UploadServiceJob started...");
-		uploading = false;
-		File workFolder = new File(ShUpConfig.shanoirUploaderFolder.getAbsolutePath() + File.separator + ShUpConfig.WORK_FOLDER);
-		processWorkFolder(workFolder, currentNominativeDataController);
-		logger.debug("UploadServiceJob ended...");
+	public void execute() throws Exception {
+		if (!LOCK.isLocked()) {
+			logger.debug("UploadServiceJob started...");
+			LOCK.lock();
+			File workFolder = new File(ShUpConfig.shanoirUploaderFolder.getAbsolutePath() + File.separator + ShUpConfig.WORK_FOLDER);
+			processWorkFolder(workFolder, currentNominativeDataController);
+			LOCK.unlock();
+			logger.debug("UploadServiceJob ended...");
+		}
 	}
 
 	/**
@@ -135,7 +140,6 @@ public class UploadServiceJob {
 			final ImportJob importJob, NominativeDataImportJobManager nominativeDataImportJobManager,
 			CurrentNominativeDataController currentNominativeDataController) {
 		try {
-			uploading = true;
 			String tempDirId = shanoirUploaderServiceClient.createTempDir();
 			logger.info("Upload: tempDirId for import: " + tempDirId);
 			/**
@@ -166,8 +170,6 @@ public class UploadServiceJob {
 			importJob.setUploadState(org.shanoir.ng.importer.model.UploadState.FINISHED);
 			importJob.setTimestamp(System.currentTimeMillis());
 			nominativeDataImportJobManager.writeImportJob(importJob);
-
-			uploading = false;
 		} catch (Exception e) {
 			currentNominativeDataController.updateNominativeDataPercentage(folder, org.shanoir.ng.importer.model.UploadState.ERROR.toString());
 			importJob.setUploadState(org.shanoir.ng.importer.model.UploadState.ERROR);
@@ -182,14 +184,6 @@ public class UploadServiceJob {
 		importJob.setWorkFolder(tempDirId);
 		String importJobJson = Util.objectWriter.writeValueAsString(importJob);
 		shanoirUploaderServiceClient.startImportJob(importJobJson);
-	}
-
-    public boolean isUploading() {
-		return uploading;
-	}
-
-	public void setUploading(boolean uploading) {
-		this.uploading = uploading;
 	}
 
 }

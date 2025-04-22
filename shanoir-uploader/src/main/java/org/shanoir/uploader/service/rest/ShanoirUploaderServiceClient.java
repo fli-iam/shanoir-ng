@@ -932,7 +932,7 @@ public class ShanoirUploaderServiceClient {
 		}		
 	}
 
-	public void getDicomInstance(String examinationUID, String seriesInstanceUID, String sopInstanceUID) throws Exception {
+	public Attributes getDicomInstance(String examinationUID, String seriesInstanceUID, String sopInstanceUID) throws Exception {
 		long startTime = System.currentTimeMillis();
 		URIBuilder b = new URIBuilder(this.serviceURLDatasetsDicomWebStudies
 			+ "/" + examinationUID
@@ -954,8 +954,7 @@ public class ShanoirUploaderServiceClient {
 					if (multipart.getCount() > 0) {
 						MimeBodyPart part = (MimeBodyPart) multipart.getBodyPart(0); // assuming single-part for now
 						try (DicomInputStream din = new DicomInputStream(part.getInputStream())) {
-							Attributes attributes = din.readDataset();
-							logger.info(attributes.toString());
+							return din.readDataset();
 						}
 					} else {
 						throw new RuntimeException("No parts found in multipart DICOM response.");
@@ -967,7 +966,8 @@ public class ShanoirUploaderServiceClient {
 					+ apiResponseMessages.getOrDefault(code, "unknown status code"));
 				throw new Exception("Error in getDicomFile");
 			}
-		}		
+		}
+		return null;	
 	}
 
 }

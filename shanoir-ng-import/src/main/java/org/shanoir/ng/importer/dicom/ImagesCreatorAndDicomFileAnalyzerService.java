@@ -197,30 +197,20 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 */
 	public File getFileFromInstance(Instance instance, Serie serie, String folderFileAbsolutePath, boolean isImportFromPACS)
 			throws FileNotFoundException {
-		StringBuilder instanceFilePath = new StringBuilder();
+		String instanceFilePath;
 		if (isImportFromPACS) {
-			instanceFilePath.append(folderFileAbsolutePath)
+			StringBuilder instanceFilePathBuilder = new StringBuilder();
+			instanceFilePathBuilder.append(folderFileAbsolutePath)
 				.append(File.separator)
 				.append(serie.getSeriesInstanceUID())
 				.append(File.separator)
 				.append(instance.getSopInstanceUID())
 				.append(SUFFIX_DCM);
+			instanceFilePath = instanceFilePathBuilder.toString();
 		} else {
-			String[] instancePathArray = instance.getReferencedFileID();
-			if (instancePathArray != null) {
-				instanceFilePath.append(folderFileAbsolutePath).append(File.separator);
-				for (int count = 0; count < instancePathArray.length; count++) {
-					instanceFilePath.append(instancePathArray[count]);
-					if (count != instancePathArray.length - 1) {
-						instanceFilePath.append(File.separator);
-					}
-				}
-			} else {
-				throw new FileNotFoundException(
-						"instancePathArray in DicomDir: missing file: " + instancePathArray);
-			}
+			instanceFilePath = DicomUtils.referencedFileIDToPath(folderFileAbsolutePath, instance.getReferencedFileID());
 		}
-		File instanceFile = new File(instanceFilePath.toString());
+		File instanceFile = new File(instanceFilePath);
 		if (instanceFile.exists()) {
 			return instanceFile;
 		} else {

@@ -1,11 +1,17 @@
 package org.shanoir.uploader.check;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+import org.dcm4che3.io.DicomInputStream;
+import org.dcm4che3.util.TagUtils;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
+import org.shanoir.ng.importer.dicom.DicomUtils;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
@@ -16,6 +22,7 @@ import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
 import org.shanoir.uploader.nominativeData.NominativeDataImportJobManager;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
+import org.shanoir.uploader.upload.UploadServiceJob;
 import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
@@ -50,12 +57,16 @@ public class ExaminationConsistencyServiceJob {
     @Autowired
 	private ShanoirUploaderServiceClient shanoirUploaderServiceClient;
 
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedRate = 10000)
     public void execute() throws Exception {
-		logger.info("ExaminationConsistencyServiceJob started...");
-		File workFolder = new File(ShUpConfig.shanoirUploaderFolder.getAbsolutePath() + File.separator + ShUpConfig.WORK_FOLDER);
-		processWorkFolder(workFolder, currentNominativeDataController);
-        logger.info("ExaminationConsistencyServiceJob ended...");
+        if (!UploadServiceJob.LOCK.isLocked()) {
+            logger.info("ExaminationConsistencyServiceJob started...");
+			UploadServiceJob.LOCK.lock();
+            File workFolder = new File(ShUpConfig.shanoirUploaderFolder.getAbsolutePath() + File.separator + ShUpConfig.WORK_FOLDER);
+            processWorkFolder(workFolder, currentNominativeDataController);    
+            UploadServiceJob.LOCK.unlock();
+            logger.info("ExaminationConsistencyServiceJob ended...");
+        }
 	}
 
     private void processWorkFolder(File workFolder, CurrentNominativeDataController currentNominativeDataController) throws Exception {
@@ -76,7 +87,17 @@ public class ExaminationConsistencyServiceJob {
 				final org.shanoir.ng.importer.model.UploadState uploadState = importJob.getUploadState();
 				if (uploadState.equals(org.shanoir.ng.importer.model.UploadState.FINISHED)) {
                     String examinationUID = StudyInstanceUIDHandler.PREFIX + importJob.getExaminationId();
-                    checkImportJob(folder, examinationUID);
+                    try {
+                        boolean check = checkImportJob(folder, examinationUID);
+                        if (check) {
+                            importJob.setUploadState(UploadState.CHECKED);
+                            importJobManager.writeImportJob(importJob);
+                        }
+                    } catch(Exception e) {
+                        importJob.setUploadState(UploadState.CHECK_FAIL);
+                        importJobManager.writeImportJob(importJob);
+                        logger.error(e.getMessage(), e);
+                    }
 				}
 			} else {
 				logger.error("Folder found in workFolder without import-job.json.");
@@ -84,7 +105,7 @@ public class ExaminationConsistencyServiceJob {
         }
     }
 
-    private void checkImportJob(File importJobFolder, String examinationUID) throws Exception {
+    private boolean checkImportJob(File importJobFolder, String examinationUID) throws Exception {
         List<Patient> patients = ImportUtils.getPatientsFromDir(importJobFolder, false);	
 		if (patients != null) {
 			for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
@@ -98,28 +119,73 @@ public class ExaminationConsistencyServiceJob {
                         List<Instance> instances = serie.getInstances();
                         for (Iterator<Instance> instancesIt = instances.iterator(); instancesIt.hasNext();) {
                             Instance instance = (Instance) instancesIt.next();
-                            shanoirUploaderServiceClient.getDicomInstance(examinationUID, serie.getSeriesInstanceUID(), instance.getSopInstanceUID());
+                            String instanceFilePath = DicomUtils.referencedFileIDToPath(importJobFolder.getAbsolutePath(), instance.getReferencedFileID());
+                            File instanceFile = new File(instanceFilePath);
+                            if (instanceFile.exists()) {
+                                try (DicomInputStream dIn = new DicomInputStream(instanceFile)) {
+                                    Attributes localInstance = dIn.readDataset();
+                                    Attributes remoteInstance = shanoirUploaderServiceClient.getDicomInstance(
+                                            examinationUID, serie.getSeriesInstanceUID(), instance.getSopInstanceUID());
+                                    if (remoteInstance != null) {
+                                        Boolean attributesEqual = compareAttributes(localInstance, remoteInstance);
+                                        byte[] pixelDataLocal = localInstance.getBytes(Tag.PixelData);
+                                        byte[] pixelDataRemote = remoteInstance.getBytes(Tag.PixelData);
+                                        Boolean pixelsEqual = java.util.Arrays.equals(pixelDataLocal, pixelDataRemote);
+                                        if (!attributesEqual || !pixelsEqual) {
+                                            throw new Exception("DICOM instance comparison issue: tags("
+                                                + attributesEqual + "), pixel(" + pixelsEqual + ")");
+                                        } else {
+                                            deleteInstanceFile(importJobFolder, instanceFile);
+                                            return true;
+                                        }   
+                                    } else {
+                                        throw new Exception("DICOM instance not found on server.");
+                                    }
+                                }
+                            } else {
+                                throw new FileNotFoundException();
+                            }
                         }
                     }
 				}
 			}
 		}
-        //deleteAllDicomFiles(importJobFolder, null);
+        return false;
     }
 
-    private void deleteAllDicomFiles(File importJobFolder, List<File> files) {
-        // Clean all DICOM files after successful consistency check on server
-        for (Iterator<File> iterator = files.iterator(); iterator.hasNext();) {
-            File file = (File) iterator.next();
-            // from-disk: delete files directly
-            if (file.getParentFile().equals(importJobFolder)) {
-                FileUtils.deleteQuietly(file);
-            // from-pacs: delete serieUID folder as well
-            } else {
-                FileUtils.deleteQuietly(file.getParentFile());
+    private boolean compareAttributes(Attributes a1, Attributes a2) {
+        if (a1.size() != a2.size()) {
+            logger.error("Number of tags differ.");
+            return false;
+        }
+        int[] tags1 = a1.tags();
+        for (int tag : tags1) {
+            if (!a2.contains(tag)) {
+                logger.error("Missing tag in second file: " + TagUtils.toString(tag));
+                return false;
+            }
+            String value1 = a1.getString(tag, null);
+            String value2 = a2.getString(tag, null);
+            if (value1 == null && value2 == null) {
+                continue;
+            }
+            if (value1 == null || value2 == null || !value1.equals(value2)) {
+                logger.error("Tag differs: " + TagUtils.toString(tag) +
+                                " | " + value1 + " != " + value2);
+                return false;
             }
         }
-        logger.info("All DICOM files deleted after successful check on server.");
+        return true;
+    }
+
+    private void deleteInstanceFile(File importJobFolder, File instanceFile) {
+        // from-disk: delete files directly
+        if (instanceFile.getParentFile().equals(importJobFolder)) {
+            FileUtils.deleteQuietly(instanceFile);
+        // from-pacs: delete serieUID folder as well
+        } else {
+            FileUtils.deleteQuietly(instanceFile.getParentFile());
+        }
     }
 
 }
