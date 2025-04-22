@@ -281,6 +281,9 @@ import { MetadataNodeComponent } from './datasets/tree/metadata-node.component';
 import { ExecutionTemplateListComponent } from "./vip/execution-template/execution-template-list.component";
 import { ExecutionTemplateComponent } from "./vip/execution-template/execution-template.component";
 import { ExecutionTemplateService } from "./vip/execution-template/execution-template.service";
+import { ExecutionTemplateParameterListComponent } from "./vip/execution-template/execution-template-parameter-list.component";
+import { ExecutionTemplateParameterComponent } from "./vip/execution-template/execution-template-parameter.component";
+import { ExecutionTemplateParameterService } from "./vip/execution-template/execution-template-parameter.service";
 
 @NgModule({
     declarations: [
@@ -463,7 +466,9 @@ import { ExecutionTemplateService } from "./vip/execution-template/execution-tem
         DoubleAwesomeComponent,
         MetadataNodeComponent,
         ExecutionTemplateListComponent,
-        ExecutionTemplateComponent
+        ExecutionTemplateComponent,
+        ExecutionTemplateParameterListComponent,
+        ExecutionTemplateParameterComponent
     ],
     bootstrap: [AppComponent],
     imports: [
@@ -570,6 +575,7 @@ import { ExecutionTemplateService } from "./vip/execution-template/execution-tem
         ShanoirEventService,
         TreeService,
         ExecutionTemplateService,
+        ExecutionTemplateParameterService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true },
         provideHttpClient(withInterceptorsFromDi())
     ]

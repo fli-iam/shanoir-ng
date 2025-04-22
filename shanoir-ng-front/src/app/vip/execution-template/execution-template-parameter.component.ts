@@ -5,14 +5,14 @@ import {ActivatedRoute} from "@angular/router";
 import {FormGroup, UntypedFormGroup, Validators} from "@angular/forms";
 import {EntityService} from "../../shared/components/entity/entity.abstract.service";
 import {Option} from "../../shared/select/select.component";
-import {ExecutionTemplateParameter} from "../shared/execution-template-parameter.model";
+import {ExecutionTemplateParameter} from "../models/execution-template-parameter.model";
 import {ExecutionTemplateParameterService} from "./execution-template-parameter.service";
+import {ExecutionTemplate} from "../models/execution-template";
 
 
 @Component({
     selector: 'execution-template-parameter',
     templateUrl: './execution-template-parameter.component.html',
-    styleUrls: ['./execution-template-parameter.component.css'],
     standalone: false
 })
 @ModesAware
@@ -31,6 +31,8 @@ export class ExecutionTemplateParameterComponent extends EntityComponent<Executi
     executionTemplateId: number
     groupBy: string
     executionForm: UntypedFormGroup
+    templateId: number
+    templateName: string
 
     constructor(
         private route: ActivatedRoute,
@@ -66,4 +68,9 @@ export class ExecutionTemplateParameterComponent extends EntityComponent<Executi
     initEdit(): Promise<void> {return Promise.resolve();}
 
     initView(): Promise<void> {return Promise.resolve();}
+
+    save(): Promise<ExecutionTemplateParameter> {
+        super.save().then(() => this.router.navigate(['execution-template/details/' + this.templateId]));
+        return Promise.resolve(this.entity);
+    }
 }

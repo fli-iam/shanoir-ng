@@ -15,11 +15,12 @@ public class ExecutionTemplateDTO extends HalEntity {
     private String name;
     private long studyId;
     private String vipPipeline;
-    private String examinationNameFilter;
     private List<ExecutionTemplateParameter> parameters;
-    private String exportFormat;
-    private String groupBy;
-    private long niftiConverter;
+    private int priority;
+
+    public int getPriority() {return priority;}
+
+    public void setPriority(int priority) {this.priority = priority;}
 
     public long getStudyId() { return studyId; }
 
@@ -33,23 +34,7 @@ public class ExecutionTemplateDTO extends HalEntity {
 
     public void setVipPipeline(String vipPipeline) {this.vipPipeline = vipPipeline;}
 
-    public String getExaminationNameFilter() {return examinationNameFilter;}
-
-    public void setExaminationNameFilter(String examinationNameFilter) {this.examinationNameFilter = examinationNameFilter;}
-
     public List<ExecutionTemplateParameter> getParameters() {return parameters;}
 
     public void setParameters(List<ExecutionTemplateParameter> parameters) {this.parameters = parameters;}
-
-    public String getExportFormat() {return exportFormat;}
-
-    public void setExportFormat(String exportFormat) {this.exportFormat = exportFormat;}
-
-    public String getGroupBy() {return groupBy;}
-
-    public void setGroupBy(String groupBy) {this.groupBy = groupBy;}
-
-    public long getNiftiConverter() {return niftiConverter;}
-
-    public void setNiftiConverter(long niftiConverter) {this.niftiConverter = niftiConverter;}
 }

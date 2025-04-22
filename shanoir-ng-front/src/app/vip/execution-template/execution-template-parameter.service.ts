@@ -16,7 +16,7 @@ import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import * as AppUtils from "../../utils/app.utils";
 import {EntityService} from "../../shared/components/entity/entity.abstract.service";
-import {ExecutionTemplateParameter} from "../shared/execution-template-parameter.model";
+import {ExecutionTemplateParameter} from "../models/execution-template-parameter.model";
 
 @Injectable()
 export class ExecutionTemplateParameterService extends EntityService<ExecutionTemplateParameter> {

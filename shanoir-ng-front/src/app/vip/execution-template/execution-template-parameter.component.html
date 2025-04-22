@@ -1,11 +1,26 @@
 <div #formContainer class="content-component detail">
     <form *ngIf="form" [formGroup]="executionForm" class="max-content" novalidate [class.disabled]="footerState.loading">
+         <span [ngSwitch]="mode">
+			<ng-template [ngSwitchCase]="'view'">
+				<h2 class="header command-zone"i18n="View execution template parameter|Title@@executiontemplateparameterDetailViewTitle">Execution template parameter</h2>
+			</ng-template>
+			<ng-template [ngSwitchCase]="'edit'">
+				<h2 class="header command-zone"i18n="Edit execution template|Title@@executiontemplateparameterDetailEditTitle">Edit execution template parameter</h2>
+			</ng-template>
+			<ng-template [ngSwitchCase]="'create'">
+				<h2 class="header command-zone"i18n="Create execution template|Title@@executiontemplateparameterDetailCreateTitle">Create execution template parameter</h2>
+			</ng-template>
+		</span>
         <fieldset>
             <ol>
-                <legend><br/>Execution template parameters <tool-tip>Files parameters should be set as regular expression for dataset names. Example *T2* will select all dataset whose names contains "T2".</tool-tip><br/></legend>
                 <li>
-                    <label i18n="Execution template detail|Execution comment filter">Filter <tool-tip>This is the regular expression (see: https://regex101.com/) used to decide if the execution should be applied on newly imported exam or not.
-                        It is based on examination. An empty field means that all examinations import should trigger the execution.</tool-tip></label>
+                    <label i18n="Execution template detail|StudyId label@@centerDetailName">Study</label>
+                    <span class="right-col" [ngSwitch]="mode">
+                        {{executionTemplateParameter.templateName}}
+					</span>
+                </li>
+                <li>
+                    <label i18n="Execution template detail|Execution comment filter">Filter <tool-tip>Examples : T2*STIR* will select all dataset whose names begin with "T2" and containing "STIR". An empty field means that all examinations import should trigger the execution. Caps sensitive.</tool-tip></label>
 
                     <span class="right-col" [ngSwitch]="mode">
 						<ng-template [ngSwitchCase]="'view'">

@@ -3,19 +3,20 @@ import {TableComponent} from "../../shared/components/table/table.component";
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ColumnDefinition } from 'src/app/shared/components/table/column.definition.type';
 import {BrowserPaginEntityListComponent} from "../../shared/components/entity/entity-list.browser.component.abstract";
-import {ExecutionTemplateParameter} from "../shared/execution-template-parameter.model";
+import {ExecutionTemplateParameter} from "../models/execution-template-parameter.model";
 import {ExecutionTemplateParameterService} from "./execution-template-parameter.service";
 
 @Component({
     selector: 'execution-template-parameter-list',
     templateUrl: './execution-template-parameter-list.component.html',
-    styleUrls: ['./execution-template-parameter-list.component.css'],
     standalone: false
 
 })
 export class ExecutionTemplateParameterListComponent extends BrowserPaginEntityListComponent<ExecutionTemplateParameter> {
 
-    @Input() executionTemplateId: number
+    @Input() templateId: number
+    @Input() templateName: String
+
 
     @ViewChild('table', { static: false }) table: TableComponent;
 
@@ -25,7 +26,7 @@ export class ExecutionTemplateParameterListComponent extends BrowserPaginEntityL
 
     ngOnInit() {
         super.ngOnInit()
-        this.breadcrumbsService.currentStep.addPrefilled("executionTemplateId", this.executionTemplateId)
+        this.breadcrumbsService.currentStep.addPrefilled("executionTemplateId", this.templateId)
     }
 
     getService(): EntityService<ExecutionTemplateParameter> {
@@ -33,7 +34,7 @@ export class ExecutionTemplateParameterListComponent extends BrowserPaginEntityL
     }
 
     getEntities(): Promise<ExecutionTemplateParameter[]> {
-        return this.executionTemplateParameterService.getExecutionTemplateParametersByExecutionTemplate(this.executionTemplateId)
+        return this.executionTemplateParameterService.getExecutionTemplateParametersByExecutionTemplate(this.templateId)
     }
 
     getColumnDefs(): ColumnDefinition[] {

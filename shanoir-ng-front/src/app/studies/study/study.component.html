@@ -413,7 +413,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </fieldset>
             <fieldset [class.hidden-tab]="activeTab != 'executions'" tab="executions">
                 <legend>Execution templates</legend>
-                <execution-template-list [studyId]="study.id" />
+                <execution-template-list [studyId]="study.id" [studyName]="study.name"/>
             </fieldset>
 		</form>
 	</div>

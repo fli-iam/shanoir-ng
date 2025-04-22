@@ -18,13 +18,16 @@ import * as AppUtils from "../../utils/app.utils";
 import {ExecutionTemplate} from "../models/execution-template";
 import {EntityService} from "../../shared/components/entity/entity.abstract.service";
 import {BACKEND_API_VIP_EXEC_TEMPLATE_URL} from "../../utils/app.utils";
+import {StudyService} from "../../studies/shared/study.service";
+import {IdName} from "../../shared/models/id-name.model";
 
 @Injectable()
 export class ExecutionTemplateService extends EntityService<ExecutionTemplate> {
 
     API_URL: string = AppUtils.BACKEND_API_VIP_EXEC_TEMPLATE_URL;
 
-    constructor(protected httpClient: HttpClient) {super(httpClient);}
+    constructor(protected httpClient: HttpClient,
+                protected studyService: StudyService) {super(httpClient);}
 
     getEntityInstance(entity: ExecutionTemplate | undefined): ExecutionTemplate {return new ExecutionTemplate();}
 
@@ -34,5 +37,12 @@ export class ExecutionTemplateService extends EntityService<ExecutionTemplate> {
      */
     public getExecutionTemplatesByStudy(study_id: number): Promise<ExecutionTemplate[]> {
         return this.httpClient.get<ExecutionTemplate[]>(this.API_URL + "/byStudy/" + study_id).toPromise();
+    }
+
+    setStudy(template) {
+        this.studyService.getStudiesNames().then(studies => {template.studyName = studies.find(s => s.id == template.entity.studyId).name;
+            template.studyId = template.entity.studyId;
+            template.entity.studyName = template.studyName;
+        });
     }
 }

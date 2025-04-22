@@ -17,12 +17,9 @@ import {PipelineParameter} from "./pipelineParameter";
 export class ExecutionTemplate extends Entity {
     id: number
     studyId: number
+    studyName: string
     name: string
     vipPipeline: string
-    examinationNameFilter: string
     parameters: PipelineParameter[]
-    exportFormat: string
-    groupBy: string
-    niftiConverter: number
     priority: number
 }

@@ -32,6 +32,8 @@ public class ExecutionTemplateServiceImpl implements ExecutionTemplateService {
 
         // Update updatable fields only
         dbExecution.setName(executionTemplate.getName());
+        dbExecution.setVipPipeline(executionTemplate.getVipPipeline());
+        dbExecution.setPriority(executionTemplate.getPriority());
 
         return this.repository.save(dbExecution);
     }

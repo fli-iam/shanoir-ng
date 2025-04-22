@@ -17,6 +17,7 @@ import {StudyRightsService} from "../../studies/shared/study-rights.service";
 export class ExecutionTemplateListComponent extends BrowserPaginEntityListComponent<ExecutionTemplate> {
 
     @Input() studyId: number
+    @Input() studyName: string
 
     @ViewChild('table', { static: false }) table: TableComponent;
 
@@ -28,6 +29,7 @@ export class ExecutionTemplateListComponent extends BrowserPaginEntityListCompon
     ngOnInit() {
         super.ngOnInit()
         this.breadcrumbsService.currentStep.addPrefilled("studyId", this.studyId)
+        this.breadcrumbsService.currentStep.addPrefilled("studyName", this.studyName)
     }
 
     getService(): EntityService<ExecutionTemplate> {
@@ -40,8 +42,9 @@ export class ExecutionTemplateListComponent extends BrowserPaginEntityListCompon
 
     getColumnDefs(): ColumnDefinition[] {
         return [
-            {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
-            {headerName: "Name", field: "name", type: "string", width: "60px", defaultSortCol: false, defaultAsc: false},
+            {headerName: "Template name", field: "name", type: "string", width: "100px", defaultSortCol: false, defaultAsc: false},
+            {headerName: "Pipeline name", field: "vipPipeline", type: "string", width: "100px", defaultSortCol: false, defaultAsc: false},
+            {headerName: "Priority", field: "priority", type: "number", width: "10px", defaultSortCol: true, defaultAsc: true},
         ];
     }
 
@@ -54,7 +57,8 @@ export class ExecutionTemplateListComponent extends BrowserPaginEntityListCompon
             new: this.hasAdminRightsOnStudy(),
             view: true,
             edit: this.hasAdminRightsOnStudy(),
-            delete: this.hasAdminRightsOnStudy()
+            delete: this.hasAdminRightsOnStudy(),
+            id: false
         };
     }
 

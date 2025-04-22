@@ -98,6 +98,8 @@ import { QualityCardComponent } from './study-cards/quality-card/quality-card.co
 import { TaskStatusComponent } from './async-tasks/status/task-status.component';
 import { ExecutionTemplateListComponent } from "./vip/execution-template/execution-template-list.component";
 import { ExecutionTemplateComponent } from "./vip/execution-template/execution-template.component";
+import { ExecutionTemplateParameterListComponent } from "./vip/execution-template/execution-template-parameter-list.component";
+import { ExecutionTemplateParameterComponent } from "./vip/execution-template/execution-template-parameter.component";
 
 let routes: Routes = [
     {
@@ -132,6 +134,9 @@ let routes: Routes = [
     }, {
         path: 'execution-template-list',
         component: ExecutionTemplateListComponent
+    }, {
+        path: 'execution-template-parameter-list',
+        component: ExecutionTemplateParameterListComponent
     }, {
         path: 'pipelines',
         component: PipelinesComponent
@@ -846,6 +851,21 @@ let routes: Routes = [
     {
         path: 'execution-template/details/:id',
         component: ExecutionTemplateComponent,
+        data: { mode: 'view' },
+    },
+    {
+        path: 'execution-template-parameter/create',
+        component: ExecutionTemplateParameterComponent,
+        data: { mode: 'create' },
+    },
+    {
+        path: 'execution-template-parameter/edit/:id',
+        component: ExecutionTemplateParameterComponent,
+        data: { mode: 'edit' },
+    },
+    {
+        path: 'execution-template-parameter/details/:id',
+        component: ExecutionTemplateParameterComponent,
         data: { mode: 'view' },
     }
 

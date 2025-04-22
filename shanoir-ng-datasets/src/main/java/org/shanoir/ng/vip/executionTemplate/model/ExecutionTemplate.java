@@ -17,6 +17,7 @@ public class ExecutionTemplate extends HalEntity {
     private Long studyId;
     private String vipPipeline;
     private String examinationNameFilter;
+    private int priority;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "execution_pipeline_parameters")
@@ -41,4 +42,8 @@ public class ExecutionTemplate extends HalEntity {
     public Long getStudyId() {return studyId;}
 
     public void setStudyId(Long studyId) {this.studyId = studyId;}
+
+    public int getPriority() {return priority;}
+
+    public void setPriority(int priority) {this.priority = priority;}
 }

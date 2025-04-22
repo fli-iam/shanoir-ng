@@ -19,5 +19,6 @@ export class ExecutionTemplateParameter extends Entity {
     executionTemplateId: number
     groupBy: string
     filter: string
-
+    templateId: number
+    templateName: string
 }
