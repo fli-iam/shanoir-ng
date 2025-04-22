@@ -148,7 +148,6 @@ public class ExaminationServiceImpl implements ExaminationService {
 					this.datasetAcquisitionService.deleteByIdCascade(dsAcq.getId(), event);
 				}
 				if (event != null) {
-					event.setObjectId(String.valueOf(event.getId()));
 					event.setProgress(1f);
 					event.setMessage("Examination with id " + id + " successfully deleted.");
 					event.setStatus(ShanoirEvent.SUCCESS);
