@@ -141,7 +141,7 @@ public interface DICOMWebApi {
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@GetMapping(value = "/instances", produces = { "application/dicom+json" })
+	@GetMapping(value = "/instances")
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<String> findInstances() throws RestServiceException;
 
@@ -152,7 +152,7 @@ public interface DICOMWebApi {
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@GetMapping(value = "/studies/{studyInstanceUID}/instances", produces = { "application/dicom+json" })
+	@GetMapping(value = "/studies/{studyInstanceUID}/instances")
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<String> findInstancesOfStudy(
 			@Parameter(description = "studyInstanceUID", required = true) @PathVariable("studyInstanceUID") String studyInstanceUID

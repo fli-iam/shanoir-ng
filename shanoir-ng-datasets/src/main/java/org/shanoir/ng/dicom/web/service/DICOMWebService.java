@@ -213,7 +213,7 @@ public class DICOMWebService {
 	}
 	
 	/**
-	 * This method is not used by the viewer OHIF (normally).
+	 * This method is used by OHIF viewer, double-click on DICOM SEG.
 	 * ShanoirUploader is calling it to get a DICOM instance,
 	 * when running its job to check examination consistency.
 	 * 
