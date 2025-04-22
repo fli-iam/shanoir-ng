@@ -949,22 +949,16 @@ public class ShanoirUploaderServiceClient {
 				if (entity != null) {
 					String contentType = entity.getContentType();
 	                byte[] rawData = EntityUtils.toByteArray(entity);
-					if (contentType != null && contentType.contains("multipart/related")) {
-						ByteArrayDataSource ds = new ByteArrayDataSource(rawData, contentType);
-						MimeMultipart multipart = new MimeMultipart(ds);
-						if (multipart.getCount() > 0) {
-							MimeBodyPart part = (MimeBodyPart) multipart.getBodyPart(0); // assuming single-part for now
-							try (DicomInputStream din = new DicomInputStream(part.getInputStream())) {
-								Attributes attributes = din.readDataset();
-							}
-						} else {
-							throw new RuntimeException("No parts found in multipart DICOM response.");
+					ByteArrayDataSource ds = new ByteArrayDataSource(rawData, contentType);
+					MimeMultipart multipart = new MimeMultipart(ds);
+					if (multipart.getCount() > 0) {
+						MimeBodyPart part = (MimeBodyPart) multipart.getBodyPart(0); // assuming single-part for now
+						try (DicomInputStream din = new DicomInputStream(part.getInputStream())) {
+							Attributes attributes = din.readDataset();
+							logger.info(attributes.toString());
 						}
 					} else {
-						// Handle single-part DICOM
-						try (DicomInputStream din = new DicomInputStream(new ByteArrayInputStream(rawData))) {
-							Attributes attributes = din.readDataset();
-						}
+						throw new RuntimeException("No parts found in multipart DICOM response.");
 					}
 				}
 			} else {
