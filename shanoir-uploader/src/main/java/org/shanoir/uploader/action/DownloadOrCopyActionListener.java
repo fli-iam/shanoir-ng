@@ -4,8 +4,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.concurrent.locks.ReentrantLock;
@@ -16,14 +14,12 @@ import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
-import org.shanoir.ng.importer.model.PseudonymusHashValues;
 import org.shanoir.ng.importer.model.Subject;
-import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.gui.MainWindow;
-import org.shanoir.uploader.utils.Util;
+import org.shanoir.uploader.utils.ImportUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,7 +85,7 @@ public class DownloadOrCopyActionListener implements ActionListener {
 			if (firstPatient == null) {
 				firstPatient = patient;
 				try {
-					firstSubject = createSubjectFromPatient(patient);
+					firstSubject = ImportUtils.createSubjectFromPatient(patient, pseudonymizer, identifierCalculator);
 					importJob.setSubject(firstSubject);
 				} catch (PseudonymusException e) {
 					logger.error(e.getMessage(), e);
@@ -123,7 +119,7 @@ public class DownloadOrCopyActionListener implements ActionListener {
 		}
 		
 		/**
-		 * 3. Download from PACS or copy from CD/DVD and write upload-job.xml + nominative-data-job.xml
+		 * 3. Download from PACS or copy from CD/DVD and write import-job.json
 		 */
 		final String filePathDicomDir = mainWindow.getFindDicomActionListener().getFilePathDicomDir();
 		Runnable runnable = new DownloadOrCopyRunnable(mainWindow.isFromPACS, false, mainWindow.frame, mainWindow.downloadProgressBar, dicomServerClient, dicomFileAnalyzer,  filePathDicomDir, importJobs);

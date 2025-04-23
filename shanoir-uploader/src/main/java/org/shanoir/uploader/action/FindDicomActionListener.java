@@ -27,6 +27,7 @@ import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.dicom.query.StudyTreeNode;
 import org.shanoir.uploader.gui.DicomTree;
 import org.shanoir.uploader.gui.MainWindow;
+import org.shanoir.uploader.utils.ImportUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,8 +54,6 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 	private IDicomServerClient dicomServerClient;
 
 	private String filePathDicomDir;
-	
-	private DicomDirGeneratorService dicomDirGeneratorService = new DicomDirGeneratorService();
 
 	public FindDicomActionListener(final MainWindow mainWindow,
 			final JFileChooser fileChooser,
@@ -86,7 +85,6 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 		if (event.getSource().getClass() == JMenuItem.class) {
 			logger.info("Opening DICOM files from CD/DVD/local file system...");
 			this.mainWindow.isFromPACS = false;
-
 			int returnVal = fileChooser.showOpenDialog(FindDicomActionListener.this);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				File selectedRootDir = fileChooser.getSelectedFile();
@@ -104,10 +102,6 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 						List<Patient> patients = dicomDirReader.readDicomDirToPatients(dicomDirFile);
 						fillMediaWithPatients(media, patients);
 						filePathDicomDir = selectedRootDir.toString();
-						// clean up in case of dicomdir generated
-						if (dicomDirGenerated) {
-							dicomDirFile.delete();
-						}
 					} catch (Exception e) {
 						logger.error(e.getMessage(), e);
 					}
@@ -186,7 +180,6 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 							studyDescription,
 							mainWindow.birthDate, mainWindow.studyDate);
 					fillMediaWithPatients(media, patients);
-
 				this.mainWindow.setCursor(Cursor.getDefaultCursor());
 			} catch (ConnectException cE) {
 				logger.error(cE.getMessage(), cE);
@@ -220,25 +213,25 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 	 */
 	private void fillMediaWithPatients(Media media, final List<Patient> patients) {
 		if (patients != null) {
-			for (Iterator iterator = patients.iterator(); iterator.hasNext();) {
-				Patient patient = (Patient) iterator.next();
+			for (Iterator patientsIt = patients.iterator(); patientsIt.hasNext();) {
+				Patient patient = (Patient) patientsIt.next();
 				final PatientTreeNode patientTreeNode = media.initChildTreeNode(patient);
 				logger.info("Patient info read: " + patient.toString());
 				// add patients
-				media.addTreeNode(patient.getPatientID(), patientTreeNode);
+				media.addTreeNode(patientTreeNode);
 				List<Study> studies = patient.getStudies();
-				for (Iterator iterator2 = studies.iterator(); iterator2.hasNext();) {
-					Study study = (Study) iterator2.next();
+				for (Iterator studiesIt = studies.iterator(); studiesIt.hasNext();) {
+					Study study = (Study) studiesIt.next();
 					final StudyTreeNode studyTreeNode = patientTreeNode.initChildTreeNode(study);
 					// add studies
-					patientTreeNode.addTreeNode(studyTreeNode.getId(), studyTreeNode);
+					patientTreeNode.addTreeNode(studyTreeNode);
 					List<Serie> series = study.getSeries();
-					for (Iterator iterator3 = series.iterator(); iterator3.hasNext();) {
-						Serie serie = (Serie) iterator3.next();
+					for (Iterator seriesIt = series.iterator(); seriesIt.hasNext();) {
+						Serie serie = (Serie) seriesIt.next();
 						if (!serie.isErroneous() && !serie.isIgnored()) {
 							final SerieTreeNode serieTreeNode = studyTreeNode.initChildTreeNode(serie);
 							// add series
-							studyTreeNode.addTreeNode(serieTreeNode.getId(), serieTreeNode);
+							studyTreeNode.addTreeNode(serieTreeNode);
 						}
 					}
 				}

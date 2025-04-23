@@ -3,8 +3,11 @@ package org.shanoir.uploader.utils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -16,6 +19,9 @@ import javax.swing.JProgressBar;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
+import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
+import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
+import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.SeriesNumberOrDescriptionSorter;
 import org.shanoir.ng.importer.model.ImportJob;
@@ -24,14 +30,12 @@ import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.PseudonymusHashValues;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Subject;
-import org.shanoir.ng.shared.dicom.EquipmentDicom;
-import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
-import org.shanoir.uploader.action.ImportFinishRunnable;
 import org.shanoir.uploader.dicom.IDicomServerClient;
-import org.shanoir.uploader.dicom.MRI;
+import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
+import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Center;
 import org.shanoir.uploader.model.rest.Examination;
@@ -46,9 +50,8 @@ import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
-import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
-import org.shanoir.uploader.upload.UploadJob;
-import org.shanoir.uploader.upload.UploadState;
+import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
+import org.shanoir.uploader.upload.UploadJobManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,7 +74,8 @@ public class ImportUtils {
 	
 	private static ObjectMapper objectMapper = new ObjectMapper();
 
-	public static final String IMPORT_JOB_JSON = "import-job.json";
+	private static DicomDirGeneratorService dicomDirGeneratorService = new DicomDirGeneratorService();
+
 
 	static {
 		objectMapper.registerModule(new JavaTimeModule())
@@ -137,84 +141,13 @@ public class ImportUtils {
 		return uploadFolder;
 	}
 
-	/**
-	 * Initializes UploadJob object to be written to file system.
-	 * 
-	 * @param selectedSeries
-	 * @param dicomData
-	 * @param uploadJob
-	 */
-	public static void initUploadJob(ImportJob importJob, UploadJob uploadJob) {
-		uploadJob.setUploadState(UploadState.READY);
-		uploadJob.setUploadDate(Util.formatTimePattern(new Date()));
-		/**
-		 * Patient level
-		 */
-		// set hash of subject identifier in any case: pseudonymus mode or not
-		Subject subject = importJob.getSubject();
-		uploadJob.setSubjectIdentifier(subject.getIdentifier());
-		// set all 10 hash values for pseudonymus mode
-		if (ShUpConfig.isModePseudonymus()) {
-			PseudonymusHashValues pseudonymusHashValues = subject.getPseudonymusHashValues();
-			uploadJob.setBirthNameHash1(pseudonymusHashValues.getBirthNameHash1());
-			uploadJob.setBirthNameHash2(pseudonymusHashValues.getBirthNameHash2());
-			uploadJob.setBirthNameHash3(pseudonymusHashValues.getBirthNameHash3());
-			uploadJob.setLastNameHash1(pseudonymusHashValues.getLastNameHash1());
-			uploadJob.setLastNameHash2(pseudonymusHashValues.getLastNameHash2());
-			uploadJob.setLastNameHash3(pseudonymusHashValues.getLastNameHash3());
-			uploadJob.setFirstNameHash1(pseudonymusHashValues.getFirstNameHash1());
-			uploadJob.setFirstNameHash2(pseudonymusHashValues.getFirstNameHash2());
-			uploadJob.setFirstNameHash3(pseudonymusHashValues.getFirstNameHash3());
-			uploadJob.setBirthDateHash(pseudonymusHashValues.getBirthDateHash());
-		}
-		LocalDate birthDate = subject.getBirthDate();
-		uploadJob.setPatientBirthDate(Util.convertLocalDateToString(birthDate));
-		uploadJob.setPatientSex(subject.getSex());
-
-		/**
-		 * Study level
-		 */
-		org.shanoir.ng.importer.model.Study study = importJob.getStudy();
-		uploadJob.setStudyInstanceUID(study.getStudyInstanceUID());
-		String studyDateStr = Util.convertLocalDateToString(study.getStudyDate());
-		uploadJob.setStudyDate(studyDateStr);
-		uploadJob.setStudyDescription(study.getStudyDescription());
-
-		/**
-		 * @todo: only write importJob json to disk to read it afterwards and avoid senseless conversions
-		 * keep xml for the moment for the GUI only
-		 */
-
-		/**
-		 * Serie level
-		 */
-		List<Serie> selectedSeries = new ArrayList<>(importJob.getSelectedSeries());
-		Serie firstSerie = selectedSeries.iterator().next();
-		MRI mriInformation = new MRI();
-		InstitutionDicom institutionDicom = firstSerie.getInstitution();
-		if(institutionDicom != null) {
-			mriInformation.setInstitutionName(institutionDicom.getInstitutionName());
-			mriInformation.setInstitutionAddress(institutionDicom.getInstitutionAddress());
-		}
-		EquipmentDicom equipmentDicom = firstSerie.getEquipment();
-		if(equipmentDicom != null) {
-			mriInformation.setManufacturer(equipmentDicom.getManufacturer());
-			mriInformation.setManufacturersModelName(equipmentDicom.getManufacturerModelName());
-			mriInformation.setDeviceSerialNumber(equipmentDicom.getDeviceSerialNumber());
-			mriInformation.setStationName(equipmentDicom.getStationName());
-			mriInformation.setMagneticFieldStrength(equipmentDicom.getMagneticFieldStrength());
-		}
-		uploadJob.setMriInformation(mriInformation);
-		logger.info(mriInformation.toString());
-	}
-
 	public static ImportJob readImportJob(File uploadFolder) throws StreamReadException, DatabindException, IOException {
-		File importJobJsonFile = new File(uploadFolder.getAbsolutePath() + File.separator + ImportFinishRunnable.IMPORT_JOB_JSON);
+		File importJobJsonFile = new File(uploadFolder.getAbsolutePath() + File.separator + ShUpConfig.IMPORT_JOB_JSON);
 		if (importJobJsonFile.exists()) {
 			ImportJob importJob = objectMapper.readValue(importJobJsonFile, ImportJob.class);
 			return importJob;
 		} else {
-			throw new IOException(ImportFinishRunnable.IMPORT_JOB_JSON + " missing in folder: " + uploadFolder.getAbsolutePath());
+			throw new IOException(ShUpConfig.IMPORT_JOB_JSON + " missing in folder: " + uploadFolder.getAbsolutePath());
 		}
 	}
 
@@ -239,6 +172,53 @@ public class ImportUtils {
 		importJob.setStudy(newStudyForJob);
 		importJob.setSelectedSeries(new LinkedHashSet<Serie>());
 		return importJob;
+	}
+
+	// The following 3 methods are used to retrieve informations from the xml files 
+	// used previously to store upload jobs informations.
+	// These are supposed to be deleted in the future.
+
+	public static String getUploadStateFromUploadJob(File folder) throws IOException {
+		final File uploadJobFile = new File(folder.getAbsolutePath() + File.separator + ShUpConfig.UPLOAD_JOB_XML);
+		if (uploadJobFile.exists()) {
+			UploadJobManager uploadJobManager = new UploadJobManager(uploadJobFile);
+			return uploadJobManager.readUploadJob().getUploadState().toString();
+		}
+		return null;
+	}
+
+	public static String getUploadPercentageFromNominativeDataJob(String filepath) {
+		final File nominativeDataJobFile = new File(filepath + File.separator + ShUpConfig.NOMINATIVE_DATA_JOB_XML);
+		if (nominativeDataJobFile.exists()) {
+			NominativeDataUploadJobManager nominativeDataJobManager = new NominativeDataUploadJobManager(nominativeDataJobFile);
+			return nominativeDataJobManager.readUploadDataJob().getUploadPercentage();
+		}
+		return null;
+	}
+
+	public static Patient getPatientFromNominativeDataJob(String filepath) {
+		final File nominativeDataJobFile = new File(filepath + File.separator + ShUpConfig.NOMINATIVE_DATA_JOB_XML);
+		Patient patient = new Patient();
+		if (nominativeDataJobFile.exists()) {
+			NominativeDataUploadJobManager nominativeDataJobManager = new NominativeDataUploadJobManager(nominativeDataJobFile);
+			//the whole name retrieved from xml file is put in patient firstname as it is just to display it in ui
+			patient.setPatientFirstName(nominativeDataJobManager.readUploadDataJob().getPatientName());
+			patient.setPatientLastName("");
+			patient.setPatientID(nominativeDataJobManager.readUploadDataJob().getIPP());
+			return patient;
+		}
+		return patient;
+	}
+
+	public static org.shanoir.ng.importer.model.Study getStudyFromNominativeDataJob(String filepath) {
+		final File nominativeDataJobFile = new File(filepath + File.separator + ShUpConfig.NOMINATIVE_DATA_JOB_XML);
+		org.shanoir.ng.importer.model.Study study = new org.shanoir.ng.importer.model.Study();
+		if (nominativeDataJobFile.exists()) {
+			NominativeDataUploadJobManager nominativeDataJobManager = new NominativeDataUploadJobManager(nominativeDataJobFile);
+			study.setStudyDate(Util.convertStringToLocalDate(nominativeDataJobManager.readUploadDataJob().getStudyDate()));
+			return study;
+		}
+		return study;
 	}
 
 	/**
@@ -324,40 +304,6 @@ public class ImportUtils {
 	}
 
 	/**
-	 * Initializes UploadStatusServiceJob object
-	 * 
-	 */
-	public static void initDataUploadJob(final ImportJob importjob, final UploadJob uploadJob, NominativeDataUploadJob dataUploadJob) {
-		Patient patient = importjob.getPatient();
-		Subject subject = importjob.getSubject();
-		org.shanoir.ng.importer.model.Study study = importjob.getStudy();
-		dataUploadJob.setPatientName(patient.getPatientFirstName() + " " + patient.getPatientLastName());
-		dataUploadJob.setPatientPseudonymusHash(subject.getIdentifier());
-		String studyDateStr = Util.convertLocalDateToString(study.getStudyDate()); 
-		dataUploadJob.setStudyDate(studyDateStr);
-		dataUploadJob.setIPP(patient.getPatientID());
-		dataUploadJob.setMriSerialNumber(uploadJob.getMriInformation().getManufacturer()
-				+ "(" + uploadJob.getMriInformation().getDeviceSerialNumber() + ")");
-		dataUploadJob.setUploadPercentage("");
-		dataUploadJob.setUploadState(UploadState.READY);
-	}
-
-	/**
-	* Write import-job.json to disk and remove unnecessary DICOM information before
-	*/
-	public static void writeImportJobJson(ImportJob importJob, File uploadFolder) {
-		importJob.setPatient(null);
-		importJob.setStudy(null);
-		try {
-			File importJobJson = new File(uploadFolder, IMPORT_JOB_JSON);
-			importJobJson.createNewFile();
-			Util.objectMapper.writeValue(importJobJson, importJob);
-		} catch (IOException e) {
-			logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
-		}
-	}
-
-	/**
 	 * In case of the PACS download the destination folder of the DCM server is set to the uploadFolder.
 	 * This means, the DICOM files send from the PACS after the c-move, will directly be stored in the
 	 * uploadFolder in the workFolder. Each file has the name of its sopInstanceUID and all files are in
@@ -437,6 +383,23 @@ public class ImportUtils {
 		return allFileNames;
 	}
 
+	/**
+	 * 
+	 * @param subjectREST
+	 * @param subject
+	 * @param subjectName
+	 * @param category
+	 * @param languageHemDom
+	 * @param manualHemDom
+	 * @param subjectStudy
+	 * @param subjectType
+	 * @param existingSubjectInStudy
+	 * @param isPhysicallyInvolved
+	 * @param subjectStudyIdentifier
+	 * @param study
+	 * @param studyCard
+	 * @return
+	 */
 	public static org.shanoir.uploader.model.rest.Subject manageSubject(org.shanoir.uploader.model.rest.Subject subjectREST, Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom, SubjectStudy subjectStudy, SubjectType subjectType, boolean existingSubjectInStudy, boolean isPhysicallyInvolved, String subjectStudyIdentifier, Study study, StudyCard studyCard) {
 		if (subjectREST == null) {
 			try {
@@ -448,7 +411,7 @@ public class ImportUtils {
 			if(addSubjectStudy(study, subjectREST, subjectStudyIdentifier, subjectType, isPhysicallyInvolved)) {
 				// create subject with subject-study filled to avoid access denied exception because of rights check
 				Long centerId = studyCard.getAcquisitionEquipment().getCenter().getId();
-				subjectREST = ShUpOnloadConfig.getShanoirUploaderServiceClient().createSubject(subjectREST, ShUpConfig.isModeSubjectCommonNameManual(), centerId);
+				subjectREST = ShUpOnloadConfig.getShanoirUploaderServiceClient().createSubject(subjectREST, ShUpConfig.isModeSubjectNameManual(), centerId);
 				if (subjectREST == null) {
 					return null;
 				} else {
@@ -467,7 +430,7 @@ public class ImportUtils {
 		return subjectREST;
 	}
 	
-	private static org.shanoir.uploader.model.rest.Subject fillSubjectREST(Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom) throws ParseException {
+	public static org.shanoir.uploader.model.rest.Subject fillSubjectREST(Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom) throws ParseException {
 		org.shanoir.uploader.model.rest.Subject subjectREST = new org.shanoir.uploader.model.rest.Subject();
 		subjectREST.setIdentifier(subject.getIdentifier());
 		subjectREST.setBirthDate(subject.getBirthDate());
@@ -481,7 +444,7 @@ public class ImportUtils {
 		if (ShUpConfig.isModePseudonymus()) {
 			subjectREST.setPseudonymusHashValues(subject.getPseudonymusHashValues());
 		}
-		if (ShUpConfig.isModeSubjectCommonNameManual()) {
+		if (ShUpConfig.isModeSubjectNameManual()) {
 			subjectREST.setName(subjectName);
 		}
 		subjectREST.setImagedObjectCategory(category);
@@ -499,12 +462,12 @@ public class ImportUtils {
 		return subjectREST;
 	}
 
-	public static Long createExamination(Study study, org.shanoir.uploader.model.rest.Subject subjectREST, Date examinationDate, String examinationComment, Long centerId) {
+	public static Long createExamination(Study study, org.shanoir.uploader.model.rest.Subject subjectREST, Date studyDate, String examinationComment, Long centerId) {
 		Examination examinationREST = new Examination();
 		examinationREST.setStudyId(study.getId());
 		examinationREST.setSubjectId(subjectREST.getId());
 		examinationREST.setCenterId(centerId);
-		examinationREST.setExaminationDate(examinationDate);
+		examinationREST.setExaminationDate(studyDate);
 		examinationREST.setComment(examinationComment);
 		examinationREST = ShUpOnloadConfig.getShanoirUploaderServiceClient().createExamination(examinationREST);
 		if (examinationREST == null) {
@@ -655,6 +618,51 @@ public class ImportUtils {
 			}
 		}
 		return null;
+	}
+
+	public static Subject createSubjectFromPatient(Patient patient, Pseudonymizer pseudonymizer, IdentifierCalculator identifierCalculator) throws PseudonymusException, UnsupportedEncodingException, NoSuchAlgorithmException {
+		Subject subject = new Subject();
+		String identifier;
+		// OFSEP mode
+		if (ShUpConfig.isModePseudonymus()) {
+			// create PseudonymusHashValues here, based on Patient info, verified by users in GUI
+			PseudonymusHashValues pseudonymusHashValues = pseudonymizer.createHashValuesWithPseudonymus(patient);
+			subject.setPseudonymusHashValues(pseudonymusHashValues);
+			identifier = identifierCalculator.calculateIdentifierWithHashs(pseudonymusHashValues.getFirstNameHash1(), pseudonymusHashValues.getBirthNameHash1(), pseudonymusHashValues.getBirthDateHash());
+		// Neurinfo mode
+		} else {
+			String birthDateString = Util.convertLocalDateToString(patient.getPatientBirthDate());
+			identifier = identifierCalculator.calculateIdentifier(patient.getPatientFirstName(), patient.getPatientLastName(), birthDateString);
+		}
+		subject.setIdentifier(identifier);
+		/**
+		 * Keep sex and set birth date in subject to 01.01.year
+		 */
+		subject.setSex(patient.getPatientSex());
+		LocalDate birthDate = patient.getPatientBirthDate();
+		if (birthDate != null) {
+			birthDate = birthDate.with(TemporalAdjusters.firstDayOfYear());
+			subject.setBirthDate(birthDate);
+		}
+		return subject;
+	}
+
+	public static List<Patient> getPatientsFromDir(File directory, boolean deleteGeneratedDICOMDir) throws IOException {
+		boolean dicomDirGenerated = false;
+		File dicomDirFile = new File(directory, DICOMDIR);
+		if (!dicomDirFile.exists()) {
+			logger.info("No DICOMDIR found: generating one.");
+			dicomDirGeneratorService.generateDicomDirFromDirectory(dicomDirFile, directory);
+			dicomDirGenerated = true;
+			logger.info("DICOMDIR generated at path: " + dicomDirFile.getAbsolutePath());
+		}
+		final DicomDirToModelService dicomDirReader = new DicomDirToModelService();
+		List<Patient> patients = dicomDirReader.readDicomDirToPatients(dicomDirFile);
+		// clean up in case of dicomdir generated
+		if (dicomDirGenerated && deleteGeneratedDICOMDir) {
+			dicomDirFile.delete();
+		}
+		return patients;
 	}
 
 }
